@@ -9,17 +9,18 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type qualityLegacyRecords struct {
-	Execution    ExecutionRecord           `json:"execution"`
-	Remote       RemoteCommandRecord       `json:"remote"`
-	Notification notifycore.AuditRecord    `json:"notification"`
-	Ticket       ticketcore.Indexed        `json:"ticket"`
-	Conversation telegramcore.Conversation `json:"conversation"`
+	Execution    executioncore.ExecutionRecord `json:"execution"`
+	Remote       RemoteCommandRecord           `json:"remote"`
+	Notification notifycore.AuditRecord        `json:"notification"`
+	Ticket       ticketcore.Indexed            `json:"ticket"`
+	Conversation telegramcore.Conversation     `json:"conversation"`
 }
 
 func openQualityLegacyDB(t *testing.T) *sql.DB {
@@ -124,10 +125,10 @@ func TestQualityStorageLegacy(t *testing.T) {
 	}
 }
 
-func qualityExecutionRepository(t *testing.T, db *sql.DB) ExecutionRepository {
+func qualityExecutionRepository(t *testing.T, db *sql.DB) executioncore.ExecutionRepository {
 	t.Helper()
 
-	repository, err := NewExecutionRepositoryFromDB(t.Context(), db, testMigrationFS())
+	repository, err := executioncore.NewExecutionRepositoryFromDB(t.Context(), db, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

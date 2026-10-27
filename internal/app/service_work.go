@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -26,9 +27,9 @@ type AgentWorkResult struct {
 	Workflow      *core.WorkflowInvocation
 	Message       string
 	Tickets       []ticketcore.Indexed
-	Execution     *core.ExecutionRecord
-	LoopRun       *core.LoopRunRecord
-	Executions    []core.ExecutionRecord
+	Execution     *executioncore.ExecutionRecord
+	LoopRun       *executioncore.LoopRunRecord
+	Executions    []executioncore.ExecutionRecord
 	Merges        []core.TicketMergeCommandResult
 	SelectedQueue []ticketcore.Indexed
 	EligibleCount int
@@ -86,8 +87,8 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 	defer release()
 
 	if !harnessruntime.ValidationPassed(preflight.Runtime.Checks) {
-		return AgentWorkResult{}, core.NewExecutionFailure(
-			core.ExecutionFailureRuntime,
+		return AgentWorkResult{}, executioncore.NewExecutionFailure(
+			executioncore.ExecutionFailureRuntime,
 			errors.New("runtime validation failed"),
 		)
 	}
@@ -149,7 +150,7 @@ func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTick
 			return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
 		}
 
-		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
+		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, executioncore.NewExecutionFailure(executioncore.ExecutionFailurePreflight, err)
 	}
 
 	return preparedAgentWorkTicket{Ticket: ticket, Preflight: preflight, Release: releaseAgentOperationLock(lock)}, nil

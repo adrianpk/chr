@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -95,25 +96,25 @@ func checkServiceWorkflowProjection(t *testing.T, service service, project strin
 func TestServiceWorkflowAdoptionOwnership(t *testing.T) {
 	cases := []struct {
 		name    string
-		status  core.ExecutionStatus
+		status  executioncore.ExecutionStatus
 		blocked bool
 	}{
-		{"pending", core.ExecutionStatusPending, true},
-		{"running", core.ExecutionStatusRunning, true},
-		{"failed history", core.ExecutionStatusFailed, false},
+		{"pending", executioncore.ExecutionStatusPending, true},
+		{"running", executioncore.ExecutionStatusRunning, true},
+		{"failed history", executioncore.ExecutionStatusFailed, false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			service := newTestService(t, newTestWorkspace(t))
 
-			repository, err := core.NewExecutionRepository(t.Context(), service.env, service.assetsFS)
+			repository, err := executioncore.NewExecutionRepository(t.Context(), service.env, service.assetsFS)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			now := time.Now().UTC()
 
-			record := core.ExecutionRecord{ID: "legacy-attempt", ProjectID: service.projectContext.ProjectID, TicketKey: "PRJ-1", Status: tc.status, CreatedAt: now, UpdatedAt: now}
+			record := executioncore.ExecutionRecord{ID: "legacy-attempt", ProjectID: service.projectContext.ProjectID, TicketKey: "PRJ-1", Status: tc.status, CreatedAt: now, UpdatedAt: now}
 			if err := repository.CreateExecution(t.Context(), record); err != nil {
 				t.Fatal(err)
 			}

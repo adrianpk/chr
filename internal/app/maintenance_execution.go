@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func (factory commandFactory) maintenanceExecutionCommand() *cli.Command {
@@ -57,7 +58,7 @@ func (factory commandFactory) runMaintenanceExecutionArtifacts(ctx context.Conte
 		return err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -67,7 +68,7 @@ func (factory commandFactory) runMaintenanceExecutionArtifacts(ctx context.Conte
 		_ = repository.Close()
 	}()
 
-	diagnostics, err := core.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	diagnostics, err := executioncore.NewExecutionArtifactDriftService(repository).ListDiagnostics(
 		ctx,
 		projectContext.ProjectID,
 	)
@@ -96,7 +97,7 @@ func (factory commandFactory) runMaintenanceExecutionCleanupPreview(ctx context.
 		return err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -118,12 +119,12 @@ func (factory commandFactory) runMaintenanceExecutionCleanupPreview(ctx context.
 	return printRuntimeArtifactCleanupPreview(factory.io.Stdout, preview)
 }
 
-func printExecutionArtifactDriftDiagnostics(stdout io.Writer, diagnostics []core.ExecutionArtifactDriftDiagnostic) error {
+func printExecutionArtifactDriftDiagnostics(stdout io.Writer, diagnostics []executioncore.ExecutionArtifactDriftDiagnostic) error {
 	drifted := 0
 	missingArtifacts := 0
 
 	for _, diagnostic := range diagnostics {
-		if diagnostic.Status != core.ExecutionArtifactDriftStatusOK {
+		if diagnostic.Status != executioncore.ExecutionArtifactDriftStatusOK {
 			drifted++
 		}
 
@@ -182,7 +183,7 @@ func printRuntimeArtifactCleanupPreview(stdout io.Writer, preview core.RuntimeAr
 	return nil
 }
 
-func printExecutionArtifactDriftDiagnostic(stdout io.Writer, diagnostic core.ExecutionArtifactDriftDiagnostic) error {
+func printExecutionArtifactDriftDiagnostic(stdout io.Writer, diagnostic executioncore.ExecutionArtifactDriftDiagnostic) error {
 	_, err := fmt.Fprintf(
 		stdout,
 		"execution: %s ticket: %s status: %s artifact_status: %s\n",

@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -83,7 +83,7 @@ func TestTelegramPresentationFailureNativeResult(t *testing.T) {
 	}
 
 	loops := listProjectLoopRuns(t, devRoot, projectID(projectDir))
-	if len(loops) != 1 || loops[0].Status != core.LoopRunStatusSucceeded || loops[0].ProcessedCount != 1 {
+	if len(loops) != 1 || loops[0].Status != executioncore.LoopRunStatusSucceeded || loops[0].ProcessedCount != 1 {
 		t.Fatal("notification changed completed loop", loops)
 	}
 

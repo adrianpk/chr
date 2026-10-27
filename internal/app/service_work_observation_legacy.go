@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
@@ -28,7 +29,7 @@ func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceCon
 		return err
 	}
 
-	retained, err := core.ReadLegacyWork(ctx, s.env, s.projectContext.ProjectID)
+	retained, err := executioncore.ReadLegacyWork(ctx, s.env, s.projectContext.ProjectID)
 	if err != nil {
 		return err
 	}
@@ -42,14 +43,14 @@ func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceCon
 
 	for _, execution := range retained.Executions {
 		current := WorkContext{ID: "execution:" + execution.ID, Kind: "execution", TicketKey: execution.TicketKey, Title: tickets[execution.TicketKey].Title, Scope: tickets[execution.TicketKey].UseCase, Status: string(execution.Status), UpdatedAt: execution.UpdatedAt, Message: execution.FailureReason}
-		if err = s.observeLegacyContext(ctx, result, &current, core.ExecutionAgentEventStreamPath(execution), execution.ID, "", &streams); err != nil {
+		if err = s.observeLegacyContext(ctx, result, &current, executioncore.ExecutionAgentEventStreamPath(execution), execution.ID, "", &streams); err != nil {
 			return err
 		}
 	}
 
 	for _, loop := range retained.Loops {
 		current := WorkContext{ID: "loop:" + loop.ID, Kind: "loop", Status: string(loop.Status), UpdatedAt: loop.UpdatedAt, Message: loop.FailureReason, Eligible: loop.EligibleCount, Processed: loop.ProcessedCount, Blocked: loop.BlockedCount, Failed: loop.FailedCount}
-		if err = s.observeLegacyContext(ctx, result, &current, core.LoopRunEventStreamPath(loop), "", loop.ID, &streams); err != nil {
+		if err = s.observeLegacyContext(ctx, result, &current, executioncore.LoopRunEventStreamPath(loop), "", loop.ID, &streams); err != nil {
 			return err
 		}
 	}
@@ -104,7 +105,7 @@ func (s service) observeLegacyActivity(ctx context.Context, result *WorkObservat
 
 	*streams++
 
-	stream, err := core.ReadRecentAgentEvents(ctx, path)
+	stream, err := executioncore.ReadRecentAgentEvents(ctx, path)
 	if err != nil {
 		return err
 	}
@@ -126,7 +127,7 @@ func (s service) observeLegacyActivity(ctx context.Context, result *WorkObservat
 	return nil
 }
 
-func legacyWorkEventMatches(event core.AgentEvent, project, execution, loop string) bool {
+func legacyWorkEventMatches(event executioncore.AgentEvent, project, execution, loop string) bool {
 	if event.ProjectID != project {
 		return false
 	}
@@ -138,7 +139,7 @@ func legacyWorkEventMatches(event core.AgentEvent, project, execution, loop stri
 	return event.LoopID == loop && event.ExecutionID == ""
 }
 
-func appendObservedLegacyEvent(result *WorkObservation, current *WorkContext, event core.AgentEvent) error {
+func appendObservedLegacyEvent(result *WorkObservation, current *WorkContext, event executioncore.AgentEvent) error {
 	if current.TicketKey != "" && event.TicketKey != "" && current.TicketKey != event.TicketKey {
 		return nil
 	}

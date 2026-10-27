@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
@@ -99,7 +100,7 @@ func NewObservabilityView(projectDir string, records ObservabilityRecords) Obser
 	}
 }
 
-func newAgentEventViews(projectDir string, events []core.AgentEvent) []AgentEventView {
+func newAgentEventViews(projectDir string, events []executioncore.AgentEvent) []AgentEventView {
 	views := make([]AgentEventView, 0, len(events))
 	for _, event := range events {
 		views = append(views, AgentEventView{
@@ -123,8 +124,8 @@ func newAgentEventViews(projectDir string, events []core.AgentEvent) []AgentEven
 	return views
 }
 
-func latestAgentEventView(projectDir string, events []core.AgentEvent) AgentEventView {
-	var latest core.AgentEvent
+func latestAgentEventView(projectDir string, events []executioncore.AgentEvent) AgentEventView {
+	var latest executioncore.AgentEvent
 
 	for _, event := range events {
 		if latest.Timestamp.IsZero() || event.Timestamp.After(latest.Timestamp) {
@@ -136,7 +137,7 @@ func latestAgentEventView(projectDir string, events []core.AgentEvent) AgentEven
 		return AgentEventView{}
 	}
 
-	views := newAgentEventViews(projectDir, []core.AgentEvent{latest})
+	views := newAgentEventViews(projectDir, []executioncore.AgentEvent{latest})
 	if len(views) == 0 {
 		return AgentEventView{}
 	}
@@ -255,8 +256,8 @@ func renderExecutionDetail(execution ExecutionView) string {
 	return output.String()
 }
 
-func latestExecution(executions []core.ExecutionRecord) core.ExecutionRecord {
-	var latest core.ExecutionRecord
+func latestExecution(executions []executioncore.ExecutionRecord) executioncore.ExecutionRecord {
+	var latest executioncore.ExecutionRecord
 	for _, execution := range executions {
 		if latest.ID == "" || execution.UpdatedAt.After(latest.UpdatedAt) {
 			latest = execution
@@ -266,8 +267,8 @@ func latestExecution(executions []core.ExecutionRecord) core.ExecutionRecord {
 	return latest
 }
 
-func latestLoopRun(loops []core.LoopRunRecord) core.LoopRunRecord {
-	var latest core.LoopRunRecord
+func latestLoopRun(loops []executioncore.LoopRunRecord) executioncore.LoopRunRecord {
+	var latest executioncore.LoopRunRecord
 	for _, loop := range loops {
 		if latest.ID == "" || loop.UpdatedAt.After(latest.UpdatedAt) {
 			latest = loop
@@ -277,7 +278,7 @@ func latestLoopRun(loops []core.LoopRunRecord) core.LoopRunRecord {
 	return latest
 }
 
-func newExecutionView(projectDir string, execution core.ExecutionRecord) ExecutionView {
+func newExecutionView(projectDir string, execution executioncore.ExecutionRecord) ExecutionView {
 	if execution.ID == "" {
 		return ExecutionView{}
 	}
@@ -295,7 +296,7 @@ func newExecutionView(projectDir string, execution core.ExecutionRecord) Executi
 	}
 }
 
-func newLoopRunView(loop core.LoopRunRecord) LoopRunView {
+func newLoopRunView(loop executioncore.LoopRunRecord) LoopRunView {
 	if loop.ID == "" {
 		return LoopRunView{}
 	}
@@ -382,8 +383,8 @@ func emptyAsUnknown(value string) string {
 // ObservabilityRecords contains the loaded daemon, execution, loop and runtime observations.
 type ObservabilityRecords struct {
 	Daemon     daemoncore.State
-	Executions []core.ExecutionRecord
-	Loops      []core.LoopRunRecord
+	Executions []executioncore.ExecutionRecord
+	Loops      []executioncore.LoopRunRecord
 	Runtime    harnessruntime.ValidationResult
-	Events     []core.AgentEvent
+	Events     []executioncore.AgentEvent
 }

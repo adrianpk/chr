@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func TestNewLoopReportBuildsSummaryFromLoopRun(t *testing.T) {
@@ -33,9 +35,9 @@ func TestNewLoopReportBuildsSummaryFromLoopRun(t *testing.T) {
 
 func TestNewLoopReportIncludesRelatedExecutions(t *testing.T) {
 	record := testLoopReportRecord()
-	executions := []ExecutionRecord{
-		testLoopReportExecution("exec-1", "CHR-1", ExecutionStatusSucceeded),
-		testLoopReportExecution("exec-2", "CHR-2", ExecutionStatusBlocked),
+	executions := []executioncore.ExecutionRecord{
+		testLoopReportExecution("exec-1", "CHR-1", executioncore.ExecutionStatusSucceeded),
+		testLoopReportExecution("exec-2", "CHR-2", executioncore.ExecutionStatusBlocked),
 	}
 
 	report, err := NewLoopReport(LoopReportOptions{
@@ -57,13 +59,13 @@ func TestNewLoopReportIncludesRelatedExecutions(t *testing.T) {
 
 func TestNewLoopReportBoundsExecutions(t *testing.T) {
 	record := testLoopReportRecord()
-	executions := []ExecutionRecord{}
+	executions := []executioncore.ExecutionRecord{}
 
 	for index := 0; index < 30; index++ {
 		executions = append(executions, testLoopReportExecution(
 			"exec-"+string(rune('a'+index%26)),
 			"CHR-1",
-			ExecutionStatusSucceeded,
+			executioncore.ExecutionStatusSucceeded,
 		))
 	}
 
@@ -90,9 +92,9 @@ func TestNewLoopReportBoundsExecutions(t *testing.T) {
 
 func TestRenderLoopReportMarkdownIncludesLoopEvidence(t *testing.T) {
 	record := testLoopReportRecord()
-	executions := []ExecutionRecord{
-		testLoopReportExecution("exec-1", "CHR-1", ExecutionStatusSucceeded),
-		testLoopReportExecution("exec-2", "CHR-2", ExecutionStatusBlocked),
+	executions := []executioncore.ExecutionRecord{
+		testLoopReportExecution("exec-1", "CHR-1", executioncore.ExecutionStatusSucceeded),
+		testLoopReportExecution("exec-2", "CHR-2", executioncore.ExecutionStatusBlocked),
 	}
 
 	report, err := NewLoopReport(LoopReportOptions{
@@ -151,15 +153,15 @@ func TestRenderLoopReportMarkdownHandlesMissingExecutions(t *testing.T) {
 	}
 }
 
-func testLoopReportRecord() LoopRunRecord {
+func testLoopReportRecord() executioncore.LoopRunRecord {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
 	startedAt := now.Add(time.Minute)
 	finishedAt := now.Add(3 * time.Minute)
 
-	return LoopRunRecord{
+	return executioncore.LoopRunRecord{
 		ID:             "loop-1",
 		ProjectID:      "project-1",
-		Status:         LoopRunStatusBlocked,
+		Status:         executioncore.LoopRunStatusBlocked,
 		EligibleCount:  3,
 		ProcessedCount: 2,
 		BlockedCount:   1,
@@ -172,10 +174,10 @@ func testLoopReportRecord() LoopRunRecord {
 	}
 }
 
-func testLoopReportExecution(id, ticketKey string, status ExecutionStatus) ExecutionRecord {
+func testLoopReportExecution(id, ticketKey string, status executioncore.ExecutionStatus) executioncore.ExecutionRecord {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
 
-	return ExecutionRecord{
+	return executioncore.ExecutionRecord{
 		ID:        id,
 		ProjectID: "project-1",
 		TicketKey: ticketKey,

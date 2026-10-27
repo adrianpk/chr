@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -139,7 +140,7 @@ func testResultBlockedReasonApplication(path string) ResultApplication {
 		TicketPath:   path,
 		TicketStatus: TicketResultStatusBlocked,
 		BlockedReason: ResultApplicationBlockedReason{
-			Kind:           ExecutionFailureHarness,
+			Kind:           executioncore.ExecutionFailureHarness,
 			Reason:         "harness: docker unavailable",
 			ResultPath:     "/tmp/result.json",
 			LogPath:        "/tmp/runtime.log",

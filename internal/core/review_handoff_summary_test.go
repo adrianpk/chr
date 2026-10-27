@@ -3,17 +3,19 @@ package core
 import (
 	"strings"
 	"testing"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func TestReviewHandoffSummaryRendersSucceededExecution(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	result := ExecutionResult{
+	result := executioncore.ExecutionResult{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          ExecutionResultStatusSucceeded,
+		Status:          executioncore.ExecutionResultStatusSucceeded,
 		Summary:         "ready for review",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
-		ChangedFiles: []ExecutionResultChangedFile{
+		ChangedFiles: []executioncore.ExecutionResultChangedFile{
 			{Path: "internal/core/review_handoff_summary.go", Summary: "add handoff summary"},
 		},
 	}
@@ -49,12 +51,12 @@ func TestReviewHandoffSummaryRendersSucceededExecution(t *testing.T) {
 
 func TestReviewHandoffSummaryRendersFailedExecution(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	record.Status = ExecutionStatusFailed
+	record.Status = executioncore.ExecutionStatusFailed
 	record.FailureReason = "validation: make verify failed"
-	result := ExecutionResult{
+	result := executioncore.ExecutionResult{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          ExecutionResultStatusFailed,
+		Status:          executioncore.ExecutionResultStatusFailed,
 		Summary:         "validation failed",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
@@ -85,12 +87,12 @@ func TestReviewHandoffSummaryRendersFailedExecution(t *testing.T) {
 
 func TestReviewHandoffSummaryRendersBlockedExecution(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	record.Status = ExecutionStatusBlocked
+	record.Status = executioncore.ExecutionStatusBlocked
 	record.FailureReason = "worker: codex could not resolve compile error"
-	result := ExecutionResult{
+	result := executioncore.ExecutionResult{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          ExecutionResultStatusFailed,
+		Status:          executioncore.ExecutionResultStatusFailed,
 		Summary:         "blocked by compile error",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
@@ -14,7 +15,7 @@ const defaultPreviousAttemptMaxValidationLines = 12
 
 // PreviousAttemptContextOptions describes a package boundary value.
 type PreviousAttemptContextOptions struct {
-	Execution                  ExecutionRecord
+	Execution                  executioncore.ExecutionRecord
 	PreviousAttemptContextPath string
 	MaxValidationLines         int
 }
@@ -23,12 +24,12 @@ type PreviousAttemptContextOptions struct {
 type PreviousAttemptContext struct {
 	ExecutionID                string
 	TicketKey                  string
-	Status                     ExecutionStatus
-	FailureKind                ExecutionFailureKind
+	Status                     executioncore.ExecutionStatus
+	FailureKind                executioncore.ExecutionFailureKind
 	FailureReason              string
 	ValidationCommand          string
-	Result                     *ExecutionResult
-	ChangedFiles               []ExecutionResultChangedFile
+	Result                     *executioncore.ExecutionResult
+	ChangedFiles               []executioncore.ExecutionResultChangedFile
 	ValidationPath             string
 	ValidationExcerpt          []string
 	FailureSignatures          []string
@@ -43,13 +44,13 @@ type previousValidationArtifact struct {
 }
 
 type previousResultArtifact struct {
-	Result *ExecutionResult
+	Result *executioncore.ExecutionResult
 	Source authoringcore.ContextSourceInventoryEntry
 }
 
 // LoadPreviousAttemptContext loads the corresponding package data.
 func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAttemptContext, error) {
-	err := ValidateExecutionRecord(opts.Execution)
+	err := executioncore.ValidateExecutionRecord(opts.Execution)
 	if err != nil {
 		return PreviousAttemptContext{}, err
 	}
@@ -71,7 +72,7 @@ func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAtt
 		ExecutionID:                opts.Execution.ID,
 		TicketKey:                  opts.Execution.TicketKey,
 		Status:                     opts.Execution.Status,
-		FailureKind:                ExecutionFailureKindFromReason(opts.Execution.FailureReason),
+		FailureKind:                executioncore.ExecutionFailureKindFromReason(opts.Execution.FailureReason),
 		FailureReason:              opts.Execution.FailureReason,
 		ValidationCommand:          opts.Execution.Runtime.ValidationCommand,
 		Result:                     loaded.Result,
@@ -128,7 +129,7 @@ func RenderPreviousAttemptContextLink(path string) string {
 	return output.String()
 }
 
-func loadPreviousAttemptValidation(record ExecutionRecord) (previousValidationArtifact, error) {
+func loadPreviousAttemptValidation(record executioncore.ExecutionRecord) (previousValidationArtifact, error) {
 	source := authoringcore.ContextSourceInventoryEntry{
 		ID:          "previous-attempt:validation",
 		Kind:        authoringcore.ContextSourceKindPreviousAttempt,
@@ -154,7 +155,7 @@ func loadPreviousAttemptValidation(record ExecutionRecord) (previousValidationAr
 	return previousValidationArtifact{Content: string(content), Source: source}, nil
 }
 
-func loadPreviousAttemptResult(record ExecutionRecord) (previousResultArtifact, error) {
+func loadPreviousAttemptResult(record executioncore.ExecutionRecord) (previousResultArtifact, error) {
 	source := authoringcore.ContextSourceInventoryEntry{
 		ID:          "previous-attempt:result",
 		Kind:        authoringcore.ContextSourceKindPreviousAttempt,
@@ -164,7 +165,7 @@ func loadPreviousAttemptResult(record ExecutionRecord) (previousResultArtifact, 
 		Required:    false,
 	}
 
-	result, err := LoadExecutionResult(record.Artifacts.ResultPath)
+	result, err := executioncore.LoadExecutionResult(record.Artifacts.ResultPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			source.Reason = "file was not found"
@@ -180,12 +181,12 @@ func loadPreviousAttemptResult(record ExecutionRecord) (previousResultArtifact, 
 	return previousResultArtifact{Result: &result, Source: source}, nil
 }
 
-func previousAttemptChangedFiles(result *ExecutionResult) []ExecutionResultChangedFile {
+func previousAttemptChangedFiles(result *executioncore.ExecutionResult) []executioncore.ExecutionResultChangedFile {
 	if result == nil {
 		return nil
 	}
 
-	return append([]ExecutionResultChangedFile(nil), result.ChangedFiles...)
+	return append([]executioncore.ExecutionResultChangedFile(nil), result.ChangedFiles...)
 }
 
 func validationExcerpt(content string, limit int) []string {
@@ -292,7 +293,7 @@ func previousAttemptValidationLimit(value int) int {
 	return defaultPreviousAttemptMaxValidationLines
 }
 
-func writePreviousAttemptResult(output *strings.Builder, result *ExecutionResult) {
+func writePreviousAttemptResult(output *strings.Builder, result *executioncore.ExecutionResult) {
 	output.WriteString("## Result\n\n")
 
 	if result == nil {
@@ -309,7 +310,7 @@ func writePreviousAttemptResult(output *strings.Builder, result *ExecutionResult
 	output.WriteString("\n\n")
 }
 
-func writePreviousAttemptChangedFiles(output *strings.Builder, changedFiles []ExecutionResultChangedFile) {
+func writePreviousAttemptChangedFiles(output *strings.Builder, changedFiles []executioncore.ExecutionResultChangedFile) {
 	output.WriteString("## Changed Files\n\n")
 
 	if len(changedFiles) == 0 {

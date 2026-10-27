@@ -3500,7 +3500,7 @@ func TestTicketLoopExecutesEligibleTickets(t *testing.T) {
 		t.Fatalf("loop runs = %d, want 1", len(loopRuns))
 	}
 
-	if loopRuns[0].Status != core.LoopRunStatusSucceeded || loopRuns[0].ProcessedCount != 1 {
+	if loopRuns[0].Status != executioncore.LoopRunStatusSucceeded || loopRuns[0].ProcessedCount != 1 {
 		t.Fatalf("loop run = %#v, want succeeded with one processed ticket", loopRuns[0])
 	}
 }
@@ -3815,7 +3815,7 @@ func TestWorkLogsPrintsExecutionLogPaths(t *testing.T) {
 	createCLIExecutionRecord(t, devRoot, record)
 	writeCLIExecutionArtifacts(t, record)
 
-	err := os.WriteFile(core.AgentEventStreamPath(record.Artifacts.RunDir), []byte("{}\n"), 0o644)
+	err := os.WriteFile(executioncore.AgentEventStreamPath(record.Artifacts.RunDir), []byte("{}\n"), 0o644)
 	if err != nil {
 		t.Fatalf("write events stream: %v", err)
 	}
@@ -3928,15 +3928,15 @@ func TestWorkLogsRejectsMissingExecution(t *testing.T) {
 func TestWorkEventsSummarizesDegradedEventStream(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 	streamPath := filepath.Join(projectDir, "ops", "default", "run", "loop-1", "events.jsonl")
-	event := core.AgentEvent{
-		SchemaVersion: core.AgentEventSchemaVersion,
+	event := executioncore.AgentEvent{
+		SchemaVersion: executioncore.AgentEventSchemaVersion,
 		Timestamp:     time.Date(2026, 6, 18, 12, 30, 0, 0, time.UTC),
 		ProjectID:     projectID(projectDir),
 		LoopID:        "loop-1",
 		TicketKey:     "CHR-1",
 		ExecutionID:   "exec-1",
-		Phase:         core.AgentEventPhaseWorkBlocked,
-		Level:         core.AgentEventLevelWarn,
+		Phase:         executioncore.AgentEventPhaseWorkBlocked,
+		Level:         executioncore.AgentEventLevelWarn,
 		Message:       "CHR-1 blocked",
 	}
 
@@ -4296,7 +4296,7 @@ func TestTicketLoopStopsOnExecutionFailure(t *testing.T) {
 		t.Fatalf("loop runs = %d, want 1", len(loopRuns))
 	}
 
-	if loopRuns[0].Status != core.LoopRunStatusFailed || loopRuns[0].FailedCount != 1 {
+	if loopRuns[0].Status != executioncore.LoopRunStatusFailed || loopRuns[0].FailedCount != 1 {
 		t.Fatalf("loop run = %#v, want failed with one failed ticket", loopRuns[0])
 	}
 }
@@ -4331,10 +4331,10 @@ func TestTicketLoopRecordsFailedNotification(t *testing.T) {
 
 func TestTicketLoopRecordsBlockedNotifications(t *testing.T) {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
-	record := core.LoopRunRecord{
+	record := executioncore.LoopRunRecord{
 		ID:             "loop-1",
 		ProjectID:      "project-1",
-		Status:         core.LoopRunStatusBlocked,
+		Status:         executioncore.LoopRunStatusBlocked,
 		EligibleCount:  1,
 		ProcessedCount: 1,
 		BlockedCount:   1,
@@ -4668,10 +4668,10 @@ func TestTicketStartPrintsWorkerFailure(t *testing.T) {
 	}
 }
 
-func assertTicketStartSucceededExecution(t *testing.T, record core.ExecutionRecord, projectDir string) {
+func assertTicketStartSucceededExecution(t *testing.T, record executioncore.ExecutionRecord, projectDir string) {
 	t.Helper()
 
-	if record.Status != core.ExecutionStatusSucceeded {
+	if record.Status != executioncore.ExecutionStatusSucceeded {
 		t.Fatalf("Status = %q, want succeeded", record.Status)
 	}
 
@@ -4757,8 +4757,8 @@ func TestTicketApplyResultAppliesExecutionResult(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
-	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+	record := createApplyResultExecution(t, devRoot, projectDir, executioncore.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, executioncore.ExecutionResultStatusSucceeded, "ready for review")
 
 	var stdout bytes.Buffer
 
@@ -4802,8 +4802,8 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := testApplyResultExecutionRecord(projectDir, core.ExecutionStatusSucceeded, "")
-	record.Workspace = core.ExecutionWorkspaceRef{
+	record := testApplyResultExecutionRecord(projectDir, executioncore.ExecutionStatusSucceeded, "")
+	record.Workspace = executioncore.ExecutionWorkspaceRef{
 		Mode:                  workspacecore.ExecutionWorktree,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: worktreeDir,
@@ -4812,14 +4812,14 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 		TicketBranch:          "chr/CHR-1",
 	}
 	runDir := filepath.Join(worktreeDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-apply")
-	record.Artifacts = core.ExecutionArtifacts{
+	record.Artifacts = executioncore.ExecutionArtifacts{
 		RunDir:         runDir,
 		ResultPath:     filepath.Join(runDir, "result.json"),
 		LogPath:        filepath.Join(runDir, "runtime.log"),
 		ValidationPath: filepath.Join(runDir, "validation.log"),
 	}
 	createApplyResultExecutionRecord(t, devRoot, record)
-	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+	writeApplyResultFile(t, record, executioncore.ExecutionResultStatusSucceeded, "ready for review")
 
 	var stdout bytes.Buffer
 
@@ -4853,8 +4853,8 @@ func TestTicketApplyResultBlocksMissingEvidenceStrategy(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
-	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+	record := createApplyResultExecution(t, devRoot, projectDir, executioncore.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, executioncore.ExecutionResultStatusSucceeded, "ready for review")
 
 	var stdout bytes.Buffer
 
@@ -4895,8 +4895,8 @@ func TestTicketApplyResultAllowsMissingOptionalEvidenceStrategy(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
-	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+	record := createApplyResultExecution(t, devRoot, projectDir, executioncore.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, executioncore.ExecutionResultStatusSucceeded, "ready for review")
 
 	var stdout bytes.Buffer
 
@@ -4929,8 +4929,8 @@ func TestTicketApplyResultBlocksActiveApplicableGherkinNotApplicable(t *testing.
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
-	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+	record := createApplyResultExecution(t, devRoot, projectDir, executioncore.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, executioncore.ExecutionResultStatusSucceeded, "ready for review")
 
 	var stdout bytes.Buffer
 
@@ -5104,7 +5104,7 @@ func setupCLIReviewRemoteBase(t *testing.T, devRoot, projectDir, base string) (*
 	return runner, replaceReviewRemoteCommandRunner(runner)
 }
 
-func assertTicketApplyResultOutput(t *testing.T, stdout string, record core.ExecutionRecord) {
+func assertTicketApplyResultOutput(t *testing.T, stdout string, record executioncore.ExecutionRecord) {
 	t.Helper()
 
 	for _, want := range []string{
@@ -5147,8 +5147,8 @@ func TestTicketApplyResultRecordsBlockedNotification(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusFailed, "codex failed")
-	writeApplyResultFile(t, record, core.ExecutionResultStatusFailed, "blocked by compile error")
+	record := createApplyResultExecution(t, devRoot, projectDir, executioncore.ExecutionStatusFailed, "codex failed")
+	writeApplyResultFile(t, record, executioncore.ExecutionResultStatusFailed, "blocked by compile error")
 
 	err := run(t.Context(), []string{
 		"ticket",
@@ -5178,8 +5178,8 @@ func TestTicketApplyResultDryRunDoesNotMutateTicket(t *testing.T) {
 
 	addProject(t, devRoot, "example", projectDir)
 
-	record := createApplyResultExecution(t, devRoot, projectDir, core.ExecutionStatusSucceeded, "")
-	writeApplyResultFile(t, record, core.ExecutionResultStatusSucceeded, "ready for review")
+	record := createApplyResultExecution(t, devRoot, projectDir, executioncore.ExecutionStatusSucceeded, "")
+	writeApplyResultFile(t, record, executioncore.ExecutionResultStatusSucceeded, "ready for review")
 
 	before := readFile(t, ticketPath)
 
@@ -6991,7 +6991,7 @@ func TestMaintenanceExecutionArtifactsReportsMissingArtifacts(t *testing.T) {
 		"execution: exec-1 ticket: CHR-1 status: succeeded artifact_status: missing_artifacts",
 		"artifact: exec-1 name: run_dir exists: true path: " + record.Artifacts.RunDir,
 		"artifact: exec-1 name: result exists: false path: " + record.Artifacts.ResultPath,
-		"artifact: exec-1 name: report exists: false path: " + core.ExecutionReportPath(record),
+		"artifact: exec-1 name: report exists: false path: " + executioncore.ExecutionReportPath(record),
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("stdout = %q, want %q", stdout.String(), want)
@@ -7466,7 +7466,7 @@ func selectProject(t *testing.T, devRoot, selector string) {
 	}
 }
 
-func createCLIExecutionRecord(t *testing.T, devRoot string, record core.ExecutionRecord) {
+func createCLIExecutionRecord(t *testing.T, devRoot string, record executioncore.ExecutionRecord) {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7477,7 +7477,7 @@ func createCLIExecutionRecord(t *testing.T, devRoot string, record core.Executio
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := core.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	repository, err := executioncore.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -7495,23 +7495,23 @@ func createCLIExecutionRecord(t *testing.T, devRoot string, record core.Executio
 	}
 }
 
-func cliExecutionRecord(projectDir, runDir string) core.ExecutionRecord {
+func cliExecutionRecord(projectDir, runDir string) executioncore.ExecutionRecord {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
 	finishedAt := now.Add(time.Minute)
 
-	return core.ExecutionRecord{
+	return executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  projectID(projectDir),
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
-		Status:     core.ExecutionStatusSucceeded,
-		Runtime: core.ExecutionRuntimeRef{
+		Status:     executioncore.ExecutionStatusSucceeded,
+		Runtime: executioncore.ExecutionRuntimeRef{
 			Image:             "chr-agent-runtime:local",
 			DockerfilePath:    filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Artifacts: core.ExecutionArtifacts{
+		Artifacts: executioncore.ExecutionArtifacts{
 			RunDir:         runDir,
 			ResultPath:     filepath.Join(runDir, "result.json"),
 			LogPath:        filepath.Join(runDir, "runtime.log"),
@@ -7524,7 +7524,7 @@ func cliExecutionRecord(projectDir, runDir string) core.ExecutionRecord {
 	}
 }
 
-func writeCLIExecutionArtifacts(t *testing.T, record core.ExecutionRecord) {
+func writeCLIExecutionArtifacts(t *testing.T, record executioncore.ExecutionRecord) {
 	t.Helper()
 
 	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
@@ -7536,7 +7536,7 @@ func writeCLIExecutionArtifacts(t *testing.T, record core.ExecutionRecord) {
 		record.Artifacts.ResultPath,
 		record.Artifacts.LogPath,
 		record.Artifacts.ValidationPath,
-		core.ExecutionReportPath(record),
+		executioncore.ExecutionReportPath(record),
 	} {
 		err = os.WriteFile(path, []byte("artifact\n"), 0o644)
 		if err != nil {
@@ -7559,7 +7559,7 @@ func writeCLIAgentEventStream(t *testing.T, path string, lines ...string) {
 	}
 }
 
-func marshalCLIAgentEventLine(t *testing.T, event core.AgentEvent) string {
+func marshalCLIAgentEventLine(t *testing.T, event executioncore.AgentEvent) string {
 	t.Helper()
 
 	data, err := json.Marshal(event)
@@ -7688,7 +7688,7 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []ticketcore.I
 	return tickets
 }
 
-func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []core.ExecutionRecord {
+func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []executioncore.ExecutionRecord {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7699,7 +7699,7 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := core.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	repository, err := executioncore.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -7719,7 +7719,7 @@ func listTicketExecutions(t *testing.T, devRoot, projectID, ticketKey string) []
 	return records
 }
 
-func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []core.LoopRunRecord {
+func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []executioncore.LoopRunRecord {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7730,7 +7730,7 @@ func listProjectLoopRuns(t *testing.T, devRoot, projectID string) []core.LoopRun
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := core.NewLoopRunRepository(t.Context(), env, testAssetsFS())
+	repository, err := executioncore.NewLoopRunRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewLoopRunRepository returned error: %v", err)
 	}
@@ -7754,9 +7754,9 @@ func createApplyResultExecution(
 	t *testing.T,
 	devRoot string,
 	projectDir string,
-	status core.ExecutionStatus,
+	status executioncore.ExecutionStatus,
 	failureReason string,
-) core.ExecutionRecord {
+) executioncore.ExecutionRecord {
 	t.Helper()
 
 	record := testApplyResultExecutionRecord(projectDir, status, failureReason)
@@ -7766,7 +7766,7 @@ func createApplyResultExecution(
 	return record
 }
 
-func createApplyResultExecutionRecord(t *testing.T, devRoot string, record core.ExecutionRecord) {
+func createApplyResultExecutionRecord(t *testing.T, devRoot string, record executioncore.ExecutionRecord) {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7777,7 +7777,7 @@ func createApplyResultExecutionRecord(t *testing.T, devRoot string, record core.
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := core.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	repository, err := executioncore.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -7797,26 +7797,26 @@ func createApplyResultExecutionRecord(t *testing.T, devRoot string, record core.
 
 func testApplyResultExecutionRecord(
 	projectDir string,
-	status core.ExecutionStatus,
+	status executioncore.ExecutionStatus,
 	failureReason string,
-) core.ExecutionRecord {
+) executioncore.ExecutionRecord {
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-apply")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
-	return core.ExecutionRecord{
+	return executioncore.ExecutionRecord{
 		ID:            "exec-apply",
 		ProjectID:     projectID(projectDir),
 		TicketKey:     "CHR-1",
 		TicketPath:    filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Do-something.md"),
 		Status:        status,
 		FailureReason: failureReason,
-		Runtime: core.ExecutionRuntimeRef{
+		Runtime: executioncore.ExecutionRuntimeRef{
 			Image:             "chr-runtime:latest",
 			DockerfilePath:    filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Artifacts: core.ExecutionArtifacts{
+		Artifacts: executioncore.ExecutionArtifacts{
 			RunDir:         runDir,
 			ResultPath:     filepath.Join(runDir, "result.json"),
 			LogPath:        filepath.Join(runDir, "runtime.log"),
@@ -7829,8 +7829,8 @@ func testApplyResultExecutionRecord(
 
 func writeApplyResultFile(
 	t *testing.T,
-	record core.ExecutionRecord,
-	status core.ExecutionResultStatus,
+	record executioncore.ExecutionRecord,
+	status executioncore.ExecutionResultStatus,
 	summary string,
 ) {
 	t.Helper()
@@ -7898,7 +7898,7 @@ type fakeTicketStartHarnessExecutor struct {
 	commands       []string
 	err            error
 	failWorker     bool
-	resultStatuses map[string]core.ExecutionResultStatus
+	resultStatuses map[string]executioncore.ExecutionResultStatus
 }
 
 func (e *fakeTicketStartHarnessExecutor) Run(
@@ -7921,7 +7921,7 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 	}
 
 	if e.failWorker && isFakeTicketStartWorkerCommand(command) {
-		return core.NewExecutionFailure(core.ExecutionFailureHarness, fmt.Errorf("codex failed"))
+		return executioncore.NewExecutionFailure(executioncore.ExecutionFailureHarness, fmt.Errorf("codex failed"))
 	}
 
 	err = e.writeFakeTicketStartResult(command)
@@ -7946,7 +7946,7 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command harn
 		return nil
 	}
 
-	status := core.ExecutionResultStatusSucceeded
+	status := executioncore.ExecutionResultStatusSucceeded
 	ticketKey := harnessEnvValue(command, "CHR_TICKET_KEY")
 
 	configured, ok := e.resultStatuses[ticketKey]
@@ -7991,7 +7991,7 @@ func installFakeTicketStartHarnessExecutor(t *testing.T, err error) *fakeTicketS
 
 	executor := &fakeTicketStartHarnessExecutor{err: err}
 	previous := newTicketStartHarnessExecutor
-	newTicketStartHarnessExecutor = func() core.HarnessExecutor {
+	newTicketStartHarnessExecutor = func() executioncore.HarnessExecutor {
 		return executor
 	}
 

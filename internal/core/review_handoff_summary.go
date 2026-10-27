@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 const reviewHandoffChangedFileLimit = 25
@@ -13,13 +15,13 @@ type ReviewHandoffSummary struct {
 	ProjectID      string
 	TicketKey      string
 	TicketPath     string
-	Status         ExecutionStatus
-	ResultStatus   ExecutionResultStatus
+	Status         executioncore.ExecutionStatus
+	ResultStatus   executioncore.ExecutionResultStatus
 	ResultSummary  string
 	Validation     ExecutionReportValidation
 	ChangedFiles   []ExecutionReportChangedFile
 	ChangedSummary ExecutionReportChangedFilesSummary
-	FailureKind    ExecutionFailureKind
+	FailureKind    executioncore.ExecutionFailureKind
 	FailureReason  string
 	ResultPath     string
 	LogPath        string
@@ -148,17 +150,17 @@ func writeReviewHandoffNextAction(output *strings.Builder, nextAction string) {
 
 func reviewHandoffNextAction(report ExecutionReport) string {
 	switch report.Execution.Status {
-	case ExecutionStatusSucceeded:
+	case executioncore.ExecutionStatusSucceeded:
 		if report.Validation.Status == ExecutionReportValidationSucceeded {
 			return "Review changed files and validation evidence."
 		}
 
 		return "Review execution result and confirm validation evidence."
-	case ExecutionStatusFailed,
-		ExecutionStatusBlocked:
+	case executioncore.ExecutionStatusFailed,
+		executioncore.ExecutionStatusBlocked:
 		return "Inspect blocker details, runtime log, validation output, and result artifact."
-	case ExecutionStatusPending,
-		ExecutionStatusRunning:
+	case executioncore.ExecutionStatusPending,
+		executioncore.ExecutionStatusRunning:
 		return "Wait for execution to finish before review."
 	default:
 		return "Inspect execution report before deciding the next action."

@@ -1,4 +1,4 @@
-package core
+package execution
 
 import (
 	"context"
@@ -41,10 +41,7 @@ func NewExecutionArtifactDriftService(repository ExecutionRepository) ExecutionA
 }
 
 // ListDiagnostics lists the requested data.
-func (s ExecutionArtifactDriftService) ListDiagnostics(
-	ctx context.Context,
-	projectID string,
-) ([]ExecutionArtifactDriftDiagnostic, error) {
+func (s ExecutionArtifactDriftService) ListDiagnostics(ctx context.Context, projectID string) ([]ExecutionArtifactDriftDiagnostic, error) {
 	records, err := s.repository.ListProjectExecutions(ctx, projectID)
 	if err != nil {
 		return nil, err

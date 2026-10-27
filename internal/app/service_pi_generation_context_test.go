@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -115,10 +116,10 @@ func piGenerationReviewCase(t *testing.T, valid bool) {
 		t.Fatal(err)
 	}
 
-	execution := core.ExecutionRecord{
+	execution := executioncore.ExecutionRecord{
 		ID: "pi-review", ProjectID: operations.projectContext.ProjectID, TicketKey: "CHR-1", TicketPath: path,
-		Workspace: core.ExecutionWorkspaceRef{Mode: workspacecore.ExecutionWorktree, ExecutionWorkspaceDir: worktree},
-		Artifacts: core.ExecutionArtifacts{ArtifactID: "00001-review", RunDir: filepath.Join(worktree, "ops", "default", "run", "00001-review"), ResultPath: "result.json"},
+		Workspace: executioncore.ExecutionWorkspaceRef{Mode: workspacecore.ExecutionWorktree, ExecutionWorkspaceDir: worktree},
+		Artifacts: executioncore.ExecutionArtifacts{ArtifactID: "00001-review", RunDir: filepath.Join(worktree, "ops", "default", "run", "00001-review"), ResultPath: "result.json"},
 	}
 
 	result, err := operations.runAgenticReviewCycle(t.Context(), indexed, execution, core.ResultApplication{TicketPath: path}, core.ReviewWorkflowConfig{})

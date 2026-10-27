@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -96,12 +97,12 @@ func TestWorkflowUpgradeCLIRejects(t *testing.T) {
 func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 	cases := []struct {
 		name    string
-		status  core.ExecutionStatus
+		status  executioncore.ExecutionStatus
 		blocked bool
 	}{
-		{"pending", core.ExecutionStatusPending, true},
-		{"running", core.ExecutionStatusRunning, true},
-		{"failed history", core.ExecutionStatusFailed, false},
+		{"pending", executioncore.ExecutionStatusPending, true},
+		{"running", executioncore.ExecutionStatusRunning, true},
+		{"failed history", executioncore.ExecutionStatusFailed, false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -127,17 +128,17 @@ func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 	}
 }
 
-func writeWorkflowUpgradeExecution(t *testing.T, operations service, status core.ExecutionStatus) {
+func writeWorkflowUpgradeExecution(t *testing.T, operations service, status executioncore.ExecutionStatus) {
 	t.Helper()
 
-	repository, err := core.NewExecutionRepository(t.Context(), operations.env, operations.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(t.Context(), operations.env, operations.assetsFS)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	now := time.Now().UTC()
 
-	record := core.ExecutionRecord{ID: "unselected-attempt", ProjectID: operations.projectContext.ProjectID, TicketKey: "OLD-101", Status: status, CreatedAt: now, UpdatedAt: now}
+	record := executioncore.ExecutionRecord{ID: "unselected-attempt", ProjectID: operations.projectContext.ProjectID, TicketKey: "OLD-101", Status: status, CreatedAt: now, UpdatedAt: now}
 	if err := repository.CreateExecution(t.Context(), record); err != nil {
 		t.Fatal(err)
 	}

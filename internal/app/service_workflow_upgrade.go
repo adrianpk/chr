@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
@@ -39,7 +40,7 @@ func (s service) UpgradeWorkflowConfiguration(ctx context.Context, opts core.Wor
 }
 
 func (s service) checkWorkflowUpgradeExecutions(ctx context.Context) (err error) {
-	repository, err := core.NewExecutionRepository(ctx, s.env, s.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}

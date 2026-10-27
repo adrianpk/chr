@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -241,7 +242,7 @@ func TestTelegramAuthoringServiceObservedEdit(t *testing.T) {
 func telegramAuthoringServiceNoWork(t *testing.T, operations service) {
 	t.Helper()
 
-	executions, err := core.NewExecutionRepository(t.Context(), operations.env, testAssetsFS())
+	executions, err := executioncore.NewExecutionRepository(t.Context(), operations.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

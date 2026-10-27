@@ -327,12 +327,12 @@ func (factory commandFactory) workEventsAction(ctx context.Context, cmd *cli.Com
 
 	path := resolveWorkEventStreamPath(projectContext.ProjectDir, cmd.Args().First())
 
-	stream, err := core.ReadAgentEventStream(ctx, path)
+	stream, err := executioncore.ReadAgentEventStream(ctx, path)
 	if err != nil {
 		return err
 	}
 
-	summary := core.SummarizeAgentEventStream(stream)
+	summary := executioncore.SummarizeAgentEventStream(stream)
 
 	return printWorkEventStreamSummary(factory.io.Stdout, projectContext.ProjectDir, summary)
 }
@@ -349,7 +349,7 @@ func (factory commandFactory) workLogsAction(ctx context.Context, cmd *cli.Comma
 		return err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, operations.env, factory.deps.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(ctx, operations.env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -365,7 +365,7 @@ func (factory commandFactory) workLogsAction(ctx context.Context, cmd *cli.Comma
 	}
 
 	if record.ProjectID != projectContext.ProjectID {
-		return fmt.Errorf("%w: %s", core.ErrExecutionNotFound, cmd.Args().First())
+		return fmt.Errorf("%w: %s", executioncore.ErrExecutionNotFound, cmd.Args().First())
 	}
 
 	return printWorkExecutionLogs(factory.io.Stdout, projectContext.ProjectDir, record)
@@ -500,7 +500,7 @@ func printAgentWorkRunAllExecution(stdout io.Writer, result AgentWorkResult) err
 	return nil
 }
 
-func printWorkExecutionLogs(stdout io.Writer, projectDir string, record core.ExecutionRecord) error {
+func printWorkExecutionLogs(stdout io.Writer, projectDir string, record executioncore.ExecutionRecord) error {
 	entries := []struct {
 		label string
 		path  string
@@ -509,8 +509,8 @@ func printWorkExecutionLogs(stdout io.Writer, projectDir string, record core.Exe
 		{label: "runtime_log", path: record.Artifacts.LogPath},
 		{label: "validation_log", path: record.Artifacts.ValidationPath},
 		{label: "result", path: record.Artifacts.ResultPath},
-		{label: "execution_report", path: core.ExecutionReportPath(record)},
-		{label: "events", path: core.ExecutionAgentEventStreamPath(record)},
+		{label: "execution_report", path: executioncore.ExecutionReportPath(record)},
+		{label: "events", path: executioncore.ExecutionAgentEventStreamPath(record)},
 	}
 
 	lines := []string{
@@ -536,7 +536,7 @@ func printWorkExecutionLogs(stdout io.Writer, projectDir string, record core.Exe
 	return printAgentWorkLines(stdout, lines)
 }
 
-func printWorkEventStreamSummary(stdout io.Writer, projectDir string, summary core.AgentEventStreamSummary) error {
+func printWorkEventStreamSummary(stdout io.Writer, projectDir string, summary executioncore.AgentEventStreamSummary) error {
 	lines := []string{
 		"work: events",
 		fmt.Sprintf("path: %s", relativeProjectPath(projectDir, summary.Path)),

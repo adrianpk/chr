@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
@@ -50,7 +51,7 @@ func emitLoopRunNotification(
 	ctx context.Context,
 	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	record core.LoopRunRecord,
+	record executioncore.LoopRunRecord,
 	assetsFS fs.FS,
 ) error {
 	event, ok := loopRunNotificationEvent(projectContext, record, time.Now().UTC())
@@ -63,10 +64,10 @@ func emitLoopRunNotification(
 
 func loopRunNotificationEvent(
 	projectContext commandProjectContext,
-	record core.LoopRunRecord,
+	record executioncore.LoopRunRecord,
 	now time.Time,
 ) (notifycore.Event, bool) {
-	if record.Status == core.LoopRunStatusSucceeded && record.ProcessedCount == 0 {
+	if record.Status == executioncore.LoopRunStatusSucceeded && record.ProcessedCount == 0 {
 		return notifycore.Event{}, false
 	}
 
@@ -96,13 +97,13 @@ func loopRunNotificationEvent(
 	}, true
 }
 
-func loopRunNotificationType(status core.LoopRunStatus) loopNotificationKind {
+func loopRunNotificationType(status executioncore.LoopRunStatus) loopNotificationKind {
 	switch status {
-	case core.LoopRunStatusSucceeded:
+	case executioncore.LoopRunStatusSucceeded:
 		return loopNotificationKind{Type: notifycore.EventLoopFinished, Severity: notifycore.SeverityInfo}
-	case core.LoopRunStatusBlocked:
+	case executioncore.LoopRunStatusBlocked:
 		return loopNotificationKind{Type: notifycore.EventLoopBlocked, Severity: notifycore.SeverityWarning}
-	case core.LoopRunStatusFailed:
+	case executioncore.LoopRunStatusFailed:
 		return loopNotificationKind{Type: notifycore.EventLoopFailed, Severity: notifycore.SeverityError}
 	default:
 		return loopNotificationKind{Type: "", Severity: ""}
@@ -202,20 +203,20 @@ func ticketBlockedNotificationDetail(plan ticketApplyResultPlan) string {
 	return detail
 }
 
-func loopRunNotificationSummary(record core.LoopRunRecord) string {
+func loopRunNotificationSummary(record executioncore.LoopRunRecord) string {
 	switch record.Status {
-	case core.LoopRunStatusSucceeded:
+	case executioncore.LoopRunStatusSucceeded:
 		return "Ticket loop finished"
-	case core.LoopRunStatusBlocked:
+	case executioncore.LoopRunStatusBlocked:
 		return "Ticket loop stopped on a blocker"
-	case core.LoopRunStatusFailed:
+	case executioncore.LoopRunStatusFailed:
 		return "Ticket loop failed"
 	default:
 		return "Ticket loop changed state"
 	}
 }
 
-func loopRunNotificationDetail(record core.LoopRunRecord) string {
+func loopRunNotificationDetail(record executioncore.LoopRunRecord) string {
 	detail := fmt.Sprintf(
 		"Eligible: %d\nProcessed: %d\nBlocked: %d\nFailed: %d",
 		record.EligibleCount,

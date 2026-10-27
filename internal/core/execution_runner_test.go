@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
@@ -26,10 +27,10 @@ func TestExecutionRunnerRunsHarnessAndMarksSucceeded(t *testing.T) {
 	}
 
 	executor := &fakeHarnessExecutor{resultPath: record.Artifacts.ResultPath}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 	})
@@ -66,15 +67,15 @@ func TestExecutionRunnerRunsHarnessAndMarksSucceeded(t *testing.T) {
 		t.Fatalf("GetExecution returned error: %v", err)
 	}
 
-	if stored.Status != ExecutionStatusSucceeded {
+	if stored.Status != executioncore.ExecutionStatusSucceeded {
 		t.Fatalf("stored Status = %q, want succeeded", stored.Status)
 	}
 }
 
-func assertSucceededRunnerRecord(t *testing.T, record ExecutionRecord) {
+func assertSucceededRunnerRecord(t *testing.T, record executioncore.ExecutionRecord) {
 	t.Helper()
 
-	if record.Status != ExecutionStatusSucceeded {
+	if record.Status != executioncore.ExecutionStatusSucceeded {
 		t.Fatalf("Status = %q, want succeeded", record.Status)
 	}
 
@@ -98,10 +99,10 @@ func TestExecutionRunnerMarksFailedWhenBuildHarnessFails(t *testing.T) {
 	}
 
 	executor := &fakeHarnessExecutor{failAt: "build"}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 	})
@@ -109,7 +110,7 @@ func TestExecutionRunnerMarksFailedWhenBuildHarnessFails(t *testing.T) {
 		t.Fatal("Run returned nil error")
 	}
 
-	if got.Status != ExecutionStatusFailed {
+	if got.Status != executioncore.ExecutionStatusFailed {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
@@ -126,7 +127,7 @@ func TestExecutionRunnerMarksFailedWhenBuildHarnessFails(t *testing.T) {
 		t.Fatalf("GetExecution returned error: %v", err)
 	}
 
-	if stored.Status != ExecutionStatusFailed {
+	if stored.Status != executioncore.ExecutionStatusFailed {
 		t.Fatalf("stored Status = %q, want failed", stored.Status)
 	}
 }
@@ -142,10 +143,10 @@ func TestExecutionRunnerClassifiesWorkerCommandFailure(t *testing.T) {
 	}
 
 	executor := &fakeHarnessExecutor{failWorker: true}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 	})
@@ -153,7 +154,7 @@ func TestExecutionRunnerClassifiesWorkerCommandFailure(t *testing.T) {
 		t.Fatal("Run returned nil error")
 	}
 
-	if got.Status != ExecutionStatusFailed {
+	if got.Status != executioncore.ExecutionStatusFailed {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
@@ -177,10 +178,10 @@ func TestExecutionRunnerMarksFailedWhenResultIsMissing(t *testing.T) {
 	}
 
 	executor := &fakeHarnessExecutor{}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 	})
@@ -188,7 +189,7 @@ func TestExecutionRunnerMarksFailedWhenResultIsMissing(t *testing.T) {
 		t.Fatal("Run returned nil error")
 	}
 
-	if got.Status != ExecutionStatusFailed {
+	if got.Status != executioncore.ExecutionStatusFailed {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
@@ -211,10 +212,10 @@ func TestExecutionRunnerMarksFailedWhenResultIsMalformed(t *testing.T) {
 		resultPath:    record.Artifacts.ResultPath,
 		resultContent: `{`,
 	}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 	})
@@ -222,7 +223,7 @@ func TestExecutionRunnerMarksFailedWhenResultIsMalformed(t *testing.T) {
 		t.Fatal("Run returned nil error")
 	}
 
-	if got.Status != ExecutionStatusFailed {
+	if got.Status != executioncore.ExecutionStatusFailed {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
@@ -245,10 +246,10 @@ func TestExecutionRunnerClassifiesFailedResultAsValidationFailure(t *testing.T) 
 		resultPath:    record.Artifacts.ResultPath,
 		resultContent: `{"execution_id":"exec-1","ticket_key":"CHR-1","status":"failed","summary":"tests failed","evidence_summary":{"strategy":"planned","produced":"none","validation":"failed"}}`,
 	}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 	})
@@ -256,7 +257,7 @@ func TestExecutionRunnerClassifiesFailedResultAsValidationFailure(t *testing.T) 
 		t.Fatal("Run returned nil error")
 	}
 
-	if got.Status != ExecutionStatusFailed {
+	if got.Status != executioncore.ExecutionStatusFailed {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
@@ -279,10 +280,10 @@ func TestExecutionRunnerClassifiesValidationCommandFailure(t *testing.T) {
 		resultPath:     record.Artifacts.ResultPath,
 		failValidation: true,
 	}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 	runner.Now = fixedRunnerClock()
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 	})
@@ -290,7 +291,7 @@ func TestExecutionRunnerClassifiesValidationCommandFailure(t *testing.T) {
 		t.Fatal("Run returned nil error")
 	}
 
-	if got.Status != ExecutionStatusFailed {
+	if got.Status != executioncore.ExecutionStatusFailed {
 		t.Fatalf("Status = %q, want failed", got.Status)
 	}
 
@@ -319,9 +320,9 @@ func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 	}
 
 	executor := &fakeHarnessExecutor{}
-	runner := NewExecutionRunner(repository, executor)
+	runner := executioncore.NewExecutionRunner(repository, executor)
 
-	got, err := runner.Run(t.Context(), RunExecutionOptions{
+	got, err := runner.Run(t.Context(), executioncore.RunExecutionOptions{
 		Record:     record,
 		Invocation: testRunnerInvocation(record),
 		DryRun:     true,
@@ -330,7 +331,7 @@ func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 		t.Fatalf("Run returned error: %v", err)
 	}
 
-	if got.Status != ExecutionStatusPending {
+	if got.Status != executioncore.ExecutionStatusPending {
 		t.Fatalf("Status = %q, want pending", got.Status)
 	}
 
@@ -343,7 +344,7 @@ func TestExecutionRunnerDryRunDoesNotPersistOrExecute(t *testing.T) {
 		t.Fatalf("GetExecution returned error: %v", err)
 	}
 
-	if stored.Status != ExecutionStatusPending {
+	if stored.Status != executioncore.ExecutionStatusPending {
 		t.Fatalf("stored Status = %q, want pending", stored.Status)
 	}
 }
@@ -376,11 +377,11 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command harnessruntime.Comm
 	}
 
 	if e.failWorker && isWorkerHarnessCommand(command) {
-		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("failed %s", name))
+		return executioncore.NewExecutionFailure(executioncore.ExecutionFailureHarness, fmt.Errorf("failed %s", name))
 	}
 
 	if e.failValidation && isValidationHarnessCommand(command) {
-		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("failed %s", name))
+		return executioncore.NewExecutionFailure(executioncore.ExecutionFailureHarness, fmt.Errorf("failed %s", name))
 	}
 
 	err = e.writeResultForWorkerRun(command)
@@ -412,7 +413,7 @@ func isValidationHarnessCommand(command harnessruntime.Command) bool {
 	return slices.Contains(command.Args, "chr-exec-1-validation")
 }
 
-func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
+func newTestExecutionRunnerRepository(t *testing.T) executioncore.ExecutionRepository {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
@@ -420,7 +421,7 @@ func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
 		t.Fatalf("open db: %v", err)
 	}
 
-	repository, err := NewExecutionRepositoryFromDB(t.Context(), db, testMigrationFS())
+	repository, err := executioncore.NewExecutionRepositoryFromDB(t.Context(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepositoryFromDB returned error: %v", err)
 	}
@@ -435,23 +436,23 @@ func newTestExecutionRunnerRepository(t *testing.T) ExecutionRepository {
 	return repository
 }
 
-func testRunnerExecutionRecord(dir string) ExecutionRecord {
+func testRunnerExecutionRecord(dir string) executioncore.ExecutionRecord {
 	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
-	return ExecutionRecord{
+	return executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
-		Status:     ExecutionStatusPending,
-		Runtime: ExecutionRuntimeRef{
+		Status:     executioncore.ExecutionStatusPending,
+		Runtime: executioncore.ExecutionRuntimeRef{
 			Image:             "chr-agent-runtime:local",
 			DockerfilePath:    filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Artifacts: ExecutionArtifacts{
+		Artifacts: executioncore.ExecutionArtifacts{
 			RunDir:         runDir,
 			ResultPath:     filepath.Join(runDir, "result.json"),
 			LogPath:        filepath.Join(runDir, "runtime.log"),
@@ -462,7 +463,7 @@ func testRunnerExecutionRecord(dir string) ExecutionRecord {
 	}
 }
 
-func testRunnerInvocation(record ExecutionRecord) harnessruntime.Invocation {
+func testRunnerInvocation(record executioncore.ExecutionRecord) harnessruntime.Invocation {
 	return harnessruntime.Invocation{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,

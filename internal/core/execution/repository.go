@@ -1,4 +1,4 @@
-package core
+package execution
 
 import (
 	"context"
@@ -145,10 +145,7 @@ func (r *sqliteExecutionRepository) GetExecution(ctx context.Context, id string)
 }
 
 // ListProjectExecutions lists the requested data.
-func (r *sqliteExecutionRepository) ListProjectExecutions(
-	ctx context.Context,
-	projectID string,
-) ([]ExecutionRecord, error) {
+func (r *sqliteExecutionRepository) ListProjectExecutions(ctx context.Context, projectID string) ([]ExecutionRecord, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
 		selectExecutionSQL()+" WHERE project_id = ? ORDER BY created_at",
@@ -172,10 +169,7 @@ func (r *sqliteExecutionRepository) ListProjectExecutions(
 }
 
 // ListTicketExecutions lists the requested data.
-func (r *sqliteExecutionRepository) ListTicketExecutions(
-	ctx context.Context,
-	projectID, ticketKey string,
-) ([]ExecutionRecord, error) {
+func (r *sqliteExecutionRepository) ListTicketExecutions(ctx context.Context, projectID, ticketKey string) ([]ExecutionRecord, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
 		selectExecutionSQL()+" WHERE project_id = ? AND ticket_key = ? ORDER BY created_at",

@@ -1,4 +1,4 @@
-package core
+package execution
 
 import (
 	"context"
@@ -134,10 +134,7 @@ func createExecutionArtifactDir(record ExecutionRecord) error {
 	return nil
 }
 
-func (r ExecutionRunner) markExecutionRunning(
-	ctx context.Context,
-	record ExecutionRecord,
-) (ExecutionRecord, error) {
+func (r ExecutionRunner) markExecutionRunning(ctx context.Context, record ExecutionRecord) (ExecutionRecord, error) {
 	startedAt := r.now()
 	record.Status = ExecutionStatusRunning
 	record.StartedAt = &startedAt
@@ -151,10 +148,7 @@ func (r ExecutionRunner) markExecutionRunning(
 	return record, nil
 }
 
-func (r ExecutionRunner) markExecutionSucceeded(
-	ctx context.Context,
-	record ExecutionRecord,
-) (ExecutionRecord, error) {
+func (r ExecutionRunner) markExecutionSucceeded(ctx context.Context, record ExecutionRecord) (ExecutionRecord, error) {
 	finishedAt := r.now()
 	record.Status = ExecutionStatusSucceeded
 	record.FinishedAt = &finishedAt

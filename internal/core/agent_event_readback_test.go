@@ -7,12 +7,14 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func TestSummarizeAgentEventStreamKeepsLatestKnownState(t *testing.T) {
 	started := validAgentEvent()
 	started.LoopID = "loop-1"
-	started.Phase = AgentEventPhaseLoopStarted
+	started.Phase = executioncore.AgentEventPhaseLoopStarted
 	started.Message = "loop started"
 
 	blocked := validAgentEvent()
@@ -20,16 +22,16 @@ func TestSummarizeAgentEventStreamKeepsLatestKnownState(t *testing.T) {
 	blocked.LoopID = "loop-1"
 	blocked.TicketKey = "CHR-1"
 	blocked.ExecutionID = "exec-1"
-	blocked.Phase = AgentEventPhaseWorkBlocked
-	blocked.Level = AgentEventLevelWarn
+	blocked.Phase = executioncore.AgentEventPhaseWorkBlocked
+	blocked.Level = executioncore.AgentEventLevelWarn
 	blocked.Message = "CHR-1 blocked"
 
-	summary := SummarizeAgentEventStream(AgentEventStream{
+	summary := executioncore.SummarizeAgentEventStream(executioncore.AgentEventStream{
 		Path:   ".chr/default/runtime/runs/loop-1/events.jsonl",
-		Events: []AgentEvent{started, blocked},
+		Events: []executioncore.AgentEvent{started, blocked},
 	})
 
-	if summary.Status != AgentEventReadbackStatusBlocked {
+	if summary.Status != executioncore.AgentEventReadbackStatusBlocked {
 		t.Fatalf("Status = %q, want blocked", summary.Status)
 	}
 
@@ -45,7 +47,7 @@ func TestSummarizeAgentEventStreamKeepsLatestKnownState(t *testing.T) {
 		t.Fatalf("LatestExecutionID = %q, want exec-1", summary.LatestExecutionID)
 	}
 
-	if summary.LatestPhase != AgentEventPhaseWorkBlocked {
+	if summary.LatestPhase != executioncore.AgentEventPhaseWorkBlocked {
 		t.Fatalf("LatestPhase = %q, want work_blocked", summary.LatestPhase)
 	}
 }
@@ -60,12 +62,12 @@ func TestSummarizeAgentEventStreamMarksMalformedReadbackDegraded(t *testing.T) {
 		t.Fatalf("write event stream: %v", err)
 	}
 
-	stream, err := ReadAgentEventStream(context.Background(), path)
+	stream, err := executioncore.ReadAgentEventStream(context.Background(), path)
 	if err != nil {
 		t.Fatalf("ReadAgentEventStream returned error: %v", err)
 	}
 
-	summary := SummarizeAgentEventStream(stream)
+	summary := executioncore.SummarizeAgentEventStream(stream)
 	if !summary.Degraded {
 		t.Fatal("Degraded = false, want true")
 	}
@@ -74,7 +76,7 @@ func TestSummarizeAgentEventStreamMarksMalformedReadbackDegraded(t *testing.T) {
 		t.Fatalf("MalformedCount = %d, want 1", summary.MalformedCount)
 	}
 
-	if summary.Status != AgentEventReadbackStatusRunning {
+	if summary.Status != executioncore.AgentEventReadbackStatusRunning {
 		t.Fatalf("Status = %q, want running from latest valid event", summary.Status)
 	}
 }
@@ -82,19 +84,19 @@ func TestSummarizeAgentEventStreamMarksMalformedReadbackDegraded(t *testing.T) {
 func TestAgentEventReadbackStatusForEventMapsTerminalPhases(t *testing.T) {
 	tests := []struct {
 		name  string
-		phase AgentEventPhase
-		level AgentEventLevel
-		want  AgentEventReadbackStatus
+		phase executioncore.AgentEventPhase
+		level executioncore.AgentEventLevel
+		want  executioncore.AgentEventReadbackStatus
 	}{
-		{name: "loop succeeded", phase: AgentEventPhaseLoopFinished, level: AgentEventLevelInfo, want: AgentEventReadbackStatusSucceeded},
-		{name: "loop blocked", phase: AgentEventPhaseLoopFinished, level: AgentEventLevelWarn, want: AgentEventReadbackStatusBlocked},
-		{name: "loop failed", phase: AgentEventPhaseLoopFinished, level: AgentEventLevelError, want: AgentEventReadbackStatusFailed},
-		{name: "work blocked", phase: AgentEventPhaseWorkBlocked, level: AgentEventLevelWarn, want: AgentEventReadbackStatusBlocked},
-		{name: "work failed", phase: AgentEventPhaseWorkFailed, level: AgentEventLevelError, want: AgentEventReadbackStatusFailed},
-		{name: "work stopped", phase: AgentEventPhaseWorkStopped, level: AgentEventLevelWarn, want: AgentEventReadbackStatusStopped},
-		{name: "validation failed", phase: AgentEventPhaseValidationFinished, level: AgentEventLevelError, want: AgentEventReadbackStatusFailed},
-		{name: "validation passed still running", phase: AgentEventPhaseValidationFinished, level: AgentEventLevelInfo, want: AgentEventReadbackStatusRunning},
-		{name: "ticket updated", phase: AgentEventPhaseTicketStatusUpdated, level: AgentEventLevelInfo, want: AgentEventReadbackStatusSucceeded},
+		{name: "loop succeeded", phase: executioncore.AgentEventPhaseLoopFinished, level: executioncore.AgentEventLevelInfo, want: executioncore.AgentEventReadbackStatusSucceeded},
+		{name: "loop blocked", phase: executioncore.AgentEventPhaseLoopFinished, level: executioncore.AgentEventLevelWarn, want: executioncore.AgentEventReadbackStatusBlocked},
+		{name: "loop failed", phase: executioncore.AgentEventPhaseLoopFinished, level: executioncore.AgentEventLevelError, want: executioncore.AgentEventReadbackStatusFailed},
+		{name: "work blocked", phase: executioncore.AgentEventPhaseWorkBlocked, level: executioncore.AgentEventLevelWarn, want: executioncore.AgentEventReadbackStatusBlocked},
+		{name: "work failed", phase: executioncore.AgentEventPhaseWorkFailed, level: executioncore.AgentEventLevelError, want: executioncore.AgentEventReadbackStatusFailed},
+		{name: "work stopped", phase: executioncore.AgentEventPhaseWorkStopped, level: executioncore.AgentEventLevelWarn, want: executioncore.AgentEventReadbackStatusStopped},
+		{name: "validation failed", phase: executioncore.AgentEventPhaseValidationFinished, level: executioncore.AgentEventLevelError, want: executioncore.AgentEventReadbackStatusFailed},
+		{name: "validation passed still running", phase: executioncore.AgentEventPhaseValidationFinished, level: executioncore.AgentEventLevelInfo, want: executioncore.AgentEventReadbackStatusRunning},
+		{name: "ticket updated", phase: executioncore.AgentEventPhaseTicketStatusUpdated, level: executioncore.AgentEventLevelInfo, want: executioncore.AgentEventReadbackStatusSucceeded},
 	}
 
 	for _, test := range tests {
@@ -103,7 +105,7 @@ func TestAgentEventReadbackStatusForEventMapsTerminalPhases(t *testing.T) {
 			event.Phase = test.phase
 			event.Level = test.level
 
-			got := AgentEventReadbackStatusForEvent(event)
+			got := executioncore.AgentEventReadbackStatusForEvent(event)
 			if got != test.want {
 				t.Fatalf("AgentEventReadbackStatusForEvent() = %q, want %q", got, test.want)
 			}

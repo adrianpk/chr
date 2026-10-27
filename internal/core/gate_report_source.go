@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	"forge.adrianpk.com/chr/internal/core/gate"
 )
 
@@ -34,7 +35,7 @@ func loadGateExecutionReport(report ReportListEntry) gate.ExecutionReport {
 		return item
 	}
 
-	result, err := LoadExecutionResult(resultPath)
+	result, err := executioncore.LoadExecutionResult(resultPath)
 	if err != nil {
 		item.FailureReason = err.Error()
 

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -122,22 +123,22 @@ func testAgenticReviewIndexedTicket(ticketPath string) ticketcore.Indexed {
 	}
 }
 
-func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) ExecutionRecord {
-	return ExecutionRecord{
+func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) executioncore.ExecutionRecord {
+	return executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
 		TicketPath: ticketPath,
-		Status:     ExecutionStatusSucceeded,
+		Status:     executioncore.ExecutionStatusSucceeded,
 		CreatedAt:  now,
 		UpdatedAt:  now,
-		Runtime: ExecutionRuntimeRef{
+		Runtime: executioncore.ExecutionRuntimeRef{
 			Image:             "runtime",
 			DockerfilePath:    "Dockerfile",
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "go test ./...",
 		},
-		Artifacts: ExecutionArtifacts{
+		Artifacts: executioncore.ExecutionArtifacts{
 			ArtifactID:     "00001-ticket-run",
 			RunDir:         filepath.Join(projectDir, "ops", "default", "run", "00001-ticket-run"),
 			ResultPath:     "result.json",

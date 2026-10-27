@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	"forge.adrianpk.com/chr/internal/harness/codex"
@@ -16,22 +17,22 @@ import (
 
 type ticketExecutionEvents struct {
 	LoopID string
-	Sink   core.AgentEventSink
+	Sink   executioncore.AgentEventSink
 }
 
-var newTicketStartHarnessExecutor = func() core.HarnessExecutor {
-	return core.OSHarnessExecutor{}
+var newTicketStartHarnessExecutor = func() executioncore.HarnessExecutor {
+	return executioncore.OSHarnessExecutor{}
 }
 
-func newPendingExecutionRecord(projectID string, ticket ticketcore.Indexed) core.ExecutionRecord {
+func newPendingExecutionRecord(projectID string, ticket ticketcore.Indexed) executioncore.ExecutionRecord {
 	now := time.Now().UTC()
 
-	return core.ExecutionRecord{
+	return executioncore.ExecutionRecord{
 		ID:         executionID(projectID, ticket.Key, now),
 		ProjectID:  projectID,
 		TicketKey:  ticket.Key,
 		TicketPath: ticket.Path,
-		Status:     core.ExecutionStatusPending,
+		Status:     executioncore.ExecutionStatusPending,
 		CreatedAt:  now,
 		UpdatedAt:  now,
 	}
@@ -45,10 +46,10 @@ func ticketStartArtifactTitle(ticket ticketcore.Indexed) string {
 	return ticket.Key + " " + ticket.Title
 }
 
-func (s service) runTicketStartExecution(ctx context.Context, input ticketExecutionInput) (core.ExecutionRecord, error) {
-	repository, err := core.NewExecutionRepository(ctx, s.env, s.assetsFS)
+func (s service) runTicketStartExecution(ctx context.Context, input ticketExecutionInput) (executioncore.ExecutionRecord, error) {
+	repository, err := executioncore.NewExecutionRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
-		return core.ExecutionRecord{}, err
+		return executioncore.ExecutionRecord{}, err
 	}
 
 	defer func() {
@@ -58,7 +59,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 
 	err = repository.CreateExecution(ctx, input.Record)
 	if err != nil {
-		return core.ExecutionRecord{}, err
+		return executioncore.ExecutionRecord{}, err
 	}
 
 	emitBranchPreparedAgentEvent(ctx, input.Events, input.Record)
@@ -66,7 +67,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 
 	err = core.MaterializeWorkerContextForExecution(ctx, input.Record, input.Runtime.Plan)
 	if err != nil {
-		return core.ExecutionRecord{}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
+		return executioncore.ExecutionRecord{}, executioncore.NewExecutionFailure(executioncore.ExecutionFailurePreflight, err)
 	}
 
 	invocation, err := harnessruntime.NewInvocation(harnessruntime.InvocationOptions{
@@ -77,13 +78,13 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 		Plan:        input.Runtime.Plan,
 	})
 	if err != nil {
-		return core.ExecutionRecord{}, err
+		return executioncore.ExecutionRecord{}, err
 	}
 
-	runner := core.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
+	runner := executioncore.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
 	runner.EventSink = input.Events.Sink
 
-	executed, runErr := runner.Run(ctx, core.RunExecutionOptions{
+	executed, runErr := runner.Run(ctx, executioncore.RunExecutionOptions{
 		Record:     input.Record,
 		Invocation: invocation,
 		LoopID:     input.Events.LoopID,
@@ -95,7 +96,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 	return executed, runErr
 }
 
-func refreshExecutedTicketArtifactMetadata(executed core.ExecutionRecord, runErr error) error {
+func refreshExecutedTicketArtifactMetadata(executed executioncore.ExecutionRecord, runErr error) error {
 	err := refreshTicketArtifactMetadata(executed)
 	if err == nil {
 		return nil

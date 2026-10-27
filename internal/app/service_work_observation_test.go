@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -97,13 +98,13 @@ func TestWorkObservationEventBinding(t *testing.T) {
 	now := time.Now().UTC()
 	current := WorkContext{ID: "execution:one", TicketKey: "PRJ-1", Status: "running", UpdatedAt: now}
 
-	event := core.AgentEvent{ProjectID: operations.projectContext.ProjectID, ExecutionID: "two", TicketKey: "PRJ-2", Timestamp: now.Add(time.Hour), Phase: core.AgentEventPhaseWorkFailed, Message: "Different task"}
+	event := executioncore.AgentEvent{ProjectID: operations.projectContext.ProjectID, ExecutionID: "two", TicketKey: "PRJ-2", Timestamp: now.Add(time.Hour), Phase: executioncore.AgentEventPhaseWorkFailed, Message: "Different task"}
 	if legacyWorkEventMatches(event, operations.projectContext.ProjectID, "one", "") {
 		t.Fatal("mixed executions")
 	}
 
 	event.ExecutionID, event.TicketKey = "one", "PRJ-1"
-	event.Phase = core.AgentEventPhaseValidationStarted
+	event.Phase = executioncore.AgentEventPhaseValidationStarted
 	event.Timestamp = now.Add(-time.Minute)
 
 	result := WorkObservation{}
@@ -221,14 +222,14 @@ func TestWorkObservationRetained(t *testing.T) {
 func seedObservedWorkResults(t *testing.T, operations service) {
 	t.Helper()
 
-	repository, err := core.NewExecutionRepository(t.Context(), operations.env, operations.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(t.Context(), operations.env, operations.assetsFS)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	now := time.Now().UTC()
-	for _, status := range []core.ExecutionStatus{core.ExecutionStatusRunning, core.ExecutionStatusSucceeded, core.ExecutionStatusFailed} {
-		record := core.ExecutionRecord{ID: string(status), ProjectID: operations.projectContext.ProjectID, TicketKey: "PRJ-" + string(status), Status: status, CreatedAt: now, UpdatedAt: now}
+	for _, status := range []executioncore.ExecutionStatus{executioncore.ExecutionStatusRunning, executioncore.ExecutionStatusSucceeded, executioncore.ExecutionStatusFailed} {
+		record := executioncore.ExecutionRecord{ID: string(status), ProjectID: operations.projectContext.ProjectID, TicketKey: "PRJ-" + string(status), Status: status, CreatedAt: now, UpdatedAt: now}
 		if err = repository.CreateExecution(t.Context(), record); err != nil {
 			t.Fatal(err)
 		}
@@ -238,12 +239,12 @@ func seedObservedWorkResults(t *testing.T, operations service) {
 		t.Fatal(err)
 	}
 
-	loops, err := core.NewLoopRunRepository(t.Context(), operations.env, operations.assetsFS)
+	loops, err := executioncore.NewLoopRunRepository(t.Context(), operations.env, operations.assetsFS)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	record := core.LoopRunRecord{ID: "retained-loop", ProjectID: operations.projectContext.ProjectID, Status: core.LoopRunStatusSucceeded, EligibleCount: 2, ProcessedCount: 1, FailedCount: 1, CreatedAt: now, UpdatedAt: now}
+	record := executioncore.LoopRunRecord{ID: "retained-loop", ProjectID: operations.projectContext.ProjectID, Status: executioncore.LoopRunStatusSucceeded, EligibleCount: 2, ProcessedCount: 1, FailedCount: 1, CreatedAt: now, UpdatedAt: now}
 	if err = loops.CreateLoopRun(t.Context(), record); err != nil {
 		t.Fatal(err)
 	}

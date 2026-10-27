@@ -27,7 +27,7 @@ commits with direct consumers and preserved durable/wire contracts.
 
 ## Contracts Added or Changed
 
-The move ledger reconciles 494 declaration/test preimages after explicit contract
+The move ledger reconciles 650 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
 meanings are unchanged. Twenty-one assigned signatures now use cohesive owner state or
@@ -38,7 +38,7 @@ seven with 187 exact debts and one external exception.
 ## Files of Interest
 
 - `internal/core/ticket/` and native ticket/indexing code.
-- `internal/core/work_readiness_service.go` and execution/readiness consumers.
+- `internal/core/execution/` and native workflow consumers.
 - The approved baseline inventory and core owner ledger.
 
 ## Validation
@@ -207,10 +207,19 @@ constructor on the same SQLite handle rather than a private implementation.
 
 - `go test ./internal/core ./internal/app -run '^Test(LegacyWorkObservation|WorkObservation|QualityStorage|QualityRecordWire)' -count=1 -timeout=3m`: passed.
 
+Execution/loop records, SQL repositories and row bindings, runner, failures,
+results, artifact inspection/path rules and event stream operations now belong to
+`core/execution`. The bounded read-only observer follows those records; native
+authoritative ticket-file selection retains its actual coordinator. Dependencies
+include the real database/runtime/state owners without a root import or facade.
+Another 156 exact declaration preimages reconcile after qualification and signature
+formatting, for 650 total. This is the mechanical move; package naming follows.
+
+- `go test ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Execution|AgentEvent|LoopRun|ValidateAgentEvent|FileAgentEvent|ReadAgentEvent|RecentWorkEvents|SummarizeAgentEvent|LegacyWorkObservation|WorkObservation|QualityRecordWire|QualityStorage|Leaf)' -count=1 -timeout=3m`: passed; execution/TUI compiled with no selected tests at this step.
+
 ## Risks and Follow-ups
 
-Remaining work includes ticket parser/validation test ownership, execution record/runner
-ownership, other assigned signatures, typed
+Remaining work includes ticket parser/validation test ownership, execution component test ownership and naming, other assigned signatures, typed
 state/preparation contracts, remaining watches/flags/legacy dispositions, the
 six-parameter phase and final exact-head controller validation.
 No Slice 11 PR has been opened.

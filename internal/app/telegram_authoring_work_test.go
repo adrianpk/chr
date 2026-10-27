@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -261,7 +262,7 @@ func TestTelegramAuthoringWorkFailedBinding(t *testing.T) {
 func telegramAuthoringWorkNoAdmission(t *testing.T, operations service) {
 	t.Helper()
 
-	executions, err := core.NewExecutionRepository(t.Context(), operations.env, testAssetsFS())
+	executions, err := executioncore.NewExecutionRepository(t.Context(), operations.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

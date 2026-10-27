@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
@@ -39,7 +40,7 @@ type AgenticReviewContext struct {
 	ProjectID           string
 	ProjectDir          string
 	Ticket              ticketcore.Indexed
-	Execution           ExecutionRecord
+	Execution           executioncore.ExecutionRecord
 	Application         ResultApplication
 	ExecutionReportPath string
 }

@@ -122,7 +122,7 @@ func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
 	assertPreparedTicketWorktreeWorkspace(t, ticketPath, preparer.results[0], *result.Execution)
 }
 
-func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared executioncore.WorktreePrepareResult, execution core.ExecutionRecord) {
+func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared executioncore.WorktreePrepareResult, execution executioncore.ExecutionRecord) {
 	t.Helper()
 
 	if prepared.Plan.Branch != "chr/chr-1-ready-frontend" {
@@ -596,11 +596,11 @@ func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *tes
 	}
 }
 
-func assertAgentWorkLoopRunBlockedAfterOneTicket(t *testing.T, record core.LoopRunRecord) {
+func assertAgentWorkLoopRunBlockedAfterOneTicket(t *testing.T, record executioncore.LoopRunRecord) {
 	t.Helper()
 
-	if record.Status != core.LoopRunStatusBlocked {
-		t.Fatalf("LoopRun.Status = %q, want %q", record.Status, core.LoopRunStatusBlocked)
+	if record.Status != executioncore.LoopRunStatusBlocked {
+		t.Fatalf("LoopRun.Status = %q, want %q", record.Status, executioncore.LoopRunStatusBlocked)
 	}
 
 	if record.EligibleCount != 2 {
@@ -616,11 +616,11 @@ func assertAgentWorkLoopRunBlockedAfterOneTicket(t *testing.T, record core.LoopR
 	}
 }
 
-func assertAgentWorkLoopRunProcessedTwoTickets(t *testing.T, record core.LoopRunRecord) {
+func assertAgentWorkLoopRunProcessedTwoTickets(t *testing.T, record executioncore.LoopRunRecord) {
 	t.Helper()
 
-	if record.Status != core.LoopRunStatusSucceeded {
-		t.Fatalf("LoopRun.Status = %q, want %q", record.Status, core.LoopRunStatusSucceeded)
+	if record.Status != executioncore.LoopRunStatusSucceeded {
+		t.Fatalf("LoopRun.Status = %q, want %q", record.Status, executioncore.LoopRunStatusSucceeded)
 	}
 
 	if record.EligibleCount != 2 {
@@ -672,33 +672,33 @@ func TestServiceStartAllReadyAgentWorkEmitsLifecycleEvents(t *testing.T) {
 func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result AgentWorkResult) {
 	t.Helper()
 
-	loopStream := readAgentEventStream(t, core.LoopRunEventStreamPath(*result.LoopRun))
-	assertAgentEventPhases(t, loopStream.Events, []core.AgentEventPhase{
-		core.AgentEventPhaseLoopStarted,
-		core.AgentEventPhaseTicketSelected,
-		core.AgentEventPhaseExecutionCreated,
-		core.AgentEventPhaseRuntimePrepared,
-		core.AgentEventPhaseWorkerStarted,
-		core.AgentEventPhaseWorkerFinished,
-		core.AgentEventPhaseValidationStarted,
-		core.AgentEventPhaseValidationFinished,
-		core.AgentEventPhaseResultApplied,
-		core.AgentEventPhaseTicketStatusUpdated,
-		core.AgentEventPhaseCycleRehydrated,
-		core.AgentEventPhaseLoopFinished,
+	loopStream := readAgentEventStream(t, executioncore.LoopRunEventStreamPath(*result.LoopRun))
+	assertAgentEventPhases(t, loopStream.Events, []executioncore.AgentEventPhase{
+		executioncore.AgentEventPhaseLoopStarted,
+		executioncore.AgentEventPhaseTicketSelected,
+		executioncore.AgentEventPhaseExecutionCreated,
+		executioncore.AgentEventPhaseRuntimePrepared,
+		executioncore.AgentEventPhaseWorkerStarted,
+		executioncore.AgentEventPhaseWorkerFinished,
+		executioncore.AgentEventPhaseValidationStarted,
+		executioncore.AgentEventPhaseValidationFinished,
+		executioncore.AgentEventPhaseResultApplied,
+		executioncore.AgentEventPhaseTicketStatusUpdated,
+		executioncore.AgentEventPhaseCycleRehydrated,
+		executioncore.AgentEventPhaseLoopFinished,
 	})
 
 	execution := result.Executions[0]
-	executionStream := readAgentEventStream(t, core.ExecutionAgentEventStreamPath(execution))
-	assertAgentEventPhases(t, executionStream.Events, []core.AgentEventPhase{
-		core.AgentEventPhaseExecutionCreated,
-		core.AgentEventPhaseRuntimePrepared,
-		core.AgentEventPhaseWorkerStarted,
-		core.AgentEventPhaseWorkerFinished,
-		core.AgentEventPhaseValidationStarted,
-		core.AgentEventPhaseValidationFinished,
-		core.AgentEventPhaseResultApplied,
-		core.AgentEventPhaseTicketStatusUpdated,
+	executionStream := readAgentEventStream(t, executioncore.ExecutionAgentEventStreamPath(execution))
+	assertAgentEventPhases(t, executionStream.Events, []executioncore.AgentEventPhase{
+		executioncore.AgentEventPhaseExecutionCreated,
+		executioncore.AgentEventPhaseRuntimePrepared,
+		executioncore.AgentEventPhaseWorkerStarted,
+		executioncore.AgentEventPhaseWorkerFinished,
+		executioncore.AgentEventPhaseValidationStarted,
+		executioncore.AgentEventPhaseValidationFinished,
+		executioncore.AgentEventPhaseResultApplied,
+		executioncore.AgentEventPhaseTicketStatusUpdated,
 	})
 
 	for _, event := range executionStream.Events {
@@ -711,14 +711,14 @@ func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result Agent
 func assertAgentWorkRepairEventPhases(t *testing.T, projectDir string, result AgentWorkResult) {
 	t.Helper()
 
-	loopStream := readAgentEventStream(t, core.LoopRunEventStreamPath(*result.LoopRun))
-	assertAgentEventPhaseSubsequence(t, loopStream.Events, []core.AgentEventPhase{
-		core.AgentEventPhaseReviewStarted,
-		core.AgentEventPhaseReviewFinished,
-		core.AgentEventPhaseRepairStarted,
-		core.AgentEventPhaseRepairFinished,
-		core.AgentEventPhaseMergeStarted,
-		core.AgentEventPhaseMergeFinished,
+	loopStream := readAgentEventStream(t, executioncore.LoopRunEventStreamPath(*result.LoopRun))
+	assertAgentEventPhaseSubsequence(t, loopStream.Events, []executioncore.AgentEventPhase{
+		executioncore.AgentEventPhaseReviewStarted,
+		executioncore.AgentEventPhaseReviewFinished,
+		executioncore.AgentEventPhaseRepairStarted,
+		executioncore.AgentEventPhaseRepairFinished,
+		executioncore.AgentEventPhaseMergeStarted,
+		executioncore.AgentEventPhaseMergeFinished,
 	})
 }
 
@@ -998,7 +998,7 @@ func assertTicketContains(t *testing.T, ticketPath, want string) {
 	}
 }
 
-func assertRepairExecutionContextContains(t *testing.T, execution core.ExecutionRecord, want string) {
+func assertRepairExecutionContextContains(t *testing.T, execution executioncore.ExecutionRecord, want string) {
 	t.Helper()
 
 	contextPath := filepath.Join(execution.Artifacts.RunDir, "files", "context.md")
@@ -1035,10 +1035,10 @@ func indexedAgentWorkTicketKeys(tickets []ticketcore.Indexed) []string {
 	return keys
 }
 
-func readAgentEventStream(t *testing.T, path string) core.AgentEventStream {
+func readAgentEventStream(t *testing.T, path string) executioncore.AgentEventStream {
 	t.Helper()
 
-	stream, err := core.ReadAgentEventStream(t.Context(), path)
+	stream, err := executioncore.ReadAgentEventStream(t.Context(), path)
 	if err != nil {
 		t.Fatalf("ReadAgentEventStream returned error: %v", err)
 	}
@@ -1050,10 +1050,10 @@ func readAgentEventStream(t *testing.T, path string) core.AgentEventStream {
 	return stream
 }
 
-func assertAgentEventPhases(t *testing.T, events []core.AgentEvent, want []core.AgentEventPhase) {
+func assertAgentEventPhases(t *testing.T, events []executioncore.AgentEvent, want []executioncore.AgentEventPhase) {
 	t.Helper()
 
-	got := make([]core.AgentEventPhase, 0, len(events))
+	got := make([]executioncore.AgentEventPhase, 0, len(events))
 	for _, event := range events {
 		got = append(got, event.Phase)
 	}
@@ -1063,7 +1063,7 @@ func assertAgentEventPhases(t *testing.T, events []core.AgentEvent, want []core.
 	}
 }
 
-func assertAgentEventPhaseSubsequence(t *testing.T, events []core.AgentEvent, want []core.AgentEventPhase) {
+func assertAgentEventPhaseSubsequence(t *testing.T, events []executioncore.AgentEvent, want []executioncore.AgentEventPhase) {
 	t.Helper()
 
 	next := 0
@@ -1078,8 +1078,8 @@ func assertAgentEventPhaseSubsequence(t *testing.T, events []core.AgentEvent, wa
 	}
 }
 
-func agentEventPhases(events []core.AgentEvent) []core.AgentEventPhase {
-	phases := make([]core.AgentEventPhase, 0, len(events))
+func agentEventPhases(events []executioncore.AgentEvent) []executioncore.AgentEventPhase {
+	phases := make([]executioncore.AgentEventPhase, 0, len(events))
 	for _, event := range events {
 		phases = append(phases, event.Phase)
 	}
@@ -1087,7 +1087,7 @@ func agentEventPhases(events []core.AgentEvent) []core.AgentEventPhase {
 	return phases
 }
 
-func agentEventPhasesEqual(left, right []core.AgentEventPhase) bool {
+func agentEventPhasesEqual(left, right []executioncore.AgentEventPhase) bool {
 	if len(left) != len(right) {
 		return false
 	}

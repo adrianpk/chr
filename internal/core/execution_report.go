@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -38,8 +39,8 @@ type ExecutionReport struct {
 
 // ExecutionReportExecution describes a package boundary value.
 type ExecutionReportExecution struct {
-	Status      ExecutionStatus
-	FailureKind ExecutionFailureKind
+	Status      executioncore.ExecutionStatus
+	FailureKind executioncore.ExecutionFailureKind
 }
 
 // ExecutionReportRuntime describes a package boundary value.
@@ -72,7 +73,7 @@ type ExecutionReportArtifacts struct {
 // ExecutionReportResult describes a package boundary value.
 type ExecutionReportResult struct {
 	Available bool
-	Status    ExecutionResultStatus
+	Status    executioncore.ExecutionResultStatus
 	Summary   string
 }
 
@@ -134,8 +135,8 @@ type ExecutionReportChangedFilesSummary struct {
 
 // ExecutionReportOptions describes a package boundary value.
 type ExecutionReportOptions struct {
-	Execution              ExecutionRecord
-	Result                 *ExecutionResult
+	Execution              executioncore.ExecutionRecord
+	Result                 *executioncore.ExecutionResult
 	IncludeEvidence        bool
 	EvidenceChecklist      *EvidenceStrategyChecklist
 	EvidenceChecklistError string
@@ -143,7 +144,7 @@ type ExecutionReportOptions struct {
 
 // NewExecutionReport constructs the corresponding package service or value.
 func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
-	err := ValidateExecutionRecord(opts.Execution)
+	err := executioncore.ValidateExecutionRecord(opts.Execution)
 	if err != nil {
 		return ExecutionReport{}, err
 	}
@@ -178,7 +179,7 @@ func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 	return report, nil
 }
 
-func executionReportFromRecord(record ExecutionRecord) ExecutionReport {
+func executionReportFromRecord(record executioncore.ExecutionRecord) ExecutionReport {
 	return ExecutionReport{
 		ExecutionID: record.ID,
 		ProjectID:   record.ProjectID,
@@ -186,7 +187,7 @@ func executionReportFromRecord(record ExecutionRecord) ExecutionReport {
 		TicketPath:  record.TicketPath,
 		Execution: ExecutionReportExecution{
 			Status:      record.Status,
-			FailureKind: ExecutionFailureKindFromReason(record.FailureReason),
+			FailureKind: executioncore.ExecutionFailureKindFromReason(record.FailureReason),
 		},
 		Runtime: ExecutionReportRuntime{
 			Image:             record.Runtime.Image,
@@ -207,7 +208,7 @@ func executionReportFromRecord(record ExecutionRecord) ExecutionReport {
 			ResultPath:     record.Artifacts.ResultPath,
 			LogPath:        record.Artifacts.LogPath,
 			ValidationPath: record.Artifacts.ValidationPath,
-			ReportPath:     ExecutionReportPath(record),
+			ReportPath:     executioncore.ExecutionReportPath(record),
 		},
 		Validation: ExecutionReportValidation{
 			Command: record.Runtime.ValidationCommand,
@@ -222,8 +223,8 @@ func executionReportFromRecord(record ExecutionRecord) ExecutionReport {
 	}
 }
 
-func validateExecutionReportResult(record ExecutionRecord, result ExecutionResult) error {
-	err := ValidateExecutionResult(result)
+func validateExecutionReportResult(record executioncore.ExecutionRecord, result executioncore.ExecutionResult) error {
+	err := executioncore.ValidateExecutionResult(result)
 	if err != nil {
 		return err
 	}
@@ -239,7 +240,7 @@ func validateExecutionReportResult(record ExecutionRecord, result ExecutionResul
 	return nil
 }
 
-func executionReportChangedFiles(result ExecutionResult) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary) {
+func executionReportChangedFiles(result executioncore.ExecutionResult) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary) {
 	changedFiles := make([]ExecutionReportChangedFile, 0, len(result.ChangedFiles))
 
 	for _, changedFile := range result.ChangedFiles {
@@ -345,19 +346,6 @@ type executionReportWriter struct{}
 // NewExecutionReportWriter constructs the corresponding package service or value.
 func NewExecutionReportWriter() ExecutionReportWriter {
 	return &executionReportWriter{}
-}
-
-// ExecutionReportPath executes the corresponding package operation.
-func ExecutionReportPath(record ExecutionRecord) string {
-	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
-		return ""
-	}
-
-	if strings.TrimSpace(record.Artifacts.ArtifactID) != "" {
-		return filepath.Join(record.Artifacts.RunDir, "evidence", "execution-report.md")
-	}
-
-	return filepath.Join(record.Artifacts.RunDir, "execution-report.md")
 }
 
 // WriteExecutionReport writes the requested output.
@@ -588,19 +576,19 @@ func writeExecutionReportChangedFiles(
 	output.WriteString("\n")
 }
 
-func executionReportValidationStatus(record ExecutionRecord) ExecutionReportValidationStatus {
+func executionReportValidationStatus(record executioncore.ExecutionRecord) ExecutionReportValidationStatus {
 	if strings.TrimSpace(record.Artifacts.ValidationPath) == "" {
 		return ExecutionReportValidationNotRun
 	}
 
 	switch record.Status {
-	case ExecutionStatusSucceeded:
+	case executioncore.ExecutionStatusSucceeded:
 		return ExecutionReportValidationSucceeded
-	case ExecutionStatusFailed,
-		ExecutionStatusBlocked:
+	case executioncore.ExecutionStatusFailed,
+		executioncore.ExecutionStatusBlocked:
 		return ExecutionReportValidationFailed
-	case ExecutionStatusPending,
-		ExecutionStatusRunning:
+	case executioncore.ExecutionStatusPending,
+		executioncore.ExecutionStatusRunning:
 		return ExecutionReportValidationUnknown
 	default:
 		return ExecutionReportValidationUnknown

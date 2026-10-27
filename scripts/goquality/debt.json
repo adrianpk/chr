@@ -58,12 +58,12 @@
     },
     {
       "id": "internal/core/execution_report.go::executionReportChangedFiles",
-      "signature": "func(result ExecutionResult) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary)",
+      "signature": "func(result executioncore.ExecutionResult) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/loop_report.go::loopReportExecutions",
-      "signature": "func(records []ExecutionRecord) ([]LoopReportExecution, LoopReportExecutionSummary)",
+      "signature": "func(records []executioncore.ExecutionRecord) ([]LoopReportExecution, LoopReportExecutionSummary)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

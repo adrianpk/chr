@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
@@ -22,7 +23,7 @@ type ProvingSandboxRunOptions struct {
 	ProjectDir    string
 	ObjectivePath string
 	DryRun        bool
-	Executor      HarnessExecutor
+	Executor      executioncore.HarnessExecutor
 	Stdout        io.Writer
 	Stderr        io.Writer
 }
@@ -113,7 +114,7 @@ func prepareProvingArtifacts(result ProvingSandboxRunResult) (*os.File, error) {
 func runProvingSandboxCommands(ctx context.Context, result ProvingSandboxRunResult, opts ProvingSandboxRunOptions, logFile io.Writer) error {
 	executor := opts.Executor
 	if executor == nil {
-		executor = OSHarnessExecutor{}
+		executor = executioncore.OSHarnessExecutor{}
 	}
 
 	stdout := provingOutput(opts.Stdout, logFile)

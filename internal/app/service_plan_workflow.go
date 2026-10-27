@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -81,7 +82,7 @@ func (s service) AdoptWorkflowPlan(ctx context.Context, opts core.WorkflowPlanAd
 }
 
 func (s service) checkWorkflowAdoptionExecutions(ctx context.Context, keys []string) (err error) {
-	repository, err := core.NewExecutionRepository(ctx, s.env, s.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -98,7 +99,7 @@ func (s service) checkWorkflowAdoptionExecutions(ctx context.Context, keys []str
 		}
 
 		for _, record := range records {
-			if record.Status == core.ExecutionStatusRunning || record.Status == core.ExecutionStatusPending {
+			if record.Status == executioncore.ExecutionStatusRunning || record.Status == executioncore.ExecutionStatusPending {
 				return fmt.Errorf("legacy task %s has unfinished execution ownership", key)
 			}
 		}

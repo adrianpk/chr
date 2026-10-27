@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -3627,12 +3628,12 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 	older := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
 	newer := older.Add(time.Hour)
 
-	view := NewObservabilityView(projectDir, ObservabilityRecords{Daemon: daemoncore.NewStoppedState(newer), Executions: []core.ExecutionRecord{
-		{ID: "exec-old", Status: core.ExecutionStatusSucceeded, UpdatedAt: older},
-		{ID: "exec-new", Status: core.ExecutionStatusFailed, UpdatedAt: newer},
-	}, Loops: []core.LoopRunRecord{
-		{ID: "loop-old", Status: core.LoopRunStatusSucceeded, UpdatedAt: older},
-		{ID: "loop-new", Status: core.LoopRunStatusFailed, UpdatedAt: newer},
+	view := NewObservabilityView(projectDir, ObservabilityRecords{Daemon: daemoncore.NewStoppedState(newer), Executions: []executioncore.ExecutionRecord{
+		{ID: "exec-old", Status: executioncore.ExecutionStatusSucceeded, UpdatedAt: older},
+		{ID: "exec-new", Status: executioncore.ExecutionStatusFailed, UpdatedAt: newer},
+	}, Loops: []executioncore.LoopRunRecord{
+		{ID: "loop-old", Status: executioncore.LoopRunStatusSucceeded, UpdatedAt: older},
+		{ID: "loop-new", Status: executioncore.LoopRunStatusFailed, UpdatedAt: newer},
 	}, Runtime: testObservabilityRuntimeResult(projectDir), Events: testObservabilityAgentEvents(projectDir, newer)})
 
 	if view.LatestExecution.ID != "exec-new" {
@@ -3659,7 +3660,7 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 		t.Fatalf("RecentEvents[0].RuntimeLog = %q, want relative runtime log path", view.RecentEvents[0].RuntimeLog)
 	}
 
-	if view.LatestEvent.Phase != string(core.AgentEventPhaseWorkerStarted) {
+	if view.LatestEvent.Phase != string(executioncore.AgentEventPhaseWorkerStarted) {
 		t.Fatalf("LatestEvent.Phase = %q, want worker_started", view.LatestEvent.Phase)
 	}
 }
@@ -3678,18 +3679,18 @@ func testObservabilityRuntimeResult(projectDir string) harnessruntime.Validation
 	}
 }
 
-func testObservabilityAgentEvents(projectDir string, timestamp time.Time) []core.AgentEvent {
-	return []core.AgentEvent{
+func testObservabilityAgentEvents(projectDir string, timestamp time.Time) []executioncore.AgentEvent {
+	return []executioncore.AgentEvent{
 		{
-			SchemaVersion: core.AgentEventSchemaVersion,
+			SchemaVersion: executioncore.AgentEventSchemaVersion,
 			Timestamp:     timestamp,
 			LoopID:        "loop-new",
 			ExecutionID:   "exec-new",
 			TicketKey:     "CHR-2",
-			Phase:         core.AgentEventPhaseWorkerStarted,
-			Level:         core.AgentEventLevelInfo,
+			Phase:         executioncore.AgentEventPhaseWorkerStarted,
+			Level:         executioncore.AgentEventLevelInfo,
 			Message:       "CHR-2 worker started",
-			Refs: core.AgentEventRefs{
+			Refs: executioncore.AgentEventRefs{
 				"runtime_log_path": filepath.Join(projectDir, "ops", "default", "run", "00002-ticket-run", "evidence", "runtime.log"),
 			},
 		},

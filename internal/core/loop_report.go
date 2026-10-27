@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 // LoopReport describes a package boundary value.
 type LoopReport struct {
 	LoopID           string
 	ProjectID        string
-	Status           LoopRunStatus
+	Status           executioncore.LoopRunStatus
 	Counts           LoopReportCounts
 	StopReason       string
 	FailureReason    string
@@ -34,7 +36,7 @@ type LoopReportCounts struct {
 type LoopReportExecution struct {
 	ExecutionID string
 	TicketKey   string
-	Status      ExecutionStatus
+	Status      executioncore.ExecutionStatus
 }
 
 // LoopReportExecutionSummary describes a package boundary value.
@@ -46,15 +48,15 @@ type LoopReportExecutionSummary struct {
 
 // LoopReportOptions describes a package boundary value.
 type LoopReportOptions struct {
-	Loop       LoopRunRecord
-	Executions []ExecutionRecord
+	Loop       executioncore.LoopRunRecord
+	Executions []executioncore.ExecutionRecord
 }
 
 const loopReportExecutionLimit = 25
 
 // NewLoopReport constructs the corresponding package service or value.
 func NewLoopReport(opts LoopReportOptions) (LoopReport, error) {
-	err := ValidateLoopRunRecord(opts.Loop)
+	err := executioncore.ValidateLoopRunRecord(opts.Loop)
 	if err != nil {
 		return LoopReport{}, err
 	}
@@ -65,7 +67,7 @@ func NewLoopReport(opts LoopReportOptions) (LoopReport, error) {
 	return report, nil
 }
 
-func loopReportFromRecord(record LoopRunRecord) LoopReport {
+func loopReportFromRecord(record executioncore.LoopRunRecord) LoopReport {
 	return LoopReport{
 		LoopID:    record.ID,
 		ProjectID: record.ProjectID,
@@ -85,7 +87,7 @@ func loopReportFromRecord(record LoopRunRecord) LoopReport {
 	}
 }
 
-func loopReportExecutions(records []ExecutionRecord) ([]LoopReportExecution, LoopReportExecutionSummary) {
+func loopReportExecutions(records []executioncore.ExecutionRecord) ([]LoopReportExecution, LoopReportExecutionSummary) {
 	executions := make([]LoopReportExecution, 0, len(records))
 
 	for _, record := range records {
@@ -125,19 +127,19 @@ func RenderLoopReportMarkdown(report LoopReport) string {
 	return output.String()
 }
 
-func loopReportStopReason(record LoopRunRecord) string {
+func loopReportStopReason(record executioncore.LoopRunRecord) string {
 	switch {
-	case record.Status == LoopRunStatusFailed && strings.TrimSpace(record.FailureReason) != "":
+	case record.Status == executioncore.LoopRunStatusFailed && strings.TrimSpace(record.FailureReason) != "":
 		return record.FailureReason
-	case record.Status == LoopRunStatusFailed:
+	case record.Status == executioncore.LoopRunStatusFailed:
 		return "loop failed before completing integration work"
 	case record.BlockedCount > 0:
 		return "loop stopped because the current ticket integration cycle blocked"
-	case record.Status == LoopRunStatusSucceeded && record.EligibleCount == 0:
+	case record.Status == executioncore.LoopRunStatusSucceeded && record.EligibleCount == 0:
 		return "loop completed with no eligible tickets"
-	case record.Status == LoopRunStatusSucceeded:
+	case record.Status == executioncore.LoopRunStatusSucceeded:
 		return "loop completed all selected integration cycles"
-	case record.Status == LoopRunStatusRunning:
+	case record.Status == executioncore.LoopRunStatusRunning:
 		return "loop is still running"
 	default:
 		return "loop stop reason is unknown"

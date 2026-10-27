@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -225,7 +225,7 @@ func renderWorkActionEvent(event AgentEventView) string {
 	}
 
 	level := strings.TrimSpace(event.Level)
-	if level != "" && level != string(core.AgentEventLevelInfo) {
+	if level != "" && level != string(executioncore.AgentEventLevelInfo) {
 		message = level + ": " + message
 	}
 

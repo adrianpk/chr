@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type ticketEvidenceRequest struct {
 	ProjectDir string
 	TicketPath string
-	Execution  *core.ExecutionRecord
-	Result     *core.ExecutionResult
+	Execution  *executioncore.ExecutionRecord
+	Result     *executioncore.ExecutionResult
 }
 
 func ticketEvidenceReadiness(ctx context.Context, request ticketEvidenceRequest) (core.EvidenceReadinessResult, error) {

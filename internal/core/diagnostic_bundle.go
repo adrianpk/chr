@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -19,7 +20,7 @@ type DiagnosticBundle struct {
 	ProjectID              string
 	MigrationStatus        database.MigrationStatus
 	RegistryDiagnostics    []projectcore.Diagnostic
-	ExecutionArtifactDrift []ExecutionArtifactDriftDiagnostic
+	ExecutionArtifactDrift []executioncore.ExecutionArtifactDriftDiagnostic
 	RuntimeCleanupPreview  RuntimeArtifactCleanupPreview
 	Reports                []ReportListEntry
 }
@@ -120,7 +121,7 @@ func writeDiagnosticBundleRegistry(output *strings.Builder, diagnostics []projec
 
 func writeDiagnosticBundleExecutionArtifacts(
 	output *strings.Builder,
-	diagnostics []ExecutionArtifactDriftDiagnostic,
+	diagnostics []executioncore.ExecutionArtifactDriftDiagnostic,
 ) {
 	output.WriteString("## Execution Artifacts\n\n")
 

@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -137,7 +138,7 @@ func checkTelegramNoWork(t *testing.T, env core.UserEnvironment) {
 		t.Fatal("receiver changed historical command handoffs", readErr)
 	}
 
-	executions, err := core.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	executions, err := executioncore.NewExecutionRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

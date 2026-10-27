@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 // Legacy reads neither initialize an absent database nor mutate existing
@@ -15,7 +17,7 @@ func TestLegacyWorkObservation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	absent, err := ReadLegacyWork(t.Context(), env, "project-1")
+	absent, err := executioncore.ReadLegacyWork(t.Context(), env, "project-1")
 	if err != nil || len(absent.Executions) != 0 {
 		t.Fatal(absent, err)
 	}
@@ -28,7 +30,7 @@ func TestLegacyWorkObservation(t *testing.T) {
 
 	before := nativeQueueImages(t, env.DataDir())
 
-	observed, err := ReadLegacyWork(t.Context(), env, "project-1")
+	observed, err := executioncore.ReadLegacyWork(t.Context(), env, "project-1")
 	if err != nil || len(observed.Executions) != 1 || observed.Executions[0].ProjectID != "project-1" {
 		t.Fatal(observed, err)
 	}
@@ -41,7 +43,7 @@ func TestLegacyWorkObservation(t *testing.T) {
 func seedObservedLegacyWork(t *testing.T, env UserEnvironment) {
 	t.Helper()
 
-	executions, err := NewExecutionRepository(t.Context(), env, testMigrationFS())
+	executions, err := executioncore.NewExecutionRepository(t.Context(), env, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

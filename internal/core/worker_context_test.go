@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
@@ -80,7 +81,7 @@ func TestMaterializeWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
 		WorkspaceBaseRef:      "origin/dev",
 		WorkspaceBaseSHA:      "abc123",
 	}
-	record := ExecutionRecord{
+	record := executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -156,7 +157,7 @@ func TestMaterializeWorkerContextForExecutionIncludesRepairHandoff(t *testing.T)
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testWorkerContextRuntimePlan(projectDir, runDir)
-	record := ExecutionRecord{
+	record := executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -214,7 +215,7 @@ func TestMaterializeWorkerContextForExecutionIncludesEvidenceStrategy(t *testing
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testWorkerContextRuntimePlan(projectDir, runDir)
-	record := ExecutionRecord{
+	record := executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -268,7 +269,7 @@ func TestMaterializeWorkerContextForExecutionIncludesGherkinPolicyGuidance(t *te
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testWorkerContextRuntimePlan(projectDir, runDir)
-	record := ExecutionRecord{
+	record := executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -423,7 +424,7 @@ func TestMaterializeWorkerContextForExecutionBlocksRepairWithoutReviewComments(t
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	plan := testWorkerContextRuntimePlan(projectDir, runDir)
-	record := ExecutionRecord{
+	record := executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1.md"),
@@ -540,10 +541,10 @@ func testWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir stri
 	}
 }
 
-func testWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string) ExecutionRecord {
+func testWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string) executioncore.ExecutionRecord {
 	t.Helper()
 
-	record := ExecutionRecord{
+	record := executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(executionWorkspaceDir, ".chr", "default", "tickets", "CHR-1.md"),

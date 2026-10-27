@@ -425,8 +425,8 @@ func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectCont
 	return tui.NewWorkReadinessView(report), nil
 }
 
-func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessruntime.Config, executions []core.ExecutionRecord, loops []core.LoopRunRecord) []core.AgentEvent {
-	events := []core.AgentEvent{}
+func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessruntime.Config, executions []executioncore.ExecutionRecord, loops []executioncore.LoopRunRecord) []executioncore.AgentEvent {
+	events := []executioncore.AgentEvent{}
 
 	loop := latestTUILoopRun(loops)
 	if loop.ID != "" {
@@ -437,20 +437,20 @@ func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessru
 			RunID:       loop.ID,
 		})
 		if err == nil {
-			events = append(events, readTUIAgentEvents(ctx, core.AgentEventStreamPath(plan.RunArtifactDir))...)
+			events = append(events, readTUIAgentEvents(ctx, executioncore.AgentEventStreamPath(plan.RunArtifactDir))...)
 		}
 	}
 
 	execution := latestTUIExecution(executions)
 	if execution.ID != "" {
-		events = append(events, readTUIAgentEvents(ctx, core.ExecutionAgentEventStreamPath(execution))...)
+		events = append(events, readTUIAgentEvents(ctx, executioncore.ExecutionAgentEventStreamPath(execution))...)
 	}
 
 	return recentTUIAgentEvents(events, 50)
 }
 
-func readTUIAgentEvents(ctx context.Context, path string) []core.AgentEvent {
-	stream, err := core.ReadAgentEventStream(ctx, path)
+func readTUIAgentEvents(ctx context.Context, path string) []executioncore.AgentEvent {
+	stream, err := executioncore.ReadAgentEventStream(ctx, path)
 	if err != nil {
 		return nil
 	}
@@ -458,7 +458,7 @@ func readTUIAgentEvents(ctx context.Context, path string) []core.AgentEvent {
 	return stream.Events
 }
 
-func recentTUIAgentEvents(events []core.AgentEvent, limit int) []core.AgentEvent {
+func recentTUIAgentEvents(events []executioncore.AgentEvent, limit int) []executioncore.AgentEvent {
 	deduped := dedupeTUIAgentEvents(events)
 	sort.SliceStable(deduped, func(left, right int) bool {
 		return deduped[left].Timestamp.Before(deduped[right].Timestamp)
@@ -471,9 +471,9 @@ func recentTUIAgentEvents(events []core.AgentEvent, limit int) []core.AgentEvent
 	return deduped
 }
 
-func dedupeTUIAgentEvents(events []core.AgentEvent) []core.AgentEvent {
+func dedupeTUIAgentEvents(events []executioncore.AgentEvent) []executioncore.AgentEvent {
 	seen := map[string]bool{}
-	deduped := make([]core.AgentEvent, 0, len(events))
+	deduped := make([]executioncore.AgentEvent, 0, len(events))
 
 	for _, event := range events {
 		key := tuiAgentEventKey(event)
@@ -489,7 +489,7 @@ func dedupeTUIAgentEvents(events []core.AgentEvent) []core.AgentEvent {
 	return deduped
 }
 
-func tuiAgentEventKey(event core.AgentEvent) string {
+func tuiAgentEventKey(event executioncore.AgentEvent) string {
 	return event.Timestamp.Format(time.RFC3339Nano) + "\x00" +
 		event.LoopID + "\x00" +
 		event.ExecutionID + "\x00" +
@@ -498,8 +498,8 @@ func tuiAgentEventKey(event core.AgentEvent) string {
 		event.Message
 }
 
-func latestTUIExecution(executions []core.ExecutionRecord) core.ExecutionRecord {
-	var latest core.ExecutionRecord
+func latestTUIExecution(executions []executioncore.ExecutionRecord) executioncore.ExecutionRecord {
+	var latest executioncore.ExecutionRecord
 	for _, execution := range executions {
 		if latest.ID == "" || execution.UpdatedAt.After(latest.UpdatedAt) {
 			latest = execution
@@ -509,8 +509,8 @@ func latestTUIExecution(executions []core.ExecutionRecord) core.ExecutionRecord 
 	return latest
 }
 
-func latestTUILoopRun(loops []core.LoopRunRecord) core.LoopRunRecord {
-	var latest core.LoopRunRecord
+func latestTUILoopRun(loops []executioncore.LoopRunRecord) executioncore.LoopRunRecord {
+	var latest executioncore.LoopRunRecord
 	for _, loop := range loops {
 		if latest.ID == "" || loop.UpdatedAt.After(latest.UpdatedAt) {
 			latest = loop
@@ -548,8 +548,8 @@ func loadTUIExecutions(
 	env core.UserEnvironment,
 	projectID string,
 	assetsFS fs.FS,
-) ([]core.ExecutionRecord, error) {
-	repository, err := core.NewExecutionRepository(ctx, env, assetsFS)
+) ([]executioncore.ExecutionRecord, error) {
+	repository, err := executioncore.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err
 	}
@@ -572,8 +572,8 @@ func loadTUILoopRuns(
 	env core.UserEnvironment,
 	projectID string,
 	assetsFS fs.FS,
-) ([]core.LoopRunRecord, error) {
-	repository, err := core.NewLoopRunRepository(ctx, env, assetsFS)
+) ([]executioncore.LoopRunRecord, error) {
+	repository, err := executioncore.NewLoopRunRepository(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err
 	}

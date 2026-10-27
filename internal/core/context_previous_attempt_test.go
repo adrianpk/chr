@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func TestLoadPreviousAttemptContextLoadsValidationAndResult(t *testing.T) {
@@ -102,20 +104,20 @@ func TestRenderPreviousAttemptContextLink(t *testing.T) {
 	}
 }
 
-func testPreviousAttemptExecutionRecord(validationPath, resultPath string) ExecutionRecord {
+func testPreviousAttemptExecutionRecord(validationPath, resultPath string) executioncore.ExecutionRecord {
 	now := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	return ExecutionRecord{
+	return executioncore.ExecutionRecord{
 		ID:            "exec-1",
 		ProjectID:     "project-1",
 		TicketKey:     "CHR-1",
 		TicketPath:    "/tmp/project/.chr/default/tickets/CHR-1.md",
-		Status:        ExecutionStatusFailed,
-		FailureReason: string(ExecutionFailureValidation) + ": make verify failed",
-		Runtime: ExecutionRuntimeRef{
+		Status:        executioncore.ExecutionStatusFailed,
+		FailureReason: string(executioncore.ExecutionFailureValidation) + ": make verify failed",
+		Runtime: executioncore.ExecutionRuntimeRef{
 			ValidationCommand: "make verify",
 		},
-		Artifacts: ExecutionArtifacts{
+		Artifacts: executioncore.ExecutionArtifacts{
 			ResultPath:     resultPath,
 			ValidationPath: validationPath,
 		},

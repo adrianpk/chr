@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -16,18 +17,18 @@ import (
 
 type ticketApplyResultPlan struct {
 	ProjectContext commandProjectContext
-	Record         core.ExecutionRecord
-	Result         core.ExecutionResult
+	Record         executioncore.ExecutionRecord
+	Result         executioncore.ExecutionResult
 	Application    core.ResultApplication
 	ReportPath     string
 }
 
-func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext commandProjectContext, record core.ExecutionRecord) (ticketApplyResultPlan, error) {
+func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext commandProjectContext, record executioncore.ExecutionRecord) (ticketApplyResultPlan, error) {
 	if record.ProjectID != projectContext.ProjectID {
 		return ticketApplyResultPlan{}, fmt.Errorf("execution project mismatch: %s", record.ProjectID)
 	}
 
-	result, err := core.LoadExecutionResult(record.Artifacts.ResultPath)
+	result, err := executioncore.LoadExecutionResult(record.Artifacts.ResultPath)
 	if err != nil {
 		return ticketApplyResultPlan{}, err
 	}
@@ -67,7 +68,7 @@ func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext com
 	}, nil
 }
 
-func discoverTicketApplyResultChangedFiles(ctx context.Context, record core.ExecutionRecord) ([]core.ResultApplicationChangedFile, error) {
+func discoverTicketApplyResultChangedFiles(ctx context.Context, record executioncore.ExecutionRecord) ([]core.ResultApplicationChangedFile, error) {
 	if record.Workspace.Mode != workspacecore.ExecutionWorktree || record.Workspace.ExecutionWorkspaceDir == "" {
 		return nil, nil
 	}
@@ -88,7 +89,7 @@ func discoverTicketApplyResultChangedFiles(ctx context.Context, record core.Exec
 	return result, nil
 }
 
-func ticketResultApplicationPath(record core.ExecutionRecord) string {
+func ticketResultApplicationPath(record executioncore.ExecutionRecord) string {
 	if record.Artifacts.ArtifactID != "" {
 		return filepath.Join(record.Artifacts.RunDir, "evidence", "result-application.md")
 	}
@@ -163,7 +164,7 @@ func writeTicketResultState(ctx context.Context, plan ticketApplyResultPlan, app
 	})
 }
 
-func refreshTicketArtifactMetadata(record core.ExecutionRecord) error {
+func refreshTicketArtifactMetadata(record executioncore.ExecutionRecord) error {
 	if record.Artifacts.ArtifactID == "" {
 		return nil
 	}

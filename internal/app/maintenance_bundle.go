@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -70,7 +71,7 @@ func collectDiagnosticBundle(ctx context.Context, env core.UserEnvironment, proj
 		return core.DiagnosticBundle{}, err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, env, assetsFS)
+	repository, err := executioncore.NewExecutionRepository(ctx, env, assetsFS)
 	if err != nil {
 		return core.DiagnosticBundle{}, err
 	}
@@ -80,7 +81,7 @@ func collectDiagnosticBundle(ctx context.Context, env core.UserEnvironment, proj
 		_ = repository.Close()
 	}()
 
-	executionArtifacts, err := core.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	executionArtifacts, err := executioncore.NewExecutionArtifactDriftService(repository).ListDiagnostics(
 		ctx,
 		projectContext.ProjectID,
 	)

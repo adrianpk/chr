@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func TestChangedFileDiscovererDiscoversWorkspaceChanges(t *testing.T) {
@@ -120,7 +122,7 @@ func writeChangedFileDiscoveryFile(t *testing.T, projectDir, relativePath, conte
 	}
 }
 
-func assertChangedFilePaths(t *testing.T, changedFiles []ExecutionResultChangedFile, want []string) {
+func assertChangedFilePaths(t *testing.T, changedFiles []executioncore.ExecutionResultChangedFile, want []string) {
 	t.Helper()
 
 	if len(changedFiles) != len(want) {

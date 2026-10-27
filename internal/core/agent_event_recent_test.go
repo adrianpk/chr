@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,14 +20,14 @@ func TestRecentWorkEvents(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	event := AgentEvent{SchemaVersion: 1, ProjectID: "sample", ExecutionID: "one", TicketKey: "PRJ-1", Phase: AgentEventPhaseValidationStarted, Level: AgentEventLevelInfo, Message: "Running validation", Timestamp: time.Now().UTC()}
+	event := executioncore.AgentEvent{SchemaVersion: 1, ProjectID: "sample", ExecutionID: "one", TicketKey: "PRJ-1", Phase: executioncore.AgentEventPhaseValidationStarted, Level: executioncore.AgentEventLevelInfo, Message: "Running validation", Timestamp: time.Now().UTC()}
 	for range workflowstate.PageLimit + 2 {
-		if err := AppendAgentEvent(t.Context(), path, event); err != nil {
+		if err := executioncore.AppendAgentEvent(t.Context(), path, event); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	observed, err := ReadRecentAgentEvents(t.Context(), path)
+	observed, err := executioncore.ReadRecentAgentEvents(t.Context(), path)
 	if err != nil || len(observed.Events) != workflowstate.PageLimit || len(observed.Malformed) != 0 {
 		t.Fatal(len(observed.Events), observed.Malformed, err)
 	}
@@ -34,7 +35,7 @@ func TestRecentWorkEvents(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 
-	if _, err = ReadRecentAgentEvents(ctx, path); err == nil {
+	if _, err = executioncore.ReadRecentAgentEvents(ctx, path); err == nil {
 		t.Fatal("cancelled observation continued")
 	}
 }

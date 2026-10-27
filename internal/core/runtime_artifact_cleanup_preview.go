@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
@@ -25,12 +26,12 @@ type RuntimeArtifactCleanupCandidate struct {
 
 // RuntimeArtifactCleanupPreviewService describes a package boundary value.
 type RuntimeArtifactCleanupPreviewService struct {
-	repository ExecutionRepository
+	repository executioncore.ExecutionRepository
 }
 
 // NewRuntimeArtifactCleanupPreviewService constructs the corresponding package service or value.
 func NewRuntimeArtifactCleanupPreviewService(
-	repository ExecutionRepository,
+	repository executioncore.ExecutionRepository,
 ) RuntimeArtifactCleanupPreviewService {
 	return RuntimeArtifactCleanupPreviewService{repository: repository}
 }
@@ -68,7 +69,7 @@ func (s RuntimeArtifactCleanupPreviewService) Preview(
 	}, nil
 }
 
-func referencedRunDirs(records []ExecutionRecord) map[string]struct{} {
+func referencedRunDirs(records []executioncore.ExecutionRecord) map[string]struct{} {
 	referenced := map[string]struct{}{}
 
 	for _, record := range records {

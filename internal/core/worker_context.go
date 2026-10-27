@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -66,7 +67,7 @@ func NewWorkerContextMaterializer() WorkerContextMaterializer {
 }
 
 // MaterializeWorkerContextForExecution executes the corresponding package operation.
-func MaterializeWorkerContextForExecution(ctx context.Context, record ExecutionRecord, plan harnessruntime.Plan) error {
+func MaterializeWorkerContextForExecution(ctx context.Context, record executioncore.ExecutionRecord, plan harnessruntime.Plan) error {
 	repairHandoff, err := workerRepairHandoff(ctx, plan.ProjectDir, record.TicketPath)
 	if err != nil {
 		return err

@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestNewResultApplicationMapsSucceededExecutionToReviewing(t *testing.T) {
 	record := testResultApplicationExecutionRecord(t.TempDir())
-	record.Status = ExecutionStatusSucceeded
+	record.Status = executioncore.ExecutionStatusSucceeded
 
 	result := testResultApplicationResult(record)
 
@@ -52,11 +53,11 @@ func TestNewResultApplicationMapsSucceededExecutionToReviewing(t *testing.T) {
 
 func TestNewResultApplicationMapsFailedExecutionToBlocked(t *testing.T) {
 	record := testResultApplicationExecutionRecord(t.TempDir())
-	record.Status = ExecutionStatusFailed
+	record.Status = executioncore.ExecutionStatusFailed
 	record.FailureReason = "harness: docker unavailable"
 
 	result := testResultApplicationResult(record)
-	result.Status = ExecutionResultStatusFailed
+	result.Status = executioncore.ExecutionResultStatusFailed
 	result.Summary = "harness failed"
 
 	application, err := NewResultApplication(ResultApplicationOptions{
@@ -71,7 +72,7 @@ func TestNewResultApplicationMapsFailedExecutionToBlocked(t *testing.T) {
 		t.Fatalf("TicketStatus = %q, want blocked", application.TicketStatus)
 	}
 
-	if application.BlockedReason.Kind != ExecutionFailureHarness {
+	if application.BlockedReason.Kind != executioncore.ExecutionFailureHarness {
 		t.Fatalf("BlockedReason.Kind = %q, want harness", application.BlockedReason.Kind)
 	}
 
@@ -106,7 +107,7 @@ func TestNewResultApplicationBlocksFailedEvidenceReadiness(t *testing.T) {
 		t.Fatalf("TicketStatus = %q, want blocked", application.TicketStatus)
 	}
 
-	if application.BlockedReason.Kind != ExecutionFailureValidation {
+	if application.BlockedReason.Kind != executioncore.ExecutionFailureValidation {
 		t.Fatalf("BlockedReason.Kind = %q, want validation", application.BlockedReason.Kind)
 	}
 
@@ -119,7 +120,7 @@ func TestNewResultApplicationBlocksEvidenceReadinessWithWorkspaceMetadata(t *tes
 	projectDir := t.TempDir()
 	worktreeDir := t.TempDir()
 	record := testResultApplicationExecutionRecord(projectDir)
-	record.Workspace = ExecutionWorkspaceRef{
+	record.Workspace = executioncore.ExecutionWorkspaceRef{
 		Mode:                  workspacecore.ExecutionWorktree,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: worktreeDir,
@@ -151,7 +152,7 @@ func TestNewResultApplicationBlocksEvidenceReadinessWithWorkspaceMetadata(t *tes
 		t.Fatalf("TicketStatus = %q, want blocked", application.TicketStatus)
 	}
 
-	if application.BlockedReason.Kind != ExecutionFailureValidation {
+	if application.BlockedReason.Kind != executioncore.ExecutionFailureValidation {
 		t.Fatalf("BlockedReason.Kind = %q, want validation", application.BlockedReason.Kind)
 	}
 
@@ -195,7 +196,7 @@ func TestNewResultApplicationPreservesChangedFiles(t *testing.T) {
 func TestNewResultApplicationMapsResultChangedFiles(t *testing.T) {
 	record := testResultApplicationExecutionRecord(t.TempDir())
 	result := testResultApplicationResult(record)
-	result.ChangedFiles = []ExecutionResultChangedFile{
+	result.ChangedFiles = []executioncore.ExecutionResultChangedFile{
 		{Path: "internal/core/execution_result.go", Summary: "add changed files"},
 	}
 
@@ -230,23 +231,23 @@ func TestNewResultApplicationRejectsMismatchedExecutionID(t *testing.T) {
 	}
 }
 
-func testResultApplicationExecutionRecord(dir string) ExecutionRecord {
+func testResultApplicationExecutionRecord(dir string) executioncore.ExecutionRecord {
 	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
-	return ExecutionRecord{
+	return executioncore.ExecutionRecord{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
-		Status:     ExecutionStatusSucceeded,
-		Runtime: ExecutionRuntimeRef{
+		Status:     executioncore.ExecutionStatusSucceeded,
+		Runtime: executioncore.ExecutionRuntimeRef{
 			Image:             "chr-agent-runtime:local",
 			DockerfilePath:    filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Artifacts: ExecutionArtifacts{
+		Artifacts: executioncore.ExecutionArtifacts{
 			RunDir:         runDir,
 			ResultPath:     filepath.Join(runDir, "result.json"),
 			LogPath:        filepath.Join(runDir, "runtime.log"),
@@ -257,11 +258,11 @@ func testResultApplicationExecutionRecord(dir string) ExecutionRecord {
 	}
 }
 
-func testResultApplicationResult(record ExecutionRecord) ExecutionResult {
-	return ExecutionResult{
+func testResultApplicationResult(record executioncore.ExecutionRecord) executioncore.ExecutionResult {
+	return executioncore.ExecutionResult{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          ExecutionResultStatusSucceeded,
+		Status:          executioncore.ExecutionResultStatusSucceeded,
 		Summary:         "ready for review",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}

@@ -10,6 +10,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -32,7 +33,7 @@ func TestLoopRunRepositoryCreatesGetsUpdatesAndListsLoopRuns(t *testing.T) {
 
 	startedAt := now.Add(time.Minute)
 	finishedAt := now.Add(2 * time.Minute)
-	record.Status = LoopRunStatusSucceeded
+	record.Status = executioncore.LoopRunStatusSucceeded
 	record.StartedAt = &startedAt
 	record.FinishedAt = &finishedAt
 	record.EligibleCount = 3
@@ -68,12 +69,12 @@ func TestLoopRunRepositoryReturnsNotFound(t *testing.T) {
 	repository := newTestLoopRunRepository(t)
 
 	_, err := repository.GetLoopRun(context.Background(), "missing")
-	if !errors.Is(err, ErrLoopRunNotFound) {
+	if !errors.Is(err, executioncore.ErrLoopRunNotFound) {
 		t.Fatalf("GetLoopRun error = %v, want ErrLoopRunNotFound", err)
 	}
 
 	err = repository.UpdateLoopRun(context.Background(), testLoopRunRecord(time.Now().UTC()))
-	if !errors.Is(err, ErrLoopRunNotFound) {
+	if !errors.Is(err, executioncore.ErrLoopRunNotFound) {
 		t.Fatalf("UpdateLoopRun error = %v, want ErrLoopRunNotFound", err)
 	}
 }
@@ -100,7 +101,7 @@ func TestNewLoopRunRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := NewLoopRunRepository(context.Background(), env, testMigrationFS())
+	repository, err := executioncore.NewLoopRunRepository(context.Background(), env, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewLoopRunRepository returned error: %v", err)
 	}
@@ -115,7 +116,7 @@ func TestNewLoopRunRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
-func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
+func newTestLoopRunRepository(t *testing.T) executioncore.LoopRunRepository {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
@@ -138,7 +139,7 @@ func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
 		RegisteredAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 
-	repository, err := NewLoopRunRepositoryFromDB(context.Background(), db, testMigrationFS())
+	repository, err := executioncore.NewLoopRunRepositoryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewLoopRunRepositoryFromDB returned error: %v", err)
 	}
@@ -153,11 +154,11 @@ func newTestLoopRunRepository(t *testing.T) LoopRunRepository {
 	return repository
 }
 
-func testLoopRunRecord(now time.Time) LoopRunRecord {
-	return LoopRunRecord{
+func testLoopRunRecord(now time.Time) executioncore.LoopRunRecord {
+	return executioncore.LoopRunRecord{
 		ID:             "loop-1",
 		ProjectID:      "project-1",
-		Status:         LoopRunStatusPending,
+		Status:         executioncore.LoopRunStatusPending,
 		EligibleCount:  2,
 		ProcessedCount: 0,
 		BlockedCount:   0,
@@ -167,7 +168,7 @@ func testLoopRunRecord(now time.Time) LoopRunRecord {
 	}
 }
 
-func assertLoopRunRecord(t *testing.T, got, want LoopRunRecord) {
+func assertLoopRunRecord(t *testing.T, got, want executioncore.LoopRunRecord) {
 	t.Helper()
 
 	gotStartedAt := optionalTimeValue(got.StartedAt)

@@ -5,6 +5,7 @@ import (
 	"io/fs"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
@@ -15,7 +16,7 @@ type ticketStartPreflight struct {
 	Env            core.UserEnvironment
 	ProjectContext commandProjectContext
 	Ticket         ticketcore.Indexed
-	Record         core.ExecutionRecord
+	Record         executioncore.ExecutionRecord
 	Runtime        harnessruntime.ValidationResult
 }
 
@@ -92,7 +93,7 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket tic
 		return ticketStartPreflight{}, err
 	}
 
-	record = core.ExecutionRecordFromRuntimePlan(record, result.Plan)
+	record = executioncore.ExecutionRecordFromRuntimePlan(record, result.Plan)
 
 	return ticketStartPreflight{
 		AssetsFS:       s.assetsFS,

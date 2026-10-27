@@ -8,12 +8,14 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func TestValidateAgentEventAcceptsValidEvent(t *testing.T) {
 	event := validAgentEvent()
 
-	err := ValidateAgentEvent(event)
+	err := executioncore.ValidateAgentEvent(event)
 	if err != nil {
 		t.Fatalf("ValidateAgentEvent returned error: %v", err)
 	}
@@ -22,44 +24,48 @@ func TestValidateAgentEventAcceptsValidEvent(t *testing.T) {
 func TestValidateAgentEventRejectsMissingRequiredFields(t *testing.T) {
 	tests := []struct {
 		name  string
-		event AgentEvent
+		event executioncore.AgentEvent
 		want  string
 	}{
 		{
 			name:  "missing schema",
-			event: func() AgentEvent { event := validAgentEvent(); event.SchemaVersion = 0; return event }(),
+			event: func() executioncore.AgentEvent { event := validAgentEvent(); event.SchemaVersion = 0; return event }(),
 			want:  "schema version",
 		},
 		{
-			name:  "missing timestamp",
-			event: func() AgentEvent { event := validAgentEvent(); event.Timestamp = time.Time{}; return event }(),
-			want:  "timestamp",
+			name: "missing timestamp",
+			event: func() executioncore.AgentEvent {
+				event := validAgentEvent()
+				event.Timestamp = time.Time{}
+				return event
+			}(),
+			want: "timestamp",
 		},
 		{
 			name:  "missing project",
-			event: func() AgentEvent { event := validAgentEvent(); event.ProjectID = ""; return event }(),
+			event: func() executioncore.AgentEvent { event := validAgentEvent(); event.ProjectID = ""; return event }(),
 			want:  "project id",
 		},
 		{
 			name:  "invalid phase",
-			event: func() AgentEvent { event := validAgentEvent(); event.Phase = "unknown"; return event }(),
+			event: func() executioncore.AgentEvent { event := validAgentEvent(); event.Phase = "unknown"; return event }(),
 			want:  "phase",
 		},
 		{
 			name:  "invalid level",
-			event: func() AgentEvent { event := validAgentEvent(); event.Level = "debug"; return event }(),
+			event: func() executioncore.AgentEvent { event := validAgentEvent(); event.Level = "debug"; return event }(),
 			want:  "level",
 		},
 		{
 			name:  "missing message",
-			event: func() AgentEvent { event := validAgentEvent(); event.Message = " "; return event }(),
+			event: func() executioncore.AgentEvent { event := validAgentEvent(); event.Message = " "; return event }(),
 			want:  "message",
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := ValidateAgentEvent(test.event)
+			err := executioncore.ValidateAgentEvent(test.event)
 			if err == nil {
 				t.Fatal("ValidateAgentEvent returned nil error")
 			}
@@ -72,20 +78,20 @@ func TestValidateAgentEventRejectsMissingRequiredFields(t *testing.T) {
 }
 
 func TestFileAgentEventSinkAppendsAndReadsEventsInOrder(t *testing.T) {
-	path := AgentEventStreamPath(filepath.Join(t.TempDir(), "runs", "loop-1"))
-	sink := NewFileAgentEventSink(path)
+	path := executioncore.AgentEventStreamPath(filepath.Join(t.TempDir(), "runs", "loop-1"))
+	sink := executioncore.NewFileAgentEventSink(path)
 
 	first := validAgentEvent()
 	first.LoopID = "loop-1"
-	first.Phase = AgentEventPhaseLoopStarted
+	first.Phase = executioncore.AgentEventPhaseLoopStarted
 	first.Message = "loop started: 2 ready tickets"
 
 	second := validAgentEvent()
 	second.LoopID = "loop-1"
 	second.TicketKey = "CHR-1"
-	second.Phase = AgentEventPhaseTicketSelected
+	second.Phase = executioncore.AgentEventPhaseTicketSelected
 	second.Message = "CHR-1 selected"
-	second.Refs = AgentEventRefs{
+	second.Refs = executioncore.AgentEventRefs{
 		"ticket_path": ".chr/default/tickets/CHR-1.md",
 	}
 
@@ -106,7 +112,7 @@ func TestFileAgentEventSinkAppendsAndReadsEventsInOrder(t *testing.T) {
 		t.Fatalf("event stream newline count = %d, want 2", got)
 	}
 
-	stream, err := ReadAgentEventStream(context.Background(), path)
+	stream, err := executioncore.ReadAgentEventStream(context.Background(), path)
 	if err != nil {
 		t.Fatalf("ReadAgentEventStream returned error: %v", err)
 	}
@@ -116,17 +122,17 @@ func TestFileAgentEventSinkAppendsAndReadsEventsInOrder(t *testing.T) {
 }
 
 func TestExecutionAgentEventStreamPathUsesCanonicalEvidenceDirectory(t *testing.T) {
-	record := ExecutionRecord{Artifacts: ExecutionArtifacts{
+	record := executioncore.ExecutionRecord{Artifacts: executioncore.ExecutionArtifacts{
 		ArtifactID: "00001-ticket-run",
 		RunDir:     filepath.Join(t.TempDir(), "ops", "default", "run", "00001-ticket-run"),
 	}}
 
-	if got, want := ExecutionAgentEventStreamPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "events.jsonl"); got != want {
+	if got, want := executioncore.ExecutionAgentEventStreamPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "events.jsonl"); got != want {
 		t.Fatalf("ExecutionAgentEventStreamPath = %q, want %q", got, want)
 	}
 }
 
-func assertAgentEventStreamPath(t *testing.T, stream AgentEventStream, path string) {
+func assertAgentEventStreamPath(t *testing.T, stream executioncore.AgentEventStream, path string) {
 	t.Helper()
 
 	if stream.Path != path {
@@ -134,7 +140,7 @@ func assertAgentEventStreamPath(t *testing.T, stream AgentEventStream, path stri
 	}
 }
 
-func assertAgentEventStreamOrder(t *testing.T, stream AgentEventStream) {
+func assertAgentEventStreamOrder(t *testing.T, stream executioncore.AgentEventStream) {
 	t.Helper()
 
 	if len(stream.Malformed) != 0 {
@@ -145,8 +151,8 @@ func assertAgentEventStreamOrder(t *testing.T, stream AgentEventStream) {
 		t.Fatalf("Events length = %d, want 2", len(stream.Events))
 	}
 
-	if stream.Events[0].Phase != AgentEventPhaseLoopStarted {
-		t.Fatalf("first phase = %q, want %q", stream.Events[0].Phase, AgentEventPhaseLoopStarted)
+	if stream.Events[0].Phase != executioncore.AgentEventPhaseLoopStarted {
+		t.Fatalf("first phase = %q, want %q", stream.Events[0].Phase, executioncore.AgentEventPhaseLoopStarted)
 	}
 
 	if stream.Events[1].TicketKey != "CHR-1" {
@@ -177,7 +183,7 @@ func TestReadAgentEventStreamKeepsMalformedLineDiagnostics(t *testing.T) {
 		t.Fatalf("write event stream: %v", err)
 	}
 
-	stream, err := ReadAgentEventStream(context.Background(), path)
+	stream, err := executioncore.ReadAgentEventStream(context.Background(), path)
 	if err != nil {
 		t.Fatalf("ReadAgentEventStream returned error: %v", err)
 	}
@@ -202,7 +208,7 @@ func TestReadAgentEventStreamKeepsMalformedLineDiagnostics(t *testing.T) {
 func TestReadAgentEventStreamReturnsEmptyForMissingFile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "missing", "events.jsonl")
 
-	stream, err := ReadAgentEventStream(context.Background(), path)
+	stream, err := executioncore.ReadAgentEventStream(context.Background(), path)
 	if err != nil {
 		t.Fatalf("ReadAgentEventStream returned error: %v", err)
 	}
@@ -216,18 +222,18 @@ func TestReadAgentEventStreamReturnsEmptyForMissingFile(t *testing.T) {
 	}
 }
 
-func validAgentEvent() AgentEvent {
-	return AgentEvent{
-		SchemaVersion: AgentEventSchemaVersion,
+func validAgentEvent() executioncore.AgentEvent {
+	return executioncore.AgentEvent{
+		SchemaVersion: executioncore.AgentEventSchemaVersion,
 		Timestamp:     time.Date(2026, 6, 18, 11, 32, 1, 0, time.UTC),
 		ProjectID:     "project-1",
-		Phase:         AgentEventPhaseWorkerStarted,
-		Level:         AgentEventLevelInfo,
+		Phase:         executioncore.AgentEventPhaseWorkerStarted,
+		Level:         executioncore.AgentEventLevelInfo,
 		Message:       "worker started",
 	}
 }
 
-func mustJSONLine(t *testing.T, event AgentEvent) string {
+func mustJSONLine(t *testing.T, event executioncore.AgentEvent) string {
 	t.Helper()
 
 	data, err := json.Marshal(event)

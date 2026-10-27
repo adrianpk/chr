@@ -8,14 +8,15 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type ticketLoopExecutionResult struct {
 	AuthorityExcluded int
-	Record            core.LoopRunRecord
-	Executions        []core.ExecutionRecord
+	Record            executioncore.LoopRunRecord
+	Executions        []executioncore.ExecutionRecord
 	Applications      []core.ResultApplication
 	Merges            []core.TicketMergeCommandResult
 }
@@ -149,7 +150,7 @@ func hasReviewRepairTicket(tickets []ticketcore.Indexed) bool {
 }
 
 func (s service) runTicketLoopExecution(ctx context.Context, selection ticketLoopSelection) (ticketLoopExecutionResult, error) {
-	repository, err := core.NewLoopRunRepository(ctx, s.env, s.assetsFS)
+	repository, err := executioncore.NewLoopRunRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketLoopExecutionResult{}, err
 	}
@@ -246,10 +247,10 @@ func (s service) finishTicketLoopExecution(ctx context.Context, loop ticketLoop)
 func (s service) executeLoopTicket(ctx context.Context, ticket ticketcore.Indexed, events ticketExecutionEvents) (ticketExecutionOutcome, error) {
 	preflight, err := s.prepareTicketStart(ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
-		return ticketExecutionOutcome{Record: core.ExecutionRecord{}, Application: core.ResultApplication{}}, err
+		return ticketExecutionOutcome{Record: executioncore.ExecutionRecord{}, Application: core.ResultApplication{}}, err
 	}
 
-	events.Sink = core.NewAgentEventFanoutSink(events.Sink, agentWorkExecutionEventSink(preflight.Record))
+	events.Sink = executioncore.NewAgentEventFanoutSink(events.Sink, agentWorkExecutionEventSink(preflight.Record))
 
 	record, err := s.runTicketStartExecution(ctx, ticketExecutionInput{Record: preflight.Record, Runtime: preflight.Runtime, Events: events})
 	if err != nil {
@@ -269,13 +270,13 @@ func (s service) executeLoopTicket(ctx context.Context, ticket ticketcore.Indexe
 	return ticketExecutionOutcome{Record: record, Application: plan.Application}, nil
 }
 
-func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRecord {
+func newRunningLoopRunRecord(projectID string, eligibleCount int) executioncore.LoopRunRecord {
 	now := time.Now().UTC()
 
-	return core.LoopRunRecord{
+	return executioncore.LoopRunRecord{
 		ID:            loopRunID(projectID, now),
 		ProjectID:     projectID,
-		Status:        core.LoopRunStatusRunning,
+		Status:        executioncore.LoopRunStatusRunning,
 		EligibleCount: eligibleCount,
 		CreatedAt:     now,
 		StartedAt:     &now,
@@ -283,10 +284,10 @@ func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRe
 	}
 }
 
-func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core.LoopRunRecord, error) {
+func allocateLoopRunArtifact(projectDir string, record executioncore.LoopRunRecord) (executioncore.LoopRunRecord, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 	if err != nil {
-		return core.LoopRunRecord{}, err
+		return executioncore.LoopRunRecord{}, err
 	}
 
 	artifact, err := opscore.CreateArtifact(opscore.ArtifactOptions{
@@ -297,7 +298,7 @@ func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core
 		ExternalIDs: []string{record.ID},
 	})
 	if err != nil {
-		return core.LoopRunRecord{}, err
+		return executioncore.LoopRunRecord{}, err
 	}
 
 	record.ArtifactID = artifact.ID
@@ -306,12 +307,12 @@ func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core
 	return record, nil
 }
 
-func finishLoopRunRecord(record core.LoopRunRecord) core.LoopRunRecord {
+func finishLoopRunRecord(record executioncore.LoopRunRecord) executioncore.LoopRunRecord {
 	finishedAt := time.Now().UTC()
 
-	record.Status = core.LoopRunStatusSucceeded
+	record.Status = executioncore.LoopRunStatusSucceeded
 	if record.BlockedCount > 0 {
-		record.Status = core.LoopRunStatusBlocked
+		record.Status = executioncore.LoopRunStatusBlocked
 	}
 
 	record.FinishedAt = &finishedAt
@@ -320,9 +321,9 @@ func finishLoopRunRecord(record core.LoopRunRecord) core.LoopRunRecord {
 	return record
 }
 
-func failLoopRunRecord(record core.LoopRunRecord, cause error) core.LoopRunRecord {
+func failLoopRunRecord(record executioncore.LoopRunRecord, cause error) executioncore.LoopRunRecord {
 	finishedAt := time.Now().UTC()
-	record.Status = core.LoopRunStatusFailed
+	record.Status = executioncore.LoopRunStatusFailed
 	record.FinishedAt = &finishedAt
 	record.UpdatedAt = finishedAt
 	record.FailureReason = cause.Error()
@@ -389,6 +390,6 @@ func (s service) runLegacyTicketLoop(ctx context.Context, request ticketLoopRequ
 }
 
 type ticketExecutionOutcome struct {
-	Record      core.ExecutionRecord
+	Record      executioncore.ExecutionRecord
 	Application core.ResultApplication
 }

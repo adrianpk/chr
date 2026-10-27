@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -21,7 +22,7 @@ type ProvingRalphLoopOptions struct {
 	ProjectDir       string
 	ObjectivePath    string
 	MaxAttempts      int
-	Executor         HarnessExecutor
+	Executor         executioncore.HarnessExecutor
 	ValidationRunner ProvingValidationRunner
 	Stdout           io.Writer
 	Stderr           io.Writer

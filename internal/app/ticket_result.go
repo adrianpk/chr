@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 )
 
 func (factory commandFactory) ticketApplyResultCommand() *cli.Command {
@@ -63,7 +64,7 @@ func (factory commandFactory) buildTicketApplyResultPlan(ctx context.Context, cm
 		return ticketApplyResultPlan{}, err
 	}
 
-	repository, err := core.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
+	repository, err := executioncore.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return ticketApplyResultPlan{}, err
 	}
@@ -88,7 +89,7 @@ func printTicketApplyResult(stdout io.Writer, plan ticketApplyResultPlan, dryRun
 		fmt.Sprintf("ticket_path: %s", plan.Application.TicketPath),
 		fmt.Sprintf("status: %s", plan.Application.TicketStatus),
 		fmt.Sprintf("result_status: %s", plan.Result.Status),
-		fmt.Sprintf("execution_report_path: %s", core.ExecutionReportPath(plan.Record)),
+		fmt.Sprintf("execution_report_path: %s", executioncore.ExecutionReportPath(plan.Record)),
 		fmt.Sprintf("report_path: %s", plan.ReportPath),
 		fmt.Sprintf("dry_run: %t", dryRun),
 	}

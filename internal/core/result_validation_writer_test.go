@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
@@ -116,7 +117,7 @@ func testResultValidationApplication(path string) ResultApplication {
 		ExecutionID: "exec-1",
 		TicketPath:  path,
 		Execution: ResultApplicationExecution{
-			Status: ExecutionStatusSucceeded,
+			Status: executioncore.ExecutionStatusSucceeded,
 		},
 		Evidence: ResultApplicationEvidence{
 			ValidationCommand: "make verify",
