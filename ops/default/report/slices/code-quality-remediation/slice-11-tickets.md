@@ -1,6 +1,6 @@
 # Slice 11: Ticket, readiness and execution boundaries
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -65,16 +65,15 @@ fixtures. `timePtr` and the default preparation test wrapper are test-only.
 
 ## Validation
 
-Focused real file/SQLite/Git and native checks passed:
+Controller validation `3XHQGI6UV6MWJFH5CWULZLBTCE` passed the exact ordered commands
+below on clean PR head `d0d65c114cf8ddffcd0492f7fc0b746a832adc0d`, now verified
+integrated into canonical dev through PR #448.
 
-- `go test ./internal/core/ticket/... ./internal/core/execution/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Ticket|RunTicket|ValidateTicketMergeHandoff|ValidateIndexedTicket|ChangedFile|ParseGitStatus|Board|ApplyAgenticReview|TrustedAutoMerge|QualityRecordWire|QualityStorage|Worktree|WorkReadiness|Leaf)' -count=1 -timeout=3m`
-- `go test ./internal/core -run '^TestWorkflow(Record|Index|ReviewModes|ReviewDecisionChecks|ReviewPolicy|SelectionNativeTies|TaskGateOrder|ManualExact)$' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core/execution/... ./internal/core ./internal/app ./internal/tui`: zero issues.
-- `make check-go-style`: pass with the counts above.
-
-The controller records the final ordered `make verify`, focused regression and
-`git diff --check` evidence for the exact clean PR head. PR-reference follow-up
-commits precede that candidate validation. Integration is not yet recorded.
+- `make verify`: pass.
+- `go test ./internal/core/ticket/... ./internal/core/execution/... -count=1 -timeout=3m`: pass.
+- `go test ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Ticket|RunTicket|ValidateTicket|Board|WorkSelectionPreflight|WorkDoctor|Evidence|ParseEvidence|RenderEvidence|UpsertEvidence|SummarizeEvidence|ExecutionReport|NewExecutionReport|RenderExecutionReport|LoopReport|NewLoopReport|RenderLoopReport|RemoteCommand|ParseRemoteCommand|DetectReviewProviderReference|RunReviewProviderDiagnostics|RemoteReviewAdapter|ApplyAgenticReview|ParseAgenticReview|TrustedAutoMerge|QualityRecordWire|QualityStorage|Leaf)' -count=1 -timeout=3m`: pass.
+- `go test ./internal/core -run '^TestWorkflow(Record|Index|ReviewModes|ReviewDecisionChecks|ReviewPolicy|SelectionNativeTies|TaskGateOrder|ManualExact)$' -count=1 -timeout=3m`: pass.
+- `git diff --check`: pass.
 
 One earlier combined selection included every WorkflowSelection/Review/Task/Manual
 test and exhausted the package's three-minute limit while entering
@@ -84,5 +83,4 @@ checks passed separately; the timeout is not successful evidence.
 ## Risks and Follow-ups
 
 Remaining workflow parameter debt is explicitly assigned to the approved
-Slice 12–15 tasks. Slice 11 delivery closes only after canonical dev integration
-is verified; its final candidate evidence remains owned by the controller.
+Slice 12–15 tasks. Slice 11 of 16 is delivered through verified canonical PR #448 integration.

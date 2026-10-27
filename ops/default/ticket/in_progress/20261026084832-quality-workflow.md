@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084832
 title: "Quality slice 12: Workflow state, store and coordinator package"
-status: ready
+status: in_progress
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: code-quality, remediation, slice-12
 source: review
 reported_at: 2026-10-26T08:48:32Z
 commits: []
+started_at: 2026-10-27T23:03:10Z
+branch: refactor/slice-12-quality-workflow
 ready_at: 2026-10-26T08:57:09Z
 ---
 
@@ -56,3 +58,6 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 Existing WorkflowRoundTrip, mutation/receipt/idempotency/materialization and process recovery regressions on owned filesystem/Git; make verify.
 
 All commands above are planned. None ran as implementation validation during this planning task.
+
+Slice 11 PR #448 is verified integrated at `d0d65c114cf8ddffcd0492f7fc0b746a832adc0d`.
+Slice 12 is active; T12.1 method/transaction/recovery mapping precedes relocation.
