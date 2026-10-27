@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -163,7 +164,7 @@ func renderAuthoringQuiz(session AuthoringSession, event AssistedTranscriptEvent
 }
 
 func renderAuthoringCapture(session AuthoringSession, capture, instruction string) string {
-	body := "---\ntitle: " + yamlString(session.Topic+" Raw Capture") + "\nstatus: \"raw\"\ntype: \"dump_raw\"\n---\n\n# " + session.Topic + " Raw Capture\n"
+	body := "---\ntitle: " + opsmetadata.Quote(session.Topic+" Raw Capture") + "\nstatus: \"raw\"\ntype: \"dump_raw\"\n---\n\n# " + session.Topic + " Raw Capture\n"
 	if instruction != "" {
 		body += "\n## Original Instruction\n\n" + instruction + "\n"
 	}

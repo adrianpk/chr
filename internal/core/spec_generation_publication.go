@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -99,7 +100,7 @@ func mergeGeneratedSpecFields(front string, fields map[string]string) string {
 	sort.Strings(keys)
 
 	for _, key := range keys {
-		lines = replaceProjectMetadataField(lines, key, yamlString(fields[key]))
+		lines = replaceProjectMetadataField(lines, key, opsmetadata.Quote(fields[key]))
 	}
 
 	// Creation time remains owned by the existing envelope on regeneration.

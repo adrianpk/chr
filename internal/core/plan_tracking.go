@@ -10,6 +10,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -94,12 +95,12 @@ func RenderGeneratedPlanTracking(tracking generationcore.GeneratedPlanTracking) 
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("title: " + yamlString(tracking.Title) + "\n")
-	output.WriteString("project_id: " + yamlString(tracking.Scope.ProjectID) + "\n")
-	output.WriteString("case_slug: " + yamlString(tracking.Scope.CaseSlug) + "\n")
-	output.WriteString("status: " + yamlString("tracking") + "\n")
-	output.WriteString("plan_path: " + yamlString(filepath.ToSlash(tracking.PlanPath)) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(tracking.CreatedAt) + "\n")
+	output.WriteString("title: " + opsmetadata.Quote(tracking.Title) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(tracking.Scope.ProjectID) + "\n")
+	output.WriteString("case_slug: " + opsmetadata.Quote(tracking.Scope.CaseSlug) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote("tracking") + "\n")
+	output.WriteString("plan_path: " + opsmetadata.Quote(filepath.ToSlash(tracking.PlanPath)) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(tracking.CreatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# " + tracking.Title + "\n\n")
 	output.WriteString(strings.TrimSpace(tracking.Body) + "\n\n")

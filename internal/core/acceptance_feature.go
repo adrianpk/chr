@@ -10,6 +10,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -223,13 +224,13 @@ func RenderAcceptanceFeatureRoundNotes(paths AcceptanceFeatureRoundPaths, notes 
 	var output strings.Builder
 
 	output.WriteString("---\n")
-	output.WriteString("title: " + yamlString("Acceptance Feature Round") + "\n")
-	output.WriteString("status: " + yamlString(notes.Status) + "\n")
-	output.WriteString("type: " + yamlString("acceptance_feature_round") + "\n")
-	output.WriteString("case: " + yamlString(notes.Scope.CaseSlug) + "\n")
-	output.WriteString("source_request: " + yamlString(notes.SourceRequestID) + "\n")
-	output.WriteString("source_response: " + yamlString(notes.SourceResponseID) + "\n")
-	output.WriteString("updated_at: " + yamlString(notes.CreatedAt.UTC().Format(time.RFC3339)) + "\n")
+	output.WriteString("title: " + opsmetadata.Quote("Acceptance Feature Round") + "\n")
+	output.WriteString("status: " + opsmetadata.Quote(notes.Status) + "\n")
+	output.WriteString("type: " + opsmetadata.Quote("acceptance_feature_round") + "\n")
+	output.WriteString("case: " + opsmetadata.Quote(notes.Scope.CaseSlug) + "\n")
+	output.WriteString("source_request: " + opsmetadata.Quote(notes.SourceRequestID) + "\n")
+	output.WriteString("source_response: " + opsmetadata.Quote(notes.SourceResponseID) + "\n")
+	output.WriteString("updated_at: " + opsmetadata.Quote(notes.CreatedAt.UTC().Format(time.RFC3339)) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# Acceptance Feature Round\n\n")
 	output.WriteString("## Missing Information\n\n")

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // TicketReviewMetadataUpdater defines a package boundary interface.
@@ -71,7 +73,7 @@ func updateTicketReviewMetadataContent(
 		updated, err = setTicketFrontmatterScalarField(
 			updated,
 			"branch",
-			yamlString(strings.TrimSpace(opts.Branch)),
+			opsmetadata.Quote(strings.TrimSpace(opts.Branch)),
 			[]string{"review_refs", "review_state", "created_at"},
 		)
 		if err != nil {
@@ -93,7 +95,7 @@ func updateTicketReviewMetadataContent(
 		updatedAt = time.Now().UTC()
 	}
 
-	return setTicketFrontmatterScalarField(updated, "updated_at", yamlTimestamp(updatedAt), nil)
+	return setTicketFrontmatterScalarField(updated, "updated_at", opsmetadata.Timestamp(updatedAt), nil)
 }
 
 func upsertTicketReviewRef(content string, ref TicketReviewRef) (string, error) {

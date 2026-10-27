@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // WorkspaceNodeKind defines a package boundary type.
@@ -310,8 +311,8 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 	}
 
 	title := firstNonEmpty(
-		unquoteMetadataString(fields["title"]),
-		unquoteMetadataString(fields["name"]),
+		opsmetadata.Unquote(fields["title"]),
+		opsmetadata.Unquote(fields["name"]),
 		firstMarkdownHeading(body),
 		strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
 	)
@@ -322,15 +323,15 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 		RelativePath: b.relativePath(path),
 		Slug:         strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
 		Title:        title,
-		Status:       unquoteMetadataString(fields["status"]),
-		DocumentType: unquoteMetadataString(fields["type"]),
+		Status:       opsmetadata.Unquote(fields["status"]),
+		DocumentType: opsmetadata.Unquote(fields["type"]),
 		SourcePath: firstNonEmpty(
-			unquoteMetadataString(fields["source"]),
-			unquoteMetadataString(fields["raw_path"]),
+			opsmetadata.Unquote(fields["source"]),
+			opsmetadata.Unquote(fields["raw_path"]),
 		),
 		CuratedPath: firstNonEmpty(
-			unquoteMetadataString(fields["curated"]),
-			unquoteMetadataString(fields["curated_path"]),
+			opsmetadata.Unquote(fields["curated"]),
+			opsmetadata.Unquote(fields["curated_path"]),
 		),
 		CaseSlug:   documentCaseSlug(fields),
 		SourceHash: contenthash.Sum(content),
@@ -351,10 +352,10 @@ func (b WorkspaceGraphBuilder) ticketNode(path string, info os.FileInfo, content
 		Kind:         WorkspaceNodeTicket,
 		Path:         path,
 		RelativePath: b.relativePath(path),
-		Slug:         unquoteMetadataString(metadata["key"]),
-		Title:        firstNonEmpty(unquoteMetadataString(metadata["title"]), filepath.Base(path)),
-		Status:       unquoteMetadataString(metadata["status"]),
-		CaseSlug:     unquoteMetadataString(metadata["use_case"]),
+		Slug:         opsmetadata.Unquote(metadata["key"]),
+		Title:        firstNonEmpty(opsmetadata.Unquote(metadata["title"]), filepath.Base(path)),
+		Status:       opsmetadata.Unquote(metadata["status"]),
+		CaseSlug:     opsmetadata.Unquote(metadata["use_case"]),
 		SourceHash:   contenthash.Sum(content),
 		ModifiedAt:   info.ModTime().UTC(),
 		Size:         info.Size(),
@@ -586,9 +587,9 @@ func isWorkspaceMarkdownPath(path string) bool {
 
 func documentCaseSlug(fields map[string]string) string {
 	return firstNonEmpty(
-		unquoteMetadataString(fields["case"]),
-		unquoteMetadataString(fields["case_slug"]),
-		unquoteMetadataString(fields["use_case"]),
+		opsmetadata.Unquote(fields["case"]),
+		opsmetadata.Unquote(fields["case_slug"]),
+		opsmetadata.Unquote(fields["use_case"]),
 	)
 }
 

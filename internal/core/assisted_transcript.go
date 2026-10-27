@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // AssistedTranscriptEventType defines a package boundary type.
@@ -189,19 +191,19 @@ func assistedTranscriptEventFromTurn(
 
 func renderAssistedTranscriptEventFrontmatter(output *bytes.Buffer, event AssistedTranscriptEvent) {
 	output.WriteString("---\n")
-	output.WriteString("id: " + yamlString(event.ID) + "\n")
-	output.WriteString("session_id: " + yamlString(event.SessionID) + "\n")
-	output.WriteString("turn_id: " + yamlString(event.TurnID) + "\n")
+	output.WriteString("id: " + opsmetadata.Quote(event.ID) + "\n")
+	output.WriteString("session_id: " + opsmetadata.Quote(event.SessionID) + "\n")
+	output.WriteString("turn_id: " + opsmetadata.Quote(event.TurnID) + "\n")
 	output.WriteString("turn_index: " + strconv.Itoa(event.TurnIndex) + "\n")
 
 	if event.Revision > 0 {
 		output.WriteString("revision: " + strconv.FormatInt(event.Revision, 10) + "\n")
 	}
 
-	output.WriteString("type: " + yamlString(string(event.Type)) + "\n")
-	output.WriteString("intent: " + yamlString(string(event.Intent)) + "\n")
-	output.WriteString("status: " + yamlString(string(event.Status)) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(event.CreatedAt) + "\n")
+	output.WriteString("type: " + opsmetadata.Quote(string(event.Type)) + "\n")
+	output.WriteString("intent: " + opsmetadata.Quote(string(event.Intent)) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote(string(event.Status)) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(event.CreatedAt) + "\n")
 	output.WriteString("---\n\n")
 }
 
@@ -301,7 +303,7 @@ func assistedTranscriptEventFromMetadata(metadata map[string]string) (AssistedTr
 		return AssistedTranscriptEvent{}, err
 	}
 
-	turnIndex, err := strconv.Atoi(unquoteMetadataString(metadata["turn_index"]))
+	turnIndex, err := strconv.Atoi(opsmetadata.Unquote(metadata["turn_index"]))
 	if err != nil {
 		return AssistedTranscriptEvent{}, fmt.Errorf("parse assisted transcript turn index: %w", err)
 	}
@@ -312,14 +314,14 @@ func assistedTranscriptEventFromMetadata(metadata map[string]string) (AssistedTr
 	}
 
 	return AssistedTranscriptEvent{
-		ID:        unquoteMetadataString(metadata["id"]),
-		SessionID: unquoteMetadataString(metadata["session_id"]),
-		TurnID:    unquoteMetadataString(metadata["turn_id"]),
+		ID:        opsmetadata.Unquote(metadata["id"]),
+		SessionID: opsmetadata.Unquote(metadata["session_id"]),
+		TurnID:    opsmetadata.Unquote(metadata["turn_id"]),
 		TurnIndex: turnIndex,
 		Revision:  revision,
-		Type:      AssistedTranscriptEventType(unquoteMetadataString(metadata["type"])),
-		Intent:    AssistedAuthoringIntent(unquoteMetadataString(metadata["intent"])),
-		Status:    AssistedAuthoringTurnStatus(unquoteMetadataString(metadata["status"])),
+		Type:      AssistedTranscriptEventType(opsmetadata.Unquote(metadata["type"])),
+		Intent:    AssistedAuthoringIntent(opsmetadata.Unquote(metadata["intent"])),
+		Status:    AssistedAuthoringTurnStatus(opsmetadata.Unquote(metadata["status"])),
 		CreatedAt: createdAt,
 	}, nil
 }

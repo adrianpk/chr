@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -177,7 +178,7 @@ func ticketEditDelivery(content string, document TicketDocument, fields map[stri
 			}
 		}
 
-		content, err = setTicketEditorField(content, "commits", yamlStringList(commits))
+		content, err = setTicketEditorField(content, "commits", opsmetadata.QuoteList(commits))
 		if err != nil {
 			return "", err
 		}
@@ -191,7 +192,7 @@ func ticketEditDelivery(content string, document TicketDocument, fields map[stri
 }
 
 func ticketEditPullRequest(content string, document TicketDocument, value string) (string, error) {
-	content, err := setTicketEditorField(content, "pr", yamlString(value))
+	content, err := setTicketEditorField(content, "pr", opsmetadata.Quote(value))
 	if err != nil || value == "" || repositoryTicketDocument(document) {
 		return content, err
 	}

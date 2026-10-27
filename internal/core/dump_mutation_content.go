@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -12,12 +13,12 @@ func defaultDumpCapture(request DumpMutationRequest) DumpCapturePreparer {
 	return func(_ context.Context, destination, raw string) (DumpCapturePreparation, error) {
 		scope := ""
 		if request.CaseSlug != "" {
-			scope = "case: " + yamlString(request.CaseSlug) + "\n"
+			scope = "case: " + opsmetadata.Quote(request.CaseSlug) + "\n"
 		}
 
 		prepared := DumpCapturePreparation{
-			Content:    "---\ntitle: " + yamlString(request.Title) + "\ntype: dump\nstatus: curated\nsource: " + yamlString(raw) + "\n" + scope + "---\n\n" + request.Content + "\n",
-			RawContent: "---\ntitle: " + yamlString(request.Title+" Raw Capture") + "\ntype: dump_raw\nstatus: raw\ncurated: " + yamlString(destination) + "\n" + scope + "---\n\n" + request.Content + "\n",
+			Content:    "---\ntitle: " + opsmetadata.Quote(request.Title) + "\ntype: dump\nstatus: curated\nsource: " + opsmetadata.Quote(raw) + "\n" + scope + "---\n\n" + request.Content + "\n",
+			RawContent: "---\ntitle: " + opsmetadata.Quote(request.Title+" Raw Capture") + "\ntype: dump_raw\nstatus: raw\ncurated: " + opsmetadata.Quote(destination) + "\n" + scope + "---\n\n" + request.Content + "\n",
 		}
 
 		return prepared, nil

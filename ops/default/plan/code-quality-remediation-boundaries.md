@@ -14,7 +14,7 @@ are omitted here; tests do not define production ownership.
 | --- | --- |
 | app | core, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/file, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
 | core/authoring/generation | core/quiz, core/workflow/state |
 | core/authoring/state | none |
 | core/configvalue | none |
@@ -25,6 +25,7 @@ are omitted here; tests do not define production ownership.
 | core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
 | core/ops | core/ops/namespace, core/project |
 | core/ops/file | core/workflow/state |
+| core/ops/metadata | none |
 | core/ops/namespace | none |
 | core/ops/slug | none |
 | core/project | core/database |
@@ -107,7 +108,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-762 current non-test files under internal/core, their declared symbols,
+764 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -645,3 +646,14 @@ Private images remain private in their owning journal; reads, lock lifetime,
 path permission, mutation sets, recovery and multi-file commits retain their
 original authority. The shared primitive does not import or coordinate workflow
 or authoring policy. The original 10 ms cancellation-aware lock retry remains.
+
+### Shared metadata scalar representation
+
+T9.1 extracts the six original quote/list/timestamp operations into
+core/ops/metadata. They are shared by authoring, workflow and ticket document
+representations; they do not acquire ticket policy or document approval rules.
+Quoted zero times, UTC RFC3339, optional absence, existing error text, list
+splitting/omission and permissive scalar fallback remain unchanged. There is no
+new YAML parser, schema, dependency or persistence authority. Production import
+checks keep this leaf limited to the standard library. Artifact-specific parser,
+publication and retry contracts remain separate.

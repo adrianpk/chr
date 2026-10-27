@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // TicketStatusUpdater defines a package boundary interface.
@@ -102,8 +104,8 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 	}
 
 	updated, err := updateTicketMetadata(string(content), map[string]string{
-		"status":     yamlString(status),
-		"updated_at": yamlTimestamp(updatedAt),
+		"status":     opsmetadata.Quote(status),
+		"updated_at": opsmetadata.Timestamp(updatedAt),
 	})
 	if err != nil {
 		return err
@@ -131,7 +133,7 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 		return validateReadyForMergeTransitionMetadata(frontmatter)
 	}
 
-	branch := unquoteMetadataString(frontmatter.Metadata["branch"])
+	branch := opsmetadata.Unquote(frontmatter.Metadata["branch"])
 	if strings.TrimSpace(branch) == "" {
 		return fmt.Errorf("ticket ready_for_review requires branch metadata")
 	}
@@ -150,10 +152,10 @@ func validateReadyForMergeTransitionMetadata(frontmatter ticketFrontmatter) erro
 	}
 
 	ticket := IndexedTicket{
-		IndexedTicketIdentity: IndexedTicketIdentity{Key: unquoteMetadataString(frontmatter.Metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForMerge}, IndexedTicketSource: IndexedTicketSource{Branch: unquoteMetadataString(frontmatter.Metadata["branch"])}, IndexedTicketReview: IndexedTicketReview{
+		IndexedTicketIdentity: IndexedTicketIdentity{Key: opsmetadata.Unquote(frontmatter.Metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForMerge}, IndexedTicketSource: IndexedTicketSource{Branch: opsmetadata.Unquote(frontmatter.Metadata["branch"])}, IndexedTicketReview: IndexedTicketReview{
 			ReviewRefs:   frontmatter.ReviewRefs,
-			ReviewState:  unquoteMetadataString(frontmatter.Metadata["review_state"]),
-			ReviewResult: unquoteMetadataString(frontmatter.Metadata["review_result"]),
+			ReviewState:  opsmetadata.Unquote(frontmatter.Metadata["review_state"]),
+			ReviewResult: opsmetadata.Unquote(frontmatter.Metadata["review_result"]),
 			ReviewRound:  reviewRound,
 		},
 	}

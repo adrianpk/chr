@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // AssistedArtifactSynthesisOptions describes a package boundary value.
@@ -98,10 +100,10 @@ func RenderAssistedSynthesizedArtifact(
 	var output strings.Builder
 
 	output.WriteString("---\n")
-	output.WriteString("session_id: " + yamlString(session.ID) + "\n")
-	output.WriteString("source_artifact: " + yamlString(sourceRef.Path) + "\n")
-	output.WriteString("target_artifact: " + yamlString(targetRef.Path) + "\n")
-	output.WriteString("target_kind: " + yamlString(string(targetRef.Kind)) + "\n")
+	output.WriteString("session_id: " + opsmetadata.Quote(session.ID) + "\n")
+	output.WriteString("source_artifact: " + opsmetadata.Quote(sourceRef.Path) + "\n")
+	output.WriteString("target_artifact: " + opsmetadata.Quote(targetRef.Path) + "\n")
+	output.WriteString("target_kind: " + opsmetadata.Quote(string(targetRef.Kind)) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# ")
 	output.WriteString(session.Topic)

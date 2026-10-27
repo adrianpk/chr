@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // TicketMetadataUpdater updates editable ticket metadata fields.
@@ -52,9 +54,9 @@ func (u *ticketMetadataUpdater) UpdateMetadata(ctx context.Context, opts UpdateT
 	}
 
 	updated, err := updateTicketMetadata(string(content), map[string]string{
-		"title":      yamlString(strings.TrimSpace(opts.Title)),
-		"synopsis":   yamlString(strings.TrimSpace(opts.Synopsis)),
-		"updated_at": yamlTimestamp(updatedAt),
+		"title":      opsmetadata.Quote(strings.TrimSpace(opts.Title)),
+		"synopsis":   opsmetadata.Quote(strings.TrimSpace(opts.Synopsis)),
+		"updated_at": opsmetadata.Timestamp(updatedAt),
 	})
 	if err != nil {
 		return err

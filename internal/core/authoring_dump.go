@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -148,11 +149,11 @@ func authoringDumpPreparation(snapshot AuthoringSnapshot, session AuthoringSessi
 
 		raw = observed.Body
 	} else {
-		raw = strings.Replace(raw, "---\n", "---\ncurated: "+yamlString(target.Destination)+"\n", 1)
+		raw = strings.Replace(raw, "---\n", "---\ncurated: "+opsmetadata.Quote(target.Destination)+"\n", 1)
 	}
 
 	return &DumpCapturePreparation{
-		Content:    "---\ntitle: " + yamlString(session.Topic) + "\ntype: dump\nstatus: curated\nsource: " + yamlString(target.RawReference) + "\n---\n\n" + string(contribution),
+		Content:    "---\ntitle: " + opsmetadata.Quote(session.Topic) + "\ntype: dump\nstatus: curated\nsource: " + opsmetadata.Quote(target.RawReference) + "\n---\n\n" + string(contribution),
 		RawContent: raw,
 	}, nil
 }

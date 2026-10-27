@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 func projectMetadataStringFields(fields map[string]json.RawMessage) map[string]string {
 	values := make(map[string]string, len(fields))
 
 	for key, value := range fields {
-		values[key] = unquoteMetadataString(string(value))
+		values[key] = opsmetadata.Unquote(string(value))
 	}
 
 	return values
@@ -23,10 +25,10 @@ func renderProjectMetadataFields(metadata ProjectMetadata) string {
 	}
 
 	fields := []struct{ name, value string }{
-		{"schema_version", "1"}, {"name", yamlString(metadata.Name)}, {"description", yamlString(metadata.Description)},
+		{"schema_version", "1"}, {"name", opsmetadata.Quote(metadata.Name)}, {"description", opsmetadata.Quote(metadata.Description)},
 	}
 	if metadata.ProjectDumpRef != "" || strings.Contains("\n"+metadata.frontmatter, "\nproject_dump_ref:") {
-		fields = append(fields, struct{ name, value string }{"project_dump_ref", yamlString(metadata.ProjectDumpRef)})
+		fields = append(fields, struct{ name, value string }{"project_dump_ref", opsmetadata.Quote(metadata.ProjectDumpRef)})
 	}
 
 	for _, field := range fields {
@@ -71,7 +73,7 @@ func projectDocumentFields(frontmatter string) (map[string]string, error) {
 			return nil, fmt.Errorf("duplicate document frontmatter field: %s", name)
 		}
 
-		fields[name] = unquoteMetadataString(value)
+		fields[name] = opsmetadata.Unquote(value)
 	}
 
 	return fields, nil

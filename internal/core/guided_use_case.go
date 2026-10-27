@@ -10,6 +10,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
@@ -151,7 +152,7 @@ func parseGuidedUseCase(value string) (*GuidedUseCaseState, error) {
 	}
 
 	var state GuidedUseCaseState
-	if err := authoringstate.Decode([]byte(unquoteMetadataString(value)), &state); err != nil {
+	if err := authoringstate.Decode([]byte(opsmetadata.Unquote(value)), &state); err != nil {
 		return nil, fmt.Errorf("parse guided state: %w", err)
 	}
 
@@ -182,7 +183,7 @@ func renderGuidedState(output *bytes.Buffer, state *GuidedUseCaseState) error {
 		return err
 	}
 
-	_, err = fmt.Fprintf(output, "guided_state: %s\n", yamlString(string(encoded)))
+	_, err = fmt.Fprintf(output, "guided_state: %s\n", opsmetadata.Quote(string(encoded)))
 
 	return err
 }

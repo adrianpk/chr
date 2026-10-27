@@ -12,6 +12,7 @@ import (
 	"time"
 
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -264,17 +265,17 @@ func RenderContextualQuizMarkdown(
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("session_id: " + yamlString(session.ID) + "\n")
-	output.WriteString("project_id: " + yamlString(session.ProjectID) + "\n")
-	output.WriteString("target: " + yamlString(string(session.Target)) + "\n")
-	output.WriteString("artifact_id: " + yamlString(artifact.ID) + "\n")
-	output.WriteString("artifact_kind: " + yamlString(string(artifact.Kind)) + "\n")
-	output.WriteString("topic: " + yamlString(session.Topic) + "\n")
-	output.WriteString("generation_strategy: " + yamlString(result.Strategy) + "\n")
-	output.WriteString("provider: " + yamlString(result.Provider) + "\n")
+	output.WriteString("session_id: " + opsmetadata.Quote(session.ID) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(session.ProjectID) + "\n")
+	output.WriteString("target: " + opsmetadata.Quote(string(session.Target)) + "\n")
+	output.WriteString("artifact_id: " + opsmetadata.Quote(artifact.ID) + "\n")
+	output.WriteString("artifact_kind: " + opsmetadata.Quote(string(artifact.Kind)) + "\n")
+	output.WriteString("topic: " + opsmetadata.Quote(session.Topic) + "\n")
+	output.WriteString("generation_strategy: " + opsmetadata.Quote(result.Strategy) + "\n")
+	output.WriteString("provider: " + opsmetadata.Quote(result.Provider) + "\n")
 	output.WriteString("requested_questions: " + fmt.Sprintf("%d", request.QuestionCount) + "\n")
 	output.WriteString("generated_questions: " + fmt.Sprintf("%d", len(result.Questions)) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(session.UpdatedAt) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(session.UpdatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# Context-Aware Quiz\n\n")
 	output.WriteString("Topic: " + session.Topic + "\n\n")

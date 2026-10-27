@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // TicketMergeCommandRemote defines a package boundary interface.
@@ -164,9 +166,9 @@ func applyTicketMergeCommandResult(ctx context.Context, path string, result Tick
 		now = time.Now().UTC()
 	}
 
-	mergedAtValue := yamlString("")
+	mergedAtValue := opsmetadata.Quote("")
 	if result.MergeState == TicketMergeStateMerged {
-		mergedAtValue = yamlTimestamp(now)
+		mergedAtValue = opsmetadata.Timestamp(now)
 	}
 
 	updated := string(content)
@@ -175,14 +177,14 @@ func applyTicketMergeCommandResult(ctx context.Context, path string, result Tick
 		value      string
 		beforeKeys []string
 	}{
-		{key: "status", value: yamlString(result.Status), beforeKeys: []string{"priority", "severity", "type"}},
-		{key: "merge_state", value: yamlString(result.MergeState), beforeKeys: []string{"merge_result", "merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
-		{key: "merge_result", value: yamlString(result.MergeResult), beforeKeys: []string{"merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
-		{key: "merge_actor", value: yamlString(result.MergeActor), beforeKeys: []string{"merge_commit", "merge_blocker", "merged_at", "created_at"}},
-		{key: "merge_commit", value: yamlString(result.MergeCommit), beforeKeys: []string{"merge_blocker", "merged_at", "created_at"}},
-		{key: "merge_blocker", value: yamlString(result.MergeBlocker), beforeKeys: []string{"merged_at", "created_at"}},
+		{key: "status", value: opsmetadata.Quote(result.Status), beforeKeys: []string{"priority", "severity", "type"}},
+		{key: "merge_state", value: opsmetadata.Quote(result.MergeState), beforeKeys: []string{"merge_result", "merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_result", value: opsmetadata.Quote(result.MergeResult), beforeKeys: []string{"merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_actor", value: opsmetadata.Quote(result.MergeActor), beforeKeys: []string{"merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_commit", value: opsmetadata.Quote(result.MergeCommit), beforeKeys: []string{"merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_blocker", value: opsmetadata.Quote(result.MergeBlocker), beforeKeys: []string{"merged_at", "created_at"}},
 		{key: "merged_at", value: mergedAtValue, beforeKeys: []string{"created_at"}},
-		{key: "updated_at", value: yamlTimestamp(now), beforeKeys: nil},
+		{key: "updated_at", value: opsmetadata.Timestamp(now), beforeKeys: nil},
 	} {
 		updated, err = setTicketFrontmatterScalarField(updated, field.key, field.value, field.beforeKeys)
 		if err != nil {

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -88,7 +89,7 @@ func TestSpecLifecycleAliases(t *testing.T) {
 			project := t.TempDir()
 			result := specTestMutate(t, project, specTestRequest("alias"))
 			document := specTestRead(t, project, result.Reference)
-			content := strings.Replace(string(document.images[0].After), "status: "+yamlString("draft"), "status: "+yamlString(status), 1)
+			content := strings.Replace(string(document.images[0].After), "status: "+opsmetadata.Quote("draft"), "status: "+opsmetadata.Quote(status), 1)
 
 			path := filepath.Join(project, result.Reference)
 			if err := os.WriteFile(path, []byte(content), 0o644); err != nil {

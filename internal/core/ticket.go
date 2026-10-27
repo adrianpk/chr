@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // DefaultTicketStatus defines a package boundary constant.
@@ -176,7 +178,7 @@ func renderTicketMergeFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		return err
 	}
 
-	return writeTicketEncodedField(output, "merged_at", yamlTimestamp(ticket.MergedAt))
+	return writeTicketEncodedField(output, "merged_at", opsmetadata.Timestamp(ticket.MergedAt))
 }
 
 func renderTicketTimeFrontmatter(output *bytes.Buffer, ticket Ticket) error {
@@ -187,7 +189,7 @@ func renderTicketTimeFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		{key: "created_at", value: ticket.CreatedAt},
 		{key: "updated_at", value: ticket.UpdatedAt},
 	} {
-		if err := writeTicketEncodedField(output, field.key, yamlTimestamp(field.value)); err != nil {
+		if err := writeTicketEncodedField(output, field.key, opsmetadata.Timestamp(field.value)); err != nil {
 			return err
 		}
 	}
@@ -211,16 +213,16 @@ func writeTicketStringFields(output *bytes.Buffer, fields []ticketStringField) e
 }
 
 func writeTicketStringField(output *bytes.Buffer, key, value string) error {
-	return writeTicketEncodedField(output, key, yamlString(value))
+	return writeTicketEncodedField(output, key, opsmetadata.Quote(value))
 }
 
 func writeTicketListField(output *bytes.Buffer, key string, values []string) error {
-	return writeTicketEncodedField(output, key, yamlStringList(values))
+	return writeTicketEncodedField(output, key, opsmetadata.QuoteList(values))
 }
 
 func writeTicketReviewRoundField(output *bytes.Buffer, value int) error {
 	if value == 0 {
-		return writeTicketEncodedField(output, "review_round", yamlString(""))
+		return writeTicketEncodedField(output, "review_round", opsmetadata.Quote(""))
 	}
 
 	return writeTicketEncodedField(output, "review_round", strconv.Itoa(value))
@@ -252,7 +254,7 @@ func writeTicketReviewRefsField(output *bytes.Buffer, refs []TicketReviewRef) er
 				prefix = "  - "
 			}
 
-			_, err = fmt.Fprintf(output, "%s%s: %s\n", prefix, field.key, yamlString(field.value))
+			_, err = fmt.Fprintf(output, "%s%s: %s\n", prefix, field.key, opsmetadata.Quote(field.value))
 			if err != nil {
 				return fmt.Errorf("write ticket frontmatter: %w", err)
 			}
@@ -285,29 +287,4 @@ func renderTicketBody(output *bytes.Buffer, body string) {
 	output.WriteString("# Comments\n\n")
 	output.WriteString("# Blocker\n\n")
 	output.WriteString("# Validation\n")
-}
-
-func yamlString(value string) string {
-	return strconv.Quote(value)
-}
-
-func yamlStringList(values []string) string {
-	if len(values) == 0 {
-		return "[]"
-	}
-
-	quoted := make([]string, 0, len(values))
-	for _, value := range values {
-		quoted = append(quoted, yamlString(value))
-	}
-
-	return "[" + strings.Join(quoted, ", ") + "]"
-}
-
-func yamlTimestamp(value time.Time) string {
-	if value.IsZero() {
-		return yamlString("")
-	}
-
-	return yamlString(value.UTC().Format(time.RFC3339))
 }

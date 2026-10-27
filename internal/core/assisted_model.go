@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // AssistedModelResponseStatus defines a package boundary type.
@@ -354,12 +356,12 @@ func RenderAssistedModelRequest(request AssistedModelRequest) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("id: " + yamlString(request.ID) + "\n")
-	output.WriteString("session_id: " + yamlString(request.SessionID) + "\n")
-	output.WriteString("turn_id: " + yamlString(request.TurnID) + "\n")
-	output.WriteString("intent: " + yamlString(string(request.Intent)) + "\n")
-	output.WriteString("target: " + yamlString(string(request.Target)) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(request.CreatedAt) + "\n")
+	output.WriteString("id: " + opsmetadata.Quote(request.ID) + "\n")
+	output.WriteString("session_id: " + opsmetadata.Quote(request.SessionID) + "\n")
+	output.WriteString("turn_id: " + opsmetadata.Quote(request.TurnID) + "\n")
+	output.WriteString("intent: " + opsmetadata.Quote(string(request.Intent)) + "\n")
+	output.WriteString("target: " + opsmetadata.Quote(string(request.Target)) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(request.CreatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# Assisted Model Request\n\n")
 	output.WriteString("## Prompt\n\n")
@@ -377,13 +379,13 @@ func RenderAssistedModelResponse(response AssistedModelResponse) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("id: " + yamlString(response.ID) + "\n")
-	output.WriteString("request_id: " + yamlString(response.RequestID) + "\n")
-	output.WriteString("session_id: " + yamlString(response.SessionID) + "\n")
-	output.WriteString("turn_id: " + yamlString(response.TurnID) + "\n")
-	output.WriteString("provider: " + yamlString(response.Provider) + "\n")
-	output.WriteString("status: " + yamlString(string(response.Status)) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(response.CreatedAt) + "\n")
+	output.WriteString("id: " + opsmetadata.Quote(response.ID) + "\n")
+	output.WriteString("request_id: " + opsmetadata.Quote(response.RequestID) + "\n")
+	output.WriteString("session_id: " + opsmetadata.Quote(response.SessionID) + "\n")
+	output.WriteString("turn_id: " + opsmetadata.Quote(response.TurnID) + "\n")
+	output.WriteString("provider: " + opsmetadata.Quote(response.Provider) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote(string(response.Status)) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(response.CreatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# Assisted Model Response\n\n")
 	writeAssistedModelResponseQuestion(&output, response)

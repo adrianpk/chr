@@ -7,6 +7,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +20,7 @@ func planOrderBytes(document generationcore.PlanOrderDocument) ([]byte, []byte, 
 	}
 
 	var output bytes.Buffer
-	fmt.Fprintf(&output, "---\nworkflow_projection: chr-tracker/v2\nstate_authority: tickets\nplan_ref: %s\nplan_revision: %d\nplan_body_hash: %s\nsource_hash: %s\n---\n\n# Workflow tracker\n\n", yamlString(document.PlanRef), document.PlanRevision, document.PlanBodyHash, contenthash.Sum(encoded))
+	fmt.Fprintf(&output, "---\nworkflow_projection: chr-tracker/v2\nstate_authority: tickets\nplan_ref: %s\nplan_revision: %d\nplan_body_hash: %s\nsource_hash: %s\n---\n\n# Workflow tracker\n\n", opsmetadata.Quote(document.PlanRef), document.PlanRevision, document.PlanBodyHash, contenthash.Sum(encoded))
 
 	if document.SetID == "" {
 		output.WriteString("Planned order. Tickets are unbound; this map cannot authorize execution.\n\n")

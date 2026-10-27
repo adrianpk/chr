@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -112,7 +113,7 @@ func (s *WorkflowStore) workflowTrackerReceiptSources(result *WorkflowTrackerSta
 func renderWorkflowTracker(result WorkflowTrackerStatus, set WorkflowRecord, tasks []WorkflowRecord) []byte {
 	var output bytes.Buffer
 	output.WriteString("---\nworkflow_projection: chr-tracker/v1\nstate_authority: tickets\n")
-	fmt.Fprintf(&output, "slice_set_id: %s\nsource_hash: %s\n---\n\n", yamlString(set.ID), result.SourceHash)
+	fmt.Fprintf(&output, "slice_set_id: %s\nsource_hash: %s\n---\n\n", opsmetadata.Quote(set.ID), result.SourceHash)
 	output.WriteString("# Workflow tracker\n\nGenerated view. Ticket records and receipts own progress. Do not execute or import this file.\n\n")
 	fmt.Fprintf(&output, "Set: %s (%s). Closure receipt: %s.\n\n", trackerCell(set.ID), trackerCell(set.Set.Status), trackerCell(set.Set.ClosureRef))
 	output.WriteString("| Slice | Phase | Pull request | Delivery receipt |\n| --- | --- | --- | --- |\n")

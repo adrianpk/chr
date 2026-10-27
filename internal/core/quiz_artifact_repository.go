@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -294,13 +295,13 @@ func RenderQuizRawCapture(state quizcore.RuntimeState, entry quizcore.Entry) str
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("project_id: " + yamlString(state.ProjectID) + "\n")
-	output.WriteString("case_slug: " + yamlString(state.CaseSlug) + "\n")
-	output.WriteString("scope: " + yamlString(quizScopeName(state.CaseSlug)) + "\n")
-	output.WriteString("status: " + yamlString("raw") + "\n")
-	output.WriteString("runtime_id: " + yamlString(state.ID) + "\n")
-	output.WriteString("curated_path: " + yamlString(state.CuratedPath) + "\n")
-	output.WriteString("updated_at: " + yamlTimestamp(state.UpdatedAt) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(state.ProjectID) + "\n")
+	output.WriteString("case_slug: " + opsmetadata.Quote(state.CaseSlug) + "\n")
+	output.WriteString("scope: " + opsmetadata.Quote(quizScopeName(state.CaseSlug)) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote("raw") + "\n")
+	output.WriteString("runtime_id: " + opsmetadata.Quote(state.ID) + "\n")
+	output.WriteString("curated_path: " + opsmetadata.Quote(state.CuratedPath) + "\n")
+	output.WriteString("updated_at: " + opsmetadata.Timestamp(state.UpdatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("## Turn\n\n")
 
@@ -349,12 +350,12 @@ func RenderQuizCuratedNotes(paths QuizArtifactPaths, notes quizcore.CuratedNotes
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("project_id: " + yamlString(notes.Scope.ProjectID) + "\n")
-	output.WriteString("case_slug: " + yamlString(notes.Scope.CaseSlug) + "\n")
-	output.WriteString("scope: " + yamlString(quizScopeName(notes.Scope.CaseSlug)) + "\n")
-	output.WriteString("status: " + yamlString("curated") + "\n")
-	output.WriteString("raw_path: " + yamlString(paths.RawRelativePath) + "\n")
-	output.WriteString("updated_at: " + yamlString(notes.UpdatedAt) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(notes.Scope.ProjectID) + "\n")
+	output.WriteString("case_slug: " + opsmetadata.Quote(notes.Scope.CaseSlug) + "\n")
+	output.WriteString("scope: " + opsmetadata.Quote(quizScopeName(notes.Scope.CaseSlug)) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote("curated") + "\n")
+	output.WriteString("raw_path: " + opsmetadata.Quote(paths.RawRelativePath) + "\n")
+	output.WriteString("updated_at: " + opsmetadata.Quote(notes.UpdatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# Quiz Notes\n\n")
 	renderQuizCuratedSection(&output, "Decisions", notes.Decisions)

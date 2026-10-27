@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -174,12 +175,12 @@ func workflowUnpreparedTicket(content []byte) (IndexedTicket, error) {
 
 	metadata := frontmatter.Metadata
 
-	created, err := optionalTicketTime(metadata["created_at"])
+	created, err := opsmetadata.OptionalTimestamp(metadata["created_at"])
 	if err != nil {
 		return IndexedTicket{}, err
 	}
 
-	return IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: unquoteMetadataString(metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: unquoteMetadataString(metadata["status"]), UseCase: unquoteMetadataString(metadata["use_case"]), Priority: unquoteMetadataString(metadata["priority"]), Severity: unquoteMetadataString(metadata["severity"]), Type: unquoteMetadataString(metadata["type"]), ProjectArea: unquoteMetadataString(metadata["project_area"]), Tags: parseMetadataStringList(metadata["tags"])}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: created}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: contenthash.Sum(content)}}, nil
+	return IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: opsmetadata.Unquote(metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: opsmetadata.Unquote(metadata["status"]), UseCase: opsmetadata.Unquote(metadata["use_case"]), Priority: opsmetadata.Unquote(metadata["priority"]), Severity: opsmetadata.Unquote(metadata["severity"]), Type: opsmetadata.Unquote(metadata["type"]), ProjectArea: opsmetadata.Unquote(metadata["project_area"]), Tags: opsmetadata.ParseList(metadata["tags"])}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: created}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: contenthash.Sum(content)}}, nil
 }
 
 func (s *WorkflowStore) hashWorkflowEvidence(ctx context.Context, selection *workflowSelection) error {

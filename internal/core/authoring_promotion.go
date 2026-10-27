@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // QuizToDraftPromotionOptions describes a package boundary value.
@@ -96,14 +98,14 @@ func RenderDraftFromQuiz(
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("session_id: " + yamlString(session.ID) + "\n")
-	output.WriteString("project_id: " + yamlString(session.ProjectID) + "\n")
-	output.WriteString("source_artifact_id: " + yamlString(source.ID) + "\n")
-	output.WriteString("source_path: " + yamlString(source.Path) + "\n")
-	output.WriteString("artifact_id: " + yamlString(target.ID) + "\n")
-	output.WriteString("artifact_kind: " + yamlString(string(target.Kind)) + "\n")
-	output.WriteString("topic: " + yamlString(session.Topic) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(session.UpdatedAt) + "\n")
+	output.WriteString("session_id: " + opsmetadata.Quote(session.ID) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(session.ProjectID) + "\n")
+	output.WriteString("source_artifact_id: " + opsmetadata.Quote(source.ID) + "\n")
+	output.WriteString("source_path: " + opsmetadata.Quote(source.Path) + "\n")
+	output.WriteString("artifact_id: " + opsmetadata.Quote(target.ID) + "\n")
+	output.WriteString("artifact_kind: " + opsmetadata.Quote(string(target.Kind)) + "\n")
+	output.WriteString("topic: " + opsmetadata.Quote(session.Topic) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(session.UpdatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# Draft\n\n")
 	output.WriteString("Topic: " + session.Topic + "\n\n")

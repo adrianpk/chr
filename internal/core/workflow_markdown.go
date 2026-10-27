@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -47,7 +48,7 @@ func workflowMarkdownFields(front string) (map[string]json.RawMessage, error) {
 		if json.Valid([]byte(value)) {
 			fields[key] = json.RawMessage(value)
 		} else {
-			fields[key] = json.RawMessage(strconv.Quote(unquoteMetadataString(value)))
+			fields[key] = json.RawMessage(strconv.Quote(opsmetadata.Unquote(value)))
 		}
 	}
 

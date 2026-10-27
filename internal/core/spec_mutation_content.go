@@ -9,6 +9,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -112,10 +113,10 @@ func specDocumentFront(document SpecDocument, request SpecMutationRequest, statu
 	}
 
 	for _, field := range []struct{ key, value string }{
-		{"title", yamlString(request.Title)},
-		{"project_id", yamlString(request.ProjectID)},
-		{"case_slug", yamlString(request.CaseSlug)},
-		{"status", yamlString(status)},
+		{"title", opsmetadata.Quote(request.Title)},
+		{"project_id", opsmetadata.Quote(request.ProjectID)},
+		{"case_slug", opsmetadata.Quote(request.CaseSlug)},
+		{"status", opsmetadata.Quote(status)},
 		{"updated_at", now},
 	} {
 		front = replaceProjectMetadataField(front, field.key, field.value)
@@ -130,7 +131,7 @@ func specDocumentFront(document SpecDocument, request SpecMutationRequest, statu
 			{"guided_content_hash", approval.ContentHash},
 			{"guided_input_digest", approval.InputDigest},
 		} {
-			front = replaceProjectMetadataField(front, field.key, yamlString(field.value))
+			front = replaceProjectMetadataField(front, field.key, opsmetadata.Quote(field.value))
 		}
 	}
 
@@ -145,7 +146,7 @@ func specDocumentFront(document SpecDocument, request SpecMutationRequest, statu
 			return nil, err
 		}
 
-		front = replaceProjectMetadataField(front, "created_at", yamlString(created))
+		front = replaceProjectMetadataField(front, "created_at", opsmetadata.Quote(created))
 	}
 
 	return front, nil

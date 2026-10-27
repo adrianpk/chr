@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 const (
@@ -219,13 +221,13 @@ func applyTicketReviewCommandResult(ctx context.Context, path string, result Tic
 		value      string
 		beforeKeys []string
 	}{
-		{key: "status", value: yamlString(result.Status), beforeKeys: []string{"priority", "severity", "type"}},
-		{key: "review_state", value: yamlString(result.ReviewState), beforeKeys: []string{"review_result", "review_comments_url", "review_round", "blocking_findings", "created_at"}},
-		{key: "review_result", value: yamlString(result.ReviewResult), beforeKeys: []string{"review_comments_url", "review_round", "blocking_findings", "created_at"}},
-		{key: "review_comments_url", value: yamlString(result.ReviewRef.URL), beforeKeys: []string{"review_round", "blocking_findings", "created_at"}},
+		{key: "status", value: opsmetadata.Quote(result.Status), beforeKeys: []string{"priority", "severity", "type"}},
+		{key: "review_state", value: opsmetadata.Quote(result.ReviewState), beforeKeys: []string{"review_result", "review_comments_url", "review_round", "blocking_findings", "created_at"}},
+		{key: "review_result", value: opsmetadata.Quote(result.ReviewResult), beforeKeys: []string{"review_comments_url", "review_round", "blocking_findings", "created_at"}},
+		{key: "review_comments_url", value: opsmetadata.Quote(result.ReviewRef.URL), beforeKeys: []string{"review_round", "blocking_findings", "created_at"}},
 		{key: "review_round", value: strconvTicketReviewRound(result), beforeKeys: []string{"blocking_findings", "created_at"}},
-		{key: "blocking_findings", value: yamlStringList(result.BlockingFindings), beforeKeys: []string{"created_at"}},
-		{key: "updated_at", value: yamlTimestamp(updatedAt), beforeKeys: nil},
+		{key: "blocking_findings", value: opsmetadata.QuoteList(result.BlockingFindings), beforeKeys: []string{"created_at"}},
+		{key: "updated_at", value: opsmetadata.Timestamp(updatedAt), beforeKeys: nil},
 	} {
 		updated, err = setTicketFrontmatterScalarField(updated, field.key, field.value, field.beforeKeys)
 		if err != nil {

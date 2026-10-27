@@ -12,6 +12,7 @@ import (
 	"unicode"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -215,15 +216,15 @@ func ParseCaseMetadata(content string) (CaseMetadata, error) {
 
 	fields := parseSimpleYAMLFields(frontmatter)
 
-	schemaVersion, err := strconv.Atoi(unquoteMetadataString(fields["schema_version"]))
+	schemaVersion, err := strconv.Atoi(opsmetadata.Unquote(fields["schema_version"]))
 	if err != nil {
 		return CaseMetadata{}, fmt.Errorf("parse case metadata schema_version: %w", err)
 	}
 
 	metadata := CaseMetadata{
 		SchemaVersion: schemaVersion,
-		Name:          unquoteMetadataString(fields["name"]),
-		Description:   unquoteMetadataString(fields["description"]),
+		Name:          opsmetadata.Unquote(fields["name"]),
+		Description:   opsmetadata.Unquote(fields["description"]),
 		Context:       strings.TrimSpace(body),
 	}
 
@@ -244,10 +245,10 @@ func RenderCaseMetadata(metadata CaseMetadata) string {
 	output.WriteString(strconv.Itoa(CaseMetadataSchemaVersion))
 	output.WriteString("\n")
 	output.WriteString("name: ")
-	output.WriteString(yamlString(metadata.Name))
+	output.WriteString(opsmetadata.Quote(metadata.Name))
 	output.WriteString("\n")
 	output.WriteString("description: ")
-	output.WriteString(yamlString(metadata.Description))
+	output.WriteString(opsmetadata.Quote(metadata.Description))
 	output.WriteString("\n")
 	output.WriteString("---\n\n")
 	output.WriteString(strings.TrimSpace(metadata.Context))

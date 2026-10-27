@@ -12,6 +12,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -159,8 +160,8 @@ func archiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore
 // RenderArchivedPlan renders the corresponding package data.
 func RenderArchivedPlan(content, sourceRelativePath string, archivedAt time.Time) string {
 	archiveMetadata := []string{
-		"archived_from: " + yamlString(filepath.ToSlash(sourceRelativePath)),
-		"archived_at: " + yamlString(archivedAt.UTC().Format(time.RFC3339Nano)),
+		"archived_from: " + opsmetadata.Quote(filepath.ToSlash(sourceRelativePath)),
+		"archived_at: " + opsmetadata.Quote(archivedAt.UTC().Format(time.RFC3339Nano)),
 	}
 
 	trimmed := strings.TrimLeft(content, "\ufeff\r\n\t ")
@@ -183,13 +184,13 @@ func RenderGeneratedPlan(plan generationcore.GeneratedPlan) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("title: " + yamlString(plan.Title) + "\n")
-	output.WriteString("project_id: " + yamlString(plan.Scope.ProjectID) + "\n")
-	output.WriteString("case_slug: " + yamlString(plan.Scope.CaseSlug) + "\n")
-	output.WriteString("status: " + yamlString("planned") + "\n")
-	output.WriteString("source_request_id: " + yamlString(plan.SourceRequestID) + "\n")
-	output.WriteString("source_response_id: " + yamlString(plan.SourceResponseID) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(plan.CreatedAt) + "\n")
+	output.WriteString("title: " + opsmetadata.Quote(plan.Title) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(plan.Scope.ProjectID) + "\n")
+	output.WriteString("case_slug: " + opsmetadata.Quote(plan.Scope.CaseSlug) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote("planned") + "\n")
+	output.WriteString("source_request_id: " + opsmetadata.Quote(plan.SourceRequestID) + "\n")
+	output.WriteString("source_response_id: " + opsmetadata.Quote(plan.SourceResponseID) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(plan.CreatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# " + plan.Title + "\n\n")
 	output.WriteString(strings.TrimSpace(plan.Body) + "\n\n")

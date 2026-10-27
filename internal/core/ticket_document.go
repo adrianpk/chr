@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -132,7 +133,7 @@ func loadTicketDocumentFields(document *TicketDocument) error {
 
 func documentFields(document *TicketDocument, parsed ticketFrontmatter) {
 	for name, value := range parsed.Metadata {
-		document.Fields[name] = unquoteMetadataString(value)
+		document.Fields[name] = opsmetadata.Unquote(value)
 	}
 
 	fields := document.Fields
@@ -152,7 +153,7 @@ func documentFields(document *TicketDocument, parsed ticketFrontmatter) {
 	}
 
 	if value, present := fields["commits"]; present {
-		fields["commits"] = strings.Join(parseMetadataStringList(value), "\n")
+		fields["commits"] = strings.Join(opsmetadata.ParseList(value), "\n")
 	}
 }
 

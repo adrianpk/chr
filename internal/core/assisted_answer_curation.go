@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // AssistedAnswerCurationOptions describes a package boundary value.
@@ -140,8 +142,8 @@ func RenderAssistedCuratedAnswerSummary(summary AssistedCuratedAnswerSummary) st
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("session_id: " + yamlString(summary.SessionID) + "\n")
-	output.WriteString("generated_at: " + yamlTimestamp(summary.GeneratedAt) + "\n")
+	output.WriteString("session_id: " + opsmetadata.Quote(summary.SessionID) + "\n")
+	output.WriteString("generated_at: " + opsmetadata.Timestamp(summary.GeneratedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# Curated Assisted Answers\n\n")
 	output.WriteString("## Model Summary\n\n")

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -91,13 +92,13 @@ func RenderGeneratedSpec(spec GeneratedSpec) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
-	output.WriteString("title: " + yamlString(spec.Title) + "\n")
-	output.WriteString("project_id: " + yamlString(spec.Scope.ProjectID) + "\n")
-	output.WriteString("case_slug: " + yamlString(spec.Scope.CaseSlug) + "\n")
-	output.WriteString("status: " + yamlString("draft") + "\n")
-	output.WriteString("source_request_id: " + yamlString(spec.SourceRequestID) + "\n")
-	output.WriteString("source_response_id: " + yamlString(spec.SourceResponseID) + "\n")
-	output.WriteString("created_at: " + yamlTimestamp(spec.CreatedAt) + "\n")
+	output.WriteString("title: " + opsmetadata.Quote(spec.Title) + "\n")
+	output.WriteString("project_id: " + opsmetadata.Quote(spec.Scope.ProjectID) + "\n")
+	output.WriteString("case_slug: " + opsmetadata.Quote(spec.Scope.CaseSlug) + "\n")
+	output.WriteString("status: " + opsmetadata.Quote("draft") + "\n")
+	output.WriteString("source_request_id: " + opsmetadata.Quote(spec.SourceRequestID) + "\n")
+	output.WriteString("source_response_id: " + opsmetadata.Quote(spec.SourceResponseID) + "\n")
+	output.WriteString("created_at: " + opsmetadata.Timestamp(spec.CreatedAt) + "\n")
 	output.WriteString("---\n\n")
 	output.WriteString("# " + spec.Title + "\n\n")
 	output.WriteString(generatedSpecBodyWithoutDuplicateTitle(spec.Title, spec.Body) + "\n\n")

@@ -34,11 +34,18 @@ become an imported coordinator dependency of authoring.
 Four ops production files and their two focused test files move with 41 original
 declaration hashes retained in the move ledger. The two shared project path and
 replacement files add three original declarations, for 44 recorded move entries. Bounded file IO, advisory lock acquisition and the
-retained FileChange value add seven extracted declarations, for 51 total entries. The current dependency map and
+retained FileChange value add seven extracted declarations, for 51 total entries. Six shared metadata scalar declarations bring the ledger
+to 57 entries. The current dependency map and
 file-owner inventory include this prerequisite. Module import checks prevent
 ops from importing authoring, root core or workflow policy.
 
 ## Contracts Added or Changed
+
+Core/ops/metadata owns the original shared scalar quoting, bracketed lists and
+optional timestamps. Its six functions preserve UTC/zero-time behavior, trimming,
+empty-item omission, permissive fallback and diagnostics. Ticket, document and
+workflow consumers call it directly; artifact-specific parsing and policy stay
+with their owners. The scalar package has only standard-library dependencies.
 
 Core/ops/file owns the original bounded reads, synced atomic writes, directory
 sync and cancellable advisory lock acquisition. Core/workflow/state owns the
@@ -100,6 +107,12 @@ seven and the same one external-interface exception.
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ops/file ./internal/core/workflow/state ./internal/core ./internal/app ./scripts/goquality`
   — passed with zero issues after IO and journal image extraction.
+
+- `go test ./internal/core/ops/metadata ./scripts/goquality ./internal/core ./internal/app -run '^Test(LeafDependencies|Ticket(Parser|Renderer)|Spec|Plan|DumpMutation|Authoring|ProjectMetadata|ProjectDump)' -count=1 -timeout=3m`
+  — passed after metadata scalar extraction, including app plan/spec regressions.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ops/metadata ./internal/core ./internal/app ./scripts/goquality`
+  — passed with zero issues after scalar extraction.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified

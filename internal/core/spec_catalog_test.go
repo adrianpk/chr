@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -129,7 +130,7 @@ func TestSpecGenerationScope(t *testing.T) {
 
 	before := specTestRead(t, project, paths.RelativePath)
 
-	content := strings.Replace(string(before.images[0].After), "case_slug: "+yamlString(""), "case_slug: "+yamlString("other-case"), 1)
+	content := strings.Replace(string(before.images[0].After), "case_slug: "+opsmetadata.Quote(""), "case_slug: "+opsmetadata.Quote("other-case"), 1)
 	if err := os.WriteFile(paths.Path, []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}

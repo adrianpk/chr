@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
@@ -38,7 +39,7 @@ func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
 }
 
 func boardTicketMetadata(ticket IndexedTicket, metadata map[string]string) IndexedTicket {
-	value := func(name string) string { return unquoteMetadataString(metadata[name]) }
+	value := func(name string) string { return opsmetadata.Unquote(metadata[name]) }
 	if value("key") != "" {
 		ticket.Key = value("key")
 	} else if value("id") != "" {
@@ -59,7 +60,7 @@ func boardTicketMetadata(ticket IndexedTicket, metadata map[string]string) Index
 	ticket.UseCase, ticket.ProjectArea, ticket.Slice = value("use_case"), value("project_area"), value("slice")
 	ticket.SourceKind, ticket.SourceRef, ticket.Branch = value("source_kind"), value("source_ref"), value("branch")
 	ticket.ReviewState, ticket.ReviewResult = value("review_state"), value("review_result")
-	ticket.Tags = parseMetadataStringList(metadata["tags"])
+	ticket.Tags = opsmetadata.ParseList(metadata["tags"])
 	ticket.BoardColumn, _ = BoardTicketStatusFor(ticket.Status)
 
 	// Repository tickets have their own status-directory vocabulary. In that

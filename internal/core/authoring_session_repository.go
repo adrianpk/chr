@@ -12,6 +12,7 @@ import (
 	"time"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -358,10 +359,10 @@ func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session AuthoringSe
 		{key: "mode", value: string(session.Mode), quoted: true},
 		{key: "target", value: string(session.Target), quoted: true},
 		{key: "topic", value: session.Topic, quoted: true},
-		{key: "created_at", value: yamlTimestamp(session.CreatedAt)},
+		{key: "created_at", value: opsmetadata.Timestamp(session.CreatedAt)},
 		{key: "started_at", value: yamlOptionalTimestamp(session.StartedAt)},
 		{key: "finished_at", value: yamlOptionalTimestamp(session.FinishedAt)},
-		{key: "updated_at", value: yamlTimestamp(session.UpdatedAt)},
+		{key: "updated_at", value: opsmetadata.Timestamp(session.UpdatedAt)},
 		{key: "description", value: session.Description, quoted: true},
 	}
 
@@ -382,7 +383,7 @@ func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session AuthoringSe
 	for _, field := range fields {
 		value := field.value
 		if field.quoted {
-			value = yamlString(value)
+			value = opsmetadata.Quote(value)
 		}
 
 		_, err = fmt.Fprintf(output, "%s: %s\n", field.key, value)
@@ -462,12 +463,12 @@ func authoringSessionFromMetadata(metadata map[string]string) (AuthoringSession,
 		return AuthoringSession{}, err
 	}
 
-	startedAt, err := optionalTicketTime(metadata["started_at"])
+	startedAt, err := opsmetadata.OptionalTimestamp(metadata["started_at"])
 	if err != nil {
 		return AuthoringSession{}, fmt.Errorf("parse authoring session started_at: %w", err)
 	}
 
-	finishedAt, err := optionalTicketTime(metadata["finished_at"])
+	finishedAt, err := opsmetadata.OptionalTimestamp(metadata["finished_at"])
 	if err != nil {
 		return AuthoringSession{}, fmt.Errorf("parse authoring session finished_at: %w", err)
 	}
@@ -478,19 +479,19 @@ func authoringSessionFromMetadata(metadata map[string]string) (AuthoringSession,
 	}
 
 	return AuthoringSession{
-		ID:          unquoteMetadataString(metadata["id"]),
-		Namespace:   unquoteMetadataString(metadata["namespace"]),
+		ID:          opsmetadata.Unquote(metadata["id"]),
+		Namespace:   opsmetadata.Unquote(metadata["namespace"]),
 		Revision:    revision,
-		ProjectID:   unquoteMetadataString(metadata["project_id"]),
-		Status:      AuthoringSessionStatus(unquoteMetadataString(metadata["status"])),
-		Mode:        AuthoringSessionMode(unquoteMetadataString(metadata["mode"])),
-		Target:      AuthoringTarget(unquoteMetadataString(metadata["target"])),
-		Topic:       unquoteMetadataString(metadata["topic"]),
+		ProjectID:   opsmetadata.Unquote(metadata["project_id"]),
+		Status:      AuthoringSessionStatus(opsmetadata.Unquote(metadata["status"])),
+		Mode:        AuthoringSessionMode(opsmetadata.Unquote(metadata["mode"])),
+		Target:      AuthoringTarget(opsmetadata.Unquote(metadata["target"])),
+		Topic:       opsmetadata.Unquote(metadata["topic"]),
 		CreatedAt:   createdAt,
 		StartedAt:   startedAt,
 		FinishedAt:  finishedAt,
 		UpdatedAt:   updatedAt,
-		Description: unquoteMetadataString(metadata["description"]),
+		Description: opsmetadata.Unquote(metadata["description"]),
 	}, nil
 }
 
@@ -613,7 +614,7 @@ func writeNewAuthoringFile(path, content string) error {
 }
 
 func requiredAuthoringTime(value, name string) (time.Time, error) {
-	parsed, err := optionalTicketTime(value)
+	parsed, err := opsmetadata.OptionalTimestamp(value)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("parse authoring session %s: %w", name, err)
 	}
@@ -627,10 +628,10 @@ func requiredAuthoringTime(value, name string) (time.Time, error) {
 
 func yamlOptionalTimestamp(value *time.Time) string {
 	if value == nil {
-		return yamlString("")
+		return opsmetadata.Quote("")
 	}
 
-	return yamlTimestamp(*value)
+	return opsmetadata.Timestamp(*value)
 }
 
 func parseAuthoringTableTime(value string) (time.Time, error) {

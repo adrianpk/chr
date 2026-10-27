@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -127,7 +128,7 @@ func prepareTicketComment(content string, request TicketEditRequest, now time.Ti
 		return "", fmt.Errorf("comments require a separate bounded operation")
 	}
 
-	content, err := setTicketEditorField(content, "updated_at", yamlTimestamp(now))
+	content, err := setTicketEditorField(content, "updated_at", opsmetadata.Timestamp(now))
 	if err != nil {
 		return "", err
 	}
@@ -183,18 +184,18 @@ func replaceTicketDescription(content, description, discussion string) (string, 
 }
 
 func ticketEditFields(document TicketDocument, request TicketEditRequest, now time.Time) map[string]string {
-	fields := map[string]string{"updated_at": yamlTimestamp(now)}
+	fields := map[string]string{"updated_at": opsmetadata.Timestamp(now)}
 
 	for key, value := range request.Fields {
 		if key == "commits" || key == "pr" {
 			continue
 		}
 
-		fields[ticketEditorStorageField(document, key)] = yamlString(strings.TrimSpace(value))
+		fields[ticketEditorStorageField(document, key)] = opsmetadata.Quote(strings.TrimSpace(value))
 	}
 
 	if request.Body != nil {
-		fields["synopsis"] = yamlString(boardDescription([]byte(*request.Body)))
+		fields["synopsis"] = opsmetadata.Quote(boardDescription([]byte(*request.Body)))
 	}
 
 	return fields
@@ -298,7 +299,7 @@ func setNativeTicketMetadata(record *WorkflowRecord, fields ticketFrontmatter) e
 			continue
 		}
 
-		encoded, err := json.Marshal(unquoteMetadataString(fields.Metadata[name]))
+		encoded, err := json.Marshal(opsmetadata.Unquote(fields.Metadata[name]))
 		if err != nil {
 			return err
 		}
@@ -307,7 +308,7 @@ func setNativeTicketMetadata(record *WorkflowRecord, fields ticketFrontmatter) e
 	}
 
 	if value, exists := fields.Metadata["commits"]; exists {
-		encoded, err := json.Marshal(parseMetadataStringList(value))
+		encoded, err := json.Marshal(opsmetadata.ParseList(value))
 		if err != nil {
 			return err
 		}

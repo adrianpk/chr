@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 func updateTicketMetadata(content string, fields map[string]string) (string, error) {
@@ -38,5 +40,5 @@ func updateTicketMetadataField(content, key, value string) (string, error) {
 }
 
 func updateTicketUpdatedAt(content string, updatedAt time.Time) (string, error) {
-	return updateTicketMetadataField(content, "updated_at", yamlTimestamp(updatedAt))
+	return updateTicketMetadataField(content, "updated_at", opsmetadata.Timestamp(updatedAt))
 }

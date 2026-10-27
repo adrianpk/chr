@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // UpdateWorkflowTicketDisplay prepares native display fields without changing execution state.
@@ -37,7 +39,7 @@ func UpdateWorkflowTicketDisplay(record WorkflowRecord, title, synopsis *string)
 		}
 
 		record.Metadata[field.name] = encoded
-		fields[field.name] = yamlString(value)
+		fields[field.name] = opsmetadata.Quote(value)
 	}
 
 	if !strings.HasPrefix(string(record.Body), "---\n") {
