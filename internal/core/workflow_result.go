@@ -12,14 +12,14 @@ import (
 
 // WorkflowResultReceipt is validated delivery evidence from the native owner.
 type WorkflowResultReceipt struct {
-	Reference workflowstate.WorkflowEvidenceRef
+	Reference workflowstate.EvidenceRef
 	Receipt   WorkflowReceipt
 	Proof     WorkflowSliceDeliveryProof
 }
 
 // WorkflowResultClosure is a successful set gate and its immutable reference.
 type WorkflowResultClosure struct {
-	Reference workflowstate.WorkflowClosingEvidence
+	Reference workflowstate.ClosingEvidence
 	Receipt   WorkflowClosingReceipt
 }
 
@@ -113,7 +113,7 @@ func (s *WorkflowStore) workflowResultReceipt(run workflowInvocationFile) (Workf
 		return WorkflowResultReceipt{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	return WorkflowResultReceipt{Reference: workflowstate.WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}, Receipt: *record.Receipt, Proof: proof}, nil
+	return WorkflowResultReceipt{Reference: workflowstate.EvidenceRef{Path: record.Path, Hash: record.SourceHash}, Receipt: *record.Receipt, Proof: proof}, nil
 }
 
 func (s *WorkflowStore) workflowResultClosure(closure WorkflowInvocationClosure) (WorkflowResultClosure, error) {

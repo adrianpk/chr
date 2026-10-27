@@ -12,10 +12,10 @@ import (
 // WorkflowInvocationClosure retains a confirmed set and its refreshed execution
 // base without changing earlier unit delivery images or admission identity.
 type WorkflowInvocationClosure struct {
-	SetID   string                                `json:"set_id"`
-	Cursor  int                                   `json:"cursor"`
-	Receipt workflowstate.WorkflowClosingEvidence `json:"receipt"`
-	Target  WorkflowPreviewTarget                 `json:"target"`
+	SetID   string                        `json:"set_id"`
+	Cursor  int                           `json:"cursor"`
+	Receipt workflowstate.ClosingEvidence `json:"receipt"`
+	Target  WorkflowPreviewTarget         `json:"target"`
 }
 
 func workflowInvocationSetID(image WorkflowInputImage) string {

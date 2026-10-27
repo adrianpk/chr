@@ -22,7 +22,7 @@ func TestNativeGrantGuards(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	base := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeOperatorBudgetGuard(t, store, run.Invocation.ID), Grant: workflowstate.WorkflowIntegrationGrant{ID: "extension", Kind: "tokens", Amount: 1, Actor: "operator", Reason: "Authorize a bounded retry"}}
+	base := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeOperatorBudgetGuard(t, store, run.Invocation.ID), Grant: workflowstate.IntegrationGrant{ID: "extension", Kind: "tokens", Amount: 1, Actor: "operator", Reason: "Authorize a bounded retry"}}
 
 	cases := []struct {
 		name   string
@@ -68,7 +68,7 @@ func TestNativeGrantConcurrent(t *testing.T) {
 	var group sync.WaitGroup
 	for _, id := range []string{"first-grant", "second-grant"} {
 		group.Go(func() {
-			_, err := store.GrantWorkflowIntegration(t.Context(), WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: guard, Grant: workflowstate.WorkflowIntegrationGrant{ID: id, Kind: "tokens", Amount: 50, Actor: "operator", Reason: "Authorize one bounded extension"}})
+			_, err := store.GrantWorkflowIntegration(t.Context(), WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: guard, Grant: workflowstate.IntegrationGrant{ID: id, Kind: "tokens", Amount: 50, Actor: "operator", Reason: "Authorize one bounded extension"}})
 			results <- err
 		})
 	}

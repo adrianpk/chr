@@ -42,11 +42,11 @@ type AgenticReviewContext struct {
 
 // AgenticReviewResult describes the structured agentic review decision.
 type AgenticReviewResult struct {
-	Decision          IntegrationReviewDecision            `json:"decision"`
-	Summary           string                               `json:"summary"`
-	BlockingFindings  []workflowstate.AgenticReviewFinding `json:"blocking_findings,omitempty"`
-	NonBlockingNotes  []workflowstate.AgenticReviewFinding `json:"non_blocking_notes,omitempty"`
-	ReviewedArtifacts []string                             `json:"reviewed_artifacts,omitempty"`
+	Decision          IntegrationReviewDecision     `json:"decision"`
+	Summary           string                        `json:"summary"`
+	BlockingFindings  []workflowstate.ReviewFinding `json:"blocking_findings,omitempty"`
+	NonBlockingNotes  []workflowstate.ReviewFinding `json:"non_blocking_notes,omitempty"`
+	ReviewedArtifacts []string                      `json:"reviewed_artifacts,omitempty"`
 }
 
 // AgenticReviewArtifact describes files produced by one local review.
@@ -396,8 +396,8 @@ func WriteAgenticReviewSummary(artifact AgenticReviewArtifact) error {
 	return nil
 }
 
-func agenticReviewFindings(result AgenticReviewResult) []workflowstate.AgenticReviewFinding {
-	findings := make([]workflowstate.AgenticReviewFinding, 0, len(result.BlockingFindings)+len(result.NonBlockingNotes))
+func agenticReviewFindings(result AgenticReviewResult) []workflowstate.ReviewFinding {
+	findings := make([]workflowstate.ReviewFinding, 0, len(result.BlockingFindings)+len(result.NonBlockingNotes))
 	findings = append(findings, result.BlockingFindings...)
 	findings = append(findings, result.NonBlockingNotes...)
 
@@ -468,7 +468,7 @@ func agenticReviewBlockingFindingBodies(result AgenticReviewResult) []string {
 	return findings
 }
 
-func validateAgenticReviewFinding(finding workflowstate.AgenticReviewFinding) error {
+func validateAgenticReviewFinding(finding workflowstate.ReviewFinding) error {
 	if !validAgenticReviewFindingCategory(finding.Category) {
 		return fmt.Errorf("invalid agentic review finding category: %s", finding.Category)
 	}
@@ -499,7 +499,7 @@ func validAgenticReviewFindingCategory(category string) bool {
 	}
 }
 
-func writeAgenticReviewFindings(output *strings.Builder, findings []workflowstate.AgenticReviewFinding) {
+func writeAgenticReviewFindings(output *strings.Builder, findings []workflowstate.ReviewFinding) {
 	if len(findings) == 0 {
 		output.WriteString("- none\n")
 

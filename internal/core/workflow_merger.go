@@ -8,32 +8,32 @@ import (
 
 // WorkflowMergerRequirement binds required source or target intent to evidence.
 type WorkflowMergerRequirement struct {
-	ID            string                            `json:"id"`
-	Origin        string                            `json:"origin"`
-	Evidence      workflowstate.WorkflowEvidenceRef `json:"evidence"`
-	ConflictsWith []string                          `json:"conflicts_with,omitempty"`
+	ID            string                    `json:"id"`
+	Origin        string                    `json:"origin"`
+	Evidence      workflowstate.EvidenceRef `json:"evidence"`
+	ConflictsWith []string                  `json:"conflicts_with,omitempty"`
 }
 
 // WorkflowMergerConflict describes a single actionable conflict. Regeneration
 // is permitted only through the repository-declared command, never a role edit.
 type WorkflowMergerConflict struct {
-	ID                  string                            `json:"id"`
-	Path                string                            `json:"path"`
-	Kind                string                            `json:"kind"`
-	Evidence            workflowstate.WorkflowEvidenceRef `json:"evidence"`
-	RequirementIDs      []string                          `json:"requirement_ids"`
-	RegenerationCommand []string                          `json:"regeneration_command,omitempty"`
-	ValidationCommand   []string                          `json:"validation_command,omitempty"`
+	ID                  string                    `json:"id"`
+	Path                string                    `json:"path"`
+	Kind                string                    `json:"kind"`
+	Evidence            workflowstate.EvidenceRef `json:"evidence"`
+	RequirementIDs      []string                  `json:"requirement_ids"`
+	RegenerationCommand []string                  `json:"regeneration_command,omitempty"`
+	ValidationCommand   []string                  `json:"validation_command,omitempty"`
 }
 
 // WorkflowMergerCheckpoint names the original replay step and every predecessor.
 // A nil checkpoint means combined-tree repair, not a collapsed rebase history.
 type WorkflowMergerCheckpoint struct {
-	ReplayIndex    int                               `json:"replay_index"`
-	OriginalCommit string                            `json:"original_commit"`
-	PreparedParent string                            `json:"prepared_parent"`
-	Predecessors   []WorkflowIntegrationReplay       `json:"predecessors"`
-	Evidence       workflowstate.WorkflowEvidenceRef `json:"evidence"`
+	ReplayIndex    int                         `json:"replay_index"`
+	OriginalCommit string                      `json:"original_commit"`
+	PreparedParent string                      `json:"prepared_parent"`
+	Predecessors   []WorkflowIntegrationReplay `json:"predecessors"`
+	Evidence       workflowstate.EvidenceRef   `json:"evidence"`
 }
 
 // WorkflowMergerInput is an immutable, credential-free contract for one role
@@ -50,8 +50,8 @@ type WorkflowMergerInput struct {
 
 // WorkflowMergerOperator groups the retained operator fields without changing their wire order.
 type WorkflowMergerOperator struct {
-	OperatorDecisionRef *workflowstate.WorkflowEvidenceRef        `json:"operator_decision_ref,omitempty"`
-	OperatorAnswers     []workflowstate.WorkflowIntegrationAnswer `json:"operator_answers,omitempty"`
+	OperatorDecisionRef *workflowstate.EvidenceRef        `json:"operator_decision_ref,omitempty"`
+	OperatorAnswers     []workflowstate.IntegrationAnswer `json:"operator_answers,omitempty"`
 }
 
 // WorkflowMergerIdentity groups the retained identity fields without changing their wire order.
@@ -82,14 +82,14 @@ type WorkflowMergerGit struct {
 
 // WorkflowMergerContext groups the retained context fields without changing their wire order.
 type WorkflowMergerContext struct {
-	SourceManifestRef   workflowstate.WorkflowEvidenceRef   `json:"source_manifest_ref"`
-	IntentRefs          []workflowstate.WorkflowEvidenceRef `json:"intent_refs"`
-	TargetChangeRefs    []workflowstate.WorkflowEvidenceRef `json:"target_change_refs"`
-	FindingRefs         []workflowstate.WorkflowEvidenceRef `json:"finding_refs"`
-	Requirements        []WorkflowMergerRequirement         `json:"requirements"`
-	Conflicts           []WorkflowMergerConflict            `json:"conflicts"`
-	HistoryCheckpoint   *WorkflowMergerCheckpoint           `json:"history_checkpoint,omitempty"`
-	RepairCheckpointRef *workflowstate.WorkflowEvidenceRef  `json:"repair_checkpoint_ref,omitempty"`
+	SourceManifestRef   workflowstate.EvidenceRef   `json:"source_manifest_ref"`
+	IntentRefs          []workflowstate.EvidenceRef `json:"intent_refs"`
+	TargetChangeRefs    []workflowstate.EvidenceRef `json:"target_change_refs"`
+	FindingRefs         []workflowstate.EvidenceRef `json:"finding_refs"`
+	Requirements        []WorkflowMergerRequirement `json:"requirements"`
+	Conflicts           []WorkflowMergerConflict    `json:"conflicts"`
+	HistoryCheckpoint   *WorkflowMergerCheckpoint   `json:"history_checkpoint,omitempty"`
+	RepairCheckpointRef *workflowstate.EvidenceRef  `json:"repair_checkpoint_ref,omitempty"`
 }
 
 // WorkflowMergerScope groups the retained scope fields without changing their wire order.
@@ -100,8 +100,8 @@ type WorkflowMergerScope struct {
 
 // WorkflowMergerValidation groups the retained validation fields without changing their wire order.
 type WorkflowMergerValidation struct {
-	ValidationContractRef workflowstate.WorkflowEvidenceRef `json:"validation_contract_ref"`
-	ValidationCommands    [][]string                        `json:"validation_commands"`
+	ValidationContractRef workflowstate.EvidenceRef `json:"validation_contract_ref"`
+	ValidationCommands    [][]string                `json:"validation_commands"`
 }
 
 // WorkflowMergerLimits groups the retained limits fields without changing their wire order.
@@ -147,14 +147,14 @@ type WorkflowMergerUsage struct {
 // WorkflowMergerResult is an untrusted proposal. It contains no approval,
 // receipt, method override, publication grant or process-control authority.
 type WorkflowMergerResult struct {
-	ProtocolVersion       int                                 `json:"protocol_version"`
-	InputHash             string                              `json:"input_hash"`
-	Outcome               string                              `json:"outcome"`
-	ChangedPaths          []string                            `json:"changed_paths"`
-	ResolutionNotes       []WorkflowMergerResolution          `json:"resolution_notes"`
-	PreservedRequirements []string                            `json:"preserved_requirements"`
-	LocalCheckRefs        []workflowstate.WorkflowEvidenceRef `json:"local_check_refs"`
-	DecisionRequests      []WorkflowMergerDecision            `json:"decision_requests"`
-	Failure               string                              `json:"failure,omitempty"`
-	Usage                 *WorkflowMergerUsage                `json:"usage,omitempty"`
+	ProtocolVersion       int                         `json:"protocol_version"`
+	InputHash             string                      `json:"input_hash"`
+	Outcome               string                      `json:"outcome"`
+	ChangedPaths          []string                    `json:"changed_paths"`
+	ResolutionNotes       []WorkflowMergerResolution  `json:"resolution_notes"`
+	PreservedRequirements []string                    `json:"preserved_requirements"`
+	LocalCheckRefs        []workflowstate.EvidenceRef `json:"local_check_refs"`
+	DecisionRequests      []WorkflowMergerDecision    `json:"decision_requests"`
+	Failure               string                      `json:"failure,omitempty"`
+	Usage                 *WorkflowMergerUsage        `json:"usage,omitempty"`
 }

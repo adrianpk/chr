@@ -52,7 +52,7 @@ func (s *WorkflowStore) workflowClosingNativeEntry(run workflowInvocationFile, r
 			return entry, err
 		}
 
-		ref := workflowstate.WorkflowEvidenceRef{Path: receipt.Path, Hash: receipt.SourceHash}
+		ref := workflowstate.EvidenceRef{Path: receipt.Path, Hash: receipt.SourceHash}
 		if run.OwnerRoot != s.layout.Root() || entry.State != "integrated" || entry.Blocker != nil || entry.ReceiptRef == nil || *entry.ReceiptRef != ref {
 			return entry, workflowstate.ErrConflict
 		}

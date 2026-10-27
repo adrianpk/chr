@@ -60,7 +60,7 @@ func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input Wor
 		return WorkflowClosingSlice{}, err
 	}
 
-	return WorkflowClosingSlice{ID: descriptor.ID, Order: descriptor.Order, Receipt: workflowstate.WorkflowClosingEvidence{Ref: receipt.Path, Hash: receipt.SourceHash}, Verification: workflowstate.WorkflowClosingEvidence{Ref: receipt.Receipt.VerificationRef, Hash: hash}, Proof: fresh}, nil
+	return WorkflowClosingSlice{ID: descriptor.ID, Order: descriptor.Order, Receipt: workflowstate.ClosingEvidence{Ref: receipt.Path, Hash: receipt.SourceHash}, Verification: workflowstate.ClosingEvidence{Ref: receipt.Receipt.VerificationRef, Hash: hash}, Proof: fresh}, nil
 }
 
 func (s *WorkflowStore) workflowClosingDeliveryProof(ctx context.Context, receipt WorkflowRecord) (WorkflowSliceDeliveryProof, string, error) {

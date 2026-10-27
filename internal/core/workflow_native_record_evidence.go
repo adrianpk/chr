@@ -25,7 +25,7 @@ type WorkflowNativeHistoryManifest struct {
 	Git    WorkflowIntegrationProof `json:"git"`
 }
 
-func (s *WorkflowStore) readWorkflowNativeEvidence(id string, ref workflowstate.WorkflowEvidenceRef, value any) error {
+func (s *WorkflowStore) readWorkflowNativeEvidence(id string, ref workflowstate.EvidenceRef, value any) error {
 	if err := validateWorkflowEvidenceRef(id, ref); err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func (s *WorkflowStore) checkWorkflowNativeValidationEvidence(b WorkflowNativeRe
 
 func (s *WorkflowStore) checkWorkflowNativeValidationInput(b WorkflowNativeRecordBinding, result WorkflowTaskResult) error {
 	var input WorkflowTaskInput
-	if err := s.readWorkflowNativeEvidence(b.InvocationID, workflowstate.WorkflowEvidenceRef{Path: result.InputRef, Hash: result.InputHash}, &input); err != nil {
+	if err := s.readWorkflowNativeEvidence(b.InvocationID, workflowstate.EvidenceRef{Path: result.InputRef, Hash: result.InputHash}, &input); err != nil {
 		return err
 	}
 

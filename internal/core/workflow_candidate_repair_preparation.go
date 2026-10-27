@@ -14,7 +14,7 @@ type WorkflowRepairedPreparationGit interface {
 	PrepareWorkflowRepairedIntegration(context.Context, WorkflowPreparationQuery, WorkflowMergerRepairState) (WorkflowIntegrationProof, error)
 }
 
-func (s *WorkflowStore) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (*WorkflowMergerRepairState, []workflowstate.WorkflowEvidenceRef, error) {
+func (s *WorkflowStore) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (*WorkflowMergerRepairState, []workflowstate.EvidenceRef, error) {
 	if run.Integration == nil {
 		return nil, nil, nil
 	}
@@ -39,8 +39,8 @@ func (s *WorkflowStore) acceptedWorkflowCandidateRepair(run workflowInvocationFi
 	return nil, nil, nil
 }
 
-func (s *WorkflowStore) readWorkflowAcceptedRepair(run workflowInvocationFile, entry WorkflowIntegrationEntry, attempt WorkflowAttempt) (*WorkflowMergerRepairState, []workflowstate.WorkflowEvidenceRef, error) {
-	ref := workflowstate.WorkflowEvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}
+func (s *WorkflowStore) readWorkflowAcceptedRepair(run workflowInvocationFile, entry WorkflowIntegrationEntry, attempt WorkflowAttempt) (*WorkflowMergerRepairState, []workflowstate.EvidenceRef, error) {
+	ref := workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}
 
 	var result WorkflowMergerAttempt
 	if err := s.readWorkflowNativeEvidence(run.ID, ref, &result); err != nil {
@@ -63,8 +63,8 @@ func (s *WorkflowStore) readWorkflowAcceptedRepair(run workflowInvocationFile, e
 	return a.Next, refs, err
 }
 
-func (s *WorkflowStore) workflowCandidateRepairAttemptRefs(run workflowInvocationFile, proof WorkflowIntegrationProof) ([]workflowstate.WorkflowEvidenceRef, error) {
-	refs := []workflowstate.WorkflowEvidenceRef{}
+func (s *WorkflowStore) workflowCandidateRepairAttemptRefs(run workflowInvocationFile, proof WorkflowIntegrationProof) ([]workflowstate.EvidenceRef, error) {
+	refs := []workflowstate.EvidenceRef{}
 
 	if proof.Provenance == nil {
 		return nil, workflowstate.ErrConflict
@@ -82,7 +82,7 @@ func (s *WorkflowStore) workflowCandidateRepairAttemptRefs(run workflowInvocatio
 	return refs, nil
 }
 
-func (s *WorkflowStore) workflowCandidateRepairAttemptRef(run workflowInvocationFile, hash string) (workflowstate.WorkflowEvidenceRef, error) {
+func (s *WorkflowStore) workflowCandidateRepairAttemptRef(run workflowInvocationFile, hash string) (workflowstate.EvidenceRef, error) {
 	for _, attempt := range run.Attempts {
 		if attempt.Purpose != workflowMergerPurpose || attempt.ResultRef == "" {
 			continue
@@ -90,20 +90,20 @@ func (s *WorkflowStore) workflowCandidateRepairAttemptRef(run workflowInvocation
 
 		data, err := s.readWorkflowReviewImage(attempt.ResultRef, attempt.ResultHash)
 		if err != nil {
-			return workflowstate.WorkflowEvidenceRef{}, err
+			return workflowstate.EvidenceRef{}, err
 		}
 
 		var result WorkflowMergerAttempt
 		if err := json.Unmarshal(data, &result); err != nil {
-			return workflowstate.WorkflowEvidenceRef{}, err
+			return workflowstate.EvidenceRef{}, err
 		}
 
 		if result.Input.InputHash == hash && result.Acceptance != nil && result.Acceptance.Outcome == "accepted_pending_validation" {
-			return workflowstate.WorkflowEvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, nil
+			return workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, nil
 		}
 	}
 
-	return workflowstate.WorkflowEvidenceRef{}, workflowstate.ErrConflict
+	return workflowstate.EvidenceRef{}, workflowstate.ErrConflict
 }
 
 func validWorkflowAcceptedRepair(run workflowInvocationFile, entry WorkflowIntegrationEntry, attempt WorkflowAttempt, result WorkflowMergerAttempt) bool {

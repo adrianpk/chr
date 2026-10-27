@@ -10,8 +10,8 @@ import (
 
 // WorkflowIntegrationBudgetBinding seals the invocation-wide budget image.
 type WorkflowIntegrationBudgetBinding struct {
-	Revision uint64                            `json:"revision"`
-	Ref      workflowstate.WorkflowEvidenceRef `json:"ref"`
+	Revision uint64                    `json:"revision"`
+	Ref      workflowstate.EvidenceRef `json:"ref"`
 }
 
 // WorkflowIntegrationLimits retain admission ceilings and positive grants.
@@ -57,39 +57,39 @@ type WorkflowTokenAllowance struct {
 // WorkflowIntegrationReservation is retained before any possible dispatch.
 // Unknown usage keeps Maximum charged; absence of a response is no refund.
 type WorkflowIntegrationReservation struct {
-	AttemptInput    *workflowstate.WorkflowEvidenceRef `json:"attempt_input,omitempty"`
-	ID              string                             `json:"id"`
-	Kind            string                             `json:"kind"`
-	Role            string                             `json:"role"`
-	EntryID         string                             `json:"entry_id"`
-	Unit            workflowstate.Ref                  `json:"unit"`
-	ClaimGeneration uint64                             `json:"claim_generation"`
-	AttemptID       string                             `json:"attempt_id"`
-	BaseCommit      string                             `json:"base_commit,omitempty"`
-	Allowance       WorkflowTokenAllowance             `json:"allowance"`
-	RuntimeDeadline time.Time                          `json:"runtime_deadline,omitempty"`
-	State           string                             `json:"state"`
-	ReportedInput   int64                              `json:"reported_input"`
-	ReportedOutput  int64                              `json:"reported_output"`
-	SettlementProof *workflowstate.WorkflowEvidenceRef `json:"settlement_proof"`
+	AttemptInput    *workflowstate.EvidenceRef `json:"attempt_input,omitempty"`
+	ID              string                     `json:"id"`
+	Kind            string                     `json:"kind"`
+	Role            string                     `json:"role"`
+	EntryID         string                     `json:"entry_id"`
+	Unit            workflowstate.Ref          `json:"unit"`
+	ClaimGeneration uint64                     `json:"claim_generation"`
+	AttemptID       string                     `json:"attempt_id"`
+	BaseCommit      string                     `json:"base_commit,omitempty"`
+	Allowance       WorkflowTokenAllowance     `json:"allowance"`
+	RuntimeDeadline time.Time                  `json:"runtime_deadline,omitempty"`
+	State           string                     `json:"state"`
+	ReportedInput   int64                      `json:"reported_input"`
+	ReportedOutput  int64                      `json:"reported_output"`
+	SettlementProof *workflowstate.EvidenceRef `json:"settlement_proof"`
 }
 
 // WorkflowIntegrationBudget is owned by the invocation, never by a queue index.
 type WorkflowIntegrationBudget struct {
-	SchemaVersion       int                                      `json:"schema_version"`
-	InvocationID        string                                   `json:"invocation_id"`
-	Revision            uint64                                   `json:"revision"`
-	AdmissionTokenLimit *int64                                   `json:"admission_token_limit"`
-	TokenLimit          *int64                                   `json:"token_limit"`
-	TokensSettled       int64                                    `json:"tokens_settled"`
-	TokensReserved      int64                                    `json:"tokens_reserved"`
-	AdmissionLimits     WorkflowIntegrationLimits                `json:"admission_limits"`
-	LimitsSnapshot      WorkflowIntegrationLimits                `json:"limits_snapshot"`
-	Usage               WorkflowIntegrationUsage                 `json:"existing_usage"`
-	UnitCounters        []WorkflowIntegrationCounter             `json:"unit_counters"`
-	Grants              []workflowstate.WorkflowIntegrationGrant `json:"grant_history"`
-	Reservations        []WorkflowIntegrationReservation         `json:"reservation_refs"`
-	Extensions          map[string]json.RawMessage               `json:"extensions,omitempty"`
+	SchemaVersion       int                              `json:"schema_version"`
+	InvocationID        string                           `json:"invocation_id"`
+	Revision            uint64                           `json:"revision"`
+	AdmissionTokenLimit *int64                           `json:"admission_token_limit"`
+	TokenLimit          *int64                           `json:"token_limit"`
+	TokensSettled       int64                            `json:"tokens_settled"`
+	TokensReserved      int64                            `json:"tokens_reserved"`
+	AdmissionLimits     WorkflowIntegrationLimits        `json:"admission_limits"`
+	LimitsSnapshot      WorkflowIntegrationLimits        `json:"limits_snapshot"`
+	Usage               WorkflowIntegrationUsage         `json:"existing_usage"`
+	UnitCounters        []WorkflowIntegrationCounter     `json:"unit_counters"`
+	Grants              []workflowstate.IntegrationGrant `json:"grant_history"`
+	Reservations        []WorkflowIntegrationReservation `json:"reservation_refs"`
+	Extensions          map[string]json.RawMessage       `json:"extensions,omitempty"`
 }
 
 // WorkflowIntegrationBudgetGuard fences budget callbacks by the owning claim.
@@ -114,7 +114,7 @@ type WorkflowIntegrationSettlement struct {
 	ReservationID string
 	State         string
 	Input, Output int64
-	Proof         *workflowstate.WorkflowEvidenceRef
+	Proof         *workflowstate.EvidenceRef
 }
 
 // WorkflowTokenSettlement proves compatible accounting for one call identity.

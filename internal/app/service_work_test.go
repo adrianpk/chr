@@ -301,7 +301,7 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 	runner := installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
 		Decision: core.IntegrationReviewDecisionPass,
 		Summary:  "Implementation is correct and validation evidence is sufficient.",
-		NonBlockingNotes: []workflowstate.AgenticReviewFinding{{
+		NonBlockingNotes: []workflowstate.ReviewFinding{{
 			Category: core.AgenticReviewFindingCosmetic,
 			Title:    "Optional wording cleanup",
 			Detail:   "One help sentence could be clearer, but behavior is correct.",
@@ -1014,7 +1014,7 @@ func agenticReviewNeedsChangesResult(title string) core.AgenticReviewResult {
 	return core.AgenticReviewResult{
 		Decision: core.IntegrationReviewDecisionNeedsChanges,
 		Summary:  "The implementation is missing a required behavior.",
-		BlockingFindings: []workflowstate.AgenticReviewFinding{{
+		BlockingFindings: []workflowstate.ReviewFinding{{
 			Category: core.AgenticReviewFindingCorrectness,
 			Title:    title,
 			Detail:   "The ticket requires invalid input recovery, but the implementation accepts bad moves.",

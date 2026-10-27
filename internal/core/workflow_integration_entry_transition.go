@@ -318,7 +318,7 @@ func bindWorkflowIntegrationPublication(entry *WorkflowIntegrationEntry, run wor
 	}
 
 	if entry.State == "finalizing" || entry.State == "integrated" {
-		entry.ReceiptRef = &workflowstate.WorkflowEvidenceRef{Path: run.DeliveryRef, Hash: run.DeliveryHash}
+		entry.ReceiptRef = &workflowstate.EvidenceRef{Path: run.DeliveryRef, Hash: run.DeliveryHash}
 	}
 }
 

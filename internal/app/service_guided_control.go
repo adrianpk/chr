@@ -74,7 +74,7 @@ func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *co
 	return nil
 }
 
-func (s service) applyGuidedNativeControl(ctx context.Context, store *core.WorkflowStore, request workflowstate.WorkflowControlMutationRequest) (workflowstate.WorkflowControlResult, error) {
+func (s service) applyGuidedNativeControl(ctx context.Context, store *core.WorkflowStore, request workflowstate.ControlMutationRequest) (workflowstate.ControlResult, error) {
 	result, found, err := store.ReadWorkflowControlReceipt(ctx, request)
 	if err != nil || found {
 		return result, err

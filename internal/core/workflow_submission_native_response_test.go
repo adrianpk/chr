@@ -39,7 +39,7 @@ func TestNativeSubmissionResponses(t *testing.T) {
 		t.Fatal("unknown response erased", err)
 	}
 
-	request.Facts.TransportResponseHistory = []workflowstate.WorkflowEvidenceRef{ref}
+	request.Facts.TransportResponseHistory = []workflowstate.EvidenceRef{ref}
 
 	retained, err = f.store.RetainWorkflowNativeSubmission(t.Context(), request)
 	if err != nil || retained.State != "awaiting_observation" || len(retained.Native.TransportResponseHistory) != 1 {

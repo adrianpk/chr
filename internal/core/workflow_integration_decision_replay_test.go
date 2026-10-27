@@ -20,20 +20,20 @@ func TestNativeDecisionReplay(t *testing.T) {
 
 	cases := []struct {
 		name    string
-		answer  workflowstate.WorkflowIntegrationAnswer
+		answer  workflowstate.IntegrationAnswer
 		outcome string
 		denied  bool
 	}{
-		{"owner", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.SourceCommit}, "replay_step", false},
-		{"foreign owner", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.BaseCommit}, "", true},
-		{"fix", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", IntegrationFix: &workflowstate.AgenticReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain compatible output", Detail: "Combined validation requires an explicit compatible integration repair"}}, "integration_fix", false},
-		{"defer", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "defer"}, "needs_decision", false},
+		{"owner", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.SourceCommit}, "replay_step", false},
+		{"foreign owner", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.BaseCommit}, "", true},
+		{"fix", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", IntegrationFix: &workflowstate.ReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain compatible output", Detail: "Combined validation requires an explicit compatible integration repair"}}, "integration_fix", false},
+		{"defer", workflowstate.IntegrationAnswer{DecisionID: "replay-owner", Action: "defer"}, "needs_decision", false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			input := original
 			input.OperatorDecisionRef = &input.SourceManifestRef
-			input.OperatorAnswers = []workflowstate.WorkflowIntegrationAnswer{tc.answer}
+			input.OperatorAnswers = []workflowstate.IntegrationAnswer{tc.answer}
 
 			input, err := SealWorkflowMergerInput(input, now)
 			if err != nil {

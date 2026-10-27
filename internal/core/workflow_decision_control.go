@@ -10,7 +10,7 @@ import (
 
 // ControlWorkflowDecision replays a completed request before checking mutable
 // revisions. New effects and their receipt share the existing native journal.
-func (s *WorkflowStore) ControlWorkflowDecision(ctx context.Context, request workflowstate.WorkflowControlMutationRequest, provider WorkflowPullRequestProvider, check WorkflowAdmissionCheck) (result workflowstate.WorkflowControlResult, err error) {
+func (s *WorkflowStore) ControlWorkflowDecision(ctx context.Context, request workflowstate.ControlMutationRequest, provider WorkflowPullRequestProvider, check WorkflowAdmissionCheck) (result workflowstate.ControlResult, err error) {
 	if !slices.Contains([]string{"approve", "grant", "answer_decision"}, request.Action) {
 		return result, workflowstate.ErrConflict
 	}
@@ -63,7 +63,7 @@ func (s *WorkflowStore) ControlWorkflowDecision(ctx context.Context, request wor
 	return result, err
 }
 
-func (s *WorkflowStore) applyWorkflowDecisionControl(ctx context.Context, run workflowInvocationFile, request workflowstate.WorkflowControlMutationRequest, guard WorkflowIntegrationBudgetGuard, provider WorkflowPullRequestProvider, commit *workflowControlCommit) error {
+func (s *WorkflowStore) applyWorkflowDecisionControl(ctx context.Context, run workflowInvocationFile, request workflowstate.ControlMutationRequest, guard WorkflowIntegrationBudgetGuard, provider WorkflowPullRequestProvider, commit *workflowControlCommit) error {
 	switch request.Action {
 	case "approve":
 		_, err := s.approveWorkflowSlice(ctx, run, request.ReviewHash, provider, commit)
@@ -82,7 +82,7 @@ func (s *WorkflowStore) applyWorkflowDecisionControl(ctx context.Context, run wo
 	}
 }
 
-func validateWorkflowControlGrant(request workflowstate.WorkflowControlMutationRequest) error {
+func validateWorkflowControlGrant(request workflowstate.ControlMutationRequest) error {
 	if request.Integration == nil || request.Grant == nil || request.Answer != nil {
 		return workflowstate.ErrConflict
 	}
@@ -94,7 +94,7 @@ func validateWorkflowControlGrant(request workflowstate.WorkflowControlMutationR
 	return nil
 }
 
-func validateWorkflowControlAnswer(request workflowstate.WorkflowControlMutationRequest) error {
+func validateWorkflowControlAnswer(request workflowstate.ControlMutationRequest) error {
 	if request.Integration == nil || request.Answer == nil || request.Grant != nil {
 		return workflowstate.ErrConflict
 	}

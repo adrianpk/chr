@@ -26,7 +26,7 @@ func nativeCandidateRepairGuard(t *testing.T, change string) {
 
 	switch change {
 	case "findings":
-		request.Input.FindingRefs = []workflowstate.WorkflowEvidenceRef{request.Input.ValidationContractRef}
+		request.Input.FindingRefs = []workflowstate.EvidenceRef{request.Input.ValidationContractRef}
 	case "policy":
 		f.provider.mu.Lock()
 		f.provider.policyRevision = "changed-policy"

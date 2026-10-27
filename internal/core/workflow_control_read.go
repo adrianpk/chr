@@ -8,14 +8,14 @@ import (
 
 // ReadWorkflowControlReceipt recovers the native journal and reads a completed
 // request. Missing receipts never reserve a binding or authorize a new effect.
-func (s *WorkflowStore) ReadWorkflowControlReceipt(ctx context.Context, request workflowstate.WorkflowControlMutationRequest) (workflowstate.WorkflowControlResult, bool, error) {
+func (s *WorkflowStore) ReadWorkflowControlReceipt(ctx context.Context, request workflowstate.ControlMutationRequest) (workflowstate.ControlResult, bool, error) {
 	request, digest, err := freezeWorkflowControlMutation(request)
 	if err != nil {
-		return workflowstate.WorkflowControlResult{}, false, err
+		return workflowstate.ControlResult{}, false, err
 	}
 
 	var (
-		result workflowstate.WorkflowControlResult
+		result workflowstate.ControlResult
 		found  bool
 	)
 

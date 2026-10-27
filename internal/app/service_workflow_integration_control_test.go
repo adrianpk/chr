@@ -25,7 +25,7 @@ func TestServiceIntegrationGrant(t *testing.T) {
 	}
 
 	request := serviceIntegrationControl(status, "grant")
-	request.BudgetGrant = &workflowstate.WorkflowIntegrationGrant{ID: "more-submissions", Kind: "submission", Amount: 1, Actor: "operator", Reason: "Authorize one additional bounded submission"}
+	request.BudgetGrant = &workflowstate.IntegrationGrant{ID: "more-submissions", Kind: "submission", Amount: 1, Actor: "operator", Reason: "Authorize one additional bounded submission"}
 	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
 
 	cases := []struct {

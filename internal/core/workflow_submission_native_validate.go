@@ -51,12 +51,12 @@ func validWorkflowNativeSubmissionOwner(submission WorkflowSubmission) bool {
 }
 
 func validateWorkflowNativeSubmissionRefs(native WorkflowNativeSubmission) error {
-	refs := append([]workflowstate.WorkflowEvidenceRef{native.CandidateRef, native.ReviewGrantRef, native.FastForwardProofRef}, native.ObservationRefs...)
+	refs := append([]workflowstate.EvidenceRef{native.CandidateRef, native.ReviewGrantRef, native.FastForwardProofRef}, native.ObservationRefs...)
 
 	refs = append(refs, native.TransportResponseHistory...)
 
 	refs = append(refs, native.GitObservationRefs...)
-	for _, ref := range []*workflowstate.WorkflowEvidenceRef{native.AdvertisementRef, native.CommandManifestRef, native.TransportResponseRef, native.ReceiptRef, native.NonApplicationRef, native.DispatchCompletionRef} {
+	for _, ref := range []*workflowstate.EvidenceRef{native.AdvertisementRef, native.CommandManifestRef, native.TransportResponseRef, native.ReceiptRef, native.NonApplicationRef, native.DispatchCompletionRef} {
 		if ref != nil {
 			refs = append(refs, *ref)
 		}
@@ -162,7 +162,7 @@ func workflowNativeApplicationProgresses(old, next WorkflowNativeSubmission) boo
 }
 
 func guardWorkflowNativeRetainedRefs(old, next WorkflowNativeSubmission) error {
-	for _, pair := range [][2]*workflowstate.WorkflowEvidenceRef{{old.AdvertisementRef, next.AdvertisementRef}, {old.CommandManifestRef, next.CommandManifestRef}, {old.ReceiptRef, next.ReceiptRef}, {old.NonApplicationRef, next.NonApplicationRef}, {old.DispatchCompletionRef, next.DispatchCompletionRef}} {
+	for _, pair := range [][2]*workflowstate.EvidenceRef{{old.AdvertisementRef, next.AdvertisementRef}, {old.CommandManifestRef, next.CommandManifestRef}, {old.ReceiptRef, next.ReceiptRef}, {old.NonApplicationRef, next.NonApplicationRef}, {old.DispatchCompletionRef, next.DispatchCompletionRef}} {
 		if pair[0] != nil && !reflect.DeepEqual(pair[0], pair[1]) {
 			return workflowstate.ErrConflict
 		}

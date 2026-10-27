@@ -7,11 +7,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore, workflowstate.WorkflowControlMutationRequest, WorkflowPullRequestProvider) {
+func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore, workflowstate.ControlMutationRequest, WorkflowPullRequestProvider) {
 	t.Helper()
 
 	binding := workflowstate.MutationBinding{RequestID: "control-receipt", Operator: "operator"}
-	request := workflowstate.WorkflowControlMutationRequest{Binding: binding, Action: action}
+	request := workflowstate.ControlMutationRequest{Binding: binding, Action: action}
 
 	var (
 		store    *WorkflowStore
@@ -32,7 +32,7 @@ func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore,
 	case "grant":
 		current, entry := nativeBudgetFixture(t, nil)
 		store, request.ID = current, entry.InvocationID
-		request.Grant = &workflowstate.WorkflowIntegrationGrant{ID: binding.RequestID, Actor: binding.Operator, Kind: "submission", Amount: 1, Reason: "One bounded submission"}
+		request.Grant = &workflowstate.IntegrationGrant{ID: binding.RequestID, Actor: binding.Operator, Kind: "submission", Amount: 1, Reason: "One bounded submission"}
 	case "answer_decision":
 		f, _, record := nativeDecisionFixture(t)
 		store, provider, request.ID = f.store, f.provider, f.run.ID
@@ -52,7 +52,7 @@ func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore,
 	}
 
 	if observed := inspection.Integration; observed != nil && observed.Entry != nil {
-		request.Integration = &workflowstate.WorkflowControlIntegrationGuard{EntryID: observed.Entry.ID, EntryRevision: observed.Entry.Revision, BudgetRevision: observed.Budget.Revision, CandidateHash: WorkflowIntegrationDisplayedCandidate(observed)}
+		request.Integration = &workflowstate.ControlIntegrationGuard{EntryID: observed.Entry.ID, EntryRevision: observed.Entry.Revision, BudgetRevision: observed.Budget.Revision, CandidateHash: WorkflowIntegrationDisplayedCandidate(observed)}
 	}
 
 	return store, request, provider

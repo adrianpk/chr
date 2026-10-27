@@ -51,7 +51,7 @@ func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pen
 
 	update = nativeSubmissionUpdate(t, f, pending)
 	update.Facts.ObservationRefs = record.Receipt.Native.ObservationRefs
-	update.Facts.ReceiptRef = &workflowstate.WorkflowEvidenceRef{Path: created.Path, Hash: created.SourceHash}
+	update.Facts.ReceiptRef = &workflowstate.EvidenceRef{Path: created.Path, Hash: created.SourceHash}
 
 	confirmed, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update)
 	if err != nil || confirmed.State != "confirmed" || confirmed.Native.ReceiptRef == nil || confirmed.Proof.ResultCommit != f.candidate.Native.PreparedResult {

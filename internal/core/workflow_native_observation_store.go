@@ -105,7 +105,7 @@ func (s *WorkflowStore) recordWorkflowNativeCanonicalObservation(ctx context.Con
 	return s.retainWorkflowNativeSubmission(ctx, run, update)
 }
 
-func appendWorkflowNativeCanonicalObservation(native *WorkflowNativeSubmission, ref workflowstate.WorkflowEvidenceRef) error {
+func appendWorkflowNativeCanonicalObservation(native *WorkflowNativeSubmission, ref workflowstate.EvidenceRef) error {
 	refs := native.ObservationRefs
 	if len(refs) > 0 && refs[len(refs)-1] == ref {
 		return nil

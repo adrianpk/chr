@@ -13,7 +13,7 @@ import (
 // worker output, launch commands, process identities or owner credentials.
 type WorkflowResultValidation struct {
 	Ticket, Title, Outcome string
-	Reference              workflowstate.WorkflowEvidenceRef
+	Reference              workflowstate.EvidenceRef
 	Commands               []WorkflowCommandResult
 	Waiver                 string
 }
@@ -84,7 +84,7 @@ func (s *WorkflowStore) workflowResultValidation(attempt WorkflowAttempt) (Workf
 		return WorkflowResultValidation{}, 0, err
 	}
 
-	return WorkflowResultValidation{Ticket: attempt.TaskKey, Title: input.Contract.Title, Outcome: evidence.Outcome, Reference: workflowstate.WorkflowEvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, Commands: evidence.Validation, Waiver: evidence.WaiverReason}, len(data) + size, nil
+	return WorkflowResultValidation{Ticket: attempt.TaskKey, Title: input.Contract.Title, Outcome: evidence.Outcome, Reference: workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, Commands: evidence.Validation, Waiver: evidence.WaiverReason}, len(data) + size, nil
 }
 
 func workflowResultMatchesAttempt(evidence WorkflowTaskResult, attempt WorkflowAttempt) bool {

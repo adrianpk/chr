@@ -14,7 +14,7 @@ func (s *WorkflowStore) commitWorkflowClosingStart(ctx context.Context, claim *w
 		claim.set.Set.Closing = &WorkflowClosingBinding{}
 	}
 
-	claim.set.Set.Closing.Attempts = append(claim.set.Set.Closing.Attempts, workflowstate.WorkflowClosingEvidence{})
+	claim.set.Set.Closing.Attempts = append(claim.set.Set.Closing.Attempts, workflowstate.ClosingEvidence{})
 	claim.set.Set.Status = "closing"
 
 	return s.commitWorkflowClosingState(ctx, claim, workflowstate.FileChange{Path: claim.state.Input.Ref, After: claim.data})
@@ -32,7 +32,7 @@ func (s *WorkflowStore) commitWorkflowClosingState(ctx context.Context, claim *w
 
 	data = append(data, '\n')
 	stateFile := workflowstate.FileChange{Path: workflowClosingFile(claim.set.ID, claim.state.Generation, "state.json"), Before: binding.Hash, After: data}
-	*binding = workflowstate.WorkflowClosingEvidence{Ref: stateFile.Path, Hash: contenthash.Sum(data)}
+	*binding = workflowstate.ClosingEvidence{Ref: stateFile.Path, Hash: contenthash.Sum(data)}
 	claim.set.Revision++
 	claim.set.UpdatedAt = time.Now().UTC()
 

@@ -11,37 +11,37 @@ import (
 // Git application alone retains awaiting_observation and cannot issue a receipt.
 type WorkflowNativeSubmission struct {
 	WorkflowNativeRecordBinding
-	CandidateHash            string                              `json:"candidate_hash"`
-	CandidateRef             workflowstate.WorkflowEvidenceRef   `json:"candidate_ref"`
-	ClaimGeneration          uint64                              `json:"claim_generation"`
-	Mechanism                string                              `json:"mechanism"`
-	ReviewGrantRef           workflowstate.WorkflowEvidenceRef   `json:"review_grant_ref"`
-	FastForwardProofRef      workflowstate.WorkflowEvidenceRef   `json:"fast_forward_proof_ref"`
-	IntentTime               time.Time                           `json:"intent_time"`
-	DispatchState            string                              `json:"dispatch_state"`
-	DispatchIdentity         *WorkflowProcessIdentity            `json:"dispatch_identity"`
-	DispatchCompletionRef    *workflowstate.WorkflowEvidenceRef  `json:"dispatch_completion_ref,omitempty"`
-	AdvertisementRef         *workflowstate.WorkflowEvidenceRef  `json:"advertisement_observation_ref"`
-	CommandManifestRef       *workflowstate.WorkflowEvidenceRef  `json:"command_manifest_ref"`
-	TransportResponseRef     *workflowstate.WorkflowEvidenceRef  `json:"transport_response_ref"`
-	TransportResponseHistory []workflowstate.WorkflowEvidenceRef `json:"transport_response_history,omitempty"`
-	ApplicationState         string                              `json:"application_state"`
-	ObservationDeadline      time.Time                           `json:"observation_deadline"`
-	ObservationRefs          []workflowstate.WorkflowEvidenceRef `json:"observation_refs"`
-	GitObservationRefs       []workflowstate.WorkflowEvidenceRef `json:"git_observation_refs,omitempty"`
-	ReceiptRef               *workflowstate.WorkflowEvidenceRef  `json:"receipt_ref"`
-	NonApplicationRef        *workflowstate.WorkflowEvidenceRef  `json:"non_application_ref"`
+	CandidateHash            string                      `json:"candidate_hash"`
+	CandidateRef             workflowstate.EvidenceRef   `json:"candidate_ref"`
+	ClaimGeneration          uint64                      `json:"claim_generation"`
+	Mechanism                string                      `json:"mechanism"`
+	ReviewGrantRef           workflowstate.EvidenceRef   `json:"review_grant_ref"`
+	FastForwardProofRef      workflowstate.EvidenceRef   `json:"fast_forward_proof_ref"`
+	IntentTime               time.Time                   `json:"intent_time"`
+	DispatchState            string                      `json:"dispatch_state"`
+	DispatchIdentity         *WorkflowProcessIdentity    `json:"dispatch_identity"`
+	DispatchCompletionRef    *workflowstate.EvidenceRef  `json:"dispatch_completion_ref,omitempty"`
+	AdvertisementRef         *workflowstate.EvidenceRef  `json:"advertisement_observation_ref"`
+	CommandManifestRef       *workflowstate.EvidenceRef  `json:"command_manifest_ref"`
+	TransportResponseRef     *workflowstate.EvidenceRef  `json:"transport_response_ref"`
+	TransportResponseHistory []workflowstate.EvidenceRef `json:"transport_response_history,omitempty"`
+	ApplicationState         string                      `json:"application_state"`
+	ObservationDeadline      time.Time                   `json:"observation_deadline"`
+	ObservationRefs          []workflowstate.EvidenceRef `json:"observation_refs"`
+	GitObservationRefs       []workflowstate.EvidenceRef `json:"git_observation_refs,omitempty"`
+	ReceiptRef               *workflowstate.EvidenceRef  `json:"receipt_ref"`
+	NonApplicationRef        *workflowstate.EvidenceRef  `json:"non_application_ref"`
 }
 
 // WorkflowNativeDispatchCompletion records a returned host-owned transport call.
 // It proves local quiescence, never remote non-application by itself.
 type WorkflowNativeDispatchCompletion struct {
-	SchemaVersion     int                               `json:"schema_version"`
-	SubmissionID      string                            `json:"submission_id"`
-	CandidateRevision string                            `json:"candidate_revision"`
-	Identity          WorkflowProcessIdentity           `json:"identity"`
-	ResponseRef       workflowstate.WorkflowEvidenceRef `json:"response_ref"`
-	FinishedAt        time.Time                         `json:"finished_at"`
+	SchemaVersion     int                       `json:"schema_version"`
+	SubmissionID      string                    `json:"submission_id"`
+	CandidateRevision string                    `json:"candidate_revision"`
+	Identity          WorkflowProcessIdentity   `json:"identity"`
+	ResponseRef       workflowstate.EvidenceRef `json:"response_ref"`
+	FinishedAt        time.Time                 `json:"finished_at"`
 }
 
 // WorkflowNativeGitObservation binds independently fetched refs and history to
@@ -126,5 +126,5 @@ func (s *WorkflowStore) RetainWorkflowNativeSubmission(ctx context.Context, requ
 func workflowNativeSubmissionIntent(candidate WorkflowIntegrationCandidate, run workflowInvocationFile, entry WorkflowIntegrationEntry) WorkflowNativeSubmission {
 	now := time.Now().UTC()
 
-	return WorkflowNativeSubmission{WorkflowNativeRecordBinding: candidate.Native.WorkflowNativeRecordBinding, CandidateHash: candidate.Native.CandidateHash, CandidateRef: *entry.CandidateRef, ClaimGeneration: entry.ClaimGeneration, Mechanism: WorkflowPublicationGitAtomicDualRef, ReviewGrantRef: workflowstate.WorkflowEvidenceRef{Path: run.Review.ResultRef, Hash: run.Review.ResultHash}, FastForwardProofRef: candidate.Native.HistoryManifestRef, IntentTime: now, DispatchState: "not_started", ApplicationState: "not_started", ObservationDeadline: now.Add(3 * time.Minute)}
+	return WorkflowNativeSubmission{WorkflowNativeRecordBinding: candidate.Native.WorkflowNativeRecordBinding, CandidateHash: candidate.Native.CandidateHash, CandidateRef: *entry.CandidateRef, ClaimGeneration: entry.ClaimGeneration, Mechanism: WorkflowPublicationGitAtomicDualRef, ReviewGrantRef: workflowstate.EvidenceRef{Path: run.Review.ResultRef, Hash: run.Review.ResultHash}, FastForwardProofRef: candidate.Native.HistoryManifestRef, IntentTime: now, DispatchState: "not_started", ApplicationState: "not_started", ObservationDeadline: now.Add(3 * time.Minute)}
 }

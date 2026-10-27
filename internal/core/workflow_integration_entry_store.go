@@ -231,7 +231,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationEntryFiles(run *workflowInvocat
 		return err
 	}
 
-	binding := WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}}
+	binding := WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}}
 	updateWorkflowIntegrationBinding(run, binding)
 
 	run.Revision++
@@ -274,7 +274,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationAdmission(ctx context.Context, 
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
 
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()

@@ -25,42 +25,42 @@ type WorkflowClosingMember struct {
 
 // WorkflowClosingSlice binds ordered descriptors to actual integration evidence.
 type WorkflowClosingSlice struct {
-	ID           string                                `json:"id"`
-	Order        int                                   `json:"slice_order"`
-	Receipt      workflowstate.WorkflowClosingEvidence `json:"receipt"`
-	Verification workflowstate.WorkflowClosingEvidence `json:"verification"`
-	Proof        WorkflowIntegrationProof              `json:"proof"`
+	ID           string                        `json:"id"`
+	Order        int                           `json:"slice_order"`
+	Receipt      workflowstate.ClosingEvidence `json:"receipt"`
+	Verification workflowstate.ClosingEvidence `json:"verification"`
+	Proof        WorkflowIntegrationProof      `json:"proof"`
 }
 
 // WorkflowClosingInput is the immutable member/plan/contract/target snapshot.
 type WorkflowClosingInput struct {
-	ValidationTimeoutSeconds int                                   `json:"validation_timeout_seconds,omitempty"`
-	Schema                   string                                `json:"schema"`
-	SetID                    string                                `json:"set_id"`
-	SetRevision              uint64                                `json:"set_revision"`
-	SetSourceHash            string                                `json:"set_source_hash"`
-	ProjectID                string                                `json:"project_id"`
-	Namespace                string                                `json:"namespace"`
-	Plan                     workflowstate.WorkflowClosingEvidence `json:"plan"`
-	ContractHash             string                                `json:"closing_contract_hash"`
-	Validation               workflowstate.Validation              `json:"closing_validation"`
-	Members                  []WorkflowClosingMember               `json:"members"`
-	Slices                   []WorkflowClosingSlice                `json:"slices"`
-	Target                   WorkflowPreviewTarget                 `json:"target"`
-	Branch                   string                                `json:"branch"`
-	Tree                     string                                `json:"tree"`
-	EvidenceHashes           map[string]string                     `json:"evidence_hashes"`
+	ValidationTimeoutSeconds int                           `json:"validation_timeout_seconds,omitempty"`
+	Schema                   string                        `json:"schema"`
+	SetID                    string                        `json:"set_id"`
+	SetRevision              uint64                        `json:"set_revision"`
+	SetSourceHash            string                        `json:"set_source_hash"`
+	ProjectID                string                        `json:"project_id"`
+	Namespace                string                        `json:"namespace"`
+	Plan                     workflowstate.ClosingEvidence `json:"plan"`
+	ContractHash             string                        `json:"closing_contract_hash"`
+	Validation               workflowstate.Validation      `json:"closing_validation"`
+	Members                  []WorkflowClosingMember       `json:"members"`
+	Slices                   []WorkflowClosingSlice        `json:"slices"`
+	Target                   WorkflowPreviewTarget         `json:"target"`
+	Branch                   string                        `json:"branch"`
+	Tree                     string                        `json:"tree"`
+	EvidenceHashes           map[string]string             `json:"evidence_hashes"`
 }
 
 // WorkflowClosingReceipt retains exact inputs and host results, including an
 // explicit waiver. Only a successful receipt can become the current closure.
 type WorkflowClosingReceipt struct {
 	WorkflowClosingInput
-	Input       workflowstate.WorkflowClosingEvidence `json:"input"`
-	Validation  []WorkflowCommandResult               `json:"validation"`
-	Outcome     string                                `json:"outcome"`
-	Waiver      string                                `json:"waiver_reason,omitempty"`
-	ConfirmedAt time.Time                             `json:"confirmed_at"`
+	Input       workflowstate.ClosingEvidence `json:"input"`
+	Validation  []WorkflowCommandResult       `json:"validation"`
+	Outcome     string                        `json:"outcome"`
+	Waiver      string                        `json:"waiver_reason,omitempty"`
+	ConfirmedAt time.Time                     `json:"confirmed_at"`
 }
 
 func (s *WorkflowStore) workflowClosingInput(ctx context.Context, set WorkflowRecord, request WorkflowSetClosureRequest, ports WorkflowFrontierPorts) (WorkflowClosingInput, error) {
@@ -79,7 +79,7 @@ func (s *WorkflowStore) workflowClosingInput(ctx context.Context, set WorkflowRe
 		return WorkflowClosingInput{}, err
 	}
 
-	input := WorkflowClosingInput{Schema: "chr-set-closing-input/v1", SetID: set.ID, SetRevision: set.Revision, SetSourceHash: set.SourceHash, ProjectID: set.ProjectID, Namespace: set.Namespace, Plan: workflowstate.WorkflowClosingEvidence{Ref: set.Set.PlanRef, Hash: set.Set.PlanHash}, Validation: set.Set.ClosingValidation, ContractHash: contenthash.Sum(contract), Target: target, Branch: request.Branch, EvidenceHashes: map[string]string{set.Set.PlanRef: set.Set.PlanHash}}
+	input := WorkflowClosingInput{Schema: "chr-set-closing-input/v1", SetID: set.ID, SetRevision: set.Revision, SetSourceHash: set.SourceHash, ProjectID: set.ProjectID, Namespace: set.Namespace, Plan: workflowstate.ClosingEvidence{Ref: set.Set.PlanRef, Hash: set.Set.PlanHash}, Validation: set.Set.ClosingValidation, ContractHash: contenthash.Sum(contract), Target: target, Branch: request.Branch, EvidenceHashes: map[string]string{set.Set.PlanRef: set.Set.PlanHash}}
 	input.ValidationTimeoutSeconds = seconds
 	reader := workflowProofReader{store: s}
 

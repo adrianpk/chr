@@ -28,7 +28,7 @@ func TestNativeBudgetGrants(t *testing.T) {
 		t.Fatal("merger ceiling bypassed", err)
 	}
 
-	grant := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, entry.InvocationID), Grant: workflowstate.WorkflowIntegrationGrant{ID: "operator-extension", Kind: "merger", Amount: 1, Actor: "operator", Reason: "accepted additional reconciliation"}}
+	grant := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, entry.InvocationID), Grant: workflowstate.IntegrationGrant{ID: "operator-extension", Kind: "merger", Amount: 1, Actor: "operator", Reason: "accepted additional reconciliation"}}
 
 	budget, err := store.GrantWorkflowIntegration(t.Context(), grant)
 	if err != nil || budget.UnitCounters[0].Merger != 3 || budget.LimitsSnapshot.Merger != 4 {
@@ -51,7 +51,7 @@ func nativeBudgetInvalidGrants(t *testing.T, store *WorkflowStore, entry Workflo
 	t.Helper()
 
 	for _, amount := range []int64{0, -1, math.MaxInt64} {
-		request := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, entry.InvocationID), Grant: workflowstate.WorkflowIntegrationGrant{ID: fmt.Sprint("invalid-", amount), Kind: "tokens", Amount: amount, Actor: "operator", Reason: "explicit boundary check"}}
+		request := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, entry.InvocationID), Grant: workflowstate.IntegrationGrant{ID: fmt.Sprint("invalid-", amount), Kind: "tokens", Amount: amount, Actor: "operator", Reason: "explicit boundary check"}}
 		if _, err := store.GrantWorkflowIntegration(t.Context(), request); err == nil {
 			t.Fatal("invalid grant accepted")
 		}

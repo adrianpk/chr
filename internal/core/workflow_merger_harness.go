@@ -18,7 +18,7 @@ const workflowMergerBrokerProtocol = "chr-merger-broker/v1"
 // this broker exclusively; the driver itself is part of the host trust boundary.
 type WorkflowMergerHarness struct {
 	Command     []string
-	Certificate workflowstate.WorkflowEvidenceRef
+	Certificate workflowstate.EvidenceRef
 }
 
 // WorkflowMergerHarnessCertificate binds an externally certified driver image
@@ -45,15 +45,15 @@ type WorkflowMergerRequest struct {
 
 // WorkflowMergerAttempt retains a proposal independently of candidate approval.
 type WorkflowMergerAttempt struct {
-	Acceptance    *WorkflowMergerAcceptance         `json:"acceptance,omitempty"`
-	SchemaVersion int                               `json:"schema_version"`
-	Input         WorkflowMergerInput               `json:"input"`
-	HarnessRef    workflowstate.WorkflowEvidenceRef `json:"harness_ref"`
-	Harness       WorkflowCommandResult             `json:"harness"`
-	Proposal      *WorkflowMergerResult             `json:"proposal"`
-	Checks        []WorkflowCommandResult           `json:"checks"`
-	TrustedUsage  *WorkflowMergerUsage              `json:"trusted_usage,omitempty"`
-	Failure       string                            `json:"failure,omitempty"`
+	Acceptance    *WorkflowMergerAcceptance `json:"acceptance,omitempty"`
+	SchemaVersion int                       `json:"schema_version"`
+	Input         WorkflowMergerInput       `json:"input"`
+	HarnessRef    workflowstate.EvidenceRef `json:"harness_ref"`
+	Harness       WorkflowCommandResult     `json:"harness"`
+	Proposal      *WorkflowMergerResult     `json:"proposal"`
+	Checks        []WorkflowCommandResult   `json:"checks"`
+	TrustedUsage  *WorkflowMergerUsage      `json:"trusted_usage,omitempty"`
+	Failure       string                    `json:"failure,omitempty"`
 }
 
 func (s *WorkflowStore) checkWorkflowMergerHarness(ctx context.Context, input WorkflowMergerInput, harness WorkflowMergerHarness) (WorkflowMergerHarnessCertificate, error) {

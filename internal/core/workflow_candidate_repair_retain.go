@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) retainWorkflowCandidateRepair(ctx context.Context, run *workflowInvocationFile, candidate WorkflowIntegrationCandidate, reason string, refs []workflowstate.WorkflowEvidenceRef) error {
+func (s *WorkflowStore) retainWorkflowCandidateRepair(ctx context.Context, run *workflowInvocationFile, candidate WorkflowIntegrationCandidate, reason string, refs []workflowstate.EvidenceRef) error {
 	if run.Integration == nil || candidate.Input.Native == nil || len(refs) == 0 {
 		return workflowstate.ErrConflict
 	}
@@ -50,7 +50,7 @@ func (s *WorkflowStore) retainWorkflowCandidateRepair(ctx context.Context, run *
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
 
 	return s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{queue}, file)
 }
@@ -74,9 +74,9 @@ func (s *WorkflowStore) retainWorkflowFailedCandidate(ctx context.Context, run w
 	}
 
 	last := current.Attempts[len(current.Attempts)-1]
-	ref := workflowstate.WorkflowEvidenceRef{Path: last.CheckpointRef, Hash: last.CheckpointHash}
+	ref := workflowstate.EvidenceRef{Path: last.CheckpointRef, Hash: last.CheckpointHash}
 
-	return s.retainWorkflowCandidateRepair(ctx, &current, candidate, "combined_gate_regression", []workflowstate.WorkflowEvidenceRef{ref})
+	return s.retainWorkflowCandidateRepair(ctx, &current, candidate, "combined_gate_regression", []workflowstate.EvidenceRef{ref})
 }
 
 func workflowCandidateRepairOwnerMatches(run workflowInvocationFile, entry WorkflowIntegrationEntry, candidate WorkflowIntegrationCandidate) bool {

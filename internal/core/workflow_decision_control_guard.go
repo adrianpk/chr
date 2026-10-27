@@ -6,7 +6,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run workflowInvocationFile, request workflowstate.WorkflowControlMutationRequest) (WorkflowIntegrationBudgetGuard, error) {
+func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run workflowInvocationFile, request workflowstate.ControlMutationRequest) (WorkflowIntegrationBudgetGuard, error) {
 	if err := checkWorkflowRevision(run.WorkflowInvocation, []uint64{request.ExpectedRevision}); err != nil {
 		return WorkflowIntegrationBudgetGuard{}, err
 	}
@@ -31,7 +31,7 @@ func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run wo
 	return workflowDisplayedIntegrationGuard(run, observed, *request.Integration)
 }
 
-func workflowDisplayedIntegrationGuard(run workflowInvocationFile, observed *WorkflowIntegrationInspection, shown workflowstate.WorkflowControlIntegrationGuard) (WorkflowIntegrationBudgetGuard, error) {
+func workflowDisplayedIntegrationGuard(run workflowInvocationFile, observed *WorkflowIntegrationInspection, shown workflowstate.ControlIntegrationGuard) (WorkflowIntegrationBudgetGuard, error) {
 	if observed == nil || observed.Entry == nil {
 		return WorkflowIntegrationBudgetGuard{}, workflowstate.ErrConflict
 	}

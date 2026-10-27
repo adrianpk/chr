@@ -17,7 +17,7 @@ type WorkflowLifecycleControlPorts struct {
 }
 
 type workflowLifecycleAcceptance struct {
-	receipt workflowstate.WorkflowControlResult
+	receipt workflowstate.ControlResult
 	replay  bool
 	limit   int
 }
@@ -25,10 +25,10 @@ type workflowLifecycleAcceptance struct {
 // ControlWorkflowLifecycle commits lifecycle acceptance and its request receipt
 // together. Continuation runs outside exclusion after acceptance; a replay only
 // returns that original receipt and never starts another checkpoint.
-func (s *WorkflowStore) ControlWorkflowLifecycle(ctx context.Context, request workflowstate.WorkflowControlMutationRequest, ports WorkflowLifecycleControlPorts, check WorkflowAdmissionCheck) (workflowstate.WorkflowControlResult, error) {
+func (s *WorkflowStore) ControlWorkflowLifecycle(ctx context.Context, request workflowstate.ControlMutationRequest, ports WorkflowLifecycleControlPorts, check WorkflowAdmissionCheck) (workflowstate.ControlResult, error) {
 	request, digest, err := freezeWorkflowControlMutation(request)
 	if err != nil || !slices.Contains([]string{"pause", "cancel", "resume", "continue", "reconcile"}, request.Action) {
-		return workflowstate.WorkflowControlResult{}, errorsOrConflict(err)
+		return workflowstate.ControlResult{}, errorsOrConflict(err)
 	}
 
 	acceptCtx, cancel := context.WithTimeout(ctx, time.Minute)
@@ -57,7 +57,7 @@ func (s *WorkflowStore) ControlWorkflowLifecycle(ctx context.Context, request wo
 	return accepted.receipt, err
 }
 
-func (s *WorkflowStore) acceptWorkflowLifecycleControl(ctx context.Context, request workflowstate.WorkflowControlMutationRequest, digest string, ports WorkflowLifecycleControlPorts, check WorkflowAdmissionCheck) (workflowLifecycleAcceptance, error) {
+func (s *WorkflowStore) acceptWorkflowLifecycleControl(ctx context.Context, request workflowstate.ControlMutationRequest, digest string, ports WorkflowLifecycleControlPorts, check WorkflowAdmissionCheck) (workflowLifecycleAcceptance, error) {
 	run, owner, err := s.locateWorkflowInvocation(ctx, request.ID)
 	if err != nil {
 		return workflowLifecycleAcceptance{}, err
@@ -94,7 +94,7 @@ func (s *WorkflowStore) acceptWorkflowLifecycleControl(ctx context.Context, requ
 	return workflowLifecycleAcceptance{receipt: commit.receipt.Result, limit: limit}, nil
 }
 
-func (s *WorkflowStore) applyWorkflowLifecycleControl(ctx context.Context, run workflowInvocationFile, request workflowstate.WorkflowControlMutationRequest, ports WorkflowLifecycleControlPorts, commit *workflowControlCommit) (int, error) {
+func (s *WorkflowStore) applyWorkflowLifecycleControl(ctx context.Context, run workflowInvocationFile, request workflowstate.ControlMutationRequest, ports WorkflowLifecycleControlPorts, commit *workflowControlCommit) (int, error) {
 	switch request.Action {
 	case "pause", "cancel":
 		return 0, s.stopWorkflow(ctx, &run, request.Action, commit)
@@ -134,7 +134,7 @@ func (s *WorkflowStore) acceptWorkflowControlContinuation(ctx context.Context, r
 	return limit, s.commitWorkflowContinuation(run, 0, "accepted", files...)
 }
 
-func validateWorkflowLifecyclePayload(request workflowstate.WorkflowControlMutationRequest) error {
+func validateWorkflowLifecyclePayload(request workflowstate.ControlMutationRequest) error {
 	if request.Integration != nil || request.Grant != nil || request.Answer != nil || request.ReviewHash != "" || request.DecisionRevision != 0 || request.DecisionHash != "" {
 		return workflowstate.ErrConflict
 	}

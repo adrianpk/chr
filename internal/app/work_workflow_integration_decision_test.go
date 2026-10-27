@@ -24,7 +24,7 @@ func workflowIntegrationAnswerRequest(shown WorkflowWorkStatus, action string) W
 	question := decision.Requests[0]
 	request := serviceIntegrationControl(shown, "answer_decision")
 	request.DecisionRevision, request.DecisionHash = decision.Revision, decision.Hash
-	request.DecisionAnswer = &workflowstate.WorkflowIntegrationAnswer{ID: "surface-answer", DecisionID: question.ID, Choice: question.Options[0], Action: action, Actor: "operator", Authority: question.Authority, Reason: "Preserve both requirements through the compatible interpretation"}
+	request.DecisionAnswer = &workflowstate.IntegrationAnswer{ID: "surface-answer", DecisionID: question.ID, Choice: question.Options[0], Action: action, Actor: "operator", Authority: question.Authority, Reason: "Preserve both requirements through the compatible interpretation"}
 
 	return request
 }

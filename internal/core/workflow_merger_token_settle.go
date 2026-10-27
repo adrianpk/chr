@@ -26,7 +26,7 @@ func workflowMergerTokenSettlement(reservation *WorkflowIntegrationReservation, 
 
 	path := "run/" + result.Input.InvocationID + "/evidence/merger-usage-" + reservation.AttemptID + ".json"
 	reservation.State, reservation.ReportedInput, reservation.ReportedOutput = "settled", usage.Input, usage.Output
-	reservation.SettlementProof = &workflowstate.WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(data)}
+	reservation.SettlementProof = &workflowstate.EvidenceRef{Path: path, Hash: contenthash.Sum(data)}
 
 	return workflowstate.FileChange{Path: path, After: data}, validateWorkflowIntegrationReservation(*reservation)
 }

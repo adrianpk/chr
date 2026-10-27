@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func freezeWorkflowControlMutation(request workflowstate.WorkflowControlMutationRequest) (workflowstate.WorkflowControlMutationRequest, string, error) {
+func freezeWorkflowControlMutation(request workflowstate.ControlMutationRequest) (workflowstate.ControlMutationRequest, string, error) {
 	if err := validateGuidedControlProof(request); err != nil {
 		return request, "", err
 	}
@@ -26,7 +26,7 @@ func freezeWorkflowControlMutation(request workflowstate.WorkflowControlMutation
 		return request, "", workflowstate.ErrConflict
 	}
 
-	var frozen workflowstate.WorkflowControlMutationRequest
+	var frozen workflowstate.ControlMutationRequest
 	if err := json.Unmarshal(data, &frozen); err != nil {
 		return frozen, "", err
 	}
@@ -38,7 +38,7 @@ func freezeWorkflowControlMutation(request workflowstate.WorkflowControlMutation
 	return frozen, contenthash.Sum(data), nil
 }
 
-func validateWorkflowControlPayload(request workflowstate.WorkflowControlMutationRequest) error {
+func validateWorkflowControlPayload(request workflowstate.ControlMutationRequest) error {
 	if request.StepLimit != 0 && request.Action != "continue" {
 		return workflowstate.ErrConflict
 	}

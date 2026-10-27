@@ -11,15 +11,15 @@ import (
 // WorkflowMergerAcceptance records host observations, never a validation or
 // review grant. Accepted checkpoints still require the complete candidate gate.
 type WorkflowMergerAcceptance struct {
-	SchemaVersion int                               `json:"schema_version"`
-	AttemptID     string                            `json:"attempt_id"`
-	InputHash     string                            `json:"input_hash"`
-	CheckpointRef workflowstate.WorkflowEvidenceRef `json:"checkpoint_ref"`
-	Outcome       string                            `json:"outcome"`
-	CheckedAt     time.Time                         `json:"checked_at"`
-	Repair        *WorkflowIntegrationTreeRepair    `json:"repair,omitempty"`
-	Next          *WorkflowMergerRepairState        `json:"next,omitempty"`
-	Failure       string                            `json:"failure,omitempty"`
+	SchemaVersion int                            `json:"schema_version"`
+	AttemptID     string                         `json:"attempt_id"`
+	InputHash     string                         `json:"input_hash"`
+	CheckpointRef workflowstate.EvidenceRef      `json:"checkpoint_ref"`
+	Outcome       string                         `json:"outcome"`
+	CheckedAt     time.Time                      `json:"checked_at"`
+	Repair        *WorkflowIntegrationTreeRepair `json:"repair,omitempty"`
+	Next          *WorkflowMergerRepairState     `json:"next,omitempty"`
+	Failure       string                         `json:"failure,omitempty"`
 }
 
 // ExecuteWorkflowMergerRepair runs a certified driver at a frozen checkpoint,

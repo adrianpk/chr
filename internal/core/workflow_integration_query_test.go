@@ -265,6 +265,6 @@ func nativeQueueDamageBudget(budget *WorkflowIntegrationBudget, damage string) {
 	case "orphan counter":
 		budget.UnitCounters = append(budget.UnitCounters, WorkflowIntegrationCounter{Unit: workflowstate.Ref{Kind: "ticket", ID: "unadmitted"}})
 	case "token grant":
-		budget.Grants = append(budget.Grants, workflowstate.WorkflowIntegrationGrant{ID: "illegal", Kind: "tokens", Amount: 1})
+		budget.Grants = append(budget.Grants, workflowstate.IntegrationGrant{ID: "illegal", Kind: "tokens", Amount: 1})
 	}
 }

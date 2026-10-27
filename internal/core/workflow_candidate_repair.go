@@ -10,21 +10,21 @@ import (
 // WorkflowCandidateRepairBinding retains actionable combined-result evidence.
 // It cannot authorize publication or rewind accepted source task execution.
 type WorkflowCandidateRepairBinding struct {
-	Unit            workflowstate.Ref                 `json:"unit"`
-	EntryID         string                            `json:"entry_id"`
-	ClaimGeneration uint64                            `json:"claim_generation"`
-	CandidateHash   string                            `json:"candidate_hash"`
-	FindingRef      workflowstate.WorkflowEvidenceRef `json:"finding_ref"`
-	RecordRef       workflowstate.WorkflowEvidenceRef `json:"record_ref"`
+	Unit            workflowstate.Ref         `json:"unit"`
+	EntryID         string                    `json:"entry_id"`
+	ClaimGeneration uint64                    `json:"claim_generation"`
+	CandidateHash   string                    `json:"candidate_hash"`
+	FindingRef      workflowstate.EvidenceRef `json:"finding_ref"`
+	RecordRef       workflowstate.EvidenceRef `json:"record_ref"`
 }
 
 // WorkflowCandidateRepair records the host result and its exact findings before
 // a bounded merger may act. Failed gate results remain non-candidates.
 type WorkflowCandidateRepair struct {
-	Schema      string                              `json:"schema"`
-	Reason      string                              `json:"reason"`
-	Candidate   WorkflowIntegrationCandidate        `json:"candidate"`
-	FindingRefs []workflowstate.WorkflowEvidenceRef `json:"finding_refs"`
+	Schema      string                       `json:"schema"`
+	Reason      string                       `json:"reason"`
+	Candidate   WorkflowIntegrationCandidate `json:"candidate"`
+	FindingRefs []workflowstate.EvidenceRef  `json:"finding_refs"`
 }
 
 // ReadWorkflowCandidateRepair returns retained findings for host request
@@ -92,13 +92,13 @@ func (s *WorkflowStore) repairWorkflowNativeReview(ctx context.Context, run work
 		return err
 	}
 
-	ref := workflowstate.WorkflowEvidenceRef{Path: run.Review.ResultRef, Hash: run.Review.ResultHash}
+	ref := workflowstate.EvidenceRef{Path: run.Review.ResultRef, Hash: run.Review.ResultHash}
 
-	return s.retainWorkflowCandidateRepair(ctx, &run, candidate, "actionable_review_finding", []workflowstate.WorkflowEvidenceRef{ref})
+	return s.retainWorkflowCandidateRepair(ctx, &run, candidate, "actionable_review_finding", []workflowstate.EvidenceRef{ref})
 }
 
 func workflowCandidateRepairFindingMatches(b WorkflowCandidateRepairBinding, review *WorkflowReviewBinding) bool {
-	return review != nil && b.Unit == review.Unit && b.FindingRef == (workflowstate.WorkflowEvidenceRef{Path: review.ResultRef, Hash: review.ResultHash})
+	return review != nil && b.Unit == review.Unit && b.FindingRef == (workflowstate.EvidenceRef{Path: review.ResultRef, Hash: review.ResultHash})
 }
 
 func (s *WorkflowStore) readWorkflowCandidateRepair(run workflowInvocationFile) (WorkflowCandidateRepair, error) {

@@ -17,10 +17,10 @@ func TestWorkflowIntegrationPayload(t *testing.T) {
 		name, choice string
 		payload      map[string]string
 		original     string
-		fix          *workflowstate.AgenticReviewFinding
+		fix          *workflowstate.ReviewFinding
 	}{
 		{"source step", "Identify the original source step", map[string]string{"original_commit": strings.Repeat("c", 40)}, strings.Repeat("c", 40), nil},
-		{"integration fix", "Declare an integration fix with an actionable finding", map[string]string{"fix_category": "correctness", "fix_title": "Preserve declared behavior", "fix_detail": "Retain both source and target requirements"}, "", &workflowstate.AgenticReviewFinding{Category: "correctness", Title: "Preserve declared behavior", Detail: "Retain both source and target requirements"}},
+		{"integration fix", "Declare an integration fix with an actionable finding", map[string]string{"fix_category": "correctness", "fix_title": "Preserve declared behavior", "fix_detail": "Retain both source and target requirements"}, "", &workflowstate.ReviewFinding{Category: "correctness", Title: "Preserve declared behavior", Detail: "Retain both source and target requirements"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			input := maps.Clone(fields)
@@ -49,7 +49,7 @@ func checkWorkflowIntegrationPayloadFence(t *testing.T, request WorkflowControlR
 	}
 }
 
-func checkWorkflowIntegrationFinding(t *testing.T, actual, expected *workflowstate.AgenticReviewFinding) {
+func checkWorkflowIntegrationFinding(t *testing.T, actual, expected *workflowstate.ReviewFinding) {
 	t.Helper()
 
 	if expected == nil {

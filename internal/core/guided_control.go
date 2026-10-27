@@ -14,23 +14,23 @@ var ErrGuidedControlRejected = errors.New("native guided control was rejected wi
 // GuidedControlState keeps stop intent separate from an interrupted stage.
 // Native receipts prove acceptance; native quiescence is acknowledged separately.
 type GuidedControlState struct {
-	StopIntent           string                                        `json:"stop_intent,omitempty"`
-	ResumeStatus         string                                        `json:"resume_status,omitempty"`
-	PreviousStatus       string                                        `json:"previous_status,omitempty"`
-	PreviousIntent       string                                        `json:"previous_intent,omitempty"`
-	PreviousBlocker      string                                        `json:"previous_blocker,omitempty"`
-	AcknowledgedRevision uint64                                        `json:"acknowledged_revision,omitempty"`
-	PendingOperation     *GuidedUseCaseOperation                       `json:"pending_operation,omitempty"`
-	NativeRequest        *workflowstate.WorkflowControlMutationRequest `json:"native_request,omitempty"`
-	NativeReceipt        *workflowstate.WorkflowControlResult          `json:"native_receipt,omitempty"`
-	CompletedOperations  []GuidedControlReceipt                        `json:"completed_operations,omitempty"`
+	StopIntent           string                                `json:"stop_intent,omitempty"`
+	ResumeStatus         string                                `json:"resume_status,omitempty"`
+	PreviousStatus       string                                `json:"previous_status,omitempty"`
+	PreviousIntent       string                                `json:"previous_intent,omitempty"`
+	PreviousBlocker      string                                `json:"previous_blocker,omitempty"`
+	AcknowledgedRevision uint64                                `json:"acknowledged_revision,omitempty"`
+	PendingOperation     *GuidedUseCaseOperation               `json:"pending_operation,omitempty"`
+	NativeRequest        *workflowstate.ControlMutationRequest `json:"native_request,omitempty"`
+	NativeReceipt        *workflowstate.ControlResult          `json:"native_receipt,omitempty"`
+	CompletedOperations  []GuidedControlReceipt                `json:"completed_operations,omitempty"`
 }
 
 // GuidedControlReceipt retains the original control outcome across later changes.
 type GuidedControlReceipt struct {
 	GuidedUseCaseOperation
-	Native   *workflowstate.WorkflowControlResult `json:"native,omitempty"`
-	Rejected bool                                 `json:"rejected,omitempty"`
+	Native   *workflowstate.ControlResult `json:"native,omitempty"`
+	Rejected bool                         `json:"rejected,omitempty"`
 }
 
 func boundedGuidedControls(control *GuidedControlState) bool {
@@ -105,13 +105,13 @@ func reserveGuidedControl(ctx context.Context, root string, session *AuthoringSe
 	return RetainGuidedUseCaseProgress(ctx, root, session)
 }
 
-func guidedNativeControlRequest(session AuthoringSession, operation GuidedUseCaseOperation) *workflowstate.WorkflowControlMutationRequest {
+func guidedNativeControlRequest(session AuthoringSession, operation GuidedUseCaseOperation) *workflowstate.ControlMutationRequest {
 	work := session.Guided.Work
 	if work == nil || work.Invocation == nil {
 		return nil
 	}
 
-	return &workflowstate.WorkflowControlMutationRequest{Guided: &workflowstate.GuidedWorkflowControlProof{RunID: session.ID, OperationDigest: operation.Digest}, Binding: workflowstate.MutationBinding{RequestID: "guided-control-" + operation.Digest, Operator: session.Guided.Actor}, Action: operation.Action, ID: work.Invocation.ID, ExpectedRevision: operation.NativeRevision}
+	return &workflowstate.ControlMutationRequest{Guided: &workflowstate.GuidedControlProof{RunID: session.ID, OperationDigest: operation.Digest}, Binding: workflowstate.MutationBinding{RequestID: "guided-control-" + operation.Digest, Operator: session.Guided.Actor}, Action: operation.Action, ID: work.Invocation.ID, ExpectedRevision: operation.NativeRevision}
 }
 
 func (r *fileAuthoringSessionRepository) retainGuidedControlFailure(ctx context.Context, session *AuthoringSession, operation GuidedUseCaseOperation, cause error) error {

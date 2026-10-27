@@ -15,12 +15,12 @@ type WorkflowIntegrationRoleStatus struct {
 
 // WorkflowIntegrationDecisionStatus carries only displayed questions and answers.
 type WorkflowIntegrationDecisionStatus struct {
-	ID       string                                    `json:"id"`
-	Revision uint64                                    `json:"revision"`
-	Hash     string                                    `json:"hash"`
-	State    string                                    `json:"state"`
-	Requests []core.WorkflowMergerDecision             `json:"questions"`
-	Answers  []workflowstate.WorkflowIntegrationAnswer `json:"answers"`
+	ID       string                            `json:"id"`
+	Revision uint64                            `json:"revision"`
+	Hash     string                            `json:"hash"`
+	State    string                            `json:"state"`
+	Requests []core.WorkflowMergerDecision     `json:"questions"`
+	Answers  []workflowstate.IntegrationAnswer `json:"answers"`
 }
 
 // WorkflowIntegrationStatus projects retained integration facts for every adapter.

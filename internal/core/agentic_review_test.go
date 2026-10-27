@@ -245,7 +245,7 @@ func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionNeedsChanges,
 			Summary:  "Needs repair.",
-			BlockingFindings: []workflowstate.AgenticReviewFinding{{
+			BlockingFindings: []workflowstate.ReviewFinding{{
 				Category: AgenticReviewFindingCorrectness,
 				Title:    "Broken behavior",
 				Detail:   "The main flow fails.",

@@ -142,7 +142,7 @@ func (s *WorkflowStore) encodeWorkflowAgentInput(ctx context.Context, run *workf
 		return prepared, file, workflowstate.FileChange{}, err
 	}
 
-	reservation.AttemptInput = &workflowstate.WorkflowEvidenceRef{Path: prepared.inputRef, Hash: prepared.inputHash}
+	reservation.AttemptInput = &workflowstate.EvidenceRef{Path: prepared.inputRef, Hash: prepared.inputHash}
 	budgetFile, err := s.workflowIntegrationBudgetChange(ctx, run, budget)
 
 	return prepared, file, budgetFile, err
@@ -201,7 +201,7 @@ func (s *WorkflowStore) checkWorkflowAgentCeilingAdmission(run workflowInvocatio
 		}
 
 		var input WorkflowTaskInput
-		if err := s.readWorkflowNativeEvidence(run.ID, workflowstate.WorkflowEvidenceRef{Path: attempt.InputRef, Hash: attempt.InputHash}, &input); err != nil {
+		if err := s.readWorkflowNativeEvidence(run.ID, workflowstate.EvidenceRef{Path: attempt.InputRef, Hash: attempt.InputHash}, &input); err != nil {
 			return err
 		}
 

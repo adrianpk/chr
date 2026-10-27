@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateGuidedControlProof(request workflowstate.WorkflowControlMutationRequest) error {
+func validateGuidedControlProof(request workflowstate.ControlMutationRequest) error {
 	proof := request.Guided
 	if proof == nil {
 		return nil

@@ -29,7 +29,7 @@ func TestServiceWorkflowGrant(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	grant := core.WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: core.WorkflowIntegrationBudgetGuard{InvocationID: started.Invocation.ID, InvocationRevision: started.Invocation.Revision, BudgetRevision: budget.Revision}, Grant: workflowstate.WorkflowIntegrationGrant{ID: "operator-grant", Kind: "tokens", Amount: 25, Actor: "operator", Reason: "Authorize one bounded extension"}}
+	grant := core.WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: core.WorkflowIntegrationBudgetGuard{InvocationID: started.Invocation.ID, InvocationRevision: started.Invocation.Revision, BudgetRevision: budget.Revision}, Grant: workflowstate.IntegrationGrant{ID: "operator-grant", Kind: "tokens", Amount: 25, Actor: "operator", Reason: "Authorize one bounded extension"}}
 
 	budget, err = operations.GrantWorkflowIntegration(t.Context(), grant)
 	if err != nil || *budget.TokenLimit != 125 || *budget.AdmissionTokenLimit != 100 {

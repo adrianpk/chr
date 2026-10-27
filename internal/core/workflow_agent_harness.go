@@ -17,7 +17,7 @@ const (
 // per-call input/output grants. The invocation owns the total ceiling.
 type WorkflowAgentHarness struct {
 	Command      []string
-	Certificate  workflowstate.WorkflowEvidenceRef
+	Certificate  workflowstate.EvidenceRef
 	InputTokens  int64
 	OutputTokens int64
 }
@@ -39,10 +39,10 @@ type WorkflowAgentHarnessCertificate struct {
 
 // WorkflowAgentCall seals a reservation and certified driver into task input.
 type WorkflowAgentCall struct {
-	ReservationID string                            `json:"reservation_id"`
-	Role          string                            `json:"role"`
-	HarnessRef    workflowstate.WorkflowEvidenceRef `json:"harness_ref"`
-	Allowance     WorkflowTokenAllowance            `json:"allowance"`
+	ReservationID string                    `json:"reservation_id"`
+	Role          string                    `json:"role"`
+	HarnessRef    workflowstate.EvidenceRef `json:"harness_ref"`
+	Allowance     WorkflowTokenAllowance    `json:"allowance"`
 }
 
 // WorkflowAgentResponse is emitted by the trusted driver, separately from its

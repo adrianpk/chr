@@ -110,7 +110,7 @@ func workflowDecisionFile(entry *WorkflowIntegrationEntry, record WorkflowIntegr
 
 	hash := contenthash.Sum(data)
 	path := "run/" + record.Input.InvocationID + "/extension/chr/integration/" + entry.ID + "/decisions/" + hash + ".json"
-	entry.DecisionRef = &workflowstate.WorkflowEvidenceRef{Path: path, Hash: hash}
+	entry.DecisionRef = &workflowstate.EvidenceRef{Path: path, Hash: hash}
 
 	return workflowstate.FileChange{Path: path, After: data}, nil
 }
@@ -129,7 +129,7 @@ func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
 	return s.commitWorkflowPullRequestFiles(run, append([]workflowstate.FileChange{entryFile}, extra...), file)
 }
@@ -166,7 +166,7 @@ func (s *WorkflowStore) workflowMergerDecisionFiles(ctx context.Context, run *wo
 		return nil, err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
 	return []workflowstate.FileChange{file, entryFile}, nil
 }

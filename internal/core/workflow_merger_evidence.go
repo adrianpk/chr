@@ -9,8 +9,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (input WorkflowMergerInput) evidenceRefs() []workflowstate.WorkflowEvidenceRef {
-	refs := []workflowstate.WorkflowEvidenceRef{input.SourceManifestRef, input.ValidationContractRef}
+func (input WorkflowMergerInput) evidenceRefs() []workflowstate.EvidenceRef {
+	refs := []workflowstate.EvidenceRef{input.SourceManifestRef, input.ValidationContractRef}
 	if input.OperatorDecisionRef != nil {
 		refs = append(refs, *input.OperatorDecisionRef)
 	}
@@ -144,7 +144,7 @@ func (s *WorkflowStore) checkWorkflowMergerCheckpointEvidence(input WorkflowMerg
 	// independently, then retain the external immutable reference in the input.
 	expected := *checkpoint
 
-	expected.Evidence, retained.Evidence = workflowstate.WorkflowEvidenceRef{}, workflowstate.WorkflowEvidenceRef{}
+	expected.Evidence, retained.Evidence = workflowstate.EvidenceRef{}, workflowstate.EvidenceRef{}
 	if !workflowNativeJSONEqual(expected, retained) {
 		return workflowstate.ErrConflict
 	}

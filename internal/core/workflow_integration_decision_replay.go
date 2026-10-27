@@ -6,7 +6,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) checkWorkflowDecisionReplayAnswer(record WorkflowIntegrationDecisions, answer workflowstate.WorkflowIntegrationAnswer) error {
+func (s *WorkflowStore) checkWorkflowDecisionReplayAnswer(record WorkflowIntegrationDecisions, answer workflowstate.IntegrationAnswer) error {
 	if answer.OriginalCommit == "" {
 		return nil
 	}

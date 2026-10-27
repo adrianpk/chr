@@ -23,7 +23,7 @@ type WorkflowTaskInput struct {
 	OrderMap                 *WorkflowOrderMapInput               `json:"order_map,omitempty"`
 	AgentCall                *WorkflowAgentCall                   `json:"agent_call,omitempty"`
 	Merger                   *WorkflowMergerInput                 `json:"merger,omitempty"`
-	MergerHarnessRef         *workflowstate.WorkflowEvidenceRef   `json:"merger_harness_ref,omitempty"`
+	MergerHarnessRef         *workflowstate.EvidenceRef           `json:"merger_harness_ref,omitempty"`
 	ValidationTimeoutSeconds int                                  `json:"validation_timeout_seconds,omitempty"`
 	Preparation              *WorkflowPreparationInput            `json:"preparation,omitempty"`
 	Review                   *WorkflowReviewInput                 `json:"review,omitempty"`

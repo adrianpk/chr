@@ -51,9 +51,9 @@ type WorkflowMergerRepairState struct {
 // WorkflowMergerRepairPlan selects an original replay owner or an explicit
 // integration fix. Ambiguity produces decisions, not implicit permission.
 type WorkflowMergerRepairPlan struct {
-	InputHash      string                              `json:"input_hash"`
-	Outcome        string                              `json:"outcome"`
-	OriginalCommit string                              `json:"original_commit,omitempty"`
-	IntegrationFix *workflowstate.AgenticReviewFinding `json:"integration_fix,omitempty"`
-	Decisions      []WorkflowMergerDecision            `json:"decisions,omitempty"`
+	InputHash      string                       `json:"input_hash"`
+	Outcome        string                       `json:"outcome"`
+	OriginalCommit string                       `json:"original_commit,omitempty"`
+	IntegrationFix *workflowstate.ReviewFinding `json:"integration_fix,omitempty"`
+	Decisions      []WorkflowMergerDecision     `json:"decisions,omitempty"`
 }

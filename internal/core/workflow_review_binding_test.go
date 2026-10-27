@@ -68,17 +68,17 @@ func TestWorkflowReviewDecisionChecks(t *testing.T) {
 	}{
 		{"another input", func(d *WorkflowReviewDecision) { d.BindingHash = "another" }},
 		{"pass findings", func(d *WorkflowReviewDecision) {
-			d.Result.BlockingFindings = []workflowstate.AgenticReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}
+			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}
 		}},
 		{"cosmetic", func(d *WorkflowReviewDecision) {
 			d.Result.Decision = IntegrationReviewDecisionNeedsChanges
 			d.RepairTaskKey = input.Slice.Tasks[0].Key
-			d.Result.BlockingFindings = []workflowstate.AgenticReviewFinding{{Category: "cosmetic", Title: "Style", Detail: "Optional formatting."}}
+			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "cosmetic", Title: "Style", Detail: "Optional formatting."}}
 		}},
 		{"unknown task", func(d *WorkflowReviewDecision) {
 			d.Result.Decision = IntegrationReviewDecisionNeedsChanges
 			d.RepairTaskKey = "another task"
-			d.Result.BlockingFindings = []workflowstate.AgenticReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}
+			d.Result.BlockingFindings = []workflowstate.ReviewFinding{{Category: "correctness", Title: "Broken", Detail: "Wrong result."}}
 		}},
 	} {
 		t.Run(test.name, func(t *testing.T) {

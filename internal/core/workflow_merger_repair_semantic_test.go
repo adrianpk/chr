@@ -95,7 +95,7 @@ func TestNativeMergerFix(t *testing.T) {
 		t.Fatal("unowned repair silently invented a replay owner", err)
 	}
 
-	finding := workflowstate.AgenticReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain integration output", Detail: "Combined validation requires this explicit repair output."}
+	finding := workflowstate.ReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain integration output", Detail: "Combined validation requires this explicit repair output."}
 
 	plan, err := PlanWorkflowMergerRepair(t.Context(), state.Query.Lane.Worktree, input, before, &finding)
 	if err != nil || plan.Outcome != "integration_fix" {

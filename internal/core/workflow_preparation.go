@@ -52,11 +52,11 @@ type WorkflowPreparationGit interface {
 // WorkflowPreparationInput freezes source proof, current policy, protection and
 // the configured method's combined result before running the host slice gate.
 type WorkflowPreparationInput struct {
-	Source            WorkflowReviewInput                 `json:"source"`
-	Capability        WorkflowPublicationCapability       `json:"capability"`
-	Git               WorkflowIntegrationProof            `json:"git"`
-	Native            *WorkflowNativePreparationInput     `json:"native,omitempty"`
-	MergerAttemptRefs []workflowstate.WorkflowEvidenceRef `json:"merger_attempt_refs,omitempty"`
+	Source            WorkflowReviewInput             `json:"source"`
+	Capability        WorkflowPublicationCapability   `json:"capability"`
+	Git               WorkflowIntegrationProof        `json:"git"`
+	Native            *WorkflowNativePreparationInput `json:"native,omitempty"`
+	MergerAttemptRefs []workflowstate.EvidenceRef     `json:"merger_attempt_refs,omitempty"`
 }
 
 // WorkflowIntegrationCandidate is retained host validation of combined content.

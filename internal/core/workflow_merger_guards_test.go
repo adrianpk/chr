@@ -111,7 +111,7 @@ func nativeMergerResultGuards() map[string]func(*WorkflowMergerResult) {
 			r.ResolutionNotes[0].RegenerationCommand = []string{"git", "checkout", "--ours", "."}
 		},
 		"escaped check": func(r *WorkflowMergerResult) {
-			r.LocalCheckRefs = []workflowstate.WorkflowEvidenceRef{{Path: "run/other/evidence/check.json", Hash: contenthash.Sum(nil)}}
+			r.LocalCheckRefs = []workflowstate.EvidenceRef{{Path: "run/other/evidence/check.json", Hash: contenthash.Sum(nil)}}
 		},
 		"empty question":        func(r *WorkflowMergerResult) { r.Outcome = "needs_decision" },
 		"empty failure":         func(r *WorkflowMergerResult) { r.Outcome = "failed" },

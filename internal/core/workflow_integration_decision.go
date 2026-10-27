@@ -10,15 +10,15 @@ import (
 // WorkflowIntegrationDecisions is an immutable revision under the existing
 // queue entry. Its original merger input owns source/base, scope and questions.
 type WorkflowIntegrationDecisions struct {
-	SchemaVersion     int                                       `json:"schema_version"`
-	ID                string                                    `json:"id"`
-	Revision          uint64                                    `json:"revision"`
-	CandidateRevision uint64                                    `json:"candidate_revision"`
-	State             string                                    `json:"state"`
-	Input             WorkflowMergerInput                       `json:"input"`
-	Requests          []WorkflowMergerDecision                  `json:"requests"`
-	Answers           []workflowstate.WorkflowIntegrationAnswer `json:"answers"`
-	Previous          *workflowstate.WorkflowEvidenceRef        `json:"previous,omitempty"`
+	SchemaVersion     int                               `json:"schema_version"`
+	ID                string                            `json:"id"`
+	Revision          uint64                            `json:"revision"`
+	CandidateRevision uint64                            `json:"candidate_revision"`
+	State             string                            `json:"state"`
+	Input             WorkflowMergerInput               `json:"input"`
+	Requests          []WorkflowMergerDecision          `json:"requests"`
+	Answers           []workflowstate.IntegrationAnswer `json:"answers"`
+	Previous          *workflowstate.EvidenceRef        `json:"previous,omitempty"`
 }
 
 // WorkflowIntegrationDecisionRequest records bounded ambiguity at a fresh
@@ -36,7 +36,7 @@ type WorkflowIntegrationAnswerRequest struct {
 	WorkflowIntegrationBudgetGuard
 	DecisionRevision uint64
 	DecisionHash     string
-	Answer           workflowstate.WorkflowIntegrationAnswer
+	Answer           workflowstate.IntegrationAnswer
 }
 
 // ReadWorkflowIntegrationDecisions returns the current sealed question record.

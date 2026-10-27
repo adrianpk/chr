@@ -75,7 +75,7 @@ func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission Wor
 	return record
 }
 
-func nativeReceiptAlteredApplication(t *testing.T, store *WorkflowStore, submission WorkflowSubmission, ref workflowstate.WorkflowEvidenceRef, change func(*WorkflowNativeGitObservation)) workflowstate.WorkflowEvidenceRef {
+func nativeReceiptAlteredApplication(t *testing.T, store *WorkflowStore, submission WorkflowSubmission, ref workflowstate.EvidenceRef, change func(*WorkflowNativeGitObservation)) workflowstate.EvidenceRef {
 	t.Helper()
 
 	var observation WorkflowNativeGitObservation

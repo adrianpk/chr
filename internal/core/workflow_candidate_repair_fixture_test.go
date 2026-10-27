@@ -29,7 +29,7 @@ func nativeCandidateRepairFixture(t *testing.T, method, reason string) (nativePr
 	if method == "rebase" {
 		checkpoint := nativeMergerReplayCheckpoint(t, state)
 		payload := *checkpoint
-		payload.Evidence = workflowstate.WorkflowEvidenceRef{}
+		payload.Evidence = workflowstate.EvidenceRef{}
 		checkpoint.Evidence = retainNativeRecordEvidence(t, f.f.store, run.ID, "candidate-replay", payload)
 		request.Input.HistoryCheckpoint = checkpoint
 	}
@@ -61,7 +61,7 @@ func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run Wo
 	input.ValidationContractRef = retainNativeRecordEvidence(t, f.f.store, run.ID, "candidate-gate", gate)
 	source := retainNativeRecordEvidence(t, f.f.store, run.ID, "candidate-intent", candidate.Input.Source)
 	target := retainNativeRecordEvidence(t, f.f.store, run.ID, "candidate-target", candidate.Input.Git)
-	input.IntentRefs, input.TargetChangeRefs = []workflowstate.WorkflowEvidenceRef{source}, []workflowstate.WorkflowEvidenceRef{target}
+	input.IntentRefs, input.TargetChangeRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}
 	input.Requirements = []WorkflowMergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
 	input.Conflicts = []WorkflowMergerConflict{{ID: "semantic-result", Path: "result.txt", Kind: "semantic", Evidence: repair.FindingRefs[0], RequirementIDs: []string{"source-api", "target-validation"}}}
 

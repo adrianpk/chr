@@ -44,7 +44,7 @@ func telegramBoundDecisionControlRequest(request telegramcore.OperationRequest, 
 
 	p := parameters
 	if control.Action == "grant" {
-		control.BudgetGrant = &workflowstate.WorkflowIntegrationGrant{ID: request.ID, Actor: request.Operator, Kind: p.Kind, Amount: p.Amount, Reason: p.Reason}
+		control.BudgetGrant = &workflowstate.IntegrationGrant{ID: request.ID, Actor: request.Operator, Kind: p.Kind, Amount: p.Amount, Reason: p.Reason}
 
 		return control, nil
 	}
@@ -67,7 +67,7 @@ func telegramDecisionAnswerRequest(request telegramcore.OperationRequest, contro
 		}
 
 		control.DecisionRevision, control.DecisionHash = decision.Revision, decision.Hash
-		control.DecisionAnswer = &workflowstate.WorkflowIntegrationAnswer{ID: request.ID, Actor: request.Operator, DecisionID: question.ID, Authority: question.Authority, Choice: question.Options[p.Option-1], Action: p.AnswerAction, Reason: p.Reason}
+		control.DecisionAnswer = &workflowstate.IntegrationAnswer{ID: request.ID, Actor: request.Operator, DecisionID: question.ID, Authority: question.Authority, Choice: question.Options[p.Option-1], Action: p.AnswerAction, Reason: p.Reason}
 
 		return control, nil
 	}

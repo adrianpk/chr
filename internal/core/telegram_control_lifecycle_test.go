@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramLifecycleJournalFixture(t *testing.T, kind string) (*WorkflowStore, workflowstate.WorkflowControlMutationRequest) {
+func telegramLifecycleJournalFixture(t *testing.T, kind string) (*WorkflowStore, workflowstate.ControlMutationRequest) {
 	t.Helper()
 
 	action := kind
@@ -45,7 +45,7 @@ func telegramLifecycleJournalFixture(t *testing.T, kind string) (*WorkflowStore,
 
 	run := workflowTestRead(t, store, id)
 
-	request := workflowstate.WorkflowControlMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "lifecycle-receipt", Operator: "operator"}, Action: action, ID: id, ExpectedRevision: run.Revision}
+	request := workflowstate.ControlMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "lifecycle-receipt", Operator: "operator"}, Action: action, ID: id, ExpectedRevision: run.Revision}
 	if action == "continue" {
 		request.StepLimit = 1
 	}
@@ -111,7 +111,7 @@ func checkTelegramLifecycleJournal(t *testing.T, kind string) {
 	checkTelegramLifecycleActor(t, reopened, request)
 }
 
-func readTelegramLifecycleReceipt(t *testing.T, store *WorkflowStore, request workflowstate.WorkflowControlMutationRequest) workflowstate.WorkflowControlResult {
+func readTelegramLifecycleReceipt(t *testing.T, store *WorkflowStore, request workflowstate.ControlMutationRequest) workflowstate.ControlResult {
 	t.Helper()
 
 	result, found, err := store.ReadWorkflowControlReceipt(t.Context(), request)
@@ -122,7 +122,7 @@ func readTelegramLifecycleReceipt(t *testing.T, store *WorkflowStore, request wo
 	return result
 }
 
-func checkTelegramLifecycleActor(t *testing.T, reopened *WorkflowStore, request workflowstate.WorkflowControlMutationRequest) {
+func checkTelegramLifecycleActor(t *testing.T, reopened *WorkflowStore, request workflowstate.ControlMutationRequest) {
 	t.Helper()
 
 	request.Binding.Operator = "another-operator"

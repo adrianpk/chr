@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run WorkflowInvocation, request workflowstate.WorkflowControlMutationRequest) error {
+func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run WorkflowInvocation, request workflowstate.ControlMutationRequest) error {
 	if request.Guided == nil {
 		return nil
 	}
@@ -34,7 +34,7 @@ func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run Work
 	return guardGuidedNativeControl(session, run, request)
 }
 
-func guardGuidedNativeControl(session AuthoringSession, run WorkflowInvocation, request workflowstate.WorkflowControlMutationRequest) error {
+func guardGuidedNativeControl(session AuthoringSession, run WorkflowInvocation, request workflowstate.ControlMutationRequest) error {
 	state := session.Guided
 	if state.Work == nil || state.Work.Invocation == nil || state.Work.Materialization == nil || state.Control == nil || state.Control.PendingOperation == nil {
 		return workflowstate.ErrConflict
@@ -129,7 +129,7 @@ func guidedStopNeedsAcknowledgement(control *GuidedControlState) bool {
 	return control != nil && control.PendingOperation == nil && control.StopIntent != "" && control.NativeReceipt != nil && control.AcknowledgedRevision == 0
 }
 
-func guidedNativeControlAuthority(session AuthoringSession, run WorkflowInvocation, request workflowstate.WorkflowControlMutationRequest) bool {
+func guidedNativeControlAuthority(session AuthoringSession, run WorkflowInvocation, request workflowstate.ControlMutationRequest) bool {
 	state := session.Guided
 
 	return guidedNativeReferenceMatches(run, session) && run.Status != "completed" && request.Binding.Operator == state.Actor && request.Guided.OperationDigest == state.Control.PendingOperation.Digest

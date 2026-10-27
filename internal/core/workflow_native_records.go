@@ -18,31 +18,31 @@ const (
 // WorkflowNativeRecordBinding preserves S independently of the published P.
 // Versioned references name host evidence, not a worker assertion or credential.
 type WorkflowNativeRecordBinding struct {
-	SchemaVersion      int                                 `json:"schema_version"`
-	EntryID            string                              `json:"entry_id"`
-	InvocationID       string                              `json:"invocation_id"`
-	Unit               workflowstate.Ref                   `json:"unit"`
-	CanonicalPR        string                              `json:"canonical_pr"`
-	SourceRepository   string                              `json:"source_repository"`
-	SourceRef          string                              `json:"source_ref"`
-	TargetRef          string                              `json:"target_ref"`
-	ObjectFormat       string                              `json:"object_format"`
-	OriginalSource     string                              `json:"original_source"`
-	PublishedSource    string                              `json:"published_source"`
-	ValidatedBase      string                              `json:"validated_base"`
-	PreparedResult     string                              `json:"prepared_result"`
-	PreparedTree       string                              `json:"prepared_tree"`
-	Method             string                              `json:"method"`
-	ContractHash       string                              `json:"contract_hash"`
-	PolicyHash         string                              `json:"policy_hash"`
-	CapabilityHash     string                              `json:"capability_hash"`
-	SourceManifestRef  workflowstate.WorkflowEvidenceRef   `json:"source_manifest_ref"`
-	HistoryManifestRef workflowstate.WorkflowEvidenceRef   `json:"history_manifest_ref"`
-	PreparationRef     workflowstate.WorkflowEvidenceRef   `json:"preparation_ref"`
-	CapabilityRef      workflowstate.WorkflowEvidenceRef   `json:"capability_ref"`
-	ValidationRefs     []workflowstate.WorkflowEvidenceRef `json:"validation_refs"`
-	MergerAttemptRefs  []workflowstate.WorkflowEvidenceRef `json:"merger_attempt_refs,omitempty"`
-	Extensions         map[string]json.RawMessage          `json:"extensions,omitempty"`
+	SchemaVersion      int                         `json:"schema_version"`
+	EntryID            string                      `json:"entry_id"`
+	InvocationID       string                      `json:"invocation_id"`
+	Unit               workflowstate.Ref           `json:"unit"`
+	CanonicalPR        string                      `json:"canonical_pr"`
+	SourceRepository   string                      `json:"source_repository"`
+	SourceRef          string                      `json:"source_ref"`
+	TargetRef          string                      `json:"target_ref"`
+	ObjectFormat       string                      `json:"object_format"`
+	OriginalSource     string                      `json:"original_source"`
+	PublishedSource    string                      `json:"published_source"`
+	ValidatedBase      string                      `json:"validated_base"`
+	PreparedResult     string                      `json:"prepared_result"`
+	PreparedTree       string                      `json:"prepared_tree"`
+	Method             string                      `json:"method"`
+	ContractHash       string                      `json:"contract_hash"`
+	PolicyHash         string                      `json:"policy_hash"`
+	CapabilityHash     string                      `json:"capability_hash"`
+	SourceManifestRef  workflowstate.EvidenceRef   `json:"source_manifest_ref"`
+	HistoryManifestRef workflowstate.EvidenceRef   `json:"history_manifest_ref"`
+	PreparationRef     workflowstate.EvidenceRef   `json:"preparation_ref"`
+	CapabilityRef      workflowstate.EvidenceRef   `json:"capability_ref"`
+	ValidationRefs     []workflowstate.EvidenceRef `json:"validation_refs"`
+	MergerAttemptRefs  []workflowstate.EvidenceRef `json:"merger_attempt_refs,omitempty"`
+	Extensions         map[string]json.RawMessage  `json:"extensions,omitempty"`
 }
 
 // WorkflowNativeCandidate adds immutable authorization to the existing candidate.
@@ -54,17 +54,17 @@ type WorkflowNativeCandidate struct {
 // WorkflowNativeReceipt requires both transaction and original-PR observations.
 type WorkflowNativeReceipt struct {
 	WorkflowNativeRecordBinding
-	CandidateHash       string                              `json:"candidate_hash"`
-	Mechanism           string                              `json:"mechanism,omitempty"`
-	CandidateRef        workflowstate.WorkflowEvidenceRef   `json:"candidate_ref"`
-	TransactionProofRef workflowstate.WorkflowEvidenceRef   `json:"transaction_proof_ref"`
-	GitApplicationRef   *workflowstate.WorkflowEvidenceRef  `json:"git_application_ref,omitempty"`
-	ObservationRefs     []workflowstate.WorkflowEvidenceRef `json:"observation_refs"`
-	ActualMergeResult   string                              `json:"actual_merge_result"`
-	ObservationContract string                              `json:"observation_contract,omitempty"`
+	CandidateHash       string                      `json:"candidate_hash"`
+	Mechanism           string                      `json:"mechanism,omitempty"`
+	CandidateRef        workflowstate.EvidenceRef   `json:"candidate_ref"`
+	TransactionProofRef workflowstate.EvidenceRef   `json:"transaction_proof_ref"`
+	GitApplicationRef   *workflowstate.EvidenceRef  `json:"git_application_ref,omitempty"`
+	ObservationRefs     []workflowstate.EvidenceRef `json:"observation_refs"`
+	ActualMergeResult   string                      `json:"actual_merge_result"`
+	ObservationContract string                      `json:"observation_contract,omitempty"`
 }
 
-func validateWorkflowEvidenceRef(id string, ref workflowstate.WorkflowEvidenceRef) error {
+func validateWorkflowEvidenceRef(id string, ref workflowstate.EvidenceRef) error {
 	if !workflowstate.ValidRequestKey(id) || filepath.Base(id) != id || strings.ContainsAny(ref.Path, "\\\x00") || !filepath.IsLocal(ref.Path) || filepath.ToSlash(filepath.Clean(ref.Path)) != ref.Path || !validWorkflowNativeFingerprint(ref.Hash) {
 		return workflowstate.ErrConflict
 	}
@@ -77,8 +77,8 @@ func validateWorkflowEvidenceRef(id string, ref workflowstate.WorkflowEvidenceRe
 	return nil
 }
 
-func (b WorkflowNativeRecordBinding) evidenceRefs() []workflowstate.WorkflowEvidenceRef {
-	refs := []workflowstate.WorkflowEvidenceRef{b.SourceManifestRef, b.HistoryManifestRef, b.PreparationRef, b.CapabilityRef}
+func (b WorkflowNativeRecordBinding) evidenceRefs() []workflowstate.EvidenceRef {
+	refs := []workflowstate.EvidenceRef{b.SourceManifestRef, b.HistoryManifestRef, b.PreparationRef, b.CapabilityRef}
 	refs = append(refs, b.ValidationRefs...)
 
 	return append(refs, b.MergerAttemptRefs...)
@@ -245,7 +245,7 @@ func validateWorkflowNativeReceiptSchema(receipt WorkflowReceipt) error {
 		return workflowstate.ErrConflict
 	}
 
-	refs := append([]workflowstate.WorkflowEvidenceRef{native.CandidateRef, native.TransactionProofRef}, native.ObservationRefs...)
+	refs := append([]workflowstate.EvidenceRef{native.CandidateRef, native.TransactionProofRef}, native.ObservationRefs...)
 	if native.GitApplicationRef != nil {
 		refs = append(refs, *native.GitApplicationRef)
 	}

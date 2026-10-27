@@ -101,14 +101,14 @@ func (s *WorkflowStore) retainWorkflowNativeDispatchResponse(submission Workflow
 	return nil
 }
 
-func (s *WorkflowStore) writeWorkflowNativeDispatchEvidence(submission WorkflowSubmission, value any) (workflowstate.WorkflowEvidenceRef, error) {
+func (s *WorkflowStore) writeWorkflowNativeDispatchEvidence(submission WorkflowSubmission, value any) (workflowstate.EvidenceRef, error) {
 	data, err := json.Marshal(value)
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowstate.WorkflowEvidenceRef{}, workflowstate.ErrConflict
+		return workflowstate.EvidenceRef{}, workflowstate.ErrConflict
 	}
 
 	hash := contenthash.Sum(data)
-	ref := workflowstate.WorkflowEvidenceRef{Path: "run/" + submission.InvocationID + "/evidence/publication/" + submission.ID + "/" + hash + ".json", Hash: hash}
+	ref := workflowstate.EvidenceRef{Path: "run/" + submission.InvocationID + "/evidence/publication/" + submission.ID + "/" + hash + ".json", Hash: hash}
 
 	path, err := s.safePath(ref.Path)
 	if err != nil {

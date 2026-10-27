@@ -22,7 +22,7 @@ func validateWorkflowIntegrationEntry(entry WorkflowIntegrationEntry) error {
 		return workflowIntegrationConflict("has invalid phase or budget owner")
 	}
 
-	for _, ref := range []*workflowstate.WorkflowEvidenceRef{entry.CandidateRef, entry.ReceiptRef, entry.DecisionRef} {
+	for _, ref := range []*workflowstate.EvidenceRef{entry.CandidateRef, entry.ReceiptRef, entry.DecisionRef} {
 		if ref != nil {
 			if err := validateWorkflowEvidenceRef(entry.InvocationID, *ref); err != nil {
 				return err

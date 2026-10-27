@@ -7,8 +7,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) newWorkflowControlCommit(request workflowstate.WorkflowControlMutationRequest, digest string, check WorkflowAdmissionCheck) *workflowControlCommit {
-	result := workflowstate.WorkflowControlResult{RequestID: request.Binding.RequestID, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), PriorRevision: request.ExpectedRevision, Revision: request.ExpectedRevision + 1}
+func (s *WorkflowStore) newWorkflowControlCommit(request workflowstate.ControlMutationRequest, digest string, check WorkflowAdmissionCheck) *workflowControlCommit {
+	result := workflowstate.ControlResult{RequestID: request.Binding.RequestID, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), PriorRevision: request.ExpectedRevision, Revision: request.ExpectedRevision + 1}
 
 	return &workflowControlCommit{receipt: workflowControlReceipt{Schema: "chr-workflow-control/v1", State: "confirmed", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Operator: request.Binding.Operator, Result: result}, check: check}
 }

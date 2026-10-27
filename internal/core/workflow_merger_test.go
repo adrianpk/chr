@@ -37,7 +37,7 @@ func nativeMergerInput(t *testing.T) (*WorkflowStore, WorkflowMergerInput, time.
 	input.ValidationContractRef = retainNativeRecordEvidence(t, store, input.InvocationID, "merger-validation", input.ValidationCommands)
 	source := retainNativeRecordEvidence(t, store, input.InvocationID, "merger-intent", "Preserve source API behavior")
 	target := retainNativeRecordEvidence(t, store, input.InvocationID, "merger-target", "Preserve target validation")
-	input.IntentRefs, input.TargetChangeRefs = []workflowstate.WorkflowEvidenceRef{source}, []workflowstate.WorkflowEvidenceRef{target}
+	input.IntentRefs, input.TargetChangeRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}
 	input.Requirements = []WorkflowMergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
 	input.Conflicts = []WorkflowMergerConflict{{ID: "conflict-1", Path: "src/service.go", Kind: "text", Evidence: source, RequirementIDs: []string{"source-api", "target-validation"}}}
 

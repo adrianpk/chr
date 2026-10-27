@@ -10,7 +10,7 @@ import (
 
 // PlanWorkflowMergerRepair selects a source-owned semantic repair or requests
 // an explicit integration fix or ownership decision. It does not accept edits.
-func PlanWorkflowMergerRepair(ctx context.Context, directory string, input WorkflowMergerInput, proof WorkflowIntegrationProof, fix *workflowstate.AgenticReviewFinding) (WorkflowMergerRepairPlan, error) {
+func PlanWorkflowMergerRepair(ctx context.Context, directory string, input WorkflowMergerInput, proof WorkflowIntegrationProof, fix *workflowstate.ReviewFinding) (WorkflowMergerRepairPlan, error) {
 	plan := WorkflowMergerRepairPlan{InputHash: input.InputHash}
 	if validateWorkflowMergerInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof) != nil || !workflowMergerRepairIdentity(input, proof) {
 		return plan, workflowstate.ErrConflict
@@ -97,7 +97,7 @@ func workflowMergerOwnsConflict(conflicts []WorkflowMergerConflict, paths []stri
 	return matched
 }
 
-func workflowMergerSemanticPlan(plan WorkflowMergerRepairPlan, input WorkflowMergerInput, owners []string, fix *workflowstate.AgenticReviewFinding) (WorkflowMergerRepairPlan, error) {
+func workflowMergerSemanticPlan(plan WorkflowMergerRepairPlan, input WorkflowMergerInput, owners []string, fix *workflowstate.ReviewFinding) (WorkflowMergerRepairPlan, error) {
 	if answered, found, err := workflowMergerAnsweredPlan(plan, input, owners); found || err != nil {
 		return answered, err
 	}
