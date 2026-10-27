@@ -16,20 +16,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func splitWorkflowMarkdown(data []byte) (string, []byte, error) {
-	text := string(data)
-	if !strings.HasPrefix(text, "---\n") {
-		return "", nil, ErrNotWorkflow
-	}
-
-	end := strings.Index(text[4:], "\n---\n")
-	if end < 0 {
-		return "", nil, fmt.Errorf("incomplete workflow frontmatter")
-	}
-
-	return text[4 : end+4], data[end+9:], nil
-}
-
 func workflowMarkdownFields(front string) (map[string]json.RawMessage, error) {
 	fields := map[string]json.RawMessage{}
 
@@ -61,13 +47,15 @@ func (s *WorkflowStore) readMarkdown(relative, path string) (WorkflowRecord, err
 		return WorkflowRecord{}, err
 	}
 
-	front, body, err := splitWorkflowMarkdown(data)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(data)
+	front, body := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		return WorkflowRecord{}, err
 	}
 
 	if !strings.Contains("\n"+front, "\nworkflow_schema:") {
-		return WorkflowRecord{}, ErrNotWorkflow
+		return WorkflowRecord{}, workflowstate.ErrNotWorkflow
 	}
 
 	fields, err := workflowMarkdownFields(front)
@@ -76,7 +64,7 @@ func (s *WorkflowStore) readMarkdown(relative, path string) (WorkflowRecord, err
 	}
 
 	if _, ok := fields["workflow_schema"]; !ok {
-		return WorkflowRecord{}, ErrNotWorkflow
+		return WorkflowRecord{}, workflowstate.ErrNotWorkflow
 	}
 
 	r := WorkflowRecord{Kind: "ticket", Path: relative, Body: body, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: contenthash.Sum(data)}
@@ -197,7 +185,9 @@ func (s *WorkflowStore) prepareAdoption(relative string, task WorkflowTask, obse
 		return WorkflowRecord{}, workflowstate.ErrConflict
 	}
 
-	front, body, err := splitWorkflowMarkdown(data)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(data)
+	front, body := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		return WorkflowRecord{}, err
 	}

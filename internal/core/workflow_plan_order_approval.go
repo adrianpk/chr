@@ -154,7 +154,9 @@ func (s *WorkflowStore) validateOrderScope(binding generationcore.PlanRevisionBi
 		return err
 	}
 
-	front, _, err := splitWorkflowMarkdown(body)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(body)
+	front := parsedMarkdown.Front
+
 	if err != nil {
 		return err
 	}

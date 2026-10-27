@@ -86,7 +86,9 @@ func projectDumpBodyFields(body []byte) (map[string]string, error) {
 		return map[string]string{}, nil
 	}
 
-	front, _, err := splitWorkflowMarkdown(body)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(body)
+	front := parsedMarkdown.Front
+
 	if err != nil {
 		return nil, err
 	}

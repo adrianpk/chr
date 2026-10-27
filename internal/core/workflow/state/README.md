@@ -9,7 +9,7 @@ native owners and transport consumers. ValidRequestKey preserves workflow reques
 identity spelling. MutationReceiptPath derives the existing content-addressed
 receipt reference; the workflow store still owns containment, IO, locks,
 transactions and receipt verification. These pure values depend only on
-core/contenthash and the standard library. Root callers use this owner directly.
+core/contenthash, ops/metadata and the standard library. Root callers use this owner directly.
 
 FileChange owns the existing path, before hash and replacement bytes shared by
 authoring and workflow journals. It keeps the original JSON keys and field order;
@@ -20,3 +20,9 @@ values, guided control proof and hashed evidence references are shared retained
 values used by authoring and native workflow consumers. Their original field
 order and JSON tags remain intact. This owner adds no authority validation,
 coordinator, store, IO or policy; each native owner retains those decisions.
+
+RequireMarkdown owns the original native envelope-presence rule over the shared
+ops/metadata splitter. ErrNotWorkflow retains the original not-adopted-record
+identity/message; native schema recognition still belongs to its caller. Legacy
+authoring selects the optional splitter directly. The dependency is one-way:
+metadata cannot import workflow state or a coordinator.

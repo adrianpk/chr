@@ -8,6 +8,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
@@ -81,8 +82,8 @@ func boardTicketMetadata(ticket IndexedTicket, metadata map[string]string) Index
 
 func boardDescription(data []byte) string {
 	text := string(data)
-	if _, body, err := splitWorkflowMarkdown(data); err == nil {
-		text = string(body)
+	if parsed, err := workflowstate.RequireMarkdown(data); err == nil {
+		text = string(parsed.Body)
 	}
 
 	lines := []string{}

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
@@ -35,7 +36,9 @@ func ReadPlanDocument(ctx context.Context, projectDir, reference string) (PlanDo
 		return PlanDocument{}, os.ErrNotExist
 	}
 
-	front, body, err := splitSpecDocument(target.images[0].After)
+	parsedMarkdown, err := opsmetadata.SplitMarkdown(target.images[0].After)
+	front, body := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		return PlanDocument{}, err
 	}

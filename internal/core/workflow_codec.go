@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func readWorkflowEnvelope(path string) (WorkflowRecord, error) {
@@ -24,7 +25,7 @@ func readWorkflowEnvelope(path string) (WorkflowRecord, error) {
 	}
 
 	if _, ok := r.Metadata["type"]; !ok {
-		return WorkflowRecord{}, ErrNotWorkflow
+		return WorkflowRecord{}, workflowstate.ErrNotWorkflow
 	}
 
 	if err := json.Unmarshal(data, &r.WorkflowIdentity); err != nil {
@@ -56,7 +57,7 @@ func (s *WorkflowStore) readRecord(relative string) (WorkflowRecord, error) {
 	}
 
 	if _, ok := r.Metadata["workflow"]; !ok {
-		return WorkflowRecord{}, ErrNotWorkflow
+		return WorkflowRecord{}, workflowstate.ErrNotWorkflow
 	}
 
 	var schema string

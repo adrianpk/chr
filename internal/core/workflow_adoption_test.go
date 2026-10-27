@@ -15,6 +15,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowPlanAdoptionFixture(t *testing.T) (*WorkflowStore, WorkflowPlanAdoptionOptions) {
@@ -53,7 +54,9 @@ func workflowPlanAdoptionFixture(t *testing.T) (*WorkflowStore, WorkflowPlanAdop
 				t.Fatal(err)
 			}
 
-			_, original, err := splitWorkflowMarkdown(data)
+			parsedMarkdown, err := workflowstate.RequireMarkdown(data)
+			original := parsedMarkdown.Body
+
 			if err != nil {
 				t.Fatal(err)
 			}

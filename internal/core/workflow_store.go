@@ -13,9 +13,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ErrNotWorkflow excludes unadopted documents from executable state.
-var ErrNotWorkflow = errors.New("document is not an adopted workflow record")
-
 // WorkflowStore owns guarded filesystem records; SQLite is never its authority.
 type WorkflowStore struct {
 	afterReplace        func(int) error
@@ -191,7 +188,7 @@ func (s *WorkflowStore) guardWrite(r *WorkflowRecord, expected uint64) error {
 	}
 
 	old, err := s.readRecord(r.Path)
-	if expected == 0 && (errors.Is(err, fs.ErrNotExist) || errors.Is(err, ErrNotWorkflow)) {
+	if expected == 0 && (errors.Is(err, fs.ErrNotExist) || errors.Is(err, workflowstate.ErrNotWorkflow)) {
 		r.Revision = 1
 
 		return r.Validate()
@@ -310,7 +307,7 @@ func (s *WorkflowStore) appendSnapshotRecord(snapshot *WorkflowSnapshot, path st
 	}
 
 	r, err := s.readRecord(filepath.ToSlash(relative))
-	if errors.Is(err, ErrNotWorkflow) {
+	if errors.Is(err, workflowstate.ErrNotWorkflow) {
 		return nil
 	}
 

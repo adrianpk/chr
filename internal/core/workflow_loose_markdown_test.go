@@ -57,7 +57,9 @@ func workflowLooseMarkdown(t *testing.T, store *WorkflowStore) WorkflowRecord {
 
 	record := workflowTestTask("PRJ-1")
 
-	front, body, err := splitWorkflowMarkdown(workflowLooseBody(record.Task.Key, "high"))
+	parsedMarkdown, err := workflowstate.RequireMarkdown(workflowLooseBody(record.Task.Key, "high"))
+	front, body := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -322,11 +322,6 @@
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 qualifies the same layout type through its shared ops owner; no allowance growth."
     },
     {
-      "id": "internal/core/spec_document.go::splitSpecDocument",
-      "signature": "func(content []byte) (string, []byte, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/spec_generation_publication.go::prepareGeneratedSpecDocument",
       "signature": "func(projectDir string, paths GeneratedSpecPaths, document SpecDocument, spec GeneratedSpec, content string) (SpecDocument, string, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -784,11 +779,6 @@
     {
       "id": "internal/core/workflow_manual_reuse.go::WorkflowStore.reuseWorkflowManualResult",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, candidate WorkflowManualCandidate) (result WorkflowTaskResult, found bool, err error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow_markdown.go::splitWorkflowMarkdown",
-      "signature": "func(data []byte) (string, []byte, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

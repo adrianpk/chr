@@ -91,7 +91,9 @@ func readLegacyTicketFile(path string) ([]byte, error) {
 		return nil, err
 	}
 
-	front, _, err := splitWorkflowMarkdown(content)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(content)
+	front := parsedMarkdown.Front
+
 	if err == nil && strings.Contains("\n"+front, "\nworkflow_schema:") {
 		return nil, ErrWorkflowAuthority
 	}

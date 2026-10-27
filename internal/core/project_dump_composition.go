@@ -44,7 +44,9 @@ func (r *fileAuthoringSessionRepository) composeProjectDumps(sources []ProjectDu
 		}
 
 		if bytes.HasPrefix(body, []byte("---\n")) {
-			front, content, err := splitWorkflowMarkdown(body)
+			parsedMarkdown, err := workflowstate.RequireMarkdown(body)
+			front, content := parsedMarkdown.Front, parsedMarkdown.Body
+
 			if err != nil {
 				return nil, err
 			}

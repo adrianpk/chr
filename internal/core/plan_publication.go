@@ -223,7 +223,9 @@ func validatePlanTargetMetadata(metadata map[string]any, reference string) error
 }
 
 func validatePlanTargetScope(target planTargetObservation, scope quizcore.Scope) error {
-	front, _, err := splitWorkflowMarkdown(target.images[0].After)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(target.images[0].After)
+	front := parsedMarkdown.Front
+
 	if err != nil {
 		return err
 	}

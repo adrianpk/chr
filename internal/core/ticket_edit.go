@@ -266,7 +266,9 @@ func prepareNativeTicketEdit(document TicketDocument, request TicketEditRequest,
 }
 
 func setNativeTicketBody(record *WorkflowRecord, document TicketDocument, request TicketEditRequest, content string) error {
-	front, body, err := splitWorkflowMarkdown([]byte(content))
+	parsedMarkdown, err := workflowstate.RequireMarkdown([]byte(content))
+	front, body := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		return err
 	}

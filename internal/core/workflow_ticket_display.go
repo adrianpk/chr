@@ -6,12 +6,13 @@ import (
 	"strings"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // UpdateWorkflowTicketDisplay prepares native display fields without changing execution state.
 func UpdateWorkflowTicketDisplay(record WorkflowRecord, title, synopsis *string) (WorkflowRecord, error) {
 	if record.Task == nil {
-		return record, ErrNotWorkflow
+		return record, workflowstate.ErrNotWorkflow
 	}
 
 	fields := map[string]string{}

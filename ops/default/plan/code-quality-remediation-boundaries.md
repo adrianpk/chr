@@ -35,7 +35,7 @@ are omitted here; tests do not define production ownership.
 | core/quiz/openai | core/quiz/model, harness |
 | core/telegram | core/authoring/state, core/contenthash, core/database, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace |
 | core/telegram/message | core/contenthash, core/ops/namespace |
-| core/workflow/state | core/contenthash |
+| core/workflow/state | core/contenthash, core/ops/metadata |
 | core/workspace | none |
 | harness | none |
 | harness/codex | harness, harness/process |
@@ -109,7 +109,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-772 current non-test files under internal/core, their declared symbols,
+774 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage

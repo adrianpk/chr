@@ -90,7 +90,7 @@ func (s *WorkflowStore) appendWorkflowOrderTask(snapshot *WorkflowSnapshot, path
 	}
 
 	record, err := s.readRecord(filepath.ToSlash(reference))
-	if errors.Is(err, ErrNotWorkflow) {
+	if errors.Is(err, workflowstate.ErrNotWorkflow) {
 		return nil
 	}
 

@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -88,7 +89,9 @@ func decodeSpecDocument(document *SpecDocument) error {
 		return err
 	}
 
-	front, body, err := splitSpecDocument(document.images[0].After)
+	parsedMarkdown, err := opsmetadata.SplitMarkdown(document.images[0].After)
+	front, body := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		return err
 	}
@@ -124,14 +127,6 @@ func decodeSpecDocument(document *SpecDocument) error {
 	}
 
 	return nil
-}
-
-func splitSpecDocument(content []byte) (string, []byte, error) {
-	if !strings.HasPrefix(string(content), "---\n") {
-		return "", content, nil
-	}
-
-	return splitWorkflowMarkdown(content)
 }
 
 func separateSpecProvenance(document *SpecDocument) {

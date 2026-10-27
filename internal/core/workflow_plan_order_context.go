@@ -103,7 +103,7 @@ func (s *WorkflowStore) repairRequiredOrderImages(snapshot WorkflowSnapshot, sou
 
 func (s *WorkflowStore) retainedOrderRegistration(setID string) (WorkflowTrackerStatus, bool, error) {
 	set, err := s.readWorkflowOrderSet(setID)
-	if errors.Is(err, os.ErrNotExist) || errors.Is(err, ErrNotWorkflow) {
+	if errors.Is(err, os.ErrNotExist) || errors.Is(err, workflowstate.ErrNotWorkflow) {
 		return WorkflowTrackerStatus{}, false, nil
 	}
 

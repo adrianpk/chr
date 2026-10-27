@@ -115,7 +115,9 @@ func (s *WorkflowStore) prepareLegacyWorkflowTicket(selection WorkflowAdoptionTa
 		return WorkflowRecord{}, err
 	}
 
-	front, original, err := splitWorkflowMarkdown(data)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(data)
+	front, original := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		return WorkflowRecord{}, err
 	}
@@ -230,8 +232,10 @@ func (s *WorkflowStore) checkLegacyWorkflowKey(path string, owners map[string]st
 		return err
 	}
 
-	front, _, err := splitWorkflowMarkdown(data)
-	if errors.Is(err, ErrNotWorkflow) {
+	parsedMarkdown, err := workflowstate.RequireMarkdown(data)
+	front := parsedMarkdown.Front
+
+	if errors.Is(err, workflowstate.ErrNotWorkflow) {
 		return nil
 	}
 
@@ -320,8 +324,10 @@ func validateLegacyWorkflowPlanState(metadata map[string]json.RawMessage, body [
 		return err
 	}
 
-	front, _, err := splitWorkflowMarkdown(body)
-	if errors.Is(err, ErrNotWorkflow) {
+	parsedMarkdown, err := workflowstate.RequireMarkdown(body)
+	front := parsedMarkdown.Front
+
+	if errors.Is(err, workflowstate.ErrNotWorkflow) {
 		return nil
 	}
 

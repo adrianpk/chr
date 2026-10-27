@@ -86,7 +86,9 @@ func loadTicketDocument(ticket IndexedTicket) (TicketDocument, error) {
 
 	document := TicketDocument{Ticket: ticket, content: content, Revision: contenthash.Sum(content), Fields: map[string]string{}, ReadOnly: map[string]string{}}
 
-	_, body, splitErr := splitWorkflowMarkdown(content)
+	parsedMarkdown, splitErr := workflowstate.RequireMarkdown(content)
+	body := parsedMarkdown.Body
+
 	if splitErr != nil {
 		if !ticket.NativeWorkflow {
 			document.ReadOnlyReason = splitErr.Error()

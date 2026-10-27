@@ -107,7 +107,7 @@ func TestWorkflowAdoption(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := s.Read(ctx, relative); !errors.Is(err, ErrNotWorkflow) {
+	if _, err := s.Read(ctx, relative); !errors.Is(err, workflowstate.ErrNotWorkflow) {
 		t.Fatalf("unadopted document became executable: %v", err)
 	}
 

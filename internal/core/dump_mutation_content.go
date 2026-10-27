@@ -100,7 +100,9 @@ func dumpSavedBody(before, content []byte) ([]byte, error) {
 		return body, nil
 	}
 
-	front, _, err := splitWorkflowMarkdown(before)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(before)
+	front := parsedMarkdown.Front
+
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +115,8 @@ func dumpEditableBody(content []byte) ([]byte, error) {
 		return content, nil
 	}
 
-	_, body, err := splitWorkflowMarkdown(content)
+	parsedMarkdown, err := workflowstate.RequireMarkdown(content)
+	body := parsedMarkdown.Body
 
 	return body, err
 }

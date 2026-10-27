@@ -121,7 +121,9 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 		document.metadata = opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "spec", Title: spec.Title, Producer: "chr"}, parts[3], spec.CreatedAt)
 	}
 
-	front, body, err := splitWorkflowMarkdown([]byte(content))
+	parsedMarkdown, err := workflowstate.RequireMarkdown([]byte(content))
+	front, body := parsedMarkdown.Front, parsedMarkdown.Body
+
 	if err != nil {
 		return document, action, err
 	}
