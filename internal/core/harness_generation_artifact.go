@@ -12,11 +12,12 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
 func harnessGenerationOperationPath(project, id string) (string, error) {
-	return workflowUpgradePath(project, filepath.Join("tmp", "agent-runs", "operations", contenthash.Sum([]byte(id))+".json"))
+	return workspacecore.WorkflowUpgradePath(project, filepath.Join("tmp", "agent-runs", "operations", contenthash.Sum([]byte(id))+".json"))
 }
 
 func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerationOperation, error) {

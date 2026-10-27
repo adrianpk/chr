@@ -1,4 +1,4 @@
-package core
+package workspace
 
 import (
 	"context"
@@ -10,10 +10,11 @@ import (
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
+// WithWorkspaceConfigLock preserves the existing guarded configuration filesystem contract.
 // Configuration mutations share this owner lock, including legacy upgrades.
 // Readers observe a complete old or new image at the atomic config rename.
-func withWorkspaceConfigLock(ctx context.Context, project string, action func() error) (err error) {
-	path, err := workflowUpgradePath(project, "tmp/config.lock")
+func WithWorkspaceConfigLock(ctx context.Context, project string, action func() error) (err error) {
+	path, err := WorkflowUpgradePath(project, "tmp/config.lock")
 	if err != nil {
 		return err
 	}

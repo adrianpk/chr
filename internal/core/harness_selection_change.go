@@ -11,6 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ErrHarnessSelectionPreparation identifies a rejected candidate before any
@@ -80,7 +81,7 @@ func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSe
 		return result, err
 	}
 
-	err = withWorkspaceConfigLock(ctx, project, func() error {
+	err = workspacecore.WithWorkspaceConfigLock(ctx, project, func() error {
 		if err := opts.Authorize(ctx); err != nil {
 			return err
 		}

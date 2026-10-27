@@ -8,6 +8,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // WorkflowUpgradeOptions explicitly selects a project policy and, optionally,
@@ -49,7 +50,7 @@ func (s *WorkflowStore) UpgradeWorkflowConfiguration(ctx context.Context, opts W
 	defer func() { err = errors.Join(err, releaseWorkflowAdoptionLocks(locks)) }()
 
 	err = s.withLock(ctx, func() (err error) {
-		return withWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
+		return workspacecore.WithWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
 			if err := requireNoHarnessSelectionChange(s.layout.ProjectDir()); err != nil {
 				return err
 			}

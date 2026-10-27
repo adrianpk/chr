@@ -71,6 +71,13 @@ The baseline prepareWorkflowHarness result was already a conforming typed
 WorkflowHarnessResolution from an earlier approved prerequisite; current direct
 binding/launch consumers and native regressions confirm that disposition.
 
+The original configuration path guard and config.lock owner are shared workspace
+filesystem operations. Native upgrade, selection changes and generation admission
+call that owner directly, preserving path checks, permissions, locking order,
+callback timing and joined unlock/close errors. Three exact function preimages
+are recorded. Workspace dependency guards admit only the concrete file owner;
+coordinator imports remain rejected.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -160,6 +167,12 @@ Selection and invocation checks passed:
 - `go test ./internal/core -run '^TestNewHarnessInvocation' -count=1 -timeout=3m`
 - `make check-go-style`: 9303 declarations, ceiling seven, 208 debts, one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
+
+Shared configuration filesystem checks passed:
+
+- `go test ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality -run '^Test(WorkflowUpgrade|WorkspaceConfig|HarnessSelection|HarnessGeneration|HarnessBinding|QualityRecordWire|ServiceHarness|Leaf|Dependency)' -count=1 -timeout=3m`
+- `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
 ## Risks and Follow-ups
 

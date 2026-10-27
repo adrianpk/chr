@@ -51,6 +51,8 @@ func leafDependencyCases() []leafDependencyCase {
 		{"state coordinator", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"shared values", "internal/core/notify/store.go", "package notify\nimport db \"" + coreImportPath + "database\"\n", false},
 		{"shared model", "internal/core/model/value.go", "package value\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"workspace file locking", "internal/core/workspace/config_lock.go", "package workspace\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
+		{"workspace coordinator", "internal/core/workspace/config_lock.go", "package workspace\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"shared authoring/state", "internal/core/authoring/state/value.go", "package value\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"shared workspace", "internal/core/workspace/value.go", "package value\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"root", "internal/core/notify/store.go", "package notify\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},

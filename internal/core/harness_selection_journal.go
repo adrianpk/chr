@@ -12,6 +12,7 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
@@ -31,7 +32,7 @@ type harnessSelectionJournal struct {
 }
 
 func readHarnessSelectionConfig(project string) ([]byte, error) {
-	path, err := workflowUpgradePath(project, "config.yml")
+	path, err := workspacecore.WorkflowUpgradePath(project, "config.yml")
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +59,7 @@ func requireNoHarnessSelectionChange(project string) error {
 }
 
 func readHarnessSelectionFile(project, relative string) ([]byte, error) {
-	path, err := workflowUpgradePath(project, relative)
+	path, err := workspacecore.WorkflowUpgradePath(project, relative)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func writeHarnessSelectionJournal(project string, journal harnessSelectionJourna
 }
 
 func writeHarnessSelectionFile(project, relative string, journal harnessSelectionJournal) error {
-	path, err := workflowUpgradePath(project, relative)
+	path, err := workspacecore.WorkflowUpgradePath(project, relative)
 	if err != nil {
 		return err
 	}
@@ -232,7 +233,7 @@ func publishRetainedHarnessSelectionImage(project string, current []byte, journa
 		return workflowstate.ErrConflict
 	}
 
-	path, err := workflowUpgradePath(project, "config.yml")
+	path, err := workspacecore.WorkflowUpgradePath(project, "config.yml")
 	if err != nil {
 		return err
 	}
@@ -245,7 +246,7 @@ func finishHarnessSelectionReceipt(project string, journal harnessSelectionJourn
 		return err
 	}
 
-	path, err := workflowUpgradePath(project, harnessSelectionPending)
+	path, err := workspacecore.WorkflowUpgradePath(project, harnessSelectionPending)
 	if err != nil {
 		return err
 	}
@@ -282,7 +283,7 @@ func retainHarnessSelectionReceipt(project string, journal harnessSelectionJourn
 }
 
 func checkHarnessSelectionReceiptCapacity(project string) error {
-	path, err := workflowUpgradePath(project, filepath.Join("harness-selection-receipts", ".capacity"))
+	path, err := workspacecore.WorkflowUpgradePath(project, filepath.Join("harness-selection-receipts", ".capacity"))
 	if err != nil {
 		return err
 	}

@@ -12,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type workflowUpgradeJournal struct {
@@ -342,7 +343,7 @@ func (s *WorkflowStore) writeWorkflowUpgradeSnapshot(journal workflowUpgradeJour
 }
 
 func (s *WorkflowStore) finishWorkflowUpgrade(journal workflowUpgradeJournal, image []byte) error {
-	path, err := workflowUpgradePath(s.layout.ProjectDir(), "config.yml")
+	path, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), "config.yml")
 	if err != nil {
 		return err
 	}
@@ -368,7 +369,7 @@ func (s *WorkflowStore) finishWorkflowUpgrade(journal workflowUpgradeJournal, im
 }
 
 func (s *WorkflowStore) removeWorkflowUpgradePending() error {
-	pending, err := workflowUpgradePath(s.layout.ProjectDir(), workflowUpgradePending)
+	pending, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), workflowUpgradePending)
 	if err != nil {
 		return err
 	}
@@ -381,7 +382,7 @@ func (s *WorkflowStore) removeWorkflowUpgradePending() error {
 }
 
 func (s *WorkflowStore) readWorkflowUpgradeFile(relative string) ([]byte, error) {
-	path, err := workflowUpgradePath(s.layout.ProjectDir(), relative)
+	path, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), relative)
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +391,7 @@ func (s *WorkflowStore) readWorkflowUpgradeFile(relative string) ([]byte, error)
 }
 
 func (s *WorkflowStore) writeWorkflowUpgradeFile(relative string, value workflowUpgradeJournal) error {
-	path, err := workflowUpgradePath(s.layout.ProjectDir(), relative)
+	path, err := workspacecore.WorkflowUpgradePath(s.layout.ProjectDir(), relative)
 	if err != nil {
 		return err
 	}

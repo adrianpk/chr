@@ -12,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // WorkflowStartRequest supplies host-only inputs around the retained admission request.
@@ -196,7 +197,7 @@ func (s *WorkflowStore) StartWorkflowGuarded(ctx context.Context, request Workfl
 	}
 
 	err = s.withLock(ctx, func() error {
-		return withWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
+		return workspacecore.WithWorkspaceConfigLock(ctx, s.layout.ProjectDir(), func() error {
 			policy, resolveErr := s.resolveWorkflowExecutionPolicy(ctx, request.RequestKey, requestedPolicy, request.IncludeLaterTickets)
 			if resolveErr != nil {
 				return resolveErr

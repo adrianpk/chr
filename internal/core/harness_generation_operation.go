@@ -10,6 +10,7 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -108,7 +109,7 @@ func FreezeHarnessGeneration(ctx context.Context, input HarnessGenerationFreezeI
 
 	input.Project = root
 
-	err = withWorkspaceConfigLock(ctx, root, func() error {
+	err = workspacecore.WithWorkspaceConfigLock(ctx, root, func() error {
 		var err error
 
 		operation, err = freezeHarnessGenerationLocked(ctx, input, resolve, location)
@@ -135,7 +136,7 @@ func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationF
 		return prepareHarnessGenerationOperation(ctx, input, resolve, location)
 	}
 
-	err = withWorkspaceConfigLock(ctx, location.ConfigDir, func() error {
+	err = workspacecore.WithWorkspaceConfigLock(ctx, location.ConfigDir, func() error {
 		var prepareErr error
 
 		operation, prepareErr = prepareHarnessGenerationOperation(ctx, input, resolve, location)
