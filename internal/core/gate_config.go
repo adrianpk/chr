@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/configvalue"
 )
 
 // GateTraceabilityMode defines a package boundary type.
@@ -59,9 +61,8 @@ func DefaultGateConfig() GateConfig {
 }
 
 // LoadGateConfig loads the corresponding package data.
-func LoadGateConfig(projectDir string) (GateConfig, error) {
+func LoadGateConfig(path string) (GateConfig, error) {
 	config := DefaultGateConfig()
-	path := UserPath(projectDir, "config", "gates.yml")
 
 	file, err := os.Open(path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -127,7 +128,7 @@ func parseGateConfigLine(rawLine, section, listKey string) (string, string, stri
 	}
 
 	if strings.HasPrefix(line, "- ") {
-		return "", configStringValue(strings.TrimPrefix(line, "- ")), section, listKey, true
+		return "", configvalue.String(strings.TrimPrefix(line, "- ")), section, listKey, true
 	}
 
 	key, value, ok := strings.Cut(line, ":")
@@ -136,7 +137,7 @@ func parseGateConfigLine(rawLine, section, listKey string) (string, string, stri
 	}
 
 	key = strings.TrimSpace(key)
-	value = configStringValue(value)
+	value = configvalue.String(value)
 
 	return key, value, section, "", true
 }
@@ -175,7 +176,7 @@ func setGateConfigValue(config *GateConfig, section, listKey, key, value string)
 
 func setGateDevMainConfigValue(config *GateDevMainConfig, key, value string) {
 	if key == "validation_command" {
-		setString(&config.ValidationCommand, value)
+		configvalue.SetString(&config.ValidationCommand, value)
 	}
 }
 
@@ -186,17 +187,17 @@ func setGateTraceabilityConfigValue(config *GateTraceabilityConfig, key, value s
 			config.Mode = GateTraceabilityMode(value)
 		}
 	case "fail_on_missing_agent_evidence":
-		config.FailOnMissingAgentEvidence = configBoolValue(value)
+		config.FailOnMissingAgentEvidence = configvalue.Bool(value)
 	case "warn_on_manual_changes":
-		config.WarnOnManualChanges = configBoolValue(value)
+		config.WarnOnManualChanges = configvalue.Bool(value)
 	}
 }
 
 func setGateManualChangesConfigValue(config *GateManualChangesConfig, key, value string) {
 	switch key {
 	case "list":
-		config.List = configBoolValue(value)
+		config.List = configvalue.Bool(value)
 	case "warn_on_high_risk_paths":
-		config.WarnOnHighRiskPaths = configBoolValue(value)
+		config.WarnOnHighRiskPaths = configvalue.Bool(value)
 	}
 }

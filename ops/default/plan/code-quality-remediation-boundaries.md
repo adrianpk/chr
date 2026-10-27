@@ -137,3 +137,23 @@ The existing daemonWorkflowRunner owns iteration resources, and adapter-specific
 Web dispatch results remain in the Web adapter. Gate report metadata and
 notification event identity are cohesive values at their current owners, ready
 for their recorded Slice 6 capability moves.
+
+## Slice 6 leaf prerequisites
+
+Gate classification consumes loaded execution report identities, changed paths and
+load diagnostics through its own report-source port. ReportLister implements the
+storage mapping. Application composition owns ops artifact allocation/metadata and
+supplies the explicit gate configuration file path. Gate retains validation, Git
+evidence, classification and report encoding; it will not import root core.
+
+Configuration literal interpretation has real gate and workspace consumers. The
+existing string, boolean and non-empty assignment functions move unchanged into
+core/configvalue, with one owner and no policy or IO. Root configuration keys
+remain with their current owner. Gate's gitOutput has no free-function callers
+outside gate: workflowProofReader.gitOutput is a distinct method, so the gate
+implementation remains local and no shared Git package is introduced.
+
+The project_dump prefix does not establish project-registry ownership. Its actual
+receivers are fileAuthoringSessionRepository and its writes use authoring locks,
+journals and receipts. These boundaries stay atomic during the project extraction;
+T6.3 will record the exact dependency-backed owner rather than copy storage code.

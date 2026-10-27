@@ -15,7 +15,7 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 
 	createdAt := time.Date(2026, 6, 1, 12, 30, 45, 0, time.UTC)
 
-	artifacts, err := NewGateReportArtifacts(projectDir, createdAt)
+	artifacts, err := newGateTestArtifacts(projectDir, createdAt)
 	if err != nil {
 		t.Fatalf("NewGateReportArtifacts returned error: %v", err)
 	}
@@ -72,7 +72,7 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 
 	createdAt := time.Date(2026, 6, 1, 12, 30, 45, 0, time.UTC)
 
-	artifacts, err := NewGateReportArtifacts(projectDir, createdAt)
+	artifacts, err := newGateTestArtifacts(projectDir, createdAt)
 	if err != nil {
 		t.Fatalf("NewGateReportArtifacts returned error: %v", err)
 	}
@@ -186,4 +186,8 @@ func TestNewFailedGateReportRecordsRefsAndFailures(t *testing.T) {
 	if len(report.Failures) != 1 {
 		t.Fatalf("Failures = %#v, want one failure", report.Failures)
 	}
+}
+
+func newGateTestArtifacts(projectDir string, createdAt time.Time) (GateReportArtifacts, error) {
+	return GateReportArtifacts{JSONPath: filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-"+createdAt.UTC().Format("2006-01-02-15-04-05z"), "evidence", "gate-report.json"), MarkdownPath: filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-"+createdAt.UTC().Format("2006-01-02-15-04-05z"), "artifact.md")}, nil
 }

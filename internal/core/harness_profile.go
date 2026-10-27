@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/configvalue"
 )
 
 const harnessProfilesLimit = 65_536
@@ -124,7 +126,7 @@ func applyHarnessSelection(config *WorkspaceConfig, values map[string]string) er
 			continue
 		}
 
-		value = configStringValue(value)
+		value = configvalue.String(value)
 
 		if !validHarnessProfileName(value) {
 			return errors.New("harness selection requires a named profile or null")

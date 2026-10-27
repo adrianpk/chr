@@ -157,17 +157,6 @@ func collectGateGitRange(
 	return mergeBase, parseGateGitCommits(commitsOutput), parseGateGitChangedFiles(filesOutput), diffStat, nil
 }
 
-func gitOutput(ctx context.Context, projectDir string, args ...string) (string, error) {
-	cmd := exec.CommandContext(ctx, "git", append([]string{"-C", projectDir}, args...)...)
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", fmt.Errorf("%s: %s", strings.Join(cmd.Args, " "), strings.TrimSpace(string(output)))
-	}
-
-	return strings.TrimSpace(string(output)), nil
-}
-
 func parseGateGitCommits(output string) []GateGitCommit {
 	commits := []GateGitCommit{}
 
@@ -227,4 +216,15 @@ func gateNonEmptyLines(output string) []string {
 	}
 
 	return lines
+}
+
+func gitOutput(ctx context.Context, projectDir string, args ...string) (string, error) {
+	cmd := exec.CommandContext(ctx, "git", append([]string{"-C", projectDir}, args...)...)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("%s: %s", strings.Join(cmd.Args, " "), strings.TrimSpace(string(output)))
+	}
+
+	return strings.TrimSpace(string(output)), nil
 }

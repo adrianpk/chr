@@ -10,7 +10,7 @@ import (
 
 // GateEvidenceClassifier describes a package boundary value.
 type GateEvidenceClassifier struct {
-	ReportLister ReportLister
+	LoadReports func(context.Context, string) ([]GateExecutionReport, error)
 }
 
 // GateEvidenceClassificationRequest describes a package boundary value.
@@ -62,14 +62,18 @@ type gateExecutionEvidence struct {
 	ticketKey   string
 	executionID string
 	reportPath  string
-	changedFile ExecutionResultChangedFile
 }
 
 // NewGateEvidenceClassifier constructs the corresponding package service or value.
-func NewGateEvidenceClassifier() GateEvidenceClassifier {
-	return GateEvidenceClassifier{
-		ReportLister: NewReportLister(),
-	}
+func NewGateEvidenceClassifier(loadReports func(context.Context, string) ([]GateExecutionReport, error)) GateEvidenceClassifier {
+	return GateEvidenceClassifier{LoadReports: loadReports}
+}
+
+// GateExecutionReport contains the report identity and the loaded result paths or diagnostic.
+type GateExecutionReport struct {
+	TicketKey, ExecutionID, RelativePath string
+	ChangedPaths                         []string
+	FailureReason                        string
 }
 
 // Classify executes the corresponding package operation.
@@ -82,9 +86,7 @@ func (c GateEvidenceClassifier) Classify(
 		return GateEvidenceClassification{}, fmt.Errorf("project directory is required")
 	}
 
-	reports, err := c.ReportLister.ListProjectReports(ctx, projectDir, ReportListFilter{
-		Kind: ReportKindExecution,
-	})
+	reports, err := c.LoadReports(ctx, projectDir)
 	if err != nil {
 		return GateEvidenceClassification{}, err
 	}
@@ -159,33 +161,24 @@ func gatePathMatchesPattern(filePath, pattern string) bool {
 }
 
 func collectGateExecutionEvidence(
-	reports []ReportListEntry,
+	reports []GateExecutionReport,
 ) (map[string]gateExecutionEvidence, []GateMissingAgentEvidence) {
 	evidenceByPath := map[string]gateExecutionEvidence{}
 	missingEvidence := []GateMissingAgentEvidence{}
 
 	for _, report := range reports {
-		resultPath := strings.TrimSpace(report.ResultPath)
-		if resultPath == "" {
-			missingEvidence = append(missingEvidence, gateMissingEvidence(report, "execution result path is missing"))
+		if report.FailureReason != "" {
+			missingEvidence = append(missingEvidence, gateMissingEvidence(report, report.FailureReason))
 
 			continue
 		}
 
-		result, err := LoadExecutionResult(resultPath)
-		if err != nil {
-			missingEvidence = append(missingEvidence, gateMissingEvidence(report, err.Error()))
-
-			continue
-		}
-
-		for _, changedFile := range result.ChangedFiles {
-			path := filepath.ToSlash(changedFile.Path)
+		for _, changedPath := range report.ChangedPaths {
+			path := filepath.ToSlash(changedPath)
 			evidenceByPath[path] = gateExecutionEvidence{
 				ticketKey:   report.TicketKey,
 				executionID: report.ExecutionID,
 				reportPath:  report.RelativePath,
-				changedFile: changedFile,
 			}
 		}
 	}
@@ -193,7 +186,7 @@ func collectGateExecutionEvidence(
 	return evidenceByPath, missingEvidence
 }
 
-func gateMissingEvidence(report ReportListEntry, reason string) GateMissingAgentEvidence {
+func gateMissingEvidence(report GateExecutionReport, reason string) GateMissingAgentEvidence {
 	return GateMissingAgentEvidence{
 		TicketKey:   report.TicketKey,
 		ExecutionID: report.ExecutionID,

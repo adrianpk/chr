@@ -160,12 +160,12 @@ func printGateWoodpeckerInitResult(stdout io.Writer, result core.GateWoodpeckerI
 func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir, baseRef, headRef string) error {
 	createdAt := time.Now().UTC()
 
-	artifacts, err := core.NewGateReportArtifacts(projectDir, createdAt)
+	artifacts, err := newGateReportArtifacts(projectDir, createdAt)
 	if err != nil {
 		return err
 	}
 
-	config, err := core.LoadGateConfig(projectDir)
+	config, err := core.LoadGateConfig(core.UserPath(projectDir, "config", "gates.yml"))
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return writeGateFailedValidationRunReport(ctx, gateReportSource{CreatedAt: createdAt, Artifacts: artifacts}, evidence, validation, err)
 	}
 
-	classification, err := core.NewGateEvidenceClassifier().Classify(ctx, core.GateEvidenceClassificationRequest{
+	classification, err := core.NewGateEvidenceClassifier(core.NewReportLister().ListGateExecutionReports).Classify(ctx, core.GateEvidenceClassificationRequest{
 		ProjectDir:    projectDir,
 		Files:         evidence.Files,
 		HighRiskPaths: config.DevMain.HighRiskPaths,
@@ -302,17 +302,21 @@ func writeGateFailedValidationRunReport(ctx context.Context, source gateReportSo
 func writeGateReports(ctx context.Context, report core.GateReport) error {
 	writer := core.NewGateReportWriter()
 
-	_, err := writer.WriteJSON(ctx, report)
+	jsonPath, err := writer.WriteJSON(ctx, report)
 	if err != nil {
 		return err
 	}
 
-	_, err = writer.WriteMarkdown(ctx, report)
+	if err := refreshGateReportArtifactMetadata(jsonPath); err != nil {
+		return err
+	}
+
+	markdownPath, err := writer.WriteMarkdown(ctx, report)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return refreshGateReportArtifactMetadata(markdownPath)
 }
 
 func printGateDevMainReport(stdout io.Writer, report core.GateReport) error {

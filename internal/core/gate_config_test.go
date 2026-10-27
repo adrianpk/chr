@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoadGateConfigUsesDefaultsWhenMissing(t *testing.T) {
-	config, err := LoadGateConfig(t.TempDir())
+	config, err := LoadGateConfig(filepath.Join(t.TempDir(), "gates.yml"))
 	if err != nil {
 		t.Fatalf("LoadGateConfig returned error: %v", err)
 	}
@@ -35,7 +35,7 @@ func TestLoadGateConfigParsesDevMainConfig(t *testing.T) {
       - docs/reference/**
 `)
 
-	config, err := LoadGateConfig(projectDir)
+	config, err := LoadGateConfig(UserPath(projectDir, "config", "gates.yml"))
 	if err != nil {
 		t.Fatalf("LoadGateConfig returned error: %v", err)
 	}

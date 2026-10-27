@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/configvalue"
 )
 
 // WorkspaceConfig describes a package boundary value.
@@ -492,7 +494,7 @@ func setWorkspaceConfigRootValue(config *WorkspaceConfig, section, key, value st
 		return true
 	}
 
-	setString(&config.TicketKeyPrefix, value)
+	configvalue.SetString(&config.TicketKeyPrefix, value)
 
 	return true
 }
@@ -528,7 +530,7 @@ func parseWorkspaceConfigLine(rawLine, section string) workspaceConfigLine {
 		return workspaceConfigLine{Section: section}
 	}
 
-	return workspaceConfigLine{Key: strings.TrimSpace(key), Value: configStringValue(value), Section: section, Parsed: true}
+	return workspaceConfigLine{Key: strings.TrimSpace(key), Value: configvalue.String(value), Section: section, Parsed: true}
 }
 
 func workspaceConfigSiblingSection(section string, indent int) string {
@@ -542,26 +544,26 @@ func workspaceConfigSiblingSection(section string, indent int) string {
 func setRuntimeConfigValue(config *RuntimeConfig, key, value string) {
 	switch key {
 	case "image":
-		setString(&config.Image, value)
+		configvalue.SetString(&config.Image, value)
 	case "dockerfile":
-		setString(&config.DockerfilePath, value)
+		configvalue.SetString(&config.DockerfilePath, value)
 	case "workdir":
-		setString(&config.Workdir, value)
+		configvalue.SetString(&config.Workdir, value)
 	case "artifact_dir":
-		setString(&config.ArtifactDir, value)
+		configvalue.SetString(&config.ArtifactDir, value)
 	case "validation_command":
-		setString(&config.ValidationCommand, value)
+		configvalue.SetString(&config.ValidationCommand, value)
 	}
 }
 
 func setNotificationConfigValue(config *NotificationConfig, key, value string) {
 	switch key {
 	case "telegram_enabled":
-		config.Telegram.Enabled = configBoolValue(value)
+		config.Telegram.Enabled = configvalue.Bool(value)
 	case "telegram_bot_token_env":
-		setString(&config.Telegram.BotTokenEnv, value)
+		configvalue.SetString(&config.Telegram.BotTokenEnv, value)
 	case "telegram_chat_id":
-		setString(&config.Telegram.ChatID, value)
+		configvalue.SetString(&config.Telegram.ChatID, value)
 	}
 }
 
@@ -574,17 +576,17 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 	case "non_blocking_comment_limit":
 		setPositiveInt(&config.NonBlockingCommentLimit, value)
 	case "forgejo_enabled":
-		config.Providers.Forgejo.Enabled = configBoolValue(value)
+		config.Providers.Forgejo.Enabled = configvalue.Bool(value)
 	case "forgejo_cli":
-		setString(&config.Providers.Forgejo.CLI, value)
+		configvalue.SetString(&config.Providers.Forgejo.CLI, value)
 	case "forgejo_token_env":
-		setString(&config.Providers.Forgejo.TokenEnv, value)
+		configvalue.SetString(&config.Providers.Forgejo.TokenEnv, value)
 	case "github_enabled":
-		config.Providers.GitHub.Enabled = configBoolValue(value)
+		config.Providers.GitHub.Enabled = configvalue.Bool(value)
 	case "github_cli":
-		setString(&config.Providers.GitHub.CLI, value)
+		configvalue.SetString(&config.Providers.GitHub.CLI, value)
 	case "github_token_env":
-		setString(&config.Providers.GitHub.TokenEnv, value)
+		configvalue.SetString(&config.Providers.GitHub.TokenEnv, value)
 	}
 }
 
@@ -613,17 +615,17 @@ func setWorkBranchPolicyConfigValue(config *WorkBranchPolicy, key, value string)
 			config.Mode = WorkBranchPolicyMode(value)
 		}
 	case "integration_branch":
-		setString(&config.IntegrationBranch, value)
+		configvalue.SetString(&config.IntegrationBranch, value)
 	case "canonical_remote":
-		setString(&config.CanonicalRemote, value)
+		configvalue.SetString(&config.CanonicalRemote, value)
 	case "require_clean_worktree":
-		config.RequireCleanWorktree = configBoolValue(value)
+		config.RequireCleanWorktree = configvalue.Bool(value)
 	case "require_remote_tracking":
-		config.RequireRemoteTracking = configBoolValue(value)
+		config.RequireRemoteTracking = configvalue.Bool(value)
 	case "allow_safe_repair":
-		config.AllowSafeRepair = configBoolValue(value)
+		config.AllowSafeRepair = configvalue.Bool(value)
 	case "allow_branch_creation":
-		config.AllowBranchCreation = configBoolValue(value)
+		config.AllowBranchCreation = configvalue.Bool(value)
 	default:
 		return false
 	}
@@ -638,7 +640,7 @@ func setWorkWorkspaceConfigValue(config *WorkWorkspaceConfig, key, value string)
 			config.Mode = WorkWorkspaceMode(value)
 		}
 	case "worktree_root":
-		setString(&config.WorktreeRoot, value)
+		configvalue.SetString(&config.WorktreeRoot, value)
 	case "worktree_base":
 		if value != "" {
 			config.WorktreeBase = WorktreeBasePolicy(value)
@@ -665,13 +667,13 @@ func setEvidenceStrategyConfigValue(config *EvidenceStrategyConfig, key, value s
 func setEvidenceStrategyBoolConfigValue(config *EvidenceStrategyConfig, key, value string) bool {
 	switch key {
 	case "enabled":
-		config.Enabled = configBoolValue(value)
+		config.Enabled = configvalue.Bool(value)
 	case "strict_ready_for_review":
-		config.StrictReadyForReview = configBoolValue(value)
+		config.StrictReadyForReview = configvalue.Bool(value)
 	case "allow_user_edits":
-		config.AllowUserEdits = configBoolValue(value)
+		config.AllowUserEdits = configvalue.Bool(value)
 	case "execution_report_copy":
-		config.ExecutionReportCopy = configBoolValue(value)
+		config.ExecutionReportCopy = configvalue.Bool(value)
 	default:
 		return false
 	}
@@ -697,22 +699,22 @@ func setEvidenceStrategyEnumConfigValue(config *EvidenceStrategyConfig, key, val
 func setWebConfigValue(config *WebConfig, key, value string) {
 	switch key {
 	case "enabled":
-		config.Enabled = configBoolValue(value)
+		config.Enabled = configvalue.Bool(value)
 	case "host":
-		setString(&config.Host, value)
+		configvalue.SetString(&config.Host, value)
 	case "port":
 		setPositiveInt(&config.Port, value)
 	case "open_browser":
-		config.OpenBrowser = configBoolValue(value)
+		config.OpenBrowser = configvalue.Bool(value)
 	case "allow_lan":
-		config.AllowLAN = configBoolValue(value)
+		config.AllowLAN = configvalue.Bool(value)
 	case "require_token":
 		mode := string(config.RequireToken)
-		setString(&mode, value)
+		configvalue.SetString(&mode, value)
 
 		config.RequireToken = WebTokenMode(mode)
 	case "token_env":
-		setString(&config.TokenEnv, value)
+		configvalue.SetString(&config.TokenEnv, value)
 	case "allowed_origins":
 		config.AllowedOrigins = configStringListValue(value)
 	case "refresh_interval_seconds":
@@ -720,29 +722,10 @@ func setWebConfigValue(config *WebConfig, key, value string) {
 	}
 }
 
-func setString(target *string, value string) {
-	if value != "" {
-		*target = value
-	}
-}
-
 func setPositiveInt(target *int, value string) {
 	parsed, ok := configPositiveIntValue(value)
 	if ok {
 		*target = parsed
-	}
-}
-
-func configStringValue(value string) string {
-	return strings.Trim(strings.TrimSpace(value), `"'`)
-}
-
-func configBoolValue(value string) bool {
-	switch strings.ToLower(strings.TrimSpace(value)) {
-	case "true", "yes", "1", "on":
-		return true
-	default:
-		return false
 	}
 }
 
@@ -771,7 +754,7 @@ func configStringListValue(value string) []string {
 
 	result := make([]string, 0, len(parts))
 	for _, part := range parts {
-		item := configStringValue(part)
+		item := configvalue.String(part)
 		if item != "" {
 			result = append(result, item)
 		}

@@ -573,8 +573,8 @@
     },
     {
       "id": "internal/core/gate_evidence_classification.go::collectGateExecutionEvidence",
-      "signature": "func(reports []ReportListEntry) (map[string]gateExecutionEvidence, []GateMissingAgentEvidence)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "signature": "func(reports []GateExecutionReport) (map[string]gateExecutionEvidence, []GateMissingAgentEvidence)",
+      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 6 evidence source port changes ReportListEntry to GateExecutionReport before the mechanical package move; result debt remains owned by T6.5."
     },
     {
       "id": "internal/core/gate_git_evidence.go::collectGateGitRefs",

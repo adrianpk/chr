@@ -25,7 +25,7 @@ func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing
 		},
 	})
 
-	classification, err := NewGateEvidenceClassifier().Classify(context.Background(), GateEvidenceClassificationRequest{
+	classification, err := NewGateEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), GateEvidenceClassificationRequest{
 		ProjectDir: projectDir,
 		Files: []GateGitChangedFile{
 			{Status: "M", Path: "internal/core/gate.go"},
@@ -57,7 +57,7 @@ func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing
 func TestGateEvidenceClassifierClassifiesHighRiskManualChanges(t *testing.T) {
 	projectDir := t.TempDir()
 
-	classification, err := NewGateEvidenceClassifier().Classify(context.Background(), GateEvidenceClassificationRequest{
+	classification, err := NewGateEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), GateEvidenceClassificationRequest{
 		ProjectDir: projectDir,
 		Files: []GateGitChangedFile{
 			{Status: "M", Path: "internal/runtime/runner.go"},
@@ -102,7 +102,7 @@ func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.
 - result: ops/default/run/00001-ticket-run/evidence/result.json
 `)
 
-	classification, err := NewGateEvidenceClassifier().Classify(context.Background(), GateEvidenceClassificationRequest{
+	classification, err := NewGateEvidenceClassifier(NewReportLister().ListGateExecutionReports).Classify(context.Background(), GateEvidenceClassificationRequest{
 		ProjectDir: projectDir,
 		Files: []GateGitChangedFile{
 			{Status: "M", Path: "internal/core/gate.go"},
