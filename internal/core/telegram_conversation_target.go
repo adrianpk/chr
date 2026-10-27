@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 type telegramConversationReader interface {
@@ -197,7 +199,7 @@ func (op telegramConversationTransaction) focus() (string, *TelegramConversation
 	}
 
 	p := op.input.Update.Peer
-	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET focused_conversation_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, c.ID, formatProjectTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
+	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET focused_conversation_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, c.ID, database.FormatTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
 
 	return "Your next details will go to " + telegramConversationLabel(c.Topic) + " in " + op.projectLabel(c.ProjectID) + ".", c, err
 }

@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramRecoveryOffline proves local retry acquires live receiver
@@ -30,7 +32,7 @@ func TestTelegramRecoveryOffline(t *testing.T) {
 		t.Fatal("live receiver retry accepted")
 	}
 
-	if _, err := os.Stat(UserDatabasePath(env)); !os.IsNotExist(err) {
+	if _, err := os.Stat(database.UserDatabasePath(env)); !os.IsNotExist(err) {
 		t.Fatal("retry opened database before receiver exclusion", err)
 	}
 }

@@ -1,6 +1,10 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
+)
 
 // Each admission retains its table's ownership shape and quota write reservation.
 type telegramDocumentSnapshotRow struct {
@@ -46,7 +50,7 @@ func (row telegramDocumentSnapshotRow) values() []any {
 		document.MediaType,
 		len(document.Payload),
 		document.Payload,
-		formatProjectTime(row.createdAt),
+		database.FormatTime(row.createdAt),
 		len(document.Payload),
 		telegramDocumentQuota,
 	}
@@ -74,7 +78,7 @@ func (row telegramNotificationDocumentRow) values() []any {
 		d.MediaType,
 		len(d.Payload),
 		d.Payload,
-		formatProjectTime(row.createdAt),
+		database.FormatTime(row.createdAt),
 		len(d.Payload),
 		telegramDocumentQuota,
 	}

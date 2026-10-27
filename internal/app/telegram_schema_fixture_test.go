@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // The image is constructed by the production migrator once per test process,
@@ -42,7 +43,7 @@ func newTelegramAppSchemaImage() (_ []byte, err error) {
 		return nil, err
 	}
 
-	return os.ReadFile(core.UserDatabasePath(env))
+	return os.ReadFile(database.UserDatabasePath(env))
 }
 
 func seedTelegramAppSchema(t *testing.T, env core.UserEnvironment) {
@@ -53,7 +54,7 @@ func seedTelegramAppSchema(t *testing.T, env core.UserEnvironment) {
 		t.Fatal(err)
 	}
 
-	path := core.UserDatabasePath(env)
+	path := database.UserDatabasePath(env)
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
 		t.Fatal(err)
 	}

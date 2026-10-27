@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 const indexedTicketColumns = `project_id, namespace, path, relative_path, key, title, synopsis, status, board_column,
@@ -44,14 +46,14 @@ func (f *indexedTicketRow) values() []any {
 		ticket.MergeResult,
 		ticket.MergeActor,
 		ticket.MergeCommit,
-		formatOptionalProjectTime(ticket.MergedAt),
+		database.OptionalTime(ticket.MergedAt),
 		ticket.MergeBlocker,
-		formatOptionalProjectTime(ticket.CreatedAt),
-		formatOptionalProjectTime(ticket.UpdatedAt),
-		formatProjectTime(ticket.FileMTime),
+		database.OptionalTime(ticket.CreatedAt),
+		database.OptionalTime(ticket.UpdatedAt),
+		database.FormatTime(ticket.FileMTime),
 		ticket.FileSize,
 		ticket.ContentHash,
-		formatProjectTime(ticket.IndexedAt),
+		database.FormatTime(ticket.IndexedAt),
 	}
 }
 

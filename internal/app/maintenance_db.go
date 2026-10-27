@@ -7,7 +7,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func (factory commandFactory) maintenanceDBCommand() *cli.Command {
@@ -39,7 +39,7 @@ func (factory commandFactory) runMaintenanceDBStatus(ctx context.Context, cmd *c
 		return err
 	}
 
-	status, err := core.NewMigrationStatusChecker(factory.deps.assetsFS).Check(ctx, env)
+	status, err := database.NewMigrationStatusChecker(factory.deps.assetsFS).Check(ctx, env)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (factory commandFactory) runMaintenanceDBStatus(ctx context.Context, cmd *c
 	return printMigrationStatus(factory.io.Stdout, status)
 }
 
-func printMigrationStatus(stdout io.Writer, status core.MigrationStatus) error {
+func printMigrationStatus(stdout io.Writer, status database.MigrationStatus) error {
 	lines := []string{
 		fmt.Sprintf("database: %s", status.DatabasePath),
 		fmt.Sprintf("database_exists: %t", status.DatabaseExists),
@@ -78,7 +78,7 @@ func printMigrationStatus(stdout io.Writer, status core.MigrationStatus) error {
 	return printUnknownMigrations(stdout, status.Unknown)
 }
 
-func printAppliedMigrations(stdout io.Writer, migrations []core.AppliedMigration) error {
+func printAppliedMigrations(stdout io.Writer, migrations []database.AppliedMigration) error {
 	for _, migration := range migrations {
 		_, err := fmt.Fprintf(
 			stdout,
@@ -95,7 +95,7 @@ func printAppliedMigrations(stdout io.Writer, migrations []core.AppliedMigration
 	return nil
 }
 
-func printPendingMigrations(stdout io.Writer, migrations []core.Migration) error {
+func printPendingMigrations(stdout io.Writer, migrations []database.Migration) error {
 	for _, migration := range migrations {
 		_, err := fmt.Fprintf(stdout, "pending_migration: %s %s\n", migration.Version, migration.Name)
 		if err != nil {
@@ -106,7 +106,7 @@ func printPendingMigrations(stdout io.Writer, migrations []core.Migration) error
 	return nil
 }
 
-func printUnknownMigrations(stdout io.Writer, migrations []core.AppliedMigration) error {
+func printUnknownMigrations(stdout io.Writer, migrations []database.AppliedMigration) error {
 	for _, migration := range migrations {
 		_, err := fmt.Fprintf(
 			stdout,

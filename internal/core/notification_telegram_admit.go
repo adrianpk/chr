@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // CreateTelegramNotification admits the event, immutable view and complete
@@ -117,7 +119,7 @@ func retainTelegramNotificationDocument(ctx context.Context, tx *sql.Tx, input T
 }
 
 func purgeTelegramNotificationDocuments(ctx context.Context, tx *sql.Tx, now time.Time) error {
-	_, err := tx.ExecContext(ctx, `UPDATE telegram_notification_documents SET payload=NULL,purged_at=? WHERE id IN (SELECT d.id FROM telegram_notification_documents d JOIN notification_events e ON e.id=d.owner_id WHERE d.payload IS NOT NULL AND d.terminal_at IS NOT NULL AND d.terminal_at<=? AND e.status IN ('delivered','failed') AND e.telegram_uncertain=0 ORDER BY d.terminal_at,d.id LIMIT 20)`, formatProjectTime(now), formatProjectTime(now.Add(-7*24*time.Hour)))
+	_, err := tx.ExecContext(ctx, `UPDATE telegram_notification_documents SET payload=NULL,purged_at=? WHERE id IN (SELECT d.id FROM telegram_notification_documents d JOIN notification_events e ON e.id=d.owner_id WHERE d.payload IS NOT NULL AND d.terminal_at IS NOT NULL AND d.terminal_at<=? AND e.status IN ('delivered','failed') AND e.telegram_uncertain=0 ORDER BY d.terminal_at,d.id LIMIT 20)`, database.FormatTime(now), database.FormatTime(now.Add(-7*24*time.Hour)))
 
 	return err
 }

@@ -11,6 +11,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramConversationAction enumerates local routing and capture operations.
@@ -129,7 +131,7 @@ func (s *TelegramReceiverStore) ApplyTelegramConversation(ctx context.Context, i
 func (op telegramConversationTransaction) ensurePeer() error {
 	p := op.input.Update.Peer
 
-	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_peers(bot_id,chat_id,topic_id,user_id,updated_at) VALUES(?,?,?,?,?) ON CONFLICT DO NOTHING`, p.BotID, p.ChatID, p.TopicID, p.UserID, formatProjectTime(op.now))
+	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_peers(bot_id,chat_id,topic_id,user_id,updated_at) VALUES(?,?,?,?,?) ON CONFLICT DO NOTHING`, p.BotID, p.ChatID, p.TopicID, p.UserID, database.FormatTime(op.now))
 	if err != nil || op.input.ContextDigest == "" {
 		return err
 	}
@@ -298,7 +300,7 @@ func (op telegramConversationTransaction) selectProject() (string, *TelegramConv
 	}
 
 	p := op.input.Update.Peer
-	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET selected_project_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, project.ID, formatProjectTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
+	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET selected_project_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, project.ID, database.FormatTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
 
 	return "Selected project: " + project.Name, nil, err
 }
@@ -355,7 +357,7 @@ func (op telegramConversationTransaction) insertConversation(project Project, bi
 
 	c := TelegramConversation{ID: telegramConversationID(op.input.Update), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: "collecting", Topic: op.input.Text, Revision: 1}
 	c.AuthorizationRef = op.developmentInstructionRef(c)
-	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,authorization_ref,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, c.ID, c.Peer.BotID, c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, c.ProjectID, c.ProjectBindingDigest, c.Namespace, c.Intent, c.Phase, c.Topic, c.AuthorizationRef, formatProjectTime(op.now), formatProjectTime(op.now))
+	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,authorization_ref,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, c.ID, c.Peer.BotID, c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, c.ProjectID, c.ProjectBindingDigest, c.Namespace, c.Intent, c.Phase, c.Topic, c.AuthorizationRef, database.FormatTime(op.now), database.FormatTime(op.now))
 
 	text := "Your request for " + telegramConversationLabel(c.Topic) + " in " + telegramConversationLabel(project.Name) + " is retained."
 	text += "\n\nYou can add more details, or send /done " + c.ID + " to finish collecting them."

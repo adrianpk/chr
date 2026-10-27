@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // WorkflowIndex is implemented by the existing SQLite ticket index.
@@ -49,20 +51,20 @@ func (i *sqliteTicketIndex) RebuildWorkflowIndex(ctx context.Context, store *Wor
 		}
 
 		if err := clearWorkflowIndex(ctx, tx, store); err != nil {
-			return rollbackWithError(tx, err)
+			return database.RollbackOnError(tx, err)
 		}
 
 		sort.SliceStable(snapshot.Records, func(a, b int) bool { return snapshot.Records[a].Set != nil && snapshot.Records[b].Set == nil })
 
 		for _, r := range snapshot.Records {
 			if err := indexWorkflowRecord(ctx, tx, store, r); err != nil {
-				return rollbackWithError(tx, err)
+				return database.RollbackOnError(tx, err)
 			}
 		}
 
 		_, err = tx.ExecContext(ctx, "INSERT INTO workflow_snapshots(project_id, namespace, source_hash) VALUES(?, ?, ?)", store.projectID, store.layout.Namespace(), workflowSnapshotHash(snapshot))
 		if err != nil {
-			return rollbackWithError(tx, err)
+			return database.RollbackOnError(tx, err)
 		}
 
 		return tx.Commit()

@@ -7,6 +7,8 @@ import (
 	"errors"
 	"math"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // PrepareTelegramPoll performs bounded retention and starts one cursor epoch
@@ -43,7 +45,7 @@ func (s *TelegramReceiverStore) PrepareTelegramPoll(ctx context.Context, botID i
 }
 
 func prepareTelegramEpoch(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
-	_, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET cursor_epoch=cursor_epoch+1,next_update_id=NULL,retention_gap_at=?,retention_gap_from_poll_at=last_poll_at,updated_at=? WHERE bot_id=? AND schema_version=1 AND last_poll_at<? AND (retention_gap_from_poll_at IS NULL OR retention_gap_from_poll_at!=last_poll_at)`, formatProjectTime(now), formatProjectTime(now), botID, formatProjectTime(now.Add(-24*time.Hour)))
+	_, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET cursor_epoch=cursor_epoch+1,next_update_id=NULL,retention_gap_at=?,retention_gap_from_poll_at=last_poll_at,updated_at=? WHERE bot_id=? AND schema_version=1 AND last_poll_at<? AND (retention_gap_from_poll_at IS NULL OR retention_gap_from_poll_at!=last_poll_at)`, database.FormatTime(now), database.FormatTime(now), botID, database.FormatTime(now.Add(-24*time.Hour)))
 
 	return err
 }
@@ -61,7 +63,7 @@ func retireTelegramSources(ctx context.Context, tx *sql.Tx, botID int64, now tim
 		return err
 	}
 
-	rows, err := tx.QueryContext(ctx, `SELECT u.update_id FROM telegram_updates u WHERE `+telegramRetirableSource+` ORDER BY u.update_id LIMIT 100`, botID, formatProjectTime(now.Add(-7*24*time.Hour)))
+	rows, err := tx.QueryContext(ctx, `SELECT u.update_id FROM telegram_updates u WHERE `+telegramRetirableSource+` ORDER BY u.update_id LIMIT 100`, botID, database.FormatTime(now.Add(-7*24*time.Hour)))
 	if err != nil {
 		return err
 	}
@@ -124,7 +126,7 @@ AND NOT EXISTS(SELECT 1 FROM telegram_actions a JOIN telegram_requests r ON r.id
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox o WHERE o.conversation_id=c.id AND o.state!='delivered')`
 
 func compactTelegramConversations(ctx context.Context, tx *sql.Tx, botID int64, now time.Time) error {
-	rows, err := tx.QueryContext(ctx, `SELECT c.id FROM telegram_conversations c WHERE `+telegramCompactableConversation+` ORDER BY c.updated_at,c.id LIMIT 20`, botID, formatProjectTime(now.Add(-7*24*time.Hour)))
+	rows, err := tx.QueryContext(ctx, `SELECT c.id FROM telegram_conversations c WHERE `+telegramCompactableConversation+` ORDER BY c.updated_at,c.id LIMIT 20`, botID, database.FormatTime(now.Add(-7*24*time.Hour)))
 	if err != nil {
 		return err
 	}
@@ -177,7 +179,7 @@ func compactTelegramConversation(ctx context.Context, tx *sql.Tx, id string, now
 		return err
 	}
 
-	_, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET capture='',question_binding='',compacted_at=? WHERE id=?`, formatProjectTime(now), id)
+	_, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET capture='',question_binding='',compacted_at=? WHERE id=?`, database.FormatTime(now), id)
 
 	return err
 }
@@ -186,7 +188,7 @@ func compactTelegramStandaloneRequests(ctx context.Context, tx *sql.Tx, botID in
 	rows, err := tx.QueryContext(ctx, `SELECT r.id FROM telegram_requests r JOIN telegram_updates u ON u.bot_id=r.bot_id AND u.update_id=r.update_id WHERE r.bot_id=? AND r.conversation_id IS NULL AND r.compacted_at IS NULL AND r.state IN ('confirmed','rejected') AND r.updated_at<=? AND u.state IN ('processed','ignored','rejected')
  AND NOT EXISTS(SELECT 1 FROM telegram_conversations c WHERE c.authorization_ref=r.id)
  AND NOT EXISTS(SELECT 1 FROM telegram_actions a WHERE a.request_id=r.id OR a.consumed_by_request=r.id)
- AND NOT EXISTS(SELECT 1 FROM telegram_outbox o WHERE o.request_id=r.id AND (o.state!='delivered' OR o.conversation_id IS NOT NULL)) ORDER BY r.updated_at,r.id LIMIT 100`, botID, formatProjectTime(now.Add(-7*24*time.Hour)))
+ AND NOT EXISTS(SELECT 1 FROM telegram_outbox o WHERE o.request_id=r.id AND (o.state!='delivered' OR o.conversation_id IS NOT NULL)) ORDER BY r.updated_at,r.id LIMIT 100`, botID, database.FormatTime(now.Add(-7*24*time.Hour)))
 	if err != nil {
 		return err
 	}
@@ -201,7 +203,7 @@ func compactTelegramStandaloneRequests(ctx context.Context, tx *sql.Tx, botID in
 			return err
 		}
 
-		if _, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET arguments='{}',prepared_input=NULL,domain_guard='',result=NULL,model_result=NULL,compacted_at=? WHERE id=?`, formatProjectTime(now), id); err != nil {
+		if _, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET arguments='{}',prepared_input=NULL,domain_guard='',result=NULL,model_result=NULL,compacted_at=? WHERE id=?`, database.FormatTime(now), id); err != nil {
 			return err
 		}
 

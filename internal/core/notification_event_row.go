@@ -1,6 +1,10 @@
 package core
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"forge.adrianpk.com/chr/internal/core/database"
+)
 
 // notificationEventRow keeps event conversions aligned with the retained audit columns.
 type notificationEventRow struct {
@@ -33,9 +37,9 @@ func (row notificationEventRow) values() []any {
 		event.Payload.Summary,
 		event.Payload.Detail,
 		event.FailureReason,
-		formatProjectTime(event.CreatedAt),
+		database.FormatTime(event.CreatedAt),
 		formatOptionalNotificationTime(event.DeliveredAt),
-		formatProjectTime(event.UpdatedAt),
+		database.FormatTime(event.UpdatedAt),
 	}
 }
 

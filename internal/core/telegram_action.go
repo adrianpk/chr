@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramAction binds one prompt to immutable prepared input and an exact peer.
@@ -68,7 +70,7 @@ func readTelegramAction(ctx context.Context, reader telegramConversationReader, 
 		return action, err
 	}
 
-	action.ExpiresAt, err = parseProjectTime(expiry)
+	action.ExpiresAt, err = database.ParseTime(expiry)
 
 	if err == nil && action.GuardVersion != 0 && action.GuardVersion != 1 {
 		return action, ErrTelegramActionUnavailable

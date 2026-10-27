@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramRecoverySparse retires only exact acknowledged IDs, retains local
@@ -148,7 +150,7 @@ func checkTelegramRecoveryCompaction(t *testing.T, guard string) {
 	t.Helper()
 
 	f, request := telegramAuthoringModelFixture(t)
-	old := formatProjectTime(time.Now().Add(-8 * 24 * time.Hour))
+	old := database.FormatTime(time.Now().Add(-8 * 24 * time.Hour))
 
 	execTelegramRecoverySQL(t, f.store, `UPDATE telegram_requests SET state='confirmed',domain_receipt_ref='canonical:retained'`)
 	execTelegramRecoverySQL(t, f.store, `UPDATE telegram_updates SET state='processed',updated_at=?`, old)
@@ -188,7 +190,7 @@ func protectTelegramRecoveryCompaction(t *testing.T, f *telegramConversationFixt
 	case "outbox":
 		execTelegramRecoverySQL(t, f.store, `UPDATE telegram_outbox SET state='blocked'`)
 	case "prompt":
-		execTelegramRecoverySQL(t, f.store, `INSERT INTO telegram_actions(token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,created_at,updated_at) VALUES(?,?,12345,100001,0,100001,1,?,'["confirm"]','pending',?,?,?)`, strings.Repeat("a", 32), request.ID, strings.Repeat("b", 64), formatProjectTime(time.Now().Add(time.Hour)), formatProjectTime(time.Now()), formatProjectTime(time.Now()))
+		execTelegramRecoverySQL(t, f.store, `INSERT INTO telegram_actions(token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,created_at,updated_at) VALUES(?,?,12345,100001,0,100001,1,?,'["confirm"]','pending',?,?,?)`, strings.Repeat("a", 32), request.ID, strings.Repeat("b", 64), database.FormatTime(time.Now().Add(time.Hour)), database.FormatTime(time.Now()), database.FormatTime(time.Now()))
 	}
 }
 

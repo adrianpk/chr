@@ -5,6 +5,8 @@ import (
 	"slices"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func TestTicketLoopQuerySelectsDefaultReadyForDevTicketsOldestFirst(t *testing.T) {
@@ -410,7 +412,7 @@ func testLoopQueryTicketWithCreatedAt(key, createdAt string) IndexedTicket {
 }
 
 func testLoopQueryTime(value string) *time.Time {
-	parsed, err := parseProjectTime(value)
+	parsed, err := database.ParseTime(value)
 	if err != nil {
 		panic(err)
 	}

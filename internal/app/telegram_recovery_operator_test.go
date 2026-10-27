@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramRecoveryOperator exercises CLI poll/delivery retries and read-only
@@ -64,7 +65,7 @@ func TestTelegramRecoveryOperator(t *testing.T) {
 func seedTelegramRecoveryOperator(t *testing.T, receiver telegramReceiver) {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(receiver.env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(receiver.env))
 	if err != nil {
 		t.Fatal(err)
 	}

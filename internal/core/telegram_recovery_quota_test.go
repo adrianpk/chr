@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramRecoveryQuota checks actual receipt and outbound boundaries. A
@@ -97,7 +99,7 @@ func seedTelegramRecoveryPayload(t *testing.T, store *TelegramReceiverStore, now
 
 		encoded := `"` + strings.Repeat("x", size-2) + `"`
 
-		_, err := tx.ExecContext(t.Context(), `INSERT INTO telegram_requests(id,bot_id,update_id,operation_ordinal,operator_id,project_id,project_binding_digest,namespace,operation_id,arguments,argument_digest,prepared_input,domain_guard,state,created_at,updated_at) VALUES(?,12345,?,?,'maintainer','alpha',?,'default','records.show','{}',?,?,?,'confirmed',?,?)`, fmt.Sprintf("quota-request-%d", index), index/8, index%8, strings.Repeat("a", 64), strings.Repeat("b", 64), encoded, strings.Repeat("c", 64), formatProjectTime(now), formatProjectTime(now))
+		_, err := tx.ExecContext(t.Context(), `INSERT INTO telegram_requests(id,bot_id,update_id,operation_ordinal,operator_id,project_id,project_binding_digest,namespace,operation_id,arguments,argument_digest,prepared_input,domain_guard,state,created_at,updated_at) VALUES(?,12345,?,?,'maintainer','alpha',?,'default','records.show','{}',?,?,?,'confirmed',?,?)`, fmt.Sprintf("quota-request-%d", index), index/8, index%8, strings.Repeat("a", 64), strings.Repeat("b", 64), encoded, strings.Repeat("c", 64), database.FormatTime(now), database.FormatTime(now))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -111,7 +113,7 @@ func seedTelegramRecoveryPayload(t *testing.T, store *TelegramReceiverStore, now
 func fillTelegramReceiptQuota(t *testing.T, store *TelegramReceiverStore, now time.Time) {
 	t.Helper()
 
-	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 0 UNION ALL SELECT id+1 FROM n WHERE id<9999) INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at) SELECT 12345,id,1,?,'ignored',100001,0,100001,1,'private',?,'','ignored','unsupported',? FROM n`, strings.Repeat("a", 64), formatProjectTime(now), formatProjectTime(now))
+	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 0 UNION ALL SELECT id+1 FROM n WHERE id<9999) INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at) SELECT 12345,id,1,?,'ignored',100001,0,100001,1,'private',?,'','ignored','unsupported',? FROM n`, strings.Repeat("a", 64), database.FormatTime(now), database.FormatTime(now))
 
 	pending := telegramRetainedTestUpdate(t, 10000, "/status")
 	if err := store.RetainBatch(t.Context(), 12345, []TelegramReceivedUpdate{pending}, now); err != nil {
@@ -134,7 +136,7 @@ func fillTelegramOutboxQuota(t *testing.T, store *TelegramReceiverStore, now tim
 		t.Fatal(err)
 	}
 
-	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 1 UNION ALL SELECT id+1 FROM n WHERE id<1024) INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at) SELECT 'quota-'||id,12345,100001,0,100001,'quota:'||id,?,'result','unresolved','blocked',?,? FROM n`, telegramReceiverTestConfig().Digest(), formatProjectTime(now.Add(-8*24*time.Hour)), formatProjectTime(now.Add(-8*24*time.Hour)))
+	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 1 UNION ALL SELECT id+1 FROM n WHERE id<1024) INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at) SELECT 'quota-'||id,12345,100001,0,100001,'quota:'||id,?,'result','unresolved','blocked',?,? FROM n`, telegramReceiverTestConfig().Digest(), database.FormatTime(now.Add(-8*24*time.Hour)), database.FormatTime(now.Add(-8*24*time.Hour)))
 
 	if _, err := store.PrepareTelegramPoll(t.Context(), 12345, now); err != nil {
 		t.Fatal(err)

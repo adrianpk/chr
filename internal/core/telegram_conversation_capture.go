@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"unicode/utf8"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func (op telegramConversationTransaction) applyCapture() (string, *TelegramConversation, error) {
@@ -106,9 +108,9 @@ func (op telegramConversationTransaction) cancelCapture(c *TelegramConversation)
 }
 
 func (op telegramConversationTransaction) saveCapture(c *TelegramConversation) error {
-	finished := sql.NullString{String: formatProjectTime(op.now), Valid: c.Phase == "canceled"}
+	finished := sql.NullString{String: database.FormatTime(op.now), Valid: c.Phase == "canceled"}
 
-	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_conversations SET capture=?,phase=?,question_binding=?,revision=revision+1,updated_at=?,finished_at=? WHERE id=? AND revision=?`, c.Capture, c.Phase, c.QuestionBinding, formatProjectTime(op.now), finished, c.ID, c.Revision)
+	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_conversations SET capture=?,phase=?,question_binding=?,revision=revision+1,updated_at=?,finished_at=? WHERE id=? AND revision=?`, c.Capture, c.Phase, c.QuestionBinding, database.FormatTime(op.now), finished, c.ID, c.Revision)
 	if err != nil {
 		return err
 	}
@@ -118,7 +120,7 @@ func (op telegramConversationTransaction) saveCapture(c *TelegramConversation) e
 	}
 
 	c.Revision++
-	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_replies SET invalidated_at=? WHERE conversation_id=? AND invalidated_at IS NULL`, formatProjectTime(op.now), c.ID)
+	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_replies SET invalidated_at=? WHERE conversation_id=? AND invalidated_at IS NULL`, database.FormatTime(op.now), c.ID)
 
 	return err
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func (factory commandFactory) maintenanceBundleCommand() *cli.Command {
@@ -57,7 +58,7 @@ func (factory commandFactory) runMaintenanceBundle(ctx context.Context, cmd *cli
 }
 
 func collectDiagnosticBundle(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, assetsFS fs.FS) (core.DiagnosticBundle, error) {
-	migrationStatus, err := core.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
+	migrationStatus, err := database.NewMigrationStatusChecker(assetsFS).Check(ctx, env)
 	if err != nil {
 		return core.DiagnosticBundle{}, err
 	}

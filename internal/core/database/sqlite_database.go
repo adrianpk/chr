@@ -1,4 +1,4 @@
-package core
+package database
 
 import (
 	"context"
@@ -8,7 +8,8 @@ import (
 
 const sqliteBusyTimeoutMilliseconds = 5000
 
-func configureSQLiteDatabase(ctx context.Context, db *sql.DB) error {
+// Configure applies the existing connection limit and busy timeout.
+func Configure(ctx context.Context, db *sql.DB) error {
 	db.SetMaxOpenConns(1)
 
 	_, err := db.ExecContext(ctx, fmt.Sprintf("PRAGMA busy_timeout = %d", sqliteBusyTimeoutMilliseconds))

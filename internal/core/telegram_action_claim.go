@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ClaimTelegramAction creates the first answer and claims its prompt in one transaction.
@@ -180,7 +182,7 @@ func createTelegramActionAnswer(op telegramConversationTransaction, claim *Teleg
 }
 
 func beginTelegramActionClaim(op telegramConversationTransaction, claim *TelegramActionClaim, answer TelegramOperationRequest) error {
-	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_actions SET state='applying',consumed_by_request=?,updated_at=? WHERE token=? AND state='pending'`, answer.ID, formatProjectTime(op.now), claim.Action.Token)
+	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_actions SET state='applying',consumed_by_request=?,updated_at=? WHERE token=? AND state='pending'`, answer.ID, database.FormatTime(op.now), claim.Action.Token)
 	if err != nil {
 		return err
 	}
@@ -189,7 +191,7 @@ func beginTelegramActionClaim(op telegramConversationTransaction, claim *Telegra
 		return err
 	}
 
-	result, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_requests SET state='applying',updated_at=? WHERE id IN (?,?) AND state IN ('prepared','awaiting_confirmation')`, formatProjectTime(op.now), answer.ID, claim.Request.ID)
+	result, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_requests SET state='applying',updated_at=? WHERE id IN (?,?) AND state IN ('prepared','awaiting_confirmation')`, database.FormatTime(op.now), answer.ID, claim.Request.ID)
 	if err != nil {
 		return err
 	}
@@ -207,12 +209,12 @@ func beginTelegramActionClaim(op telegramConversationTransaction, claim *Telegra
 }
 
 func supersedeTelegramAction(op telegramConversationTransaction, claim *TelegramActionClaim, state string) error {
-	_, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND state IN ('pending','applying')`, state, formatProjectTime(op.now), claim.Action.Token)
+	_, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND state IN ('pending','applying')`, state, database.FormatTime(op.now), claim.Action.Token)
 	if err != nil {
 		return err
 	}
 
-	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_requests SET state='blocked',updated_at=? WHERE id IN (?,?) AND state NOT IN ('confirmed','rejected')`, formatProjectTime(op.now), claim.Request.ID, claim.Action.AnswerRequestID)
+	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_requests SET state='blocked',updated_at=? WHERE id IN (?,?) AND state NOT IN ('confirmed','rejected')`, database.FormatTime(op.now), claim.Request.ID, claim.Action.AnswerRequestID)
 	claim.Action.State = state
 
 	if err != nil {

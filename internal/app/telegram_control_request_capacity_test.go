@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramControlRequestCapacity returns durable diagnostics for records,
@@ -64,7 +65,7 @@ func checkTelegramCapacityAction(t *testing.T, f *telegramConversationAppFixture
 func seedTelegramAppRequestCapacity(t *testing.T, f *telegramConversationAppFixture, template string) {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(f.receiver.env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(f.receiver.env))
 	if err != nil {
 		t.Fatal(err)
 	}

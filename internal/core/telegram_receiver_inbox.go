@@ -7,6 +7,8 @@ import (
 	"math"
 	"regexp"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // RetainBatch commits every normalized receipt and the next sparse cursor together.
@@ -41,7 +43,7 @@ func (s *TelegramReceiverStore) RetainBatch(ctx context.Context, botID int64, up
 		}
 
 		_, err = tx.ExecContext(ctx, `UPDATE telegram_receivers SET next_update_id=?,last_poll_at=?,health='ready',
-retry_attempt=0,retry_at=NULL,last_error_code='',updated_at=? WHERE bot_id=?`, next, formatProjectTime(now), formatProjectTime(now), botID)
+retry_attempt=0,retry_at=NULL,last_error_code='',updated_at=? WHERE bot_id=?`, next, database.FormatTime(now), database.FormatTime(now), botID)
 
 		return err
 	})

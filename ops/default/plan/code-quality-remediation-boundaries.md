@@ -173,3 +173,17 @@ parsed line, and report constructors retain five coherent report inputs. Report
 status and Woodpecker configuration outcomes have typed constants with the same
 serialized spellings. Preview and overwrite flags retain the supported init
 contract: DryRun takes precedence, and Write replaces only an existing owned file.
+
+### Shared database dependency for T6.2/T6.3
+
+Notification and project repositories use the same core.db schema, migration
+assets, connection settings, timestamp representation and cancellation handling.
+Those existing operations now have one core/database owner. Each repository
+still owns its SQL, bound row values, transaction, quota reservation and commit.
+Read-only registry/receiver inspection opens an existing database without migration.
+No repository reaches another capability's private database field.
+
+Database directory inputs use only DataDir; the root UserEnvironment remains the
+host configuration boundary. The schema-status fixture explicitly constructs an
+old database instead of calling a private migration helper. Existing migration,
+real-SQLite record, notification quota/retention and registry regressions pass.

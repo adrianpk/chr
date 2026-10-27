@@ -6,18 +6,20 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) {
 	bundle := DiagnosticBundle{
 		ProjectDir: "/tmp/project",
 		ProjectID:  "project-1",
-		MigrationStatus: MigrationStatus{
+		MigrationStatus: database.MigrationStatus{
 			DatabasePath:      "/tmp/core.db",
 			DatabaseExists:    true,
 			SchemaTableExists: true,
-			Available:         []Migration{{Version: "1", Name: "create_projects"}},
-			Applied:           []AppliedMigration{{Version: "1", Name: "create_projects"}},
+			Available:         []database.Migration{{Version: "1", Name: "create_projects"}},
+			Applied:           []database.AppliedMigration{{Version: "1", Name: "create_projects"}},
 		},
 		RegistryDiagnostics: []ProjectRegistryDiagnostic{{
 			Project: Project{

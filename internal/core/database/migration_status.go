@@ -1,4 +1,4 @@
-package core
+package database
 
 import (
 	"context"
@@ -42,14 +42,14 @@ func NewMigrationStatusChecker(assetsFS fs.FS) MigrationStatusChecker {
 }
 
 // UserDatabasePath executes the corresponding package operation.
-func UserDatabasePath(env UserEnvironment) string {
-	return filepath.Join(env.DataDir(), userDatabaseName)
+func UserDatabasePath(env DataDirectory) string {
+	return filepath.Join(env.DataDir(), UserFileName)
 }
 
 // Check executes the corresponding package operation.
 func (c MigrationStatusChecker) Check(
 	ctx context.Context,
-	env UserEnvironment,
+	env DataDirectory,
 ) (MigrationStatus, error) {
 	err := ctx.Err()
 	if err != nil {

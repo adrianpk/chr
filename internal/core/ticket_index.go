@@ -13,6 +13,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ErrTicketNotFound identifies a package boundary error.
@@ -38,19 +40,19 @@ func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (T
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open ticket index database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	index, err := NewTicketIndexFromDB(ctx, db, assetsFS)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return index, nil
@@ -58,7 +60,7 @@ func NewTicketIndex(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (T
 
 // NewTicketIndexFromDB constructs the corresponding package service or value.
 func NewTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (TicketIndex, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -82,16 +84,16 @@ func (i *sqliteTicketIndex) UpsertTicket(ctx context.Context, ticket IndexedTick
 
 	err = upsertIndexedTicket(ctx, tx, ticket)
 	if err != nil {
-		return rollbackWithError(tx, err)
+		return database.RollbackOnError(tx, err)
 	}
 
 	err = replaceIndexedTicketTags(ctx, tx, ticket)
 	if err != nil {
-		return rollbackWithError(tx, err)
+		return database.RollbackOnError(tx, err)
 	}
 
 	if _, err := tx.ExecContext(ctx, "DELETE FROM workflow_snapshots WHERE project_id = ?", ticket.ProjectID); err != nil {
-		return rollbackWithError(tx, err)
+		return database.RollbackOnError(tx, err)
 	}
 
 	err = tx.Commit()
@@ -370,7 +372,7 @@ func assignIndexedTicketTimes(
 	indexedAt string,
 ) error {
 	if createdAt.Valid {
-		parsedCreatedAt, err := parseProjectTime(createdAt.String)
+		parsedCreatedAt, err := database.ParseTime(createdAt.String)
 		if err != nil {
 			return err
 		}
@@ -379,7 +381,7 @@ func assignIndexedTicketTimes(
 	}
 
 	if updatedAt.Valid {
-		parsedUpdatedAt, err := parseProjectTime(updatedAt.String)
+		parsedUpdatedAt, err := database.ParseTime(updatedAt.String)
 		if err != nil {
 			return err
 		}
@@ -388,7 +390,7 @@ func assignIndexedTicketTimes(
 	}
 
 	if mergedAt.Valid {
-		parsedMergedAt, err := parseProjectTime(mergedAt.String)
+		parsedMergedAt, err := database.ParseTime(mergedAt.String)
 		if err != nil {
 			return err
 		}
@@ -396,12 +398,12 @@ func assignIndexedTicketTimes(
 		ticket.MergedAt = &parsedMergedAt
 	}
 
-	parsedFileMTime, err := parseProjectTime(fileMTime)
+	parsedFileMTime, err := database.ParseTime(fileMTime)
 	if err != nil {
 		return err
 	}
 
-	parsedIndexedAt, err := parseProjectTime(indexedAt)
+	parsedIndexedAt, err := database.ParseTime(indexedAt)
 	if err != nil {
 		return err
 	}

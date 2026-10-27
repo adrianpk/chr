@@ -8,12 +8,14 @@ import (
 	"testing"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func TestMigrationStatusReportsPendingWhenDatabaseIsMissing(t *testing.T) {
 	env := testMigrationStatusEnvironment(t)
 
-	status, err := NewMigrationStatusChecker(testMigrationFS()).Check(context.Background(), env)
+	status, err := database.NewMigrationStatusChecker(testMigrationFS()).Check(context.Background(), env)
 	if err != nil {
 		t.Fatalf("Check returned error: %v", err)
 	}
@@ -31,12 +33,12 @@ func TestMigrationStatusReportsCleanDatabase(t *testing.T) {
 	env := testMigrationStatusEnvironment(t)
 	db := openMigrationStatusDB(t, env)
 
-	err := NewMigrator(testMigrationFS()).Migrate(context.Background(), db)
+	err := database.NewMigrator(testMigrationFS()).Migrate(context.Background(), db)
 	if err != nil {
 		t.Fatalf("Migrate returned error: %v", err)
 	}
 
-	status, err := NewMigrationStatusChecker(testMigrationFS()).Check(context.Background(), env)
+	status, err := database.NewMigrationStatusChecker(testMigrationFS()).Check(context.Background(), env)
 	if err != nil {
 		t.Fatalf("Check returned error: %v", err)
 	}
@@ -62,7 +64,7 @@ func TestMigrationStatusReportsUnknownAppliedMigration(t *testing.T) {
 	env := testMigrationStatusEnvironment(t)
 	db := openMigrationStatusDB(t, env)
 
-	err := ensureSchemaMigrations(context.Background(), db)
+	_, err := db.ExecContext(context.Background(), `CREATE TABLE schema_migrations(version text PRIMARY KEY, name text NOT NULL, applied_at text NOT NULL)`)
 	if err != nil {
 		t.Fatalf("ensureSchemaMigrations returned error: %v", err)
 	}
@@ -73,7 +75,7 @@ VALUES ('99999999999999', 'future', '2026-05-21T12:00:00Z')`)
 		t.Fatalf("insert unknown migration: %v", err)
 	}
 
-	status, err := NewMigrationStatusChecker(testMigrationFS()).Check(context.Background(), env)
+	status, err := database.NewMigrationStatusChecker(testMigrationFS()).Check(context.Background(), env)
 	if err != nil {
 		t.Fatalf("Check returned error: %v", err)
 	}
@@ -109,7 +111,7 @@ func openMigrationStatusDB(t *testing.T, env UserEnvironment) *sql.DB {
 		t.Fatalf("MkdirAll returned error: %v", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		t.Fatalf("Open returned error: %v", err)
 	}

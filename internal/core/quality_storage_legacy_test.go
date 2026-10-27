@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 type qualityLegacyRecords struct {
@@ -42,7 +44,7 @@ func openQualityLegacyDB(t *testing.T) *sql.DB {
 	})
 	db.SetMaxOpenConns(1)
 
-	if err := configureSQLiteDatabase(t.Context(), db); err != nil {
+	if err := database.Configure(t.Context(), db); err != nil {
 		t.Fatal(err)
 	}
 
@@ -103,7 +105,7 @@ func TestQualityStorageLegacy(t *testing.T) {
 	db := openQualityLegacyDB(t)
 
 	before := qualityOwnerImages(t, db)
-	if err := NewMigrator(os.DirFS("../../cmd/chr")).Migrate(t.Context(), db); err != nil {
+	if err := database.NewMigrator(os.DirFS("../../cmd/chr")).Migrate(t.Context(), db); err != nil {
 		t.Fatal(err)
 	}
 

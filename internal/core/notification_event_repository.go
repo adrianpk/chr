@@ -11,6 +11,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ErrNotificationEventNotFound identifies a package boundary error.
@@ -50,19 +52,19 @@ func NewNotificationEventRepository(
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open notification event database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	repository, err := NewNotificationEventRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return repository, nil
@@ -74,7 +76,7 @@ func NewNotificationEventRepositoryFromDB(
 	db *sql.DB,
 	assetsFS fs.FS,
 ) (NotificationEventRepository, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -217,12 +219,12 @@ func scanNotificationAuditRecord(scanner notificationAuditScanner) (Notification
 
 	record := row.record
 
-	parsedCreatedAt, err := parseProjectTime(row.createdAt)
+	parsedCreatedAt, err := database.ParseTime(row.createdAt)
 	if err != nil {
 		return NotificationAuditRecord{}, err
 	}
 
-	parsedUpdatedAt, err := parseProjectTime(row.updatedAt)
+	parsedUpdatedAt, err := database.ParseTime(row.updatedAt)
 	if err != nil {
 		return NotificationAuditRecord{}, err
 	}
@@ -256,7 +258,7 @@ func formatOptionalNotificationTime(value *time.Time) any {
 		return nil
 	}
 
-	return formatProjectTime(*value)
+	return database.FormatTime(*value)
 }
 
 func parseOptionalNotificationTime(value sql.NullString) (*time.Time, error) {
@@ -264,7 +266,7 @@ func parseOptionalNotificationTime(value sql.NullString) (*time.Time, error) {
 		return nil, nil
 	}
 
-	parsed, err := parseProjectTime(value.String)
+	parsed, err := database.ParseTime(value.String)
 	if err != nil {
 		return nil, err
 	}

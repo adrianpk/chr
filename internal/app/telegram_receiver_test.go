@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func telegramAppTestReceiver(t *testing.T, api core.TelegramReceiverAPI) (telegramReceiver, core.TelegramReceiverConfig) {
@@ -256,7 +257,7 @@ func checkTelegramShutdownReleased(t *testing.T, env core.UserEnvironment) {
 		t.Fatal(err)
 	}
 
-	if _, err := os.Stat(core.UserDatabasePath(env)); err != nil {
+	if _, err := os.Stat(database.UserDatabasePath(env)); err != nil {
 		t.Fatal("shutdown lost durable state", err)
 	}
 }

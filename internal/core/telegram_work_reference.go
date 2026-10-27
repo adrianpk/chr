@@ -6,6 +6,8 @@ import (
 	"errors"
 	"math"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramWorkReference points to a confirmed admission and its current local
@@ -89,7 +91,7 @@ func (s *TelegramReceiverStore) ObserveTelegramWork(ctx context.Context, ref Tel
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		_, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET last_observed_revision=?,updated_at=? WHERE id=? AND revision=? AND invocation_id=? AND authorization_ref=? AND COALESCE(last_observed_revision,0)<=?`, revision, formatProjectTime(now), ref.Request.Target.ConversationID, ref.ConversationRevision, ref.Invocation.ID, ref.Request.ID, revision)
+		_, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET last_observed_revision=?,updated_at=? WHERE id=? AND revision=? AND invocation_id=? AND authorization_ref=? AND COALESCE(last_observed_revision,0)<=?`, revision, database.FormatTime(now), ref.Request.Target.ConversationID, ref.ConversationRevision, ref.Invocation.ID, ref.Request.ID, revision)
 
 		return err
 	})

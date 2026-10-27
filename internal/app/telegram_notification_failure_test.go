@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func installTelegramNotificationSender(t *testing.T, handler http.HandlerFunc) {
@@ -224,7 +225,7 @@ func checkTelegramNotificationBeforeIO(t *testing.T, query string) {
 		t.Fatal(err)
 	}
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(env))
 	if err != nil {
 		t.Fatal(err)
 	}

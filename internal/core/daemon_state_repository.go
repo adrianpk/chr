@@ -11,6 +11,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 const daemonStateID = "daemon"
@@ -39,19 +41,19 @@ func NewDaemonStateRepository(ctx context.Context, env UserEnvironment, assetsFS
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open daemon state database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	repository, err := NewDaemonStateRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return repository, nil
@@ -59,7 +61,7 @@ func NewDaemonStateRepository(ctx context.Context, env UserEnvironment, assetsFS
 
 // NewDaemonStateRepositoryFromDB constructs the corresponding package service or value.
 func NewDaemonStateRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (DaemonStateRepository, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -100,7 +102,7 @@ func (r *sqliteDaemonStateRepository) UpsertDaemonState(ctx context.Context, sta
 		formatOptionalDaemonTime(state.HeartbeatAt),
 		formatOptionalDaemonTime(state.StopRequestedAt),
 		state.FailureReason,
-		formatProjectTime(state.UpdatedAt),
+		database.FormatTime(state.UpdatedAt),
 	)
 	if err != nil {
 		return fmt.Errorf("upsert daemon state: %w", err)
@@ -114,8 +116,8 @@ func (r *sqliteDaemonStateRepository) UpdateDaemonHeartbeat(ctx context.Context,
 	result, err := r.db.ExecContext(
 		ctx,
 		`UPDATE daemon_state SET heartbeat_at = ?, updated_at = ? WHERE id = ?`,
-		formatProjectTime(heartbeatAt),
-		formatProjectTime(heartbeatAt),
+		database.FormatTime(heartbeatAt),
+		database.FormatTime(heartbeatAt),
 		daemonStateID,
 	)
 	if err != nil {
@@ -142,8 +144,8 @@ func (r *sqliteDaemonStateRepository) RequestDaemonStop(ctx context.Context, req
 SET status = ?, stop_requested_at = ?, updated_at = ?
 WHERE id = ? AND status IN (?, ?, ?)`,
 		string(DaemonStatusStopping),
-		formatProjectTime(requestedAt),
-		formatProjectTime(requestedAt),
+		database.FormatTime(requestedAt),
+		database.FormatTime(requestedAt),
 		daemonStateID,
 		string(DaemonStatusStarting),
 		string(DaemonStatusRunning),
@@ -214,7 +216,7 @@ func scanDaemonState(scanner daemonStateScanner) (DaemonState, error) {
 		return DaemonState{}, fmt.Errorf("unexpected daemon state id: %s", id)
 	}
 
-	parsedUpdatedAt, err := parseProjectTime(updatedAt)
+	parsedUpdatedAt, err := database.ParseTime(updatedAt)
 	if err != nil {
 		return DaemonState{}, err
 	}
@@ -266,7 +268,7 @@ func formatOptionalDaemonTime(value *time.Time) any {
 		return nil
 	}
 
-	return formatProjectTime(*value)
+	return database.FormatTime(*value)
 }
 
 func parseOptionalDaemonTime(value sql.NullString) (*time.Time, error) {
@@ -274,7 +276,7 @@ func parseOptionalDaemonTime(value sql.NullString) (*time.Time, error) {
 		return nil, nil
 	}
 
-	parsed, err := parseProjectTime(value.String)
+	parsed, err := database.ParseTime(value.String)
 	if err != nil {
 		return nil, err
 	}

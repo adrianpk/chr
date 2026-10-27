@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramPresentationConfirmationMigration restores the actual old action
@@ -19,7 +21,7 @@ func TestTelegramPresentationConfirmationMigration(t *testing.T) {
 
 	execTelegramRecoverySQL(t, f.store, "UPDATE telegram_outbox SET state='uncertain',attempts=2,total_attempts=2 WHERE action_token=?", action.Token)
 
-	migrations, err := ReadSQLiteMigrations(telegramRecoveryMigrationAssets(t))
+	migrations, err := database.ReadSQLiteMigrations(telegramRecoveryMigrationAssets(t))
 	if err != nil {
 		t.Fatal(err)
 	}

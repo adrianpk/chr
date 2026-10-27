@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // Legacy dispatch uses the persisted original payload and old sender contract.
@@ -68,7 +69,7 @@ func checkTelegramLegacyNotificationDispatch(t *testing.T, manifest string) {
 func setTelegramLegacyNotificationManifest(t *testing.T, env core.UserEnvironment, manifest string) {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(env))
 	if err != nil {
 		t.Fatal(err)
 	}

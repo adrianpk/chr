@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramControlReplyBinding keeps an early reply pending until the sender
@@ -99,7 +101,7 @@ func TestTelegramControlReplyExhaustion(t *testing.T) {
 		{"exhausted", -time.Minute, ErrTelegramActionUnavailable},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if _, err := f.store.db.ExecContext(t.Context(), `UPDATE telegram_outbox SET attempts=5,retry_at=? WHERE id=?`, formatProjectTime(time.Now().Add(test.delay)), delivery.ID); err != nil {
+			if _, err := f.store.db.ExecContext(t.Context(), `UPDATE telegram_outbox SET attempts=5,retry_at=? WHERE id=?`, database.FormatTime(time.Now().Add(test.delay)), delivery.ID); err != nil {
 				t.Fatal(err)
 			}
 

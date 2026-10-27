@@ -11,6 +11,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ErrExecutionNotFound identifies a package boundary error.
@@ -55,19 +57,19 @@ func NewExecutionRepository(ctx context.Context, env UserEnvironment, assetsFS f
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open execution database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	repository, err := NewExecutionRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return repository, nil
@@ -75,7 +77,7 @@ func NewExecutionRepository(ctx context.Context, env UserEnvironment, assetsFS f
 
 // NewExecutionRepositoryFromDB constructs the corresponding package service or value.
 func NewExecutionRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ExecutionRepository, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -248,12 +250,12 @@ func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
 }
 
 func parseExecutionRecordTimes(createdAt, updatedAt string, startedAt, finishedAt sql.NullString) (executionRecordTimes, error) {
-	parsedCreatedAt, err := parseProjectTime(createdAt)
+	parsedCreatedAt, err := database.ParseTime(createdAt)
 	if err != nil {
 		return executionRecordTimes{}, err
 	}
 
-	parsedUpdatedAt, err := parseProjectTime(updatedAt)
+	parsedUpdatedAt, err := database.ParseTime(updatedAt)
 	if err != nil {
 		return executionRecordTimes{}, err
 	}
@@ -293,7 +295,7 @@ func formatOptionalExecutionTime(value *time.Time) any {
 		return nil
 	}
 
-	return formatProjectTime(*value)
+	return database.FormatTime(*value)
 }
 
 func parseOptionalExecutionTime(value sql.NullString) (*time.Time, error) {
@@ -301,7 +303,7 @@ func parseOptionalExecutionTime(value sql.NullString) (*time.Time, error) {
 		return nil, nil
 	}
 
-	parsed, err := parseProjectTime(value.String)
+	parsed, err := database.ParseTime(value.String)
 	if err != nil {
 		return nil, err
 	}

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramInterpretation retains resolution independently of application effects.
@@ -49,7 +51,7 @@ func (s *TelegramReceiverStore) ResolveTelegramInterpretation(ctx context.Contex
 	if callErr != nil {
 		result.ErrorCode = telegramInterpretationFailure(callErr)
 		result.RetryAt = time.Now().UTC().Add(time.Second * time.Duration(1<<(result.Attempts-1)))
-		_, err = s.db.ExecContext(finishCtx, `UPDATE telegram_updates SET interpretation_retry_at=?,interpretation_error_code=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND interpretation_attempt=?`, formatProjectTime(result.RetryAt), result.ErrorCode, update.Peer.BotID, update.UpdateID, update.Digest, result.Attempts)
+		_, err = s.db.ExecContext(finishCtx, `UPDATE telegram_updates SET interpretation_retry_at=?,interpretation_error_code=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND interpretation_attempt=?`, database.FormatTime(result.RetryAt), result.ErrorCode, update.Peer.BotID, update.UpdateID, update.Digest, result.Attempts)
 
 		return result, err
 	}
@@ -112,7 +114,7 @@ func (s *TelegramReceiverStore) reserveTelegramInterpretation(ctx context.Contex
 
 		result.Attempts++
 		result.RetryAt = now.Add(61 * time.Second)
-		_, err = tx.ExecContext(ctx, `UPDATE telegram_updates SET interpretation_attempt=?,interpretation_retry_at=?,interpretation_error_code='interrupted' WHERE bot_id=? AND update_id=? AND payload_digest=?`, result.Attempts, formatProjectTime(result.RetryAt), update.Peer.BotID, update.UpdateID, update.Digest)
+		_, err = tx.ExecContext(ctx, `UPDATE telegram_updates SET interpretation_attempt=?,interpretation_retry_at=?,interpretation_error_code='interrupted' WHERE bot_id=? AND update_id=? AND payload_digest=?`, result.Attempts, database.FormatTime(result.RetryAt), update.Peer.BotID, update.UpdateID, update.Digest)
 		ready = err == nil
 
 		return err

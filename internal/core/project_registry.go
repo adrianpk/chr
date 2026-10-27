@@ -8,12 +8,11 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"time"
 
 	_ "modernc.org/sqlite"
-)
 
-const userDatabaseName = "core.db"
+	"forge.adrianpk.com/chr/internal/core/database"
+)
 
 // ErrProjectNotFound identifies a package boundary error.
 var ErrProjectNotFound = errors.New("project not found")
@@ -44,21 +43,21 @@ func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open project registry database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err = migrator.Migrate(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, fmt.Errorf("migrate project registry database: %w", err))
+		return nil, database.CloseOnError(db, fmt.Errorf("migrate project registry database: %w", err))
 	}
 
 	return &sqliteProjectRegistry{db: db}, nil
@@ -66,7 +65,7 @@ func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS
 
 // NewProjectRegistryFromDB constructs the corresponding package service or value.
 func NewProjectRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ProjectRegistry, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -96,9 +95,9 @@ func (r *sqliteProjectRegistry) AddProject(ctx context.Context, project Project)
 		project.ID,
 		project.Name,
 		project.Path,
-		boolToInt(project.Enabled),
-		formatProjectTime(project.RegisteredAt),
-		formatOptionalProjectTime(project.LastIndexedAt),
+		database.BoolInt(project.Enabled),
+		database.FormatTime(project.RegisteredAt),
+		database.OptionalTime(project.LastIndexedAt),
 	)
 	if err != nil {
 		return fmt.Errorf("add project: %w", err)
@@ -266,7 +265,7 @@ func scanProject(scanner projectScanner) (Project, error) {
 		return Project{}, fmt.Errorf("scan project: %w", err)
 	}
 
-	parsedRegisteredAt, err := parseProjectTime(registeredAt)
+	parsedRegisteredAt, err := database.ParseTime(registeredAt)
 	if err != nil {
 		return Project{}, err
 	}
@@ -275,7 +274,7 @@ func scanProject(scanner projectScanner) (Project, error) {
 	project.RegisteredAt = parsedRegisteredAt
 
 	if lastIndexedAt.Valid {
-		parsedLastIndexedAt, err := parseProjectTime(lastIndexedAt.String)
+		parsedLastIndexedAt, err := database.ParseTime(lastIndexedAt.String)
 		if err != nil {
 			return Project{}, err
 		}
@@ -304,42 +303,4 @@ func validateProject(project Project) error {
 	}
 
 	return nil
-}
-
-func formatProjectTime(value time.Time) string {
-	return value.UTC().Format(time.RFC3339)
-}
-
-func formatOptionalProjectTime(value *time.Time) any {
-	if value == nil {
-		return nil
-	}
-
-	return formatProjectTime(*value)
-}
-
-func parseProjectTime(value string) (time.Time, error) {
-	parsed, err := time.Parse(time.RFC3339, value)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("parse project timestamp: %w", err)
-	}
-
-	return parsed, nil
-}
-
-func boolToInt(value bool) int {
-	if value {
-		return 1
-	}
-
-	return 0
-}
-
-func closeDBWithError(db *sql.DB, err error) error {
-	closeErr := db.Close()
-	if closeErr != nil {
-		return fmt.Errorf("%w; close database failed: %w", err, closeErr)
-	}
-
-	return err
 }

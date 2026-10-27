@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramPresentationConfirmationGuards rejects altered scope or retained
@@ -27,7 +29,7 @@ func changeTelegramConfirmation(t *testing.T, f *telegramConversationFixture, ac
 	case "document bytes":
 		execTelegramRecoverySQL(t, f.store, "UPDATE telegram_document_snapshots SET payload=zeroblob(byte_count)")
 	case "missing document":
-		execTelegramRecoverySQL(t, f.store, "UPDATE telegram_document_snapshots SET payload=NULL,purged_at=?", formatProjectTime(time.Now()))
+		execTelegramRecoverySQL(t, f.store, "UPDATE telegram_document_snapshots SET payload=NULL,purged_at=?", database.FormatTime(time.Now()))
 	case "source binding":
 		execTelegramRecoverySQL(t, f.store, `UPDATE telegram_requests SET prepared_input='{"reserved_id":"PRJ-2"}' WHERE id=?`, action.RequestID)
 	case "keyboard choices":

@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ErrTelegramReplyPending retains an early reply while its exact peer's sender
@@ -30,7 +32,7 @@ func resolveTelegramReplyBinding(ctx context.Context, reader telegramConversatio
 
 	var sending int
 
-	err = reader.QueryRowContext(ctx, `SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND conversation_id IS NOT NULL AND state='sending' AND (attempts<5 OR retry_at>?)`, p.BotID, p.ChatID, p.TopicID, p.UserID, formatProjectTime(time.Now())).Scan(&sending)
+	err = reader.QueryRowContext(ctx, `SELECT COUNT(*) FROM telegram_outbox WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND conversation_id IS NOT NULL AND state='sending' AND (attempts<5 OR retry_at>?)`, p.BotID, p.ChatID, p.TopicID, p.UserID, database.FormatTime(time.Now())).Scan(&sending)
 	if sending > 0 {
 		return telegramReplyWaiting, err
 	}

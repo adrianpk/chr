@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
@@ -78,7 +80,7 @@ func retainedTelegramActionClaim(ctx context.Context, tx *sql.Tx, claim Telegram
 func finishTelegramActionRequests(ctx context.Context, tx *sql.Tx, claim TelegramActionClaim, result TelegramActionResult, now time.Time) error {
 	recovery := confirmedTelegramControlReceipt(claim, result)
 	for _, request := range []TelegramOperationRequest{claim.Request, claim.Answer} {
-		changed, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND (state='applying' OR (? AND state='blocked'))`, result.State, result.ReceiptRef, string(result.Facts), formatProjectTime(now), request.ID, request.ArgumentDigest, recovery)
+		changed, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND (state='applying' OR (? AND state='blocked'))`, result.State, result.ReceiptRef, string(result.Facts), database.FormatTime(now), request.ID, request.ArgumentDigest, recovery)
 		if err != nil {
 			return err
 		}
@@ -97,7 +99,7 @@ func finishTelegramActionState(ctx context.Context, tx *sql.Tx, claim TelegramAc
 		actionState = "superseded"
 	}
 
-	changed, err := tx.ExecContext(ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND (state='applying' OR (? AND state IN ('expired','superseded'))) AND consumed_by_request=?`, actionState, formatProjectTime(now), claim.Action.Token, confirmedTelegramControlReceipt(claim, result), claim.Answer.ID)
+	changed, err := tx.ExecContext(ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND (state='applying' OR (? AND state IN ('expired','superseded'))) AND consumed_by_request=?`, actionState, database.FormatTime(now), claim.Action.Token, confirmedTelegramControlReceipt(claim, result), claim.Answer.ID)
 	if err != nil {
 		return err
 	}
@@ -106,7 +108,7 @@ func finishTelegramActionState(ctx context.Context, tx *sql.Tx, claim TelegramAc
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `UPDATE telegram_replies SET invalidated_at=? WHERE action_token=? AND invalidated_at IS NULL`, formatProjectTime(now), claim.Action.Token)
+	_, err = tx.ExecContext(ctx, `UPDATE telegram_replies SET invalidated_at=? WHERE action_token=? AND invalidated_at IS NULL`, database.FormatTime(now), claim.Action.Token)
 
 	return err
 }
@@ -116,7 +118,7 @@ func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained Telegr
 		return err
 	}
 
-	if err := projectTelegramWorkBinding(ctx, tx, retained.Request, result, formatProjectTime(now)); err != nil {
+	if err := projectTelegramWorkBinding(ctx, tx, retained.Request, result, database.FormatTime(now)); err != nil {
 		return err
 	}
 
@@ -124,7 +126,7 @@ func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained Telegr
 		return ErrWorkflowConflict
 	}
 
-	if err := projectTelegramAuthoringWorkPhase(ctx, tx, retained.Request, result.ConversationPhase, formatProjectTime(now)); err != nil {
+	if err := projectTelegramAuthoringWorkPhase(ctx, tx, retained.Request, result.ConversationPhase, database.FormatTime(now)); err != nil {
 		return err
 	}
 

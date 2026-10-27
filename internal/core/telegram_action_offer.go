@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // OfferTelegramAction atomically checkpoints a prompt, acknowledges its source and
@@ -48,7 +50,7 @@ func (s *TelegramReceiverStore) OfferTelegramAction(ctx context.Context, offer T
 			return err
 		}
 
-		return projectTelegramAuthoringWorkPhase(ctx, tx, request, offer.ConversationPhase, formatProjectTime(now))
+		return projectTelegramAuthoringWorkPhase(ctx, tx, request, offer.ConversationPhase, database.FormatTime(now))
 	})
 
 	return action, err
@@ -77,7 +79,7 @@ func retainTelegramAction(op telegramConversationTransaction, request TelegramOp
 
 	p := request.Source.Peer
 
-	_, err = op.tx.ExecContext(op.ctx, `INSERT INTO telegram_actions(token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,'pending',?,?,?)`, token, request.ID, p.BotID, p.ChatID, p.TopicID, p.UserID, request.Target.ConversationRevision, telegramActionGuard(request), string(choices), formatProjectTime(offer.ExpiresAt), formatProjectTime(op.now), formatProjectTime(op.now))
+	_, err = op.tx.ExecContext(op.ctx, `INSERT INTO telegram_actions(token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,'pending',?,?,?)`, token, request.ID, p.BotID, p.ChatID, p.TopicID, p.UserID, request.Target.ConversationRevision, telegramActionGuard(request), string(choices), database.FormatTime(offer.ExpiresAt), database.FormatTime(op.now), database.FormatTime(op.now))
 	if err != nil {
 		return TelegramAction{}, err
 	}
@@ -94,7 +96,7 @@ func retainTelegramAction(op telegramConversationTransaction, request TelegramOp
 }
 
 func queueTelegramActionPrompt(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token string) error {
-	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_requests SET state='awaiting_confirmation',updated_at=? WHERE id=? AND state='ready'`, formatProjectTime(op.now), request.ID)
+	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_requests SET state='awaiting_confirmation',updated_at=? WHERE id=? AND state='ready'`, database.FormatTime(op.now), request.ID)
 	if err != nil {
 		return err
 	}

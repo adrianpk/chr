@@ -7,6 +7,8 @@ import (
 	"testing"
 	"testing/fstest"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // A pending plain reply created before format support remains unchanged after migration.
@@ -26,7 +28,7 @@ func TestTelegramHelpLegacyMigration(t *testing.T) {
 	}
 	// Seed the old representation directly: new queue code requires the new columns.
 	_, err = store.db.ExecContext(t.Context(), `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at)
- VALUES('legacy-help',12345,100001,0,100001,'update:1',?,'result','legacy plain help','pending',?,?)`, config.Digest(), formatProjectTime(now), formatProjectTime(now))
+ VALUES('legacy-help',12345,100001,0,100001,'update:1',?,'result','legacy plain help','pending',?,?)`, config.Digest(), database.FormatTime(now), database.FormatTime(now))
 	if err != nil {
 		t.Fatal(err)
 	}

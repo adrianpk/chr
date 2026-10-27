@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramRecoveryPollEpoch checks the actual HTTP poll after a long
@@ -67,7 +68,7 @@ func telegramRecoveryEpochServer(t *testing.T, polled chan<- map[string]json.Raw
 func expireTelegramRecoveryCursor(t *testing.T, receiver telegramReceiver) {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(receiver.env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(receiver.env))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // QueueDocumentResponse atomically freezes a primary document with its source
@@ -117,7 +119,7 @@ func purgeTelegramDocuments(ctx context.Context, tx *sql.Tx, botID int64, now ti
 	_, err := tx.ExecContext(ctx, `UPDATE telegram_document_snapshots AS d SET payload=NULL,purged_at=? WHERE d.id IN (
  SELECT s.id FROM telegram_document_snapshots s WHERE s.bot_id=? AND s.payload IS NOT NULL AND s.terminal_at IS NOT NULL AND s.terminal_at<=?
  AND NOT EXISTS(SELECT 1 FROM telegram_outbox o WHERE o.document_id=s.id AND (o.state!='delivered' OR EXISTS(SELECT 1 FROM telegram_actions a WHERE a.token=o.action_token AND a.state IN ('pending','applying'))))
- ORDER BY s.terminal_at,s.id LIMIT 20)`, formatProjectTime(now), botID, formatProjectTime(now.Add(-7*24*time.Hour)))
+ ORDER BY s.terminal_at,s.id LIMIT 20)`, database.FormatTime(now), botID, database.FormatTime(now.Add(-7*24*time.Hour)))
 
 	return err
 }

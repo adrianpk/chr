@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramDeliveryDiagnostic exposes bounded metadata, never message bodies.
@@ -33,7 +35,7 @@ type TelegramReceiverDiagnostics struct {
 
 // InspectTelegramReceiverDiagnostics reads without migration or network IO.
 func InspectTelegramReceiverDiagnostics(ctx context.Context, env UserEnvironment, botID int64) (result TelegramReceiverDiagnostics, err error) {
-	db, err := openUserDatabaseReadOnly(ctx, env)
+	db, err := database.OpenReadOnly(ctx, env)
 	if err != nil {
 		return result, err
 	}
@@ -75,14 +77,14 @@ func readTelegramDeliveryDiagnostics(ctx context.Context, db *sql.DB, botID int6
 		}
 
 		if retryAt != "" {
-			item.RetryAt, err = parseProjectTime(retryAt)
+			item.RetryAt, err = database.ParseTime(retryAt)
 			if err != nil {
 				return result, err
 			}
 		}
 
 		if started != "" {
-			item.RetryStartedAt, err = parseProjectTime(started)
+			item.RetryStartedAt, err = database.ParseTime(started)
 			if err != nil {
 				return result, err
 			}

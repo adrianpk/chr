@@ -7,6 +7,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramProcessingLane bounds adapter calls independently of native workers.
@@ -177,7 +179,7 @@ FROM telegram_updates u WHERE u.bot_id=? AND u.state='pending' AND u.processing_
 AND (u.interpretation IS NOT NULL OR u.interpretation_attempt>=5 OR u.interpretation_retry_at IS NULL OR u.interpretation_retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_requests r WHERE r.bot_id=u.bot_id AND r.update_id=u.update_id AND r.state='applying' AND r.model_result IS NULL AND r.model_attempt<5 AND r.model_retry_at>?)
 AND (u.processing_lane!='ordinary' OR NOT EXISTS(SELECT 1 FROM telegram_updates earlier WHERE earlier.bot_id=u.bot_id AND earlier.chat_id=u.chat_id AND earlier.topic_id=u.topic_id AND earlier.user_id=u.user_id AND earlier.state='pending' AND earlier.processing_lane='ordinary' AND earlier.update_id<u.update_id))
-ORDER BY CASE WHEN u.processing_lane='decision' THEN u.control_input ELSE 0 END DESC,u.update_id LIMIT 50`, botID, lane, formatProjectTime(now), formatProjectTime(now))
+ORDER BY CASE WHEN u.processing_lane='decision' THEN u.control_input ELSE 0 END DESC,u.update_id LIMIT 50`, botID, lane, database.FormatTime(now), database.FormatTime(now))
 	if err != nil {
 		return nil, err
 	}

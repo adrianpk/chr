@@ -3,6 +3,8 @@ package core
 import (
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // Existing plain and legacy-Markdown deliveries keep their exact text, fallback
@@ -34,7 +36,7 @@ func TestTelegramPresentationFormatMigration(t *testing.T) {
 		{"old-help", "*Original help*", "Markdown", "Original help", 1},
 	} {
 		_, err := store.db.ExecContext(t.Context(), `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,attempts,total_attempts,parse_mode,plain_text,plain_fallback,created_at,updated_at)
- VALUES(?,12345,100001,0,100001,?,?,'result',?,'uncertain',2,2,?,?,?,?,?)`, item.id, item.id, config.Digest(), item.text, item.mode, item.plain, item.fallback, formatProjectTime(now), formatProjectTime(now))
+ VALUES(?,12345,100001,0,100001,?,?,'result',?,'uncertain',2,2,?,?,?,?,?)`, item.id, item.id, config.Digest(), item.text, item.mode, item.plain, item.fallback, database.FormatTime(now), database.FormatTime(now))
 		if err != nil {
 			t.Fatal(err)
 		}

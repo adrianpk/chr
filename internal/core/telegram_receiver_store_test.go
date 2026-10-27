@@ -7,6 +7,8 @@ import (
 	"testing"
 	"testing/fstest"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func openTelegramReceiverTestStore(t *testing.T, env UserEnvironment) *TelegramReceiverStore {
@@ -290,7 +292,7 @@ func TestTelegramReceiverOutboxCapacity(t *testing.T) {
 	_, err := store.db.ExecContext(t.Context(), `WITH RECURSIVE n(id) AS (SELECT 1 UNION ALL SELECT id+1 FROM n WHERE id<1024)
 INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,state,created_at,updated_at)
 SELECT 'existing-'||id,12345,100001,0,100001,'existing:'||id,?,'result','retained','pending',?,? FROM n`,
-		telegramReceiverTestConfig().Digest(), formatProjectTime(now), formatProjectTime(now))
+		telegramReceiverTestConfig().Digest(), database.FormatTime(now), database.FormatTime(now))
 	if err != nil {
 		t.Fatal(err)
 	}

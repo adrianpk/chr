@@ -11,6 +11,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ErrLoopRunNotFound identifies a package boundary error.
@@ -36,19 +38,19 @@ func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open loop run database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	repository, err := NewLoopRunRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return repository, nil
@@ -56,7 +58,7 @@ func NewLoopRunRepository(ctx context.Context, env UserEnvironment, assetsFS fs.
 
 // NewLoopRunRepositoryFromDB constructs the corresponding package service or value.
 func NewLoopRunRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (LoopRunRepository, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -84,10 +86,10 @@ func (r *sqliteLoopRunRepository) CreateLoopRun(ctx context.Context, record Loop
 		record.BlockedCount,
 		record.FailedCount,
 		record.FailureReason,
-		formatProjectTime(record.CreatedAt),
+		database.FormatTime(record.CreatedAt),
 		formatOptionalLoopRunTime(record.StartedAt),
 		formatOptionalLoopRunTime(record.FinishedAt),
-		formatProjectTime(record.UpdatedAt),
+		database.FormatTime(record.UpdatedAt),
 	)
 	if err != nil {
 		return fmt.Errorf("create loop run: %w", err)
@@ -113,10 +115,10 @@ func (r *sqliteLoopRunRepository) UpdateLoopRun(ctx context.Context, record Loop
 		record.BlockedCount,
 		record.FailedCount,
 		record.FailureReason,
-		formatProjectTime(record.CreatedAt),
+		database.FormatTime(record.CreatedAt),
 		formatOptionalLoopRunTime(record.StartedAt),
 		formatOptionalLoopRunTime(record.FinishedAt),
-		formatProjectTime(record.UpdatedAt),
+		database.FormatTime(record.UpdatedAt),
 		record.ID,
 	)
 	if err != nil {
@@ -229,12 +231,12 @@ func scanLoopRun(scanner loopRunScanner) (LoopRunRecord, error) {
 		return LoopRunRecord{}, fmt.Errorf("scan loop run: %w", err)
 	}
 
-	parsedCreatedAt, err := parseProjectTime(createdAt)
+	parsedCreatedAt, err := database.ParseTime(createdAt)
 	if err != nil {
 		return LoopRunRecord{}, err
 	}
 
-	parsedUpdatedAt, err := parseProjectTime(updatedAt)
+	parsedUpdatedAt, err := database.ParseTime(updatedAt)
 	if err != nil {
 		return LoopRunRecord{}, err
 	}
@@ -283,7 +285,7 @@ func formatOptionalLoopRunTime(value *time.Time) any {
 		return nil
 	}
 
-	return formatProjectTime(*value)
+	return database.FormatTime(*value)
 }
 
 func parseOptionalLoopRunTime(value sql.NullString) (*time.Time, error) {
@@ -291,7 +293,7 @@ func parseOptionalLoopRunTime(value sql.NullString) (*time.Time, error) {
 		return nil, nil
 	}
 
-	parsed, err := parseProjectTime(value.String)
+	parsed, err := database.ParseTime(value.String)
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // PrepareTelegramOperation checkpoints the exact owner input before application.
@@ -15,7 +17,7 @@ func (s *TelegramReceiverStore) PrepareTelegramOperation(ctx context.Context, re
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET prepared_input=?,domain_guard=?,state='ready',updated_at=? WHERE id=? AND argument_digest=? AND state='prepared' AND prepared_input IS NULL`, string(input), workflowHash(input), formatProjectTime(now), request.ID, request.ArgumentDigest)
+		result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET prepared_input=?,domain_guard=?,state='ready',updated_at=? WHERE id=? AND argument_digest=? AND state='prepared' AND prepared_input IS NULL`, string(input), workflowHash(input), database.FormatTime(now), request.ID, request.ArgumentDigest)
 		if err != nil {
 			return err
 		}
@@ -30,7 +32,7 @@ func (s *TelegramReceiverStore) PrepareTelegramOperation(ctx context.Context, re
 
 // BeginTelegramOperation persists application intent without spanning the owner call.
 func (s *TelegramReceiverStore) BeginTelegramOperation(ctx context.Context, request TelegramOperationRequest, now time.Time) error {
-	result, err := s.db.ExecContext(ctx, `UPDATE telegram_requests SET state='applying',updated_at=? WHERE id=? AND argument_digest=? AND state IN ('ready','applying') AND prepared_input=? AND domain_guard=?`, formatProjectTime(now), request.ID, request.ArgumentDigest, string(request.PreparedInput), workflowHash(request.PreparedInput))
+	result, err := s.db.ExecContext(ctx, `UPDATE telegram_requests SET state='applying',updated_at=? WHERE id=? AND argument_digest=? AND state IN ('ready','applying') AND prepared_input=? AND domain_guard=?`, database.FormatTime(now), request.ID, request.ArgumentDigest, string(request.PreparedInput), workflowHash(request.PreparedInput))
 	if err != nil {
 		return err
 	}
@@ -56,7 +58,7 @@ func (s *TelegramReceiverStore) FinishTelegramOperation(ctx context.Context, req
 }
 
 func finishTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, state, receipt string, facts json.RawMessage, text, configDigest string, now time.Time) error {
-	result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND ((?='confirmed' AND state='applying') OR (?='rejected' AND state='prepared') OR (?='blocked' AND state IN ('prepared','ready','applying'))) `, state, receipt, string(facts), formatProjectTime(now), request.ID, request.ArgumentDigest, state, state, state)
+	result, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET state=?,domain_receipt_ref=NULLIF(?,''),result=?,updated_at=? WHERE id=? AND argument_digest=? AND ((?='confirmed' AND state='applying') OR (?='rejected' AND state='prepared') OR (?='blocked' AND state IN ('prepared','ready','applying'))) `, state, receipt, string(facts), database.FormatTime(now), request.ID, request.ArgumentDigest, state, state, state)
 	if err != nil {
 		return err
 	}

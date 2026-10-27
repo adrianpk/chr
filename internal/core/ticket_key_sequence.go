@@ -11,6 +11,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TicketKeySequenceRepository defines a package boundary interface.
@@ -42,19 +44,19 @@ func NewTicketKeySequenceRepository(
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open ticket key sequence database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	repository, err := NewTicketKeySequenceRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return repository, nil
@@ -66,7 +68,7 @@ func NewTicketKeySequenceRepositoryFromDB(
 	db *sql.DB,
 	assetsFS fs.FS,
 ) (TicketKeySequenceRepository, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -100,7 +102,7 @@ func (r *sqliteTicketKeySequenceRepository) ReserveNextTicketKey(
 
 	nextNumber, err := reserveNextTicketKey(ctx, tx, opts)
 	if err != nil {
-		return 0, rollbackWithError(tx, err)
+		return 0, database.RollbackOnError(tx, err)
 	}
 
 	err = tx.Commit()
@@ -155,7 +157,7 @@ func updateExistingTicketKeySequence(
 SET next_number = ?, updated_at = ?
 WHERE project_id = ? AND prefix = ?`,
 		reservedNumber+1,
-		formatProjectTime(opts.UpdatedAt),
+		database.FormatTime(opts.UpdatedAt),
 		opts.ProjectID,
 		opts.Prefix,
 	)
@@ -174,7 +176,7 @@ VALUES (?, ?, ?, ?)`,
 		opts.ProjectID,
 		opts.Prefix,
 		opts.Seed+1,
-		formatProjectTime(opts.UpdatedAt),
+		database.FormatTime(opts.UpdatedAt),
 	)
 	if err != nil {
 		return 0, fmt.Errorf("create ticket key sequence: %w", err)

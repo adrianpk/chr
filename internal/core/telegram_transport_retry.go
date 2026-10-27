@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramTransportRetry names one exhausted transport cycle. It cannot reset
@@ -71,7 +73,7 @@ func (s *TelegramReceiverStore) retryTelegramTransport(ctx context.Context, requ
 			return retryTelegramPoll(ctx, tx, request, now)
 		}
 
-		result, err := tx.ExecContext(ctx, `UPDATE telegram_outbox SET state='pending',attempts=0,retry_at=NULL,last_error_code='',retry_cycle=retry_cycle+1,retry_actor=?,retry_started_at=?,updated_at=? WHERE id=? AND bot_id=? AND state!='delivered' AND (state='blocked' OR attempts=5)`, request.Actor, formatProjectTime(now), formatProjectTime(now), request.DeliveryID, request.BotID)
+		result, err := tx.ExecContext(ctx, `UPDATE telegram_outbox SET state='pending',attempts=0,retry_at=NULL,last_error_code='',retry_cycle=retry_cycle+1,retry_actor=?,retry_started_at=?,updated_at=? WHERE id=? AND bot_id=? AND state!='delivered' AND (state='blocked' OR attempts=5)`, request.Actor, database.FormatTime(now), database.FormatTime(now), request.DeliveryID, request.BotID)
 		if err != nil {
 			return err
 		}
@@ -81,7 +83,7 @@ func (s *TelegramReceiverStore) retryTelegramTransport(ctx context.Context, requ
 }
 
 func retryTelegramPoll(ctx context.Context, tx *sql.Tx, request TelegramTransportRetry, now time.Time) error {
-	result, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET health='degraded',retry_attempt=0,retry_at=NULL,last_error_code='',retry_cycle=retry_cycle+1,retry_actor=?,retry_started_at=?,updated_at=? WHERE bot_id=? AND schema_version=1 AND (health='blocked' OR retry_attempt=5)`, request.Actor, formatProjectTime(now), formatProjectTime(now), request.BotID)
+	result, err := tx.ExecContext(ctx, `UPDATE telegram_receivers SET health='degraded',retry_attempt=0,retry_at=NULL,last_error_code='',retry_cycle=retry_cycle+1,retry_actor=?,retry_started_at=?,updated_at=? WHERE bot_id=? AND schema_version=1 AND (health='blocked' OR retry_attempt=5)`, request.Actor, database.FormatTime(now), database.FormatTime(now), request.BotID)
 	if err != nil {
 		return err
 	}

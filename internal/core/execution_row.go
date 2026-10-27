@@ -1,6 +1,10 @@
 package core
 
-import "database/sql"
+import (
+	"database/sql"
+
+	"forge.adrianpk.com/chr/internal/core/database"
+)
 
 // executionRow pairs the stored column order with domain values and raw scan conversions.
 type executionRow struct {
@@ -43,10 +47,10 @@ func (row executionRow) values() []any {
 		record.Artifacts.LogPath,
 		record.Artifacts.ValidationPath,
 		record.FailureReason,
-		formatProjectTime(record.CreatedAt),
+		database.FormatTime(record.CreatedAt),
 		formatOptionalExecutionTime(record.StartedAt),
 		formatOptionalExecutionTime(record.FinishedAt),
-		formatProjectTime(record.UpdatedAt),
+		database.FormatTime(record.UpdatedAt),
 	}
 }
 

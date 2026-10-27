@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramOperationRequest retains one complete transport binding before dispatch.
@@ -190,7 +192,7 @@ func reservePreparedTelegramOperation(ctx context.Context, tx *sql.Tx, request T
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `UPDATE telegram_requests SET prepared_input=?,domain_guard=?,state='ready',updated_at=? WHERE id=? AND argument_digest=? AND state='prepared' AND prepared_input IS NULL`, string(input), workflowHash(input), formatProjectTime(now), request.ID, request.ArgumentDigest)
+	_, err = tx.ExecContext(ctx, `UPDATE telegram_requests SET prepared_input=?,domain_guard=?,state='ready',updated_at=? WHERE id=? AND argument_digest=? AND state='prepared' AND prepared_input IS NULL`, string(input), workflowHash(input), database.FormatTime(now), request.ID, request.ArgumentDigest)
 	if err != nil {
 		return err
 	}
@@ -211,7 +213,7 @@ func insertTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOp
 		return err
 	}
 
-	_, err := tx.ExecContext(ctx, `INSERT INTO telegram_requests(id,bot_id,update_id,operation_ordinal,operator_id,project_id,project_binding_digest,namespace,conversation_id,expected_conversation_revision,operation_id,arguments,argument_digest,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,NULLIF(?,''),NULLIF(?,0),?,?,?,'prepared',?,?) ON CONFLICT(bot_id,update_id,operation_ordinal) DO NOTHING`, request.ID, request.Source.Peer.BotID, request.Source.UpdateID, request.Ordinal, request.Operator, request.Target.ProjectID, request.Target.ProjectBindingDigest, request.Target.Namespace, request.Target.ConversationID, request.Target.ConversationRevision, request.OperationID, string(request.Arguments), request.ArgumentDigest, formatProjectTime(now), formatProjectTime(now))
+	_, err := tx.ExecContext(ctx, `INSERT INTO telegram_requests(id,bot_id,update_id,operation_ordinal,operator_id,project_id,project_binding_digest,namespace,conversation_id,expected_conversation_revision,operation_id,arguments,argument_digest,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,NULLIF(?,''),NULLIF(?,0),?,?,?,'prepared',?,?) ON CONFLICT(bot_id,update_id,operation_ordinal) DO NOTHING`, request.ID, request.Source.Peer.BotID, request.Source.UpdateID, request.Ordinal, request.Operator, request.Target.ProjectID, request.Target.ProjectBindingDigest, request.Target.Namespace, request.Target.ConversationID, request.Target.ConversationRevision, request.OperationID, string(request.Arguments), request.ArgumentDigest, database.FormatTime(now), database.FormatTime(now))
 	if err != nil {
 		return err
 	}

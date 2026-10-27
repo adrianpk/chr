@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramBoundBotID reads the local verified binding without claiming receiver ownership.
@@ -25,7 +27,7 @@ func TelegramBoundBotID(env UserEnvironment) (int64, error) {
 
 // InspectTelegramReceiver reads local status without migrations, network calls or state creation.
 func InspectTelegramReceiver(ctx context.Context, env UserEnvironment, botID int64) (state TelegramReceiverState, err error) {
-	db, err := openUserDatabaseReadOnly(ctx, env)
+	db, err := database.OpenReadOnly(ctx, env)
 	if err != nil {
 		return state, err
 	}

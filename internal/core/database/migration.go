@@ -1,4 +1,5 @@
-package core
+// Package database owns the existing user SQLite schema and connection rules.
+package database
 
 import (
 	"context"
@@ -125,7 +126,7 @@ func (m *migrator) applyMigration(ctx context.Context, db *sql.DB, migration Mig
 
 	_, err = tx.ExecContext(ctx, migration.UpSQL)
 	if err != nil {
-		return rollbackWithError(tx, fmt.Errorf("apply migration %s: %w", migration.Version, err))
+		return RollbackOnError(tx, fmt.Errorf("apply migration %s: %w", migration.Version, err))
 	}
 
 	appliedAt := m.now().UTC().Format(time.RFC3339)
@@ -138,7 +139,7 @@ func (m *migrator) applyMigration(ctx context.Context, db *sql.DB, migration Mig
 		appliedAt,
 	)
 	if err != nil {
-		return rollbackWithError(tx, fmt.Errorf("record migration %s: %w", migration.Version, err))
+		return RollbackOnError(tx, fmt.Errorf("record migration %s: %w", migration.Version, err))
 	}
 
 	err = tx.Commit()
@@ -271,7 +272,8 @@ func migrationApplied(ctx context.Context, db *sql.DB, version string) (bool, er
 	return true, nil
 }
 
-func rollbackWithError(tx *sql.Tx, err error) error {
+// RollbackOnError preserves the original and rollback errors.
+func RollbackOnError(tx *sql.Tx, err error) error {
 	rollbackErr := tx.Rollback()
 	if rollbackErr != nil {
 		return fmt.Errorf("%w; rollback failed: %w", err, rollbackErr)

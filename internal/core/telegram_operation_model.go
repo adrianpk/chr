@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramOperationModel retains a provider result independently of semantic
@@ -101,7 +103,7 @@ func (s *TelegramReceiverStore) reserveTelegramOperationModel(ctx context.Contex
 
 		result.Attempts++
 		result.RetryAt, result.ErrorCode = now.Add(61*time.Second), "interrupted"
-		_, err = tx.ExecContext(ctx, `UPDATE telegram_requests SET model_attempt=?,model_retry_at=?,model_error_code='interrupted' WHERE id=? AND argument_digest=?`, result.Attempts, formatProjectTime(result.RetryAt), request.ID, request.ArgumentDigest)
+		_, err = tx.ExecContext(ctx, `UPDATE telegram_requests SET model_attempt=?,model_retry_at=?,model_error_code='interrupted' WHERE id=? AND argument_digest=?`, result.Attempts, database.FormatTime(result.RetryAt), request.ID, request.ArgumentDigest)
 		ready = err == nil
 
 		return err
@@ -114,7 +116,7 @@ func (s *TelegramReceiverStore) finishTelegramOperationModel(ctx context.Context
 	return s.transaction(ctx, func(tx *sql.Tx) error {
 		retry := ""
 		if !model.RetryAt.IsZero() {
-			retry = formatProjectTime(model.RetryAt)
+			retry = database.FormatTime(model.RetryAt)
 		}
 
 		changed, err := tx.ExecContext(ctx, `UPDATE telegram_requests SET model_result=NULLIF(?,''),model_retry_at=NULLIF(?,''),model_error_code=? WHERE id=? AND argument_digest=? AND model_attempt=? AND state='applying' AND model_result IS NULL`, string(model.Response), retry, model.ErrorCode, request.ID, request.ArgumentDigest, model.Attempts)

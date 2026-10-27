@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 const diagnosticBundleRelativePath = ".chr/maintenance/diagnostic-bundle.md"
@@ -14,7 +16,7 @@ const diagnosticBundleRelativePath = ".chr/maintenance/diagnostic-bundle.md"
 type DiagnosticBundle struct {
 	ProjectDir             string
 	ProjectID              string
-	MigrationStatus        MigrationStatus
+	MigrationStatus        database.MigrationStatus
 	RegistryDiagnostics    []ProjectRegistryDiagnostic
 	ExecutionArtifactDrift []ExecutionArtifactDriftDiagnostic
 	RuntimeCleanupPreview  RuntimeArtifactCleanupPreview
@@ -80,7 +82,7 @@ func writeDiagnosticBundleSummary(output *strings.Builder, bundle DiagnosticBund
 	output.WriteString("\n")
 }
 
-func writeDiagnosticBundleDatabase(output *strings.Builder, status MigrationStatus) {
+func writeDiagnosticBundleDatabase(output *strings.Builder, status database.MigrationStatus) {
 	output.WriteString("## Database\n\n")
 	writeDiagnosticBundleField(output, "database_exists", fmt.Sprintf("%t", status.DatabaseExists))
 	writeDiagnosticBundleField(output, "schema_migrations_exists", fmt.Sprintf("%t", status.SchemaTableExists))

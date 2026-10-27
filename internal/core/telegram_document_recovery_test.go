@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func seedTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore, count int) {
@@ -18,7 +20,7 @@ func seedTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore, count
 
 	_, err := store.db.ExecContext(t.Context(), `WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM n WHERE x<?)
  INSERT INTO telegram_document_snapshots(id,owner_kind,owner_id,bot_id,chat_id,topic_id,user_id,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at)
- SELECT 'quota-'||x,'receiver','quota-owner-'||x,12345,100001,0,100001,?,'example-project','default',?,'exports/quota.md',?,?,'quota.md','text/markdown',2097152,zeroblob(2097152),? FROM n`, count, telegramReceiverTestConfig().Digest(), strings.Repeat("a", 64), workflowHash(zero), workflowHash(zero), formatProjectTime(time.Now()))
+ SELECT 'quota-'||x,'receiver','quota-owner-'||x,12345,100001,0,100001,?,'example-project','default',?,'exports/quota.md',?,?,'quota.md','text/markdown',2097152,zeroblob(2097152),? FROM n`, count, telegramReceiverTestConfig().Digest(), strings.Repeat("a", 64), workflowHash(zero), workflowHash(zero), database.FormatTime(time.Now()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +184,7 @@ func TestTelegramPresentationDocumentRetention(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.db.ExecContext(t.Context(), "UPDATE telegram_actions SET expires_at=? WHERE token=?", formatProjectTime(now.Add(14*24*time.Hour)), action.Token); err != nil {
+	if _, err := f.store.db.ExecContext(t.Context(), "UPDATE telegram_actions SET expires_at=? WHERE token=?", database.FormatTime(now.Add(14*24*time.Hour)), action.Token); err != nil {
 		t.Fatal(err)
 	}
 

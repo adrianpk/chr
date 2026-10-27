@@ -1,5 +1,7 @@
 package core
 
+import "forge.adrianpk.com/chr/internal/core/database"
+
 // remoteCommandRow retains encoded loop values and timestamp inputs beside the domain record.
 type remoteCommandRow struct {
 	record                                RemoteCommandRecord
@@ -38,8 +40,8 @@ func (row remoteCommandRow) values() []any {
 		request.RawText,
 		record.HandoffCommand,
 		record.RejectionReason,
-		formatProjectTime(request.ReceivedAt),
-		formatProjectTime(request.CreatedAt),
+		database.FormatTime(request.ReceivedAt),
+		database.FormatTime(request.CreatedAt),
 	}
 }
 

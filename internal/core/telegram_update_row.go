@@ -1,6 +1,10 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
+)
 
 type telegramUpdateRow struct {
 	botID, epoch int64
@@ -30,11 +34,11 @@ func (row telegramUpdateRow) values() []any {
 		update.Peer.UserID,
 		update.MessageID,
 		update.ChatType,
-		formatProjectTime(row.receivedAt),
+		database.FormatTime(row.receivedAt),
 		update.Text,
 		row.state,
 		update.Reason,
-		formatProjectTime(row.receivedAt),
+		database.FormatTime(row.receivedAt),
 		update.ReplyToMessageID,
 		row.lane,
 		row.control,

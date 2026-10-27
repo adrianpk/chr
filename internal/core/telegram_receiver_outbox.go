@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramReceiverDelivery retains a response independently of its send outcome.
@@ -68,7 +70,7 @@ func queueTelegramResponseParts(ctx context.Context, tx *sql.Tx, update Telegram
 		return errors.New("telegram outbox capacity exhausted")
 	}
 
-	result, err := tx.ExecContext(ctx, "UPDATE telegram_updates SET state='processed',updated_at=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND state='pending'", formatProjectTime(now), update.Peer.BotID, update.UpdateID, update.Digest)
+	result, err := tx.ExecContext(ctx, "UPDATE telegram_updates SET state='processed',updated_at=? WHERE bot_id=? AND update_id=? AND payload_digest=? AND state='pending'", database.FormatTime(now), update.Peer.BotID, update.UpdateID, update.Digest)
 	if err != nil {
 		return err
 	}
@@ -83,7 +85,7 @@ func queueTelegramResponseParts(ctx context.Context, tx *sql.Tx, update Telegram
 		id := "tgd-" + hex.EncodeToString(sum[:16])
 
 		_, err = tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,event_key,config_digest,kind,text,part_index,part_count,state,created_at,updated_at)
-VALUES(?,?,?,?,?,?,?,'result',?,?,?,'pending',?,?)`, id, update.Peer.BotID, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID, key, configDigest, part, index+1, len(parts), formatProjectTime(now), formatProjectTime(now))
+VALUES(?,?,?,?,?,?,?,'result',?,?,?,'pending',?,?)`, id, update.Peer.BotID, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID, key, configDigest, part, index+1, len(parts), database.FormatTime(now), database.FormatTime(now))
 		if err != nil {
 			return err
 		}
@@ -124,7 +126,7 @@ func (s *TelegramReceiverStore) RejectPendingUpdate(ctx context.Context, update 
 			return err
 		}
 
-		_, err := tx.ExecContext(ctx, `UPDATE telegram_updates SET state='rejected',payload='',reason_code='authorization_revoked',updated_at=? WHERE bot_id=? AND update_id=? AND state='pending'`, formatProjectTime(now), update.Peer.BotID, update.UpdateID)
+		_, err := tx.ExecContext(ctx, `UPDATE telegram_updates SET state='rejected',payload='',reason_code='authorization_revoked',updated_at=? WHERE bot_id=? AND update_id=? AND state='pending'`, database.FormatTime(now), update.Peer.BotID, update.UpdateID)
 
 		return err
 	})
@@ -136,7 +138,7 @@ func (s *TelegramReceiverStore) DueDeliveries(ctx context.Context, botID int64, 
 WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
 AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_outbox recent WHERE recent.conversation_id=o.conversation_id AND recent.kind='progress' AND recent.total_attempts>0 AND recent.event_key!=o.event_key AND recent.updated_at>?))
-ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o.bot_id AND u.update_id=CAST(substr(o.event_key,8) AS INTEGER) AND o.event_key='update:'||u.update_id) WHEN 'urgent' THEN 0 WHEN 'decision' THEN 1 ELSE 2 END,o.created_at,o.rowid LIMIT 50`, botID, formatProjectTime(now), formatProjectTime(now.Add(-30*time.Second)))
+ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o.bot_id AND u.update_id=CAST(substr(o.event_key,8) AS INTEGER) AND o.event_key='update:'||u.update_id) WHEN 'urgent' THEN 0 WHEN 'decision' THEN 1 ELSE 2 END,o.created_at,o.rowid LIMIT 50`, botID, database.FormatTime(now), database.FormatTime(now.Add(-30*time.Second)))
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +191,7 @@ func (s *TelegramReceiverStore) TryReserveDelivery(ctx context.Context, id strin
 	result, err := s.db.ExecContext(ctx, `UPDATE telegram_outbox AS o SET state='sending',attempts=attempts+1,total_attempts=total_attempts+1,
 retry_at=?,updated_at=? WHERE id=? AND state IN ('pending','sending','uncertain') AND attempts<5 AND (retry_at IS NULL OR retry_at<=?)
 AND (o.kind!='progress' OR o.attempts>0 OR NOT EXISTS(SELECT 1 FROM telegram_outbox recent WHERE recent.conversation_id=o.conversation_id AND recent.kind='progress' AND recent.total_attempts>0 AND recent.event_key!=o.event_key AND recent.updated_at>?))`,
-		formatProjectTime(now.Add(16*time.Second)), formatProjectTime(now), id, formatProjectTime(now), formatProjectTime(now.Add(-30*time.Second)))
+		database.FormatTime(now.Add(16*time.Second)), database.FormatTime(now), id, database.FormatTime(now), database.FormatTime(now.Add(-30*time.Second)))
 	if err != nil {
 		return false, err
 	}
@@ -220,7 +222,7 @@ func (s *TelegramReceiverStore) deliverySent(ctx context.Context, id string, mes
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		result, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='delivered',telegram_message_id=?,telegram_file_id=NULLIF(?,''),retry_at=NULL,last_error_code='',updated_at=? WHERE id=? AND state='sending' AND ((document_id IS NULL AND ?='') OR (document_id IS NOT NULL AND ?!=''))", messageID, fileID, formatProjectTime(now), id, fileID, fileID)
+		result, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='delivered',telegram_message_id=?,telegram_file_id=NULLIF(?,''),retry_at=NULL,last_error_code='',updated_at=? WHERE id=? AND state='sending' AND ((document_id IS NULL AND ?='') OR (document_id IS NOT NULL AND ?!=''))", messageID, fileID, database.FormatTime(now), id, fileID, fileID)
 		if err != nil {
 			return err
 		}
@@ -229,7 +231,7 @@ func (s *TelegramReceiverStore) deliverySent(ctx context.Context, id string, mes
 			return err
 		}
 
-		if _, err := tx.ExecContext(ctx, `UPDATE telegram_document_snapshots SET terminal_at=? WHERE owner_id=? AND terminal_at IS NULL`, formatProjectTime(now), id); err != nil {
+		if _, err := tx.ExecContext(ctx, `UPDATE telegram_document_snapshots SET terminal_at=? WHERE owner_id=? AND terminal_at IS NULL`, database.FormatTime(now), id); err != nil {
 			return err
 		}
 
@@ -255,7 +257,7 @@ func (s *TelegramReceiverStore) DeliveryFailed(ctx context.Context, delivery Tel
 		state = "blocked"
 	}
 
-	_, err := s.db.ExecContext(ctx, "UPDATE telegram_outbox SET state=?,last_error_code=?,retry_at=?,updated_at=? WHERE id=? AND state='sending'", state, code, formatProjectTime(now.Add(delay)), formatProjectTime(now), delivery.ID)
+	_, err := s.db.ExecContext(ctx, "UPDATE telegram_outbox SET state=?,last_error_code=?,retry_at=?,updated_at=? WHERE id=? AND state='sending'", state, code, database.FormatTime(now.Add(delay)), database.FormatTime(now), delivery.ID)
 
 	return err
 }
@@ -263,11 +265,11 @@ func (s *TelegramReceiverStore) DeliveryFailed(ctx context.Context, delivery Tel
 // BlockDelivery prevents delivery to a revoked peer without creating another request.
 func (s *TelegramReceiverStore) BlockDelivery(ctx context.Context, id string, now time.Time) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='blocked',last_error_code='authorization_revoked',updated_at=? WHERE id=? AND state!='delivered'", formatProjectTime(now), id); err != nil {
+		if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET state='blocked',last_error_code='authorization_revoked',updated_at=? WHERE id=? AND state!='delivered'", database.FormatTime(now), id); err != nil {
 			return err
 		}
 
-		_, err := tx.ExecContext(ctx, "UPDATE telegram_document_snapshots SET terminal_at=? WHERE owner_id=? AND terminal_at IS NULL", formatProjectTime(now), id)
+		_, err := tx.ExecContext(ctx, "UPDATE telegram_document_snapshots SET terminal_at=? WHERE owner_id=? AND terminal_at IS NULL", database.FormatTime(now), id)
 
 		return err
 	})

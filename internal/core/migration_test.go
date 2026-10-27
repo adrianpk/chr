@@ -9,10 +9,12 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func TestReadSQLiteMigrationsParsesAndSortsAssets(t *testing.T) {
-	migrations, err := ReadSQLiteMigrations(fstest.MapFS{
+	migrations, err := database.ReadSQLiteMigrations(fstest.MapFS{
 		"assets/migration/sqlite/20260518000002-second.sql": {
 			Data: []byte("-- +migrate Up\nCREATE TABLE second (id text);\n-- +migrate Down\nDROP TABLE second;"),
 		},
@@ -39,7 +41,7 @@ func TestReadSQLiteMigrationsParsesAndSortsAssets(t *testing.T) {
 
 func TestMigratorAppliesPendingMigrations(t *testing.T) {
 	db := openTestSQLite(t)
-	migrator := NewMigrator(testMigrationFS(), WithMigratorClock(func() time.Time {
+	migrator := database.NewMigrator(testMigrationFS(), database.WithMigratorClock(func() time.Time {
 		return time.Date(2026, 5, 18, 12, 30, 0, 0, time.UTC)
 	}))
 
@@ -82,7 +84,7 @@ func TestMigratorAppliesPendingMigrations(t *testing.T) {
 
 func TestMigratorSkipsAppliedMigrations(t *testing.T) {
 	db := openTestSQLite(t)
-	migrator := NewMigrator(testMigrationFS())
+	migrator := database.NewMigrator(testMigrationFS())
 
 	err := migrator.Migrate(context.Background(), db)
 	if err != nil {

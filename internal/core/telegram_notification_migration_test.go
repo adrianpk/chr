@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // A physical pre-28 database upgrades without rewriting event status, payload,
@@ -55,7 +57,7 @@ func checkTelegramLegacyNotification(t *testing.T, repository NotificationEventR
 		t.Fatal(err)
 	}
 
-	if saved.Event.Payload != record.Event.Payload || saved.Event.References != record.Event.References || saved.Event.Status != record.Event.Status || formatProjectTime(saved.Event.UpdatedAt) != formatProjectTime(record.Event.UpdatedAt) {
+	if saved.Event.Payload != record.Event.Payload || saved.Event.References != record.Event.References || saved.Event.Status != record.Event.Status || database.FormatTime(saved.Event.UpdatedAt) != database.FormatTime(record.Event.UpdatedAt) {
 		t.Fatal("migration changed legacy event", saved)
 	}
 

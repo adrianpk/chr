@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"os"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramReceiverStore extends the existing user database with transport receipts.
@@ -34,7 +36,7 @@ type TelegramReceiverState struct {
 
 // NewTelegramReceiverStore applies additive migrations and rejects future schemas.
 func NewTelegramReceiverStore(ctx context.Context, env UserEnvironment, assets fs.FS) (*TelegramReceiverStore, error) {
-	status, err := NewMigrationStatusChecker(assets).Check(ctx, env)
+	status, err := database.NewMigrationStatusChecker(assets).Check(ctx, env)
 	if err != nil {
 		return nil, err
 	}
@@ -47,17 +49,17 @@ func NewTelegramReceiverStore(ctx context.Context, env UserEnvironment, assets f
 		return nil, err
 	}
 
-	db, err := sql.Open("sqlite", UserDatabasePath(env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(env))
 	if err != nil {
 		return nil, err
 	}
 
-	if err := configureSQLiteDatabase(ctx, db); err != nil {
-		return nil, closeDBWithError(db, err)
+	if err := database.Configure(ctx, db); err != nil {
+		return nil, database.CloseOnError(db, err)
 	}
 
-	if err := NewMigrator(assets).Migrate(ctx, db); err != nil {
-		return nil, closeDBWithError(db, err)
+	if err := database.NewMigrator(assets).Migrate(ctx, db); err != nil {
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return &TelegramReceiverStore{db: db, env: env}, nil
@@ -68,7 +70,7 @@ func createTelegramDatabase(env UserEnvironment) error {
 		return err
 	}
 
-	file, err := os.OpenFile(UserDatabasePath(env), os.O_CREATE|os.O_RDWR, 0o600)
+	file, err := os.OpenFile(database.UserDatabasePath(env), os.O_CREATE|os.O_RDWR, 0o600)
 	if err != nil {
 		return err
 	}
@@ -94,7 +96,7 @@ func (s *TelegramReceiverStore) BindReceiver(ctx context.Context, botID int64, c
 	}
 
 	_, err := s.db.ExecContext(ctx, `INSERT INTO telegram_receivers(bot_id, config_digest, updated_at) VALUES(?,?,?)
-ON CONFLICT(bot_id) DO UPDATE SET config_digest=excluded.config_digest, updated_at=excluded.updated_at WHERE schema_version=1`, botID, config.Digest(), formatProjectTime(now))
+ON CONFLICT(bot_id) DO UPDATE SET config_digest=excluded.config_digest, updated_at=excluded.updated_at WHERE schema_version=1`, botID, config.Digest(), database.FormatTime(now))
 	if err != nil {
 		return err
 	}
@@ -155,7 +157,7 @@ func parseTelegramOptionalTime(value sql.NullString) (time.Time, error) {
 		return time.Time{}, nil
 	}
 
-	return parseProjectTime(value.String)
+	return database.ParseTime(value.String)
 }
 
 func (s *TelegramReceiverStore) transaction(ctx context.Context, action func(*sql.Tx) error) error {
@@ -165,33 +167,10 @@ func (s *TelegramReceiverStore) transaction(ctx context.Context, action func(*sq
 	}
 
 	if err := action(tx); err != nil {
-		return errors.Join(telegramTransactionFailure(ctx, err), telegramTransactionFailure(ctx, tx.Rollback()))
+		return errors.Join(database.TransactionFailure(ctx, err), database.TransactionFailure(ctx, tx.Rollback()))
 	}
 
-	return telegramTransactionFailure(ctx, tx.Commit())
-}
-
-// This owner alone commits/rolls back the transaction. database/sql can win
-// that race after cancellation and return the bare ErrTxDone instead of the
-// context error. Wrapped/joined checkpoint failures must remain failures.
-func telegramTransactionFailure(ctx context.Context, err error) error {
-	if ctx.Err() == nil {
-		return err
-	}
-
-	if _, wrapped := err.(interface{ Unwrap() error }); wrapped {
-		return err
-	}
-
-	if _, joined := err.(interface{ Unwrap() []error }); joined {
-		return err
-	}
-
-	if errors.Is(err, sql.ErrTxDone) {
-		return ctx.Err()
-	}
-
-	return err
+	return database.TransactionFailure(ctx, tx.Commit())
 }
 
 // ReservePoll checkpoints an attempt before IO; restart cannot reset exhaustion.
@@ -199,7 +178,7 @@ func (s *TelegramReceiverStore) ReservePoll(ctx context.Context, botID int64, no
 	result, err := s.db.ExecContext(ctx, `UPDATE telegram_receivers SET retry_attempt=retry_attempt+1,
 total_retry_attempts=total_retry_attempts+1,retry_at=?,updated_at=?
 WHERE bot_id=? AND schema_version=1 AND retry_attempt<5 AND health!='blocked' AND (retry_at IS NULL OR retry_at<=?)`,
-		formatProjectTime(now.Add(16*time.Second)), formatProjectTime(now), botID, formatProjectTime(now))
+		database.FormatTime(now.Add(16*time.Second)), database.FormatTime(now), botID, database.FormatTime(now))
 	if err != nil {
 		return err
 	}
@@ -235,7 +214,7 @@ func (s *TelegramReceiverStore) PollFailed(ctx context.Context, botID int64, fai
 	}
 
 	_, err = s.db.ExecContext(ctx, `UPDATE telegram_receivers SET health=?,last_error_code=?,retry_at=?,updated_at=? WHERE bot_id=?`,
-		health, code, formatProjectTime(now.Add(delay)), formatProjectTime(now), botID)
+		health, code, database.FormatTime(now.Add(delay)), database.FormatTime(now), botID)
 
 	return err
 }

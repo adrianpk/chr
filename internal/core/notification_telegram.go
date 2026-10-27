@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramNotificationTarget binds the existing configured sender, project root
@@ -44,10 +46,10 @@ func (r *sqliteNotificationEventRepository) notificationTransaction(ctx context.
 	}
 
 	if err = action(tx); err != nil {
-		return errors.Join(telegramTransactionFailure(ctx, err), telegramTransactionFailure(ctx, tx.Rollback()))
+		return errors.Join(database.TransactionFailure(ctx, err), database.TransactionFailure(ctx, tx.Rollback()))
 	}
 
-	return telegramTransactionFailure(ctx, tx.Commit())
+	return database.TransactionFailure(ctx, tx.Commit())
 }
 
 // ErrTelegramNotificationTargetUnavailable refuses changed or unavailable

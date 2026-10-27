@@ -12,6 +12,8 @@ import (
 	"strings"
 
 	_ "modernc.org/sqlite"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ErrRemoteCommandRecordNotFound identifies a package boundary error.
@@ -40,19 +42,19 @@ func NewRemoteCommandRecordRepository(
 		return nil, fmt.Errorf("create user data directory: %w", err)
 	}
 
-	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), userDatabaseName))
+	db, err := sql.Open("sqlite", filepath.Join(env.DataDir(), database.UserFileName))
 	if err != nil {
 		return nil, fmt.Errorf("open remote command database: %w", err)
 	}
 
-	err = configureSQLiteDatabase(ctx, db)
+	err = database.Configure(ctx, db)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	repository, err := NewRemoteCommandRecordRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
-		return nil, closeDBWithError(db, err)
+		return nil, database.CloseOnError(db, err)
 	}
 
 	return repository, nil
@@ -64,7 +66,7 @@ func NewRemoteCommandRecordRepositoryFromDB(
 	db *sql.DB,
 	assetsFS fs.FS,
 ) (RemoteCommandRecordRepository, error) {
-	migrator := NewMigrator(assetsFS)
+	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
 	if err != nil {
@@ -190,12 +192,12 @@ func finishScannedRemoteCommandRecord(
 	record.Status = RemoteCommandRecordStatus(status)
 	record.Request.Intent = RemoteCommandIntent(intent)
 
-	record.Request.ReceivedAt, err = parseProjectTime(receivedAt)
+	record.Request.ReceivedAt, err = database.ParseTime(receivedAt)
 	if err != nil {
 		return RemoteCommandRecord{}, err
 	}
 
-	record.Request.CreatedAt, err = parseProjectTime(createdAt)
+	record.Request.CreatedAt, err = database.ParseTime(createdAt)
 	if err != nil {
 		return RemoteCommandRecord{}, err
 	}

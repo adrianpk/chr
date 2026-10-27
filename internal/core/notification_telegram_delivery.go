@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // ReserveTelegramNotification permits one original dispatch and at most one
@@ -35,7 +37,7 @@ func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx conte
 	if ack.MessageID > 0 {
 		minimumAttempts = 1
 		status = NotificationStatusDelivered
-		delivered = formatProjectTime(now)
+		delivered = database.FormatTime(now)
 		uncertain = false
 		code = ""
 	}
@@ -45,7 +47,7 @@ func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx conte
 	}
 
 	return r.notificationTransaction(ctx, func(tx *sql.Tx) error {
-		result, err := tx.ExecContext(ctx, `UPDATE notification_events SET status=?,failure_reason=?,delivered_at=?,updated_at=?,telegram_message_id=NULLIF(?,0),telegram_file_id=NULLIF(?,''),telegram_uncertain=? WHERE id=? AND project_id=? AND telegram_destination=? AND telegram_config_digest=? AND telegram_namespace=? AND telegram_project_binding_digest=? AND status='pending' AND telegram_attempts>=?`, string(status), code, delivered, formatProjectTime(now), ack.MessageID, ack.FileID, uncertain, id, target.ProjectID, target.Destination, target.ConfigDigest, target.Namespace, target.ProjectBindingDigest, minimumAttempts)
+		result, err := tx.ExecContext(ctx, `UPDATE notification_events SET status=?,failure_reason=?,delivered_at=?,updated_at=?,telegram_message_id=NULLIF(?,0),telegram_file_id=NULLIF(?,''),telegram_uncertain=? WHERE id=? AND project_id=? AND telegram_destination=? AND telegram_config_digest=? AND telegram_namespace=? AND telegram_project_binding_digest=? AND status='pending' AND telegram_attempts>=?`, string(status), code, delivered, database.FormatTime(now), ack.MessageID, ack.FileID, uncertain, id, target.ProjectID, target.Destination, target.ConfigDigest, target.Namespace, target.ProjectBindingDigest, minimumAttempts)
 		if err != nil {
 			return err
 		}
@@ -63,7 +65,7 @@ func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx conte
 			return nil
 		}
 
-		_, err = tx.ExecContext(ctx, "UPDATE telegram_notification_documents SET terminal_at=COALESCE(terminal_at,?) WHERE owner_id=?", formatProjectTime(now), id)
+		_, err = tx.ExecContext(ctx, "UPDATE telegram_notification_documents SET terminal_at=COALESCE(terminal_at,?) WHERE owner_id=?", database.FormatTime(now), id)
 
 		return err
 	})

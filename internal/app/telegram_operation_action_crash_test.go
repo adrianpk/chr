@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 func reopenTelegramOperationReceiver(t *testing.T, f *telegramConversationAppFixture) {
@@ -133,7 +134,7 @@ func TestTelegramOperationUncertainActionSend(t *testing.T) {
 func setTelegramOperationRetryAt(t *testing.T, env core.UserEnvironment, deadline time.Time) {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(env))
 	if err != nil {
 		t.Fatal(err)
 	}

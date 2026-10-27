@@ -7,6 +7,8 @@ import (
 	"testing"
 	"testing/fstest"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TestTelegramRecoverySchema upgrades retained receiver state, proves a failed
@@ -29,7 +31,7 @@ func TestTelegramRecoverySchema(t *testing.T) {
 		}
 	})
 
-	now := formatProjectTime(time.Now())
+	now := database.FormatTime(time.Now())
 	execTelegramRecoverySQL(t, old, `INSERT INTO telegram_receivers(bot_id,config_digest,next_update_id,retry_attempt,retry_cycle,total_retry_attempts,updated_at) VALUES(12345,?,501,5,7,11,?)`, telegramReceiverTestConfig().Digest(), now)
 	execTelegramRecoverySQL(t, old, `INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at) VALUES(12345,499,1,?,'message',100001,0,100001,1,'private',?,'/status','pending','',?)`, strings.Repeat("a", 64), now, now)
 
@@ -125,7 +127,7 @@ func TestTelegramRecoveryMalformed(t *testing.T) {
 // overflow becomes a durable rejection instead of evicting unresolved input.
 func TestTelegramRecoveryPending(t *testing.T) {
 	store := openTelegramReceiverTestStore(t, telegramReceiverTestEnv(t))
-	old := formatProjectTime(time.Now().Add(-8 * 24 * time.Hour))
+	old := database.FormatTime(time.Now().Add(-8 * 24 * time.Hour))
 	execTelegramRecoverySQL(t, store, `WITH RECURSIVE n(id) AS (SELECT 1 UNION ALL SELECT id+1 FROM n WHERE id<1024) INSERT INTO telegram_updates(bot_id,update_id,cursor_epoch,payload_digest,update_kind,chat_id,topic_id,user_id,message_id,chat_type,received_at,payload,state,reason_code,updated_at,processing_lane,control_input) SELECT 12345,id,1,?,'message',100001,0,100001,id,'private',?,'/status','pending','',?,CASE WHEN id>992 THEN 'urgent' ELSE 'ordinary' END,id>992 FROM n`, strings.Repeat("a", 64), old, old)
 
 	if _, err := store.PrepareTelegramPoll(t.Context(), 12345, time.Now()); err != nil {

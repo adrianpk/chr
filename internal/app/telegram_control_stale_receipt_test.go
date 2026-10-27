@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 type telegramStaleControlFixture struct {
@@ -172,7 +173,7 @@ func telegramControlRetainAnswer(t *testing.T, f *telegramConversationAppFixture
 func telegramControlPromptMessage(t *testing.T, f *telegramConversationAppFixture, token string) int64 {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(f.receiver.env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(f.receiver.env))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -190,7 +191,7 @@ func telegramControlPromptMessage(t *testing.T, f *telegramConversationAppFixtur
 func staleTelegramControlPrompt(t *testing.T, f *telegramConversationAppFixture, token, stale string) {
 	t.Helper()
 
-	db, err := sql.Open("sqlite", core.UserDatabasePath(f.receiver.env))
+	db, err := sql.Open("sqlite", database.UserDatabasePath(f.receiver.env))
 	if err != nil {
 		t.Fatal(err)
 	}

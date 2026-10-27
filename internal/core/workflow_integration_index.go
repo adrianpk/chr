@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // WorkflowIntegrationIndex extends the existing SQLite projection. Its rows are
@@ -43,19 +45,19 @@ func (i *sqliteTicketIndex) replaceWorkflowIntegrationIndex(ctx context.Context,
 
 	for _, table := range []string{"workflow_integration_entries", "workflow_integration_snapshots"} {
 		if _, err := tx.ExecContext(ctx, "DELETE FROM "+table+" WHERE project_id = ? AND coordinator_id = ?", projectID, coordinatorID); err != nil {
-			return rollbackWithError(tx, err)
+			return database.RollbackOnError(tx, err)
 		}
 	}
 
 	for _, view := range snapshot.Views {
 		if err := indexWorkflowIntegrationView(ctx, tx, view); err != nil {
-			return rollbackWithError(tx, err)
+			return database.RollbackOnError(tx, err)
 		}
 	}
 
 	_, err = tx.ExecContext(ctx, "INSERT INTO workflow_integration_snapshots VALUES(?, ?, ?)", projectID, coordinatorID, snapshot.Hash)
 	if err != nil {
-		return rollbackWithError(tx, err)
+		return database.RollbackOnError(tx, err)
 	}
 
 	return tx.Commit()

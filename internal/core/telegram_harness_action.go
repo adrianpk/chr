@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/database"
 )
 
 // TelegramHarnessSelectionOperation identifies deterministic configuration selection.
@@ -135,7 +137,7 @@ func finishTelegramHarnessConversation(ctx context.Context, tx *sql.Tx, request 
 		phase = "completed"
 	}
 
-	_, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET phase=?,updated_at=? WHERE id=? AND revision=? AND project_binding_digest=? AND phase='prepared'`, phase, formatProjectTime(now), request.Target.ConversationID, request.Target.ConversationRevision, request.Target.ProjectBindingDigest)
+	_, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET phase=?,updated_at=? WHERE id=? AND revision=? AND project_binding_digest=? AND phase='prepared'`, phase, database.FormatTime(now), request.Target.ConversationID, request.Target.ConversationRevision, request.Target.ProjectBindingDigest)
 
 	return err
 }
