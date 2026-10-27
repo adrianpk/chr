@@ -1,5 +1,7 @@
 package app
 
+import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+
 import (
 	"encoding/json"
 	"net/http"
@@ -35,7 +37,7 @@ func telegramAuthoringBridgeHTTP(t *testing.T, f *telegramConversationAppFixture
 	t.Cleanup(server.Close)
 
 	provider := core.NewConfiguredStructuredModel(true)
-	provider.API = core.OpenAIQuizModelAdapter{APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations := telegramOperationConcreteService(t, f.receiver)
 	operations.conversationModel = provider
 	f.receiver.operations = operations

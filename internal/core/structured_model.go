@@ -1,5 +1,7 @@
 package core
 
+import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+
 import (
 	"context"
 	"encoding/json"
@@ -29,7 +31,7 @@ type StructuredModelProvider interface {
 // One shared instance limits all of its callers to two concurrent model requests.
 type ConfiguredStructuredModel struct {
 	OpenAI bool
-	API    OpenAIQuizModelAdapter
+	API    openaiquiz.OpenAIQuizModelAdapter
 	Runner harness.AgentRunner
 	slots  chan struct{}
 }
@@ -101,7 +103,9 @@ func (p *ConfiguredStructuredModel) invokeBoundOpenAI(ctx context.Context, reque
 
 	call := harness.AgentRunRequest{ID: request.ID, Purpose: request.Purpose, ProjectDir: request.ProjectDir, Prompt: request.Instructions + "\n" + string(request.Input), OutputSchema: schema, OutputName: "output.json"}
 
-	return RunAPIGeneration(ctx, call, func(ctx context.Context) ([]byte, error) { return p.invokeOpenAI(ctx, request) })
+	return RunAPIGeneration(ctx, call, func(ctx context.Context) ([]byte, error) {
+		return p.API.InvokeStructured(ctx, openaiquiz.StructuredRequest{Purpose: request.Purpose, Instructions: request.Instructions, Input: request.Input, Schema: request.Schema})
+	})
 }
 
 func (p *ConfiguredStructuredModel) invokeHarness(ctx context.Context, request StructuredModelRequest) ([]byte, error) {

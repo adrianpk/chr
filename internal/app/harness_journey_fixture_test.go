@@ -1,5 +1,7 @@
 package app
 
+import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+
 import (
 	"context"
 	"fmt"
@@ -118,7 +120,7 @@ func (f *harnessJourney) configureAPI(t *testing.T) {
 	t.Cleanup(server.Close)
 
 	provider := core.NewConfiguredStructuredModel(false)
-	provider.API = core.OpenAIQuizModelAdapter{APIKey: "fixture-only", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, APIKey: "fixture-only", BaseURL: server.URL, Client: server.Client()}
 	f.operations.conversationModel = provider
 }
 

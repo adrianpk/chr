@@ -1,5 +1,7 @@
 package app
 
+import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+
 import (
 	"encoding/json"
 	"net/http"
@@ -38,7 +40,7 @@ func generationBindingPlanCase(t *testing.T, fixture func(*testing.T, string) (s
 	}))
 	t.Cleanup(server.Close)
 
-	api := core.OpenAIQuizModelAdapter{ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	api := openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations.quizModel = api
 	provider := core.NewConfiguredStructuredModel(true)
 	provider.API = api

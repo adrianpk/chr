@@ -1,4 +1,4 @@
-package core
+package openai
 
 import (
 	"bytes"
@@ -26,6 +26,7 @@ const (
 
 // OpenAIQuizModelAdapter describes a package boundary value.
 type OpenAIQuizModelAdapter struct {
+	Host       Host
 	APIKey     string
 	BaseURL    string
 	Model      string
@@ -84,7 +85,10 @@ type openAIResponsesError struct {
 
 // Invoke invokes the configured model adapter.
 func (a OpenAIQuizModelAdapter) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
-	request.ID = HarnessGenerationRequestID(ctx, request.ID)
+	if a.Host == nil {
+		return quizmodel.Response{}, fmt.Errorf("quiz generation host is required")
+	}
+	request.ID = a.Host.RequestID(ctx, request.ID)
 
 	err := quizmodel.ValidateRequest(request)
 	if err != nil {
@@ -103,7 +107,7 @@ func (a OpenAIQuizModelAdapter) Invoke(ctx context.Context, request quizmodel.Re
 	response, err := quizmodel.ResponseFromOutput(request, output)
 	err = quizmodel.ValidateParsedResponse(response, err)
 
-	err = ValidateHarnessGenerationOutput(ctx, a.quizAPIRunRequest(request, trace), err)
+	err = a.Host.ValidateOutput(ctx, a.quizAPIRunRequest(request, trace), err)
 	if err != nil {
 		a.recordOpenAIQuizResponse(ctx, request, trace, result, "parse_error", err, quizmodel.Response{})
 
@@ -115,11 +119,7 @@ func (a OpenAIQuizModelAdapter) Invoke(ctx context.Context, request quizmodel.Re
 	return response, nil
 }
 
-func (a OpenAIQuizModelAdapter) invokeOpenAI(
-	ctx context.Context,
-	request quizmodel.Request,
-	trace openAIQuizTrace,
-) ([]byte, openAIQuizExecutionResult, error) {
+func (a OpenAIQuizModelAdapter) invokeOpenAI(ctx context.Context, request quizmodel.Request, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error) {
 	if a.openAIAPIKey() == "" {
 		return nil, openAIQuizExecutionResult{}, fmt.Errorf("OPENAI_API_KEY is required for quiz model generation")
 	}
@@ -181,11 +181,7 @@ func (a OpenAIQuizModelAdapter) openAIRequestBody(request quizmodel.Request) ([]
 	return payload, nil
 }
 
-func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
-	request quizmodel.Request,
-	httpRequest *http.Request,
-	startedAt time.Time,
-) (openAIQuizExecutionResult, error) {
+func (a OpenAIQuizModelAdapter) executeOpenAIRequest(request quizmodel.Request, httpRequest *http.Request, startedAt time.Time) (openAIQuizExecutionResult, error) {
 	response, err := a.httpClient(request).Do(httpRequest)
 	if err != nil {
 		return openAIQuizExecutionResult{Latency: time.Since(startedAt)}, fmt.Errorf("invoke OpenAI quiz model: %w", err)
@@ -235,12 +231,8 @@ func (a OpenAIQuizModelAdapter) newOpenAIQuizTrace(request quizmodel.Request) op
 	}
 }
 
-func (a OpenAIQuizModelAdapter) recordOpenAIQuizRequest(
-	ctx context.Context,
-	request quizmodel.Request,
-	trace openAIQuizTrace,
-) {
-	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: a.ProjectDir}, map[string]any{
+func (a OpenAIQuizModelAdapter) recordOpenAIQuizRequest(ctx context.Context, request quizmodel.Request, trace openAIQuizTrace) {
+	a.Host.Trace(ctx, a.ProjectDir, map[string]any{
 		"event":                 "llm_request",
 		"llm_call_id":           trace.CallID,
 		"request_id":            request.ID,
@@ -252,15 +244,7 @@ func (a OpenAIQuizModelAdapter) recordOpenAIQuizRequest(
 	})
 }
 
-func (a OpenAIQuizModelAdapter) recordOpenAIQuizResponse(
-	ctx context.Context,
-	request quizmodel.Request,
-	trace openAIQuizTrace,
-	result openAIQuizExecutionResult,
-	status string,
-	responseErr error,
-	response quizmodel.Response,
-) {
+func (a OpenAIQuizModelAdapter) recordOpenAIQuizResponse(ctx context.Context, request quizmodel.Request, trace openAIQuizTrace, result openAIQuizExecutionResult, status string, responseErr error, response quizmodel.Response) {
 	event := map[string]any{
 		"event":                  "llm_response",
 		"llm_call_id":            trace.CallID,
@@ -281,7 +265,7 @@ func (a OpenAIQuizModelAdapter) recordOpenAIQuizResponse(
 		event["error"] = responseErr.Error()
 	}
 
-	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: a.ProjectDir}, event)
+	a.Host.Trace(ctx, a.ProjectDir, event)
 }
 
 func newLLMCallID() string {

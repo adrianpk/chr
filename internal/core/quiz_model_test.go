@@ -1,5 +1,7 @@
 package core
 
+import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+
 import (
 	"context"
 	"encoding/json"
@@ -253,49 +255,6 @@ func TestQuizModelProviderPayloadCarriesAcceptanceReadiness(t *testing.T) {
 	}
 }
 
-func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *testing.T) {
-	request := validQuizModelRequest()
-	request.ContextSections = append(request.ContextSections, quizmodel.ContextSection{
-		Name:      "project_dump",
-		Layer:     "dump",
-		Authority: ".chr/default/dumps/project-context.md",
-		Content:   "Detailed project dump that should guide next-question generation.",
-	})
-
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
-	if err != nil {
-		t.Fatalf("openAIRequestBody returned error: %v", err)
-	}
-
-	envelope, input := decodeOpenAIQuizRequestBody(t, body)
-
-	if envelope.Model != "test-model" {
-		t.Fatalf("model = %q, want test-model", envelope.Model)
-	}
-
-	if envelope.Store {
-		t.Fatal("store = true, want false")
-	}
-
-	if envelope.Metadata["chr_action"] != string(quizmodel.ActionNextQuestion) {
-		t.Fatalf("metadata = %#v, want next-question action", envelope.Metadata)
-	}
-
-	if _, ok := input["context_sections"]; !ok {
-		t.Fatalf("next-question input missing context_sections: %#v", input)
-	}
-
-	for _, key := range []string{"project", "quiz", "recent_entries", "current_question", "output_contract"} {
-		if _, ok := input[key]; !ok {
-			t.Fatalf("next-question input missing key %q: %#v", key, input)
-		}
-	}
-
-	if envelope.Text.Format.Name != "quiz_next_question" {
-		t.Fatalf("format name = %q, want quiz_next_question", envelope.Text.Format.Name)
-	}
-}
-
 func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Action = quizmodel.ActionDraftSpec
@@ -313,73 +272,6 @@ func TestQuizModelProviderPayloadKeepsDraftSpecContextInProviderText(t *testing.
 
 	if _, ok := payload["context_sections"]; !ok {
 		t.Fatalf("draft-spec provider payload omitted context_sections: %#v", payload)
-	}
-}
-
-func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing.T) {
-	request := validQuizModelRequest()
-	request.Action = quizmodel.ActionDraftSpec
-	request.Strategy = "draft_spec"
-	request.Payload.OutputContract = quizmodel.NewOutputContract(quizmodel.ActionDraftSpec, request.Mode)
-	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-	request.ContextSections = append(request.ContextSections, quizmodel.ContextSection{
-		Name:      "project_dump",
-		Layer:     "dump",
-		Authority: ".chr/default/dumps/project-context.md",
-		Content:   "Detailed project dump for draft spec synthesis.",
-		Metadata:  map[string]string{"source": "dump"},
-	})
-
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
-	if err != nil {
-		t.Fatalf("openAIRequestBody returned error: %v", err)
-	}
-
-	envelope, input := decodeOpenAIQuizRequestBody(t, body)
-
-	if envelope.Metadata["chr_action"] != string(quizmodel.ActionDraftSpec) {
-		t.Fatalf("metadata = %#v, want draft-spec action", envelope.Metadata)
-	}
-
-	sections, ok := input["context_sections"].([]any)
-	if !ok {
-		t.Fatalf("context_sections = %#v, want array", input["context_sections"])
-	}
-
-	if len(sections) != len(request.ContextSections) {
-		t.Fatalf("context_sections length = %d, want %d", len(sections), len(request.ContextSections))
-	}
-
-	if envelope.Text.Format.Name != "quiz_draft_spec" {
-		t.Fatalf("format name = %q, want quiz_draft_spec", envelope.Text.Format.Name)
-	}
-}
-
-func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecSchemaWithoutFeature(t *testing.T) {
-	request := validQuizModelRequest()
-	request.Action = quizmodel.ActionGenerateSpec
-	request.Strategy = "spec_generation"
-	request.Payload.OutputContract = quizmodel.NewOutputContract(quizmodel.ActionGenerateSpec, request.Mode)
-	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
-	if err != nil {
-		t.Fatalf("openAIRequestBody returned error: %v", err)
-	}
-
-	envelope, _ := decodeOpenAIQuizRequestBody(t, body)
-
-	if envelope.Text.Format.Name != "generated_spec" {
-		t.Fatalf("format name = %q, want generated_spec", envelope.Text.Format.Name)
-	}
-
-	properties, ok := envelope.Text.Format.Schema["properties"].(map[string]any)
-	if !ok {
-		t.Fatalf("schema properties = %#v, want map", envelope.Text.Format.Schema["properties"])
-	}
-
-	if _, ok := properties["feature"]; ok {
-		t.Fatalf("schema properties includes feature: %#v", properties)
 	}
 }
 
@@ -403,79 +295,6 @@ func TestQuizModelProviderPayloadKeepsPlanOutlineContextInProviderText(t *testin
 	}
 }
 
-func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
-	request := validQuizModelRequest()
-	request.Action = quizmodel.ActionGeneratePlanOutline
-	request.Strategy = "plan_outline_generation"
-	request.Payload.OutputContract = quizmodel.NewOutputContract(quizmodel.ActionGeneratePlanOutline, request.Mode)
-	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
-	if err != nil {
-		t.Fatalf("openAIRequestBody returned error: %v", err)
-	}
-
-	envelope, input := decodeOpenAIQuizRequestBody(t, body)
-
-	if envelope.Metadata["chr_action"] != string(quizmodel.ActionGeneratePlanOutline) {
-		t.Fatalf("metadata = %#v, want plan-outline action", envelope.Metadata)
-	}
-
-	if envelope.Text.Format.Name != "generated_plan_outline" {
-		t.Fatalf("format name = %q, want generated_plan_outline", envelope.Text.Format.Name)
-	}
-
-	if envelope.Text.Format.Schema["required"] == nil {
-		t.Fatalf("plan outline schema missing required fields: %#v", envelope.Text.Format.Schema)
-	}
-
-	if _, ok := input["context_sections"]; !ok {
-		t.Fatalf("plan-outline input omitted context_sections: %#v", input)
-	}
-}
-
-func TestOpenAIQuizModelRequestBodySerializesPlanSliceDetailContract(t *testing.T) {
-	request := validQuizModelRequest()
-	request.Action = quizmodel.ActionGeneratePlanSliceDetail
-	request.Strategy = "plan_slice_detail_generation"
-	request.Payload.OutputContract = quizmodel.NewOutputContract(quizmodel.ActionGeneratePlanSliceDetail, request.Mode)
-	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
-	request.ContextSections = append(request.ContextSections, quizmodel.ContextSection{
-		Name:      "plan_outline",
-		Layer:     "plan",
-		Authority: "generated_plan_outline",
-		Content:   "Outline context.",
-	})
-
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
-	if err != nil {
-		t.Fatalf("openAIRequestBody returned error: %v", err)
-	}
-
-	envelope, input := decodeOpenAIQuizRequestBody(t, body)
-
-	if envelope.Metadata["chr_action"] != string(quizmodel.ActionGeneratePlanSliceDetail) {
-		t.Fatalf("metadata = %#v, want plan-slice-detail action", envelope.Metadata)
-	}
-
-	if envelope.Text.Format.Name != "generated_plan_slice_detail" {
-		t.Fatalf("format name = %q, want generated_plan_slice_detail", envelope.Text.Format.Name)
-	}
-
-	required, ok := envelope.Text.Format.Schema["required"].([]any)
-	if !ok {
-		t.Fatalf("schema required = %#v, want []any", envelope.Text.Format.Schema["required"])
-	}
-
-	if !containsAnyString(required, "ticket_metadata") {
-		t.Fatalf("slice detail schema required fields = %#v, want ticket_metadata", required)
-	}
-
-	if _, ok := input["context_sections"]; !ok {
-		t.Fatalf("plan-slice-detail input omitted context_sections: %#v", input)
-	}
-}
-
 func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv(ActiveOperatorIDEnv, "adrian")
@@ -491,7 +310,7 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	}))
 	defer server.Close()
 
-	model := OpenAIQuizModelAdapter{
+	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -527,7 +346,7 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	}))
 	defer server.Close()
 
-	model := OpenAIQuizModelAdapter{
+	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -565,7 +384,7 @@ func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 	}))
 	defer server.Close()
 
-	model := OpenAIQuizModelAdapter{
+	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -602,7 +421,7 @@ func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 	}))
 	defer server.Close()
 
-	model := OpenAIQuizModelAdapter{
+	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -630,28 +449,6 @@ func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 
 	if events[1]["error"] == "" {
 		t.Fatalf("missing provider error in response event: %#v", events[1])
-	}
-}
-
-func TestOpenAIQuizModelTimeoutUsesLongerTimeoutForGeneration(t *testing.T) {
-	if got := openAIQuizModelTimeout(quizmodel.ActionNextQuestion); got != 60*time.Second {
-		t.Fatalf("next question timeout = %s, want 60s", got)
-	}
-
-	if got := openAIQuizModelTimeout(quizmodel.ActionGenerateSpec); got != 5*time.Minute {
-		t.Fatalf("spec generation timeout = %s, want 5m", got)
-	}
-
-	if got := openAIQuizModelTimeout(quizmodel.ActionGeneratePlan); got != 5*time.Minute {
-		t.Fatalf("plan generation timeout = %s, want 5m", got)
-	}
-
-	if got := openAIQuizModelTimeout(quizmodel.ActionGeneratePlanOutline); got != 5*time.Minute {
-		t.Fatalf("plan outline generation timeout = %s, want 5m", got)
-	}
-
-	if got := openAIQuizModelTimeout(quizmodel.ActionGeneratePlanSliceDetail); got != 5*time.Minute {
-		t.Fatalf("plan slice detail generation timeout = %s, want 5m", got)
 	}
 }
 
@@ -1420,26 +1217,6 @@ func containsAnyString(values []any, want string) bool {
 	}
 
 	return false
-}
-
-func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (openAIResponsesRequest, map[string]any) {
-	t.Helper()
-
-	var envelope openAIResponsesRequest
-
-	err := json.Unmarshal(body, &envelope)
-	if err != nil {
-		t.Fatalf("decode OpenAI request body: %v", err)
-	}
-
-	input := map[string]any{}
-
-	err = json.Unmarshal([]byte(envelope.Input), &input)
-	if err != nil {
-		t.Fatalf("decode OpenAI request input: %v", err)
-	}
-
-	return envelope, input
 }
 
 func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {

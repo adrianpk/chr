@@ -1,5 +1,7 @@
 package app
 
+import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+
 import (
 	"context"
 	"crypto/rand"
@@ -71,7 +73,7 @@ func (s service) prepareGenerationBinding(ctx context.Context, config core.Works
 
 	selection := resolved.View
 	if selection.Backend == "openai" {
-		return prepareLegacyAPIGeneration(config, purpose, (core.OpenAIQuizModelAdapter{}).ResolvedModel())
+		return prepareLegacyAPIGeneration(config, purpose, (openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}}).ResolvedModel())
 	}
 
 	if !selection.Readiness.Ready() {
@@ -169,17 +171,17 @@ func (s service) generationAdapters(ctx context.Context) (service, error) {
 
 func (s service) boundQuizAdapter(selection core.HarnessSelection) quizmodel.Adapter {
 	switch adapter := s.quizModel.(type) {
-	case core.OpenAIQuizModelAdapter:
+	case openaiquiz.OpenAIQuizModelAdapter:
 		return s.selectedQuizAdapter(selection, adapter)
 	case core.ActionRoutingQuizModelAdapter:
-		api, ok := adapter.DefaultAdapter.(core.OpenAIQuizModelAdapter)
+		api, ok := adapter.DefaultAdapter.(openaiquiz.OpenAIQuizModelAdapter)
 		if !ok {
-			api = core.OpenAIQuizModelAdapter{ProjectDir: s.projectContext.ProjectDir}
+			api = openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, ProjectDir: s.projectContext.ProjectDir}
 		}
 
 		return s.selectedQuizAdapter(selection, api)
 	case core.HarnessQuizModelAdapter:
-		return s.selectedQuizAdapter(selection, core.OpenAIQuizModelAdapter{ProjectDir: s.projectContext.ProjectDir})
+		return s.selectedQuizAdapter(selection, openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, ProjectDir: s.projectContext.ProjectDir})
 	default:
 		// An injected provider retains its transport contract and receives the
 		// same owning context; production assembly uses the concrete adapters above.
@@ -187,7 +189,7 @@ func (s service) boundQuizAdapter(selection core.HarnessSelection) quizmodel.Ada
 	}
 }
 
-func (s service) selectedQuizAdapter(selection core.HarnessSelection, api core.OpenAIQuizModelAdapter) quizmodel.Adapter {
+func (s service) selectedQuizAdapter(selection core.HarnessSelection, api openaiquiz.OpenAIQuizModelAdapter) quizmodel.Adapter {
 	if selection.Backend == "openai" {
 		api.Model = selection.Model
 		api.ProjectDir = s.projectContext.ProjectDir

@@ -1,4 +1,4 @@
-package core
+package openai
 
 import (
 	"bytes"
@@ -13,13 +13,13 @@ import (
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
-func (p *ConfiguredStructuredModel) invokeOpenAI(ctx context.Context, request StructuredModelRequest) ([]byte, error) {
-	if p.API.openAIAPIKey() == "" {
+func (a OpenAIQuizModelAdapter) InvokeStructured(ctx context.Context, request StructuredRequest) ([]byte, error) {
+	if a.openAIAPIKey() == "" {
 		return nil, errors.New("configured model credentials are unavailable")
 	}
 
 	body, err := json.Marshal(openAIResponsesRequest{
-		Model: p.API.openAIModel(), Instructions: request.Instructions,
+		Model: a.openAIModel(), Instructions: request.Instructions,
 		Input: string(request.Input), Store: false,
 		Text: openAIResponsesText{Format: quizmodel.NewOutputFormat(request.Purpose, "Typed application response", request.Schema)},
 	})
@@ -27,19 +27,19 @@ func (p *ConfiguredStructuredModel) invokeOpenAI(ctx context.Context, request St
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(p.API.openAIBaseURL(), "/")+"/responses", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(a.openAIBaseURL(), "/")+"/responses", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+p.API.openAIAPIKey())
+	req.Header.Set("Authorization", "Bearer "+a.openAIAPIKey())
 	req.Header.Set("Content-Type", "application/json")
 
-	return p.readOpenAI(ctx, req)
+	return a.readStructured(ctx, req)
 }
 
-func (p *ConfiguredStructuredModel) readOpenAI(ctx context.Context, req *http.Request) ([]byte, error) {
-	client := p.API.Client
+func (a OpenAIQuizModelAdapter) readStructured(ctx context.Context, req *http.Request) ([]byte, error) {
+	client := a.Client
 	if client == nil {
 		client = &http.Client{}
 	}
@@ -69,4 +69,11 @@ func (p *ConfiguredStructuredModel) readOpenAI(ctx context.Context, req *http.Re
 	}
 
 	return []byte(text), nil
+}
+
+// StructuredRequest is the transport input after caller-owned admission and bounds.
+type StructuredRequest struct {
+	Purpose, Instructions string
+	Input                 json.RawMessage
+	Schema                map[string]any
 }

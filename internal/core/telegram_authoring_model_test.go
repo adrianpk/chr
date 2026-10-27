@@ -1,5 +1,7 @@
 package core
 
+import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+
 import (
 	"context"
 	"encoding/json"
@@ -36,7 +38,7 @@ func TestTelegramAuthoringModelBoundary(t *testing.T) {
 			defer server.Close()
 
 			provider := NewConfiguredStructuredModel(true)
-			provider.API = OpenAIQuizModelAdapter{APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+			provider.API = openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 
 			_, err := provider.InvokeStructuredModel(t.Context(), telegramAuthoringModelRequest())
 			if (err != nil) != tt.wantErr {
@@ -68,7 +70,7 @@ func TestTelegramAuthoringModelCapacity(t *testing.T) {
 	defer server.Close()
 
 	provider := NewConfiguredStructuredModel(true)
-	provider.API = OpenAIQuizModelAdapter{APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()

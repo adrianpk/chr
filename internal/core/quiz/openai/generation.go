@@ -1,4 +1,4 @@
-package core
+package openai
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func (a OpenAIQuizModelAdapter) invokeBoundQuizAPI(ctx context.Context, request 
 
 	call := a.quizAPIRunRequest(request, trace)
 	call.OutputSchema = schema
-	output, err := RunAPIGeneration(ctx, call, func(ctx context.Context) ([]byte, error) {
+	output, err := a.Host.Run(ctx, call, func(ctx context.Context) ([]byte, error) {
 		body, execution, err := a.invokeOpenAI(ctx, request, trace)
 		result = execution
 

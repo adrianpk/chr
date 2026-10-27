@@ -19,6 +19,8 @@ func TestLeafDependencies(t *testing.T) {
 		{"model coordinator", "internal/core/quiz/model/response.go", "package model\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"model contract", "internal/core/quiz/model/response.go", "package model\nimport _ \"" + coreImportPath + "authoring/generation\"\n", false},
 		{"model provider", "internal/core/quiz/model/response.go", "package model\nimport _ \"" + coreImportPath + "quiz/openai\"\n", true},
+		{"OpenAI coordinator", "internal/core/quiz/openai/adapter.go", "package openai\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"OpenAI contract", "internal/core/quiz/openai/adapter.go", "package openai\nimport _ \"" + coreImportPath + "quiz/model\"\n", false},
 		{"receipt digest", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "contenthash\"\n", false},
 		{"state coordinator", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"shared values", "internal/core/notify/store.go", "package notify\nimport db \"" + coreImportPath + "database\"\n", false},
