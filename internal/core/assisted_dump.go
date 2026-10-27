@@ -17,6 +17,21 @@ import (
 // Other conflicts must preserve the prepared source and existing destination.
 var ErrAssistedCurationMissing = errors.New("assisted curated answer source is missing")
 
+type assistedDumpImages struct {
+	Result  AssistedArtifactSynthesisResult
+	Changes []workflowstate.FileChange
+}
+
+type assistedDumpTarget struct {
+	Binding dumpMutationBinding
+	Target  dumpMutationTarget
+}
+
+type assistedDumpSessionImage struct {
+	Result  AssistedArtifactSynthesisResult
+	Session workflowstate.FileChange
+}
+
 func synthesizeAssistedDump(ctx context.Context, opts AssistedArtifactSynthesisOptions) (AssistedArtifactSynthesisResult, error) {
 	operation, err := normalizeAssistedDumpOperation(opts)
 	if err != nil {
@@ -25,25 +40,27 @@ func synthesizeAssistedDump(ctx context.Context, opts AssistedArtifactSynthesisO
 
 	r := operation.repository
 
-	retained, found, err := r.assistedDumpReceipt(operation.operationID, operation.digest)
-	if err != nil || found {
-		return retained, err
+	retained, err := r.assistedDumpReceipt(operation.operationID, operation.digest)
+	if err != nil || retained.Exists {
+		return retained.Result, err
 	}
 
 	if err := r.projectDumpOperationAvailable(operation.operationID); err != nil {
-		return retained, err
+		return retained.Result, err
 	}
 
-	result, changes, err := r.prepareAssistedDump(ctx, operation)
+	prepared, err := r.prepareAssistedDump(ctx, operation)
 	if err != nil {
-		return result, err
+		return prepared.Result, err
 	}
+
+	result := prepared.Result
 
 	if err := ctx.Err(); err != nil {
 		return result, err
 	}
 
-	if err := r.writeAuthoringJournalVersion(projectDumpJournalSchema, changes); err != nil {
+	if err := r.writeAuthoringJournalVersion(projectDumpJournalSchema, prepared.Changes); err != nil {
 		return result, err
 	}
 
@@ -115,86 +132,88 @@ func assistedDumpDigest(opts AssistedArtifactSynthesisOptions) (string, error) {
 	return contenthash.Sum(encoded), nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAssistedDump(ctx context.Context, operation assistedDumpOperation) (AssistedArtifactSynthesisResult, []workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAssistedDump(ctx context.Context, operation assistedDumpOperation) (assistedDumpImages, error) {
 	var result AssistedArtifactSynthesisResult
 
 	opts := operation.options
 
 	session, err := r.assistedDumpSessionImage(opts.Session)
 	if err != nil {
-		return result, nil, err
+		return assistedDumpImages{Result: result}, err
 	}
 
 	source, err := r.assistedDumpSourceImage(opts)
 	if err != nil {
-		return result, nil, err
+		return assistedDumpImages{Result: result}, err
 	}
 
-	binding, target, err := r.assistedDumpPreparation(ctx, opts, operation.operationID)
+	prepared, err := r.assistedDumpPreparation(ctx, opts, operation.operationID)
 	if err != nil {
-		return result, nil, err
+		return assistedDumpImages{Result: result}, err
 	}
 
-	images, err := r.dumpMutationChanges(binding, target)
+	images, err := r.dumpMutationChanges(prepared.Binding, prepared.Target)
 	if err != nil {
-		return result, nil, err
+		return assistedDumpImages{Result: result}, err
 	}
 
 	changes := images.Changes
 
-	result, session, err = assistedDumpResult(opts, images.Result, session, changes)
+	sessionResult, err := assistedDumpResult(opts, images.Result, session, changes)
 	if err != nil {
-		return result, nil, err
+		return assistedDumpImages{Result: sessionResult.Result}, err
 	}
+
+	result, session = sessionResult.Result, sessionResult.Session
 
 	history, err := r.assistedDumpCommittedImages(result, changes)
 	if err != nil {
-		return result, nil, err
+		return assistedDumpImages{Result: result}, err
 	}
 
 	receipt, err := assistedDumpReceiptChange(operation.digest, result)
 
 	changes = append(changes, history...)
 
-	return result, append(changes, session, source, receipt), err
+	return assistedDumpImages{Result: result, Changes: append(changes, session, source, receipt)}, err
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpPreparation(ctx context.Context, opts AssistedArtifactSynthesisOptions, operationID string) (dumpMutationBinding, dumpMutationTarget, error) {
+func (r *fileAuthoringSessionRepository) assistedDumpPreparation(ctx context.Context, opts AssistedArtifactSynthesisOptions, operationID string) (assistedDumpTarget, error) {
 	request := DumpMutationRequest{OperationID: operationID, Action: "capture", Title: opts.Session.Topic}
 
 	target, err := r.dumpMutationTarget(ctx, request)
 	if err != nil {
-		return dumpMutationBinding{}, target, err
+		return assistedDumpTarget{Target: target}, err
 	}
 
 	content := RenderAssistedSynthesizedArtifact(opts.Session, opts.CuratedSummary, opts.SourceRef, authoringDumpRef(target.Destination))
 
 	body, err := dumpEditableBody([]byte(content))
 	if err != nil {
-		return dumpMutationBinding{}, target, err
+		return assistedDumpTarget{Target: target}, err
 	}
 
 	request.Content = string(body)
 	if err := validateDumpMutation(request); err != nil {
-		return dumpMutationBinding{}, target, err
+		return assistedDumpTarget{Target: target}, err
 	}
 
 	prepared, err := defaultDumpCapture(request)(ctx, target.Destination, target.RawReference)
 
 	binding := dumpMutationBinding{Request: request, Destination: target.Destination, RawReference: target.RawReference, Prepared: &prepared}
 	if err != nil {
-		return binding, target, err
+		return assistedDumpTarget{Binding: binding, Target: target}, err
 	}
 
-	return binding, target, validateDumpPreparation(binding, prepared)
+	return assistedDumpTarget{Binding: binding, Target: target}, validateDumpPreparation(binding, prepared)
 }
 
-func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectDumpMutationResult, sessionImage workflowstate.FileChange, changes []workflowstate.FileChange) (AssistedArtifactSynthesisResult, workflowstate.FileChange, error) {
+func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectDumpMutationResult, sessionImage workflowstate.FileChange, changes []workflowstate.FileChange) (assistedDumpSessionImage, error) {
 	ref := authoringDumpRef(mutation.Destination)
 
 	session := opts.Session
 	if len(session.Outputs) >= 16 && !assistedSessionHasOutput(session, ref.Path) || len(session.Provenance) >= 64 {
-		return AssistedArtifactSynthesisResult{}, sessionImage, errors.New("assisted dump session capacity exhausted")
+		return assistedDumpSessionImage{Session: sessionImage}, errors.New("assisted dump session capacity exhausted")
 	}
 
 	if !assistedSessionHasOutput(session, ref.Path) {
@@ -213,7 +232,7 @@ func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectD
 
 	content, err := RenderAuthoringSession(session, paths)
 	if err != nil {
-		return AssistedArtifactSynthesisResult{}, sessionImage, err
+		return assistedDumpSessionImage{Session: sessionImage}, err
 	}
 
 	sessionImage.After = []byte(content)
@@ -221,7 +240,7 @@ func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectD
 	result := AssistedArtifactSynthesisResult{Session: session, Layout: AuthoringArtifactLayout{Ref: ref, FullPath: fullPath, Dir: filepath.Dir(fullPath)}, Mutation: &mutation}
 	result.Content = string(authoringImageMap(changes)[ref.Path])
 
-	return result, sessionImage, nil
+	return assistedDumpSessionImage{Result: result, Session: sessionImage}, nil
 }
 
 func assistedSessionHasOutput(session AuthoringSession, reference string) bool {

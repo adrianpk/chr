@@ -157,26 +157,6 @@
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/assisted_dump.go::fileAuthoringSessionRepository.prepareAssistedDump",
-      "signature": "func(ctx context.Context, operation assistedDumpOperation) (AssistedArtifactSynthesisResult, []workflowstate.FileChange, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
-    },
-    {
-      "id": "internal/core/assisted_dump.go::fileAuthoringSessionRepository.assistedDumpPreparation",
-      "signature": "func(ctx context.Context, opts AssistedArtifactSynthesisOptions, operationID string) (dumpMutationBinding, dumpMutationTarget, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/assisted_dump.go::assistedDumpResult",
-      "signature": "func(opts AssistedArtifactSynthesisOptions, mutation ProjectDumpMutationResult, sessionImage workflowstate.FileChange, changes []workflowstate.FileChange) (AssistedArtifactSynthesisResult, workflowstate.FileChange, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
-    },
-    {
-      "id": "internal/core/assisted_dump_receipt.go::fileAuthoringSessionRepository.assistedDumpReceipt",
-      "signature": "func(operationID, digest string) (AssistedArtifactSynthesisResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/assisted_quiz_loop.go::invokeAndRecordAssistedQuizModel",
       "signature": "func(ctx context.Context, opts AssistedQuizLoopOptions, request AssistedModelRequest) (AssistedModelResponse, AssistedModelInvocationPaths, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

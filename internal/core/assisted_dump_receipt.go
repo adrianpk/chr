@@ -18,6 +18,11 @@ type assistedDumpMutationReceipt struct {
 	Mutation                 ProjectDumpMutationResult
 }
 
+type assistedDumpReceiptLookup struct {
+	Result AssistedArtifactSynthesisResult
+	Exists bool
+}
+
 func assistedDumpReceiptChange(digest string, result AssistedArtifactSynthesisResult) (workflowstate.FileChange, error) {
 	receipt := assistedDumpMutationReceipt{Schema: "chr-assisted-dump-receipt/v1", Digest: digest, Session: result.Session, Reference: result.Layout.Ref, Mutation: *result.Mutation}
 
@@ -32,35 +37,35 @@ func assistedDumpReceiptChange(digest string, result AssistedArtifactSynthesisRe
 	return workflowstate.FileChange{Path: authoringReceiptRef(receipt.Mutation.OperationID), After: encoded}, err
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpReceipt(operationID, digest string) (AssistedArtifactSynthesisResult, bool, error) {
+func (r *fileAuthoringSessionRepository) assistedDumpReceipt(operationID, digest string) (assistedDumpReceiptLookup, error) {
 	var receipt assistedDumpMutationReceipt
 
 	encoded, err := r.readAuthoringDocument(filepath.ToSlash(authoringReceiptRef(operationID)))
 	if errors.Is(err, os.ErrNotExist) {
-		return AssistedArtifactSynthesisResult{}, false, nil
+		return assistedDumpReceiptLookup{}, nil
 	}
 
 	if err != nil {
-		return AssistedArtifactSynthesisResult{}, false, err
+		return assistedDumpReceiptLookup{}, err
 	}
 
 	if err := authoringstate.Decode(encoded, &receipt); err != nil {
-		return AssistedArtifactSynthesisResult{}, false, err
+		return assistedDumpReceiptLookup{}, err
 	}
 
 	if err := validateAssistedDumpReceipt(receipt, operationID, digest); err != nil {
-		return AssistedArtifactSynthesisResult{}, false, err
+		return assistedDumpReceiptLookup{}, err
 	}
 
 	content, err := r.assistedDumpReceiptContent(receipt.Mutation)
 	if err != nil {
-		return AssistedArtifactSynthesisResult{}, false, err
+		return assistedDumpReceiptLookup{}, err
 	}
 
 	fullPath := filepath.Join(r.projectDir, filepath.FromSlash(receipt.Reference.Path))
 	result := AssistedArtifactSynthesisResult{Session: receipt.Session, Layout: AuthoringArtifactLayout{Ref: receipt.Reference, FullPath: fullPath, Dir: filepath.Dir(fullPath)}, Content: string(content), Mutation: &receipt.Mutation}
 
-	return result, true, nil
+	return assistedDumpReceiptLookup{Result: result, Exists: true}, nil
 }
 
 func validateAssistedDumpReceipt(receipt assistedDumpMutationReceipt, operationID, digest string) error {
