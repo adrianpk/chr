@@ -1,5 +1,7 @@
 package app
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"bytes"
 	"database/sql"
@@ -83,7 +85,7 @@ func checkTelegramNotificationHTTPFailure(t *testing.T, failure telegramNotifica
 		t.Fatal(err)
 	}
 
-	reopened, err := core.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
+	reopened, err := notifycore.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -104,11 +106,11 @@ func checkTelegramNotificationHTTPFailure(t *testing.T, failure telegramNotifica
 	}
 }
 
-func checkTelegramNotificationFailed(t *testing.T, repository core.NotificationEventRepository, input core.TelegramNotificationInput, uncertain bool) {
+func checkTelegramNotificationFailed(t *testing.T, repository notifycore.NotificationEventRepository, input notifycore.TelegramNotificationInput, uncertain bool) {
 	t.Helper()
 
 	saved, frozen, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, input.Target)
-	if err != nil || !frozen || saved.Status != core.NotificationStatusFailed || saved.Attempts != 1 || saved.Uncertain != uncertain || saved.Acknowledgement.MessageID != 0 {
+	if err != nil || !frozen || saved.Status != notifycore.NotificationStatusFailed || saved.Attempts != 1 || saved.Uncertain != uncertain || saved.Acknowledgement.MessageID != 0 {
 		t.Fatal("failure invented delivery or allowance", saved, err)
 	}
 
@@ -164,7 +166,7 @@ func checkTelegramNotificationRevocation(t *testing.T, change string) {
 	}
 
 	saved, err := repository.GetNotificationEvent(t.Context(), input.Record.Event.ID)
-	if err != nil || saved.Event.Status != core.NotificationStatusFailed || saved.Event.FailureReason != "notification_target_unavailable" {
+	if err != nil || saved.Event.Status != notifycore.NotificationStatusFailed || saved.Event.FailureReason != "notification_target_unavailable" {
 		t.Fatal("revocation claimed another outcome", saved, err)
 	}
 }
@@ -246,7 +248,7 @@ func checkTelegramNotificationBeforeIO(t *testing.T, query string) {
 	}
 
 	saved, err := repository.GetNotificationEvent(t.Context(), input.Record.Event.ID)
-	if err != nil || saved.Event.Status != core.NotificationStatusFailed || saved.Event.FailureReason != "notification_document_unavailable" {
+	if err != nil || saved.Event.Status != notifycore.NotificationStatusFailed || saved.Event.FailureReason != "notification_document_unavailable" {
 		t.Fatal("invalid image claimed delivery", saved, err)
 	}
 }
@@ -292,11 +294,11 @@ func TestTelegramPresentationNotificationConcurrent(t *testing.T) {
 	checkTelegramConcurrentNotification(t, repository, input, calls.Load())
 }
 
-func checkTelegramConcurrentNotification(t *testing.T, repository core.NotificationEventRepository, input core.TelegramNotificationInput, calls int32) {
+func checkTelegramConcurrentNotification(t *testing.T, repository notifycore.NotificationEventRepository, input notifycore.TelegramNotificationInput, calls int32) {
 	t.Helper()
 
 	saved, frozen, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, input.Target)
-	if err != nil || !frozen || saved.Attempts != 1 || saved.Status != core.NotificationStatusDelivered || calls != 1 {
+	if err != nil || !frozen || saved.Attempts != 1 || saved.Status != notifycore.NotificationStatusDelivered || calls != 1 {
 		t.Fatal("concurrent dispatch duplicated delivery", saved, calls, err)
 	}
 }
@@ -326,7 +328,7 @@ func TestTelegramPresentationFailureNotificationPreparation(t *testing.T) {
 	}
 
 	saved, frozen, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, input.Target)
-	if err != nil || frozen || saved.Status != core.NotificationStatusFailed || calls.Load() != 0 {
+	if err != nil || frozen || saved.Status != notifycore.NotificationStatusFailed || calls.Load() != 0 {
 		t.Fatal("failed presentation left a partial image or claimed delivery", saved, frozen, err)
 	}
 }

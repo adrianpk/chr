@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"database/sql"
 	"encoding/json"
@@ -12,11 +14,11 @@ import (
 )
 
 type qualityLegacyRecords struct {
-	Execution    ExecutionRecord         `json:"execution"`
-	Remote       RemoteCommandRecord     `json:"remote"`
-	Notification NotificationAuditRecord `json:"notification"`
-	Ticket       IndexedTicket           `json:"ticket"`
-	Conversation TelegramConversation    `json:"conversation"`
+	Execution    ExecutionRecord                    `json:"execution"`
+	Remote       RemoteCommandRecord                `json:"remote"`
+	Notification notifycore.NotificationAuditRecord `json:"notification"`
+	Ticket       IndexedTicket                      `json:"ticket"`
+	Conversation TelegramConversation               `json:"conversation"`
 }
 
 func openQualityLegacyDB(t *testing.T) *sql.DB {

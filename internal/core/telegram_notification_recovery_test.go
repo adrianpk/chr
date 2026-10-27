@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"bytes"
 	"errors"
@@ -98,7 +100,7 @@ func checkTelegramNotificationQuotaRollback(t *testing.T, repository *notificati
 		t.Fatal("full database admitted another export", err)
 	}
 
-	if _, err := repository.GetNotificationEvent(t.Context(), input.Record.Event.ID); !errors.Is(err, ErrNotificationEventNotFound) {
+	if _, err := repository.GetNotificationEvent(t.Context(), input.Record.Event.ID); !errors.Is(err, notifycore.ErrNotificationEventNotFound) {
 		t.Fatal("failed reservation kept its event", err)
 	}
 }
@@ -135,7 +137,7 @@ func TestTelegramPresentationNotificationRetention(t *testing.T) {
 	checkTelegramNotificationRetention(t, repository, originalHash)
 }
 
-func finishTelegramNotificationRetention(t *testing.T, repository NotificationEventRepository, input TelegramNotificationInput, index int, old, now time.Time) {
+func finishTelegramNotificationRetention(t *testing.T, repository notifycore.NotificationEventRepository, input notifycore.TelegramNotificationInput, index int, old, now time.Time) {
 	t.Helper()
 
 	if index == 22 {

@@ -1,5 +1,7 @@
 package app
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"context"
 	"crypto/sha256"
@@ -23,18 +25,18 @@ func emitTicketBlockedNotification(
 	}
 
 	now := time.Now().UTC()
-	event := core.NotificationEvent{
+	event := notifycore.NotificationEvent{
 		ID:        workflowNotificationEventID(plan.ProjectContext.ProjectID, "ticket-blocked", now),
 		ProjectID: plan.ProjectContext.ProjectID,
-		Type:      core.NotificationEventTicketBlocked,
-		Severity:  core.NotificationSeverityWarning,
-		Status:    core.NotificationStatusSkipped,
-		Source:    core.NotificationSourceTicketExecution,
-		References: core.NotificationReferences{
+		Type:      notifycore.NotificationEventTicketBlocked,
+		Severity:  notifycore.NotificationSeverityWarning,
+		Status:    notifycore.NotificationStatusSkipped,
+		Source:    notifycore.NotificationSourceTicketExecution,
+		References: notifycore.NotificationReferences{
 			TicketKey:   plan.Application.TicketKey,
 			ExecutionID: plan.Application.ExecutionID,
 		},
-		Payload: core.NotificationPayload{
+		Payload: notifycore.NotificationPayload{
 			Summary: fmt.Sprintf("Ticket %s is blocked", plan.Application.TicketKey),
 			Detail:  ticketBlockedNotificationDetail(plan),
 		},
@@ -64,29 +66,29 @@ func loopRunNotificationEvent(
 	projectContext commandProjectContext,
 	record core.LoopRunRecord,
 	now time.Time,
-) (core.NotificationEvent, bool) {
+) (notifycore.NotificationEvent, bool) {
 	if record.Status == core.LoopRunStatusSucceeded && record.ProcessedCount == 0 {
-		return core.NotificationEvent{}, false
+		return notifycore.NotificationEvent{}, false
 	}
 
 	notificationKind := loopRunNotificationType(record.Status)
 
 	eventType, severity := notificationKind.Type, notificationKind.Severity
 	if eventType == "" {
-		return core.NotificationEvent{}, false
+		return notifycore.NotificationEvent{}, false
 	}
 
-	return core.NotificationEvent{
+	return notifycore.NotificationEvent{
 		ID:        workflowNotificationEventID(projectContext.ProjectID, string(eventType), now),
 		ProjectID: projectContext.ProjectID,
 		Type:      eventType,
 		Severity:  severity,
-		Status:    core.NotificationStatusSkipped,
-		Source:    core.NotificationSourceTicketLoop,
-		References: core.NotificationReferences{
+		Status:    notifycore.NotificationStatusSkipped,
+		Source:    notifycore.NotificationSourceTicketLoop,
+		References: notifycore.NotificationReferences{
 			LoopRunID: record.ID,
 		},
-		Payload: core.NotificationPayload{
+		Payload: notifycore.NotificationPayload{
 			Summary: loopRunNotificationSummary(record),
 			Detail:  loopRunNotificationDetail(record),
 		},
@@ -98,11 +100,11 @@ func loopRunNotificationEvent(
 func loopRunNotificationType(status core.LoopRunStatus) loopNotificationKind {
 	switch status {
 	case core.LoopRunStatusSucceeded:
-		return loopNotificationKind{Type: core.NotificationEventLoopFinished, Severity: core.NotificationSeverityInfo}
+		return loopNotificationKind{Type: notifycore.NotificationEventLoopFinished, Severity: notifycore.NotificationSeverityInfo}
 	case core.LoopRunStatusBlocked:
-		return loopNotificationKind{Type: core.NotificationEventLoopBlocked, Severity: core.NotificationSeverityWarning}
+		return loopNotificationKind{Type: notifycore.NotificationEventLoopBlocked, Severity: notifycore.NotificationSeverityWarning}
 	case core.LoopRunStatusFailed:
-		return loopNotificationKind{Type: core.NotificationEventLoopFailed, Severity: core.NotificationSeverityError}
+		return loopNotificationKind{Type: notifycore.NotificationEventLoopFailed, Severity: notifycore.NotificationSeverityError}
 	default:
 		return loopNotificationKind{Type: "", Severity: ""}
 	}
@@ -112,7 +114,7 @@ func emitWorkflowNotification(
 	ctx context.Context,
 	env core.UserEnvironment,
 	projectContext commandProjectContext,
-	event core.NotificationEvent,
+	event notifycore.NotificationEvent,
 	assetsFS fs.FS,
 ) error {
 	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
@@ -122,7 +124,7 @@ func emitWorkflowNotification(
 
 	record := workflowNotificationAuditRecord(event, config.Notifications)
 
-	repository, err := core.NewNotificationEventRepository(ctx, env, assetsFS)
+	repository, err := notifycore.NewNotificationEventRepository(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}
@@ -132,7 +134,7 @@ func emitWorkflowNotification(
 		_ = repository.Close()
 	}()
 
-	if record.Event.Status != core.NotificationStatusPending {
+	if record.Event.Status != notifycore.NotificationStatusPending {
 		return repository.CreateNotificationEvent(ctx, record)
 	}
 
@@ -146,7 +148,7 @@ func emitWorkflowNotification(
 	return workflowNotificationFailure(ctx, repository, record.Event.ID, sendErr)
 }
 
-func workflowNotificationFailure(ctx context.Context, repository core.NotificationEventRepository, id string, failure error) error {
+func workflowNotificationFailure(ctx context.Context, repository notifycore.NotificationEventRepository, id string, failure error) error {
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
@@ -160,7 +162,7 @@ func workflowNotificationFailure(ctx context.Context, repository core.Notificati
 		return errors.Join(failure, err)
 	}
 
-	if saved.Event.Status == core.NotificationStatusFailed {
+	if saved.Event.Status == notifycore.NotificationStatusFailed {
 		return nil
 	}
 
@@ -168,24 +170,24 @@ func workflowNotificationFailure(ctx context.Context, repository core.Notificati
 }
 
 func workflowNotificationAuditRecord(
-	event core.NotificationEvent,
-	config core.NotificationConfig,
-) core.NotificationAuditRecord {
+	event notifycore.NotificationEvent,
+	config notifycore.NotificationConfig,
+) notifycore.NotificationAuditRecord {
 	if !config.Telegram.Enabled {
-		event.Status = core.NotificationStatusSkipped
+		event.Status = notifycore.NotificationStatusSkipped
 
-		return core.NotificationAuditRecord{Event: event}
+		return notifycore.NotificationAuditRecord{Event: event}
 	}
 
-	event.Status = core.NotificationStatusPending
-	record := core.NotificationAuditRecord{
+	event.Status = notifycore.NotificationStatusPending
+	record := notifycore.NotificationAuditRecord{
 		Event:   event,
 		Channel: "telegram",
 	}
 
-	err := core.ValidateNotificationConfig(config)
+	err := notifycore.ValidateNotificationConfig(config)
 	if err != nil {
-		record.Event.Status = core.NotificationStatusFailed
+		record.Event.Status = notifycore.NotificationStatusFailed
 		record.Event.FailureReason = err.Error()
 	}
 
@@ -236,6 +238,6 @@ func workflowNotificationEventID(projectID, kind string, createdAt time.Time) st
 }
 
 type loopNotificationKind struct {
-	Type     core.NotificationEventType
-	Severity core.NotificationSeverity
+	Type     notifycore.NotificationEventType
+	Severity notifycore.NotificationSeverity
 }

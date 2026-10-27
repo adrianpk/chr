@@ -1,6 +1,8 @@
 //nolint:wsl_v5 // Web adapter tests keep setup and assertions close to the rendered behavior.
 package app
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"bytes"
 	"context"
@@ -3005,7 +3007,7 @@ func TestNotifyTelegramTestSendsAndRecordsAudit(t *testing.T) {
 		t.Fatalf("len(records) = %d, want 1", len(records))
 	}
 
-	if records[0].Event.Status != core.NotificationStatusDelivered {
+	if records[0].Event.Status != notifycore.NotificationStatusDelivered {
 		t.Fatalf("notification status = %q, want delivered", records[0].Event.Status)
 	}
 }
@@ -4216,7 +4218,7 @@ func TestTicketLoopDispatchesConfiguredFinishedNotification(t *testing.T) {
 	}
 
 	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
-	assertNotificationEvent(t, records, 0, core.NotificationEventLoopFinished, core.NotificationStatusDelivered)
+	assertNotificationEvent(t, records, 0, notifycore.NotificationEventLoopFinished, notifycore.NotificationStatusDelivered)
 
 	if gotPayload.ChatID != "123456" {
 		t.Fatalf("telegram chat id = %q, want configured chat id", gotPayload.ChatID)
@@ -4313,7 +4315,7 @@ func TestTicketLoopRecordsFailedNotification(t *testing.T) {
 	}
 
 	notificationRecords := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
-	assertNotificationEvent(t, notificationRecords, 0, core.NotificationEventLoopFailed, core.NotificationStatusSkipped)
+	assertNotificationEvent(t, notificationRecords, 0, notifycore.NotificationEventLoopFailed, notifycore.NotificationStatusSkipped)
 }
 
 func TestTicketLoopRecordsBlockedNotifications(t *testing.T) {
@@ -4334,7 +4336,7 @@ func TestTicketLoopRecordsBlockedNotifications(t *testing.T) {
 		t.Fatal("loopRunNotificationEvent returned false")
 	}
 
-	if event.Type != core.NotificationEventLoopBlocked {
+	if event.Type != notifycore.NotificationEventLoopBlocked {
 		t.Fatalf("event type = %q, want loop_blocked", event.Type)
 	}
 }
@@ -5151,7 +5153,7 @@ func TestTicketApplyResultRecordsBlockedNotification(t *testing.T) {
 	}
 
 	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
-	assertNotificationEvent(t, records, 0, core.NotificationEventTicketBlocked, core.NotificationStatusSkipped)
+	assertNotificationEvent(t, records, 0, notifycore.NotificationEventTicketBlocked, notifycore.NotificationStatusSkipped)
 
 	if records[0].Event.References.ExecutionID != record.ID {
 		t.Fatalf("execution reference = %q, want %q", records[0].Event.References.ExecutionID, record.ID)
@@ -8486,7 +8488,7 @@ func listNotificationEventsForTest(
 	t *testing.T,
 	devRoot string,
 	projectID string,
-) []core.NotificationAuditRecord {
+) []notifycore.NotificationAuditRecord {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -8497,7 +8499,7 @@ func listNotificationEventsForTest(
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := core.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
+	repository, err := notifycore.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewNotificationEventRepository returned error: %v", err)
 	}
@@ -8550,10 +8552,10 @@ func listRemoteCommandRecordsForTest(t *testing.T, devRoot string) []core.Remote
 
 func assertNotificationEvent(
 	t *testing.T,
-	records []core.NotificationAuditRecord,
+	records []notifycore.NotificationAuditRecord,
 	index int,
-	eventType core.NotificationEventType,
-	status core.NotificationStatus,
+	eventType notifycore.NotificationEventType,
+	status notifycore.NotificationStatus,
 ) {
 	t.Helper()
 

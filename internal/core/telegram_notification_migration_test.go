@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"errors"
 	"strings"
@@ -18,15 +20,15 @@ func TestTelegramPresentationNotificationMigration(t *testing.T) {
 	assets := telegramRecoveryMigrationAssets(t)
 	delete(assets, "assets/migration/sqlite/20261021000028-add_telegram_notification_presentation.sql")
 
-	old, err := NewNotificationEventRepository(t.Context(), env, assets)
+	old, err := notifycore.NewNotificationEventRepository(t.Context(), env, assets)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	input := telegramNotificationTestInput(t)
-	records := []NotificationAuditRecord{input.Record, input.Record}
+	records := []notifycore.NotificationAuditRecord{input.Record, input.Record}
 	records[1].Event.ID = "legacy-delivered"
-	records[1].Event.Status = NotificationStatusDelivered
+	records[1].Event.Status = notifycore.NotificationStatusDelivered
 
 	records[1].Event.DeliveredAt = &records[1].Event.UpdatedAt
 	for _, record := range records {
@@ -51,7 +53,7 @@ func TestTelegramPresentationNotificationMigration(t *testing.T) {
 	}
 }
 
-func checkTelegramLegacyNotification(t *testing.T, repository NotificationEventRepository, record NotificationAuditRecord, target TelegramNotificationTarget) {
+func checkTelegramLegacyNotification(t *testing.T, repository notifycore.NotificationEventRepository, record notifycore.NotificationAuditRecord, target notifycore.TelegramNotificationTarget) {
 	t.Helper()
 
 	saved, err := repository.GetNotificationEvent(t.Context(), record.Event.ID)
@@ -105,13 +107,13 @@ func TestTelegramPresentationFailureNotificationMapping(t *testing.T) {
 func TestTelegramPresentationFailureNotificationInput(t *testing.T) {
 	for _, item := range []struct {
 		name   string
-		change func(*TelegramNotificationInput)
+		change func(*notifycore.TelegramNotificationInput)
 	}{
-		{"encoding", func(i *TelegramNotificationInput) { i.Document.Payload = []byte{0xff} }},
-		{"oversized", func(i *TelegramNotificationInput) {
+		{"encoding", func(i *notifycore.TelegramNotificationInput) { i.Document.Payload = []byte{0xff} }},
+		{"oversized", func(i *notifycore.TelegramNotificationInput) {
 			i.Document.Payload = []byte(strings.Repeat("x", tgmessage.DocumentLimit+1))
 		}},
-		{"wrong root", func(i *TelegramNotificationInput) {
+		{"wrong root", func(i *notifycore.TelegramNotificationInput) {
 			i.Document.ProjectBindingDigest = contenthash.Sum([]byte("other root"))
 		}},
 	} {
@@ -124,7 +126,7 @@ func TestTelegramPresentationFailureNotificationInput(t *testing.T) {
 				t.Fatal("invalid admission accepted", err)
 			}
 
-			if _, err := repository.GetNotificationEvent(t.Context(), input.Record.Event.ID); !errors.Is(err, ErrNotificationEventNotFound) {
+			if _, err := repository.GetNotificationEvent(t.Context(), input.Record.Event.ID); !errors.Is(err, notifycore.ErrNotificationEventNotFound) {
 				t.Fatal("invalid admission kept its owner", err)
 			}
 		})
@@ -159,11 +161,11 @@ func TestTelegramPresentationFailureNotificationReopen(t *testing.T) {
 	checkTelegramNotificationReopened(t, repository, input)
 }
 
-func checkTelegramNotificationReopened(t *testing.T, repository NotificationEventRepository, input TelegramNotificationInput) {
+func checkTelegramNotificationReopened(t *testing.T, repository notifycore.NotificationEventRepository, input notifycore.TelegramNotificationInput) {
 	t.Helper()
 
 	retained := telegramNotificationRetained(t, repository, input.Record.Event.ID, input.Target)
-	if retained.Status != NotificationStatusFailed || !retained.Uncertain || retained.Attempts != 1 || retained.Acknowledgement.MessageID != 0 {
+	if retained.Status != notifycore.NotificationStatusFailed || !retained.Uncertain || retained.Attempts != 1 || retained.Acknowledgement.MessageID != 0 {
 		t.Fatal("reopen invented delivery or allowance", retained)
 	}
 

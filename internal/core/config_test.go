@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"os"
 	"path/filepath"
@@ -21,8 +23,8 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 
 	assertDefaultRuntimeConfig(t, config.Runtime)
 
-	if config.Notifications != DefaultNotificationConfig() {
-		t.Fatalf("Notifications = %#v, want %#v", config.Notifications, DefaultNotificationConfig())
+	if config.Notifications != notifycore.DefaultNotificationConfig() {
+		t.Fatalf("Notifications = %#v, want %#v", config.Notifications, notifycore.DefaultNotificationConfig())
 	}
 
 	if config.Review != DefaultReviewWorkflowConfig() {
@@ -94,8 +96,8 @@ func TestLoadWorkspaceConfigParsesNotificationConfig(t *testing.T) {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := NotificationConfig{
-		Telegram: TelegramNotificationConfig{
+	want := notifycore.NotificationConfig{
+		Telegram: notifycore.TelegramNotificationConfig{
 			Enabled:     true,
 			BotTokenEnv: "CHR_TELEGRAM_BOT_TOKEN",
 			ChatID:      "123456",
@@ -724,22 +726,22 @@ func TestLoadWorkspaceConfigSupportsLegacyTopLevelTicketKeyPrefix(t *testing.T) 
 }
 
 func TestValidateNotificationConfigAcceptsDisabledConfig(t *testing.T) {
-	err := ValidateNotificationConfig(NotificationConfig{})
+	err := notifycore.ValidateNotificationConfig(notifycore.NotificationConfig{})
 	if err != nil {
 		t.Fatalf("ValidateNotificationConfig returned error: %v", err)
 	}
 }
 
 func TestValidateNotificationConfigAcceptsEnabledTelegramConfig(t *testing.T) {
-	config := NotificationConfig{
-		Telegram: TelegramNotificationConfig{
+	config := notifycore.NotificationConfig{
+		Telegram: notifycore.TelegramNotificationConfig{
 			Enabled:     true,
 			BotTokenEnv: "CHR_TELEGRAM_BOT_TOKEN",
 			ChatID:      "123456",
 		},
 	}
 
-	err := ValidateNotificationConfig(config)
+	err := notifycore.ValidateNotificationConfig(config)
 	if err != nil {
 		t.Fatalf("ValidateNotificationConfig returned error: %v", err)
 	}
@@ -748,13 +750,13 @@ func TestValidateNotificationConfigAcceptsEnabledTelegramConfig(t *testing.T) {
 func TestValidateNotificationConfigRejectsIncompleteTelegramConfig(t *testing.T) {
 	for _, test := range []struct {
 		name    string
-		config  NotificationConfig
+		config  notifycore.NotificationConfig
 		wantErr string
 	}{
 		{
 			name: "token env",
-			config: NotificationConfig{
-				Telegram: TelegramNotificationConfig{
+			config: notifycore.NotificationConfig{
+				Telegram: notifycore.TelegramNotificationConfig{
 					Enabled: true,
 					ChatID:  "123456",
 				},
@@ -763,8 +765,8 @@ func TestValidateNotificationConfigRejectsIncompleteTelegramConfig(t *testing.T)
 		},
 		{
 			name: "chat id",
-			config: NotificationConfig{
-				Telegram: TelegramNotificationConfig{
+			config: notifycore.NotificationConfig{
+				Telegram: notifycore.TelegramNotificationConfig{
 					Enabled:     true,
 					BotTokenEnv: "CHR_TELEGRAM_BOT_TOKEN",
 				},
@@ -773,7 +775,7 @@ func TestValidateNotificationConfigRejectsIncompleteTelegramConfig(t *testing.T)
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			err := ValidateNotificationConfig(test.config)
+			err := notifycore.ValidateNotificationConfig(test.config)
 			if err == nil {
 				t.Fatal("ValidateNotificationConfig returned nil error")
 			}

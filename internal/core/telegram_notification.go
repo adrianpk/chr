@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"bytes"
 	"context"
@@ -38,7 +40,7 @@ type TelegramSender struct {
 }
 
 // RenderTelegramNotificationMessage renders the corresponding package data.
-func RenderTelegramNotificationMessage(event NotificationEvent) TelegramMessage {
+func RenderTelegramNotificationMessage(event notifycore.NotificationEvent) TelegramMessage {
 	text := event.Payload.Summary
 	if event.Payload.Detail != "" {
 		text = text + "\n\n" + event.Payload.Detail

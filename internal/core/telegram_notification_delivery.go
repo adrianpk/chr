@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"bytes"
 	"context"
@@ -15,7 +17,7 @@ import (
 
 // SendPresentation shares the receiver's bounded HTTP boundary and multipart
 // uploader while retaining the notification sender and string destination.
-func (s TelegramSender) SendPresentation(ctx context.Context, token, destination string, delivery TelegramNotificationDelivery) (tgmessage.Acknowledgement, error) {
+func (s TelegramSender) SendPresentation(ctx context.Context, token, destination string, delivery notifycore.TelegramNotificationDelivery) (tgmessage.Acknowledgement, error) {
 	if strings.TrimSpace(token) == "" {
 		return tgmessage.Acknowledgement{}, fmt.Errorf("telegram bot token is required")
 	}
@@ -24,7 +26,7 @@ func (s TelegramSender) SendPresentation(ctx context.Context, token, destination
 		return tgmessage.Acknowledgement{}, fmt.Errorf("telegram chat id is required")
 	}
 
-	if err := ValidateTelegramNotificationDelivery(delivery); err != nil {
+	if err := notifycore.ValidateTelegramNotificationDelivery(delivery); err != nil {
 		return tgmessage.Acknowledgement{}, err
 	}
 
@@ -43,7 +45,7 @@ func (s TelegramSender) SendPresentation(ctx context.Context, token, destination
 	return api.sendNotificationText(ctx, token, destination, presentation.PlainFallback, entities)
 }
 
-func (api TelegramReceiverAPI) sendNotificationDocument(ctx context.Context, token, destination string, delivery TelegramNotificationDelivery, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
+func (api TelegramReceiverAPI) sendNotificationDocument(ctx context.Context, token, destination string, delivery notifycore.TelegramNotificationDelivery, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
 	body, contentType, err := telegramDocumentMultipartDestination(destination, 0, *delivery.Document, delivery.Presentation.PlainFallback, entities, nil)
 	if err != nil {
 		return tgmessage.Acknowledgement{}, err
@@ -109,7 +111,7 @@ func TelegramNotificationFailure(failure error) (string, bool) {
 		return api.Code, api.Uncertain
 	}
 
-	if errors.Is(failure, ErrTelegramNotificationTargetUnavailable) {
+	if errors.Is(failure, notifycore.ErrTelegramNotificationTargetUnavailable) {
 		return "notification_target_unavailable", false
 	}
 

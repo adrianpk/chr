@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"bufio"
 	"errors"
@@ -19,7 +21,7 @@ type WorkspaceConfig struct {
 	Workflow        WorkflowConfig
 	TicketKeyPrefix string
 	Runtime         RuntimeConfig
-	Notifications   NotificationConfig
+	Notifications   notifycore.NotificationConfig
 	Review          ReviewWorkflowConfig
 	Work            WorkConfig
 	Evidence        EvidenceConfig
@@ -369,7 +371,7 @@ func defaultWorkspaceConfig() WorkspaceConfig {
 	return WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,
 		Runtime:         DefaultRuntimeConfig(),
-		Notifications:   DefaultNotificationConfig(),
+		Notifications:   notifycore.DefaultNotificationConfig(),
 		Review:          DefaultReviewWorkflowConfig(),
 		Work:            DefaultWorkConfig(),
 		Evidence:        DefaultEvidenceConfig(),
@@ -539,7 +541,7 @@ func setRuntimeConfigValue(config *RuntimeConfig, key, value string) {
 	}
 }
 
-func setNotificationConfigValue(config *NotificationConfig, key, value string) {
+func setNotificationConfigValue(config *notifycore.NotificationConfig, key, value string) {
 	switch key {
 	case "telegram_enabled":
 		config.Telegram.Enabled = configvalue.Bool(value)

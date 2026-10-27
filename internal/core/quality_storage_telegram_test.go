@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"database/sql"
 	"reflect"
@@ -20,7 +22,7 @@ func qualityReceiverInput(t *testing.T) TelegramReceivedUpdate {
 	return update
 }
 
-func qualityNotificationInput(t *testing.T, db *sql.DB) TelegramNotificationInput {
+func qualityNotificationInput(t *testing.T, db *sql.DB) notifycore.TelegramNotificationInput {
 	t.Helper()
 
 	input := telegramNotificationTestInput(t)

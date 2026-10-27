@@ -1,5 +1,7 @@
 package core
 
+import notifycore "forge.adrianpk.com/chr/internal/core/notify"
+
 import (
 	"database/sql"
 	"encoding/json"
@@ -130,7 +132,7 @@ func changeQualityOptionalTimes(records *qualityLegacyRecords, populated bool) {
 	records.Execution.StartedAt = nil
 	records.Execution.FinishedAt = nil
 	records.Notification.Event.DeliveredAt = nil
-	records.Notification.Event.Status = NotificationStatusPending
+	records.Notification.Event.Status = notifycore.NotificationStatusPending
 
 	records.Execution.Status = ExecutionStatusPending
 	if populated {
@@ -138,7 +140,7 @@ func changeQualityOptionalTimes(records *qualityLegacyRecords, populated bool) {
 		finished := started.Add(3 * time.Minute)
 		delivered := records.Notification.Event.CreatedAt.Add(4 * time.Minute)
 		records.Execution.Status = ExecutionStatusSucceeded
-		records.Notification.Event.Status = NotificationStatusDelivered
+		records.Notification.Event.Status = notifycore.NotificationStatusDelivered
 		records.Execution.StartedAt = &started
 		records.Execution.FinishedAt = &finished
 		records.Notification.Event.DeliveredAt = &delivered
