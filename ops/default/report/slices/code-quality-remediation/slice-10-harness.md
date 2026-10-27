@@ -75,7 +75,8 @@ binding/launch consumers and native regressions confirm that disposition.
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
 files to this slice. Each current owner and consumer is checked before moving.
-The seven declaration preimages in slice-10-moves.csv match after namespace
+The seven binding and 29 profile/selection declaration/test preimages in
+slice-10-moves.csv match after namespace
 qualification and the equivalent standard-library membership predicate.
 Dependency guards allow only the existing neutral capability and exact digest
 owner; workflow/coordinator imports remain forbidden.
