@@ -1,4 +1,4 @@
-package core
+package daemon
 
 import (
 	"context"
@@ -35,7 +35,7 @@ type sqliteDaemonStateRepository struct {
 }
 
 // NewDaemonStateRepository constructs the corresponding package service or value.
-func NewDaemonStateRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (DaemonStateRepository, error) {
+func NewDaemonStateRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (DaemonStateRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)

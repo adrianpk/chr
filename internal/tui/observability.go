@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 )
 
 // ObservabilityView summarizes execution, loop, and runtime observability.
@@ -379,7 +380,7 @@ func emptyAsUnknown(value string) string {
 
 // ObservabilityRecords contains the loaded daemon, execution, loop and runtime observations.
 type ObservabilityRecords struct {
-	Daemon     core.DaemonState
+	Daemon     daemoncore.DaemonState
 	Executions []core.ExecutionRecord
 	Loops      []core.LoopRunRecord
 	Runtime    core.RuntimeValidationResult

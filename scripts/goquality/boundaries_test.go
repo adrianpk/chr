@@ -11,7 +11,7 @@ type leafDependencyCase struct {
 }
 
 func leafDependencyCases() []leafDependencyCase {
-	return []leafDependencyCase{
+	return append([]leafDependencyCase{
 		{"authoring bounded journals", "internal/core/authoring/owner.go", "package authoring\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
 		{"authoring native coordinator", "internal/core/authoring/guided_preparation.go", "package authoring\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"file authoring cycle", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "authoring\"\n", true},
@@ -69,6 +69,13 @@ func leafDependencyCases() []leafDependencyCase {
 		{"external", "internal/core/database/driver.go", "package database\nimport _ \"modernc.org/sqlite\"\n", false},
 		{"assembly", "internal/app/app.go", "package app\nimport _ \"" + moduleImportPath + "/internal/core\"\n", false},
 		{"similar sibling", "internal/core/notifyx/store.go", "package notifyx\nimport _ \"" + moduleImportPath + "/internal/app\"\n", false},
+	}, harnessLifecycleDependencyCases()...)
+}
+
+func harnessLifecycleDependencyCases() []leafDependencyCase {
+	return []leafDependencyCase{
+		{"daemon persistence", "internal/core/harness/daemon/state_repository.go", "package daemon\nimport _ \"" + coreImportPath + "database\"\n", false},
+		{"daemon coordinator", "internal/core/harness/daemon/state_repository.go", "package daemon\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 	}
 }
 

@@ -1,10 +1,9 @@
-package core
+package daemon
 
 import (
 	"context"
 	"database/sql"
 	"errors"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -123,32 +122,6 @@ func TestDaemonStateRepositoryRejectsInvalidState(t *testing.T) {
 	if err == nil || err.Error() != "daemon pid is required for running status" {
 		t.Fatalf("UpsertDaemonState error = %v, want pid validation", err)
 	}
-}
-
-func TestNewDaemonStateRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
-	root := t.TempDir()
-
-	env, err := NewUserEnvironment(UserEnvironmentOptions{
-		DevMode: true,
-		DevRoot: root,
-	})
-	if err != nil {
-		t.Fatalf("NewUserEnvironment returned error: %v", err)
-	}
-
-	repository, err := NewDaemonStateRepository(context.Background(), env, testMigrationFS())
-	if err != nil {
-		t.Fatalf("NewDaemonStateRepository returned error: %v", err)
-	}
-
-	t.Cleanup(func() {
-		err := repository.Close()
-		if err != nil {
-			t.Fatalf("close repository: %v", err)
-		}
-	})
-
-	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
 func newTestDaemonStateRepository(t *testing.T) DaemonStateRepository {

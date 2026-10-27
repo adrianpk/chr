@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -3624,7 +3625,7 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 	older := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
 	newer := older.Add(time.Hour)
 
-	view := NewObservabilityView(projectDir, ObservabilityRecords{Daemon: core.NewStoppedDaemonState(newer), Executions: []core.ExecutionRecord{
+	view := NewObservabilityView(projectDir, ObservabilityRecords{Daemon: daemoncore.NewStoppedDaemonState(newer), Executions: []core.ExecutionRecord{
 		{ID: "exec-old", Status: core.ExecutionStatusSucceeded, UpdatedAt: older},
 		{ID: "exec-new", Status: core.ExecutionStatusFailed, UpdatedAt: newer},
 	}, Loops: []core.LoopRunRecord{

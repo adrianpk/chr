@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 )
 
 type daemonStopRequestResult struct {
@@ -20,7 +21,7 @@ func requestDaemonStopState(
 	assets fs.FS,
 	requestedAt time.Time,
 ) (daemonStopRequestResult, error) {
-	repository, err := core.NewDaemonStateRepository(ctx, env, assets)
+	repository, err := daemoncore.NewDaemonStateRepository(ctx, env, assets)
 	if err != nil {
 		return daemonStopRequestResult{}, err
 	}
@@ -31,7 +32,7 @@ func requestDaemonStopState(
 	}()
 
 	err = repository.RequestDaemonStop(ctx, requestedAt)
-	if errors.Is(err, core.ErrDaemonStateNotFound) {
+	if errors.Is(err, daemoncore.ErrDaemonStateNotFound) {
 		return daemonStopRequestResult{AlreadyStopped: true}, nil
 	}
 

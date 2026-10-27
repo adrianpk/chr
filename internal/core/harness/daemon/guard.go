@@ -1,4 +1,5 @@
-package core
+// Package daemon owns host lifecycle state, start guards and persistent stop/heartbeat operations.
+package daemon
 
 import (
 	"fmt"

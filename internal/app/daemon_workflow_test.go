@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -25,7 +26,7 @@ func daemonWorkflowFixture(t *testing.T, output *bytes.Buffer) daemonWorkflowRun
 	repository := newDaemonStateRepositoryForTest(t, root)
 
 	now := time.Now().UTC()
-	if err := repository.UpsertDaemonState(t.Context(), core.DaemonState{Status: core.DaemonStatusRunning, PID: os.Getpid(), StartedAt: &now, HeartbeatAt: &now, UpdatedAt: now}); err != nil {
+	if err := repository.UpsertDaemonState(t.Context(), daemoncore.DaemonState{Status: daemoncore.DaemonStatusRunning, PID: os.Getpid(), StartedAt: &now, HeartbeatAt: &now, UpdatedAt: now}); err != nil {
 		t.Fatal(err)
 	}
 

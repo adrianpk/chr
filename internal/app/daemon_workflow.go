@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -30,12 +31,12 @@ type daemonWorkflowRunner struct {
 	stdout     io.Writer
 	env        core.UserEnvironment
 	assets     fs.FS
-	repository core.DaemonStateRepository
+	repository daemoncore.DaemonStateRepository
 }
 
-func (runner daemonWorkflowRunner) projects(ctx context.Context, projects []core.DaemonProject, result *daemonForegroundLoopResult) error {
+func (runner daemonWorkflowRunner) projects(ctx context.Context, projects []daemoncore.DaemonProject, result *daemonForegroundLoopResult) error {
 	for _, project := range projects {
-		if project.Status != core.DaemonProjectStatusReady {
+		if project.Status != daemoncore.DaemonProjectStatusReady {
 			continue
 		}
 
@@ -135,7 +136,7 @@ func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry proje
 		return err
 	}
 
-	projects, err := core.LoadDaemonProjects(ctx, registry)
+	projects, err := daemoncore.LoadDaemonProjects(ctx, registry)
 	if err != nil {
 		return err
 	}
@@ -167,7 +168,7 @@ func (runner daemonWorkflowRunner) progress(project string, progress RetainedWor
 
 // Heartbeats stay fresh during owned workers. A daemon stop yields between
 // checkpoints; per-invocation pause/cancel uses the shared worker stop watcher.
-func watchDaemonHeartbeat(ctx context.Context, repository core.DaemonStateRepository) (context.Context, func() error) {
+func watchDaemonHeartbeat(ctx context.Context, repository daemoncore.DaemonStateRepository) (context.Context, func() error) {
 	watched, cancel := context.WithCancel(ctx)
 	finished := make(chan error, 1)
 

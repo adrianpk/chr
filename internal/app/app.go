@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -516,10 +517,10 @@ func latestTUILoopRun(loops []core.LoopRunRecord) core.LoopRunRecord {
 	return latest
 }
 
-func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) (core.DaemonState, error) {
-	repository, err := core.NewDaemonStateRepository(ctx, env, assetsFS)
+func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) (daemoncore.DaemonState, error) {
+	repository, err := daemoncore.NewDaemonStateRepository(ctx, env, assetsFS)
 	if err != nil {
-		return core.DaemonState{}, err
+		return daemoncore.DaemonState{}, err
 	}
 
 	defer func() {
@@ -528,12 +529,12 @@ func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS 
 	}()
 
 	state, err := repository.GetDaemonState(ctx)
-	if errors.Is(err, core.ErrDaemonStateNotFound) {
-		return core.NewStoppedDaemonState(time.Now().UTC()), nil
+	if errors.Is(err, daemoncore.ErrDaemonStateNotFound) {
+		return daemoncore.NewStoppedDaemonState(time.Now().UTC()), nil
 	}
 
 	if err != nil {
-		return core.DaemonState{}, err
+		return daemoncore.DaemonState{}, err
 	}
 
 	return state, nil

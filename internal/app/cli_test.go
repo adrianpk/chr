@@ -25,6 +25,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/gate"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
@@ -1772,8 +1773,8 @@ func TestDaemonStatusPrintsStoredRunningState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt.Add(time.Minute)
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:        core.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:        daemoncore.DaemonStatusRunning,
 		PID:           1234,
 		StartedAt:     &startedAt,
 		HeartbeatAt:   &heartbeatAt,
@@ -1814,8 +1815,8 @@ func TestDaemonStatusPrintsStoredStoppingState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	stopRequestedAt := startedAt.Add(time.Minute)
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:          core.DaemonStatusStopping,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:          daemoncore.DaemonStatusStopping,
 		PID:             1234,
 		StartedAt:       &startedAt,
 		StopRequestedAt: &stopRequestedAt,
@@ -1850,8 +1851,8 @@ func TestDaemonStatusPrintsStoredStaleState(t *testing.T) {
 	devRoot := t.TempDir()
 	updatedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:        core.DaemonStatusStale,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:        daemoncore.DaemonStatusStale,
 		PID:           1234,
 		FailureReason: "missing process",
 		UpdatedAt:     updatedAt,
@@ -1886,8 +1887,8 @@ func TestDaemonStatusRecoversStaleRunningState(t *testing.T) {
 	startedAt := time.Now().UTC().Add(-10 * time.Minute)
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:      core.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:      daemoncore.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -1918,7 +1919,7 @@ func TestDaemonStatusRecoversStaleRunningState(t *testing.T) {
 	}
 
 	state := getDaemonState(t, devRoot)
-	if state.Status != core.DaemonStatusStale {
+	if state.Status != daemoncore.DaemonStatusStale {
 		t.Fatalf("daemon state = %#v, want stale", state)
 	}
 }
@@ -1960,8 +1961,8 @@ func TestDaemonStartDryRunRejectsFreshRunningState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:      core.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:      daemoncore.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -2305,8 +2306,8 @@ func TestDaemonStartDryRunAllowsStaleRunningState(t *testing.T) {
 	startedAt := time.Now().UTC().Add(-10 * time.Minute)
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:      core.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:      daemoncore.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -2410,7 +2411,7 @@ func TestDaemonStartRunsForegroundLoop(t *testing.T) {
 	}
 
 	state := getDaemonState(t, devRoot)
-	if state.Status != core.DaemonStatusStopped {
+	if state.Status != daemoncore.DaemonStatusStopped {
 		t.Fatalf("daemon state = %#v, want stopped", state)
 	}
 }
@@ -2438,8 +2439,8 @@ func TestDaemonStartRejectsFreshRunningState(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:      core.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:      daemoncore.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -2466,8 +2467,8 @@ func TestDaemonStopRequestsRunningDaemonStop(t *testing.T) {
 	startedAt := time.Now().UTC()
 	heartbeatAt := startedAt
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:      core.DaemonStatusRunning,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:      daemoncore.DaemonStatusRunning,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -2492,7 +2493,7 @@ func TestDaemonStopRequestsRunningDaemonStop(t *testing.T) {
 	}
 
 	state := getDaemonState(t, devRoot)
-	if state.Status != core.DaemonStatusStopping || state.StopRequestedAt == nil {
+	if state.Status != daemoncore.DaemonStatusStopping || state.StopRequestedAt == nil {
 		t.Fatalf("daemon state = %#v, want stopping with stop request", state)
 	}
 }
@@ -2523,8 +2524,8 @@ func TestDaemonStopRequestedHelperReadsStopRequest(t *testing.T) {
 	startedAt := time.Now().UTC()
 	stopRequestedAt := startedAt.Add(time.Minute)
 
-	upsertDaemonState(t, devRoot, core.DaemonState{
-		Status:          core.DaemonStatusStopping,
+	upsertDaemonState(t, devRoot, daemoncore.DaemonState{
+		Status:          daemoncore.DaemonStatusStopping,
 		PID:             1234,
 		StartedAt:       &startedAt,
 		StopRequestedAt: &stopRequestedAt,
@@ -7566,7 +7567,7 @@ func marshalCLIAgentEventLine(t *testing.T, event core.AgentEvent) string {
 	return string(data)
 }
 
-func upsertDaemonState(t *testing.T, devRoot string, state core.DaemonState) {
+func upsertDaemonState(t *testing.T, devRoot string, state daemoncore.DaemonState) {
 	t.Helper()
 
 	repository := newDaemonStateRepositoryForTest(t, devRoot)
@@ -7577,7 +7578,7 @@ func upsertDaemonState(t *testing.T, devRoot string, state core.DaemonState) {
 	}
 }
 
-func getDaemonState(t *testing.T, devRoot string) core.DaemonState {
+func getDaemonState(t *testing.T, devRoot string) daemoncore.DaemonState {
 	t.Helper()
 
 	repository := newDaemonStateRepositoryForTest(t, devRoot)
@@ -7590,7 +7591,7 @@ func getDaemonState(t *testing.T, devRoot string) core.DaemonState {
 	return state
 }
 
-func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) core.DaemonStateRepository {
+func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) daemoncore.DaemonStateRepository {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7601,7 +7602,7 @@ func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) core.DaemonSt
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := core.NewDaemonStateRepository(t.Context(), env, testAssetsFS())
+	repository, err := daemoncore.NewDaemonStateRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewDaemonStateRepository returned error: %v", err)
 	}

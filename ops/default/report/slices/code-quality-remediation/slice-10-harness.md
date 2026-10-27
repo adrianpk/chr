@@ -78,6 +78,15 @@ callback timing and joined unlock/close errors. Three exact function preimages
 are recorded. Workspace dependency guards admit only the concrete file owner;
 coordinator imports remain rejected.
 
+Daemon lifecycle values, start guards, SQLite state persistence and enabled-project
+classification now live under core/harness/daemon. Application and TUI consumers
+call that owner directly. The constructor uses the existing database.DataDirectory
+port; SQL text, state fields, timing, stop requests and failure messages are
+unchanged. Four existing test files follow their owner; the real user-environment
+integration stays beside its environment, and package fixtures use production
+migration assets against owned in-memory databases. The 68 moved declarations and
+tests retain their source preimages after namespace qualification.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -182,6 +191,15 @@ Shared configuration filesystem checks passed:
 Configuration API naming check passed:
 
 - `go test ./internal/core/workspace ./internal/core ./internal/app -run '^Test(WorkflowUpgrade|HarnessSelection|HarnessGeneration)' -count=1 -timeout=3m`
+
+Daemon owner move checks passed:
+
+- `go test ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(ValidateDaemon|EvaluateDaemon|LoadDaemon|DaemonState|NewDaemon|Daemon|Leaf)' -count=1 -timeout=3m`: TUI compiled; lifecycle, persistence, native/application and dependency checks passed.
+- `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
+
+The mechanical move exposes pre-existing Daemon prefixes under the new daemon
+namespace; the required separate naming commit removes that stuttering before
+final strict lint validation.
 
 ## Risks and Follow-ups
 

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
@@ -182,7 +183,7 @@ func TestDaemonWorkflowCoordinatorStop(t *testing.T) {
 	}
 }
 
-func checkDaemonWorkflowHeartbeat(t *testing.T, repository core.DaemonStateRepository) {
+func checkDaemonWorkflowHeartbeat(t *testing.T, repository daemoncore.DaemonStateRepository) {
 	t.Helper()
 
 	deadline := time.Now().Add(5 * time.Second)
