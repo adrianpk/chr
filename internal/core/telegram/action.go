@@ -56,15 +56,12 @@ type ActionClaim struct {
 	ReceiptOnly bool
 }
 
-const actionColumns = `token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,COALESCE(consumed_by_request,''),guard_version,COALESCE(presentation_hash,'')`
-
 func readAction(ctx context.Context, reader conversationReader, token string, peer PeerIdentity) (Action, error) {
-	var (
-		action          Action
-		choices, expiry string
-	)
+	var row actionReadRow
 
-	err := reader.QueryRowContext(ctx, `SELECT `+actionColumns+` FROM telegram_actions WHERE token=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, token, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID).Scan(&action.Token, &action.RequestID, &action.Peer.BotID, &action.Peer.ChatID, &action.Peer.TopicID, &action.Peer.UserID, &action.ConversationRevision, &action.GuardDigest, &choices, &action.State, &expiry, &action.AnswerRequestID, &action.GuardVersion, &action.PresentationHash)
+	err := reader.QueryRowContext(ctx, `SELECT `+actionColumns+` FROM telegram_actions WHERE token=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, token, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID).Scan(row.scanTargets()...)
+
+	action, choices, expiry := row.action, row.choices, row.expiry
 	if err != nil {
 		return action, err
 	}

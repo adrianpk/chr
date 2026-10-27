@@ -622,11 +622,6 @@
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
-      "id": "internal/core/telegram/document_outbox.go::retainDocument",
-      "signature": "func(ctx context.Context, tx *sql.Tx, id, owner string, peer PeerIdentity, configDigest string, document tgmessage.Document, now time.Time) error",
-      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
-    },
-    {
       "id": "internal/core/telegram/document_result.go::queueOperationResult",
       "signature": "func(ctx context.Context, tx *sql.Tx, request OperationRequest, text, receipt, configDigest string, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -704,11 +699,6 @@
     {
       "id": "internal/core/telegram/work_projection.go::queueWorkObservation",
       "signature": "func(ctx context.Context, tx *sql.Tx, ref WorkReference, observation WorkObservation, configDigest string, now time.Time) error",
-      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/telegram/work_projection.go::insertWorkNotice",
-      "signature": "func(ctx context.Context, tx *sql.Tx, ref WorkReference, kind, key, text, configDigest string, part, parts int, now time.Time) error",
       "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

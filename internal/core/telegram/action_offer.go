@@ -79,7 +79,9 @@ func retainAction(op conversationTransaction, request OperationRequest, offer Ac
 
 	p := request.Source.Peer
 
-	_, err = op.tx.ExecContext(op.ctx, `INSERT INTO telegram_actions(token,request_id,bot_id,chat_id,topic_id,user_id,conversation_revision,guard_digest,allowed_choices,state,expires_at,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,'pending',?,?,?)`, token, request.ID, p.BotID, p.ChatID, p.TopicID, p.UserID, request.Target.ConversationRevision, actionGuard(request), string(choices), database.FormatTime(offer.ExpiresAt), database.FormatTime(op.now), database.FormatTime(op.now))
+	row := actionAdmissionRow{token: token, request: request, choices: string(choices), expiresAt: offer.ExpiresAt, createdAt: op.now}
+
+	_, err = op.tx.ExecContext(op.ctx, insertActionSQL, row.values()...)
 	if err != nil {
 		return Action{}, err
 	}

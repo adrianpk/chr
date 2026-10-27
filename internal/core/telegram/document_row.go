@@ -48,3 +48,24 @@ func (row documentSnapshotRow) values() []any {
 		tgmessage.DocumentQuota,
 	}
 }
+
+const deliveryDocumentColumns = `d.project_id,d.namespace,d.project_binding_digest,d.source_ref,d.source_hash,d.content_hash,d.filename,d.media_type,d.payload`
+
+type deliveryDocumentRow struct {
+	document tgmessage.Document
+	hash     string
+}
+
+func (row *deliveryDocumentRow) scanTargets() []any {
+	return []any{
+		&row.document.ProjectID,
+		&row.document.Namespace,
+		&row.document.ProjectBindingDigest,
+		&row.document.SourceRef,
+		&row.document.SourceHash,
+		&row.hash,
+		&row.document.Filename,
+		&row.document.MediaType,
+		&row.document.Payload,
+	}
+}

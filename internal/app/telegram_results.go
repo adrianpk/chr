@@ -66,6 +66,7 @@ type (
 		Start bool
 	}
 )
+
 type telegramHarnessRetention struct {
 	Items   []WorkflowWorkStatus
 	More    bool

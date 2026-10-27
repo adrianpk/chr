@@ -515,3 +515,16 @@ only its Telegram composition adapter projects the named receipt result. The
 complete selected app Telegram/guided regression set and pinned lint pass; 30
 further exact allowances disappear. App mutation and dispatch inputs, queue rows
 and typed state cleanup remain active work before final slice validation.
+
+
+Typed queue rows align the original response-part and work-notice columns with
+their ordered values; action admission/read, receiver delivery and document image
+scans use typed row owners. Document retention accepts its existing Slice 3
+snapshot row directly. Fixed SQL literals, defaults, NULL behavior and quota
+reservation remain unchanged. A bounded static comparison records 174 unchanged
+SQL expressions in slice-7-storage.csv against cb4affbe32cf. Existing row identity,
+cross-table rollback, original multipart bytes, caption fallback, finite quota,
+action guards, receiver and retained recovery regressions and pinned lint pass.
+Two more allowances disappear, leaving 335 repository-wide. All 67 assigned
+result rows and 52 baseline B rows now conform to the approved policy; 28 A
+inputs and the remaining state/error/close work still precede PR readiness.

@@ -52,7 +52,7 @@ func queueDocument(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, respo
 // The caller owns the outbox row and has validated the complete source image.
 func bindDocumentImage(ctx context.Context, tx *sql.Tx, deliveryID string, peer PeerIdentity, response tgmessage.DocumentResponse, configDigest string, now time.Time) error {
 	id := "tgdoc-" + contenthash.Sum([]byte(deliveryID))[:32]
-	if err := retainDocument(ctx, tx, id, deliveryID, peer, configDigest, response.Document, now); err != nil {
+	if err := retainDocument(ctx, tx, documentSnapshotRow{id: id, owner: deliveryID, peer: peer, configDigest: configDigest, document: response.Document, createdAt: now}); err != nil {
 		return err
 	}
 
@@ -72,11 +72,9 @@ func bindDocumentImage(ctx context.Context, tx *sql.Tx, deliveryID string, peer 
 	return checkIntakeCapacity(ctx, tx, peer.BotID)
 }
 
-func retainDocument(ctx context.Context, tx *sql.Tx, id, owner string, peer PeerIdentity, configDigest string, document tgmessage.Document, now time.Time) error {
+func retainDocument(ctx context.Context, tx *sql.Tx, row documentSnapshotRow) error {
 	// The outbox insertion already owns SQLite's write reservation. Quota check
 	// and admission therefore serialize with other admissions and cleanup.
-	row := documentSnapshotRow{id: id, owner: owner, peer: peer, configDigest: configDigest, document: document, createdAt: now}
-
 	result, err := tx.ExecContext(ctx, insertDocumentSnapshotSQL, row.values()...)
 	if err != nil {
 		return err
@@ -97,15 +95,14 @@ func retainDocument(ctx context.Context, tx *sql.Tx, id, owner string, peer Peer
 // ReadDeliveryDocument resolves bytes only through the exact original outbox,
 // destination, configuration and presentation hash, including during retry.
 func (s *ReceiverStore) ReadDeliveryDocument(ctx context.Context, delivery ReceiverDelivery) (tgmessage.Document, error) {
-	var (
-		document tgmessage.Document
-		hash     string
-	)
+	var row deliveryDocumentRow
 
 	p := delivery.Peer
 
-	err := s.db.QueryRowContext(ctx, `SELECT d.project_id,d.namespace,d.project_binding_digest,d.source_ref,d.source_hash,d.content_hash,d.filename,d.media_type,d.payload FROM telegram_document_snapshots d JOIN telegram_outbox o ON o.id=d.owner_id AND o.document_id=d.id
- WHERE o.id=? AND d.id=? AND d.bot_id=? AND d.chat_id=? AND d.topic_id=? AND d.user_id=? AND d.config_digest=? AND o.config_digest=d.config_digest AND o.bot_id=d.bot_id AND o.chat_id=d.chat_id AND o.topic_id=d.topic_id AND o.user_id=d.user_id AND d.payload IS NOT NULL AND o.state='sending'`, delivery.ID, delivery.DocumentID, p.BotID, p.ChatID, p.TopicID, p.UserID, delivery.ConfigDigest).Scan(&document.ProjectID, &document.Namespace, &document.ProjectBindingDigest, &document.SourceRef, &document.SourceHash, &hash, &document.Filename, &document.MediaType, &document.Payload)
+	err := s.db.QueryRowContext(ctx, `SELECT `+deliveryDocumentColumns+` FROM telegram_document_snapshots d JOIN telegram_outbox o ON o.id=d.owner_id AND o.document_id=d.id
+ WHERE o.id=? AND d.id=? AND d.bot_id=? AND d.chat_id=? AND d.topic_id=? AND d.user_id=? AND d.config_digest=? AND o.config_digest=d.config_digest AND o.bot_id=d.bot_id AND o.chat_id=d.chat_id AND o.topic_id=d.topic_id AND o.user_id=d.user_id AND d.payload IS NOT NULL AND o.state='sending'`, delivery.ID, delivery.DocumentID, p.BotID, p.ChatID, p.TopicID, p.UserID, delivery.ConfigDigest).Scan(row.scanTargets()...)
+
+	document, hash := row.document, row.hash
 	if err != nil {
 		return document, fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 	}

@@ -139,7 +139,7 @@ func queueWorkObservation(ctx context.Context, tx *sql.Tx, ref WorkReference, ob
 	}
 
 	for index, part := range parts {
-		if err := insertWorkNotice(ctx, tx, ref, observation.Kind, key, part, configDigest, index+1, len(parts), now); err != nil {
+		if err := insertWorkNotice(ctx, tx, workNoticeRow{ref: ref, kind: observation.Kind, key: key, text: part, configDigest: configDigest, part: index + 1, parts: len(parts), at: now}); err != nil {
 			return err
 		}
 
@@ -153,10 +153,8 @@ func queueWorkObservation(ctx context.Context, tx *sql.Tx, ref WorkReference, ob
 	return checkIntakeCapacity(ctx, tx, ref.Request.Source.Peer.BotID)
 }
 
-func insertWorkNotice(ctx context.Context, tx *sql.Tx, ref WorkReference, kind, key, text, configDigest string, part, parts int, now time.Time) error {
-	peer, target := ref.Request.Source.Peer, ref.Request.Target
-	id := "tgd-" + contenthash.Sum(fmt.Appendf(nil, "%d:%s:%d", peer.BotID, key, part))[:32]
-	_, err := tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,conversation_id,conversation_revision,request_id,event_key,config_digest,kind,text,part_index,part_count,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending',?,?)`, id, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID, target.ConversationID, ref.ConversationRevision, ref.Request.ID, key, configDigest, kind, text, part, parts, database.FormatTime(now), database.FormatTime(now))
+func insertWorkNotice(ctx context.Context, tx *sql.Tx, row workNoticeRow) error {
+	_, err := tx.ExecContext(ctx, insertWorkNoticeSQL, row.values()...)
 
 	return err
 }
