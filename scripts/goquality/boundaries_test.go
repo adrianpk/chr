@@ -44,6 +44,7 @@ func leafDependencyCases() []leafDependencyCase {
 		{"native frontmatter", "internal/core/workflow/state/markdown.go", "package state\nimport _ \"" + coreImportPath + "ops/metadata\"\n", false},
 		{"metadata state cycle", "internal/core/ops/metadata/markdown.go", "package metadata\nimport _ \"" + coreImportPath + "workflow/state\"\n", true},
 		{"harness identity capability", "internal/core/harness/binding.go", "package harness\nimport _ \"" + moduleImportPath + "/internal/harness\"\n", false},
+		{"binding digest", "internal/core/harness/binding_validation.go", "package harness\nimport _ \"" + coreImportPath + "contenthash\"\n", false},
 		{"harness identity coordinator", "internal/core/harness/binding.go", "package harness\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"retained harness binding", "internal/core/workflow/state/admission.go", "package state\nimport _ \"" + coreImportPath + "harness\"\n", false},
 		{"harness state cycle", "internal/core/harness/binding.go", "package harness\nimport _ \"" + coreImportPath + "workflow/state\"\n", true},

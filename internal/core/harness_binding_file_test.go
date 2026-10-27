@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"syscall"
 	"testing"
+
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 // Supported CLI distributions can exceed 256 MiB. Fingerprinting remains
@@ -41,7 +43,7 @@ func TestHarnessBindingExecutableFiles(t *testing.T) {
 				t.Fatal("executable type admission disagreed", err)
 			}
 
-			if valid && (!harnessSelectionDigest(reference.Hash) || !filepath.IsAbs(command[0]) || len(command) != 1) {
+			if valid && (!harnesscore.SelectionDigest(reference.Hash) || !filepath.IsAbs(command[0]) || len(command) != 1) {
 				t.Fatal("executable identity was not retained")
 			}
 		})

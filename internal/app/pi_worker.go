@@ -15,6 +15,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -96,7 +97,7 @@ func piWorkerPrompt(data []byte, options pi.WorkerRuntimeOptions) (string, error
 	}
 
 	binding := *input.HarnessBinding
-	if err := core.ValidateHarnessBinding(binding); err != nil {
+	if err := harnesscore.ValidateHarnessBinding(binding); err != nil {
 		return "", err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -40,7 +41,7 @@ func validateHarnessSelectionAudit(audit HarnessSelectionAudit) error {
 		return errors.New("invalid harness selection project or actor")
 	}
 
-	if (workflowstate.MutationBinding{RequestID: audit.RequestID, Operator: audit.ChangedBy}).Validate() != nil || !harnessSelectionDigest(audit.RequestDigest) {
+	if (workflowstate.MutationBinding{RequestID: audit.RequestID, Operator: audit.ChangedBy}).Validate() != nil || !harnesscore.SelectionDigest(audit.RequestDigest) {
 		return errors.New("invalid harness selection request metadata")
 	}
 

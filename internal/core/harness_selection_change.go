@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -113,7 +113,7 @@ func harnessSelectionRequestDigest(r HarnessSelectionChangeRequest) (string, err
 		return "", errors.New("harness selection requires an authorized actor and preparation")
 	}
 
-	if (workflowstate.MutationBinding{RequestID: r.ProjectRef, Operator: r.Binding.Operator}).Validate() != nil || !harnessSelectionDigest(r.ExpectedRevision) {
+	if (workflowstate.MutationBinding{RequestID: r.ProjectRef, Operator: r.Binding.Operator}).Validate() != nil || !harnesscore.SelectionDigest(r.ExpectedRevision) {
 		return "", errors.New("harness selection requires an exact project and configuration revision")
 	}
 
@@ -132,18 +132,12 @@ func validateHarnessSelectionChoices(r HarnessSelectionChangeRequest) error {
 	}
 
 	for _, value := range []*string{r.Worker, r.Generation} {
-		if value != nil && *value != "" && !validHarnessProfileName(*value) {
+		if value != nil && *value != "" && !harnesscore.ValidHarnessProfileName(*value) {
 			return errors.New("harness selection requires a named profile or clear")
 		}
 	}
 
 	return nil
-}
-
-func harnessSelectionDigest(value string) bool {
-	decoded, err := hex.DecodeString(value)
-
-	return err == nil && len(decoded) == 32
 }
 
 func publishHarnessSelectionChange(ctx context.Context, project string, opts HarnessSelectionChangeOptions, digest string) (HarnessSelectionSnapshot, error) {

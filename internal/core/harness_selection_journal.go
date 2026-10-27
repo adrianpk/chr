@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -123,7 +124,7 @@ func validateHarnessSelectionJournalBinding(journal harnessSelectionJournal) err
 	digest, err := harnessSelectionRequestDigest(journal.Request)
 
 	r := journal.Result
-	if err != nil || digest != r.RequestDigest || journal.Before != journal.Request.ExpectedRevision || !harnessSelectionDigest(r.Revision) {
+	if err != nil || digest != r.RequestDigest || journal.Before != journal.Request.ExpectedRevision || !harnesscore.SelectionDigest(r.Revision) {
 		return errors.New("invalid harness selection request evidence")
 	}
 
@@ -144,7 +145,7 @@ func validateHarnessSelectionJournalResult(journal harnessSelectionJournal) erro
 			return errors.New("harness selection result changed requested choices")
 		}
 
-		if field.result != "" && !validHarnessProfileName(field.result) {
+		if field.result != "" && !harnesscore.ValidHarnessProfileName(field.result) {
 			return errors.New("invalid retained harness choice")
 		}
 	}

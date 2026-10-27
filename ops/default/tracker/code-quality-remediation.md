@@ -145,7 +145,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T10.1 | Use the existing internal/harness packages for adapter-neutral runner contracts and provider/process adapters. Move core-owned admission/binding policy to internal/core/harness when required; do not make the runner library import project workflow policy. | pending | — | not run |
+| T10.1 | Use the existing internal/harness packages for adapter-neutral runner contracts and provider/process adapters. Move core-owned admission/binding policy to internal/core/harness when required; do not make the runner library import project workflow policy. | in_progress | — | Pure binding sealing/validation and lexical predicates moved to their value owner; native command fencing remains at its workflow owner; remaining admission/host boundaries pending |
 | T10.2 | Convert runtimeArtifactPaths and runtime command/path/result tuples into existing or new precise values. Refactor supervised-process repeated inputs and harness/process exchange signatures with explicit resource ownership. | pending | — | not run |
 | T10.3 | Separate executable identity, model/profile selection, frozen capabilities and host-owned execution policy. Preserve serialized binding hashes, finite budgets, output retention and provider-independent error behavior. | pending | — | not run |
 | T10.4 | Derive contexts at the caller or use a narrowly owned cancellation handle; do not store operation contexts or lose cleanup on early errors. Review relevant boolean flags and test-only wrappers with real call-path evidence. | pending | — | not run |

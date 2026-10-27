@@ -58,7 +58,7 @@ func ValidateHarnessGenerationBinding(binding HarnessGenerationBinding) error {
 }
 
 func validateGenerationBindingSelection(s HarnessSelection) error {
-	if s.Role != harnesscore.Generation || !s.Readiness.Ready() || !harnessSelectionDigest(s.SelectionRevision) || !harnessSelectionDigest(s.ProfileRevision) {
+	if s.Role != harnesscore.Generation || !s.Readiness.Ready() || !harnesscore.SelectionDigest(s.SelectionRevision) || !harnesscore.SelectionDigest(s.ProfileRevision) {
 		return errors.New("generation binding requires a ready versioned selection")
 	}
 
@@ -81,7 +81,7 @@ func validateGenerationBindingText(binding HarnessGenerationBinding) error {
 }
 
 func validateGenerationBindingSource(s HarnessSelection) error {
-	if s.Source == "project" && validHarnessProfileName(s.Profile) {
+	if s.Source == "project" && harnesscore.ValidHarnessProfileName(s.Profile) {
 		return nil
 	}
 
@@ -102,7 +102,7 @@ func validateGenerationBindingTransport(binding HarnessGenerationBinding) error 
 		return errors.New("generation binding requires executable and capability evidence")
 	}
 
-	if !harnessSelectionDigest(binding.ExecutableRef.Hash) || !harnessSelectionDigest(binding.ExecutableRef.CommandHash) {
+	if !harnesscore.SelectionDigest(binding.ExecutableRef.Hash) || !harnesscore.SelectionDigest(binding.ExecutableRef.CommandHash) {
 		return errors.New("generation binding requires executable fingerprints")
 	}
 

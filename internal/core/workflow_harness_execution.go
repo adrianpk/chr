@@ -3,6 +3,7 @@ package core
 import (
 	"slices"
 
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -45,7 +46,7 @@ func validateWorkflowTaskHarnessSchema(input WorkflowTaskInput) error {
 	}
 
 	if input.ExecutionMode == "manual" && len(input.Worker) == 0 {
-		return ValidateHarnessBinding(*input.HarnessBinding)
+		return harnesscore.ValidateHarnessBinding(*input.HarnessBinding)
 	}
 
 	return validateWorkflowHarnessPair(input.HarnessBinding, input.Worker)

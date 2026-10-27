@@ -230,7 +230,7 @@ func validateGenerationResources(resources harness.GenerationResources, backend 
 		return nil
 	}
 
-	if !harnessSelectionDigest(resources.ModelConfigHash) {
+	if !harnesscore.SelectionDigest(resources.ModelConfigHash) {
 		return errors.New("generation model resource requires identity evidence")
 	}
 

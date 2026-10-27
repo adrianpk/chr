@@ -6,7 +6,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/configvalue"
@@ -91,7 +90,7 @@ func HarnessProfileRevision(p HarnessProfile) string {
 }
 
 func validateHarnessProfile(p HarnessProfile) error {
-	if !validHarnessProfileName(p.Name) || !workflowConfigChoice(p.Harness, []string{"codex", "pi"}) || p.Command == "" {
+	if !harnesscore.ValidHarnessProfileName(p.Name) || !workflowConfigChoice(p.Harness, []string{"codex", "pi"}) || p.Command == "" {
 		return errors.New("a harness profile needs a unique name, supported harness and executable")
 	}
 
@@ -100,10 +99,6 @@ func validateHarnessProfile(p HarnessProfile) error {
 	}
 
 	return nil
-}
-
-func validHarnessProfileName(value string) bool {
-	return regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`).MatchString(value)
 }
 
 func applyHarnessSelection(config *WorkspaceConfig, values map[string]string) error {
@@ -121,7 +116,7 @@ func applyHarnessSelection(config *WorkspaceConfig, values map[string]string) er
 
 		value = configvalue.String(value)
 
-		if !validHarnessProfileName(value) {
+		if !harnesscore.ValidHarnessProfileName(value) {
 			return errors.New("harness selection requires a named profile or null")
 		}
 

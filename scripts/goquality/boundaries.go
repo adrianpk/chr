@@ -17,7 +17,7 @@ const (
 var leafImports = map[string]map[string]bool{
 	"internal/core/ticket/metadata":      {coreImportPath + "ops/metadata": true},
 	"internal/core/authoring":            {coreImportPath + "authoring/generation": true, coreImportPath + "authoring/state": true, coreImportPath + "contenthash": true, coreImportPath + "model": true, coreImportPath + "ops": true, coreImportPath + "ops/file": true, coreImportPath + "ops/metadata": true, coreImportPath + "ops/namespace": true, coreImportPath + "ops/slug": true, coreImportPath + "project": true, coreImportPath + "quiz": true, coreImportPath + "ticket/metadata": true, coreImportPath + "workflow/state": true, coreImportPath + "workspace": true},
-	"internal/core/harness":              {moduleImportPath + "/internal/harness": true},
+	"internal/core/harness":              {coreImportPath + "contenthash": true, moduleImportPath + "/internal/harness": true},
 	"internal/core/authoring/acceptance": {coreImportPath + "authoring/generation": true, coreImportPath + "ops": true, coreImportPath + "ops/metadata": true, coreImportPath + "quiz": true},
 	"internal/core/ops/metadata":         {},
 	"internal/core/ops/file":             {coreImportPath + "workflow/state": true},
