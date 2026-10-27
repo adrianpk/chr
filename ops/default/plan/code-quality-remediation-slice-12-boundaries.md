@@ -7,8 +7,10 @@ Source revision: `d0d65c114cf8ddffcd0492f7fc0b746a832adc0d`.
 The [method map](code-quality-remediation-slice-12-methods.csv) freezes all 908
 current `WorkflowStore` methods across 234 files. Each row records its exact
 source identity, signature, declaration hash, responsibility, direct calls and
-reachable named lock/mutation/recovery entries. The receiver owner is always
-`internal/core/workflow`. A future stage policy owner identifies the consumer of
+reachable named lock/mutation/recovery entries. The target receiver owner is always
+`internal/core/workflow`; the source revision still defines the type and its
+methods together in `internal/core`. This is a relocation map, not evidence that
+the family has already moved. A future stage policy owner identifies the consumer of
 store operations; it does not permit methods of a nonlocal type in another Go
 package. Stage policy must become functions/methods of its own types over
 consumer-owned operations when its approved extraction task runs.

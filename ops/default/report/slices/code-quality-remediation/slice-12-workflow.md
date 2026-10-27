@@ -21,7 +21,8 @@ existing workflow/state owner with direct native, app and adapter consumers.
 
 ## Implementation Notes
 
-The approved T12.1–T12.6 tasks own this slice. All methods of the store move with
+The approved T12.1–T12.6 tasks own this slice. The shared review prerequisite is
+implemented in `f4be8551581dbec43746e5b676b714911af24e2c`. All methods of the store move with
 their owning Go type. Shared stage data belongs in workflow/state when needed
 without transferring persistence, coordination or transport behavior.
 
