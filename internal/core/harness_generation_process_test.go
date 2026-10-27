@@ -46,7 +46,7 @@ func TestHarnessGenerationBindingHostProcess(t *testing.T) {
 		return
 	}
 
-	operation, err := FreezeHarnessGeneration(t.Context(), project, "operation-fixture", "plan_generation", nil)
+	operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "operation-fixture", Purpose: "plan_generation"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

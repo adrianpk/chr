@@ -145,7 +145,7 @@ func TestHarnessGenerationBindingFiles(t *testing.T) {
 
 			test.replace(t, path)
 
-			if _, err := FreezeHarnessGeneration(t.Context(), project, operation.ID, operation.Purpose, nil); err == nil {
+			if _, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil); err == nil {
 				t.Fatal("invalid artifact was treated as a fresh operation")
 			}
 		})
@@ -187,7 +187,7 @@ func TestHarnessGenerationBindingCallIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	second, err := FreezeHarnessGeneration(t.Context(), project, "second-operation", operation.Purpose, generationBindingResolver(operation.program, "model-alpha"))
+	second, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "second-operation", Purpose: operation.Purpose}, generationBindingResolver(operation.program, "model-alpha"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,31 +12,6 @@
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/service_harness_generation.go::service.bindHarnessGeneration/function/1",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig) (harnesscore.GenerationBinding, core.HarnessGenerationLaunch, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_generation.go::service.prepareGenerationBinding",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig, purpose string) (harnesscore.GenerationBinding, core.HarnessGenerationLaunch, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_generation.go::prepareLegacyAPIGeneration",
-      "signature": "func(config core.WorkspaceConfig, purpose, model string) (harnesscore.GenerationBinding, core.HarnessGenerationLaunch, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_generation.go::prepareCodexGenerationBinding",
-      "signature": "func(selection harnesscore.Selection, program string) (harnesscore.GenerationBinding, core.HarnessGenerationLaunch, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_generation.go::preparePiGenerationBinding",
-      "signature": "func(selection harnesscore.Selection, resolved resolvedHarnessSelection, configDir string) (harnesscore.GenerationBinding, core.HarnessGenerationLaunch, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/service_harness_selection.go::resolveConfiguredHarnessSelection",
       "signature": "func(ctx context.Context, config core.WorkspaceConfig, profiles map[string]harnesscore.Profile, name string, role harnesscore.Role, action, configDir string) (resolvedHarnessSelection, error)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -130,26 +105,6 @@
       "id": "internal/core/execution_runner.go::ExecutionRunner.emitExecutionAgentEvent",
       "signature": "func(ctx context.Context, loopID string, record ExecutionRecord, phase AgentEventPhase, level AgentEventLevel, message string)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/harness_generation_operation.go::HarnessGenerationResolver",
-      "signature": "func(context.Context, WorkspaceConfig) (harnesscore.GenerationBinding, HarnessGenerationLaunch, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/harness_generation_operation.go::FreezeHarnessGeneration",
-      "signature": "func(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver, locations ...HarnessGenerationLocation) (HarnessGenerationOperation, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/harness_generation_operation.go::freezeHarnessGenerationLocked",
-      "signature": "func(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/harness_generation_operation.go::prepareHarnessGenerationOperation",
-      "signature": "func(ctx context.Context, project, id, purpose string, resolve HarnessGenerationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/loop_report.go::loopReportExecutions",

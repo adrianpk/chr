@@ -9,7 +9,7 @@ func TestHarnessGenerationBindingLocation(t *testing.T) {
 	host, worktree := t.TempDir(), t.TempDir()
 	location := HarnessGenerationLocation{ConfigDir: project, ExecutionDir: worktree, ProjectRef: "sample-project"}
 
-	operation, err := FreezeHarnessGeneration(t.Context(), host, "review-operation", "plan_generation", generationBindingResolver(original.program, "original-model"), location)
+	operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: host, ID: "review-operation", Purpose: "plan_generation", Locations: []HarnessGenerationLocation{location}}, generationBindingResolver(original.program, "original-model"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +23,7 @@ func TestHarnessGenerationBindingLocation(t *testing.T) {
 
 	replacement := HarnessGenerationLocation{ConfigDir: t.TempDir(), ExecutionDir: t.TempDir(), ProjectRef: "replacement"}
 
-	retained, err := FreezeHarnessGeneration(t.Context(), host, operation.ID, operation.Purpose, nil, replacement)
+	retained, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: host, ID: operation.ID, Purpose: operation.Purpose, Locations: []HarnessGenerationLocation{replacement}}, nil)
 	if err != nil || retained != operation {
 		t.Fatal("host recovery followed replacement routing", err)
 	}

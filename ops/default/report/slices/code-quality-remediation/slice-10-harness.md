@@ -52,6 +52,14 @@ usage retains unknown/partial/known status and absent counters, while checklist
 observation retains a nonfatal parse problem. Their callers consume named fields
 at the same original observation and guarded mutation points.
 
+Generation freezing now accepts one request for project/operation identity and
+host routing, with context and resolution kept explicit. The original zero-or-one
+location check, retained lookup before current selection, nested configuration
+locks, config revision/profile guards, executable checks and artifact write order
+remain. Preparation and its owned resolver return one binding/launch value;
+Codex, Pi and legacy API paths keep their distinct readiness and dispatch rules.
+No operation context is stored in either new record.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -92,9 +100,9 @@ Focused implementation checks passed:
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`
 
-The signature disposition ledger records fifteen fixed occurrences and six cohesive
-five-input contracts. Seventeen assigned occurrences remain pending. Fifteen exact
-debt allowances are removed: 222 remain, with ceiling seven and one external
+The signature disposition ledger records twenty-two fixed occurrences and six cohesive
+five-input contracts. Ten assigned occurrences remain pending. The fixed signatures and two owned resolver contracts remove 24 exact
+debt allowances: 213 remain, with ceiling seven and one external
 exception unchanged. No migration debt or broader allowance is introduced.
 
 Focused runtime/resource and concurrency checks passed:
@@ -128,9 +136,15 @@ Observation checks passed:
 - `make check-go-style`: 9303 declarations, ceiling seven, 222 debts, one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
 
+Generation input/preparation checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(HarnessGeneration|HarnessBinding|QualityRecordWire|ServiceHarness|PiGeneration|PlanContextualQuiz|HarnessAuthoringQuiz|TelegramHarness)' -count=1 -timeout=3m`
+- `make check-go-style`: 9303 declarations, ceiling seven, 213 debts, one external exception. The first checks identified two resolved resolver/callback allowances; their exact stale entries were removed and recorded in slice-10-contracts.csv.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
+
 ## Risks and Follow-ups
 
 T10.1-T10.6 remain in progress or pending; PR readiness is not established.
 Remaining work includes configuration/selection and generation admission owners,
-17 signature dispositions, host lifecycle/flag review and final exact-head
+10 signature dispositions, host lifecycle/flag review and final exact-head
 controller validation. No Slice 10 PR has been opened.

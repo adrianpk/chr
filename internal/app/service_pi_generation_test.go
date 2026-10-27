@@ -128,20 +128,20 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	binding, launch, err := operations.prepareGenerationBinding(t.Context(), config, "conversation")
+	prepared, err := operations.prepareGenerationBinding(t.Context(), config, "conversation")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	binding.ProtocolRevision = "pi-rpc/future"
+	prepared.Binding.ProtocolRevision = "pi-rpc/future"
 
-	binding, err = harnesscore.SealGenerationBinding(binding)
+	prepared.Binding, err = harnesscore.SealGenerationBinding(prepared.Binding)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := core.FreezeHarnessGeneration(t.Context(), operations.projectContext.ProjectDir, "unsupported-protocol", "conversation", func(context.Context, core.WorkspaceConfig) (harnesscore.GenerationBinding, core.HarnessGenerationLaunch, error) {
-		return binding, launch, nil
+	op, err := core.FreezeHarnessGeneration(t.Context(), core.HarnessGenerationFreezeInput{Project: operations.projectContext.ProjectDir, ID: "unsupported-protocol", Purpose: "conversation"}, func(context.Context, core.WorkspaceConfig) (core.HarnessGenerationPreparation, error) {
+		return core.HarnessGenerationPreparation{Binding: prepared.Binding, Launch: prepared.Launch}, nil
 	})
 	if err != nil {
 		t.Fatal(err)

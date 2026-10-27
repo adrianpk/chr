@@ -27,7 +27,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	finished := make(chan generationBindingAdmissionResult, 1)
 
 	go func() {
-		operation, err := FreezeHarnessGeneration(t.Context(), project, "ordered-operation", "plan_generation", func(ctx context.Context, c WorkspaceConfig) (harnesscore.GenerationBinding, HarnessGenerationLaunch, error) {
+		operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "ordered-operation", Purpose: "plan_generation"}, func(ctx context.Context, c WorkspaceConfig) (HarnessGenerationPreparation, error) {
 			close(entered)
 			<-release
 
@@ -62,7 +62,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 		t.Fatal("ordered switch failed", err)
 	}
 
-	fresh, err := FreezeHarnessGeneration(t.Context(), project, "after-switch", "plan_generation", generationBindingResolver(program, "model-beta"))
+	fresh, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "after-switch", Purpose: "plan_generation"}, generationBindingResolver(program, "model-beta"))
 	if err != nil || fresh.Binding.Selection.Profile != "beta" {
 		t.Fatal("independent admission retained old role", err)
 	}
@@ -78,7 +78,7 @@ type generationBindingAdmissionResult struct {
 func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 	project := t.TempDir()
 
-	operation, err := FreezeHarnessGeneration(t.Context(), project, "api-operation", "quiz_next_question", func(_ context.Context, c WorkspaceConfig) (harnesscore.GenerationBinding, HarnessGenerationLaunch, error) {
+	operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "api-operation", Purpose: "quiz_next_question"}, func(_ context.Context, c WorkspaceConfig) (HarnessGenerationPreparation, error) {
 		binding, err := harnesscore.SealGenerationBinding(harnesscore.GenerationBinding{
 			Selection: harnesscore.Selection{
 				Role: harnesscore.Generation, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",
@@ -87,7 +87,7 @@ func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 			}, ProtocolRevision: "responses/v1",
 		})
 
-		return binding, HarnessGenerationLaunch{}, err
+		return HarnessGenerationPreparation{Binding: binding}, err
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -98,7 +98,7 @@ func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 		t.Fatal("direct API operation dispatched through a harness", err)
 	}
 
-	retained, err := FreezeHarnessGeneration(t.Context(), project, operation.ID, operation.Purpose, nil)
+	retained, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil)
 	if err != nil || retained != operation {
 		t.Fatal("direct API recovery changed identity", err)
 	}
@@ -120,12 +120,12 @@ func TestHarnessGenerationBindingCapacity(t *testing.T) {
 		}
 	}
 
-	_, err = FreezeHarnessGeneration(t.Context(), project, "over-capacity", operation.Purpose, generationBindingResolver(operation.program, "model-alpha"))
+	_, err = FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "over-capacity", Purpose: operation.Purpose}, generationBindingResolver(operation.program, "model-alpha"))
 	if err == nil {
 		t.Fatal("identity capacity silently evicted an existing operation")
 	}
 
-	if retained, err := FreezeHarnessGeneration(t.Context(), project, operation.ID, operation.Purpose, nil); err != nil || retained != operation {
+	if retained, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil); err != nil || retained != operation {
 		t.Fatal("capacity exhaustion broke existing recovery", err)
 	}
 }

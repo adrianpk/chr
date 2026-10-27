@@ -23,19 +23,19 @@ func TestHarnessGenerationBindingFreeze(t *testing.T) {
 
 	resolve := generationBindingResolver(program, "model-alpha")
 
-	first, err := FreezeHarnessGeneration(t.Context(), project, "operation-first", "plan_generation", resolve)
+	first, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "operation-first", Purpose: "plan_generation"}, resolve)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: beta\n")
 
-	nested, err := FreezeHarnessGeneration(WithHarnessGeneration(t.Context(), first), project, "nested", "question", nil)
+	nested, err := FreezeHarnessGeneration(WithHarnessGeneration(t.Context(), first), HarnessGenerationFreezeInput{Project: project, ID: "nested", Purpose: "question"}, nil)
 	if err != nil || nested != first {
 		t.Fatal("nested call rebound its operation", err)
 	}
 
-	retained, err := FreezeHarnessGeneration(t.Context(), project, first.ID, first.Purpose, nil)
+	retained, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: first.ID, Purpose: first.Purpose}, nil)
 	if err != nil || retained != first {
 		t.Fatal("restart consulted replacement selection", err)
 	}
@@ -46,19 +46,19 @@ func TestHarnessGenerationBindingFreeze(t *testing.T) {
 func checkGenerationBindingFresh(t *testing.T, project string, first HarnessGenerationOperation) {
 	t.Helper()
 
-	fresh, err := FreezeHarnessGeneration(t.Context(), project, "independent", first.Purpose, generationBindingResolver(first.program, "model-beta"))
+	fresh, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "independent", Purpose: first.Purpose}, generationBindingResolver(first.program, "model-beta"))
 	if err != nil || fresh.Binding.Selection.Profile != "beta" || fresh.Binding.Selection.SelectionRevision == first.Binding.Selection.SelectionRevision {
 		t.Fatal("fresh operation did not resolve current configuration", err)
 	}
 
-	if _, err := FreezeHarnessGeneration(t.Context(), project, first.ID, "other-purpose", nil); err == nil {
+	if _, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: first.ID, Purpose: "other-purpose"}, nil); err == nil {
 		t.Fatal("reused operation identity changed purpose")
 	}
 
 	// Even unreadable live settings must not prevent retained identity recovery.
 	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  unknown: invalid\n")
 
-	if resumed, err := FreezeHarnessGeneration(t.Context(), project, first.ID, first.Purpose, nil); err != nil || resumed != first {
+	if resumed, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: first.ID, Purpose: first.Purpose}, nil); err != nil || resumed != first {
 		t.Fatal("recovery tried parsing live configuration", err)
 	}
 }
@@ -75,10 +75,10 @@ func generationBindingProgram(t *testing.T, project string) string {
 }
 
 func generationBindingResolver(program, model string) HarnessGenerationResolver {
-	return func(_ context.Context, config WorkspaceConfig) (harnesscore.GenerationBinding, HarnessGenerationLaunch, error) {
+	return func(_ context.Context, config WorkspaceConfig) (HarnessGenerationPreparation, error) {
 		executable, err := FreezeHarnessExecutable([]string{program})
 		if err != nil {
-			return harnesscore.GenerationBinding{}, HarnessGenerationLaunch{}, err
+			return HarnessGenerationPreparation{}, err
 		}
 
 		selection := harnesscore.Selection{
@@ -90,7 +90,7 @@ func generationBindingResolver(program, model string) HarnessGenerationResolver 
 		}
 		binding, err := harnesscore.SealGenerationBinding(harnesscore.GenerationBinding{Selection: selection, ExecutableRef: executable.Reference, ProtocolRevision: "fixture-generation/v1"})
 
-		return binding, HarnessGenerationLaunch{Program: executable.Command[0]}, err
+		return HarnessGenerationPreparation{Binding: binding, Launch: HarnessGenerationLaunch{Program: executable.Command[0]}}, err
 	}
 }
 
@@ -109,7 +109,7 @@ func TestHarnessGenerationBindingCorruption(t *testing.T) {
 			project, operation := generationBindingFixture(t)
 			replaceGenerationBindingRecord(t, operation, test.change)
 
-			if _, err := FreezeHarnessGeneration(t.Context(), project, operation.ID, operation.Purpose, nil); err == nil {
+			if _, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil); err == nil {
 				t.Fatal("retained corruption accepted")
 			}
 		})
@@ -156,7 +156,7 @@ func generationBindingFixture(t *testing.T) (string, HarnessGenerationOperation)
 	program := generationBindingProgram(t, project)
 	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
 
-	operation, err := FreezeHarnessGeneration(t.Context(), project, "operation-fixture", "plan_generation", generationBindingResolver(program, "model-alpha"))
+	operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "operation-fixture", Purpose: "plan_generation"}, generationBindingResolver(program, "model-alpha"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +195,7 @@ func TestHarnessGenerationBindingDispatchFence(t *testing.T) {
 				t.Fatal("dispatch fence did not precede model execution", err)
 			}
 
-			if _, err := FreezeHarnessGeneration(t.Context(), project, operation.ID, operation.Purpose, nil); err != nil {
+			if _, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil); err != nil {
 				t.Fatal("diagnostic recovery required a dispatch-ready executable", err)
 			}
 		})
