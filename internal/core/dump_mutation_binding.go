@@ -24,22 +24,29 @@ type dumpMutationBinding struct {
 	Attempts                  int
 }
 
+type dumpMutationBindingLookup struct {
+	Binding dumpMutationBinding
+	Exists  bool
+}
+
 func (r *fileAuthoringSessionRepository) prepareDumpMutation(ctx context.Context, request DumpMutationRequest, digest string, prepare DumpCapturePreparer) (dumpMutationBinding, error) {
-	binding, found, err := r.readDumpMutationBinding(request, digest)
+	observed, err := r.readDumpMutationBinding(request, digest)
 	if err != nil {
-		return binding, err
+		return observed.Binding, err
 	}
+
+	binding := observed.Binding
 
 	target, err := r.dumpMutationTarget(ctx, request)
 	if err != nil {
 		return binding, err
 	}
 
-	if found && (binding.Destination != target.Destination || binding.RawReference != target.RawReference) {
+	if observed.Exists && (binding.Destination != target.Destination || binding.RawReference != target.RawReference) {
 		return binding, workflowstate.ErrConflict
 	}
 
-	if !found {
+	if !observed.Exists {
 		binding = dumpMutationBinding{Schema: "chr-project-dump-request/v1", Digest: digest, Request: request, Destination: target.Destination, RawReference: target.RawReference}
 		if err := r.reserveDumpMutation(binding); err != nil {
 			return binding, err
@@ -53,23 +60,23 @@ func (r *fileAuthoringSessionRepository) prepareDumpMutation(ctx context.Context
 	return r.prepareDumpCapture(ctx, binding, prepare)
 }
 
-func (r *fileAuthoringSessionRepository) readDumpMutationBinding(request DumpMutationRequest, digest string) (dumpMutationBinding, bool, error) {
+func (r *fileAuthoringSessionRepository) readDumpMutationBinding(request DumpMutationRequest, digest string) (dumpMutationBindingLookup, error) {
 	var binding dumpMutationBinding
 
 	data, err := r.readBoundedAuthoringDocument(filepath.ToSlash(authoringRequestRef(request.OperationID)), dumpMutationBindingLimit)
 	if errors.Is(err, os.ErrNotExist) {
-		return binding, false, nil
+		return dumpMutationBindingLookup{Binding: binding}, nil
 	}
 
 	if err != nil {
-		return binding, false, err
+		return dumpMutationBindingLookup{Binding: binding}, err
 	}
 
 	if err := authoringstate.Decode(data, &binding); err != nil {
-		return binding, false, err
+		return dumpMutationBindingLookup{Binding: binding}, err
 	}
 
-	return binding, true, r.validateDumpMutationBinding(binding, digest)
+	return dumpMutationBindingLookup{Binding: binding, Exists: true}, r.validateDumpMutationBinding(binding, digest)
 }
 
 func (r *fileAuthoringSessionRepository) validateDumpMutationBinding(binding dumpMutationBinding, digest string) error {

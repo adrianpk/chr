@@ -33,10 +33,12 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Contex
 		return AuthoringArtifactRef{}, nil, err
 	}
 
-	changes, _, err := r.dumpMutationChanges(mutation, target)
+	images, err := r.dumpMutationChanges(mutation, target)
 	if err != nil {
 		return AuthoringArtifactRef{}, nil, err
 	}
+
+	changes := images.Changes
 
 	// Earlier turns already retained this session's raw input. Never rewrite it.
 	if authoringArtifactObservation(snapshot, target.RawReference) != nil {

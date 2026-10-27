@@ -135,12 +135,14 @@ func (r *fileAuthoringSessionRepository) prepareAssistedDump(ctx context.Context
 		return result, nil, err
 	}
 
-	changes, mutation, err := r.dumpMutationChanges(binding, target)
+	images, err := r.dumpMutationChanges(binding, target)
 	if err != nil {
 		return result, nil, err
 	}
 
-	result, session, err = assistedDumpResult(opts, mutation, session, changes)
+	changes := images.Changes
+
+	result, session, err = assistedDumpResult(opts, images.Result, session, changes)
 	if err != nil {
 		return result, nil, err
 	}
