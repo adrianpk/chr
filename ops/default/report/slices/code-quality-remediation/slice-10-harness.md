@@ -364,6 +364,21 @@ and production signature checks pass after naming; pinned strict lint passes:
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
+Real flag and wrapper call-path checks passed:
+
+- `go test ./internal/core/harness/host ./internal/core/harness/trace ./internal/core ./internal/app ./internal/harness/pi -run '^Test(HarnessGeneration|StructuredHarness|RuntimeInit|HarnessSelectionCLI|PiTransportUsage|RecordLLMTrace|WriteLLMTrace|LoadLLMTrace)' -count=1 -timeout=3m`
+- `make check-go-style`: 9308 declarations, ceiling seven, 207 exact debts, one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/host ./internal/core ./internal/app ./internal/harness/pi`: zero issues.
+
+The boundary ledger records binary CLI command kind, filesystem creation outcome,
+API/runner selection and measurement validity as distinct real contracts. The
+redundant response trace forwarder is removed; internal host and external quiz
+adapters now invoke the same implementation directly. The move ledger retains
+327 verified declarations/constant specifications after removing that facade.
+Native asset initialization, configuration transactions, execution diagnostics,
+ticket context and capacity admission retain their actual composition owners,
+with explicit dependencies rather than compatibility re-exports.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

@@ -60,7 +60,7 @@ func (p AuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx contex
 
 	err = ValidateGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Action, ProjectDir: request.ProjectDir}, err)
 	if err != nil {
-		recordResponse(ctx, harness.AgentRunRequest{
+		RecordResponse(ctx, harness.AgentRunRequest{
 			ID:         request.ID,
 			Purpose:    request.Action,
 			ProjectDir: request.ProjectDir,
@@ -69,7 +69,7 @@ func (p AuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx contex
 		return authoringcore.QuizGenerationResult{}, err
 	}
 
-	recordResponse(ctx, harness.AgentRunRequest{
+	RecordResponse(ctx, harness.AgentRunRequest{
 		ID:         request.ID,
 		Purpose:    request.Action,
 		ProjectDir: request.ProjectDir,

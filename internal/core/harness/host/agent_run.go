@@ -46,7 +46,7 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 			status = "error"
 		}
 
-		recordResponse(ctx, request, result, status, err)
+		RecordResponse(ctx, request, result, status, err)
 	}
 
 	return result, err
@@ -61,7 +61,8 @@ func recordRequest(ctx context.Context, request harness.AgentRunRequest, result 
 	})
 }
 
-func recordResponse(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
+// RecordResponse records an agent response trace event.
+func RecordResponse(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
 	request.ID = GenerationRequestID(ctx, request.ID)
 
 	event := map[string]any{
@@ -85,9 +86,4 @@ func recordResponse(ctx context.Context, request harness.AgentRunRequest, result
 	}
 
 	harnesstrace.Record(ctx, harnesstrace.LoadOptions{ProjectDir: request.ProjectDir}, event)
-}
-
-// RecordResponse records a deferred agent response trace event.
-func RecordResponse(ctx context.Context, request harness.AgentRunRequest, result harness.AgentRunResult, status string, runErr error) {
-	recordResponse(ctx, request, result, status, runErr)
 }
