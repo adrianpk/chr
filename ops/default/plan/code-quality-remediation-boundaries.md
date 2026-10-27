@@ -7,7 +7,7 @@ Plan: [Approved delivery](code-quality-remediation.md).
 ## Observed production graph
 
 `go list -f '{{.ImportPath}}: {{join .Imports " "}}' ./internal/... ./cmd/...`
-confirms these module-local edges at the Slice 8 runtime extraction checkpoint. Standard-library and external dependencies
+confirms these module-local edges at the Slice 8 model/service extraction checkpoint. Standard-library and external dependencies
 are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
@@ -553,3 +553,21 @@ ordered argv gate or explicit waiver, with its original command and deadline
 bounds. `core/authoring/state.Decode` retains unknown-field and trailing-data
 rejection. `core/model.ExtractJSONObject` retains the existing model-output
 object extraction rule. Each helper has one owner and direct consumers.
+
+## Slice 8 model and transition ownership
+
+`core/quiz/model.Request` binds the action, mode, runtime, context and required
+output contract. Response keeps question, optional generated artifact and raw
+output identity. Adapter.Invoke is the shared provider port; context remains an
+explicit argument. The named questionRoute keeps parent and trunk identity
+separate. Both API and harness consumers use the shared schema, instructions and
+strict output parsing. Provider IO remains pending extraction.
+
+`core/quiz` owns the pure entry/answer, active question, buffered candidate, trail
+and tag-fallback rules. The app operation service owns reading observed entries,
+model invocation, readiness context and user operation responses. Its former
+production-unused request wrapper is removed; the live entry-aware request path
+has the original readiness tests over persisted entries.
+
+`core/ops/slug.Normalize` is the original Unicode letter/digit/separator rule used
+by artifact names and model tags. It has no repository access or model policy.
