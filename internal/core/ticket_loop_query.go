@@ -86,12 +86,12 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 
 	eligible := make([]IndexedTicket, 0, len(tickets))
 	for _, ticket := range tickets {
-		if slices.Contains(statuses, ticket.Status) && filters.match(ticket) {
+		if slices.Contains(statuses, ticket.Status) && matchesTicketLoopFilters(filters, ticket) {
 			eligible = append(eligible, ticket)
 		}
 	}
 
-	slices.SortFunc(eligible, order.compare)
+	slices.SortFunc(eligible, func(left, right IndexedTicket) int { return compareTicketLoopOrder(order, left, right) })
 
 	return eligible, nil
 }
@@ -146,7 +146,7 @@ func normalizeTicketLoopFreeformValues(values []string) []string {
 	return normalized
 }
 
-func (filters TicketLoopFilters) match(ticket IndexedTicket) bool {
+func matchesTicketLoopFilters(filters TicketLoopFilters, ticket IndexedTicket) bool {
 	return matchesTicketLoopValues(filters.Priorities, ticket.Priority) &&
 		matchesTicketLoopValues(filters.Severities, ticket.Severity) &&
 		matchesTicketLoopValues(filters.ProjectAreas, ticket.ProjectArea) &&
@@ -190,7 +190,7 @@ func normalizeTicketLoopOrder(order TicketLoopOrder) (TicketLoopOrder, error) {
 	}
 }
 
-func (order TicketLoopOrder) compare(left, right IndexedTicket) int {
+func compareTicketLoopOrder(order TicketLoopOrder, left, right IndexedTicket) int {
 	switch order {
 	case TicketLoopOrderCreatedAt:
 		return compareIndexedTicketsByCreatedAt(left, right)

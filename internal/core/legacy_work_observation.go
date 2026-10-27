@@ -111,7 +111,7 @@ func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID s
 		return result, err
 	}
 
-	slices.SortFunc(result.Eligible, order.compare)
+	slices.SortFunc(result.Eligible, func(left, right IndexedTicket) int { return compareTicketLoopOrder(order, left, right) })
 
 	return result, nil
 }

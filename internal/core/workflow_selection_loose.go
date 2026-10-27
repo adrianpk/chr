@@ -86,7 +86,7 @@ func workflowLooseExclusion(request WorkflowPreviewRequest, ticket IndexedTicket
 	ticket.Priority, ticket.Severity = workflowRank(ticket.Priority), workflowRank(ticket.Severity)
 
 	ticket.ProjectArea = strings.TrimSpace(ticket.ProjectArea)
-	if !request.Filters.match(ticket) {
+	if !matchesTicketLoopFilters(request.Filters, ticket) {
 		return "filter_mismatch"
 	}
 
@@ -122,7 +122,7 @@ func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMe
 	}
 
 	slices.SortFunc(members, func(left, right WorkflowPreviewMember) int {
-		return order.compare(tickets[left.Key], tickets[right.Key])
+		return compareTicketLoopOrder(order, tickets[left.Key], tickets[right.Key])
 	})
 }
 
