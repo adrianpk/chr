@@ -1,11 +1,12 @@
 # Slice 9: Authoring, document generation and guided preparation
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-9-quality-authoring`
 PR: `#446`
+Integrated commit: `0ce066b1599b55f6efc3f151bb960a74b75d5e91`
 
 ## Purpose
 
@@ -141,4 +142,4 @@ to the exact clean PR head and this ordered command list:
 
 ## Risks and Follow-ups
 
-Integration into dev is pending.
+Verified canonical PR #446 integration into dev at `0ce066b1599b55f6efc3f151bb960a74b75d5e91`; all three ordered controller checks passed on that exact clean head.

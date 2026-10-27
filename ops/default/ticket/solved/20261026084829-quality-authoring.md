@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084829
 title: "Quality slice 9: Authoring, document generation and guided preparation"
-status: reviewing
+status: solved
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -13,6 +13,8 @@ commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, 
 branch: refactor/slice-9-quality-authoring
 pr: "#446"
 started_at: 2026-10-27T13:06:46Z
+resolution: fixed
+closed_at: 2026-10-27T18:12:54Z
 ready_at: 2026-10-26T08:57:09Z
 ---
 
@@ -74,3 +76,7 @@ pass; exact debt is 237 with ceiling seven and one external exception.
 T9.6 is reviewing under [canonical PR #446](https://forge.adrianpk.com/adrianpk/chr/pulls/446).
 The controller ledger binds ordered final validation to the exact clean PR head.
 Integration is pending.
+
+T9.1-T9.6 are delivered through verified PR #446 at `0ce066b1599b55f6efc3f151bb960a74b75d5e91`.
+All three exact-head controller checks passed: make verify, focused non-short
+authoring/native regressions and git diff --check.
