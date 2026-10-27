@@ -112,11 +112,11 @@ stopped at four import/type-layout formatting errors. Those files are corrected;
 pinned core/TUI lint passes. The retained controller diagnostics identify that
 failed candidate, and the following final batch validates its replacement.
 
-Final validation runs through the controller after the PR-reference commit:
+Final validation passed through the controller after the PR-reference commit:
 make verify, focused non-short leaf/core/application regressions, focused retained
 notification/authoring concurrency and recovery race checks, then git diff --check.
 The controller retains the exact clean HEAD, ordered commands, results and logs;
-that record and PR Validation own final results. Integration remains pending.
+that record and PR Validation own final results. Integration is verified below.
 
 ## Risks and Follow-ups
 

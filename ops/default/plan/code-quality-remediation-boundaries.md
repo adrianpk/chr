@@ -388,3 +388,21 @@ are removed. Help tests still exercise the live renderer with real metadata;
 the guided result guard uses the actual shared guidedResultExport type. All
 existing assertions remain, including full result, original document and unsafe
 export guards. Focused explanation/work/help and guided result-guard checks pass.
+
+
+### Remaining receiver move edges at the Slice 7 checkpoint
+
+The current declaration scan still finds the broad AuthoringSession input and
+validateGuidedUseCase at guided association; shared authoring session identity,
+intent and workspace directory spelling; the two structured-model error
+identities; and generic remote-command record mapping. Resolve those edges at
+their actual shared value or composition owner before moving receiver files.
+Do not copy validators, import root core from Telegram, expose store internals or
+leave pass-through facades. Preserve domain validation before binding a narrow
+routing projection and preserve errors.Is identity for model capacity/output.
+Legacy remote-update decoding and generic command mapping have separate owners;
+verify real callers before retaining, relocating or removing either path.
+
+The mechanical receiver move and all 156 assigned signature dispositions remain
+pending. The focused task evidence does not substitute for the final clean-head
+make verify and controller-recorded PR validation.
