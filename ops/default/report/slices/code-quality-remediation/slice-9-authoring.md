@@ -124,6 +124,10 @@ credential/process behavior and frozen wire records. Pinned strict lint passed
 across authoring/core/app/TUI and the checker. Exact dispositions, retained
 preimages, import-cycle fixtures, style and package README checks passed.
 
+The initial controller `make verify` on ac448ac25558 stopped at the relocated
+function signature-line policy. Declaration formatting was normalized without
+changing parameters or bodies before final validation.
+
 The controller validation ledger and PR Validation bind final successful outcomes
 to the exact clean PR head and this ordered command list:
 

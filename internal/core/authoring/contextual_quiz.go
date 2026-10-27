@@ -107,10 +107,7 @@ type FakeAuthoringQuizQuestionProvider struct {
 }
 
 // PlanContextualQuizGeneration executes the corresponding package operation.
-func PlanContextualQuizGeneration(
-	ctx context.Context,
-	opts ContextualQuizGenerationOptions,
-) (ContextualQuizGenerationPlan, error) {
+func PlanContextualQuizGeneration(ctx context.Context, opts ContextualQuizGenerationOptions) (ContextualQuizGenerationPlan, error) {
 	err := validateContextualQuizGenerationOptions(opts)
 	if err != nil {
 		return ContextualQuizGenerationPlan{}, err
@@ -188,12 +185,7 @@ func NewQuizGenerationRequest(projectDir string, session Session, questionCount 
 }
 
 // RenderContextualQuizMarkdown renders the corresponding package data.
-func RenderContextualQuizMarkdown(
-	session Session,
-	artifact ArtifactRef,
-	request QuizGenerationRequest,
-	result QuizGenerationResult,
-) string {
+func RenderContextualQuizMarkdown(session Session, artifact ArtifactRef, request QuizGenerationRequest, result QuizGenerationResult) string {
 	var output bytes.Buffer
 
 	output.WriteString("---\n")
@@ -252,10 +244,7 @@ func ValidateQuizGenerationResult(result QuizGenerationResult) error {
 }
 
 // GenerateAuthoringQuizQuestions generates the requested artifact.
-func (p *FakeAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(
-	ctx context.Context,
-	request QuizGenerationRequest,
-) (QuizGenerationResult, error) {
+func (p *FakeAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx context.Context, request QuizGenerationRequest) (QuizGenerationResult, error) {
 	err := ctx.Err()
 	if err != nil {
 		return QuizGenerationResult{}, err
@@ -416,11 +405,7 @@ func contextualQuizLayoutOptions(opts ContextualQuizGenerationOptions) ArtifactL
 	}
 }
 
-func appendContextualQuizOutput(
-	session Session,
-	artifact ArtifactRef,
-	recordedAt time.Time,
-) Session {
+func appendContextualQuizOutput(session Session, artifact ArtifactRef, recordedAt time.Time) Session {
 	artifact.Role = ArtifactRoleOutput
 	session.Outputs = append(session.Outputs, artifact)
 	session.Provenance = append(session.Provenance, ProvenanceLink{
