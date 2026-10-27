@@ -718,3 +718,11 @@ list values, diagnostics, order, caps and lock/capacity resource lifetime remain
 unchanged. Seven more assigned results are fixed; 167 exact debts remain at
 ceiling six. Existing parsing/rendering/lock/storage/wire regressions and pinned
 strict lint pass.
+
+Named review addresses/endpoints preserve original URL validation and provider
+configuration admission. Named native-policy observations preserve projection
+bytes/reasons/contract, including partial contract values on errors. Source and
+publisher binding, JSON fingerprints, response/pagination bounds and capability
+guards are unchanged. Existing provider/native capability/PR/local Git regressions
+and strict lint pass; five more assigned results are fixed, leaving 162 exact
+debts at ceiling six.

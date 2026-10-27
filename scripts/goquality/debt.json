@@ -32,31 +32,6 @@
       "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/review_provider_diagnostics.go::parseReviewProviderURL",
-      "signature": "func(rawURL string) (*url.URL, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/review_remote_adapter.go::RemoteReviewAdapter.resolve",
-      "signature": "func(rawURL string) (ReviewProviderReference, ReviewProviderTargetConfig, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/review_workflow_native_capability.go::RemoteReviewAdapter.readWorkflowNativePolicy",
-      "signature": "func(ctx context.Context, pr WorkflowPullRequestSnapshot, method string) ([]byte, []WorkflowNativeUnsupported, string, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/review_workflow_native_policy.go::workflowNativeRemotePolicy",
-      "signature": "func(responses []json.RawMessage, method, contract string) ([]byte, []WorkflowNativeUnsupported, string, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/review_workflow_pull_request.go::RemoteReviewAdapter.resolveWorkflowRepository",
-      "signature": "func(repository string) (ReviewProviderReference, ReviewProviderTargetConfig, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/workflow_adoption.go::WorkflowStore.resumePlanAdoption",
       "signature": "func(snapshot WorkflowSnapshot, opts WorkflowPlanAdoptionOptions, hash string) (WorkflowMaterializationResult, bool, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

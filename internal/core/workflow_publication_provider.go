@@ -16,10 +16,12 @@ func (adapter RemoteReviewAdapter) WorkflowIntegrationCapability(ctx context.Con
 		return WorkflowPublicationCapability{}, err
 	}
 
-	reference, _, err := adapter.resolve(pr.URL)
+	resolvedReview, err := adapter.resolve(pr.URL)
 	if err != nil {
 		return WorkflowPublicationCapability{}, err
 	}
+
+	reference := resolvedReview.reference
 
 	if !slices.Contains([]string{"merge", "rebase", "squash"}, method) {
 		return WorkflowPublicationCapability{}, fmt.Errorf("unsupported workflow integration method")

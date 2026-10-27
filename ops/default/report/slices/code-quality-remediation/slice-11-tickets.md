@@ -30,10 +30,10 @@ commits with direct consumers and preserved durable/wire contracts.
 The move ledger reconciles 723 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
-meanings are unchanged. Forty-one assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger records 34 fixes; seven newly implemented results await commit references; remaining
+meanings are unchanged. Forty-six assigned signatures now use cohesive owner state or
+named outcomes. The partial disposition ledger records 41 fixes; five newly implemented review results await commit references; remaining
 assigned signatures and watches are open. The global policy is at ceiling
-six with 167 exact debts and one external exception.
+six with 162 exact debts and one external exception.
 
 ## Files of Interest
 
@@ -280,9 +280,19 @@ resource lifetime are preserved. Seven additional assigned results are fixed;
 - `go test ./internal/core -run '^Test(ParseEvidenceStrategyChecklist|RenderEvidenceStrategyChecklist|UpsertEvidenceStrategyChecklist|SummarizeEvidenceStrategyChecklist|RenderExecutionReport|RenderLoopReport|ParseRemoteCommand)' -count=1 -timeout=3m`: passed.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues after the evidence/report/lock result changes.
 
+Review URL parsing and provider/repository resolution return named address and
+endpoint values. Native policy observation returns original projection bytes,
+unsupported reasons and the independent observation contract, including partial
+contract values on errors. Host/API identity, source binding, JSON/fingerprint
+inputs, bounds, CLI arguments, error ordering and capability guards are unchanged.
+Five additional assigned results are fixed; 162 exact debts remain at ceiling six.
+
+- `go test ./internal/core ./internal/app ./internal/tui -run '^Test(DetectReviewProviderReference|RunReviewProviderDiagnostics|RemoteReviewAdapter|NativeCapability|NativeMergePolicy|WorkflowPRAdapter|WorkflowPRBranch|NativeHostPublication|NativeHostDenials|NativePRChanges)' -count=1 -timeout=3m`: passed, including local Git and provider fixtures; app/TUI compiled with no selected tests.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues after review result changes.
+
 ## Risks and Follow-ups
 
-Remaining work includes 18 assigned signature/watch entries, typed state and
+Remaining work includes 13 assigned five-parameter watch entries, typed state and
 preparation contracts, control-flag/legacy reconciliation, and ticket parser/
 validation test ownership with its merge-state dependencies. Final candidate
 validation and the Slice 11 PR remain pending.

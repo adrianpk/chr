@@ -31,12 +31,12 @@ func (adapter *WorkflowNativeReviewAdapter) WorkflowIntegrationCapability(ctx co
 		return WorkflowPublicationCapability{}, err
 	}
 
-	data, reasons, contract, err := adapter.readWorkflowNativePolicy(ctx, pr, method)
+	observation, err := adapter.readWorkflowNativePolicy(ctx, pr, method)
 	if err != nil {
 		return WorkflowPublicationCapability{}, err
 	}
 
-	if len(reasons) != 0 || !workflowNativeObservationContractMatches(contract, policy.ObservationContract) {
+	if len(observation.unsupported) != 0 || !workflowNativeObservationContractMatches(observation.contract, policy.ObservationContract) {
 		return WorkflowPublicationCapability{}, fmt.Errorf("%w: current repository policy does not support the publisher profile", ErrWorkflowAtomicGuard)
 	}
 
@@ -50,7 +50,7 @@ func (adapter *WorkflowNativeReviewAdapter) WorkflowIntegrationCapability(ctx co
 		return WorkflowPublicationCapability{}, err
 	}
 
-	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, data...)), AtomicSourceBase: true, ExactResult: true}, nil
+	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.data...)), AtomicSourceBase: true, ExactResult: true}, nil
 }
 
 // WorkflowPreparedNativeCapability observes the actual receive-pack server for

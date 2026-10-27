@@ -78,7 +78,7 @@ func workflowNativeSourceBinding(request WorkflowNativeCapabilityRequest) bool {
 }
 
 func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Context, request WorkflowNativeCapabilityRequest, policy WorkflowNativePolicy, git WorkflowGitPublicationInspector, capability WorkflowNativeCapability) (WorkflowNativeCapability, error) {
-	policyData, reasons, contract, err := adapter.readWorkflowNativePolicy(ctx, request.PullRequest, request.Publication.Git.Method)
+	observation, err := adapter.readWorkflowNativePolicy(ctx, request.PullRequest, request.Publication.Git.Method)
 	if err != nil {
 		return capability, err
 	}
@@ -88,7 +88,7 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 		return capability, err
 	}
 
-	capability.PolicyFingerprint = contenthash.Sum(append(hostData, policyData...))
+	capability.PolicyFingerprint = contenthash.Sum(append(hostData, observation.data...))
 
 	identity, err := adapter.readWorkflowNativeIdentity(ctx, request.PullRequest)
 	if err != nil {
@@ -101,8 +101,8 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 
 	capability.CredentialIdentityFingerprint = contenthash.Sum([]byte(policy.CredentialIdentityFingerprint + "\x00" + identity))
 
-	capability.Unsupported = append(capability.Unsupported, reasons...)
-	if !workflowNativeObservationContractMatches(contract, policy.ObservationContract) {
+	capability.Unsupported = append(capability.Unsupported, observation.unsupported...)
+	if !workflowNativeObservationContractMatches(observation.contract, policy.ObservationContract) {
 		capability.Unsupported = append(capability.Unsupported, WorkflowNativeUnsupported{"observation_uncertified", "Certify same-original-PR Git merge observation on this repository."})
 	}
 
@@ -167,11 +167,13 @@ func changedWorkflowNativeCapability(prior, current WorkflowNativeCapability) st
 	return "source, target, method or profile"
 }
 
-func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context, pr WorkflowPullRequestSnapshot, method string) ([]byte, []WorkflowNativeUnsupported, string, error) {
-	reference, config, err := adapter.resolve(pr.URL)
+func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context, pr WorkflowPullRequestSnapshot, method string) (workflowNativePolicyObservation, error) {
+	resolvedReview, err := adapter.resolve(pr.URL)
 	if err != nil {
-		return nil, nil, "", err
+		return workflowNativePolicyObservation{}, err
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	paths := []string{workflowRemoteRepositoryPath(reference), workflowRemoteRepositoryPath(reference) + "/branches/" + url.PathEscape(pr.BaseBranch), workflowRemoteRepositoryPath(reference) + "/branches/" + url.PathEscape(pr.HeadBranch)}
 
@@ -187,7 +189,7 @@ func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context,
 	for _, path := range paths {
 		data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(pr.Repository, reference, "GET", path, false)...)
 		if err != nil || len(data) > workflowstate.FileLimit || !json.Valid(data) {
-			return nil, nil, contract, fmt.Errorf("native publication policy could not be completely observed")
+			return workflowNativePolicyObservation{contract: contract}, fmt.Errorf("native publication policy could not be completely observed")
 		}
 
 		responses = append(responses, data)
@@ -195,7 +197,7 @@ func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context,
 
 	var repository workflowNativeRepositoryPolicy
 	if err := json.Unmarshal(responses[0], &repository); err != nil || strings.TrimSuffix(repository.URL, "/") != pr.Repository {
-		return nil, nil, contract, workflowstate.ErrConflict
+		return workflowNativePolicyObservation{contract: contract}, workflowstate.ErrConflict
 	}
 
 	return workflowNativeRemotePolicy(responses, method, contract)

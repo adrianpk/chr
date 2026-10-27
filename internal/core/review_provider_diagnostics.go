@@ -109,7 +109,7 @@ func DetectReviewProviderReference(rawURL string) (ReviewProviderReference, erro
 		return ReviewProviderReference{Provider: ReviewProviderUnsupported}, errors.New("pull request URL is required")
 	}
 
-	parsed, segments, err := parseReviewProviderURL(trimmed)
+	address, err := parseReviewProviderURL(trimmed)
 
 	reference := ReviewProviderReference{
 		Provider: ReviewProviderUnsupported,
@@ -119,16 +119,16 @@ func DetectReviewProviderReference(rawURL string) (ReviewProviderReference, erro
 		return reference, err
 	}
 
-	reference.Host = strings.ToLower(parsed.Hostname())
-	reference.Owner = segments[0]
-	reference.Repo = segments[1]
+	reference.Host = strings.ToLower(address.url.Hostname())
+	reference.Owner = address.segments[0]
+	reference.Repo = address.segments[1]
 
-	reference.Number, err = parseReviewProviderPRNumber(segments[3], trimmed)
+	reference.Number, err = parseReviewProviderPRNumber(address.segments[3], trimmed)
 	if err != nil {
 		return reference, err
 	}
 
-	reference.Provider = detectReviewProvider(reference.Host, segments[2])
+	reference.Provider = detectReviewProvider(reference.Host, address.segments[2])
 	if reference.Provider == ReviewProviderUnsupported {
 		return reference, fmt.Errorf("unsupported pull request URL: %s", trimmed)
 	}
@@ -174,13 +174,7 @@ func RunReviewProviderDiagnostics(ctx context.Context, opts ReviewProviderDiagno
 	return diagnostic
 }
 
-func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(
-	ctx context.Context,
-	runner ReviewProviderDiagnosticRunner,
-	reference ReviewProviderReference,
-	config ReviewProviderTargetConfig,
-	dryRun bool,
-) {
+func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config ReviewProviderTargetConfig, dryRun bool) {
 	if !diagnostic.checkProviderEnabled(reference, config) {
 		return
 	}
@@ -196,10 +190,7 @@ func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(
 	diagnostic.checkProviderPullRequestRead(ctx, runner, reference, config, dryRun)
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(
-	reference ReviewProviderReference,
-	config ReviewProviderTargetConfig,
-) bool {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(reference ReviewProviderReference, config ReviewProviderTargetConfig) bool {
 	if !config.Enabled {
 		diagnostic.addCheck("provider_enabled", ReviewProviderDiagnosticCheckFail, "provider_disabled", string(reference.Provider))
 
@@ -211,10 +202,7 @@ func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(
 	return true
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderCLI(
-	runner ReviewProviderDiagnosticRunner,
-	config ReviewProviderTargetConfig,
-) bool {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderCLI(runner ReviewProviderDiagnosticRunner, config ReviewProviderTargetConfig) bool {
 	if strings.TrimSpace(config.CLI) == "" {
 		diagnostic.addCheck("cli_available", ReviewProviderDiagnosticCheckFail, "missing_cli_config", "")
 
@@ -233,10 +221,7 @@ func (diagnostic *ReviewProviderDiagnostic) checkProviderCLI(
 	return true
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderToken(
-	runner ReviewProviderDiagnosticRunner,
-	config ReviewProviderTargetConfig,
-) bool {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderToken(runner ReviewProviderDiagnosticRunner, config ReviewProviderTargetConfig) bool {
 	tokenEnv := strings.TrimSpace(config.TokenEnv)
 	if tokenEnv == "" {
 		diagnostic.addCheck("token_available", ReviewProviderDiagnosticCheckSkipped, "token_env_not_configured", "")
@@ -255,13 +240,7 @@ func (diagnostic *ReviewProviderDiagnostic) checkProviderToken(
 	return true
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderPullRequestRead(
-	ctx context.Context,
-	runner ReviewProviderDiagnosticRunner,
-	reference ReviewProviderReference,
-	config ReviewProviderTargetConfig,
-	dryRun bool,
-) {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderPullRequestRead(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config ReviewProviderTargetConfig, dryRun bool) {
 	if dryRun {
 		diagnostic.addCheck("pr_readable", ReviewProviderDiagnosticCheckSkipped, "dry_run", reference.URL)
 
@@ -337,18 +316,23 @@ func cleanPathSegments(rawPath string) []string {
 	return segments
 }
 
-func parseReviewProviderURL(rawURL string) (*url.URL, []string, error) {
+type reviewProviderURL struct {
+	url      *url.URL
+	segments []string
+}
+
+func parseReviewProviderURL(rawURL string) (reviewProviderURL, error) {
 	parsed, err := url.Parse(rawURL)
 	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
-		return nil, nil, fmt.Errorf("invalid pull request URL: %s", rawURL)
+		return reviewProviderURL{}, fmt.Errorf("invalid pull request URL: %s", rawURL)
 	}
 
 	segments := cleanPathSegments(parsed.Path)
 	if len(segments) < 4 {
-		return nil, nil, fmt.Errorf("unsupported pull request URL: %s", rawURL)
+		return reviewProviderURL{}, fmt.Errorf("unsupported pull request URL: %s", rawURL)
 	}
 
-	return parsed, segments, nil
+	return reviewProviderURL{url: parsed, segments: segments}, nil
 }
 
 func parseReviewProviderPRNumber(rawNumber, rawURL string) (int, error) {

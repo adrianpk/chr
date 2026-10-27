@@ -65,7 +65,10 @@ func nativeFixtureAPI(t *testing.T, ctx context.Context, profile nativeLiveProfi
 
 	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
 
-	reference, config, err := adapter.resolveWorkflowRepository(profile.URL)
+	resolvedReview, err := adapter.resolveWorkflowRepository(profile.URL)
+
+	reference, config := resolvedReview.reference, resolvedReview.config
+
 	if err != nil || !validNativeLiveProfile(profile) || !strings.HasPrefix(endpoint, workflowRemoteRepositoryPath(reference)+"/") {
 		t.Fatal("fixture API mutation escaped its designated repository")
 	}

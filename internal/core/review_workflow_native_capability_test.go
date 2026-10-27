@@ -64,10 +64,12 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 	result := nativeCapabilityFixture{adapter: adapter, runner: runner, request: WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: publication}, policy: &nativePolicyFixture{policy: policy}, git: &nativeInspectorFixture{WorkflowGitPublicationInspector: NewWorkflowGitPublisher(repository, fixture.remote)}, remote: fixture.remote}
 	result.prefix = nativePolicyCommand(t, result, "")
 
-	reference, config, err := adapter.resolve(pr.URL)
+	resolvedReview, err := adapter.resolve(pr.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	runner.outputs[remoteReviewCommandKey(config.CLI, workflowRemoteAPIArgs(repository, reference, "GET", "/user", false)...)] = []byte(`{"id":1,"login":"fixture-publisher"}`)
 
@@ -88,10 +90,12 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 func nativePolicyCommand(t *testing.T, fixture nativeCapabilityFixture, suffix string) string {
 	t.Helper()
 
-	reference, config, err := fixture.adapter.resolve(fixture.request.PullRequest.URL)
+	resolvedReview, err := fixture.adapter.resolve(fixture.request.PullRequest.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	return remoteReviewCommandKey(config.CLI, workflowRemoteAPIArgs(fixture.request.PullRequest.Repository, reference, "GET", workflowRemoteRepositoryPath(reference)+suffix, false)...)
 }

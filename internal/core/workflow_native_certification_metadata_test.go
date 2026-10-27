@@ -67,10 +67,12 @@ func nativeChangeOriginalPR(t *testing.T, ctx context.Context, f *nativeFaultCas
 
 	pr := f.evidence.Native.Binding.PullRequest
 
-	reference, _, err := f.adapter.resolve(pr.URL)
+	resolvedReview, err := f.adapter.resolve(pr.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	reference := resolvedReview.reference
 
 	payload := map[string]string{"state": "closed"}
 

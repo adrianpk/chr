@@ -22,22 +22,28 @@ type workflowNativeBranchPolicy struct {
 	Protected *bool `json:"protected"`
 }
 
-func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract string) ([]byte, []WorkflowNativeUnsupported, string, error) {
+type workflowNativePolicyObservation struct {
+	data        []byte
+	unsupported []WorkflowNativeUnsupported
+	contract    string
+}
+
+func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract string) (workflowNativePolicyObservation, error) {
 	var (
 		repository     workflowNativeRepositoryPolicy
 		target, source workflowNativeBranchPolicy
 	)
 
 	if err := json.Unmarshal(responses[0], &repository); err != nil {
-		return nil, nil, contract, err
+		return workflowNativePolicyObservation{contract: contract}, err
 	}
 
 	if err := json.Unmarshal(responses[1], &target); err != nil {
-		return nil, nil, contract, err
+		return workflowNativePolicyObservation{contract: contract}, err
 	}
 
 	if err := json.Unmarshal(responses[2], &source); err != nil {
-		return nil, nil, contract, err
+		return workflowNativePolicyObservation{contract: contract}, err
 	}
 
 	projection, err := json.Marshal(struct {
@@ -47,7 +53,7 @@ func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract st
 		Rules      []json.RawMessage
 	}{repository, target, source, responses[3:]})
 	if err != nil {
-		return nil, nil, contract, err
+		return workflowNativePolicyObservation{contract: contract}, err
 	}
 
 	reasons := workflowNativeProtectionReasons(repository, target, source, method, contract)
@@ -55,7 +61,7 @@ func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract st
 	for _, response := range responses[3:] {
 		var rules []json.RawMessage
 		if err := json.Unmarshal(response, &rules); err != nil || rules == nil {
-			return nil, nil, contract, fmt.Errorf("effective branch rules could not be completely observed")
+			return workflowNativePolicyObservation{contract: contract}, fmt.Errorf("effective branch rules could not be completely observed")
 		}
 
 		if len(rules) != 0 {
@@ -63,7 +69,7 @@ func workflowNativeRemotePolicy(responses []json.RawMessage, method, contract st
 		}
 	}
 
-	return projection, reasons, contract, nil
+	return workflowNativePolicyObservation{data: projection, unsupported: reasons, contract: contract}, nil
 }
 
 func workflowNativeProtectionReasons(repository workflowNativeRepositoryPolicy, target, source workflowNativeBranchPolicy, method, contract string) []WorkflowNativeUnsupported {

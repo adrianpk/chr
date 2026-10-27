@@ -31,10 +31,12 @@ type workflowRemotePRBranch struct {
 // CheckWorkflowRepositoryProvider checks local provider prerequisites without
 // reading or creating a pull request. Remote authentication remains untested.
 func (adapter RemoteReviewAdapter) CheckWorkflowRepositoryProvider(ctx context.Context, repository string) error {
-	reference, config, err := adapter.resolveWorkflowRepository(repository)
+	resolvedReview, err := adapter.resolveWorkflowRepository(repository)
 	if err != nil {
 		return err
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	diagnostic := ReviewProviderDiagnostic{}
 	diagnostic.addProviderChecks(ctx, OSReviewProviderDiagnosticRunner{}, reference, config, true)
@@ -48,10 +50,12 @@ func (adapter RemoteReviewAdapter) CheckWorkflowRepositoryProvider(ctx context.C
 
 // FindWorkflowPullRequests observes all states and rejects incomplete pagination.
 func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context, query WorkflowPullRequestQuery) ([]WorkflowPullRequestSnapshot, error) {
-	reference, config, err := adapter.resolveWorkflowRepository(query.Repository)
+	resolvedReview, err := adapter.resolveWorkflowRepository(query.Repository)
 	if err != nil {
 		return nil, err
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	if !validWorkflowPRBranch(query.HeadBranch) || !validWorkflowPRBranch(query.BaseBranch) {
 		return nil, workflowstate.ErrConflict
@@ -140,10 +144,12 @@ func (adapter RemoteReviewAdapter) ReadWorkflowPullRequest(ctx context.Context, 
 		return WorkflowPullRequestSnapshot{}, err
 	}
 
-	reference, config, err := adapter.resolve(rawURL)
+	resolvedReview, err := adapter.resolve(rawURL)
 	if err != nil {
 		return WorkflowPullRequestSnapshot{}, err
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	endpoint := workflowRemotePRListPath(reference) + "/" + strconv.Itoa(reference.Number)
 
@@ -157,10 +163,12 @@ func (adapter RemoteReviewAdapter) ReadWorkflowPullRequest(ctx context.Context, 
 
 // CreateWorkflowPullRequest creates a PR only; it never reviews or merges it.
 func (adapter RemoteReviewAdapter) CreateWorkflowPullRequest(ctx context.Context, request WorkflowPullRequestRequest) (WorkflowPullRequestSnapshot, error) {
-	reference, config, err := adapter.resolveWorkflowRepository(request.Repository)
+	resolvedReview, err := adapter.resolveWorkflowRepository(request.Repository)
 	if err != nil {
 		return WorkflowPullRequestSnapshot{}, err
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	if !validWorkflowPRBranch(request.HeadBranch) || !validWorkflowPullRequestContent(WorkflowSlicePullRequestRequest{BaseBranch: request.BaseBranch, Title: request.Title, Body: request.Body}) {
 		return WorkflowPullRequestSnapshot{}, workflowstate.ErrConflict
@@ -181,10 +189,12 @@ func (adapter RemoteReviewAdapter) CreateWorkflowPullRequest(ctx context.Context
 
 // ReadWorkflowBranch checks the actual canonical source before PR creation.
 func (adapter RemoteReviewAdapter) ReadWorkflowBranch(ctx context.Context, repository, branch string) (string, error) {
-	reference, config, err := adapter.resolveWorkflowRepository(repository)
+	resolvedReview, err := adapter.resolveWorkflowRepository(repository)
 	if err != nil {
 		return "", err
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	if !validWorkflowPRBranch(branch) {
 		return "", workflowstate.ErrConflict
@@ -257,10 +267,10 @@ func workflowRemotePRSnapshot(pr workflowRemotePRJSON) (WorkflowPullRequestSnaps
 	return WorkflowPullRequestSnapshot{URL: pr.URL, Repository: repository, HeadRepository: headRepository, HeadBranch: pr.Head.Ref, BaseBranch: pr.Base.Ref, HeadCommit: pr.Head.SHA, BaseCommit: pr.Base.SHA, State: pr.State, Merged: pr.Merged, ResultCommit: pr.ResultCommit}, nil
 }
 
-func (adapter RemoteReviewAdapter) resolveWorkflowRepository(repository string) (ReviewProviderReference, ReviewProviderTargetConfig, error) {
+func (adapter RemoteReviewAdapter) resolveWorkflowRepository(repository string) (reviewProviderEndpoint, error) {
 	canonical, err := workflowCanonicalRepository(repository)
 	if err != nil {
-		return ReviewProviderReference{}, ReviewProviderTargetConfig{}, err
+		return reviewProviderEndpoint{}, err
 	}
 
 	marker := "/pulls/1"

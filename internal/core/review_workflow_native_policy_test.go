@@ -32,9 +32,9 @@ func TestNativeMergePolicy(t *testing.T) {
 				json.RawMessage(`{"protected":false}`), json.RawMessage(`{"protected":false}`),
 			}
 
-			_, reasons, _, err := workflowNativeRemotePolicy(responses, "merge", tc.contract)
-			if err != nil || (len(reasons) == 0) != tc.allowed {
-				t.Fatalf("merge policy allowed=%t, want %t; reasons=%+v, error=%v", len(reasons) == 0, tc.allowed, reasons, err)
+			observation, err := workflowNativeRemotePolicy(responses, "merge", tc.contract)
+			if err != nil || (len(observation.unsupported) == 0) != tc.allowed {
+				t.Fatalf("merge policy allowed=%t, want %t; reasons=%+v, error=%v", len(observation.unsupported) == 0, tc.allowed, observation.unsupported, err)
 			}
 		})
 	}

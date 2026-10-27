@@ -205,10 +205,12 @@ func nativeLiveActivity(t *testing.T, adapter RemoteReviewAdapter, profile nativ
 func nativeLiveActivityContext(t *testing.T, ctx context.Context, adapter RemoteReviewAdapter, profile nativeLiveProfile, pr WorkflowPullRequestSnapshot, action string) {
 	t.Helper()
 
-	reference, _, err := adapter.resolve(pr.URL)
+	resolvedReview, err := adapter.resolve(pr.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	reference := resolvedReview.reference
 
 	forge := strings.TrimSuffix(profile.URL, "/"+profile.Repository)
 

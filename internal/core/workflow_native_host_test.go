@@ -39,10 +39,12 @@ func newNativeHostFixture(t *testing.T) nativeHostFixture {
 	runner.outputs[forge.prefix+"/branches/dev"] = []byte(`{"protected":false,"commit":{"id":"` + f.base + `"}}`)
 	runner.outputs[forge.prefix+"/branches/"+url.PathEscape(f.provider.pr.HeadBranch)] = []byte(`{"protected":false,"commit":{"id":"` + f.provider.pr.HeadCommit + `"}}`)
 
-	reference, config, err := remote.resolve(f.provider.pr.URL)
+	resolvedReview, err := remote.resolve(f.provider.pr.URL)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	runner.outputs[remoteReviewCommandKey(config.CLI, workflowRemoteAPIArgs(profile.Repository, reference, "GET", "/user", false)...)] = []byte(`{"id":1,"login":"fixture-publisher"}`)
 

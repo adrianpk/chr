@@ -11,10 +11,12 @@ import (
 )
 
 func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Context, pr WorkflowPullRequestSnapshot) (string, error) {
-	reference, config, err := adapter.resolve(pr.URL)
+	resolvedReview, err := adapter.resolve(pr.URL)
 	if err != nil {
 		return "", err
 	}
+
+	reference, config := resolvedReview.reference, resolvedReview.config
 
 	data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(pr.Repository, reference, "GET", "/user", false)...)
 	if err != nil || len(data) > workflowstate.FileLimit {
