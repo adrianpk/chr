@@ -20,14 +20,14 @@ type telegramHarnessApplyProbe struct {
 	lose  bool
 }
 
-func (s *telegramHarnessApplyProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.HarnessSelectionSnapshot, error) {
+func (s *telegramHarnessApplyProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
 	s.calls++
 
 	result, err := s.service.ChangeTelegramHarnessSelections(ctx, target, request, authorize)
 	if err == nil && s.lose {
 		s.lose = false
 
-		return harnesscore.HarnessSelectionSnapshot{}, errTelegramHarnessLostAck
+		return harnesscore.SelectionSnapshot{}, errTelegramHarnessLostAck
 	}
 
 	return result, err
@@ -141,7 +141,7 @@ func TestTelegramHarnessSelectionRedelivery(t *testing.T) {
 	}
 }
 
-func telegramHarnessCheckSendRetry(t *testing.T, f *telegramConversationAppFixture, operations service, calls int, saved harnesscore.HarnessSelectionSnapshot, stage, token string) {
+func telegramHarnessCheckSendRetry(t *testing.T, f *telegramConversationAppFixture, operations service, calls int, saved harnesscore.SelectionSnapshot, stage, token string) {
 	t.Helper()
 
 	retry := telegramOperationNotice(t, f)

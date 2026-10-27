@@ -28,3 +28,8 @@ and stop requests, start guards and project loading. These children consume the
 parent's values; the parent cannot import either child. The `runtime` child owns
 host launch plans, artifact layout, command assembly and filesystem validation;
 `trace` owns bounded host trace records and retention.
+
+SelectionAudit and SelectionSnapshot retain the exact accepted change identity,
+role references and complete configuration revision. They contain no mutation
+authority. Native configuration owns authorization, locked full-image changes,
+request digests, recovery and bounded receipts.

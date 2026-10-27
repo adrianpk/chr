@@ -68,7 +68,7 @@ func (f *harnessJourney) checkViews(t *testing.T, choice harnessJourneyChoice) {
 	f.checkTelegramView(t, choice)
 }
 
-func (f *harnessJourney) checkSharedViews(t *testing.T, snapshot harnesscore.HarnessSelectionSnapshot) {
+func (f *harnessJourney) checkSharedViews(t *testing.T, snapshot harnesscore.SelectionSnapshot) {
 	t.Helper()
 
 	web, webErr := webHarnessProvider(f.operations).HarnessSelectionView(t.Context())

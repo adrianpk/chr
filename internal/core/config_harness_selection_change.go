@@ -37,20 +37,20 @@ type HarnessSelectionChangeOptions struct {
 }
 
 // HarnessSelections projects one coherent workspace image and its last change.
-func (c WorkspaceConfig) HarnessSelections(project string) (harnesscore.HarnessSelectionSnapshot, error) {
+func (c WorkspaceConfig) HarnessSelections(project string) (harnesscore.SelectionSnapshot, error) {
 	if c.HarnessAudit.ProjectRef != "" && c.HarnessAudit.ProjectRef != project {
-		return harnesscore.HarnessSelectionSnapshot{}, fmt.Errorf("%w: harness selections belong to another project", workflowstate.ErrConflict)
+		return harnesscore.SelectionSnapshot{}, fmt.Errorf("%w: harness selections belong to another project", workflowstate.ErrConflict)
 	}
 
 	audit := c.HarnessAudit
 	audit.ProjectRef = project
 
-	return harnesscore.HarnessSelectionSnapshot{HarnessSelectionAudit: audit, Worker: c.Harnesses.Worker, Generation: c.Harnesses.Generation, Revision: c.Revision()}, nil
+	return harnesscore.SelectionSnapshot{SelectionAudit: audit, Worker: c.Harnesses.Worker, Generation: c.Harnesses.Generation, Revision: c.Revision()}, nil
 }
 
 // ChangeHarnessSelections publishes an authorized complete image under the
 // configuration owner's cross-process lock. Replays return the original snapshot.
-func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSelectionChangeOptions) (result harnesscore.HarnessSelectionSnapshot, err error) {
+func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSelectionChangeOptions) (result harnesscore.SelectionSnapshot, err error) {
 	if opts.Authorize == nil || opts.Validate == nil {
 		return result, errors.New("harness selection requires authority and preparation")
 	}
@@ -124,10 +124,10 @@ func validateHarnessSelectionChoices(r HarnessSelectionChangeRequest) error {
 	return nil
 }
 
-func publishHarnessSelectionChange(ctx context.Context, project string, opts HarnessSelectionChangeOptions, digest string) (harnesscore.HarnessSelectionSnapshot, error) {
+func publishHarnessSelectionChange(ctx context.Context, project string, opts HarnessSelectionChangeOptions, digest string) (harnesscore.SelectionSnapshot, error) {
 	journal, err := prepareHarnessSelectionChange(ctx, project, opts, digest)
 	if err != nil {
-		return harnesscore.HarnessSelectionSnapshot{}, err
+		return harnesscore.SelectionSnapshot{}, err
 	}
 
 	if err := checkHarnessSelectionReceiptCapacity(project); err != nil {

@@ -30,7 +30,7 @@ func (f *harnessSelectionFixture) SaveHarnessSelections(request HarnessSelection
 // The project key opens an asynchronous compact picker. Late reads cannot
 // reopen a cancelled interaction or replace a newer project's visible choices.
 func TestTUIHarnessSelectionRead(t *testing.T) {
-	executor := &harnessSelectionFixture{view: HarnessSelectionView{Snapshot: harnesscore.HarnessSelectionSnapshot{Revision: strings.Repeat("a", 64)}}}
+	executor := &harnessSelectionFixture{view: HarnessSelectionView{Snapshot: harnesscore.SelectionSnapshot{Revision: strings.Repeat("a", 64)}}}
 	model := NewModel(Options{HarnessExecutor: executor})
 	updated, first := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("h")})
 

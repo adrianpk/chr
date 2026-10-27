@@ -129,8 +129,8 @@ func (r telegramReceiver) finishHarnessActionFailure(ctx context.Context, claim 
 
 func (r telegramReceiver) finishHarnessAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, completion telegramHarnessCompletion) error {
 	facts, err := json.Marshal(struct {
-		State    telegramcore.OperationState           `json:"state"`
-		Snapshot *harnesscore.HarnessSelectionSnapshot `json:"snapshot,omitempty"`
+		State    telegramcore.OperationState    `json:"state"`
+		Snapshot *harnesscore.SelectionSnapshot `json:"snapshot,omitempty"`
 	}{completion.State, completion.Snapshot})
 	if err != nil {
 		return err
@@ -154,6 +154,6 @@ func telegramHarnessSavedRole(profile string) string {
 
 type telegramHarnessCompletion struct {
 	State    telegramcore.OperationState
-	Snapshot *harnesscore.HarnessSelectionSnapshot
+	Snapshot *harnesscore.SelectionSnapshot
 	Text     string
 }

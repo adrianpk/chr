@@ -20,7 +20,7 @@ import (
 // WorkspaceConfig describes a package boundary value.
 type WorkspaceConfig struct {
 	Harnesses       harnesscore.SelectionConfig
-	HarnessAudit    harnesscore.HarnessSelectionAudit
+	HarnessAudit    harnesscore.SelectionAudit
 	Workflow        WorkflowConfig
 	TicketKeyPrefix string
 	Runtime         harnessruntime.Config

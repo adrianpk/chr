@@ -70,7 +70,7 @@ type telegramHarnessAuthorityProbe struct {
 	change func()
 }
 
-func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.HarnessSelectionSnapshot, error) {
+func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
 	calls := 0
 
 	return s.service.ChangeTelegramHarnessSelections(ctx, target, request, func(ctx context.Context) error {

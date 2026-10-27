@@ -19,7 +19,7 @@ type telegramHarnessStatus struct {
 
 type telegramHarnessService interface {
 	InspectTelegramHarnessSelections(context.Context, telegramcore.OperationTarget) (telegramHarnessStatus, error)
-	ChangeTelegramHarnessSelections(context.Context, telegramcore.OperationTarget, core.HarnessSelectionChangeRequest, func(context.Context) error) (harnesscore.HarnessSelectionSnapshot, error)
+	ChangeTelegramHarnessSelections(context.Context, telegramcore.OperationTarget, core.HarnessSelectionChangeRequest, func(context.Context) error) (harnesscore.SelectionSnapshot, error)
 }
 
 func (s service) telegramHarnessProject(ctx context.Context, target telegramcore.OperationTarget) (service, error) {
@@ -67,10 +67,10 @@ func (s service) telegramHarnessRetained(ctx context.Context) telegramHarnessRet
 
 // ChangeTelegramHarnessSelections resolves the registry root and delegates the
 // confirmed envelope to the shared atomic configuration owner.
-func (s service) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, change core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.HarnessSelectionSnapshot, error) {
+func (s service) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, change core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
 	scoped, err := s.telegramHarnessProject(ctx, target)
 	if err != nil {
-		return harnesscore.HarnessSelectionSnapshot{}, err
+		return harnesscore.SelectionSnapshot{}, err
 	}
 
 	return scoped.ChangeHarnessSelections(ctx, change, authorize)

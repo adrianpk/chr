@@ -68,7 +68,7 @@ func TestTelegramHarnessSelectionConfirm(t *testing.T) {
 	checkTelegramNoWork(t, f.receiver.env)
 }
 
-func telegramHarnessCheckSaved(t *testing.T, operations service, requestID string) harnesscore.HarnessSelectionSnapshot {
+func telegramHarnessCheckSaved(t *testing.T, operations service, requestID string) harnesscore.SelectionSnapshot {
 	t.Helper()
 
 	saved := webHarnessSnapshot(t, operations)
@@ -251,7 +251,7 @@ func TestTelegramHarnessSelectionEnvelope(t *testing.T) {
 	}
 }
 
-func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action telegramcore.Action, saved harnesscore.HarnessSelectionSnapshot) {
+func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action telegramcore.Action, saved harnesscore.SelectionSnapshot) {
 	t.Helper()
 
 	notice := f.send(t, "/answer "+action.Token+" confirm", 0)

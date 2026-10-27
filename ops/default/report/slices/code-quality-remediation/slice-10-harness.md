@@ -357,6 +357,13 @@ declaration preimages preserve embedded fields, order and JSON tags. The native
 configuration owner retains actual full-image revision, authorization, guarded
 change/recovery and bounded receipts.
 
+The separate selection naming commit exposes harness.SelectionAudit and
+SelectionSnapshot. Native selection files are named config_harness_selection_*
+to reflect their actual whole-image transaction owner. The same selected tests
+and production signature checks pass after naming; pinned strict lint passes:
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness ./internal/core ./internal/app ./scripts/goquality`: zero issues.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

@@ -68,7 +68,7 @@ func tuiHarnessOtherProcess(t *testing.T, operations service) {
 		t.Fatal("independent Web change failed", err)
 	}
 
-	var snapshot harnesscore.HarnessSelectionSnapshot
+	var snapshot harnesscore.SelectionSnapshot
 	if err := json.NewDecoder(strings.NewReader(string(output))).Decode(&snapshot); err != nil || snapshot.Worker != "beta" {
 		t.Fatal("independent Web process did not save its choice", err)
 	}

@@ -288,7 +288,7 @@ func webHarnessAssertWrite(t *testing.T, handler http.Handler, cookies []*http.C
 	return response.Body.String()
 }
 
-func webHarnessSnapshot(t *testing.T, operations service) harnesscore.HarnessSelectionSnapshot {
+func webHarnessSnapshot(t *testing.T, operations service) harnesscore.SelectionSnapshot {
 	t.Helper()
 
 	config, err := core.LoadWorkspaceConfig(operations.projectContext.ProjectDir)
@@ -304,7 +304,7 @@ func webHarnessSnapshot(t *testing.T, operations service) harnesscore.HarnessSel
 	return snapshot
 }
 
-func webHarnessCheckProcess(t *testing.T, operations service, expected harnesscore.HarnessSelectionSnapshot) {
+func webHarnessCheckProcess(t *testing.T, operations service, expected harnesscore.SelectionSnapshot) {
 	t.Helper()
 
 	program, err := os.Executable()
@@ -321,7 +321,7 @@ func webHarnessCheckProcess(t *testing.T, operations service, expected harnessco
 		t.Fatal(err)
 	}
 
-	var actual harnesscore.HarnessSelectionSnapshot
+	var actual harnesscore.SelectionSnapshot
 	if err := json.NewDecoder(strings.NewReader(string(output))).Decode(&actual); err != nil || actual != expected {
 		t.Fatal("independent process did not observe the saved image", actual, err)
 	}

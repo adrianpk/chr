@@ -72,7 +72,7 @@ func TestTUIHarnessSelectionSave(t *testing.T) {
 	}
 }
 
-func tuiHarnessRetrySave(t *testing.T, model tea.Model, operations service, executor *tuiHarnessLostAck, saved harnesscore.HarnessSelectionSnapshot) tea.Model {
+func tuiHarnessRetrySave(t *testing.T, model tea.Model, operations service, executor *tuiHarnessLostAck, saved harnesscore.SelectionSnapshot) tea.Model {
 	t.Helper()
 
 	visible := strings.Join(strings.Fields(model.View()), " ")

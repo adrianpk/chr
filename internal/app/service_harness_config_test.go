@@ -47,7 +47,7 @@ func TestHarnessSelectionServiceChange(t *testing.T) {
 	}
 }
 
-func checkHarnessSelectionServiceStatus(t *testing.T, second service, accepted harnesscore.HarnessSelectionSnapshot, configDir, command string) {
+func checkHarnessSelectionServiceStatus(t *testing.T, second service, accepted harnesscore.SelectionSnapshot, configDir, command string) {
 	t.Helper()
 
 	status, err := second.InspectHarnessSelections(t.Context(), "spec_generation")
@@ -61,7 +61,7 @@ func checkHarnessSelectionServiceStatus(t *testing.T, second service, accepted h
 	}
 }
 
-func checkHarnessSelectionServiceReplay(t *testing.T, second service, request core.HarnessSelectionChangeRequest, authority func(context.Context) error, accepted harnesscore.HarnessSelectionSnapshot) {
+func checkHarnessSelectionServiceReplay(t *testing.T, second service, request core.HarnessSelectionChangeRequest, authority func(context.Context) error, accepted harnesscore.SelectionSnapshot) {
 	t.Helper()
 
 	replay, err := second.ChangeHarnessSelections(t.Context(), request, authority)

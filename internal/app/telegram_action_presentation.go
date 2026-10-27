@@ -96,7 +96,7 @@ func telegramActionReplayDetails(request telegramcore.OperationRequest) string {
 		}
 	case telegramcore.HarnessSelectionOperation:
 		var facts struct {
-			Snapshot *harnesscore.HarnessSelectionSnapshot `json:"snapshot"`
+			Snapshot *harnesscore.SelectionSnapshot `json:"snapshot"`
 		}
 		if json.Unmarshal(request.Result, &facts) == nil && facts.Snapshot != nil {
 			return fmt.Sprintf("Original defaults saved for %s. Worker: %s. Generation: %s. Only new operations use these defaults.", facts.Snapshot.ProjectRef, telegramHarnessSavedRole(facts.Snapshot.Worker), telegramHarnessSavedRole(facts.Snapshot.Generation))

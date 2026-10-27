@@ -84,7 +84,7 @@ type harnessBindingAdmissionResult struct {
 	err    error
 }
 type harnessBindingChangeResult struct {
-	result harnesscore.HarnessSelectionSnapshot
+	result harnesscore.SelectionSnapshot
 	err    error
 }
 

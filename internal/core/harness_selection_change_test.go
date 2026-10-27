@@ -36,7 +36,7 @@ func TestHarnessSelectionChange(t *testing.T) {
 	checkHarnessSelectionChangeReplay(t, project, request, result)
 }
 
-func checkHarnessSelectionChangeReplay(t *testing.T, project string, request HarnessSelectionChangeRequest, result harnesscore.HarnessSelectionSnapshot) {
+func checkHarnessSelectionChangeReplay(t *testing.T, project string, request HarnessSelectionChangeRequest, result harnesscore.SelectionSnapshot) {
 	t.Helper()
 
 	next := harnessSelectionTestRequest("second", result.Revision, "beta")

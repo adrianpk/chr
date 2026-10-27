@@ -19,7 +19,7 @@ type HarnessSelectionExecutor interface {
 // HarnessSelectionView contains public selection identities, never private paths.
 type HarnessSelectionView struct {
 	RequestID          string
-	Snapshot           harnesscore.HarnessSelectionSnapshot
+	Snapshot           harnesscore.SelectionSnapshot
 	Worker, Generation harnesscore.Selection
 	Profiles           []HarnessProfileView
 	Retained           []HarnessRetainedView
