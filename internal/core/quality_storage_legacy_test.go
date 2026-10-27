@@ -79,7 +79,7 @@ func readQualityLegacyRecords(t *testing.T, db *sql.DB, want qualityLegacyRecord
 		t.Fatal(err)
 	}
 
-	got.Ticket, err = qualityTicketIndex(t, db).GetProjectTicketByKey(t.Context(), want.Ticket.ProjectID, want.Ticket.Key)
+	got.Ticket, err = qualityTicketIndex(t, db).GetProjectByKey(t.Context(), want.Ticket.ProjectID, want.Ticket.Key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,10 +124,10 @@ func TestQualityStorageLegacy(t *testing.T) {
 	}
 }
 
-func qualityTicketIndex(t *testing.T, db *sql.DB) ticketcore.TicketIndex {
+func qualityTicketIndex(t *testing.T, db *sql.DB) ticketcore.Index {
 	t.Helper()
 
-	index, err := ticketcore.NewTicketIndexFromDB(t.Context(), db, testMigrationFS())
+	index, err := ticketcore.NewIndexFromDB(t.Context(), db, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

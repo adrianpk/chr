@@ -67,7 +67,7 @@ func (factory commandFactory) runTicketShow(ctx context.Context, cmd *cli.Comman
 		return err
 	}
 
-	ticket, err := index.GetProjectTicketByKey(ctx, projectContext.ProjectID, cmd.Args().First())
+	ticket, err := index.GetProjectByKey(ctx, projectContext.ProjectID, cmd.Args().First())
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func (factory commandFactory) runTicketList(ctx context.Context, cmd *cli.Comman
 		return err
 	}
 
-	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
+	tickets, err := index.ListProject(ctx, projectContext.ProjectID)
 	if err != nil {
 		return err
 	}

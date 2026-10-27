@@ -7650,7 +7650,7 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket ticketcore.Ind
 	ticket.ContentHash = "hash"
 	ticket.IndexedAt = now
 
-	err = index.UpsertTicket(t.Context(), ticket)
+	err = index.Upsert(t.Context(), ticket)
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
@@ -7679,7 +7679,7 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []ticketcore.I
 		}
 	}()
 
-	tickets, err := index.ListProjectTickets(t.Context(), projectID(projectDir))
+	tickets, err := index.ListProject(t.Context(), projectID(projectDir))
 	if err != nil {
 		t.Fatalf("ListProjectTickets returned error: %v", err)
 	}

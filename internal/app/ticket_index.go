@@ -29,8 +29,8 @@ func (factory commandFactory) openTicketIndexForCommand(ctx context.Context, cmd
 	return commandTicketIndex{Project: projectContext, Index: index}, nil
 }
 
-func refreshProjectTicketIndex(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext) error {
-	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(ctx, ticketcore.ReconcileProjectTicketsOptions{
+func refreshProjectTicketIndex(ctx context.Context, index ticketcore.Index, projectContext commandProjectContext) error {
+	result, err := ticketcore.NewReconciler(index).ReconcileProject(ctx, ticketcore.ReconcileProjectOptions{
 		ProjectID:    projectContext.ProjectID,
 		ProjectDir:   projectContext.ProjectDir,
 		ReconciledAt: time.Now().UTC(),
@@ -50,5 +50,5 @@ func refreshProjectTicketIndex(ctx context.Context, index ticketcore.TicketIndex
 
 type commandTicketIndex struct {
 	Project commandProjectContext
-	Index   ticketcore.TicketIndex
+	Index   ticketcore.Index
 }

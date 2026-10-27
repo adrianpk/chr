@@ -6,45 +6,45 @@ import (
 	"time"
 )
 
-// TicketIndexRebuilder defines a package boundary interface.
-type TicketIndexRebuilder interface {
-	RebuildProjectTickets(ctx context.Context, opts RebuildProjectTicketsOptions) (RebuildProjectTicketsResult, error)
+// Rebuilder defines a package boundary interface.
+type Rebuilder interface {
+	Rebuild(ctx context.Context, opts RebuildOptions) (RebuildResult, error)
 }
 
-// RebuildProjectTicketsOptions describes a package boundary value.
-type RebuildProjectTicketsOptions struct {
+// RebuildOptions describes a package boundary value.
+type RebuildOptions struct {
 	ProjectID  string
 	ProjectDir string
 	IndexedAt  time.Time
 }
 
-// RebuildProjectTicketsResult describes a package boundary value.
-type RebuildProjectTicketsResult struct {
+// RebuildResult describes a package boundary value.
+type RebuildResult struct {
 	IndexedTickets int
-	ParseErrors    []TicketIndexRebuildParseError
+	ParseErrors    []RebuildParseError
 }
 
-// TicketIndexRebuildParseError describes a package boundary value.
-type TicketIndexRebuildParseError struct {
+// RebuildParseError describes a package boundary value.
+type RebuildParseError struct {
 	Path         string
 	RelativePath string
 	Err          error
 }
 
-type ticketIndexRebuilder struct {
-	discoverer TicketFileDiscoverer
+type rebuilder struct {
+	discoverer Discoverer
 	parser     Parser
-	index      TicketIndex
+	index      Index
 	now        func() time.Time
 }
 
-// TicketIndexRebuilderOption defines a package boundary type.
-type TicketIndexRebuilderOption func(*ticketIndexRebuilder)
+// RebuildOption defines a package boundary type.
+type RebuildOption func(*rebuilder)
 
-// NewTicketIndexRebuilder constructs the corresponding package service or value.
-func NewTicketIndexRebuilder(index TicketIndex, opts ...TicketIndexRebuilderOption) TicketIndexRebuilder {
-	rebuilder := &ticketIndexRebuilder{
-		discoverer: NewTicketFileDiscoverer(),
+// NewRebuilder constructs the corresponding package service or value.
+func NewRebuilder(index Index, opts ...RebuildOption) Rebuilder {
+	rebuilder := &rebuilder{
+		discoverer: NewDiscoverer(),
 		parser:     NewParser(),
 		index:      index,
 		now:        time.Now,
@@ -57,57 +57,57 @@ func NewTicketIndexRebuilder(index TicketIndex, opts ...TicketIndexRebuilderOpti
 	return rebuilder
 }
 
-// WithTicketIndexRebuilderDiscoverer executes the corresponding package operation.
-func WithTicketIndexRebuilderDiscoverer(discoverer TicketFileDiscoverer) TicketIndexRebuilderOption {
-	return func(rebuilder *ticketIndexRebuilder) {
+// WithRebuildDiscoverer executes the corresponding package operation.
+func WithRebuildDiscoverer(discoverer Discoverer) RebuildOption {
+	return func(rebuilder *rebuilder) {
 		if discoverer != nil {
 			rebuilder.discoverer = discoverer
 		}
 	}
 }
 
-// WithTicketIndexRebuilderParser executes the corresponding package operation.
-func WithTicketIndexRebuilderParser(parser Parser) TicketIndexRebuilderOption {
-	return func(rebuilder *ticketIndexRebuilder) {
+// WithRebuildParser executes the corresponding package operation.
+func WithRebuildParser(parser Parser) RebuildOption {
+	return func(rebuilder *rebuilder) {
 		if parser != nil {
 			rebuilder.parser = parser
 		}
 	}
 }
 
-// WithTicketIndexRebuilderClock executes the corresponding package operation.
-func WithTicketIndexRebuilderClock(now func() time.Time) TicketIndexRebuilderOption {
-	return func(rebuilder *ticketIndexRebuilder) {
+// WithRebuildClock executes the corresponding package operation.
+func WithRebuildClock(now func() time.Time) RebuildOption {
+	return func(rebuilder *rebuilder) {
 		if now != nil {
 			rebuilder.now = now
 		}
 	}
 }
 
-// RebuildProjectTickets executes the corresponding package operation.
-func (r *ticketIndexRebuilder) RebuildProjectTickets(ctx context.Context, opts RebuildProjectTicketsOptions) (RebuildProjectTicketsResult, error) {
+// Rebuild executes the corresponding package operation.
+func (r *rebuilder) Rebuild(ctx context.Context, opts RebuildOptions) (RebuildResult, error) {
 	err := validateRebuildProjectTicketsOptions(opts)
 	if err != nil {
-		return RebuildProjectTicketsResult{}, err
+		return RebuildResult{}, err
 	}
 
-	files, err := r.discoverer.DiscoverTicketFiles(ctx, DiscoverTicketFilesOptions{
+	files, err := r.discoverer.Discover(ctx, DiscoverOptions{
 		ProjectDir: opts.ProjectDir,
 	})
 	if err != nil {
-		return RebuildProjectTicketsResult{}, err
+		return RebuildResult{}, err
 	}
 
-	result := RebuildProjectTicketsResult{}
+	result := RebuildResult{}
 
 	indexedAt := opts.IndexedAt.UTC()
 	if indexedAt.IsZero() {
 		indexedAt = r.now().UTC()
 	}
 
-	err = r.index.DeleteProjectTickets(ctx, opts.ProjectID)
+	err = r.index.DeleteProject(ctx, opts.ProjectID)
 	if err != nil {
-		return RebuildProjectTicketsResult{}, err
+		return RebuildResult{}, err
 	}
 
 	for _, file := range files {
@@ -116,10 +116,10 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(ctx context.Context, opts R
 			ProjectDir:   opts.ProjectDir,
 			Path:         file.Path,
 			IndexedAt:    indexedAt,
-			RelativeBase: TicketsDirectory(opts.ProjectDir),
+			RelativeBase: Directory(opts.ProjectDir),
 		})
 		if err != nil {
-			result.ParseErrors = append(result.ParseErrors, TicketIndexRebuildParseError{
+			result.ParseErrors = append(result.ParseErrors, RebuildParseError{
 				Path:         file.Path,
 				RelativePath: file.RelativePath,
 				Err:          err,
@@ -128,9 +128,9 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(ctx context.Context, opts R
 			continue
 		}
 
-		err = r.index.UpsertTicket(ctx, ticket)
+		err = r.index.Upsert(ctx, ticket)
 		if err != nil {
-			return RebuildProjectTicketsResult{}, err
+			return RebuildResult{}, err
 		}
 
 		result.IndexedTickets++
@@ -139,7 +139,7 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(ctx context.Context, opts R
 	return result, nil
 }
 
-func validateRebuildProjectTicketsOptions(opts RebuildProjectTicketsOptions) error {
+func validateRebuildProjectTicketsOptions(opts RebuildOptions) error {
 	if opts.ProjectID == "" {
 		return fmt.Errorf("project id is required")
 	}

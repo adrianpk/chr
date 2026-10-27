@@ -20,15 +20,15 @@ func TestTicketIndexRebuilderRebuildsProjectTickets(t *testing.T) {
 		UpdatedAt: rebuildTestUpdatedAt(),
 	})
 
-	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHR-1", nil))
+	err := index.Upsert(context.Background(), testIndexedTicket("CHR-1", nil))
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
 
-	result, err := ticketcore.NewTicketIndexRebuilder(
+	result, err := ticketcore.NewRebuilder(
 		index,
-		ticketcore.WithTicketIndexRebuilderClock(rebuildTestIndexedAt),
-	).RebuildProjectTickets(context.Background(), ticketcore.RebuildProjectTicketsOptions{
+		ticketcore.WithRebuildClock(rebuildTestIndexedAt),
+	).Rebuild(context.Background(), ticketcore.RebuildOptions{
 		ProjectID:  "project-1",
 		ProjectDir: projectDir,
 	})
@@ -44,7 +44,7 @@ func TestTicketIndexRebuilderRebuildsProjectTickets(t *testing.T) {
 		t.Fatalf("ParseErrors = %#v, want none", result.ParseErrors)
 	}
 
-	tickets, err := index.ListProjectTickets(context.Background(), "project-1")
+	tickets, err := index.ListProject(context.Background(), "project-1")
 	if err != nil {
 		t.Fatalf("ListProjectTickets returned error: %v", err)
 	}
@@ -70,10 +70,10 @@ func TestTicketIndexRebuilderPreservesParseErrors(t *testing.T) {
 	})
 	writeDiscoveryTestFile(t, projectDir, ".chr/default/tickets/CHR-2-Bad.md")
 
-	result, err := ticketcore.NewTicketIndexRebuilder(
+	result, err := ticketcore.NewRebuilder(
 		index,
-		ticketcore.WithTicketIndexRebuilderClock(rebuildTestIndexedAt),
-	).RebuildProjectTickets(context.Background(), ticketcore.RebuildProjectTicketsOptions{
+		ticketcore.WithRebuildClock(rebuildTestIndexedAt),
+	).Rebuild(context.Background(), ticketcore.RebuildOptions{
 		ProjectID:  "project-1",
 		ProjectDir: projectDir,
 	})

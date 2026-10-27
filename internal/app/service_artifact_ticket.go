@@ -112,7 +112,7 @@ func (s service) reserveNextTicketKeyNumber(keyPrefix string) (int, error) {
 		return 0, err
 	}
 
-	repository, err := ticketcore.NewTicketKeySequenceRepository(s.ctx, s.env, s.assetsFS)
+	repository, err := ticketcore.NewKeySequenceRepository(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return 0, err
 	}
@@ -122,7 +122,7 @@ func (s service) reserveNextTicketKeyNumber(keyPrefix string) (int, error) {
 		_ = repository.Close()
 	}()
 
-	return repository.ReserveNextTicketKey(s.ctx, ticketcore.ReserveNextTicketKeyOptions{
+	return repository.ReserveKey(s.ctx, ticketcore.ReserveKeyOptions{
 		ProjectID: s.projectContext.ProjectID,
 		Prefix:    keyPrefix,
 		Seed:      seed,
@@ -165,7 +165,7 @@ func (s service) refreshCreatedTicketIndex(ticketPath string) error {
 		_ = index.Close()
 	}()
 
-	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(s.ctx, ticketcore.ReconcileProjectTicketOptions{
+	result, err := ticketcore.NewReconciler(index).ReconcileTicket(s.ctx, ticketcore.ReconcileTicketOptions{
 		ProjectID:    s.projectContext.ProjectID,
 		ProjectDir:   s.projectContext.ProjectDir,
 		TicketPath:   ticketPath,
@@ -498,5 +498,5 @@ func (s service) ticketByKey(key string) (ticketcore.Indexed, error) {
 		return ticketcore.Indexed{}, err
 	}
 
-	return index.GetProjectTicketByKey(s.ctx, s.projectContext.ProjectID, key)
+	return index.GetProjectByKey(s.ctx, s.projectContext.ProjectID, key)
 }

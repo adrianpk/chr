@@ -125,7 +125,7 @@ func (runner daemonWorkflowRunner) workflow(ctx context.Context, operations serv
 	return progress.Attempted, err
 }
 
-func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry projectcore.Registry, index ticketcore.TicketIndex, result *daemonForegroundLoopResult) error {
+func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry projectcore.Registry, index ticketcore.Index, result *daemonForegroundLoopResult) error {
 	if err := runner.repository.UpdateHeartbeat(ctx, time.Now().UTC()); err != nil {
 		return err
 	}

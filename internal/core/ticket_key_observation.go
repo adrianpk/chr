@@ -42,7 +42,7 @@ func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
 }
 
 func ticketKeyRoots(projectDir string) ([]string, error) {
-	roots := []string{ticketcore.TicketsDirectory(projectDir)}
+	roots := []string{ticketcore.Directory(projectDir)}
 
 	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.DirectoryName))
 	if errors.Is(err, os.ErrNotExist) {

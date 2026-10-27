@@ -149,5 +149,5 @@ func qualityTicketFault(t *testing.T, db *sql.DB) func() error {
 
 	qualityStorageExec(t, db, `CREATE TEMP TRIGGER quality_abort BEFORE INSERT ON indexed_ticket_tags BEGIN SELECT RAISE(ABORT,'injected ticket tag failure'); END`)
 
-	return func() error { return qualityTicketIndex(t, db).UpsertTicket(t.Context(), ticket) }
+	return func() error { return qualityTicketIndex(t, db).Upsert(t.Context(), ticket) }
 }

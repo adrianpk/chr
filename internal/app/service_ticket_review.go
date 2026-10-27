@@ -29,7 +29,7 @@ func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (c
 		return core.TicketReviewCommandResult{}, err
 	}
 
-	ticket, err := index.GetProjectTicketByKey(ctx, s.projectContext.ProjectID, request.Key)
+	ticket, err := index.GetProjectByKey(ctx, s.projectContext.ProjectID, request.Key)
 	if err != nil {
 		return core.TicketReviewCommandResult{}, err
 	}
@@ -62,7 +62,7 @@ func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (c
 	return result, nil
 }
 
-func refreshTicketIndexAfterReview(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
+func refreshTicketIndexAfterReview(ctx context.Context, index ticketcore.Index, projectContext commandProjectContext, dryRun bool) error {
 	if dryRun {
 		return nil
 	}

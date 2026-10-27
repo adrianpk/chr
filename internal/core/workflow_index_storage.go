@@ -15,18 +15,18 @@ import (
 // WorkflowTicketIndex composes ticket storage with the existing native projections.
 // Both projections share the same SQLite handle and original cache invalidation.
 type WorkflowTicketIndex interface {
-	ticketcore.TicketIndex
+	ticketcore.Index
 	WorkflowIndex
 	WorkflowIntegrationIndex
 }
 
 type workflowTicketIndex struct {
-	ticketcore.TicketIndex
+	ticketcore.Index
 	db *sql.DB
 }
 
 // NewWorkflowTicketIndex constructs the corresponding package service or value.
-func NewWorkflowTicketIndex(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (ticketcore.TicketIndex, error) {
+func NewWorkflowTicketIndex(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (ticketcore.Index, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -52,10 +52,10 @@ func NewWorkflowTicketIndex(ctx context.Context, env database.DataDirectory, ass
 
 // NewWorkflowTicketIndexFromDB assembles ticket and native projections on one handle.
 func NewWorkflowTicketIndexFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (WorkflowTicketIndex, error) {
-	tickets, err := ticketcore.NewTicketIndexFromDB(ctx, db, assetsFS)
+	tickets, err := ticketcore.NewIndexFromDB(ctx, db, assetsFS)
 	if err != nil {
 		return nil, err
 	}
 
-	return &workflowTicketIndex{TicketIndex: tickets, db: db}, nil
+	return &workflowTicketIndex{Index: tickets, db: db}, nil
 }

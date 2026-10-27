@@ -77,7 +77,7 @@ func TestTicketIndexStatusCheckerReportsOrphanedTicket(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
 
-	err := index.UpsertTicket(context.Background(), testIndexedTicket("CHR-1", nil))
+	err := index.Upsert(context.Background(), testIndexedTicket("CHR-1", nil))
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
@@ -109,13 +109,13 @@ func TestTicketIndexStatusCheckerReportsInvalidTicket(t *testing.T) {
 	}
 }
 
-func rebuildProjectTicketsForStatusTest(t *testing.T, index ticketcore.TicketIndex, projectDir string) {
+func rebuildProjectTicketsForStatusTest(t *testing.T, index ticketcore.Index, projectDir string) {
 	t.Helper()
 
-	_, err := ticketcore.NewTicketIndexRebuilder(
+	_, err := ticketcore.NewRebuilder(
 		index,
-		ticketcore.WithTicketIndexRebuilderClock(rebuildTestIndexedAt),
-	).RebuildProjectTickets(context.Background(), ticketcore.RebuildProjectTicketsOptions{
+		ticketcore.WithRebuildClock(rebuildTestIndexedAt),
+	).Rebuild(context.Background(), ticketcore.RebuildOptions{
 		ProjectID:  "project-1",
 		ProjectDir: projectDir,
 	})
@@ -126,15 +126,15 @@ func rebuildProjectTicketsForStatusTest(t *testing.T, index ticketcore.TicketInd
 
 func checkProjectTicketIndexForStatusTest(
 	t *testing.T,
-	index ticketcore.TicketIndex,
+	index ticketcore.Index,
 	projectDir string,
-) ticketcore.TicketIndexStatus {
+) ticketcore.IndexStatus {
 	t.Helper()
 
-	status, err := ticketcore.NewTicketIndexStatusChecker(
+	status, err := ticketcore.NewIndexStatusChecker(
 		index,
-		ticketcore.WithTicketIndexStatusCheckerClock(rebuildTestIndexedAt),
-	).CheckProjectTicketIndex(context.Background(), ticketcore.CheckProjectTicketIndexOptions{
+		ticketcore.WithIndexStatusClock(rebuildTestIndexedAt),
+	).CheckIndex(context.Background(), ticketcore.CheckIndexOptions{
 		ProjectID:  "project-1",
 		ProjectDir: projectDir,
 	})
@@ -147,7 +147,7 @@ func checkProjectTicketIndexForStatusTest(
 
 func assertTicketIndexStatusCounts(
 	t *testing.T,
-	status ticketcore.TicketIndexStatus,
+	status ticketcore.IndexStatus,
 	missing int,
 	stale int,
 	orphaned int,

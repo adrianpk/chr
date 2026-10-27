@@ -261,7 +261,7 @@ func (s service) refreshAgenticReviewTicketIndex(execution core.ExecutionRecord,
 		_ = index.Close()
 	}()
 
-	_, err = ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(s.ctx, ticketcore.ReconcileProjectTicketOptions{
+	_, err = ticketcore.NewReconciler(index).ReconcileTicket(s.ctx, ticketcore.ReconcileTicketOptions{
 		ProjectID:    s.projectContext.ProjectID,
 		ProjectDir:   s.projectContext.ProjectDir,
 		TicketPath:   ticketPath,

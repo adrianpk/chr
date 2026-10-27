@@ -94,7 +94,7 @@ func qualityTicketUpsert(t *testing.T, db *sql.DB, want qualityLegacyRecords) {
 	t.Helper()
 	qualityStorageExec(t, db, "UPDATE indexed_tickets SET title='poison-title',synopsis='poison-synopsis',source_ref='poison-source',branch='poison-branch',review_comments_url='poison-comments',merge_commit='poison-commit'")
 
-	if err := qualityTicketIndex(t, db).UpsertTicket(t.Context(), want.Ticket); err != nil {
+	if err := qualityTicketIndex(t, db).Upsert(t.Context(), want.Ticket); err != nil {
 		t.Fatal(err)
 	}
 }

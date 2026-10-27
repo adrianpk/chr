@@ -118,12 +118,12 @@ func (s service) selectTicketStartTicket(ctx context.Context, key string) (ticke
 		return ticketcore.Indexed{}, err
 	}
 
-	ticket, err := index.GetProjectTicketByKey(ctx, s.projectContext.ProjectID, key)
+	ticket, err := index.GetProjectByKey(ctx, s.projectContext.ProjectID, key)
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}
 
-	tickets, err := index.ListProjectTickets(ctx, s.projectContext.ProjectID)
+	tickets, err := index.ListProject(ctx, s.projectContext.ProjectID)
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}

@@ -15,26 +15,26 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// TicketKeySequenceRepository defines a package boundary interface.
-type TicketKeySequenceRepository interface {
-	ReserveNextTicketKey(ctx context.Context, opts ReserveNextTicketKeyOptions) (int, error)
+// KeySequenceRepository defines a package boundary interface.
+type KeySequenceRepository interface {
+	ReserveKey(ctx context.Context, opts ReserveKeyOptions) (int, error)
 	Close() error
 }
 
-// ReserveNextTicketKeyOptions describes a package boundary value.
-type ReserveNextTicketKeyOptions struct {
+// ReserveKeyOptions describes a package boundary value.
+type ReserveKeyOptions struct {
 	ProjectID string
 	Prefix    string
 	Seed      int
 	UpdatedAt time.Time
 }
 
-type sqliteTicketKeySequenceRepository struct {
+type sqliteKeySequenceRepository struct {
 	db *sql.DB
 }
 
-// NewTicketKeySequenceRepository constructs the corresponding package service or value.
-func NewTicketKeySequenceRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (TicketKeySequenceRepository, error) {
+// NewKeySequenceRepository constructs the corresponding package service or value.
+func NewKeySequenceRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (KeySequenceRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -50,7 +50,7 @@ func NewTicketKeySequenceRepository(ctx context.Context, env database.DataDirect
 		return nil, database.CloseOnError(db, err)
 	}
 
-	repository, err := NewTicketKeySequenceRepositoryFromDB(ctx, db, assetsFS)
+	repository, err := NewKeySequenceRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
 		return nil, database.CloseOnError(db, err)
 	}
@@ -58,8 +58,8 @@ func NewTicketKeySequenceRepository(ctx context.Context, env database.DataDirect
 	return repository, nil
 }
 
-// NewTicketKeySequenceRepositoryFromDB constructs the corresponding package service or value.
-func NewTicketKeySequenceRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (TicketKeySequenceRepository, error) {
+// NewKeySequenceRepositoryFromDB constructs the corresponding package service or value.
+func NewKeySequenceRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (KeySequenceRepository, error) {
 	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
@@ -67,11 +67,11 @@ func NewTicketKeySequenceRepositoryFromDB(ctx context.Context, db *sql.DB, asset
 		return nil, fmt.Errorf("migrate ticket key sequence database: %w", err)
 	}
 
-	return &sqliteTicketKeySequenceRepository{db: db}, nil
+	return &sqliteKeySequenceRepository{db: db}, nil
 }
 
-// ReserveNextTicketKey executes the corresponding package operation.
-func (r *sqliteTicketKeySequenceRepository) ReserveNextTicketKey(ctx context.Context, opts ReserveNextTicketKeyOptions) (int, error) {
+// ReserveKey executes the corresponding package operation.
+func (r *sqliteKeySequenceRepository) ReserveKey(ctx context.Context, opts ReserveKeyOptions) (int, error) {
 	if opts.ProjectID == "" {
 		return 0, fmt.Errorf("project id is required")
 	}
@@ -103,7 +103,7 @@ func (r *sqliteTicketKeySequenceRepository) ReserveNextTicketKey(ctx context.Con
 }
 
 // Close executes the corresponding package operation.
-func (r *sqliteTicketKeySequenceRepository) Close() error {
+func (r *sqliteKeySequenceRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {
 		return fmt.Errorf("close ticket key sequence database: %w", err)
@@ -112,7 +112,7 @@ func (r *sqliteTicketKeySequenceRepository) Close() error {
 	return nil
 }
 
-func reserveNextTicketKey(ctx context.Context, tx *sql.Tx, opts ReserveNextTicketKeyOptions) (int, error) {
+func reserveNextTicketKey(ctx context.Context, tx *sql.Tx, opts ReserveKeyOptions) (int, error) {
 	var nextNumber int
 
 	err := tx.QueryRowContext(
@@ -132,7 +132,7 @@ func reserveNextTicketKey(ctx context.Context, tx *sql.Tx, opts ReserveNextTicke
 	return createTicketKeySequence(ctx, tx, opts)
 }
 
-func updateExistingTicketKeySequence(ctx context.Context, tx *sql.Tx, opts ReserveNextTicketKeyOptions, nextNumber int) (int, error) {
+func updateExistingTicketKeySequence(ctx context.Context, tx *sql.Tx, opts ReserveKeyOptions, nextNumber int) (int, error) {
 	reservedNumber := max(nextNumber, opts.Seed)
 
 	_, err := tx.ExecContext(
@@ -152,7 +152,7 @@ WHERE project_id = ? AND prefix = ?`,
 	return reservedNumber, nil
 }
 
-func createTicketKeySequence(ctx context.Context, tx *sql.Tx, opts ReserveNextTicketKeyOptions) (int, error) {
+func createTicketKeySequence(ctx context.Context, tx *sql.Tx, opts ReserveKeyOptions) (int, error) {
 	_, err := tx.ExecContext(
 		ctx,
 		`INSERT INTO ticket_key_sequences (project_id, prefix, next_number, updated_at)

@@ -19,7 +19,7 @@ type agentWorkLoopSelection struct {
 }
 
 func parseProjectTicketsFromDir(ctx context.Context, projectID, projectDir string, indexedAt time.Time) ([]ticketcore.Indexed, error) {
-	files, err := ticketcore.NewTicketFileDiscoverer().DiscoverTicketFiles(ctx, ticketcore.DiscoverTicketFilesOptions{ProjectDir: projectDir})
+	files, err := ticketcore.NewDiscoverer().Discover(ctx, ticketcore.DiscoverOptions{ProjectDir: projectDir})
 	if err != nil {
 		return nil, err
 	}
@@ -97,8 +97,8 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 	}, nil
 }
 
-func (s service) applyAgentWorkSelectionPreflight(index ticketcore.TicketIndex, tickets []ticketcore.Indexed, workConfig core.WorkConfig) ([]ticketcore.Indexed, error) {
-	allTickets, err := index.ListProjectTickets(s.ctx, s.projectContext.ProjectID)
+func (s service) applyAgentWorkSelectionPreflight(index ticketcore.Index, tickets []ticketcore.Indexed, workConfig core.WorkConfig) ([]ticketcore.Indexed, error) {
+	allTickets, err := index.ListProject(s.ctx, s.projectContext.ProjectID)
 	if err != nil {
 		return nil, err
 	}

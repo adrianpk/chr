@@ -24,3 +24,10 @@ row/tag bindings with native projection writes in the caller's transaction; it d
 not validate, invalidate snapshots or commit. Public index writes retain their
 existing validation and snapshot invalidation order. Native composition retains
 one shared SQLite handle and source/cache authority.
+
+NewIndexFromDB constructs Index, which provides Upsert,
+ListProject, GetProjectByKey and DeleteProject. Discoverer.Discover,
+Rebuilder.Rebuild, Reconciler.ReconcileProject/ReconcileTicket and
+IndexStatusChecker.CheckIndex retain the original operation boundaries.
+KeySequenceRepository.ReserveKey retains durable reservation semantics.
+Directory resolves the existing legacy document path.

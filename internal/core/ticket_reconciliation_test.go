@@ -20,9 +20,9 @@ func TestTicketReconcilerRefreshesCleanProject(t *testing.T) {
 		UpdatedAt: rebuildTestUpdatedAt(),
 	})
 
-	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(
+	result, err := ticketcore.NewReconciler(index).ReconcileProject(
 		context.Background(),
-		ticketcore.ReconcileProjectTicketsOptions{
+		ticketcore.ReconcileProjectOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			ReconciledAt: rebuildTestIndexedAt(),
@@ -40,7 +40,7 @@ func TestTicketReconcilerRefreshesCleanProject(t *testing.T) {
 		t.Fatalf("Blockers = %#v, want none", result.Blockers)
 	}
 
-	ticket, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
+	ticket, err := index.GetProjectByKey(context.Background(), "project-1", "CHR-1")
 	if err != nil {
 		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
 	}
@@ -55,9 +55,9 @@ func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 	index := newTestTicketIndex(t)
 	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chr", "default", "tickets", "CHR-1-Bad.md"))
 
-	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(
+	result, err := ticketcore.NewReconciler(index).ReconcileProject(
 		context.Background(),
-		ticketcore.ReconcileProjectTicketsOptions{
+		ticketcore.ReconcileProjectOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			ReconciledAt: rebuildTestIndexedAt(),
@@ -80,8 +80,8 @@ func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 		t.Fatal("FirstBlocker returned false")
 	}
 
-	if blocker.Kind != ticketcore.TicketReconciliationBlockerParseError {
-		t.Fatalf("Kind = %q, want %q", blocker.Kind, ticketcore.TicketReconciliationBlockerParseError)
+	if blocker.Kind != ticketcore.ReconcileBlockerParseError {
+		t.Fatalf("Kind = %q, want %q", blocker.Kind, ticketcore.ReconcileBlockerParseError)
 	}
 
 	if blocker.RelativePath != "CHR-1-Bad.md" {
@@ -119,9 +119,9 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 		t.Fatalf("WriteResultState returned error: %v", err)
 	}
 
-	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(
+	result, err := ticketcore.NewReconciler(index).ReconcileTicket(
 		context.Background(),
-		ticketcore.ReconcileProjectTicketOptions{
+		ticketcore.ReconcileTicketOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			TicketPath:   ticketPath,
@@ -140,7 +140,7 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 		t.Fatalf("Blockers = %#v, want none", result.Blockers)
 	}
 
-	ticket, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
+	ticket, err := index.GetProjectByKey(context.Background(), "project-1", "CHR-1")
 	if err != nil {
 		t.Fatalf("GetProjectTicketByKey returned error: %v", err)
 	}
@@ -160,9 +160,9 @@ func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Bad.md")
 	writeFile(t, ticketPath, "missing frontmatter")
 
-	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(
+	result, err := ticketcore.NewReconciler(index).ReconcileTicket(
 		context.Background(),
-		ticketcore.ReconcileProjectTicketOptions{
+		ticketcore.ReconcileTicketOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			TicketPath:   ticketPath,
@@ -191,12 +191,12 @@ func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	}
 }
 
-func reconcileAllProjectTickets(t *testing.T, index ticketcore.TicketIndex, projectDir string) {
+func reconcileAllProjectTickets(t *testing.T, index ticketcore.Index, projectDir string) {
 	t.Helper()
 
-	_, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(
+	_, err := ticketcore.NewReconciler(index).ReconcileProject(
 		context.Background(),
-		ticketcore.ReconcileProjectTicketsOptions{
+		ticketcore.ReconcileProjectOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			ReconciledAt: rebuildTestIndexedAt(),

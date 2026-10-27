@@ -82,7 +82,7 @@ func (s *WorkflowStore) readBoardTickets(ctx context.Context, native bool) ([]ti
 		}
 	}
 
-	for _, root := range []string{filepath.Join(s.layout.Root(), "ticket"), ticketcore.TicketsDirectory(s.layout.ProjectDir())} {
+	for _, root := range []string{filepath.Join(s.layout.Root(), "ticket"), ticketcore.Directory(s.layout.ProjectDir())} {
 		if err := s.readLooseBoardTickets(ctx, root, tickets, paths); err != nil {
 			return nil, err
 		}
@@ -229,7 +229,7 @@ func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[st
 	}
 
 	if old, exists := tickets[ticket.Key]; exists {
-		if old.NativeWorkflow || root == ticketcore.TicketsDirectory(s.layout.ProjectDir()) && !strings.HasPrefix(old.Path, root+string(filepath.Separator)) {
+		if old.NativeWorkflow || root == ticketcore.Directory(s.layout.ProjectDir()) && !strings.HasPrefix(old.Path, root+string(filepath.Separator)) {
 			return nil
 		}
 

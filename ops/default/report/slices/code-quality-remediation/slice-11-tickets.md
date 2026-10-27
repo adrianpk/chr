@@ -93,12 +93,15 @@ metadata update and transaction. Existing snapshot invalidation, SQL/bind order,
 NULL timestamps, migrations, cancellation and parse blockers remain unchanged.
 Three storage regressions construct the index through its existing public database
 constructor rather than exposing its private SQL implementation. Another 89
-preimages reconcile, bringing the move ledger to 162. Strict lint detected API
-name stuttering after the mechanical move; the separate naming commit is pending.
+preimages reconcile, bringing the move ledger to 162. The separate naming change exposes Index, Discoverer, Rebuilder, Reconciler,
+IndexStatusChecker and KeySequenceRepository with direct operation names.
+The same focused tests and signature policy pass after naming. Strict lint passes
+with zero issues; all 162 declaration preimages reconcile after qualification
+and naming.
 
 ## Risks and Follow-ups
 
-Remaining work includes ticket API naming/repository rules, execution/readiness
+Remaining work includes ticket filesystem repository rules, execution/readiness
 ownership and D03, other assigned signatures, typed state/preparation contracts,
 the six-parameter reconciliation and final exact-head controller validation.
 No Slice 11 PR has been opened.

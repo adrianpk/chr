@@ -186,7 +186,7 @@ func refreshAppliedTicketIndex(ctx context.Context, env core.UserEnvironment, pl
 		_ = index.Close()
 	}()
 
-	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(ctx, ticketcore.ReconcileProjectTicketOptions{
+	result, err := ticketcore.NewReconciler(index).ReconcileTicket(ctx, ticketcore.ReconcileTicketOptions{
 		ProjectID:    plan.ProjectContext.ProjectID,
 		ProjectDir:   plan.ProjectContext.ProjectDir,
 		TicketPath:   plan.Application.TicketPath,

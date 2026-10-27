@@ -11,38 +11,38 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// TicketFileDiscoverer defines a package boundary interface.
-type TicketFileDiscoverer interface {
-	DiscoverTicketFiles(ctx context.Context, opts DiscoverTicketFilesOptions) ([]DiscoveredTicketFile, error)
+// Discoverer defines a package boundary interface.
+type Discoverer interface {
+	Discover(ctx context.Context, opts DiscoverOptions) ([]DiscoveredFile, error)
 }
 
-// DiscoverTicketFilesOptions describes a package boundary value.
-type DiscoverTicketFilesOptions struct {
+// DiscoverOptions describes a package boundary value.
+type DiscoverOptions struct {
 	ProjectDir string
 }
 
-// DiscoveredTicketFile describes a package boundary value.
-type DiscoveredTicketFile struct {
+// DiscoveredFile describes a package boundary value.
+type DiscoveredFile struct {
 	Path         string
 	RelativePath string
 }
 
-type ticketFileDiscoverer struct{}
+type discoverer struct{}
 
-// NewTicketFileDiscoverer constructs the corresponding package service or value.
-func NewTicketFileDiscoverer() TicketFileDiscoverer {
-	return &ticketFileDiscoverer{}
+// NewDiscoverer constructs the corresponding package service or value.
+func NewDiscoverer() Discoverer {
+	return &discoverer{}
 }
 
-// DiscoverTicketFiles executes the corresponding package operation.
-func (d *ticketFileDiscoverer) DiscoverTicketFiles(ctx context.Context, opts DiscoverTicketFilesOptions) ([]DiscoveredTicketFile, error) {
+// Discover executes the corresponding package operation.
+func (d *discoverer) Discover(ctx context.Context, opts DiscoverOptions) ([]DiscoveredFile, error) {
 	err := ctx.Err()
 	if err != nil {
 		return nil, err
 	}
 
-	ticketsDir := TicketsDirectory(opts.ProjectDir)
-	files := []DiscoveredTicketFile{}
+	ticketsDir := Directory(opts.ProjectDir)
+	files := []DiscoveredFile{}
 
 	err = filepath.WalkDir(ticketsDir, func(path string, entry os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -63,7 +63,7 @@ func (d *ticketFileDiscoverer) DiscoverTicketFiles(ctx context.Context, opts Dis
 			return fmt.Errorf("resolve relative ticket path: %w", err)
 		}
 
-		files = append(files, DiscoveredTicketFile{
+		files = append(files, DiscoveredFile{
 			Path:         path,
 			RelativePath: filepath.ToSlash(relativePath),
 		})
@@ -81,8 +81,8 @@ func (d *ticketFileDiscoverer) DiscoverTicketFiles(ctx context.Context, opts Dis
 	return sortDiscoveredTicketFiles(files), nil
 }
 
-func sortDiscoveredTicketFiles(files []DiscoveredTicketFile) []DiscoveredTicketFile {
-	slices.SortFunc(files, func(left, right DiscoveredTicketFile) int {
+func sortDiscoveredTicketFiles(files []DiscoveredFile) []DiscoveredFile {
+	slices.SortFunc(files, func(left, right DiscoveredFile) int {
 		if left.RelativePath < right.RelativePath {
 			return -1
 		}
@@ -97,7 +97,7 @@ func sortDiscoveredTicketFiles(files []DiscoveredTicketFile) []DiscoveredTicketF
 	return files
 }
 
-// TicketsDirectory resolves the legacy ticket document directory.
-func TicketsDirectory(projectDir string) string {
+// Directory resolves the legacy ticket document directory.
+func Directory(projectDir string) string {
 	return workspacecore.UserPath(projectDir, "tickets")
 }

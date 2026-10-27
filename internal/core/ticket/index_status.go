@@ -6,52 +6,52 @@ import (
 	"time"
 )
 
-// TicketIndexStatusChecker defines a package boundary interface.
-type TicketIndexStatusChecker interface {
-	CheckProjectTicketIndex(ctx context.Context, opts CheckProjectTicketIndexOptions) (TicketIndexStatus, error)
+// IndexStatusChecker defines a package boundary interface.
+type IndexStatusChecker interface {
+	CheckIndex(ctx context.Context, opts CheckIndexOptions) (IndexStatus, error)
 }
 
-// CheckProjectTicketIndexOptions describes a package boundary value.
-type CheckProjectTicketIndexOptions struct {
+// CheckIndexOptions describes a package boundary value.
+type CheckIndexOptions struct {
 	ProjectID  string
 	ProjectDir string
 	IndexedAt  time.Time
 }
 
-// TicketIndexStatus describes a package boundary value.
-type TicketIndexStatus struct {
-	Missing  []TicketIndexStatusFile
-	Stale    []TicketIndexStatusTicket
+// IndexStatus describes a package boundary value.
+type IndexStatus struct {
+	Missing  []IndexStatusFile
+	Stale    []IndexStatusTicket
 	Orphaned []Indexed
-	Invalid  []TicketIndexRebuildParseError
+	Invalid  []RebuildParseError
 }
 
-// TicketIndexStatusFile describes a package boundary value.
-type TicketIndexStatusFile struct {
+// IndexStatusFile describes a package boundary value.
+type IndexStatusFile struct {
 	Path         string
 	RelativePath string
 }
 
-// TicketIndexStatusTicket describes a package boundary value.
-type TicketIndexStatusTicket struct {
+// IndexStatusTicket describes a package boundary value.
+type IndexStatusTicket struct {
 	Indexed Indexed
 	Parsed  Indexed
 }
 
-type ticketIndexStatusChecker struct {
-	discoverer TicketFileDiscoverer
+type indexStatusChecker struct {
+	discoverer Discoverer
 	parser     Parser
-	index      TicketIndex
+	index      Index
 	now        func() time.Time
 }
 
-// TicketIndexStatusCheckerOption defines a package boundary type.
-type TicketIndexStatusCheckerOption func(*ticketIndexStatusChecker)
+// IndexStatusOption defines a package boundary type.
+type IndexStatusOption func(*indexStatusChecker)
 
-// NewTicketIndexStatusChecker constructs the corresponding package service or value.
-func NewTicketIndexStatusChecker(index TicketIndex, opts ...TicketIndexStatusCheckerOption) TicketIndexStatusChecker {
-	checker := &ticketIndexStatusChecker{
-		discoverer: NewTicketFileDiscoverer(),
+// NewIndexStatusChecker constructs the corresponding package service or value.
+func NewIndexStatusChecker(index Index, opts ...IndexStatusOption) IndexStatusChecker {
+	checker := &indexStatusChecker{
+		discoverer: NewDiscoverer(),
 		parser:     NewParser(),
 		index:      index,
 		now:        time.Now,
@@ -64,39 +64,39 @@ func NewTicketIndexStatusChecker(index TicketIndex, opts ...TicketIndexStatusChe
 	return checker
 }
 
-// WithTicketIndexStatusCheckerClock executes the corresponding package operation.
-func WithTicketIndexStatusCheckerClock(now func() time.Time) TicketIndexStatusCheckerOption {
-	return func(checker *ticketIndexStatusChecker) {
+// WithIndexStatusClock executes the corresponding package operation.
+func WithIndexStatusClock(now func() time.Time) IndexStatusOption {
+	return func(checker *indexStatusChecker) {
 		if now != nil {
 			checker.now = now
 		}
 	}
 }
 
-// CheckProjectTicketIndex executes the corresponding package operation.
-func (c *ticketIndexStatusChecker) CheckProjectTicketIndex(ctx context.Context, opts CheckProjectTicketIndexOptions) (TicketIndexStatus, error) {
+// CheckIndex executes the corresponding package operation.
+func (c *indexStatusChecker) CheckIndex(ctx context.Context, opts CheckIndexOptions) (IndexStatus, error) {
 	err := validateCheckProjectTicketIndexOptions(opts)
 	if err != nil {
-		return TicketIndexStatus{}, err
+		return IndexStatus{}, err
 	}
 
-	files, err := c.discoverer.DiscoverTicketFiles(ctx, DiscoverTicketFilesOptions{
+	files, err := c.discoverer.Discover(ctx, DiscoverOptions{
 		ProjectDir: opts.ProjectDir,
 	})
 	if err != nil {
-		return TicketIndexStatus{}, err
+		return IndexStatus{}, err
 	}
 
-	indexedTickets, err := c.index.ListProjectTickets(ctx, opts.ProjectID)
+	indexedTickets, err := c.index.ListProject(ctx, opts.ProjectID)
 	if err != nil {
-		return TicketIndexStatus{}, err
+		return IndexStatus{}, err
 	}
 
 	return c.compareProjectTicketIndex(ctx, opts, files, indexedTickets), nil
 }
 
-func (c *ticketIndexStatusChecker) compareProjectTicketIndex(ctx context.Context, opts CheckProjectTicketIndexOptions, files []DiscoveredTicketFile, indexedTickets []Indexed) TicketIndexStatus {
-	status := TicketIndexStatus{}
+func (c *indexStatusChecker) compareProjectTicketIndex(ctx context.Context, opts CheckIndexOptions, files []DiscoveredFile, indexedTickets []Indexed) IndexStatus {
+	status := IndexStatus{}
 	indexedByRelativePath := indexedTicketsByRelativePath(indexedTickets)
 	seenRelativePaths := map[string]struct{}{}
 	indexedAt := c.indexedAt(opts)
@@ -109,10 +109,10 @@ func (c *ticketIndexStatusChecker) compareProjectTicketIndex(ctx context.Context
 			ProjectDir:   opts.ProjectDir,
 			Path:         file.Path,
 			IndexedAt:    indexedAt,
-			RelativeBase: TicketsDirectory(opts.ProjectDir),
+			RelativeBase: Directory(opts.ProjectDir),
 		})
 		if err != nil {
-			status.Invalid = append(status.Invalid, TicketIndexRebuildParseError{
+			status.Invalid = append(status.Invalid, RebuildParseError{
 				Path:         file.Path,
 				RelativePath: file.RelativePath,
 				Err:          err,
@@ -123,13 +123,13 @@ func (c *ticketIndexStatusChecker) compareProjectTicketIndex(ctx context.Context
 
 		indexed, found := indexedByRelativePath[file.RelativePath]
 		if !found {
-			status.Missing = append(status.Missing, TicketIndexStatusFile(file))
+			status.Missing = append(status.Missing, IndexStatusFile(file))
 
 			continue
 		}
 
 		if ticketFileStateChanged(indexed, parsed) {
-			status.Stale = append(status.Stale, TicketIndexStatusTicket{
+			status.Stale = append(status.Stale, IndexStatusTicket{
 				Indexed: indexed,
 				Parsed:  parsed,
 			})
@@ -141,7 +141,7 @@ func (c *ticketIndexStatusChecker) compareProjectTicketIndex(ctx context.Context
 	return status
 }
 
-func (c *ticketIndexStatusChecker) indexedAt(opts CheckProjectTicketIndexOptions) time.Time {
+func (c *indexStatusChecker) indexedAt(opts CheckIndexOptions) time.Time {
 	indexedAt := opts.IndexedAt.UTC()
 	if indexedAt.IsZero() {
 		indexedAt = c.now().UTC()
@@ -150,7 +150,7 @@ func (c *ticketIndexStatusChecker) indexedAt(opts CheckProjectTicketIndexOptions
 	return indexedAt
 }
 
-func validateCheckProjectTicketIndexOptions(opts CheckProjectTicketIndexOptions) error {
+func validateCheckProjectTicketIndexOptions(opts CheckIndexOptions) error {
 	if opts.ProjectID == "" {
 		return fmt.Errorf("project id is required")
 	}

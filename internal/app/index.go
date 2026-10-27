@@ -70,7 +70,7 @@ func (factory commandFactory) runIndexRebuild(ctx context.Context, cmd *cli.Comm
 		_ = index.Close()
 	}()
 
-	result, err := ticketcore.NewTicketIndexRebuilder(index).RebuildProjectTickets(ctx, ticketcore.RebuildProjectTicketsOptions{
+	result, err := ticketcore.NewRebuilder(index).Rebuild(ctx, ticketcore.RebuildOptions{
 		ProjectID:  projectContext.ProjectID,
 		ProjectDir: projectContext.ProjectDir,
 		IndexedAt:  time.Now().UTC(),
@@ -82,7 +82,7 @@ func (factory commandFactory) runIndexRebuild(ctx context.Context, cmd *cli.Comm
 	return printIndexRebuildResult(factory.io.Stdout, result)
 }
 
-func printIndexRebuildResult(stdout io.Writer, result ticketcore.RebuildProjectTicketsResult) error {
+func printIndexRebuildResult(stdout io.Writer, result ticketcore.RebuildResult) error {
 	_, err := fmt.Fprintf(stdout, "indexed: %d\n", result.IndexedTickets)
 	if err != nil {
 		return fmt.Errorf("write index rebuild result: %w", err)
@@ -132,7 +132,7 @@ func (factory commandFactory) runIndexStatus(ctx context.Context, cmd *cli.Comma
 		_ = index.Close()
 	}()
 
-	status, err := ticketcore.NewTicketIndexStatusChecker(index).CheckProjectTicketIndex(ctx, ticketcore.CheckProjectTicketIndexOptions{
+	status, err := ticketcore.NewIndexStatusChecker(index).CheckIndex(ctx, ticketcore.CheckIndexOptions{
 		ProjectID:  projectContext.ProjectID,
 		ProjectDir: projectContext.ProjectDir,
 		IndexedAt:  time.Now().UTC(),
@@ -153,7 +153,7 @@ func (factory commandFactory) runIndexStatus(ctx context.Context, cmd *cli.Comma
 	return nil
 }
 
-func printIndexStatusResult(stdout io.Writer, status ticketcore.TicketIndexStatus) error {
+func printIndexStatusResult(stdout io.Writer, status ticketcore.IndexStatus) error {
 	err := printIndexStatusCounts(stdout, status)
 	if err != nil {
 		return err
@@ -167,7 +167,7 @@ func printIndexStatusResult(stdout io.Writer, status ticketcore.TicketIndexStatu
 	return nil
 }
 
-func printIndexStatusCounts(stdout io.Writer, status ticketcore.TicketIndexStatus) error {
+func printIndexStatusCounts(stdout io.Writer, status ticketcore.IndexStatus) error {
 	_, err := fmt.Fprintf(stdout, "missing: %d\n", len(status.Missing))
 	if err != nil {
 		return fmt.Errorf("write index status result: %w", err)
@@ -191,7 +191,7 @@ func printIndexStatusCounts(stdout io.Writer, status ticketcore.TicketIndexStatu
 	return nil
 }
 
-func printIndexStatusDetails(stdout io.Writer, status ticketcore.TicketIndexStatus) error {
+func printIndexStatusDetails(stdout io.Writer, status ticketcore.IndexStatus) error {
 	for _, missing := range status.Missing {
 		_, err := fmt.Fprintf(stdout, "missing_ticket: %s\n", missing.RelativePath)
 		if err != nil {
@@ -223,7 +223,7 @@ func printIndexStatusDetails(stdout io.Writer, status ticketcore.TicketIndexStat
 	return nil
 }
 
-func ticketIndexHasDrift(status ticketcore.TicketIndexStatus) bool {
+func ticketIndexHasDrift(status ticketcore.IndexStatus) bool {
 	return len(status.Missing) > 0 ||
 		len(status.Stale) > 0 ||
 		len(status.Orphaned) > 0 ||

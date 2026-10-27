@@ -375,7 +375,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 	}
 }
 
-func upsertLoopQueryTicket(t *testing.T, index ticketcore.TicketIndex, key, status string) {
+func upsertLoopQueryTicket(t *testing.T, index ticketcore.Index, key, status string) {
 	t.Helper()
 
 	ticket := testIndexedTicket(key, nil)
@@ -384,7 +384,7 @@ func upsertLoopQueryTicket(t *testing.T, index ticketcore.TicketIndex, key, stat
 	upsertLoopQueryTicketWithMetadata(t, index, ticket)
 }
 
-func upsertLoopQueryTicketWithMetadata(t *testing.T, index ticketcore.TicketIndex, metadata ticketcore.Indexed) {
+func upsertLoopQueryTicketWithMetadata(t *testing.T, index ticketcore.Index, metadata ticketcore.Indexed) {
 	t.Helper()
 
 	ticket := testIndexedTicket(metadata.Key, metadata.Tags)
@@ -396,7 +396,7 @@ func upsertLoopQueryTicketWithMetadata(t *testing.T, index ticketcore.TicketInde
 	ticket.ProjectArea = metadata.ProjectArea
 	ticket.CreatedAt = metadata.CreatedAt
 
-	err := index.UpsertTicket(context.Background(), ticket)
+	err := index.Upsert(context.Background(), ticket)
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}

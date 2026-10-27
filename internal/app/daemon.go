@@ -299,7 +299,7 @@ func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, max
 
 func refreshDaemonProjects(
 	ctx context.Context,
-	index ticketcore.TicketIndex,
+	index ticketcore.Index,
 	projects []daemoncore.Project,
 	result *daemonForegroundLoopResult,
 ) error {

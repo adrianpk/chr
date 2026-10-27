@@ -11,14 +11,14 @@ import (
 func TestTicketKeySequenceReservesSeedThenNextNumbers(t *testing.T) {
 	db := openTestSQLite(t)
 
-	repository, err := ticketcore.NewTicketKeySequenceRepositoryFromDB(context.Background(), db, testMigrationFS())
+	repository, err := ticketcore.NewKeySequenceRepositoryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewTicketKeySequenceRepositoryFromDB returned error: %v", err)
 	}
 
 	now := time.Date(2026, 5, 26, 12, 0, 0, 0, time.UTC)
 
-	first, err := repository.ReserveNextTicketKey(context.Background(), ticketcore.ReserveNextTicketKeyOptions{
+	first, err := repository.ReserveKey(context.Background(), ticketcore.ReserveKeyOptions{
 		ProjectID: "project-1",
 		Prefix:    "CHR",
 		Seed:      7,
@@ -28,7 +28,7 @@ func TestTicketKeySequenceReservesSeedThenNextNumbers(t *testing.T) {
 		t.Fatalf("ReserveNextTicketKey returned error: %v", err)
 	}
 
-	second, err := repository.ReserveNextTicketKey(context.Background(), ticketcore.ReserveNextTicketKeyOptions{
+	second, err := repository.ReserveKey(context.Background(), ticketcore.ReserveKeyOptions{
 		ProjectID: "project-1",
 		Prefix:    "CHR",
 		Seed:      1,
@@ -46,14 +46,14 @@ func TestTicketKeySequenceReservesSeedThenNextNumbers(t *testing.T) {
 func TestTicketKeySequenceKeepsProjectPrefixesIndependent(t *testing.T) {
 	db := openTestSQLite(t)
 
-	repository, err := ticketcore.NewTicketKeySequenceRepositoryFromDB(context.Background(), db, testMigrationFS())
+	repository, err := ticketcore.NewKeySequenceRepositoryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewTicketKeySequenceRepositoryFromDB returned error: %v", err)
 	}
 
 	now := time.Date(2026, 5, 26, 12, 0, 0, 0, time.UTC)
 
-	first, err := repository.ReserveNextTicketKey(context.Background(), ticketcore.ReserveNextTicketKeyOptions{
+	first, err := repository.ReserveKey(context.Background(), ticketcore.ReserveKeyOptions{
 		ProjectID: "project-1",
 		Prefix:    "CHR",
 		Seed:      1,
@@ -63,7 +63,7 @@ func TestTicketKeySequenceKeepsProjectPrefixesIndependent(t *testing.T) {
 		t.Fatalf("ReserveNextTicketKey returned error: %v", err)
 	}
 
-	second, err := repository.ReserveNextTicketKey(context.Background(), ticketcore.ReserveNextTicketKeyOptions{
+	second, err := repository.ReserveKey(context.Background(), ticketcore.ReserveKeyOptions{
 		ProjectID: "project-1",
 		Prefix:    "PRJ",
 		Seed:      1,
@@ -81,14 +81,14 @@ func TestTicketKeySequenceKeepsProjectPrefixesIndependent(t *testing.T) {
 func TestTicketKeySequenceAdvancesWhenFilesystemSeedIsHigher(t *testing.T) {
 	db := openTestSQLite(t)
 
-	repository, err := ticketcore.NewTicketKeySequenceRepositoryFromDB(context.Background(), db, testMigrationFS())
+	repository, err := ticketcore.NewKeySequenceRepositoryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewTicketKeySequenceRepositoryFromDB returned error: %v", err)
 	}
 
 	now := time.Date(2026, 5, 26, 12, 0, 0, 0, time.UTC)
 
-	_, err = repository.ReserveNextTicketKey(context.Background(), ticketcore.ReserveNextTicketKeyOptions{
+	_, err = repository.ReserveKey(context.Background(), ticketcore.ReserveKeyOptions{
 		ProjectID: "project-1",
 		Prefix:    "CHR",
 		Seed:      1,
@@ -98,7 +98,7 @@ func TestTicketKeySequenceAdvancesWhenFilesystemSeedIsHigher(t *testing.T) {
 		t.Fatalf("ReserveNextTicketKey returned error: %v", err)
 	}
 
-	next, err := repository.ReserveNextTicketKey(context.Background(), ticketcore.ReserveNextTicketKeyOptions{
+	next, err := repository.ReserveKey(context.Background(), ticketcore.ReserveKeyOptions{
 		ProjectID: "project-1",
 		Prefix:    "CHR",
 		Seed:      10,

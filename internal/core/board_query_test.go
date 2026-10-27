@@ -137,13 +137,13 @@ func assertBoardColumn(t *testing.T, board Board, columnID, title string, wantKe
 	t.Fatalf("missing board column %s", columnID)
 }
 
-func upsertBoardQueryTicket(t *testing.T, index ticketcore.TicketIndex, key, status string) {
+func upsertBoardQueryTicket(t *testing.T, index ticketcore.Index, key, status string) {
 	t.Helper()
 
 	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: key}, IndexedClassification: ticketcore.IndexedClassification{Status: status}})
 }
 
-func upsertBoardQueryTicketWithMetadata(t *testing.T, index ticketcore.TicketIndex, metadata ticketcore.Indexed) {
+func upsertBoardQueryTicketWithMetadata(t *testing.T, index ticketcore.Index, metadata ticketcore.Indexed) {
 	t.Helper()
 
 	ticket := testIndexedTicket(metadata.Key, metadata.Tags)
@@ -151,7 +151,7 @@ func upsertBoardQueryTicketWithMetadata(t *testing.T, index ticketcore.TicketInd
 	ticket.BoardColumn, _ = ticketcore.BoardStatus(metadata.Status)
 	ticket.ReviewState = metadata.ReviewState
 
-	err := index.UpsertTicket(context.Background(), ticket)
+	err := index.Upsert(context.Background(), ticket)
 	if err != nil {
 		t.Fatalf("UpsertTicket returned error: %v", err)
 	}
