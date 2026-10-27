@@ -3,6 +3,8 @@ package core
 import (
 	"path/filepath"
 	"testing"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func TestResolveOpsLayoutDefaultsToDefaultNamespace(t *testing.T) {
@@ -16,8 +18,8 @@ func TestResolveOpsLayoutDefaultsToDefaultNamespace(t *testing.T) {
 		t.Fatalf("ResolveOpsLayout returned error: %v", err)
 	}
 
-	if layout.Namespace() != DefaultOpsNamespace {
-		t.Fatalf("Namespace = %q, want %q", layout.Namespace(), DefaultOpsNamespace)
+	if layout.Namespace() != opsnamespace.Default {
+		t.Fatalf("Namespace = %q, want %q", layout.Namespace(), opsnamespace.Default)
 	}
 
 	if layout.Root() != filepath.Join(projectDir, "ops", "default") {
@@ -44,7 +46,7 @@ func TestResolveOpsLayoutUsesOpsUser(t *testing.T) {
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{
 		ProjectDir: t.TempDir(),
 		LookupEnv: func(name string) string {
-			if name == OpsUserEnv {
+			if name == opsnamespace.UserEnv {
 				return "adrian"
 			}
 

@@ -5,13 +5,15 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func TestReportListerListsProjectReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -19,7 +21,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00002-agent-work-loop",
 		"evidence",
@@ -27,7 +29,7 @@ func TestReportListerListsProjectReports(t *testing.T) {
 	), "# Loop Report\n\n## Summary\n\n- loop: loop-1\n- status: blocked\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -56,7 +58,7 @@ func TestReportListerFiltersReports(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -64,7 +66,7 @@ func TestReportListerFiltersReports(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",
 		"evidence",
@@ -104,11 +106,11 @@ func TestReportListerReturnsEmptyWhenRunDirectoryIsMissing(t *testing.T) {
 
 func TestReportListerUsesActiveOpsNamespace(t *testing.T) {
 	projectDir := t.TempDir()
-	t.Setenv(OpsUserEnv, "adrian")
+	t.Setenv(opsnamespace.UserEnv, "adrian")
 
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-default-run",
 		"evidence",

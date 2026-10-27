@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -45,7 +46,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationTarget(ctx context.Context,
 	}
 
 	if observed.Destination == "" {
-		target, err := r.newDumpMutationTarget(DefaultOpsNamespace, request.Title)
+		target, err := r.newDumpMutationTarget(opsnamespace.Default, request.Title)
 		target.Project = observed.Project
 
 		return target, err

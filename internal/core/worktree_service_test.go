@@ -8,6 +8,8 @@ import (
 	"slices"
 	"testing"
 	"time"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
@@ -38,7 +40,7 @@ func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
 }
 
 func TestNewWorktreePlanUsesConfiguredOpsNamespace(t *testing.T) {
-	t.Setenv(OpsUserEnv, "adrian")
+	t.Setenv(opsnamespace.UserEnv, "adrian")
 
 	dir := t.TempDir()
 

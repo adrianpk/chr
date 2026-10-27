@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -66,7 +67,7 @@ func TestTelegramAuthoringExplainRouting(t *testing.T) {
 
 func telegramAuthoringExplainRoute(t *testing.T, mode string) {
 	t.Helper()
-	t.Setenv(core.OpsUserEnv, "original")
+	t.Setenv(opsnamespace.UserEnv, "original")
 
 	f := newTelegramConversationAppFixture(t)
 	telegramAuthoringExplainOverview(t, f)
@@ -155,7 +156,7 @@ func telegramAuthoringExplainCheckCalls(t *testing.T, mode string, calls, interp
 // TestTelegramAuthoringExplainRecovery reopens after result retention but before
 // source acknowledgement, preserving an independent edit and the original answer.
 func TestTelegramAuthoringExplainRecovery(t *testing.T) {
-	t.Setenv(core.OpsUserEnv, "original")
+	t.Setenv(opsnamespace.UserEnv, "original")
 
 	f := newTelegramConversationAppFixture(t)
 	readme := telegramAuthoringExplainOverview(t, f)

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -31,7 +32,7 @@ func (s telegramAuthoringLostAck) ContinueTelegramAuthoring(ctx context.Context,
 // TestTelegramAuthoringBridgeLostAck reopens SQLite after a confirmed canonical
 // write, preserves an independent edit and recovers one source acknowledgement.
 func TestTelegramAuthoringBridgeLostAck(t *testing.T) {
-	t.Setenv(core.OpsUserEnv, "original")
+	t.Setenv(opsnamespace.UserEnv, "original")
 
 	f := newTelegramConversationAppFixture(t)
 	calls := telegramAuthoringBridgeHTTP(t, f, func(authoringModelInput) string {
@@ -57,7 +58,7 @@ func TestTelegramAuthoringBridgeLostAck(t *testing.T) {
 
 	f.receiver.operations = operations
 
-	t.Setenv(core.OpsUserEnv, "changed-after-write")
+	t.Setenv(opsnamespace.UserEnv, "changed-after-write")
 
 	if err := f.receiver.drain(t.Context()); err != nil {
 		t.Fatal(err)

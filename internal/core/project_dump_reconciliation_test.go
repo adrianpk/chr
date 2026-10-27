@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -163,7 +164,7 @@ func checkProjectDumpOriginalImages(t *testing.T, r *fileAuthoringSessionReposit
 func checkProjectDumpReconciliationMetadata(t *testing.T, project string, preview ProjectDumpReconciliationPreview) {
 	t.Helper()
 
-	t.Setenv(OpsUserEnv, "another-namespace")
+	t.Setenv(opsnamespace.UserEnv, "another-namespace")
 
 	observed, err := ObserveProjectDump(t.Context(), project)
 	if err != nil || observed.Destination != preview.Destination || observed.ReconciliationReason != "" || len(observed.Candidates) != 1 || len(observed.Aliases) != 2 {

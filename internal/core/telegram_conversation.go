@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -315,7 +316,11 @@ func (op telegramConversationTransaction) start() (string, *TelegramConversation
 		return "", nil, err
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: project.Path, Namespace: op.input.Namespace})
+	if _, err := projectcore.ResolveDirectory(project.Path); err != nil {
+		return "", nil, err
+	}
+
+	namespace, err := opsnamespace.Resolve(op.input.Namespace, nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -324,7 +329,7 @@ func (op telegramConversationTransaction) start() (string, *TelegramConversation
 		return "", nil, err
 	}
 
-	return op.insertConversation(project, binding, layout.Namespace())
+	return op.insertConversation(project, binding, namespace)
 }
 
 func (op telegramConversationTransaction) checkAllocation() error {

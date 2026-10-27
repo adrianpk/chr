@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 type telegramWorkLostAck struct {
@@ -145,7 +146,7 @@ func telegramWorkChangePreview(t *testing.T, operations service, record core.Wor
 func TestTelegramWorkNamespace(t *testing.T) {
 	f, operations, record := telegramWorkFixture(t)
 	action, _ := telegramWorkOffer(t, f, "/work --namespace default ticket "+record.Task.Key)
-	t.Setenv(core.OpsUserEnv, "elsewhere")
+	t.Setenv(opsnamespace.UserEnv, "elsewhere")
 
 	operations.workflowNamespace = "default"
 

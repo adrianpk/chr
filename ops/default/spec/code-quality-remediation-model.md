@@ -432,3 +432,13 @@ uncertain-to-delivered retry (attempt one to two). One application and one canon
 record remain required. This replaces stale visible opaque-ID assertions with
 stronger evidence at their durable owner; production behavior is unchanged.
 The focused three-test command passes, including the real HTTP/native journey.
+
+
+Shared project-directory validation retains filepath.Abs, directory existence/type
+checks and original errors at project.ResolveDirectory. Namespace selection retains
+explicit input, OPS_USER and default precedence, trimming and invalid-name errors
+at namespace.Resolve. Existing operational layouts still validate the directory
+before selecting its namespace. Telegram allocation/target construction calls the
+same two shared operations in that exact order after root binding; artifact path
+composition stays with OpsLayout. Original filesystem, namespace precedence,
+registry and Telegram conversation/target tests pass with direct consumers.

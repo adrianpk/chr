@@ -9,3 +9,7 @@ active-selection file contents and normal missing-project errors.
 
 The only internal dependency is core/database. No root core, adapter or workflow
 coordinator is imported. Callers use this package directly.
+
+ResolveDirectory validates the existing shared project directory contract. It
+returns the absolute path after the original existence/type checks; workspace
+initialization and operational namespace callers use that same operation.

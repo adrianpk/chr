@@ -127,7 +127,7 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 		return withLegacyTicketLock(ctx, path, action)
 	}
 
-	layout := OpsLayout{projectDir: root, namespace: DefaultOpsNamespace}
+	layout := OpsLayout{projectDir: root, namespace: opsnamespace.Default}
 
 	relative, err := filepath.Rel(root, path)
 	if err != nil {

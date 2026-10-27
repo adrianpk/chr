@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 const (
@@ -106,7 +108,7 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 		return InitResult{}, err
 	}
 
-	absProjectDir, err := resolveProjectDir(opts.ProjectDir)
+	absProjectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
 		return InitResult{}, err
 	}
@@ -141,28 +143,6 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 	}
 
 	return result, nil
-}
-
-func resolveProjectDir(projectDir string) (string, error) {
-	if projectDir == "" {
-		projectDir = "."
-	}
-
-	absProjectDir, err := filepath.Abs(projectDir)
-	if err != nil {
-		return "", fmt.Errorf("resolve project directory: %w", err)
-	}
-
-	info, err := os.Stat(absProjectDir)
-	if err != nil {
-		return "", fmt.Errorf("inspect project directory: %w", err)
-	}
-
-	if !info.IsDir() {
-		return "", fmt.Errorf("project directory is not a directory: %s", absProjectDir)
-	}
-
-	return absProjectDir, nil
 }
 
 func initDirectories(ctx context.Context, projectDir string, dryRun bool, result *InitResult) error {

@@ -5,13 +5,15 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func TestReportLookupFindsReportByExecutionID(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -38,7 +40,7 @@ func TestReportLookupFindsReportByRelativePath(t *testing.T) {
 	projectDir := t.TempDir()
 	relativePath := filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-agent-work-loop",
 		"evidence",
@@ -77,7 +79,7 @@ func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 	projectDir := t.TempDir()
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -85,7 +87,7 @@ func TestReportLookupRejectsAmbiguousReport(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",
 		"evidence",

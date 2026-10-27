@@ -8,6 +8,7 @@ import (
 	"sync"
 	"testing"
 
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,14 +16,14 @@ import (
 // caller's active namespace changes. Every contribution and raw source survives.
 func TestDumpMutationCapture(t *testing.T) {
 	project := t.TempDir()
-	t.Setenv(OpsUserEnv, "operator-space")
+	t.Setenv(opsnamespace.UserEnv, "operator-space")
 
 	first, err := MutateDump(t.Context(), project, dumpCaptureRequest("first", "First material."), nil)
 	if err != nil || first.Destination != "ops/default/dump/00000-project-context/artifact.md" {
 		t.Fatal("first capture did not use default project namespace", first, err)
 	}
 
-	t.Setenv(OpsUserEnv, "another-space")
+	t.Setenv(opsnamespace.UserEnv, "another-space")
 
 	var group sync.WaitGroup
 	for _, id := range []string{"second", "third"} {

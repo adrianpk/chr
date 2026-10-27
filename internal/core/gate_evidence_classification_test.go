@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/gate"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing.T) {
@@ -85,7 +86,7 @@ func TestGateEvidenceClassifierRecordsMissingExecutionResultEvidence(t *testing.
 	reportPath := filepath.Join(
 		projectDir,
 		OpsDirectoryName,
-		DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -132,7 +133,7 @@ func writeGateEvidenceExecutionArtifacts(
 ) {
 	t.Helper()
 
-	runDir := filepath.Join(projectDir, OpsDirectoryName, DefaultOpsNamespace, "run", "00001-ticket-run")
+	runDir := filepath.Join(projectDir, OpsDirectoryName, opsnamespace.Default, "run", "00001-ticket-run")
 	resultPath := filepath.Join(runDir, "evidence", "result.json")
 	reportPath := filepath.Join(runDir, "evidence", "execution-report.md")
 	resultContent := `{"execution_id":"` + result.ExecutionID +

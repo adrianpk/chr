@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -135,7 +136,7 @@ func TestTelegramOperationLostAcknowledgement(t *testing.T) {
 
 	f.receiver.store, f.receiver.operations = store, operations
 
-	t.Setenv(core.OpsUserEnv, "changed-after-prepare")
+	t.Setenv(opsnamespace.UserEnv, "changed-after-prepare")
 
 	if err := f.receiver.drain(t.Context()); err != nil {
 		t.Fatal(err)

@@ -2,20 +2,16 @@ package core
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 const (
 	// OpsDirectoryName is the project-local root for shared operational artifacts.
 	OpsDirectoryName = "ops"
-	// DefaultOpsNamespace is used when no explicit shared namespace is configured.
-	DefaultOpsNamespace = "default"
-	// OpsUserEnv selects the shared operational namespace.
-	OpsUserEnv = "OPS_USER"
 )
 
 var opsArtifactTypes = map[string]struct{}{
@@ -38,27 +34,14 @@ type ResolveOpsLayoutOptions struct {
 
 // ResolveOpsLayout resolves an explicit namespace, OPS_USER, or default.
 func ResolveOpsLayout(opts ResolveOpsLayoutOptions) (OpsLayout, error) {
-	projectDir, err := resolveProjectDir(opts.ProjectDir)
+	projectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
 		return OpsLayout{}, err
 	}
 
-	lookupEnv := opts.LookupEnv
-	if lookupEnv == nil {
-		lookupEnv = os.Getenv
-	}
-
-	namespace := strings.TrimSpace(opts.Namespace)
-	if namespace == "" {
-		namespace = strings.TrimSpace(lookupEnv(OpsUserEnv))
-	}
-
-	if namespace == "" {
-		namespace = DefaultOpsNamespace
-	}
-
-	if !opsnamespace.Valid(namespace) {
-		return OpsLayout{}, fmt.Errorf("invalid ops namespace: %s", namespace)
+	namespace, err := opsnamespace.Resolve(opts.Namespace, opts.LookupEnv)
+	if err != nil {
+		return OpsLayout{}, err
 	}
 
 	return OpsLayout{projectDir: projectDir, namespace: namespace}, nil

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -143,12 +144,16 @@ func (op telegramConversationTransaction) operationTarget(conversation *Telegram
 		return TelegramOperationTarget{}, err
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: project.Path, Namespace: op.input.Namespace})
+	if _, err := projectcore.ResolveDirectory(project.Path); err != nil {
+		return TelegramOperationTarget{}, err
+	}
+
+	namespace, err := opsnamespace.Resolve(op.input.Namespace, nil)
 	if err != nil {
 		return TelegramOperationTarget{}, err
 	}
 
-	target := TelegramOperationTarget{ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: layout.Namespace()}
+	target := TelegramOperationTarget{ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace}
 	if conversation == nil {
 		return target, nil
 	}

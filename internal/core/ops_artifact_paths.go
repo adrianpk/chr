@@ -14,7 +14,7 @@ func OpsArtifactBodyFile() string { return opsArtifactBodyFile }
 
 // DefaultOpsArtifactRoot returns the default namespace root for one artifact type.
 func DefaultOpsArtifactRoot(projectDir, artifactType string) string {
-	return filepath.Join(projectDir, OpsDirectoryName, DefaultOpsNamespace, artifactType)
+	return filepath.Join(projectDir, OpsDirectoryName, opsnamespace.Default, artifactType)
 }
 
 // IsOpsArtifactBodyPath reports whether path is an artifact.md body inside ops/.

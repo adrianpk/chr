@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -115,7 +116,7 @@ func TestTelegramConversationProjects(t *testing.T) {
 
 // TestTelegramConversationBinding keeps namespace, project and intent independent of peer selection.
 func TestTelegramConversationBinding(t *testing.T) {
-	t.Setenv(OpsUserEnv, "first")
+	t.Setenv(opsnamespace.UserEnv, "first")
 
 	f := newTelegramConversationFixture(t)
 	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "alpha"; i.Intent = "develop" })
@@ -126,7 +127,7 @@ func TestTelegramConversationBinding(t *testing.T) {
 	}
 
 	f.apply(t, TelegramConversationSelect, func(i *TelegramConversationInput) { i.Project = "beta" })
-	t.Setenv(OpsUserEnv, "second")
+	t.Setenv(opsnamespace.UserEnv, "second")
 	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Conversation = original.ID })
 
 	sessions := f.sessions(t)

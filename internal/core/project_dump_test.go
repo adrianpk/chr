@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -88,7 +89,7 @@ func checkProjectDumpNamespace(t *testing.T, project, reference string, saved Pr
 
 	service := NewProjectMetadataService(project)
 
-	t.Setenv(OpsUserEnv, "new-namespace")
+	t.Setenv(opsnamespace.UserEnv, "new-namespace")
 
 	observed, err := ObserveProjectDump(t.Context(), project)
 	if err != nil || observed.Destination != reference || observed.ReconciliationReason != "" {

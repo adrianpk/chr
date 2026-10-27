@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func telegramAuthoringPreparedFixture(t *testing.T, start string) (*telegramConversationAppFixture, string, *atomic.Int64) {
 	t.Helper()
-	t.Setenv(core.OpsUserEnv, "original")
+	t.Setenv(opsnamespace.UserEnv, "original")
 
 	f := telegramOperationAppFixture(t)
 	calls := telegramAuthoringBridgeHTTP(t, f, func(authoringModelInput) string {

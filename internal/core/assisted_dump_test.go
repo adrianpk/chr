@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -66,7 +67,7 @@ func TestAssistedDumpConcurrent(t *testing.T) {
 	root := t.TempDir()
 	reference := projectDumpTestArtifact(t, root, "legacy", "Retained", "# Original material\n")
 	options := []AssistedArtifactSynthesisOptions{assistedDumpTestOptions(t, root, "first"), assistedDumpTestOptions(t, root, "second")}
-	t.Setenv(OpsUserEnv, "other")
+	t.Setenv(opsnamespace.UserEnv, "other")
 
 	var group sync.WaitGroup
 	for _, opts := range options {

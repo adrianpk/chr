@@ -15,6 +15,7 @@ import (
 	_ "modernc.org/sqlite"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // ErrTicketNotFound identifies a package boundary error.
@@ -444,7 +445,7 @@ func timePtr(value time.Time) *time.Time {
 
 func indexedTicketNamespace(ticket IndexedTicket) string {
 	if ticket.Namespace == "" {
-		return DefaultOpsNamespace
+		return opsnamespace.Default
 	}
 
 	return ticket.Namespace

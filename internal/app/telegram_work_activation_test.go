@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -77,7 +78,7 @@ func checkTelegramWorkActivation(t *testing.T, extent string) {
 	t.Helper()
 
 	f, operations, ref := telegramWorkAdmitted(t, extent)
-	t.Setenv(core.OpsUserEnv, "elsewhere")
+	t.Setenv(opsnamespace.UserEnv, "elsewhere")
 
 	operations.workflowNamespace = "default"
 	h := newTelegramWorkHost(f.receiver)

@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"path/filepath"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // RuntimeAssets defines a package boundary interface.
@@ -42,7 +44,7 @@ func (r *runtimeAssets) Init(ctx context.Context, opts RuntimeInitOptions) (Runt
 		return RuntimeInitResult{}, err
 	}
 
-	absProjectDir, err := resolveProjectDir(opts.ProjectDir)
+	absProjectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
 		return RuntimeInitResult{}, err
 	}

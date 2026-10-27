@@ -224,7 +224,7 @@ func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]OpsLayout,
 		return nil, fmt.Errorf("workflow namespace observation bound exceeded")
 	}
 
-	names := []string{s.layout.Namespace(), DefaultOpsNamespace}
+	names := []string{s.layout.Namespace(), opsnamespace.Default}
 
 	for _, entry := range entries {
 		if entry.IsDir() && opsnamespace.Valid(entry.Name()) {

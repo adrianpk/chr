@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func TestWorkspaceGraphBuilderBuildsCaseRootedViews(t *testing.T) {
@@ -367,5 +369,5 @@ func canonicalWorkspaceGraphFixturePath(path string) string {
 	slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 	artifactID := "00000-" + opsArtifactSlugOrDefault(slug)
 
-	return filepath.Join(projectDir, OpsDirectoryName, DefaultOpsNamespace, artifactType, artifactID, OpsArtifactBodyFile())
+	return filepath.Join(projectDir, OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, OpsArtifactBodyFile())
 }

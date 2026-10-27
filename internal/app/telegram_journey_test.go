@@ -10,14 +10,14 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // TestTelegramJourney follows one conversation through actual Telegram/model
 // HTTP, clarification, canonical preparation, restart, exact admission and
 // unattended native integration. Fixture publication is not live bot evidence.
 func TestTelegramJourney(t *testing.T) {
-	t.Setenv(core.OpsUserEnv, "default")
+	t.Setenv(opsnamespace.UserEnv, "default")
 
 	f, operations, _ := telegramWorkAdmissionFixture(t, "ticket")
 	provider := telegramJourneyProvider(t, operations)

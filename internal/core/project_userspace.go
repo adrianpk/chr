@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"unicode"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // ActiveOperatorIDEnv defines a package boundary constant.
@@ -32,7 +34,7 @@ type EnsureProjectUserspaceOptions struct {
 
 // ResolveProjectUserspace executes the corresponding package operation.
 func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUserspace, error) {
-	projectDir, err := resolveProjectDir(opts.ProjectDir)
+	projectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
 		return ProjectUserspace{}, err
 	}

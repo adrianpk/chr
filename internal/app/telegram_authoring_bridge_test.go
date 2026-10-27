@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func telegramAuthoringBridgeHTTP(t *testing.T, f *telegramConversationAppFixture, generate func(authoringModelInput) string, intent func(ConversationIntentContext) ConversationIntent) *atomic.Int64 {
@@ -106,7 +107,7 @@ func telegramAuthoringBridgeNoWork(t *testing.T, f *telegramConversationAppFixtu
 // TestTelegramAuthoringBridgeJourney traverses real Telegram/model HTTP and
 // SQLite boundaries to generate, answer and refine canonical artifacts once.
 func TestTelegramAuthoringBridgeJourney(t *testing.T) {
-	t.Setenv(core.OpsUserEnv, "original")
+	t.Setenv(opsnamespace.UserEnv, "original")
 
 	f := newTelegramConversationAppFixture(t)
 	calls := telegramAuthoringBridgeHTTP(t, f, func(input authoringModelInput) string {
@@ -122,7 +123,7 @@ func TestTelegramAuthoringBridgeJourney(t *testing.T) {
 		t.Fatal("capture did not generate a dump", text)
 	}
 
-	t.Setenv(core.OpsUserEnv, "changed-after-capture")
+	t.Setenv(opsnamespace.UserEnv, "changed-after-capture")
 
 	question := f.send(t, "/quiz "+c.ID, 0)
 	if !strings.Contains(question.Text, "Which retry ceiling") {

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -51,7 +52,7 @@ type RuntimePlan struct {
 
 // PlanRuntime executes the corresponding package operation.
 func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
-	projectDir, err := resolveProjectDir(opts.ProjectDir)
+	projectDir, err := projectcore.ResolveDirectory(opts.ProjectDir)
 	if err != nil {
 		return RuntimePlan{}, err
 	}

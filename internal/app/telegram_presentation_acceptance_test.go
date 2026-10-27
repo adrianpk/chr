@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // Rare navigation and malformed requests traverse HTTP dispatch and SQLite.
@@ -94,7 +95,7 @@ func TestTelegramPresentationJourney(t *testing.T) {
 
 func telegramPresentationJourneyFixture(t *testing.T) (*telegramConversationAppFixture, *telegramWorkAutomaticProvider) {
 	t.Helper()
-	t.Setenv(core.OpsUserEnv, "default")
+	t.Setenv(opsnamespace.UserEnv, "default")
 
 	f, operations, _ := telegramWorkAdmissionFixture(t, "ticket")
 	provider := telegramJourneyProvider(t, operations)

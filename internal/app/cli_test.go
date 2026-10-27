@@ -24,6 +24,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/gate"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -1241,7 +1242,7 @@ func TestGateDevMainFailsWhenAgentEvidenceIsMissing(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(core.OpsDirectoryName, core.DefaultOpsNamespace, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.OpsDirectoryName, opsnamespace.Default, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -1303,7 +1304,7 @@ func TestGateDevMainAllowsMissingAgentEvidenceWhenConfigured(t *testing.T) {
 	baseSHA := gateCLIGitOutput(t, projectDir, "rev-parse", "HEAD")
 
 	writeGateCLIFile(t, projectDir, "README.md", "gate evidence\n")
-	writeGateCLIFile(t, projectDir, filepath.Join(core.OpsDirectoryName, core.DefaultOpsNamespace, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
+	writeGateCLIFile(t, projectDir, filepath.Join(core.OpsDirectoryName, opsnamespace.Default, "run", "00001-ticket-run", "evidence", "execution-report.md"), `# Execution Report
 
 ## Summary
 
@@ -5199,7 +5200,7 @@ func TestReportListListsProjectReports(t *testing.T) {
 
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -5207,7 +5208,7 @@ func TestReportListListsProjectReports(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00002-agent-work-loop",
 		"evidence",
@@ -5241,7 +5242,7 @@ func TestReportListFiltersReports(t *testing.T) {
 
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -5249,7 +5250,7 @@ func TestReportListFiltersReports(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n- status: succeeded\n")
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",
 		"evidence",
@@ -5288,7 +5289,7 @@ func TestReportShowPrintsReportBody(t *testing.T) {
 
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -5319,7 +5320,7 @@ func TestReportShowPrintsReportMetadata(t *testing.T) {
 
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-agent-work-loop",
 		"evidence",
@@ -5351,7 +5352,7 @@ func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
 
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00001-ticket-run",
 		"evidence",
@@ -5359,7 +5360,7 @@ func TestReportShowRejectsAmbiguousLookup(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: exec-1\n- ticket: CHR-1\n")
 	writeCLIReport(t, projectDir, filepath.Join(
 		core.OpsDirectoryName,
-		core.DefaultOpsNamespace,
+		opsnamespace.Default,
 		"run",
 		"00002-ticket-run",
 		"evidence",

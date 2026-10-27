@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
@@ -1163,7 +1164,7 @@ func canonicalServiceWorkspaceFixturePath(path string) string {
 
 	artifactID := "00000-" + opsArtifactSlugForServiceFixture(slug)
 
-	return filepath.Join(projectDir, core.OpsDirectoryName, core.DefaultOpsNamespace, artifactType, artifactID, core.OpsArtifactBodyFile())
+	return filepath.Join(projectDir, core.OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, core.OpsArtifactBodyFile())
 }
 
 func opsArtifactSlugForServiceFixture(value string) string {

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -51,7 +52,7 @@ func (r *fileAuthoringSessionRepository) authoringDumpTarget(session AuthoringSe
 	}
 
 	if target.Destination == "" {
-		allocated, err := r.newDumpMutationTarget(DefaultOpsNamespace, session.Topic)
+		allocated, err := r.newDumpMutationTarget(opsnamespace.Default, session.Topic)
 		if err != nil {
 			return target, err
 		}

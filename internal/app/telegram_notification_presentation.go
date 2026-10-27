@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"forge.adrianpk.com/chr/internal/core"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
@@ -29,7 +29,7 @@ func telegramNotificationTarget(project commandProjectContext, config notifycore
 		return notifycore.TelegramTarget{}, err
 	}
 
-	return notifycore.ResolveTelegramTarget(projectcore.Project{ID: project.ProjectID, Path: project.ProjectDir, Enabled: true}, core.DefaultOpsNamespace, config.ChatID, recordDigest(payload))
+	return notifycore.ResolveTelegramTarget(projectcore.Project{ID: project.ProjectID, Path: project.ProjectDir, Enabled: true}, opsnamespace.Default, config.ChatID, recordDigest(payload))
 }
 
 func telegramNotificationInput(record notifycore.AuditRecord, project commandProjectContext, config notifycore.TelegramConfig) (notifycore.TelegramInput, error) {

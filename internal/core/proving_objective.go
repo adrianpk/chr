@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // ProvingObjective describes a package boundary value.
@@ -85,7 +87,7 @@ type provingObjectiveSource struct {
 }
 
 func loadProvingObjectiveForProject(projectDir, objectivePath string) (provingObjectiveSource, error) {
-	projectDir, err := resolveProjectDir(projectDir)
+	projectDir, err := projectcore.ResolveDirectory(projectDir)
 	if err != nil {
 		return provingObjectiveSource{}, err
 	}

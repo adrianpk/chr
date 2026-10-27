@@ -96,7 +96,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-702 current non-test files under internal/core, their declared symbols,
+704 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -359,3 +359,14 @@ database.DataDirectory and creates no lock/configuration ownership. The broader
 UserEnvironment remains host composition and implements these narrow ports.
 Original database paths, file permissions, lock names, descriptor lifetimes,
 model slot limits and retry budgets are unchanged.
+
+
+project.ResolveDirectory is the original shared directory validator, with unchanged
+absolute resolution, filesystem checks and error text. Root workspace/layout and
+Telegram callers use that same implementation. namespace.Resolve owns the original
+explicit/OPS_USER/default choice, trimming and spelling errors; namespace.Default
+and UserEnv have one owner, with no root re-export. Filesystem layout still owns
+operational artifact paths. Both Telegram conversation allocation and target
+resolution retain directory validation immediately before namespace choice, in
+their original order after the project binding digest. No transaction boundary,
+registry root digest, namespace precedence or environment setting changes.

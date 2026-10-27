@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
@@ -20,7 +21,7 @@ func telegramNotificationTestInput(t *testing.T) notifycore.TelegramInput {
 	record := testNotificationAuditRecord(time.Now().UTC())
 	record.Channel = "telegram"
 
-	target, err := notifycore.ResolveTelegramTarget(projectcore.Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, DefaultOpsNamespace, "@example_channel", contenthash.Sum([]byte("configured sender")))
+	target, err := notifycore.ResolveTelegramTarget(projectcore.Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, opsnamespace.Default, "@example_channel", contenthash.Sum([]byte("configured sender")))
 	if err != nil {
 		t.Fatal(err)
 	}

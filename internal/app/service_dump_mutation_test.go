@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -37,7 +38,7 @@ func TestServiceDumpCapture(t *testing.T) {
 		t.Fatal(first, err)
 	}
 
-	t.Setenv(core.OpsUserEnv, "another-namespace")
+	t.Setenv(opsnamespace.UserEnv, "another-namespace")
 
 	replay, err := operations.CreateDump(request)
 	if err != nil || replay.Mutation != first.Mutation || curator.calls.Load() != 1 {
@@ -195,7 +196,7 @@ func TestServiceDumpReconciliation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Setenv(core.OpsUserEnv, "another-namespace")
+	t.Setenv(opsnamespace.UserEnv, "another-namespace")
 
 	catalog, err := operations.ListDumps()
 	if err != nil || len(catalog.Dumps) != 2 {
