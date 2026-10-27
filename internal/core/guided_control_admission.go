@@ -27,7 +27,7 @@ func validateGuidedControlProof(request workflowstate.ControlMutationRequest) er
 
 // BindGuidedControlInvocation reconciles uncertain admission without admitting
 // new work. Only an existing exact request can become the control target.
-func BindGuidedControlInvocation(ctx context.Context, root string, session *authoringcore.Session) error {
+func BindGuidedControlInvocation(ctx context.Context, root string, session *authoringcore.Session, workflow authoringcore.GuidedWorkflowObserver) error {
 	absolute, err := filepath.Abs(root)
 	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
 		return workflowstate.ErrConflict
@@ -46,7 +46,7 @@ func BindGuidedControlInvocation(ctx context.Context, root string, session *auth
 		return workflowstate.ErrConflict
 	}
 
-	lookup, err := findGuidedControlInvocation(ctx, root, *session)
+	lookup, err := workflow.FindAdmission(ctx, *session)
 	if err != nil || !lookup.Found {
 		return err
 	}

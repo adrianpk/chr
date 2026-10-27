@@ -28,7 +28,7 @@ func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore
 }
 
 func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.Session) error {
-	if err := core.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session); err != nil {
+	if err := core.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir)); err != nil {
 		return err
 	}
 

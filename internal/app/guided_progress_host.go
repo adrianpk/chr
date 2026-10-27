@@ -137,7 +137,7 @@ func (host *guidedWorkHost) activateRetained(operations service, session authori
 
 	status, err := operations.WorkflowStatus(host.ctx, run.ID, WorkflowStatusRequest{Limit: 8})
 	if err == nil && status.Status == "completed" {
-		_, err = core.ReconcileGuidedResult(host.ctx, operations.projectContext.ProjectDir, authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})
+		_, err = core.ReconcileGuidedResult(host.ctx, operations.projectContext.ProjectDir, authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
 
 		return err
 	}
@@ -191,7 +191,7 @@ func (host *guidedWorkHost) acknowledgeStop(ctx context.Context, operations serv
 
 	scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
 
-	_, err = core.ReconcileGuidedStop(ctx, operations.projectContext.ProjectDir, scope)
+	_, err = core.ReconcileGuidedStop(ctx, operations.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
 	if err != nil && !errors.Is(err, context.Canceled) {
 		slog.WarnContext(ctx, "Guided stop acknowledgement needs recovery", "code", "guided_stop_acknowledgement_failed")
 	}

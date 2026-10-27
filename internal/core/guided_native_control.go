@@ -91,7 +91,7 @@ func guidedNativeReferenceMatches(run WorkflowInvocation, session authoringcore.
 }
 
 // ReconcileGuidedStop acknowledges quiescence only from the original native owner.
-func ReconcileGuidedStop(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (session authoringcore.Session, err error) {
+func ReconcileGuidedStop(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope, workflow authoringcore.GuidedWorkflowObserver) (session authoringcore.Session, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, scope.RunID)
@@ -108,12 +108,12 @@ func ReconcileGuidedStop(ctx context.Context, root string, scope authoringcore.G
 			return nil
 		}
 
-		run, err := ReadGuidedInvocation(ctx, root, session)
+		run, err := workflow.ObserveStop(ctx, session, control.StopIntent)
 		if err != nil {
 			return err
 		}
 
-		if run.Status != workflowStopStatus(control.StopIntent) || run.StopIntent != control.StopIntent {
+		if !run.Acknowledged {
 			return nil
 		}
 

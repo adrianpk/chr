@@ -102,7 +102,7 @@ func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.Se
 		}
 	}
 
-	return core.ReconcileGuidedStop(ctx, s.projectContext.ProjectDir, scope)
+	return core.ReconcileGuidedStop(ctx, s.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir))
 }
 
 // recoverGuidedInterruptedWork resumes a quiescent host interruption under the

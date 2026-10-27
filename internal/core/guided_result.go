@@ -62,7 +62,7 @@ func guardGuidedResultMembers(work *authoringcore.GuidedWorkState, run WorkflowI
 
 // ReconcileGuidedResult is an owned lifecycle transition. Only complete native
 // receipts can finish a run; pending operations and explicit stops take priority.
-func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (session authoringcore.Session, err error) {
+func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope, workflow authoringcore.GuidedWorkflowObserver) (session authoringcore.Session, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, scope.RunID)
@@ -78,23 +78,16 @@ func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore
 			return nil
 		}
 
-		result, err := ReadGuidedResult(ctx, root, session)
+		result, err := workflow.InspectResult(ctx, session)
 		if err != nil || !result.Complete {
 			return err
 		}
 
-		reference := authoringcore.GuidedResultReference{InvocationID: result.Invocation.ID, Revision: result.Invocation.Revision}
-		for _, receipt := range result.Receipts {
-			reference.Receipts = append(reference.Receipts, receipt.Reference)
-		}
-
-		for _, closure := range result.Closures {
-			reference.Closures = append(reference.Closures, closure.Reference)
-		}
+		reference := result.Reference
 
 		session.Guided.Result = &reference
 		session.Guided.Stage, session.Guided.Status, session.Guided.Blocker = "results", "completed", ""
-		session.Status, session.FinishedAt = authoringcore.SessionStatusFinalized, &result.Invocation.UpdatedAt
+		session.Status, session.FinishedAt = authoringcore.SessionStatusFinalized, &result.UpdatedAt
 
 		return RetainGuidedUseCaseProgress(ctx, root, &session)
 	})

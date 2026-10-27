@@ -210,7 +210,7 @@ func assertGuidedStopAccepted(t *testing.T, operations service, stopping authori
 func acknowledgeGuidedTestStop(t *testing.T, operations service, claim *core.WorkflowClaim, scope authoringcore.GuidedUseCaseScope) authoringcore.Session {
 	t.Helper()
 
-	unsettled, err := core.ReconcileGuidedStop(t.Context(), operations.projectContext.ProjectDir, scope)
+	unsettled, err := core.ReconcileGuidedStop(t.Context(), operations.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
 	if err != nil || unsettled.Guided.Status != "blocked" {
 		t.Fatal("running owner was falsely acknowledged", err)
 	}
