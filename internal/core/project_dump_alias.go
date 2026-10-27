@@ -24,7 +24,8 @@ func ResolveProjectDumpReference(ctx context.Context, projectDir, reference stri
 			return ProjectDumpArtifact{}, err
 		}
 
-		artifact, _, err := r.readProjectDumpArtifact(ref)
+		dumpRead, err := r.readProjectDumpArtifact(ref)
+		artifact := dumpRead.Artifact
 
 		return artifact, err
 	})

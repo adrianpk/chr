@@ -48,7 +48,8 @@ func ReadDumpDocument(ctx context.Context, projectDir, reference string) (DumpDo
 	}
 
 	r := &fileAuthoringSessionRepository{projectDir: root}
-	body, _, err := r.projectDumpImages(artifact)
+	fileImages, err := r.projectDumpImages(artifact)
+	body := fileImages.Body
 
 	observed := DumpDocumentObservation{Artifact: artifact, Revision: dumpDocumentRevision(root, artifact), Content: string(body)}
 	if err != nil {
@@ -96,7 +97,9 @@ func (r *fileAuthoringSessionRepository) mutateDump(ctx context.Context, request
 	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		var found bool
 
-		result, found, err = r.projectDumpReceipt(request.OperationID, digest)
+		receiptLookup, receiptErr := r.projectDumpReceipt(request.OperationID, digest)
+
+		result, found, err = receiptLookup.Result, receiptLookup.Found, receiptErr
 		if err != nil || found {
 			return err
 		}

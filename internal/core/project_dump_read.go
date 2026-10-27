@@ -102,7 +102,9 @@ func (scan *projectDumpInventory) readNamespace(ctx context.Context, namespace s
 
 		ref := filepath.ToSlash(filepath.Join(root, entry.Name(), OpsArtifactBodyFile()))
 
-		artifact, size, err := scan.repository.readProjectDumpArtifact(ref)
+		dumpRead, err := scan.repository.readProjectDumpArtifact(ref)
+		artifact, size := dumpRead.Artifact, dumpRead.Bytes
+
 		if err != nil {
 			return fmt.Errorf("%w: %s: %w", ErrProjectDumpReconciliation, ref, err)
 		}

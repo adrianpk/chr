@@ -205,7 +205,9 @@ func CaseMetadataPath(projectDir, slug string) string {
 
 // ParseCaseMetadata parses the corresponding package data.
 func ParseCaseMetadata(content string) (CaseMetadata, error) {
-	frontmatter, body, err := splitMarkdownFrontmatter(content)
+	markdown, err := splitMarkdownFrontmatter(content)
+	frontmatter, body := markdown.Frontmatter, markdown.Body
+
 	if err != nil {
 		return CaseMetadata{}, fmt.Errorf("parse case metadata: %w", err)
 	}

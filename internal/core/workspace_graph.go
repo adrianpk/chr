@@ -297,7 +297,9 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 
 	body := string(content)
 	if strings.HasPrefix(string(content), "---\n") {
-		frontmatter, nextBody, splitErr := splitMarkdownFrontmatter(string(content))
+		markdown, splitErr := splitMarkdownFrontmatter(string(content))
+		frontmatter, nextBody := markdown.Frontmatter, markdown.Body
+
 		if splitErr != nil {
 			return WorkspaceNode{}, splitErr
 		}

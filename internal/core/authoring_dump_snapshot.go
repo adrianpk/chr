@@ -65,7 +65,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpImage(snapshot *Author
 		return ProjectDumpArtifact{}, err
 	}
 
-	artifact, err := projectDumpArtifact(reference, body, encoded, fields, metadata)
+	artifact, err := projectDumpArtifact(reference, projectDumpFileImages{Body: body, Metadata: encoded}, fields, metadata)
 	if err != nil {
 		return artifact, err
 	}

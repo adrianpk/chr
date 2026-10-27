@@ -657,36 +657,6 @@
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/project_dump_artifact.go::fileAuthoringSessionRepository.readProjectDumpArtifact",
-      "signature": "func(reference string) (ProjectDumpArtifact, int, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/project_dump_composition.go::fileAuthoringSessionRepository.projectDumpImages",
-      "signature": "func(source ProjectDumpArtifact) ([]byte, []byte, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/project_dump_composition.go::fileAuthoringSessionRepository.projectDumpReconciliationChanges",
-      "signature": "func(observed ProjectDumpObservation, preview ProjectDumpReconciliationPreview, operationID string) ([]workflowFileChange, ProjectDumpMutationResult, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/project_dump_receipt.go::fileAuthoringSessionRepository.projectDumpReceipt",
-      "signature": "func(operationID, digest string) (ProjectDumpMutationResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/project_metadata.go::splitMarkdownFrontmatter",
-      "signature": "func(content string) (string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/project_metadata_fields.go::projectDocumentField",
-      "signature": "func(line string) (string, string, bool)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/quiz_action_receipt.go::fileAuthoringSessionRepository.quizReceipt",
       "signature": "func(operationID, digest string) (QuizActionResult, bool, error)",
       "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

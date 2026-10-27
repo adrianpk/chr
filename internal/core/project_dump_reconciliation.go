@@ -109,7 +109,9 @@ func (r *fileAuthoringSessionRepository) reconcileProjectDump(ctx context.Contex
 	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		var found bool
 
-		result, found, err = r.projectDumpReceipt(request.OperationID, digest)
+		receiptLookup, receiptErr := r.projectDumpReceipt(request.OperationID, digest)
+
+		result, found, err = receiptLookup.Result, receiptLookup.Found, receiptErr
 		if err != nil || found {
 			return err
 		}
@@ -161,7 +163,9 @@ func (r *fileAuthoringSessionRepository) applyProjectDumpReconciliation(ctx cont
 		return ProjectDumpMutationResult{}, workflowstate.ErrConflict
 	}
 
-	changes, result, err := r.projectDumpReconciliationChanges(observed, preview, request.OperationID)
+	dumpChanges, err := r.projectDumpReconciliationChanges(observed, preview, request.OperationID)
+
+	changes, result := dumpChanges.Changes, dumpChanges.Result
 	if err != nil {
 		return result, err
 	}

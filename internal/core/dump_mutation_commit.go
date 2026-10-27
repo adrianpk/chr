@@ -88,7 +88,9 @@ func (r *fileAuthoringSessionRepository) dumpMutationBefore(target dumpMutationT
 		return nil, nil, nil, nil
 	}
 
-	body, metadata, err := r.projectDumpImages(target.Artifact)
+	fileImages, err := r.projectDumpImages(target.Artifact)
+	body, metadata := fileImages.Body, fileImages.Metadata
+
 	if err != nil {
 		return nil, nil, nil, err
 	}

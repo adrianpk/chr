@@ -40,20 +40,20 @@ func projectDumpReceiptChange(digest string, result ProjectDumpMutationResult) (
 	return workflowFileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
 }
 
-func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest string) (ProjectDumpMutationResult, bool, error) {
+func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest string) (projectDumpReceiptLookup, error) {
 	var receipt projectDumpMutationReceipt
 
 	encoded, err := r.readAuthoringDocument(filepath.ToSlash(authoringReceiptRef(operationID)))
 	if errors.Is(err, os.ErrNotExist) {
-		return receipt.Result, false, nil
+		return projectDumpReceiptLookup{Result: receipt.Result, Found: false}, nil
 	}
 
 	if err != nil {
-		return receipt.Result, false, err
+		return projectDumpReceiptLookup{Result: receipt.Result, Found: false}, err
 	}
 
 	if err := decodeAuthoringState(encoded, &receipt); err != nil {
-		return receipt.Result, false, err
+		return projectDumpReceiptLookup{Result: receipt.Result, Found: false}, err
 	}
 
 	checksum := receipt.Checksum
@@ -61,14 +61,14 @@ func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest 
 
 	encoded, err = json.Marshal(receipt)
 	if err != nil {
-		return receipt.Result, false, err
+		return projectDumpReceiptLookup{Result: receipt.Result, Found: false}, err
 	}
 
 	if receipt.Schema != "chr-project-dump-receipt/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || contenthash.Sum(encoded) != checksum {
-		return receipt.Result, false, workflowstate.ErrConflict
+		return projectDumpReceiptLookup{Result: receipt.Result, Found: false}, workflowstate.ErrConflict
 	}
 
-	return receipt.Result, true, nil
+	return projectDumpReceiptLookup{Result: receipt.Result, Found: true}, nil
 }
 
 func (r *fileAuthoringSessionRepository) projectDumpOperationAvailable(operationID string) error {

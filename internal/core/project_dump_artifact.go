@@ -11,34 +11,34 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
-func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference string) (ProjectDumpArtifact, int, error) {
+func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference string) (projectDumpRead, error) {
 	if err := ValidateProjectDumpReference(reference); err != nil {
-		return ProjectDumpArtifact{}, 0, err
+		return projectDumpRead{Artifact: ProjectDumpArtifact{}, Bytes: 0}, err
 	}
 
 	body, err := r.readAuthoringDocument(reference)
 	if err != nil {
-		return ProjectDumpArtifact{}, 0, err
+		return projectDumpRead{Artifact: ProjectDumpArtifact{}, Bytes: 0}, err
 	}
 
 	encoded, err := r.readAuthoringDocument(filepath.Join(filepath.Dir(reference), "metadata.json"))
 	if err != nil {
-		return ProjectDumpArtifact{}, 0, err
+		return projectDumpRead{Artifact: ProjectDumpArtifact{}, Bytes: 0}, err
 	}
 
 	metadata, err := decodeProjectDumpMetadata(reference, encoded)
 	if err != nil {
-		return ProjectDumpArtifact{}, 0, err
+		return projectDumpRead{Artifact: ProjectDumpArtifact{}, Bytes: 0}, err
 	}
 
 	fields, err := projectDumpBodyFields(body)
 	if err != nil {
-		return ProjectDumpArtifact{}, 0, err
+		return projectDumpRead{Artifact: ProjectDumpArtifact{}, Bytes: 0}, err
 	}
 
-	artifact, err := projectDumpArtifact(reference, body, encoded, fields, metadata)
+	artifact, err := projectDumpArtifact(reference, projectDumpFileImages{Body: body, Metadata: encoded}, fields, metadata)
 
-	return artifact, len(body) + len(encoded), err
+	return projectDumpRead{Artifact: artifact, Bytes: len(body) + len(encoded)}, err
 }
 
 func (r *fileAuthoringSessionRepository) readAuthoringDocument(relative string) ([]byte, error) {
@@ -92,14 +92,14 @@ func projectDumpBodyFields(body []byte) (map[string]string, error) {
 	return projectDocumentFields(front)
 }
 
-func projectDumpArtifact(reference string, body, encoded []byte, fields, metadata map[string]string) (ProjectDumpArtifact, error) {
+func projectDumpArtifact(reference string, images projectDumpFileImages, fields, metadata map[string]string) (ProjectDumpArtifact, error) {
 	scope, err := projectDumpScope(fields["case"], fields["use_case"], fields["case_slug"], metadata["case"], metadata["use_case"], metadata["case_slug"])
 	if err != nil {
 		return ProjectDumpArtifact{}, err
 	}
 
 	artifact := ProjectDumpArtifact{
-		Reference: reference, Title: metadata["title"], SourceHash: contenthash.Sum(body), MetadataHash: contenthash.Sum(encoded), CaseSlug: scope,
+		Reference: reference, Title: metadata["title"], SourceHash: contenthash.Sum(images.Body), MetadataHash: contenthash.Sum(images.Metadata), CaseSlug: scope,
 		Raw: fields["type"] == "dump_raw" || fields["status"] == "raw" && fields["curated"] != "", CuratedReference: fields["curated"],
 		CanonicalReference: metadata["canonical_ref"],
 		Status:             fields["status"], DocumentType: fields["type"],

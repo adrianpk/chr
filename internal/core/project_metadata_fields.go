@@ -38,7 +38,9 @@ func renderProjectMetadataFields(metadata ProjectMetadata) string {
 
 func replaceProjectMetadataField(lines []string, key, value string) []string {
 	for i, line := range lines {
-		name, _, found := projectDocumentField(line)
+		field := projectDocumentField(line)
+
+		name, found := field.Name, field.Found
 		if !found || name != key {
 			continue
 		}
@@ -58,7 +60,9 @@ func projectDocumentFields(frontmatter string) (map[string]string, error) {
 	fields := map[string]string{}
 
 	for _, line := range strings.Split(frontmatter, "\n") {
-		name, value, found := projectDocumentField(line)
+		field := projectDocumentField(line)
+
+		name, value, found := field.Name, field.Value, field.Found
 		if !found {
 			continue
 		}
@@ -73,12 +77,12 @@ func projectDocumentFields(frontmatter string) (map[string]string, error) {
 	return fields, nil
 }
 
-func projectDocumentField(line string) (string, string, bool) {
+func projectDocumentField(line string) documentField {
 	if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
-		return "", "", false
+		return documentField{Name: "", Value: "", Found: false}
 	}
 
 	name, value, found := strings.Cut(line, ":")
 
-	return strings.TrimSpace(name), strings.TrimSpace(value), found
+	return documentField{Name: strings.TrimSpace(name), Value: strings.TrimSpace(value), Found: found}
 }

@@ -159,7 +159,9 @@ func ProjectMetadataPath(projectDir string) string {
 
 // ParseProjectMetadata parses the corresponding package data.
 func ParseProjectMetadata(content string) (ProjectMetadata, error) {
-	frontmatter, body, err := splitMarkdownFrontmatter(content)
+	markdown, err := splitMarkdownFrontmatter(content)
+	frontmatter, body := markdown.Frontmatter, markdown.Body
+
 	if err != nil {
 		return ProjectMetadata{}, err
 	}
@@ -271,22 +273,22 @@ func firstMarkdownParagraph(content string, limit int) string {
 	return description
 }
 
-func splitMarkdownFrontmatter(content string) (string, string, error) {
+func splitMarkdownFrontmatter(content string) (metadataMarkdown, error) {
 	if !strings.HasPrefix(content, "---\n") {
-		return "", "", fmt.Errorf("project metadata frontmatter opening delimiter is required")
+		return metadataMarkdown{Frontmatter: "", Body: ""}, fmt.Errorf("project metadata frontmatter opening delimiter is required")
 	}
 
 	remaining := strings.TrimPrefix(content, "---\n")
 
 	end := strings.Index(remaining, "\n---")
 	if end < 0 {
-		return "", "", fmt.Errorf("project metadata frontmatter closing delimiter is required")
+		return metadataMarkdown{Frontmatter: "", Body: ""}, fmt.Errorf("project metadata frontmatter closing delimiter is required")
 	}
 
 	body := strings.TrimPrefix(remaining[end:], "\n---")
 	body = strings.TrimPrefix(body, "\n")
 
-	return remaining[:end], body, nil
+	return metadataMarkdown{Frontmatter: remaining[:end], Body: body}, nil
 }
 
 func parseSimpleYAMLFields(content string) map[string]string {
