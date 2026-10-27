@@ -414,7 +414,7 @@ func assistedSessionFromCommand(cmd *cli.Command, projectContext commandProjectC
 		Description: strings.TrimSpace(cmd.String("description")),
 	}
 
-	err := authoringcore.ValidateAuthoringSession(session)
+	err := authoringcore.ValidateSession(session)
 	if err != nil {
 		return authoringcore.Session{}, err
 	}

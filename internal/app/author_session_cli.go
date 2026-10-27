@@ -185,7 +185,7 @@ func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProject
 		Description: strings.TrimSpace(cmd.String("description")),
 	}
 
-	err := authoringcore.ValidateAuthoringSession(session)
+	err := authoringcore.ValidateSession(session)
 	if err != nil {
 		return authoringcore.Session{}, err
 	}

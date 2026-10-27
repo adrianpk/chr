@@ -60,7 +60,7 @@ func LoadAssistedAuthoringContextPackage(
 		return AssistedAuthoringContextPackage{}, err
 	}
 
-	err = authoringcore.ValidateAuthoringSession(opts.Session)
+	err = authoringcore.ValidateSession(opts.Session)
 	if err != nil {
 		return AssistedAuthoringContextPackage{}, err
 	}

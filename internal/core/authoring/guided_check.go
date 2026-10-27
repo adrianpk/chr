@@ -7,8 +7,8 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
-// ValidateGuidedUseCase checks the existing complete guided session contract.
-func ValidateGuidedUseCase(session Session) error {
+// ValidateGuided checks the existing complete guided session contract.
+func ValidateGuided(session Session) error {
 	state := session.Guided
 	if state == nil {
 		return nil

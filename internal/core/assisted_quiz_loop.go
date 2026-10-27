@@ -160,7 +160,7 @@ func validateAssistedQuizLoopOptions(opts AssistedQuizLoopOptions) error {
 		return err
 	}
 
-	err = authoringcore.ValidateAuthoringSession(opts.Session)
+	err = authoringcore.ValidateSession(opts.Session)
 	if err != nil {
 		return err
 	}

@@ -108,7 +108,7 @@ func validateQuizToDraftPromotionOptions(opts QuizToDraftPromotionOptions) error
 		return fmt.Errorf("quiz to draft project dir is required")
 	}
 
-	err := authoringcore.ValidateAuthoringSession(opts.Session)
+	err := authoringcore.ValidateSession(opts.Session)
 	if err != nil {
 		return err
 	}

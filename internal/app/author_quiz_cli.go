@@ -133,7 +133,7 @@ func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectConte
 		UpdatedAt: now,
 	}
 
-	err := authoringcore.ValidateAuthoringSession(session)
+	err := authoringcore.ValidateSession(session)
 	if err != nil {
 		return authoringcore.Session{}, err
 	}

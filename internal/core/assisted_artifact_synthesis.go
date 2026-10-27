@@ -127,7 +127,7 @@ func RenderAssistedSynthesizedArtifact(
 }
 
 func validateAssistedArtifactSynthesisOptions(opts AssistedArtifactSynthesisOptions) error {
-	err := authoringcore.ValidateAuthoringSession(opts.Session)
+	err := authoringcore.ValidateSession(opts.Session)
 	if err != nil {
 		return err
 	}
@@ -140,7 +140,7 @@ func validateAssistedArtifactSynthesisOptions(opts AssistedArtifactSynthesisOpti
 		return fmt.Errorf("assisted artifact synthesis summary session id does not match session")
 	}
 
-	if err := authoringcore.ValidateAuthoringArtifactRef(opts.SourceRef); err != nil {
+	if err := authoringcore.ValidateArtifactRef(opts.SourceRef); err != nil {
 		return err
 	}
 

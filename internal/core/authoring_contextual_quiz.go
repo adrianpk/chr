@@ -473,7 +473,7 @@ func validateContextualQuizGenerationOptions(opts ContextualQuizGenerationOption
 		return fmt.Errorf("contextual quiz project dir is required")
 	}
 
-	err := authoringcore.ValidateAuthoringSession(opts.Session)
+	err := authoringcore.ValidateSession(opts.Session)
 	if err != nil {
 		return err
 	}

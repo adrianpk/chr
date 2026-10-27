@@ -60,7 +60,7 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 }
 
 func telegramGuidedAssociation(session authoringcore.Session) (telegramcore.GuidedAssociation, error) {
-	if session.Guided == nil || authoringcore.ValidateGuidedUseCase(session) != nil {
+	if session.Guided == nil || authoringcore.ValidateGuided(session) != nil {
 		return telegramcore.GuidedAssociation{}, workflowstate.ErrConflict
 	}
 
