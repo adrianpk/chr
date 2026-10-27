@@ -114,7 +114,11 @@ func TestWorkflowReviewRestriction(t *testing.T) {
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "restricted", ReviewRestriction: workflowstate.ReviewHuman, Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey:        "restricted",
+		ReviewRestriction: workflowstate.ReviewHuman,
+		Selection:         workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}
 	run := workflowTestStart(t, store, request)
 	workflowReviewConfig(t, store, workflowstate.ReviewTrustedAutoMerge)
 

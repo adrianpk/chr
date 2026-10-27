@@ -25,7 +25,11 @@ func (s service) admitBoundWorkExtent(ctx context.Context, selection workflowsta
 
 	// Retained requests must reach the owner before re-reading mutable records,
 	// targets or policy. The owner checks every guard for a new admission.
-	request := core.WorkflowStartRequest{RequestKey: bindings[0].RequestKey, Selection: selection, Admission: &workflowstate.AdmissionGuard{SnapshotHash: selection.SnapshotHash, Selected: selected, Policy: bindings[0].Policy, ExecutionPolicy: bindings[0].ExecutionPolicy, ReadyTicket: bindings[0].ReadyTicket}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: bindings[0].RequestKey,
+		Selection:  selection,
+		Admission:  &workflowstate.AdmissionGuard{SnapshotHash: selection.SnapshotHash, Selected: selected, Policy: bindings[0].Policy, ExecutionPolicy: bindings[0].ExecutionPolicy, ReadyTicket: bindings[0].ReadyTicket},
+	}}
 
 	store, err := s.workflowStore()
 	if err != nil {

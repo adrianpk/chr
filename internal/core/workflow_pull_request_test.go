@@ -157,7 +157,10 @@ func workflowPRPlanFixture(t *testing.T, extent string, policy workflowstate.Exe
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "slice-pr", Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "slice-pr",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}
 	request.Policy = policy
 	run := workflowTestStart(t, store, request)
 

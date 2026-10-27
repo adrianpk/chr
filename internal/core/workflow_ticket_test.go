@@ -38,7 +38,10 @@ func workflowTicketFixture(t *testing.T, extent string, gate workflowstate.Valid
 		selector.Identity = record.Task.Key
 	}
 
-	request := WorkflowStartRequest{RequestKey: "independent", Selection: workflowstate.PreviewRequest{Selector: selector, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "independent",
+		Selection:  workflowstate.PreviewRequest{Selector: selector, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}
 
 	return store, record, request
 }

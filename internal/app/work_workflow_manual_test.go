@@ -26,7 +26,10 @@ printf '{"input_hash":"%s","branch":"%s","commit":"%s","tree":"%s"}\n' "${input%
 func workflowCLIManualStart(t *testing.T, operations service, hierarchy core.WorkflowMaterializationResult) string {
 	t.Helper()
 
-	request := core.WorkflowStartRequest{RequestKey: "cli-manual", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: serviceWorkflowDependencyGit(t, operations.projectContext.ProjectDir, "rev-parse", "HEAD")}}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "cli-manual",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: serviceWorkflowDependencyGit(t, operations.projectContext.ProjectDir, "rev-parse", "HEAD")}},
+	}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

@@ -9,7 +9,7 @@ native owners and transport consumers. ValidRequestKey preserves workflow reques
 identity spelling. MutationReceiptPath derives the existing content-addressed
 receipt reference; the workflow store still owns containment, IO, locks,
 transactions and receipt verification. These pure values depend only on
-core/contenthash, ops/metadata and the standard library. Root callers use this owner directly.
+core/contenthash, core/harness, ops/metadata and the standard library. Root callers use this owner directly.
 
 FileChange owns the existing path, before hash and replacement bytes shared by
 authoring and workflow journals. It keeps the original JSON keys and field order;
@@ -33,3 +33,11 @@ enum spellings and zero/empty representation. Native owners still normalize and
 validate requests, filter/order indexed tickets, observe policy and hold locks.
 The shared values contain no host resolver, executable command or configuration
 snapshot. Configuration defaults retain their original explicit enum values.
+
+StartInput is the unchanged serializable native request retained by guided work.
+It references the existing core/harness binding value; that owner cannot import
+workflow state. The native caller embeds StartInput and supplies executable argv,
+selection guard and resolver callback separately. Guided replay retains no host
+callback, command or configuration snapshot, and native admission still owns all
+normalization, authority, current-state checks, receipt identity and dispatch.
+The frozen guided/session/start/invocation fixtures retain the original bytes.

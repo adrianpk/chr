@@ -28,7 +28,11 @@ func workflowContinuationFixture(t *testing.T) (*WorkflowStore, WorkflowStartReq
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "bounded-call", Policy: workflowstate.ExecutionPolicy{CheckpointStepLimit: 2}, Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "bounded-call",
+		Policy:     workflowstate.ExecutionPolicy{CheckpointStepLimit: 2},
+		Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}
 
 	return store, request, workflowTestStart(t, store, request).Invocation
 }

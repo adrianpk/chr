@@ -12,7 +12,11 @@ import (
 // retains the frozen policy while rejecting a stale second operator request.
 func TestServiceWorkflowGrant(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
-	request := core.WorkflowStartRequest{RequestKey: "budget-grant", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}, Policy: workflowstate.ExecutionPolicy{AgentTokenBudget: 100}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "budget-grant",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
+		Policy:     workflowstate.ExecutionPolicy{AgentTokenBudget: 100},
+	}}
 
 	started, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

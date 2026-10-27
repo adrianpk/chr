@@ -31,7 +31,10 @@ func TestPiWorkerContainer(t *testing.T) {
 	configurePiWorkerFixture(t, operations, bridge, image, endpoint.URL)
 	assertPiBridgeGenerationRejection(t, operations)
 
-	request := core.WorkflowStartRequest{RequestKey: "pi-worker", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "pi-worker",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
+	}}
 
 	restarted, started := recoverPiWorkerFixture(t, operations, request)
 

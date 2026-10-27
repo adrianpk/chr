@@ -127,7 +127,10 @@ func clonePiIsolationTicket(t *testing.T, operations service, original core.Work
 func startPiIsolationInvocation(t *testing.T, operations service, key, target string) core.WorkflowInvocation {
 	t.Helper()
 
-	request := core.WorkflowStartRequest{RequestKey: key, Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: key,
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
+	}}
 
 	started, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

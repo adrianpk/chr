@@ -93,7 +93,11 @@ func TestWorkflowAmendmentAdmission(t *testing.T) {
 			}
 
 			target, _ := workflowSelectionCommit(t, store)
-			request := WorkflowStartRequest{RequestKey: "membership", Policy: workflowstate.ExecutionPolicy{IncludeLaterTickets: include}, Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+			request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+				RequestKey: "membership",
+				Policy:     workflowstate.ExecutionPolicy{IncludeLaterTickets: include},
+				Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
+			}}
 			run := workflowTestStart(t, store, request)
 			amend := workflowApprovedAmendment(t, store, hierarchy.Set)
 			workflowAppendPlanTask(&amend.Plan)

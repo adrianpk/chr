@@ -78,8 +78,12 @@ func guidedAdmissionProofFixture(t *testing.T) (AuthoringSession, WorkflowStartR
 		t.Fatal(err)
 	}
 
-	request := WorkflowStartRequest{RequestKey: "admission", Selection: selection, Admission: &workflowstate.AdmissionGuard{Guided: &proof}}
-	session := AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Revision: 1, Guided: &GuidedUseCaseState{SchemaVersion: 1, Actor: "operator", ProgressionIntent: true, Stage: "preparation", Work: &GuidedWorkState{Materialization: &GuidedMaterializationReference{ID: "materialized"}, Admission: &request}, PendingOperation: &GuidedUseCaseOperation{Action: "admit", Digest: "operation"}, Checkpoints: []GuidedStageCheckpoint{checkpoint}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "admission",
+		Selection:  selection,
+		Admission:  &workflowstate.AdmissionGuard{Guided: &proof},
+	}}
+	session := AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Revision: 1, Guided: &GuidedUseCaseState{SchemaVersion: 1, Actor: "operator", ProgressionIntent: true, Stage: "preparation", Work: &GuidedWorkState{Materialization: &GuidedMaterializationReference{ID: "materialized"}, Admission: &request.StartInput}, PendingOperation: &GuidedUseCaseOperation{Action: "admit", Digest: "operation"}, Checkpoints: []GuidedStageCheckpoint{checkpoint}}}
 
 	return session, request
 }

@@ -25,7 +25,10 @@ func workflowSliceFixture(t *testing.T, gate workflowstate.Validation) (*Workflo
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "slice-1", Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "slice-1",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}
 
 	return store, hierarchy, request
 }

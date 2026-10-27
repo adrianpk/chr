@@ -45,7 +45,11 @@ func TestWorkflowAssuranceOrdered(t *testing.T) {
 
 	target, _ := workflowSelectionCommit(t, store)
 	ports, provider := workflowAssurancePorts(t, store, target)
-	request := WorkflowStartRequest{RequestKey: "composed-ordered", Policy: workflowstate.ExecutionPolicy{CheckpointStepLimit: 1}, Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "composed-ordered",
+		Policy:     workflowstate.ExecutionPolicy{CheckpointStepLimit: 1},
+		Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice_set"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
+	}}
 	run := workflowTestStart(t, store, request).Invocation
 	completed := workflowAssuranceRun(t, store, run.ID, ports)
 	checkWorkflowAssuranceDelivery(t, store, completed, provider, []string{"PRJ-1", "PRJ-2", "PRJ-3", "PRJ-4", "PRJ-5", "PRJ-6"}, 2)

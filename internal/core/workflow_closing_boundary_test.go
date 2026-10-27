@@ -76,7 +76,10 @@ func TestWorkflowClosingUseCase(t *testing.T) {
 		sets = append(sets, set)
 	}
 
-	start := WorkflowStartRequest{RequestKey: "empty-case", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "use_case", Identity: "empty-case"}, Target: workflowstate.PreviewTarget{Repository: fixture.provider.pr.Repository, Commit: fixture.target}}}
+	start := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "empty-case",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "use_case", Identity: "empty-case"}, Target: workflowstate.PreviewTarget{Repository: fixture.provider.pr.Repository, Commit: fixture.target}},
+	}}
 	run := workflowTestStart(t, fixture.store, start)
 	ports := WorkflowContinuationPorts{Publication: WorkflowPublicationPorts{Provider: workflowFrontierPorts(fixture).Provider, Observer: fixture.git}, Target: fixture.git}
 

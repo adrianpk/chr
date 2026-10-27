@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-// Production syntax checks include aliases, generated files, build variants and
-// descendants, while preserving external dependencies and test-only fixtures.
-func TestLeafDependencies(t *testing.T) {
-	tests := []struct {
-		name, path, source string
-		blocked            bool
-	}{
+type leafDependencyCase struct {
+	name, path, source string
+	blocked            bool
+}
+
+func leafDependencyCases() []leafDependencyCase {
+	return []leafDependencyCase{
 		{"acceptance coordinator", "internal/core/authoring/acceptance/feature.go", "package acceptance\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"acceptance payload", "internal/core/authoring/acceptance/feature.go", "package acceptance\nimport _ \"" + coreImportPath + "authoring/generation\"\n", false},
 		{"metadata coordinator", "internal/core/ops/metadata/scalar.go", "package metadata\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
@@ -33,6 +33,8 @@ func TestLeafDependencies(t *testing.T) {
 		{"metadata state cycle", "internal/core/ops/metadata/markdown.go", "package metadata\nimport _ \"" + coreImportPath + "workflow/state\"\n", true},
 		{"harness identity capability", "internal/core/harness/binding.go", "package harness\nimport _ \"" + moduleImportPath + "/internal/harness\"\n", false},
 		{"harness identity coordinator", "internal/core/harness/binding.go", "package harness\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"retained harness binding", "internal/core/workflow/state/admission.go", "package state\nimport _ \"" + coreImportPath + "harness\"\n", false},
+		{"harness state cycle", "internal/core/harness/binding.go", "package harness\nimport _ \"" + coreImportPath + "workflow/state\"\n", true},
 		{"state coordinator", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"shared values", "internal/core/notify/store.go", "package notify\nimport db \"" + coreImportPath + "database\"\n", false},
 		{"shared model", "internal/core/model/value.go", "package value\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
@@ -53,7 +55,12 @@ func TestLeafDependencies(t *testing.T) {
 		{"assembly", "internal/app/app.go", "package app\nimport _ \"" + moduleImportPath + "/internal/core\"\n", false},
 		{"similar sibling", "internal/core/notifyx/store.go", "package notifyx\nimport _ \"" + moduleImportPath + "/internal/app\"\n", false},
 	}
-	for _, test := range tests {
+}
+
+// Production syntax checks include aliases, generated files, build variants and
+// descendants, while preserving external dependencies and test-only fixtures.
+func TestLeafDependencies(t *testing.T) {
+	for _, test := range leafDependencyCases() {
 		t.Run(test.name, func(t *testing.T) {
 			scan := scanFixture(t, map[string]string{test.path: test.source})
 

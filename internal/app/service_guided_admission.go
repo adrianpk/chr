@@ -88,7 +88,12 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *core.Autho
 	policy.IncludeLaterTickets = false
 	includeLater := false
 	proof := &workflowstate.GuidedAdmission{RunID: session.ID, Actor: session.Guided.Actor, Policy: core.GuidedWorkAdmissionPolicy, OperationDigest: session.Guided.PendingOperation.Digest, CheckpointDigest: digest, MaterializationID: work.Materialization.ID}
-	work.Admission = &core.WorkflowStartRequest{RequestKey: "guided-work-" + session.Guided.PendingOperation.Digest, Selection: preview.Request, IncludeLaterTickets: &includeLater, Admission: &workflowstate.AdmissionGuard{Guided: proof, SnapshotHash: preview.Request.SnapshotHash, Policy: preview.View.Policy, ExecutionPolicy: policy}}
+	work.Admission = &workflowstate.StartInput{
+		RequestKey:          "guided-work-" + session.Guided.PendingOperation.Digest,
+		Selection:           preview.Request,
+		IncludeLaterTickets: &includeLater,
+		Admission:           &workflowstate.AdmissionGuard{Guided: proof, SnapshotHash: preview.Request.SnapshotHash, Policy: preview.View.Policy, ExecutionPolicy: policy},
+	}
 
 	if err := core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session); err != nil {
 		return err
@@ -103,8 +108,7 @@ func (s service) retainGuidedInvocation(ctx context.Context, session *core.Autho
 		return err
 	}
 
-	request := *session.Guided.Work.Admission
-	request.ResolveHarness = s.prepareGuidedWorkflowHarness
+	request := core.WorkflowStartRequest{StartInput: *session.Guided.Work.Admission, ResolveHarness: s.prepareGuidedWorkflowHarness}
 
 	started, err := store.StartWorkflowGuarded(ctx, request, s.boundAdmissionCheck(request.Selection, func(ctx context.Context) error {
 		return s.checkGuidedWorkPrerequisites(ctx, request.Selection)

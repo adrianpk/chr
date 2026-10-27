@@ -18,7 +18,10 @@ func TestWorkflowLooseMarkdown(t *testing.T) {
 	store := workflowTestStore(t)
 	record := workflowLooseMarkdown(t, store)
 	commit, _ := workflowSelectionCommit(t, store)
-	run := workflowTestStart(t, store, WorkflowStartRequest{RequestKey: "native-queue", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}).Invocation
+	run := workflowTestStart(t, store, WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "native-queue",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}).Invocation
 
 	var front string
 	if err := json.Unmarshal(record.Metadata["frontmatter"], &front); err != nil {

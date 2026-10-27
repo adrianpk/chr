@@ -60,7 +60,11 @@ func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection wor
 	}
 
 	selection.Target = target
-	request := core.WorkflowStartRequest{RequestKey: "work-entry-" + strconv.FormatInt(time.Now().UnixNano(), 10), Selection: selection, ReviewRestriction: restriction}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey:        "work-entry-" + strconv.FormatInt(time.Now().UnixNano(), 10),
+		Selection:         selection,
+		ReviewRestriction: restriction,
+	}}
 
 	if len(selected) == 1 {
 		request.Selected = selected[0]

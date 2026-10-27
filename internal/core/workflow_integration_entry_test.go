@@ -252,7 +252,10 @@ func nativeEntryNextNamespace(t *testing.T, store *WorkflowStore) (*WorkflowStor
 	}
 
 	commit, _ := workflowSelectionCommit(t, peer)
-	run := workflowTestStart(t, peer, WorkflowStartRequest{RequestKey: "other-unit", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: record.Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}).Invocation
+	run := workflowTestStart(t, peer, WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "other-unit",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: record.Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}).Invocation
 
 	return peer, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}
 }

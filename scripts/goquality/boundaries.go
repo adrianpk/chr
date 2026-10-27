@@ -55,7 +55,7 @@ var leafImports = map[string]map[string]bool{
 	"internal/core/configvalue":      {},
 	"internal/core/contenthash":      {},
 	"internal/core/ops/namespace":    {},
-	"internal/core/workflow/state":   {coreImportPath + "contenthash": true, coreImportPath + "ops/metadata": true},
+	"internal/core/workflow/state":   {coreImportPath + "contenthash": true, coreImportPath + "ops/metadata": true, coreImportPath + "harness": true},
 }
 
 func checkLeafDependencies(importsByFile map[string][]string) []string {

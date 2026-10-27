@@ -104,7 +104,10 @@ func workflowConfigDeadlineFixture(t *testing.T, extent string, gate workflowsta
 		}
 
 		commit, _ := workflowSelectionCommit(t, store)
-		request := WorkflowStartRequest{RequestKey: "config-slice-deadline", Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+		request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+			RequestKey: "config-slice-deadline",
+			Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+		}}
 
 		return store, request
 	}

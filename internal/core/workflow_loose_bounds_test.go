@@ -142,7 +142,12 @@ func TestWorkflowLooseTerminal(t *testing.T) {
 
 	workflowLooseCreate(t, f.store, workflowLooseRecord(t, f.store, "PRJ-91"), "PRJ-93", "critical", nil)
 
-	request := WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey:        run.RequestKey,
+		Selection:         run.Selection,
+		Policy:            run.Policy,
+		ReviewRestriction: run.ReviewRestriction,
+	}}
 	retry := workflowTestStart(t, f.store, request)
 
 	progress, err := f.store.ContinueWorkflow(t.Context(), run.ID, WorkflowContinuationRequest{Worker: workflowPRWorker()}, WorkflowContinuationPorts{})

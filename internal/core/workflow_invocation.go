@@ -14,18 +14,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowStartRequest admits an explicit finite selection with a retry key.
+// WorkflowStartRequest supplies host-only inputs around the retained admission request.
 type WorkflowStartRequest struct {
-	HarnessBinding      *harnesscore.Binding          `json:"harness_binding,omitempty"`
-	HarnessCommand      []string                      `json:"-"`
-	ResolveHarness      WorkflowHarnessResolver       `json:"-"`
-	Admission           *workflowstate.AdmissionGuard `json:"admission_guard,omitempty"`
-	IncludeLaterTickets *bool                         `json:"include_later_tickets_override,omitempty"`
-	Selected            *workflowstate.SelectionGuard `json:"-"`
-	RequestKey          string
-	Selection           workflowstate.PreviewRequest
-	Policy              workflowstate.ExecutionPolicy
-	ReviewRestriction   workflowstate.ReviewMode `json:"review_restriction,omitempty"`
+	workflowstate.StartInput
+	HarnessCommand []string                      `json:"-"`
+	ResolveHarness WorkflowHarnessResolver       `json:"-"`
+	Selected       *workflowstate.SelectionGuard `json:"-"`
 }
 
 // WorkflowMember retains admission facts and the latest accepted owned image.

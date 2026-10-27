@@ -43,7 +43,10 @@ func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.Generate
 		t.Fatal(err)
 	}
 
-	request := core.WorkflowStartRequest{RequestKey: "independent", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "independent",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
+	}}
 
 	return operations, record, request
 }

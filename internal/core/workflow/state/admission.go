@@ -1,5 +1,19 @@
 package state
 
+import harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+
+// StartInput is the exact serializable native admission input retained by guided state.
+// Host callbacks and commands belong to the caller, outside the durable value.
+type StartInput struct {
+	HarnessBinding      *harnesscore.Binding `json:"harness_binding,omitempty"`
+	Admission           *AdmissionGuard      `json:"admission_guard,omitempty"`
+	IncludeLaterTickets *bool                `json:"include_later_tickets_override,omitempty"`
+	RequestKey          string
+	Selection           PreviewRequest
+	Policy              ExecutionPolicy
+	ReviewRestriction   ReviewMode `json:"review_restriction,omitempty"`
+}
+
 // GuidedAdmission records authority provenance without extending native policy.
 type GuidedAdmission struct {
 	RunID, Actor, Policy, OperationDigest, CheckpointDigest, MaterializationID string

@@ -36,7 +36,7 @@ are omitted here; tests do not define production ownership.
 | core/quiz/openai | core/quiz/model, harness |
 | core/telegram | core/authoring/state, core/contenthash, core/database, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace |
 | core/telegram/message | core/contenthash, core/ops/namespace |
-| core/workflow/state | core/contenthash, core/ops/metadata |
+| core/workflow/state | core/contenthash, core/harness, core/ops/metadata |
 | core/workspace | none |
 | harness | none |
 | harness/codex | harness, harness/process |

@@ -11,7 +11,11 @@ import (
 // operation and preserves that checkpoint on equivalent invocation attachment.
 func TestServiceWorkflowContinuation(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	request := core.WorkflowStartRequest{RequestKey: "bounded-service", Policy: workflowstate.ExecutionPolicy{CheckpointStepLimit: 1}, Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "bounded-service",
+		Policy:     workflowstate.ExecutionPolicy{CheckpointStepLimit: 1},
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
+	}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

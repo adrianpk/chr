@@ -15,7 +15,10 @@ import (
 func TestWorkflowPlanOrderContext(t *testing.T) {
 	store, hierarchy, status := workflowOrderFixture(t)
 	commit, _ := workflowSelectionCommit(t, store)
-	run := workflowTestStart(t, store, WorkflowStartRequest{RequestKey: "ordered-context", Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}})
+	run := workflowTestStart(t, store, WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "ordered-context",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}})
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 
 	path := filepath.Join(store.layout.Root(), status.PlanRevision.TrackerRef)

@@ -15,6 +15,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramControlWorker struct {
@@ -147,7 +148,10 @@ func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture
 
 		selection.SnapshotHash = ""
 
-		started, err := operations.StartWorkflow(t.Context(), core.WorkflowStartRequest{RequestKey: task.Key, Selection: selection})
+		started, err := operations.StartWorkflow(t.Context(), core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+			RequestKey: task.Key,
+			Selection:  selection,
+		}})
 		if err != nil {
 			t.Fatal("admit independent capacity task", task.Key, err)
 		}

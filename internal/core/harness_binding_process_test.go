@@ -12,6 +12,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // This owned host subprocess resumes and retries a serialized v2 invocation
@@ -35,7 +36,14 @@ func TestHarnessBindingHostProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	retry := WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction, Admission: run.Admission, HarnessBinding: run.HarnessBinding}
+	retry := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey:        run.RequestKey,
+		Selection:         run.Selection,
+		Policy:            run.Policy,
+		ReviewRestriction: run.ReviewRestriction,
+		Admission:         run.Admission,
+		HarnessBinding:    run.HarnessBinding,
+	}}
 
 	result, err := store.StartWorkflow(t.Context(), retry)
 	if err != nil || !result.Attached || result.Invocation.HarnessBinding == nil {

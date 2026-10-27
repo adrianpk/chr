@@ -17,7 +17,14 @@ func validateWorkflowInvocation(run workflowInvocationFile) error {
 		return err
 	}
 
-	request, err := normalizeWorkflowStart(WorkflowStartRequest{RequestKey: run.RequestKey, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction, Admission: run.Admission, HarnessBinding: run.HarnessBinding, HarnessCommand: run.HarnessCommand})
+	request, err := normalizeWorkflowStart(WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey:        run.RequestKey,
+		Selection:         run.Selection,
+		Policy:            run.Policy,
+		ReviewRestriction: run.ReviewRestriction,
+		Admission:         run.Admission,
+		HarnessBinding:    run.HarnessBinding,
+	}, HarnessCommand: run.HarnessCommand})
 	if err != nil {
 		return err
 	}

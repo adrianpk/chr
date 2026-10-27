@@ -38,7 +38,10 @@ func TestServiceWorkflowClaim(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := core.WorkflowStartRequest{RequestKey: "manual-claim", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: strings.TrimSpace(string(output))}}}
+	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "manual-claim",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: strings.TrimSpace(string(output))}},
+	}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

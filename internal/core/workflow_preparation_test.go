@@ -57,7 +57,10 @@ func workflowPreparationPlanFixture(t *testing.T, method, extent string, gate wo
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "slice-prepare", Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		RequestKey: "slice-prepare",
+		Selection:  workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, extent), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}},
+	}}
 	run := workflowTestStart(t, store, request).Invocation
 
 	candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.ID, workflowPRWorker())
