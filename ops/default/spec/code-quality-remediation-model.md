@@ -697,3 +697,16 @@ indexes in named outcomes. Native metadata writers retain byte/line ranges and
 comparison retains original prefix/integer admission and fallback ordering. These
 seven result changes leave 180 exact debts at ceiling seven; actual field/wire/
 SQL contracts and guarded write/transition admission remain unchanged.
+
+All seven Slice 11 high-arity inputs are fixed. Legacy observation owns its
+per-pass 32-stream budget/output and source identity. Rejection construction
+uses existing parse options; the SQL row decodes its own fields; review planning
+uses existing operation options and a named state/status transition. Defaults,
+IDs, filters, decoding order and native/agentic admission remain unchanged.
+
+The global parameter ceiling is six with 174 exact debts and one external
+exception. All 18 above-six declarations have precise temporary assignments to
+approved Slices 12–15, recorded in the parameter-phase ledger and expiring in
+Slice 16. All 34 completed signatures have task-commit and validation references.
+The remaining 25 assigned entries, typed-state/preparation work and final
+controller validation are still open.

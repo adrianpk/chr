@@ -1,5 +1,5 @@
 {
-  "max_parameters": 7,
+  "max_parameters": 6,
   "debt": [
     {
       "id": "internal/app/daemon_workflow.go::watchDaemonHeartbeat",
@@ -174,7 +174,7 @@
     {
       "id": "internal/core/workflow_closing_command.go::WorkflowStore.waitWorkflowClosingCommand",
       "signature": "func(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *opsfile.CommandOutput, base string) (WorkflowCommandResult, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 15. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_closing_native.go::WorkflowStore.workflowClosingNativeDeliveryProof",
@@ -239,7 +239,7 @@
     {
       "id": "internal/core/workflow_execution_command.go::runWorkflowSupervisedProcess",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) (WorkflowCommandResult, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 12. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_execution_prepare.go::WorkflowStore.prepareWorkflowAttempt",
@@ -409,7 +409,7 @@
     {
       "id": "internal/core/workflow_materialization_build.go::WorkflowStore.buildMaterializationForSet",
       "signature": "func(ctx context.Context, opts WorkflowMaterializationOptions, plan generationcore.GeneratedWorkflowPlan, body []byte, number int, now time.Time, set WorkflowRecord) (WorkflowMaterializationResult, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 12. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_materialization_build.go::WorkflowStore.buildMaterializationTasks",
@@ -434,7 +434,7 @@
     {
       "id": "internal/core/workflow_merger_acceptance.go::WorkflowStore.commitWorkflowMergerRepair",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, git WorkflowMergerRepairGit, state WorkflowMergerRepairState, repair WorkflowIntegrationTreeRepair, acceptance *WorkflowMergerAcceptance) error",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_acceptance_observe.go::WorkflowStore.observeWorkflowMergerRepair",
@@ -444,12 +444,12 @@
     {
       "id": "internal/core/workflow_merger_acceptance_regenerate.go::WorkflowStore.regenerateWorkflowMerger",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, reader workflowIntegrationReader, state WorkflowMergerRepairState, repair WorkflowIntegrationTreeRepair) ([]WorkflowMergerRegenerationEvidence, error)",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_acceptance_regenerate.go::WorkflowStore.runWorkflowMergerRegeneration",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, reader workflowIntegrationReader, state WorkflowMergerRepairState, conflict WorkflowMergerConflict, tree string) (WorkflowMergerRegenerationEvidence, error)",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_acceptance_tree.go::workflowIntegrationReader.checkMergerObservedPaths",
@@ -464,7 +464,7 @@
     {
       "id": "internal/core/workflow_merger_admission.go::WorkflowStore.checkWorkflowMergerAdmissionInputs",
       "signature": "func(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, budget WorkflowIntegrationBudget, input WorkflowMergerInput, harness WorkflowMergerHarness, provider WorkflowPullRequestProvider) error",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_broker.go::serveWorkflowMergerBroker",
@@ -489,17 +489,17 @@
     {
       "id": "internal/core/workflow_merger_claim.go::WorkflowStore.claimWorkflowMerger",
       "signature": "func(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, budget WorkflowIntegrationBudget, input WorkflowMergerInput, harness WorkflowMergerHarness, seed string) (claim *WorkflowClaim, prepared workflowPreparedTask, err error)",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_claim_persist.go::WorkflowStore.persistWorkflowMergerClaim",
       "signature": "func(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, claim *WorkflowClaim, budget WorkflowIntegrationBudget, input WorkflowMergerInput, harness WorkflowMergerHarness, lane WorkflowLane, root string) (*WorkflowClaim, workflowPreparedTask, error)",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_driver.go::executeWorkflowMergerDriver",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall, gate, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) workflowMergerDriverResult",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_driver.go::exchangeWorkflowMerger",
@@ -514,7 +514,7 @@
     {
       "id": "internal/core/workflow_merger_repair_verify.go::workflowIntegrationReader.verifyMergerTreeRepair",
       "signature": "func(ctx context.Context, repair WorkflowIntegrationTreeRepair, original, parent, source, tree string, conflicts []string) error",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_merger_workspace.go::WorkflowStore.workflowMergerWorkspace",
@@ -614,12 +614,12 @@
     {
       "id": "internal/core/workflow_preparation_claim.go::WorkflowStore.claimWorkflowIntegrationValidation",
       "signature": "func(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, source WorkflowReviewInput, capability WorkflowPublicationCapability, provider WorkflowPublicationGuardProvider, git WorkflowPreparationGit) (claim *WorkflowClaim, prepared workflowPreparedTask, input WorkflowPreparationInput, err error)",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_preparation_claim.go::WorkflowStore.prepareWorkflowIntegrationGit",
       "signature": "func(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, source WorkflowReviewInput, capability WorkflowPublicationCapability, provider WorkflowPublicationGuardProvider, git WorkflowPreparationGit, lane WorkflowLane) (WorkflowPreparationInput, WorkflowLane, error)",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_preparation_native_evidence.go::workflowNativePreparationEvidenceFile",
@@ -644,12 +644,12 @@
     {
       "id": "internal/core/workflow_preparation_result.go::WorkflowStore.finishWorkflowIntegrationValidation",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, candidate *WorkflowIntegrationCandidate, provider WorkflowPublicationGuardProvider, validationErr error, interrupted bool) error",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_preparation_result.go::WorkflowStore.checkpointWorkflowPreparationFailure",
       "signature": "func(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, claim *WorkflowClaim, candidate WorkflowIntegrationCandidate, prepared workflowPreparedTask, provider WorkflowPublicationGuardProvider, validationErr, failure error) error",
-      "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 13. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_preparation_result.go::WorkflowStore.retainWorkflowPreparationFailureRepair",
@@ -754,12 +754,12 @@
     {
       "id": "internal/core/workflow_review_result.go::WorkflowStore.finishWorkflowReview",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, decision WorkflowReviewDecision, executionErr error, interrupted bool) (result WorkflowReviewBinding, err error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 14. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_review_result.go::WorkflowStore.acceptWorkflowReview",
       "signature": "func(ctx context.Context, claim *WorkflowClaim, run workflowInvocationFile, record WorkflowRecord, provider WorkflowPullRequestProvider, decision WorkflowReviewDecision, executionErr error) (WorkflowReviewBinding, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 14. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_slice_prepare.go::WorkflowStore.prepareWorkflowSliceValidation",
@@ -799,7 +799,7 @@
     {
       "id": "internal/core/workflow_submission_native_store.go::WorkflowStore.persistWorkflowNativeIntent",
       "signature": "func(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, journal workflowSubmissionJournal, guard WorkflowPublicationGuard, candidate WorkflowIntegrationCandidate, fence WorkflowIntegrationBudgetGuard) (WorkflowSubmission, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "reason": "Existing above-six workflow debt; assigned to approved Slice 14. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_submission_native_store.go::checkWorkflowNativeSubmissionCallback",

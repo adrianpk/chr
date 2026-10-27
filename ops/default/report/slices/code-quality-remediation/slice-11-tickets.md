@@ -31,15 +31,16 @@ The move ledger reconciles 723 declaration/test preimages after explicit contrac
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
 meanings are unchanged. Thirty-four assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger records 28 fixes, with six new operation/result contracts awaiting their commit references; remaining
-assigned signatures and watches are open. The global policy remains at ceiling
-seven with 174 exact debts and one external exception.
+named outcomes. The partial disposition ledger records all 34 fixes; remaining
+assigned signatures and watches are open. The global policy is at ceiling
+six with 174 exact debts and one external exception.
 
 ## Files of Interest
 
 - `internal/core/ticket/` and native ticket/indexing code.
 - `internal/core/execution/` and native workflow consumers.
 - The approved baseline inventory and core owner ledger.
+- [Signature dispositions](../../../plan/code-quality-remediation-slice-11-dispositions.csv) and [parameter phase](../../../plan/code-quality-remediation-slice-11-parameter-phase.csv).
 
 ## Validation
 
@@ -258,9 +259,20 @@ high-arity inputs and one result entry: 174 exact debts remain at ceiling seven.
 - `make check-go-style`: 9307 declarations, ceiling seven, 174 exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues after the operation input changes.
 
+All seven assigned high-arity baseline entries are fixed and linked to task
+commits. The policy ceiling advances from seven to six. Eighteen above-six
+declarations retain exact temporary debt entries assigned by the approved
+inventory to Slices 12–15; the parameter-phase ledger records each identity,
+signature, arity, owner and expiry. No new exception or permanent retention is
+introduced. Counts: 9307 production declarations, 174 exact debts, one external
+exception. The signature ledger now records all 34 completed fixes.
+
+- `make check-go-style`: passed at ceiling six with the exact residual assignments.
+
 ## Risks and Follow-ups
 
-Remaining work includes ticket parser/validation test ownership, merge-state dependencies in ticket parser/validation tests, other assigned signatures, typed
-state/preparation contracts, remaining watches/flags/legacy dispositions, the
-six-parameter phase and final exact-head controller validation.
+Remaining work includes 25 assigned signature/watch entries, typed state and
+preparation contracts, control-flag/legacy reconciliation, and ticket parser/
+validation test ownership with its merge-state dependencies. Final candidate
+validation and the Slice 11 PR remain pending.
 No Slice 11 PR has been opened.
