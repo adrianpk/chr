@@ -38,7 +38,7 @@ func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope qu
 }
 
 func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (planGenerationResult, error) {
-	modelRequest, err := s.newPlanGenerationModelRequest(state, sources)
+	modelRequest, err := s.newPlanGenerationModelRequest(ctx, state, sources)
 	if err != nil {
 		return planGenerationResult{}, err
 	}
@@ -108,7 +108,7 @@ func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, s
 }
 
 func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation) (planOutlineGenerationResult, error) {
-	modelRequest, err := s.newPlanOutlineGenerationModelRequest(state, sources)
+	modelRequest, err := s.newPlanOutlineGenerationModelRequest(ctx, state, sources)
 	if err != nil {
 		return planOutlineGenerationResult{}, err
 	}
@@ -143,7 +143,7 @@ func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, 
 }
 
 func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.RuntimeState, sources authoringcore.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (planSliceDetailGenerationResult, error) {
-	modelRequest, err := s.newPlanSliceDetailGenerationModelRequest(state, sources, outline, targetSliceID)
+	modelRequest, err := s.newPlanSliceDetailGenerationModelRequest(ctx, state, sources, outline, targetSliceID)
 	if err != nil {
 		return planSliceDetailGenerationResult{}, err
 	}

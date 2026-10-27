@@ -17,7 +17,7 @@ func TestPiGenerationResourceRecovery(t *testing.T) {
 	profiles := filepath.Join(config, "harnesses.yml")
 	harnessSelectionWrite(t, profiles, "profiles:\n  writing:\n    harness: pi\n    command: "+filepath.Join(driver, "driver")+"\n    model_provider: fixture\n    model: fixture-model\n    credential_ref: auth.json\n    model_config_ref: models.json\n")
 
-	if _, _, err := operations.bindGeneration(t.Context(), "resource-recovery", "conversation"); err != nil {
+	if _, err := operations.bindGeneration(t.Context(), "resource-recovery", "conversation"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -26,7 +26,9 @@ func TestPiGenerationResourceRecovery(t *testing.T) {
 
 	fresh := newService(t.Context(), operations.env, operations.projectContext, testAssetsFS())
 
-	bound, ctx, err := fresh.bindGeneration(t.Context(), "resource-recovery", "conversation")
+	bound, err := fresh.bindGeneration(t.Context(), "resource-recovery", "conversation")
+
+	ctx := bound.context(t.Context())
 	if err != nil {
 		t.Fatal("recovered Pi profile was re-resolved", err)
 	}

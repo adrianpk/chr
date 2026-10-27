@@ -76,7 +76,9 @@ func (s service) ResolveConversationIntent(ctx context.Context, requestID string
 		return result, err
 	}
 
-	s, ctx, err = scoped.bindGeneration(ctx, "intent-"+requestID, "conversation")
+	bound, err := scoped.bindGeneration(ctx, "intent-"+requestID, "conversation")
+	s, ctx = bound.service, bound.context(ctx)
+
 	if err != nil {
 		return result, err
 	}

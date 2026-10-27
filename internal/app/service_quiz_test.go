@@ -238,7 +238,7 @@ path writes a report file and returns an accepted status.
 		t.Fatal(err)
 	}
 
-	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	request, err := operations.newQuizModelRequestWithEntries(t.Context(), state, entries)
 	if err != nil {
 		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}
@@ -298,7 +298,7 @@ This is a documentation-only architecture cleanup for a package boundary.
 		t.Fatal(err)
 	}
 
-	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	request, err := operations.newQuizModelRequestWithEntries(t.Context(), state, entries)
 	if err != nil {
 		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}
@@ -340,7 +340,7 @@ The project has an existing file and should write an output report.
 		t.Fatal(err)
 	}
 
-	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	request, err := operations.newQuizModelRequestWithEntries(t.Context(), state, entries)
 	if err != nil {
 		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}
@@ -394,7 +394,7 @@ success path accepts the request and writes a visible status response.
 		t.Fatal(err)
 	}
 
-	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	request, err := operations.newQuizModelRequestWithEntries(t.Context(), state, entries)
 	if err != nil {
 		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}

@@ -90,11 +90,11 @@ func (s service) StartQuiz(request QuizStartRequest) (QuizOperationResult, error
 		mode = quizcore.ModeDeep
 	}
 
-	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "start", Mode: mode})
+	return s.applyQuizAction(s.ctx, quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "start", Mode: mode})
 }
 
 func (s service) ResumeQuiz(request QuizResumeRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "resume"})
+	return s.applyQuizAction(s.ctx, quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "resume"})
 }
 
 func (s service) AnswerQuiz(request QuizAnswerRequest) (QuizOperationResult, error) {
@@ -103,15 +103,15 @@ func (s service) AnswerQuiz(request QuizAnswerRequest) (QuizOperationResult, err
 		return QuizOperationResult{}, fmt.Errorf("quiz answer is required")
 	}
 
-	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "answer", Answer: answer})
+	return s.applyQuizAction(s.ctx, quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "answer", Answer: answer})
 }
 
 func (s service) SkipQuiz(request QuizSkipRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "skip"})
+	return s.applyQuizAction(s.ctx, quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "skip"})
 }
 
 func (s service) CompleteQuiz(request QuizCompleteRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "done"})
+	return s.applyQuizAction(s.ctx, quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "done"})
 }
 
 func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperationResult, error) {
@@ -119,9 +119,9 @@ func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperat
 }
 
 func (s service) CancelQuiz(request QuizCancelRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "cancel"})
+	return s.applyQuizAction(s.ctx, quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "cancel"})
 }
 
 func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "mode", Mode: request.Mode})
+	return s.applyQuizAction(s.ctx, quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "mode", Mode: request.Mode})
 }

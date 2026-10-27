@@ -144,7 +144,9 @@ func harnessJourneyExecuteWorker(t *testing.T, operations service, id, target st
 func (f *harnessJourney) generate(ctx context.Context, t *testing.T, id, profile string) {
 	t.Helper()
 
-	bound, ctx, err := f.operations.bindGeneration(ctx, id, "spec_generation")
+	bound, err := f.operations.bindGeneration(ctx, id, "spec_generation")
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +156,7 @@ func (f *harnessJourney) generate(ctx context.Context, t *testing.T, id, profile
 		t.Fatal("generation resolved the wrong role", generation.Binding.Selection.Profile)
 	}
 
-	if err := harnessJourneyInvoke(ctx, bound, id+"-call"); err != nil {
+	if err := harnessJourneyInvoke(ctx, bound.service, id+"-call"); err != nil {
 		t.Fatal("selected structured transport failed", err)
 	}
 }

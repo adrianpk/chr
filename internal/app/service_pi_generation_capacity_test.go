@@ -21,14 +21,18 @@ func TestPiGenerationCapacity(t *testing.T) {
 	ctx, cancel := context.WithTimeout(t.Context(), 5*time.Second)
 	defer cancel()
 
-	first, firstCtx, err := operations.bindGeneration(ctx, "capacity-first", "conversation")
+	first, err := operations.bindGeneration(ctx, "capacity-first", "conversation")
+	firstCtx := first.context(ctx)
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	switchGenerationFixture(t, operations, "other")
 
-	second, secondCtx, err := operations.bindGeneration(ctx, "capacity-second", "conversation")
+	second, err := operations.bindGeneration(ctx, "capacity-second", "conversation")
+	secondCtx := second.context(ctx)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +48,7 @@ func TestPiGenerationCapacity(t *testing.T) {
 	for i, call := range []struct {
 		s   service
 		ctx context.Context
-	}{{first, firstCtx}, {second, secondCtx}} {
+	}{{first.service, firstCtx}, {second.service, secondCtx}} {
 		peers.Go(func() {
 			_, err := call.s.conversationModel.InvokeStructuredModel(call.ctx, piCapacityRequest(call.s.projectContext.ProjectDir, "owned-"+string(rune('a'+i))))
 			results <- err

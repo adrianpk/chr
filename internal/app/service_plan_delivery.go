@@ -156,17 +156,19 @@ func (s service) checkDeliveryTarget(ctx context.Context, scope quizcore.Scope, 
 }
 
 func (s service) generatePlanTicketContracts(ctx context.Context, input generationcore.GeneratedWorkflowPlan, plan PlanView) (generationcore.GeneratedWorkflowPlan, error) {
-	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(quizmodel.ActionMaterializePlanTracking))
+	bound, err := s.bindGeneration(ctx, input.MaterializationID, string(quizmodel.ActionMaterializePlanTracking))
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		return input, err
 	}
 
-	state, err := bound.specGenerationRuntimeState(plan.Scope)
+	state, err := bound.specGenerationRuntimeState(ctx, plan.Scope)
 	if err != nil {
 		return input, err
 	}
 
-	request, err := bound.newPlanTrackingModelRequest(state, plan)
+	request, err := bound.newPlanTrackingModelRequest(ctx, state, plan)
 	if err != nil {
 		return input, err
 	}

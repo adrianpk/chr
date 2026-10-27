@@ -124,7 +124,7 @@ func (p webViewProvider) writeQuizAction(operations service, request webui.Write
 		answer = strings.TrimSpace(request.Fields["answer"])
 	}
 
-	result, err := operations.applyQuizAction(quizcore.ActionRequest{Scope: scope, Binding: binding, Action: action, Mode: quizcore.Mode(request.Fields["mode"]), Answer: answer})
+	result, err := operations.applyQuizAction(operations.ctx, quizcore.ActionRequest{Scope: scope, Binding: binding, Action: action, Mode: quizcore.Mode(request.Fields["mode"]), Answer: answer})
 	if err != nil {
 		return webQuizWriteFailure(request.ID, err), nil
 	}

@@ -58,12 +58,14 @@ func (s service) ExplainPreparedAuthoring(ctx context.Context, prepared Prepared
 		return result, errors.New("read the original document without generating an explanation")
 	}
 
-	bound, ctx, err := s.bindGeneration(ctx, "explanation-"+prepared.Request.ID, "conversation")
+	bound, err := s.bindGeneration(ctx, "explanation-"+prepared.Request.ID, "conversation")
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		return result, err
 	}
 
-	s = bound
+	s = bound.service
 
 	if s.conversationModel == nil {
 		return result, errors.New("configured authoring provider is unavailable")

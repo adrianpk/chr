@@ -19,12 +19,12 @@ type planGenerationInputs struct {
 }
 
 func (s service) prepareAndPublishPlan(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, error) {
-	bound, ctx, err := s.bindGeneration(ctx, "plan-"+dumpRequestID(operation.ID), string(quizmodel.ActionGeneratePlan))
+	bound, err := s.bindGeneration(ctx, "plan-"+dumpRequestID(operation.ID), string(quizmodel.ActionGeneratePlan))
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
 
-	s = bound
+	s, ctx = bound.service, bound.context(ctx)
 	scope, expected, replace := operation.Scope, operation.ExpectedRevision, operation.Replace
 	s.appendPlanGenerationLog("generate_plan_started", map[string]string{"case_slug": scope.CaseSlug, "timeout": longGenerationTimeout.String()})
 
@@ -33,16 +33,14 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation generation
 		return PlanOperationResult{}, err
 	}
 
-	sources := inputs.Sources
-
-	generated, err := s.generatePlanWithConfiguredBackend(ctx, scope, inputs.State, sources)
+	generated, err := s.generatePlanWithConfiguredBackend(ctx, scope, inputs.State, inputs.Sources)
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
 
 	plan := generated.Plan
 	plan.SourceRequestID, plan.SourceResponseID = strings.Join(generated.RequestIDs, ","), strings.Join(generated.ResponseIDs, ",")
-	plan.ExpectedRevision, plan.SourceObservationHash = inputs.TargetRevision, sources.Hash
+	plan.ExpectedRevision, plan.SourceObservationHash = inputs.TargetRevision, inputs.Sources.Hash
 
 	plan.RequireOrderMap = true
 	plan.Order = authoringcore.ScopePlanDeliveryOrder(plan.Order, operation)
@@ -53,7 +51,7 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation generation
 	}
 
 	plan.CreateOnly = !replace
-	for _, input := range sources.Inputs {
+	for _, input := range inputs.Sources.Inputs {
 		plan.SourceInputs = append(plan.SourceInputs, generationcore.PlanSourceBinding{Kind: input.Kind, Reference: input.Reference, Revision: input.Revision})
 	}
 
@@ -65,12 +63,12 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation generation
 		return PlanOperationResult{}, err
 	}
 
-	paths, err := s.publishObservedPlan(ctx, plan, sources)
+	paths, err := s.publishObservedPlan(ctx, plan, inputs.Sources)
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
 
-	s.appendPlanGenerationLog("generate_plan_written", map[string]string{"case_slug": scope.CaseSlug, "source_observation_hash": sources.Hash, "relative_path": paths.RelativePath})
+	s.appendPlanGenerationLog("generate_plan_written", map[string]string{"case_slug": scope.CaseSlug, "source_observation_hash": inputs.Sources.Hash, "relative_path": paths.RelativePath})
 
 	message := "Plan generated."
 	if replace {

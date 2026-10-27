@@ -21,3 +21,8 @@ workflow or configuration-coordinator dependency. Complete WorkspaceConfig image
 parsing and revision stay with their existing configuration owner. Native command
 fencing, selection transactions and generation launch lifecycle retain their own
 execution and configuration responsibilities.
+
+The `host` child owns executable resolution, streaming fingerprints and retained
+command admission. The `daemon` child owns lifecycle state, persistent heartbeat
+and stop requests, start guards and project loading. These children consume the
+parent's values; the parent cannot import either child.

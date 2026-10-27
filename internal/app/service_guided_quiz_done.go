@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -9,7 +10,7 @@ import (
 
 // Done asks the same clarification owner whether the saved answers suffice.
 // A user control alone cannot grant the trusted completion required by sealing.
-func (s service) prepareGuidedQuizDone(observed quizcore.Observation) (quizcore.Transition, error) {
+func (s service) prepareGuidedQuizDone(ctx context.Context, observed quizcore.Observation) (quizcore.Transition, error) {
 	state := observed.State
 	if state.AnswersRecorded == 0 {
 		state.ContinuationError = "Answer at least one question before finishing clarification."
@@ -20,12 +21,12 @@ func (s service) prepareGuidedQuizDone(observed quizcore.Observation) (quizcore.
 	check := state
 	check.Mode = quizcore.ModeDeep
 
-	request, err := s.guidedQuizModelRequest(check, observed.Entries)
+	request, err := s.guidedQuizModelRequest(ctx, check, observed.Entries)
 	if err != nil {
 		return quizcore.Transition{}, err
 	}
 
-	response, err := s.invokeQuizGeneration(check, request)
+	response, err := s.invokeQuizGeneration(ctx, check, request)
 	if err != nil {
 		return quizcore.Transition{}, err
 	}

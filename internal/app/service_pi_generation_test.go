@@ -147,7 +147,7 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, _, err := operations.bindGeneration(core.WithHarnessGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := operations.bindGeneration(core.WithHarnessGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unsupported Pi protocol did not reach its dispatch fence", err)
 	}
 

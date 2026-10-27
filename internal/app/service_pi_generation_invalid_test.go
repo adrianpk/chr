@@ -27,7 +27,9 @@ func TestPiGenerationInvalidCallers(t *testing.T) {
 
 				_, err = operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "invalid-plan", Scope: quizcore.Scope{CaseSlug: "blog"}})
 			case "conversation":
-				bound, ctx, bindErr := operations.bindGeneration(t.Context(), "invalid-conversation", "conversation")
+				bound, bindErr := operations.bindGeneration(t.Context(), "invalid-conversation", "conversation")
+
+				ctx := bound.context(t.Context())
 				if bindErr != nil {
 					t.Fatal(bindErr)
 				}

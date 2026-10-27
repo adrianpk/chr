@@ -9,24 +9,21 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-func (s service) applyQuizAction(request quizcore.ActionRequest) (QuizOperationResult, error) {
-	binding, err := s.quizActionBinding(request.Scope, request.Binding)
+func (s service) applyQuizAction(ctx context.Context, request quizcore.ActionRequest) (QuizOperationResult, error) {
+	binding, err := s.quizActionBinding(ctx, request.Scope, request.Binding)
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
 
 	request.Binding = binding
-	result, err := s.quizRepository().ApplyAction(s.ctx, request, func(ctx context.Context, observed quizcore.Observation) (quizcore.Transition, error) {
-		bounded := s
-		bounded.ctx = ctx
-
-		return bounded.prepareQuizAction(request, observed)
+	result, err := s.quizRepository().ApplyAction(ctx, request, func(ctx context.Context, observed quizcore.Observation) (quizcore.Transition, error) {
+		return s.prepareQuizAction(ctx, request, observed)
 	})
 
 	return QuizOperationResult{Message: result.Message, State: result.State}, err
 }
 
-func (s service) quizActionBinding(scope quizcore.Scope, binding quizcore.ActionBinding) (quizcore.ActionBinding, error) {
+func (s service) quizActionBinding(ctx context.Context, scope quizcore.Scope, binding quizcore.ActionBinding) (quizcore.ActionBinding, error) {
 	if binding.ExpectedRevision != "" {
 		return binding, nil
 	}
@@ -36,7 +33,7 @@ func (s service) quizActionBinding(scope quizcore.Scope, binding quizcore.Action
 	}
 	// Legacy command callers observe before acquiring the writer. Concurrent
 	// commands therefore conflict rather than answering the next question.
-	observed, err := s.quizRepository().Observe(s.ctx, scope)
+	observed, err := s.quizRepository().Observe(ctx, scope)
 	if err != nil {
 		return binding, err
 	}
@@ -49,31 +46,31 @@ func (s service) quizActionBinding(scope quizcore.Scope, binding quizcore.Action
 	return binding, nil
 }
 
-func (s service) prepareQuizAction(request quizcore.ActionRequest, observed quizcore.Observation) (quizcore.Transition, error) {
+func (s service) prepareQuizAction(ctx context.Context, request quizcore.ActionRequest, observed quizcore.Observation) (quizcore.Transition, error) {
 	observed.State.GenerationOperationID = quizGenerationOperationID(request, observed.State)
 
 	switch request.Action {
 	case "start":
-		return s.prepareQuizStart(request, observed)
+		return s.prepareQuizStart(ctx, request, observed)
 	case "answer", "skip":
-		return s.prepareQuizOutcome(request, observed)
+		return s.prepareQuizOutcome(ctx, request, observed)
 	case "mode":
-		return s.prepareQuizMode(request.Mode, observed)
+		return s.prepareQuizMode(ctx, request.Mode, observed)
 	case "resume":
 		state := observed.State
 		if state.ActiveQuestion == nil && state.Status != quizcore.RuntimeStatusDone {
-			state = s.continueQuiz(state, observed.Entries)
+			state = s.continueQuiz(ctx, state, observed.Entries)
 		}
 
 		return quizcore.Transition{State: state, Message: "Quiz resumed."}, nil
 	case "done", "cancel":
-		return s.prepareQuizClose(request.Action, observed)
+		return s.prepareQuizClose(ctx, request.Action, observed)
 	default:
 		return quizcore.Transition{}, fmt.Errorf("unsupported quiz action")
 	}
 }
 
-func (s service) prepareQuizStart(request quizcore.ActionRequest, observed quizcore.Observation) (quizcore.Transition, error) {
+func (s service) prepareQuizStart(ctx context.Context, request quizcore.ActionRequest, observed quizcore.Observation) (quizcore.Transition, error) {
 	if !request.Mode.Valid() {
 		return quizcore.Transition{}, fmt.Errorf("quiz mode is invalid: %s", request.Mode)
 	}
@@ -89,7 +86,7 @@ func (s service) prepareQuizStart(request quizcore.ActionRequest, observed quizc
 
 	state.GenerationOperationID = "quiz-" + request.Binding.OperationID
 
-	state, err = s.nextQuizQuestion(state, observed.Entries)
+	state, err = s.nextQuizQuestion(ctx, state, observed.Entries)
 
 	message := "Quiz started."
 	if state.Status == quizcore.RuntimeStatusDone {
@@ -99,7 +96,7 @@ func (s service) prepareQuizStart(request quizcore.ActionRequest, observed quizc
 	return quizcore.Transition{State: state, Message: message}, err
 }
 
-func (s service) prepareQuizOutcome(request quizcore.ActionRequest, observed quizcore.Observation) (quizcore.Transition, error) {
+func (s service) prepareQuizOutcome(ctx context.Context, request quizcore.ActionRequest, observed quizcore.Observation) (quizcore.Transition, error) {
 	state := observed.State
 	if state.Status != quizcore.RuntimeStatusActive || state.ActiveQuestion == nil {
 		return quizcore.Transition{}, fmt.Errorf("quiz has no active question")
@@ -118,7 +115,7 @@ func (s service) prepareQuizOutcome(request quizcore.ActionRequest, observed qui
 	entry := quizcore.EntryFromState(state, status, answer, s.utcNow())
 	entry.ID = fmt.Sprintf("%s-entry-%03d", state.SessionID, state.QuestionsAsked)
 	state = quizcore.StateAfterEntry(state, entry)
-	state = s.continueQuiz(state, append(append([]quizcore.Entry(nil), observed.Entries...), entry))
+	state = s.continueQuiz(ctx, state, append(append([]quizcore.Entry(nil), observed.Entries...), entry))
 
 	message := "Quiz answer recorded."
 	if status == quizcore.EntryStatusSkipped {
@@ -136,13 +133,13 @@ func (s service) prepareQuizOutcome(request quizcore.ActionRequest, observed qui
 	return quizcore.Transition{State: state, Entry: &entry, Message: message}, nil
 }
 
-func (s service) continueQuiz(state quizcore.RuntimeState, entries []quizcore.Entry) quizcore.RuntimeState {
+func (s service) continueQuiz(ctx context.Context, state quizcore.RuntimeState, entries []quizcore.Entry) quizcore.RuntimeState {
 	state.ContinuationPending, state.ContinuationError = false, ""
 	if state.QuestionsAsked >= state.QuestionBudget {
 		return s.finishQuiz(state)
 	}
 
-	next, err := s.nextQuizQuestion(state, entries)
+	next, err := s.nextQuizQuestion(ctx, state, entries)
 	if err != nil {
 		state.Status, state.ActiveQuestion = quizcore.RuntimeStatusBlocked, nil
 		state.ContinuationPending, state.ContinuationError = true, "Question generation failed. Resume to retry."
@@ -160,7 +157,7 @@ func (s service) continueQuiz(state quizcore.RuntimeState, entries []quizcore.En
 	return next
 }
 
-func (s service) prepareQuizMode(mode quizcore.Mode, observed quizcore.Observation) (quizcore.Transition, error) {
+func (s service) prepareQuizMode(ctx context.Context, mode quizcore.Mode, observed quizcore.Observation) (quizcore.Transition, error) {
 	if !mode.Valid() {
 		return quizcore.Transition{}, fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
@@ -176,7 +173,7 @@ func (s service) prepareQuizMode(mode quizcore.Mode, observed quizcore.Observati
 	if mode == quizcore.ModeFast && state.FastBatchID == "" {
 		var err error
 
-		state, err = s.generateFastQuizBatch(state, observed.Entries)
+		state, err = s.generateFastQuizBatch(ctx, state, observed.Entries)
 		if err != nil {
 			return quizcore.Transition{}, err
 		}
@@ -192,10 +189,10 @@ func (s service) prepareQuizMode(mode quizcore.Mode, observed quizcore.Observati
 	return quizcore.Transition{State: state, Message: "Quiz mode switched."}, nil
 }
 
-func (s service) prepareQuizClose(action string, observed quizcore.Observation) (quizcore.Transition, error) {
+func (s service) prepareQuizClose(ctx context.Context, action string, observed quizcore.Observation) (quizcore.Transition, error) {
 	state := observed.State
 	if action == "done" && s.guidedContext != nil {
-		return s.prepareGuidedQuizDone(observed)
+		return s.prepareGuidedQuizDone(ctx, observed)
 	}
 
 	state.Status = quizcore.RuntimeStatusDone

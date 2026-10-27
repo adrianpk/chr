@@ -52,7 +52,7 @@ func (s service) ListSpecs() (SpecListResult, error) {
 		return SpecListResult{}, err
 	}
 
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(s.ctx)
 	if err != nil {
 		return SpecListResult{}, err
 	}
@@ -75,7 +75,8 @@ func (s service) GenerateSpec(ctx context.Context, request SpecGenerateRequest) 
 	var result SpecOperationResult
 
 	err := s.withGenerationRuntime(ctx, "spec", scope, func(ctx context.Context) error {
-		bound, ctx, err := s.bindGeneration(ctx, "spec-"+dumpRequestID(request.OperationID), string(quizmodel.ActionGenerateSpec))
+		bound, err := s.bindGeneration(ctx, "spec-"+dumpRequestID(request.OperationID), string(quizmodel.ActionGenerateSpec))
+		ctx = bound.context(ctx)
 		if err != nil {
 			return err
 		}
@@ -95,7 +96,7 @@ func (s service) generateSpec(ctx context.Context, scope quizcore.Scope) (SpecOp
 		"timeout":   longGenerationTimeout.String(),
 	})
 
-	state, err := s.specGenerationRuntimeState(scope)
+	state, err := s.specGenerationRuntimeState(ctx, scope)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_spec_runtime_state_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -114,7 +115,7 @@ func (s service) generateSpec(ctx context.Context, scope quizcore.Scope) (SpecOp
 		return SpecOperationResult{}, err
 	}
 
-	modelRequest, err := s.newSpecGenerationModelRequest(state)
+	modelRequest, err := s.newSpecGenerationModelRequest(ctx, state)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_spec_request_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -260,8 +261,8 @@ func (v SpecView) withMetadata(useCaseTitle, title, status string, updatedAt tim
 	return v
 }
 
-func (s service) specGenerationRuntimeState(scope quizcore.Scope) (quizcore.RuntimeState, error) {
-	state, err := s.quizRepository().LoadRuntimeState(s.ctx, scope)
+func (s service) specGenerationRuntimeState(ctx context.Context, scope quizcore.Scope) (quizcore.RuntimeState, error) {
+	state, err := s.quizRepository().LoadRuntimeState(ctx, scope)
 	if err == nil {
 		return state, nil
 	}
@@ -282,26 +283,22 @@ func (s service) specGenerationRuntimeState(scope quizcore.Scope) (quizcore.Runt
 	return state, nil
 }
 
-func (s service) newSpecGenerationModelRequest(state quizcore.RuntimeState) (quizmodel.Request, error) {
-	return s.newDocumentGenerationModelRequest(state, documentModelOperation{
+func (s service) newSpecGenerationModelRequest(ctx context.Context, state quizcore.RuntimeState) (quizmodel.Request, error) {
+	return s.newDocumentGenerationModelRequest(ctx, state, documentModelOperation{
 		action: quizmodel.ActionGenerateSpec, strategy: "spec_generation", requestIDPrefix: "spec-generation",
 	}, s.appendSpecGenerationContextSections)
 }
 
-func (s service) appendSpecGenerationContextSections(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
-	dumps, err := s.specGenerationSources()
+func (s service) appendSpecGenerationContextSections(ctx context.Context, sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
+	dumps, err := s.specGenerationSources(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return s.appendGenerationContextSections(sections, scope, func(index core.WorkspaceIndex) []string { return specContextNodeIDs(index, scope, dumps) })
+	return s.appendGenerationContextSections(ctx, sections, scope, func(index core.WorkspaceIndex) []string { return specContextNodeIDs(index, scope, dumps) })
 }
 
-func (s service) appendGenerationContextSections(
-	sections []quizmodel.ContextSection,
-	scope quizcore.Scope,
-	nodeIDs func(core.WorkspaceIndex) []string,
-) ([]quizmodel.ContextSection, error) {
+func (s service) appendGenerationContextSections(ctx context.Context, sections []quizmodel.ContextSection, scope quizcore.Scope, nodeIDs func(core.WorkspaceIndex) []string) ([]quizmodel.ContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", authoringcore.ProjectMetadataPath(""))
 
@@ -315,7 +312,7 @@ func (s service) appendGenerationContextSections(
 		)
 	}
 
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,9 @@ func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project
 
 	operations := newService(ctx, env, project, nil)
 
-	bound, callCtx, err := operations.bindGeneration(ctx, "contextual-"+sessionID, "contextual_quiz")
+	bound, err := operations.bindGeneration(ctx, "contextual-"+sessionID, "contextual_quiz")
+
+	callCtx := bound.context(ctx)
 	if native, ok := provider.(core.HarnessAuthoringQuizQuestionProvider); ok && bound.generationRunner != nil {
 		native.Runner = bound.generationRunner
 		provider = native

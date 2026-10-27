@@ -119,7 +119,7 @@ func piGenerationReviewCase(t *testing.T, valid bool) {
 		Artifacts: core.ExecutionArtifacts{ArtifactID: "00001-review", RunDir: filepath.Join(worktree, "ops", "default", "run", "00001-review"), ResultPath: "result.json"},
 	}
 
-	result, err := operations.runAgenticReviewCycle(indexed, execution, core.ResultApplication{TicketPath: path}, core.ReviewWorkflowConfig{})
+	result, err := operations.runAgenticReviewCycle(t.Context(), indexed, execution, core.ResultApplication{TicketPath: path}, core.ReviewWorkflowConfig{})
 	if (err == nil) != valid || valid && result.Status != core.TicketStatusReadyForDev {
 		t.Fatal("unexpected Pi review validation", err)
 	}

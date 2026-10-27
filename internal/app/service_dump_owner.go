@@ -23,18 +23,17 @@ func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, err
 	}
 
 	result, err := authoringcore.MutateDump(s.ctx, s.projectContext.ProjectDir, mutation, func(ctx context.Context, destination, raw string) (authoringcore.DumpCapturePreparation, error) {
-		preparer, _, err := s.bindGeneration(ctx, "dump-"+mutation.OperationID, "dump_curation")
+		preparer, err := s.bindGeneration(ctx, "dump-"+mutation.OperationID, "dump_curation")
 		if err != nil {
 			if !errors.Is(err, errLegacyGenerationUnavailable) {
 				return authoringcore.DumpCapturePreparation{}, err
 			}
 
-			preparer = s
-			preparer.ctx = ctx
+			preparer = boundGeneration{service: s}
 			preparer.dumpCurator = fallbackDumpCurationProvider{Reason: err.Error()}
 		}
 
-		curation, err := preparer.curateDump(request)
+		curation, err := preparer.curateDump(preparer.context(ctx), request)
 		if err != nil {
 			return authoringcore.DumpCapturePreparation{}, err
 		}
@@ -86,7 +85,7 @@ func (s service) finishDumpMutation(mutation authoringcore.ProjectDumpMutationRe
 		result.Content, result.Revision = read.Content, read.Revision
 	}
 
-	_, indexErr := s.workspaceIndex()
+	_, indexErr := s.workspaceIndex(s.ctx)
 
 	catalog, catalogErr := s.ListDumps()
 	if indexErr != nil || catalogErr != nil {

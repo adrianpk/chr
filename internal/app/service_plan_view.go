@@ -35,7 +35,7 @@ func (s service) ListPlans() (PlanListResult, error) {
 		return PlanListResult{}, err
 	}
 
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(s.ctx)
 	if err != nil {
 		return PlanListResult{}, err
 	}

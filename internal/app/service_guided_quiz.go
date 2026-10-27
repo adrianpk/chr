@@ -37,7 +37,6 @@ func (s service) ConductGuidedQuiz(ctx context.Context, command authoringcore.Gu
 
 	return authoringcore.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
 		bounded := s
-		bounded.ctx = ctx
 		bounded.guidedContext = &guidedGenerationContext{session: *session}
 
 		return bounded.conductGuidedQuiz(ctx, session)
@@ -71,7 +70,7 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *authoringcore.S
 		}
 	}
 
-	result, err := s.applyQuizAction(*session.Guided.PendingOperation.QuizRequest)
+	result, err := s.applyQuizAction(ctx, *session.Guided.PendingOperation.QuizRequest)
 	if err != nil {
 		return err
 	}
@@ -147,10 +146,10 @@ func guidedDumpCheckpoint(session authoringcore.Session) (authoringcore.GuidedSt
 	return authoringcore.GuidedStageCheckpoint{}, errors.New("guided quiz requires a retained dump checkpoint")
 }
 
-func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.Request, error) {
+func (s service) guidedQuizModelRequest(ctx context.Context, state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.Request, error) {
 	session := s.guidedContext.session
 
-	sections, err := s.guidedCommittedSections(session, "dump")
+	sections, err := s.guidedCommittedSections(ctx, session, "dump")
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
@@ -181,7 +180,7 @@ func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []q
 	}, nil
 }
 
-func (s service) guidedCommittedSections(session authoringcore.Session, stage string) ([]quizmodel.ContextSection, error) {
+func (s service) guidedCommittedSections(ctx context.Context, session authoringcore.Session, stage string) ([]quizmodel.ContextSection, error) {
 	sections := []quizmodel.ContextSection{}
 
 	for _, checkpoint := range session.Guided.Checkpoints {
@@ -190,7 +189,7 @@ func (s service) guidedCommittedSections(session authoringcore.Session, stage st
 		}
 
 		for _, artifact := range checkpoint.Artifacts {
-			content, err := authoringcore.ReadGuidedCommittedArtifact(s.ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
+			content, err := authoringcore.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
 			if err != nil {
 				return nil, err
 			}

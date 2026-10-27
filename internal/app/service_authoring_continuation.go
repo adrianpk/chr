@@ -70,12 +70,14 @@ type authoringModelInput struct {
 }
 
 func (s service) generateAuthoringDraft(ctx context.Context, snapshot authoringcore.Snapshot, request authoringcore.ContinuationRequest) (authoringcore.Draft, error) {
-	bound, ctx, err := s.bindGeneration(ctx, "authoring-"+request.Binding.RequestID, "conversation")
+	bound, err := s.bindGeneration(ctx, "authoring-"+request.Binding.RequestID, "conversation")
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		return authoringcore.Draft{}, err
 	}
 
-	s = bound
+	s = bound.service
 	if s.conversationModel == nil {
 		return authoringcore.Draft{}, errors.New("configured authoring provider is unavailable")
 	}

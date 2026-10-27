@@ -47,10 +47,7 @@ func (s service) GenerateGuidedSpec(ctx context.Context, command authoringcore.G
 	command.GuidedUseCaseScope = scope
 
 	return authoringcore.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
-		bounded := s
-		bounded.ctx = ctx
-
-		return bounded.generateGuidedSpec(ctx, session)
+		return s.generateGuidedSpec(ctx, session)
 	})
 }
 
@@ -125,12 +122,14 @@ func (s service) guidedSpecEffect(phase string) error {
 }
 
 func (s service) prepareGuidedSpec(ctx context.Context, session authoringcore.Session) (authoringcore.GuidedPreparedSpec, error) {
-	bound, ctx, err := s.bindGeneration(ctx, "guided-spec-"+session.Guided.PendingOperation.Digest, string(quizmodel.ActionGenerateSpec))
+	bound, err := s.bindGeneration(ctx, "guided-spec-"+session.Guided.PendingOperation.Digest, string(quizmodel.ActionGenerateSpec))
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		return authoringcore.GuidedPreparedSpec{}, err
 	}
 
-	prepared, err := bound.guidedSpecModelRequest(session)
+	prepared, err := bound.guidedSpecModelRequest(ctx, session)
 	if err != nil {
 		return authoringcore.GuidedPreparedSpec{}, err
 	}
@@ -147,8 +146,8 @@ func (s service) prepareGuidedSpec(ctx context.Context, session authoringcore.Se
 	return authoringcore.GuidedPreparedSpec{Title: response.DraftSpec.Title, Body: response.DraftSpec.Body, InputDigest: prepared.Digest, RequestID: prepared.Request.ID, ResponseID: response.ID}, nil
 }
 
-func (s service) guidedSpecModelRequest(session authoringcore.Session) (guidedSpecRequest, error) {
-	inputs, err := s.guidedSpecInputs(session)
+func (s service) guidedSpecModelRequest(ctx context.Context, session authoringcore.Session) (guidedSpecRequest, error) {
+	inputs, err := s.guidedSpecInputs(ctx, session)
 	if err != nil {
 		return guidedSpecRequest{}, err
 	}
@@ -163,7 +162,7 @@ func (s service) guidedSpecModelRequest(session authoringcore.Session) (guidedSp
 
 	digest, err := authoringcore.GuidedCheckpointDigest(inputs.Checkpoint)
 	request := quizmodel.Request{
-		ID: core.HarnessGenerationRequestID(s.ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.ActionGenerateSpec, Strategy: "guided_committed_inputs",
+		ID: core.HarnessGenerationRequestID(ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.ActionGenerateSpec, Strategy: "guided_committed_inputs",
 		Scope: quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: quizcore.ModeDeep,
 		RuntimeState: inputs.State, Payload: payload, ContextSections: append(coreSections, inputs.Sections...), OutputContract: quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}
@@ -171,24 +170,24 @@ func (s service) guidedSpecModelRequest(session authoringcore.Session) (guidedSp
 	return guidedSpecRequest{Request: request, Digest: digest}, err
 }
 
-func (s service) guidedSpecInputs(session authoringcore.Session) (guidedSpecInput, error) {
+func (s service) guidedSpecInputs(ctx context.Context, session authoringcore.Session) (guidedSpecInput, error) {
 	var (
 		state   quizcore.RuntimeState
 		entries []quizcore.Entry
 		quiz    authoringcore.GuidedStageCheckpoint
 	)
 
-	sections, err := s.guidedCommittedSections(session, "dump")
+	sections, err := s.guidedCommittedSections(ctx, session, "dump")
 	if err != nil {
 		return guidedSpecInput{State: state, Entries: entries, Checkpoint: quiz}, err
 	}
 
-	clarified, err := s.guidedCommittedSections(session, "quiz")
+	clarified, err := s.guidedCommittedSections(ctx, session, "quiz")
 	if err != nil {
 		return guidedSpecInput{State: state, Entries: entries, Checkpoint: quiz}, err
 	}
 
-	committed, err := s.guidedCommittedQuiz(session)
+	committed, err := s.guidedCommittedQuiz(ctx, session)
 	if err != nil {
 		return guidedSpecInput{State: committed.State, Entries: entries, Checkpoint: committed.Checkpoint}, err
 	}
@@ -212,7 +211,7 @@ func (s service) guidedSpecInputs(session authoringcore.Session) (guidedSpecInpu
 	return guidedSpecInput{Sections: append(sections, clarified...), State: state, Entries: entries, Checkpoint: quiz}, nil
 }
 
-func (s service) guidedCommittedQuiz(session authoringcore.Session) (guidedCommittedQuizResult, error) {
+func (s service) guidedCommittedQuiz(ctx context.Context, session authoringcore.Session) (guidedCommittedQuizResult, error) {
 	var state quizcore.RuntimeState
 
 	for _, checkpoint := range session.Guided.Checkpoints {
@@ -225,7 +224,7 @@ func (s service) guidedCommittedQuiz(session authoringcore.Session) (guidedCommi
 				continue
 			}
 
-			data, err := authoringcore.ReadGuidedCommittedArtifact(s.ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
+			data, err := authoringcore.ReadGuidedCommittedArtifact(ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
 			if err != nil {
 				return guidedCommittedQuizResult{State: state, Checkpoint: checkpoint}, err
 			}

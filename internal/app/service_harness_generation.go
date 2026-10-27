@@ -16,28 +16,41 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
-type generationOperationBinder func(service, context.Context, string, string) (context.Context, error)
+type generationOperationBinder func(service, context.Context, string, string) (*core.HarnessGenerationOperation, error)
+
+// boundGeneration holds selected adapters and the admitted operation value.
+// Callers derive their call context from their own parent; no operation context is retained.
+type boundGeneration struct {
+	service
+	operation *core.HarnessGenerationOperation
+}
+
+func (b boundGeneration) context(parent context.Context) context.Context {
+	if b.operation == nil {
+		return parent
+	}
+
+	return core.WithHarnessGeneration(parent, *b.operation)
+}
 
 var errLegacyGenerationUnavailable = errors.New("legacy generation executable is unavailable")
 
-func (s service) bindGeneration(ctx context.Context, id, purpose string) (service, context.Context, error) {
+func (s service) bindGeneration(ctx context.Context, id, purpose string) (boundGeneration, error) {
 	if s.generationBinder == nil {
-		return s, ctx, errors.New("generation operation binder is required")
+		return boundGeneration{service: s}, errors.New("generation operation binder is required")
 	}
 
-	ctx, err := s.generationBinder(s, ctx, id, purpose)
+	operation, err := s.generationBinder(s, ctx, id, purpose)
 	if err != nil {
-		return s, ctx, err
+		return boundGeneration{service: s}, err
 	}
 
-	s.ctx = ctx
+	bound, err := s.generationAdapters(operation)
 
-	bound, err := s.generationAdapters(ctx)
-
-	return bound, ctx, err
+	return boundGeneration{service: bound, operation: operation}, err
 }
 
-func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) (context.Context, error) {
+func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) (*core.HarnessGenerationOperation, error) {
 	if id == "" {
 		id = rand.Text()
 	}
@@ -56,10 +69,10 @@ func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) 
 		return s.prepareGenerationBinding(ctx, config, purpose)
 	})
 	if err != nil {
-		return ctx, err
+		return nil, err
 	}
 
-	return core.WithHarnessGeneration(ctx, operation), nil
+	return &operation, nil
 }
 
 func (s service) prepareGenerationBinding(ctx context.Context, config core.WorkspaceConfig, purpose string) (core.HarnessGenerationPreparation, error) {
@@ -139,9 +152,8 @@ func prepareCodexGenerationBinding(selection harnesscore.Selection, program stri
 	return core.HarnessGenerationPreparation{Binding: binding, Launch: core.HarnessGenerationLaunch{Program: executable.Command[0]}}, err
 }
 
-func (s service) generationAdapters(ctx context.Context) (service, error) {
-	generation, bound := core.HarnessGenerationSelection(ctx)
-	if !bound {
+func (s service) generationAdapters(generation *core.HarnessGenerationOperation) (service, error) {
+	if generation == nil {
 		return s, nil
 	}
 
@@ -246,7 +258,9 @@ func (s service) singlePassPlan(ctx context.Context) bool {
 }
 
 func (s service) materializeBoundPlanTracking(ctx context.Context, id string, scope quizcore.Scope, plan PlanView, path string) (PlanTrackingResult, error) {
-	bound, ctx, err := s.bindGeneration(ctx, "tracking-"+dumpRequestID(id), string(quizmodel.ActionMaterializePlanTracking))
+	bound, err := s.bindGeneration(ctx, "tracking-"+dumpRequestID(id), string(quizmodel.ActionMaterializePlanTracking))
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}

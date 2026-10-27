@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"sort"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -14,8 +15,8 @@ func (s service) ListSpecDocuments() ([]authoringcore.SpecDocument, error) {
 	return authoringcore.ListSpecDocuments(s.ctx, s.projectContext.ProjectDir)
 }
 
-func (s service) specGenerationSources() (authoringcore.ProjectDumpObservation, error) {
-	observed, err := authoringcore.ObserveProjectDump(s.ctx, s.projectContext.ProjectDir)
+func (s service) specGenerationSources(ctx context.Context) (authoringcore.ProjectDumpObservation, error) {
+	observed, err := authoringcore.ObserveProjectDump(ctx, s.projectContext.ProjectDir)
 	if err != nil {
 		return observed, err
 	}

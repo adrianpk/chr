@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -153,14 +154,14 @@ func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTick
 }
 
 func (s service) StartReadyAgentWorkLoop() (AgentWorkResult, error) {
-	return s.StartAgentWorkLoop(defaultAgentWorkSelectionOptions(1))
+	return s.StartAgentWorkLoop(s.ctx, defaultAgentWorkSelectionOptions(1))
 }
 
 func (s service) StartAllReadyAgentWork() (AgentWorkResult, error) {
-	return s.StartAgentWorkLoop(defaultAgentWorkSelectionOptions(0))
+	return s.StartAgentWorkLoop(s.ctx, defaultAgentWorkSelectionOptions(0))
 }
 
-func (s service) StartAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
+func (s service) StartAgentWorkLoop(ctx context.Context, opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
 	if err := validateAgentWorkSelectionOptions(opts); err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -178,7 +179,7 @@ func (s service) StartAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkRe
 		return AgentWorkResult{}, err
 	}
 
-	result, err := s.startAgentWorkLoop(opts)
+	result, err := s.startAgentWorkLoop(ctx, opts)
 
 	return legacyAgentWorkResult(result), err
 }
@@ -221,15 +222,15 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 	}, nil
 }
 
-func (s service) startAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
-	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
+func (s service) startAgentWorkLoop(ctx context.Context, opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
+	lock, err := acquireAgentOperationLock(ctx, s.projectContext, core.AgentOperationDevelopment)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
 
 	defer releaseAgentOperationLock(lock)()
 
-	integrationResult, err := s.runAgentWorkIntegrationCycles(opts)
+	integrationResult, err := s.runAgentWorkIntegrationCycles(ctx, opts)
 	result, selectedQueue, eligibleCount := integrationResult.Execution, integrationResult.SelectedQueue, integrationResult.EligibleCount
 
 	if err != nil {

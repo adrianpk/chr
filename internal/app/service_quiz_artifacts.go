@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -10,25 +11,26 @@ import (
 )
 
 func (s service) generateQuizDraftSpec(scope quizcore.Scope) (QuizOperationResult, error) {
-	bound, _, err := s.bindGeneration(s.ctx, "", string(quizmodel.ActionDraftSpec))
+	bound, err := s.bindGeneration(s.ctx, "", string(quizmodel.ActionDraftSpec))
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
 
-	s = bound
+	ctx := bound.context(s.ctx)
+	s = bound.service
 	repository := s.quizRepository()
 
-	state, err := repository.LoadRuntimeState(s.ctx, scope)
+	state, err := repository.LoadRuntimeState(ctx, scope)
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
 
-	paths, err := s.writeQuizCuratedNotes(scope)
+	paths, err := s.writeQuizCuratedNotes(ctx, scope)
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
 
-	err = s.writeQuizDraftSpec(state, paths)
+	err = s.writeQuizDraftSpec(ctx, state, paths)
 	if err != nil {
 		return QuizOperationResult{}, err
 	}
@@ -36,34 +38,34 @@ func (s service) generateQuizDraftSpec(scope quizcore.Scope) (QuizOperationResul
 	return QuizOperationResult{Message: "Spec generated.", State: state}, nil
 }
 
-func (s service) writeQuizCuratedNotes(scope quizcore.Scope) (authoringcore.QuizArtifactPaths, error) {
+func (s service) writeQuizCuratedNotes(ctx context.Context, scope quizcore.Scope) (authoringcore.QuizArtifactPaths, error) {
 	repository := s.quizRepository()
 
-	entries, err := repository.LoadRawCaptureEntries(s.ctx, scope)
+	entries, err := repository.LoadRawCaptureEntries(ctx, scope)
 	if err != nil {
 		return authoringcore.QuizArtifactPaths{}, err
 	}
 
-	return repository.WriteCuratedNotes(s.ctx, quizcore.CurateEntries(scope, entries, s.utcNow()))
+	return repository.WriteCuratedNotes(ctx, quizcore.CurateEntries(scope, entries, s.utcNow()))
 }
 
-func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths authoringcore.QuizArtifactPaths) error {
+func (s service) writeQuizDraftSpec(ctx context.Context, state quizcore.RuntimeState, paths authoringcore.QuizArtifactPaths) error {
 	target, err := authoringcore.QuizDraftSpecLayout(s.projectContext.ProjectDir, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
 		return err
 	}
 
-	revision, err := authoringcore.SpecTargetRevision(s.ctx, s.projectContext.ProjectDir, target.RelativePath)
+	revision, err := authoringcore.SpecTargetRevision(ctx, s.projectContext.ProjectDir, target.RelativePath)
 	if err != nil {
 		return err
 	}
 
-	request, err := s.newQuizDraftSpecModelRequest(state, paths)
+	request, err := s.newQuizDraftSpecModelRequest(ctx, state, paths)
 	if err != nil {
 		return err
 	}
 
-	response, err := quizmodel.Invoke(s.ctx, s.quizModel, request)
+	response, err := quizmodel.Invoke(ctx, s.quizModel, request)
 	if err != nil {
 		return err
 	}
@@ -78,18 +80,18 @@ func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths authoring
 	spec.SourceResponseID = response.ID
 	spec.CreatedAt = response.CreatedAt.UTC()
 
-	_, err = authoringcore.WriteQuizDraftSpec(s.ctx, s.projectContext.ProjectDir, spec)
+	_, err = authoringcore.WriteQuizDraftSpec(ctx, s.projectContext.ProjectDir, spec)
 
 	return err
 }
 
-func (s service) newQuizDraftSpecModelRequest(state quizcore.RuntimeState, paths authoringcore.QuizArtifactPaths) (quizmodel.Request, error) {
+func (s service) newQuizDraftSpecModelRequest(ctx context.Context, state quizcore.RuntimeState, paths authoringcore.QuizArtifactPaths) (quizmodel.Request, error) {
 	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, quizmodel.ActionDraftSpec)
+	payload, err := s.newQuizModelPayload(ctx, scope, state, quizmodel.ActionDraftSpec)
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
@@ -99,7 +101,7 @@ func (s service) newQuizDraftSpecModelRequest(state quizcore.RuntimeState, paths
 		return quizmodel.Request{}, err
 	}
 
-	sections, err = s.appendQuizSupplementalContextSections(sections, scope)
+	sections, err = s.appendQuizSupplementalContextSections(ctx, sections, scope)
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
@@ -113,7 +115,7 @@ func (s service) newQuizDraftSpecModelRequest(state quizcore.RuntimeState, paths
 	)
 
 	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
+		ID:              core.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
 		Action:          quizmodel.ActionDraftSpec,
 		Strategy:        "draft_spec",
 		Scope:           scope,

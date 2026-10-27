@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -14,13 +16,14 @@ func quizGenerationOperationID(request quizcore.ActionRequest, state quizcore.Ru
 	return "quiz-" + request.Binding.OperationID
 }
 
-func (s service) invokeQuizGeneration(state quizcore.RuntimeState, request quizmodel.Request) (quizmodel.Response, error) {
-	bound, _, err := s.bindGeneration(s.ctx, state.GenerationOperationID, string(quizmodel.ActionNextQuestion))
+func (s service) invokeQuizGeneration(ctx context.Context, state quizcore.RuntimeState, request quizmodel.Request) (quizmodel.Response, error) {
+	bound, err := s.bindGeneration(ctx, state.GenerationOperationID, string(quizmodel.ActionNextQuestion))
 	if err != nil {
 		return quizmodel.Response{}, err
 	}
 
-	request.ID = core.HarnessGenerationRequestID(bound.ctx, request.ID)
+	ctx = bound.context(ctx)
+	request.ID = core.HarnessGenerationRequestID(ctx, request.ID)
 
-	return quizmodel.Invoke(bound.ctx, bound.quizModel, request)
+	return quizmodel.Invoke(ctx, bound.quizModel, request)
 }

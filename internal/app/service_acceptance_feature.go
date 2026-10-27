@@ -35,7 +35,8 @@ func (s service) GenerateAcceptanceFeature(ctx context.Context, request Acceptan
 	var result AcceptanceFeatureOperationResult
 
 	err := s.withGenerationRuntime(ctx, "acceptance_feature", scope, func(ctx context.Context) error {
-		bound, ctx, err := s.bindGeneration(ctx, "acceptance_feature-"+dumpRequestID(request.OperationID), string(quizmodel.ActionGenerateAcceptanceFeature))
+		bound, err := s.bindGeneration(ctx, "acceptance_feature-"+dumpRequestID(request.OperationID), string(quizmodel.ActionGenerateAcceptanceFeature))
+		ctx = bound.context(ctx)
 		if err != nil {
 			return err
 		}
@@ -55,7 +56,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 		"timeout":   longGenerationTimeout.String(),
 	})
 
-	state, err := s.specGenerationRuntimeState(scope)
+	state, err := s.specGenerationRuntimeState(ctx, scope)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_runtime_state_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -65,7 +66,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 		return AcceptanceFeatureOperationResult{}, err
 	}
 
-	specNode, err := s.latestSpecNodeForFeatureScope(scope)
+	specNode, err := s.latestSpecNodeForFeatureScope(ctx, scope)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_spec_missing", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -75,7 +76,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 		return AcceptanceFeatureOperationResult{}, err
 	}
 
-	modelRequest, err := s.newAcceptanceFeatureModelRequest(state)
+	modelRequest, err := s.newAcceptanceFeatureModelRequest(ctx, state)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_request_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -184,8 +185,8 @@ func (s service) acceptanceFeatureRoundPath(ctx context.Context, scope quizcore.
 	return paths.RelativePath, nil
 }
 
-func (s service) latestSpecNodeForFeatureScope(scope quizcore.Scope) (core.WorkspaceNode, error) {
-	index, err := s.workspaceIndex()
+func (s service) latestSpecNodeForFeatureScope(ctx context.Context, scope quizcore.Scope) (core.WorkspaceNode, error) {
+	index, err := s.workspaceIndex(ctx)
 	if err != nil {
 		return core.WorkspaceNode{}, err
 	}
@@ -198,14 +199,14 @@ func (s service) latestSpecNodeForFeatureScope(scope quizcore.Scope) (core.Works
 	return node, nil
 }
 
-func (s service) newAcceptanceFeatureModelRequest(state quizcore.RuntimeState) (quizmodel.Request, error) {
-	return s.newDocumentGenerationModelRequest(state, documentModelOperation{
+func (s service) newAcceptanceFeatureModelRequest(ctx context.Context, state quizcore.RuntimeState) (quizmodel.Request, error) {
+	return s.newDocumentGenerationModelRequest(ctx, state, documentModelOperation{
 		action: quizmodel.ActionGenerateAcceptanceFeature, strategy: "acceptance_feature_generation", requestIDPrefix: "acceptance-feature-generation",
 	}, s.appendAcceptanceFeatureGenerationContextSections)
 }
 
-func (s service) appendAcceptanceFeatureGenerationContextSections(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
-	sections, err := s.appendGenerationContextSections(sections, scope, sortedAcceptanceFeatureContextNodeIDs)
+func (s service) appendAcceptanceFeatureGenerationContextSections(ctx context.Context, sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
+	sections, err := s.appendGenerationContextSections(ctx, sections, scope, sortedAcceptanceFeatureContextNodeIDs)
 	if err != nil {
 		return nil, err
 	}

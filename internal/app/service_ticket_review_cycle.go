@@ -14,7 +14,7 @@ var newAgenticReviewRunner = func() core.AgenticReviewRunner {
 	return core.HarnessAgenticReviewRunner{Runner: codex.Runner{}}
 }
 
-func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket core.IndexedTicket) (agentWorkRepairResult, error) {
+func (s service) repairAgentWorkCycleTicket(ctx context.Context, state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions, ticket core.IndexedTicket) (agentWorkRepairResult, error) {
 	if !agentWorkCycleRunsRepair(opts.Policy, ticket) {
 		return agentWorkRepairResult{Ticket: ticket, Execution: opts.Execution, Stop: true}, nil
 	}
@@ -23,9 +23,9 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 		return agentWorkRepairResult{Ticket: ticket, Execution: opts.Execution, Stop: true}, nil
 	}
 
-	emitRepairStartedAgentEvent(s.ctx, opts.LoopSink, state.Record, ticket)
+	emitRepairStartedAgentEvent(ctx, opts.LoopSink, state.Record, ticket)
 
-	ticketOutcome, err := s.executeLoopTicket(s.ctx, ticket, ticketExecutionEvents{
+	ticketOutcome, err := s.executeLoopTicket(ctx, ticket, ticketExecutionEvents{
 		LoopID: state.Record.ID,
 		Sink:   opts.LoopSink,
 	})
@@ -39,12 +39,12 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 	state.Result.Applications = append(state.Result.Applications, application)
 
 	if application.TicketStatus == core.TicketResultStatusBlocked {
-		emitRepairFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, execution, ticket)
+		emitRepairFinishedAgentEvent(ctx, opts.LoopSink, state.Record, execution, ticket)
 
 		return agentWorkRepairResult{Ticket: ticket, Execution: execution, Stop: true}, nil
 	}
 
-	reviewResult, err := s.reviewAgentWorkCycleTicket(agentWorkPostDevelopmentOptions{
+	reviewResult, err := s.reviewAgentWorkCycleTicket(ctx, agentWorkPostDevelopmentOptions{
 		Ticket:       ticket,
 		Policy:       opts.Policy,
 		Record:       state.Record,
@@ -60,12 +60,12 @@ func (s service) repairAgentWorkCycleTicket(state *agentWorkIntegrationCycleStat
 		return agentWorkRepairResult{Ticket: core.IndexedTicket{}, Execution: execution, Stop: false}, err
 	}
 
-	emitRepairFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, execution, reviewedTicket)
+	emitRepairFinishedAgentEvent(ctx, opts.LoopSink, state.Record, execution, reviewedTicket)
 
 	return agentWorkRepairResult{Ticket: reviewedTicket, Execution: execution, Stop: stop}, nil
 }
 
-func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions) (agentWorkReviewResult, error) {
+func (s service) reviewAgentWorkCycleTicket(ctx context.Context, opts agentWorkPostDevelopmentOptions) (agentWorkReviewResult, error) {
 	cycleTicket := opts.Ticket
 	runsAgenticReview := agentWorkCycleRunsAgenticReview(opts.Policy, opts.Application)
 	runsTrustedReview := agentWorkCycleRunsTrustedAutoMergeReview(opts.Policy, opts.Application)
@@ -73,13 +73,13 @@ func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions
 	var err error
 
 	if runsAgenticReview {
-		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, reviewStartedEvent{Record: opts.Record, Execution: opts.Execution, Ticket: opts.Ticket, Mode: opts.Policy.Mode})
+		emitReviewStartedAgentEvent(ctx, opts.LoopSink, reviewStartedEvent{Record: opts.Record, Execution: opts.Execution, Ticket: opts.Ticket, Mode: opts.Policy.Mode})
 
-		cycleTicket, err = s.runAgenticReviewCycle(opts.Ticket, opts.Execution, opts.Application, opts.ReviewConfig)
+		cycleTicket, err = s.runAgenticReviewCycle(ctx, opts.Ticket, opts.Execution, opts.Application, opts.ReviewConfig)
 	}
 
 	if runsTrustedReview {
-		emitReviewStartedAgentEvent(s.ctx, opts.LoopSink, reviewStartedEvent{Record: opts.Record, Execution: opts.Execution, Ticket: opts.Ticket, Mode: opts.Policy.Mode})
+		emitReviewStartedAgentEvent(ctx, opts.LoopSink, reviewStartedEvent{Record: opts.Record, Execution: opts.Execution, Ticket: opts.Ticket, Mode: opts.Policy.Mode})
 
 		cycleTicket, err = s.runTrustedAutoMergeReviewCycle(opts.Ticket, opts.Execution, opts.Application)
 	}
@@ -89,7 +89,7 @@ func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions
 	}
 
 	if runsAgenticReview || runsTrustedReview {
-		emitReviewFinishedAgentEvent(s.ctx, opts.LoopSink, opts.Record, opts.Execution, cycleTicket)
+		emitReviewFinishedAgentEvent(ctx, opts.LoopSink, opts.Record, opts.Execution, cycleTicket)
 	}
 
 	stop := agentWorkCycleStopsBeforeMerge(opts.Policy) || !agentWorkCycleTicketReadyForMerge(opts.Policy, cycleTicket)
@@ -97,11 +97,11 @@ func (s service) reviewAgentWorkCycleTicket(opts agentWorkPostDevelopmentOptions
 	return agentWorkReviewResult{Ticket: cycleTicket, Stop: stop}, nil
 }
 
-func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) (core.IndexedTicket, error) {
+func (s service) runAgenticReviewCycle(ctx context.Context, selected core.IndexedTicket, execution core.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) (core.IndexedTicket, error) {
 	reviewedAt := s.now().UTC()
 	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
 
-	ticket, err := parseAgenticReviewTicket(s.ctx, s.projectContext.ProjectID, reviewProjectDir, application.TicketPath, reviewedAt)
+	ticket, err := parseAgenticReviewTicket(ctx, s.projectContext.ProjectID, reviewProjectDir, application.TicketPath, reviewedAt)
 	if err != nil {
 		return core.IndexedTicket{}, err
 	}
@@ -109,20 +109,20 @@ func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution co
 	ticket = agentWorkTicketWithSelectedReviewMetadata(ticket, selected)
 	s.generationExecutionDir = reviewProjectDir
 
-	bound, _, err := s.bindGeneration(s.ctx, "review-"+execution.ID, "agentic_review")
+	bound, err := s.bindGeneration(ctx, "review-"+execution.ID, "agentic_review")
 	if err != nil {
 		return core.IndexedTicket{}, err
 	}
 
-	s = bound
+	ctx = bound.context(ctx)
 
 	runner := newAgenticReviewRunner()
-	if native, ok := runner.(core.HarnessAgenticReviewRunner); ok && s.generationRunner != nil {
-		native.Runner = s.generationRunner
+	if native, ok := runner.(core.HarnessAgenticReviewRunner); ok && bound.generationRunner != nil {
+		native.Runner = bound.generationRunner
 		runner = native
 	}
 
-	artifact, err := runner.Review(s.ctx, core.AgenticReviewContext{
+	artifact, err := runner.Review(ctx, core.AgenticReviewContext{
 		ProjectID:           s.projectContext.ProjectID,
 		ProjectDir:          reviewProjectDir,
 		Ticket:              ticket,
@@ -134,7 +134,7 @@ func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution co
 		return core.IndexedTicket{}, err
 	}
 
-	result, err := core.ApplyAgenticReviewResult(s.ctx, core.ApplyAgenticReviewResultOptions{
+	result, err := core.ApplyAgenticReviewResult(ctx, core.ApplyAgenticReviewResultOptions{
 		Ticket:     ticket,
 		Artifact:   artifact,
 		ReviewedAt: reviewedAt,
@@ -143,7 +143,7 @@ func (s service) runAgenticReviewCycle(selected core.IndexedTicket, execution co
 		return core.IndexedTicket{}, err
 	}
 
-	err = writeAgenticReviewNonBlockingComments(s.ctx, ticket.Path, artifact.Result.NonBlockingNotes, config.NonBlockingCommentLimit, reviewedAt)
+	err = writeAgenticReviewNonBlockingComments(ctx, ticket.Path, artifact.Result.NonBlockingNotes, config.NonBlockingCommentLimit, reviewedAt)
 	if err != nil {
 		return core.IndexedTicket{}, err
 	}

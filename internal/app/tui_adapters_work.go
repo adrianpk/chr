@@ -61,7 +61,7 @@ func (e tuiWorkActionExecutor) startReadyLoopResult() (tui.WorkActionResult, err
 }
 
 func (e tuiWorkActionExecutor) runAllReadyResult(request tui.WorkActionRequest) (tui.WorkActionResult, error) {
-	result, err := e.operations.StartAgentWorkLoop(agentWorkSelectionOptionsFromTUIRequest(request))
+	result, err := e.operations.StartAgentWorkLoop(e.operations.ctx, agentWorkSelectionOptionsFromTUIRequest(request))
 	if err != nil {
 		return tui.WorkActionResult{}, err
 	}

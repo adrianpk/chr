@@ -303,7 +303,7 @@ func (factory commandFactory) workRunAllAction(ctx context.Context, cmd *cli.Com
 		return printAgentWorkRunAllPreview(factory.io.Stdout, projectContext, selection, result)
 	}
 
-	result, err := operations.StartAgentWorkLoop(selection)
+	result, err := operations.StartAgentWorkLoop(ctx, selection)
 	if err != nil {
 		return err
 	}

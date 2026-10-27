@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -12,9 +13,9 @@ import (
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
-func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
+func (s service) nextQuizQuestion(ctx context.Context, state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
 	if state.Mode == quizcore.ModeFast {
-		return s.nextFastQuizQuestion(state, entries)
+		return s.nextFastQuizQuestion(ctx, state, entries)
 	}
 
 	if len(state.Candidates) > 0 {
@@ -24,12 +25,12 @@ func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcor
 		return state, nil
 	}
 
-	request, err := s.newQuizModelRequestWithEntries(state, entries)
+	request, err := s.newQuizModelRequestWithEntries(ctx, state, entries)
 	if err != nil {
 		return state, err
 	}
 
-	response, err := s.invokeQuizGeneration(state, request)
+	response, err := s.invokeQuizGeneration(ctx, state, request)
 	if err != nil {
 		return state, err
 	}
@@ -57,11 +58,11 @@ func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcor
 	return state, nil
 }
 
-func (s service) nextFastQuizQuestion(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
+func (s service) nextFastQuizQuestion(ctx context.Context, state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
 	if state.FastBatchID == "" {
 		var err error
 
-		state, err = s.generateFastQuizBatch(state, entries)
+		state, err = s.generateFastQuizBatch(ctx, state, entries)
 		if err != nil {
 			return state, err
 		}
@@ -91,13 +92,13 @@ func (s service) activateNextFastQuestion(state quizcore.RuntimeState) quizcore.
 	return quizcore.ActivateCandidate(state, candidate, s.utcNow())
 }
 
-func (s service) generateFastQuizBatch(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
-	request, err := s.newQuizModelRequestWithEntries(state, entries)
+func (s service) generateFastQuizBatch(ctx context.Context, state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
+	request, err := s.newQuizModelRequestWithEntries(ctx, state, entries)
 	if err != nil {
 		return state, err
 	}
 
-	response, err := s.invokeQuizGeneration(state, request)
+	response, err := s.invokeQuizGeneration(ctx, state, request)
 	if err != nil {
 		return state, err
 	}

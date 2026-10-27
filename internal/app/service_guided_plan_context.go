@@ -17,13 +17,13 @@ type guidedPlanSourcesResult struct {
 	State   quizcore.RuntimeState
 }
 
-func (s service) guidedPlanSources(session authoringcore.Session) (guidedPlanSourcesResult, error) {
-	inputs, err := s.guidedSpecInputs(session)
+func (s service) guidedPlanSources(ctx context.Context, session authoringcore.Session) (guidedPlanSourcesResult, error) {
+	inputs, err := s.guidedSpecInputs(ctx, session)
 	if err != nil {
 		return guidedPlanSourcesResult{State: inputs.State}, err
 	}
 
-	specification, err := s.guidedCommittedSections(session, "specification")
+	specification, err := s.guidedCommittedSections(ctx, session, "specification")
 	if err != nil {
 		return guidedPlanSourcesResult{State: inputs.State}, err
 	}
@@ -64,12 +64,14 @@ func (s service) generateGuidedContracts(ctx context.Context, session authoringc
 
 	input.UseCase = session.Guided.CaseSlug
 
-	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(quizmodel.ActionMaterializePlanTracking))
+	bound, err := s.bindGeneration(ctx, input.MaterializationID, string(quizmodel.ActionMaterializePlanTracking))
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		return input, err
 	}
 
-	request, err := bound.guidedContractsRequest(session, input)
+	request, err := bound.guidedContractsRequest(ctx, session, input)
 	if err != nil {
 		return input, err
 	}
@@ -91,13 +93,13 @@ func (s service) generateGuidedContracts(ctx context.Context, session authoringc
 	return generated, nil
 }
 
-func (s service) guidedContractsRequest(session authoringcore.Session, input generationcore.GeneratedWorkflowPlan) (quizmodel.Request, error) {
-	observed, err := s.guidedPlanSources(session)
+func (s service) guidedContractsRequest(ctx context.Context, session authoringcore.Session, input generationcore.GeneratedWorkflowPlan) (quizmodel.Request, error) {
+	observed, err := s.guidedPlanSources(ctx, session)
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
 
-	request, err := s.newPlanningModelRequest(observed.State, observed.Sources, documentModelOperation{action: quizmodel.ActionMaterializePlanTracking, strategy: quizmodel.StrategyPlanDelivery, requestIDPrefix: "guided-contracts"})
+	request, err := s.newPlanningModelRequest(ctx, observed.State, observed.Sources, documentModelOperation{action: quizmodel.ActionMaterializePlanTracking, strategy: quizmodel.StrategyPlanDelivery, requestIDPrefix: "guided-contracts"})
 	if err != nil {
 		return request, err
 	}

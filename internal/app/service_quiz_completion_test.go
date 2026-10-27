@@ -25,7 +25,7 @@ func TestServiceQuizFullHistory(t *testing.T) {
 		entries[index] = quizcore.Entry{Question: fmt.Sprintf("Decision %d?", index), Answer: fmt.Sprintf("Answer %d.", index), Status: quizcore.EntryStatusAnswered}
 	}
 
-	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	request, err := operations.newQuizModelRequestWithEntries(t.Context(), state, entries)
 	if err != nil {
 		t.Fatal(err)
 	}

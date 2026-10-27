@@ -82,7 +82,7 @@ func TestTelegramHarnessSelectionVisibility(t *testing.T) {
 	webHarnessCheckProcess(t, operations, saved)
 	webHarnessCheckRetained(t, operations, worker)
 	webHarnessCheckNewInvocation(t, operations, record, start)
-	telegramHarnessCheckGeneration(t.Context(), t, operations, bound)
+	telegramHarnessCheckGeneration(t.Context(), t, operations, core.WithHarnessGeneration(t.Context(), *bound))
 
 	if notice := f.send(t, "/harness", 0); !strings.Contains(notice.Text, "Worker: beta") || !strings.Contains(notice.Text, "alpha · Codex · model-a") {
 		t.Fatal("Telegram confused defaults with retained worker binding", notice)
@@ -117,12 +117,12 @@ func telegramHarnessCheckGeneration(ctx context.Context, t *testing.T, operation
 func telegramHarnessGenerationBinding(ctx context.Context, t *testing.T, operations service, id string) harnesscore.GenerationBinding {
 	t.Helper()
 
-	ctx, err := operations.bindHarnessGeneration(ctx, id, "spec_generation")
+	operation, err := operations.bindHarnessGeneration(ctx, id, "spec_generation")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	generation, bound := core.HarnessGenerationSelection(ctx)
+	generation, bound := core.HarnessGenerationSelection(core.WithHarnessGeneration(ctx, *operation))
 	if !bound {
 		t.Fatal("generation selection was not bound")
 	}

@@ -94,6 +94,15 @@ consumers call each owner directly; no root forwarding API remains. The existing
 large, symlink, FIFO, directory and oversized executable tests follow their host
 owner. Native admission still owns its distinct omitted-command request case.
 
+Application generation binding now returns one boundGeneration value containing
+selected adapters and the admitted operation, without an operation context. Its
+callers derive contexts from their own parents. Model IDs, source observations,
+quiz transitions, guided reads and review dispatch receive that explicit context.
+The guarded quiz/spec paths no longer copy their writer context into a service.
+The original binding, protocol checks, fallback behavior and finite budgets remain.
+A real Pi peer regression cancels one caller and then dispatches the same admitted
+operation from a fresh caller; capacity peers retain independent cancellation.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -140,9 +149,10 @@ Focused implementation checks passed:
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`
 
-The signature disposition ledger records 30 fixed occurrences and seven cohesive
-five-input contracts. Only service.bindGeneration remains pending. The fixed signatures
-and two owned resolver contracts remove 29 exact debt allowances: 208 remain, with ceiling seven and one external
+The signature disposition ledger records 31 fixed occurrences and seven cohesive
+five-input contracts. All 38 assigned occurrences now have a concrete disposition.
+Together with the two additional owned resolver contracts, these changes remove
+30 exact debt allowances: 207 remain, with ceiling seven and one external
 exception unchanged. No migration debt or broader allowance is introduced.
 
 Focused runtime/resource and concurrency checks passed:
@@ -227,9 +237,19 @@ consumers and the baseline disposition follow the moved operation.
 - `go test ./internal/core/harness/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessBinding|HarnessGeneration|HarnessSelection|QualityRecordWire|ServiceHarness|Leaf)' -count=1 -timeout=3m`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
 
+Generation caller context checks passed:
+
+- `go test ./internal/app -run '^Test(HarnessGenerationCallerContext|HarnessGenerationBinding|HarnessJourney|PiGeneration|GuidedUseCase(Spec|Quiz|Plan|Admission)|TelegramHarness)' -count=1 -timeout=3m`
+- `go test ./internal/app -run '^Test(AgentWork|StartAgent|Work|FastQuiz|Quiz|Generate|Spec|Plan|Dump)' -count=1 -timeout=3m`
+- `go test -race ./internal/app -run '^Test(HarnessGenerationCallerContext|PiGenerationCapacity)$' -count=1 -timeout=3m`
+- `make check-go-style`: 9304 declarations, ceiling seven, 207 exact debts, one external exception.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/app`: zero issues.
+
 ## Risks and Follow-ups
 
-T10.1-T10.6 remain in progress or pending; PR readiness is not established.
-Remaining work includes configuration/selection and generation admission owners,
-the service.bindGeneration signature, host lifecycle/flag review and final exact-head
-controller validation. No Slice 10 PR has been opened.
+The slice remains in progress; PR readiness is not established. All assigned
+signature occurrences are reconciled. Remaining work includes configuration/
+selection and generation admission ownership, runtime host boundaries, the
+remaining lifecycle/flag/wrapper review, and final exact-HEAD controller validation.
+No Slice 10 PR has been opened.

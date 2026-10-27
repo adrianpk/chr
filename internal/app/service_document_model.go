@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
@@ -14,10 +15,10 @@ type documentModelOperation struct {
 	requestIDPrefix string
 }
 
-func (s service) newDocumentGenerationModelRequest(state quizcore.RuntimeState, operation documentModelOperation, appendContext func([]quizmodel.ContextSection, quizcore.Scope) ([]quizmodel.ContextSection, error)) (quizmodel.Request, error) {
+func (s service) newDocumentGenerationModelRequest(ctx context.Context, state quizcore.RuntimeState, operation documentModelOperation, appendContext func(context.Context, []quizmodel.ContextSection, quizcore.Scope) ([]quizmodel.ContextSection, error)) (quizmodel.Request, error) {
 	scope := quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 
-	payload, err := s.newQuizModelPayload(scope, state, operation.action)
+	payload, err := s.newQuizModelPayload(ctx, scope, state, operation.action)
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
@@ -27,17 +28,20 @@ func (s service) newDocumentGenerationModelRequest(state quizcore.RuntimeState, 
 		return quizmodel.Request{}, err
 	}
 
-	sections, err = appendContext(sections, scope)
+	sections, err = appendContext(ctx, sections, scope)
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
 
-	return s.documentGenerationModelRequest(scope, state, payload, sections, operation), nil
+	request := s.documentGenerationModelRequest(scope, state, payload, sections, operation)
+	request.ID = core.HarnessGenerationRequestID(ctx, request.ID)
+
+	return request, nil
 }
 
 func (s service) documentGenerationModelRequest(scope quizcore.Scope, state quizcore.RuntimeState, payload quizmodel.Payload, sections []quizmodel.ContextSection, operation documentModelOperation) quizmodel.Request {
 	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("%s-%s", operation.requestIDPrefix, specScopeID(scope))),
+		ID:              fmt.Sprintf("%s-%s", operation.requestIDPrefix, specScopeID(scope)),
 		Action:          operation.action,
 		Strategy:        operation.strategy,
 		Scope:           scope,

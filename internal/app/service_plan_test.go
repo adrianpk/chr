@@ -172,12 +172,12 @@ The implementation must preserve editorial review.
 
 	operations := newPlanTestService(t, projectDir)
 	scope := quizcore.Scope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
-	state, err := operations.specGenerationRuntimeState(scope)
+	state, err := operations.specGenerationRuntimeState(t.Context(), scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
 	}
 
-	request, err := operations.newPlanOutlineGenerationModelRequest(state, planTestSources(t, operations, scope))
+	request, err := operations.newPlanOutlineGenerationModelRequest(t.Context(), state, planTestSources(t, operations, scope))
 	if err != nil {
 		t.Fatalf("newPlanOutlineGenerationModelRequest returned error: %v", err)
 	}
@@ -227,12 +227,12 @@ The implementation must preserve editorial review.
 
 	operations := newPlanTestService(t, projectDir)
 	scope := quizcore.Scope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
-	state, err := operations.specGenerationRuntimeState(scope)
+	state, err := operations.specGenerationRuntimeState(t.Context(), scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
 	}
 
-	request, err := operations.newPlanGenerationModelRequest(state, planTestSources(t, operations, scope))
+	request, err := operations.newPlanGenerationModelRequest(t.Context(), state, planTestSources(t, operations, scope))
 	if err != nil {
 		t.Fatalf("newPlanGenerationModelRequest returned error: %v", err)
 	}
@@ -274,13 +274,13 @@ The implementation must preserve editorial review.
 
 	operations := newPlanTestService(t, projectDir)
 	scope := quizcore.Scope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}
-	state, err := operations.specGenerationRuntimeState(scope)
+	state, err := operations.specGenerationRuntimeState(t.Context(), scope)
 	if err != nil {
 		t.Fatalf("specGenerationRuntimeState returned error: %v", err)
 	}
 
 	outline := validServiceGeneratedPlanOutline(scope, operations.now())
-	request, err := operations.newPlanSliceDetailGenerationModelRequest(state, planTestSources(t, operations, scope), outline, "Slice 1")
+	request, err := operations.newPlanSliceDetailGenerationModelRequest(t.Context(), state, planTestSources(t, operations, scope), outline, "Slice 1")
 	if err != nil {
 		t.Fatalf("newPlanSliceDetailGenerationModelRequest returned error: %v", err)
 	}

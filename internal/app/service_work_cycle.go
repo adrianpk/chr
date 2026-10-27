@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+
 	"forge.adrianpk.com/chr/internal/core"
 )
 
@@ -21,8 +23,8 @@ type agentWorkPostDevelopmentOptions struct {
 	LoopSink     core.AgentEventSink
 }
 
-func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (agentWorkIntegrationResult, error) {
-	repository, err := core.NewLoopRunRepository(s.ctx, s.env, s.assetsFS)
+func (s service) runAgentWorkIntegrationCycles(ctx context.Context, opts AgentWorkSelectionOptions) (agentWorkIntegrationResult, error) {
+	repository, err := core.NewLoopRunRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return agentWorkIntegrationResult{Execution: ticketLoopExecutionResult{}, SelectedQueue: nil, EligibleCount: 0}, err
 	}
@@ -44,12 +46,12 @@ func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (
 		return agentWorkIntegrationResult{Execution: ticketLoopExecutionResult{}, SelectedQueue: nil, EligibleCount: 0}, err
 	}
 
-	if err := repository.CreateLoopRun(s.ctx, record); err != nil {
+	if err := repository.CreateLoopRun(ctx, record); err != nil {
 		return agentWorkIntegrationResult{Execution: ticketLoopExecutionResult{}, SelectedQueue: nil, EligibleCount: 0}, err
 	}
 
 	loopSink := agentWorkLoopEventSink(s.projectContext.ProjectDir, record)
-	emitLoopStartedAgentEvent(s.ctx, loopSink, record)
+	emitLoopStartedAgentEvent(ctx, loopSink, record)
 
 	state := agentWorkIntegrationCycleState{
 		Result:        ticketLoopExecutionResult{Record: record, AuthorityExcluded: selection.ExcludedAdopted},
@@ -62,7 +64,7 @@ func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (
 	for len(selection.Tickets) > 0 && agentWorkCycleLimitAllowsNext(opts, processedCycles) {
 		var stop bool
 
-		cycleResult, err := s.runAgentWorkIntegrationCycle(selection, state, loopSink)
+		cycleResult, err := s.runAgentWorkIntegrationCycle(ctx, selection, state, loopSink)
 
 		state, stop = cycleResult.State, cycleResult.Stop
 		if err != nil {
@@ -84,7 +86,7 @@ func (s service) runAgentWorkIntegrationCycles(opts AgentWorkSelectionOptions) (
 	return s.finishAgentWorkIntegrationCycles(repository, state, loopSink, initialEligibleCount)
 }
 
-func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink) (agentWorkCycleResult, error) {
+func (s service) runAgentWorkIntegrationCycle(ctx context.Context, selection agentWorkLoopSelection, state agentWorkIntegrationCycleState, loopSink core.AgentEventSink) (agentWorkCycleResult, error) {
 	ticket := selection.Tickets[0]
 
 	cyclePlan, err := core.PlanIntegrationCycle(core.IntegrationCyclePlanOptions{
@@ -97,9 +99,9 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	}
 
 	state.SelectedQueue = append(state.SelectedQueue, ticket)
-	emitTicketSelectedAgentEvent(s.ctx, loopSink, state.Record, ticket)
+	emitTicketSelectedAgentEvent(ctx, loopSink, state.Record, ticket)
 
-	ticketOutcome, err := s.executeLoopTicket(s.ctx, ticket, ticketExecutionEvents{
+	ticketOutcome, err := s.executeLoopTicket(ctx, ticket, ticketExecutionEvents{
 		LoopID: state.Record.ID,
 		Sink:   loopSink,
 	})
@@ -113,7 +115,7 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	state.Result.Applications = append(state.Result.Applications, application)
 	state.Record.ProcessedCount++
 
-	stop, err := s.finishAgentWorkIntegrationCycle(&state, agentWorkPostDevelopmentOptions{
+	stop, err := s.finishAgentWorkIntegrationCycle(ctx, &state, agentWorkPostDevelopmentOptions{
 		Ticket:       ticket,
 		Policy:       cyclePlan.Policy,
 		Record:       state.Record,
@@ -130,8 +132,8 @@ func (s service) runAgentWorkIntegrationCycle(selection agentWorkLoopSelection, 
 	return agentWorkCycleResult{State: state, Stop: stop}, nil
 }
 
-func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions) (bool, error) {
-	emitCycleRehydratedAgentEvent(s.ctx, opts.LoopSink, state.Record, opts.Execution, opts.Application)
+func (s service) finishAgentWorkIntegrationCycle(ctx context.Context, state *agentWorkIntegrationCycleState, opts agentWorkPostDevelopmentOptions) (bool, error) {
+	emitCycleRehydratedAgentEvent(ctx, opts.LoopSink, state.Record, opts.Execution, opts.Application)
 
 	if opts.Application.TicketStatus == core.TicketResultStatusBlocked {
 		state.Record.BlockedCount++
@@ -139,7 +141,7 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 		return true, nil
 	}
 
-	reviewResult, err := s.reviewAgentWorkCycleTicket(opts)
+	reviewResult, err := s.reviewAgentWorkCycleTicket(ctx, opts)
 	cycleTicket, stop := reviewResult.Ticket, reviewResult.Stop
 
 	if err != nil {
@@ -148,7 +150,7 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 
 	finalExecution := opts.Execution
 	if stop {
-		repairResult, err := s.repairAgentWorkCycleTicket(state, opts, cycleTicket)
+		repairResult, err := s.repairAgentWorkCycleTicket(ctx, state, opts, cycleTicket)
 		cycleTicket, finalExecution, stop = repairResult.Ticket, repairResult.Execution, repairResult.Stop
 
 		if err != nil {
@@ -166,7 +168,7 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 		return false, nil
 	}
 
-	emitMergeStartedAgentEvent(s.ctx, opts.LoopSink, state.Record, finalExecution, cycleTicket)
+	emitMergeStartedAgentEvent(ctx, opts.LoopSink, state.Record, finalExecution, cycleTicket)
 
 	merge, err := s.runAgentWorkMergeCycle(agentWorkMergeCycleOptions{
 		Ticket:       cycleTicket,
@@ -179,7 +181,7 @@ func (s service) finishAgentWorkIntegrationCycle(state *agentWorkIntegrationCycl
 	}
 
 	state.Result.Merges = append(state.Result.Merges, merge)
-	emitMergeFinishedAgentEvent(s.ctx, opts.LoopSink, state.Record, finalExecution, merge)
+	emitMergeFinishedAgentEvent(ctx, opts.LoopSink, state.Record, finalExecution, merge)
 
 	if agentWorkCycleMergeBlocked(merge) {
 		state.Record.BlockedCount++

@@ -113,12 +113,14 @@ func prepareHarnessLivePi(t *testing.T, operations service, options harnessLiveP
 func harnessLivePiGeneration(t *testing.T, operations service) core.HarnessRunMetadata {
 	t.Helper()
 
-	bound, ctx, err := operations.bindGeneration(t.Context(), "live-pi-generation", "spec_generation")
+	bound, err := operations.bindGeneration(t.Context(), "live-pi-generation", "spec_generation")
+
+	ctx := bound.context(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request := harnessJourneyRequest(bound, "live-structured-call")
+	request := harnessJourneyRequest(bound.service, "live-structured-call")
 
 	output, err := bound.conversationModel.InvokeStructuredModel(ctx, request)
 	if err != nil {

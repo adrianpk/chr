@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -11,9 +12,9 @@ import (
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
-func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.Request, error) {
+func (s service) newQuizModelRequestWithEntries(ctx context.Context, state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.Request, error) {
 	if s.guidedContext != nil {
-		return s.guidedQuizModelRequest(state, entries)
+		return s.guidedQuizModelRequest(ctx, state, entries)
 	}
 
 	scope := quizcore.Scope{
@@ -28,7 +29,7 @@ func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, ent
 		return quizmodel.Request{}, err
 	}
 
-	supplementalSections, err := s.appendQuizSupplementalContextSections(nil, scope)
+	supplementalSections, err := s.appendQuizSupplementalContextSections(ctx, nil, scope)
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
@@ -49,7 +50,7 @@ func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, ent
 	}
 
 	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
+		ID:              core.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
 		Action:          quizmodel.ActionNextQuestion,
 		Strategy:        quizModelStrategy(state.Mode),
 		Scope:           scope,
@@ -64,8 +65,8 @@ func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, ent
 	}, nil
 }
 
-func (s service) newQuizModelPayload(scope quizcore.Scope, state quizcore.RuntimeState, action quizmodel.Action) (quizmodel.Payload, error) {
-	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, scope)
+func (s service) newQuizModelPayload(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, action quizmodel.Action) (quizmodel.Payload, error) {
+	entries, err := s.quizRepository().LoadRawCaptureEntries(ctx, scope)
 	if err != nil {
 		return quizmodel.Payload{}, err
 	}
@@ -97,7 +98,7 @@ func (s service) quizModelProjectPayload() quizmodel.ProjectPayload {
 	return payload
 }
 
-func (s service) appendQuizSupplementalContextSections(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
+func (s service) appendQuizSupplementalContextSections(ctx context.Context, sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", authoringcore.ProjectMetadataPath(""))
 
@@ -111,7 +112,7 @@ func (s service) appendQuizSupplementalContextSections(sections []quizmodel.Cont
 		)
 	}
 
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(ctx)
 	if err != nil {
 		return nil, err
 	}

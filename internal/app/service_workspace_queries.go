@@ -1,6 +1,10 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/core"
+import (
+	"context"
+
+	"forge.adrianpk.com/chr/internal/core"
+)
 
 // WorkspacePathResolutionResult reports a workspace index path resolution.
 type WorkspacePathResolutionResult struct {
@@ -24,7 +28,7 @@ type WorkspaceIndexSearchResult struct {
 }
 
 func (s service) ListWorkspaceCases() ([]core.WorkspaceCaseSuggestion, error) {
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(s.ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +37,7 @@ func (s service) ListWorkspaceCases() ([]core.WorkspaceCaseSuggestion, error) {
 }
 
 func (s service) SuggestWorkspaceCases(query string) ([]core.WorkspaceCaseSuggestion, error) {
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(s.ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +46,7 @@ func (s service) SuggestWorkspaceCases(query string) ([]core.WorkspaceCaseSugges
 }
 
 func (s service) ResolveWorkspacePath(path string) (WorkspacePathResolutionResult, error) {
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(s.ctx)
 	if err != nil {
 		return WorkspacePathResolutionResult{}, err
 	}
@@ -62,7 +66,7 @@ func (s service) ResolveWorkspacePath(path string) (WorkspacePathResolutionResul
 }
 
 func (s service) RelatedWorkspaceDocuments(nodeID string) (WorkspaceRelatedDocumentsResult, error) {
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(s.ctx)
 	if err != nil {
 		return WorkspaceRelatedDocumentsResult{}, err
 	}
@@ -83,7 +87,7 @@ func (s service) RelatedWorkspaceDocuments(nodeID string) (WorkspaceRelatedDocum
 }
 
 func (s service) SearchWorkspaceIndex(query string) (WorkspaceIndexSearchResult, error) {
-	index, err := s.workspaceIndex()
+	index, err := s.workspaceIndex(s.ctx)
 	if err != nil {
 		return WorkspaceIndexSearchResult{}, err
 	}
@@ -101,8 +105,8 @@ func (s service) SearchWorkspaceIndex(query string) (WorkspaceIndexSearchResult,
 	}, nil
 }
 
-func (s service) workspaceIndex() (core.WorkspaceIndex, error) {
-	result, err := core.NewWorkspaceGraphBuilder(s.projectContext.ProjectDir).BuildCachedIndex(s.ctx)
+func (s service) workspaceIndex(ctx context.Context) (core.WorkspaceIndex, error) {
+	result, err := core.NewWorkspaceGraphBuilder(s.projectContext.ProjectDir).BuildCachedIndex(ctx)
 	if err != nil {
 		return core.WorkspaceIndex{}, err
 	}

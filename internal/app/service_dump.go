@@ -130,13 +130,13 @@ func (s service) resolveDumpPath(relativePath string) (string, error) {
 	return filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(observed.Reference)), nil
 }
 
-func (s service) curateDump(request DumpCreateRequest) (DumpCurationResult, error) {
+func (s service) curateDump(ctx context.Context, request DumpCreateRequest) (DumpCurationResult, error) {
 	provider := s.dumpCurator
 	if provider == nil {
 		provider = fallbackDumpCurationProvider{Reason: "dump curation provider is not configured"}
 	}
 
-	result, err := provider.CurateDump(s.ctx, DumpCurationRequest{
+	result, err := provider.CurateDump(ctx, DumpCurationRequest{
 		ProjectDir: s.projectContext.ProjectDir,
 		ProjectID:  s.projectContext.ProjectID,
 		Title:      request.Title,
@@ -147,13 +147,13 @@ func (s service) curateDump(request DumpCreateRequest) (DumpCurationResult, erro
 		return normalizeDumpCurationResult(result, request.Content), nil
 	}
 
-	if generation, bound := core.HarnessGenerationSelection(s.ctx); bound && generation.Binding.Selection.Source == "project" {
+	if generation, bound := core.HarnessGenerationSelection(ctx); bound && generation.Binding.Selection.Source == "project" {
 		return DumpCurationResult{}, err
 	}
 
 	fallback, fallbackErr := (fallbackDumpCurationProvider{
 		Reason: "llm_unavailable: " + err.Error(),
-	}).CurateDump(s.ctx, DumpCurationRequest{
+	}).CurateDump(ctx, DumpCurationRequest{
 		ProjectDir: s.projectContext.ProjectDir,
 		ProjectID:  s.projectContext.ProjectID,
 		Title:      request.Title,

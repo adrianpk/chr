@@ -149,7 +149,9 @@ func (f *harnessJourney) startGeneration(t *testing.T) harnessJourneyActive {
 
 	ctx, cancel := context.WithTimeout(t.Context(), time.Minute)
 
-	bound, ctx, err := f.operations.bindGeneration(ctx, "original-generation", "spec_generation")
+	bound, err := f.operations.bindGeneration(ctx, "original-generation", "spec_generation")
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		cancel()
 		t.Fatal(err)
@@ -161,7 +163,7 @@ func (f *harnessJourney) startGeneration(t *testing.T) harnessJourneyActive {
 	go func() {
 		defer close(finished)
 
-		result <- harnessJourneyInvoke(ctx, bound, "original-call")
+		result <- harnessJourneyInvoke(ctx, bound.service, "original-call")
 	}()
 
 	t.Cleanup(func() {

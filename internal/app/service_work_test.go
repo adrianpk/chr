@@ -185,7 +185,7 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{
+	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{
 		Statuses:      []string{core.TicketStatusReadyForDev},
 		Order:         workflowstate.TicketOrderCreatedAt,
 		MaxIterations: 1,
@@ -328,7 +328,7 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{MaxIterations: 2})
 	if err != nil {
 		t.Fatalf("StartAllReadyAgentWork returned error: %v", err)
 	}
@@ -379,7 +379,7 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{MaxIterations: 2})
 	if err != nil {
 		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
 	}
@@ -425,7 +425,7 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) 
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{MaxIterations: 2})
 	if err != nil {
 		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
 	}
@@ -472,7 +472,7 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{MaxIterations: 2})
 	if err != nil {
 		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
 	}
@@ -528,7 +528,7 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
-	result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 2})
+	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{MaxIterations: 2})
 	if err != nil {
 		t.Fatalf("StartAgentWorkLoop returned error: %v", err)
 	}

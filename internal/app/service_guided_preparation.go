@@ -90,12 +90,14 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *authoringcore.S
 }
 
 func (s service) generateGuidedPlan(ctx context.Context, session authoringcore.Session) (authoringcore.GuidedPreparedPlan, error) {
-	bound, ctx, err := s.bindGeneration(ctx, session.Guided.Work.PublicationOperation.ID, string(quizmodel.ActionGeneratePlan))
+	bound, err := s.bindGeneration(ctx, session.Guided.Work.PublicationOperation.ID, string(quizmodel.ActionGeneratePlan))
+	ctx = bound.context(ctx)
+
 	if err != nil {
 		return authoringcore.GuidedPreparedPlan{}, err
 	}
 
-	observed, err := bound.guidedPlanSources(session)
+	observed, err := bound.guidedPlanSources(ctx, session)
 	if err != nil {
 		return authoringcore.GuidedPreparedPlan{}, err
 	}

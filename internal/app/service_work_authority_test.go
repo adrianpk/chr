@@ -177,7 +177,7 @@ func TestServiceWorkAuthority(t *testing.T) {
 			writeCLIWorkspaceConfig(t, project, tc.config)
 
 			operations := newTestService(t, project)
-			if _, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: tc.limit}); err == nil {
+			if _, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{MaxIterations: tc.limit}); err == nil {
 				t.Fatal("invalid authority request accepted")
 			}
 
@@ -237,7 +237,7 @@ func checkServiceWorkNativeSteps(t *testing.T, operations service) {
 	t.Helper()
 
 	for range 2 {
-		result, err := operations.StartAgentWorkLoop(AgentWorkSelectionOptions{MaxIterations: 1})
+		result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{MaxIterations: 1})
 		if err != nil || result.Workflow == nil || serviceWorkTaskAttempts(*result.Workflow) != 1 || result.Workflow.ConfirmedCursor != 0 {
 			t.Fatal("bounded native step replayed a worker", err)
 		}

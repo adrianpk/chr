@@ -91,12 +91,12 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 }
 
 func (s service) materializePlanTracking(ctx context.Context, scope quizcore.Scope, plan PlanView, trackingRelativePath string) (PlanTrackingResult, error) {
-	state, err := s.specGenerationRuntimeState(scope)
+	state, err := s.specGenerationRuntimeState(ctx, scope)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
 
-	modelRequest, err := s.newPlanTrackingModelRequest(state, plan)
+	modelRequest, err := s.newPlanTrackingModelRequest(ctx, state, plan)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
@@ -252,12 +252,12 @@ func relativeProjectPath(projectDir, path string) string {
 	return filepath.ToSlash(relativePath)
 }
 
-func (s service) newPlanTrackingModelRequest(state quizcore.RuntimeState, plan PlanView) (quizmodel.Request, error) {
-	return s.newDocumentGenerationModelRequest(state, documentModelOperation{
+func (s service) newPlanTrackingModelRequest(ctx context.Context, state quizcore.RuntimeState, plan PlanView) (quizmodel.Request, error) {
+	return s.newDocumentGenerationModelRequest(ctx, state, documentModelOperation{
 		action:          quizmodel.ActionMaterializePlanTracking,
 		strategy:        "plan_tracking_materialization",
 		requestIDPrefix: "plan-tracking",
-	}, func(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
+	}, func(_ context.Context, sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
 		sections = append(sections, quizmodel.ContextSection{
 			Name:      "implementation_plan",
 			Layer:     "plan",
