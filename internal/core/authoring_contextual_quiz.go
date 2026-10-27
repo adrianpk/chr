@@ -165,22 +165,7 @@ func writeContextualQuiz(plan ContextualQuizGenerationPlan) error {
 		return fmt.Errorf("authoring quiz artifact already exists: %s", plan.Layout.FullPath)
 	}
 
-	projectDir := strings.TrimSuffix(plan.Layout.FullPath, string(os.PathSeparator)+filepath.FromSlash(plan.Layout.Ref.Path))
-	if err := EnsureAuthoringArtifactMetadata(projectDir, plan.Layout.Ref); err != nil {
-		return err
-	}
-
-	err := os.MkdirAll(plan.Layout.Dir, 0o755)
-	if err != nil {
-		return fmt.Errorf("create contextual quiz directory: %w", err)
-	}
-
-	err = os.WriteFile(plan.Layout.FullPath, []byte(plan.Content), 0o644)
-	if err != nil {
-		return fmt.Errorf("write contextual quiz artifact: %w", err)
-	}
-
-	return nil
+	return writeAuthoringArtifactStep(plan.Layout, plan.Content, "contextual quiz")
 }
 
 // NewAuthoringQuizGenerationRequest constructs the corresponding package service or value.

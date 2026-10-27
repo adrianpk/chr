@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -65,22 +64,7 @@ func writeQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
 		return fmt.Errorf("authoring draft artifact already exists: %s", plan.Layout.FullPath)
 	}
 
-	projectDir := strings.TrimSuffix(plan.Layout.FullPath, string(os.PathSeparator)+filepath.FromSlash(plan.Layout.Ref.Path))
-	if err := EnsureAuthoringArtifactMetadata(projectDir, plan.Layout.Ref); err != nil {
-		return err
-	}
-
-	err := os.MkdirAll(plan.Layout.Dir, 0o755)
-	if err != nil {
-		return fmt.Errorf("create authoring draft directory: %w", err)
-	}
-
-	err = os.WriteFile(plan.Layout.FullPath, []byte(plan.Content), 0o644)
-	if err != nil {
-		return fmt.Errorf("write authoring draft artifact: %w", err)
-	}
-
-	return nil
+	return writeAuthoringArtifactStep(plan.Layout, plan.Content, "authoring draft")
 }
 
 // RenderDraftFromQuiz renders the corresponding package data.
