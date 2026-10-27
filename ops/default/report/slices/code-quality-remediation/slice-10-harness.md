@@ -217,6 +217,16 @@ Executable owner move checks passed:
 - `go test ./internal/core/harness/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessBinding|HarnessGeneration|HarnessSelection|QualityRecordWire|ServiceHarness|Leaf)' -count=1 -timeout=3m`
 - `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
 
+Executable API naming check passed:
+
+The separate naming commit exposes host.FreezeExecutable, ExecutableHash,
+CheckCommandImage, CheckExecutable and ValidateBindingCommand, and the pure
+harness.CloneBinding. Twelve declaration/test preimages still match; direct
+consumers and the baseline disposition follow the moved operation.
+
+- `go test ./internal/core/harness/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessBinding|HarnessGeneration|HarnessSelection|QualityRecordWire|ServiceHarness|Leaf)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
+
 ## Risks and Follow-ups
 
 T10.1-T10.6 remain in progress or pending; PR readiness is not established.

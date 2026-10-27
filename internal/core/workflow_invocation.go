@@ -474,7 +474,7 @@ func (s *WorkflowStore) createWorkflowInvocation(ctx context.Context, request Wo
 func newWorkflowInvocation(root string, identity WorkflowIdentity, request WorkflowStartRequest, hash string, preview WorkflowPreview) workflowInvocationFile {
 	invocation := WorkflowInvocation{WorkflowIdentity: identity, WorkflowInvocationInput: WorkflowInvocationInput{Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded}, WorkflowInvocationExecution: WorkflowInvocationExecution{Status: "pending"}}
 
-	invocation.HarnessBinding = harnesscore.CloneHarnessBinding(request.HarnessBinding)
+	invocation.HarnessBinding = harnesscore.CloneBinding(request.HarnessBinding)
 	if invocation.HarnessBinding != nil {
 		invocation.Schema = "chr-invocation/v2"
 	}

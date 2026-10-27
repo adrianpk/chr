@@ -125,7 +125,7 @@ func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model stri
 }
 
 func prepareCodexGenerationBinding(selection harnesscore.Selection, program string) (core.HarnessGenerationPreparation, error) {
-	executable, err := harnesshost.FreezeHarnessExecutable([]string{program})
+	executable, err := harnesshost.FreezeExecutable([]string{program})
 	if err != nil {
 		return core.HarnessGenerationPreparation{}, err
 	}
@@ -227,7 +227,7 @@ func preparePiGenerationBinding(selection harnesscore.Selection, resolved resolv
 		return core.HarnessGenerationPreparation{}, err
 	}
 
-	executable, err := harnesshost.FreezeHarnessExecutable([]string{resolved.Executable})
+	executable, err := harnesshost.FreezeExecutable([]string{resolved.Executable})
 	if err != nil {
 		return core.HarnessGenerationPreparation{}, err
 	}

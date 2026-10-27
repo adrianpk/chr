@@ -60,7 +60,7 @@ func TestHarnessBindingPending(t *testing.T) {
 func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessResolver {
 	t.Helper()
 
-	executable, err := harnesshost.FreezeHarnessExecutable(command)
+	executable, err := harnesshost.FreezeExecutable(command)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +183,7 @@ func TestHarnessBindingRejects(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			run.HarnessBinding = harnesscore.CloneHarnessBinding(run.HarnessBinding)
+			run.HarnessBinding = harnesscore.CloneBinding(run.HarnessBinding)
 
 			switch change {
 			case "hash":

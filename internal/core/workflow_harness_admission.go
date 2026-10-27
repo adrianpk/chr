@@ -48,7 +48,7 @@ func (s *WorkflowStore) resolveWorkflowHarnessRequest(ctx context.Context, reque
 		return request, err
 	}
 
-	return request, harnesshost.CheckHarnessExecutable(request.HarnessBinding, request.HarnessCommand)
+	return request, harnesshost.CheckExecutable(request.HarnessBinding, request.HarnessCommand)
 }
 
 func (s *WorkflowStore) retainedWorkflowHarnessRequest(ctx context.Context, request WorkflowStartRequest) (WorkflowStartRequest, bool, error) {
@@ -77,7 +77,7 @@ func retainWorkflowHarnessRequest(request WorkflowStartRequest, run workflowInvo
 		return request, workflowstate.ErrConflict
 	}
 
-	request.HarnessBinding = harnesscore.CloneHarnessBinding(run.HarnessBinding)
+	request.HarnessBinding = harnesscore.CloneBinding(run.HarnessBinding)
 	request.HarnessCommand = slices.Clone(run.HarnessCommand)
 
 	return request, nil
@@ -98,7 +98,7 @@ func checkCurrentWorkflowHarness(config WorkspaceConfig, request WorkflowStartRe
 			return workflowstate.ErrConflict
 		}
 
-		return harnesshost.ValidateWorkflowHarnessPair(nil, request.HarnessCommand)
+		return harnesshost.ValidateBindingCommand(nil, request.HarnessCommand)
 	}
 
 	if binding.SelectionRevision != config.Revision() || binding.Profile != config.Harnesses.Worker {
@@ -109,7 +109,7 @@ func checkCurrentWorkflowHarness(config WorkspaceConfig, request WorkflowStartRe
 		return workflowstate.ErrConflict
 	}
 
-	return harnesshost.ValidateWorkflowHarnessPair(binding, request.HarnessCommand)
+	return harnesshost.ValidateBindingCommand(binding, request.HarnessCommand)
 }
 
 // WorkflowHarnessWorker reads only the invocation's retained host command. A nil
@@ -121,7 +121,7 @@ func (s *WorkflowStore) WorkflowHarnessWorker(ctx context.Context, id string) (c
 			return readErr
 		}
 
-		if readErr := harnesshost.CheckHarnessExecutable(run.HarnessBinding, run.HarnessCommand); readErr != nil {
+		if readErr := harnesshost.CheckExecutable(run.HarnessBinding, run.HarnessCommand); readErr != nil {
 			return readErr
 		}
 
@@ -147,5 +147,5 @@ func validateWorkflowInvocationHarness(run workflowInvocationFile) error {
 		return workflowstate.ErrConflict
 	}
 
-	return harnesshost.ValidateWorkflowHarnessPair(run.HarnessBinding, run.HarnessCommand)
+	return harnesshost.ValidateBindingCommand(run.HarnessBinding, run.HarnessCommand)
 }

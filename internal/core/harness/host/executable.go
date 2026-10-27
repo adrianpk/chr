@@ -18,11 +18,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-const harnessExecutableLimit = 512 << 20
+const executableLimit = 512 << 20
 
-// FreezeHarnessExecutable resolves a host-selected program once and binds its
+// FreezeExecutable resolves a host-selected program once and binds its
 // regular executable file and argv. It never launches the executable.
-func FreezeHarnessExecutable(command []string) (harnesscore.Executable, error) {
+func FreezeExecutable(command []string) (harnesscore.Executable, error) {
 	if err := workflowstate.ValidateCommand(command); err != nil {
 		return harnesscore.Executable{}, err
 	}
@@ -45,7 +45,7 @@ func FreezeHarnessExecutable(command []string) (harnesscore.Executable, error) {
 	retained := slices.Clone(command)
 	retained[0] = program
 
-	hash, err := HarnessExecutableHash(program)
+	hash, err := ExecutableHash(program)
 	if err != nil {
 		return harnesscore.Executable{}, err
 	}
@@ -55,30 +55,30 @@ func FreezeHarnessExecutable(command []string) (harnesscore.Executable, error) {
 	return harnesscore.Executable{Reference: harnesscore.ExecutableRef{Hash: hash, CommandHash: contenthash.Sum(data)}, Command: retained}, err
 }
 
-// HarnessExecutableHash fingerprints a bounded regular executable without launching it.
-func HarnessExecutableHash(program string) (string, error) {
-	file, err := openHarnessExecutable(program)
+// ExecutableHash fingerprints a bounded regular executable without launching it.
+func ExecutableHash(program string) (string, error) {
+	file, err := openExecutable(program)
 	if err != nil {
 		return "", errors.New("retained harness executable is unavailable")
 	}
 	defer func() { _ = file.Close() }() //nolint:errcheck // Read-only; file/hash IO errors are returned.
 
 	info, err := file.Stat()
-	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o111 == 0 || info.Size() > harnessExecutableLimit {
+	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o111 == 0 || info.Size() > executableLimit {
 		return "", errors.New("harness executable requires a regular executable file within 512 MiB")
 	}
 
 	hash := sha256.New()
 
-	count, err := io.Copy(hash, io.LimitReader(file, harnessExecutableLimit+1))
-	if err != nil || count > harnessExecutableLimit {
+	count, err := io.Copy(hash, io.LimitReader(file, executableLimit+1))
+	if err != nil || count > executableLimit {
 		return "", errors.New("harness executable could not be fingerprinted within bounds")
 	}
 
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
-func openHarnessExecutable(program string) (*os.File, error) {
+func openExecutable(program string) (*os.File, error) {
 	info, err := os.Lstat(program)
 	if err != nil || !info.Mode().IsRegular() {
 		return nil, errors.New("harness executable must be a regular file")
@@ -88,8 +88,8 @@ func openHarnessExecutable(program string) (*os.File, error) {
 	return os.OpenFile(program, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
 }
 
-// CheckHarnessCommandImage validates the retained absolute argv image without launching it.
-func CheckHarnessCommandImage(binding harnesscore.Binding, command []string) error {
+// CheckCommandImage validates the retained absolute argv image without launching it.
+func CheckCommandImage(binding harnesscore.Binding, command []string) error {
 	if err := workflowstate.ValidateCommand(command); err != nil {
 		return err
 	}
@@ -106,13 +106,13 @@ func CheckHarnessCommandImage(binding harnesscore.Binding, command []string) err
 	return nil
 }
 
-// CheckHarnessExecutable checks admitted command identity and the current executable image.
-func CheckHarnessExecutable(binding *harnesscore.Binding, command []string) error {
+// CheckExecutable checks admitted command identity and the current executable image.
+func CheckExecutable(binding *harnesscore.Binding, command []string) error {
 	if binding == nil {
 		return nil
 	}
 
-	if err := ValidateWorkflowHarnessPair(binding, command); err != nil {
+	if err := ValidateBindingCommand(binding, command); err != nil {
 		return err
 	}
 
@@ -121,7 +121,7 @@ func CheckHarnessExecutable(binding *harnesscore.Binding, command []string) erro
 		return workflowstate.ErrConflict
 	}
 
-	hash, err := HarnessExecutableHash(resolved)
+	hash, err := ExecutableHash(resolved)
 	if err != nil {
 		return err
 	}

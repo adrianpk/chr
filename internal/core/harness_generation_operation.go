@@ -236,7 +236,7 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 	}
 
 	// The generic command-image check does no worker-role or live-profile IO.
-	return harnesshost.CheckHarnessCommandImage(harnesscore.Binding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
+	return harnesshost.CheckCommandImage(harnesscore.Binding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
 }
 
 func validateGenerationResources(resources harness.GenerationResources, backend string) error {
@@ -279,7 +279,7 @@ func checkGenerationExecutable(operation HarnessGenerationOperation) error {
 		return errors.New("retained generation executable cannot be resolved")
 	}
 
-	hash, err := harnesshost.HarnessExecutableHash(operation.program)
+	hash, err := harnesshost.ExecutableHash(operation.program)
 	if err != nil {
 		return err
 	}

@@ -32,7 +32,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		return core.WorkflowHarnessResolution{}, err
 	}
 
-	executable, err := harnesshost.FreezeHarnessExecutable(selected.Command)
+	executable, err := harnesshost.FreezeExecutable(selected.Command)
 	if err != nil {
 		return core.WorkflowHarnessResolution{}, err
 	}

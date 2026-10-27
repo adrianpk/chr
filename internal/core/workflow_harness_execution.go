@@ -21,7 +21,7 @@ func workflowBoundTaskWorker(run workflowInvocationFile, worker []string, mode s
 		return nil, workflowstate.ErrConflict
 	}
 
-	if err := harnesshost.CheckHarnessExecutable(run.HarnessBinding, run.HarnessCommand); err != nil {
+	if err := harnesshost.CheckExecutable(run.HarnessBinding, run.HarnessCommand); err != nil {
 		return nil, err
 	}
 
@@ -50,7 +50,7 @@ func validateWorkflowTaskHarnessSchema(input WorkflowTaskInput) error {
 		return harnesscore.ValidateBinding(*input.HarnessBinding)
 	}
 
-	return harnesshost.ValidateWorkflowHarnessPair(input.HarnessBinding, input.Worker)
+	return harnesshost.ValidateBindingCommand(input.HarnessBinding, input.Worker)
 }
 
 func checkWorkflowTaskHarness(run workflowInvocationFile, input WorkflowTaskInput) error {

@@ -77,7 +77,7 @@ func generationBindingProgram(t *testing.T, project string) string {
 
 func generationBindingResolver(program, model string) HarnessGenerationResolver {
 	return func(_ context.Context, config WorkspaceConfig) (HarnessGenerationPreparation, error) {
-		executable, err := harnesshost.FreezeHarnessExecutable([]string{program})
+		executable, err := harnesshost.FreezeExecutable([]string{program})
 		if err != nil {
 			return HarnessGenerationPreparation{}, err
 		}

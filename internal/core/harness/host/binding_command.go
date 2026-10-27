@@ -6,8 +6,8 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
-// ValidateWorkflowHarnessPair preserves the admitted binding value and command contract.
-func ValidateWorkflowHarnessPair(binding *harnesscore.Binding, command []string) error {
+// ValidateBindingCommand preserves the admitted binding value and command contract.
+func ValidateBindingCommand(binding *harnesscore.Binding, command []string) error {
 	if binding == nil {
 		if len(command) != 0 {
 			return errors.New("unbound workflow cannot retain a harness command")
@@ -20,5 +20,5 @@ func ValidateWorkflowHarnessPair(binding *harnesscore.Binding, command []string)
 		return err
 	}
 
-	return CheckHarnessCommandImage(*binding, command)
+	return CheckCommandImage(*binding, command)
 }

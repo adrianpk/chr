@@ -92,7 +92,7 @@ func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvoc
 
 	input := WorkflowTaskInput{Schema: "chr-task-input/v1", InvocationID: run.ID, AttemptID: attempt.ID, Generation: attempt.Generation, TaskKey: record.Task.Key, InputRevision: attempt.InputRevision, SourceHash: record.SourceHash, ContractHash: record.Task.ContractHash, Body: string(record.Body), Target: run.ExecutionSelection().Target, Lane: *run.Lane, Worker: slices.Clone(worker)}
 	if run.HarnessBinding != nil && attempt.Purpose == "" {
-		input.HarnessBinding = harnesscore.CloneHarnessBinding(run.HarnessBinding)
+		input.HarnessBinding = harnesscore.CloneBinding(run.HarnessBinding)
 		input.Schema = "chr-task-input/v2"
 	}
 

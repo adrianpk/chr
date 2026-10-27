@@ -10,5 +10,5 @@ func validateWorkflowRequestedHarness(binding *harnesscore.Binding, command []st
 		return harnesscore.ValidateBinding(*binding)
 	}
 
-	return harnesshost.ValidateWorkflowHarnessPair(binding, command)
+	return harnesshost.ValidateBindingCommand(binding, command)
 }

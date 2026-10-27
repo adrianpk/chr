@@ -99,7 +99,7 @@ func workflowRetainedEntryRequest(request WorkflowStartRequest, run WorkflowInvo
 	}
 
 	if request.HarnessBinding == nil {
-		request.HarnessBinding = harnesscore.CloneHarnessBinding(run.HarnessBinding)
+		request.HarnessBinding = harnesscore.CloneBinding(run.HarnessBinding)
 	}
 
 	request.Selection.Target = run.Selection.Target
