@@ -77,19 +77,21 @@ func (s service) validatePlanDeliveryScope(ctx context.Context, scope quizcore.S
 }
 
 func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (core.WorkflowMaterializationResult, error) {
-	input, layout, err := s.planDeliveryInput(ctx, request, generated)
+	observed, err := s.planDeliveryInput(ctx, request, generated)
 	if err != nil {
 		return core.WorkflowMaterializationResult{}, err
 	}
 
+	input, layout := observed.Input, observed.Layout
+
 	store := core.NewWorkflowStore(layout, s.projectContext.ProjectID)
 
-	if result, found, err := store.ResumePlanDelivery(ctx, input); found || err != nil {
+	if retained, err := store.ResumePlanDelivery(ctx, input); retained.Found || err != nil {
 		if err == nil {
 			err = s.refreshWorkflowProjection(ctx, store)
 		}
 
-		return result, err
+		return retained.Result, err
 	}
 
 	retained := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), input.PlanRef))
@@ -103,35 +105,40 @@ func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGener
 	return s.MaterializeWorkflowPlan(ctx, plan)
 }
 
-func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, opscore.Layout, error) {
+type planDeliveryObservation struct {
+	Input  generationcore.GeneratedWorkflowPlan
+	Layout opscore.Layout
+}
+
+func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (planDeliveryObservation, error) {
 	scope := s.quizScope(request.Scope)
 
 	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
-		return input, opscore.Layout{}, err
+		return planDeliveryObservation{Input: input}, err
 	}
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: scope.Namespace})
 	if err != nil {
-		return input, layout, err
+		return planDeliveryObservation{Input: input, Layout: layout}, err
 	}
 
 	canonical := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), input.PlanRevision.Reference))
 	retained := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), input.PlanRef))
 
 	if generated.Plan.RelativePath != canonical && generated.Plan.RelativePath != retained {
-		return input, layout, workflowstate.ErrConflict
+		return planDeliveryObservation{Input: input, Layout: layout}, workflowstate.ErrConflict
 	}
 
 	if generated.Existing {
 		if err := s.checkDeliveryTarget(ctx, scope, request.ExpectedRevision); err != nil {
-			return input, layout, err
+			return planDeliveryObservation{Input: input, Layout: layout}, err
 		}
 	}
 
 	input.UseCase = scope.CaseSlug
 
-	return input, layout, nil
+	return planDeliveryObservation{Input: input, Layout: layout}, nil
 }
 
 func (s service) checkDeliveryTarget(ctx context.Context, scope quizcore.Scope, expected string) error {

@@ -9,27 +9,34 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
-func (s service) replayPlanPublication(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, bool, error) {
+type planPublicationReplay struct {
+	Result PlanOperationResult
+	Found  bool
+}
+
+func (s service) replayPlanPublication(ctx context.Context, operation generationcore.PlanPublicationOperation) (planPublicationReplay, error) {
 	if operation.ID == "" {
-		return PlanOperationResult{}, false, nil
+		return planPublicationReplay{}, nil
 	}
 
-	committed, found, err := core.LookupPlanPublication(ctx, s.projectContext.ProjectDir, operation)
-	if err != nil || !found {
-		return PlanOperationResult{}, found, err
+	observed, err := core.LookupPlanPublication(ctx, s.projectContext.ProjectDir, operation)
+	if err != nil || !observed.Found {
+		return planPublicationReplay{Found: observed.Found}, err
 	}
+
+	committed := observed.Result
 
 	reference := committed.Reference
 	if committed.Binding.BodyRef != "" {
 		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: operation.Scope.Namespace})
 		if err != nil {
-			return PlanOperationResult{}, false, err
+			return planPublicationReplay{}, err
 		}
 
 		reference = filepath.ToSlash(filepath.Join(layout.RelativeRoot(), committed.Binding.BodyRef))
 	}
 
-	return PlanOperationResult{Message: "Plan generation already committed.", Plan: s.planViewFromPath(operation.Scope, reference, filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(reference)))}, true, nil
+	return planPublicationReplay{Result: PlanOperationResult{Message: "Plan generation already committed.", Plan: s.planViewFromPath(operation.Scope, reference, filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(reference)))}, Found: true}, nil
 }
 
 func (s service) retainedPlanTracking(plan PlanView, binding generationcore.PlanRevisionBinding) (PlanTrackingResult, error) {

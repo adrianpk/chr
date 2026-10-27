@@ -201,9 +201,9 @@ func checkPlanOrderRecovery(t *testing.T, after int) {
 		t.Fatal("pending pair was readable", err)
 	}
 
-	result, found, err := LookupPlanPublication(t.Context(), project, *plan.Operation)
-	if err != nil || !found || result.Binding.Revision != 1 {
-		t.Fatal("receipt did not recover", result, found, err)
+	result, err := LookupPlanPublication(t.Context(), project, *plan.Operation)
+	if err != nil || !result.Found || result.Result.Binding.Revision != 1 {
+		t.Fatal("receipt did not recover", result.Result, result.Found, err)
 	}
 
 	readTestPlanBinding(t, project, plan.Scope)

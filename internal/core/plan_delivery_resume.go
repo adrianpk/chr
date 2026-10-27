@@ -11,24 +11,31 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// WorkflowMaterializationLookup retains presence independently of a failed
+// contract/receipt read, so a matching set cannot trigger a second allocation.
+type WorkflowMaterializationLookup struct {
+	Result WorkflowMaterializationResult
+	Found  bool
+}
+
 // ResumePlanDelivery verifies an existing materialization from its original
 // contracts and receipt without calling a provider or reallocating tickets.
-func (s *WorkflowStore) ResumePlanDelivery(ctx context.Context, input generationcore.GeneratedWorkflowPlan) (result WorkflowMaterializationResult, found bool, err error) {
+func (s *WorkflowStore) ResumePlanDelivery(ctx context.Context, input generationcore.GeneratedWorkflowPlan) (lookup WorkflowMaterializationLookup, err error) {
 	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		snapshot, readErr := s.readSnapshot(ctx)
 		if readErr != nil {
 			return readErr
 		}
 
-		result, found, readErr = s.resumePlanDelivery(snapshot, input)
+		lookup, readErr = s.resumePlanDelivery(snapshot, input)
 
 		return readErr
 	})
 
-	return result, found, err
+	return lookup, err
 }
 
-func (s *WorkflowStore) resumePlanDelivery(snapshot WorkflowSnapshot, input generationcore.GeneratedWorkflowPlan) (WorkflowMaterializationResult, bool, error) {
+func (s *WorkflowStore) resumePlanDelivery(snapshot WorkflowSnapshot, input generationcore.GeneratedWorkflowPlan) (WorkflowMaterializationLookup, error) {
 	for _, record := range snapshot.Records {
 		if record.Set == nil || record.Metadata["materialization_id"] == nil {
 			continue
@@ -36,7 +43,7 @@ func (s *WorkflowStore) resumePlanDelivery(snapshot WorkflowSnapshot, input gene
 
 		var id string
 		if err := json.Unmarshal(record.Metadata["materialization_id"], &id); err != nil {
-			return WorkflowMaterializationResult{}, false, err
+			return WorkflowMaterializationLookup{}, err
 		}
 
 		if id != input.MaterializationID {
@@ -45,15 +52,15 @@ func (s *WorkflowStore) resumePlanDelivery(snapshot WorkflowSnapshot, input gene
 
 		plan, err := s.readPlanDeliveryContracts(input, record)
 		if err != nil {
-			return WorkflowMaterializationResult{}, true, err
+			return WorkflowMaterializationLookup{Found: true}, err
 		}
 
 		result, err := s.readMaterializationReceipt(record, plan, snapshot)
 
-		return result, true, err
+		return WorkflowMaterializationLookup{Result: result, Found: true}, err
 	}
 
-	return WorkflowMaterializationResult{}, false, nil
+	return WorkflowMaterializationLookup{}, nil
 }
 
 func (s *WorkflowStore) readPlanDeliveryContracts(input generationcore.GeneratedWorkflowPlan, set WorkflowRecord) (generationcore.GeneratedWorkflowPlan, error) {

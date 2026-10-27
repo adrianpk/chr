@@ -63,9 +63,9 @@ func PublishGuidedPlan(ctx context.Context, root string, scope GuidedUseCaseScop
 			return err
 		}
 
-		previous, found, lookupErr := LookupPlanPublication(ctx, root, *plan.Operation)
-		if lookupErr != nil || found {
-			result = previous
+		previous, lookupErr := LookupPlanPublication(ctx, root, *plan.Operation)
+		if lookupErr != nil || previous.Found {
+			result = previous.Result
 
 			return lookupErr
 		}
@@ -74,8 +74,10 @@ func PublishGuidedPlan(ctx context.Context, root string, scope GuidedUseCaseScop
 			return err
 		}
 
-		result, found, err = LookupPlanPublication(ctx, root, *plan.Operation)
-		if err == nil && !found {
+		committed, lookupErr := LookupPlanPublication(ctx, root, *plan.Operation)
+
+		result, err = committed.Result, lookupErr
+		if err == nil && !committed.Found {
 			err = workflowstate.ErrConflict
 		}
 

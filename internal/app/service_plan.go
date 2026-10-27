@@ -44,8 +44,8 @@ type existingPlanResult struct {
 func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	operation := generationcore.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, TrackerReplaceHash: request.TrackerReplaceHash, TicketDelivery: request.TicketDelivery}
-	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
-		return result, err
+	if replay, err := s.replayPlanPublication(ctx, operation); replay.Found || err != nil {
+		return replay.Result, err
 	}
 	existing, err := s.existingGeneratedPlan(scope)
 	if err != nil {
@@ -95,8 +95,8 @@ func (s service) existingGeneratedPlan(scope quizcore.Scope) (existingPlanResult
 func (s service) RegeneratePlan(ctx context.Context, request PlanRegenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
 	operation := generationcore.PlanPublicationOperation{ID: request.OperationID, Scope: scope, ExpectedRevision: request.ExpectedRevision, Replace: true, TrackerReplaceHash: request.TrackerReplaceHash}
-	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
-		return result, err
+	if replay, err := s.replayPlanPublication(ctx, operation); replay.Found || err != nil {
+		return replay.Result, err
 	}
 	var result PlanOperationResult
 

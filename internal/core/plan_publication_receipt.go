@@ -26,17 +26,24 @@ type planPublicationReceipt struct {
 	Result                   PlanPublicationResult
 }
 
+// PlanPublicationLookup distinguishes a retained publication from expected absence.
+// Result preserves any original partial observation when a lookup fails.
+type PlanPublicationLookup struct {
+	Result PlanPublicationResult
+	Found  bool
+}
+
 // LookupPlanPublication recovers any pending authoring transaction and returns
 // a committed retry without invoking a model or advancing the current revision.
-func LookupPlanPublication(ctx context.Context, projectDir string, operation generationcore.PlanPublicationOperation) (result PlanPublicationResult, found bool, err error) {
+func LookupPlanPublication(ctx context.Context, projectDir string, operation generationcore.PlanPublicationOperation) (lookup PlanPublicationLookup, err error) {
 	err = WithAuthoringMutation(ctx, projectDir, func(context.Context) error {
 		r := &fileAuthoringSessionRepository{projectDir: projectDir}
-		result, found, err = r.planReceipt(operation)
+		lookup, err = r.planReceipt(operation)
 
 		return err
 	})
 
-	return result, found, err
+	return lookup, err
 }
 
 func (r *fileAuthoringSessionRepository) planOperationDigest(operation generationcore.PlanPublicationOperation) (string, error) {
@@ -59,36 +66,36 @@ func (r *fileAuthoringSessionRepository) planOperationDigest(operation generatio
 	return contenthash.Sum(append([]byte(root+"\x00plan\x00"+paths.RelativePath+"\x00"), encoded...)), err
 }
 
-func (r *fileAuthoringSessionRepository) planReceipt(operation generationcore.PlanPublicationOperation) (PlanPublicationResult, bool, error) {
+func (r *fileAuthoringSessionRepository) planReceipt(operation generationcore.PlanPublicationOperation) (PlanPublicationLookup, error) {
 	var receipt planPublicationReceipt
 
 	digest, err := r.planOperationDigest(operation)
 	if err != nil {
-		return receipt.Result, false, err
+		return PlanPublicationLookup{Result: receipt.Result}, err
 	}
 
 	encoded, err := r.authoringRead(authoringReceiptRef(operation.ID))
 	if errors.Is(err, os.ErrNotExist) {
-		return receipt.Result, false, nil
+		return PlanPublicationLookup{Result: receipt.Result}, nil
 	}
 
 	if err != nil {
-		return receipt.Result, false, err
+		return PlanPublicationLookup{Result: receipt.Result}, err
 	}
 
 	if err := authoringstate.Decode(encoded, &receipt); err != nil {
-		return receipt.Result, false, err
+		return PlanPublicationLookup{Result: receipt.Result}, err
 	}
 
 	if err := validatePlanPublicationReceipt(receipt, operation.ID, digest); err != nil {
-		return receipt.Result, false, err
+		return PlanPublicationLookup{Result: receipt.Result}, err
 	}
 
 	if err := r.validatePlanReceiptResult(operation.Scope, receipt.Result); err != nil {
-		return receipt.Result, false, err
+		return PlanPublicationLookup{Result: receipt.Result}, err
 	}
 
-	return receipt.Result, true, nil
+	return PlanPublicationLookup{Result: receipt.Result, Found: true}, nil
 }
 
 func (r *fileAuthoringSessionRepository) completedPlanOperation(plan generationcore.GeneratedPlan) (bool, error) {
@@ -105,9 +112,9 @@ func (r *fileAuthoringSessionRepository) completedPlanOperation(plan generationc
 		return false, workflowstate.ErrConflict
 	}
 
-	_, found, err := r.planReceipt(operation)
+	lookup, err := r.planReceipt(operation)
 
-	return found, err
+	return lookup.Found, err
 }
 
 func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths GeneratedPlanPaths, plan generationcore.GeneratedPlan, changes []workflowstate.FileChange) ([]workflowstate.FileChange, error) {

@@ -36,15 +36,15 @@ func TestPlanPublicationRetry(t *testing.T) {
 
 	current := readTestPlanBinding(t, project, plan.Scope)
 
-	result, found, err := LookupPlanPublication(t.Context(), project, *plan.Operation)
-	if err != nil || !found || result.Binding != first || current.Revision != 2 {
-		t.Fatal(result, found, err, current)
+	result, err := LookupPlanPublication(t.Context(), project, *plan.Operation)
+	if err != nil || !result.Found || result.Result.Binding != first || current.Revision != 2 {
+		t.Fatal(result.Result, result.Found, err, current)
 	}
 
 	changed := *plan.Operation
 
 	changed.Replace = true
-	if _, _, err := LookupPlanPublication(t.Context(), project, changed); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := LookupPlanPublication(t.Context(), project, changed); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("operation ID accepted changed intent", err)
 	}
 }
@@ -71,13 +71,13 @@ func TestPlanPublicationReceiptGuards(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			result, found, err := LookupPlanPublication(t.Context(), project, *plan.Operation)
-			if err != nil || !found {
+			result, err := LookupPlanPublication(t.Context(), project, *plan.Operation)
+			if err != nil || !result.Found {
 				t.Fatal(err)
 			}
 
-			target := item.mutate(t, project, result)
-			if _, _, err := LookupPlanPublication(t.Context(), target, *plan.Operation); err == nil {
+			target := item.mutate(t, project, result.Result)
+			if _, err := LookupPlanPublication(t.Context(), target, *plan.Operation); err == nil {
 				t.Fatal("invalid receipt replayed")
 			}
 		})
