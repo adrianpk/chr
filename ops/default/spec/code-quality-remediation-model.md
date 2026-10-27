@@ -442,3 +442,13 @@ before selecting its namespace. Telegram allocation/target construction calls th
 same two shared operations in that exact order after root binding; artifact path
 composition stays with OpsLayout. Original filesystem, namespace precedence,
 registry and Telegram conversation/target tests pass with direct consumers.
+
+
+D06 shares intake mechanics through two independent typed route records. Exact
+retained operation lookup still precedes parsing; an unrelated retained operation
+does not change recognition. Unrecognized input still falls through, malformed
+recognized input still queues its own diagnostic, and current configuration and
+permitted projects populate the actual parsed command before dispatch. Work and
+explanation preserve their distinct reservation, authority, model, document and
+confirmation paths. Test-only help forwarding and guided result aliases are
+removed while their live renderer/export guards and behavioral tests remain.

@@ -12,7 +12,7 @@ import (
 
 // Help must be readable by category rather than one unstructured command list.
 func TestTelegramHelpPresentation(t *testing.T) {
-	text := telegramHelpReply("").Text
+	text := renderTelegramHelp(telegramHelpMetadata(), "").Text
 	for _, heading := range []string{"Execution", "Tickets", "Projects", "Authoring", "Conversations", "System controls"} {
 		if !strings.Contains(text, "*"+heading+"*\n") {
 			t.Fatalf("missing category %q in help:\n%s", heading, text)
@@ -33,7 +33,7 @@ func TestTelegramHelpMetadata(t *testing.T) {
 		t.Fatalf("metadata entries = %d, want %d", len(entries), want)
 	}
 
-	reply := telegramHelpReply("")
+	reply := renderTelegramHelp(telegramHelpMetadata(), "")
 	for _, entry := range entries {
 		if !slices.Contains(strings.Split(reply.PlainText, "\n"), entry.Syntax) || !strings.Contains(reply.Text, "`"+entry.Syntax+"`") {
 			t.Fatalf("canonical syntax missing: %q", entry.Syntax)

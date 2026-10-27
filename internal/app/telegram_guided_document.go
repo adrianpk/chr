@@ -58,5 +58,3 @@ func telegramGuidedResultDocument(target core.TelegramOperationTarget, observed 
 
 	return &tgmessage.DocumentResponse{Message: message, Document: telegramDocumentForTarget(target, "exports/guided-results/"+observed.Session.ID+".json", recordDigest(payload), filename, "application/json", payload)}, nil
 }
-
-type telegramGuidedResultExport = guidedResultExport

@@ -11,32 +11,21 @@ import (
 )
 
 func (r telegramReceiver) respondExplanation(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
-	retained, found, err := r.store.TelegramOperation(ctx, update, 0)
-	if err != nil {
-		return true, err
+	route := telegramCommandRoute{
+		OperationID: "authoring.explain", Continue: r.continueExplanation, Help: telegramExplanationHelp(),
+		Parse: func(update core.TelegramReceivedUpdate) (telegramParsedCommand, error) {
+			command, recognized, err := parseTelegramExplanation(update)
+
+			return telegramParsedCommand{
+				Recognized: recognized, Input: &command.Input,
+				Dispatch: func(ctx context.Context, user core.TelegramAllowedUser) error {
+					return r.dispatchExplanation(ctx, user, command)
+				},
+			}, err
+		},
 	}
 
-	if found && retained.OperationID == "authoring.explain" {
-		return true, r.continueExplanation(ctx, retained, config)
-	}
-
-	command, recognized, err := parseTelegramExplanation(update)
-	if !recognized {
-		return false, nil
-	}
-
-	if err != nil {
-		return true, r.recordDiagnostic(ctx, update, config, telegramExplanationHelp())
-	}
-
-	command.Input.Config = config
-
-	command.Input.Projects, err = r.operations.ListRegisteredProjects(user.ProjectIDs)
-	if err != nil {
-		return true, err
-	}
-
-	return true, r.dispatchExplanation(ctx, user, command)
+	return r.respondCommand(ctx, user, config, update, route)
 }
 
 func (r telegramReceiver) dispatchExplanation(ctx context.Context, user core.TelegramAllowedUser, command telegramExplanationCommand) error {

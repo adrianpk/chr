@@ -14,10 +14,6 @@ type telegramReadReply struct {
 
 const telegramHelpOverflow = "The complete command list exceeds the Telegram help limit. Use the local command reference for the full list."
 
-func telegramHelpReply(prefix string) telegramReadReply {
-	return renderTelegramHelp(telegramHelpMetadata(), prefix)
-}
-
 func renderTelegramHelp(entries []telegramHelpEntry, prefix string) telegramReadReply {
 	if len(entries) == 0 {
 		return telegramReadReply{}

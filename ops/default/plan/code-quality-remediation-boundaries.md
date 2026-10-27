@@ -370,3 +370,21 @@ operational artifact paths. Both Telegram conversation allocation and target
 resolution retain directory validation immediately before namespace choice, in
 their original order after the project binding digest. No transaction boundary,
 registry root digest, namespace precedence or environment setting changes.
+
+
+### Telegram dispatch pair D06
+
+The explanation and work responders now share only retained lookup, command
+recognition, malformed-input diagnostics and current authority/project population.
+Each constructs its own telegramCommandRoute with its original operation ID,
+parser, help and resume callback. Its typed command remains captured locally;
+the shared input pointer populates that same command before dispatch. Explanation
+preparation/model/document behavior and native work preview/admission keep their
+separate handlers, guards and confirmation contracts. Context is passed into each
+operation; no context is stored in a reusable route.
+
+The definition-only telegramHelpReply wrapper and telegramGuidedResultExport alias
+are removed. Help tests still exercise the live renderer with real metadata;
+the guided result guard uses the actual shared guidedResultExport type. All
+existing assertions remain, including full result, original document and unsafe
+export guards. Focused explanation/work/help and guided result-guard checks pass.

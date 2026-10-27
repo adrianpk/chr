@@ -60,7 +60,7 @@ func assertGuidedTelegramResultExport(t *testing.T, f *telegramConversationAppFi
 
 	upload := readGuidedTelegramUpload(t, f)
 
-	var result telegramGuidedResultExport
+	var result guidedResultExport
 	if err := json.Unmarshal(upload.Payload, &result); err != nil {
 		t.Fatal(err)
 	}
