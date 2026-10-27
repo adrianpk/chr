@@ -345,3 +345,55 @@ sample ledger names the production revisions and retains all 30 observations.
 After the mechanical proofs, one moved case helper's signature header is put on
 a single line to satisfy the repository's signature-format rule. Its types and
 body are unchanged. The historical move hashes retain their original scope.
+
+
+## Slice 6 compatibility and dependency evidence
+
+Gate, project identity and notification persistence now have direct package
+callers and enforced production import bounds. Config parsing consumes an explicit
+path and named parsed-line state. Git refs/ranges retain distinct base/head and
+partial evidence on error. Report classification consumes loaded execution
+reports; artifact allocation and metadata refresh remain application composition.
+Gate report JSON, validation command execution and failure evidence retain their
+original contracts. The two five-input report constructors remain cohesive.
+
+Project registry and active selection preserve original SQLite columns/order,
+normal absence, active file bytes and atomic replacement. The shared database
+owner preserves schema, migration order, connection/timestamp handling and joined
+transaction failures. RootBindingDigest preserves project ID, registered absolute
+path and resolved path separated by NUL bytes. Root conversation mapping preserves
+the original safe unavailable-root diagnostic.
+
+Notification transactions still own admission, reserve, completion and retention.
+TelegramLookup separates delivery/Frozen from failure; legacy rows stay untouched.
+TelegramCompletion carries the original event/target, acknowledgement, safe failure
+code/certainty and time. Conditional SQL preserves target/hash/owner bindings,
+attempt counts, the single definite-format fallback and uncertainty across reopen.
+Acknowledgement still clears failure/uncertainty without granting another attempt.
+The shared quota predicate retains its exact schema-level conditions inside each
+owner's existing transaction; receiver mutation ownership remains separate.
+
+Shared message declarations have 27 explicit identifier-normalized token proofs
+including literals and tags. Hash-sensitive storage and record fixtures retain
+original bytes, field order, omission/null semantics, entities and document hashes.
+Content hashing has one SHA-256/hex owner, namespace spelling one pure owner and
+conditional writes one ErrConflict identity. No schema or retained-hash migration
+is introduced. Mechanical gate/project/notification moves have 240 complete
+unchanged declaration-text hashes before qualified-name/result conversions.
+
+All six assigned authoring tuple returns now use precise named outcomes. Artifact
+reads preserve aggregate byte counts and partial construction; file images preserve
+separate body/metadata bytes; reconciliation preserves partial mutation results;
+receipt reads preserve absence/found/error; Markdown/field parsing preserves raw
+body and found state. Both mutation callbacks explicitly assign their outer
+result/error after receipt lookup. Replay, locks, checksums and operation identities
+therefore retain the existing owner. Those transactions remain authoring behavior
+under the recorded Slice 9 package owner; their Slice 6 signatures are complete.
+
+The 19-row disposition ledger records 16 fixed occurrences and three cohesive
+five-input contracts. Temporary debt decreases from 425 to 410 because the watch
+items and already-retired rows are distinct from outstanding violations. Both
+locally owned notification interfaces change with their implementations. The
+existing external-interface exception remains unchanged. Static import fixtures
+cover forbidden aliases, descendants, generated sources and build variants; real
+SQLite/HTTP/Git/child/filesystem fixtures cover the behavior of direct consumers.

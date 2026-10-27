@@ -7,23 +7,32 @@ Plan: [Approved delivery](code-quality-remediation.md).
 ## Observed production graph
 
 `go list -f '{{.ImportPath}}: {{join .Imports " "}}' ./internal/... ./cmd/...`
-confirms these module-local edges. Standard-library and external dependencies
+confirms these module-local edges at the Slice 6 implementation checkpoint. Standard-library and external dependencies
 are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
 | cmd/chr | app |
-| app | core, harness, harness/codex, harness/pi, tui, webui, webui/ui |
-| core | harness, harness/process |
+| app | core, core/database, core/gate, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, harness, harness/codex, harness/pi, tui, webui, webui/ui |
+| core | core/configvalue, core/contenthash, core/database, core/gate, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, harness, harness/process |
+| core/configvalue | none |
+| core/contenthash | none |
+| core/database | none |
+| core/gate | core/configvalue |
+| core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
+| core/ops/namespace | none |
+| core/project | core/database |
+| core/telegram/message | core/contenthash, core/ops/namespace |
+| core/workflow/state | none |
 | harness | none |
 | harness/codex | harness, harness/process |
 | harness/pi | harness, harness/process |
 | harness/process | harness |
-| tui | core |
+| tui | core, core/workflow/state |
 | webui | webui/htmx, webui/render, webui/ui |
+| webui/htmx | none |
 | webui/render | webui/htmx, webui/ui |
 | webui/ui | webui/htmx |
-| webui/htmx | none |
 
 All names above are relative to internal/ except cmd/chr. The graph compiles
 without cycles. The tooling command scripts/goquality depends only on the
@@ -55,7 +64,7 @@ util or options package is not an acceptable cycle repair.
 
 | Declaration owner | Actual consumers and dependency decision |
 | --- | --- |
-| core/content_hash.go | Existing workflowHash SHA-256 implementation; workflow, guided checkpoints, authoring and configuration use the same bytes and encoding. It has no storage/coordinator dependency. The existing name and calls remain intact; there is no forwarding facade. |
+| core/contenthash/hash.go | Slice 6 gives the existing workflowHash/contentHash SHA-256 implementation one neutral owner. Workflow, retained messages, guided checkpoints, authoring and configuration call Sum directly with the same bytes and encoding. No root forwarding facade remains. |
 | core/project_paths.go | resolveProjectPath and pathIsInsideProject; runtime, context and workspace consumers retain absolute/relative containment behavior. This owner depends only on filepath and strings. |
 | core/project_files.go | Existing writeFileAtomically; project/artifact consumers retain their own permission, locking and transaction decisions. This helper keeps its existing temporary-file behavior and is not substituted for guarded workflow writes. |
 | core/config.go, config_workflow.go and capability config files | WorkspaceConfig and its configuration values stay in the existing configuration owner. Configuration parsing must not import the future workflow coordinator. Shared workflow state may be a dependency only when it has no dependency back to configuration or stages. |
@@ -65,8 +74,8 @@ util or options package is not an acceptable cycle repair.
 These are concrete declarations, not a request to export unrelated private
 helpers. Before a consumer moves, its package receives only the values and
 consumer-owned operations it actually needs. A stage cannot import its
-coordinator to reach these helpers. Current core has no new import edge and
-the extracted functions are unchanged, so no new package cycle is introduced.
+coordinator to reach these helpers. At the Slice 2 checkpoint no package edge changed. The actual Slice 6 imports
+above and enforced dependency contracts now govern the extracted owners.
 
 ## Domain names
 
@@ -87,7 +96,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-678 current non-test files directly under internal/core, their declared symbols,
+699 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -214,7 +223,7 @@ shared authoring mutation locks, durable receipts and project-dump reconciliatio
 Their final package owner is core/authoring in Slice 9; moving those operations
 into the identity package would split that existing transactional owner. All
 baseline signature rows assigned to Slice 6 remain assigned here and must be
-resolved by T6.5. project_userspace remains shared workspace/operator configuration
+resolved by T6.5; all are now fixed in the Slice 6 dispositions ledger. project_userspace remains shared workspace/operator configuration
 at the core root. No helper implementation is copied to make the graph compile.
 
 ### Shared notification value dependencies
@@ -282,3 +291,44 @@ row cleanup remains explicitly best effort after iteration errors are checked;
 transaction rollback/commit failures remain observable. Receiver HTTP sending and
 its storage keep their own owner, with notification validation over shared payload
 values. Core/notify imports no root core, adapter or workflow coordinator.
+
+
+### Complete Slice 6 contract and dependency dispositions
+
+[All 19 assigned occurrences](code-quality-remediation-slice-6-dispositions.csv)
+link original IDs to actual declarations, signatures, implementation commits and
+focused validation. Sixteen are fixed; NewReport, NewFailedReport and the guarded
+document lookup retain their cohesive five-input contracts. The six authoring
+result conversions retain byte counts, body/metadata separation, partial change
+results, normal receipt absence and parse-found outcomes. Receipt callbacks assign
+the outer result/error under the existing authoring mutation lock; no receipt or
+transaction ownership moves to project identity.
+
+The existing production AST check now enforces every extracted owner in
+scripts/goquality/boundaries.go. Imports are checked in generated files, every
+build variant and descendants; root core, adapters and workflow coordination are
+forbidden. Named imports, aliases and dot/blank imports have the same direction.
+Test-only integration fixtures retain access to public consumer boundaries.
+Standard-library facilities and existing external database drivers remain valid.
+
+The glossary uses gate for Git/configured-validation evidence and report encoding;
+project for registered identity/selection; notification for retained event and
+conditional delivery ownership; message for immutable rendering contracts; and
+state.ErrConflict for the single existing conditional-write conflict identity.
+Notification pending/skipped/delivered/failed, event source/severity and registry
+diagnostic spellings are unchanged. Gate report status and Woodpecker action
+use named types with their original values. No public wire/status rename occurs.
+
+ReserveTelegram's plain flag selects the original dispatch or the one definite
+format fallback, guarded by original attempt/fallback predicates; it is not an
+unbounded retry switch. Frozen, Found, Present, Uncertain and rendering/enablement
+flags retain independent domain meanings. Existing read-only-close suppressions
+remain documented next to checked iteration/scanner errors; owned error sentinels
+have Err names and preserve their identities. No broad suppression or facade is
+added. The root-only bindDump distinction remains part of authoring authority.
+
+Package READMEs state the direct capabilities and dependencies. The finite file
+ledger records current declarations, while baseline signature ownership remains
+unchanged. The schema assets, original source review and detections are unchanged.
+Global temporary debt is 410 with ceiling seven and the same single external
+exception; no assigned Slice 6 declaration remains in that manifest.
