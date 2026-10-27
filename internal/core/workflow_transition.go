@@ -12,8 +12,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-const workflowJournalPath = "lock/workflow-transition.json"
-
 // WorkflowChange binds a replacement record to its observed revision and image.
 type WorkflowChange struct {
 	Record           WorkflowRecord
@@ -110,7 +108,7 @@ func (s *WorkflowStore) commitAllocatedFiles(changes []workflowstate.FileChange,
 		return err
 	}
 
-	path, err := s.safePath(workflowJournalPath)
+	path, err := s.safePath(workflowstate.JournalPath)
 	if err != nil {
 		return err
 	}
@@ -129,7 +127,7 @@ func (s *WorkflowStore) commitAllocatedFiles(changes []workflowstate.FileChange,
 }
 
 func (s *WorkflowStore) recoverTransition() error {
-	path, err := s.safePath(workflowJournalPath)
+	path, err := s.safePath(workflowstate.JournalPath)
 	if err != nil {
 		return err
 	}
@@ -231,7 +229,7 @@ func (s *WorkflowStore) replayJournal(journal workflowJournal) error {
 		return err
 	}
 
-	path, err := s.safePath(workflowJournalPath)
+	path, err := s.safePath(workflowstate.JournalPath)
 	if err != nil {
 		return err
 	}

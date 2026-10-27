@@ -63,7 +63,8 @@ func (r *fileAuthoringSessionRepository) authoringArtifactMetadata(binding autho
 	return append(encoded, '\n'), err
 }
 
-func advanceAuthoringMetadata(metadata map[string]any) error {
+// AdvanceArtifactMetadata validates and increments the existing authoring artifact revision.
+func AdvanceArtifactMetadata(metadata map[string]any) error {
 	revision, ok := metadata["revision"].(float64)
 	if !ok || revision < 1 || revision > 4096 {
 		return errors.New("invalid authoring artifact revision")
@@ -99,7 +100,7 @@ func (r *fileAuthoringSessionRepository) observedAuthoringMetadata(ref authoring
 		return nil, err
 	}
 
-	if err := advanceAuthoringMetadata(metadata); err != nil {
+	if err := AdvanceArtifactMetadata(metadata); err != nil {
 		return nil, err
 	}
 

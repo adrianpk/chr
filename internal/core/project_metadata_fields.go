@@ -58,7 +58,8 @@ func replaceProjectMetadataField(lines []string, key, value string) []string {
 	return append(lines, key+": "+value)
 }
 
-func projectDocumentFields(frontmatter string) (map[string]string, error) {
+// ProjectDocumentFields retains document field parsing and duplicate rejection.
+func ProjectDocumentFields(frontmatter string) (map[string]string, error) {
 	fields := map[string]string{}
 
 	for _, line := range strings.Split(frontmatter, "\n") {

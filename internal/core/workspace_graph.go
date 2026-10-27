@@ -185,7 +185,7 @@ func (b WorkspaceGraphBuilder) loadCases(ctx context.Context, graph *WorkspaceGr
 			return nil
 		}
 
-		slug := caseSlugFromPath(path)
+		slug := CaseSlugFromPath(path)
 		graph.Cases = append(graph.Cases, WorkspaceNode{
 			Kind:         WorkspaceNodeCase,
 			Path:         path,
@@ -301,14 +301,14 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 
 	body := string(content)
 	if strings.HasPrefix(string(content), "---\n") {
-		markdown, splitErr := splitMarkdownFrontmatter(string(content))
+		markdown, splitErr := SplitMetadataMarkdown(string(content))
 		frontmatter, nextBody := markdown.Frontmatter, markdown.Body
 
 		if splitErr != nil {
 			return WorkspaceNode{}, splitErr
 		}
 
-		fields = parseSimpleYAMLFields(frontmatter)
+		fields = ParseSimpleYAMLFields(frontmatter)
 		body = nextBody
 	}
 

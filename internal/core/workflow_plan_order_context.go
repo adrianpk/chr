@@ -200,7 +200,7 @@ func (s *WorkflowStore) requiredOrderRepairImages(snapshot WorkflowSnapshot, sou
 		return nil, err
 	}
 
-	orderImages, err := planOrderBytes(document)
+	orderImages, err := EncodePlanOrder(document)
 	if err != nil {
 		return nil, err
 	}

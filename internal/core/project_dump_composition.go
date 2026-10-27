@@ -103,7 +103,7 @@ func projectDumpReconciledMetadata(source ProjectDumpArtifact, original []byte, 
 		return nil, err
 	}
 
-	if err := advanceAuthoringMetadata(metadata); err != nil {
+	if err := AdvanceArtifactMetadata(metadata); err != nil {
 		return nil, err
 	}
 

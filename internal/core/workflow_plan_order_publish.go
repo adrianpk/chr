@@ -27,7 +27,7 @@ func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterialization
 		return nil, err
 	}
 
-	images, err := planOrderBytes(document)
+	images, err := EncodePlanOrder(document)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func (s *WorkflowStore) currentPlanOrderMetadata(binding workflowstate.PlanRevis
 		return nil, workflowstate.FileChange{}, false, err
 	}
 
-	if err := validatePlanTargetMetadata(metadata, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), binding.Reference))); err != nil {
+	if err := ValidatePlanTargetMetadata(metadata, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), binding.Reference))); err != nil {
 		return nil, workflowstate.FileChange{}, false, err
 	}
 
@@ -238,7 +238,7 @@ func (s *WorkflowStore) boundCurrentPlanChanges(previous, next workflowstate.Pla
 		return nil, err
 	}
 
-	if err := advanceAuthoringMetadata(metadata); err != nil {
+	if err := AdvanceArtifactMetadata(metadata); err != nil {
 		return nil, err
 	}
 
@@ -275,11 +275,11 @@ func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next workflowstate.
 		return nil, err
 	}
 
-	if err := validatePlanTrackerMetadata(envelope, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), metadataRef))); err != nil {
+	if err := ValidatePlanTrackerMetadata(envelope, filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), metadataRef))); err != nil {
 		return nil, err
 	}
 
-	if err := advanceAuthoringMetadata(envelope); err != nil {
+	if err := AdvanceArtifactMetadata(envelope); err != nil {
 		return nil, err
 	}
 
@@ -301,7 +301,7 @@ func (s *WorkflowStore) registerBoundProjection(metadata map[string]any, binding
 		return err
 	}
 
-	files, err := planManifestFiles(metadata["files"])
+	files, err := PlanManifestFiles(metadata["files"])
 	if err != nil {
 		return err
 	}

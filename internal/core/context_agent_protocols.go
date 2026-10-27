@@ -150,16 +150,16 @@ func RenderProtocolsContext(ctx AgentProtocolContext) string {
 	opsmetadata.WriteMarkdownField(&output, "Target", ctx.TargetPath)
 
 	output.WriteString("## Applicable AGENTS.md Files\n\n")
-	writeContextDocuments(&output, ctx.AgentFiles, "No applicable AGENTS.md files were found.")
+	WriteContextDocuments(&output, ctx.AgentFiles, "No applicable AGENTS.md files were found.")
 
 	output.WriteString("## Selected .chr Context\n\n")
-	writeContextDocuments(&output, ctx.ChrFiles, "No selected .chr protocol files were found.")
+	WriteContextDocuments(&output, ctx.ChrFiles, "No selected .chr protocol files were found.")
 
 	return output.String()
 }
 
 func normalizeAgentProtocolContextOptions(opts AgentProtocolContextOptions) (agentProtocolPaths, error) {
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return agentProtocolPaths{}, err
 	}
@@ -176,7 +176,8 @@ func normalizeAgentProtocolContextOptions(opts AgentProtocolContextOptions) (age
 	return agentProtocolPaths{ProjectDir: projectDir, TargetPath: targetPath, TargetDir: targetDirectory(targetPath)}, nil
 }
 
-func cleanAbsProjectDir(projectDir string) (string, error) {
+// CleanContextProjectDir returns the original trimmed absolute context root.
+func CleanContextProjectDir(projectDir string) (string, error) {
 	projectDir = strings.TrimSpace(projectDir)
 	if projectDir == "" {
 		return "", fmt.Errorf("agent protocol project dir is required")
@@ -418,7 +419,8 @@ func loadProtocolCandidateFiles(
 	return authoringcore.ContextDocumentLoad{Documents: documents, Sources: sources}, nil
 }
 
-func writeContextDocuments(output *strings.Builder, documents []authoringcore.ContextDocument, emptyMessage string) {
+// WriteContextDocuments renders the existing document context and empty message.
+func WriteContextDocuments(output *strings.Builder, documents []authoringcore.ContextDocument, emptyMessage string) {
 	if len(documents) == 0 {
 		output.WriteString(emptyMessage)
 		output.WriteString("\n\n")

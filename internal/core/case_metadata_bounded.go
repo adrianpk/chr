@@ -71,7 +71,7 @@ func (s CaseMetadataService) loadBoundedCase(path string) (CaseMetadata, error) 
 
 	metadata.SourcePath, metadata.SourceHash, metadata.Exists = path, contenthash.Sum(data), true
 	if metadata.Slug == "" {
-		metadata.Slug = caseSlugFromPath(path)
+		metadata.Slug = CaseSlugFromPath(path)
 	}
 
 	return metadata, nil

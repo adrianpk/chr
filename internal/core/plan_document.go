@@ -44,7 +44,7 @@ func ReadPlanDocument(ctx context.Context, projectDir, reference string) (PlanDo
 		return PlanDocument{}, err
 	}
 
-	fields, err := projectDocumentFields(front)
+	fields, err := ProjectDocumentFields(front)
 	if err != nil {
 		return PlanDocument{}, err
 	}

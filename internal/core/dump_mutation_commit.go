@@ -178,7 +178,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationMetadata(binding dumpMutati
 	} else {
 		err = json.Unmarshal(before, &metadata)
 		if err == nil {
-			err = advanceAuthoringMetadata(metadata)
+			err = AdvanceArtifactMetadata(metadata)
 		}
 	}
 

@@ -106,7 +106,7 @@ func TestTelegramOperationOwnerConflict(t *testing.T) {
 		t.Fatal("divergent image overwritten", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(owner.layout.Root(), workflowJournalPath)); err != nil {
+	if _, err := os.Stat(filepath.Join(owner.layout.Root(), workflowstate.JournalPath)); err != nil {
 		t.Fatal("unfinished journal lost", err)
 	}
 }

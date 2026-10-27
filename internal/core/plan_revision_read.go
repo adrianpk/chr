@@ -69,7 +69,7 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcor
 	namespace := strings.Split(result.Reference, "/")[1]
 
 	binding := result.Binding
-	if !validPlanBindingPaths(namespace, binding) {
+	if !ValidPlanBindingPaths(namespace, binding) {
 		return workflowstate.ErrConflict
 	}
 
@@ -80,7 +80,7 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcor
 }
 
 func (r *fileAuthoringSessionRepository) validatePlanRevisionImages(namespace string, binding workflowstate.PlanRevisionBinding) error {
-	if !validPlanBindingPaths(namespace, binding) {
+	if !ValidPlanBindingPaths(namespace, binding) {
 		return workflowstate.ErrConflict
 	}
 
@@ -105,7 +105,8 @@ func (r *fileAuthoringSessionRepository) checkPlanImages(root string, images map
 	return nil
 }
 
-func validPlanBindingPaths(namespace string, binding workflowstate.PlanRevisionBinding) bool {
+// ValidPlanBindingPaths checks the original concrete retained plan binding paths.
+func ValidPlanBindingPaths(namespace string, binding workflowstate.PlanRevisionBinding) bool {
 	parts := strings.Split(binding.Reference, "/")
 	if len(parts) != 3 || parts[0] != "plan" || !opscore.HasArtifactNumberPrefix(parts[1]) || parts[2] != "artifact.md" {
 		return false
@@ -118,5 +119,5 @@ func validPlanBindingPaths(namespace string, binding workflowstate.PlanRevisionB
 
 	root := filepath.ToSlash(filepath.Join(opscore.DirectoryName, namespace)) + "/"
 
-	return validPlanRevisionJournalPath(root+binding.BodyRef) && validPlanTrackerJournalPath(root+binding.CurrentTrackerRef)
+	return ValidPlanRevisionJournalPath(root+binding.BodyRef) && validPlanTrackerJournalPath(root+binding.CurrentTrackerRef)
 }

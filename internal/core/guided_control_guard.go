@@ -8,7 +8,7 @@ import (
 func guardGuidedControl(session authoringcore.Session, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
 	state := session.Guided
 
-	if !guidedControlAction(operation.Action) {
+	if !ValidGuidedControlAction(operation.Action) {
 		return false, workflowstate.ErrConflict
 	}
 
@@ -39,7 +39,8 @@ func replayGuidedControl(receipt authoringcore.GuidedControlReceipt, operation a
 	return true, guidedDigestConflict(receipt.GuidedUseCaseOperation, operation)
 }
 
-func guidedControlAction(action string) bool {
+// ValidGuidedControlAction reports the existing guided action set.
+func ValidGuidedControlAction(action string) bool {
 	return action == "pause" || action == "resume" || action == "cancel"
 }
 

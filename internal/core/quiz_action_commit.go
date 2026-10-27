@@ -184,7 +184,7 @@ func (r *fileAuthoringSessionRepository) quizMetadataBefore(image workflowstate.
 		return nil, errors.New("quiz metadata is empty")
 	}
 
-	if err := advanceAuthoringMetadata(metadata); err != nil {
+	if err := AdvanceArtifactMetadata(metadata); err != nil {
 		return nil, err
 	}
 

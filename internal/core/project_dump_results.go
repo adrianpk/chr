@@ -19,7 +19,8 @@ type projectDumpReceiptLookup struct {
 	Found  bool
 }
 type (
-	metadataMarkdown struct{ Frontmatter, Body string }
+	// MetadataMarkdown retains the legacy project header and body text.
+	MetadataMarkdown struct{ Frontmatter, Body string }
 	documentField    struct {
 		Name, Value string
 		Found       bool

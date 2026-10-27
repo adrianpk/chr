@@ -32,7 +32,7 @@ type WorktreePlan struct {
 
 // NewWorktreePlan executes the corresponding package operation.
 func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return WorktreePlan{}, err
 	}

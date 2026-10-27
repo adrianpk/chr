@@ -246,7 +246,7 @@ func TestWorkflowPlanAdoptionOwned(t *testing.T) {
 		t.Fatal("partial adoption was duplicated or omitted")
 	}
 
-	if _, err := os.Stat(filepath.Join(store.layout.Root(), workflowJournalPath)); !errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(filepath.Join(store.layout.Root(), workflowstate.JournalPath)); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("unrecovered journal: %v", err)
 	}
 }

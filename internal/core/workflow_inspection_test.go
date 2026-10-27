@@ -21,7 +21,7 @@ func TestWorkflowInspectionJournal(t *testing.T) {
 		t.Fatal("transition interruption not injected")
 	}
 
-	journal := filepath.Join(store.layout.Root(), workflowJournalPath)
+	journal := filepath.Join(store.layout.Root(), workflowstate.JournalPath)
 
 	before, err := os.ReadFile(journal)
 	if err != nil {
@@ -96,7 +96,7 @@ func TestWorkflowInspectionLinked(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	journal := filepath.Join(layout.Root(), workflowJournalPath)
+	journal := filepath.Join(layout.Root(), workflowstate.JournalPath)
 
 	before := []byte("interrupted linked transition\n")
 	if err := os.WriteFile(journal, before, 0o600); err != nil {

@@ -153,7 +153,7 @@ func acquireAgentOperationFile(lockPath, operation, owner string, createdAt time
 }
 
 func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (string, string, time.Time, error) {
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return "", "", time.Time{}, err
 	}
@@ -357,7 +357,7 @@ func shouldEvaluateWorkBranchPolicy(opts WorkSelectionPreflightOptions) bool {
 }
 
 func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPreflightOptions) (*WorkSelectionBlockReason, error) {
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return nil, err
 	}

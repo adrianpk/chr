@@ -56,7 +56,7 @@ type AssistedTranscriptQuestionGap struct {
 func LoadAssistedAuthoringContextPackage(
 	opts AssistedAuthoringContextPackageOptions,
 ) (AssistedAuthoringContextPackage, error) {
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return AssistedAuthoringContextPackage{}, err
 	}
@@ -431,14 +431,14 @@ func writeAssistedContextTranscript(output *strings.Builder, summary AssistedTra
 func writeAssistedContextProtocols(output *strings.Builder, ctx AgentProtocolContext) {
 	output.WriteString("## Protocols\n\n")
 	output.WriteString("### AGENTS.md\n\n")
-	writeContextDocuments(output, ctx.AgentFiles, "No applicable AGENTS.md files were found.")
+	WriteContextDocuments(output, ctx.AgentFiles, "No applicable AGENTS.md files were found.")
 	output.WriteString("### .chr Protocol Files\n\n")
-	writeContextDocuments(output, ctx.ChrFiles, "No selected .chr protocol files were found.")
+	WriteContextDocuments(output, ctx.ChrFiles, "No selected .chr protocol files were found.")
 }
 
 func writeAssistedContextDocuments(output *strings.Builder, documents []authoringcore.ContextDocument) {
 	output.WriteString("## Selected Documents\n\n")
-	writeContextDocuments(output, documents, "No selected authoring documents were found.")
+	WriteContextDocuments(output, documents, "No selected authoring documents were found.")
 }
 
 func writeAssistedContextConversationBoundary(output *strings.Builder) {

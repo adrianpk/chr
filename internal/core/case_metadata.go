@@ -102,7 +102,7 @@ func (s CaseMetadataService) LoadPath(path string) (CaseMetadata, error) {
 	metadata.Exists = true
 
 	if strings.TrimSpace(metadata.Slug) == "" {
-		metadata.Slug = caseSlugFromPath(path)
+		metadata.Slug = CaseSlugFromPath(path)
 	}
 
 	return metadata, nil
@@ -140,7 +140,7 @@ func (s CaseMetadataService) save(metadata CaseMetadata) (CaseMetadata, error) {
 	}
 
 	if strings.TrimSpace(metadata.Slug) == "" {
-		metadata.Slug = caseSlugFromPath(path)
+		metadata.Slug = CaseSlugFromPath(path)
 	}
 
 	err = validateCaseMetadataWriteHash(path, metadata)
@@ -208,14 +208,14 @@ func CaseMetadataPath(projectDir, slug string) string {
 
 // ParseCaseMetadata parses the corresponding package data.
 func ParseCaseMetadata(content string) (CaseMetadata, error) {
-	markdown, err := splitMarkdownFrontmatter(content)
+	markdown, err := SplitMetadataMarkdown(content)
 	frontmatter, body := markdown.Frontmatter, markdown.Body
 
 	if err != nil {
 		return CaseMetadata{}, fmt.Errorf("parse case metadata: %w", err)
 	}
 
-	fields := parseSimpleYAMLFields(frontmatter)
+	fields := ParseSimpleYAMLFields(frontmatter)
 
 	schemaVersion, err := strconv.Atoi(opsmetadata.Unquote(fields["schema_version"]))
 	if err != nil {
@@ -297,7 +297,8 @@ func slugifyCaseName(name string) string {
 	return slug
 }
 
-func caseSlugFromPath(path string) string {
+// CaseSlugFromPath derives the existing case slug from its source path.
+func CaseSlugFromPath(path string) string {
 	slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 	if strings.TrimSpace(slug) == "" {
 		return "case"

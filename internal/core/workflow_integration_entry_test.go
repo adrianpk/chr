@@ -148,7 +148,7 @@ func checkNativeEntryReplay(t *testing.T, store *WorkflowStore, request Workflow
 		t.Fatal("replay duplicated allocation or revision")
 	}
 
-	if _, err := os.Stat(filepath.Join(store.layout.Root(), workflowJournalPath)); !errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(filepath.Join(store.layout.Root(), workflowstate.JournalPath)); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("completed replay retained a transition journal", err)
 	}
 }

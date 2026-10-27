@@ -162,14 +162,14 @@ func ProjectMetadataPath(projectDir string) string {
 
 // ParseProjectMetadata parses the corresponding package data.
 func ParseProjectMetadata(content string) (ProjectMetadata, error) {
-	markdown, err := splitMarkdownFrontmatter(content)
+	markdown, err := SplitMetadataMarkdown(content)
 	frontmatter, body := markdown.Frontmatter, markdown.Body
 
 	if err != nil {
 		return ProjectMetadata{}, err
 	}
 
-	values, err := projectDocumentFields(frontmatter)
+	values, err := ProjectDocumentFields(frontmatter)
 	if err != nil {
 		return ProjectMetadata{}, err
 	}
@@ -276,25 +276,27 @@ func firstMarkdownParagraph(content string, limit int) string {
 	return description
 }
 
-func splitMarkdownFrontmatter(content string) (metadataMarkdown, error) {
+// SplitMetadataMarkdown retains the legacy required project header and body slicing.
+func SplitMetadataMarkdown(content string) (MetadataMarkdown, error) {
 	if !strings.HasPrefix(content, "---\n") {
-		return metadataMarkdown{Frontmatter: "", Body: ""}, fmt.Errorf("project metadata frontmatter opening delimiter is required")
+		return MetadataMarkdown{Frontmatter: "", Body: ""}, fmt.Errorf("project metadata frontmatter opening delimiter is required")
 	}
 
 	remaining := strings.TrimPrefix(content, "---\n")
 
 	end := strings.Index(remaining, "\n---")
 	if end < 0 {
-		return metadataMarkdown{Frontmatter: "", Body: ""}, fmt.Errorf("project metadata frontmatter closing delimiter is required")
+		return MetadataMarkdown{Frontmatter: "", Body: ""}, fmt.Errorf("project metadata frontmatter closing delimiter is required")
 	}
 
 	body := strings.TrimPrefix(remaining[end:], "\n---")
 	body = strings.TrimPrefix(body, "\n")
 
-	return metadataMarkdown{Frontmatter: remaining[:end], Body: body}, nil
+	return MetadataMarkdown{Frontmatter: remaining[:end], Body: body}, nil
 }
 
-func parseSimpleYAMLFields(content string) map[string]string {
+// ParseSimpleYAMLFields keeps the original permissive project field parsing.
+func ParseSimpleYAMLFields(content string) map[string]string {
 	fields := map[string]string{}
 
 	for _, line := range strings.Split(content, "\n") {

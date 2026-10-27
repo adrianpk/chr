@@ -13,7 +13,7 @@ import (
 
 // Load assembles the original workspace, session and filesystem context.
 func (WorkspaceAuthoringQuizContext) Load(ctx context.Context, projectDir string, session authoringcore.Session) ([]AuthoringQuizContextSection, error) {
-	projectDir, err := cleanAbsProjectDir(projectDir)
+	projectDir, err := CleanContextProjectDir(projectDir)
 	if err != nil {
 		return nil, err
 	}

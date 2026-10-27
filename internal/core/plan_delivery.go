@@ -64,7 +64,7 @@ func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.
 		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
-	if !samePlannedWorkflowBinding(planned, binding) || !validPlanBindingPaths(layout.Namespace(), planned) {
+	if !samePlannedWorkflowBinding(planned, binding) || !ValidPlanBindingPaths(layout.Namespace(), planned) {
 		return generationcore.GeneratedWorkflowPlan{}, workflowstate.ErrConflict
 	}
 

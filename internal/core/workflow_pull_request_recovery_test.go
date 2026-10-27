@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSlicePRCrashProcess is an owned writer that exits after provider
@@ -68,7 +69,7 @@ func TestWorkflowSlicePRCrashProcess(t *testing.T) {
 func workflowPRCrashJournalState(t *testing.T, store *WorkflowStore, state string) bool {
 	t.Helper()
 
-	path, err := store.safePath(workflowJournalPath)
+	path, err := store.safePath(workflowstate.JournalPath)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -23,21 +23,6 @@ func (s *WorkflowStore) withWorkflowPlanMutation(ctx context.Context, action fun
 	})
 }
 
-func (r *fileAuthoringSessionRepository) checkPlanWorkflowPending(reference string) error {
-	root := filepath.Dir(filepath.Dir(filepath.Dir(reference)))
-
-	path, err := r.authoringPath(filepath.ToSlash(filepath.Join(root, workflowJournalPath)))
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Lstat(path); !errors.Is(err, os.ErrNotExist) {
-		return errors.Join(workflowstate.ErrConflict, err)
-	}
-
-	return nil
-}
-
 func (s *WorkflowStore) validateApprovedOrder(plan generationcore.GeneratedWorkflowPlan, setID string) error {
 	if plan.PlanRevision == nil {
 		return s.requirePlanRevisionBinding(plan.PlanRef)
@@ -61,7 +46,7 @@ func (s *WorkflowStore) validateApprovedOrder(plan generationcore.GeneratedWorkf
 }
 
 func (s *WorkflowStore) validatePlannedApproval(plan generationcore.GeneratedWorkflowPlan, binding workflowstate.PlanRevisionBinding) error {
-	if !validPlanBindingPaths(s.layout.Namespace(), binding) || plan.PlanRef != binding.BodyRef || plan.PlanHash != binding.BodyHash {
+	if !ValidPlanBindingPaths(s.layout.Namespace(), binding) || plan.PlanRef != binding.BodyRef || plan.PlanHash != binding.BodyHash {
 		return workflowstate.ErrConflict
 	}
 
@@ -110,7 +95,7 @@ func (s *WorkflowStore) validateApprovalOrderImages(binding workflowstate.PlanRe
 
 func (s *WorkflowStore) requirePlanRevisionBinding(reference string) error {
 	full := filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), reference))
-	if validPlanRevisionJournalPath(full) {
+	if ValidPlanRevisionJournalPath(full) {
 		return fmt.Errorf("%w: generated plan requires its explicit revision binding", workflowstate.ErrConflict)
 	}
 
@@ -161,7 +146,7 @@ func (s *WorkflowStore) validateOrderScope(binding workflowstate.PlanRevisionBin
 		return err
 	}
 
-	fields, err := projectDocumentFields(front)
+	fields, err := ProjectDocumentFields(front)
 	if err != nil {
 		return err
 	}

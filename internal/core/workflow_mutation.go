@@ -249,7 +249,7 @@ func (s *WorkflowStore) checkMutationCapacity() error {
 }
 
 func (s *WorkflowStore) releaseUnusedMutationAllocation(guard string) error {
-	path, err := s.safePath(workflowJournalPath)
+	path, err := s.safePath(workflowstate.JournalPath)
 	if err != nil {
 		return err
 	}

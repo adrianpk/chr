@@ -26,7 +26,7 @@ func specDocumentChanges(document SpecDocument, request SpecMutationRequest) ([]
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 
 	if request.Action == "save" {
-		if err := advanceAuthoringMetadata(document.metadata); err != nil {
+		if err := AdvanceArtifactMetadata(document.metadata); err != nil {
 			return nil, err
 		}
 	}
@@ -140,7 +140,7 @@ func specDocumentFront(document SpecDocument, request SpecMutationRequest, statu
 		}
 	}
 
-	fields, err := projectDocumentFields(document.front)
+	fields, err := ProjectDocumentFields(document.front)
 	if err != nil {
 		return nil, err
 	}

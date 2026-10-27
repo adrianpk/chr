@@ -96,7 +96,7 @@ func decodeSpecDocument(document *SpecDocument) error {
 		return err
 	}
 
-	fields, err := projectDocumentFields(front)
+	fields, err := ProjectDocumentFields(front)
 	if err != nil {
 		return err
 	}

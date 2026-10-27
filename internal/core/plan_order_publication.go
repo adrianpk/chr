@@ -53,7 +53,7 @@ func preparePlanOrderChanges(projectDir string, target planTargetObservation, in
 
 	binding, document := revision.Binding, revision.Document
 
-	images, err := planOrderBytes(document)
+	images, err := EncodePlanOrder(document)
 	if err != nil {
 		return nil, err
 	}
@@ -207,7 +207,8 @@ func checkPreviousPlanTracker(target planTargetObservation, image workflowstate.
 	return nil
 }
 
-func validPlanRevisionJournalPath(reference string) bool {
+// ValidPlanRevisionJournalPath reports paths allowed by the original plan revision journal.
+func ValidPlanRevisionJournalPath(reference string) bool {
 	parts := strings.Split(filepath.ToSlash(reference), "/")
 	if !validPlanRevisionDirectory(parts) || !validPlanRevisionKey(parts[6]) {
 		return false
@@ -228,7 +229,7 @@ func validPlanTrackerJournalPath(reference string) bool {
 }
 
 func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]any, changes []workflowstate.FileChange) error {
-	files, err := planManifestFiles(metadata["files"])
+	files, err := PlanManifestFiles(metadata["files"])
 	if err != nil {
 		return err
 	}
@@ -259,11 +260,11 @@ func planCurrentTrackerMetadata(layout opscore.Layout, reference string, plan ge
 		return nil, err
 	}
 
-	if err := validatePlanTrackerMetadata(metadata, reference); err != nil {
+	if err := ValidatePlanTrackerMetadata(metadata, reference); err != nil {
 		return nil, err
 	}
 
-	if err := advanceAuthoringMetadata(metadata); err != nil {
+	if err := AdvanceArtifactMetadata(metadata); err != nil {
 		return nil, err
 	}
 
@@ -290,7 +291,8 @@ func validPlanRevisionKey(value string) bool {
 	return err == nil
 }
 
-func planManifestFiles(value any) ([]any, error) {
+// PlanManifestFiles preserves nil, decoded and string manifest lists.
+func PlanManifestFiles(value any) ([]any, error) {
 	switch files := value.(type) {
 	case nil:
 		return nil, nil
@@ -308,7 +310,8 @@ func planManifestFiles(value any) ([]any, error) {
 	}
 }
 
-func validatePlanTrackerMetadata(metadata map[string]any, reference string) error {
+// ValidatePlanTrackerMetadata checks the existing tracker envelope identity.
+func ValidatePlanTrackerMetadata(metadata map[string]any, reference string) error {
 	parts := strings.Split(reference, "/")
 	if metadata["schema_version"] != "ops-layout/v1" || metadata["type"] != "tracker" || metadata["namespace"] != parts[1] || metadata["id"] != parts[3] {
 		return workflowstate.ErrConflict

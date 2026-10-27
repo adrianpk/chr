@@ -141,7 +141,7 @@ func TestWorkflowSelectionPendingJournal(t *testing.T) {
 		t.Fatal("interruption not injected")
 	}
 
-	path := filepath.Join(store.layout.Root(), workflowJournalPath)
+	path := filepath.Join(store.layout.Root(), workflowstate.JournalPath)
 
 	before, err := os.ReadFile(path)
 	if err != nil {

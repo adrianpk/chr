@@ -272,7 +272,7 @@ func (s CaseMetadataService) guardNewCaseMutation(metadata CaseMetadata) error {
 		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	if !metadata.Exists || contenthash.Sum(data) != metadata.SourceHash || metadata.Slug != caseSlugFromPath(path) {
+	if !metadata.Exists || contenthash.Sum(data) != metadata.SourceHash || metadata.Slug != CaseSlugFromPath(path) {
 		return workflowstate.ErrConflict
 	}
 
@@ -299,7 +299,7 @@ func (s CaseMetadataService) prepareCaseMutationPath(metadata CaseMetadata) (Cas
 	}
 
 	metadata.SourcePath = filepath.ToSlash(relative)
-	metadata.Slug = caseSlugFromPath(path)
+	metadata.Slug = CaseSlugFromPath(path)
 
 	return metadata, nil
 }

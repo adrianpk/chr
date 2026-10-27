@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowFinalizationCrashProcess exits at an actual replacement in the
@@ -58,7 +59,7 @@ func TestWorkflowFinalizationCrashProcess(t *testing.T) {
 func workflowFinalizationJournal(t *testing.T, store *WorkflowStore) bool {
 	t.Helper()
 
-	path, err := store.safePath(workflowJournalPath)
+	path, err := store.safePath(workflowstate.JournalPath)
 	if err != nil {
 		t.Fatal(err)
 	}

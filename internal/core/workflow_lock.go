@@ -58,7 +58,7 @@ func (s *WorkflowStore) withRepositoryLock(ctx context.Context, prepare, action 
 }
 
 func (s *WorkflowStore) requireNoWorkflowTransition() error {
-	path, err := s.safePath(workflowJournalPath)
+	path, err := s.safePath(workflowstate.JournalPath)
 	if err != nil {
 		return err
 	}

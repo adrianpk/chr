@@ -41,7 +41,7 @@ func MutateSpec(ctx context.Context, projectDir string, request SpecMutationRequ
 		return result, err
 	}
 
-	root, err := cleanAbsProjectDir(projectDir)
+	root, err := CleanContextProjectDir(projectDir)
 	if err != nil {
 		return result, err
 	}

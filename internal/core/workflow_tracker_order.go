@@ -58,7 +58,7 @@ func (s *WorkflowStore) workflowOrderTrackerImage(snapshot WorkflowSnapshot, set
 		return result, nil, err
 	}
 
-	images, err := planOrderBytes(document)
+	images, err := EncodePlanOrder(document)
 	if err != nil {
 		return result, nil, err
 	}
@@ -71,7 +71,7 @@ func (s *WorkflowStore) workflowOrderTrackerImage(snapshot WorkflowSnapshot, set
 
 func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []WorkflowRecord) (generationcore.PlanOrderDocument, error) {
 	binding := set.Set.PlanRevision
-	if binding == nil || !validPlanBindingPaths(s.layout.Namespace(), *binding) || binding.BodyHash != set.Set.PlanHash {
+	if binding == nil || !ValidPlanBindingPaths(s.layout.Namespace(), *binding) || binding.BodyHash != set.Set.PlanHash {
 		return generationcore.PlanOrderDocument{}, fmt.Errorf("order-only tracker requires its retained plan revision")
 	}
 
@@ -201,7 +201,7 @@ func validateWorkflowPlanRevision(namespace string, set workflowstate.WorkflowSe
 	}
 
 	binding := *set.PlanRevision
-	if !validPlanBindingPaths(namespace, binding) || binding.BodyHash != set.PlanHash {
+	if !ValidPlanBindingPaths(namespace, binding) || binding.BodyHash != set.PlanHash {
 		return workflowstate.ErrConflict
 	}
 

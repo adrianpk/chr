@@ -256,7 +256,7 @@ func seedSpecGeneratedDocument(t *testing.T, project string) SpecDocument {
 func specTestFields(t *testing.T, front string) map[string]string {
 	t.Helper()
 
-	fields, err := projectDocumentFields(front)
+	fields, err := ProjectDocumentFields(front)
 	if err != nil {
 		t.Fatal(err)
 	}

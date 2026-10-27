@@ -113,7 +113,7 @@ func newWorkReadinessSettings(ctx context.Context, opts WorkReadinessOptions) (w
 		return workReadinessSettings{}, err
 	}
 
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return workReadinessSettings{}, err
 	}
@@ -187,7 +187,7 @@ func newWorkReadinessRepairSettings(ctx context.Context, opts WorkReadinessRepai
 		return workReadinessRepairSettings{}, err
 	}
 
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return workReadinessRepairSettings{}, err
 	}

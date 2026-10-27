@@ -103,7 +103,7 @@ func (OSGoGraphCommandRunner) Run(
 
 // LoadGoGraphContext loads the corresponding package data.
 func LoadGoGraphContext(opts GoGraphContextOptions) (GoGraphContext, error) {
-	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
+	projectDir, err := CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
 		return GoGraphContext{}, err
 	}

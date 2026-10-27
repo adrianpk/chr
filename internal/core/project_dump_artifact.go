@@ -93,7 +93,7 @@ func projectDumpBodyFields(body []byte) (map[string]string, error) {
 		return nil, err
 	}
 
-	return projectDocumentFields(front)
+	return ProjectDocumentFields(front)
 }
 
 func projectDumpArtifact(reference string, images projectDumpFileImages, fields, metadata map[string]string) (ProjectDumpArtifact, error) {

@@ -133,7 +133,7 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 		return generatedSpecPreparation{Document: document, Action: action}, err
 	}
 
-	fields, err := projectDocumentFields(front)
+	fields, err := ProjectDocumentFields(front)
 	if err != nil {
 		return generatedSpecPreparation{Document: document, Action: action}, err
 	}

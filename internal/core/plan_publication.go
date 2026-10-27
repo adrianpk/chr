@@ -65,7 +65,7 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 			return target, err
 		}
 
-		if err := validatePlanTargetMetadata(target.metadata, reference); err != nil {
+		if err := ValidatePlanTargetMetadata(target.metadata, reference); err != nil {
 			return target, err
 		}
 	}
@@ -128,7 +128,7 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 		if err != nil {
 			return nil, err
 		}
-	} else if err := advanceAuthoringMetadata(metadata); err != nil {
+	} else if err := AdvanceArtifactMetadata(metadata); err != nil {
 		return nil, err
 	}
 
@@ -213,7 +213,8 @@ func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, 
 	}, nil
 }
 
-func validatePlanTargetMetadata(metadata map[string]any, reference string) error {
+// ValidatePlanTargetMetadata checks the existing canonical plan envelope identity.
+func ValidatePlanTargetMetadata(metadata map[string]any, reference string) error {
 	parts := strings.Split(reference, "/")
 	if metadata["schema_version"] != "ops-layout/v1" || metadata["type"] != "plan" || metadata["namespace"] != parts[1] || metadata["id"] != parts[3] {
 		return workflowstate.ErrConflict
@@ -230,7 +231,7 @@ func validatePlanTargetScope(target planTargetObservation, scope quizcore.Scope)
 		return err
 	}
 
-	fields, err := projectDocumentFields(front)
+	fields, err := ProjectDocumentFields(front)
 	if err != nil {
 		return err
 	}

@@ -49,7 +49,7 @@ func validAuthoringJournalVersionPath(schema, reference string) bool {
 		return true
 	}
 
-	return validProjectDumpHistoryPath(reference) || validQuizRuntimeJournalPath(reference) || validPlanRevisionJournalPath(reference) || validPlanTrackerJournalPath(reference)
+	return validProjectDumpHistoryPath(reference) || validQuizRuntimeJournalPath(reference) || ValidPlanRevisionJournalPath(reference) || validPlanTrackerJournalPath(reference)
 }
 
 func validQuizRuntimeJournalPath(reference string) bool {
