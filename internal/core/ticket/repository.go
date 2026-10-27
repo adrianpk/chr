@@ -15,16 +15,16 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// DefaultTicketKeyPrefix defines a package boundary constant.
-const DefaultTicketKeyPrefix = "CHR"
+// DefaultKeyPrefix defines a package boundary constant.
+const DefaultKeyPrefix = "CHR"
 
-// TicketRepository defines a package boundary interface.
-type TicketRepository interface {
-	CreateTicket(ctx context.Context, opts CreateTicketOptions) (CreateTicketResult, error)
+// Repository defines a package boundary interface.
+type Repository interface {
+	Create(ctx context.Context, opts CreateOptions) (CreateResult, error)
 }
 
-// CreateTicketOptions describes a package boundary value.
-type CreateTicketOptions struct {
+// CreateOptions describes a package boundary value.
+type CreateOptions struct {
 	Title       string
 	Synopsis    string
 	Status      string
@@ -40,16 +40,16 @@ type CreateTicketOptions struct {
 	Body        string
 }
 
-// CreateTicketResult describes a package boundary value.
-type CreateTicketResult struct {
+// CreateResult describes a package boundary value.
+type CreateResult struct {
 	Key  string
 	Path string
 }
 
-// TicketRepositoryOption defines a package boundary type.
-type TicketRepositoryOption func(*fileTicketRepository)
+// RepositoryOption defines a package boundary type.
+type RepositoryOption func(*fileRepository)
 
-type fileTicketRepository struct {
+type fileRepository struct {
 	projectDir    string
 	keyPrefix     string
 	renderer      Renderer
@@ -57,12 +57,12 @@ type fileTicketRepository struct {
 	nextKeyNumber func(context.Context, string) (int, error)
 }
 
-// NewTicketRepository stores the required key allocator and document dependencies.
-func NewTicketRepository(projectDir string, nextKeyNumber func(context.Context, string) (int, error), opts ...TicketRepositoryOption) TicketRepository {
-	repository := &fileTicketRepository{
+// NewRepository stores the required key allocator and document dependencies.
+func NewRepository(projectDir string, nextKeyNumber func(context.Context, string) (int, error), opts ...RepositoryOption) Repository {
+	repository := &fileRepository{
 		projectDir:    projectDir,
 		nextKeyNumber: nextKeyNumber,
-		keyPrefix:     DefaultTicketKeyPrefix,
+		keyPrefix:     DefaultKeyPrefix,
 		renderer:      NewRenderer(),
 		now:           time.Now,
 	}
@@ -74,51 +74,51 @@ func NewTicketRepository(projectDir string, nextKeyNumber func(context.Context, 
 	return repository
 }
 
-// WithTicketRepositoryKeyPrefix executes the corresponding package operation.
-func WithTicketRepositoryKeyPrefix(keyPrefix string) TicketRepositoryOption {
-	return func(repository *fileTicketRepository) {
+// WithKeyPrefix executes the corresponding package operation.
+func WithKeyPrefix(keyPrefix string) RepositoryOption {
+	return func(repository *fileRepository) {
 		if keyPrefix != "" {
 			repository.keyPrefix = keyPrefix
 		}
 	}
 }
 
-// WithTicketRepositoryRenderer executes the corresponding package operation.
-func WithTicketRepositoryRenderer(renderer Renderer) TicketRepositoryOption {
-	return func(repository *fileTicketRepository) {
+// WithRenderer executes the corresponding package operation.
+func WithRenderer(renderer Renderer) RepositoryOption {
+	return func(repository *fileRepository) {
 		if renderer != nil {
 			repository.renderer = renderer
 		}
 	}
 }
 
-// WithTicketRepositoryClock executes the corresponding package operation.
-func WithTicketRepositoryClock(now func() time.Time) TicketRepositoryOption {
-	return func(repository *fileTicketRepository) {
+// WithRepositoryClock executes the corresponding package operation.
+func WithRepositoryClock(now func() time.Time) RepositoryOption {
+	return func(repository *fileRepository) {
 		if now != nil {
 			repository.now = now
 		}
 	}
 }
 
-// CreateTicket executes the corresponding package operation.
-func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTicketOptions) (CreateTicketResult, error) {
+// Create executes the corresponding package operation.
+func (r *fileRepository) Create(ctx context.Context, opts CreateOptions) (CreateResult, error) {
 	err := ctx.Err()
 	if err != nil {
-		return CreateTicketResult{}, err
+		return CreateResult{}, err
 	}
 
 	if strings.TrimSpace(opts.Title) == "" {
-		return CreateTicketResult{}, fmt.Errorf("ticket title is required")
+		return CreateResult{}, fmt.Errorf("ticket title is required")
 	}
 
 	if strings.TrimSpace(opts.Synopsis) == "" {
-		return CreateTicketResult{}, fmt.Errorf("ticket synopsis is required")
+		return CreateResult{}, fmt.Errorf("ticket synopsis is required")
 	}
 
 	nextNumber, err := r.nextKeyNumber(ctx, r.keyPrefix)
 	if err != nil {
-		return CreateTicketResult{}, err
+		return CreateResult{}, err
 	}
 
 	now := r.now().UTC()
@@ -144,22 +144,22 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 
 	content, err := r.renderer.Render(ticket)
 	if err != nil {
-		return CreateTicketResult{}, err
+		return CreateResult{}, err
 	}
 
 	path := r.ticketPath(opts.UseCase, key, opts.Title)
 
 	err = os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {
-		return CreateTicketResult{}, fmt.Errorf("create ticket directory: %w", err)
+		return CreateResult{}, fmt.Errorf("create ticket directory: %w", err)
 	}
 
 	err = os.WriteFile(path, []byte(content), 0o644)
 	if err != nil {
-		return CreateTicketResult{}, fmt.Errorf("create ticket file: %w", err)
+		return CreateResult{}, fmt.Errorf("create ticket file: %w", err)
 	}
 
-	return CreateTicketResult{Key: key, Path: path}, nil
+	return CreateResult{Key: key, Path: path}, nil
 }
 
 func ticketStatusOrDefault(status string) string {
@@ -171,33 +171,33 @@ func ticketStatusOrDefault(status string) string {
 	return status
 }
 
-// TicketNumberObservation preserves whether a ticket key was present.
-type TicketNumberObservation struct {
+// NumberObservation preserves whether a ticket key was present.
+type NumberObservation struct {
 	Number int
 	Found  bool
 }
 
-// ReadTicketNumber observes a key in the filename before reading ticket metadata.
-func ReadTicketNumber(path, keyPrefix string) (TicketNumberObservation, error) {
-	number, ok := KeyNumberFromText(keyPrefix, filepath.Base(path))
+// ReadNumber observes a key in the filename before reading ticket metadata.
+func ReadNumber(path, keyPrefix string) (NumberObservation, error) {
+	number, ok := NumberFromText(keyPrefix, filepath.Base(path))
 	if ok {
-		return TicketNumberObservation{Number: number, Found: true}, nil
+		return NumberObservation{Number: number, Found: true}, nil
 	}
 
 	content, err := opsfile.Read(path)
 	if err != nil {
-		return TicketNumberObservation{}, fmt.Errorf("read ticket metadata: %w", err)
+		return NumberObservation{}, fmt.Errorf("read ticket metadata: %w", err)
 	}
 
-	number, ok = KeyNumberFromText(keyPrefix, string(content))
+	number, ok = NumberFromText(keyPrefix, string(content))
 	if ok {
-		return TicketNumberObservation{Number: number, Found: true}, nil
+		return NumberObservation{Number: number, Found: true}, nil
 	}
 
-	return TicketNumberObservation{}, nil
+	return NumberObservation{}, nil
 }
 
-func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
+func (r *fileRepository) ticketPath(useCase, key, title string) string {
 	parts := []string{workspacecore.UserPath(r.projectDir, "tickets")}
 
 	slug := slugcore.Normalize(useCase)
@@ -210,8 +210,8 @@ func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
 	return filepath.Join(parts...)
 }
 
-// KeyNumberFromText observes the existing prefix-number spelling.
-func KeyNumberFromText(prefix, text string) (int, bool) {
+// NumberFromText observes the existing prefix-number spelling.
+func NumberFromText(prefix, text string) (int, bool) {
 	pattern := regexp.MustCompile(regexp.QuoteMeta(prefix) + `-(\d+)`)
 
 	match := pattern.FindStringSubmatch(text)

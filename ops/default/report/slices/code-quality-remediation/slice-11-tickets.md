@@ -126,14 +126,17 @@ method were removed after their live caller moved to the injected allocator.
 The filesystem repository and shared key readers now have the ticket owner.
 Sixteen more declaration preimages reconcile, for 178 total. The mechanical move
 passes the existing ticket creation/native key recovery, Board/application/wire
-regressions and signature policy; the separate repository API naming follows.
+regressions and signature policy. The separate naming exposes Repository.Create,
+CreateOptions/CreateResult, NewRepository, WithKeyPrefix/WithRenderer/
+WithRepositoryClock and ReadNumber/NumberObservation/NumberFromText.
+The same focused selection and strict lint pass after naming.
 
 - `go test ./internal/core/ticket/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(Ticket|ServiceWorkflowTicket|QualityRecordWire|Board|Leaf)' -count=1 -timeout=3m`: passed.
 - `make check-go-style`: 9307 declarations, ceiling seven, 203 exact debts and one external exception.
 
 ## Risks and Follow-ups
 
-Remaining work includes ticket repository API naming and test ownership, execution/readiness
+Remaining work includes ticket test ownership, execution/readiness
 ownership and D03, other assigned signatures, typed state/preparation contracts,
 the six-parameter reconciliation and final exact-head controller validation.
 No Slice 11 PR has been opened.

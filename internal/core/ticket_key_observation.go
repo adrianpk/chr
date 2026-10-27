@@ -16,7 +16,7 @@ import (
 
 // NextTicketKeyNumber observes legacy tickets and native envelopes across namespaces.
 func NextTicketKeyNumber(ctx context.Context, projectDir, keyPrefix string) (int, error) {
-	observer := ticketKeyObserver{projectDir: projectDir, keyPrefix: ticketcore.DefaultTicketKeyPrefix}
+	observer := ticketKeyObserver{projectDir: projectDir, keyPrefix: ticketcore.DefaultKeyPrefix}
 	if keyPrefix != "" {
 		observer.keyPrefix = keyPrefix
 	}
@@ -79,7 +79,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 }
 
 func (r *ticketKeyObserver) observedTicketNumber(path string) (int, error) {
-	observed, err := ticketcore.ReadTicketNumber(path, r.keyPrefix)
+	observed, err := ticketcore.ReadNumber(path, r.keyPrefix)
 	if err != nil || filepath.Base(path) != opscore.ArtifactBodyFile() {
 		return observed.Number, err
 	}
@@ -100,7 +100,7 @@ func (r *ticketKeyObserver) observedTicketNumber(path string) (int, error) {
 		}
 	}
 
-	metadataNumber, _ := ticketcore.KeyNumberFromText(r.keyPrefix, task.Key)
+	metadataNumber, _ := ticketcore.NumberFromText(r.keyPrefix, task.Key)
 
 	return max(observed.Number, metadataNumber), err
 }

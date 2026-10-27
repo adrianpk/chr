@@ -21,8 +21,8 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	if config.TicketKeyPrefix != ticketcore.DefaultTicketKeyPrefix {
-		t.Fatalf("TicketKeyPrefix = %q, want %q", config.TicketKeyPrefix, ticketcore.DefaultTicketKeyPrefix)
+	if config.TicketKeyPrefix != ticketcore.DefaultKeyPrefix {
+		t.Fatalf("TicketKeyPrefix = %q, want %q", config.TicketKeyPrefix, ticketcore.DefaultKeyPrefix)
 	}
 
 	assertDefaultRuntimeConfig(t, config.Runtime)

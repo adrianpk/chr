@@ -31,3 +31,10 @@ Rebuilder.Rebuild, Reconciler.ReconcileProject/ReconcileTicket and
 IndexStatusChecker.CheckIndex retain the original operation boundaries.
 KeySequenceRepository.ReserveKey retains durable reservation semantics.
 Directory resolves the existing legacy document path.
+
+Repository.Create owns ticket file admission, allocation, rendering and creation.
+NewRepository requires a key allocator and passes its configured prefix to that
+allocator after validation. WithKeyPrefix, WithRenderer and WithRepositoryClock
+configure the existing writer dependencies. Native namespace/envelope observation
+remains outside this package. ReadNumber returns NumberObservation plus error;
+NumberFromText and DefaultKeyPrefix share the original lexical key contract.

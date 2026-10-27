@@ -281,7 +281,7 @@ func DefaultWorkBranchPolicy() WorkBranchPolicy {
 // LoadWorkspaceConfig loads the corresponding package data.
 func defaultWorkspaceConfig() WorkspaceConfig {
 	return WorkspaceConfig{
-		TicketKeyPrefix: ticketcore.DefaultTicketKeyPrefix,
+		TicketKeyPrefix: ticketcore.DefaultKeyPrefix,
 		Runtime:         harnessruntime.DefaultConfig(),
 		Notifications:   notifycore.DefaultConfig(),
 		Review:          DefaultReviewWorkflowConfig(),
