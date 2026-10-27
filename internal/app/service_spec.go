@@ -305,40 +305,9 @@ func (s service) specGenerationRuntimeState(scope quizcore.Scope) (quizcore.Runt
 }
 
 func (s service) newSpecGenerationModelRequest(state quizcore.RuntimeState) (quizmodel.Request, error) {
-	scope := quizcore.Scope{
-		ProjectID: state.ProjectID,
-		CaseSlug:  state.CaseSlug,
-	}
-
-	payload, err := s.newQuizModelPayload(scope, state, quizmodel.ActionGenerateSpec)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	sections, err := quizmodel.ContextSectionsForPayload(payload)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	sections, err = s.appendSpecGenerationContextSections(sections, scope)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("spec-generation-%s", specScopeID(scope))),
-		Action:          quizmodel.ActionGenerateSpec,
-		Strategy:        "spec_generation",
-		Scope:           scope,
-		Mode:            state.Mode,
-		RuntimeState:    state,
-		Payload:         payload,
-		ContextSections: sections,
-		OutputContract: quizmodel.OutputContract{
-			RequiredFields: payload.OutputContract.RequiredFields,
-		},
-		CreatedAt: s.utcNow(),
-	}, nil
+	return s.newDocumentGenerationModelRequest(state, documentModelOperation{
+		action: quizmodel.ActionGenerateSpec, strategy: "spec_generation", requestIDPrefix: "spec-generation",
+	}, s.appendSpecGenerationContextSections)
 }
 
 func (s service) appendSpecGenerationContextSections(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {

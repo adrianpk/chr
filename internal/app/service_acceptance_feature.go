@@ -199,40 +199,9 @@ func (s service) latestSpecNodeForFeatureScope(scope quizcore.Scope) (core.Works
 }
 
 func (s service) newAcceptanceFeatureModelRequest(state quizcore.RuntimeState) (quizmodel.Request, error) {
-	scope := quizcore.Scope{
-		ProjectID: state.ProjectID,
-		CaseSlug:  state.CaseSlug,
-	}
-
-	payload, err := s.newQuizModelPayload(scope, state, quizmodel.ActionGenerateAcceptanceFeature)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	sections, err := quizmodel.ContextSectionsForPayload(payload)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	sections, err = s.appendAcceptanceFeatureGenerationContextSections(sections, scope)
-	if err != nil {
-		return quizmodel.Request{}, err
-	}
-
-	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("acceptance-feature-generation-%s", specScopeID(scope))),
-		Action:          quizmodel.ActionGenerateAcceptanceFeature,
-		Strategy:        "acceptance_feature_generation",
-		Scope:           scope,
-		Mode:            state.Mode,
-		RuntimeState:    state,
-		Payload:         payload,
-		ContextSections: sections,
-		OutputContract: quizmodel.OutputContract{
-			RequiredFields: payload.OutputContract.RequiredFields,
-		},
-		CreatedAt: s.utcNow(),
-	}, nil
+	return s.newDocumentGenerationModelRequest(state, documentModelOperation{
+		action: quizmodel.ActionGenerateAcceptanceFeature, strategy: "acceptance_feature_generation", requestIDPrefix: "acceptance-feature-generation",
+	}, s.appendAcceptanceFeatureGenerationContextSections)
 }
 
 func (s service) appendAcceptanceFeatureGenerationContextSections(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
