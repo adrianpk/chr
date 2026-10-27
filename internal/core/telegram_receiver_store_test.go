@@ -212,13 +212,18 @@ func TestTelegramReceiverMigration(t *testing.T) {
 		t.Fatal("failed migration accepted", store.Close())
 	}
 
-	sqliteRegistry, ok := registry.(*sqliteProjectRegistry)
-	if !ok {
-		t.Fatal("unexpected registry implementation")
+	inspection, err := database.OpenReadOnly(t.Context(), env)
+	if err != nil {
+		t.Fatal(err)
 	}
+	defer func() {
+		if err := inspection.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
 
 	var tableCount int
-	if err := sqliteRegistry.db.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM sqlite_master WHERE name='telegram_receivers'").Scan(&tableCount); err != nil || tableCount != 0 {
+	if err := inspection.QueryRowContext(t.Context(), "SELECT COUNT(*) FROM sqlite_master WHERE name='telegram_receivers'").Scan(&tableCount); err != nil || tableCount != 0 {
 		t.Fatal("partial migration remained", tableCount, err)
 	}
 

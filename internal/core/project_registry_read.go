@@ -8,7 +8,7 @@ import (
 )
 
 // ReadRegisteredProjects reads explicit identities without migrating or creating a registry.
-func ReadRegisteredProjects(ctx context.Context, env UserEnvironment, ids []string) (projects []Project, err error) {
+func ReadRegisteredProjects(ctx context.Context, env database.DataDirectory, ids []string) (projects []Project, err error) {
 	if len(ids) == 0 || len(ids) > 50 {
 		return nil, errors.New("one to 50 explicit project identities are required")
 	}

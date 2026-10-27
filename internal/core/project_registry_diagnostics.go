@@ -32,18 +32,21 @@ const (
 
 // ProjectRegistryDiagnosticsService describes a package boundary value.
 type ProjectRegistryDiagnosticsService struct {
-	registry ProjectRegistry
-	store    ActiveProjectStore
+	registry           ProjectRegistry
+	store              ActiveProjectStore
+	workspaceDirectory string
 }
 
 // NewProjectRegistryDiagnosticsService constructs the corresponding package service or value.
 func NewProjectRegistryDiagnosticsService(
 	registry ProjectRegistry,
 	store ActiveProjectStore,
+	workspaceDirectory string,
 ) ProjectRegistryDiagnosticsService {
 	return ProjectRegistryDiagnosticsService{
-		registry: registry,
-		store:    store,
+		registry:           registry,
+		store:              store,
+		workspaceDirectory: workspaceDirectory,
 	}
 }
 
@@ -63,19 +66,19 @@ func (s ProjectRegistryDiagnosticsService) ListDiagnostics(
 
 	diagnostics := make([]ProjectRegistryDiagnostic, 0, len(projects))
 	for _, project := range projects {
-		diagnostics = append(diagnostics, diagnoseProjectRegistryEntry(project, activeProject.ProjectID))
+		diagnostics = append(diagnostics, diagnoseProjectRegistryEntry(project, activeProject.ProjectID, s.workspaceDirectory))
 	}
 
 	return diagnostics, nil
 }
 
-func diagnoseProjectRegistryEntry(project Project, activeProjectID string) ProjectRegistryDiagnostic {
+func diagnoseProjectRegistryEntry(project Project, activeProjectID, workspaceDirectory string) ProjectRegistryDiagnostic {
 	diagnostic := ProjectRegistryDiagnostic{
 		Project: project,
 		Active:  project.ID == activeProjectID,
 	}
 
-	workspacePath := filepath.Join(project.Path, DirectoryName)
+	workspacePath := filepath.Join(project.Path, workspaceDirectory)
 	projectInfo, projectErr := os.Stat(project.Path)
 
 	if projectErr == nil && projectInfo.IsDir() {

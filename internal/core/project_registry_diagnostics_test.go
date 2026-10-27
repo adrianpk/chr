@@ -34,6 +34,7 @@ func TestProjectRegistryDiagnosticsReportsProjectState(t *testing.T) {
 	diagnostics, err := NewProjectRegistryDiagnosticsService(
 		registry,
 		NewActiveProjectStore(env),
+		DirectoryName,
 	).ListDiagnostics(context.Background())
 	if err != nil {
 		t.Fatalf("ListDiagnostics returned error: %v", err)

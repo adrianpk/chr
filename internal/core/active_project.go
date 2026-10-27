@@ -28,7 +28,7 @@ type activeProjectStore struct {
 }
 
 // NewActiveProjectStore constructs the corresponding package service or value.
-func NewActiveProjectStore(env UserEnvironment) ActiveProjectStore {
+func NewActiveProjectStore(env ConfigDirectory) ActiveProjectStore {
 	return &activeProjectStore{
 		path: filepath.Join(env.ConfigDir(), "active-project"),
 	}
@@ -101,3 +101,6 @@ func (s *activeProjectStore) ClearActiveProject() error {
 
 	return nil
 }
+
+// ConfigDirectory supplies the active-selection configuration directory.
+type ConfigDirectory interface{ ConfigDir() string }

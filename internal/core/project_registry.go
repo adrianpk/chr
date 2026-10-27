@@ -37,7 +37,7 @@ type sqliteProjectRegistry struct {
 }
 
 // NewProjectRegistry constructs the corresponding package service or value.
-func NewProjectRegistry(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (ProjectRegistry, error) {
+func NewProjectRegistry(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (ProjectRegistry, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)

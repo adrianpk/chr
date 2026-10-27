@@ -54,10 +54,10 @@ func CloseOnError(db *sql.DB, err error) error {
 	return err
 }
 
+// TransactionFailure retains cancellation when SQLite reports a completed transaction.
 // This owner alone commits/rolls back the transaction. database/sql can win
 // that race after cancellation and return the bare ErrTxDone instead of the
 // context error. Wrapped/joined checkpoint failures must remain failures.
-// TransactionFailure retains cancellation when SQLite reports a completed transaction.
 func TransactionFailure(ctx context.Context, err error) error {
 	if ctx.Err() == nil {
 		return err

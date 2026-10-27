@@ -125,6 +125,7 @@ func collectDiagnosticBundleRegistry(ctx context.Context, env core.UserEnvironme
 	diagnostics, err := core.NewProjectRegistryDiagnosticsService(
 		registry,
 		core.NewActiveProjectStore(env),
+		core.DirectoryName,
 	).ListDiagnostics(ctx)
 	if err != nil {
 		return nil, err

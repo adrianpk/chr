@@ -81,6 +81,7 @@ func (factory commandFactory) runMaintenanceRegistryStatus(ctx context.Context, 
 	diagnostics, err := core.NewProjectRegistryDiagnosticsService(
 		registry,
 		core.NewActiveProjectStore(env),
+		core.DirectoryName,
 	).ListDiagnostics(ctx)
 	if err != nil {
 		return err
