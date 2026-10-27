@@ -31,6 +31,14 @@ in progress or pending. No Slice 9 completion or PR readiness is claimed.
 
 ## Implementation Notes
 
+D07 compares guided preparation and admission against the existing guided spec
+work-preparation/committed-input sections, its Slice 3 plan and the authoring
+reference. The shared application helper owns scope resolution, command scope
+binding and retained authoring-step entry with the original bounded service
+context/namespace. Each caller retains its exact action/error guard; plan
+preparation, receipt reconciliation, host readiness and native admission remain
+separate. Existing tests are unchanged for this pair.
+
 Acceptance implementation is split into artifact.go for paths/writes, round.go
 for clarification note rendering/answer retention and check.go for the static
 Gherkin parser. These are separate existing responsibilities; the parser remains
@@ -151,6 +159,11 @@ The post-split acceptance/model/app selection, exact style/README checks and
 pinned strict lint passed again for the new file layout. The parser has 357
 lines, round notes 223 and artifact writing 142; these counts describe cohesive
 owners rather than an imposed file-size cap.
+
+- `go test ./internal/app -run '^TestGuidedUseCase(Preparation|Admission|RecoveryAdmission|ControlAdmission|TelegramScope)' -count=1 -timeout=3m`
+  — passed after D07; committed inputs, exact scope, retries and lost acknowledgements remain covered.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/app`
+  — passed with zero issues after D07; the signature check retains 300 debts.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified

@@ -20,19 +20,7 @@ func (s service) PrepareGuidedWork(ctx context.Context, command core.GuidedUseCa
 		return core.AuthoringSession{}, errors.New("unsupported guided preparation command")
 	}
 
-	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
-	if err != nil {
-		return core.AuthoringSession{}, err
-	}
-
-	command.GuidedUseCaseScope = scope
-
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *core.AuthoringSession) error {
-		bounded := s
-		bounded.ctx, bounded.workflowNamespace = ctx, session.Namespace
-
-		return bounded.prepareGuidedWork(ctx, session)
-	})
+	return s.applyGuidedWorkStep(ctx, command, service.prepareGuidedWork)
 }
 
 func (s service) prepareGuidedWork(ctx context.Context, session *core.AuthoringSession) error {

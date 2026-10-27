@@ -14,19 +14,7 @@ func (s service) AdmitGuidedWork(ctx context.Context, command core.GuidedUseCase
 		return core.AuthoringSession{}, errors.New("unsupported guided admission command")
 	}
 
-	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
-	if err != nil {
-		return core.AuthoringSession{}, err
-	}
-
-	command.GuidedUseCaseScope = scope
-
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *core.AuthoringSession) error {
-		bounded := s
-		bounded.ctx, bounded.workflowNamespace = ctx, session.Namespace
-
-		return bounded.admitGuidedWork(ctx, session)
-	})
+	return s.applyGuidedWorkStep(ctx, command, service.admitGuidedWork)
 }
 
 func (s service) admitGuidedWork(ctx context.Context, session *core.AuthoringSession) error {
