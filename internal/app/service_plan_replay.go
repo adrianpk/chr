@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func (s service) replayPlanPublication(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, bool, error) {
@@ -20,7 +21,7 @@ func (s service) replayPlanPublication(ctx context.Context, operation generation
 
 	reference := committed.Reference
 	if committed.Binding.BodyRef != "" {
-		layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: operation.Scope.Namespace})
+		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: operation.Scope.Namespace})
 		if err != nil {
 			return PlanOperationResult{}, false, err
 		}
@@ -32,7 +33,7 @@ func (s service) replayPlanPublication(ctx context.Context, operation generation
 }
 
 func (s service) retainedPlanTracking(plan PlanView, binding generationcore.PlanRevisionBinding) (PlanTrackingResult, error) {
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: plan.Scope.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: plan.Scope.Namespace})
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}

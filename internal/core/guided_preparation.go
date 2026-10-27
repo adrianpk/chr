@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -174,7 +175,7 @@ func guidedPreparationPaths(session AuthoringSession) ([]string, error) {
 	materialized := work.Materialization
 	binding := materialized.PlanRevision
 
-	root := filepath.ToSlash(filepath.Join(OpsDirectoryName, session.Namespace))
+	root := filepath.ToSlash(filepath.Join(opscore.OpsDirectoryName, session.Namespace))
 	if validatePlanDocumentReference(work.Publication.Reference) != nil || !strings.HasPrefix(work.Publication.Reference, root+"/") {
 		return nil, workflowstate.ErrConflict
 	}

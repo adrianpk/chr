@@ -1,6 +1,10 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
+)
 
 // TestNativeMergerWorkspace exercises both Git object formats. The private
 // checkout must import the exact source without changing the source repository.
@@ -10,7 +14,7 @@ func TestNativeMergerWorkspace(t *testing.T) {
 			dir := t.TempDir()
 			workflowIntegrationCommand(t, dir, "init", "--quiet", "--object-format="+format)
 
-			layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "default"})
+			layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "default"})
 			if err != nil {
 				t.Fatal(err)
 			}

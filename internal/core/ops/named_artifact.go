@@ -1,4 +1,4 @@
-package core
+package ops
 
 import (
 	"path/filepath"
@@ -19,7 +19,7 @@ func NamedOpsArtifactBody(projectDir, artifactType, name string) (NamedOpsArtifa
 		return NamedOpsArtifactPath{}, err
 	}
 
-	id := "00000-" + opsArtifactSlugOrDefault(name)
+	id := "00000-" + OpsArtifactSlugOrDefault(name)
 
 	artifactDir, err := layout.ArtifactDirectory(artifactType, id)
 	if err != nil {
@@ -73,7 +73,7 @@ func EnsureNamedOpsArtifactMetadata(projectDir, artifactType, name string) error
 		return err
 	}
 
-	id := "00000-" + opsArtifactSlugOrDefault(name)
+	id := "00000-" + OpsArtifactSlugOrDefault(name)
 
 	artifact, err := EnsureOpsArtifactEnvelope(CreateOpsArtifactOptions{
 		Layout:      layout,

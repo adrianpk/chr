@@ -13,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -23,7 +24,7 @@ func TestWorkflowProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: os.Getenv("CHR_WORKFLOW_HELPER_DIR"), Namespace: "default"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: os.Getenv("CHR_WORKFLOW_HELPER_DIR"), Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,7 +216,7 @@ func workflowTestLinkedStore(t *testing.T, store *WorkflowStore) *WorkflowStore 
 		}
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

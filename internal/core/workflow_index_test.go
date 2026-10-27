@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -178,7 +179,7 @@ func TestWorkflowNamespaces(t *testing.T) {
 	index := workflowTestIndex(t, ":memory:")
 	workflowTestCreate(t, store, "CHR-1")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "team"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "team"})
 	if err != nil {
 		t.Fatal(err)
 	}

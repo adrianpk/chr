@@ -8,6 +8,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -45,7 +46,7 @@ func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.
 		return generationcore.GeneratedWorkflowPlan{}, fmt.Errorf("generate a revision-bound plan before creating its tickets")
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: scope.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: scope.Namespace})
 	if err != nil {
 		return generationcore.GeneratedWorkflowPlan{}, err
 	}
@@ -74,7 +75,7 @@ func samePlannedWorkflowBinding(planned, current generationcore.PlanRevisionBind
 	return planned.Reference == current.Reference && planned.Revision == current.Revision && planned.BodyHash == current.BodyHash && planned.PlannedOrderHash == current.PlannedOrderHash
 }
 
-func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Context, layout OpsLayout, binding generationcore.PlanRevisionBinding) (generationcore.GeneratedWorkflowPlan, error) {
+func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Context, layout opscore.OpsLayout, binding generationcore.PlanRevisionBinding) (generationcore.GeneratedWorkflowPlan, error) {
 	reference := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), binding.Reference))
 
 	document, err := ReadPlanDocument(ctx, r.projectDir, reference)

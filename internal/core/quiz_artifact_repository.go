@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -70,12 +71,12 @@ func QuizArtifactLayout(projectDir string, scope quizcore.Scope) (QuizArtifactPa
 		return QuizArtifactPaths{}, err
 	}
 
-	raw, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz-raw")
+	raw, err := opscore.NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz-raw")
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
-	curated, err := NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz")
+	curated, err := opscore.NamedOpsArtifactBody(projectDir, "quiz", scopeID+"-quiz")
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -159,7 +160,7 @@ func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state quizcore.Ru
 		return QuizArtifactPaths{}, err
 	}
 
-	if err := EnsureNamedOpsArtifactMetadata(r.projectDir, "quiz", scopeID+"-quiz-raw"); err != nil {
+	if err := opscore.EnsureNamedOpsArtifactMetadata(r.projectDir, "quiz", scopeID+"-quiz-raw"); err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
@@ -195,7 +196,7 @@ func (r *fileQuizArtifactRepository) writeCuratedNotes(ctx context.Context, note
 		return QuizArtifactPaths{}, err
 	}
 
-	if err := EnsureNamedOpsArtifactMetadata(r.projectDir, "quiz", scopeID+"-quiz"); err != nil {
+	if err := opscore.EnsureNamedOpsArtifactMetadata(r.projectDir, "quiz", scopeID+"-quiz"); err != nil {
 		return QuizArtifactPaths{}, err
 	}
 
@@ -432,7 +433,7 @@ func scopedQuizArtifactLayout(projectDir string, scope quizcore.Scope) (QuizArti
 		return QuizArtifactPaths{}, err
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: scope.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: scope.Namespace})
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -445,12 +446,12 @@ func scopedQuizArtifactLayout(projectDir string, scope quizcore.Scope) (QuizArti
 		{id + "-quiz-raw", &paths.RawRelativePath, &paths.RawPath},
 		{id + "-quiz", &paths.CuratedRelativePath, &paths.CuratedPath},
 	} {
-		dir, err := layout.ArtifactDirectory("quiz", "00000-"+opsArtifactSlugOrDefault(target.name))
+		dir, err := layout.ArtifactDirectory("quiz", "00000-"+opscore.OpsArtifactSlugOrDefault(target.name))
 		if err != nil {
 			return paths, err
 		}
 
-		*target.absolute = filepath.Join(dir, OpsArtifactBodyFile())
+		*target.absolute = filepath.Join(dir, opscore.OpsArtifactBodyFile())
 
 		relative, err := filepath.Rel(projectDir, *target.absolute)
 		if err != nil {

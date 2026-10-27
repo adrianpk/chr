@@ -11,6 +11,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -165,12 +166,12 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 func generatedPlanMetadata(projectDir, reference, title string, plan generationcore.GeneratedPlan) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
 	if err != nil {
 		return nil, err
 	}
 
-	return newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "chr"}, parts[3], plan.CreatedAt), nil
+	return opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "plan", Title: title, Producer: "chr"}, parts[3], plan.CreatedAt), nil
 }
 
 func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, target planTargetObservation, plan generationcore.GeneratedPlan) ([]workflowFileChange, error) {

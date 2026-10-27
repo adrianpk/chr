@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -65,7 +65,7 @@ func TestPiGenerationTrackingInvalid(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := core.EnsureOpsArtifactBodyMetadata(project, filepath.ToSlash(relative)); err != nil {
+	if err := opscore.EnsureOpsArtifactBodyMetadata(project, filepath.ToSlash(relative)); err != nil {
 		t.Fatal(err)
 	}
 

@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 type workflowFrontierProcessResult struct {
@@ -23,7 +25,7 @@ func TestWorkflowFrontierProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "default"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

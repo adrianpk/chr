@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -54,7 +55,7 @@ func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, targ
 
 	reader := workflowProofReader{store: s}
 
-	files, err := reader.gitOutput(ctx, "ls-tree", "-r", "--name-only", target.Commit, "--", OpsDirectoryName)
+	files, err := reader.gitOutput(ctx, "ls-tree", "-r", "--name-only", target.Commit, "--", opscore.OpsDirectoryName)
 	if err != nil {
 		return err
 	}
@@ -92,7 +93,7 @@ func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, targ
 func workflowCoordinatorTargetPath(path string) bool {
 	parts := strings.Split(filepath.ToSlash(path), "/")
 
-	return len(parts) == 3 && parts[0] == OpsDirectoryName && opsnamespace.Valid(parts[1]) && parts[2] == workflowCoordinatorPath
+	return len(parts) == 3 && parts[0] == opscore.OpsDirectoryName && opsnamespace.Valid(parts[1]) && parts[2] == workflowCoordinatorPath
 }
 
 func (s *WorkflowStore) checkWorkflowFrontierOwnership(ctx context.Context, run workflowInvocationFile) error {

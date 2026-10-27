@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -368,7 +369,7 @@ func canonicalWorkspaceGraphFixturePath(path string) string {
 
 	projectDir := strings.TrimSuffix(parts[0], "/")
 	slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
-	artifactID := "00000-" + opsArtifactSlugOrDefault(slug)
+	artifactID := "00000-" + opscore.OpsArtifactSlugOrDefault(slug)
 
-	return filepath.Join(projectDir, OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, OpsArtifactBodyFile())
+	return filepath.Join(projectDir, opscore.OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, opscore.OpsArtifactBodyFile())
 }

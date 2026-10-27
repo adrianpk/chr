@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -40,7 +41,7 @@ func validateSpecReference(reference string) error {
 	}
 
 	parts := strings.Split(reference, "/")
-	if len(parts) != 5 || parts[0] != OpsDirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "spec" || parts[4] != OpsArtifactBodyFile() {
+	if len(parts) != 5 || parts[0] != opscore.OpsDirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "spec" || parts[4] != opscore.OpsArtifactBodyFile() {
 		return errors.New("spec reference must identify a canonical spec artifact")
 	}
 

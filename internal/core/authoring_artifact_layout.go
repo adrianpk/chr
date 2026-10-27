@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // AuthoringArtifactLayoutOptions describes a package boundary value.
@@ -125,7 +127,7 @@ func validateAuthoringArtifactLayoutOptions(opts AuthoringArtifactLayoutOptions)
 
 // EnsureAuthoringArtifactMetadata ensures metadata for an authoring artifact body.
 func EnsureAuthoringArtifactMetadata(projectDir string, ref AuthoringArtifactRef) error {
-	return EnsureOpsArtifactBodyMetadata(projectDir, ref.Path)
+	return opscore.EnsureOpsArtifactBodyMetadata(projectDir, ref.Path)
 }
 
 func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string, error) {
@@ -137,7 +139,7 @@ func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string,
 	fileName := authoringArtifactFileName(opts.SessionID, name)
 	artifactType := authoringArtifactType(opts.Kind)
 
-	body, err := NamedOpsArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
+	body, err := opscore.NamedOpsArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
 
 	return body.RelativePath, body.Path, err
 }

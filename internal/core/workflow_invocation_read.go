@@ -10,6 +10,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -83,7 +84,7 @@ func (s *WorkflowStore) locateWorkflowInvocationPrepared(ctx context.Context, id
 func (s *WorkflowStore) workflowOwnerStore(run workflowInvocationFile) (*WorkflowStore, error) {
 	projectDir := filepath.Dir(filepath.Dir(run.OwnerRoot))
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: run.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: run.Namespace})
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +183,7 @@ func (s *WorkflowStore) appendObservedWorkflowInvocation(runs *[]workflowInvocat
 	return nil
 }
 
-func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]OpsLayout, error) {
+func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]opscore.OpsLayout, error) {
 	worktrees, err := (OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return nil, err
@@ -192,7 +193,7 @@ func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]OpsLay
 		return nil, fmt.Errorf("workflow worktree observation bound exceeded")
 	}
 
-	result := []OpsLayout{}
+	result := []opscore.OpsLayout{}
 
 	for _, worktree := range worktrees {
 		if worktree.Bare || worktree.Prunable {
@@ -214,8 +215,8 @@ func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]OpsLay
 	return result, nil
 }
 
-func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]OpsLayout, error) {
-	entries, err := os.ReadDir(filepath.Join(projectDir, OpsDirectoryName))
+func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]opscore.OpsLayout, error) {
+	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.OpsDirectoryName))
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return nil, err
 	}
@@ -235,10 +236,10 @@ func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]OpsLayout,
 	slices.Sort(names)
 
 	names = slices.Compact(names)
-	result := []OpsLayout{}
+	result := []opscore.OpsLayout{}
 
 	for _, name := range names {
-		layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: name})
+		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: name})
 		if err != nil {
 			return nil, err
 		}

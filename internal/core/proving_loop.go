@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -314,7 +315,7 @@ func writeProvingRalphLoopSummary(projectDir string, result ProvingRalphLoopResu
 		return fmt.Errorf("write proving ralph loop summary: %w", err)
 	}
 
-	if err := RefreshOpsArtifactMetadata(artifact.Dir, result.Status, time.Now()); err != nil {
+	if err := opscore.RefreshOpsArtifactMetadata(artifact.Dir, result.Status, time.Now()); err != nil {
 		return err
 	}
 

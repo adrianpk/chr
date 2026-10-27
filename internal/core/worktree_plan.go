@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // WorktreePlanOptions describes a package boundary value.
@@ -77,7 +79,7 @@ func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
 }
 
 func resolvedWorktreeRoot(projectDir string) (string, error) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return "", err
 	}

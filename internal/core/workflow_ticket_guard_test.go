@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func workflowTicketValidated(t *testing.T) (*WorkflowStore, WorkflowRecord, WorkflowInvocation) {
@@ -89,7 +91,7 @@ func TestWorkflowTicketCrashProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

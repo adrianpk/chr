@@ -9,6 +9,7 @@ import (
 	"time"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -90,7 +91,7 @@ func AcceptanceFeatureLayout(projectDir string, scope quizcore.Scope) (Acceptanc
 		return AcceptanceFeaturePaths{}, err
 	}
 
-	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
+	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
 	if err != nil {
 		return AcceptanceFeaturePaths{}, err
 	}
@@ -114,7 +115,7 @@ func AcceptanceFeatureRoundLayout(projectDir string, scope quizcore.Scope) (Acce
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
+	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
 	if err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
@@ -156,7 +157,7 @@ func WriteAcceptanceFeature(
 		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
 	}
 
-	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature"); err != nil {
+	if err := opscore.EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature"); err != nil {
 		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
 	}
 
@@ -195,7 +196,7 @@ func WriteAcceptanceFeatureRoundNotes(ctx context.Context, projectDir string, no
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	if err := EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature-round"); err != nil {
+	if err := opscore.EnsureNamedOpsArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature-round"); err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 

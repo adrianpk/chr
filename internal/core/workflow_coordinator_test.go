@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // TestWorkflowCoordinatorClone rejects copied authority before an invocation
@@ -60,7 +61,7 @@ func workflowCoordinatorClone(t *testing.T, store *WorkflowStore) *WorkflowStore
 		t.Fatalf("clone: %v: %s", err, output)
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: store.layout.Namespace()})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: store.layout.Namespace()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -183,7 +184,7 @@ func TestWorkflowCoordinatorMove(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: destination, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -114,7 +115,7 @@ func TestWorkflowCapacityAliases(t *testing.T) {
 	workflowSelectionGit(t, store, "worktree", "add", "-qb", "capacity-linked", linkedPath, "HEAD")
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "work:\n  max_active_workers: 2\n")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: linkedPath, Namespace: "other"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: linkedPath, Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

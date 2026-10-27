@@ -11,6 +11,7 @@ import (
 	"strings"
 	"syscall"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -127,16 +128,9 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 		return withLegacyTicketLock(ctx, path, action)
 	}
 
-	layout := OpsLayout{projectDir: root, namespace: opsnamespace.Default}
-
-	relative, err := filepath.Rel(root, path)
+	layout, err := legacyTicketOpsLayout(root, path)
 	if err != nil {
 		return err
-	}
-
-	parts := strings.Split(filepath.ToSlash(relative), "/")
-	if len(parts) > 2 && parts[0] == OpsDirectoryName && opsnamespace.Valid(parts[1]) {
-		layout.namespace = parts[1]
 	}
 
 	return NewWorkflowStore(layout, "").withLock(ctx, action)
@@ -176,4 +170,20 @@ func legacyTicketGitRoot(path string) (string, error) {
 			return "", nil
 		}
 	}
+}
+
+func legacyTicketOpsLayout(root, path string) (opscore.OpsLayout, error) {
+	namespace := opsnamespace.Default
+
+	relative, err := filepath.Rel(root, path)
+	if err != nil {
+		return opscore.OpsLayout{}, err
+	}
+
+	parts := strings.Split(filepath.ToSlash(relative), "/")
+	if len(parts) > 2 && parts[0] == opscore.OpsDirectoryName && opsnamespace.Valid(parts[1]) {
+		namespace = parts[1]
+	}
+
+	return opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: namespace})
 }

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -87,7 +88,7 @@ func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFi
 func telegramWorkEditSource(t *testing.T, operations service, record core.WorkflowRecord) {
 	t.Helper()
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: "default"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

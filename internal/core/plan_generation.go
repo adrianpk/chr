@@ -11,6 +11,7 @@ import (
 	"time"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -136,7 +137,7 @@ func archiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore
 		return ArchivedPlanPaths{}, false, err
 	}
 
-	if err := EnsureOpsArtifactBodyMetadata(projectDir, archivePaths.RelativePath); err != nil {
+	if err := opscore.EnsureOpsArtifactBodyMetadata(projectDir, archivePaths.RelativePath); err != nil {
 		return ArchivedPlanPaths{}, false, err
 	}
 
@@ -203,22 +204,22 @@ func RenderGeneratedPlan(plan generationcore.GeneratedPlan) string {
 
 func scopedPlanArtifactBody(projectDir, namespace, name string) (string, string, error) {
 	if namespace == "" {
-		body, err := NamedOpsArtifactBody(projectDir, "plan", name)
+		body, err := opscore.NamedOpsArtifactBody(projectDir, "plan", name)
 
 		return body.RelativePath, body.Path, err
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: namespace})
 	if err != nil {
 		return "", "", err
 	}
 
-	dir, err := layout.ArtifactDirectory("plan", "00000-"+opsArtifactSlugOrDefault(name))
+	dir, err := layout.ArtifactDirectory("plan", "00000-"+opscore.OpsArtifactSlugOrDefault(name))
 	if err != nil {
 		return "", "", err
 	}
 
-	path := filepath.Join(dir, OpsArtifactBodyFile())
+	path := filepath.Join(dir, opscore.OpsArtifactBodyFile())
 	relative, err := filepath.Rel(projectDir, path)
 
 	return filepath.ToSlash(relative), path, err

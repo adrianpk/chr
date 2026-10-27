@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -62,7 +63,7 @@ func ValidateProjectDumpReference(reference string) error {
 }
 
 func validProjectDumpEnvelope(parts []string) bool {
-	return parts[0] == OpsDirectoryName && parts[2] == "dump" && parts[4] == OpsArtifactBodyFile() && opsnamespace.Valid(parts[1]) && strings.TrimSpace(parts[1]) == parts[1]
+	return parts[0] == opscore.OpsDirectoryName && parts[2] == "dump" && parts[4] == opscore.OpsArtifactBodyFile() && opsnamespace.Valid(parts[1]) && strings.TrimSpace(parts[1]) == parts[1]
 }
 
 // ObserveProjectDump inspects canonical documents without creating metadata,

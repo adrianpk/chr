@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"strconv"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // TestWorkflowFinalizationCrashProcess exits at an actual replacement in the
@@ -17,7 +19,7 @@ func TestWorkflowFinalizationCrashProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -193,12 +194,12 @@ func (r *fileAuthoringSessionRepository) quizMetadataBefore(image workflowFileCh
 func (r *fileAuthoringSessionRepository) newQuizMetadata(reference string, now time.Time) (map[string]any, error) {
 	parts := strings.Split(filepath.ToSlash(reference), "/")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: parts[1]})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: parts[1]})
 	if err != nil {
 		return nil, err
 	}
 
-	return newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: "quiz", Title: strings.TrimPrefix(parts[3], "00000-"), Producer: "chr"}, parts[3], now), nil
+	return opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "quiz", Title: strings.TrimPrefix(parts[3], "00000-"), Producer: "chr"}, parts[3], now), nil
 }
 
 const quizProviderTimeout = 90 * time.Second

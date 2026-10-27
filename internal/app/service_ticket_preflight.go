@@ -5,6 +5,7 @@ import (
 	"io/fs"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 type ticketStartPreflight struct {
@@ -54,12 +55,12 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket cor
 		record.TicketPath = workspace.TicketPath
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}
 
-	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
+	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
 		Title:       ticketStartArtifactTitle(workspace.Ticket),

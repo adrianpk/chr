@@ -7,13 +7,14 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeRolePeer(t *testing.T, store *WorkflowStore, namespace, key, target string) (*WorkflowStore, WorkflowIntegrationEntry) {
 	t.Helper()
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

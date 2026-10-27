@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -43,7 +44,7 @@ func (r *fileAuthoringSessionRepository) checkProjectDumpInspection(ctx context.
 func (r *fileAuthoringSessionRepository) projectDumpArtifacts(ctx context.Context) ([]ProjectDumpArtifact, error) {
 	scan := projectDumpInventory{repository: r}
 
-	namespaces, err := scan.readEntries(OpsDirectoryName)
+	namespaces, err := scan.readEntries(opscore.OpsDirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (r *fileAuthoringSessionRepository) projectDumpArtifacts(ctx context.Contex
 }
 
 func (scan *projectDumpInventory) readNamespace(ctx context.Context, namespace string) error {
-	root := filepath.Join(OpsDirectoryName, namespace, "dump")
+	root := filepath.Join(opscore.OpsDirectoryName, namespace, "dump")
 
 	entries, err := scan.readEntries(root)
 	if err != nil {
@@ -100,7 +101,7 @@ func (scan *projectDumpInventory) readNamespace(ctx context.Context, namespace s
 			continue
 		}
 
-		ref := filepath.ToSlash(filepath.Join(root, entry.Name(), OpsArtifactBodyFile()))
+		ref := filepath.ToSlash(filepath.Join(root, entry.Name(), opscore.OpsArtifactBodyFile()))
 
 		dumpRead, err := scan.repository.readProjectDumpArtifact(ref)
 		artifact, size := dumpRead.Artifact, dumpRead.Bytes

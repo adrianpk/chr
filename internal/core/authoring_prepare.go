@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -181,9 +182,9 @@ func AuthoringContinuationArtifact(namespace, sessionID string, kind AuthoringAr
 		role = AuthoringArtifactRoleInput
 	}
 
-	id := "00000-" + opsArtifactSlugOrDefault(sessionID+"-"+suffix)
+	id := "00000-" + opscore.OpsArtifactSlugOrDefault(sessionID+"-"+suffix)
 
-	return AuthoringArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(OpsDirectoryName, namespace, authoringArtifactType(kind), id, OpsArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
+	return AuthoringArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(opscore.OpsDirectoryName, namespace, authoringArtifactType(kind), id, opscore.OpsArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
 }
 
 func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) ([]workflowFileChange, error) {

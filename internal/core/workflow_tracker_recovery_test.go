@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -63,7 +64,7 @@ func TestWorkflowTrackerProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: project, Namespace: "default"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

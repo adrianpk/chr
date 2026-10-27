@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -1133,7 +1134,7 @@ func newPlanTestService(t *testing.T, project string) service {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := core.EnsureOpsArtifactBodyMetadata(project, filepath.ToSlash(reference)); err != nil {
+			if err := opscore.EnsureOpsArtifactBodyMetadata(project, filepath.ToSlash(reference)); err != nil {
 				t.Fatal(err)
 			}
 		}

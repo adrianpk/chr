@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
@@ -22,7 +23,7 @@ func TestAgentOperationLockBlocksConcurrentOperation(t *testing.T) {
 		t.Fatalf("AcquireAgentOperationLock returned error: %v", err)
 	}
 
-	if want := filepath.Join(projectDir, OpsDirectoryName, opsnamespace.Default, "lock", "agent-operation.lock"); lock.path != want {
+	if want := filepath.Join(projectDir, opscore.OpsDirectoryName, opsnamespace.Default, "lock", "agent-operation.lock"); lock.path != want {
 		t.Fatalf("lock path = %q, want %q", lock.path, want)
 	}
 

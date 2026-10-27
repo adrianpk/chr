@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -18,7 +19,7 @@ func TestWorkflowPreparationCrashProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

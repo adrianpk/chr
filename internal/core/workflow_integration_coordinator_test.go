@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -64,7 +65,7 @@ func nativeCoordinatorLinked(t *testing.T, store *WorkflowStore) *WorkflowStore 
 	dir := filepath.Join(t.TempDir(), "linked")
 	workflowSelectionGit(t, store, "worktree", "add", "-qb", "native-linked", dir, "HEAD")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "alias"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: "alias"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,6 +9,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -86,7 +87,7 @@ func (s *WorkflowStore) materializeNewPlan(ctx context.Context, opts WorkflowMat
 	}
 	defer func() { err = errors.Join(err, s.releaseWorkflowAllocation(guard)) }()
 
-	result, err = s.buildMaterialization(ctx, opts, body, nextOpsArtifactNumber(s.layout.Root()))
+	result, err = s.buildMaterialization(ctx, opts, body, opscore.NextOpsArtifactNumber(s.layout.Root()))
 	if err != nil {
 		return result, err
 	}

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func guidedResultFixture(t *testing.T) (service, core.AuthoringSession, *guidedWorkHost, *serviceWorkEntryProvider) {
@@ -147,7 +148,7 @@ func TestGuidedUseCaseResultCorrupt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: session.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: session.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // TestNativeFaultProcess is the owned host subprocess for publication crashes.
@@ -17,7 +19,7 @@ func TestNativeFaultProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: root, Namespace: "default"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: "default"})
 	if err != nil {
 		t.Fatal(err)
 	}

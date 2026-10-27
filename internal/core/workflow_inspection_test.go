@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -86,7 +87,7 @@ func TestWorkflowInspectionLinked(t *testing.T) {
 	linked := filepath.Join(t.TempDir(), "linked")
 	workflowSelectionGit(t, store, "worktree", "add", "-qb", "inspection-linked", linked, "HEAD")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: linked, Namespace: "other"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: linked, Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -22,7 +23,7 @@ type RuntimePlanOptions struct {
 	WorkspaceBaseRef      string
 	WorkspaceBaseSHA      string
 	RunID                 string
-	OpsLayout             *OpsLayout
+	OpsLayout             *opscore.OpsLayout
 	ArtifactID            string
 }
 
@@ -209,7 +210,7 @@ func runtimeArtifactPathSetFor(projectDir, executionWorkspaceDir, configuredArti
 	return privateRuntimeArtifactPaths(executionWorkspaceDir, configuredArtifactDir, opts), nil
 }
 
-func canonicalRuntimeArtifactPaths(layout OpsLayout, artifactID string, opts RuntimePlanOptions) (runtimeArtifactPathSet, error) {
+func canonicalRuntimeArtifactPaths(layout opscore.OpsLayout, artifactID string, opts RuntimePlanOptions) (runtimeArtifactPathSet, error) {
 	artifactDir, err := layout.ArtifactRoot("run")
 	if err != nil {
 		return runtimeArtifactPathSet{}, err
@@ -230,7 +231,7 @@ func canonicalRuntimeArtifactPaths(layout OpsLayout, artifactID string, opts Run
 	}, nil
 }
 
-func canonicalRunArtifactDir(layout OpsLayout, artifactDir, artifactID string, opts RuntimePlanOptions) (string, error) {
+func canonicalRunArtifactDir(layout opscore.OpsLayout, artifactDir, artifactID string, opts RuntimePlanOptions) (string, error) {
 	switch {
 	case artifactID != "":
 		return layout.ArtifactDirectory("run", artifactID)
@@ -269,10 +270,10 @@ func privateRunArtifactDir(artifactDir string, opts RuntimePlanOptions) string {
 	return artifactDir
 }
 
-func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlanOptions) (OpsLayout, string, bool, error) {
+func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlanOptions) (opscore.OpsLayout, string, bool, error) {
 	if opts.OpsLayout != nil || opts.ArtifactID != "" {
 		if opts.OpsLayout == nil || strings.TrimSpace(opts.ArtifactID) == "" {
-			return OpsLayout{}, "", false, fmt.Errorf("canonical ops layout and artifact id are required together")
+			return opscore.OpsLayout{}, "", false, fmt.Errorf("canonical ops layout and artifact id are required together")
 		}
 
 		return *opts.OpsLayout, strings.TrimSpace(opts.ArtifactID), true, nil
@@ -280,15 +281,15 @@ func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlan
 
 	artifactDir := filepath.ToSlash(filepath.Clean(filepath.FromSlash(strings.TrimSpace(configuredArtifactDir))))
 	if artifactDir == PrivateRuntimeArtifactDir {
-		layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
 		if err != nil {
-			return OpsLayout{}, "", false, err
+			return opscore.OpsLayout{}, "", false, err
 		}
 
 		return layout, "", true, nil
 	}
 
-	return OpsLayout{}, "", false, nil
+	return opscore.OpsLayout{}, "", false, nil
 }
 
 func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceMode, workdir string) []harness.RuntimeMount {

@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // This owned host subprocess resumes and retries a serialized v2 invocation
@@ -19,7 +21,7 @@ func TestHarnessBindingHostProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: project})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project})
 	if err != nil {
 		t.Fatal(err)
 	}

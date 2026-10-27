@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // TestWorkflowSubmissionCrashProcess is the owned writer that exits during
@@ -15,7 +17,7 @@ func TestWorkflowSubmissionCrashProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

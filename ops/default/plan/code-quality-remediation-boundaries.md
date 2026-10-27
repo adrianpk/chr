@@ -7,14 +7,14 @@ Plan: [Approved delivery](code-quality-remediation.md).
 ## Observed production graph
 
 `go list -f '{{.ImportPath}}: {{join .Imports " "}}' ./internal/... ./cmd/...`
-confirms these module-local edges at the Slice 8 implementation checkpoint. Standard-library and external dependencies
+confirms these module-local edges at the Slice 9 shared-envelope checkpoint. Standard-library and external dependencies
 are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
-| app | core, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
+| app | core, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
 | core/authoring/generation | core/quiz, core/workflow/state |
 | core/authoring/state | none |
 | core/configvalue | none |
@@ -23,6 +23,7 @@ are omitted here; tests do not define production ownership.
 | core/gate | core/configvalue |
 | core/model | none |
 | core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
+| core/ops | core/ops/namespace, core/project |
 | core/ops/namespace | none |
 | core/ops/slug | none |
 | core/project | core/database |
@@ -37,7 +38,7 @@ are omitted here; tests do not define production ownership.
 | harness/codex | harness, harness/process |
 | harness/pi | harness, harness/process |
 | harness/process | harness |
-| tui | core, core/workflow/state |
+| tui | core, core/ops, core/workflow/state |
 | webui | webui/htmx, webui/render, webui/ui |
 | webui/htmx | none |
 | webui/render | webui/htmx, webui/ui |
@@ -105,7 +106,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-757 current non-test files under internal/core, their declared symbols,
+758 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -593,3 +594,29 @@ caller-owned capacity. Import checks prohibit a reverse domain/provider edge.
 identity rule; it is distinct from the session-ID contract. The journal keeps the
 original 90-second bounded transition context. No context is stored in domain or
 provider values. State spellings, schema compatibility and finite limits remain.
+
+## Slice 9 shared operational envelope prerequisite
+
+The initial dependency scan of all 101 assigned root authoring files found 78
+shared declarations outside that source set. The scan is a move prerequisite,
+not completion evidence. Workflow state and durable transactions, harness
+admission, ticket parsing and workspace assembly still need their proper values
+or narrow consumer-owned ports before the complete authoring move can compile.
+
+Core/ops now owns the original namespace layout, canonical/named envelope paths,
+namespace-wide number observation, exclusive allocation-file creation and shared
+metadata. Its only local dependencies are project directory validation and ops
+namespace resolution. No session, workflow, provider or approval dependency is
+permitted. Production dependency checks cover this owner and its descendants.
+
+Workflow callers retain guarded allocator reclamation, ownership digest,
+recovery and release. Exposing those ops allocation operations does not transfer
+the workflow lock or journal to callers. Authoring still owns its envelope
+journal and metadata revision decisions. The numeric path-prefix predicate keeps
+the old regex semantics; it does not tighten supported identity spelling.
+Legacy ticket writing resolves its already-observed Git root with an explicit
+namespace, preserving default versus path-owned namespace and avoiding OPS_USER.
+
+The distinct ASCII artifact-ID slug rule stays separate from the Unicode quiz
+slug rule. The metadata body schema, type list, namespace precedence, directories,
+number scan, file omission and allocation lock cleanup remain unchanged.

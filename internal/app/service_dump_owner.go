@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func (s service) CreateDump(request DumpCreateRequest) (DumpOperationResult, error) {
 	mutation := core.DumpMutationRequest{OperationID: dumpRequestID(request.OperationID), ExpectedRevision: request.ExpectedRevision, Action: "capture", Namespace: request.Namespace, CaseSlug: request.Scope.CaseSlug, Title: strings.TrimSpace(request.Title), Content: request.Content}
 	if request.Scope.CaseSlug != "" {
-		layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: request.Namespace})
+		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: request.Namespace})
 		if err != nil {
 			return DumpOperationResult{}, err
 		}

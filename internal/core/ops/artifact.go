@@ -1,4 +1,4 @@
-package core
+package ops
 
 import (
 	"encoding/json"
@@ -14,6 +14,9 @@ import (
 )
 
 var opsArtifactIDPattern = regexp.MustCompile(`^(\d+)-`)
+
+// HasOpsArtifactNumberPrefix reports the existing numeric artifact path prefix.
+func HasOpsArtifactNumberPrefix(name string) bool { return opsArtifactIDPattern.MatchString(name) }
 
 // OpsArtifact is one allocated shared artifact envelope.
 type OpsArtifact struct {
@@ -39,7 +42,7 @@ func CreateOpsArtifact(opts CreateOpsArtifactOptions) (artifact OpsArtifact, err
 	}
 
 	lockPath := filepath.Join(opts.Layout.Root(), "lock", "id.lock")
-	if err := acquireOpsArtifactLock(lockPath); err != nil {
+	if err := AcquireOpsArtifactLock(lockPath); err != nil {
 		return OpsArtifact{}, err
 	}
 
@@ -49,18 +52,18 @@ func CreateOpsArtifact(opts CreateOpsArtifactOptions) (artifact OpsArtifact, err
 		}
 	}()
 
-	id := fmt.Sprintf("%05d-%s", nextOpsArtifactNumber(opts.Layout.Root()), opsArtifactSlugOrDefault(opts.Title))
+	id := fmt.Sprintf("%05d-%s", NextOpsArtifactNumber(opts.Layout.Root()), OpsArtifactSlugOrDefault(opts.Title))
 
 	dir, err := opts.Layout.ArtifactDirectory(opts.Type, id)
 	if err != nil {
 		return OpsArtifact{}, err
 	}
 
-	if err := createOpsArtifactEnvelope(dir, opts.Producer); err != nil {
+	if err := CreateOpsArtifactEnvelope(dir, opts.Producer); err != nil {
 		return OpsArtifact{}, err
 	}
 
-	metadata := newOpsArtifactMetadata(opts, id, opsArtifactNow(opts))
+	metadata := NewOpsArtifactMetadata(opts, id, opsArtifactNow(opts))
 	if err := writeOpsArtifactFiles(dir, opts.Title, metadata); err != nil {
 		return OpsArtifact{}, err
 	}
@@ -83,7 +86,7 @@ func EnsureOpsArtifactEnvelope(opts CreateOpsArtifactOptions, id string) (OpsArt
 		return OpsArtifact{}, err
 	}
 
-	if err := createOpsArtifactEnvelope(dir, opts.Producer); err != nil {
+	if err := CreateOpsArtifactEnvelope(dir, opts.Producer); err != nil {
 		return OpsArtifact{}, err
 	}
 
@@ -91,7 +94,7 @@ func EnsureOpsArtifactEnvelope(opts CreateOpsArtifactOptions, id string) (OpsArt
 		return OpsArtifact{}, err
 	}
 
-	metadata := newOpsArtifactMetadata(opts, id, opsArtifactNow(opts))
+	metadata := NewOpsArtifactMetadata(opts, id, opsArtifactNow(opts))
 	if err := ensureOpsArtifactMetadata(filepath.Join(dir, "metadata.json"), metadata); err != nil {
 		return OpsArtifact{}, err
 	}
@@ -123,7 +126,8 @@ func opsArtifactNow(opts CreateOpsArtifactOptions) time.Time {
 	return time.Now().UTC()
 }
 
-func newOpsArtifactMetadata(opts CreateOpsArtifactOptions, id string, now time.Time) map[string]any {
+// NewOpsArtifactMetadata constructs the original shared envelope metadata.
+func NewOpsArtifactMetadata(opts CreateOpsArtifactOptions, id string, now time.Time) map[string]any {
 	timestamp := now.Format(time.RFC3339)
 
 	return map[string]any{
@@ -144,7 +148,8 @@ func newOpsArtifactMetadata(opts CreateOpsArtifactOptions, id string, now time.T
 	}
 }
 
-func createOpsArtifactEnvelope(dir, producer string) error {
+// CreateOpsArtifactEnvelope creates the shared envelope directories.
+func CreateOpsArtifactEnvelope(dir, producer string) error {
 	paths := []string{"", "files", "evidence", filepath.Join("extension", strings.TrimSpace(producer))}
 	for _, path := range paths {
 		if err := os.MkdirAll(filepath.Join(dir, path), 0o755); err != nil {
@@ -205,7 +210,9 @@ func ensureOpsArtifactMetadata(path string, metadata map[string]any) error {
 	return nil
 }
 
-func acquireOpsArtifactLock(path string) error {
+// AcquireOpsArtifactLock creates the shared exclusive allocation lock.
+// The caller owns guarded reclamation and removal after this returns.
+func AcquireOpsArtifactLock(path string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return fmt.Errorf("create ops lock directory: %w", err)
 	}
@@ -222,7 +229,9 @@ func acquireOpsArtifactLock(path string) error {
 	return file.Close()
 }
 
-func nextOpsArtifactNumber(namespaceRoot string) int {
+// NextOpsArtifactNumber observes the next namespace-wide artifact number.
+// Callers that allocate must hold the namespace allocation lock.
+func NextOpsArtifactNumber(namespaceRoot string) int {
 	maximum := 0
 
 	for artifactType := range opsArtifactTypes {
@@ -253,7 +262,8 @@ func opsArtifactNumber(name string) int {
 	return number
 }
 
-func opsArtifactSlugOrDefault(value string) string {
+// OpsArtifactSlugOrDefault keeps the canonical ASCII ID slug and fallback.
+func OpsArtifactSlugOrDefault(value string) string {
 	slug := opsArtifactSlug(value)
 	if slug == "" {
 		return "artifact"

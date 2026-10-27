@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -102,15 +103,15 @@ func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGener
 	return s.MaterializeWorkflowPlan(ctx, plan)
 }
 
-func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, core.OpsLayout, error) {
+func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, opscore.OpsLayout, error) {
 	scope := s.quizScope(request.Scope)
 
 	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
-		return input, core.OpsLayout{}, err
+		return input, opscore.OpsLayout{}, err
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: scope.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: scope.Namespace})
 	if err != nil {
 		return input, layout, err
 	}

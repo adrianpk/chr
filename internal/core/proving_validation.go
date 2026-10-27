@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // ProvingValidationCommandResult describes a package boundary value.
@@ -81,7 +83,7 @@ func RunProvingValidationForObjective(ctx context.Context, projectDir string, ob
 		return ProvingValidationResult{}, fmt.Errorf("write proving validation log: %w", err)
 	}
 
-	if err := RefreshOpsArtifactMetadata(artifact.Dir, provingValidationArtifactStatus(result), time.Now()); err != nil {
+	if err := opscore.RefreshOpsArtifactMetadata(artifact.Dir, provingValidationArtifactStatus(result), time.Now()); err != nil {
 		return ProvingValidationResult{}, err
 	}
 

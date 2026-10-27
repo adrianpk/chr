@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -111,12 +112,12 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 		action = "create"
 		parts := strings.Split(paths.RelativePath, "/")
 
-		layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
+		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
 		if err != nil {
 			return document, action, err
 		}
 
-		document.metadata = newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: "spec", Title: spec.Title, Producer: "chr"}, parts[3], spec.CreatedAt)
+		document.metadata = opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "spec", Title: spec.Title, Producer: "chr"}, parts[3], spec.CreatedAt)
 	}
 
 	front, body, err := splitWorkflowMarkdown([]byte(content))

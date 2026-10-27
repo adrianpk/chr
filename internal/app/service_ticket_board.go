@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // ReadTicketBoard uses the selected authority without rebuilding the legacy index.
@@ -28,7 +29,7 @@ func (s service) ticketDocumentOptions() (core.TicketBoardReadOptions, error) {
 		return core.TicketBoardReadOptions{}, err
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
 		return core.TicketBoardReadOptions{}, err
 	}

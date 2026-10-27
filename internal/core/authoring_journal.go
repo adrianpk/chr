@@ -9,6 +9,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -167,7 +168,7 @@ func (r *fileAuthoringSessionRepository) applyAuthoringImage(change workflowFile
 
 func (r *fileAuthoringSessionRepository) ensureAuthoringEnvelope(relative string) error {
 	parts := strings.Split(filepath.ToSlash(relative), "/")
-	if len(parts) != 5 || parts[0] != OpsDirectoryName {
+	if len(parts) != 5 || parts[0] != opscore.OpsDirectoryName {
 		return nil
 	}
 
@@ -183,7 +184,7 @@ func (r *fileAuthoringSessionRepository) ensureAuthoringEnvelope(relative string
 		return err
 	}
 
-	return createOpsArtifactEnvelope(path, "chr")
+	return opscore.CreateOpsArtifactEnvelope(path, "chr")
 }
 
 func (r *fileAuthoringSessionRepository) replayAuthoringJournal(journal authoringMutationJournal) error {
@@ -221,7 +222,7 @@ func (r *fileAuthoringSessionRepository) checkAuthoringJournalImages(journal aut
 
 func validAuthoringOpsJournalPath(path string) bool {
 	parts := strings.Split(path, "/")
-	if len(parts) != 5 || parts[0] != OpsDirectoryName || !opsnamespace.Valid(parts[1]) {
+	if len(parts) != 5 || parts[0] != opscore.OpsDirectoryName || !opsnamespace.Valid(parts[1]) {
 		return false
 	}
 

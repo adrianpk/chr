@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 type workflowParallelRunnerSpec struct {
@@ -47,7 +49,7 @@ func TestWorkflowParallelRunner(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: spec.Directory, Namespace: spec.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: spec.Directory, Namespace: spec.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

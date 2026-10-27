@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,12 +20,12 @@ var ErrNotWorkflow = errors.New("document is not an adopted workflow record")
 type WorkflowStore struct {
 	afterReplace        func(int) error
 	afterTrackerReplace func(int) error
-	layout              OpsLayout
+	layout              opscore.OpsLayout
 	projectID           string
 }
 
 // NewWorkflowStore stores dependencies without performing IO.
-func NewWorkflowStore(layout OpsLayout, projectID string) *WorkflowStore {
+func NewWorkflowStore(layout opscore.OpsLayout, projectID string) *WorkflowStore {
 	return &WorkflowStore{layout: layout, projectID: projectID}
 }
 
@@ -65,7 +66,7 @@ func (s *WorkflowStore) Create(ctx context.Context, title string, record Workflo
 			return err
 		}
 
-		artifact, createErr := CreateOpsArtifact(CreateOpsArtifactOptions{Layout: s.layout, Type: record.Kind, Title: title, Producer: "chr"})
+		artifact, createErr := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: s.layout, Type: record.Kind, Title: title, Producer: "chr"})
 		if createErr != nil {
 			return createErr
 		}

@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -243,17 +244,17 @@ func checkServiceDumpAliases(t *testing.T, operations service, destination strin
 func serviceDumpArtifact(t *testing.T, project, namespace, title, body string) string {
 	t.Helper()
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: namespace})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: title, Producer: "chr"})
+	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: title, Producer: "chr"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	path := filepath.Join(artifact.Dir, core.OpsArtifactBodyFile())
+	path := filepath.Join(artifact.Dir, opscore.OpsArtifactBodyFile())
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}

@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
@@ -1116,13 +1117,13 @@ func writeServiceWorkspaceFile(t *testing.T, path, content string) {
 		root = filepath.Dir(root)
 	}
 
-	if kind, ok := core.OpsArtifactTypeForBodyPath(root, path); ok && kind == "dump" {
+	if kind, ok := opscore.OpsArtifactTypeForBodyPath(root, path); ok && kind == "dump" {
 		relative, err := filepath.Rel(root, path)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if err := core.EnsureOpsArtifactBodyMetadata(root, filepath.ToSlash(relative)); err != nil {
+		if err := opscore.EnsureOpsArtifactBodyMetadata(root, filepath.ToSlash(relative)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -1167,7 +1168,7 @@ func canonicalServiceWorkspaceFixturePath(path string) string {
 
 	artifactID := "00000-" + opsArtifactSlugForServiceFixture(slug)
 
-	return filepath.Join(projectDir, core.OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, core.OpsArtifactBodyFile())
+	return filepath.Join(projectDir, opscore.OpsDirectoryName, opsnamespace.Default, artifactType, artifactID, opscore.OpsArtifactBodyFile())
 }
 
 func opsArtifactSlugForServiceFixture(value string) string {

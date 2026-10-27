@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -42,7 +43,7 @@ func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
 func ticketKeyRoots(projectDir string) ([]string, error) {
 	roots := []string{ticketsDirectory(projectDir)}
 
-	entries, err := os.ReadDir(filepath.Join(projectDir, OpsDirectoryName))
+	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.OpsDirectoryName))
 	if errors.Is(err, os.ErrNotExist) {
 		return roots, nil
 	}
@@ -57,7 +58,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 
 	for _, entry := range entries {
 		if opsnamespace.Valid(entry.Name()) {
-			roots = append(roots, filepath.Join(projectDir, OpsDirectoryName, entry.Name(), "ticket"))
+			roots = append(roots, filepath.Join(projectDir, opscore.OpsDirectoryName, entry.Name(), "ticket"))
 		}
 	}
 
@@ -66,7 +67,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 
 func (r *fileTicketRepository) observedTicketNumber(path string) (int, error) {
 	number, _, err := r.ticketNumber(path)
-	if err != nil || filepath.Base(path) != OpsArtifactBodyFile() {
+	if err != nil || filepath.Base(path) != opscore.OpsArtifactBodyFile() {
 		return number, err
 	}
 

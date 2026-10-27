@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // Shared application operations preserve the destination through metadata edits
@@ -39,17 +39,17 @@ func newProjectDumpTestService(t *testing.T) (service, string) {
 
 	project := newTestWorkspace(t)
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: "team-a"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project, Namespace: "team-a"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: "Existing project context", Producer: "chr"})
+	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: "Existing project context", Producer: "chr"})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	reference, err := filepath.Rel(project, filepath.Join(artifact.Dir, core.OpsArtifactBodyFile()))
+	reference, err := filepath.Rel(project, filepath.Join(artifact.Dir, opscore.OpsArtifactBodyFile()))
 	if err != nil {
 		t.Fatal(err)
 	}

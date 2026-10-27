@@ -2,6 +2,7 @@ package app
 
 import (
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // CreateSpecRequest selects a native lifecycle without a generation prerequisite.
@@ -15,7 +16,7 @@ type SaveSpecRequest struct {
 }
 
 func (s service) CreateSpec(request CreateSpecRequest) (core.SpecMutationResult, error) {
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir})
 	if err != nil {
 		return core.SpecMutationResult{}, err
 	}

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -277,7 +278,7 @@ func checkDaemonWorkflowRecoveryCheckpoint(t *testing.T, operations service, bef
 func daemonWorkflowCrashOwner(t *testing.T, project string) {
 	t.Helper()
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: project})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: project})
 	if err != nil {
 		t.Fatal(err)
 	}

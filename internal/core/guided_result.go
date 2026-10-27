@@ -4,6 +4,7 @@ import (
 	"context"
 	"reflect"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -21,7 +22,7 @@ func ReadGuidedResult(ctx context.Context, root string, session AuthoringSession
 		return WorkflowResultInspection{}, workflowstate.ErrConflict
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
 		return WorkflowResultInspection{}, err
 	}

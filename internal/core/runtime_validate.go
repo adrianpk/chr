@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -19,7 +20,7 @@ type RuntimeValidationOptions struct {
 	WorkspaceBaseRef      string
 	WorkspaceBaseSHA      string
 	RunID                 string
-	OpsLayout             *OpsLayout
+	OpsLayout             *opscore.OpsLayout
 	ArtifactID            string
 }
 

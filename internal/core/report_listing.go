@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // ReportKind defines a package boundary type.
@@ -60,7 +62,7 @@ func (l ReportLister) ListProjectReports(
 		return nil, err
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return nil, err
 	}

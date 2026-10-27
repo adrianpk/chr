@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -96,7 +97,7 @@ func prepareProvingArtifacts(result ProvingSandboxRunResult) (*os.File, error) {
 		return nil, fmt.Errorf("open proving runtime log: %w", err)
 	}
 
-	if err := RefreshOpsArtifactMetadata(artifact.Dir, "running", time.Now()); err != nil {
+	if err := opscore.RefreshOpsArtifactMetadata(artifact.Dir, "running", time.Now()); err != nil {
 		if closeErr := logFile.Close(); closeErr != nil {
 			return nil, fmt.Errorf("%w; close proving runtime log: %w", err, closeErr)
 		}
@@ -197,15 +198,15 @@ func planProvingRuntime(projectDir string, objective ProvingObjective, mounts []
 	return ProvingSandboxRunResult{Objective: objective, Plan: plan, TicketPath: ticketPath}, nil
 }
 
-func ensureProvingOpsArtifact(projectDir string, objective ProvingObjective) (OpsArtifact, error) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+func ensureProvingOpsArtifact(projectDir string, objective ProvingObjective) (opscore.OpsArtifact, error) {
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
 	if err != nil {
-		return OpsArtifact{}, err
+		return opscore.OpsArtifact{}, err
 	}
 
 	id := filepath.Base(filepath.Clean(filepath.FromSlash(objective.ArtifactRoot)))
 
-	return EnsureOpsArtifactEnvelope(CreateOpsArtifactOptions{
+	return opscore.EnsureOpsArtifactEnvelope(opscore.CreateOpsArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
 		Title:       "Proving " + objective.ID,

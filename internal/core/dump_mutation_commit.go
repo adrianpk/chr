@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -141,12 +142,12 @@ func (r *fileAuthoringSessionRepository) dumpCaptureChanges(binding dumpMutation
 func (r *fileAuthoringSessionRepository) newDumpMutationMetadata(reference string, request DumpMutationRequest) (map[string]any, error) {
 	parts := strings.Split(reference, "/")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: parts[1]})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: parts[1]})
 	if err != nil {
 		return nil, err
 	}
 
-	metadata := newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: request.Title, Producer: "chr"}, parts[3], time.Now().UTC())
+	metadata := opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: "dump", Title: request.Title, Producer: "chr"}, parts[3], time.Now().UTC())
 	if request.CaseSlug != "" {
 		metadata["case"] = request.CaseSlug
 	}

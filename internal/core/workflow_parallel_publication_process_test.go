@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 type workflowParallelPublisherSpec struct {
@@ -34,7 +36,7 @@ func TestWorkflowParallelPublisher(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: spec.ProjectDir, Namespace: spec.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: spec.ProjectDir, Namespace: spec.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"syscall"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // TestWorkflowCapacityProcess is an owned process barrier. It holds the actual
@@ -18,7 +20,7 @@ func TestWorkflowCapacityProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: os.Getenv("CHR_CAPACITY_NAMESPACE")})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir, Namespace: os.Getenv("CHR_CAPACITY_NAMESPACE")})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,7 +144,7 @@ func workflowCapacityLinked(t *testing.T, store *WorkflowStore, workers int) *Wo
 	workflowSelectionGit(t, store, "worktree", "add", "-qb", "capacity-process-linked", directory, "HEAD")
 	writeWorkspaceConfig(t, directory, "work:\n  max_active_workers: "+strconv.Itoa(workers)+"\n")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: directory, Namespace: "other"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: directory, Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

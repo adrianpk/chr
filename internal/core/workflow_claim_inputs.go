@@ -9,6 +9,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +21,7 @@ func (s *WorkflowStore) nextWorkflowInvocationNumber(ctx context.Context) (int, 
 
 	number := 1
 	for _, layout := range layouts {
-		number = max(number, nextOpsArtifactNumber(layout.Root()))
+		number = max(number, opscore.NextOpsArtifactNumber(layout.Root()))
 	}
 
 	return number, nil

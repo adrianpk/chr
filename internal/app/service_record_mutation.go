@@ -7,13 +7,14 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PrepareRecordMutation freezes validated owner input before durable dispatch.
 func (s service) PrepareRecordMutation(ctx context.Context, namespace string, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
 		return PreparedRecordMutation{}, err
 	}

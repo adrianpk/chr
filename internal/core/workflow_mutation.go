@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -350,7 +351,7 @@ func (s *WorkflowStore) prepareMutationRecord(request WorkflowMutationRequest) (
 	}
 
 	if request.ExpectedRevision == 0 {
-		allocated, err := s.materializationEnvelope(record.Kind, request.Title, nextOpsArtifactNumber(s.layout.Root()), time.Now().UTC())
+		allocated, err := s.materializationEnvelope(record.Kind, request.Title, opscore.NextOpsArtifactNumber(s.layout.Root()), time.Now().UTC())
 		if err != nil {
 			return record, err
 		}

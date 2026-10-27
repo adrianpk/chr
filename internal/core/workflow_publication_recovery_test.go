@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strconv"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // TestWorkflowPublicationCrashProcess exits while the shared delivery fan-out
@@ -16,7 +18,7 @@ func TestWorkflowPublicationCrashProcess(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -31,7 +32,7 @@ func GeneratedPlanTrackingLayout(projectDir string, scope quizcore.Scope) (Gener
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	body, err := NamedOpsArtifactBody(projectDir, "tracker", scopeID+"-tracking")
+	body, err := opscore.NamedOpsArtifactBody(projectDir, "tracker", scopeID+"-tracking")
 	if err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
@@ -69,7 +70,7 @@ func WriteGeneratedPlanTracking(
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	if err := EnsureNamedOpsArtifactMetadata(projectDir, "tracker", scopeID+"-tracking"); err != nil {
+	if err := opscore.EnsureNamedOpsArtifactMetadata(projectDir, "tracker", scopeID+"-tracking"); err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
 

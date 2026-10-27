@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -55,7 +56,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationTarget(ctx context.Context,
 	target := dumpMutationTarget{Project: observed.Project, Artifact: observed.Candidates[0], Destination: observed.Destination}
 	parts := strings.Split(target.Destination, "/")
 
-	target.RawReference = strings.Join([]string{OpsDirectoryName, parts[1], "dump", "00000-" + contenthash.Sum([]byte(request.OperationID)) + "-raw", OpsArtifactBodyFile()}, "/")
+	target.RawReference = strings.Join([]string{opscore.OpsDirectoryName, parts[1], "dump", "00000-" + contenthash.Sum([]byte(request.OperationID)) + "-raw", opscore.OpsArtifactBodyFile()}, "/")
 	if err := r.requireNewDumpEnvelope(target.RawReference); err != nil {
 		return target, err
 	}
@@ -106,14 +107,14 @@ func (r *fileAuthoringSessionRepository) validateDumpCase(ctx context.Context, s
 }
 
 func (r *fileAuthoringSessionRepository) newDumpMutationTarget(namespace, title string) (dumpMutationTarget, error) {
-	slug := opsArtifactSlugOrDefault(title)
+	slug := opscore.OpsArtifactSlugOrDefault(title)
 	for attempt := 1; attempt <= 100; attempt++ {
 		id := "00000-" + slug
 		if attempt > 1 {
 			id += fmt.Sprintf("-%d", attempt)
 		}
 
-		root := strings.Join([]string{OpsDirectoryName, namespace, "dump"}, "/")
+		root := strings.Join([]string{opscore.OpsDirectoryName, namespace, "dump"}, "/")
 
 		target := dumpMutationTarget{Destination: root + "/" + id + "/artifact.md", RawReference: root + "/" + id + "-raw/artifact.md"}
 		if err := r.requireNewDumpEnvelope(target.Destination); errors.Is(err, os.ErrExist) {

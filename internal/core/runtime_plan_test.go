@@ -3,6 +3,8 @@ package core
 import (
 	"path/filepath"
 	"testing"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
@@ -146,7 +148,7 @@ func TestPlanRuntimeUsesRunArtifactPaths(t *testing.T) {
 func TestPlanRuntimeUsesCanonicalOpsArtifactPaths(t *testing.T) {
 	dir := t.TempDir()
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

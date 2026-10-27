@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -106,7 +107,7 @@ func workflowParallelPublicationTargets(t *testing.T, conflict bool, target stri
 func workflowParallelPublicationStore(t *testing.T, original *WorkflowStore) *WorkflowStore {
 	t.Helper()
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: original.layout.ProjectDir(), Namespace: "other"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: original.layout.ProjectDir(), Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

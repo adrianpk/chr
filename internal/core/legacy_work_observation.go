@@ -9,6 +9,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -86,7 +87,7 @@ type LegacyWorkQueue struct {
 }
 
 // ReadLegacyWorkQueue reads authoritative files without refreshing SQL.
-func ReadLegacyWorkQueue(ctx context.Context, layout OpsLayout, projectID string) (result LegacyWorkQueue, err error) {
+func ReadLegacyWorkQueue(ctx context.Context, layout opscore.OpsLayout, projectID string) (result LegacyWorkQueue, err error) {
 	result.Tickets, err = NewWorkflowStore(layout, projectID).readBoardTickets(ctx, false)
 	if err != nil {
 		return result, err

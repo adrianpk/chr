@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -114,7 +115,7 @@ func (s *WorkflowStore) guardWorkflowOperationLocks(ctx context.Context) error {
 	return nil
 }
 
-func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayout, error) {
+func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]opscore.OpsLayout, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
 		return nil, err
@@ -127,7 +128,7 @@ func (s *WorkflowStore) workflowOperationLayouts(ctx context.Context) ([]OpsLayo
 		return nil, err
 	}
 
-	result := []OpsLayout{}
+	result := []opscore.OpsLayout{}
 
 	for _, layout := range layouts {
 		// The inherited common-directory reservation also excludes legacy starts

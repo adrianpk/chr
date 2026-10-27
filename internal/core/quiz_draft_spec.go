@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -31,7 +32,7 @@ func QuizDraftSpecLayout(projectDir string, scope quizcore.Scope) (QuizDraftSpec
 		return QuizDraftSpecPaths{}, err
 	}
 
-	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-quiz-spec")
+	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-quiz-spec")
 	if err != nil {
 		return QuizDraftSpecPaths{}, err
 	}

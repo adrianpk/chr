@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 type ticketLoopExecutionResult struct {
@@ -207,7 +208,7 @@ func (s service) failTicketLoopExecution(ctx context.Context, loop ticketLoop, c
 	emitLoopFailedAgentEvents(ctx, loop.Events, loop.Record, cause)
 
 	if loop.Record.ArtifactID != "" {
-		if err := core.RefreshOpsArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
+		if err := opscore.RefreshOpsArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
 			return ticketLoopExecutionResult{}, err
 		}
 	}
@@ -229,7 +230,7 @@ func (s service) finishTicketLoopExecution(ctx context.Context, loop ticketLoop)
 	emitLoopFinishedAgentEvent(ctx, loop.Events, loop.Record)
 
 	if loop.Record.ArtifactID != "" {
-		if err := core.RefreshOpsArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
+		if err := opscore.RefreshOpsArtifactMetadata(loop.Record.ArtifactDir, string(loop.Record.Status), time.Now().UTC()); err != nil {
 			return ticketLoopExecutionResult{}, err
 		}
 	}
@@ -282,12 +283,12 @@ func newRunningLoopRunRecord(projectID string, eligibleCount int) core.LoopRunRe
 }
 
 func allocateLoopRunArtifact(projectDir string, record core.LoopRunRecord) (core.LoopRunRecord, error) {
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return core.LoopRunRecord{}, err
 	}
 
-	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
+	artifact, err := opscore.CreateOpsArtifact(opscore.CreateOpsArtifactOptions{
 		Layout:      layout,
 		Type:        "run",
 		Title:       "Agent work loop",

@@ -12,6 +12,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -164,7 +165,7 @@ func authoringRelativePaths(projectDir string, paths AuthoringSessionPaths) (Aut
 func validAuthoringArtifactRef(namespace string, ref AuthoringArtifactRef) bool {
 	parts := strings.Split(filepath.ToSlash(ref.Path), "/")
 
-	return len(parts) == 5 && parts[0] == OpsDirectoryName && parts[1] == namespace && parts[4] == OpsArtifactBodyFile() && parts[2] == authoringArtifactType(ref.Kind)
+	return len(parts) == 5 && parts[0] == opscore.OpsDirectoryName && parts[1] == namespace && parts[4] == opscore.OpsArtifactBodyFile() && parts[2] == authoringArtifactType(ref.Kind)
 }
 
 func holdsAuthoringOwner(ctx context.Context, root string) bool {

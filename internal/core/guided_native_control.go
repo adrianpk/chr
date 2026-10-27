@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -61,7 +62,7 @@ func ReadGuidedInvocation(ctx context.Context, root string, session AuthoringSes
 		return WorkflowInvocation{}, workflowstate.ErrConflict
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
 		return WorkflowInvocation{}, err
 	}

@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func nativeAgentFaultMode(t *testing.T, mode string) {
@@ -125,7 +127,7 @@ func TestNativeAgentHost(t *testing.T) {
 		return
 	}
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: dir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: dir})
 	if err != nil {
 		t.Fatal(err)
 	}

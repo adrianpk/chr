@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"os"
+
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 func acquireLegacyWorkflowCapacity(ctx context.Context, projectDir string) (reservation *os.File, err error) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: projectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: projectDir})
 	if err != nil {
 		return nil, err
 	}

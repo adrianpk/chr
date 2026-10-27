@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // WorkspaceNodeKind defines a package boundary type.
@@ -253,8 +254,8 @@ func (b WorkspaceGraphBuilder) loadDocument(graph *WorkspaceGraph, path string) 
 }
 
 func (b WorkspaceGraphBuilder) shouldSkipDocument(path string) bool {
-	opsPrefix := filepath.ToSlash(filepath.Join(b.projectDir, OpsDirectoryName)) + "/"
-	if strings.HasPrefix(filepath.ToSlash(path), opsPrefix) && !IsOpsArtifactBodyPath(b.projectDir, path) {
+	opsPrefix := filepath.ToSlash(filepath.Join(b.projectDir, opscore.OpsDirectoryName)) + "/"
+	if strings.HasPrefix(filepath.ToSlash(path), opsPrefix) && !opscore.IsOpsArtifactBodyPath(b.projectDir, path) {
 		return true
 	}
 
@@ -267,13 +268,13 @@ func (b WorkspaceGraphBuilder) shouldSkipDocument(path string) bool {
 
 func workspaceDocumentRoots(projectDir string) []string {
 	return []string{
-		DefaultOpsArtifactRoot(projectDir, "dump"),
-		DefaultOpsArtifactRoot(projectDir, "quiz"),
-		DefaultOpsArtifactRoot(projectDir, "spec"),
-		DefaultOpsArtifactRoot(projectDir, "plan"),
-		DefaultOpsArtifactRoot(projectDir, "tracker"),
-		DefaultOpsArtifactRoot(projectDir, "ticket"),
-		DefaultOpsArtifactRoot(projectDir, "report"),
+		opscore.DefaultOpsArtifactRoot(projectDir, "dump"),
+		opscore.DefaultOpsArtifactRoot(projectDir, "quiz"),
+		opscore.DefaultOpsArtifactRoot(projectDir, "spec"),
+		opscore.DefaultOpsArtifactRoot(projectDir, "plan"),
+		opscore.DefaultOpsArtifactRoot(projectDir, "tracker"),
+		opscore.DefaultOpsArtifactRoot(projectDir, "ticket"),
+		opscore.DefaultOpsArtifactRoot(projectDir, "report"),
 	}
 }
 
@@ -473,7 +474,7 @@ func isCaseMetadataPath(projectDir, path string) bool {
 }
 
 func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
-	if artifactType, ok := OpsArtifactTypeForBodyPath(projectDir, path); ok {
+	if artifactType, ok := opscore.OpsArtifactTypeForBodyPath(projectDir, path); ok {
 		return workspaceKindForOpsArtifactType(artifactType)
 	}
 

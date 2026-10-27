@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // Actual Pi workers with different credentials reach a shared endpoint barrier
@@ -247,7 +248,7 @@ func piIsolationInput(t *testing.T, operations service, id string) core.Workflow
 		t.Fatal("missing owned worker attempt", err)
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -229,7 +230,7 @@ func TestNativeEntryFences(t *testing.T) {
 func nativeEntryNextNamespace(t *testing.T, store *WorkflowStore) (*WorkflowStore, WorkflowIntegrationAdmission) {
 	t.Helper()
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "other"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: store.layout.ProjectDir(), Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

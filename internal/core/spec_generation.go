@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -47,7 +48,7 @@ func GeneratedSpecLayout(projectDir string, scope quizcore.Scope) (GeneratedSpec
 		return GeneratedSpecPaths{}, err
 	}
 
-	body, err := NamedOpsArtifactBody(projectDir, "spec", scopeID+"-spec")
+	body, err := opscore.NamedOpsArtifactBody(projectDir, "spec", scopeID+"-spec")
 	if err != nil {
 		return GeneratedSpecPaths{}, err
 	}

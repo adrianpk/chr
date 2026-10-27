@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -18,7 +19,7 @@ import (
 func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, error) {
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 
-	namespaces, err := r.authoringDirectoryEntries(OpsDirectoryName)
+	namespaces, err := r.authoringDirectoryEntries(opscore.OpsDirectoryName)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +32,7 @@ func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, 
 			continue
 		}
 
-		root := filepath.Join(OpsDirectoryName, namespace.Name(), "spec")
+		root := filepath.Join(opscore.OpsDirectoryName, namespace.Name(), "spec")
 
 		entries, err := r.authoringDirectoryEntries(root)
 		if err != nil {
@@ -89,11 +90,11 @@ func (r *fileAuthoringSessionRepository) specDocumentsInDirectory(ctx context.Co
 	var documents []SpecDocument
 
 	for _, entry := range entries {
-		if !opsArtifactIDPattern.MatchString(entry.Name()) {
+		if !opscore.HasOpsArtifactNumberPrefix(entry.Name()) {
 			continue
 		}
 
-		document, err := ReadSpecDocument(ctx, r.projectDir, filepath.ToSlash(filepath.Join(root, entry.Name(), OpsArtifactBodyFile())))
+		document, err := ReadSpecDocument(ctx, r.projectDir, filepath.ToSlash(filepath.Join(root, entry.Name(), opscore.OpsArtifactBodyFile())))
 		if err != nil {
 			return nil, err
 		}

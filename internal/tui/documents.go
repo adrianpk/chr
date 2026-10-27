@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // DocumentView is the terminal projection of a workspace document.
@@ -84,7 +84,7 @@ func (scanner *documentScanner) append(ctx context.Context, path string, entry o
 		return nil
 	}
 
-	if strings.HasPrefix(filepath.ToSlash(path), filepath.ToSlash(filepath.Join(scanner.projectDir, core.OpsDirectoryName))+"/") && !core.IsOpsArtifactBodyPath(scanner.projectDir, path) {
+	if strings.HasPrefix(filepath.ToSlash(path), filepath.ToSlash(filepath.Join(scanner.projectDir, opscore.OpsDirectoryName))+"/") && !opscore.IsOpsArtifactBodyPath(scanner.projectDir, path) {
 		return nil
 	}
 
@@ -251,12 +251,12 @@ func documentRoots(projectDir string) []struct {
 		family string
 		path   string
 	}{
-		{family: "dump", path: core.DefaultOpsArtifactRoot(projectDir, "dump")},
-		{family: "quiz", path: core.DefaultOpsArtifactRoot(projectDir, "quiz")},
-		{family: "spec", path: core.DefaultOpsArtifactRoot(projectDir, "spec")},
-		{family: "plan", path: core.DefaultOpsArtifactRoot(projectDir, "plan")},
-		{family: "tracker", path: core.DefaultOpsArtifactRoot(projectDir, "tracker")},
-		{family: "report", path: core.DefaultOpsArtifactRoot(projectDir, "report")},
+		{family: "dump", path: opscore.DefaultOpsArtifactRoot(projectDir, "dump")},
+		{family: "quiz", path: opscore.DefaultOpsArtifactRoot(projectDir, "quiz")},
+		{family: "spec", path: opscore.DefaultOpsArtifactRoot(projectDir, "spec")},
+		{family: "plan", path: opscore.DefaultOpsArtifactRoot(projectDir, "plan")},
+		{family: "tracker", path: opscore.DefaultOpsArtifactRoot(projectDir, "tracker")},
+		{family: "report", path: opscore.DefaultOpsArtifactRoot(projectDir, "report")},
 		{family: "dump", path: filepath.Join(projectDir, ".prj", "dumps")},
 		{family: "quiz", path: filepath.Join(projectDir, ".prj", "quizzes")},
 		{family: "spec", path: filepath.Join(projectDir, ".prj", "specs")},

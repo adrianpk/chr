@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
 // TestWorkflowSubmissionAtomicGuard changes a canonical source or target after
@@ -114,7 +115,7 @@ func workflowSubmissionAlias(t *testing.T, f workflowPreparationFixture) *Workfl
 	linked := filepath.Join(t.TempDir(), "linked")
 	workflowIntegrationCommand(t, f.store.layout.ProjectDir(), "worktree", "add", "--detach", linked, "HEAD")
 
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: linked, Namespace: "other"})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: linked, Namespace: "other"})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -40,12 +41,12 @@ func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding author
 }
 
 func (r *fileAuthoringSessionRepository) authoringArtifactMetadata(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref AuthoringArtifactRef, observed *AuthoringArtifactObservation) ([]byte, error) {
-	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: binding.Request.Namespace})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: binding.Request.Namespace})
 	if err != nil {
 		return nil, err
 	}
 
-	metadata := newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: authoringArtifactType(ref.Kind), Title: snapshot.Session.Topic, Producer: "chr", ExternalIDs: []string{binding.Request.SessionID}}, ref.ID, time.Now().UTC())
+	metadata := opscore.NewOpsArtifactMetadata(opscore.CreateOpsArtifactOptions{Layout: layout, Type: authoringArtifactType(ref.Kind), Title: snapshot.Session.Topic, Producer: "chr", ExternalIDs: []string{binding.Request.SessionID}}, ref.ID, time.Now().UTC())
 	if observed != nil {
 		metadata, err = r.observedAuthoringMetadata(ref, *observed)
 		if err != nil {

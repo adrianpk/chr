@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -33,7 +34,7 @@ func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*Ag
 			continue
 		}
 
-		layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: worktree.Path, Namespace: s.layout.Namespace()})
+		layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: worktree.Path, Namespace: s.layout.Namespace()})
 		if err != nil {
 			return nil, errors.Join(err, releaseWorkflowAdoptionLocks(locks))
 		}
@@ -49,7 +50,7 @@ func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*Ag
 	return locks, nil
 }
 
-func acquireWorkflowAdoptionLock(layout OpsLayout) (*AgentOperationLock, error) {
+func acquireWorkflowAdoptionLock(layout opscore.OpsLayout) (*AgentOperationLock, error) {
 	path := filepath.Join(layout.Root(), "lock", "agent-operation.lock")
 
 	if err := reclaimWorkflowAdoptionLock(path); err != nil {

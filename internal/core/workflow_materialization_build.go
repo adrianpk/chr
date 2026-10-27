@@ -11,6 +11,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -49,10 +50,10 @@ func (s *WorkflowStore) buildMaterializationForSet(ctx context.Context, opts Wor
 }
 
 func (s *WorkflowStore) materializationEnvelope(kind, title string, number int, now time.Time) (WorkflowRecord, error) {
-	id := fmt.Sprintf("%05d-%s", number, opsArtifactSlugOrDefault(title))
-	opts := CreateOpsArtifactOptions{Layout: s.layout, Type: kind, Title: title, Producer: "chr"}
+	id := fmt.Sprintf("%05d-%s", number, opscore.OpsArtifactSlugOrDefault(title))
+	opts := opscore.CreateOpsArtifactOptions{Layout: s.layout, Type: kind, Title: title, Producer: "chr"}
 
-	metadata, err := workflowJSONFields(newOpsArtifactMetadata(opts, id, now))
+	metadata, err := workflowJSONFields(opscore.NewOpsArtifactMetadata(opts, id, now))
 	if err != nil {
 		return WorkflowRecord{}, err
 	}

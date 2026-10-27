@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -161,7 +162,7 @@ func checkNativeTicketRejected(t *testing.T, opts TicketBoardReadOptions, docume
 func TestTicketDocumentCreation(t *testing.T) {
 	for _, native := range []bool{false, true} {
 		t.Run(map[bool]string{false: "unadopted", true: "native"}[native], func(t *testing.T) {
-			layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
+			layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
 			if err != nil {
 				t.Fatal(err)
 			}

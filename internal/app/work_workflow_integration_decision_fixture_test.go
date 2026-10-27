@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -112,7 +113,7 @@ func serviceIntegrationDecisionEvidence(t *testing.T, operations service, id, na
 		t.Fatal(err)
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +145,7 @@ func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID st
 		t.Fatal(err)
 	}
 
-	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
+	layout, err := opscore.ResolveOpsLayout(opscore.ResolveOpsLayoutOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		t.Fatal(err)
 	}

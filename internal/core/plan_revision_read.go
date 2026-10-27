@@ -9,6 +9,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -72,7 +73,7 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcor
 		return workflowstate.ErrConflict
 	}
 
-	root := filepath.Join(OpsDirectoryName, namespace)
+	root := filepath.Join(opscore.OpsDirectoryName, namespace)
 	images := map[string]string{binding.BodyRef: binding.BodyHash, filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "planned-order.json")): binding.PlannedOrderHash, filepath.ToSlash(filepath.Join(filepath.Dir(binding.TrackerRef), "planned-tracker.md")): binding.PlannedTrackerHash}
 
 	return r.checkPlanImages(root, images)
@@ -83,7 +84,7 @@ func (r *fileAuthoringSessionRepository) validatePlanRevisionImages(namespace st
 		return workflowstate.ErrConflict
 	}
 
-	root := filepath.Join(OpsDirectoryName, namespace)
+	root := filepath.Join(opscore.OpsDirectoryName, namespace)
 	images := map[string]string{binding.BodyRef: binding.BodyHash, binding.OrderRef: binding.OrderHash, binding.TrackerRef: binding.TrackerHash, binding.CurrentTrackerRef: binding.TrackerHash}
 
 	return r.checkPlanImages(root, images)
@@ -106,7 +107,7 @@ func (r *fileAuthoringSessionRepository) checkPlanImages(root string, images map
 
 func validPlanBindingPaths(namespace string, binding generationcore.PlanRevisionBinding) bool {
 	parts := strings.Split(binding.Reference, "/")
-	if len(parts) != 3 || parts[0] != "plan" || !opsArtifactIDPattern.MatchString(parts[1]) || parts[2] != "artifact.md" {
+	if len(parts) != 3 || parts[0] != "plan" || !opscore.HasOpsArtifactNumberPrefix(parts[1]) || parts[2] != "artifact.md" {
 		return false
 	}
 
@@ -115,7 +116,7 @@ func validPlanBindingPaths(namespace string, binding generationcore.PlanRevision
 		return false
 	}
 
-	root := filepath.ToSlash(filepath.Join(OpsDirectoryName, namespace)) + "/"
+	root := filepath.ToSlash(filepath.Join(opscore.OpsDirectoryName, namespace)) + "/"
 
 	return validPlanRevisionJournalPath(root+binding.BodyRef) && validPlanTrackerJournalPath(root+binding.CurrentTrackerRef)
 }

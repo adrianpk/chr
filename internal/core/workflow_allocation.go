@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -27,7 +28,7 @@ func (s *WorkflowStore) acquireWorkflowAllocation() (string, error) {
 		return "", err
 	}
 
-	if err := acquireOpsArtifactLock(path); err != nil {
+	if err := opscore.AcquireOpsArtifactLock(path); err != nil {
 		return "", err
 	}
 
