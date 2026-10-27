@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-12
 source: review
 reported_at: 2026-10-26T08:48:32Z
-commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c]
+commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca]
 started_at: 2026-10-27T23:03:10Z
 branch: refactor/slice-12-quality-workflow
 ready_at: 2026-10-26T08:57:09Z
@@ -83,10 +83,11 @@ relocation. Stage ports, assigned signatures and final validation stay open.
 
 The next T12.2 prerequisite moves ticket queries and Board/document projections
 to their existing ticket owner with actual native, app and adapter consumers.
+The projection implementation is `a96c05cee2000654f23e2ce0b0347b1155ec17ca`.
 Forty-two moved declaration token sequences match after qualification/naming and
 cmp.Compare substitution; one local generic integer comparator is removed.
 Public query tests colocate with their owner and share its existing SQLite
 fixtures. Twelve more direct dependencies resolve, leaving 57 root couplings;
 all 908 store methods remain together at their original receiver. Native writes,
 locks and journals retain their authority. Focused ticket, native filesystem/Git,
-wire/storage, app and boundary checks and the ceiling-six policy pass.
+wire/storage, app and boundary checks, strict lint and the ceiling-six policy pass.

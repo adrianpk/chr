@@ -23,7 +23,8 @@ existing workflow/state owner with direct native, app and adapter consumers.
 
 The approved T12.1–T12.6 tasks own this slice. The shared review prerequisite is
 implemented in `f4be8551581dbec43746e5b676b714911af24e2c`. All methods of the store move with
-their owning Go type. Shared stage data belongs in workflow/state when needed
+their owning Go type. The ticket-projection prerequisite is implemented in
+`a96c05cee2000654f23e2ce0b0347b1155ec17ca`. Shared stage data belongs in workflow/state when needed
 without transferring persistence, coordination or transport behavior.
 
 ## Contracts Added or Changed
