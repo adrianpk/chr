@@ -42,7 +42,7 @@ func authorQuizNewFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(authoringcore.AuthoringTargetSpec),
+			Value: string(authoringcore.TargetSpec),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -83,7 +83,7 @@ func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Com
 	return factory.runAuthorContextualQuizNew(ctx, cmd, projectContext, session, now)
 }
 
-func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session authoringcore.AuthoringSession, now time.Time) error {
+func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session authoringcore.Session, now time.Time) error {
 	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider core.AuthoringQuizQuestionProvider) error {
 		plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
 			ProjectDir:    projectContext.ProjectDir,
@@ -116,18 +116,18 @@ func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cm
 	})
 }
 
-func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (authoringcore.AuthoringSession, error) {
+func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (authoringcore.Session, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return authoringcore.AuthoringSession{}, fmt.Errorf("quiz topic is required")
+		return authoringcore.Session{}, fmt.Errorf("quiz topic is required")
 	}
 
-	session := authoringcore.AuthoringSession{
+	session := authoringcore.Session{
 		ID:        authoringSessionID(now),
 		ProjectID: projectContext.ProjectID,
-		Status:    authoringcore.AuthoringSessionStatusDraft,
-		Mode:      authoringcore.AuthoringSessionModeContextual,
-		Target:    authoringcore.AuthoringTarget(cmd.String("target")),
+		Status:    authoringcore.SessionStatusDraft,
+		Mode:      authoringcore.SessionModeContextual,
+		Target:    authoringcore.Target(cmd.String("target")),
 		Topic:     topic,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -135,7 +135,7 @@ func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectConte
 
 	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	return session, nil

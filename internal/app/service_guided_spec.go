@@ -34,19 +34,19 @@ type guidedCommittedQuizResult struct {
 }
 
 // GenerateGuidedSpec generates, saves and approves only the current run's specification.
-func (s service) GenerateGuidedSpec(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
+func (s service) GenerateGuidedSpec(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	if command.Action != "spec" {
-		return authoringcore.AuthoringSession{}, errors.New("unsupported guided specification command")
+		return authoringcore.Session{}, errors.New("unsupported guided specification command")
 	}
 
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.AuthoringSession) error {
+	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
 		bounded := s
 		bounded.ctx = ctx
 
@@ -54,7 +54,7 @@ func (s service) GenerateGuidedSpec(ctx context.Context, command authoringcore.G
 	})
 }
 
-func (s service) generateGuidedSpec(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) generateGuidedSpec(ctx context.Context, session *authoringcore.Session) error {
 	if session.Guided.Stage != "specification" {
 		return workflowstate.ErrConflict
 	}
@@ -95,7 +95,7 @@ func (s service) generateGuidedSpec(ctx context.Context, session *authoringcore.
 	return s.approveGuidedSpec(ctx, session, request, draft)
 }
 
-func (s service) approveGuidedSpec(ctx context.Context, session *authoringcore.AuthoringSession, request core.SpecMutationRequest, draft core.SpecMutationResult) error {
+func (s service) approveGuidedSpec(ctx context.Context, session *authoringcore.Session, request core.SpecMutationRequest, draft core.SpecMutationResult) error {
 	operation := session.Guided.PendingOperation
 	approval := authoringcore.GuidedSpecApproval{RunID: session.ID, Actor: session.Guided.Actor, Policy: authoringcore.GuidedSpecApprovalPolicy, GeneratedRevision: draft.Revision, ContentHash: session.Guided.SpecDraft.ContentHash, InputDigest: operation.PreparedSpec.InputDigest}
 	request.OperationID, request.Action = "guided-"+operation.Digest+"-approve", "save"
@@ -124,7 +124,7 @@ func (s service) guidedSpecEffect(phase string) error {
 	return nil
 }
 
-func (s service) prepareGuidedSpec(ctx context.Context, session authoringcore.AuthoringSession) (authoringcore.GuidedPreparedSpec, error) {
+func (s service) prepareGuidedSpec(ctx context.Context, session authoringcore.Session) (authoringcore.GuidedPreparedSpec, error) {
 	bound, ctx, err := s.bindGeneration(ctx, "guided-spec-"+session.Guided.PendingOperation.Digest, string(quizmodel.ActionGenerateSpec))
 	if err != nil {
 		return authoringcore.GuidedPreparedSpec{}, err
@@ -147,7 +147,7 @@ func (s service) prepareGuidedSpec(ctx context.Context, session authoringcore.Au
 	return authoringcore.GuidedPreparedSpec{Title: response.DraftSpec.Title, Body: response.DraftSpec.Body, InputDigest: prepared.Digest, RequestID: prepared.Request.ID, ResponseID: response.ID}, nil
 }
 
-func (s service) guidedSpecModelRequest(session authoringcore.AuthoringSession) (guidedSpecRequest, error) {
+func (s service) guidedSpecModelRequest(session authoringcore.Session) (guidedSpecRequest, error) {
 	inputs, err := s.guidedSpecInputs(session)
 	if err != nil {
 		return guidedSpecRequest{}, err
@@ -171,7 +171,7 @@ func (s service) guidedSpecModelRequest(session authoringcore.AuthoringSession) 
 	return guidedSpecRequest{Request: request, Digest: digest}, err
 }
 
-func (s service) guidedSpecInputs(session authoringcore.AuthoringSession) (guidedSpecInput, error) {
+func (s service) guidedSpecInputs(session authoringcore.Session) (guidedSpecInput, error) {
 	var (
 		state   quizcore.RuntimeState
 		entries []quizcore.Entry
@@ -212,7 +212,7 @@ func (s service) guidedSpecInputs(session authoringcore.AuthoringSession) (guide
 	return guidedSpecInput{Sections: append(sections, clarified...), State: state, Entries: entries, Checkpoint: quiz}, nil
 }
 
-func (s service) guidedCommittedQuiz(session authoringcore.AuthoringSession) (guidedCommittedQuizResult, error) {
+func (s service) guidedCommittedQuiz(session authoringcore.Session) (guidedCommittedQuizResult, error) {
 	var state quizcore.RuntimeState
 
 	for _, checkpoint := range session.Guided.Checkpoints {

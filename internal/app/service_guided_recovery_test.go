@@ -57,7 +57,7 @@ func TestGuidedUseCaseRecoveryDisconnect(t *testing.T) {
 	}
 }
 
-func assertGuidedRecoveryInspection(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedRecoveryInspection(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
@@ -98,7 +98,7 @@ func TestGuidedUseCaseRecoveryStage(t *testing.T) {
 	operations.guidedWorkHost = host
 	host.start(func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy })
 
-	recovered := waitGuidedRecovery(t, operations, session, func(current authoringcore.AuthoringSession) bool {
+	recovered := waitGuidedRecovery(t, operations, session, func(current authoringcore.Session) bool {
 		return current.Guided.Quiz != nil && current.Guided.PendingOperation == nil
 	})
 
@@ -168,7 +168,7 @@ func TestGuidedUseCaseRecoveryAdmission(t *testing.T) {
 	operations.guidedWorkHost = host
 	host.start(func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy })
 
-	current := waitGuidedRecovery(t, operations, pending, func(current authoringcore.AuthoringSession) bool {
+	current := waitGuidedRecovery(t, operations, pending, func(current authoringcore.Session) bool {
 		run, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
 
 		return err == nil && current.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"
@@ -182,7 +182,7 @@ func TestGuidedUseCaseRecoveryAdmission(t *testing.T) {
 	}
 }
 
-func waitGuidedRecovery(t *testing.T, operations service, session authoringcore.AuthoringSession, ready func(authoringcore.AuthoringSession) bool) authoringcore.AuthoringSession {
+func waitGuidedRecovery(t *testing.T, operations service, session authoringcore.Session, ready func(authoringcore.Session) bool) authoringcore.Session {
 	t.Helper()
 
 	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
@@ -203,7 +203,7 @@ func waitGuidedRecovery(t *testing.T, operations service, session authoringcore.
 
 	failGuidedRecovery(t, operations, scope)
 
-	return authoringcore.AuthoringSession{}
+	return authoringcore.Session{}
 }
 
 func failGuidedRecovery(t *testing.T, operations service, scope authoringcore.GuidedUseCaseScope) {
@@ -241,7 +241,7 @@ func guidedBlockedRecoveryModel(t *testing.T, operations *service, model *fakeSe
 	return entered, unblock
 }
 
-func guidedLostStartFixture(t *testing.T) (service, authoringcore.AuthoringSession, core.WorkflowInvocation) {
+func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, core.WorkflowInvocation) {
 	t.Helper()
 
 	operations, prepared, _ := guidedAdmissionFixture(t)
@@ -267,7 +267,7 @@ func guidedLostStartFixture(t *testing.T) (service, authoringcore.AuthoringSessi
 	return operations, pending, before
 }
 
-func guidedRecoveryReviewReady(ctx context.Context, operations service, session authoringcore.AuthoringSession) bool {
+func guidedRecoveryReviewReady(ctx context.Context, operations service, session authoringcore.Session) bool {
 	run, err := core.ReadGuidedInvocation(ctx, operations.projectContext.ProjectDir, session)
 
 	return err == nil && session.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"

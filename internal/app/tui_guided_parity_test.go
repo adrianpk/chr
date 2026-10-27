@@ -75,7 +75,7 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 	assertGuidedTUIFinalParity(t, executor, f, operations, provider, completed)
 }
 
-func assertGuidedTUIStaleScope(t *testing.T, executor tuiGuidedExecutor, operations service, old authoringcore.AuthoringSession) {
+func assertGuidedTUIStaleScope(t *testing.T, executor tuiGuidedExecutor, operations service, old authoringcore.Session) {
 	t.Helper()
 
 	for _, foreign := range []string{"revision", "project", "namespace"} {
@@ -98,7 +98,7 @@ func assertGuidedTUIStaleScope(t *testing.T, executor tuiGuidedExecutor, operati
 	}
 }
 
-func assertGuidedTUIExport(t *testing.T, executor tuiGuidedExecutor, session authoringcore.AuthoringSession, complete bool) {
+func assertGuidedTUIExport(t *testing.T, executor tuiGuidedExecutor, session authoringcore.Session, complete bool) {
 	t.Helper()
 
 	view, err := executor.ExecuteGuided(tui.GuidedRequest{Action: "document", Document: "results", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}})
@@ -120,7 +120,7 @@ func assertGuidedTUIExport(t *testing.T, executor tuiGuidedExecutor, session aut
 	}
 }
 
-func assertGuidedTUIFinalParity(t *testing.T, executor tuiGuidedExecutor, f *telegramConversationAppFixture, operations service, provider webViewProvider, session authoringcore.AuthoringSession) {
+func assertGuidedTUIFinalParity(t *testing.T, executor tuiGuidedExecutor, f *telegramConversationAppFixture, operations service, provider webViewProvider, session authoringcore.Session) {
 	t.Helper()
 
 	request := tui.GuidedRequest{Action: "inspect", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}}
@@ -147,7 +147,7 @@ func assertGuidedTUIFinalParity(t *testing.T, executor tuiGuidedExecutor, f *tel
 	}
 }
 
-func guidedTUIRunMatches(terminal tui.GuidedView, telegram authoringcore.AuthoringSession, runID string) bool {
+func guidedTUIRunMatches(terminal tui.GuidedView, telegram authoringcore.Session, runID string) bool {
 	return terminal.Session.ID == telegram.ID && telegram.ID == runID && terminal.Session.Guided.Actor == telegram.Guided.Actor && len(telegram.Guided.LaterIdeas) == 1
 }
 

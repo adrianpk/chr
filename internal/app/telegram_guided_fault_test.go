@@ -26,10 +26,10 @@ func applyGuidedTelegramControls(t *testing.T, f *telegramConversationAppFixture
 	}
 }
 
-func (s telegramGuidedAppendAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
+func (s telegramGuidedAppendAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.Session, error) {
 	session, err := s.service.ApplyTelegramGuided(ctx, target, input)
 	if err == nil && input.Command.Action == "append" {
-		return authoringcore.AuthoringSession{}, s.lost
+		return authoringcore.Session{}, s.lost
 	}
 
 	return session, err

@@ -46,7 +46,7 @@ func guardGuidedApprovalDocument(request SpecMutationRequest, document SpecDocum
 	return nil
 }
 
-func guardGuidedApprovalSource(session authoringcore.AuthoringSession, request SpecMutationRequest, document SpecDocument) error {
+func guardGuidedApprovalSource(session authoringcore.Session, request SpecMutationRequest, document SpecDocument) error {
 	approval := request.GuidedApproval
 
 	draft := session.Guided.SpecDraft
@@ -71,7 +71,7 @@ func guardGuidedApprovalSource(session authoringcore.AuthoringSession, request S
 	return nil
 }
 
-func guardGuidedApprovalRun(session authoringcore.AuthoringSession, request SpecMutationRequest) error {
+func guardGuidedApprovalRun(session authoringcore.Session, request SpecMutationRequest) error {
 	approval := request.GuidedApproval
 	if approval == nil || validateSpecReference(request.Reference) != nil {
 		return workflowstate.ErrConflict
@@ -105,7 +105,7 @@ func guardGuidedPreparedSpec(operation *authoringcore.GuidedUseCaseOperation, re
 	return nil
 }
 
-func guidedStageCheckpoint(session authoringcore.AuthoringSession, stage string) (authoringcore.GuidedStageCheckpoint, error) {
+func guidedStageCheckpoint(session authoringcore.Session, stage string) (authoringcore.GuidedStageCheckpoint, error) {
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage == stage && len(checkpoint.Artifacts) > 0 {
 			return checkpoint, nil
@@ -116,7 +116,7 @@ func guidedStageCheckpoint(session authoringcore.AuthoringSession, stage string)
 }
 
 // SealGuidedSpec retains the exact approved revision and committed dependency chain.
-func SealGuidedSpec(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
+func SealGuidedSpec(ctx context.Context, root string, session *authoringcore.Session) error {
 	approval := session.Guided.SpecApproval
 	if approval == nil || session.Guided.PendingOperation == nil {
 		return workflowstate.ErrConflict

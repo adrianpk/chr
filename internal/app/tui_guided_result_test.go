@@ -12,7 +12,7 @@ import (
 func TestGuidedUseCaseTUIResultGuard(t *testing.T) {
 	for _, name := range []string{"missing", "partial", "invalid", "verified"} {
 		t.Run(name, func(t *testing.T) {
-			session := &authoringcore.AuthoringSession{Guided: &authoringcore.GuidedUseCaseState{Status: "completed", Stage: "results"}}
+			session := &authoringcore.Session{Guided: &authoringcore.GuidedUseCaseState{Status: "completed", Stage: "results"}}
 
 			observed := GuidedUseCaseInspection{Session: session}
 			if name != "missing" {

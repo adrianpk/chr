@@ -16,15 +16,15 @@ import (
 )
 
 // PrepareGuidedWork generates and materializes exactly the committed approved scope.
-func (s service) PrepareGuidedWork(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
+func (s service) PrepareGuidedWork(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	if command.Action != "prepare" {
-		return authoringcore.AuthoringSession{}, errors.New("unsupported guided preparation command")
+		return authoringcore.Session{}, errors.New("unsupported guided preparation command")
 	}
 
 	return s.applyGuidedWorkStep(ctx, command, service.prepareGuidedWork)
 }
 
-func (s service) prepareGuidedWork(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) prepareGuidedWork(ctx context.Context, session *authoringcore.Session) error {
 	if session.Guided.SpecApproval == nil {
 		return workflowstate.ErrConflict
 	}
@@ -63,7 +63,7 @@ func (s service) prepareGuidedWork(ctx context.Context, session *authoringcore.A
 	return s.materializeGuidedWork(ctx, session)
 }
 
-func (s service) reserveGuidedPlan(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) reserveGuidedPlan(ctx context.Context, session *authoringcore.Session) error {
 	if session.Guided.Work != nil {
 		return nil
 	}
@@ -89,7 +89,7 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *authoringcore.A
 	return core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
 }
 
-func (s service) generateGuidedPlan(ctx context.Context, session authoringcore.AuthoringSession) (authoringcore.GuidedPreparedPlan, error) {
+func (s service) generateGuidedPlan(ctx context.Context, session authoringcore.Session) (authoringcore.GuidedPreparedPlan, error) {
 	bound, ctx, err := s.bindGeneration(ctx, session.Guided.Work.PublicationOperation.ID, string(quizmodel.ActionGeneratePlan))
 	if err != nil {
 		return authoringcore.GuidedPreparedPlan{}, err
@@ -136,7 +136,7 @@ func (s service) generateGuidedPlan(ctx context.Context, session authoringcore.A
 	return authoringcore.GuidedPreparedPlan{Plan: plan, TargetRevision: session.Guided.Work.PublicationOperation.ExpectedRevision, InputDigest: sources.Hash}, nil
 }
 
-func (s service) publishGuidedPlan(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) publishGuidedPlan(ctx context.Context, session *authoringcore.Session) error {
 	if session.Guided.Work.Publication != nil {
 		return nil
 	}
@@ -155,7 +155,7 @@ func (s service) publishGuidedPlan(ctx context.Context, session *authoringcore.A
 	return core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
 }
 
-func (s service) materializeGuidedWork(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) materializeGuidedWork(ctx context.Context, session *authoringcore.Session) error {
 	operation := session.Guided.PendingOperation
 	if operation.PreparedWorkflow == nil {
 		input, err := s.generateGuidedContracts(ctx, *session)
@@ -179,7 +179,7 @@ func (s service) materializeGuidedWork(ctx context.Context, session *authoringco
 	return core.SealGuidedPreparation(ctx, s.projectContext.ProjectDir, session)
 }
 
-func (s service) retainGuidedMaterialization(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) retainGuidedMaterialization(ctx context.Context, session *authoringcore.Session) error {
 	result, err := s.MaterializeWorkflowPlan(ctx, *session.Guided.PendingOperation.PreparedWorkflow)
 	if err != nil {
 		return err

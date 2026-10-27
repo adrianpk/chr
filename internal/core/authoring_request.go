@@ -225,9 +225,9 @@ func validateAuthoringReceipt(receipt authoringMutationReceipt, request Authorin
 	return nil
 }
 
-func validAuthoringContinuationKind(kind authoringcore.AuthoringArtifactKind) bool {
+func validAuthoringContinuationKind(kind authoringcore.ArtifactKind) bool {
 	switch kind {
-	case authoringcore.AuthoringArtifactKindDump, authoringcore.AuthoringArtifactKindQuiz, authoringcore.AuthoringArtifactKindSpec, authoringcore.AuthoringArtifactKindPlan:
+	case authoringcore.ArtifactKindDump, authoringcore.ArtifactKindQuiz, authoringcore.ArtifactKindSpec, authoringcore.ArtifactKindPlan:
 		return true
 	default:
 		return false

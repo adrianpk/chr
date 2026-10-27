@@ -40,7 +40,7 @@ func TestGuidedUseCasePreparationCommitted(t *testing.T) {
 	}
 }
 
-func assertGuidedPreparation(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedPreparation(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -140,7 +140,7 @@ func TestGuidedUseCasePreparationExisting(t *testing.T) {
 	}
 }
 
-func guidedPreparationFixture(t *testing.T, namespace string) (service, authoringcore.AuthoringSession, *planDeliveryTestModel) {
+func guidedPreparationFixture(t *testing.T, namespace string) (service, authoringcore.Session, *planDeliveryTestModel) {
 	t.Helper()
 
 	operations, session, _ := guidedQuizFixture(t, namespace)

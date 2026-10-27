@@ -11,15 +11,15 @@ import (
 
 // ControlGuidedUseCase preserves interrupted stages and delegates native work
 // controls with their displayed revision and a durable original request.
-func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
+func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseControl(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.AuthoringSession) error {
+	return core.ApplyGuidedUseCaseControl(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
 		bounded := s
 		bounded.ctx, bounded.workflowNamespace = ctx, session.Namespace
 
@@ -27,7 +27,7 @@ func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore
 	})
 }
 
-func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.Session) error {
 	if err := core.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session); err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.A
 	return s.acknowledgeGuidedNativeControl(ctx, session)
 }
 
-func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *authoringcore.Session) error {
 	control := session.Guided.Control
 
 	run, err := core.ReadGuidedInvocation(ctx, s.projectContext.ProjectDir, *session)
@@ -104,7 +104,7 @@ func (s service) applyGuidedNativeControl(ctx context.Context, store *core.Workf
 	return result, errors.Join(core.ErrGuidedControlRejected, err)
 }
 
-func guidedControlCommand(session authoringcore.AuthoringSession) (authoringcore.GuidedUseCaseCommand, bool) {
+func guidedControlCommand(session authoringcore.Session) (authoringcore.GuidedUseCaseCommand, bool) {
 	if session.Guided == nil {
 		return authoringcore.GuidedUseCaseCommand{}, false
 	}

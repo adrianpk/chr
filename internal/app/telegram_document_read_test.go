@@ -151,7 +151,7 @@ func reserveTelegramOriginalDocument(t *testing.T, f *telegramConversationAppFix
 
 	input := telegramOperationRetainInput(t, f, "Show the "+kind+" document.")
 	input.Conversation = conversation
-	command := telegramExplanationCommand{Input: input, Question: input.Update.Text, DocumentKind: authoringcore.AuthoringArtifactKind(kind)}
+	command := telegramExplanationCommand{Input: input, Question: input.Update.Text, DocumentKind: authoringcore.ArtifactKind(kind)}
 	user := input.Config.AllowedUsers[0]
 	operations := telegramOperationConcreteService(t, f.receiver)
 

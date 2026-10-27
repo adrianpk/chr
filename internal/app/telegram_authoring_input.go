@@ -112,10 +112,10 @@ func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, ans
 		return request, workflowstate.ErrConflict
 	}
 
-	request.Target = authoringcore.AuthoringArtifactKind(snapshot.Session.Target)
+	request.Target = authoringcore.ArtifactKind(snapshot.Session.Target)
 
 	request.Question, request.Instructions = snapshot.Question, answer
-	if request.Target != authoringcore.AuthoringArtifactKindQuiz {
+	if request.Target != authoringcore.ArtifactKindQuiz {
 		request.Action = core.AuthoringContinuationRespond
 	}
 

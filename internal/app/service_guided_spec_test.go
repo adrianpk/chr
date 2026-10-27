@@ -42,7 +42,7 @@ func TestGuidedUseCaseSpecApproval(t *testing.T) {
 	}
 }
 
-func assertGuidedSpecApproval(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedSpecApproval(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	approval := session.Guided.SpecApproval
@@ -57,7 +57,7 @@ func assertGuidedSpecApproval(t *testing.T, operations service, session authorin
 	assertGuidedSpecCheckpoint(t, operations, session)
 }
 
-func assertGuidedSpecCheckpoint(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedSpecCheckpoint(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	approval := session.Guided.SpecApproval
@@ -156,7 +156,7 @@ func TestGuidedUseCaseSpecInvalid(t *testing.T) {
 	}
 }
 
-func guidedSpecFixture(t *testing.T) (service, authoringcore.AuthoringSession, *fakeServiceQuizModel) {
+func guidedSpecFixture(t *testing.T) (service, authoringcore.Session, *fakeServiceQuizModel) {
 	t.Helper()
 
 	operations, session, model := guidedQuizFixture(t, "default")

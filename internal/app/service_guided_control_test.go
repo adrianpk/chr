@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func guidedNativeControl(t *testing.T, operations service, session authoringcore.AuthoringSession, id, action string) authoringcore.GuidedUseCaseCommand {
+func guidedNativeControl(t *testing.T, operations service, session authoringcore.Session, id, action string) authoringcore.GuidedUseCaseCommand {
 	t.Helper()
 
 	command := guidedQuizCommand(session, id, action, "")
@@ -63,7 +63,7 @@ func testGuidedNativeStop(t *testing.T, action string) {
 	}
 }
 
-func assertGuidedNativeResume(t *testing.T, operations service, paused authoringcore.AuthoringSession, original authoringcore.GuidedUseCaseCommand) {
+func assertGuidedNativeResume(t *testing.T, operations service, paused authoringcore.Session, original authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
 	before := assertGuidedNativeAdmission(t, operations, paused)
@@ -81,7 +81,7 @@ func assertGuidedNativeResume(t *testing.T, operations service, paused authoring
 	assertGuidedResumedAttempts(t, operations, before, resumed)
 }
 
-func assertGuidedResumedAttempts(t *testing.T, operations service, before core.WorkflowInvocation, resumed authoringcore.AuthoringSession) {
+func assertGuidedResumedAttempts(t *testing.T, operations service, before core.WorkflowInvocation, resumed authoringcore.Session) {
 	t.Helper()
 
 	host := newGuidedWorkHost(t.Context())
@@ -162,7 +162,7 @@ func testGuidedControlAdmission(t *testing.T, admitted bool) {
 	assertGuidedControlAdmissionCount(t, operations, paused, admitted)
 }
 
-func assertGuidedControlAdmissionCount(t *testing.T, operations service, paused authoringcore.AuthoringSession, admitted bool) {
+func assertGuidedControlAdmissionCount(t *testing.T, operations service, paused authoringcore.Session, admitted bool) {
 	t.Helper()
 
 	page, err := operations.WorkflowStatusPage(t.Context(), 0, 8)
@@ -181,7 +181,7 @@ func assertGuidedControlAdmissionCount(t *testing.T, operations service, paused 
 	}
 }
 
-func guidedAdmittedFixture(t *testing.T) (service, authoringcore.AuthoringSession) {
+func guidedAdmittedFixture(t *testing.T) (service, authoringcore.Session) {
 	t.Helper()
 
 	operations, prepared, _ := guidedAdmissionFixture(t)
@@ -194,7 +194,7 @@ func guidedAdmittedFixture(t *testing.T) (service, authoringcore.AuthoringSessio
 	return operations, started
 }
 
-func assertGuidedStopAccepted(t *testing.T, operations service, stopping authoringcore.AuthoringSession, action string) {
+func assertGuidedStopAccepted(t *testing.T, operations service, stopping authoringcore.Session, action string) {
 	t.Helper()
 
 	if stopping.Guided.Status != "blocked" || stopping.Guided.Control.NativeReceipt == nil || stopping.Guided.Control.AcknowledgedRevision != 0 {
@@ -207,7 +207,7 @@ func assertGuidedStopAccepted(t *testing.T, operations service, stopping authori
 	}
 }
 
-func acknowledgeGuidedTestStop(t *testing.T, operations service, claim *core.WorkflowClaim, scope authoringcore.GuidedUseCaseScope) authoringcore.AuthoringSession {
+func acknowledgeGuidedTestStop(t *testing.T, operations service, claim *core.WorkflowClaim, scope authoringcore.GuidedUseCaseScope) authoringcore.Session {
 	t.Helper()
 
 	unsettled, err := core.ReconcileGuidedStop(t.Context(), operations.projectContext.ProjectDir, scope)
@@ -227,7 +227,7 @@ func acknowledgeGuidedTestStop(t *testing.T, operations service, claim *core.Wor
 	return stopped
 }
 
-func rejectStaleGuidedControl(t *testing.T, operations service, started authoringcore.AuthoringSession) authoringcore.AuthoringSession {
+func rejectStaleGuidedControl(t *testing.T, operations service, started authoringcore.Session) authoringcore.Session {
 	t.Helper()
 
 	stale := guidedNativeControl(t, operations, started, "stale", "pause")
@@ -241,7 +241,7 @@ func rejectStaleGuidedControl(t *testing.T, operations service, started authorin
 	return rejected
 }
 
-func pendingGuidedAdmissionFixture(t *testing.T, admitted bool) (service, authoringcore.GuidedUseCaseCommand, authoringcore.AuthoringSession) {
+func pendingGuidedAdmissionFixture(t *testing.T, admitted bool) (service, authoringcore.GuidedUseCaseCommand, authoringcore.Session) {
 	t.Helper()
 
 	operations, prepared, _ := guidedAdmissionFixture(t)

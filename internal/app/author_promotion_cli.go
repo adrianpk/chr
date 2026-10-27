@@ -113,7 +113,7 @@ func (factory commandFactory) runAuthorPromoteQuizToDraft(ctx context.Context, c
 	return printAuthorPromotionPlan(factory.io.Stdout, plan, false)
 }
 
-func resolveAuthoringSessionForPromotion(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, handle, artifactPath string) (authoringcore.AuthoringSession, error) {
+func resolveAuthoringSessionForPromotion(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, handle, artifactPath string) (authoringcore.Session, error) {
 	if strings.TrimSpace(handle) != "" {
 		return resolveAuthoringSession(ctx, repository, handle)
 	}
@@ -121,13 +121,13 @@ func resolveAuthoringSessionForPromotion(ctx context.Context, repository core.Au
 	return resolveAuthoringSessionFromArtifact(ctx, repository, projectDir, artifactPath)
 }
 
-func resolveAuthoringSessionFromArtifact(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, artifactPath string) (authoringcore.AuthoringSession, error) {
+func resolveAuthoringSessionFromArtifact(ctx context.Context, repository core.AuthoringSessionRepository, projectDir, artifactPath string) (authoringcore.Session, error) {
 	sessions, err := repository.ListSessions(ctx)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
-	matches := []authoringcore.AuthoringSession{}
+	matches := []authoringcore.Session{}
 	normalizedPath := normalizeAuthoringArtifactPath(projectDir, artifactPath)
 
 	for _, session := range sessions {
@@ -141,13 +141,13 @@ func resolveAuthoringSessionFromArtifact(ctx context.Context, repository core.Au
 	}
 
 	if len(matches) > 1 {
-		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring artifact path is ambiguous: %s", artifactPath)
+		return authoringcore.Session{}, fmt.Errorf("authoring artifact path is ambiguous: %s", artifactPath)
 	}
 
-	return authoringcore.AuthoringSession{}, fmt.Errorf("authoring session is required when artifact metadata cannot identify one session")
+	return authoringcore.Session{}, fmt.Errorf("authoring session is required when artifact metadata cannot identify one session")
 }
 
-func authoringSessionHasArtifact(session authoringcore.AuthoringSession, projectDir, artifactPath string) bool {
+func authoringSessionHasArtifact(session authoringcore.Session, projectDir, artifactPath string) bool {
 	for _, artifact := range session.Outputs {
 		if normalizeAuthoringArtifactPath(projectDir, artifact.Path) == artifactPath {
 			return true

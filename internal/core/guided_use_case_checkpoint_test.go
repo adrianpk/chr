@@ -52,7 +52,7 @@ func TestGuidedUseCaseCheckpointPreserves(t *testing.T) {
 	assertGuidedCheckpointInput(t, root, session)
 }
 
-func assertGuidedCheckpointInput(t *testing.T, root string, session authoringcore.AuthoringSession) {
+func assertGuidedCheckpointInput(t *testing.T, root string, session authoringcore.Session) {
 	t.Helper()
 
 	if session.Guided.Stage != "quiz" || session.Guided.Status != "blocked" || len(session.Guided.Checkpoints) != 1 {

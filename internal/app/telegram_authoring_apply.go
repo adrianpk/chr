@@ -139,12 +139,12 @@ func telegramAuthoringFailure(err error) string {
 }
 
 type telegramAuthoringFacts struct {
-	RequestID  string                               `json:"request_id"`
-	SessionRef string                               `json:"session_ref"`
-	Revision   int64                                `json:"revision"`
-	SourceHash string                               `json:"source_hash"`
-	Outputs    []authoringcore.AuthoringArtifactRef `json:"outputs"`
-	Question   *telegramcore.ConversationQuestion   `json:"question,omitempty"`
+	RequestID  string                             `json:"request_id"`
+	SessionRef string                             `json:"session_ref"`
+	Revision   int64                              `json:"revision"`
+	SourceHash string                             `json:"source_hash"`
+	Outputs    []authoringcore.ArtifactRef        `json:"outputs"`
+	Question   *telegramcore.ConversationQuestion `json:"question,omitempty"`
 }
 
 func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramcore.OperationRequest, result core.AuthoringContinuationResult, config telegramcore.ReceiverConfig) error {
@@ -190,7 +190,7 @@ func telegramAuthoringResultText(conversation string, result core.AuthoringConti
 		return tgmessage.Render(tgmessage.Blocks{Content: result.Prompt, SecondaryText: "Reply to this message to answer. Use /reply " + conversation + " <answer> when you cannot reply directly."}).PlainFallback
 	}
 
-	if result.Session.Target == authoringcore.AuthoringTargetDump {
+	if result.Session.Target == authoringcore.TargetDump {
 		return tgmessage.Render(tgmessage.Blocks{Family: "15", InitialText: "Your request and details are saved as a dump for " + result.Session.Topic + ".", SecondaryText: "Use /quiz " + conversation + " to clarify the requirements."}).PlainFallback
 	}
 

@@ -14,8 +14,8 @@ import (
 type AuthoringArtifactLayoutOptions struct {
 	ProjectDir   string
 	SessionID    string
-	Kind         authoringcore.AuthoringArtifactKind
-	Role         authoringcore.AuthoringArtifactRole
+	Kind         authoringcore.ArtifactKind
+	Role         authoringcore.ArtifactRole
 	Topic        string
 	Name         string
 	Description  string
@@ -24,7 +24,7 @@ type AuthoringArtifactLayoutOptions struct {
 
 // AuthoringArtifactLayout describes a package boundary value.
 type AuthoringArtifactLayout struct {
-	Ref       authoringcore.AuthoringArtifactRef
+	Ref       authoringcore.ArtifactRef
 	FullPath  string
 	Dir       string
 	Collision AuthoringArtifactCollision
@@ -41,8 +41,8 @@ type AuthoringArtifactCollision struct {
 type AuthoringArtifactInventoryEntry struct {
 	SessionID  string
 	ArtifactID string
-	Kind       authoringcore.AuthoringArtifactKind
-	Role       authoringcore.AuthoringArtifactRole
+	Kind       authoringcore.ArtifactKind
+	Role       authoringcore.ArtifactRole
 	Path       string
 	Exists     bool
 	Collision  bool
@@ -66,7 +66,7 @@ func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (Authoring
 	}
 
 	return AuthoringArtifactLayout{
-		Ref: authoringcore.AuthoringArtifactRef{
+		Ref: authoringcore.ArtifactRef{
 			ID:          authoringArtifactID(opts),
 			Kind:        opts.Kind,
 			Role:        opts.Role,
@@ -115,7 +115,7 @@ func validateAuthoringArtifactLayoutOptions(opts AuthoringArtifactLayoutOptions)
 		return fmt.Errorf("authoring artifact role is invalid: %s", opts.Role)
 	}
 
-	if opts.Kind == authoringcore.AuthoringArtifactKindSession || opts.Kind == authoringcore.AuthoringArtifactKindTranscript {
+	if opts.Kind == authoringcore.ArtifactKindSession || opts.Kind == authoringcore.ArtifactKindTranscript {
 		return fmt.Errorf("authoring artifact kind is session-owned: %s", opts.Kind)
 	}
 
@@ -127,7 +127,7 @@ func validateAuthoringArtifactLayoutOptions(opts AuthoringArtifactLayoutOptions)
 }
 
 // EnsureAuthoringArtifactMetadata ensures metadata for an authoring artifact body.
-func EnsureAuthoringArtifactMetadata(projectDir string, ref authoringcore.AuthoringArtifactRef) error {
+func EnsureAuthoringArtifactMetadata(projectDir string, ref authoringcore.ArtifactRef) error {
 	return opscore.EnsureArtifactBodyMetadata(projectDir, ref.Path)
 }
 
@@ -143,17 +143,17 @@ func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (opscore.NamedAr
 	return opscore.NamedArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
 }
 
-func authoringArtifactType(kind authoringcore.AuthoringArtifactKind) string {
-	types := map[authoringcore.AuthoringArtifactKind]string{
-		authoringcore.AuthoringArtifactKindDump:     "dump",
-		authoringcore.AuthoringArtifactKindQuiz:     "quiz",
-		authoringcore.AuthoringArtifactKindDraft:    "spec",
-		authoringcore.AuthoringArtifactKindSpec:     "spec",
-		authoringcore.AuthoringArtifactKindPlan:     "plan",
-		authoringcore.AuthoringArtifactKindSliceSet: "plan",
-		authoringcore.AuthoringArtifactKindSlice:    "plan",
-		authoringcore.AuthoringArtifactKindTracker:  "tracker",
-		authoringcore.AuthoringArtifactKindTicket:   "ticket",
+func authoringArtifactType(kind authoringcore.ArtifactKind) string {
+	types := map[authoringcore.ArtifactKind]string{
+		authoringcore.ArtifactKindDump:     "dump",
+		authoringcore.ArtifactKindQuiz:     "quiz",
+		authoringcore.ArtifactKindDraft:    "spec",
+		authoringcore.ArtifactKindSpec:     "spec",
+		authoringcore.ArtifactKindPlan:     "plan",
+		authoringcore.ArtifactKindSliceSet: "plan",
+		authoringcore.ArtifactKindSlice:    "plan",
+		authoringcore.ArtifactKindTracker:  "tracker",
+		authoringcore.ArtifactKindTicket:   "ticket",
 	}
 
 	artifactType, ok := types[kind]

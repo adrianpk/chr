@@ -30,7 +30,7 @@ type ArtifactActionResult struct {
 	Message           string
 	Tickets           []core.IndexedTicket
 	Documents         []DocumentView
-	AuthoringSessions []authoringcore.AuthoringSession
+	AuthoringSessions []authoringcore.Session
 }
 
 // ArtifactActionState stores the pending confirmation state for an artifact

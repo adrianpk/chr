@@ -87,13 +87,13 @@ func (r *fileAuthoringSessionRepository) readAuthoringImage(relative string, ima
 }
 
 func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *AuthoringSnapshot, images map[string][]byte) error {
-	refs := append(append([]authoringcore.AuthoringArtifactRef{}, snapshot.Session.Inputs...), snapshot.Session.Outputs...)
+	refs := append(append([]authoringcore.ArtifactRef{}, snapshot.Session.Inputs...), snapshot.Session.Outputs...)
 	if len(refs) > 16 {
 		return errors.New("authoring artifact context capacity exceeded")
 	}
 
 	for _, ref := range refs {
-		if ref.Kind == authoringcore.AuthoringArtifactKindDump {
+		if ref.Kind == authoringcore.ArtifactKindDump {
 			if _, err := r.readAuthoringDumpObservations(snapshot, ref, images); err != nil {
 				return err
 			}
@@ -189,7 +189,7 @@ func (r *fileAuthoringSessionRepository) guardAuthoringSnapshot(request Authorin
 		return snapshot, workflowstate.ErrConflict
 	}
 
-	if request.Action == "create" || snapshot.Session.Status != authoringcore.AuthoringSessionStatusActive {
+	if request.Action == "create" || snapshot.Session.Status != authoringcore.SessionStatusActive {
 		return snapshot, workflowstate.ErrConflict
 	}
 
@@ -200,7 +200,7 @@ func (r *fileAuthoringSessionRepository) guardAuthoringSnapshot(request Authorin
 	return snapshot, nil
 }
 
-func parseManagedAuthoringSession(content []byte, id string) (authoringcore.AuthoringSession, error) {
+func parseManagedAuthoringSession(content []byte, id string) (authoringcore.Session, error) {
 	session, err := ParseAuthoringSession(string(content))
 	if err != nil {
 		return session, err

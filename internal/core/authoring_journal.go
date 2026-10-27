@@ -232,5 +232,5 @@ func validAuthoringOpsJournalPath(path string) bool {
 		return false
 	}
 
-	return validAuthoringContinuationKind(authoringcore.AuthoringArtifactKind(parts[2]))
+	return validAuthoringContinuationKind(authoringcore.ArtifactKind(parts[2]))
 }

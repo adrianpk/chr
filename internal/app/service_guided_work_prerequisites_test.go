@@ -33,7 +33,7 @@ func TestGuidedUseCaseAdmissionPrerequisites(t *testing.T) {
 	}
 }
 
-func breakGuidedPrerequisite(t *testing.T, operations *service, prepared authoringcore.AuthoringSession, name string) {
+func breakGuidedPrerequisite(t *testing.T, operations *service, prepared authoringcore.Session, name string) {
 	t.Helper()
 
 	config := "workflow:\n  version: 1\nreview:\n  mode: human_review\nwork:\n  state_authority: tickets\n"
@@ -99,7 +99,7 @@ func TestGuidedUseCaseAdmissionPolicy(t *testing.T) {
 	}
 }
 
-func restoreGuidedAdmissionPolicy(t *testing.T, operations service, blocked authoringcore.AuthoringSession, original []byte) {
+func restoreGuidedAdmissionPolicy(t *testing.T, operations service, blocked authoringcore.Session, original []byte) {
 	t.Helper()
 
 	path := core.UserPath(operations.projectContext.ProjectDir, "config.yml")

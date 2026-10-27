@@ -73,7 +73,7 @@ func TestGuidedUseCaseAdmissionWeb(t *testing.T) {
 	assertGuidedWorkWebStatus(t, provider, handler, started)
 }
 
-func assertGuidedWorkWebStatus(t *testing.T, provider webViewProvider, handler http.Handler, session authoringcore.AuthoringSession) {
+func assertGuidedWorkWebStatus(t *testing.T, provider webViewProvider, handler http.Handler, session authoringcore.Session) {
 	t.Helper()
 
 	before, err := provider.GuidedUseCaseView(t.Context(), session.ID, session.Namespace)
@@ -104,7 +104,7 @@ func guidedWebWorkCountsMatch(work *webui.GuidedUseCaseWork) bool {
 	return work != nil && work.Validated == 1 && work.Confirmed == 0 && work.Remaining == 1
 }
 
-func assertGuidedWorkPage(t *testing.T, body string, session authoringcore.AuthoringSession) {
+func assertGuidedWorkPage(t *testing.T, body string, session authoringcore.Session) {
 	t.Helper()
 
 	for _, text := range []string{"1 of 1 tasks validated", "0 delivered", "1 remaining", "The work needs review", "Plan"} {

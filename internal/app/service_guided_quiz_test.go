@@ -137,7 +137,7 @@ func TestGuidedUseCaseQuizInvalid(t *testing.T) {
 	}
 }
 
-func guidedQuizFixture(t *testing.T, namespace string) (service, authoringcore.AuthoringSession, *fakeServiceQuizModel) {
+func guidedQuizFixture(t *testing.T, namespace string) (service, authoringcore.Session, *fakeServiceQuizModel) {
 	t.Helper()
 
 	if testing.Short() {
@@ -178,7 +178,7 @@ func guidedQuizFixture(t *testing.T, namespace string) (service, authoringcore.A
 	return operations, session, model
 }
 
-func guidedQuizCommand(session authoringcore.AuthoringSession, id, action, content string) authoringcore.GuidedUseCaseCommand {
+func guidedQuizCommand(session authoringcore.Session, id, action, content string) authoringcore.GuidedUseCaseCommand {
 	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: id, Action: action, Content: content}
 	if session.Guided.Quiz != nil {
 		command.QuestionID, command.InputDigest = session.Guided.Quiz.QuestionID, session.Guided.Quiz.InputDigest
@@ -271,7 +271,7 @@ func invalidGuidedQuizAnswer(command authoringcore.GuidedUseCaseCommand, variant
 	return command
 }
 
-func assertGuidedQuizCompletion(t *testing.T, completed authoringcore.AuthoringSession, dump authoringcore.GuidedStageCheckpoint) {
+func assertGuidedQuizCompletion(t *testing.T, completed authoringcore.Session, dump authoringcore.GuidedStageCheckpoint) {
 	t.Helper()
 
 	if completed.Guided.Stage != "specification" || len(completed.Guided.Checkpoints) != 2 {

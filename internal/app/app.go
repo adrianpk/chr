@@ -285,7 +285,7 @@ type tuiOptionsData struct {
 	plans                []tui.PlanView
 	projectMetadata      core.ProjectMetadata
 	cases                []core.CaseMetadata
-	authoringSessions    []authoringcore.AuthoringSession
+	authoringSessions    []authoringcore.Session
 	observability        tui.ObservabilityView
 	workReadiness        tui.WorkReadinessView
 	workspaceGraph       core.WorkspaceGraph
@@ -348,7 +348,7 @@ func loadTUITickets(
 func loadTUIAuthoringSessions(
 	ctx context.Context,
 	projectContext commandProjectContext,
-) ([]authoringcore.AuthoringSession, error) {
+) ([]authoringcore.Session, error) {
 	sessions, err := core.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
 	if err != nil {
 		return nil, err

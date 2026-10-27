@@ -13,7 +13,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-func assertGuidedTelegramOriginals(t *testing.T, f *telegramConversationAppFixture, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedTelegramOriginals(t *testing.T, f *telegramConversationAppFixture, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	c := f.sessions(t)[0]
@@ -75,7 +75,7 @@ func assertGuidedTelegramResultExport(t *testing.T, f *telegramConversationAppFi
 	}
 }
 
-func assertGuidedTelegramPreparedOriginals(t *testing.T, f *telegramConversationAppFixture, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedTelegramPreparedOriginals(t *testing.T, f *telegramConversationAppFixture, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	for _, kind := range []string{"plan", "tracker"} {
@@ -108,7 +108,7 @@ func TestGuidedUseCaseTelegramResultGuard(t *testing.T) {
 		{name: "partial evidence", result: &core.WorkflowResultInspection{}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			session := authoringcore.AuthoringSession{Topic: "Result guard", Guided: &authoringcore.GuidedUseCaseState{Stage: "results", Status: "completed"}}
+			session := authoringcore.Session{Topic: "Result guard", Guided: &authoringcore.GuidedUseCaseState{Stage: "results", Status: "completed"}}
 			observed := GuidedUseCaseInspection{Session: &session, Result: test.result}
 
 			text := telegramGuidedPrompt(observed)

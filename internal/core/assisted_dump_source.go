@@ -20,7 +20,7 @@ func normalizeAssistedDumpSource(opts *AssistedArtifactSynthesisOptions) error {
 		path = filepath.Join(opts.ProjectDir, path)
 	}
 
-	if path != expected || opts.SourceRef.ID != "curated-summary-"+opts.Session.ID || opts.SourceRef.Kind != authoringcore.AuthoringArtifactKindDraft || opts.SourceRef.Role != authoringcore.AuthoringArtifactRoleOutput {
+	if path != expected || opts.SourceRef.ID != "curated-summary-"+opts.Session.ID || opts.SourceRef.Kind != authoringcore.ArtifactKindDraft || opts.SourceRef.Role != authoringcore.ArtifactRoleOutput {
 		return workflowstate.ErrConflict
 	}
 
@@ -60,7 +60,7 @@ func (r *fileAuthoringSessionRepository) assistedDumpSourceImage(opts AssistedAr
 	return workflowstate.FileChange{Path: filepath.FromSlash(opts.SourceRef.Path), Before: contenthash.Sum(content), After: content}, nil
 }
 
-func (r *fileAuthoringSessionRepository) assistedDumpSessionImage(session authoringcore.AuthoringSession) (workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) assistedDumpSessionImage(session authoringcore.Session) (workflowstate.FileChange, error) {
 	paths, err := r.authoringSessionPaths(session.ID)
 	if err != nil {
 		return workflowstate.FileChange{}, err

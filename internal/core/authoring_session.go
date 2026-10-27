@@ -8,7 +8,7 @@ import (
 )
 
 // ValidateAuthoringSession validates the corresponding package boundary value.
-func ValidateAuthoringSession(session authoringcore.AuthoringSession) error {
+func ValidateAuthoringSession(session authoringcore.Session) error {
 	if session.ID == "" {
 		return fmt.Errorf("authoring session id is required")
 	}
@@ -33,12 +33,12 @@ func ValidateAuthoringSession(session authoringcore.AuthoringSession) error {
 		return fmt.Errorf("authoring session topic is required")
 	}
 
-	err := validateAuthoringArtifactRefs("input", session.Inputs, authoringcore.AuthoringArtifactRoleInput)
+	err := validateAuthoringArtifactRefs("input", session.Inputs, authoringcore.ArtifactRoleInput)
 	if err != nil {
 		return err
 	}
 
-	err = validateAuthoringArtifactRefs("output", session.Outputs, authoringcore.AuthoringArtifactRoleOutput)
+	err = validateAuthoringArtifactRefs("output", session.Outputs, authoringcore.ArtifactRoleOutput)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func ValidateAuthoringSession(session authoringcore.AuthoringSession) error {
 	return validateAuthoringSessionTimes(session)
 }
 
-func validateAuthoringArtifactRefs(name string, refs []authoringcore.AuthoringArtifactRef, expectedRole authoringcore.AuthoringArtifactRole) error {
+func validateAuthoringArtifactRefs(name string, refs []authoringcore.ArtifactRef, expectedRole authoringcore.ArtifactRole) error {
 	for index, ref := range refs {
 		err := validateAuthoringArtifactRef(ref)
 		if err != nil {
@@ -66,7 +66,7 @@ func validateAuthoringArtifactRefs(name string, refs []authoringcore.AuthoringAr
 	return nil
 }
 
-func validateAuthoringArtifactRef(ref authoringcore.AuthoringArtifactRef) error {
+func validateAuthoringArtifactRef(ref authoringcore.ArtifactRef) error {
 	if ref.ID == "" {
 		return fmt.Errorf("artifact id is required")
 	}
@@ -86,7 +86,7 @@ func validateAuthoringArtifactRef(ref authoringcore.AuthoringArtifactRef) error 
 	return nil
 }
 
-func validateAuthoringProvenanceLinks(links []authoringcore.AuthoringProvenanceLink) error {
+func validateAuthoringProvenanceLinks(links []authoringcore.ProvenanceLink) error {
 	for index, link := range links {
 		if !link.Relation.Valid() {
 			return fmt.Errorf("authoring provenance link %d relation is invalid: %s", index+1, link.Relation)
@@ -110,7 +110,7 @@ func validateAuthoringProvenanceLinks(links []authoringcore.AuthoringProvenanceL
 	return nil
 }
 
-func validateAuthoringSessionTimes(session authoringcore.AuthoringSession) error {
+func validateAuthoringSessionTimes(session authoringcore.Session) error {
 	if err := validateManagedAuthoringRevision(session); err != nil {
 		return err
 	}
@@ -130,7 +130,7 @@ func validateAuthoringSessionTimes(session authoringcore.AuthoringSession) error
 	return nil
 }
 
-func validateManagedAuthoringRevision(session authoringcore.AuthoringSession) error {
+func validateManagedAuthoringRevision(session authoringcore.Session) error {
 	if err := ValidateGuidedUseCase(session); err != nil {
 		return err
 	}

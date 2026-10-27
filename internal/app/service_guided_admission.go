@@ -10,15 +10,15 @@ import (
 )
 
 // AdmitGuidedWork binds original progression intent to one exact native invocation.
-func (s service) AdmitGuidedWork(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
+func (s service) AdmitGuidedWork(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	if command.Action != "admit" {
-		return authoringcore.AuthoringSession{}, errors.New("unsupported guided admission command")
+		return authoringcore.Session{}, errors.New("unsupported guided admission command")
 	}
 
 	return s.applyGuidedWorkStep(ctx, command, service.admitGuidedWork)
 }
 
-func (s service) admitGuidedWork(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) admitGuidedWork(ctx context.Context, session *authoringcore.Session) error {
 	if s.guidedWorkHost == nil {
 		return &core.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation."}
 	}
@@ -55,7 +55,7 @@ func (s service) admitGuidedWork(ctx context.Context, session *authoringcore.Aut
 	return nil
 }
 
-func (s service) ensureGuidedInvocation(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) ensureGuidedInvocation(ctx context.Context, session *authoringcore.Session) error {
 	if session.Guided.Work.Invocation != nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func (s service) ensureGuidedInvocation(ctx context.Context, session *authoringc
 	return s.retainGuidedInvocation(ctx, session)
 }
 
-func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringcore.Session) error {
 	checkpoint, err := core.GuidedPreparationCheckpoint(*session)
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringc
 	return s.guidedAdmissionEffect("preview")
 }
 
-func (s service) retainGuidedInvocation(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) retainGuidedInvocation(ctx context.Context, session *authoringcore.Session) error {
 	store, err := s.workflowStore()
 	if err != nil {
 		return err

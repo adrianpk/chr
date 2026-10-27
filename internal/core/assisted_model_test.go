@@ -154,7 +154,7 @@ func testAssistedModelRequest() AssistedModelRequest {
 		SessionID: "session-1",
 		TurnID:    "turn-1",
 		Intent:    AssistedAuthoringIntentDiscover,
-		Target:    authoringcore.AuthoringTargetSpec,
+		Target:    authoringcore.TargetSpec,
 		Context:   "# Assisted Authoring Context\n\nSession context.",
 		Prompt:    "Build the next question.",
 		CreatedAt: now,

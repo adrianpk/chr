@@ -20,7 +20,7 @@ func TestSynthesizeAssistedArtifactWritesEditableArtifactAndUpdatesProvenance(t 
 		Session:        session,
 		CuratedSummary: summary,
 		SourceRef:      sourceRef,
-		TargetKind:     authoringcore.AuthoringArtifactKindSpec,
+		TargetKind:     authoringcore.ArtifactKindSpec,
 		TargetName:     "assisted spec",
 		Repository:     repository,
 		Now:            func() time.Time { return time.Date(2026, 5, 21, 22, 0, 0, 0, time.UTC) },
@@ -71,7 +71,7 @@ func TestSynthesizeAssistedArtifactRejectsCollisionWithoutReplace(t *testing.T) 
 		Session:        session,
 		CuratedSummary: summary,
 		SourceRef:      sourceRef,
-		TargetKind:     authoringcore.AuthoringArtifactKindSpec,
+		TargetKind:     authoringcore.ArtifactKindSpec,
 		TargetName:     "assisted spec",
 		Repository:     repository,
 	})
@@ -95,7 +95,7 @@ func TestSynthesizeAssistedArtifactAllowsExplicitReplace(t *testing.T) {
 		Session:        session,
 		CuratedSummary: summary,
 		SourceRef:      sourceRef,
-		TargetKind:     authoringcore.AuthoringArtifactKindSpec,
+		TargetKind:     authoringcore.ArtifactKindSpec,
 		TargetName:     "assisted spec",
 		AllowReplace:   true,
 		Repository:     repository,
@@ -112,10 +112,10 @@ func TestSynthesizeAssistedArtifactAllowsExplicitReplace(t *testing.T) {
 
 func TestRenderAssistedSynthesizedArtifactIsDeterministic(t *testing.T) {
 	_, session, sourceRef, summary := setupAssistedArtifactSynthesisTest(t, t.TempDir())
-	targetRef := authoringcore.AuthoringArtifactRef{
+	targetRef := authoringcore.ArtifactRef{
 		ID:          "spec:session-1:assisted-spec",
-		Kind:        authoringcore.AuthoringArtifactKindSpec,
-		Role:        authoringcore.AuthoringArtifactRoleOutput,
+		Kind:        authoringcore.ArtifactKindSpec,
+		Role:        authoringcore.ArtifactRoleOutput,
 		Path:        ".chr/default/specs/session-1-assisted-spec.md",
 		Description: "Synthesized assisted authoring artifact.",
 	}
@@ -131,16 +131,16 @@ func TestRenderAssistedSynthesizedArtifactIsDeterministic(t *testing.T) {
 func setupAssistedArtifactSynthesisTest(
 	t *testing.T,
 	dir string,
-) (AuthoringSessionRepository, authoringcore.AuthoringSession, authoringcore.AuthoringArtifactRef, AssistedCuratedAnswerSummary) {
+) (AuthoringSessionRepository, authoringcore.Session, authoringcore.ArtifactRef, AssistedCuratedAnswerSummary) {
 	t.Helper()
 
 	repository := NewAuthoringSessionRepository(dir)
 	session := testAssistedContextSession(dir)
 	sourcePath := filepath.Join(dir, ".chr", "authoring", "sessions", session.ID, "curated-summary.md")
-	sourceRef := authoringcore.AuthoringArtifactRef{
+	sourceRef := authoringcore.ArtifactRef{
 		ID:          "curated-summary-" + session.ID,
-		Kind:        authoringcore.AuthoringArtifactKindDraft,
-		Role:        authoringcore.AuthoringArtifactRoleOutput,
+		Kind:        authoringcore.ArtifactKindDraft,
+		Role:        authoringcore.ArtifactRoleOutput,
 		Path:        filepath.ToSlash(sourcePath),
 		Description: "Curated assisted authoring answer summary.",
 	}
@@ -164,15 +164,15 @@ func setupAssistedArtifactSynthesisTest(
 func planAssistedArtifactSynthesisLayout(
 	t *testing.T,
 	dir string,
-	session authoringcore.AuthoringSession,
+	session authoringcore.Session,
 ) AuthoringArtifactLayout {
 	t.Helper()
 
 	layout, err := PlanAuthoringArtifactLayout(AuthoringArtifactLayoutOptions{
 		ProjectDir: dir,
 		SessionID:  session.ID,
-		Kind:       authoringcore.AuthoringArtifactKindSpec,
-		Role:       authoringcore.AuthoringArtifactRoleOutput,
+		Kind:       authoringcore.ArtifactKindSpec,
+		Role:       authoringcore.ArtifactRoleOutput,
 		Topic:      session.Topic,
 		Name:       "assisted spec",
 	})

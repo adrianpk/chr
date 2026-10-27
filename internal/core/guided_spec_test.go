@@ -16,7 +16,7 @@ func TestGuidedUseCaseSpecAuthority(t *testing.T) {
 		t.Run(variant, func(t *testing.T) {
 			approval := &authoringcore.GuidedSpecApproval{RunID: "run", Actor: "operator", Policy: authoringcore.GuidedSpecApprovalPolicy, InputDigest: "inputs"}
 			request := SpecMutationRequest{GuidedApproval: approval, ProjectID: "project", Reference: "ops/default/spec/spec/artifact.md", Title: "Generated", Body: "Exact generated body"}
-			session := authoringcore.AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Guided: &authoringcore.GuidedUseCaseState{Stage: "specification", Actor: "operator", ProgressionIntent: true, PendingOperation: &authoringcore.GuidedUseCaseOperation{Action: "spec", PreparedSpec: &authoringcore.GuidedPreparedSpec{Title: request.Title, Body: request.Body, InputDigest: "inputs"}}}}
+			session := authoringcore.Session{ID: "run", ProjectID: "project", Namespace: "default", Guided: &authoringcore.GuidedUseCaseState{Stage: "specification", Actor: "operator", ProgressionIntent: true, PendingOperation: &authoringcore.GuidedUseCaseOperation{Action: "spec", PreparedSpec: &authoringcore.GuidedPreparedSpec{Title: request.Title, Body: request.Body, InputDigest: "inputs"}}}}
 
 			switch variant {
 			case "actor":
@@ -89,7 +89,7 @@ func TestGuidedUseCaseSpecCheckpoint(t *testing.T) {
 	}
 }
 
-func guidedSpecSealFixture(t *testing.T) (string, authoringcore.AuthoringSession) {
+func guidedSpecSealFixture(t *testing.T) (string, authoringcore.Session) {
 	t.Helper()
 
 	root, command := guidedCheckpointFixture(t)

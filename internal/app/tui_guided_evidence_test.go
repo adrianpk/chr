@@ -8,7 +8,7 @@ import (
 
 // Keep concrete temporary-fixture checkpoint and native evidence identities in
 // verbose acceptance output without exposing host paths or raw worker state.
-func assertGuidedTUIEvidence(t *testing.T, session authoringcore.AuthoringSession, result guidedResultExport) {
+func assertGuidedTUIEvidence(t *testing.T, session authoringcore.Session, result guidedResultExport) {
 	t.Helper()
 
 	if len(result.Deliveries) == 0 || len(result.Closures) == 0 || len(result.Validations) == 0 || len(result.Ideas) != 1 {

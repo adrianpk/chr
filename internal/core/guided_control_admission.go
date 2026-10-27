@@ -27,7 +27,7 @@ func validateGuidedControlProof(request workflowstate.ControlMutationRequest) er
 
 // BindGuidedControlInvocation reconciles uncertain admission without admitting
 // new work. Only an existing exact request can become the control target.
-func BindGuidedControlInvocation(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
+func BindGuidedControlInvocation(ctx context.Context, root string, session *authoringcore.Session) error {
 	absolute, err := filepath.Abs(root)
 	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
 		return workflowstate.ErrConflict
@@ -65,7 +65,7 @@ type guidedAdmissionLookup struct {
 	Found      bool
 }
 
-func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session authoringcore.AuthoringSession) (result guidedAdmissionLookup, err error) {
+func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session authoringcore.Session) (result guidedAdmissionLookup, err error) {
 	err = s.withLock(ctx, func() error {
 		runs, err := s.repositoryWorkflowInvocations(ctx)
 		if err != nil {
@@ -93,7 +93,7 @@ func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session autho
 	return result, err
 }
 
-func findGuidedControlInvocation(ctx context.Context, root string, session authoringcore.AuthoringSession) (guidedAdmissionLookup, error) {
+func findGuidedControlInvocation(ctx context.Context, root string, session authoringcore.Session) (guidedAdmissionLookup, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
 		return guidedAdmissionLookup{}, err

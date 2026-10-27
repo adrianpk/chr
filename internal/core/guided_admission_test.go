@@ -62,7 +62,7 @@ func TestGuidedUseCaseAdmissionAuthority(t *testing.T) {
 	}
 }
 
-func guidedAdmissionProofFixture(t *testing.T) (authoringcore.AuthoringSession, WorkflowStartRequest) {
+func guidedAdmissionProofFixture(t *testing.T) (authoringcore.Session, WorkflowStartRequest) {
 	t.Helper()
 
 	checkpoint := authoringcore.GuidedStageCheckpoint{Stage: "preparation", Commit: strings.Repeat("a", 40), Artifacts: []authoringcore.GuidedCommittedArtifact{{Path: "ops/default/ticket/one/metadata.json", Hash: strings.Repeat("b", 64)}}}
@@ -84,12 +84,12 @@ func guidedAdmissionProofFixture(t *testing.T) (authoringcore.AuthoringSession, 
 		Selection:  selection,
 		Admission:  &workflowstate.AdmissionGuard{Guided: &proof},
 	}}
-	session := authoringcore.AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Revision: 1, Guided: &authoringcore.GuidedUseCaseState{SchemaVersion: 1, Actor: "operator", ProgressionIntent: true, Stage: "preparation", Work: &authoringcore.GuidedWorkState{Materialization: &authoringcore.GuidedMaterializationReference{ID: "materialized"}, Admission: &request.StartInput}, PendingOperation: &authoringcore.GuidedUseCaseOperation{Action: "admit", Digest: "operation"}, Checkpoints: []authoringcore.GuidedStageCheckpoint{checkpoint}}}
+	session := authoringcore.Session{ID: "run", ProjectID: "project", Namespace: "default", Revision: 1, Guided: &authoringcore.GuidedUseCaseState{SchemaVersion: 1, Actor: "operator", ProgressionIntent: true, Stage: "preparation", Work: &authoringcore.GuidedWorkState{Materialization: &authoringcore.GuidedMaterializationReference{ID: "materialized"}, Admission: &request.StartInput}, PendingOperation: &authoringcore.GuidedUseCaseOperation{Action: "admit", Digest: "operation"}, Checkpoints: []authoringcore.GuidedStageCheckpoint{checkpoint}}}
 
 	return session, request
 }
 
-func changeGuidedAdmissionProof(session *authoringcore.AuthoringSession, request *WorkflowStartRequest, variant string) {
+func changeGuidedAdmissionProof(session *authoringcore.Session, request *WorkflowStartRequest, variant string) {
 	switch variant {
 	case "intent":
 		session.Guided.ProgressionIntent = false

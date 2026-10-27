@@ -164,7 +164,7 @@ func authoringRelativePaths(projectDir string, paths AuthoringSessionPaths) (Aut
 	return result, nil
 }
 
-func validAuthoringArtifactRef(namespace string, ref authoringcore.AuthoringArtifactRef) bool {
+func validAuthoringArtifactRef(namespace string, ref authoringcore.ArtifactRef) bool {
 	parts := strings.Split(filepath.ToSlash(ref.Path), "/")
 
 	return len(parts) == 5 && parts[0] == opscore.DirectoryName && parts[1] == namespace && parts[4] == opscore.ArtifactBodyFile() && parts[2] == authoringArtifactType(ref.Kind)

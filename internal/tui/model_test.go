@@ -1982,13 +1982,13 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 			Documents: []DocumentView{
 				{Index: 0, Title: "TUI Plan"},
 			},
-			AuthoringSessions: []authoringcore.AuthoringSession{
+			AuthoringSessions: []authoringcore.Session{
 				{
 					ID:        "author-20260522-100000",
 					ProjectID: "project-1",
-					Status:    authoringcore.AuthoringSessionStatusDraft,
-					Mode:      authoringcore.AuthoringSessionModeTUI,
-					Target:    authoringcore.AuthoringTargetSpec,
+					Status:    authoringcore.SessionStatusDraft,
+					Mode:      authoringcore.SessionModeTUI,
+					Target:    authoringcore.TargetSpec,
 					Topic:     "TUI artifact creation",
 				},
 			},
@@ -3492,19 +3492,19 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 	updated := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
 	model := NewModel(Options{
-		AuthoringSessions: []authoringcore.AuthoringSession{
+		AuthoringSessions: []authoringcore.Session{
 			{
 				ID:        "auth-1",
 				ProjectID: "project-1",
-				Status:    authoringcore.AuthoringSessionStatusActive,
-				Mode:      authoringcore.AuthoringSessionModeAssisted,
-				Target:    authoringcore.AuthoringTargetSpec,
+				Status:    authoringcore.SessionStatusActive,
+				Mode:      authoringcore.SessionModeAssisted,
+				Target:    authoringcore.TargetSpec,
 				Topic:     "Billing sync",
 				UpdatedAt: updated,
-				Inputs: []authoringcore.AuthoringArtifactRef{
+				Inputs: []authoringcore.ArtifactRef{
 					{Path: ".prj/dumps/billing.md"},
 				},
-				Outputs: []authoringcore.AuthoringArtifactRef{
+				Outputs: []authoringcore.ArtifactRef{
 					{Path: ".chr/default/specs/auth-1-billing-sync.md"},
 				},
 			},

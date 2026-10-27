@@ -182,15 +182,15 @@ func assistedTranscriptEventWith(update func(*AssistedTranscriptEvent)) Assisted
 	return event
 }
 
-func validAssistedTranscriptSession() authoringcore.AuthoringSession {
+func validAssistedTranscriptSession() authoringcore.Session {
 	now := time.Date(2026, 5, 21, 17, 0, 0, 0, time.UTC)
 
-	return authoringcore.AuthoringSession{
+	return authoringcore.Session{
 		ID:        "auth-1",
 		ProjectID: "project-1",
-		Status:    authoringcore.AuthoringSessionStatusDraft,
-		Mode:      authoringcore.AuthoringSessionModeAssisted,
-		Target:    authoringcore.AuthoringTargetSpec,
+		Status:    authoringcore.SessionStatusDraft,
+		Mode:      authoringcore.SessionModeAssisted,
+		Target:    authoringcore.TargetSpec,
 		Topic:     "Retry behavior",
 		CreatedAt: now,
 		UpdatedAt: now,

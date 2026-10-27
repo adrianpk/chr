@@ -11,7 +11,7 @@ import (
 
 func recordWireFactories() map[string]func() any {
 	return map[string]func() any{
-		"guided-session":  func() any { return &authoringcore.AuthoringSession{} },
+		"guided-session":  func() any { return &authoringcore.Session{} },
 		"guided-control":  func() any { return &authoringcore.GuidedControlState{} },
 		"workflow-start":  func() any { return &WorkflowStartRequest{} },
 		"invocation":      func() any { return &WorkflowInvocation{} },

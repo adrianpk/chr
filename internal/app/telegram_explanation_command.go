@@ -10,7 +10,7 @@ import (
 type telegramExplanationCommand struct {
 	Input        telegramcore.ConversationInput
 	Question     string
-	DocumentKind authoringcore.AuthoringArtifactKind
+	DocumentKind authoringcore.ArtifactKind
 }
 
 func telegramExplanationRegistry() []ConversationIntentOperation {
@@ -58,7 +58,7 @@ func parseTelegramExplanation(update telegramcore.ReceivedUpdate) (telegramExpla
 func telegramIntentExplanation(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramExplanationParsing, error) {
 	a := intent.Arguments
 
-	command := telegramExplanationCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: authoringcore.AuthoringArtifactKind(a.Action)}
+	command := telegramExplanationCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: authoringcore.ArtifactKind(a.Action)}
 	if intent.OperationID != telegramExplanationRegistry()[0].ID {
 		return telegramExplanationParsing{Command: command, Recognized: false}, nil
 	}

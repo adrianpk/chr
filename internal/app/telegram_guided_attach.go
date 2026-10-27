@@ -36,7 +36,7 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 		return "", err
 	}
 
-	var matches []authoringcore.AuthoringSession
+	var matches []authoringcore.Session
 
 	for _, session := range observed.Runs {
 		if strings.EqualFold(session.Topic, title) {
@@ -60,7 +60,7 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 	return conversation.ID, err
 }
 
-func telegramGuidedAssociation(session authoringcore.AuthoringSession) (telegramcore.GuidedAssociation, error) {
+func telegramGuidedAssociation(session authoringcore.Session) (telegramcore.GuidedAssociation, error) {
 	if session.Guided == nil || core.ValidateGuidedUseCase(session) != nil {
 		return telegramcore.GuidedAssociation{}, workflowstate.ErrConflict
 	}

@@ -54,7 +54,7 @@ func RetainGuidedHostBlocker(ctx context.Context, root string, scope authoringco
 }
 
 // GuidedPreparationCheckpoint returns the sealed canonical preparation input.
-func GuidedPreparationCheckpoint(session authoringcore.AuthoringSession) (authoringcore.GuidedStageCheckpoint, error) {
+func GuidedPreparationCheckpoint(session authoringcore.Session) (authoringcore.GuidedStageCheckpoint, error) {
 	if session.Guided == nil {
 		return authoringcore.GuidedStageCheckpoint{}, workflowstate.ErrConflict
 	}
@@ -120,7 +120,7 @@ func (s *WorkflowStore) checkGuidedWorkflowTarget(ctx context.Context, request W
 	return s.checkWorkflowCoordinatorTarget(ctx, request.Selection.Target)
 }
 
-func guardGuidedAdmissionProof(session authoringcore.AuthoringSession, project, namespace string, request WorkflowStartRequest) error {
+func guardGuidedAdmissionProof(session authoringcore.Session, project, namespace string, request WorkflowStartRequest) error {
 	if err := guardGuidedAdmissionState(session, project, namespace); err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func guardGuidedAdmissionProof(session authoringcore.AuthoringSession, project, 
 	return nil
 }
 
-func guardGuidedAdmissionCheckpoint(session authoringcore.AuthoringSession, expected string) error {
+func guardGuidedAdmissionCheckpoint(session authoringcore.Session, expected string) error {
 	checkpoint, err := GuidedPreparationCheckpoint(session)
 	if err != nil {
 		return err
@@ -168,7 +168,7 @@ func guardGuidedAdmissionCheckpoint(session authoringcore.AuthoringSession, expe
 	return nil
 }
 
-func guardGuidedAdmissionState(session authoringcore.AuthoringSession, project, namespace string) error {
+func guardGuidedAdmissionState(session authoringcore.Session, project, namespace string) error {
 	state := session.Guided
 	if state == nil || !validGuidedIntent(session) || session.ProjectID != project || session.Namespace != namespace || state.Stage != "preparation" || state.Work == nil || state.Work.Materialization == nil || state.Work.Admission == nil || state.PendingOperation == nil {
 		return workflowstate.ErrConflict
@@ -177,7 +177,7 @@ func guardGuidedAdmissionState(session authoringcore.AuthoringSession, project, 
 	return nil
 }
 
-func guardGuidedAdmissionIntent(session authoringcore.AuthoringSession, proof workflowstate.GuidedAdmission) error {
+func guardGuidedAdmissionIntent(session authoringcore.Session, proof workflowstate.GuidedAdmission) error {
 	state := session.Guided
 	if proof.Policy != GuidedWorkAdmissionPolicy || proof.Actor != state.Actor || proof.RunID != session.ID || state.PendingOperation.Action != "admit" || proof.OperationDigest != state.PendingOperation.Digest || proof.MaterializationID != state.Work.Materialization.ID {
 		return workflowstate.ErrConflict

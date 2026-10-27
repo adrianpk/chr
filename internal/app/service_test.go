@@ -756,11 +756,11 @@ func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 		t.Fatalf("AuthoringSessions = %#v, want one session", result.AuthoringSessions)
 	}
 
-	if result.AuthoringSessions[0].Mode != authoringcore.AuthoringSessionModeTUI {
+	if result.AuthoringSessions[0].Mode != authoringcore.SessionModeTUI {
 		t.Fatalf("session mode = %q, want tui", result.AuthoringSessions[0].Mode)
 	}
 
-	if result.AuthoringSessions[0].Target != authoringcore.AuthoringTargetSpec {
+	if result.AuthoringSessions[0].Target != authoringcore.TargetSpec {
 		t.Fatalf("session target = %q, want spec", result.AuthoringSessions[0].Target)
 	}
 

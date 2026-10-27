@@ -44,7 +44,7 @@ type AssistedModelRequest struct {
 	SessionID string
 	TurnID    string
 	Intent    AssistedAuthoringIntent
-	Target    authoringcore.AuthoringTarget
+	Target    authoringcore.Target
 	Context   string
 	Prompt    string
 	CreatedAt time.Time

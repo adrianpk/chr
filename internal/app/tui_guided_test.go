@@ -71,7 +71,7 @@ func guidedTUIModel(operations service) (tuiGuidedExecutor, *tui.Model) {
 	return executor, tui.NewModel(tui.Options{ProjectID: operations.projectContext.ProjectID, GuidedExecutor: executor})
 }
 
-func onlyGuidedTUIRun(t *testing.T, operations service) authoringcore.AuthoringSession {
+func onlyGuidedTUIRun(t *testing.T, operations service) authoringcore.Session {
 	t.Helper()
 
 	view, err := operations.InspectGuidedUseCase(t.Context(), "", "default")
@@ -130,7 +130,7 @@ func guidedTUIUpdatedModel(t *testing.T, model tea.Model) *tui.Model {
 	return value
 }
 
-func assertGuidedTUIOriginals(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedTUIOriginals(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	replaceGuidedWebDocuments(t, operations.projectContext.ProjectDir, session)

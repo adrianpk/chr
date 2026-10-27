@@ -5,7 +5,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func guardGuidedControl(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
+func guardGuidedControl(session authoringcore.Session, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
 	state := session.Guided
 
 	if !guidedControlAction(operation.Action) {
@@ -61,7 +61,7 @@ func guidedControlOwnsID(control *authoringcore.GuidedControlState, id string) b
 	return false
 }
 
-func guardFreshGuidedControl(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
+func guardFreshGuidedControl(session authoringcore.Session, operation authoringcore.GuidedUseCaseOperation) error {
 	state := session.Guided
 	if session.Revision != operation.ExpectedRevision {
 		return workflowstate.ErrConflict

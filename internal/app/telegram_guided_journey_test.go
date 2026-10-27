@@ -148,7 +148,7 @@ func assertGuidedTelegramNativeControls(t *testing.T, f *telegramConversationApp
 	}
 }
 
-func assertGuidedTelegramCompleted(t *testing.T, f *telegramConversationAppFixture, operations service, original authoringcore.AuthoringSession) authoringcore.AuthoringSession {
+func assertGuidedTelegramCompleted(t *testing.T, f *telegramConversationAppFixture, operations service, original authoringcore.Session) authoringcore.Session {
 	t.Helper()
 
 	completed := readGuidedTelegramSession(t, operations, f.sessions(t)[0])

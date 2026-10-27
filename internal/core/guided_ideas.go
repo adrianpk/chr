@@ -23,7 +23,7 @@ type GuidedLaterIdea struct {
 
 // RetainGuidedIdea writes one bounded idea and its reference through the authoring
 // journal, without replacing a pending stage, control, checkpoint or native scope.
-func RetainGuidedIdea(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.AuthoringSession, err error) {
+func RetainGuidedIdea(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.Session, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil || command.Action != "idea" || strings.TrimSpace(command.Content) == "" || len(command.Content) > 8192 {
 		return session, errors.Join(workflowstate.ErrConflict, err)
@@ -51,7 +51,7 @@ func RetainGuidedIdea(ctx context.Context, root string, command authoringcore.Gu
 	return session, err
 }
 
-func guardGuidedIdea(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
+func guardGuidedIdea(session authoringcore.Session, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
 	for _, idea := range session.Guided.LaterIdeas {
 		if idea.ID == operation.ID {
 			if idea.Digest != operation.Digest {
@@ -83,7 +83,7 @@ func guidedIdeaOwnsID(state *authoringcore.GuidedUseCaseState, id string) bool {
 	return false
 }
 
-func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
+func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *authoringcore.Session, operation authoringcore.GuidedUseCaseOperation) error {
 	idea := GuidedLaterIdea{GuidedIdeaReference: authoringcore.GuidedIdeaReference{ID: operation.ID, Digest: operation.Digest, Actor: session.Guided.Actor, CreatedAt: time.Now().UTC()}, Content: operation.Content, State: "pending_review"}
 	idea.Path = authoringRuntimeRef(filepath.Join("sessions", session.ID, "later-ideas", operation.ID+".json"))
 
@@ -112,7 +112,7 @@ func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *authoringcore
 }
 
 // ReadGuidedIdeas verifies original separately retained entries without recovery.
-func ReadGuidedIdeas(ctx context.Context, root string, session authoringcore.AuthoringSession) ([]GuidedLaterIdea, error) {
+func ReadGuidedIdeas(ctx context.Context, root string, session authoringcore.Session) ([]GuidedLaterIdea, error) {
 	if session.Guided == nil {
 		return nil, workflowstate.ErrConflict
 	}

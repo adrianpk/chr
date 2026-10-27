@@ -13,7 +13,7 @@ import (
 )
 
 // FinishGuidedUseCaseDump seals meaningful capture without dispatching later stages.
-func FinishGuidedUseCaseDump(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.AuthoringSession, err error) {
+func FinishGuidedUseCaseDump(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.Session, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.finishGuidedUseCaseDump(ctx, command)
@@ -24,7 +24,7 @@ func FinishGuidedUseCaseDump(ctx context.Context, root string, command authoring
 	return session, err
 }
 
-func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	session, err := r.getGuardedSession(ctx, command.RunID)
 	if err != nil {
 		return session, err
@@ -47,7 +47,7 @@ func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Con
 	return r.completeGuidedCapture(ctx, session, command, operation)
 }
 
-func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Context, session authoringcore.AuthoringSession, command authoringcore.GuidedUseCaseCommand, operation authoringcore.GuidedUseCaseOperation) (authoringcore.AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Context, session authoringcore.Session, command authoringcore.GuidedUseCaseCommand, operation authoringcore.GuidedUseCaseOperation) (authoringcore.Session, error) {
 	if command.Action != "finish" || session.Guided.Stage != "dump" {
 		return session, workflowstate.ErrConflict
 	}
@@ -88,7 +88,7 @@ func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Conte
 	return r.getGuardedSession(ctx, session.ID)
 }
 
-func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (authoringcore.GuidedStageCheckpoint, error) {
+func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, session *authoringcore.Session, operation authoringcore.GuidedUseCaseOperation) (authoringcore.GuidedStageCheckpoint, error) {
 	if session.Guided.PendingCheckpoint == nil {
 		checkpoint, err := r.prepareGuidedDump(ctx, *session, operation)
 		if err != nil {
@@ -120,7 +120,7 @@ func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, ses
 	return checkpoint, nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (authoringcore.GuidedStageCheckpoint, error) {
+func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, session authoringcore.Session, operation authoringcore.GuidedUseCaseOperation) (authoringcore.GuidedStageCheckpoint, error) {
 	request := DumpMutationRequest{OperationID: "guided-" + contenthash.Sum([]byte(session.ID+"-dump")), Action: "capture", Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug, Title: session.Guided.CaseName, Content: session.Guided.Capture, ExpectedRevision: session.Guided.CaseHash}
 
 	result, err := MutateDump(ctx, r.projectDir, request, nil)

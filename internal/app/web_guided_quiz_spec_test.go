@@ -70,7 +70,7 @@ func TestGuidedUseCaseSpecWeb(t *testing.T) {
 	}
 }
 
-func assertGuidedWebOriginals(t *testing.T, provider webViewProvider, handler http.Handler, completed authoringcore.AuthoringSession) {
+func assertGuidedWebOriginals(t *testing.T, provider webViewProvider, handler http.Handler, completed authoringcore.Session) {
 	t.Helper()
 	replaceGuidedWebDocuments(t, provider.projectContext.ProjectDir, completed)
 
@@ -146,7 +146,7 @@ func guidedWebHandler(t *testing.T, provider webViewProvider) http.Handler {
 	return handler
 }
 
-func captureGuidedWebInput(t *testing.T, provider webViewProvider, handler http.Handler) authoringcore.AuthoringSession {
+func captureGuidedWebInput(t *testing.T, provider webViewProvider, handler http.Handler) authoringcore.Session {
 	t.Helper()
 
 	operations := provider.service(t.Context())
@@ -176,7 +176,7 @@ func guidedWebCommandForm(command authoringcore.GuidedUseCaseCommand) url.Values
 	return url.Values{"action": {"guided.input"}, "surface": {"guided"}, "confirm": {"true"}, "id": {command.RunID}, "namespace": {command.Namespace}, "request_id": {command.OperationID}, "revision": {strconv.FormatInt(command.ExpectedRevision, 10)}, "native_revision": {strconv.FormatUint(command.NativeRevision, 10)}, "step": {command.Action}, "content": {command.Content}, "question_id": {command.QuestionID}, "input_digest": {command.InputDigest}}
 }
 
-func replaceGuidedWebDocuments(t *testing.T, root string, session authoringcore.AuthoringSession) {
+func replaceGuidedWebDocuments(t *testing.T, root string, session authoringcore.Session) {
 	t.Helper()
 
 	for _, checkpoint := range session.Guided.Checkpoints {
@@ -192,7 +192,7 @@ func replaceGuidedWebDocuments(t *testing.T, root string, session authoringcore.
 	}
 }
 
-func assertGuidedWebRetryBinding(t *testing.T, provider webViewProvider, pending authoringcore.AuthoringSession) {
+func assertGuidedWebRetryBinding(t *testing.T, provider webViewProvider, pending authoringcore.Session) {
 	t.Helper()
 
 	view, err := provider.GuidedUseCaseView(t.Context(), pending.ID, pending.Namespace)

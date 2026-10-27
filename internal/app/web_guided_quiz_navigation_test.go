@@ -88,7 +88,7 @@ func assertGuidedQuizAcceptedAnswer(t *testing.T, browser *webWorkflowBrowser, f
 	}
 }
 
-func assertGuidedQuizHistory(t *testing.T, browser *webWorkflowBrowser, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedQuizHistory(t *testing.T, browser *webWorkflowBrowser, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	if got := browser.evaluate(t, `sessionStorage.getItem('test-guarded-unloads')||'0'`); got != "0" {

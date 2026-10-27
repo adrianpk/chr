@@ -206,11 +206,11 @@ func authoringWorkDescription(snapshot core.AuthoringSnapshot) (core.AuthoringAr
 	var selected core.AuthoringArtifactObservation
 
 	for _, artifact := range snapshot.Artifacts {
-		if artifact.Ref.Role != authoringcore.AuthoringArtifactRoleOutput {
+		if artifact.Ref.Role != authoringcore.ArtifactRoleOutput {
 			continue
 		}
 
-		if artifact.Ref.Kind == authoringcore.AuthoringArtifactKindSpec || (selected.Ref.Path == "" && artifact.Ref.Kind == authoringcore.AuthoringArtifactKindDump) {
+		if artifact.Ref.Kind == authoringcore.ArtifactKindSpec || (selected.Ref.Path == "" && artifact.Ref.Kind == authoringcore.ArtifactKindDump) {
 			selected = artifact
 		}
 	}

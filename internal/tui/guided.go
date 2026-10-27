@@ -35,8 +35,8 @@ type GuidedView struct {
 	Retry                                   *GuidedRequest
 	Native                                  *WorkflowView
 	CanRetainIdea, CanApprove               bool
-	Session                                 *authoringcore.AuthoringSession
-	Runs                                    []authoringcore.AuthoringSession
+	Session                                 *authoringcore.Session
+	Runs                                    []authoringcore.Session
 	Policy, Problems, Progress              []string
 	Document                                *GuidedDocument
 }

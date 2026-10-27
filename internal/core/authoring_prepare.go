@@ -17,7 +17,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx contex
 	request := binding.Request
 	session := snapshot.Session
 	session.Revision++
-	session.Target = authoringcore.AuthoringTarget(request.Target)
+	session.Target = authoringcore.Target(request.Target)
 	session.UpdatedAt = time.Now().UTC()
 
 	prepared, err := r.prepareAuthoringContent(ctx, binding, snapshot, &session, draft)
@@ -57,11 +57,11 @@ type authoringContentImages struct {
 }
 
 type authoringOutputImages struct {
-	Ref     authoringcore.AuthoringArtifactRef
+	Ref     authoringcore.ArtifactRef
 	Changes []workflowstate.FileChange
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *authoringcore.AuthoringSession, draft AuthoringDraft) (authoringContentImages, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *authoringcore.Session, draft AuthoringDraft) (authoringContentImages, error) {
 	request := binding.Request
 
 	var (
@@ -70,8 +70,8 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 	)
 
 	if request.Action == "create" {
-		capture := AuthoringContinuationArtifact(request.Namespace, request.SessionID, authoringcore.AuthoringArtifactKindDump, true)
-		session.Inputs = []authoringcore.AuthoringArtifactRef{capture}
+		capture := AuthoringContinuationArtifact(request.Namespace, request.SessionID, authoringcore.ArtifactKindDump, true)
+		session.Inputs = []authoringcore.ArtifactRef{capture}
 		raw := renderAuthoringCapture(*session, request.Capture, request.OriginalInstruction)
 
 		prepared, err := r.authoringArtifactChanges(binding, snapshot, capture, raw)
@@ -79,7 +79,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 			return authoringContentImages{}, err
 		}
 
-		if request.Target != authoringcore.AuthoringArtifactKindDump || draft.Question != "" {
+		if request.Target != authoringcore.ArtifactKindDump || draft.Question != "" {
 			changes = append(changes, prepared...)
 		}
 	}
@@ -94,7 +94,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringContent(ctx context.Con
 
 	if draft.Question != "" {
 		event := authoringQuestionEvent(snapshot, session, draft)
-		if request.Target == authoringcore.AuthoringArtifactKindQuiz {
+		if request.Target == authoringcore.ArtifactKindQuiz {
 			prepared, err := r.prepareAuthoringOutput(ctx, binding, snapshot, session, renderAuthoringQuiz(*session, event))
 
 			return authoringContentImages{Changes: append(changes, prepared...), Events: append(events, event)}, err
@@ -136,7 +136,7 @@ func (r *fileAuthoringSessionRepository) authoringTranscriptImage(binding author
 	return []byte(text), nil
 }
 
-func authoringQuestionEvent(snapshot AuthoringSnapshot, session *authoringcore.AuthoringSession, draft AuthoringDraft) AssistedTranscriptEvent {
+func authoringQuestionEvent(snapshot AuthoringSnapshot, session *authoringcore.Session, draft AuthoringDraft) AssistedTranscriptEvent {
 	index := 1
 
 	for _, event := range snapshot.Events {
@@ -169,13 +169,13 @@ func authoringAnswerEvent(snapshot AuthoringSnapshot, request AuthoringContinuat
 	return question
 }
 
-func renderAuthoringQuiz(session authoringcore.AuthoringSession, event AssistedTranscriptEvent) string {
+func renderAuthoringQuiz(session authoringcore.Session, event AssistedTranscriptEvent) string {
 	result := AuthoringQuizGenerationResult{Provider: "configured", Strategy: "bounded_continuation", Questions: []AuthoringQuizQuestion{{ID: event.Question.ID, Text: event.Question.Prompt}}}
 
-	return RenderContextualQuizMarkdown(session, AuthoringContinuationArtifact(session.Namespace, session.ID, authoringcore.AuthoringArtifactKindQuiz, false), AuthoringQuizGenerationRequest{ID: event.ID, SessionID: session.ID, Topic: session.Topic, Target: session.Target}, result)
+	return RenderContextualQuizMarkdown(session, AuthoringContinuationArtifact(session.Namespace, session.ID, authoringcore.ArtifactKindQuiz, false), AuthoringQuizGenerationRequest{ID: event.ID, SessionID: session.ID, Topic: session.Topic, Target: session.Target}, result)
 }
 
-func renderAuthoringCapture(session authoringcore.AuthoringSession, capture, instruction string) string {
+func renderAuthoringCapture(session authoringcore.Session, capture, instruction string) string {
 	body := "---\ntitle: " + opsmetadata.Quote(session.Topic+" Raw Capture") + "\nstatus: \"raw\"\ntype: \"dump_raw\"\n---\n\n# " + session.Topic + " Raw Capture\n"
 	if instruction != "" {
 		body += "\n## Original Instruction\n\n" + instruction + "\n"
@@ -186,21 +186,21 @@ func renderAuthoringCapture(session authoringcore.AuthoringSession, capture, ins
 
 // AuthoringContinuationArtifact reserves a deterministic canonical artifact ref.
 // Its identity is derived from the shared session, never from model output.
-func AuthoringContinuationArtifact(namespace, sessionID string, kind authoringcore.AuthoringArtifactKind, capture bool) authoringcore.AuthoringArtifactRef {
+func AuthoringContinuationArtifact(namespace, sessionID string, kind authoringcore.ArtifactKind, capture bool) authoringcore.ArtifactRef {
 	suffix := string(kind)
-	role := authoringcore.AuthoringArtifactRoleOutput
+	role := authoringcore.ArtifactRoleOutput
 
 	if capture {
 		suffix = "capture"
-		role = authoringcore.AuthoringArtifactRoleInput
+		role = authoringcore.ArtifactRoleInput
 	}
 
 	id := "00000-" + opscore.ArtifactSlugOrDefault(sessionID+"-"+suffix)
 
-	return authoringcore.AuthoringArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(opscore.DirectoryName, namespace, authoringArtifactType(kind), id, opscore.ArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
+	return authoringcore.ArtifactRef{ID: id, Kind: kind, Role: role, Path: filepath.ToSlash(filepath.Join(opscore.DirectoryName, namespace, authoringArtifactType(kind), id, opscore.ArtifactBodyFile())), Description: "Shared authoring " + suffix + " artifact."}
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *authoringcore.AuthoringSession, body string) ([]workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *authoringcore.Session, body string) ([]workflowstate.FileChange, error) {
 	images, err := r.prepareAuthoringOutputChanges(ctx, binding, snapshot, session, body)
 	if err != nil {
 		return nil, err
@@ -220,20 +220,20 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringOutput(ctx context.Cont
 	}
 
 	source := session.Inputs[0]
-	relation := authoringcore.AuthoringProvenanceRelationGenerated
+	relation := authoringcore.ProvenanceRelationGenerated
 
 	if binding.Request.Action == "refine" {
 		source = ref
-		relation = authoringcore.AuthoringProvenanceRelationRefined
+		relation = authoringcore.ProvenanceRelationRefined
 	}
 
-	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{Relation: relation, Source: source, Target: ref, Decision: "Bound authoring request " + binding.Request.Binding.RequestID, RecordedAt: session.UpdatedAt})
+	session.Provenance = append(session.Provenance, authoringcore.ProvenanceLink{Relation: relation, Source: source, Target: ref, Decision: "Bound authoring request " + binding.Request.Binding.RequestID, RecordedAt: session.UpdatedAt})
 
 	return images.Changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *authoringcore.AuthoringSession, body string) (authoringOutputImages, error) {
-	if binding.Request.Target == authoringcore.AuthoringArtifactKindDump {
+func (r *fileAuthoringSessionRepository) prepareAuthoringOutputChanges(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *authoringcore.Session, body string) (authoringOutputImages, error) {
+	if binding.Request.Target == authoringcore.ArtifactKindDump {
 		return r.prepareAuthoringDump(ctx, binding, snapshot, *session, body)
 	}
 

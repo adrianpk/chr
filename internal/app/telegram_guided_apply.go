@@ -167,7 +167,7 @@ func telegramGuidedSourceMatches(owner telegramGuidedInput, request telegramcore
 	return owner.Command.OperationID == request.ID
 }
 
-func applyTelegramGuided(ctx context.Context, operations telegramGuidedService, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
+func applyTelegramGuided(ctx context.Context, operations telegramGuidedService, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.Session, error) {
 	session, err := operations.ApplyTelegramGuided(ctx, target, input)
 	// A missing prerequisite is a retained stage outcome, not a failed input.
 	var prerequisite *core.GuidedPrerequisiteError

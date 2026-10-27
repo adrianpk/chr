@@ -65,7 +65,7 @@ const (
 type AssistedAuthoringConfig struct {
 	SessionID        string
 	ProjectID        string
-	Target           authoringcore.AuthoringTarget
+	Target           authoringcore.Target
 	Intent           AssistedAuthoringIntent
 	MaxTurns         int
 	MaxFollowUps     int

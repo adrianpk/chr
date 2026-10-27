@@ -86,7 +86,7 @@ type Options struct {
 	Quizzes              []QuizView
 	Specs                []SpecView
 	Plans                []PlanView
-	AuthoringSessions    []authoringcore.AuthoringSession
+	AuthoringSessions    []authoringcore.Session
 	Observability        ObservabilityView
 	WorkReadiness        WorkReadinessView
 	WorkspaceGraph       core.WorkspaceGraph

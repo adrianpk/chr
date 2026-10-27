@@ -11,7 +11,7 @@ import (
 var ErrGuidedUseCaseStopped = errors.New("guided progression is paused or terminal")
 
 // GuidedDispatchAllowed observes retained authorization without recovering state.
-func GuidedDispatchAllowed(session authoringcore.AuthoringSession) bool {
+func GuidedDispatchAllowed(session authoringcore.Session) bool {
 	state := session.Guided
 	if state == nil || !state.ProgressionIntent {
 		return false
@@ -31,7 +31,7 @@ func GuidedDispatchAllowed(session authoringcore.AuthoringSession) bool {
 
 // ReserveGuidedUseCaseStep retains accepted input before asynchronous provider
 // dispatch. Replays retain the original arguments and owner request identity.
-func ReserveGuidedUseCaseStep(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.AuthoringSession, err error) {
+func ReserveGuidedUseCaseStep(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.Session, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil {
 		return session, err

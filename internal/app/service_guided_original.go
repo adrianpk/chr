@@ -39,7 +39,7 @@ func (s service) ReadGuidedUseCaseOriginal(ctx context.Context, id, namespace, k
 	return GuidedUseCaseArtifact{}, workflowstate.ErrConflict
 }
 
-func guidedOriginalMatches(session authoringcore.AuthoringSession, stage, path, kind string) bool {
+func guidedOriginalMatches(session authoringcore.Session, stage, path, kind string) bool {
 	if kind == "tracker" {
 		if session.Guided.Work == nil || session.Guided.Work.Materialization == nil {
 			return false

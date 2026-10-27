@@ -15,7 +15,7 @@ import (
 )
 
 // ValidateGuidedUseCase checks the existing complete guided session contract.
-func ValidateGuidedUseCase(session authoringcore.AuthoringSession) error {
+func ValidateGuidedUseCase(session authoringcore.Session) error {
 	state := session.Guided
 	if state == nil {
 		return nil
@@ -100,7 +100,7 @@ func renderGuidedState(output *bytes.Buffer, state *authoringcore.GuidedUseCaseS
 	return err
 }
 
-func validGuidedIntent(session authoringcore.AuthoringSession) bool {
+func validGuidedIntent(session authoringcore.Session) bool {
 	state := session.Guided
 
 	return state.SchemaVersion == 1 && session.Revision > 0 && opsnamespace.Valid(session.Namespace) && strings.TrimSpace(state.Actor) != "" && len(state.Actor) <= 128 && state.ProgressionIntent

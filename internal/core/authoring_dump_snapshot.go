@@ -12,7 +12,7 @@ import (
 
 // Dump observations include every alias image and the resolved canonical body.
 // This keeps an old session reference usable without dropping its edit guard.
-func (r *fileAuthoringSessionRepository) readAuthoringDumpObservations(snapshot *AuthoringSnapshot, ref authoringcore.AuthoringArtifactRef, images map[string][]byte) (ProjectDumpArtifact, error) {
+func (r *fileAuthoringSessionRepository) readAuthoringDumpObservations(snapshot *AuthoringSnapshot, ref authoringcore.ArtifactRef, images map[string][]byte) (ProjectDumpArtifact, error) {
 	if err := ValidateProjectDumpReference(ref.Path); err != nil || ref.Path == "" || strings.Split(ref.Path, "/")[3] != ref.ID {
 		return ProjectDumpArtifact{}, workflowstate.ErrConflict
 	}
@@ -46,7 +46,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpObservations(snapshot 
 	return resolved, nil
 }
 
-func (r *fileAuthoringSessionRepository) readAuthoringDumpImage(snapshot *AuthoringSnapshot, original authoringcore.AuthoringArtifactRef, reference string, images map[string][]byte) (ProjectDumpArtifact, error) {
+func (r *fileAuthoringSessionRepository) readAuthoringDumpImage(snapshot *AuthoringSnapshot, original authoringcore.ArtifactRef, reference string, images map[string][]byte) (ProjectDumpArtifact, error) {
 	body, err := r.readAuthoringDumpBytes(reference, images)
 	if err != nil {
 		return ProjectDumpArtifact{}, err
@@ -99,7 +99,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpBytes(reference string
 	return r.readAuthoringDocument(reference)
 }
 
-func guardAuthoringDumpReference(namespace string, ref authoringcore.AuthoringArtifactRef, resolved ProjectDumpArtifact, project ProjectMetadata) error {
+func guardAuthoringDumpReference(namespace string, ref authoringcore.ArtifactRef, resolved ProjectDumpArtifact, project ProjectMetadata) error {
 	if project.ProjectDumpRef != "" && project.ProjectDumpRef != resolved.Reference {
 		return workflowstate.ErrConflict
 	}
@@ -111,7 +111,7 @@ func guardAuthoringDumpReference(namespace string, ref authoringcore.AuthoringAr
 	return nil
 }
 
-func appendAuthoringDumpObservation(snapshot *AuthoringSnapshot, original authoringcore.AuthoringArtifactRef, artifact ProjectDumpArtifact, body, encoded []byte) error {
+func appendAuthoringDumpObservation(snapshot *AuthoringSnapshot, original authoringcore.ArtifactRef, artifact ProjectDumpArtifact, body, encoded []byte) error {
 	if authoringArtifactObservation(*snapshot, artifact.Reference) != nil {
 		return nil
 	}

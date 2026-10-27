@@ -126,7 +126,7 @@ func checkTelegramPresentationJourneyArtifacts(t *testing.T, f *telegramConversa
 	t.Helper()
 
 	snapshot := telegramAuthoringBridgeSnapshot(t, f, conversation)
-	matched := map[authoringcore.AuthoringArtifactKind]bool{}
+	matched := map[authoringcore.ArtifactKind]bool{}
 
 	for len(f.documents) > 0 {
 		upload := <-f.documents
@@ -141,7 +141,7 @@ func checkTelegramPresentationJourneyArtifacts(t *testing.T, f *telegramConversa
 		}
 	}
 
-	for _, kind := range []authoringcore.AuthoringArtifactKind{authoringcore.AuthoringArtifactKindDump, authoringcore.AuthoringArtifactKindSpec, authoringcore.AuthoringArtifactKindPlan} {
+	for _, kind := range []authoringcore.ArtifactKind{authoringcore.ArtifactKindDump, authoringcore.ArtifactKindSpec, authoringcore.ArtifactKindPlan} {
 		if !matched[kind] {
 			t.Fatal("generated artifact was not attached completely", kind)
 		}

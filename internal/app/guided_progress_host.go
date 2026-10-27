@@ -15,7 +15,7 @@ func guidedProgressKey(operations service, scope authoringcore.GuidedUseCaseScop
 	return operations.projectContext.ProjectDir + "\x00" + scope.ProjectID + "\x00" + scope.Namespace + "\x00" + scope.RunID
 }
 
-func guidedProgressFingerprint(session authoringcore.AuthoringSession) string {
+func guidedProgressFingerprint(session authoringcore.Session) string {
 	if command, ready := guidedControlCommand(session); ready {
 		return "control/" + command.OperationID
 	}
@@ -101,7 +101,7 @@ func (host *guidedWorkHost) runProgress(ctx context.Context, operations service,
 	}
 }
 
-func (host *guidedWorkHost) retainProgressAttempt(key string, session authoringcore.AuthoringSession) {
+func (host *guidedWorkHost) retainProgressAttempt(key string, session authoringcore.Session) {
 	if session.Guided == nil {
 		return
 	}
@@ -121,7 +121,7 @@ func (host *guidedWorkHost) releaseProgress(key string) {
 	delete(host.progress, key)
 }
 
-func (host *guidedWorkHost) activateRetained(operations service, session authoringcore.AuthoringSession) error {
+func (host *guidedWorkHost) activateRetained(operations service, session authoringcore.Session) error {
 	if !core.GuidedDispatchAllowed(session) || session.Guided.Work == nil || session.Guided.Work.Invocation == nil {
 		return nil
 	}

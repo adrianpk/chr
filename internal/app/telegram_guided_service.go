@@ -12,7 +12,7 @@ import (
 type telegramGuidedService interface {
 	InspectTelegramGuided(context.Context, telegramcore.OperationTarget, string) (GuidedUseCaseInspection, error)
 	ReadTelegramGuidedOriginal(context.Context, telegramcore.OperationTarget, string, string) (GuidedUseCaseArtifact, error)
-	ApplyTelegramGuided(context.Context, telegramcore.OperationTarget, telegramGuidedInput) (authoringcore.AuthoringSession, error)
+	ApplyTelegramGuided(context.Context, telegramcore.OperationTarget, telegramGuidedInput) (authoringcore.Session, error)
 }
 
 type telegramGuidedInput struct {
@@ -49,21 +49,21 @@ func (s service) InspectTelegramGuided(ctx context.Context, target telegramcore.
 }
 
 // ApplyTelegramGuided maps a frozen transport request to shared guided commands.
-func (s service) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
+func (s service) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.Session, error) {
 	command := input.Command
 	if command.ProjectID != target.ProjectID || command.Namespace != target.Namespace || command.RunID == "" {
-		return authoringcore.AuthoringSession{}, workflowstate.ErrConflict
+		return authoringcore.Session{}, workflowstate.ErrConflict
 	}
 
 	scoped, err := s.telegramGuidedProject(ctx, target)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	if input.Inspect {
 		observed, err := scoped.InspectGuidedUseCase(ctx, command.RunID, command.Namespace)
 		if err != nil {
-			return authoringcore.AuthoringSession{}, err
+			return authoringcore.Session{}, err
 		}
 
 		return *observed.Session, nil

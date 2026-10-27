@@ -19,10 +19,10 @@ import (
 // AuthoringExplanationRequest asks about the project and optional canonical
 // session. It has no mutation, command, approval or work-admission fields.
 type AuthoringExplanationRequest struct {
-	ID           string                              `json:"id"`
-	Question     string                              `json:"question"`
-	SessionID    string                              `json:"session_id,omitempty"`
-	DocumentKind authoringcore.AuthoringArtifactKind `json:"document_kind,omitempty"`
+	ID           string                     `json:"id"`
+	Question     string                     `json:"question"`
+	SessionID    string                     `json:"session_id,omitempty"`
+	DocumentKind authoringcore.ArtifactKind `json:"document_kind,omitempty"`
 }
 
 // AuthoringExplanation returns bounded prose and the canonical sources supplied

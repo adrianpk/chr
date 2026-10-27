@@ -43,7 +43,7 @@ func (host *guidedAdmissionHost) activate(_ service, id string) error {
 	return nil
 }
 
-func guidedAdmissionFixture(t *testing.T) (service, authoringcore.AuthoringSession, *guidedAdmissionHost) {
+func guidedAdmissionFixture(t *testing.T) (service, authoringcore.Session, *guidedAdmissionHost) {
 	t.Helper()
 
 	operations, session, _ := guidedPreparationFixture(t, "default")
@@ -106,7 +106,7 @@ func TestGuidedUseCaseAdmissionExact(t *testing.T) {
 	}
 }
 
-func assertGuidedNativeAdmission(t *testing.T, operations service, session authoringcore.AuthoringSession) core.WorkflowInvocation {
+func assertGuidedNativeAdmission(t *testing.T, operations service, session authoringcore.Session) core.WorkflowInvocation {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -124,7 +124,7 @@ func assertGuidedNativeAdmission(t *testing.T, operations service, session autho
 	return run
 }
 
-func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, session authoringcore.AuthoringSession) {
+func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, session authoringcore.Session) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -141,7 +141,7 @@ func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, sessio
 	assertGuidedNativeProvenance(t, run, session)
 }
 
-func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, session authoringcore.AuthoringSession) {
+func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, session authoringcore.Session) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -152,7 +152,7 @@ func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, ses
 	}
 }
 
-func addGuidedUnrelatedTicket(t *testing.T, operations service, session authoringcore.AuthoringSession, key string) {
+func addGuidedUnrelatedTicket(t *testing.T, operations service, session authoringcore.Session, key string) {
 	t.Helper()
 
 	store, err := operations.workflowStore()

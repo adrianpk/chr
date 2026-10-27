@@ -15,7 +15,7 @@ func TestTelegramAuthoringRespondRecovery(t *testing.T) {
 	root := t.TempDir()
 	repo := &fileAuthoringSessionRepository{projectDir: root}
 	request := telegramAuthoringOwnerRequest()
-	request.Target = authoringcore.AuthoringArtifactKindSpec
+	request.Target = authoringcore.ArtifactKindSpec
 
 	asked, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
 		return AuthoringDraft{Question: "Which timeout?"}, nil
@@ -24,7 +24,7 @@ func TestTelegramAuthoringRespondRecovery(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	respond := telegramAuthoringNextOwner(asked, "respond", "respond", authoringcore.AuthoringArtifactKindSpec)
+	respond := telegramAuthoringNextOwner(asked, "respond", "respond", authoringcore.ArtifactKindSpec)
 	respond.Question, respond.Instructions = asked.Question, "Sixty seconds."
 	providerCalls := 0
 	generate := func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {

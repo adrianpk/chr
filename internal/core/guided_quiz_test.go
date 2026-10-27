@@ -17,7 +17,7 @@ func TestGuidedUseCaseQuizSufficiency(t *testing.T) {
 	for _, variant := range []string{"complete", "complete-with-skip", "unconfirmed-skip", "empty", "budget", "skipped", "foreign"} {
 		t.Run(variant, func(t *testing.T) {
 			state := quizcore.RuntimeState{SessionID: "quiz", Status: quizcore.RuntimeStatusDone, ClarificationComplete: true, QuestionsAsked: 1, AnswersRecorded: 1}
-			session := authoringcore.AuthoringSession{Guided: &authoringcore.GuidedUseCaseState{Quiz: &authoringcore.GuidedQuizState{SessionID: "quiz", Revision: "revision"}}}
+			session := authoringcore.Session{Guided: &authoringcore.GuidedUseCaseState{Quiz: &authoringcore.GuidedQuizState{SessionID: "quiz", Revision: "revision"}}}
 
 			switch variant {
 			case "complete-with-skip", "unconfirmed-skip":

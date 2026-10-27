@@ -59,7 +59,7 @@ func PublishGuidedPlan(ctx context.Context, root string, scope authoringcore.Gui
 	return result, err
 }
 
-func guidedPublicationPlan(session authoringcore.AuthoringSession) (generationcore.GeneratedPlan, error) {
+func guidedPublicationPlan(session authoringcore.Session) (generationcore.GeneratedPlan, error) {
 	state := session.Guided
 	if err := guardGuidedPreparationState(state); err != nil {
 		return generationcore.GeneratedPlan{}, err
@@ -113,7 +113,7 @@ func GuidedMaterializationBinding(result WorkflowMaterializationResult, input ge
 }
 
 // SealGuidedPreparation freezes the initial plan, bound tracker and native contracts.
-func SealGuidedPreparation(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
+func SealGuidedPreparation(ctx context.Context, root string, session *authoringcore.Session) error {
 	if session.Guided.Work == nil || session.Guided.Work.Materialization == nil || session.Guided.PendingOperation == nil {
 		return workflowstate.ErrConflict
 	}
@@ -140,7 +140,7 @@ func SealGuidedPreparation(ctx context.Context, root string, session *authoringc
 	return nil
 }
 
-func guidedPreparationPaths(session authoringcore.AuthoringSession) ([]string, error) {
+func guidedPreparationPaths(session authoringcore.Session) ([]string, error) {
 	work := session.Guided.Work
 	if work.Publication == nil {
 		return nil, workflowstate.ErrConflict
@@ -179,7 +179,7 @@ func guidedPreparationPaths(session authoringcore.AuthoringSession) ([]string, e
 	return paths, nil
 }
 
-func workSliceContracts(session authoringcore.AuthoringSession) []string {
+func workSliceContracts(session authoringcore.Session) []string {
 	input := session.Guided.PendingOperation.PreparedWorkflow
 	if input == nil {
 		return nil
@@ -226,7 +226,7 @@ func ValidateGuidedContracts(input, generated generationcore.GeneratedWorkflowPl
 	return err
 }
 
-func guardGuidedPlanScope(session authoringcore.AuthoringSession) error {
+func guardGuidedPlanScope(session authoringcore.Session) error {
 	state := session.Guided
 	operation := state.Work.PublicationOperation
 	prepared := state.PendingOperation.PreparedPlan

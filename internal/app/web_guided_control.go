@@ -22,11 +22,11 @@ func guidedWebCommand(request webui.WriteActionRequest) (authoringcore.GuidedUse
 	return command, err
 }
 
-func guidedWebPending(session authoringcore.AuthoringSession) bool {
+func guidedWebPending(session authoringcore.Session) bool {
 	return session.Guided != nil && (session.Guided.PendingOperation != nil || session.Guided.Control != nil && session.Guided.Control.PendingOperation != nil)
 }
 
-func guidedWebControls(view *webui.GuidedUseCaseView, session authoringcore.AuthoringSession, work *WorkflowWorkStatus) {
+func guidedWebControls(view *webui.GuidedUseCaseView, session authoringcore.Session, work *WorkflowWorkStatus) {
 	view.Suspended = !core.GuidedDispatchAllowed(session)
 	if command, ready := guidedControlCommand(session); ready {
 		view.Controls = []webui.GuidedUseCaseControl{guidedWebControl(command, "Retry "+command.Action)}

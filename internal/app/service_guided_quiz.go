@@ -15,7 +15,7 @@ import (
 )
 
 type guidedGenerationContext struct {
-	session authoringcore.AuthoringSession
+	session authoringcore.Session
 }
 
 type guidedQuizInput struct {
@@ -24,19 +24,19 @@ type guidedQuizInput struct {
 }
 
 // ConductGuidedQuiz applies a scoped quiz start, recovery or current answer.
-func (s service) ConductGuidedQuiz(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
+func (s service) ConductGuidedQuiz(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	if !guidedQuizAction(command.Action) {
-		return authoringcore.AuthoringSession{}, errors.New("unsupported guided quiz command")
+		return authoringcore.Session{}, errors.New("unsupported guided quiz command")
 	}
 
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.AuthoringSession) error {
+	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.Session) error {
 		bounded := s
 		bounded.ctx = ctx
 		bounded.guidedContext = &guidedGenerationContext{session: *session}
@@ -45,7 +45,7 @@ func (s service) ConductGuidedQuiz(ctx context.Context, command authoringcore.Gu
 	})
 }
 
-func (s service) conductGuidedQuiz(ctx context.Context, session *authoringcore.AuthoringSession) error {
+func (s service) conductGuidedQuiz(ctx context.Context, session *authoringcore.Session) error {
 	if session.Guided.Stage != "quiz" {
 		return workflowstate.ErrConflict
 	}
@@ -86,7 +86,7 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *authoringcore.A
 	return s.finishGuidedQuizResult(ctx, session, result.State, digest)
 }
 
-func (s service) finishGuidedQuizResult(ctx context.Context, session *authoringcore.AuthoringSession, state quizcore.RuntimeState, digest string) error {
+func (s service) finishGuidedQuizResult(ctx context.Context, session *authoringcore.Session, state quizcore.RuntimeState, digest string) error {
 	session.Guided.Quiz = &authoringcore.GuidedQuizState{SessionID: state.SessionID, Revision: state.Revision, InputDigest: digest}
 	session.Guided.Status = "waiting_input"
 
@@ -107,7 +107,7 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *authoringc
 	return nil
 }
 
-func (s service) prepareGuidedQuizAction(ctx context.Context, session authoringcore.AuthoringSession, digest string) (quizcore.ActionRequest, error) {
+func (s service) prepareGuidedQuizAction(ctx context.Context, session authoringcore.Session, digest string) (quizcore.ActionRequest, error) {
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	observed, err := s.quizRepository().Observe(ctx, scope)
@@ -138,7 +138,7 @@ func (s service) prepareGuidedQuizAction(ctx context.Context, session authoringc
 	return quizcore.ActionRequest{Scope: scope, Binding: binding, Action: input.Action, Answer: strings.TrimSpace(operation.Content), Mode: input.Mode}, nil
 }
 
-func guidedDumpCheckpoint(session authoringcore.AuthoringSession) (authoringcore.GuidedStageCheckpoint, error) {
+func guidedDumpCheckpoint(session authoringcore.Session) (authoringcore.GuidedStageCheckpoint, error) {
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage == "dump" && len(checkpoint.Artifacts) > 0 {
 			return checkpoint, nil
@@ -182,7 +182,7 @@ func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []q
 	}, nil
 }
 
-func (s service) guidedCommittedSections(session authoringcore.AuthoringSession, stage string) ([]quizmodel.ContextSection, error) {
+func (s service) guidedCommittedSections(session authoringcore.Session, stage string) ([]quizmodel.ContextSection, error) {
 	sections := []quizmodel.ContextSection{}
 
 	for _, checkpoint := range session.Guided.Checkpoints {

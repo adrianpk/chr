@@ -43,7 +43,7 @@ func SynthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		return result, err
 	}
 
-	if opts.TargetKind == authoringcore.AuthoringArtifactKindDump {
+	if opts.TargetKind == authoringcore.ArtifactKindDump {
 		var cancel context.CancelFunc
 
 		ctx, cancel = context.WithTimeout(ctx, 90*time.Second)

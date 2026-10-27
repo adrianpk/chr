@@ -7,7 +7,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-func guidedInvocationMatches(run core.WorkflowInvocation, session authoringcore.AuthoringSession) bool {
+func guidedInvocationMatches(run core.WorkflowInvocation, session authoringcore.Session) bool {
 	if run.Admission == nil || run.Admission.Guided == nil || session.Guided.Work.Materialization == nil {
 		return false
 	}

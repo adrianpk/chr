@@ -27,7 +27,7 @@ type AuthoringSessionView struct {
 }
 
 // NewAuthoringSessionViews converts core authoring sessions into TUI rows.
-func NewAuthoringSessionViews(sessions []authoringcore.AuthoringSession) []AuthoringSessionView {
+func NewAuthoringSessionViews(sessions []authoringcore.Session) []AuthoringSessionView {
 	views := make([]AuthoringSessionView, 0, len(sessions))
 
 	for index, session := range sessions {
@@ -146,7 +146,7 @@ func (m *Model) selectNextAuthoringSession() {
 	}
 }
 
-func authoringArtifactPaths(refs []authoringcore.AuthoringArtifactRef) []string {
+func authoringArtifactPaths(refs []authoringcore.ArtifactRef) []string {
 	paths := make([]string, 0, len(refs))
 	for _, ref := range refs {
 		if ref.Path != "" {

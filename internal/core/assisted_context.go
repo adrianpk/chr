@@ -16,7 +16,7 @@ import (
 type AssistedAuthoringContextPackageOptions struct {
 	ProjectDir       string
 	TargetPath       string
-	Session          authoringcore.AuthoringSession
+	Session          authoringcore.Session
 	SessionPaths     AuthoringSessionPaths
 	TranscriptEvents []AssistedTranscriptEvent
 }
@@ -25,7 +25,7 @@ type AssistedAuthoringContextPackageOptions struct {
 type AssistedAuthoringContextPackage struct {
 	ProjectDir        string
 	WorkspaceDir      string
-	Session           authoringcore.AuthoringSession
+	Session           authoringcore.Session
 	SessionPaths      AuthoringSessionPaths
 	AgentProtocol     AgentProtocolContext
 	SelectedDocuments []ContextDocument
@@ -147,8 +147,8 @@ type assistedTranscriptContext struct {
 	Sources []ContextSourceInventoryEntry
 }
 
-func loadAuthoringSelectedDocuments(projectDir string, session authoringcore.AuthoringSession) (authoringSelectedDocuments, error) {
-	refs := append([]authoringcore.AuthoringArtifactRef{}, session.Inputs...)
+func loadAuthoringSelectedDocuments(projectDir string, session authoringcore.Session) (authoringSelectedDocuments, error) {
+	refs := append([]authoringcore.ArtifactRef{}, session.Inputs...)
 	refs = append(refs, session.Outputs...)
 	sort.SliceStable(refs, func(left, right int) bool {
 		return refs[left].Path < refs[right].Path
@@ -177,7 +177,7 @@ func loadAuthoringSelectedDocuments(projectDir string, session authoringcore.Aut
 	return authoringSelectedDocuments{Documents: documents, Sources: sources}, nil
 }
 
-func loadAuthoringSelectedDocument(projectDir string, ref authoringcore.AuthoringArtifactRef) (authoringSelectedDocument, error) {
+func loadAuthoringSelectedDocument(projectDir string, ref authoringcore.ArtifactRef) (authoringSelectedDocument, error) {
 	path := ref.Path
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(projectDir, filepath.FromSlash(path))

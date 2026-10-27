@@ -9,9 +9,9 @@ import (
 )
 
 // StartNamedGuidedUseCase starts through the existing idempotent name owner.
-func (s service) StartNamedGuidedUseCase(ctx context.Context, request authoringcore.GuidedUseCaseStart, name string) (authoringcore.AuthoringSession, error) {
+func (s service) StartNamedGuidedUseCase(ctx context.Context, request authoringcore.GuidedUseCaseStart, name string) (authoringcore.Session, error) {
 	if strings.TrimSpace(name) == "" || len(name) > 512 {
-		return authoringcore.AuthoringSession{}, errors.New("enter a name of at most 512 bytes")
+		return authoringcore.Session{}, errors.New("enter a name of at most 512 bytes")
 	}
 
 	session, err := s.StartGuidedUseCase(ctx, request.RunID, request.Namespace, request.Actor)

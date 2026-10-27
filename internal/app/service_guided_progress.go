@@ -11,7 +11,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-func (s service) applyGuidedCommand(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
+func (s service) applyGuidedCommand(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.Session, error) {
 	switch command.Action {
 	case "finish":
 		return core.FinishGuidedUseCaseDump(ctx, s.projectContext.ProjectDir, command)
@@ -28,7 +28,7 @@ func (s service) applyGuidedCommand(ctx context.Context, command authoringcore.G
 	}
 }
 
-func (s service) advanceGuidedUseCase(ctx context.Context, session authoringcore.AuthoringSession) (authoringcore.AuthoringSession, error) {
+func (s service) advanceGuidedUseCase(ctx context.Context, session authoringcore.Session) (authoringcore.Session, error) {
 	for range 6 {
 		command, ready := guidedProgressCommand(session)
 		if !ready {
@@ -46,7 +46,7 @@ func (s service) advanceGuidedUseCase(ctx context.Context, session authoringcore
 	return session, errors.New("guided authoring progression reached its bounded step limit")
 }
 
-func guidedProgressCommand(session authoringcore.AuthoringSession) (authoringcore.GuidedUseCaseCommand, bool) {
+func guidedProgressCommand(session authoringcore.Session) (authoringcore.GuidedUseCaseCommand, bool) {
 	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision}
 	if !core.GuidedDispatchAllowed(session) {
 		return command, false
@@ -73,7 +73,7 @@ func guidedProgressCommand(session authoringcore.AuthoringSession) (authoringcor
 	return command, true
 }
 
-func guidedAutomaticAction(session authoringcore.AuthoringSession) (string, bool) {
+func guidedAutomaticAction(session authoringcore.Session) (string, bool) {
 	switch session.Guided.Stage {
 	case "quiz":
 		if session.Guided.Quiz != nil {

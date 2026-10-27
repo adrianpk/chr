@@ -222,7 +222,7 @@ func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectD
 	}
 
 	now := assistedArtifactSynthesisNow(opts.Now)
-	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{Relation: authoringcore.AuthoringProvenanceRelationGenerated, Source: opts.SourceRef, Target: ref, Decision: "Synthesized assisted dump " + mutation.OperationID, RecordedAt: now})
+	session.Provenance = append(session.Provenance, authoringcore.ProvenanceLink{Relation: authoringcore.ProvenanceRelationGenerated, Source: opts.SourceRef, Target: ref, Decision: "Synthesized assisted dump " + mutation.OperationID, RecordedAt: now})
 
 	session.UpdatedAt = now
 	if session.Revision > 0 {
@@ -244,7 +244,7 @@ func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectD
 	return assistedDumpSessionImage{Result: result, Session: sessionImage}, nil
 }
 
-func assistedSessionHasOutput(session authoringcore.AuthoringSession, reference string) bool {
+func assistedSessionHasOutput(session authoringcore.Session, reference string) bool {
 	for _, ref := range session.Outputs {
 		if ref.Path == reference {
 			return true

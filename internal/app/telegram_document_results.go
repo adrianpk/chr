@@ -43,7 +43,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request telegra
 		return nil, err
 	}
 
-	if owner.Target != authoringcore.AuthoringArtifactKindDump && owner.Target != authoringcore.AuthoringArtifactKindSpec && owner.Target != authoringcore.AuthoringArtifactKindPlan {
+	if owner.Target != authoringcore.ArtifactKindDump && owner.Target != authoringcore.ArtifactKindSpec && owner.Target != authoringcore.ArtifactKindPlan {
 		return nil, nil
 	}
 
@@ -69,7 +69,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request telegra
 	return telegramPrimaryAuthoringDocument(request.Target, result, snapshot, owner.Target)
 }
 
-func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind authoringcore.AuthoringArtifactKind) (*tgmessage.DocumentResponse, error) {
+func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind authoringcore.ArtifactKind) (*tgmessage.DocumentResponse, error) {
 	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
 		artifact := snapshot.Artifacts[index]
 		if artifact.Ref.Kind != kind || artifact.Body == "" {
@@ -80,9 +80,9 @@ func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, resul
 
 		headline := string(kind) + " ready for " + result.Session.Topic + "."
 		switch kind {
-		case authoringcore.AuthoringArtifactKindSpec:
+		case authoringcore.ArtifactKindSpec:
 			headline = "Draft specification ready for " + result.Session.Topic + "."
-		case authoringcore.AuthoringArtifactKindDump:
+		case authoringcore.ArtifactKindDump:
 			headline = "Your request and details are saved as a dump for " + result.Session.Topic + "."
 		}
 

@@ -13,7 +13,7 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
-func guidedResultFixture(t *testing.T) (service, authoringcore.AuthoringSession, *guidedWorkHost, *serviceWorkEntryProvider) {
+func guidedResultFixture(t *testing.T) (service, authoringcore.Session, *guidedWorkHost, *serviceWorkEntryProvider) {
 	t.Helper()
 
 	operations, prepared, _ := guidedAdmissionFixture(t)
@@ -37,7 +37,7 @@ func guidedResultFixture(t *testing.T) (service, authoringcore.AuthoringSession,
 	return operations, session, host, provider
 }
 
-func finishGuidedResultFixture(t *testing.T, operations service, session authoringcore.AuthoringSession, host *guidedWorkHost, provider *serviceWorkEntryProvider) authoringcore.AuthoringSession {
+func finishGuidedResultFixture(t *testing.T, operations service, session authoringcore.Session, host *guidedWorkHost, provider *serviceWorkEntryProvider) authoringcore.Session {
 	t.Helper()
 
 	run := assertGuidedNativeAdmission(t, operations, session)
@@ -91,7 +91,7 @@ func TestGuidedUseCaseResultEvidence(t *testing.T) {
 	assertGuidedResultReadOnly(t, operations, completed)
 }
 
-func assertGuidedResultUnconfirmed(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedResultUnconfirmed(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	before, err := operations.InspectGuidedUseCase(t.Context(), session.ID, session.Namespace)
@@ -100,7 +100,7 @@ func assertGuidedResultUnconfirmed(t *testing.T, operations service, session aut
 	}
 }
 
-func assertGuidedResultProjection(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedResultProjection(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	provider := webViewProvider{projectContext: operations.projectContext, serviceFactory: func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy }}
@@ -116,7 +116,7 @@ func assertGuidedResultProjection(t *testing.T, operations service, session auth
 	}
 }
 
-func assertGuidedResultReadOnly(t *testing.T, operations service, session authoringcore.AuthoringSession) {
+func assertGuidedResultReadOnly(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
 	before, err := core.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, session)

@@ -40,7 +40,7 @@ func testGuidedProcessRecovery(t *testing.T, action string) {
 	}
 
 	host := startGuidedRecoveryHost(t, operations)
-	current := waitGuidedRecovery(t, operations, session, func(current authoringcore.AuthoringSession) bool {
+	current := waitGuidedRecovery(t, operations, session, func(current authoringcore.Session) bool {
 		if action == "continue" {
 			return guidedRecoveryReviewReady(t.Context(), operations, current)
 		}
@@ -87,7 +87,7 @@ func TestGuidedUseCaseRecoveryShutdown(t *testing.T) {
 	}
 
 	host := startGuidedRecoveryHost(t, operations)
-	current := waitGuidedRecovery(t, operations, session, func(current authoringcore.AuthoringSession) bool {
+	current := waitGuidedRecovery(t, operations, session, func(current authoringcore.Session) bool {
 		return guidedRecoveryReviewReady(t.Context(), operations, current)
 	})
 

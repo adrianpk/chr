@@ -344,7 +344,7 @@ func validAuthoringQuizGenerationRequest(projectDir string) AuthoringQuizGenerat
 		Strategy:      AuthoringQuizGenerationStrategyDeep,
 		ProjectDir:    projectDir,
 		SessionID:     "author-20260522-090000",
-		Target:        authoringcore.AuthoringTargetSpec,
+		Target:        authoringcore.TargetSpec,
 		Topic:         "Billing sync behavior",
 		QuestionCount: 1,
 		ContextSections: []AuthoringQuizContextSection{
@@ -411,13 +411,13 @@ func assertMatchingTraceCallID(t *testing.T, events []map[string]any) {
 	}
 }
 
-func validContextualQuizSession(now time.Time) authoringcore.AuthoringSession {
-	return authoringcore.AuthoringSession{
+func validContextualQuizSession(now time.Time) authoringcore.Session {
+	return authoringcore.Session{
 		ID:        "author-20260522-090000",
 		ProjectID: "project-1",
-		Status:    authoringcore.AuthoringSessionStatusDraft,
-		Mode:      authoringcore.AuthoringSessionModeContextual,
-		Target:    authoringcore.AuthoringTargetSpec,
+		Status:    authoringcore.SessionStatusDraft,
+		Mode:      authoringcore.SessionModeContextual,
+		Target:    authoringcore.TargetSpec,
 		Topic:     "Billing sync behavior",
 		CreatedAt: now,
 		UpdatedAt: now,

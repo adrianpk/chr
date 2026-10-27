@@ -60,7 +60,7 @@ func (host *guidedWorkHost) recoverPage(ctx context.Context, operations service,
 	return page.NextOffset
 }
 
-func (host *guidedWorkHost) recoverRun(ctx context.Context, operations service, session authoringcore.AuthoringSession) {
+func (host *guidedWorkHost) recoverRun(ctx context.Context, operations service, session authoringcore.Session) {
 	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
 	operations.workflowNamespace = session.Namespace
 

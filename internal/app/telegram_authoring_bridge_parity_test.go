@@ -93,7 +93,7 @@ func telegramAuthoringParityAssertions(t *testing.T, f *telegramConversationAppF
 	t.Helper()
 
 	for _, artifact := range snapshot.Artifacts {
-		if artifact.Ref.Kind == authoringcore.AuthoringArtifactKindSpec && !strings.Contains(artifact.Body, "Clarify the existing validation") {
+		if artifact.Ref.Kind == authoringcore.ArtifactKindSpec && !strings.Contains(artifact.Body, "Clarify the existing validation") {
 			t.Fatal("refinement did not reach the shared writer")
 		}
 	}

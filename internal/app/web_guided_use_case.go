@@ -67,7 +67,7 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 	}
 
 	var (
-		session authoringcore.AuthoringSession
+		session authoringcore.Session
 		err     error
 	)
 
@@ -138,7 +138,7 @@ func guidedWebInputBinding(view *webui.GuidedUseCaseView, state *authoringcore.G
 	}
 }
 
-func startGuidedWebUseCase(operations service, request webui.WriteActionRequest) (authoringcore.AuthoringSession, error) {
+func startGuidedWebUseCase(operations service, request webui.WriteActionRequest) (authoringcore.Session, error) {
 	if request.Fields["step"] != "name" {
 		return operations.StartGuidedUseCase(operations.ctx, request.Fields["request_id"], request.Fields["namespace"], "local")
 	}

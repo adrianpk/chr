@@ -84,7 +84,7 @@ func TestGuidedUseCaseQuizDone(t *testing.T) {
 	assertGuidedQuizCompletion(t, current, session.Guided.Checkpoints[0])
 }
 
-func observeGuidedQuiz(t *testing.T, operations service, session authoringcore.AuthoringSession) quizcore.Observation {
+func observeGuidedQuiz(t *testing.T, operations service, session authoringcore.Session) quizcore.Observation {
 	t.Helper()
 
 	observed, err := operations.quizRepository().Observe(t.Context(), quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug})
@@ -95,7 +95,7 @@ func observeGuidedQuiz(t *testing.T, operations service, session authoringcore.A
 	return observed
 }
 
-func switchGuidedQuizModes(t *testing.T, operations service, current authoringcore.AuthoringSession) authoringcore.AuthoringSession {
+func switchGuidedQuizModes(t *testing.T, operations service, current authoringcore.Session) authoringcore.Session {
 	t.Helper()
 
 	var err error
@@ -114,7 +114,7 @@ func switchGuidedQuizModes(t *testing.T, operations service, current authoringco
 	return current
 }
 
-func assertGuidedQuizControlReplay(t *testing.T, operations service, command authoringcore.GuidedUseCaseCommand, completed authoringcore.AuthoringSession, model *fakeServiceQuizModel) {
+func assertGuidedQuizControlReplay(t *testing.T, operations service, command authoringcore.GuidedUseCaseCommand, completed authoringcore.Session, model *fakeServiceQuizModel) {
 	t.Helper()
 
 	replay, err := operations.ConductGuidedQuiz(t.Context(), command)

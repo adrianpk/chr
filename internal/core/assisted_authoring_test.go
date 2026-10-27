@@ -37,7 +37,7 @@ func invalidAssistedAuthoringConfigTests() []struct {
 	}{
 		{name: "session id", config: assistedAuthoringConfigWith(func(config *AssistedAuthoringConfig) { config.SessionID = "" })},
 		{name: "project id", config: assistedAuthoringConfigWith(func(config *AssistedAuthoringConfig) { config.ProjectID = "" })},
-		{name: "target", config: assistedAuthoringConfigWith(func(config *AssistedAuthoringConfig) { config.Target = authoringcore.AuthoringTarget("unknown") })},
+		{name: "target", config: assistedAuthoringConfigWith(func(config *AssistedAuthoringConfig) { config.Target = authoringcore.Target("unknown") })},
 		{name: "intent", config: assistedAuthoringConfigWith(func(config *AssistedAuthoringConfig) { config.Intent = AssistedAuthoringIntent("unknown") })},
 		{name: "max turns", config: assistedAuthoringConfigWith(func(config *AssistedAuthoringConfig) { config.MaxTurns = 0 })},
 		{name: "max follow ups", config: assistedAuthoringConfigWith(func(config *AssistedAuthoringConfig) { config.MaxFollowUps = -1 })},
@@ -103,7 +103,7 @@ func validAssistedAuthoringConfig() AssistedAuthoringConfig {
 	return AssistedAuthoringConfig{
 		SessionID:    "auth-1",
 		ProjectID:    "project-1",
-		Target:       authoringcore.AuthoringTargetSpec,
+		Target:       authoringcore.TargetSpec,
 		Intent:       AssistedAuthoringIntentDiscover,
 		MaxTurns:     6,
 		MaxFollowUps: 2,

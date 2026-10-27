@@ -167,14 +167,14 @@ func TestRenderAndParseAuthoringSession(t *testing.T) {
 	assertAuthoringSessionRoundTrip(t, parsed, session)
 }
 
-func assertAuthoringSessionRoundTrip(t *testing.T, got, want authoringcore.AuthoringSession) {
+func assertAuthoringSessionRoundTrip(t *testing.T, got, want authoringcore.Session) {
 	t.Helper()
 	assertAuthoringSessionMetadata(t, got, want)
 	assertAuthoringSessionArtifacts(t, got, want)
 	assertAuthoringSessionProvenance(t, got, want)
 }
 
-func assertAuthoringSessionMetadata(t *testing.T, got, want authoringcore.AuthoringSession) {
+func assertAuthoringSessionMetadata(t *testing.T, got, want authoringcore.Session) {
 	t.Helper()
 
 	if got.ID != want.ID {
@@ -202,7 +202,7 @@ func assertAuthoringSessionMetadata(t *testing.T, got, want authoringcore.Author
 	}
 }
 
-func assertAuthoringSessionArtifacts(t *testing.T, got, want authoringcore.AuthoringSession) {
+func assertAuthoringSessionArtifacts(t *testing.T, got, want authoringcore.Session) {
 	t.Helper()
 
 	if len(got.Inputs) != len(want.Inputs) {
@@ -222,7 +222,7 @@ func assertAuthoringSessionArtifacts(t *testing.T, got, want authoringcore.Autho
 	}
 }
 
-func assertAuthoringSessionProvenance(t *testing.T, got, want authoringcore.AuthoringSession) {
+func assertAuthoringSessionProvenance(t *testing.T, got, want authoringcore.Session) {
 	t.Helper()
 
 	if len(got.Provenance) != len(want.Provenance) {

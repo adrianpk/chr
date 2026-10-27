@@ -10,7 +10,7 @@ import (
 )
 
 // ReadGuidedResult verifies the exact native binding and its original evidence.
-func ReadGuidedResult(ctx context.Context, root string, session authoringcore.AuthoringSession) (WorkflowResultInspection, error) {
+func ReadGuidedResult(ctx context.Context, root string, session authoringcore.Session) (WorkflowResultInspection, error) {
 	if session.Guided == nil || session.Guided.Work == nil || session.Guided.Work.Invocation == nil {
 		return WorkflowResultInspection{}, workflowstate.ErrConflict
 	}
@@ -32,7 +32,7 @@ func ReadGuidedResult(ctx context.Context, root string, session authoringcore.Au
 	return result, nil
 }
 
-func guardGuidedResultBinding(session authoringcore.AuthoringSession, run WorkflowInvocation) error {
+func guardGuidedResultBinding(session authoringcore.Session, run WorkflowInvocation) error {
 	work := session.Guided.Work
 	if work.Materialization == nil || work.Admission == nil {
 		return workflowstate.ErrConflict
@@ -62,7 +62,7 @@ func guardGuidedResultMembers(work *authoringcore.GuidedWorkState, run WorkflowI
 
 // ReconcileGuidedResult is an owned lifecycle transition. Only complete native
 // receipts can finish a run; pending operations and explicit stops take priority.
-func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (session authoringcore.AuthoringSession, err error) {
+func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (session authoringcore.Session, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, scope.RunID)
@@ -94,7 +94,7 @@ func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore
 
 		session.Guided.Result = &reference
 		session.Guided.Stage, session.Guided.Status, session.Guided.Blocker = "results", "completed", ""
-		session.Status, session.FinishedAt = authoringcore.AuthoringSessionStatusFinalized, &result.Invocation.UpdatedAt
+		session.Status, session.FinishedAt = authoringcore.SessionStatusFinalized, &result.Invocation.UpdatedAt
 
 		return RetainGuidedUseCaseProgress(ctx, root, &session)
 	})
@@ -102,7 +102,7 @@ func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore
 	return session, err
 }
 
-func guidedResultReady(session authoringcore.AuthoringSession) bool {
+func guidedResultReady(session authoringcore.Session) bool {
 	state := session.Guided
 	if !GuidedDispatchAllowed(session) || state.PendingOperation != nil || state.Stage != "execution" {
 		return false

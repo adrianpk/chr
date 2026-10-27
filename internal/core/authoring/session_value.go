@@ -4,124 +4,124 @@ import (
 	"time"
 )
 
-// AuthoringSessionStatus defines a package boundary type.
-type AuthoringSessionStatus string
+// SessionStatus defines a package boundary type.
+type SessionStatus string
 
 const (
-	// AuthoringSessionStatusDraft defines a package boundary constant.
-	AuthoringSessionStatusDraft AuthoringSessionStatus = "draft"
-	// AuthoringSessionStatusActive defines a package boundary constant.
-	AuthoringSessionStatusActive AuthoringSessionStatus = "active"
-	// AuthoringSessionStatusFinalized defines a package boundary constant.
-	AuthoringSessionStatusFinalized AuthoringSessionStatus = "finalized"
-	// AuthoringSessionStatusDiscarded defines a package boundary constant.
-	AuthoringSessionStatusDiscarded AuthoringSessionStatus = "discarded"
+	// SessionStatusDraft defines a package boundary constant.
+	SessionStatusDraft SessionStatus = "draft"
+	// SessionStatusActive defines a package boundary constant.
+	SessionStatusActive SessionStatus = "active"
+	// SessionStatusFinalized defines a package boundary constant.
+	SessionStatusFinalized SessionStatus = "finalized"
+	// SessionStatusDiscarded defines a package boundary constant.
+	SessionStatusDiscarded SessionStatus = "discarded"
 )
 
-// AuthoringSessionMode defines a package boundary type.
-type AuthoringSessionMode string
+// SessionMode defines a package boundary type.
+type SessionMode string
 
 const (
-	// AuthoringSessionModeMarkdownDirect defines a package boundary constant.
-	AuthoringSessionModeMarkdownDirect AuthoringSessionMode = "markdown_direct"
-	// AuthoringSessionModeContextual defines a package boundary constant.
-	AuthoringSessionModeContextual AuthoringSessionMode = "contextual"
-	// AuthoringSessionModeAssisted defines a package boundary constant.
-	AuthoringSessionModeAssisted AuthoringSessionMode = "assisted"
-	// AuthoringSessionModeTUI defines a package boundary constant.
-	AuthoringSessionModeTUI AuthoringSessionMode = "tui"
+	// SessionModeMarkdownDirect defines a package boundary constant.
+	SessionModeMarkdownDirect SessionMode = "markdown_direct"
+	// SessionModeContextual defines a package boundary constant.
+	SessionModeContextual SessionMode = "contextual"
+	// SessionModeAssisted defines a package boundary constant.
+	SessionModeAssisted SessionMode = "assisted"
+	// SessionModeTUI defines a package boundary constant.
+	SessionModeTUI SessionMode = "tui"
 )
 
-// AuthoringTarget defines a package boundary type.
-type AuthoringTarget string
+// Target defines a package boundary type.
+type Target string
 
 const (
-	// AuthoringTargetDump defines a package boundary constant.
-	AuthoringTargetDump AuthoringTarget = "dump"
-	// AuthoringTargetQuiz defines a package boundary constant.
-	AuthoringTargetQuiz AuthoringTarget = "quiz"
-	// AuthoringTargetDraft defines a package boundary constant.
-	AuthoringTargetDraft AuthoringTarget = "draft"
-	// AuthoringTargetSpec defines a package boundary constant.
-	AuthoringTargetSpec AuthoringTarget = "spec"
-	// AuthoringTargetPlan defines a package boundary constant.
-	AuthoringTargetPlan AuthoringTarget = "plan"
-	// AuthoringTargetSliceSet defines a package boundary constant.
-	AuthoringTargetSliceSet AuthoringTarget = "slice_set"
-	// AuthoringTargetSlice defines a package boundary constant.
-	AuthoringTargetSlice AuthoringTarget = "slice"
-	// AuthoringTargetTracker defines a package boundary constant.
-	AuthoringTargetTracker AuthoringTarget = "tracker"
-	// AuthoringTargetTicket defines a package boundary constant.
-	AuthoringTargetTicket AuthoringTarget = "ticket"
+	// TargetDump defines a package boundary constant.
+	TargetDump Target = "dump"
+	// TargetQuiz defines a package boundary constant.
+	TargetQuiz Target = "quiz"
+	// TargetDraft defines a package boundary constant.
+	TargetDraft Target = "draft"
+	// TargetSpec defines a package boundary constant.
+	TargetSpec Target = "spec"
+	// TargetPlan defines a package boundary constant.
+	TargetPlan Target = "plan"
+	// TargetSliceSet defines a package boundary constant.
+	TargetSliceSet Target = "slice_set"
+	// TargetSlice defines a package boundary constant.
+	TargetSlice Target = "slice"
+	// TargetTracker defines a package boundary constant.
+	TargetTracker Target = "tracker"
+	// TargetTicket defines a package boundary constant.
+	TargetTicket Target = "ticket"
 )
 
-// AuthoringArtifactKind defines a package boundary type.
-type AuthoringArtifactKind string
+// ArtifactKind defines a package boundary type.
+type ArtifactKind string
 
 const (
-	// AuthoringArtifactKindSession defines a package boundary constant.
-	AuthoringArtifactKindSession AuthoringArtifactKind = "session"
-	// AuthoringArtifactKindTranscript defines a package boundary constant.
-	AuthoringArtifactKindTranscript AuthoringArtifactKind = "transcript"
-	// AuthoringArtifactKindDump defines a package boundary constant.
-	AuthoringArtifactKindDump AuthoringArtifactKind = "dump"
-	// AuthoringArtifactKindQuiz defines a package boundary constant.
-	AuthoringArtifactKindQuiz AuthoringArtifactKind = "quiz"
-	// AuthoringArtifactKindDraft defines a package boundary constant.
-	AuthoringArtifactKindDraft AuthoringArtifactKind = "draft"
-	// AuthoringArtifactKindSpec defines a package boundary constant.
-	AuthoringArtifactKindSpec AuthoringArtifactKind = "spec"
-	// AuthoringArtifactKindPlan defines a package boundary constant.
-	AuthoringArtifactKindPlan AuthoringArtifactKind = "plan"
-	// AuthoringArtifactKindSliceSet defines a package boundary constant.
-	AuthoringArtifactKindSliceSet AuthoringArtifactKind = "slice_set"
-	// AuthoringArtifactKindSlice defines a package boundary constant.
-	AuthoringArtifactKindSlice AuthoringArtifactKind = "slice"
-	// AuthoringArtifactKindTracker defines a package boundary constant.
-	AuthoringArtifactKindTracker AuthoringArtifactKind = "tracker"
-	// AuthoringArtifactKindTicket defines a package boundary constant.
-	AuthoringArtifactKindTicket AuthoringArtifactKind = "ticket"
+	// ArtifactKindSession defines a package boundary constant.
+	ArtifactKindSession ArtifactKind = "session"
+	// ArtifactKindTranscript defines a package boundary constant.
+	ArtifactKindTranscript ArtifactKind = "transcript"
+	// ArtifactKindDump defines a package boundary constant.
+	ArtifactKindDump ArtifactKind = "dump"
+	// ArtifactKindQuiz defines a package boundary constant.
+	ArtifactKindQuiz ArtifactKind = "quiz"
+	// ArtifactKindDraft defines a package boundary constant.
+	ArtifactKindDraft ArtifactKind = "draft"
+	// ArtifactKindSpec defines a package boundary constant.
+	ArtifactKindSpec ArtifactKind = "spec"
+	// ArtifactKindPlan defines a package boundary constant.
+	ArtifactKindPlan ArtifactKind = "plan"
+	// ArtifactKindSliceSet defines a package boundary constant.
+	ArtifactKindSliceSet ArtifactKind = "slice_set"
+	// ArtifactKindSlice defines a package boundary constant.
+	ArtifactKindSlice ArtifactKind = "slice"
+	// ArtifactKindTracker defines a package boundary constant.
+	ArtifactKindTracker ArtifactKind = "tracker"
+	// ArtifactKindTicket defines a package boundary constant.
+	ArtifactKindTicket ArtifactKind = "ticket"
 )
 
-// AuthoringArtifactRole defines a package boundary type.
-type AuthoringArtifactRole string
+// ArtifactRole defines a package boundary type.
+type ArtifactRole string
 
 const (
-	// AuthoringArtifactRoleInput defines a package boundary constant.
-	AuthoringArtifactRoleInput AuthoringArtifactRole = "input"
-	// AuthoringArtifactRoleOutput defines a package boundary constant.
-	AuthoringArtifactRoleOutput AuthoringArtifactRole = "output"
+	// ArtifactRoleInput defines a package boundary constant.
+	ArtifactRoleInput ArtifactRole = "input"
+	// ArtifactRoleOutput defines a package boundary constant.
+	ArtifactRoleOutput ArtifactRole = "output"
 )
 
-// AuthoringProvenanceRelation defines a package boundary type.
-type AuthoringProvenanceRelation string
+// ProvenanceRelation defines a package boundary type.
+type ProvenanceRelation string
 
 const (
-	// AuthoringProvenanceRelationSeededBy defines a package boundary constant.
-	AuthoringProvenanceRelationSeededBy AuthoringProvenanceRelation = "seeded_by"
-	// AuthoringProvenanceRelationGenerated defines a package boundary constant.
-	AuthoringProvenanceRelationGenerated AuthoringProvenanceRelation = "generated"
-	// AuthoringProvenanceRelationPromoted defines a package boundary constant.
-	AuthoringProvenanceRelationPromoted AuthoringProvenanceRelation = "promoted"
-	// AuthoringProvenanceRelationRefined defines a package boundary constant.
-	AuthoringProvenanceRelationRefined AuthoringProvenanceRelation = "refined"
+	// ProvenanceRelationSeededBy defines a package boundary constant.
+	ProvenanceRelationSeededBy ProvenanceRelation = "seeded_by"
+	// ProvenanceRelationGenerated defines a package boundary constant.
+	ProvenanceRelationGenerated ProvenanceRelation = "generated"
+	// ProvenanceRelationPromoted defines a package boundary constant.
+	ProvenanceRelationPromoted ProvenanceRelation = "promoted"
+	// ProvenanceRelationRefined defines a package boundary constant.
+	ProvenanceRelationRefined ProvenanceRelation = "refined"
 )
 
-// AuthoringSession describes a package boundary value.
-type AuthoringSession struct {
+// Session describes a package boundary value.
+type Session struct {
 	Guided      *GuidedUseCaseState `json:",omitempty"`
 	ID          string
 	Namespace   string
 	Revision    int64
 	ProjectID   string
-	Status      AuthoringSessionStatus
-	Mode        AuthoringSessionMode
-	Target      AuthoringTarget
+	Status      SessionStatus
+	Mode        SessionMode
+	Target      Target
 	Topic       string
-	Inputs      []AuthoringArtifactRef
-	Outputs     []AuthoringArtifactRef
-	Provenance  []AuthoringProvenanceLink
+	Inputs      []ArtifactRef
+	Outputs     []ArtifactRef
+	Provenance  []ProvenanceLink
 	CreatedAt   time.Time
 	StartedAt   *time.Time
 	FinishedAt  *time.Time
@@ -129,31 +129,31 @@ type AuthoringSession struct {
 	Description string
 }
 
-// AuthoringArtifactRef describes a package boundary value.
-type AuthoringArtifactRef struct {
+// ArtifactRef describes a package boundary value.
+type ArtifactRef struct {
 	ID          string
-	Kind        AuthoringArtifactKind
-	Role        AuthoringArtifactRole
+	Kind        ArtifactKind
+	Role        ArtifactRole
 	Path        string
 	Description string
 }
 
-// AuthoringProvenanceLink describes a package boundary value.
-type AuthoringProvenanceLink struct {
-	Relation   AuthoringProvenanceRelation
-	Source     AuthoringArtifactRef
-	Target     AuthoringArtifactRef
+// ProvenanceLink describes a package boundary value.
+type ProvenanceLink struct {
+	Relation   ProvenanceRelation
+	Source     ArtifactRef
+	Target     ArtifactRef
 	Decision   string
 	RecordedAt time.Time
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s AuthoringSessionStatus) Valid() bool {
+func (s SessionStatus) Valid() bool {
 	switch s {
-	case AuthoringSessionStatusDraft,
-		AuthoringSessionStatusActive,
-		AuthoringSessionStatusFinalized,
-		AuthoringSessionStatusDiscarded:
+	case SessionStatusDraft,
+		SessionStatusActive,
+		SessionStatusFinalized,
+		SessionStatusDiscarded:
 		return true
 	default:
 		return false
@@ -161,12 +161,12 @@ func (s AuthoringSessionStatus) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (m AuthoringSessionMode) Valid() bool {
+func (m SessionMode) Valid() bool {
 	switch m {
-	case AuthoringSessionModeMarkdownDirect,
-		AuthoringSessionModeContextual,
-		AuthoringSessionModeAssisted,
-		AuthoringSessionModeTUI:
+	case SessionModeMarkdownDirect,
+		SessionModeContextual,
+		SessionModeAssisted,
+		SessionModeTUI:
 		return true
 	default:
 		return false
@@ -174,17 +174,17 @@ func (m AuthoringSessionMode) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (t AuthoringTarget) Valid() bool {
+func (t Target) Valid() bool {
 	switch t {
-	case AuthoringTargetDump,
-		AuthoringTargetQuiz,
-		AuthoringTargetDraft,
-		AuthoringTargetSpec,
-		AuthoringTargetPlan,
-		AuthoringTargetSliceSet,
-		AuthoringTargetSlice,
-		AuthoringTargetTracker,
-		AuthoringTargetTicket:
+	case TargetDump,
+		TargetQuiz,
+		TargetDraft,
+		TargetSpec,
+		TargetPlan,
+		TargetSliceSet,
+		TargetSlice,
+		TargetTracker,
+		TargetTicket:
 		return true
 	default:
 		return false
@@ -192,19 +192,19 @@ func (t AuthoringTarget) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (k AuthoringArtifactKind) Valid() bool {
+func (k ArtifactKind) Valid() bool {
 	switch k {
-	case AuthoringArtifactKindSession,
-		AuthoringArtifactKindTranscript,
-		AuthoringArtifactKindDump,
-		AuthoringArtifactKindQuiz,
-		AuthoringArtifactKindDraft,
-		AuthoringArtifactKindSpec,
-		AuthoringArtifactKindPlan,
-		AuthoringArtifactKindSliceSet,
-		AuthoringArtifactKindSlice,
-		AuthoringArtifactKindTracker,
-		AuthoringArtifactKindTicket:
+	case ArtifactKindSession,
+		ArtifactKindTranscript,
+		ArtifactKindDump,
+		ArtifactKindQuiz,
+		ArtifactKindDraft,
+		ArtifactKindSpec,
+		ArtifactKindPlan,
+		ArtifactKindSliceSet,
+		ArtifactKindSlice,
+		ArtifactKindTracker,
+		ArtifactKindTicket:
 		return true
 	default:
 		return false
@@ -212,10 +212,9 @@ func (k AuthoringArtifactKind) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (r AuthoringArtifactRole) Valid() bool {
+func (r ArtifactRole) Valid() bool {
 	switch r {
-	case AuthoringArtifactRoleInput,
-		AuthoringArtifactRoleOutput:
+	case ArtifactRoleInput, ArtifactRoleOutput:
 		return true
 	default:
 		return false
@@ -223,12 +222,12 @@ func (r AuthoringArtifactRole) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (r AuthoringProvenanceRelation) Valid() bool {
+func (r ProvenanceRelation) Valid() bool {
 	switch r {
-	case AuthoringProvenanceRelationSeededBy,
-		AuthoringProvenanceRelationGenerated,
-		AuthoringProvenanceRelationPromoted,
-		AuthoringProvenanceRelationRefined:
+	case ProvenanceRelationSeededBy,
+		ProvenanceRelationGenerated,
+		ProvenanceRelationPromoted,
+		ProvenanceRelationRefined:
 		return true
 	default:
 		return false

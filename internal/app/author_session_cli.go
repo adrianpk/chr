@@ -59,12 +59,12 @@ func authorSessionFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "authoring mode",
-			Value: string(authoringcore.AuthoringSessionModeMarkdownDirect),
+			Value: string(authoringcore.SessionModeMarkdownDirect),
 		},
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(authoringcore.AuthoringTargetDraft),
+			Value: string(authoringcore.TargetDraft),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -167,18 +167,18 @@ func (factory commandFactory) runAuthorSessionShow(ctx context.Context, cmd *cli
 	return printAuthorSession(factory.io.Stdout, session)
 }
 
-func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (authoringcore.AuthoringSession, error) {
+func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (authoringcore.Session, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring topic is required")
+		return authoringcore.Session{}, fmt.Errorf("authoring topic is required")
 	}
 
-	session := authoringcore.AuthoringSession{
+	session := authoringcore.Session{
 		ID:          authoringSessionID(now),
 		ProjectID:   projectContext.ProjectID,
-		Status:      authoringcore.AuthoringSessionStatusDraft,
-		Mode:        authoringcore.AuthoringSessionMode(cmd.String("mode")),
-		Target:      authoringcore.AuthoringTarget(cmd.String("target")),
+		Status:      authoringcore.SessionStatusDraft,
+		Mode:        authoringcore.SessionMode(cmd.String("mode")),
+		Target:      authoringcore.Target(cmd.String("target")),
 		Topic:       topic,
 		CreatedAt:   now,
 		UpdatedAt:   now,
@@ -187,7 +187,7 @@ func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProject
 
 	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	return session, nil
@@ -197,10 +197,10 @@ func authoringSessionID(now time.Time) string {
 	return "author-" + now.UTC().Format("20060102-150405")
 }
 
-func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessionRepository, handle string) (authoringcore.AuthoringSession, error) {
+func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessionRepository, handle string) (authoringcore.Session, error) {
 	handle = strings.TrimSpace(handle)
 	if handle == "" {
-		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring session is required")
+		return authoringcore.Session{}, fmt.Errorf("authoring session is required")
 	}
 
 	session, err := repository.GetSession(ctx, handle)
@@ -209,12 +209,12 @@ func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessi
 	}
 
 	if !errors.Is(err, core.ErrAuthoringSessionNotFound) {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	sessions, listErr := repository.ListSessions(ctx)
 	if listErr != nil {
-		return authoringcore.AuthoringSession{}, listErr
+		return authoringcore.Session{}, listErr
 	}
 
 	matches := matchingAuthoringSessions(sessions, handle)
@@ -223,15 +223,15 @@ func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessi
 	}
 
 	if len(matches) > 1 {
-		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
+		return authoringcore.Session{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
 	}
 
-	return authoringcore.AuthoringSession{}, fmt.Errorf("%w: %s", core.ErrAuthoringSessionNotFound, handle)
+	return authoringcore.Session{}, fmt.Errorf("%w: %s", core.ErrAuthoringSessionNotFound, handle)
 }
 
-func matchingAuthoringSessions(sessions []authoringcore.AuthoringSession, handle string) []authoringcore.AuthoringSession {
+func matchingAuthoringSessions(sessions []authoringcore.Session, handle string) []authoringcore.Session {
 	handleSlug := authoringHandleSlug(handle)
-	matches := []authoringcore.AuthoringSession{}
+	matches := []authoringcore.Session{}
 
 	for _, session := range sessions {
 		if authoringSessionMatchesHandle(session, handle, handleSlug) {
@@ -242,7 +242,7 @@ func matchingAuthoringSessions(sessions []authoringcore.AuthoringSession, handle
 	return matches
 }
 
-func authoringSessionMatchesHandle(session authoringcore.AuthoringSession, handle, handleSlug string) bool {
+func authoringSessionMatchesHandle(session authoringcore.Session, handle, handleSlug string) bool {
 	if strings.EqualFold(session.ID, handle) {
 		return true
 	}
@@ -280,7 +280,7 @@ func authoringHandleSlug(value string) string {
 	return strings.Trim(builder.String(), "-")
 }
 
-func printAuthorSessionCreated(stdout io.Writer, session authoringcore.AuthoringSession, paths core.AuthoringSessionPaths, projectDir string) error {
+func printAuthorSessionCreated(stdout io.Writer, session authoringcore.Session, paths core.AuthoringSessionPaths, projectDir string) error {
 	lines := []string{
 		"session: created " + session.ID,
 		"target: " + string(session.Target),
@@ -294,7 +294,7 @@ func printAuthorSessionCreated(stdout io.Writer, session authoringcore.Authoring
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorSession(stdout io.Writer, session authoringcore.AuthoringSession) error {
+func printAuthorSession(stdout io.Writer, session authoringcore.Session) error {
 	lines := []string{
 		"session: " + session.ID,
 		"status: " + string(session.Status),

@@ -15,10 +15,10 @@ import (
 type AssistedArtifactSynthesisOptions struct {
 	ProjectDir     string
 	OperationID    string
-	Session        authoringcore.AuthoringSession
+	Session        authoringcore.Session
 	CuratedSummary AssistedCuratedAnswerSummary
-	SourceRef      authoringcore.AuthoringArtifactRef
-	TargetKind     authoringcore.AuthoringArtifactKind
+	SourceRef      authoringcore.ArtifactRef
+	TargetKind     authoringcore.ArtifactKind
 	TargetName     string
 	AllowReplace   bool
 	Repository     AuthoringSessionRepository
@@ -27,7 +27,7 @@ type AssistedArtifactSynthesisOptions struct {
 
 // AssistedArtifactSynthesisResult describes a package boundary value.
 type AssistedArtifactSynthesisResult struct {
-	Session authoringcore.AuthoringSession
+	Session authoringcore.Session
 	Layout  AuthoringArtifactLayout
 	Content string
 	// Mutation retains committed dump hashes independently of later edits.
@@ -41,7 +41,7 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		return AssistedArtifactSynthesisResult{}, err
 	}
 
-	if opts.TargetKind == authoringcore.AuthoringArtifactKindDump {
+	if opts.TargetKind == authoringcore.ArtifactKindDump {
 		return synthesizeAssistedDump(ctx, opts)
 	}
 
@@ -49,7 +49,7 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		ProjectDir:   opts.ProjectDir,
 		SessionID:    opts.Session.ID,
 		Kind:         opts.TargetKind,
-		Role:         authoringcore.AuthoringArtifactRoleOutput,
+		Role:         authoringcore.ArtifactRoleOutput,
 		Topic:        opts.Session.Topic,
 		Name:         opts.TargetName,
 		Description:  "Synthesized assisted authoring artifact.",
@@ -93,10 +93,10 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 
 // RenderAssistedSynthesizedArtifact renders the corresponding package data.
 func RenderAssistedSynthesizedArtifact(
-	session authoringcore.AuthoringSession,
+	session authoringcore.Session,
 	summary AssistedCuratedAnswerSummary,
-	sourceRef authoringcore.AuthoringArtifactRef,
-	targetRef authoringcore.AuthoringArtifactRef,
+	sourceRef authoringcore.ArtifactRef,
+	targetRef authoringcore.ArtifactRef,
 ) string {
 	var output strings.Builder
 
@@ -148,7 +148,7 @@ func validateAssistedArtifactSynthesisOptions(opts AssistedArtifactSynthesisOpti
 		return fmt.Errorf("assisted artifact synthesis target kind is invalid: %s", opts.TargetKind)
 	}
 
-	if opts.TargetKind == authoringcore.AuthoringArtifactKindSession || opts.TargetKind == authoringcore.AuthoringArtifactKindTranscript {
+	if opts.TargetKind == authoringcore.ArtifactKindSession || opts.TargetKind == authoringcore.ArtifactKindTranscript {
 		return fmt.Errorf("assisted artifact synthesis target kind is session-owned: %s", opts.TargetKind)
 	}
 
@@ -162,14 +162,14 @@ func validateAssistedArtifactSynthesisOptions(opts AssistedArtifactSynthesisOpti
 func updateAssistedArtifactSynthesisSession(
 	ctx context.Context,
 	opts AssistedArtifactSynthesisOptions,
-	targetRef authoringcore.AuthoringArtifactRef,
-) (authoringcore.AuthoringSession, error) {
+	targetRef authoringcore.ArtifactRef,
+) (authoringcore.Session, error) {
 	now := assistedArtifactSynthesisNow(opts.Now)
 	session := opts.Session
 
 	session.Outputs = append(session.Outputs, targetRef)
-	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{
-		Relation:   authoringcore.AuthoringProvenanceRelationGenerated,
+	session.Provenance = append(session.Provenance, authoringcore.ProvenanceLink{
+		Relation:   authoringcore.ProvenanceRelationGenerated,
 		Source:     opts.SourceRef,
 		Target:     targetRef,
 		Decision:   "Synthesized assisted authoring artifact from curated summary.",
@@ -179,7 +179,7 @@ func updateAssistedArtifactSynthesisSession(
 
 	_, err := opts.Repository.UpdateSession(ctx, session)
 	if err != nil {
-		return authoringcore.AuthoringSession{}, err
+		return authoringcore.Session{}, err
 	}
 
 	return session, nil

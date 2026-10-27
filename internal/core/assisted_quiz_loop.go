@@ -30,7 +30,7 @@ const (
 // AssistedQuizLoopOptions describes a package boundary value.
 type AssistedQuizLoopOptions struct {
 	Config           AssistedAuthoringConfig
-	Session          authoringcore.AuthoringSession
+	Session          authoringcore.Session
 	SessionPaths     AuthoringSessionPaths
 	ContextPackage   AssistedAuthoringContextPackage
 	TranscriptEvents []AssistedTranscriptEvent

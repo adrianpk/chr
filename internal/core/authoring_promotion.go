@@ -14,7 +14,7 @@ import (
 // QuizToDraftPromotionOptions describes a package boundary value.
 type QuizToDraftPromotionOptions struct {
 	ProjectDir   string
-	Session      authoringcore.AuthoringSession
+	Session      authoringcore.Session
 	QuizPath     string
 	Now          time.Time
 	AllowReplace bool
@@ -23,9 +23,9 @@ type QuizToDraftPromotionOptions struct {
 
 // QuizToDraftPromotionPlan describes a package boundary value.
 type QuizToDraftPromotionPlan struct {
-	Session    authoringcore.AuthoringSession
+	Session    authoringcore.Session
 	Layout     AuthoringArtifactLayout
-	Source     authoringcore.AuthoringArtifactRef
+	Source     authoringcore.ArtifactRef
 	Content    string
 	WouldWrite bool
 }
@@ -70,9 +70,9 @@ func writeQuizToDraftPromotion(plan QuizToDraftPromotionPlan) error {
 
 // RenderDraftFromQuiz renders the corresponding package data.
 func RenderDraftFromQuiz(
-	session authoringcore.AuthoringSession,
-	source authoringcore.AuthoringArtifactRef,
-	target authoringcore.AuthoringArtifactRef,
+	session authoringcore.Session,
+	source authoringcore.ArtifactRef,
+	target authoringcore.ArtifactRef,
 	quizPath string,
 ) (string, error) {
 	quizContent, err := os.ReadFile(quizPath)
@@ -128,8 +128,8 @@ func quizToDraftLayoutOptions(opts QuizToDraftPromotionOptions) AuthoringArtifac
 	return AuthoringArtifactLayoutOptions{
 		ProjectDir:   opts.ProjectDir,
 		SessionID:    opts.Session.ID,
-		Kind:         authoringcore.AuthoringArtifactKindDraft,
-		Role:         authoringcore.AuthoringArtifactRoleOutput,
+		Kind:         authoringcore.ArtifactKindDraft,
+		Role:         authoringcore.ArtifactRoleOutput,
 		Topic:        opts.Session.Topic,
 		Description:  "Draft promoted from a quiz.",
 		AllowReplace: opts.AllowReplace,
@@ -137,15 +137,15 @@ func quizToDraftLayoutOptions(opts QuizToDraftPromotionOptions) AuthoringArtifac
 }
 
 func appendQuizToDraftOutput(
-	session authoringcore.AuthoringSession,
-	source authoringcore.AuthoringArtifactRef,
-	target authoringcore.AuthoringArtifactRef,
+	session authoringcore.Session,
+	source authoringcore.ArtifactRef,
+	target authoringcore.ArtifactRef,
 	recordedAt time.Time,
-) authoringcore.AuthoringSession {
-	target.Role = authoringcore.AuthoringArtifactRoleOutput
+) authoringcore.Session {
+	target.Role = authoringcore.ArtifactRoleOutput
 	session.Outputs = append(session.Outputs, target)
-	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{
-		Relation:   authoringcore.AuthoringProvenanceRelationPromoted,
+	session.Provenance = append(session.Provenance, authoringcore.ProvenanceLink{
+		Relation:   authoringcore.ProvenanceRelationPromoted,
 		Source:     source,
 		Target:     target,
 		Decision:   "Promote quiz answers into an editable draft.",
@@ -156,17 +156,17 @@ func appendQuizToDraftOutput(
 	return session
 }
 
-func quizPromotionSourceArtifact(opts QuizToDraftPromotionOptions) authoringcore.AuthoringArtifactRef {
+func quizPromotionSourceArtifact(opts QuizToDraftPromotionOptions) authoringcore.ArtifactRef {
 	for _, output := range opts.Session.Outputs {
-		if output.Kind == authoringcore.AuthoringArtifactKindQuiz {
+		if output.Kind == authoringcore.ArtifactKindQuiz {
 			return output
 		}
 	}
 
-	return authoringcore.AuthoringArtifactRef{
+	return authoringcore.ArtifactRef{
 		ID:          "quiz:" + opts.Session.ID,
-		Kind:        authoringcore.AuthoringArtifactKindQuiz,
-		Role:        authoringcore.AuthoringArtifactRoleInput,
+		Kind:        authoringcore.ArtifactKindQuiz,
+		Role:        authoringcore.ArtifactRoleInput,
 		Path:        opts.QuizPath,
 		Description: "Quiz artifact selected for promotion.",
 	}

@@ -14,8 +14,8 @@ import (
 
 type assistedDumpMutationReceipt struct {
 	Schema, Digest, Checksum string
-	Session                  authoringcore.AuthoringSession
-	Reference                authoringcore.AuthoringArtifactRef
+	Session                  authoringcore.Session
+	Reference                authoringcore.ArtifactRef
 	Mutation                 ProjectDumpMutationResult
 }
 

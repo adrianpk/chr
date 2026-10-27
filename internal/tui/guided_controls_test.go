@@ -84,7 +84,7 @@ func TestGuidedUseCaseTUICatalogResult(t *testing.T) {
 	retained.Guided.Status = "completed"
 	m.guided.View.Session = nil
 
-	m.guided.View.Runs = []authoringcore.AuthoringSession{retained}
+	m.guided.View.Runs = []authoringcore.Session{retained}
 	if !strings.Contains(m.View(), "inspect results") || strings.Contains(m.View(), "completed") {
 		t.Fatal("catalog claimed completion without inspecting receipts")
 	}

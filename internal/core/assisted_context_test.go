@@ -91,10 +91,10 @@ func TestLoadAssistedAuthoringContextPackageRecordsMissingSelectedDocuments(t *t
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Workspace Protocol\n")
 
 	session := testAssistedContextSession(dir)
-	session.Inputs = append(session.Inputs, authoringcore.AuthoringArtifactRef{
+	session.Inputs = append(session.Inputs, authoringcore.ArtifactRef{
 		ID:          "missing-doc",
-		Kind:        authoringcore.AuthoringArtifactKindDraft,
-		Role:        authoringcore.AuthoringArtifactRoleInput,
+		Kind:        authoringcore.ArtifactKindDraft,
+		Role:        authoringcore.ArtifactRoleInput,
 		Path:        "docs/missing.md",
 		Description: "Missing document.",
 	})
@@ -147,21 +147,21 @@ func TestLoadAssistedAuthoringContextPackageRejectsTranscriptSessionMismatch(t *
 	}
 }
 
-func testAssistedContextSession(dir string) authoringcore.AuthoringSession {
+func testAssistedContextSession(dir string) authoringcore.Session {
 	now := time.Date(2026, 5, 21, 10, 0, 0, 0, time.UTC)
 
-	return authoringcore.AuthoringSession{
+	return authoringcore.Session{
 		ID:        "session-1",
 		ProjectID: "project-1",
-		Status:    authoringcore.AuthoringSessionStatusActive,
-		Mode:      authoringcore.AuthoringSessionModeAssisted,
-		Target:    authoringcore.AuthoringTargetSpec,
+		Status:    authoringcore.SessionStatusActive,
+		Mode:      authoringcore.SessionModeAssisted,
+		Target:    authoringcore.TargetSpec,
 		Topic:     "Assisted authoring",
-		Inputs: []authoringcore.AuthoringArtifactRef{
+		Inputs: []authoringcore.ArtifactRef{
 			{
 				ID:          "authoring-reference",
-				Kind:        authoringcore.AuthoringArtifactKindDraft,
-				Role:        authoringcore.AuthoringArtifactRoleInput,
+				Kind:        authoringcore.ArtifactKindDraft,
+				Role:        authoringcore.ArtifactRoleInput,
 				Path:        filepath.ToSlash(filepath.Join("docs", "reference", "authoring.md")),
 				Description: "Authoring reference.",
 			},

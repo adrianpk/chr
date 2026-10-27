@@ -83,7 +83,7 @@ func assertGuidedWebControlStale(t *testing.T, handler http.Handler, original ur
 	}
 }
 
-func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler) (authoringcore.AuthoringSession, url.Values) {
+func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler) (authoringcore.Session, url.Values) {
 	t.Helper()
 
 	operations := provider.service(t.Context())
@@ -115,7 +115,7 @@ func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Ha
 	return paused, pause
 }
 
-func resumeGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler, paused authoringcore.AuthoringSession, body string) authoringcore.AuthoringSession {
+func resumeGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler, paused authoringcore.Session, body string) authoringcore.Session {
 	t.Helper()
 
 	operations := provider.service(t.Context())

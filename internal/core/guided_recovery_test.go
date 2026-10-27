@@ -30,7 +30,7 @@ func TestGuidedUseCaseRecoveryInventory(t *testing.T) {
 	}
 }
 
-func guidedRecoveryInventoryFixture(t *testing.T) (string, authoringcore.AuthoringSession) {
+func guidedRecoveryInventoryFixture(t *testing.T) (string, authoringcore.Session) {
 	t.Helper()
 
 	root, original := guidedCaptureFixture(t)

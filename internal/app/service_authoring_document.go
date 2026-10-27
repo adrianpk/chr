@@ -11,16 +11,16 @@ import (
 
 var errAuthoringDocumentUnavailable = errors.New("requested original authoring document is unavailable")
 
-func validAuthoringDocumentKind(kind authoringcore.AuthoringArtifactKind) bool {
+func validAuthoringDocumentKind(kind authoringcore.ArtifactKind) bool {
 	switch kind {
-	case authoringcore.AuthoringArtifactKindDump, authoringcore.AuthoringArtifactKindSpec, authoringcore.AuthoringArtifactKindPlan:
+	case authoringcore.ArtifactKindDump, authoringcore.ArtifactKindSpec, authoringcore.ArtifactKindPlan:
 		return true
 	default:
 		return false
 	}
 }
 
-func (s service) authoringDocument(ctx context.Context, sessionID string, kind authoringcore.AuthoringArtifactKind) (core.AuthoringArtifactObservation, error) {
+func (s service) authoringDocument(ctx context.Context, sessionID string, kind authoringcore.ArtifactKind) (core.AuthoringArtifactObservation, error) {
 	snapshot, err := s.ObserveAuthoring(ctx, sessionID)
 	if err != nil {
 		return core.AuthoringArtifactObservation{}, err

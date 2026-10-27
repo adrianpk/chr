@@ -81,7 +81,7 @@ func sendForeignGuidedTelegramReply(t *testing.T, f *telegramConversationAppFixt
 	}
 }
 
-func changeGuidedTelegramFromWeb(t *testing.T, operations service, before authoringcore.AuthoringSession) authoringcore.AuthoringSession {
+func changeGuidedTelegramFromWeb(t *testing.T, operations service, before authoringcore.Session) authoringcore.Session {
 	t.Helper()
 
 	operations.projectContext = commandProjectContext{ProjectID: before.ProjectID, ProjectDir: guidedTelegramProject(t, operations, before.ProjectID)}

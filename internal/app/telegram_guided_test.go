@@ -89,7 +89,7 @@ func TestGuidedUseCaseTelegramCapture(t *testing.T) {
 	}
 }
 
-func assertGuidedTelegramReplay(t *testing.T, f *telegramConversationAppFixture, root string, scope authoringcore.GuidedUseCaseScope, before authoringcore.AuthoringSession, startID int64) {
+func assertGuidedTelegramReplay(t *testing.T, f *telegramConversationAppFixture, root string, scope authoringcore.GuidedUseCaseScope, before authoringcore.Session, startID int64) {
 	t.Helper()
 
 	f.updates <- f.last
@@ -182,7 +182,7 @@ func TestGuidedUseCaseTelegramClarification(t *testing.T) {
 	assertGuidedTelegramIdeaPause(t, f, operations, model, before, 0)
 }
 
-func assertGuidedTelegramIdeaPause(t *testing.T, f *telegramConversationAppFixture, operations service, model *fakeServiceQuizModel, before authoringcore.AuthoringSession, reply int64) {
+func assertGuidedTelegramIdeaPause(t *testing.T, f *telegramConversationAppFixture, operations service, model *fakeServiceQuizModel, before authoringcore.Session, reply int64) {
 	t.Helper()
 
 	idea := f.send(t, "Idea: add an unrelated export later", reply)
@@ -206,7 +206,7 @@ func guidedTelegramModel(t *testing.T, operations *service) *fakeServiceQuizMode
 	return model
 }
 
-func readGuidedTelegramSession(t *testing.T, operations service, c telegramcore.Conversation) authoringcore.AuthoringSession {
+func readGuidedTelegramSession(t *testing.T, operations service, c telegramcore.Conversation) authoringcore.Session {
 	t.Helper()
 
 	root := guidedTelegramProject(t, operations, c.ProjectID)
@@ -383,12 +383,12 @@ type telegramGuidedLostAck struct {
 	calls int
 }
 
-func (s *telegramGuidedLostAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
+func (s *telegramGuidedLostAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.Session, error) {
 	session, err := s.service.ApplyTelegramGuided(ctx, target, input)
 	if err == nil && input.Command.Action == "pause" {
 		s.calls++
 		if s.calls == 1 {
-			return authoringcore.AuthoringSession{}, s.lost
+			return authoringcore.Session{}, s.lost
 		}
 	}
 

@@ -15,13 +15,13 @@ import (
 type ArtifactOperationResult struct {
 	Message           string
 	Tickets           []core.IndexedTicket
-	AuthoringSessions []authoringcore.AuthoringSession
+	AuthoringSessions []authoringcore.Session
 }
 
 // CreateAuthoringSessionResult identifies a persisted authoring session and
 // the files created for it.
 type CreateAuthoringSessionResult struct {
-	Session authoringcore.AuthoringSession
+	Session authoringcore.Session
 	Paths   core.AuthoringSessionPaths
 }
 
@@ -184,12 +184,12 @@ func (s service) refreshCreatedTicketIndex(ticketPath string) error {
 
 func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 	now := time.Now().UTC()
-	session := authoringcore.AuthoringSession{
+	session := authoringcore.Session{
 		ID:        authoringSessionID(now),
 		ProjectID: s.projectContext.ProjectID,
-		Status:    authoringcore.AuthoringSessionStatusDraft,
-		Mode:      authoringcore.AuthoringSessionModeTUI,
-		Target:    authoringcore.AuthoringTargetSpec,
+		Status:    authoringcore.SessionStatusDraft,
+		Mode:      authoringcore.SessionModeTUI,
+		Target:    authoringcore.TargetSpec,
 		Topic:     "TUI artifact creation",
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -211,7 +211,7 @@ func (s service) CreateTUIAuthoringSession() (ArtifactOperationResult, error) {
 	return reloaded, nil
 }
 
-func (s service) CreateAuthoringSession(session authoringcore.AuthoringSession) (CreateAuthoringSessionResult, error) {
+func (s service) CreateAuthoringSession(session authoringcore.Session) (CreateAuthoringSessionResult, error) {
 	paths, err := core.NewAuthoringSessionRepository(s.projectContext.ProjectDir).CreateSession(s.ctx, session)
 	if err != nil {
 		return CreateAuthoringSessionResult{}, err

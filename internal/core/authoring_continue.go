@@ -86,7 +86,7 @@ func (r *fileAuthoringSessionRepository) continueAuthoring(ctx context.Context, 
 func newAuthoringSnapshot(request AuthoringContinuationRequest) AuthoringSnapshot {
 	now := time.Now().UTC()
 
-	return AuthoringSnapshot{Session: authoringcore.AuthoringSession{ID: request.SessionID, ProjectID: request.ProjectID, Namespace: request.Namespace, Status: authoringcore.AuthoringSessionStatusActive, Mode: authoringcore.AuthoringSessionModeAssisted, Target: authoringcore.AuthoringTarget(request.Target), Topic: request.Topic, CreatedAt: now, StartedAt: &now, UpdatedAt: now}, Events: []AssistedTranscriptEvent{}}
+	return AuthoringSnapshot{Session: authoringcore.Session{ID: request.SessionID, ProjectID: request.ProjectID, Namespace: request.Namespace, Status: authoringcore.SessionStatusActive, Mode: authoringcore.SessionModeAssisted, Target: authoringcore.Target(request.Target), Topic: request.Topic, CreatedAt: now, StartedAt: &now, UpdatedAt: now}, Events: []AssistedTranscriptEvent{}}
 }
 
 func guardAuthoringContinuation(snapshot AuthoringSnapshot, request AuthoringContinuationRequest) error {
@@ -169,7 +169,7 @@ func validateAuthoringDraft(draft AuthoringDraft, request AuthoringContinuationR
 		return errors.New("authoring rationale requires a question")
 	}
 
-	if request.Action == "ask" || request.Target == authoringcore.AuthoringArtifactKindQuiz {
+	if request.Action == "ask" || request.Target == authoringcore.ArtifactKindQuiz {
 		return errors.New("authoring provider returned no question")
 	}
 
@@ -273,7 +273,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringSnapshot(ctx context.Co
 }
 
 func guardAuthoringAnswer(snapshot AuthoringSnapshot, request AuthoringContinuationRequest) error {
-	if request.Target != authoringcore.AuthoringArtifactKind(snapshot.Session.Target) || snapshot.Question == nil || *snapshot.Question != *request.Question || snapshot.Question.Revision != snapshot.Session.Revision {
+	if request.Target != authoringcore.ArtifactKind(snapshot.Session.Target) || snapshot.Question == nil || *snapshot.Question != *request.Question || snapshot.Question.Revision != snapshot.Session.Revision {
 		return workflowstate.ErrConflict
 	}
 
@@ -292,8 +292,8 @@ func validateGeneratedAuthoring(ctx context.Context, draft AuthoringDraft, snaps
 	return ctx.Err()
 }
 
-func (r *fileAuthoringSessionRepository) writeAuthoringContinuationJournal(target authoringcore.AuthoringArtifactKind, changes []workflowstate.FileChange) error {
-	if target == authoringcore.AuthoringArtifactKindDump {
+func (r *fileAuthoringSessionRepository) writeAuthoringContinuationJournal(target authoringcore.ArtifactKind, changes []workflowstate.FileChange) error {
+	if target == authoringcore.ArtifactKindDump {
 		return r.writeAuthoringJournalVersion(projectDumpJournalSchema, changes)
 	}
 
