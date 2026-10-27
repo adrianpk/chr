@@ -200,6 +200,13 @@ Four more assigned signatures are fixed; 187 exact debts remain at ceiling seven
 - `make check-go-style`: 9307 declarations, ceiling seven, 187 exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues.
 
+The bounded legacy execution/loop observer now consumes database.DataDirectory;
+its read-only open, absent-database behavior, page bounds and decoding are unchanged.
+Storage binding/null/legacy regressions use the existing public execution database
+constructor on the same SQLite handle rather than a private implementation.
+
+- `go test ./internal/core ./internal/app -run '^Test(LegacyWorkObservation|WorkObservation|QualityStorage|QualityRecordWire)' -count=1 -timeout=3m`: passed.
+
 ## Risks and Follow-ups
 
 Remaining work includes ticket parser/validation test ownership, execution record/runner

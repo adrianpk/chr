@@ -22,7 +22,7 @@ type LegacyWorkObservation struct {
 
 // ReadLegacyWork opens existing state in SQLite read-only mode. An absent
 // database means no retained work; this operation never initializes a schema.
-func ReadLegacyWork(ctx context.Context, env UserEnvironment, projectID string) (result LegacyWorkObservation, err error) {
+func ReadLegacyWork(ctx context.Context, env database.DataDirectory, projectID string) (result LegacyWorkObservation, err error) {
 	path := database.UserDatabasePath(env)
 	if _, err = os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		return result, nil

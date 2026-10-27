@@ -57,7 +57,7 @@ func qualityExecutionInsert(t *testing.T, db *sql.DB, want qualityLegacyRecords)
 	t.Helper()
 	qualityStorageExec(t, db, "DELETE FROM execution_records")
 
-	if err := (&sqliteExecutionRepository{db: db}).CreateExecution(t.Context(), want.Execution); err != nil {
+	if err := qualityExecutionRepository(t, db).CreateExecution(t.Context(), want.Execution); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -67,7 +67,7 @@ func qualityExecutionUpdate(t *testing.T, db *sql.DB, want qualityLegacyRecords)
 	// Poison same-type values first; an omitted assignment cannot retain its expected value.
 	qualityStorageExec(t, db, "UPDATE execution_records SET project_id='value-002',ticket_key='poison-key',ticket_path='poison-path',runtime_image='poison-image',workspace_base_ref='poison-ref',artifact_log_path='poison-log',failure_reason='poison-failure'")
 
-	if err := (&sqliteExecutionRepository{db: db}).UpdateExecution(t.Context(), want.Execution); err != nil {
+	if err := qualityExecutionRepository(t, db).UpdateExecution(t.Context(), want.Execution); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -104,7 +104,7 @@ func qualityTicketUpsert(t *testing.T, db *sql.DB, want qualityLegacyRecords) {
 func TestQualityStorageNulls(t *testing.T) {
 	db := openQualityLegacyDB(t)
 	want := qualityLegacyExpected(t)
-	execution := &sqliteExecutionRepository{db: db}
+	execution := qualityExecutionRepository(t, db)
 	notification := qualityNotificationRepository(t, db)
 
 	for _, populated := range []bool{true, false} {

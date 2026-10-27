@@ -64,7 +64,7 @@ func readQualityLegacyRecords(t *testing.T, db *sql.DB, want qualityLegacyRecord
 		err error
 	)
 
-	got.Execution, err = (&sqliteExecutionRepository{db: db}).GetExecution(t.Context(), want.Execution.ID)
+	got.Execution, err = qualityExecutionRepository(t, db).GetExecution(t.Context(), want.Execution.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,6 +122,17 @@ func TestQualityStorageLegacy(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("legacy records changed:\ngot %#v\nwant %#v", got, want)
 	}
+}
+
+func qualityExecutionRepository(t *testing.T, db *sql.DB) ExecutionRepository {
+	t.Helper()
+
+	repository, err := NewExecutionRepositoryFromDB(t.Context(), db, testMigrationFS())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return repository
 }
 
 func qualityTicketIndex(t *testing.T, db *sql.DB) ticketcore.Index {
