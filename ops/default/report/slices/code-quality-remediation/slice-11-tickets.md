@@ -26,6 +26,8 @@ remain in progress.
 
 The approved T11.1–T11.6 task list owns scope. Moves and naming remain separate
 commits with direct consumers and preserved durable/wire contracts.
+The completed signature/control/preparation checkpoint is `c0814149f515e4a44f1dc491ea6fba30de976fec`;
+remaining ticket/review state work keeps this report drafting.
 
 ## Contracts Added or Changed
 
