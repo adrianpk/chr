@@ -1,10 +1,9 @@
-package core
+package execution_test
 
 import (
 	"context"
 	"database/sql"
 	"errors"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -88,32 +87,6 @@ func TestLoopRunRepositoryRejectsInvalidRecords(t *testing.T) {
 	if err == nil || err.Error() != "loop run eligible count cannot be negative" {
 		t.Fatalf("CreateLoopRun error = %v, want negative count validation", err)
 	}
-}
-
-func TestNewLoopRunRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
-	root := t.TempDir()
-
-	env, err := NewUserEnvironment(UserEnvironmentOptions{
-		DevMode: true,
-		DevRoot: root,
-	})
-	if err != nil {
-		t.Fatalf("NewUserEnvironment returned error: %v", err)
-	}
-
-	repository, err := executioncore.NewLoopRunRepository(context.Background(), env, testMigrationFS())
-	if err != nil {
-		t.Fatalf("NewLoopRunRepository returned error: %v", err)
-	}
-
-	t.Cleanup(func() {
-		err := repository.Close()
-		if err != nil {
-			t.Fatalf("close repository: %v", err)
-		}
-	})
-
-	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
 func newTestLoopRunRepository(t *testing.T) executioncore.LoopRunRepository {

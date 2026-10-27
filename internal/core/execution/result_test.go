@@ -1,4 +1,4 @@
-package core
+package execution_test
 
 import (
 	"os"
@@ -170,14 +170,6 @@ func TestLoadExecutionResultAcceptsEvidenceSummaryForChangeKinds(t *testing.T) {
 				t.Fatalf("EvidenceSummary.Strategy = %q, want %q", result.EvidenceSummary.Strategy, tt.want)
 			}
 		})
-	}
-}
-
-func testExecutionResultEvidenceSummary() executioncore.ResultEvidenceSummary {
-	return executioncore.ResultEvidenceSummary{
-		Strategy:   "planned",
-		Produced:   "evidence produced",
-		Validation: "validation passed",
 	}
 }
 

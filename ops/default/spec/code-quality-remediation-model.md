@@ -684,7 +684,9 @@ inspection/path policy and bounded read-only SQL observation now have the execut
 owner. Native ticket-file queue policy retains its coordinator. Naming uses the
 actual package owner without root aliases. All 156 moved declarations preserve
 their original strings, fields, SQL order, nulls, limits, resource cleanup and error
-semantics after qualification/naming; the move ledger now covers 650 preimages.
+semantics after qualification/naming; the move ledger now covers 723 preimages.
 The signature ledger records all 21 completed fixes; ceiling seven retains 187
-exact debts and one external exception. Component test placement and remaining
+exact debts and one external exception. Execution component tests use public owner APIs, real SQLite and shipped
+migrations; environment and native observation/evidence/cleanup integration tests
+retain their coordinator fixtures. Parser/validation placement and the remaining
 Slice 11 contracts are still pending.

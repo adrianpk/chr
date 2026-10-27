@@ -27,7 +27,7 @@ commits with direct consumers and preserved durable/wire contracts.
 
 ## Contracts Added or Changed
 
-The move ledger reconciles 650 declaration/test preimages after explicit contract
+The move ledger reconciles 723 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
 meanings are unchanged. Twenty-one assigned signatures now use cohesive owner state or
@@ -222,9 +222,19 @@ with direct consumers. All 156 source preimages still reconcile after naming.
 - `make check-go-style`: 9307 declarations, ceiling seven, 187 exact debts and one external exception after the execution move.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after naming.
 
+Thirty-nine existing execution record/repository/runner/event/artifact component
+tests now live beside the public execution API with real SQLite and shipped
+migrations. Two user-environment construction tests remain native integration
+tests. Root observation, evidence and cleanup integrations retain only their
+private fixtures. No production test exports were added. Another 73 exact test/
+fixture preimages reconcile, for 723 total.
+
+- `go test ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Execution|AgentEvent|LoopRun|NewExecutionRepository|NewLoopRunRepository|ValidateAgentEvent|FileAgentEvent|ReadAgentEvent|RecentWorkEvents|SummarizeAgentEvent|LegacyWorkObservation|WorkObservation|QualityRecordWire|QualityStorage|Leaf|RuntimeArtifactCleanup|ResultApplication|ReviewHandoff|EvidenceReadiness)' -count=1 -timeout=3m`: passed, including the relocated execution tests; TUI compiled with no selected tests.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after test placement.
+
 ## Risks and Follow-ups
 
-Remaining work includes ticket parser/validation test ownership, execution component test ownership, other assigned signatures, typed
+Remaining work includes ticket parser/validation test ownership, merge-state dependencies in ticket parser/validation tests, other assigned signatures, typed
 state/preparation contracts, remaining watches/flags/legacy dispositions, the
 six-parameter phase and final exact-head controller validation.
 No Slice 11 PR has been opened.

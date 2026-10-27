@@ -1,4 +1,4 @@
-package core
+package execution_test
 
 import (
 	"context"

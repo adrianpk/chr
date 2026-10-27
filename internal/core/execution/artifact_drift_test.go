@@ -1,4 +1,4 @@
-package core
+package execution_test
 
 import (
 	"context"
@@ -115,12 +115,7 @@ func writeExecutionArtifacts(t *testing.T, record executioncore.Record) {
 	}
 }
 
-func assertArtifactExists(
-	t *testing.T,
-	diagnostic executioncore.ArtifactDriftDiagnostic,
-	name string,
-	want bool,
-) {
+func assertArtifactExists(t *testing.T, diagnostic executioncore.ArtifactDriftDiagnostic, name string, want bool) {
 	t.Helper()
 
 	for _, artifact := range diagnostic.Artifacts {
