@@ -1,6 +1,6 @@
 # Slice 10: Harness contracts and runtime lifecycle
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -104,7 +104,10 @@ command list, with required repository commands first:
 - `go test -race ./internal/harness/process ./internal/harness/pi ./internal/core ./internal/app -run '^Test(AgentRunProcess(Cancellation|Streams|Bounds|Reaper)|PiTransport(Cancellation|Usage)|PiCredentialRefresh(Canceled|Deadline)|PiWorkerIsolation(Reservation|Canceled)|HarnessGenerationBindingSelectionOrder|HarnessGenerationCallerContext|PiGenerationCapacity)$' -count=1 -timeout=3m`
 - `git diff --check`
 
+Integration was verified through canonical PR #447 and dev at
+`add303a00a38df26dd23b25dbf5dc5dc59cf0e9a`. The controller recorded all four ordered
+checks against that exact candidate.
+
 ## Risks and Follow-ups
 
-Controller validation and integration into dev determine final delivery state.
-The report and ticket remain reviewing until that integration is verified.
+None recorded.
