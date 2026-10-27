@@ -15,30 +15,30 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// ErrExecutionNotFound identifies a package boundary error.
-var ErrExecutionNotFound = errors.New("execution not found")
+// ErrNotFound identifies a package boundary error.
+var ErrNotFound = errors.New("execution not found")
 
-// ExecutionRepository defines a package boundary interface.
-type ExecutionRepository interface {
-	CreateExecution(ctx context.Context, record ExecutionRecord) error
-	UpdateExecution(ctx context.Context, record ExecutionRecord) error
-	GetExecution(ctx context.Context, id string) (ExecutionRecord, error)
-	ListProjectExecutions(ctx context.Context, projectID string) ([]ExecutionRecord, error)
+// Repository defines a package boundary interface.
+type Repository interface {
+	CreateExecution(ctx context.Context, record Record) error
+	UpdateExecution(ctx context.Context, record Record) error
+	GetExecution(ctx context.Context, id string) (Record, error)
+	ListProjectExecutions(ctx context.Context, projectID string) ([]Record, error)
 	RequireProjectQuiescent(ctx context.Context, projectID string) error
-	ListTicketExecutions(ctx context.Context, projectID, ticketKey string) ([]ExecutionRecord, error)
+	ListTicketExecutions(ctx context.Context, projectID, ticketKey string) ([]Record, error)
 	Close() error
 }
 
-type sqliteExecutionRepository struct {
+type sqliteRepository struct {
 	db *sql.DB
 }
 
 // RequireProjectQuiescent observes at most one unfinished legacy owner without
 // allocating a project's historical executions during a policy transition.
-func (r *sqliteExecutionRepository) RequireProjectQuiescent(ctx context.Context, projectID string) error {
+func (r *sqliteRepository) RequireProjectQuiescent(ctx context.Context, projectID string) error {
 	var id string
 
-	err := r.db.QueryRowContext(ctx, "SELECT id FROM execution_records WHERE project_id = ? AND status IN (?, ?) LIMIT 1", projectID, ExecutionStatusPending, ExecutionStatusRunning).Scan(&id)
+	err := r.db.QueryRowContext(ctx, "SELECT id FROM execution_records WHERE project_id = ? AND status IN (?, ?) LIMIT 1", projectID, StatusPending, StatusRunning).Scan(&id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil
 	}
@@ -50,8 +50,8 @@ func (r *sqliteExecutionRepository) RequireProjectQuiescent(ctx context.Context,
 	return fmt.Errorf("unfinished legacy execution %s blocks project upgrade", id)
 }
 
-// NewExecutionRepository constructs the corresponding package service or value.
-func NewExecutionRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (ExecutionRepository, error) {
+// NewRepository constructs the corresponding package service or value.
+func NewRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (Repository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -67,7 +67,7 @@ func NewExecutionRepository(ctx context.Context, env database.DataDirectory, ass
 		return nil, database.CloseOnError(db, err)
 	}
 
-	repository, err := NewExecutionRepositoryFromDB(ctx, db, assetsFS)
+	repository, err := NewRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
 		return nil, database.CloseOnError(db, err)
 	}
@@ -75,8 +75,8 @@ func NewExecutionRepository(ctx context.Context, env database.DataDirectory, ass
 	return repository, nil
 }
 
-// NewExecutionRepositoryFromDB constructs the corresponding package service or value.
-func NewExecutionRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ExecutionRepository, error) {
+// NewRepositoryFromDB constructs the corresponding package service or value.
+func NewRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (Repository, error) {
 	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
@@ -84,12 +84,12 @@ func NewExecutionRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.F
 		return nil, fmt.Errorf("migrate execution database: %w", err)
 	}
 
-	return &sqliteExecutionRepository{db: db}, nil
+	return &sqliteRepository{db: db}, nil
 }
 
 // CreateExecution executes the corresponding package operation.
-func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record ExecutionRecord) error {
-	err := ValidateExecutionRecord(record)
+func (r *sqliteRepository) CreateExecution(ctx context.Context, record Record) error {
+	err := ValidateRecord(record)
 	if err != nil {
 		return err
 	}
@@ -103,8 +103,8 @@ func (r *sqliteExecutionRepository) CreateExecution(ctx context.Context, record 
 }
 
 // UpdateExecution executes the corresponding package operation.
-func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record ExecutionRecord) error {
-	err := ValidateExecutionRecord(record)
+func (r *sqliteRepository) UpdateExecution(ctx context.Context, record Record) error {
+	err := ValidateRecord(record)
 	if err != nil {
 		return err
 	}
@@ -122,30 +122,30 @@ func (r *sqliteExecutionRepository) UpdateExecution(ctx context.Context, record 
 	}
 
 	if affected == 0 {
-		return fmt.Errorf("%w: %s", ErrExecutionNotFound, record.ID)
+		return fmt.Errorf("%w: %s", ErrNotFound, record.ID)
 	}
 
 	return nil
 }
 
 // GetExecution executes the corresponding package operation.
-func (r *sqliteExecutionRepository) GetExecution(ctx context.Context, id string) (ExecutionRecord, error) {
+func (r *sqliteRepository) GetExecution(ctx context.Context, id string) (Record, error) {
 	row := r.db.QueryRowContext(ctx, selectExecutionSQL()+" WHERE id = ?", id)
 
 	record, err := scanExecution(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return ExecutionRecord{}, fmt.Errorf("%w: %s", ErrExecutionNotFound, id)
+		return Record{}, fmt.Errorf("%w: %s", ErrNotFound, id)
 	}
 
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	return record, nil
 }
 
 // ListProjectExecutions lists the requested data.
-func (r *sqliteExecutionRepository) ListProjectExecutions(ctx context.Context, projectID string) ([]ExecutionRecord, error) {
+func (r *sqliteRepository) ListProjectExecutions(ctx context.Context, projectID string) ([]Record, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
 		selectExecutionSQL()+" WHERE project_id = ? ORDER BY created_at",
@@ -169,7 +169,7 @@ func (r *sqliteExecutionRepository) ListProjectExecutions(ctx context.Context, p
 }
 
 // ListTicketExecutions lists the requested data.
-func (r *sqliteExecutionRepository) ListTicketExecutions(ctx context.Context, projectID, ticketKey string) ([]ExecutionRecord, error) {
+func (r *sqliteRepository) ListTicketExecutions(ctx context.Context, projectID, ticketKey string) ([]Record, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
 		selectExecutionSQL()+" WHERE project_id = ? AND ticket_key = ? ORDER BY created_at",
@@ -193,8 +193,8 @@ func (r *sqliteExecutionRepository) ListTicketExecutions(ctx context.Context, pr
 	return records, nil
 }
 
-func scanExecutionRows(rows *sql.Rows) ([]ExecutionRecord, error) {
-	records := []ExecutionRecord{}
+func scanExecutionRows(rows *sql.Rows) ([]Record, error) {
+	records := []Record{}
 
 	for rows.Next() {
 		record, err := scanExecution(rows)
@@ -214,7 +214,7 @@ func scanExecutionRows(rows *sql.Rows) ([]ExecutionRecord, error) {
 }
 
 // Close executes the corresponding package operation.
-func (r *sqliteExecutionRepository) Close() error {
+func (r *sqliteRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {
 		return fmt.Errorf("close execution repository database: %w", err)
@@ -234,10 +234,10 @@ type executionRecordTimes struct {
 	FinishedAt *time.Time
 }
 
-func scanExecution(scanner executionScanner) (ExecutionRecord, error) {
+func scanExecution(scanner executionScanner) (Record, error) {
 	var row executionRow
 	if err := scanner.Scan(row.scanTargets()...); err != nil {
-		return ExecutionRecord{}, fmt.Errorf("scan execution: %w", err)
+		return Record{}, fmt.Errorf("scan execution: %w", err)
 	}
 
 	return row.decoded()

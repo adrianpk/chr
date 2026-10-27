@@ -9,13 +9,13 @@ import (
 
 func TestReviewHandoffSummaryRendersSucceededExecution(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	result := executioncore.ExecutionResult{
+	result := executioncore.Result{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          executioncore.ExecutionResultStatusSucceeded,
+		Status:          executioncore.ResultStatusSucceeded,
 		Summary:         "ready for review",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
-		ChangedFiles: []executioncore.ExecutionResultChangedFile{
+		ChangedFiles: []executioncore.ResultChangedFile{
 			{Path: "internal/core/review_handoff_summary.go", Summary: "add handoff summary"},
 		},
 	}
@@ -51,12 +51,12 @@ func TestReviewHandoffSummaryRendersSucceededExecution(t *testing.T) {
 
 func TestReviewHandoffSummaryRendersFailedExecution(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	record.Status = executioncore.ExecutionStatusFailed
+	record.Status = executioncore.StatusFailed
 	record.FailureReason = "validation: make verify failed"
-	result := executioncore.ExecutionResult{
+	result := executioncore.Result{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          executioncore.ExecutionResultStatusFailed,
+		Status:          executioncore.ResultStatusFailed,
 		Summary:         "validation failed",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
@@ -87,12 +87,12 @@ func TestReviewHandoffSummaryRendersFailedExecution(t *testing.T) {
 
 func TestReviewHandoffSummaryRendersBlockedExecution(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	record.Status = executioncore.ExecutionStatusBlocked
+	record.Status = executioncore.StatusBlocked
 	record.FailureReason = "worker: codex could not resolve compile error"
-	result := executioncore.ExecutionResult{
+	result := executioncore.Result{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          executioncore.ExecutionResultStatusFailed,
+		Status:          executioncore.ResultStatusFailed,
 		Summary:         "blocked by compile error",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}

@@ -100,7 +100,7 @@ func (s service) reviewAgentWorkCycleTicket(ctx context.Context, opts agentWorkP
 	return agentWorkReviewResult{Ticket: cycleTicket, Stop: stop}, nil
 }
 
-func (s service) runAgenticReviewCycle(ctx context.Context, selected ticketcore.Indexed, execution executioncore.ExecutionRecord, application core.ResultApplication, config core.ReviewWorkflowConfig) (ticketcore.Indexed, error) {
+func (s service) runAgenticReviewCycle(ctx context.Context, selected ticketcore.Indexed, execution executioncore.Record, application core.ResultApplication, config core.ReviewWorkflowConfig) (ticketcore.Indexed, error) {
 	reviewedAt := s.now().UTC()
 	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
 
@@ -131,7 +131,7 @@ func (s service) runAgenticReviewCycle(ctx context.Context, selected ticketcore.
 		Ticket:              ticket,
 		Execution:           execution,
 		Application:         application,
-		ExecutionReportPath: executioncore.ExecutionReportPath(execution),
+		ExecutionReportPath: executioncore.ReportPath(execution),
 	})
 	if err != nil {
 		return ticketcore.Indexed{}, err
@@ -163,7 +163,7 @@ func (s service) runAgenticReviewCycle(ctx context.Context, selected ticketcore.
 	return ticket, nil
 }
 
-func (s service) runTrustedAutoMergeReviewCycle(selected ticketcore.Indexed, execution executioncore.ExecutionRecord, application core.ResultApplication) (ticketcore.Indexed, error) {
+func (s service) runTrustedAutoMergeReviewCycle(selected ticketcore.Indexed, execution executioncore.Record, application core.ResultApplication) (ticketcore.Indexed, error) {
 	reviewedAt := s.now().UTC()
 	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
 
@@ -247,7 +247,7 @@ func renderAgenticReviewNonBlockingComment(note workflowstate.ReviewFinding) str
 	return fmt.Sprintf("Agentic review note (%s): %s\n\n%s", note.Category, note.Title, note.Detail)
 }
 
-func (s service) refreshAgenticReviewTicketIndex(execution executioncore.ExecutionRecord, ticketPath string, reviewedAt time.Time) error {
+func (s service) refreshAgenticReviewTicketIndex(execution executioncore.Record, ticketPath string, reviewedAt time.Time) error {
 	if execution.Workspace.Mode == workspacecore.ExecutionWorktree {
 		return nil
 	}
@@ -272,7 +272,7 @@ func (s service) refreshAgenticReviewTicketIndex(execution executioncore.Executi
 	return err
 }
 
-func agenticReviewProjectDir(projectContext commandProjectContext, execution executioncore.ExecutionRecord) string {
+func agenticReviewProjectDir(projectContext commandProjectContext, execution executioncore.Record) string {
 	if execution.Workspace.Mode == workspacecore.ExecutionWorktree && execution.Workspace.ExecutionWorkspaceDir != "" {
 		return execution.Workspace.ExecutionWorkspaceDir
 	}
@@ -282,7 +282,7 @@ func agenticReviewProjectDir(projectContext commandProjectContext, execution exe
 
 type agentWorkRepairResult struct {
 	Ticket    ticketcore.Indexed
-	Execution executioncore.ExecutionRecord
+	Execution executioncore.Record
 	Stop      bool
 }
 

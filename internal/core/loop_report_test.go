@@ -35,9 +35,9 @@ func TestNewLoopReportBuildsSummaryFromLoopRun(t *testing.T) {
 
 func TestNewLoopReportIncludesRelatedExecutions(t *testing.T) {
 	record := testLoopReportRecord()
-	executions := []executioncore.ExecutionRecord{
-		testLoopReportExecution("exec-1", "CHR-1", executioncore.ExecutionStatusSucceeded),
-		testLoopReportExecution("exec-2", "CHR-2", executioncore.ExecutionStatusBlocked),
+	executions := []executioncore.Record{
+		testLoopReportExecution("exec-1", "CHR-1", executioncore.StatusSucceeded),
+		testLoopReportExecution("exec-2", "CHR-2", executioncore.StatusBlocked),
 	}
 
 	report, err := NewLoopReport(LoopReportOptions{
@@ -59,13 +59,13 @@ func TestNewLoopReportIncludesRelatedExecutions(t *testing.T) {
 
 func TestNewLoopReportBoundsExecutions(t *testing.T) {
 	record := testLoopReportRecord()
-	executions := []executioncore.ExecutionRecord{}
+	executions := []executioncore.Record{}
 
 	for index := 0; index < 30; index++ {
 		executions = append(executions, testLoopReportExecution(
 			"exec-"+string(rune('a'+index%26)),
 			"CHR-1",
-			executioncore.ExecutionStatusSucceeded,
+			executioncore.StatusSucceeded,
 		))
 	}
 
@@ -92,9 +92,9 @@ func TestNewLoopReportBoundsExecutions(t *testing.T) {
 
 func TestRenderLoopReportMarkdownIncludesLoopEvidence(t *testing.T) {
 	record := testLoopReportRecord()
-	executions := []executioncore.ExecutionRecord{
-		testLoopReportExecution("exec-1", "CHR-1", executioncore.ExecutionStatusSucceeded),
-		testLoopReportExecution("exec-2", "CHR-2", executioncore.ExecutionStatusBlocked),
+	executions := []executioncore.Record{
+		testLoopReportExecution("exec-1", "CHR-1", executioncore.StatusSucceeded),
+		testLoopReportExecution("exec-2", "CHR-2", executioncore.StatusBlocked),
 	}
 
 	report, err := NewLoopReport(LoopReportOptions{
@@ -174,10 +174,10 @@ func testLoopReportRecord() executioncore.LoopRunRecord {
 	}
 }
 
-func testLoopReportExecution(id, ticketKey string, status executioncore.ExecutionStatus) executioncore.ExecutionRecord {
+func testLoopReportExecution(id, ticketKey string, status executioncore.Status) executioncore.Record {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
 
-	return executioncore.ExecutionRecord{
+	return executioncore.Record{
 		ID:        id,
 		ProjectID: "project-1",
 		TicketKey: ticketKey,

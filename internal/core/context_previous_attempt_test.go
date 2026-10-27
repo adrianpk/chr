@@ -104,20 +104,20 @@ func TestRenderPreviousAttemptContextLink(t *testing.T) {
 	}
 }
 
-func testPreviousAttemptExecutionRecord(validationPath, resultPath string) executioncore.ExecutionRecord {
+func testPreviousAttemptExecutionRecord(validationPath, resultPath string) executioncore.Record {
 	now := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	return executioncore.ExecutionRecord{
+	return executioncore.Record{
 		ID:            "exec-1",
 		ProjectID:     "project-1",
 		TicketKey:     "CHR-1",
 		TicketPath:    "/tmp/project/.chr/default/tickets/CHR-1.md",
-		Status:        executioncore.ExecutionStatusFailed,
-		FailureReason: string(executioncore.ExecutionFailureValidation) + ": make verify failed",
-		Runtime: executioncore.ExecutionRuntimeRef{
+		Status:        executioncore.StatusFailed,
+		FailureReason: string(executioncore.FailureValidation) + ": make verify failed",
+		Runtime: executioncore.RuntimeRef{
 			ValidationCommand: "make verify",
 		},
-		Artifacts: executioncore.ExecutionArtifacts{
+		Artifacts: executioncore.Artifacts{
 			ResultPath:     resultPath,
 			ValidationPath: validationPath,
 		},

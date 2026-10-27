@@ -42,13 +42,13 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 
 	preflight, err := factory.buildTicketStartPreflight(ctx, cmd)
 	if err != nil {
-		return executioncore.NewExecutionFailure(executioncore.ExecutionFailurePreflight, err)
+		return executioncore.NewFailure(executioncore.FailurePreflight, err)
 	}
 
 	if !harnessruntime.ValidationPassed(preflight.Runtime.Checks) {
-		preflight.Record.Status = executioncore.ExecutionStatusBlocked
-		preflight.Record.FailureReason = executioncore.NewExecutionFailure(
-			executioncore.ExecutionFailureRuntime,
+		preflight.Record.Status = executioncore.StatusBlocked
+		preflight.Record.FailureReason = executioncore.NewFailure(
+			executioncore.FailureRuntime,
 			fmt.Errorf("runtime validation failed"),
 		).Error()
 
@@ -57,7 +57,7 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 			return err
 		}
 
-		return executioncore.NewExecutionFailure(executioncore.ExecutionFailureRuntime, fmt.Errorf("runtime validation failed"))
+		return executioncore.NewFailure(executioncore.FailureRuntime, fmt.Errorf("runtime validation failed"))
 	}
 
 	if !cmd.Bool("dry-run") {
@@ -72,7 +72,7 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 	return printTicketStartResult(factory.io.Stdout, preflight.Ticket, preflight.Record, preflight.Runtime, cmd.Bool("dry-run"))
 }
 
-func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, preflight ticketStartPreflight) (executioncore.ExecutionRecord, error) {
+func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, preflight ticketStartPreflight) (executioncore.Record, error) {
 	record, err := newService(ctx, preflight.Env, preflight.ProjectContext, preflight.AssetsFS).runTicketStartExecution(ctx, ticketExecutionInput{Record: preflight.Record, Runtime: preflight.Runtime, Events: ticketExecutionEvents{
 		Sink: agentWorkExecutionEventSink(preflight.Record),
 	}})
@@ -82,13 +82,13 @@ func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, pref
 
 	printErr := printTicketStartResult(stdout, preflight.Ticket, record, preflight.Runtime, false)
 	if printErr != nil {
-		return executioncore.ExecutionRecord{}, printErr
+		return executioncore.Record{}, printErr
 	}
 
 	return record, err
 }
 
-func printTicketStartResult(stdout io.Writer, ticket ticketcore.Indexed, record executioncore.ExecutionRecord, result harnessruntime.ValidationResult, dryRun bool) error {
+func printTicketStartResult(stdout io.Writer, ticket ticketcore.Indexed, record executioncore.Record, result harnessruntime.ValidationResult, dryRun bool) error {
 	lines := []string{
 		fmt.Sprintf("execution: %s", record.ID),
 		fmt.Sprintf("ticket: %s", ticket.Key),
@@ -112,12 +112,12 @@ func printTicketStartResult(stdout io.Writer, ticket ticketcore.Indexed, record 
 	return printRuntimeValidateResult(stdout, result, dryRun)
 }
 
-func printTicketStartFailure(stdout io.Writer, record executioncore.ExecutionRecord) error {
+func printTicketStartFailure(stdout io.Writer, record executioncore.Record) error {
 	if record.FailureReason == "" {
 		return nil
 	}
 
-	kind := executioncore.ExecutionFailureKindFromReason(record.FailureReason)
+	kind := executioncore.FailureKindFromReason(record.FailureReason)
 	if kind != "" {
 		_, err := fmt.Fprintf(stdout, "failure_kind: %s\n", kind)
 		if err != nil {
@@ -133,7 +133,7 @@ func printTicketStartFailure(stdout io.Writer, record executioncore.ExecutionRec
 	return printTicketStartDiagnostics(stdout, record)
 }
 
-func printTicketStartDiagnostics(stdout io.Writer, record executioncore.ExecutionRecord) error {
+func printTicketStartDiagnostics(stdout io.Writer, record executioncore.Record) error {
 	diagnostics := []struct {
 		name string
 		path string
@@ -157,20 +157,20 @@ func printTicketStartDiagnostics(stdout io.Writer, record executioncore.Executio
 	return nil
 }
 
-func runOwnedTicketStart(ctx context.Context, stdout io.Writer, preflight ticketStartPreflight) (executioncore.ExecutionRecord, error) {
+func runOwnedTicketStart(ctx context.Context, stdout io.Writer, preflight ticketStartPreflight) (executioncore.Record, error) {
 	lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, core.AgentOperationDevelopment)
 	if err != nil {
-		return executioncore.ExecutionRecord{}, err
+		return executioncore.Record{}, err
 	}
 
 	defer releaseAgentOperationLock(lock)()
 
 	if err := core.CheckLegacyWorkTicket(preflight.Ticket.Path); err != nil {
-		return executioncore.ExecutionRecord{}, err
+		return executioncore.Record{}, err
 	}
 
 	if err := newService(ctx, preflight.Env, preflight.ProjectContext, preflight.AssetsFS).checkLegacyAgentWorkKey(preflight.Ticket.Key); err != nil {
-		return executioncore.ExecutionRecord{}, err
+		return executioncore.Record{}, err
 	}
 
 	return runAndPrintTicketStartExecution(ctx, stdout, preflight)

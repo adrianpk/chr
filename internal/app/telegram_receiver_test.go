@@ -138,7 +138,7 @@ func checkTelegramNoWork(t *testing.T, env core.UserEnvironment) {
 		t.Fatal("receiver changed historical command handoffs", readErr)
 	}
 
-	executions, err := executioncore.NewExecutionRepository(t.Context(), env, testAssetsFS())
+	executions, err := executioncore.NewRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

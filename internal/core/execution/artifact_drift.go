@@ -6,48 +6,48 @@ import (
 	"os"
 )
 
-// ExecutionArtifactDriftStatus defines a package boundary type.
-type ExecutionArtifactDriftStatus string
+// ArtifactDriftStatus defines a package boundary type.
+type ArtifactDriftStatus string
 
 const (
-	// ExecutionArtifactDriftStatusOK defines a package boundary constant.
-	ExecutionArtifactDriftStatusOK ExecutionArtifactDriftStatus = "ok"
-	// ExecutionArtifactDriftStatusMissing defines a package boundary constant.
-	ExecutionArtifactDriftStatusMissing ExecutionArtifactDriftStatus = "missing_artifacts"
+	// ArtifactDriftStatusOK defines a package boundary constant.
+	ArtifactDriftStatusOK ArtifactDriftStatus = "ok"
+	// ArtifactDriftStatusMissing defines a package boundary constant.
+	ArtifactDriftStatusMissing ArtifactDriftStatus = "missing_artifacts"
 )
 
-// ExecutionArtifactDriftDiagnostic describes a package boundary value.
-type ExecutionArtifactDriftDiagnostic struct {
-	Execution ExecutionRecord
-	Status    ExecutionArtifactDriftStatus
-	Artifacts []ExecutionArtifactPathDiagnostic
+// ArtifactDriftDiagnostic describes a package boundary value.
+type ArtifactDriftDiagnostic struct {
+	Execution Record
+	Status    ArtifactDriftStatus
+	Artifacts []ArtifactPathDiagnostic
 }
 
-// ExecutionArtifactPathDiagnostic describes a package boundary value.
-type ExecutionArtifactPathDiagnostic struct {
+// ArtifactPathDiagnostic describes a package boundary value.
+type ArtifactPathDiagnostic struct {
 	Name   string
 	Path   string
 	Exists bool
 }
 
-// ExecutionArtifactDriftService describes a package boundary value.
-type ExecutionArtifactDriftService struct {
-	repository ExecutionRepository
+// ArtifactDriftService describes a package boundary value.
+type ArtifactDriftService struct {
+	repository Repository
 }
 
-// NewExecutionArtifactDriftService constructs the corresponding package service or value.
-func NewExecutionArtifactDriftService(repository ExecutionRepository) ExecutionArtifactDriftService {
-	return ExecutionArtifactDriftService{repository: repository}
+// NewArtifactDriftService constructs the corresponding package service or value.
+func NewArtifactDriftService(repository Repository) ArtifactDriftService {
+	return ArtifactDriftService{repository: repository}
 }
 
 // ListDiagnostics lists the requested data.
-func (s ExecutionArtifactDriftService) ListDiagnostics(ctx context.Context, projectID string) ([]ExecutionArtifactDriftDiagnostic, error) {
+func (s ArtifactDriftService) ListDiagnostics(ctx context.Context, projectID string) ([]ArtifactDriftDiagnostic, error) {
 	records, err := s.repository.ListProjectExecutions(ctx, projectID)
 	if err != nil {
 		return nil, err
 	}
 
-	diagnostics := make([]ExecutionArtifactDriftDiagnostic, 0, len(records))
+	diagnostics := make([]ArtifactDriftDiagnostic, 0, len(records))
 
 	for _, record := range records {
 		diagnostic, err := inspectExecutionArtifacts(record)
@@ -61,35 +61,35 @@ func (s ExecutionArtifactDriftService) ListDiagnostics(ctx context.Context, proj
 	return diagnostics, nil
 }
 
-func inspectExecutionArtifacts(record ExecutionRecord) (ExecutionArtifactDriftDiagnostic, error) {
-	artifacts := []ExecutionArtifactPathDiagnostic{
+func inspectExecutionArtifacts(record Record) (ArtifactDriftDiagnostic, error) {
+	artifacts := []ArtifactPathDiagnostic{
 		{Name: "run_dir", Path: record.Artifacts.RunDir, Exists: false},
 		{Name: "result", Path: record.Artifacts.ResultPath, Exists: false},
 		{Name: "log", Path: record.Artifacts.LogPath, Exists: false},
 		{Name: "validation", Path: record.Artifacts.ValidationPath, Exists: false},
-		{Name: "report", Path: ExecutionReportPath(record), Exists: false},
+		{Name: "report", Path: ReportPath(record), Exists: false},
 	}
 
 	for index, artifact := range artifacts {
 		exists, err := executionArtifactExists(artifact.Name, artifact.Path)
 		if err != nil {
-			return ExecutionArtifactDriftDiagnostic{}, err
+			return ArtifactDriftDiagnostic{}, err
 		}
 
 		artifacts[index].Exists = exists
 	}
 
-	status := ExecutionArtifactDriftStatusOK
+	status := ArtifactDriftStatusOK
 
 	for _, artifact := range artifacts {
 		if !artifact.Exists {
-			status = ExecutionArtifactDriftStatusMissing
+			status = ArtifactDriftStatusMissing
 
 			break
 		}
 	}
 
-	return ExecutionArtifactDriftDiagnostic{
+	return ArtifactDriftDiagnostic{
 		Execution: record,
 		Status:    status,
 		Artifacts: artifacts,

@@ -3628,9 +3628,9 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 	older := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
 	newer := older.Add(time.Hour)
 
-	view := NewObservabilityView(projectDir, ObservabilityRecords{Daemon: daemoncore.NewStoppedState(newer), Executions: []executioncore.ExecutionRecord{
-		{ID: "exec-old", Status: executioncore.ExecutionStatusSucceeded, UpdatedAt: older},
-		{ID: "exec-new", Status: executioncore.ExecutionStatusFailed, UpdatedAt: newer},
+	view := NewObservabilityView(projectDir, ObservabilityRecords{Daemon: daemoncore.NewStoppedState(newer), Executions: []executioncore.Record{
+		{ID: "exec-old", Status: executioncore.StatusSucceeded, UpdatedAt: older},
+		{ID: "exec-new", Status: executioncore.StatusFailed, UpdatedAt: newer},
 	}, Loops: []executioncore.LoopRunRecord{
 		{ID: "loop-old", Status: executioncore.LoopRunStatusSucceeded, UpdatedAt: older},
 		{ID: "loop-new", Status: executioncore.LoopRunStatusFailed, UpdatedAt: newer},

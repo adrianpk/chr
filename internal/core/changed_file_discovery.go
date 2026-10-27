@@ -14,7 +14,7 @@ import (
 
 // ChangedFileDiscoverer defines a package boundary interface.
 type ChangedFileDiscoverer interface {
-	DiscoverChangedFiles(ctx context.Context, opts DiscoverChangedFilesOptions) ([]executioncore.ExecutionResultChangedFile, error)
+	DiscoverChangedFiles(ctx context.Context, opts DiscoverChangedFilesOptions) ([]executioncore.ResultChangedFile, error)
 }
 
 // DiscoverChangedFilesOptions describes a package boundary value.
@@ -34,7 +34,7 @@ func NewChangedFileDiscoverer() ChangedFileDiscoverer {
 func (d *gitChangedFileDiscoverer) DiscoverChangedFiles(
 	ctx context.Context,
 	opts DiscoverChangedFilesOptions,
-) ([]executioncore.ExecutionResultChangedFile, error) {
+) ([]executioncore.ResultChangedFile, error) {
 	workspaceDir := changedFileDiscoveryWorkspaceDir(opts)
 	if strings.TrimSpace(workspaceDir) == "" {
 		return nil, fmt.Errorf("project directory is required")
@@ -64,8 +64,8 @@ func changedFileDiscoveryWorkspaceDir(opts DiscoverChangedFilesOptions) string {
 	return opts.ProjectDir
 }
 
-func parseGitStatusChangedFiles(output string) []executioncore.ExecutionResultChangedFile {
-	changedFiles := []executioncore.ExecutionResultChangedFile{}
+func parseGitStatusChangedFiles(output string) []executioncore.ResultChangedFile {
+	changedFiles := []executioncore.ResultChangedFile{}
 	seen := map[string]struct{}{}
 
 	for _, line := range strings.Split(output, "\n") {
@@ -80,10 +80,10 @@ func parseGitStatusChangedFiles(output string) []executioncore.ExecutionResultCh
 		}
 
 		seen[path] = struct{}{}
-		changedFiles = append(changedFiles, executioncore.ExecutionResultChangedFile{Path: path})
+		changedFiles = append(changedFiles, executioncore.ResultChangedFile{Path: path})
 	}
 
-	slices.SortFunc(changedFiles, func(left, right executioncore.ExecutionResultChangedFile) int {
+	slices.SortFunc(changedFiles, func(left, right executioncore.ResultChangedFile) int {
 		if left.Path < right.Path {
 			return -1
 		}

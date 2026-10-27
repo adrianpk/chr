@@ -39,8 +39,8 @@ type ExecutionReport struct {
 
 // ExecutionReportExecution describes a package boundary value.
 type ExecutionReportExecution struct {
-	Status      executioncore.ExecutionStatus
-	FailureKind executioncore.ExecutionFailureKind
+	Status      executioncore.Status
+	FailureKind executioncore.FailureKind
 }
 
 // ExecutionReportRuntime describes a package boundary value.
@@ -73,7 +73,7 @@ type ExecutionReportArtifacts struct {
 // ExecutionReportResult describes a package boundary value.
 type ExecutionReportResult struct {
 	Available bool
-	Status    executioncore.ExecutionResultStatus
+	Status    executioncore.ResultStatus
 	Summary   string
 }
 
@@ -135,8 +135,8 @@ type ExecutionReportChangedFilesSummary struct {
 
 // ExecutionReportOptions describes a package boundary value.
 type ExecutionReportOptions struct {
-	Execution              executioncore.ExecutionRecord
-	Result                 *executioncore.ExecutionResult
+	Execution              executioncore.Record
+	Result                 *executioncore.Result
 	IncludeEvidence        bool
 	EvidenceChecklist      *EvidenceStrategyChecklist
 	EvidenceChecklistError string
@@ -144,7 +144,7 @@ type ExecutionReportOptions struct {
 
 // NewExecutionReport constructs the corresponding package service or value.
 func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
-	err := executioncore.ValidateExecutionRecord(opts.Execution)
+	err := executioncore.ValidateRecord(opts.Execution)
 	if err != nil {
 		return ExecutionReport{}, err
 	}
@@ -179,7 +179,7 @@ func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 	return report, nil
 }
 
-func executionReportFromRecord(record executioncore.ExecutionRecord) ExecutionReport {
+func executionReportFromRecord(record executioncore.Record) ExecutionReport {
 	return ExecutionReport{
 		ExecutionID: record.ID,
 		ProjectID:   record.ProjectID,
@@ -187,7 +187,7 @@ func executionReportFromRecord(record executioncore.ExecutionRecord) ExecutionRe
 		TicketPath:  record.TicketPath,
 		Execution: ExecutionReportExecution{
 			Status:      record.Status,
-			FailureKind: executioncore.ExecutionFailureKindFromReason(record.FailureReason),
+			FailureKind: executioncore.FailureKindFromReason(record.FailureReason),
 		},
 		Runtime: ExecutionReportRuntime{
 			Image:             record.Runtime.Image,
@@ -208,7 +208,7 @@ func executionReportFromRecord(record executioncore.ExecutionRecord) ExecutionRe
 			ResultPath:     record.Artifacts.ResultPath,
 			LogPath:        record.Artifacts.LogPath,
 			ValidationPath: record.Artifacts.ValidationPath,
-			ReportPath:     executioncore.ExecutionReportPath(record),
+			ReportPath:     executioncore.ReportPath(record),
 		},
 		Validation: ExecutionReportValidation{
 			Command: record.Runtime.ValidationCommand,
@@ -223,8 +223,8 @@ func executionReportFromRecord(record executioncore.ExecutionRecord) ExecutionRe
 	}
 }
 
-func validateExecutionReportResult(record executioncore.ExecutionRecord, result executioncore.ExecutionResult) error {
-	err := executioncore.ValidateExecutionResult(result)
+func validateExecutionReportResult(record executioncore.Record, result executioncore.Result) error {
+	err := executioncore.ValidateResult(result)
 	if err != nil {
 		return err
 	}
@@ -240,7 +240,7 @@ func validateExecutionReportResult(record executioncore.ExecutionRecord, result 
 	return nil
 }
 
-func executionReportChangedFiles(result executioncore.ExecutionResult) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary) {
+func executionReportChangedFiles(result executioncore.Result) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary) {
 	changedFiles := make([]ExecutionReportChangedFile, 0, len(result.ChangedFiles))
 
 	for _, changedFile := range result.ChangedFiles {
@@ -576,19 +576,19 @@ func writeExecutionReportChangedFiles(
 	output.WriteString("\n")
 }
 
-func executionReportValidationStatus(record executioncore.ExecutionRecord) ExecutionReportValidationStatus {
+func executionReportValidationStatus(record executioncore.Record) ExecutionReportValidationStatus {
 	if strings.TrimSpace(record.Artifacts.ValidationPath) == "" {
 		return ExecutionReportValidationNotRun
 	}
 
 	switch record.Status {
-	case executioncore.ExecutionStatusSucceeded:
+	case executioncore.StatusSucceeded:
 		return ExecutionReportValidationSucceeded
-	case executioncore.ExecutionStatusFailed,
-		executioncore.ExecutionStatusBlocked:
+	case executioncore.StatusFailed,
+		executioncore.StatusBlocked:
 		return ExecutionReportValidationFailed
-	case executioncore.ExecutionStatusPending,
-		executioncore.ExecutionStatusRunning:
+	case executioncore.StatusPending,
+		executioncore.StatusRunning:
 		return ExecutionReportValidationUnknown
 	default:
 		return ExecutionReportValidationUnknown

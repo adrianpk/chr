@@ -116,10 +116,10 @@ func piGenerationReviewCase(t *testing.T, valid bool) {
 		t.Fatal(err)
 	}
 
-	execution := executioncore.ExecutionRecord{
+	execution := executioncore.Record{
 		ID: "pi-review", ProjectID: operations.projectContext.ProjectID, TicketKey: "CHR-1", TicketPath: path,
-		Workspace: executioncore.ExecutionWorkspaceRef{Mode: workspacecore.ExecutionWorktree, ExecutionWorkspaceDir: worktree},
-		Artifacts: executioncore.ExecutionArtifacts{ArtifactID: "00001-review", RunDir: filepath.Join(worktree, "ops", "default", "run", "00001-review"), ResultPath: "result.json"},
+		Workspace: executioncore.WorkspaceRef{Mode: workspacecore.ExecutionWorktree, ExecutionWorkspaceDir: worktree},
+		Artifacts: executioncore.Artifacts{ArtifactID: "00001-review", RunDir: filepath.Join(worktree, "ops", "default", "run", "00001-review"), ResultPath: "result.json"},
 	}
 
 	result, err := operations.runAgenticReviewCycle(t.Context(), indexed, execution, core.ResultApplication{TicketPath: path}, core.ReviewWorkflowConfig{})

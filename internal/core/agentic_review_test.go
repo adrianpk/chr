@@ -123,22 +123,22 @@ func testAgenticReviewIndexedTicket(ticketPath string) ticketcore.Indexed {
 	}
 }
 
-func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) executioncore.ExecutionRecord {
-	return executioncore.ExecutionRecord{
+func testAgenticReviewExecution(projectDir, ticketPath string, now time.Time) executioncore.Record {
+	return executioncore.Record{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
 		TicketPath: ticketPath,
-		Status:     executioncore.ExecutionStatusSucceeded,
+		Status:     executioncore.StatusSucceeded,
 		CreatedAt:  now,
 		UpdatedAt:  now,
-		Runtime: executioncore.ExecutionRuntimeRef{
+		Runtime: executioncore.RuntimeRef{
 			Image:             "runtime",
 			DockerfilePath:    "Dockerfile",
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "go test ./...",
 		},
-		Artifacts: executioncore.ExecutionArtifacts{
+		Artifacts: executioncore.Artifacts{
 			ArtifactID:     "00001-ticket-run",
 			RunDir:         filepath.Join(projectDir, "ops", "default", "run", "00001-ticket-run"),
 			ResultPath:     "result.json",

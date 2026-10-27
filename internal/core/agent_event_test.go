@@ -37,6 +37,7 @@ func TestValidateAgentEventRejectsMissingRequiredFields(t *testing.T) {
 			event: func() executioncore.AgentEvent {
 				event := validAgentEvent()
 				event.Timestamp = time.Time{}
+
 				return event
 			}(),
 			want: "timestamp",
@@ -122,12 +123,12 @@ func TestFileAgentEventSinkAppendsAndReadsEventsInOrder(t *testing.T) {
 }
 
 func TestExecutionAgentEventStreamPathUsesCanonicalEvidenceDirectory(t *testing.T) {
-	record := executioncore.ExecutionRecord{Artifacts: executioncore.ExecutionArtifacts{
+	record := executioncore.Record{Artifacts: executioncore.Artifacts{
 		ArtifactID: "00001-ticket-run",
 		RunDir:     filepath.Join(t.TempDir(), "ops", "default", "run", "00001-ticket-run"),
 	}}
 
-	if got, want := executioncore.ExecutionAgentEventStreamPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "events.jsonl"); got != want {
+	if got, want := executioncore.RecordEventStreamPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "events.jsonl"); got != want {
 		t.Fatalf("ExecutionAgentEventStreamPath = %q, want %q", got, want)
 	}
 }

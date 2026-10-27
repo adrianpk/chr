@@ -13,16 +13,16 @@ import (
 func TestValidateExecutionRecordAcceptsValidRecord(t *testing.T) {
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
-	record := executioncore.ExecutionRecord{
+	record := executioncore.Record{
 		ID:        "exec-1",
 		ProjectID: "project-1",
 		TicketKey: "CHR-1",
-		Status:    executioncore.ExecutionStatusPending,
+		Status:    executioncore.StatusPending,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 
-	err := executioncore.ValidateExecutionRecord(record)
+	err := executioncore.ValidateRecord(record)
 	if err != nil {
 		t.Fatalf("ValidateExecutionRecord returned error: %v", err)
 	}
@@ -33,7 +33,7 @@ func TestValidateExecutionRecordRejectsMissingRequiredFields(t *testing.T) {
 
 	for _, test := range missingRequiredExecutionRecordTests(now) {
 		t.Run(test.name, func(t *testing.T) {
-			err := executioncore.ValidateExecutionRecord(test.record)
+			err := executioncore.ValidateRecord(test.record)
 			if err == nil {
 				t.Fatal("ValidateExecutionRecord returned nil error")
 			}
@@ -43,11 +43,11 @@ func TestValidateExecutionRecordRejectsMissingRequiredFields(t *testing.T) {
 
 func missingRequiredExecutionRecordTests(now time.Time) []struct {
 	name   string
-	record executioncore.ExecutionRecord
+	record executioncore.Record
 } {
 	return []struct {
 		name   string
-		record executioncore.ExecutionRecord
+		record executioncore.Record
 	}{
 		missingExecutionIDTest(now),
 		missingExecutionProjectIDTest(now),
@@ -59,17 +59,17 @@ func missingRequiredExecutionRecordTests(now time.Time) []struct {
 
 func missingExecutionIDTest(now time.Time) struct {
 	name   string
-	record executioncore.ExecutionRecord
+	record executioncore.Record
 } {
 	return struct {
 		name   string
-		record executioncore.ExecutionRecord
+		record executioncore.Record
 	}{
 		name: "id",
-		record: executioncore.ExecutionRecord{
+		record: executioncore.Record{
 			ProjectID: "project-1",
 			TicketKey: "CHR-1",
-			Status:    executioncore.ExecutionStatusPending,
+			Status:    executioncore.StatusPending,
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -78,17 +78,17 @@ func missingExecutionIDTest(now time.Time) struct {
 
 func missingExecutionProjectIDTest(now time.Time) struct {
 	name   string
-	record executioncore.ExecutionRecord
+	record executioncore.Record
 } {
 	return struct {
 		name   string
-		record executioncore.ExecutionRecord
+		record executioncore.Record
 	}{
 		name: "project id",
-		record: executioncore.ExecutionRecord{
+		record: executioncore.Record{
 			ID:        "exec-1",
 			TicketKey: "CHR-1",
-			Status:    executioncore.ExecutionStatusPending,
+			Status:    executioncore.StatusPending,
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -97,17 +97,17 @@ func missingExecutionProjectIDTest(now time.Time) struct {
 
 func missingExecutionTicketKeyTest(now time.Time) struct {
 	name   string
-	record executioncore.ExecutionRecord
+	record executioncore.Record
 } {
 	return struct {
 		name   string
-		record executioncore.ExecutionRecord
+		record executioncore.Record
 	}{
 		name: "ticket key",
-		record: executioncore.ExecutionRecord{
+		record: executioncore.Record{
 			ID:        "exec-1",
 			ProjectID: "project-1",
-			Status:    executioncore.ExecutionStatusPending,
+			Status:    executioncore.StatusPending,
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -116,18 +116,18 @@ func missingExecutionTicketKeyTest(now time.Time) struct {
 
 func missingExecutionCreatedAtTest(now time.Time) struct {
 	name   string
-	record executioncore.ExecutionRecord
+	record executioncore.Record
 } {
 	return struct {
 		name   string
-		record executioncore.ExecutionRecord
+		record executioncore.Record
 	}{
 		name: "created at",
-		record: executioncore.ExecutionRecord{
+		record: executioncore.Record{
 			ID:        "exec-1",
 			ProjectID: "project-1",
 			TicketKey: "CHR-1",
-			Status:    executioncore.ExecutionStatusPending,
+			Status:    executioncore.StatusPending,
 			UpdatedAt: now,
 		},
 	}
@@ -135,18 +135,18 @@ func missingExecutionCreatedAtTest(now time.Time) struct {
 
 func missingExecutionUpdatedAtTest(now time.Time) struct {
 	name   string
-	record executioncore.ExecutionRecord
+	record executioncore.Record
 } {
 	return struct {
 		name   string
-		record executioncore.ExecutionRecord
+		record executioncore.Record
 	}{
 		name: "updated at",
-		record: executioncore.ExecutionRecord{
+		record: executioncore.Record{
 			ID:        "exec-1",
 			ProjectID: "project-1",
 			TicketKey: "CHR-1",
-			Status:    executioncore.ExecutionStatusPending,
+			Status:    executioncore.StatusPending,
 			CreatedAt: now,
 		},
 	}
@@ -155,16 +155,16 @@ func missingExecutionUpdatedAtTest(now time.Time) struct {
 func TestValidateExecutionRecordRejectsInvalidStatus(t *testing.T) {
 	now := time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC)
 
-	record := executioncore.ExecutionRecord{
+	record := executioncore.Record{
 		ID:        "exec-1",
 		ProjectID: "project-1",
 		TicketKey: "CHR-1",
-		Status:    executioncore.ExecutionStatus("unknown"),
+		Status:    executioncore.Status("unknown"),
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 
-	err := executioncore.ValidateExecutionRecord(record)
+	err := executioncore.ValidateRecord(record)
 	if err == nil {
 		t.Fatal("ValidateExecutionRecord returned nil error")
 	}
@@ -175,18 +175,18 @@ func TestValidateExecutionRecordRejectsFinishedBeforeStarted(t *testing.T) {
 	startedAt := now
 	finishedAt := now.Add(-time.Minute)
 
-	record := executioncore.ExecutionRecord{
+	record := executioncore.Record{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
-		Status:     executioncore.ExecutionStatusFailed,
+		Status:     executioncore.StatusFailed,
 		CreatedAt:  now,
 		StartedAt:  &startedAt,
 		FinishedAt: &finishedAt,
 		UpdatedAt:  now,
 	}
 
-	err := executioncore.ValidateExecutionRecord(record)
+	err := executioncore.ValidateRecord(record)
 	if err == nil {
 		t.Fatal("ValidateExecutionRecord returned nil error")
 	}
@@ -213,7 +213,7 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 		ValidationCommand:     "make verify",
 	}
 
-	record := executioncore.ExecutionRecordFromRuntimePlan(executioncore.ExecutionRecord{ID: "exec-1"}, plan)
+	record := executioncore.RecordFromRuntimePlan(executioncore.Record{ID: "exec-1"}, plan)
 
 	if record.Runtime.Image != plan.Image {
 		t.Fatalf("Runtime.Image = %q, want %q", record.Runtime.Image, plan.Image)
@@ -249,12 +249,12 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 }
 
 func TestExecutionStatusValid(t *testing.T) {
-	validStatuses := []executioncore.ExecutionStatus{
-		executioncore.ExecutionStatusPending,
-		executioncore.ExecutionStatusRunning,
-		executioncore.ExecutionStatusSucceeded,
-		executioncore.ExecutionStatusFailed,
-		executioncore.ExecutionStatusBlocked,
+	validStatuses := []executioncore.Status{
+		executioncore.StatusPending,
+		executioncore.StatusRunning,
+		executioncore.StatusSucceeded,
+		executioncore.StatusFailed,
+		executioncore.StatusBlocked,
 	}
 
 	for _, status := range validStatuses {
@@ -263,7 +263,7 @@ func TestExecutionStatusValid(t *testing.T) {
 		}
 	}
 
-	if executioncore.ExecutionStatus("unknown").Valid() {
+	if executioncore.Status("unknown").Valid() {
 		t.Fatal("unknown status is valid, want invalid")
 	}
 }

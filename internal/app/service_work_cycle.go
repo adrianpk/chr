@@ -18,7 +18,7 @@ type agentWorkPostDevelopmentOptions struct {
 	Ticket       ticketcore.Indexed
 	Policy       core.IntegrationCyclePolicy
 	Record       executioncore.LoopRunRecord
-	Execution    executioncore.ExecutionRecord
+	Execution    executioncore.Record
 	Application  core.ResultApplication
 	Selection    agentWorkLoopSelection
 	ReviewConfig core.ReviewWorkflowConfig

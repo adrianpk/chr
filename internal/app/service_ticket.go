@@ -7,7 +7,7 @@ import (
 )
 
 type ticketExecutionInput struct {
-	Record  executioncore.ExecutionRecord
+	Record  executioncore.Record
 	Runtime harnessruntime.ValidationResult
 	Events  ticketExecutionEvents
 }

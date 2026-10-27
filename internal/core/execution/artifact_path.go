@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
-// ExecutionReportPath executes the corresponding package operation.
-func ExecutionReportPath(record ExecutionRecord) string {
+// ReportPath executes the corresponding package operation.
+func ReportPath(record Record) string {
 	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
 		return ""
 	}

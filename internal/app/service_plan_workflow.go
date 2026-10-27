@@ -82,7 +82,7 @@ func (s service) AdoptWorkflowPlan(ctx context.Context, opts core.WorkflowPlanAd
 }
 
 func (s service) checkWorkflowAdoptionExecutions(ctx context.Context, keys []string) (err error) {
-	repository, err := executioncore.NewExecutionRepository(ctx, s.env, s.assetsFS)
+	repository, err := executioncore.NewRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func (s service) checkWorkflowAdoptionExecutions(ctx context.Context, keys []str
 		}
 
 		for _, record := range records {
-			if record.Status == executioncore.ExecutionStatusRunning || record.Status == executioncore.ExecutionStatusPending {
+			if record.Status == executioncore.StatusRunning || record.Status == executioncore.StatusPending {
 				return fmt.Errorf("legacy task %s has unfinished execution ownership", key)
 			}
 		}

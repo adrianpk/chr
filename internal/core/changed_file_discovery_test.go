@@ -122,7 +122,7 @@ func writeChangedFileDiscoveryFile(t *testing.T, projectDir, relativePath, conte
 	}
 }
 
-func assertChangedFilePaths(t *testing.T, changedFiles []executioncore.ExecutionResultChangedFile, want []string) {
+func assertChangedFilePaths(t *testing.T, changedFiles []executioncore.ResultChangedFile, want []string) {
 	t.Helper()
 
 	if len(changedFiles) != len(want) {

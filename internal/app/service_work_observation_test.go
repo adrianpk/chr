@@ -222,14 +222,14 @@ func TestWorkObservationRetained(t *testing.T) {
 func seedObservedWorkResults(t *testing.T, operations service) {
 	t.Helper()
 
-	repository, err := executioncore.NewExecutionRepository(t.Context(), operations.env, operations.assetsFS)
+	repository, err := executioncore.NewRepository(t.Context(), operations.env, operations.assetsFS)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	now := time.Now().UTC()
-	for _, status := range []executioncore.ExecutionStatus{executioncore.ExecutionStatusRunning, executioncore.ExecutionStatusSucceeded, executioncore.ExecutionStatusFailed} {
-		record := executioncore.ExecutionRecord{ID: string(status), ProjectID: operations.projectContext.ProjectID, TicketKey: "PRJ-" + string(status), Status: status, CreatedAt: now, UpdatedAt: now}
+	for _, status := range []executioncore.Status{executioncore.StatusRunning, executioncore.StatusSucceeded, executioncore.StatusFailed} {
+		record := executioncore.Record{ID: string(status), ProjectID: operations.projectContext.ProjectID, TicketKey: "PRJ-" + string(status), Status: status, CreatedAt: now, UpdatedAt: now}
 		if err = repository.CreateExecution(t.Context(), record); err != nil {
 			t.Fatal(err)
 		}

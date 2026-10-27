@@ -36,8 +36,8 @@ func agentWorkLoopEventSink(projectDir string, record executioncore.LoopRunRecor
 	return executioncore.NewFileAgentEventSink(executioncore.AgentEventStreamPath(plan.RunArtifactDir))
 }
 
-func agentWorkExecutionEventSink(record executioncore.ExecutionRecord) executioncore.AgentEventSink {
-	return executioncore.NewFileAgentEventSink(executioncore.ExecutionAgentEventStreamPath(record))
+func agentWorkExecutionEventSink(record executioncore.Record) executioncore.AgentEventSink {
+	return executioncore.NewFileAgentEventSink(executioncore.RecordEventStreamPath(record))
 }
 
 func emitAgentWorkEvent(ctx context.Context, sink executioncore.AgentEventSink, event executioncore.AgentEvent) {
@@ -78,7 +78,7 @@ func agentWorkApplicationRefs(plan ticketApplyResultPlan) executioncore.AgentEve
 		"runtime_log_path":        plan.Application.Evidence.LogPath,
 		"validation_command":      plan.Application.Evidence.ValidationCommand,
 		"validation_log_path":     plan.Application.Evidence.ValidationPath,
-		"execution_report_path":   executioncore.ExecutionReportPath(plan.Record),
+		"execution_report_path":   executioncore.ReportPath(plan.Record),
 		"result_application_path": plan.ReportPath,
 	})
 }
@@ -182,7 +182,7 @@ func emitTicketSelectedAgentEvent(ctx context.Context, sink executioncore.AgentE
 	})
 }
 
-func emitCycleRehydratedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.ExecutionRecord, application core.ResultApplication) {
+func emitCycleRehydratedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.Record, application core.ResultApplication) {
 	emitAgentWorkEvent(ctx, sink, executioncore.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -192,7 +192,7 @@ func emitCycleRehydratedAgentEvent(ctx context.Context, sink executioncore.Agent
 		Message:     fmt.Sprintf("%s cycle rehydrated: ticket status %s", application.TicketKey, application.TicketStatus),
 		Refs: compactAppAgentEventRefs(executioncore.AgentEventRefs{
 			"ticket_path":           application.TicketPath,
-			"execution_report_path": executioncore.ExecutionReportPath(execution),
+			"execution_report_path": executioncore.ReportPath(execution),
 			"runtime_log_path":      application.Evidence.LogPath,
 			"validation_log_path":   application.Evidence.ValidationPath,
 		}),
@@ -211,7 +211,7 @@ func emitReviewStartedAgentEvent(ctx context.Context, sink executioncore.AgentEv
 	})
 }
 
-func emitReviewFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.ExecutionRecord, ticket ticketcore.Indexed) {
+func emitReviewFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.Record, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, executioncore.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -235,7 +235,7 @@ func emitRepairStartedAgentEvent(ctx context.Context, sink executioncore.AgentEv
 	})
 }
 
-func emitRepairFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.ExecutionRecord, ticket ticketcore.Indexed) {
+func emitRepairFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.Record, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, executioncore.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -248,7 +248,7 @@ func emitRepairFinishedAgentEvent(ctx context.Context, sink executioncore.AgentE
 	})
 }
 
-func emitMergeStartedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.ExecutionRecord, ticket ticketcore.Indexed) {
+func emitMergeStartedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.Record, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, executioncore.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -260,7 +260,7 @@ func emitMergeStartedAgentEvent(ctx context.Context, sink executioncore.AgentEve
 	})
 }
 
-func emitMergeFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.ExecutionRecord, result core.TicketMergeCommandResult) {
+func emitMergeFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEventSink, record executioncore.LoopRunRecord, execution executioncore.Record, result core.TicketMergeCommandResult) {
 	emitAgentWorkEvent(ctx, sink, executioncore.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -273,7 +273,7 @@ func emitMergeFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEv
 	})
 }
 
-func emitBranchPreparedAgentEvent(ctx context.Context, events ticketExecutionEvents, record executioncore.ExecutionRecord) {
+func emitBranchPreparedAgentEvent(ctx context.Context, events ticketExecutionEvents, record executioncore.Record) {
 	if record.Workspace.Mode != workspacecore.ExecutionWorktree {
 		return
 	}
@@ -296,7 +296,7 @@ func emitBranchPreparedAgentEvent(ctx context.Context, events ticketExecutionEve
 	})
 }
 
-func emitExecutionCreatedAgentEvent(ctx context.Context, events ticketExecutionEvents, record executioncore.ExecutionRecord) {
+func emitExecutionCreatedAgentEvent(ctx context.Context, events ticketExecutionEvents, record executioncore.Record) {
 	emitAgentWorkEvent(ctx, events.Sink, executioncore.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      events.LoopID,
@@ -416,7 +416,7 @@ func nonEmptyAgentWorkEventValue(value, fallback string) string {
 
 type reviewStartedEvent struct {
 	Record    executioncore.LoopRunRecord
-	Execution executioncore.ExecutionRecord
+	Execution executioncore.Record
 	Ticket    ticketcore.Indexed
 	Mode      core.IntegrationCycleMode
 }

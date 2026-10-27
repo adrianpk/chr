@@ -96,25 +96,25 @@ func checkServiceWorkflowProjection(t *testing.T, service service, project strin
 func TestServiceWorkflowAdoptionOwnership(t *testing.T) {
 	cases := []struct {
 		name    string
-		status  executioncore.ExecutionStatus
+		status  executioncore.Status
 		blocked bool
 	}{
-		{"pending", executioncore.ExecutionStatusPending, true},
-		{"running", executioncore.ExecutionStatusRunning, true},
-		{"failed history", executioncore.ExecutionStatusFailed, false},
+		{"pending", executioncore.StatusPending, true},
+		{"running", executioncore.StatusRunning, true},
+		{"failed history", executioncore.StatusFailed, false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			service := newTestService(t, newTestWorkspace(t))
 
-			repository, err := executioncore.NewExecutionRepository(t.Context(), service.env, service.assetsFS)
+			repository, err := executioncore.NewRepository(t.Context(), service.env, service.assetsFS)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			now := time.Now().UTC()
 
-			record := executioncore.ExecutionRecord{ID: "legacy-attempt", ProjectID: service.projectContext.ProjectID, TicketKey: "PRJ-1", Status: tc.status, CreatedAt: now, UpdatedAt: now}
+			record := executioncore.Record{ID: "legacy-attempt", ProjectID: service.projectContext.ProjectID, TicketKey: "PRJ-1", Status: tc.status, CreatedAt: now, UpdatedAt: now}
 			if err := repository.CreateExecution(t.Context(), record); err != nil {
 				t.Fatal(err)
 			}

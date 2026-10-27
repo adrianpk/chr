@@ -21,7 +21,7 @@ func TestExecutionArtifactDriftServiceReportsPresentArtifacts(t *testing.T) {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
-	diagnostics, err := executioncore.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	diagnostics, err := executioncore.NewArtifactDriftService(repository).ListDiagnostics(
 		context.Background(),
 		record.ProjectID,
 	)
@@ -33,7 +33,7 @@ func TestExecutionArtifactDriftServiceReportsPresentArtifacts(t *testing.T) {
 		t.Fatalf("len(diagnostics) = %d, want 1", len(diagnostics))
 	}
 
-	if diagnostics[0].Status != executioncore.ExecutionArtifactDriftStatusOK {
+	if diagnostics[0].Status != executioncore.ArtifactDriftStatusOK {
 		t.Fatalf("Status = %q, want ok", diagnostics[0].Status)
 	}
 
@@ -59,7 +59,7 @@ func TestExecutionArtifactDriftServiceReportsMissingArtifacts(t *testing.T) {
 		t.Fatalf("CreateExecution returned error: %v", err)
 	}
 
-	diagnostics, err := executioncore.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	diagnostics, err := executioncore.NewArtifactDriftService(repository).ListDiagnostics(
 		context.Background(),
 		record.ProjectID,
 	)
@@ -67,7 +67,7 @@ func TestExecutionArtifactDriftServiceReportsMissingArtifacts(t *testing.T) {
 		t.Fatalf("ListDiagnostics returned error: %v", err)
 	}
 
-	if diagnostics[0].Status != executioncore.ExecutionArtifactDriftStatusMissing {
+	if diagnostics[0].Status != executioncore.ArtifactDriftStatusMissing {
 		t.Fatalf("Status = %q, want missing artifacts", diagnostics[0].Status)
 	}
 
@@ -78,13 +78,13 @@ func TestExecutionArtifactDriftServiceReportsMissingArtifacts(t *testing.T) {
 	assertArtifactExists(t, diagnostics[0], "report", false)
 }
 
-func testExecutionArtifactRecord(t *testing.T, now time.Time) executioncore.ExecutionRecord {
+func testExecutionArtifactRecord(t *testing.T, now time.Time) executioncore.Record {
 	t.Helper()
 
 	runDir := filepath.Join(t.TempDir(), ".chr", "default", "runtime", "runs", "exec-1")
 
 	record := testExecutionRecord(now)
-	record.Artifacts = executioncore.ExecutionArtifacts{
+	record.Artifacts = executioncore.Artifacts{
 		RunDir:         runDir,
 		ResultPath:     filepath.Join(runDir, "result.json"),
 		LogPath:        filepath.Join(runDir, "runtime.log"),
@@ -94,7 +94,7 @@ func testExecutionArtifactRecord(t *testing.T, now time.Time) executioncore.Exec
 	return record
 }
 
-func writeExecutionArtifacts(t *testing.T, record executioncore.ExecutionRecord) {
+func writeExecutionArtifacts(t *testing.T, record executioncore.Record) {
 	t.Helper()
 
 	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
@@ -106,7 +106,7 @@ func writeExecutionArtifacts(t *testing.T, record executioncore.ExecutionRecord)
 		record.Artifacts.ResultPath,
 		record.Artifacts.LogPath,
 		record.Artifacts.ValidationPath,
-		executioncore.ExecutionReportPath(record),
+		executioncore.ReportPath(record),
 	} {
 		err = os.WriteFile(path, []byte("artifact\n"), 0o644)
 		if err != nil {
@@ -117,7 +117,7 @@ func writeExecutionArtifacts(t *testing.T, record executioncore.ExecutionRecord)
 
 func assertArtifactExists(
 	t *testing.T,
-	diagnostic executioncore.ExecutionArtifactDriftDiagnostic,
+	diagnostic executioncore.ArtifactDriftDiagnostic,
 	name string,
 	want bool,
 ) {

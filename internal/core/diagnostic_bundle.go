@@ -20,7 +20,7 @@ type DiagnosticBundle struct {
 	ProjectID              string
 	MigrationStatus        database.MigrationStatus
 	RegistryDiagnostics    []projectcore.Diagnostic
-	ExecutionArtifactDrift []executioncore.ExecutionArtifactDriftDiagnostic
+	ExecutionArtifactDrift []executioncore.ArtifactDriftDiagnostic
 	RuntimeCleanupPreview  RuntimeArtifactCleanupPreview
 	Reports                []ReportListEntry
 }
@@ -121,7 +121,7 @@ func writeDiagnosticBundleRegistry(output *strings.Builder, diagnostics []projec
 
 func writeDiagnosticBundleExecutionArtifacts(
 	output *strings.Builder,
-	diagnostics []executioncore.ExecutionArtifactDriftDiagnostic,
+	diagnostics []executioncore.ArtifactDriftDiagnostic,
 ) {
 	output.WriteString("## Execution Artifacts\n\n")
 

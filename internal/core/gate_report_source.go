@@ -35,7 +35,7 @@ func loadGateExecutionReport(report ReportListEntry) gate.ExecutionReport {
 		return item
 	}
 
-	result, err := executioncore.LoadExecutionResult(resultPath)
+	result, err := executioncore.LoadResult(resultPath)
 	if err != nil {
 		item.FailureReason = err.Error()
 

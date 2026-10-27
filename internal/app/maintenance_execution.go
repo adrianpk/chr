@@ -58,7 +58,7 @@ func (factory commandFactory) runMaintenanceExecutionArtifacts(ctx context.Conte
 		return err
 	}
 
-	repository, err := executioncore.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
+	repository, err := executioncore.NewRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (factory commandFactory) runMaintenanceExecutionArtifacts(ctx context.Conte
 		_ = repository.Close()
 	}()
 
-	diagnostics, err := executioncore.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	diagnostics, err := executioncore.NewArtifactDriftService(repository).ListDiagnostics(
 		ctx,
 		projectContext.ProjectID,
 	)
@@ -97,7 +97,7 @@ func (factory commandFactory) runMaintenanceExecutionCleanupPreview(ctx context.
 		return err
 	}
 
-	repository, err := executioncore.NewExecutionRepository(ctx, env, factory.deps.assetsFS)
+	repository, err := executioncore.NewRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -119,12 +119,12 @@ func (factory commandFactory) runMaintenanceExecutionCleanupPreview(ctx context.
 	return printRuntimeArtifactCleanupPreview(factory.io.Stdout, preview)
 }
 
-func printExecutionArtifactDriftDiagnostics(stdout io.Writer, diagnostics []executioncore.ExecutionArtifactDriftDiagnostic) error {
+func printExecutionArtifactDriftDiagnostics(stdout io.Writer, diagnostics []executioncore.ArtifactDriftDiagnostic) error {
 	drifted := 0
 	missingArtifacts := 0
 
 	for _, diagnostic := range diagnostics {
-		if diagnostic.Status != executioncore.ExecutionArtifactDriftStatusOK {
+		if diagnostic.Status != executioncore.ArtifactDriftStatusOK {
 			drifted++
 		}
 
@@ -183,7 +183,7 @@ func printRuntimeArtifactCleanupPreview(stdout io.Writer, preview core.RuntimeAr
 	return nil
 }
 
-func printExecutionArtifactDriftDiagnostic(stdout io.Writer, diagnostic executioncore.ExecutionArtifactDriftDiagnostic) error {
+func printExecutionArtifactDriftDiagnostic(stdout io.Writer, diagnostic executioncore.ArtifactDriftDiagnostic) error {
 	_, err := fmt.Fprintf(
 		stdout,
 		"execution: %s ticket: %s status: %s artifact_status: %s\n",

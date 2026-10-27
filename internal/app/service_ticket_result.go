@@ -17,18 +17,18 @@ import (
 
 type ticketApplyResultPlan struct {
 	ProjectContext commandProjectContext
-	Record         executioncore.ExecutionRecord
-	Result         executioncore.ExecutionResult
+	Record         executioncore.Record
+	Result         executioncore.Result
 	Application    core.ResultApplication
 	ReportPath     string
 }
 
-func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext commandProjectContext, record executioncore.ExecutionRecord) (ticketApplyResultPlan, error) {
+func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext commandProjectContext, record executioncore.Record) (ticketApplyResultPlan, error) {
 	if record.ProjectID != projectContext.ProjectID {
 		return ticketApplyResultPlan{}, fmt.Errorf("execution project mismatch: %s", record.ProjectID)
 	}
 
-	result, err := executioncore.LoadExecutionResult(record.Artifacts.ResultPath)
+	result, err := executioncore.LoadResult(record.Artifacts.ResultPath)
 	if err != nil {
 		return ticketApplyResultPlan{}, err
 	}
@@ -68,7 +68,7 @@ func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext com
 	}, nil
 }
 
-func discoverTicketApplyResultChangedFiles(ctx context.Context, record executioncore.ExecutionRecord) ([]core.ResultApplicationChangedFile, error) {
+func discoverTicketApplyResultChangedFiles(ctx context.Context, record executioncore.Record) ([]core.ResultApplicationChangedFile, error) {
 	if record.Workspace.Mode != workspacecore.ExecutionWorktree || record.Workspace.ExecutionWorkspaceDir == "" {
 		return nil, nil
 	}
@@ -89,7 +89,7 @@ func discoverTicketApplyResultChangedFiles(ctx context.Context, record execution
 	return result, nil
 }
 
-func ticketResultApplicationPath(record executioncore.ExecutionRecord) string {
+func ticketResultApplicationPath(record executioncore.Record) string {
 	if record.Artifacts.ArtifactID != "" {
 		return filepath.Join(record.Artifacts.RunDir, "evidence", "result-application.md")
 	}
@@ -164,7 +164,7 @@ func writeTicketResultState(ctx context.Context, plan ticketApplyResultPlan, app
 	})
 }
 
-func refreshTicketArtifactMetadata(record executioncore.ExecutionRecord) error {
+func refreshTicketArtifactMetadata(record executioncore.Record) error {
 	if record.Artifacts.ArtifactID == "" {
 		return nil
 	}

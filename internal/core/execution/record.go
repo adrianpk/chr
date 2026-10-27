@@ -8,32 +8,32 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// ExecutionStatus defines a package boundary type.
-type ExecutionStatus string
+// Status defines a package boundary type.
+type Status string
 
 const (
-	// ExecutionStatusPending defines a package boundary constant.
-	ExecutionStatusPending ExecutionStatus = "pending"
-	// ExecutionStatusRunning defines a package boundary constant.
-	ExecutionStatusRunning ExecutionStatus = "running"
-	// ExecutionStatusSucceeded defines a package boundary constant.
-	ExecutionStatusSucceeded ExecutionStatus = "succeeded"
-	// ExecutionStatusFailed defines a package boundary constant.
-	ExecutionStatusFailed ExecutionStatus = "failed"
-	// ExecutionStatusBlocked defines a package boundary constant.
-	ExecutionStatusBlocked ExecutionStatus = "blocked"
+	// StatusPending defines a package boundary constant.
+	StatusPending Status = "pending"
+	// StatusRunning defines a package boundary constant.
+	StatusRunning Status = "running"
+	// StatusSucceeded defines a package boundary constant.
+	StatusSucceeded Status = "succeeded"
+	// StatusFailed defines a package boundary constant.
+	StatusFailed Status = "failed"
+	// StatusBlocked defines a package boundary constant.
+	StatusBlocked Status = "blocked"
 )
 
-// ExecutionRecord describes a package boundary value.
-type ExecutionRecord struct {
+// Record describes a package boundary value.
+type Record struct {
 	ID            string
 	ProjectID     string
 	TicketKey     string
 	TicketPath    string
-	Status        ExecutionStatus
-	Runtime       ExecutionRuntimeRef
-	Workspace     ExecutionWorkspaceRef
-	Artifacts     ExecutionArtifacts
+	Status        Status
+	Runtime       RuntimeRef
+	Workspace     WorkspaceRef
+	Artifacts     Artifacts
 	FailureReason string
 	CreatedAt     time.Time
 	StartedAt     *time.Time
@@ -41,16 +41,16 @@ type ExecutionRecord struct {
 	UpdatedAt     time.Time
 }
 
-// ExecutionRuntimeRef describes a package boundary value.
-type ExecutionRuntimeRef struct {
+// RuntimeRef describes a package boundary value.
+type RuntimeRef struct {
 	Image             string
 	DockerfilePath    string
 	ContainerWorkdir  string
 	ValidationCommand string
 }
 
-// ExecutionWorkspaceRef describes where the agent work ran.
-type ExecutionWorkspaceRef struct {
+// WorkspaceRef describes where the agent work ran.
+type WorkspaceRef struct {
 	Mode                  workspacecore.ExecutionMode
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
@@ -59,8 +59,8 @@ type ExecutionWorkspaceRef struct {
 	TicketBranch          string
 }
 
-// ExecutionArtifacts describes a package boundary value.
-type ExecutionArtifacts struct {
+// Artifacts describes a package boundary value.
+type Artifacts struct {
 	ArtifactID     string
 	RunDir         string
 	ResultPath     string
@@ -68,15 +68,15 @@ type ExecutionArtifacts struct {
 	ValidationPath string
 }
 
-// ExecutionRecordFromRuntimePlan executes the corresponding package operation.
-func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan harnessruntime.Plan) ExecutionRecord {
-	record.Runtime = ExecutionRuntimeRef{
+// RecordFromRuntimePlan executes the corresponding package operation.
+func RecordFromRuntimePlan(record Record, plan harnessruntime.Plan) Record {
+	record.Runtime = RuntimeRef{
 		Image:             plan.Image,
 		DockerfilePath:    plan.DockerfilePath,
 		ContainerWorkdir:  plan.ContainerWorkdir,
 		ValidationCommand: plan.ValidationCommand,
 	}
-	record.Workspace = ExecutionWorkspaceRef{
+	record.Workspace = WorkspaceRef{
 		Mode:                  plan.WorkspaceMode,
 		ProjectCheckoutDir:    plan.ProjectCheckoutDir,
 		ExecutionWorkspaceDir: plan.ExecutionWorkspaceDir,
@@ -84,7 +84,7 @@ func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan harnessruntime.
 		BaseSHA:               plan.WorkspaceBaseSHA,
 		TicketBranch:          plan.TicketBranch,
 	}
-	record.Artifacts = ExecutionArtifacts{
+	record.Artifacts = Artifacts{
 		ArtifactID:     plan.ArtifactID,
 		RunDir:         plan.RunArtifactDir,
 		ResultPath:     plan.ResultPath,
@@ -95,8 +95,8 @@ func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan harnessruntime.
 	return record
 }
 
-// ValidateExecutionRecord validates the corresponding package boundary value.
-func ValidateExecutionRecord(record ExecutionRecord) error {
+// ValidateRecord validates the corresponding package boundary value.
+func ValidateRecord(record Record) error {
 	if record.ID == "" {
 		return fmt.Errorf("execution id is required")
 	}
@@ -129,13 +129,13 @@ func ValidateExecutionRecord(record ExecutionRecord) error {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s ExecutionStatus) Valid() bool {
+func (s Status) Valid() bool {
 	switch s {
-	case ExecutionStatusPending,
-		ExecutionStatusRunning,
-		ExecutionStatusSucceeded,
-		ExecutionStatusFailed,
-		ExecutionStatusBlocked:
+	case StatusPending,
+		StatusRunning,
+		StatusSucceeded,
+		StatusFailed,
+		StatusBlocked:
 		return true
 	default:
 		return false

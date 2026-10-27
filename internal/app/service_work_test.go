@@ -122,7 +122,7 @@ func TestServiceStartAgentWorkTicketPreparesWorktreeWorkspace(t *testing.T) {
 	assertPreparedTicketWorktreeWorkspace(t, ticketPath, preparer.results[0], *result.Execution)
 }
 
-func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared executioncore.WorktreePrepareResult, execution executioncore.ExecutionRecord) {
+func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prepared executioncore.WorktreePrepareResult, execution executioncore.Record) {
 	t.Helper()
 
 	if prepared.Plan.Branch != "chr/chr-1-ready-frontend" {
@@ -689,7 +689,7 @@ func assertRunAllAgentEventStreams(t *testing.T, projectDir string, result Agent
 	})
 
 	execution := result.Executions[0]
-	executionStream := readAgentEventStream(t, executioncore.ExecutionAgentEventStreamPath(execution))
+	executionStream := readAgentEventStream(t, executioncore.RecordEventStreamPath(execution))
 	assertAgentEventPhases(t, executionStream.Events, []executioncore.AgentEventPhase{
 		executioncore.AgentEventPhaseExecutionCreated,
 		executioncore.AgentEventPhaseRuntimePrepared,
@@ -998,7 +998,7 @@ func assertTicketContains(t *testing.T, ticketPath, want string) {
 	}
 }
 
-func assertRepairExecutionContextContains(t *testing.T, execution executioncore.ExecutionRecord, want string) {
+func assertRepairExecutionContextContains(t *testing.T, execution executioncore.Record, want string) {
 	t.Helper()
 
 	contextPath := filepath.Join(execution.Artifacts.RunDir, "files", "context.md")

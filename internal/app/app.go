@@ -425,7 +425,7 @@ func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectCont
 	return tui.NewWorkReadinessView(report), nil
 }
 
-func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessruntime.Config, executions []executioncore.ExecutionRecord, loops []executioncore.LoopRunRecord) []executioncore.AgentEvent {
+func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessruntime.Config, executions []executioncore.Record, loops []executioncore.LoopRunRecord) []executioncore.AgentEvent {
 	events := []executioncore.AgentEvent{}
 
 	loop := latestTUILoopRun(loops)
@@ -443,7 +443,7 @@ func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessru
 
 	execution := latestTUIExecution(executions)
 	if execution.ID != "" {
-		events = append(events, readTUIAgentEvents(ctx, executioncore.ExecutionAgentEventStreamPath(execution))...)
+		events = append(events, readTUIAgentEvents(ctx, executioncore.RecordEventStreamPath(execution))...)
 	}
 
 	return recentTUIAgentEvents(events, 50)
@@ -498,8 +498,8 @@ func tuiAgentEventKey(event executioncore.AgentEvent) string {
 		event.Message
 }
 
-func latestTUIExecution(executions []executioncore.ExecutionRecord) executioncore.ExecutionRecord {
-	var latest executioncore.ExecutionRecord
+func latestTUIExecution(executions []executioncore.Record) executioncore.Record {
+	var latest executioncore.Record
 	for _, execution := range executions {
 		if latest.ID == "" || execution.UpdatedAt.After(latest.UpdatedAt) {
 			latest = execution
@@ -548,8 +548,8 @@ func loadTUIExecutions(
 	env core.UserEnvironment,
 	projectID string,
 	assetsFS fs.FS,
-) ([]executioncore.ExecutionRecord, error) {
-	repository, err := executioncore.NewExecutionRepository(ctx, env, assetsFS)
+) ([]executioncore.Record, error) {
+	repository, err := executioncore.NewRepository(ctx, env, assetsFS)
 	if err != nil {
 		return nil, err
 	}

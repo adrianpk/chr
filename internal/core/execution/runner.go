@@ -29,31 +29,31 @@ func (e OSHarnessExecutor) Run(ctx context.Context, command harnessruntime.Comma
 
 	err := cmd.Run()
 	if err != nil {
-		return NewExecutionFailure(ExecutionFailureHarness, fmt.Errorf("run harness command %s: %w", command.Program, err))
+		return NewFailure(FailureHarness, fmt.Errorf("run harness command %s: %w", command.Program, err))
 	}
 
 	return nil
 }
 
-// ExecutionRunner describes a package boundary value.
-type ExecutionRunner struct {
-	Repository ExecutionRepository
+// Runner describes a package boundary value.
+type Runner struct {
+	Repository Repository
 	Executor   HarnessExecutor
 	EventSink  AgentEventSink
 	Now        func() time.Time
 }
 
-// RunExecutionOptions describes a package boundary value.
-type RunExecutionOptions struct {
-	Record     ExecutionRecord
+// RunOptions describes a package boundary value.
+type RunOptions struct {
+	Record     Record
 	Invocation harnessruntime.Invocation
 	LoopID     string
 	DryRun     bool
 }
 
-// NewExecutionRunner constructs the corresponding package service or value.
-func NewExecutionRunner(repository ExecutionRepository, executor HarnessExecutor) ExecutionRunner {
-	return ExecutionRunner{
+// NewRunner constructs the corresponding package service or value.
+func NewRunner(repository Repository, executor HarnessExecutor) Runner {
+	return Runner{
 		Repository: repository,
 		Executor:   executor,
 		Now:        time.Now,
@@ -61,7 +61,7 @@ func NewExecutionRunner(repository ExecutionRepository, executor HarnessExecutor
 }
 
 // Run executes the configured operation.
-func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (ExecutionRecord, error) {
+func (r Runner) Run(ctx context.Context, opts RunOptions) (Record, error) {
 	record := opts.Record
 	if opts.DryRun {
 		return record, nil
@@ -69,17 +69,17 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 
 	err := r.validate()
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	err = createExecutionArtifactDir(record)
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	output, err := openExecutionOutputArtifacts(record.Artifacts)
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	defer func() {
@@ -93,7 +93,7 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 
 	record, err = r.markExecutionRunning(ctx, record)
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	err = r.runHarness(ctx, opts, record, output)
@@ -113,7 +113,7 @@ func (r ExecutionRunner) Run(ctx context.Context, opts RunExecutionOptions) (Exe
 	return r.markExecutionSucceeded(ctx, record)
 }
 
-func (r ExecutionRunner) validate() error {
+func (r Runner) validate() error {
 	if r.Repository == nil {
 		return fmt.Errorf("execution repository is required")
 	}
@@ -125,7 +125,7 @@ func (r ExecutionRunner) validate() error {
 	return nil
 }
 
-func createExecutionArtifactDir(record ExecutionRecord) error {
+func createExecutionArtifactDir(record Record) error {
 	err := os.MkdirAll(record.Artifacts.RunDir, 0o755)
 	if err != nil {
 		return fmt.Errorf("create execution artifact directory: %w", err)
@@ -134,29 +134,29 @@ func createExecutionArtifactDir(record ExecutionRecord) error {
 	return nil
 }
 
-func (r ExecutionRunner) markExecutionRunning(ctx context.Context, record ExecutionRecord) (ExecutionRecord, error) {
+func (r Runner) markExecutionRunning(ctx context.Context, record Record) (Record, error) {
 	startedAt := r.now()
-	record.Status = ExecutionStatusRunning
+	record.Status = StatusRunning
 	record.StartedAt = &startedAt
 	record.UpdatedAt = startedAt
 
 	err := r.Repository.UpdateExecution(ctx, record)
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	return record, nil
 }
 
-func (r ExecutionRunner) markExecutionSucceeded(ctx context.Context, record ExecutionRecord) (ExecutionRecord, error) {
+func (r Runner) markExecutionSucceeded(ctx context.Context, record Record) (Record, error) {
 	finishedAt := r.now()
-	record.Status = ExecutionStatusSucceeded
+	record.Status = StatusSucceeded
 	record.FinishedAt = &finishedAt
 	record.UpdatedAt = finishedAt
 
 	err := r.Repository.UpdateExecution(ctx, record)
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	return record, nil
@@ -167,7 +167,7 @@ type executionOutputArtifacts struct {
 	validation *os.File
 }
 
-func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (executionOutputArtifacts, error) {
+func openExecutionOutputArtifacts(artifacts Artifacts) (executionOutputArtifacts, error) {
 	logFile, err := os.OpenFile(artifacts.LogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o644)
 	if err != nil {
 		return executionOutputArtifacts{}, fmt.Errorf("open execution log artifact: %w", err)
@@ -186,7 +186,7 @@ func openExecutionOutputArtifacts(artifacts ExecutionArtifacts) (executionOutput
 	return executionOutputArtifacts{log: logFile, validation: validationFile}, nil
 }
 
-func (r ExecutionRunner) runHarness(ctx context.Context, opts RunExecutionOptions, record ExecutionRecord, output executionOutputArtifacts) error {
+func (r Runner) runHarness(ctx context.Context, opts RunOptions, record Record, output executionOutputArtifacts) error {
 	err := r.Executor.Run(ctx, opts.Invocation.Build, output.log, output.log)
 	if err != nil {
 		failure := harnessFailure(err)
@@ -228,92 +228,92 @@ func (r ExecutionRunner) runHarness(ctx context.Context, opts RunExecutionOption
 }
 
 func harnessFailure(err error) error {
-	var failure ExecutionFailure
+	var failure Failure
 	if errors.As(err, &failure) {
 		return err
 	}
 
-	return NewExecutionFailure(ExecutionFailureHarness, err)
+	return NewFailure(FailureHarness, err)
 }
 
 func workerFailure(err error) error {
-	var failure ExecutionFailure
+	var failure Failure
 	if errors.As(err, &failure) {
-		if failure.Kind == ExecutionFailureWorker {
+		if failure.Kind == FailureWorker {
 			return err
 		}
 
-		return NewExecutionFailure(ExecutionFailureWorker, failure.Err)
+		return NewFailure(FailureWorker, failure.Err)
 	}
 
-	return NewExecutionFailure(ExecutionFailureWorker, err)
+	return NewFailure(FailureWorker, err)
 }
 
 func validationFailure(err error) error {
-	var failure ExecutionFailure
+	var failure Failure
 	if errors.As(err, &failure) {
-		if failure.Kind == ExecutionFailureValidation {
+		if failure.Kind == FailureValidation {
 			return err
 		}
 
-		return NewExecutionFailure(ExecutionFailureValidation, failure.Err)
+		return NewFailure(FailureValidation, failure.Err)
 	}
 
-	return NewExecutionFailure(ExecutionFailureValidation, err)
+	return NewFailure(FailureValidation, err)
 }
 
-func captureExecutionResult(record ExecutionRecord) (ExecutionResult, error) {
-	result, err := LoadExecutionResult(record.Artifacts.ResultPath)
+func captureExecutionResult(record Record) (Result, error) {
+	result, err := LoadResult(record.Artifacts.ResultPath)
 	if err != nil {
-		return ExecutionResult{}, NewExecutionFailure(ExecutionFailureResultCapture, err)
+		return Result{}, NewFailure(FailureResultCapture, err)
 	}
 
 	err = validateExecutionResultForRecord(result, record)
 	if err != nil {
-		return ExecutionResult{}, err
+		return Result{}, err
 	}
 
 	return result, nil
 }
 
-func validateExecutionResultForRecord(result ExecutionResult, record ExecutionRecord) error {
+func validateExecutionResultForRecord(result Result, record Record) error {
 	if result.ExecutionID != record.ID {
-		return NewExecutionFailure(
-			ExecutionFailureResultCapture,
+		return NewFailure(
+			FailureResultCapture,
 			fmt.Errorf("execution result id mismatch: %s", result.ExecutionID),
 		)
 	}
 
 	if result.TicketKey != record.TicketKey {
-		return NewExecutionFailure(
-			ExecutionFailureResultCapture,
+		return NewFailure(
+			FailureResultCapture,
 			fmt.Errorf("execution result ticket key mismatch: %s", result.TicketKey),
 		)
 	}
 
-	if result.Status == ExecutionResultStatusFailed {
-		return NewExecutionFailure(ExecutionFailureValidation, fmt.Errorf("execution result failed: %s", result.Summary))
+	if result.Status == ResultStatusFailed {
+		return NewFailure(FailureValidation, fmt.Errorf("execution result failed: %s", result.Summary))
 	}
 
 	return nil
 }
 
-func (r ExecutionRunner) failExecution(ctx context.Context, record ExecutionRecord, cause error) (ExecutionRecord, error) {
+func (r Runner) failExecution(ctx context.Context, record Record, cause error) (Record, error) {
 	finishedAt := r.now()
-	record.Status = ExecutionStatusFailed
+	record.Status = StatusFailed
 	record.FinishedAt = &finishedAt
 	record.UpdatedAt = finishedAt
 	record.FailureReason = cause.Error()
 
 	err := r.Repository.UpdateExecution(ctx, record)
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	return record, cause
 }
 
-func (r ExecutionRunner) emitChangedFilesDetected(ctx context.Context, loopID string, record ExecutionRecord, result ExecutionResult) {
+func (r Runner) emitChangedFilesDetected(ctx context.Context, loopID string, record Record, result Result) {
 	if len(result.ChangedFiles) == 0 {
 		return
 	}
@@ -327,7 +327,7 @@ type executionEventMessage struct {
 	message string
 }
 
-func (r ExecutionRunner) emitExecutionAgentEvent(ctx context.Context, loopID string, record ExecutionRecord, message executionEventMessage) {
+func (r Runner) emitExecutionAgentEvent(ctx context.Context, loopID string, record Record, message executionEventMessage) {
 	if r.EventSink == nil {
 		return
 	}
@@ -349,7 +349,7 @@ func (r ExecutionRunner) emitExecutionAgentEvent(ctx context.Context, loopID str
 	}
 }
 
-func executionAgentEventRefs(record ExecutionRecord) AgentEventRefs {
+func executionAgentEventRefs(record Record) AgentEventRefs {
 	return compactAgentEventRefs(AgentEventRefs{
 		"ticket_path":           record.TicketPath,
 		"context_path":          filepath.Join(record.Artifacts.RunDir, "context.md"),
@@ -357,7 +357,7 @@ func executionAgentEventRefs(record ExecutionRecord) AgentEventRefs {
 		"runtime_log_path":      record.Artifacts.LogPath,
 		"validation_command":    record.Runtime.ValidationCommand,
 		"validation_log_path":   record.Artifacts.ValidationPath,
-		"execution_report_path": ExecutionReportPath(record),
+		"execution_report_path": ReportPath(record),
 	})
 }
 
@@ -375,7 +375,7 @@ func compactAgentEventRefs(refs AgentEventRefs) AgentEventRefs {
 	return refs
 }
 
-func (r ExecutionRunner) now() time.Time {
+func (r Runner) now() time.Time {
 	if r.Now != nil {
 		return r.Now().UTC()
 	}

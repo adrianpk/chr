@@ -43,7 +43,7 @@ func TestLegacyWorkObservation(t *testing.T) {
 func seedObservedLegacyWork(t *testing.T, env UserEnvironment) {
 	t.Helper()
 
-	executions, err := executioncore.NewExecutionRepository(t.Context(), env, testMigrationFS())
+	executions, err := executioncore.NewRepository(t.Context(), env, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,7 +9,7 @@ import (
 
 // executionRow pairs the stored column order with domain values and raw scan conversions.
 type executionRow struct {
-	record                ExecutionRecord
+	record                Record
 	status, workspaceMode string
 	createdAt, updatedAt  string
 	startedAt, finishedAt sql.NullString
@@ -87,14 +87,14 @@ func (row *executionRow) scanTargets() []any {
 	}
 }
 
-func (row executionRow) decoded() (ExecutionRecord, error) {
+func (row executionRow) decoded() (Record, error) {
 	times, err := parseExecutionRecordTimes(row.createdAt, row.updatedAt, row.startedAt, row.finishedAt)
 	if err != nil {
-		return ExecutionRecord{}, err
+		return Record{}, err
 	}
 
 	record := row.record
-	record.Status = ExecutionStatus(row.status)
+	record.Status = Status(row.status)
 	record.Workspace.Mode = workspacecore.ExecutionMode(row.workspaceMode)
 	record.CreatedAt, record.UpdatedAt = times.CreatedAt, times.UpdatedAt
 	record.StartedAt, record.FinishedAt = times.StartedAt, times.FinishedAt

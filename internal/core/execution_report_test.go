@@ -41,26 +41,26 @@ func TestExecutionReportPathUsesCanonicalEvidenceDirectory(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
 	record.Artifacts.ArtifactID = "00001-ticket-run"
 
-	if got, want := executioncore.ExecutionReportPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "execution-report.md"); got != want {
+	if got, want := executioncore.ReportPath(record), filepath.Join(record.Artifacts.RunDir, "evidence", "execution-report.md"); got != want {
 		t.Fatalf("ExecutionReportPath = %q, want %q", got, want)
 	}
 }
 
 func TestNewExecutionReportIncludesResultEvidence(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	result := executioncore.ExecutionResult{
+	result := executioncore.Result{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
-		Status:      executioncore.ExecutionResultStatusSucceeded,
+		Status:      executioncore.ResultStatusSucceeded,
 		Summary:     "ready for review",
-		EvidenceSummary: executioncore.ExecutionResultEvidenceSummary{
+		EvidenceSummary: executioncore.ResultEvidenceSummary{
 			Strategy:      "bugfix regression strategy",
 			Produced:      "unit and fuzz coverage",
 			Validation:    "make verify passed",
 			Deviations:    []string{"mutation testing skipped"},
 			RemainingRisk: []string{"manual CLI smoke not run"},
 		},
-		ChangedFiles: []executioncore.ExecutionResultChangedFile{
+		ChangedFiles: []executioncore.ResultChangedFile{
 			{Path: "internal/core/execution_report.go", Summary: "add report model"},
 		},
 	}
@@ -103,10 +103,10 @@ func TestNewExecutionReportIncludesResultEvidence(t *testing.T) {
 
 func TestNewExecutionReportRejectsMismatchedResult(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	result := executioncore.ExecutionResult{
+	result := executioncore.Result{
 		ExecutionID:     "exec-other",
 		TicketKey:       record.TicketKey,
-		Status:          executioncore.ExecutionResultStatusSucceeded,
+		Status:          executioncore.ResultStatusSucceeded,
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 
@@ -139,26 +139,26 @@ func TestRenderExecutionReportMarkdownIncludesEvidenceSections(t *testing.T) {
 	assertExecutionReportMarkdownIncludesEvidenceSections(t, markdown, record)
 }
 
-func testExecutionReportRichEvidenceResult(record executioncore.ExecutionRecord) executioncore.ExecutionResult {
-	return executioncore.ExecutionResult{
+func testExecutionReportRichEvidenceResult(record executioncore.Record) executioncore.Result {
+	return executioncore.Result{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
-		Status:      executioncore.ExecutionResultStatusSucceeded,
+		Status:      executioncore.ResultStatusSucceeded,
 		Summary:     "ready for review",
-		EvidenceSummary: executioncore.ExecutionResultEvidenceSummary{
+		EvidenceSummary: executioncore.ResultEvidenceSummary{
 			Strategy:      "bugfix regression strategy",
 			Produced:      "unit and fuzz coverage",
 			Validation:    "make verify passed",
 			Deviations:    []string{"mutation testing skipped"},
 			RemainingRisk: []string{"manual CLI smoke not run"},
 		},
-		ChangedFiles: []executioncore.ExecutionResultChangedFile{
+		ChangedFiles: []executioncore.ResultChangedFile{
 			{Path: "internal/core/execution_report.go", Summary: "add report model"},
 		},
 	}
 }
 
-func assertExecutionReportMarkdownIncludesEvidenceSections(t *testing.T, markdown string, record executioncore.ExecutionRecord) {
+func assertExecutionReportMarkdownIncludesEvidenceSections(t *testing.T, markdown string, record executioncore.Record) {
 	t.Helper()
 
 	for _, want := range []string{
@@ -213,16 +213,16 @@ func assertExecutionReportMarkdownIncludesEvidenceSections(t *testing.T, markdow
 
 func TestNewExecutionReportSortsAndBoundsChangedFiles(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	result := executioncore.ExecutionResult{
+	result := executioncore.Result{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          executioncore.ExecutionResultStatusSucceeded,
+		Status:          executioncore.ResultStatusSucceeded,
 		Summary:         "ready for review",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
 
 	for index := 29; index >= 0; index-- {
-		result.ChangedFiles = append(result.ChangedFiles, executioncore.ExecutionResultChangedFile{
+		result.ChangedFiles = append(result.ChangedFiles, executioncore.ResultChangedFile{
 			Path:    filepath.Join("file", string(rune('a'+index%26))+".go"),
 			Summary: "changed",
 		})
@@ -260,10 +260,10 @@ func TestNewExecutionReportSortsAndBoundsChangedFiles(t *testing.T) {
 
 func TestExecutionReportWriterWritesMarkdownReport(t *testing.T) {
 	record := testExecutionReportRecord(t.TempDir())
-	result := executioncore.ExecutionResult{
+	result := executioncore.Result{
 		ExecutionID:     record.ID,
 		TicketKey:       record.TicketKey,
-		Status:          executioncore.ExecutionResultStatusSucceeded,
+		Status:          executioncore.ResultStatusSucceeded,
 		Summary:         "ready for review",
 		EvidenceSummary: testExecutionResultEvidenceSummary(),
 	}
@@ -339,25 +339,25 @@ func TestRenderExecutionReportMarkdownHandlesMissingResult(t *testing.T) {
 	}
 }
 
-func testExecutionReportRecord(dir string) executioncore.ExecutionRecord {
+func testExecutionReportRecord(dir string) executioncore.Record {
 	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 	now := time.Date(2026, 5, 21, 10, 0, 0, 0, time.UTC)
 	startedAt := now.Add(time.Minute)
 	finishedAt := now.Add(2 * time.Minute)
 
-	return executioncore.ExecutionRecord{
+	return executioncore.Record{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
 		TicketPath: filepath.Join(dir, ".chr", "default", "tickets", "CHR-1.md"),
-		Status:     executioncore.ExecutionStatusSucceeded,
-		Runtime: executioncore.ExecutionRuntimeRef{
+		Status:     executioncore.StatusSucceeded,
+		Runtime: executioncore.RuntimeRef{
 			Image:             "chr-agent-runtime:local",
 			DockerfilePath:    filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Workspace: executioncore.ExecutionWorkspaceRef{
+		Workspace: executioncore.WorkspaceRef{
 			Mode:                  workspacecore.ExecutionWorktree,
 			ProjectCheckoutDir:    dir,
 			ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "default", "worktrees", "CHR-1"),
@@ -365,7 +365,7 @@ func testExecutionReportRecord(dir string) executioncore.ExecutionRecord {
 			BaseSHA:               "abc123",
 			TicketBranch:          "chr/CHR-1",
 		},
-		Artifacts: executioncore.ExecutionArtifacts{
+		Artifacts: executioncore.Artifacts{
 			RunDir:         runDir,
 			ResultPath:     filepath.Join(runDir, "result.json"),
 			LogPath:        filepath.Join(runDir, "runtime.log"),

@@ -136,12 +136,12 @@ func changeQualityOptionalTimes(records *qualityLegacyRecords, populated bool) {
 	records.Notification.Event.DeliveredAt = nil
 	records.Notification.Event.Status = notifycore.StatusPending
 
-	records.Execution.Status = executioncore.ExecutionStatusPending
+	records.Execution.Status = executioncore.StatusPending
 	if populated {
 		started := records.Execution.CreatedAt.Add(2 * time.Minute)
 		finished := started.Add(3 * time.Minute)
 		delivered := records.Notification.Event.CreatedAt.Add(4 * time.Minute)
-		records.Execution.Status = executioncore.ExecutionStatusSucceeded
+		records.Execution.Status = executioncore.StatusSucceeded
 		records.Notification.Event.Status = notifycore.StatusDelivered
 		records.Execution.StartedAt = &started
 		records.Execution.FinishedAt = &finished

@@ -29,7 +29,7 @@ func TestLoadExecutionResultParsesEnvelope(t *testing.T) {
 		]
 	}`)
 
-	result, err := executioncore.LoadExecutionResult(path)
+	result, err := executioncore.LoadResult(path)
 	if err != nil {
 		t.Fatalf("LoadExecutionResult returned error: %v", err)
 	}
@@ -38,7 +38,7 @@ func TestLoadExecutionResultParsesEnvelope(t *testing.T) {
 		t.Fatalf("ExecutionID = %q, want exec-1", result.ExecutionID)
 	}
 
-	if result.Status != executioncore.ExecutionResultStatusSucceeded {
+	if result.Status != executioncore.ResultStatusSucceeded {
 		t.Fatalf("Status = %q, want succeeded", result.Status)
 	}
 
@@ -58,7 +58,7 @@ func TestLoadExecutionResultParsesEnvelope(t *testing.T) {
 func TestLoadExecutionResultRejectsMalformedJSON(t *testing.T) {
 	path := writeExecutionResultFile(t, `{`)
 
-	_, err := executioncore.LoadExecutionResult(path)
+	_, err := executioncore.LoadResult(path)
 	if err == nil {
 		t.Fatal("LoadExecutionResult returned nil error")
 	}
@@ -76,7 +76,7 @@ func TestLoadExecutionResultRejectsInvalidEnvelope(t *testing.T) {
 		}
 	}`)
 
-	_, err := executioncore.LoadExecutionResult(path)
+	_, err := executioncore.LoadResult(path)
 	if err == nil {
 		t.Fatal("LoadExecutionResult returned nil error")
 	}
@@ -99,7 +99,7 @@ func TestLoadExecutionResultRejectsInvalidChangedFilePath(t *testing.T) {
 		]
 	}`)
 
-	_, err := executioncore.LoadExecutionResult(path)
+	_, err := executioncore.LoadResult(path)
 	if err == nil {
 		t.Fatal("LoadExecutionResult returned nil error")
 	}
@@ -113,7 +113,7 @@ func TestLoadExecutionResultRejectsMissingEvidenceSummary(t *testing.T) {
 		"summary": "done"
 	}`)
 
-	_, err := executioncore.LoadExecutionResult(path)
+	_, err := executioncore.LoadResult(path)
 	if err == nil {
 		t.Fatal("LoadExecutionResult returned nil error")
 	}
@@ -161,7 +161,7 @@ func TestLoadExecutionResultAcceptsEvidenceSummaryForChangeKinds(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			path := writeExecutionResultFile(t, tt.content)
 
-			result, err := executioncore.LoadExecutionResult(path)
+			result, err := executioncore.LoadResult(path)
 			if err != nil {
 				t.Fatalf("LoadExecutionResult returned error: %v", err)
 			}
@@ -173,8 +173,8 @@ func TestLoadExecutionResultAcceptsEvidenceSummaryForChangeKinds(t *testing.T) {
 	}
 }
 
-func testExecutionResultEvidenceSummary() executioncore.ExecutionResultEvidenceSummary {
-	return executioncore.ExecutionResultEvidenceSummary{
+func testExecutionResultEvidenceSummary() executioncore.ResultEvidenceSummary {
+	return executioncore.ResultEvidenceSummary{
 		Strategy:   "planned",
 		Produced:   "evidence produced",
 		Validation: "validation passed",

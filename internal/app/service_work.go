@@ -27,9 +27,9 @@ type AgentWorkResult struct {
 	Workflow      *core.WorkflowInvocation
 	Message       string
 	Tickets       []ticketcore.Indexed
-	Execution     *executioncore.ExecutionRecord
+	Execution     *executioncore.Record
 	LoopRun       *executioncore.LoopRunRecord
-	Executions    []executioncore.ExecutionRecord
+	Executions    []executioncore.Record
 	Merges        []core.TicketMergeCommandResult
 	SelectedQueue []ticketcore.Indexed
 	EligibleCount int
@@ -87,8 +87,8 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 	defer release()
 
 	if !harnessruntime.ValidationPassed(preflight.Runtime.Checks) {
-		return AgentWorkResult{}, executioncore.NewExecutionFailure(
-			executioncore.ExecutionFailureRuntime,
+		return AgentWorkResult{}, executioncore.NewFailure(
+			executioncore.FailureRuntime,
 			errors.New("runtime validation failed"),
 		)
 	}
@@ -150,7 +150,7 @@ func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTick
 			return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
 		}
 
-		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, executioncore.NewExecutionFailure(executioncore.ExecutionFailurePreflight, err)
+		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, executioncore.NewFailure(executioncore.FailurePreflight, err)
 	}
 
 	return preparedAgentWorkTicket{Ticket: ticket, Preflight: preflight, Release: releaseAgentOperationLock(lock)}, nil

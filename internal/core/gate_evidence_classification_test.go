@@ -15,17 +15,17 @@ import (
 
 func TestGateEvidenceClassifierClassifiesAgentManagedAndManualChanges(t *testing.T) {
 	projectDir := t.TempDir()
-	writeGateEvidenceExecutionArtifacts(t, projectDir, "CHR-1", "exec-1", executioncore.ExecutionResult{
+	writeGateEvidenceExecutionArtifacts(t, projectDir, "CHR-1", "exec-1", executioncore.Result{
 		ExecutionID: "exec-1",
 		TicketKey:   "CHR-1",
-		Status:      executioncore.ExecutionResultStatusSucceeded,
+		Status:      executioncore.ResultStatusSucceeded,
 		Summary:     "implemented",
-		EvidenceSummary: executioncore.ExecutionResultEvidenceSummary{
+		EvidenceSummary: executioncore.ResultEvidenceSummary{
 			Strategy:   "planned",
 			Produced:   "updated gate",
 			Validation: "validation passed",
 		},
-		ChangedFiles: []executioncore.ExecutionResultChangedFile{
+		ChangedFiles: []executioncore.ResultChangedFile{
 			{Path: "internal/core/gate.go", Summary: "updated gate"},
 		},
 	})
@@ -131,7 +131,7 @@ func writeGateEvidenceExecutionArtifacts(
 	projectDir string,
 	ticketKey string,
 	executionID string,
-	result executioncore.ExecutionResult,
+	result executioncore.Result,
 ) {
 	t.Helper()
 

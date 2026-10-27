@@ -16,7 +16,7 @@ type ticketStartPreflight struct {
 	Env            core.UserEnvironment
 	ProjectContext commandProjectContext
 	Ticket         ticketcore.Indexed
-	Record         executioncore.ExecutionRecord
+	Record         executioncore.Record
 	Runtime        harnessruntime.ValidationResult
 }
 
@@ -93,7 +93,7 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket tic
 		return ticketStartPreflight{}, err
 	}
 
-	record = executioncore.ExecutionRecordFromRuntimePlan(record, result.Plan)
+	record = executioncore.RecordFromRuntimePlan(record, result.Plan)
 
 	return ticketStartPreflight{
 		AssetsFS:       s.assetsFS,

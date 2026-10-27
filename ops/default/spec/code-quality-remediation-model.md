@@ -678,3 +678,13 @@ identity and preserve schema, UTC timestamp and refs. Full and bounded recent
 event readers share a named valid/malformed-line result with unchanged diagnostics,
 ordering and limits. Execution/loop SQL constructors consume DataDirectory without
 changing directory/open/configure/migrate/cleanup semantics.
+
+Execution/loop records, result/failure contracts, runner, event streams, artifact
+inspection/path policy and bounded read-only SQL observation now have the execution
+owner. Native ticket-file queue policy retains its coordinator. Naming uses the
+actual package owner without root aliases. All 156 moved declarations preserve
+their original strings, fields, SQL order, nulls, limits, resource cleanup and error
+semantics after qualification/naming; the move ledger now covers 650 preimages.
+The signature ledger records all 21 completed fixes; ceiling seven retains 187
+exact debts and one external exception. Component test placement and remaining
+Slice 11 contracts are still pending.

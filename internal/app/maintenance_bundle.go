@@ -71,7 +71,7 @@ func collectDiagnosticBundle(ctx context.Context, env core.UserEnvironment, proj
 		return core.DiagnosticBundle{}, err
 	}
 
-	repository, err := executioncore.NewExecutionRepository(ctx, env, assetsFS)
+	repository, err := executioncore.NewRepository(ctx, env, assetsFS)
 	if err != nil {
 		return core.DiagnosticBundle{}, err
 	}
@@ -81,7 +81,7 @@ func collectDiagnosticBundle(ctx context.Context, env core.UserEnvironment, proj
 		_ = repository.Close()
 	}()
 
-	executionArtifacts, err := executioncore.NewExecutionArtifactDriftService(repository).ListDiagnostics(
+	executionArtifacts, err := executioncore.NewArtifactDriftService(repository).ListDiagnostics(
 		ctx,
 		projectContext.ProjectID,
 	)

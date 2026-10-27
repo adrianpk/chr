@@ -43,7 +43,7 @@ func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceCon
 
 	for _, execution := range retained.Executions {
 		current := WorkContext{ID: "execution:" + execution.ID, Kind: "execution", TicketKey: execution.TicketKey, Title: tickets[execution.TicketKey].Title, Scope: tickets[execution.TicketKey].UseCase, Status: string(execution.Status), UpdatedAt: execution.UpdatedAt, Message: execution.FailureReason}
-		if err = s.observeLegacyContext(ctx, result, &current, executioncore.ExecutionAgentEventStreamPath(execution), execution.ID, "", &streams); err != nil {
+		if err = s.observeLegacyContext(ctx, result, &current, executioncore.RecordEventStreamPath(execution), execution.ID, "", &streams); err != nil {
 			return err
 		}
 	}

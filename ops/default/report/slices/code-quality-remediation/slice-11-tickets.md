@@ -31,7 +31,7 @@ The move ledger reconciles 650 declaration/test preimages after explicit contrac
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
 meanings are unchanged. Twenty-one assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger records those 17 fixes; remaining
+named outcomes. The partial disposition ledger records those 21 fixes; remaining
 assigned signatures and watches are open. The global policy remains at ceiling
 seven with 187 exact debts and one external exception.
 
@@ -213,13 +213,18 @@ results, artifact inspection/path rules and event stream operations now belong t
 authoritative ticket-file selection retains its actual coordinator. Dependencies
 include the real database/runtime/state owners without a root import or facade.
 Another 156 exact declaration preimages reconcile after qualification and signature
-formatting, for 650 total. This is the mechanical move; package naming follows.
+formatting, for 650 total. The separate naming change uses Record, Status, RuntimeRef, WorkspaceRef,
+Artifacts, Repository, Runner, RunOptions, Result, Failure and artifact operations
+with direct consumers. All 156 source preimages still reconcile after naming.
 
 - `go test ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Execution|AgentEvent|LoopRun|ValidateAgentEvent|FileAgentEvent|ReadAgentEvent|RecentWorkEvents|SummarizeAgentEvent|LegacyWorkObservation|WorkObservation|QualityRecordWire|QualityStorage|Leaf)' -count=1 -timeout=3m`: passed; execution/TUI compiled with no selected tests at this step.
 
+- `make check-go-style`: 9307 declarations, ceiling seven, 187 exact debts and one external exception after the execution move.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/execution ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after naming.
+
 ## Risks and Follow-ups
 
-Remaining work includes ticket parser/validation test ownership, execution component test ownership and naming, other assigned signatures, typed
+Remaining work includes ticket parser/validation test ownership, execution component test ownership, other assigned signatures, typed
 state/preparation contracts, remaining watches/flags/legacy dispositions, the
 six-parameter phase and final exact-head controller validation.
 No Slice 11 PR has been opened.

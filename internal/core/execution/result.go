@@ -8,28 +8,28 @@ import (
 	"strings"
 )
 
-// ExecutionResultStatus defines a package boundary type.
-type ExecutionResultStatus string
+// ResultStatus defines a package boundary type.
+type ResultStatus string
 
 const (
-	// ExecutionResultStatusSucceeded defines a package boundary constant.
-	ExecutionResultStatusSucceeded ExecutionResultStatus = "succeeded"
-	// ExecutionResultStatusFailed defines a package boundary constant.
-	ExecutionResultStatusFailed ExecutionResultStatus = "failed"
+	// ResultStatusSucceeded defines a package boundary constant.
+	ResultStatusSucceeded ResultStatus = "succeeded"
+	// ResultStatusFailed defines a package boundary constant.
+	ResultStatusFailed ResultStatus = "failed"
 )
 
-// ExecutionResult describes a package boundary value.
-type ExecutionResult struct {
-	ExecutionID     string                         `json:"execution_id"`
-	TicketKey       string                         `json:"ticket_key"`
-	Status          ExecutionResultStatus          `json:"status"`
-	Summary         string                         `json:"summary"`
-	EvidenceSummary ExecutionResultEvidenceSummary `json:"evidence_summary"`
-	ChangedFiles    []ExecutionResultChangedFile   `json:"changed_files,omitempty"`
+// Result describes a package boundary value.
+type Result struct {
+	ExecutionID     string                `json:"execution_id"`
+	TicketKey       string                `json:"ticket_key"`
+	Status          ResultStatus          `json:"status"`
+	Summary         string                `json:"summary"`
+	EvidenceSummary ResultEvidenceSummary `json:"evidence_summary"`
+	ChangedFiles    []ResultChangedFile   `json:"changed_files,omitempty"`
 }
 
-// ExecutionResultEvidenceSummary describes evidence produced by the worker.
-type ExecutionResultEvidenceSummary struct {
+// ResultEvidenceSummary describes evidence produced by the worker.
+type ResultEvidenceSummary struct {
 	Strategy      string   `json:"strategy"`
 	Produced      string   `json:"produced"`
 	Validation    string   `json:"validation"`
@@ -37,17 +37,17 @@ type ExecutionResultEvidenceSummary struct {
 	RemainingRisk []string `json:"remaining_risk,omitempty"`
 }
 
-// ExecutionResultChangedFile describes a package boundary value.
-type ExecutionResultChangedFile struct {
+// ResultChangedFile describes a package boundary value.
+type ResultChangedFile struct {
 	Path    string `json:"path"`
 	Summary string `json:"summary,omitempty"`
 }
 
-// LoadExecutionResult loads the corresponding package data.
-func LoadExecutionResult(path string) (ExecutionResult, error) {
+// LoadResult loads the corresponding package data.
+func LoadResult(path string) (Result, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return ExecutionResult{}, fmt.Errorf("open execution result: %w", err)
+		return Result{}, fmt.Errorf("open execution result: %w", err)
 	}
 
 	defer func() {
@@ -58,23 +58,23 @@ func LoadExecutionResult(path string) (ExecutionResult, error) {
 	decoder := json.NewDecoder(file)
 	decoder.DisallowUnknownFields()
 
-	var result ExecutionResult
+	var result Result
 
 	err = decoder.Decode(&result)
 	if err != nil {
-		return ExecutionResult{}, fmt.Errorf("decode execution result: %w", err)
+		return Result{}, fmt.Errorf("decode execution result: %w", err)
 	}
 
-	err = ValidateExecutionResult(result)
+	err = ValidateResult(result)
 	if err != nil {
-		return ExecutionResult{}, err
+		return Result{}, err
 	}
 
 	return result, nil
 }
 
-// ValidateExecutionResult validates the corresponding package boundary value.
-func ValidateExecutionResult(result ExecutionResult) error {
+// ValidateResult validates the corresponding package boundary value.
+func ValidateResult(result Result) error {
 	if result.ExecutionID == "" {
 		return fmt.Errorf("execution result id is required")
 	}
@@ -100,7 +100,7 @@ func ValidateExecutionResult(result ExecutionResult) error {
 	return nil
 }
 
-func validateExecutionResultEvidenceSummary(summary ExecutionResultEvidenceSummary) error {
+func validateExecutionResultEvidenceSummary(summary ResultEvidenceSummary) error {
 	if strings.TrimSpace(summary.Strategy) == "" {
 		return fmt.Errorf("execution result evidence_summary.strategy is required")
 	}
@@ -116,7 +116,7 @@ func validateExecutionResultEvidenceSummary(summary ExecutionResultEvidenceSumma
 	return nil
 }
 
-func validateExecutionResultChangedFiles(changedFiles []ExecutionResultChangedFile) error {
+func validateExecutionResultChangedFiles(changedFiles []ResultChangedFile) error {
 	for _, changedFile := range changedFiles {
 		path := strings.TrimSpace(changedFile.Path)
 		if path == "" {
@@ -132,10 +132,10 @@ func validateExecutionResultChangedFiles(changedFiles []ExecutionResultChangedFi
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s ExecutionResultStatus) Valid() bool {
+func (s ResultStatus) Valid() bool {
 	switch s {
-	case ExecutionResultStatusSucceeded,
-		ExecutionResultStatusFailed:
+	case ResultStatusSucceeded,
+		ResultStatusFailed:
 		return true
 	default:
 		return false

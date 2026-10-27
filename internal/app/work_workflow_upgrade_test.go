@@ -97,12 +97,12 @@ func TestWorkflowUpgradeCLIRejects(t *testing.T) {
 func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 	cases := []struct {
 		name    string
-		status  executioncore.ExecutionStatus
+		status  executioncore.Status
 		blocked bool
 	}{
-		{"pending", executioncore.ExecutionStatusPending, true},
-		{"running", executioncore.ExecutionStatusRunning, true},
-		{"failed history", executioncore.ExecutionStatusFailed, false},
+		{"pending", executioncore.StatusPending, true},
+		{"running", executioncore.StatusRunning, true},
+		{"failed history", executioncore.StatusFailed, false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -128,17 +128,17 @@ func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 	}
 }
 
-func writeWorkflowUpgradeExecution(t *testing.T, operations service, status executioncore.ExecutionStatus) {
+func writeWorkflowUpgradeExecution(t *testing.T, operations service, status executioncore.Status) {
 	t.Helper()
 
-	repository, err := executioncore.NewExecutionRepository(t.Context(), operations.env, operations.assetsFS)
+	repository, err := executioncore.NewRepository(t.Context(), operations.env, operations.assetsFS)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	now := time.Now().UTC()
 
-	record := executioncore.ExecutionRecord{ID: "unselected-attempt", ProjectID: operations.projectContext.ProjectID, TicketKey: "OLD-101", Status: status, CreatedAt: now, UpdatedAt: now}
+	record := executioncore.Record{ID: "unselected-attempt", ProjectID: operations.projectContext.ProjectID, TicketKey: "OLD-101", Status: status, CreatedAt: now, UpdatedAt: now}
 	if err := repository.CreateExecution(t.Context(), record); err != nil {
 		t.Fatal(err)
 	}

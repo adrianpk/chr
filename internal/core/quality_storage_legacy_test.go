@@ -16,11 +16,11 @@ import (
 )
 
 type qualityLegacyRecords struct {
-	Execution    executioncore.ExecutionRecord `json:"execution"`
-	Remote       RemoteCommandRecord           `json:"remote"`
-	Notification notifycore.AuditRecord        `json:"notification"`
-	Ticket       ticketcore.Indexed            `json:"ticket"`
-	Conversation telegramcore.Conversation     `json:"conversation"`
+	Execution    executioncore.Record      `json:"execution"`
+	Remote       RemoteCommandRecord       `json:"remote"`
+	Notification notifycore.AuditRecord    `json:"notification"`
+	Ticket       ticketcore.Indexed        `json:"ticket"`
+	Conversation telegramcore.Conversation `json:"conversation"`
 }
 
 func openQualityLegacyDB(t *testing.T) *sql.DB {
@@ -125,10 +125,10 @@ func TestQualityStorageLegacy(t *testing.T) {
 	}
 }
 
-func qualityExecutionRepository(t *testing.T, db *sql.DB) executioncore.ExecutionRepository {
+func qualityExecutionRepository(t *testing.T, db *sql.DB) executioncore.Repository {
 	t.Helper()
 
-	repository, err := executioncore.NewExecutionRepositoryFromDB(t.Context(), db, testMigrationFS())
+	repository, err := executioncore.NewRepositoryFromDB(t.Context(), db, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

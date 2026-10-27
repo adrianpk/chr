@@ -26,12 +26,12 @@ type RuntimeArtifactCleanupCandidate struct {
 
 // RuntimeArtifactCleanupPreviewService describes a package boundary value.
 type RuntimeArtifactCleanupPreviewService struct {
-	repository executioncore.ExecutionRepository
+	repository executioncore.Repository
 }
 
 // NewRuntimeArtifactCleanupPreviewService constructs the corresponding package service or value.
 func NewRuntimeArtifactCleanupPreviewService(
-	repository executioncore.ExecutionRepository,
+	repository executioncore.Repository,
 ) RuntimeArtifactCleanupPreviewService {
 	return RuntimeArtifactCleanupPreviewService{repository: repository}
 }
@@ -69,7 +69,7 @@ func (s RuntimeArtifactCleanupPreviewService) Preview(
 	}, nil
 }
 
-func referencedRunDirs(records []executioncore.ExecutionRecord) map[string]struct{} {
+func referencedRunDirs(records []executioncore.Record) map[string]struct{} {
 	referenced := map[string]struct{}{}
 
 	for _, record := range records {

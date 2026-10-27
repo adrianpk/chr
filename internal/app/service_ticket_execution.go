@@ -24,15 +24,15 @@ var newTicketStartHarnessExecutor = func() executioncore.HarnessExecutor {
 	return executioncore.OSHarnessExecutor{}
 }
 
-func newPendingExecutionRecord(projectID string, ticket ticketcore.Indexed) executioncore.ExecutionRecord {
+func newPendingExecutionRecord(projectID string, ticket ticketcore.Indexed) executioncore.Record {
 	now := time.Now().UTC()
 
-	return executioncore.ExecutionRecord{
+	return executioncore.Record{
 		ID:         executionID(projectID, ticket.Key, now),
 		ProjectID:  projectID,
 		TicketKey:  ticket.Key,
 		TicketPath: ticket.Path,
-		Status:     executioncore.ExecutionStatusPending,
+		Status:     executioncore.StatusPending,
 		CreatedAt:  now,
 		UpdatedAt:  now,
 	}
@@ -46,10 +46,10 @@ func ticketStartArtifactTitle(ticket ticketcore.Indexed) string {
 	return ticket.Key + " " + ticket.Title
 }
 
-func (s service) runTicketStartExecution(ctx context.Context, input ticketExecutionInput) (executioncore.ExecutionRecord, error) {
-	repository, err := executioncore.NewExecutionRepository(ctx, s.env, s.assetsFS)
+func (s service) runTicketStartExecution(ctx context.Context, input ticketExecutionInput) (executioncore.Record, error) {
+	repository, err := executioncore.NewRepository(ctx, s.env, s.assetsFS)
 	if err != nil {
-		return executioncore.ExecutionRecord{}, err
+		return executioncore.Record{}, err
 	}
 
 	defer func() {
@@ -59,7 +59,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 
 	err = repository.CreateExecution(ctx, input.Record)
 	if err != nil {
-		return executioncore.ExecutionRecord{}, err
+		return executioncore.Record{}, err
 	}
 
 	emitBranchPreparedAgentEvent(ctx, input.Events, input.Record)
@@ -67,7 +67,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 
 	err = core.MaterializeWorkerContextForExecution(ctx, input.Record, input.Runtime.Plan)
 	if err != nil {
-		return executioncore.ExecutionRecord{}, executioncore.NewExecutionFailure(executioncore.ExecutionFailurePreflight, err)
+		return executioncore.Record{}, executioncore.NewFailure(executioncore.FailurePreflight, err)
 	}
 
 	invocation, err := harnessruntime.NewInvocation(harnessruntime.InvocationOptions{
@@ -78,13 +78,13 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 		Plan:        input.Runtime.Plan,
 	})
 	if err != nil {
-		return executioncore.ExecutionRecord{}, err
+		return executioncore.Record{}, err
 	}
 
-	runner := executioncore.NewExecutionRunner(repository, newTicketStartHarnessExecutor())
+	runner := executioncore.NewRunner(repository, newTicketStartHarnessExecutor())
 	runner.EventSink = input.Events.Sink
 
-	executed, runErr := runner.Run(ctx, executioncore.RunExecutionOptions{
+	executed, runErr := runner.Run(ctx, executioncore.RunOptions{
 		Record:     input.Record,
 		Invocation: invocation,
 		LoopID:     input.Events.LoopID,
@@ -96,7 +96,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 	return executed, runErr
 }
 
-func refreshExecutedTicketArtifactMetadata(executed executioncore.ExecutionRecord, runErr error) error {
+func refreshExecutedTicketArtifactMetadata(executed executioncore.Record, runErr error) error {
 	err := refreshTicketArtifactMetadata(executed)
 	if err == nil {
 		return nil

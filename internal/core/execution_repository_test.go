@@ -33,7 +33,7 @@ func TestExecutionRepositoryCreatesGetsUpdatesAndListsExecutions(t *testing.T) {
 
 	startedAt := now.Add(time.Minute)
 	finishedAt := now.Add(2 * time.Minute)
-	record.Status = executioncore.ExecutionStatusSucceeded
+	record.Status = executioncore.StatusSucceeded
 	record.StartedAt = &startedAt
 	record.FinishedAt = &finishedAt
 	record.UpdatedAt = finishedAt
@@ -78,12 +78,12 @@ func TestExecutionRepositoryReturnsNotFound(t *testing.T) {
 	repository := newTestExecutionRepository(t)
 
 	_, err := repository.GetExecution(context.Background(), "missing")
-	if !errors.Is(err, executioncore.ErrExecutionNotFound) {
+	if !errors.Is(err, executioncore.ErrNotFound) {
 		t.Fatalf("GetExecution error = %v, want ErrExecutionNotFound", err)
 	}
 
 	err = repository.UpdateExecution(context.Background(), testExecutionRecord(time.Now().UTC()))
-	if !errors.Is(err, executioncore.ErrExecutionNotFound) {
+	if !errors.Is(err, executioncore.ErrNotFound) {
 		t.Fatalf("UpdateExecution error = %v, want ErrExecutionNotFound", err)
 	}
 }
@@ -99,7 +99,7 @@ func TestNewExecutionRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := executioncore.NewExecutionRepository(context.Background(), env, testMigrationFS())
+	repository, err := executioncore.NewRepository(context.Background(), env, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewExecutionRepository returned error: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestNewExecutionRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
-func newTestExecutionRepository(t *testing.T) executioncore.ExecutionRepository {
+func newTestExecutionRepository(t *testing.T) executioncore.Repository {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
@@ -124,7 +124,7 @@ func newTestExecutionRepository(t *testing.T) executioncore.ExecutionRepository 
 
 	db.SetMaxOpenConns(1)
 
-	repository, err := executioncore.NewExecutionRepositoryFromDB(context.Background(), db, testMigrationFS())
+	repository, err := executioncore.NewRepositoryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		closeErr := db.Close()
 		if closeErr != nil {
@@ -144,20 +144,20 @@ func newTestExecutionRepository(t *testing.T) executioncore.ExecutionRepository 
 	return repository
 }
 
-func testExecutionRecord(now time.Time) executioncore.ExecutionRecord {
-	return executioncore.ExecutionRecord{
+func testExecutionRecord(now time.Time) executioncore.Record {
+	return executioncore.Record{
 		ID:         "exec-1",
 		ProjectID:  "project-1",
 		TicketKey:  "CHR-1",
 		TicketPath: "/tmp/project/.chr/default/tickets/CHR-1.md",
-		Status:     executioncore.ExecutionStatusPending,
-		Runtime: executioncore.ExecutionRuntimeRef{
+		Status:     executioncore.StatusPending,
+		Runtime: executioncore.RuntimeRef{
 			Image:             "chr-agent-runtime:local",
 			DockerfilePath:    "/tmp/project/.chr/default/runtime/agent/Dockerfile",
 			ContainerWorkdir:  "/workspace",
 			ValidationCommand: "make verify",
 		},
-		Workspace: executioncore.ExecutionWorkspaceRef{
+		Workspace: executioncore.WorkspaceRef{
 			Mode:                  workspacecore.ExecutionWorktree,
 			ProjectCheckoutDir:    "/tmp/project",
 			ExecutionWorkspaceDir: "/tmp/project/.chr/default/worktrees/CHR-1",
@@ -165,7 +165,7 @@ func testExecutionRecord(now time.Time) executioncore.ExecutionRecord {
 			BaseSHA:               "abc123",
 			TicketBranch:          "chr/CHR-1",
 		},
-		Artifacts: executioncore.ExecutionArtifacts{
+		Artifacts: executioncore.Artifacts{
 			ArtifactID: "00001-parser-validation",
 			RunDir:     "/tmp/project/.chr/default/runtime/runs/exec-1",
 			ResultPath: "/tmp/project/.chr/default/runtime/runs/exec-1/result.json",
@@ -176,7 +176,7 @@ func testExecutionRecord(now time.Time) executioncore.ExecutionRecord {
 	}
 }
 
-func assertExecutionRecord(t *testing.T, got, want executioncore.ExecutionRecord) {
+func assertExecutionRecord(t *testing.T, got, want executioncore.Record) {
 	t.Helper()
 
 	gotStartedAt := optionalTimeValue(got.StartedAt)

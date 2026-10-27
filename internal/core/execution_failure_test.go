@@ -8,7 +8,7 @@ import (
 )
 
 func TestExecutionFailurePrefixesErrorWithKind(t *testing.T) {
-	err := executioncore.NewExecutionFailure(executioncore.ExecutionFailureHarness, fmt.Errorf("docker failed"))
+	err := executioncore.NewFailure(executioncore.FailureHarness, fmt.Errorf("docker failed"))
 
 	if err.Error() != "harness: docker failed" {
 		t.Fatalf("Error = %q, want harness prefix", err.Error())
@@ -16,9 +16,9 @@ func TestExecutionFailurePrefixesErrorWithKind(t *testing.T) {
 }
 
 func TestExecutionFailureKindFromReasonParsesKnownKind(t *testing.T) {
-	kind := executioncore.ExecutionFailureKindFromReason("worker: codex failed")
+	kind := executioncore.FailureKindFromReason("worker: codex failed")
 
-	if kind != executioncore.ExecutionFailureWorker {
+	if kind != executioncore.FailureWorker {
 		t.Fatalf("kind = %q, want worker", kind)
 	}
 }

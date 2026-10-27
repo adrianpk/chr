@@ -15,13 +15,13 @@ type ReviewHandoffSummary struct {
 	ProjectID      string
 	TicketKey      string
 	TicketPath     string
-	Status         executioncore.ExecutionStatus
-	ResultStatus   executioncore.ExecutionResultStatus
+	Status         executioncore.Status
+	ResultStatus   executioncore.ResultStatus
 	ResultSummary  string
 	Validation     ExecutionReportValidation
 	ChangedFiles   []ExecutionReportChangedFile
 	ChangedSummary ExecutionReportChangedFilesSummary
-	FailureKind    executioncore.ExecutionFailureKind
+	FailureKind    executioncore.FailureKind
 	FailureReason  string
 	ResultPath     string
 	LogPath        string
@@ -150,17 +150,17 @@ func writeReviewHandoffNextAction(output *strings.Builder, nextAction string) {
 
 func reviewHandoffNextAction(report ExecutionReport) string {
 	switch report.Execution.Status {
-	case executioncore.ExecutionStatusSucceeded:
+	case executioncore.StatusSucceeded:
 		if report.Validation.Status == ExecutionReportValidationSucceeded {
 			return "Review changed files and validation evidence."
 		}
 
 		return "Review execution result and confirm validation evidence."
-	case executioncore.ExecutionStatusFailed,
-		executioncore.ExecutionStatusBlocked:
+	case executioncore.StatusFailed,
+		executioncore.StatusBlocked:
 		return "Inspect blocker details, runtime log, validation output, and result artifact."
-	case executioncore.ExecutionStatusPending,
-		executioncore.ExecutionStatusRunning:
+	case executioncore.StatusPending,
+		executioncore.StatusRunning:
 		return "Wait for execution to finish before review."
 	default:
 		return "Inspect execution report before deciding the next action."

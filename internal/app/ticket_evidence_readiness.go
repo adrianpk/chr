@@ -13,8 +13,8 @@ import (
 type ticketEvidenceRequest struct {
 	ProjectDir string
 	TicketPath string
-	Execution  *executioncore.ExecutionRecord
-	Result     *executioncore.ExecutionResult
+	Execution  *executioncore.Record
+	Result     *executioncore.Result
 }
 
 func ticketEvidenceReadiness(ctx context.Context, request ticketEvidenceRequest) (core.EvidenceReadinessResult, error) {

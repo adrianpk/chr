@@ -117,7 +117,7 @@ func testResultValidationApplication(path string) ResultApplication {
 		ExecutionID: "exec-1",
 		TicketPath:  path,
 		Execution: ResultApplicationExecution{
-			Status: executioncore.ExecutionStatusSucceeded,
+			Status: executioncore.StatusSucceeded,
 		},
 		Evidence: ResultApplicationEvidence{
 			ValidationCommand: "make verify",

@@ -16,7 +16,7 @@ import (
 type ticketLoopExecutionResult struct {
 	AuthorityExcluded int
 	Record            executioncore.LoopRunRecord
-	Executions        []executioncore.ExecutionRecord
+	Executions        []executioncore.Record
 	Applications      []core.ResultApplication
 	Merges            []core.TicketMergeCommandResult
 }
@@ -247,7 +247,7 @@ func (s service) finishTicketLoopExecution(ctx context.Context, loop ticketLoop)
 func (s service) executeLoopTicket(ctx context.Context, ticket ticketcore.Indexed, events ticketExecutionEvents) (ticketExecutionOutcome, error) {
 	preflight, err := s.prepareTicketStart(ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
-		return ticketExecutionOutcome{Record: executioncore.ExecutionRecord{}, Application: core.ResultApplication{}}, err
+		return ticketExecutionOutcome{Record: executioncore.Record{}, Application: core.ResultApplication{}}, err
 	}
 
 	events.Sink = executioncore.NewAgentEventFanoutSink(events.Sink, agentWorkExecutionEventSink(preflight.Record))
@@ -390,6 +390,6 @@ func (s service) runLegacyTicketLoop(ctx context.Context, request ticketLoopRequ
 }
 
 type ticketExecutionOutcome struct {
-	Record      executioncore.ExecutionRecord
+	Record      executioncore.Record
 	Application core.ResultApplication
 }

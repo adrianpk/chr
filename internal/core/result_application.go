@@ -31,8 +31,8 @@ type ResultApplication struct {
 
 // ResultApplicationExecution describes a package boundary value.
 type ResultApplicationExecution struct {
-	Status        executioncore.ExecutionStatus
-	FailureKind   executioncore.ExecutionFailureKind
+	Status        executioncore.Status
+	FailureKind   executioncore.FailureKind
 	FailureReason string
 }
 
@@ -58,7 +58,7 @@ type ResultApplicationChangedFile struct {
 
 // ResultApplicationBlockedReason describes a package boundary value.
 type ResultApplicationBlockedReason struct {
-	Kind           executioncore.ExecutionFailureKind
+	Kind           executioncore.FailureKind
 	Reason         string
 	LogPath        string
 	ResultPath     string
@@ -67,8 +67,8 @@ type ResultApplicationBlockedReason struct {
 
 // ResultApplicationOptions describes a package boundary value.
 type ResultApplicationOptions struct {
-	Execution         executioncore.ExecutionRecord
-	Result            executioncore.ExecutionResult
+	Execution         executioncore.Record
+	Result            executioncore.Result
 	EvidenceReadiness *EvidenceReadinessResult
 	ChangedFiles      []ResultApplicationChangedFile
 	CommentAuthor     string
@@ -89,7 +89,7 @@ func NewResultApplication(opts ResultApplicationOptions) (ResultApplication, err
 		TicketStatus: ticketStatusForResultApplication(opts),
 		Execution: ResultApplicationExecution{
 			Status:        opts.Execution.Status,
-			FailureKind:   executioncore.ExecutionFailureKindFromReason(opts.Execution.FailureReason),
+			FailureKind:   executioncore.FailureKindFromReason(opts.Execution.FailureReason),
 			FailureReason: opts.Execution.FailureReason,
 		},
 		Summary:      opts.Result.Summary,
@@ -119,12 +119,12 @@ func resultApplicationChangedFiles(opts ResultApplicationOptions) []ResultApplic
 }
 
 func validateResultApplicationInputs(opts ResultApplicationOptions) error {
-	err := executioncore.ValidateExecutionRecord(opts.Execution)
+	err := executioncore.ValidateRecord(opts.Execution)
 	if err != nil {
 		return err
 	}
 
-	err = executioncore.ValidateExecutionResult(opts.Result)
+	err = executioncore.ValidateResult(opts.Result)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func validateResultApplicationInputs(opts ResultApplicationOptions) error {
 
 func ticketStatusForResultApplication(opts ResultApplicationOptions) string {
 	readinessAllowsReview := opts.EvidenceReadiness == nil || opts.EvidenceReadiness.Allowed
-	if opts.Execution.Status == executioncore.ExecutionStatusSucceeded && opts.Result.Status == executioncore.ExecutionResultStatusSucceeded && readinessAllowsReview {
+	if opts.Execution.Status == executioncore.StatusSucceeded && opts.Result.Status == executioncore.ResultStatusSucceeded && readinessAllowsReview {
 		return TicketResultStatusReviewing
 	}
 
@@ -187,12 +187,12 @@ func blockedResultReason(opts ResultApplicationOptions, application ResultApplic
 		return ResultApplicationBlockedReason{}
 	}
 
-	evidenceBlocked := opts.Execution.Status == executioncore.ExecutionStatusSucceeded &&
+	evidenceBlocked := opts.Execution.Status == executioncore.StatusSucceeded &&
 		opts.EvidenceReadiness != nil &&
 		!opts.EvidenceReadiness.Allowed
 	if evidenceBlocked {
 		return ResultApplicationBlockedReason{
-			Kind:           executioncore.ExecutionFailureValidation,
+			Kind:           executioncore.FailureValidation,
 			Reason:         opts.EvidenceReadiness.BlockerReason(),
 			LogPath:        application.Evidence.LogPath,
 			ResultPath:     application.Evidence.ResultPath,

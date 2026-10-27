@@ -140,7 +140,7 @@ func testResultBlockedReasonApplication(path string) ResultApplication {
 		TicketPath:   path,
 		TicketStatus: TicketResultStatusBlocked,
 		BlockedReason: ResultApplicationBlockedReason{
-			Kind:           executioncore.ExecutionFailureHarness,
+			Kind:           executioncore.FailureHarness,
 			Reason:         "harness: docker unavailable",
 			ResultPath:     "/tmp/result.json",
 			LogPath:        "/tmp/runtime.log",

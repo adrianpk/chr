@@ -40,7 +40,7 @@ type AgenticReviewContext struct {
 	ProjectID           string
 	ProjectDir          string
 	Ticket              ticketcore.Indexed
-	Execution           executioncore.ExecutionRecord
+	Execution           executioncore.Record
 	Application         ResultApplication
 	ExecutionReportPath string
 }

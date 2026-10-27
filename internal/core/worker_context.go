@@ -67,7 +67,7 @@ func NewWorkerContextMaterializer() WorkerContextMaterializer {
 }
 
 // MaterializeWorkerContextForExecution executes the corresponding package operation.
-func MaterializeWorkerContextForExecution(ctx context.Context, record executioncore.ExecutionRecord, plan harnessruntime.Plan) error {
+func MaterializeWorkerContextForExecution(ctx context.Context, record executioncore.Record, plan harnessruntime.Plan) error {
 	repairHandoff, err := workerRepairHandoff(ctx, plan.ProjectDir, record.TicketPath)
 	if err != nil {
 		return err

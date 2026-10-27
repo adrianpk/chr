@@ -42,7 +42,7 @@ func TestTicketResultCommentWriterWritesExecutionComment(t *testing.T) {
 func TestTicketResultCommentWriterWritesFailureReason(t *testing.T) {
 	path := writeResultCommentTicket(t)
 	application := testResultCommentApplication(path)
-	application.Execution.Status = executioncore.ExecutionStatusFailed
+	application.Execution.Status = executioncore.StatusFailed
 	application.Execution.FailureReason = "harness: docker unavailable"
 	application.Comment.Body = RenderResultApplicationCommentBody(application)
 
@@ -118,7 +118,7 @@ func testResultCommentApplication(path string) ResultApplication {
 		ExecutionID: "exec-1",
 		TicketPath:  path,
 		Execution: ResultApplicationExecution{
-			Status: executioncore.ExecutionStatusSucceeded,
+			Status: executioncore.StatusSucceeded,
 		},
 		Summary: "ready for review",
 		Evidence: ResultApplicationEvidence{

@@ -256,8 +256,8 @@ func renderExecutionDetail(execution ExecutionView) string {
 	return output.String()
 }
 
-func latestExecution(executions []executioncore.ExecutionRecord) executioncore.ExecutionRecord {
-	var latest executioncore.ExecutionRecord
+func latestExecution(executions []executioncore.Record) executioncore.Record {
+	var latest executioncore.Record
 	for _, execution := range executions {
 		if latest.ID == "" || execution.UpdatedAt.After(latest.UpdatedAt) {
 			latest = execution
@@ -278,7 +278,7 @@ func latestLoopRun(loops []executioncore.LoopRunRecord) executioncore.LoopRunRec
 	return latest
 }
 
-func newExecutionView(projectDir string, execution executioncore.ExecutionRecord) ExecutionView {
+func newExecutionView(projectDir string, execution executioncore.Record) ExecutionView {
 	if execution.ID == "" {
 		return ExecutionView{}
 	}
@@ -383,7 +383,7 @@ func emptyAsUnknown(value string) string {
 // ObservabilityRecords contains the loaded daemon, execution, loop and runtime observations.
 type ObservabilityRecords struct {
 	Daemon     daemoncore.State
-	Executions []executioncore.ExecutionRecord
+	Executions []executioncore.Record
 	Loops      []executioncore.LoopRunRecord
 	Runtime    harnessruntime.ValidationResult
 	Events     []executioncore.AgentEvent

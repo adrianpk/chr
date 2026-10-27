@@ -36,7 +36,7 @@ type LoopReportCounts struct {
 type LoopReportExecution struct {
 	ExecutionID string
 	TicketKey   string
-	Status      executioncore.ExecutionStatus
+	Status      executioncore.Status
 }
 
 // LoopReportExecutionSummary describes a package boundary value.
@@ -49,7 +49,7 @@ type LoopReportExecutionSummary struct {
 // LoopReportOptions describes a package boundary value.
 type LoopReportOptions struct {
 	Loop       executioncore.LoopRunRecord
-	Executions []executioncore.ExecutionRecord
+	Executions []executioncore.Record
 }
 
 const loopReportExecutionLimit = 25
@@ -87,7 +87,7 @@ func loopReportFromRecord(record executioncore.LoopRunRecord) LoopReport {
 	}
 }
 
-func loopReportExecutions(records []executioncore.ExecutionRecord) ([]LoopReportExecution, LoopReportExecutionSummary) {
+func loopReportExecutions(records []executioncore.Record) ([]LoopReportExecution, LoopReportExecutionSummary) {
 	executions := make([]LoopReportExecution, 0, len(records))
 
 	for _, record := range records {

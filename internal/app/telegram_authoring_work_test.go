@@ -262,7 +262,7 @@ func TestTelegramAuthoringWorkFailedBinding(t *testing.T) {
 func telegramAuthoringWorkNoAdmission(t *testing.T, operations service) {
 	t.Helper()
 
-	executions, err := executioncore.NewExecutionRepository(t.Context(), operations.env, testAssetsFS())
+	executions, err := executioncore.NewRepository(t.Context(), operations.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

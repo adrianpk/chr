@@ -49,8 +49,8 @@ func AgentEventStreamPath(runDir string) string {
 	return filepath.Join(runDir, AgentEventStreamFileName)
 }
 
-// ExecutionAgentEventStreamPath returns the event stream path for one execution.
-func ExecutionAgentEventStreamPath(record ExecutionRecord) string {
+// RecordEventStreamPath returns the event stream path for one execution.
+func RecordEventStreamPath(record Record) string {
 	if strings.TrimSpace(record.Artifacts.RunDir) == "" {
 		return ""
 	}

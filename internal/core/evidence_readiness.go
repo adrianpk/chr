@@ -13,8 +13,8 @@ type EvidenceReadinessRequest struct {
 	Config         EvidenceStrategyConfig
 	Checklist      *EvidenceStrategyChecklist
 	ChecklistError string
-	Execution      *executioncore.ExecutionRecord
-	Result         *executioncore.ExecutionResult
+	Execution      *executioncore.Record
+	Result         *executioncore.Result
 	Gherkin        EvidenceGherkinContext
 	ReviewRefs     []ticketmetadata.ReviewRef
 }
@@ -85,13 +85,13 @@ func evidenceRuntimeDiagnostics(request EvidenceReadinessRequest) []EvidenceRead
 		return nil
 	}
 
-	if request.Execution != nil && request.Execution.Status != executioncore.ExecutionStatusSucceeded {
+	if request.Execution != nil && request.Execution.Status != executioncore.StatusSucceeded {
 		return []EvidenceReadinessDiagnostic{
 			evidenceRuntimeDiagnostic(*request.Execution),
 		}
 	}
 
-	if request.Result != nil && request.Result.Status != executioncore.ExecutionResultStatusSucceeded {
+	if request.Result != nil && request.Result.Status != executioncore.ResultStatusSucceeded {
 		return []EvidenceReadinessDiagnostic{{
 			Code:   EvidenceStrategyDiagnosticValidationFailed,
 			Reason: "worker result status is " + string(request.Result.Status),
@@ -101,23 +101,23 @@ func evidenceRuntimeDiagnostics(request EvidenceReadinessRequest) []EvidenceRead
 	return nil
 }
 
-func evidenceRuntimeDiagnostic(record executioncore.ExecutionRecord) EvidenceReadinessDiagnostic {
-	kind := executioncore.ExecutionFailureKindFromReason(record.FailureReason)
+func evidenceRuntimeDiagnostic(record executioncore.Record) EvidenceReadinessDiagnostic {
+	kind := executioncore.FailureKindFromReason(record.FailureReason)
 	switch kind {
-	case executioncore.ExecutionFailureValidation:
+	case executioncore.FailureValidation:
 		return EvidenceReadinessDiagnostic{
 			Code:   EvidenceStrategyDiagnosticValidationFailed,
 			Reason: nonEmptyEvidenceReason(record.FailureReason, "execution validation failed"),
 		}
-	case executioncore.ExecutionFailureRuntime,
-		executioncore.ExecutionFailureHarness,
-		executioncore.ExecutionFailurePreflight:
+	case executioncore.FailureRuntime,
+		executioncore.FailureHarness,
+		executioncore.FailurePreflight:
 		return EvidenceReadinessDiagnostic{
 			Code:   EvidenceStrategyDiagnosticRuntimeUnavailable,
 			Reason: nonEmptyEvidenceReason(record.FailureReason, "execution runtime failed"),
 		}
-	case executioncore.ExecutionFailureWorker,
-		executioncore.ExecutionFailureResultCapture:
+	case executioncore.FailureWorker,
+		executioncore.FailureResultCapture:
 		return EvidenceReadinessDiagnostic{
 			Code:   EvidenceStrategyDiagnosticCodexRuntimeUnavailable,
 			Reason: nonEmptyEvidenceReason(record.FailureReason, "worker result is unavailable"),

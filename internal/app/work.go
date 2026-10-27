@@ -349,7 +349,7 @@ func (factory commandFactory) workLogsAction(ctx context.Context, cmd *cli.Comma
 		return err
 	}
 
-	repository, err := executioncore.NewExecutionRepository(ctx, operations.env, factory.deps.assetsFS)
+	repository, err := executioncore.NewRepository(ctx, operations.env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -365,7 +365,7 @@ func (factory commandFactory) workLogsAction(ctx context.Context, cmd *cli.Comma
 	}
 
 	if record.ProjectID != projectContext.ProjectID {
-		return fmt.Errorf("%w: %s", executioncore.ErrExecutionNotFound, cmd.Args().First())
+		return fmt.Errorf("%w: %s", executioncore.ErrNotFound, cmd.Args().First())
 	}
 
 	return printWorkExecutionLogs(factory.io.Stdout, projectContext.ProjectDir, record)
@@ -500,7 +500,7 @@ func printAgentWorkRunAllExecution(stdout io.Writer, result AgentWorkResult) err
 	return nil
 }
 
-func printWorkExecutionLogs(stdout io.Writer, projectDir string, record executioncore.ExecutionRecord) error {
+func printWorkExecutionLogs(stdout io.Writer, projectDir string, record executioncore.Record) error {
 	entries := []struct {
 		label string
 		path  string
@@ -509,8 +509,8 @@ func printWorkExecutionLogs(stdout io.Writer, projectDir string, record executio
 		{label: "runtime_log", path: record.Artifacts.LogPath},
 		{label: "validation_log", path: record.Artifacts.ValidationPath},
 		{label: "result", path: record.Artifacts.ResultPath},
-		{label: "execution_report", path: executioncore.ExecutionReportPath(record)},
-		{label: "events", path: executioncore.ExecutionAgentEventStreamPath(record)},
+		{label: "execution_report", path: executioncore.ReportPath(record)},
+		{label: "events", path: executioncore.RecordEventStreamPath(record)},
 	}
 
 	lines := []string{

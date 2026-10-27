@@ -12,11 +12,11 @@ func TestEvaluateEvidenceReadinessAllowsCompleteEvidence(t *testing.T) {
 	result := EvaluateEvidenceReadiness(EvidenceReadinessRequest{
 		Config:    DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklist(),
-		Execution: testEvidenceReadinessExecution(func(record *executioncore.ExecutionRecord) {
-			record.Status = executioncore.ExecutionStatusSucceeded
+		Execution: testEvidenceReadinessExecution(func(record *executioncore.Record) {
+			record.Status = executioncore.StatusSucceeded
 		}),
-		Result: testEvidenceReadinessResult(func(result *executioncore.ExecutionResult) {
-			result.Status = executioncore.ExecutionResultStatusSucceeded
+		Result: testEvidenceReadinessResult(func(result *executioncore.Result) {
+			result.Status = executioncore.ResultStatusSucceeded
 		}),
 	})
 
@@ -95,8 +95,8 @@ func failedEvidenceExecutionRequest(reason string) EvidenceReadinessRequest {
 	return EvidenceReadinessRequest{
 		Config:    DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklist(),
-		Execution: testEvidenceReadinessExecution(func(record *executioncore.ExecutionRecord) {
-			record.Status = executioncore.ExecutionStatusFailed
+		Execution: testEvidenceReadinessExecution(func(record *executioncore.Record) {
+			record.Status = executioncore.StatusFailed
 			record.FailureReason = reason
 		}),
 	}
@@ -106,7 +106,7 @@ func missingEvidenceSummaryRequest() EvidenceReadinessRequest {
 	return EvidenceReadinessRequest{
 		Config:    DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklist(),
-		Result: testEvidenceReadinessResult(func(result *executioncore.ExecutionResult) {
+		Result: testEvidenceReadinessResult(func(result *executioncore.Result) {
 			result.EvidenceSummary.Validation = ""
 		}),
 	}
@@ -227,13 +227,13 @@ func testEvidenceReadinessConfig(edit func(*EvidenceStrategyConfig)) EvidenceStr
 	return config
 }
 
-func testEvidenceReadinessExecution(edit func(*executioncore.ExecutionRecord)) *executioncore.ExecutionRecord {
+func testEvidenceReadinessExecution(edit func(*executioncore.Record)) *executioncore.Record {
 	now := time.Date(2026, 6, 19, 10, 0, 0, 0, time.UTC)
-	record := executioncore.ExecutionRecord{
+	record := executioncore.Record{
 		ID:        "exec-1",
 		ProjectID: "project-1",
 		TicketKey: "CHR-1",
-		Status:    executioncore.ExecutionStatusSucceeded,
+		Status:    executioncore.StatusSucceeded,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -243,13 +243,13 @@ func testEvidenceReadinessExecution(edit func(*executioncore.ExecutionRecord)) *
 	return &record
 }
 
-func testEvidenceReadinessResult(edit func(*executioncore.ExecutionResult)) *executioncore.ExecutionResult {
-	result := executioncore.ExecutionResult{
+func testEvidenceReadinessResult(edit func(*executioncore.Result)) *executioncore.Result {
+	result := executioncore.Result{
 		ExecutionID: "exec-1",
 		TicketKey:   "CHR-1",
-		Status:      executioncore.ExecutionResultStatusSucceeded,
+		Status:      executioncore.ResultStatusSucceeded,
 		Summary:     "done",
-		EvidenceSummary: executioncore.ExecutionResultEvidenceSummary{
+		EvidenceSummary: executioncore.ResultEvidenceSummary{
 			Strategy:   "complete strategy",
 			Produced:   "unit and fuzz evidence",
 			Validation: "make verify passed",
