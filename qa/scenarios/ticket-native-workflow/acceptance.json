@@ -32,9 +32,9 @@
           "source": "internal/core/workflow_record_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/authoring",
           "test": "TestWorkflowPlanHierarchy",
-          "source": "internal/core/plan_workflow_test.go"
+          "source": "internal/core/authoring/plan_workflow_test.go"
         },
         {
           "package": "./internal/core",

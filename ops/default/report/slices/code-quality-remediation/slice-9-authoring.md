@@ -127,6 +127,10 @@ preimages, import-cycle fixtures, style and package README checks passed.
 The initial controller `make verify` on ac448ac25558 stopped at the relocated
 function signature-line policy. Declaration formatting was normalized without
 changing parameters or bodies before final validation.
+A subsequent `make verify` on 083449128608 passed strict lint and short Go tests,
+but CI preflight found a relocated test binding. Its source/package binding and
+the bounded runner package list now include the real authoring owner; criteria,
+test identities, counts and assertions remain unchanged.
 
 The controller validation ledger and PR Validation bind final successful outcomes
 to the exact clean PR head and this ordered command list:
