@@ -109,13 +109,13 @@ func TestTicketIndexStatusCheckerReportsInvalidTicket(t *testing.T) {
 	}
 }
 
-func rebuildProjectTicketsForStatusTest(t *testing.T, index TicketIndex, projectDir string) {
+func rebuildProjectTicketsForStatusTest(t *testing.T, index ticketcore.TicketIndex, projectDir string) {
 	t.Helper()
 
-	_, err := NewTicketIndexRebuilder(
+	_, err := ticketcore.NewTicketIndexRebuilder(
 		index,
-		WithTicketIndexRebuilderClock(rebuildTestIndexedAt),
-	).RebuildProjectTickets(context.Background(), RebuildProjectTicketsOptions{
+		ticketcore.WithTicketIndexRebuilderClock(rebuildTestIndexedAt),
+	).RebuildProjectTickets(context.Background(), ticketcore.RebuildProjectTicketsOptions{
 		ProjectID:  "project-1",
 		ProjectDir: projectDir,
 	})
@@ -126,15 +126,15 @@ func rebuildProjectTicketsForStatusTest(t *testing.T, index TicketIndex, project
 
 func checkProjectTicketIndexForStatusTest(
 	t *testing.T,
-	index TicketIndex,
+	index ticketcore.TicketIndex,
 	projectDir string,
-) TicketIndexStatus {
+) ticketcore.TicketIndexStatus {
 	t.Helper()
 
-	status, err := NewTicketIndexStatusChecker(
+	status, err := ticketcore.NewTicketIndexStatusChecker(
 		index,
-		WithTicketIndexStatusCheckerClock(rebuildTestIndexedAt),
-	).CheckProjectTicketIndex(context.Background(), CheckProjectTicketIndexOptions{
+		ticketcore.WithTicketIndexStatusCheckerClock(rebuildTestIndexedAt),
+	).CheckProjectTicketIndex(context.Background(), ticketcore.CheckProjectTicketIndexOptions{
 		ProjectID:  "project-1",
 		ProjectDir: projectDir,
 	})
@@ -147,7 +147,7 @@ func checkProjectTicketIndexForStatusTest(
 
 func assertTicketIndexStatusCounts(
 	t *testing.T,
-	status TicketIndexStatus,
+	status ticketcore.TicketIndexStatus,
 	missing int,
 	stale int,
 	orphaned int,

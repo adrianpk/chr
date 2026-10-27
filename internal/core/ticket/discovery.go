@@ -1,4 +1,4 @@
-package core
+package ticket
 
 import (
 	"context"
@@ -35,16 +35,13 @@ func NewTicketFileDiscoverer() TicketFileDiscoverer {
 }
 
 // DiscoverTicketFiles executes the corresponding package operation.
-func (d *ticketFileDiscoverer) DiscoverTicketFiles(
-	ctx context.Context,
-	opts DiscoverTicketFilesOptions,
-) ([]DiscoveredTicketFile, error) {
+func (d *ticketFileDiscoverer) DiscoverTicketFiles(ctx context.Context, opts DiscoverTicketFilesOptions) ([]DiscoveredTicketFile, error) {
 	err := ctx.Err()
 	if err != nil {
 		return nil, err
 	}
 
-	ticketsDir := ticketsDirectory(opts.ProjectDir)
+	ticketsDir := TicketsDirectory(opts.ProjectDir)
 	files := []DiscoveredTicketFile{}
 
 	err = filepath.WalkDir(ticketsDir, func(path string, entry os.DirEntry, walkErr error) error {
@@ -100,6 +97,7 @@ func sortDiscoveredTicketFiles(files []DiscoveredTicketFile) []DiscoveredTicketF
 	return files
 }
 
-func ticketsDirectory(projectDir string) string {
+// TicketsDirectory resolves the legacy ticket document directory.
+func TicketsDirectory(projectDir string) string {
 	return workspacecore.UserPath(projectDir, "tickets")
 }

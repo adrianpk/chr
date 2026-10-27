@@ -21,7 +21,7 @@ var NormalBoardColumns = []string{
 
 // BoardQuery describes a package boundary value.
 type BoardQuery struct {
-	Index TicketIndex
+	Index ticketcore.TicketIndex
 }
 
 // BoardQueryOptions describes a package boundary value.
@@ -60,7 +60,7 @@ type BoardAttentionTicket struct {
 }
 
 // NewBoardQuery constructs the corresponding package service or value.
-func NewBoardQuery(index TicketIndex) BoardQuery {
+func NewBoardQuery(index ticketcore.TicketIndex) BoardQuery {
 	return BoardQuery{Index: index}
 }
 

@@ -23,11 +23,11 @@ type TicketLoopQueryOptions struct {
 
 // TicketLoopQuery describes a package boundary value.
 type TicketLoopQuery struct {
-	Index TicketIndex
+	Index ticketcore.TicketIndex
 }
 
 // NewTicketLoopQuery constructs the corresponding package service or value.
-func NewTicketLoopQuery(index TicketIndex) TicketLoopQuery {
+func NewTicketLoopQuery(index ticketcore.TicketIndex) TicketLoopQuery {
 	return TicketLoopQuery{Index: index}
 }
 

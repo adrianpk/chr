@@ -18,7 +18,7 @@ func TestWorkflowWorkObservation(t *testing.T) {
 	store, hierarchy := workflowSelectionFixture(t)
 	expected := workflowTestPreview(t, store, "slice_set", hierarchy.Set.ID)
 
-	legacy := filepath.Join(ticketsDirectory(store.layout.ProjectDir()), "broken.md")
+	legacy := filepath.Join(ticketcore.TicketsDirectory(store.layout.ProjectDir()), "broken.md")
 	if err := os.MkdirAll(filepath.Dir(legacy), 0o755); err != nil {
 		t.Fatal(err)
 	}

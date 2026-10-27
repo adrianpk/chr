@@ -1,4 +1,4 @@
-package core
+package ticket
 
 import (
 	"context"
@@ -34,11 +34,7 @@ type sqliteTicketKeySequenceRepository struct {
 }
 
 // NewTicketKeySequenceRepository constructs the corresponding package service or value.
-func NewTicketKeySequenceRepository(
-	ctx context.Context,
-	env database.DataDirectory,
-	assetsFS fs.FS,
-) (TicketKeySequenceRepository, error) {
+func NewTicketKeySequenceRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (TicketKeySequenceRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -63,11 +59,7 @@ func NewTicketKeySequenceRepository(
 }
 
 // NewTicketKeySequenceRepositoryFromDB constructs the corresponding package service or value.
-func NewTicketKeySequenceRepositoryFromDB(
-	ctx context.Context,
-	db *sql.DB,
-	assetsFS fs.FS,
-) (TicketKeySequenceRepository, error) {
+func NewTicketKeySequenceRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (TicketKeySequenceRepository, error) {
 	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
@@ -79,10 +71,7 @@ func NewTicketKeySequenceRepositoryFromDB(
 }
 
 // ReserveNextTicketKey executes the corresponding package operation.
-func (r *sqliteTicketKeySequenceRepository) ReserveNextTicketKey(
-	ctx context.Context,
-	opts ReserveNextTicketKeyOptions,
-) (int, error) {
+func (r *sqliteTicketKeySequenceRepository) ReserveNextTicketKey(ctx context.Context, opts ReserveNextTicketKeyOptions) (int, error) {
 	if opts.ProjectID == "" {
 		return 0, fmt.Errorf("project id is required")
 	}
@@ -143,12 +132,7 @@ func reserveNextTicketKey(ctx context.Context, tx *sql.Tx, opts ReserveNextTicke
 	return createTicketKeySequence(ctx, tx, opts)
 }
 
-func updateExistingTicketKeySequence(
-	ctx context.Context,
-	tx *sql.Tx,
-	opts ReserveNextTicketKeyOptions,
-	nextNumber int,
-) (int, error) {
+func updateExistingTicketKeySequence(ctx context.Context, tx *sql.Tx, opts ReserveNextTicketKeyOptions, nextNumber int) (int, error) {
 	reservedNumber := max(nextNumber, opts.Seed)
 
 	_, err := tx.ExecContext(

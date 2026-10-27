@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func TestTicketFileDiscovererDiscoversMarkdownTickets(t *testing.T) {
@@ -14,9 +16,9 @@ func TestTicketFileDiscovererDiscoversMarkdownTickets(t *testing.T) {
 	writeDiscoveryTestFile(t, projectDir, ".chr/default/tickets/CHR-1-First.md")
 	writeDiscoveryTestFile(t, projectDir, ".chr/default/tickets/notes.txt")
 
-	files, err := NewTicketFileDiscoverer().DiscoverTicketFiles(
+	files, err := ticketcore.NewTicketFileDiscoverer().DiscoverTicketFiles(
 		context.Background(),
-		DiscoverTicketFilesOptions{ProjectDir: projectDir},
+		ticketcore.DiscoverTicketFilesOptions{ProjectDir: projectDir},
 	)
 	if err != nil {
 		t.Fatalf("DiscoverTicketFiles returned error: %v", err)
@@ -31,9 +33,9 @@ func TestTicketFileDiscovererDiscoversMarkdownTickets(t *testing.T) {
 }
 
 func TestTicketFileDiscovererRejectsMissingTicketDirectory(t *testing.T) {
-	_, err := NewTicketFileDiscoverer().DiscoverTicketFiles(
+	_, err := ticketcore.NewTicketFileDiscoverer().DiscoverTicketFiles(
 		context.Background(),
-		DiscoverTicketFilesOptions{ProjectDir: t.TempDir()},
+		ticketcore.DiscoverTicketFilesOptions{ProjectDir: t.TempDir()},
 	)
 	if err == nil {
 		t.Fatal("DiscoverTicketFiles returned nil error")
@@ -58,7 +60,7 @@ func writeDiscoveryTestFile(t *testing.T, projectDir, relativePath string) {
 
 func assertDiscoveredTicketFile(
 	t *testing.T,
-	file DiscoveredTicketFile,
+	file ticketcore.DiscoveredTicketFile,
 	projectDir string,
 	relativePath string,
 ) {

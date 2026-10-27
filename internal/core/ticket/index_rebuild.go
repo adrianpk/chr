@@ -1,11 +1,9 @@
-package core
+package ticket
 
 import (
 	"context"
 	"fmt"
 	"time"
-
-	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // TicketIndexRebuilder defines a package boundary interface.
@@ -35,7 +33,7 @@ type TicketIndexRebuildParseError struct {
 
 type ticketIndexRebuilder struct {
 	discoverer TicketFileDiscoverer
-	parser     ticketcore.Parser
+	parser     Parser
 	index      TicketIndex
 	now        func() time.Time
 }
@@ -47,7 +45,7 @@ type TicketIndexRebuilderOption func(*ticketIndexRebuilder)
 func NewTicketIndexRebuilder(index TicketIndex, opts ...TicketIndexRebuilderOption) TicketIndexRebuilder {
 	rebuilder := &ticketIndexRebuilder{
 		discoverer: NewTicketFileDiscoverer(),
-		parser:     ticketcore.NewParser(),
+		parser:     NewParser(),
 		index:      index,
 		now:        time.Now,
 	}
@@ -69,7 +67,7 @@ func WithTicketIndexRebuilderDiscoverer(discoverer TicketFileDiscoverer) TicketI
 }
 
 // WithTicketIndexRebuilderParser executes the corresponding package operation.
-func WithTicketIndexRebuilderParser(parser ticketcore.Parser) TicketIndexRebuilderOption {
+func WithTicketIndexRebuilderParser(parser Parser) TicketIndexRebuilderOption {
 	return func(rebuilder *ticketIndexRebuilder) {
 		if parser != nil {
 			rebuilder.parser = parser
@@ -87,10 +85,7 @@ func WithTicketIndexRebuilderClock(now func() time.Time) TicketIndexRebuilderOpt
 }
 
 // RebuildProjectTickets executes the corresponding package operation.
-func (r *ticketIndexRebuilder) RebuildProjectTickets(
-	ctx context.Context,
-	opts RebuildProjectTicketsOptions,
-) (RebuildProjectTicketsResult, error) {
+func (r *ticketIndexRebuilder) RebuildProjectTickets(ctx context.Context, opts RebuildProjectTicketsOptions) (RebuildProjectTicketsResult, error) {
 	err := validateRebuildProjectTicketsOptions(opts)
 	if err != nil {
 		return RebuildProjectTicketsResult{}, err
@@ -116,12 +111,12 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(
 	}
 
 	for _, file := range files {
-		ticket, err := r.parser.Parse(ctx, ticketcore.ParseOptions{
+		ticket, err := r.parser.Parse(ctx, ParseOptions{
 			ProjectID:    opts.ProjectID,
 			ProjectDir:   opts.ProjectDir,
 			Path:         file.Path,
 			IndexedAt:    indexedAt,
-			RelativeBase: ticketsDirectory(opts.ProjectDir),
+			RelativeBase: TicketsDirectory(opts.ProjectDir),
 		})
 		if err != nil {
 			result.ParseErrors = append(result.ParseErrors, TicketIndexRebuildParseError{

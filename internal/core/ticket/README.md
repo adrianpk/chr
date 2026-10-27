@@ -17,3 +17,10 @@ Ticket and Indexed are document/projection values. Renderer.Render, Parser.Parse
 ValidateIndexed and the status/classification functions retain their original
 contracts. Native mutation paths consume the same WriteReviewRefsField and
 ValidateReviewRef implementation as document rendering and validation.
+
+The ticket index owns SQLite ticket rows/tags, discovery, rebuilding, reconciliation,
+index status and durable key reservation. UpsertInTransaction shares the original
+row/tag bindings with native projection writes in the caller's transaction; it does
+not validate, invalidate snapshots or commit. Public index writes retain their
+existing validation and snapshot invalidation order. Native composition retains
+one shared SQLite handle and source/cache authority.

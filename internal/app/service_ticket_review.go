@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 type ticketReviewInput struct {
@@ -61,7 +62,7 @@ func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (c
 	return result, nil
 }
 
-func refreshTicketIndexAfterReview(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
+func refreshTicketIndexAfterReview(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
 	if dryRun {
 		return nil
 	}

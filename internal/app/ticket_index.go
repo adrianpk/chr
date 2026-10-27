@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (factory commandFactory) openTicketIndexForCommand(ctx context.Context, cmd *cli.Command, env core.UserEnvironment) (commandTicketIndex, error) {
@@ -28,8 +29,8 @@ func (factory commandFactory) openTicketIndexForCommand(ctx context.Context, cmd
 	return commandTicketIndex{Project: projectContext, Index: index}, nil
 }
 
-func refreshProjectTicketIndex(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext) error {
-	result, err := core.NewTicketReconciler(index).ReconcileProjectTickets(ctx, core.ReconcileProjectTicketsOptions{
+func refreshProjectTicketIndex(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext) error {
+	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(ctx, ticketcore.ReconcileProjectTicketsOptions{
 		ProjectID:    projectContext.ProjectID,
 		ProjectDir:   projectContext.ProjectDir,
 		ReconciledAt: time.Now().UTC(),
@@ -49,5 +50,5 @@ func refreshProjectTicketIndex(ctx context.Context, index core.TicketIndex, proj
 
 type commandTicketIndex struct {
 	Project commandProjectContext
-	Index   core.TicketIndex
+	Index   ticketcore.TicketIndex
 }

@@ -1,12 +1,10 @@
-package core
+package ticket
 
 import (
 	"context"
 	"fmt"
 	"path/filepath"
 	"time"
-
-	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // TicketReconciler defines a package boundary interface.
@@ -66,7 +64,7 @@ func (r TicketReconciliationResult) FirstBlocker() (TicketReconciliationBlocker,
 
 type ticketReconciler struct {
 	rebuilder TicketIndexRebuilder
-	parser    ticketcore.Parser
+	parser    Parser
 	index     TicketIndex
 }
 
@@ -74,16 +72,13 @@ type ticketReconciler struct {
 func NewTicketReconciler(index TicketIndex) TicketReconciler {
 	return &ticketReconciler{
 		rebuilder: NewTicketIndexRebuilder(index),
-		parser:    ticketcore.NewParser(),
+		parser:    NewParser(),
 		index:     index,
 	}
 }
 
 // ReconcileProjectTickets executes the corresponding package operation.
-func (r *ticketReconciler) ReconcileProjectTickets(
-	ctx context.Context,
-	opts ReconcileProjectTicketsOptions,
-) (TicketReconciliationResult, error) {
+func (r *ticketReconciler) ReconcileProjectTickets(ctx context.Context, opts ReconcileProjectTicketsOptions) (TicketReconciliationResult, error) {
 	err := validateReconcileProjectTicketsOptions(opts)
 	if err != nil {
 		return TicketReconciliationResult{}, err
@@ -105,10 +100,7 @@ func (r *ticketReconciler) ReconcileProjectTickets(
 }
 
 // ReconcileProjectTicket executes the corresponding package operation.
-func (r *ticketReconciler) ReconcileProjectTicket(
-	ctx context.Context,
-	opts ReconcileProjectTicketOptions,
-) (TicketReconciliationResult, error) {
+func (r *ticketReconciler) ReconcileProjectTicket(ctx context.Context, opts ReconcileProjectTicketOptions) (TicketReconciliationResult, error) {
 	err := validateReconcileProjectTicketOptions(opts)
 	if err != nil {
 		return TicketReconciliationResult{}, err
@@ -134,20 +126,16 @@ func (r *ticketReconciler) ReconcileProjectTicket(
 	return TicketReconciliationResult{IndexedTickets: 1}, nil
 }
 
-func (r *ticketReconciler) parseProjectTicket(
-	ctx context.Context,
-	opts ReconcileProjectTicketOptions,
-	indexedAt time.Time,
-) (ticketcore.Indexed, TicketReconciliationBlocker, bool) {
-	ticket, err := r.parser.Parse(ctx, ticketcore.ParseOptions{
+func (r *ticketReconciler) parseProjectTicket(ctx context.Context, opts ReconcileProjectTicketOptions, indexedAt time.Time) (Indexed, TicketReconciliationBlocker, bool) {
+	ticket, err := r.parser.Parse(ctx, ParseOptions{
 		ProjectID:    opts.ProjectID,
 		ProjectDir:   opts.ProjectDir,
 		Path:         opts.TicketPath,
 		IndexedAt:    indexedAt,
-		RelativeBase: ticketsDirectory(opts.ProjectDir),
+		RelativeBase: TicketsDirectory(opts.ProjectDir),
 	})
 	if err != nil {
-		return ticketcore.Indexed{}, TicketReconciliationBlocker{
+		return Indexed{}, TicketReconciliationBlocker{
 			Kind:         TicketReconciliationBlockerParseError,
 			Path:         opts.TicketPath,
 			RelativePath: relativeTicketPathForBlocker(opts.ProjectDir, opts.TicketPath),
@@ -187,7 +175,7 @@ func validateReconcileProjectTicketOptions(opts ReconcileProjectTicketOptions) e
 }
 
 func relativeTicketPathForBlocker(projectDir, ticketPath string) string {
-	relativePath, err := filepath.Rel(ticketsDirectory(projectDir), ticketPath)
+	relativePath, err := filepath.Rel(TicketsDirectory(projectDir), ticketPath)
 	if err != nil {
 		return ticketPath
 	}

@@ -11,5 +11,5 @@ telegram_conversations,internal/core/telegram_conversation_target.go,scanTelegra
 telegram_document_snapshots,internal/core/telegram_document_outbox.go,retainTelegramDocument,ExecContext,20,74,internal/core/telegram_document_row.go::telegramDocumentSnapshotRow; telegramDocumentSnapshotColumns
 telegram_updates,internal/core/telegram_receiver_inbox.go,retainTelegramUpdate,ExecContext,18,105,internal/core/telegram_update_row.go::telegramUpdateRow; telegramUpdateColumns
 notification_events,internal/core/notification_event_repository.go,notificationEventArguments,expanded bind: create + Telegram admission,17,,internal/core/notification_event_row.go::notificationEventRow; notificationEventColumns
-indexed_tickets,internal/core/ticket_index.go,indexedTicketUpsertArgs,expanded bind: upsert,36,,internal/core/indexed_ticket_row.go::indexedTicketRow; indexedTicketColumns
-indexed_tickets,internal/core/ticket_index.go,indexedTicketScanFields.args,expanded scan: get + list,36,,internal/core/indexed_ticket_row.go::indexedTicketRow; indexedTicketColumns
+indexed_tickets,internal/core/ticket/index.go,indexedTicketUpsertArgs,expanded bind: upsert,36,,internal/core/ticket/index_row.go::indexedTicketRow; indexedTicketColumns
+indexed_tickets,internal/core/ticket/index.go,indexedTicketScanFields.args,expanded scan: get + list,36,,internal/core/ticket/index_row.go::indexedTicketRow; indexedTicketColumns

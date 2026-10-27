@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -185,7 +186,7 @@ func refreshAppliedTicketIndex(ctx context.Context, env core.UserEnvironment, pl
 		_ = index.Close()
 	}()
 
-	result, err := core.NewTicketReconciler(index).ReconcileProjectTicket(ctx, core.ReconcileProjectTicketOptions{
+	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(ctx, ticketcore.ReconcileProjectTicketOptions{
 		ProjectID:    plan.ProjectContext.ProjectID,
 		ProjectDir:   plan.ProjectContext.ProjectDir,
 		TicketPath:   plan.Application.TicketPath,

@@ -137,11 +137,7 @@ func indexWorkflowTask(ctx context.Context, tx *sql.Tx, store *WorkflowStore, r 
 		}
 	}
 
-	if err := upsertIndexedTicket(ctx, tx, ticket); err != nil {
-		return err
-	}
-
-	if err := replaceIndexedTicketTags(ctx, tx, ticket); err != nil {
+	if err := ticketcore.UpsertInTransaction(ctx, tx, ticket); err != nil {
 		return err
 	}
 

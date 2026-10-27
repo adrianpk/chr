@@ -81,9 +81,24 @@ recovery behavior. Existing database initialization, migration, cleanup and
 transactional cache invalidation remain intact. Eight additional constructor/
 receiver preimages reconcile, for 73 recorded declarations/tests in total.
 
+Ticket storage/discovery move checks passed:
+
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Ticket|ValidateIndexedTicket|QualityRecordWire|QualityStorage|Board|Leaf|WorkflowIndex|NativeQueueIndex|NativeIntegrationQueue)' -count=1 -timeout=3m`
+- `make check-go-style`: 9309 declarations, ceiling seven, 205 exact debts and one external exception.
+
+Ticket rows/tags, discovery, rebuilding, reconciliation, status checking and key
+reservation now have the ticket owner. Native writes share the same row/tag
+operation in the caller's transaction; the native owner retains its workflow
+metadata update and transaction. Existing snapshot invalidation, SQL/bind order,
+NULL timestamps, migrations, cancellation and parse blockers remain unchanged.
+Three storage regressions construct the index through its existing public database
+constructor rather than exposing its private SQL implementation. Another 89
+preimages reconcile, bringing the move ledger to 162. Strict lint detected API
+name stuttering after the mechanical move; the separate naming commit is pending.
+
 ## Risks and Follow-ups
 
-Remaining work includes ticket indexing/repository rules, execution/readiness
+Remaining work includes ticket API naming/repository rules, execution/readiness
 ownership and D03, other assigned signatures, typed state/preparation contracts,
 the six-parameter reconciliation and final exact-head controller validation.
 No Slice 11 PR has been opened.

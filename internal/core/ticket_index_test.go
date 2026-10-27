@@ -119,7 +119,7 @@ func TestTicketIndexGetTicketByKeyRejectsMissingTicket(t *testing.T) {
 	index := newTestTicketIndex(t)
 
 	_, err := index.GetProjectTicketByKey(context.Background(), "project-1", "CHR-1")
-	if !errors.Is(err, ErrTicketNotFound) {
+	if !errors.Is(err, ticketcore.ErrTicketNotFound) {
 		t.Fatalf("err = %v, want ErrTicketNotFound", err)
 	}
 }
@@ -147,7 +147,7 @@ func TestTicketIndexDeletesProjectTickets(t *testing.T) {
 	}
 }
 
-func newTestTicketIndex(t *testing.T) TicketIndex {
+func newTestTicketIndex(t *testing.T) ticketcore.TicketIndex {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
@@ -170,7 +170,7 @@ func newTestTicketIndex(t *testing.T) TicketIndex {
 		RegisteredAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
 
-	index, err := NewTicketIndexFromDB(context.Background(), db, testMigrationFS())
+	index, err := ticketcore.NewTicketIndexFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndexFromDB returned error: %v", err)
 	}

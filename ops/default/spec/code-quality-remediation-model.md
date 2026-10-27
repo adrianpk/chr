@@ -640,3 +640,10 @@ source locks, integration/cache hashes, query validation and corruption recovery
 remain at the workflow owner. Ticket updates retain their original transactional
 workflow-snapshot invalidation. No second database pool, cache authority or
 forwarding API was introduced; application assembly uses the actual native owner.
+
+Ticket projection storage, row/tag binding, document discovery, reconciliation,
+index status and key reservation belong to `core/ticket`. Native projection writes
+reuse the same transactional row/tag operation on their existing transaction;
+workflow metadata, source authority and commit remain with native orchestration.
+Public index upserts retain validation and snapshot invalidation in their original
+order. No schema, migration, SQL binding or null/time contract changes.

@@ -16,7 +16,7 @@ const (
 // inherit the same bounds; a new directory cannot bypass the owner contract.
 var leafImports = map[string]map[string]bool{
 	"internal/core/ticket/metadata":      {coreImportPath + "ops/metadata": true},
-	"internal/core/ticket":               {coreImportPath + "ops/metadata": true, coreImportPath + "ticket/metadata": true, coreImportPath + "contenthash": true, coreImportPath + "workspace": true},
+	"internal/core/ticket":               {coreImportPath + "database": true, coreImportPath + "ops/namespace": true, coreImportPath + "ops/metadata": true, coreImportPath + "ticket/metadata": true, coreImportPath + "contenthash": true, coreImportPath + "workspace": true},
 	"internal/core/authoring":            {coreImportPath + "authoring/generation": true, coreImportPath + "authoring/state": true, coreImportPath + "contenthash": true, coreImportPath + "model": true, coreImportPath + "ops": true, coreImportPath + "ops/file": true, coreImportPath + "ops/metadata": true, coreImportPath + "ops/namespace": true, coreImportPath + "ops/slug": true, coreImportPath + "project": true, coreImportPath + "quiz": true, coreImportPath + "ticket/metadata": true, coreImportPath + "workflow/state": true, coreImportPath + "workspace": true},
 	"internal/core/harness":              {coreImportPath + "contenthash": true, moduleImportPath + "/internal/harness": true},
 	"internal/core/harness/daemon":       {coreImportPath + "database": true, coreImportPath + "project": true, coreImportPath + "workspace": true},

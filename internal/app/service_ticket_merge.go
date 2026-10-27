@@ -70,7 +70,7 @@ func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (cor
 	return result, nil
 }
 
-func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, key string) (ticketMergeSelection, error) {
+func ticketMergeCommandTickets(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext, key string) (ticketMergeSelection, error) {
 	tickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
 		return ticketMergeSelection{Ticket: ticketcore.Indexed{}, Tickets: nil}, err
@@ -84,7 +84,7 @@ func ticketMergeCommandTickets(ctx context.Context, index core.TicketIndex, proj
 	return ticketMergeSelection{Ticket: ticket, Tickets: tickets}, nil
 }
 
-func refreshTicketIndexAfterMerge(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
+func refreshTicketIndexAfterMerge(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext, dryRun bool) error {
 	if dryRun {
 		return nil
 	}

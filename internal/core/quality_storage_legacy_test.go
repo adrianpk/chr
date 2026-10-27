@@ -79,7 +79,7 @@ func readQualityLegacyRecords(t *testing.T, db *sql.DB, want qualityLegacyRecord
 		t.Fatal(err)
 	}
 
-	got.Ticket, err = (&sqliteTicketIndex{db: db}).GetProjectTicketByKey(t.Context(), want.Ticket.ProjectID, want.Ticket.Key)
+	got.Ticket, err = qualityTicketIndex(t, db).GetProjectTicketByKey(t.Context(), want.Ticket.ProjectID, want.Ticket.Key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,4 +122,15 @@ func TestQualityStorageLegacy(t *testing.T) {
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("legacy records changed:\ngot %#v\nwant %#v", got, want)
 	}
+}
+
+func qualityTicketIndex(t *testing.T, db *sql.DB) ticketcore.TicketIndex {
+	t.Helper()
+
+	index, err := ticketcore.NewTicketIndexFromDB(t.Context(), db, testMigrationFS())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return index
 }

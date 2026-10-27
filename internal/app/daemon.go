@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 func (factory commandFactory) daemonCommand() *cli.Command {
@@ -298,7 +299,7 @@ func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, max
 
 func refreshDaemonProjects(
 	ctx context.Context,
-	index core.TicketIndex,
+	index ticketcore.TicketIndex,
 	projects []daemoncore.Project,
 	result *daemonForegroundLoopResult,
 ) error {

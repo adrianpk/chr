@@ -24,7 +24,7 @@ type ticketLoopRunOptions struct {
 	MaxIterations int
 }
 
-func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) (ticketLoopSelection, error) {
+func selectTicketLoopTickets(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext, queryOptions core.TicketLoopQueryOptions, runOptions ticketLoopRunOptions) (ticketLoopSelection, error) {
 	tickets, err := core.NewTicketLoopQuery(index).EligibleTickets(ctx, queryOptions)
 	if err != nil {
 		return ticketLoopSelection{Tickets: nil, EligibleCount: 0}, err
@@ -41,7 +41,7 @@ func selectTicketLoopTickets(ctx context.Context, index core.TicketIndex, projec
 	return ticketLoopSelection{Tickets: tickets, EligibleCount: len(eligibleTickets)}, nil
 }
 
-func applyTicketLoopPreflight(ctx context.Context, index core.TicketIndex, projectContext commandProjectContext, tickets []ticketcore.Indexed) ([]ticketcore.Indexed, error) {
+func applyTicketLoopPreflight(ctx context.Context, index ticketcore.TicketIndex, projectContext commandProjectContext, tickets []ticketcore.Indexed) ([]ticketcore.Indexed, error) {
 	allTickets, err := index.ListProjectTickets(ctx, projectContext.ProjectID)
 	if err != nil {
 		return nil, err

@@ -20,9 +20,9 @@ func TestTicketReconcilerRefreshesCleanProject(t *testing.T) {
 		UpdatedAt: rebuildTestUpdatedAt(),
 	})
 
-	result, err := NewTicketReconciler(index).ReconcileProjectTickets(
+	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(
 		context.Background(),
-		ReconcileProjectTicketsOptions{
+		ticketcore.ReconcileProjectTicketsOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			ReconciledAt: rebuildTestIndexedAt(),
@@ -55,9 +55,9 @@ func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 	index := newTestTicketIndex(t)
 	writeDiscoveryTestFile(t, projectDir, filepath.Join(".chr", "default", "tickets", "CHR-1-Bad.md"))
 
-	result, err := NewTicketReconciler(index).ReconcileProjectTickets(
+	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(
 		context.Background(),
-		ReconcileProjectTicketsOptions{
+		ticketcore.ReconcileProjectTicketsOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			ReconciledAt: rebuildTestIndexedAt(),
@@ -80,8 +80,8 @@ func TestTicketReconcilerReturnsParseErrorBlockers(t *testing.T) {
 		t.Fatal("FirstBlocker returned false")
 	}
 
-	if blocker.Kind != TicketReconciliationBlockerParseError {
-		t.Fatalf("Kind = %q, want %q", blocker.Kind, TicketReconciliationBlockerParseError)
+	if blocker.Kind != ticketcore.TicketReconciliationBlockerParseError {
+		t.Fatalf("Kind = %q, want %q", blocker.Kind, ticketcore.TicketReconciliationBlockerParseError)
 	}
 
 	if blocker.RelativePath != "CHR-1-Bad.md" {
@@ -119,9 +119,9 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 		t.Fatalf("WriteResultState returned error: %v", err)
 	}
 
-	result, err := NewTicketReconciler(index).ReconcileProjectTicket(
+	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(
 		context.Background(),
-		ReconcileProjectTicketOptions{
+		ticketcore.ReconcileProjectTicketOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			TicketPath:   ticketPath,
@@ -160,9 +160,9 @@ func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Bad.md")
 	writeFile(t, ticketPath, "missing frontmatter")
 
-	result, err := NewTicketReconciler(index).ReconcileProjectTicket(
+	result, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTicket(
 		context.Background(),
-		ReconcileProjectTicketOptions{
+		ticketcore.ReconcileProjectTicketOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			TicketPath:   ticketPath,
@@ -191,12 +191,12 @@ func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	}
 }
 
-func reconcileAllProjectTickets(t *testing.T, index TicketIndex, projectDir string) {
+func reconcileAllProjectTickets(t *testing.T, index ticketcore.TicketIndex, projectDir string) {
 	t.Helper()
 
-	_, err := NewTicketReconciler(index).ReconcileProjectTickets(
+	_, err := ticketcore.NewTicketReconciler(index).ReconcileProjectTickets(
 		context.Background(),
-		ReconcileProjectTicketsOptions{
+		ticketcore.ReconcileProjectTicketsOptions{
 			ProjectID:    "project-1",
 			ProjectDir:   projectDir,
 			ReconciledAt: rebuildTestIndexedAt(),

@@ -81,6 +81,8 @@ func harnessLifecycleDependencyCases() []leafDependencyCase {
 		{"runtime layout", "internal/core/harness/runtime/plan.go", "package runtime\nimport _ \"" + coreImportPath + "ops\"\n", false},
 		{"runtime coordinator", "internal/core/harness/runtime/plan.go", "package runtime\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"ticket codec", "internal/core/ticket/parser.go", "package ticket\nimport _ \"" + coreImportPath + "ticket/metadata\"\n", false},
+		{"ticket storage", "internal/core/ticket/index.go", "package ticket\nimport _ \"" + coreImportPath + "database\"\n", false},
+		{"ticket namespace", "internal/core/ticket/index.go", "package ticket\nimport _ \"" + coreImportPath + "ops/namespace\"\n", false},
 		{"ticket coordinator", "internal/core/ticket/parser.go", "package ticket\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"ticket metadata parent", "internal/core/ticket/metadata/parse.go", "package metadata\nimport _ \"" + coreImportPath + "ticket\"\n", true},
 		{"trace workspace", "internal/core/harness/trace/trace.go", "package trace\nimport _ \"" + coreImportPath + "workspace\"\n", false},

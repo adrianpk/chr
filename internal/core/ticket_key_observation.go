@@ -10,6 +10,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -41,7 +42,7 @@ func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
 }
 
 func ticketKeyRoots(projectDir string) ([]string, error) {
-	roots := []string{ticketsDirectory(projectDir)}
+	roots := []string{ticketcore.TicketsDirectory(projectDir)}
 
 	entries, err := os.ReadDir(filepath.Join(projectDir, opscore.DirectoryName))
 	if errors.Is(err, os.ErrNotExist) {

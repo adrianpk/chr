@@ -137,13 +137,13 @@ func assertBoardColumn(t *testing.T, board Board, columnID, title string, wantKe
 	t.Fatalf("missing board column %s", columnID)
 }
 
-func upsertBoardQueryTicket(t *testing.T, index TicketIndex, key, status string) {
+func upsertBoardQueryTicket(t *testing.T, index ticketcore.TicketIndex, key, status string) {
 	t.Helper()
 
 	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: key}, IndexedClassification: ticketcore.IndexedClassification{Status: status}})
 }
 
-func upsertBoardQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata ticketcore.Indexed) {
+func upsertBoardQueryTicketWithMetadata(t *testing.T, index ticketcore.TicketIndex, metadata ticketcore.Indexed) {
 	t.Helper()
 
 	ticket := testIndexedTicket(metadata.Key, metadata.Tags)
