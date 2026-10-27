@@ -15,7 +15,8 @@ finish assigned signatures and typed states, and reconcile the six-parameter pha
 ## Delivered Behavior
 
 Ticket and indexed-ticket models, exact rendering, parsing and field/status
-validation now have a direct ticket owner. Native status mutation retains its
+validation now have a direct ticket owner. Indexing, discovery, reconciliation,
+key reservation and filesystem creation also use that owner. Native status mutation retains its
 actual guarded file-write and transition admission. Shared integer decoding lives
 with the existing metadata codec. Implementation remains in progress.
 
@@ -26,10 +27,13 @@ commits with direct consumers and preserved durable/wire contracts.
 
 ## Contracts Added or Changed
 
-Sixty-five moved declaration/test preimages reconcile after namespace qualification.
-Fields, field order, text/JSON bytes, timestamps, empty values, legacy aliases and
-errors are unchanged. Five existing debt identities/type qualifications moved
-without adding an allowance; the global debt count remains 207.
+The move ledger reconciles 226 declaration/test preimages after explicit contract
+prerequisites, namespace qualification, naming and signature formatting. Durable
+fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
+meanings are unchanged. Four assigned signatures now use cohesive owner state or
+named outcomes. The partial disposition ledger records those four fixes; remaining
+assigned signatures and watches are open. The global policy remains at ceiling
+seven with 203 exact debts and one external exception.
 
 ## Files of Interest
 
@@ -159,7 +163,8 @@ remain separate operations; no preflight or repair IO moved into normalization.
 
 ## Risks and Follow-ups
 
-Remaining work includes remaining ticket parser/validation test ownership, execution/readiness
-ownership and readiness service splitting, other assigned signatures, typed state/preparation contracts,
-the six-parameter reconciliation and final exact-head controller validation.
+Remaining work includes ticket parser/validation test ownership, execution/readiness
+ownership and readiness service splitting, other assigned signatures, typed
+state/preparation contracts, remaining watches/flags/legacy dispositions, the
+six-parameter phase and final exact-head controller validation.
 No Slice 11 PR has been opened.
