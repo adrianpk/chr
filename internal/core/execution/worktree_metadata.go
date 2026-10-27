@@ -22,7 +22,7 @@ type WorktreeMetadata struct {
 	BaseSHA             string    `json:"base_sha"`
 	WorktreePath        string    `json:"worktree_path"`
 	LastExecutionID     string    `json:"last_execution_id,omitempty"`
-	LastExecutionStatus string    `json:"last_execution_status,omitempty"`
+	LastExecutionStatus Status    `json:"last_execution_status,omitempty"`
 	LastExecutionRunDir string    `json:"last_execution_run_dir,omitempty"`
 	UpdatedAt           time.Time `json:"updated_at"`
 }

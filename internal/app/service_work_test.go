@@ -189,7 +189,7 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
 	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{
-		Statuses:      []string{ticketcore.StatusReadyForDev},
+		Statuses:      []string{string(ticketcore.StatusReadyForDev)},
 		Order:         workflowstate.TicketOrderCreatedAt,
 		MaxIterations: 1,
 	})
@@ -340,8 +340,8 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 1)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
 	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-2"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.StatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", string(ticketcore.StatusDone))
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", string(ticketcore.StatusDone))
 	assertAgenticReviewRunArtifact(t, projectDir, "CHR-1", result.Executions[0].ID)
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `review_result: "pass"`)
@@ -389,12 +389,12 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusReadyForMerge)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", string(ticketcore.StatusReadyForMerge))
 	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_blocker: "not_mergeable"`)
 
-	if len(result.Merges) != 1 || result.Merges[0].MergeState != core.TicketMergeStateBlocked {
+	if len(result.Merges) != 1 || result.Merges[0].MergeState != ticketcore.MergeStateBlocked {
 		t.Fatalf("merge result = %#v, want one blocked merge", result.Merges)
 	}
 }
@@ -435,12 +435,12 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) 
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusReadyForMerge)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", string(ticketcore.StatusReadyForMerge))
 	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_blocker: "provider failed"`)
 
-	if len(result.Merges) != 1 || result.Merges[0].MergeState != core.TicketMergeStateBlocked {
+	if len(result.Merges) != 1 || result.Merges[0].MergeState != ticketcore.MergeStateBlocked {
 		t.Fatalf("merge result = %#v, want one blocked merge", result.Merges)
 	}
 }
@@ -483,8 +483,8 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 1)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.StatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", string(ticketcore.StatusDone))
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", string(ticketcore.StatusDone))
 
 	if len(runner.reviews) != 0 {
 		t.Fatalf("agentic review calls = %d, want 0", len(runner.reviews))
@@ -540,8 +540,8 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 2)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
 	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-1", "CHR-2"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.StatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", string(ticketcore.StatusDone))
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", string(ticketcore.StatusDone))
 	assertTicketContains(t, ticketPath, `review_round: 2`)
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `merge_state: "merged"`)
@@ -585,7 +585,7 @@ func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *tes
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 2)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
 	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-1"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusReadyForDev)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", string(ticketcore.StatusReadyForDev))
 	assertTicketContains(t, ticketPath, `review_round: 2`)
 	assertTicketContains(t, ticketPath, `review_state: "changes_requested"`)
 	assertTicketContains(t, ticketPath, `review_result: "needs_changes"`)
@@ -933,7 +933,7 @@ func writeTrustedAutoMergeLoopConfig(t *testing.T, projectDir string) {
 }
 
 func testLoopTicketWithPullRequestRef(key, title string) ticketcore.Ticket {
-	ticket := testLoopTicket(key, title, ticketcore.StatusReadyForDev, "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"})
+	ticket := testLoopTicket(key, title, string(ticketcore.StatusReadyForDev), "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"})
 	ticket.Branch = "feat/slice-2-pr-reference-workflow"
 	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
@@ -979,7 +979,7 @@ func assertAgentWorkTicketState(t *testing.T, tickets []ticketcore.Indexed, tick
 
 	for _, ticket := range tickets {
 		if ticket.Key == ticketKey {
-			if ticket.Status != status {
+			if string(ticket.Status) != status {
 				t.Fatalf("%s status = %q, want %q", ticketKey, ticket.Status, status)
 			}
 

@@ -100,12 +100,12 @@ func validateWorkflowTask(t WorkflowTask) error {
 
 func validateWorkflowTaskPhase(t WorkflowTask) error {
 	allowed := map[string][]string{
-		"pending":       {ticketcore.StatusBacklog, ticketcore.StatusReadyForDev},
-		"running":       {ticketcore.StatusInProgress},
-		"validated":     {ticketcore.StatusInProgress},
-		"waiting_slice": {ticketcore.StatusInProgress, ticketcore.StatusReadyForReview, ticketcore.StatusReadyForMerge},
-		"blocked":       {ticketcore.StatusBlockedLegacy},
-		"integrated":    {ticketcore.StatusDone},
+		"pending":       {string(ticketcore.StatusBacklog), string(ticketcore.StatusReadyForDev)},
+		"running":       {string(ticketcore.StatusInProgress)},
+		"validated":     {string(ticketcore.StatusInProgress)},
+		"waiting_slice": {string(ticketcore.StatusInProgress), string(ticketcore.StatusReadyForReview), string(ticketcore.StatusReadyForMerge)},
+		"blocked":       {string(ticketcore.StatusBlockedLegacy)},
+		"integrated":    {string(ticketcore.StatusDone)},
 	}
 	if !slices.Contains(allowed[t.Phase], t.Status) {
 		return fmt.Errorf("invalid workflow task phase/status: %s/%s", t.Phase, t.Status)

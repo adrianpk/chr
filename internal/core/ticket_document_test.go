@@ -119,7 +119,7 @@ func TestTicketDocumentRejections(t *testing.T) {
 	for _, fields := range []map[string]string{
 		{"priority": "urgent"},
 		{"type": "imaginary"},
-		{"status": ticketcore.StatusDone},
+		{"status": string(ticketcore.StatusDone)},
 		{"claim_generation": "99"},
 		{"pr": "file:///secret"},
 		{"commits": "not-a-commit"},

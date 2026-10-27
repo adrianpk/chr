@@ -42,7 +42,7 @@ func TestWorkflowLooseCrashProcess(t *testing.T) {
 	id := os.Getenv("CHR_LOOSE_CRASH_ID")
 	switch os.Getenv("CHR_LOOSE_CRASH_ACTION") {
 	case "write":
-		workflowLooseClassify(t, store, workflowLooseRecord(t, store, "PRJ-91"), "critical", ticketcore.StatusReadyForDev)
+		workflowLooseClassify(t, store, workflowLooseRecord(t, store, "PRJ-91"), "critical", string(ticketcore.StatusReadyForDev))
 	case "select":
 		_, err = store.ReconcileWorkflowMembership(t.Context(), id)
 	case "block":
@@ -179,7 +179,7 @@ func prepareWorkflowLooseCrash(t *testing.T, f workflowIntegrationFixture, actio
 
 	if action == "select" {
 		workflowAdvanceFrontier(t, f)
-		workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", ticketcore.StatusReadyForDev)
+		workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", string(ticketcore.StatusReadyForDev))
 	}
 }
 

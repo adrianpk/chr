@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
@@ -66,7 +67,7 @@ func ticketReviewFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "result",
 			Usage: "review result: pass, needs_changes, insufficient_evidence, needs_human_decision",
-			Value: core.TicketReviewCommandResultPass,
+			Value: string(ticketcore.ReviewResultPass),
 		},
 		&cli.StringSliceFlag{
 			Name:  "finding",
@@ -147,10 +148,10 @@ func printTicketReviewResult(stdout io.Writer, projectContext commandProjectCont
 		"ticket_review: result",
 		"project_id: " + projectContext.ProjectID,
 		"ticket: " + result.TicketKey,
-		"result: " + result.ReviewResult,
-		"review_state: " + result.ReviewState,
+		"result: " + string(result.ReviewResult),
+		"review_state: " + string(result.ReviewState),
 		fmt.Sprintf("review_round: %d", result.ReviewRound),
-		"status: " + result.Status,
+		"status: " + string(result.Status),
 		"review_ref: " + result.ReviewRef.URL,
 		"provider: " + string(result.RemoteSnapshot.Reference.Provider),
 		fmt.Sprintf("remote_comments: %d", len(result.RemoteComments)),

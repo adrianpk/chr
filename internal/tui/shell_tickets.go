@@ -319,19 +319,19 @@ func compactTicketCell(value string, width int, center bool) string {
 
 func compactTicketStatusLabel(status string) string {
 	labels := map[string]string{
-		ticketcore.StatusBacklog:         "BL",
-		ticketcore.StatusReadyForDev:     "RFD",
-		ticketcore.StatusInProgress:      "IP",
-		ticketcore.StatusReadyForReview:  "RFR",
-		ticketcore.StatusReadyForMerge:   "RFM",
-		ticketcore.StatusDone:            "DONE",
-		ticketcore.StatusOpenLegacy:      "OPN",
-		ticketcore.StatusReadyLegacy:     "RDY",
-		ticketcore.StatusReviewingLegacy: "REV",
-		ticketcore.StatusBlockedLegacy:   "BLK",
-		ticketcore.StatusSolvedLegacy:    "SLV",
-		ticketcore.StatusMergedLegacy:    "DONE",
-		ticketcore.StatusClosedLegacy:    "CLS",
+		string(ticketcore.StatusBacklog):         "BL",
+		string(ticketcore.StatusReadyForDev):     "RFD",
+		string(ticketcore.StatusInProgress):      "IP",
+		string(ticketcore.StatusReadyForReview):  "RFR",
+		string(ticketcore.StatusReadyForMerge):   "RFM",
+		string(ticketcore.StatusDone):            "DONE",
+		string(ticketcore.StatusOpenLegacy):      "OPN",
+		string(ticketcore.StatusReadyLegacy):     "RDY",
+		string(ticketcore.StatusReviewingLegacy): "REV",
+		string(ticketcore.StatusBlockedLegacy):   "BLK",
+		string(ticketcore.StatusSolvedLegacy):    "SLV",
+		string(ticketcore.StatusMergedLegacy):    "DONE",
+		string(ticketcore.StatusClosedLegacy):    "CLS",
 	}
 
 	label, ok := labels[strings.TrimSpace(status)]
@@ -361,17 +361,17 @@ func compactBoardColumnLabel(column string) string {
 	switch strings.TrimSpace(column) {
 	case boardAttentionColumn:
 		return "ATT"
-	case ticketcore.StatusBacklog:
+	case string(ticketcore.StatusBacklog):
 		return "BL"
-	case ticketcore.StatusReadyForDev:
+	case string(ticketcore.StatusReadyForDev):
 		return "RFD"
-	case ticketcore.StatusInProgress:
+	case string(ticketcore.StatusInProgress):
 		return "IP"
-	case ticketcore.StatusReadyForReview:
+	case string(ticketcore.StatusReadyForReview):
 		return "RFR"
-	case ticketcore.StatusReadyForMerge:
+	case string(ticketcore.StatusReadyForMerge):
 		return "RFM"
-	case ticketcore.StatusDone:
+	case string(ticketcore.StatusDone):
 		return "Done"
 	default:
 		return truncatePlainLine(humanizeCompactToken(column), 5)

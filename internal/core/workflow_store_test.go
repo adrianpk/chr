@@ -54,7 +54,7 @@ func TestWorkflowRoundTrip(t *testing.T) {
 	r.Metadata["custom"] = json.RawMessage(`{"native":true}`)
 	r.Metadata["title"] = json.RawMessage(`"Renamed ticket"`)
 	r.Domain["extra"] = json.RawMessage(`"preserved"`)
-	r.Task.Status = ticketcore.StatusBacklog
+	r.Task.Status = string(ticketcore.StatusBacklog)
 
 	written, err := s.Write(ctx, r, r.Revision)
 	if err != nil {

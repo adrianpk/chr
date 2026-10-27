@@ -14,7 +14,7 @@ func workflowTestTask(id string) WorkflowRecord {
 	return WorkflowRecord{
 		WorkflowIdentity: WorkflowIdentity{ID: id, ProjectID: "project-1", Namespace: "default", Revision: 1, CreatedAt: now, UpdatedAt: now},
 		Kind:             "ticket", Path: "ticket/" + id + "/metadata.json", Body: []byte("# Original body\n"),
-		Task: &WorkflowTask{Schema: WorkflowSchema, Key: id, Status: ticketcore.StatusReadyForDev, Phase: "pending", ContractHash: "contract-1"},
+		Task: &WorkflowTask{Schema: WorkflowSchema, Key: id, Status: string(ticketcore.StatusReadyForDev), Phase: "pending", ContractHash: "contract-1"},
 	}
 }
 
@@ -35,9 +35,11 @@ func TestWorkflowRecord(t *testing.T) {
 		{"schema", func(r *WorkflowRecord) { r.Task.Schema = "chr-workflow/v2" }},
 		{"partial", func(r *WorkflowRecord) { r.Task.SetID = "set-1" }},
 		{"negative order", func(r *WorkflowRecord) { r.Task.Order = -1 }},
-		{"unproven done", func(r *WorkflowRecord) { r.Task.Phase, r.Task.Status = "integrated", ticketcore.StatusDone }},
-		{"unowned running", func(r *WorkflowRecord) { r.Task.Phase, r.Task.Status = "running", ticketcore.StatusInProgress }},
-		{"unvalidated", func(r *WorkflowRecord) { r.Task.Phase, r.Task.Status = "validated", ticketcore.StatusInProgress }},
+		{"unproven done", func(r *WorkflowRecord) { r.Task.Phase, r.Task.Status = "integrated", string(ticketcore.StatusDone) }},
+		{"unowned running", func(r *WorkflowRecord) { r.Task.Phase, r.Task.Status = "running", string(ticketcore.StatusInProgress) }},
+		{"unvalidated", func(r *WorkflowRecord) {
+			r.Task.Phase, r.Task.Status = "validated", string(ticketcore.StatusInProgress)
+		}},
 		{"revision", func(r *WorkflowRecord) { r.Revision = 0 }},
 	}
 	for _, tc := range cases {

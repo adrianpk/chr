@@ -97,7 +97,7 @@ func TestWorkflowLooseLater(t *testing.T) {
 			workflowLooseCreate(t, f.store, original, "PRJ-93", "critical", nil)
 			workflowLooseCreate(t, f.store, original, "PRJ-94", "critical", nil)
 			workflowLooseFields(t, f.store, "PRJ-94", "persistence", "critical", "high")
-			workflowLooseClassify(t, f.store, workflowLooseCreate(t, f.store, original, "PRJ-95", "critical", nil), "critical", ticketcore.StatusBacklog)
+			workflowLooseClassify(t, f.store, workflowLooseCreate(t, f.store, original, "PRJ-95", "critical", nil), "critical", string(ticketcore.StatusBacklog))
 			workflowFinalizeFrontier(t, f)
 			workflowAdvanceFrontier(t, f)
 

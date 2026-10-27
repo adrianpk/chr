@@ -11,12 +11,12 @@ import (
 
 // NormalBoardColumns defines a package boundary variable.
 var NormalBoardColumns = []string{
-	ticketcore.StatusBacklog,
-	ticketcore.StatusReadyForDev,
-	ticketcore.StatusInProgress,
-	ticketcore.StatusReadyForReview,
-	ticketcore.StatusReadyForMerge,
-	ticketcore.StatusDone,
+	string(ticketcore.StatusBacklog),
+	string(ticketcore.StatusReadyForDev),
+	string(ticketcore.StatusInProgress),
+	string(ticketcore.StatusReadyForReview),
+	string(ticketcore.StatusReadyForMerge),
+	string(ticketcore.StatusDone),
 }
 
 // BoardQuery describes a package boundary value.
@@ -115,10 +115,12 @@ func newBoardColumns() map[string][]ticketcore.Indexed {
 
 func boardColumnForTicket(ticket ticketcore.Indexed) (string, bool) {
 	if ticketcore.NormalBoardStatus(ticket.BoardColumn) {
-		return ticket.BoardColumn, true
+		return string(ticket.BoardColumn), true
 	}
 
-	return ticketcore.BoardStatus(ticket.Status)
+	status, ok := ticketcore.BoardStatus(ticket.Status)
+
+	return string(status), ok
 }
 
 func boardFromColumns(
@@ -165,7 +167,7 @@ func BoardAttentionReasons(ticket ticketcore.Indexed) []string {
 	}
 
 	if _, ok := boardColumnForTicket(ticket); !ok {
-		reasons = append(reasons, "status is outside normal Board columns: "+ticket.Status)
+		reasons = append(reasons, "status is outside normal Board columns: "+string(ticket.Status))
 	}
 
 	switch ticket.ReviewState {

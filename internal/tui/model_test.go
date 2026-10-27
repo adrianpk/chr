@@ -3149,7 +3149,7 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
-	if navigated.activeBoardColumn() != ticketcore.StatusReadyForDev {
+	if navigated.activeBoardColumn() != string(ticketcore.StatusReadyForDev) {
 		t.Fatalf("board column = %q, want ready_for_dev", navigated.activeBoardColumn())
 	}
 
@@ -3281,7 +3281,7 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 		t.Fatal("board attention view is still active")
 	}
 
-	if normal.activeBoardColumn() != ticketcore.StatusBacklog {
+	if normal.activeBoardColumn() != string(ticketcore.StatusBacklog) {
 		t.Fatalf("board column = %q, want backlog", normal.activeBoardColumn())
 	}
 }
@@ -3332,7 +3332,7 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 		t.Fatalf("selectedTicket = %d, want 1", restored.selectedTicket)
 	}
 
-	if restored.activeBoardColumn() != ticketcore.StatusReadyForDev {
+	if restored.activeBoardColumn() != string(ticketcore.StatusReadyForDev) {
 		t.Fatalf("activeBoardColumn = %q, want ready_for_dev", restored.activeBoardColumn())
 	}
 }

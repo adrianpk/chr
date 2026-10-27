@@ -182,7 +182,7 @@ func workflowUnpreparedTicket(content []byte) (ticketcore.Indexed, error) {
 		return ticketcore.Indexed{}, err
 	}
 
-	return ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: opsmetadata.Unquote(metadata["key"])}, IndexedClassification: ticketcore.IndexedClassification{Status: opsmetadata.Unquote(metadata["status"]), UseCase: opsmetadata.Unquote(metadata["use_case"]), Priority: opsmetadata.Unquote(metadata["priority"]), Severity: opsmetadata.Unquote(metadata["severity"]), Type: opsmetadata.Unquote(metadata["type"]), ProjectArea: opsmetadata.Unquote(metadata["project_area"]), Tags: opsmetadata.ParseList(metadata["tags"])}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: created}, IndexedProjection: ticketcore.IndexedProjection{ContentHash: contenthash.Sum(content)}}, nil
+	return ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: opsmetadata.Unquote(metadata["key"])}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.Status(opsmetadata.Unquote(metadata["status"])), UseCase: opsmetadata.Unquote(metadata["use_case"]), Priority: opsmetadata.Unquote(metadata["priority"]), Severity: opsmetadata.Unquote(metadata["severity"]), Type: opsmetadata.Unquote(metadata["type"]), ProjectArea: opsmetadata.Unquote(metadata["project_area"]), Tags: opsmetadata.ParseList(metadata["tags"])}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: created}, IndexedProjection: ticketcore.IndexedProjection{ContentHash: contenthash.Sum(content)}}, nil
 }
 
 func (s *WorkflowStore) hashWorkflowEvidence(ctx context.Context, selection *workflowSelection) error {

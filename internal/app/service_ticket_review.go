@@ -48,7 +48,7 @@ func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (c
 	defer release()
 
 	result, err := core.RunTicketReviewCommand(ctx, core.TicketReviewCommandOptions{
-		Ticket: ticket, Config: config, Result: request.Result, Findings: request.Findings,
+		Ticket: ticket, Config: config, Result: ticketcore.ReviewResult(request.Result), Findings: request.Findings,
 		Adapter: adapter, DryRun: request.DryRun, ReviewedAt: time.Now().UTC(),
 	})
 	if err != nil {

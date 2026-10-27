@@ -188,7 +188,7 @@ func RenderAgenticReviewContext(review AgenticReviewContext) string {
 	writeAgenticReviewField(&output, "project_id", review.ProjectID)
 	writeAgenticReviewField(&output, "ticket_key", review.Ticket.Key)
 	writeAgenticReviewField(&output, "ticket_title", review.Ticket.Title)
-	writeAgenticReviewField(&output, "ticket_status", review.Ticket.Status)
+	writeAgenticReviewField(&output, "ticket_status", string(review.Ticket.Status))
 	writeAgenticReviewField(&output, "ticket_path", review.Ticket.Path)
 	writeAgenticReviewField(&output, "branch", review.Ticket.Branch)
 	writeAgenticReviewField(&output, "execution_id", review.Execution.ID)
@@ -409,26 +409,26 @@ func agenticReviewFindings(result AgenticReviewResult) []workflowstate.ReviewFin
 	return findings
 }
 
-func ticketReviewResultForAgenticDecision(decision IntegrationReviewDecision) string {
+func ticketReviewResultForAgenticDecision(decision IntegrationReviewDecision) ticketcore.ReviewResult {
 	switch decision {
 	case IntegrationReviewDecisionPass:
-		return TicketReviewCommandResultPass
+		return ticketcore.ReviewResultPass
 	case IntegrationReviewDecisionNeedsChanges:
-		return TicketReviewCommandResultNeedsChanges
+		return ticketcore.ReviewResultNeedsChanges
 	case IntegrationReviewDecisionInsufficientEvidence:
-		return TicketReviewCommandResultInsufficientEvidence
+		return ticketcore.ReviewResultInsufficientEvidence
 	case IntegrationReviewDecisionHumanRequired:
-		return TicketReviewCommandResultNeedsHumanDecision
+		return ticketcore.ReviewResultNeedsHumanDecision
 	default:
-		return TicketReviewCommandResultNeedsHumanDecision
+		return ticketcore.ReviewResultNeedsHumanDecision
 	}
 }
 
-func ticketReviewStateForResult(result string) string {
+func ticketReviewStateForResult(result ticketcore.ReviewResult) ticketcore.ReviewState {
 	return ticketReviewCommandStateAndStatus(result).state
 }
 
-func ticketReviewStatusForResult(result string) string {
+func ticketReviewStatusForResult(result ticketcore.ReviewResult) ticketcore.Status {
 	return ticketReviewCommandStateAndStatus(result).status
 }
 

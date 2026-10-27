@@ -113,7 +113,7 @@ func (s *WorkflowStore) readNativeBoardTickets(ctx context.Context, tickets map[
 		}
 
 		ticket.NativeWorkflow = true
-		ticket.Key, ticket.Status, ticket.Slice = record.Task.Key, record.Task.Status, record.Task.SliceID
+		ticket.Key, ticket.Status, ticket.Slice = record.Task.Key, ticketcore.Status(record.Task.Status), record.Task.SliceID
 		ticket.ContentHash, ticket.IndexedAt = record.SourceHash, time.Time{}
 
 		ticket.BoardColumn, _ = ticketcore.BoardStatus(ticket.Status)

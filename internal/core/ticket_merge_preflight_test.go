@@ -42,7 +42,7 @@ func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 
 func TestRunTicketMergePreflightBlocksMissingHandoff(t *testing.T) {
 	ticket := testMergePreflightTicket()
-	ticket.ReviewResult = TicketReviewCommandResultNeedsChanges
+	ticket.ReviewResult = ticketcore.ReviewResultNeedsChanges
 
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: ticket,
@@ -159,8 +159,8 @@ func testMergePreflightTicket() ticketcore.Indexed {
 			RelativePath: "CHR-2-Test.md",
 			Key:          "CHR-2",
 		}, IndexedSummary: ticketcore.IndexedSummary{Title: "Test ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForMerge}, IndexedSource: ticketcore.IndexedSource{Branch: "feat/slice-2-merger-preflight"}, IndexedReview: ticketcore.IndexedReview{
-			ReviewState:  TicketReviewCommandResultPass,
-			ReviewResult: TicketReviewCommandResultPass,
+			ReviewState:  ticketcore.ReviewStatePass,
+			ReviewResult: ticketcore.ReviewResultPass,
 			ReviewRefs: []ticketmetadata.ReviewRef{{
 				Type:     "pull_request",
 				Provider: "forgejo",

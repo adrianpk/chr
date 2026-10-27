@@ -43,7 +43,7 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 		t.Fatalf("ApplyTrustedAutoMergeReview returned error: %v", err)
 	}
 
-	if result.Status != ticketcore.StatusReadyForMerge || result.ReviewResult != TicketReviewCommandResultPass {
+	if result.Status != ticketcore.StatusReadyForMerge || result.ReviewResult != ticketcore.ReviewResultPass {
 		t.Fatalf("result = %#v, want trusted pass ready_for_merge", result)
 	}
 

@@ -72,7 +72,7 @@ func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardReque
 
 func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.TicketDetailRequest) (webui.TicketDetailView, error) {
 	if request.New {
-		return p.completeTicketEditor(webui.TicketDetailView{New: true, Fields: map[string]string{"status": ticketcore.StatusBacklog, "priority": "normal", "severity": "unclassified", "type": "task"}})
+		return p.completeTicketEditor(webui.TicketDetailView{New: true, Fields: map[string]string{"status": string(ticketcore.StatusBacklog), "priority": "normal", "severity": "unclassified", "type": "task"}})
 	}
 
 	document, err := p.service(ctx).ReadTicketDocument(request.Key)
@@ -87,7 +87,7 @@ func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.Tic
 		Key:             ticket.Key,
 		Title:           ticket.Title,
 		Priority:        ticket.Priority,
-		Status:          ticket.Status,
+		Status:          string(ticket.Status),
 		Type:            ticket.Type,
 		ProjectArea:     ticket.ProjectArea,
 		UseCase:         ticket.UseCase,
@@ -226,8 +226,8 @@ func webTicketView(ticket ticketcore.Indexed) webui.BoardTicketView {
 		Key:               ticket.Key,
 		Title:             ticket.Title,
 		Synopsis:          ticket.Synopsis,
-		Status:            ticket.Status,
-		BoardColumn:       ticket.BoardColumn,
+		Status:            string(ticket.Status),
+		BoardColumn:       string(ticket.BoardColumn),
 		Priority:          ticket.Priority,
 		Severity:          ticket.Severity,
 		Type:              ticket.Type,
@@ -235,12 +235,12 @@ func webTicketView(ticket ticketcore.Indexed) webui.BoardTicketView {
 		ProjectArea:       ticket.ProjectArea,
 		Slice:             ticket.Slice,
 		Branch:            ticket.Branch,
-		ReviewState:       ticket.ReviewState,
+		ReviewState:       string(ticket.ReviewState),
 		ReviewRound:       ticket.ReviewRound,
-		ReviewResult:      ticket.ReviewResult,
+		ReviewResult:      string(ticket.ReviewResult),
 		ReviewCommentsURL: ticket.ReviewCommentsURL,
-		MergeState:        ticket.MergeState,
-		MergeResult:       ticket.MergeResult,
+		MergeState:        string(ticket.MergeState),
+		MergeResult:       string(ticket.MergeResult),
 		MergeBlocker:      ticket.MergeBlocker,
 		RelativePath:      ticket.RelativePath,
 		SourceKind:        ticket.SourceKind,

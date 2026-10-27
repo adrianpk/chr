@@ -68,22 +68,22 @@ func TestTicketStatusUpdaterRejectsInvalidStatus(t *testing.T) {
 
 func TestTicketStatusValidationAcceptsBoardAndLegacyStatuses(t *testing.T) {
 	for _, status := range []string{
-		ticketcore.StatusBacklog,
-		ticketcore.StatusReadyForDev,
-		ticketcore.StatusInProgress,
-		ticketcore.StatusReadyForReview,
-		ticketcore.StatusReadyForMerge,
-		ticketcore.StatusDone,
-		ticketcore.StatusOpenLegacy,
-		ticketcore.StatusReadyLegacy,
-		ticketcore.StatusReviewingLegacy,
-		ticketcore.StatusBlockedLegacy,
-		ticketcore.StatusSolvedLegacy,
-		ticketcore.StatusMergedLegacy,
-		ticketcore.StatusClosedLegacy,
+		string(ticketcore.StatusBacklog),
+		string(ticketcore.StatusReadyForDev),
+		string(ticketcore.StatusInProgress),
+		string(ticketcore.StatusReadyForReview),
+		string(ticketcore.StatusReadyForMerge),
+		string(ticketcore.StatusDone),
+		string(ticketcore.StatusOpenLegacy),
+		string(ticketcore.StatusReadyLegacy),
+		string(ticketcore.StatusReviewingLegacy),
+		string(ticketcore.StatusBlockedLegacy),
+		string(ticketcore.StatusSolvedLegacy),
+		string(ticketcore.StatusMergedLegacy),
+		string(ticketcore.StatusClosedLegacy),
 	} {
 		t.Run(status, func(t *testing.T) {
-			if !ticketcore.ValidStatus(status) {
+			if !ticketcore.ValidStatus(ticketcore.Status(status)) {
 				t.Fatalf("IsValidTicketStatus(%q) = false, want true", status)
 			}
 		})
@@ -97,25 +97,25 @@ func TestBoardTicketStatusForMapsNormalAndLegacyStatuses(t *testing.T) {
 		want   string
 		wantOK bool
 	}{
-		{name: "normal", status: ticketcore.StatusReadyForDev, want: ticketcore.StatusReadyForDev, wantOK: true},
-		{name: "open legacy", status: ticketcore.StatusOpenLegacy, want: ticketcore.StatusBacklog, wantOK: true},
-		{name: "ready legacy", status: ticketcore.StatusReadyLegacy, want: ticketcore.StatusReadyForDev, wantOK: true},
-		{name: "reviewing legacy", status: ticketcore.StatusReviewingLegacy, want: ticketcore.StatusReadyForReview, wantOK: true},
-		{name: "solved legacy", status: ticketcore.StatusSolvedLegacy, want: ticketcore.StatusReadyForMerge, wantOK: true},
-		{name: "merged legacy", status: ticketcore.StatusMergedLegacy, want: ticketcore.StatusDone, wantOK: true},
-		{name: "closed legacy", status: ticketcore.StatusClosedLegacy, want: ticketcore.StatusDone, wantOK: true},
-		{name: "blocked legacy", status: ticketcore.StatusBlockedLegacy, wantOK: false},
+		{name: "normal", status: string(ticketcore.StatusReadyForDev), want: string(ticketcore.StatusReadyForDev), wantOK: true},
+		{name: "open legacy", status: string(ticketcore.StatusOpenLegacy), want: string(ticketcore.StatusBacklog), wantOK: true},
+		{name: "ready legacy", status: string(ticketcore.StatusReadyLegacy), want: string(ticketcore.StatusReadyForDev), wantOK: true},
+		{name: "reviewing legacy", status: string(ticketcore.StatusReviewingLegacy), want: string(ticketcore.StatusReadyForReview), wantOK: true},
+		{name: "solved legacy", status: string(ticketcore.StatusSolvedLegacy), want: string(ticketcore.StatusReadyForMerge), wantOK: true},
+		{name: "merged legacy", status: string(ticketcore.StatusMergedLegacy), want: string(ticketcore.StatusDone), wantOK: true},
+		{name: "closed legacy", status: string(ticketcore.StatusClosedLegacy), want: string(ticketcore.StatusDone), wantOK: true},
+		{name: "blocked legacy", status: string(ticketcore.StatusBlockedLegacy), wantOK: false},
 		{name: "unknown", status: "unknown", wantOK: false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, ok := ticketcore.BoardStatus(tt.status)
+			got, ok := ticketcore.BoardStatus(ticketcore.Status(tt.status))
 			if ok != tt.wantOK {
 				t.Fatalf("ok = %v, want %v", ok, tt.wantOK)
 			}
 
-			if got != tt.want {
+			if string(got) != tt.want {
 				t.Fatalf("status = %q, want %q", got, tt.want)
 			}
 		})

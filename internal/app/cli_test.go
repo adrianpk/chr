@@ -3383,7 +3383,7 @@ func testLoopTicket(
 	return ticketcore.Ticket{
 		Key:         key,
 		Title:       title,
-		Status:      status,
+		Status:      ticketcore.Status(status),
 		Priority:    priority,
 		Severity:    severity,
 		Type:        ticketType,
@@ -3421,11 +3421,11 @@ Loop behavior.
 
 func testReviewRepairTicket() ticketcore.Ticket {
 	ticket := testLoopTicket(
-		"CHR-1", "Review repair", ticketcore.StatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
+		"CHR-1", "Review repair", string(ticketcore.StatusReadyForDev), "high", "critical", "bug", "review", "backend", []string{"repair"},
 	)
 	ticket.Branch = "feat/chr-1-review-repair"
 	ticket.ReviewState = "changes_requested"
-	ticket.ReviewResult = core.TicketReviewCommandResultNeedsChanges
+	ticket.ReviewResult = ticketcore.ReviewResultNeedsChanges
 	ticket.ReviewRound = 1
 	ticket.ReviewCommentsURL = "https://forge.example.com/adrianpk/chr/pulls/274"
 	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
@@ -5073,8 +5073,8 @@ func testTicketReadyForReview() ticketcore.Ticket {
 func testTicketReadyForMerge() ticketcore.Ticket {
 	ticket := testTicketWithReviewRef()
 	ticket.Status = ticketcore.StatusReadyForMerge
-	ticket.ReviewState = core.TicketReviewCommandResultPass
-	ticket.ReviewResult = core.TicketReviewCommandResultPass
+	ticket.ReviewState = ticketcore.ReviewStatePass
+	ticket.ReviewResult = ticketcore.ReviewResultPass
 	ticket.ReviewRound = 1
 
 	return ticket
@@ -5611,7 +5611,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.StatusReadyForReview,
+		string(ticketcore.StatusReadyForReview),
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
@@ -5645,7 +5645,7 @@ func TestTicketStatusBlocksReadyForReviewWithoutEvidenceStrategy(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.StatusReadyForReview,
+		string(ticketcore.StatusReadyForReview),
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")
@@ -5678,7 +5678,7 @@ func TestTicketStatusAllowsReadyForReviewWithOptionalEvidenceStrategy(t *testing
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.StatusReadyForReview,
+		string(ticketcore.StatusReadyForReview),
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
@@ -6293,7 +6293,7 @@ func TestTicketStatusRejectsReadyForReviewWithoutReviewRef(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.StatusReadyForReview,
+		string(ticketcore.StatusReadyForReview),
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")

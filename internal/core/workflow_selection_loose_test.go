@@ -132,12 +132,12 @@ func TestWorkflowSelectionLooseOwnership(t *testing.T) {
 	record := workflowTestTask("PRJ-9")
 	record.Task.UseCase = "example"
 
-	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", ticketcore.StatusDone, "run/evidence/receipt.json"
+	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", string(ticketcore.StatusDone), "run/evidence/receipt.json"
 	if _, err := store.Create(t.Context(), "Done", record); err != nil {
 		t.Fatal(err)
 	}
 
-	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Statuses: []string{ticketcore.StatusReadyForDev, ticketcore.StatusDone}, Filters: workflowstate.TicketFilters{UseCases: []string{"example"}}}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Statuses: []string{string(ticketcore.StatusReadyForDev), string(ticketcore.StatusDone)}, Filters: workflowstate.TicketFilters{UseCases: []string{"example"}}}
 
 	preview, err := store.Preview(t.Context(), request)
 	if err != nil || preview.Total != 0 || preview.Excluded["slice_owned"] != len(result.Tasks) || preview.Excluded["integrated"] != 1 {
@@ -158,9 +158,9 @@ func TestWorkflowSelectionConcurrent(t *testing.T) {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			record.Task.Status = ticketcore.StatusBacklog
+			record.Task.Status = string(ticketcore.StatusBacklog)
 			if i%2 == 0 {
-				record.Task.Status = ticketcore.StatusReadyForDev
+				record.Task.Status = string(ticketcore.StatusReadyForDev)
 			}
 
 			next, err := store.Write(t.Context(), record, record.Revision)

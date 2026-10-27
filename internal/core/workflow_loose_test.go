@@ -23,7 +23,7 @@ func workflowLooseConfiguredQueue(t *testing.T, includeLater bool, setup func(*W
 		request.Selection.Order = workflowstate.TicketOrderPriority
 		request.Policy.IncludeLaterTickets = includeLater
 
-		workflowLooseClassify(t, store, first, "critical", ticketcore.StatusReadyForDev)
+		workflowLooseClassify(t, store, first, "critical", string(ticketcore.StatusReadyForDev))
 		workflowLooseCreate(t, store, first, "PRJ-91", "high", nil)
 		workflowLooseCreate(t, store, first, "PRJ-92", "normal", []workflowstate.Ref{{Kind: "ticket", ID: first.Task.Key}})
 
@@ -58,7 +58,7 @@ func workflowLooseCreate(t *testing.T, store *WorkflowStore, original WorkflowRe
 		t.Fatal(err)
 	}
 
-	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: ticketcore.StatusReadyForDev, Phase: "pending", DependsOn: dependencies, ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: workflowLooseBody(key, priority), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), Phase: "pending", DependsOn: dependencies, ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: workflowLooseBody(key, priority), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	created, err := store.Create(t.Context(), key, record)
 	if err != nil {
@@ -109,8 +109,8 @@ func workflowLooseRecord(t *testing.T, store *WorkflowStore, key string) Workflo
 func TestWorkflowLooseReselection(t *testing.T) {
 	f := workflowLooseQueueFixture(t, false)
 	first := workflowTestRead(t, f.store, f.run.ID)
-	workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-91"), "high", ticketcore.StatusBacklog)
-	workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", ticketcore.StatusReadyForDev)
+	workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-91"), "high", string(ticketcore.StatusBacklog))
+	workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, "PRJ-92"), "critical", string(ticketcore.StatusReadyForDev))
 
 	before, err := f.store.ReconcileWorkflowMembership(t.Context(), first.ID)
 	if err != nil || before.Members[0].Admission.Key != "PRJ-90" || before.Members[1].Admission.Key != "PRJ-91" || before.Lane.Unit.ID != "PRJ-90" {

@@ -194,8 +194,8 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 		Title:        "Do something",
 		Status:       ticketcore.StatusReadyForReview,
 		Branch:       "feat/slice-1-merger-handoff-contract",
-		ReviewState:  TicketReviewCommandResultPass,
-		ReviewResult: TicketReviewCommandResultPass,
+		ReviewState:  ticketcore.ReviewStatePass,
+		ReviewResult: ticketcore.ReviewResultPass,
 		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",

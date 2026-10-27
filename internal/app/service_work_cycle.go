@@ -229,7 +229,7 @@ func agentWorkCycleTicketReadyForMerge(policy core.IntegrationCyclePolicy, ticke
 }
 
 func agentWorkCycleMergeBlocked(result core.TicketMergeCommandResult) bool {
-	return result.MergeState != core.TicketMergeStateMerged || result.Status != ticketcore.StatusDone
+	return result.MergeState != ticketcore.MergeStateMerged || result.Status != ticketcore.StatusDone
 }
 
 func (s service) finishAgentWorkIntegrationCycles(repository executioncore.LoopRunRepository, state agentWorkIntegrationCycleState, loopSink executioncore.AgentEventSink, initialEligibleCount int) (agentWorkIntegrationResult, error) {

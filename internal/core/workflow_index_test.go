@@ -112,7 +112,7 @@ func TestWorkflowIndex(t *testing.T) {
 		t.Fatal("slice index lost owning set")
 	}
 
-	first.Task.Status = ticketcore.StatusBacklog
+	first.Task.Status = string(ticketcore.StatusBacklog)
 	workflowTestWrite(t, store, first)
 
 	if _, err := index.QueryWorkflow(context.Background(), store, q); !errors.Is(err, workflowstate.ErrConflict) {

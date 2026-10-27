@@ -40,5 +40,5 @@ func PrepareIndependentWorkflowTask(record WorkflowRecord, contract generationco
 }
 
 func workflowIndependentBacklog(record WorkflowRecord) bool {
-	return record.Kind == "ticket" && record.Task != nil && record.Task.SetID == "" && record.Task.SliceID == "" && record.Task.Status == ticketcore.StatusBacklog && record.Task.Phase == "pending" && record.Task.AttemptID == "" && len(record.Task.DependsOn) == 0
+	return record.Kind == "ticket" && record.Task != nil && record.Task.SetID == "" && record.Task.SliceID == "" && record.Task.Status == string(ticketcore.StatusBacklog) && record.Task.Phase == "pending" && record.Task.AttemptID == "" && len(record.Task.DependsOn) == 0
 }

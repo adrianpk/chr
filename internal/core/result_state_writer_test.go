@@ -73,7 +73,7 @@ func writeResultStateTicket(t *testing.T, status string) string {
 	ticket := ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
-		Status:    status,
+		Status:    ticketcore.Status(status),
 		CreatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
 	}

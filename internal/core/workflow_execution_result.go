@@ -83,13 +83,13 @@ func applyWorkflowTaskResult(run *workflowInvocationFile, record *WorkflowRecord
 	if !result.Successful {
 		attempt.Outcome, run.Status = "failed", "paused"
 		run.Outcome = result.Outcome
-		record.Task.Phase, record.Task.Status = "pending", ticketcore.StatusReadyForDev
+		record.Task.Phase, record.Task.Status = "pending", string(ticketcore.StatusReadyForDev)
 
 		return
 	}
 
 	attempt.Outcome = "validated"
-	record.Task.Phase, record.Task.Status = "validated", ticketcore.StatusInProgress
+	record.Task.Phase, record.Task.Status = "validated", string(ticketcore.StatusInProgress)
 	record.Task.Evidence = append(record.Task.Evidence, ref)
 	run.Cursor++
 

@@ -19,19 +19,19 @@ file creation use the ticket owner. Execution records, repositories, runner,
 events, readiness, explicit repair and worktrees use the execution owner. Native
 workflow authority retains its actual transaction and source owner. All 59
 assigned signature/watch entries are reconciled; preparation selection is typed
-and the global ceiling is six. Ticket/review typed states and final validation
-remain in progress.
+and the global ceiling is six. Ticket/review/merge states and execution cleanup outcomes are typed; remaining
+owner dispositions and final validation are in progress.
 
 ## Implementation Notes
 
 The approved T11.1–T11.6 task list owns scope. Moves and naming remain separate
 commits with direct consumers and preserved durable/wire contracts.
 The completed signature/control/preparation checkpoint is `c0814149f515e4a44f1dc491ea6fba30de976fec`;
-remaining ticket/review state work keeps this report drafting.
+remaining owner dispositions and final candidate validation keep this report drafting.
 
 ## Contracts Added or Changed
 
-The move ledger reconciles 724 declaration/test preimages after explicit contract
+The move ledger reconciles 756 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
 meanings are unchanged. All 59 assigned signatures have exact dispositions:
@@ -39,7 +39,9 @@ meanings are unchanged. All 59 assigned signatures have exact dispositions:
 ledger records 13 concrete boundaries. Preparation uses a private typed mode;
 its automatic test wrapper is no longer production code. The global policy is
 at ceiling six with 9306 production declarations, 162 exact debts and one external
-exception. Ticket/review state typing remains pending.
+exception. Ticket status, review state/result and merge state/result are separate types.
+Execution/loop statuses retain their existing typed machines; worktree cleanup
+and retained execution status are typed at their actual execution owner.
 
 ## Files of Interest
 
@@ -324,3 +326,14 @@ workflow debt signature reflects the new type and retains its Slice 12 owner.
 Remaining work includes ticket/review typed states and parser/validation test
 ownership with its merge-state dependencies. Final candidate validation and the
 Slice 11 PR remain pending.
+
+Typed state and test ownership checkpoint:
+
+- Ticket, review decision/transition, merge outcome and execution cleanup types preserve the original strings, empty/null values, SQL bindings and guarded transitions. Native task schema and provider PR status remain separate contracts with explicit conversion at projections and codecs.
+- Ten parser/validation component tests now sit beside the ticket owner. Native integrations retain only their actual private file/time fixtures. The move ledger records 756 exact current declaration/test preimages.
+- `go test ./internal/core/ticket/... ./internal/core/execution/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(Ticket|RunTicket|ValidateIndexedTicket|Board|ApplyAgenticReview|ParseAgenticReview|AgenticReview|TrustedAutoMerge|ResultState|ApplyExecutionResult|QualityRecordWire|QualityStorage|Worktree|WorkReadiness|Leaf|Model.*Board)' -count=1 -timeout=3m`: pass, including real file/SQLite/Git boundaries and frozen wire/storage fixtures.
+- `go test ./internal/core -run '^TestWorkflow(Record|Index|ReviewModes|ReviewDecisionChecks|ReviewPolicy|SelectionNativeTies|TaskGateOrder|ManualExact)$' -count=1 -timeout=3m`: pass.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core/execution/... ./internal/core ./internal/app ./internal/tui`: zero issues.
+- `make check-go-style`: pass, 9306 production declarations, ceiling six, 162 exact debts and one external exception.
+
+An earlier combined selection also included every WorkflowSelection/Review/Task/Manual test and reached the package's three-minute limit while entering TestWorkflowReviewModes/trusted. The focused selections above pass; no timeout or failed selection is represented as a successful check. Native owner dispositions and exact-head controller validation remain pending.

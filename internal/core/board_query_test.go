@@ -10,9 +10,9 @@ import (
 
 func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicket(t, index, "CHR-3", ticketcore.StatusDone)
-	upsertBoardQueryTicket(t, index, "CHR-1", ticketcore.StatusBacklog)
-	upsertBoardQueryTicket(t, index, "CHR-2", ticketcore.StatusReadyForDev)
+	upsertBoardQueryTicket(t, index, "CHR-3", string(ticketcore.StatusDone))
+	upsertBoardQueryTicket(t, index, "CHR-1", string(ticketcore.StatusBacklog))
+	upsertBoardQueryTicket(t, index, "CHR-2", string(ticketcore.StatusReadyForDev))
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -29,9 +29,9 @@ func TestBoardQueryReturnsNormalColumnsAndCounts(t *testing.T) {
 		t.Fatalf("columns = %d, want %d", len(board.Columns), len(NormalBoardColumns))
 	}
 
-	assertBoardColumn(t, board, ticketcore.StatusBacklog, "Backlog", []string{"CHR-1"})
-	assertBoardColumn(t, board, ticketcore.StatusReadyForDev, "Ready For Dev", []string{"CHR-2"})
-	assertBoardColumn(t, board, ticketcore.StatusDone, "Done", []string{"CHR-3"})
+	assertBoardColumn(t, board, string(ticketcore.StatusBacklog), "Backlog", []string{"CHR-1"})
+	assertBoardColumn(t, board, string(ticketcore.StatusReadyForDev), "Ready For Dev", []string{"CHR-2"})
+	assertBoardColumn(t, board, string(ticketcore.StatusDone), "Done", []string{"CHR-3"})
 }
 
 func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
@@ -45,13 +45,13 @@ func TestBoardQueryMapsLegacyStatusesToBoardColumns(t *testing.T) {
 		t.Fatalf("ProjectBoard returned error: %v", err)
 	}
 
-	assertBoardColumn(t, board, ticketcore.StatusReadyForDev, "Ready For Dev", []string{"CHR-1"})
+	assertBoardColumn(t, board, string(ticketcore.StatusReadyForDev), "Ready For Dev", []string{"CHR-1"})
 }
 
 func TestBoardQuerySeparatesAttentionTickets(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertBoardQueryTicket(t, index, "CHR-1", ticketcore.StatusBacklog)
-	upsertBoardQueryTicket(t, index, "CHR-2", ticketcore.StatusBlockedLegacy)
+	upsertBoardQueryTicket(t, index, "CHR-1", string(ticketcore.StatusBacklog))
+	upsertBoardQueryTicket(t, index, "CHR-2", string(ticketcore.StatusBlockedLegacy))
 
 	board, err := NewBoardQuery(index).ProjectBoard(context.Background(), BoardQueryOptions{
 		ProjectID: "project-1",
@@ -140,7 +140,7 @@ func assertBoardColumn(t *testing.T, board Board, columnID, title string, wantKe
 func upsertBoardQueryTicket(t *testing.T, index ticketcore.Index, key, status string) {
 	t.Helper()
 
-	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: key}, IndexedClassification: ticketcore.IndexedClassification{Status: status}})
+	upsertBoardQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: key}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.Status(status)}})
 }
 
 func upsertBoardQueryTicketWithMetadata(t *testing.T, index ticketcore.Index, metadata ticketcore.Indexed) {

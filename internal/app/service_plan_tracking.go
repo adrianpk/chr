@@ -149,7 +149,7 @@ func (s service) createPlanTrackingTickets(scope quizcore.Scope, planPath, track
 		result, err := s.CreateTicket(CreateTicketRequest{
 			Title:       payload.Title,
 			Synopsis:    payload.Synopsis,
-			Status:      ticketcore.StatusReadyForDev,
+			Status:      string(ticketcore.StatusReadyForDev),
 			Priority:    payload.Priority,
 			Severity:    payload.Severity,
 			Type:        payload.Type,

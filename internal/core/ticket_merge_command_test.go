@@ -61,7 +61,7 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 		t.Fatalf("RunTicketMergeCommand returned error: %v", err)
 	}
 
-	if result.Status != ticketcore.StatusDone || result.MergeState != TicketMergeStateMerged {
+	if result.Status != ticketcore.StatusDone || result.MergeState != ticketcore.MergeStateMerged {
 		t.Fatalf("result = %#v, want done merged", result)
 	}
 
@@ -137,7 +137,7 @@ func TestRunTicketMergeCommandRecordsProviderFailure(t *testing.T) {
 		t.Fatalf("RunTicketMergeCommand returned error: %v", err)
 	}
 
-	if result.Preflight.Allowed || result.MergeState != TicketMergeStateBlocked {
+	if result.Preflight.Allowed || result.MergeState != ticketcore.MergeStateBlocked {
 		t.Fatalf("result = %#v, want blocked provider failure", result)
 	}
 
@@ -168,7 +168,7 @@ func TestRunTicketMergeCommandRecordsBlockedPreflight(t *testing.T) {
 		t.Fatalf("RunTicketMergeCommand returned error: %v", err)
 	}
 
-	if result.Preflight.Allowed || result.MergeState != TicketMergeStateBlocked {
+	if result.Preflight.Allowed || result.MergeState != ticketcore.MergeStateBlocked {
 		t.Fatalf("result = %#v, want blocked preflight", result)
 	}
 
@@ -213,8 +213,8 @@ func writeMergeCommandTicket(t *testing.T) (ticketcore.Indexed, string) {
 		Title:        "Merge reviewed ticket",
 		Status:       ticketcore.StatusReadyForMerge,
 		Branch:       "feat/slice-3-merge-execution-command",
-		ReviewState:  TicketReviewCommandResultPass,
-		ReviewResult: TicketReviewCommandResultPass,
+		ReviewState:  ticketcore.ReviewStatePass,
+		ReviewResult: ticketcore.ReviewResultPass,
 		ReviewRefs: []ticketmetadata.ReviewRef{{
 			Type:     "pull_request",
 			Provider: "forgejo",

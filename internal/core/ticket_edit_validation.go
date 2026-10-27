@@ -63,7 +63,7 @@ func validateTicketResolution(document TicketDocument, request TicketEditRequest
 		status = value
 	}
 
-	if !slices.Contains([]string{"solved", "closed", ticketcore.StatusDone}, status) {
+	if !slices.Contains([]string{"solved", "closed", string(ticketcore.StatusDone)}, status) {
 		return fmt.Errorf("resolution is available only for resolved tickets")
 	}
 
@@ -136,19 +136,19 @@ func validateTicketEditStatus(document TicketDocument, request TicketEditRequest
 		return nil
 	}
 
-	if !ticketcore.NormalBoardStatus(status) {
+	if !ticketcore.NormalBoardStatus(ticketcore.Status(status)) {
 		return fmt.Errorf("unsupported ticket destination")
 	}
 
 	if document.native != nil {
-		if document.Phase != "pending" || !slices.Contains([]string{ticketcore.StatusBacklog, ticketcore.StatusReadyForDev}, status) {
+		if document.Phase != "pending" || !slices.Contains([]string{string(ticketcore.StatusBacklog), string(ticketcore.StatusReadyForDev)}, status) {
 			return fmt.Errorf("workflow phase and integration evidence own this transition")
 		}
 
 		return nil
 	}
 
-	if status == ticketcore.StatusDone {
+	if ticketcore.Status(status) == ticketcore.StatusDone {
 		return fmt.Errorf("moving to Done requires recorded integration through the workflow owner")
 	}
 

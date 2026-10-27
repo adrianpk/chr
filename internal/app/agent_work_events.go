@@ -219,7 +219,7 @@ func emitReviewFinishedAgentEvent(ctx context.Context, sink executioncore.AgentE
 		TicketKey:   ticket.Key,
 		Phase:       executioncore.AgentEventPhaseReviewFinished,
 		Level:       ticketReviewAgentEventLevel(ticket),
-		Message:     fmt.Sprintf("%s review finished: %s", ticket.Key, nonEmptyAgentWorkEventValue(ticket.ReviewResult, ticket.Status)),
+		Message:     fmt.Sprintf("%s review finished: %s", ticket.Key, nonEmptyAgentWorkEventValue(string(ticket.ReviewResult), string(ticket.Status))),
 		Refs:        agentWorkReviewRefs(ticket),
 	})
 }
@@ -243,7 +243,7 @@ func emitRepairFinishedAgentEvent(ctx context.Context, sink executioncore.AgentE
 		TicketKey:   ticket.Key,
 		Phase:       executioncore.AgentEventPhaseRepairFinished,
 		Level:       ticketReviewAgentEventLevel(ticket),
-		Message:     fmt.Sprintf("%s repair finished: %s", ticket.Key, nonEmptyAgentWorkEventValue(ticket.ReviewResult, ticket.Status)),
+		Message:     fmt.Sprintf("%s repair finished: %s", ticket.Key, nonEmptyAgentWorkEventValue(string(ticket.ReviewResult), string(ticket.Status))),
 		Refs:        agentWorkReviewRefs(ticket),
 	})
 }
@@ -268,7 +268,7 @@ func emitMergeFinishedAgentEvent(ctx context.Context, sink executioncore.AgentEv
 		TicketKey:   result.TicketKey,
 		Phase:       executioncore.AgentEventPhaseMergeFinished,
 		Level:       mergeAgentEventLevel(result),
-		Message:     fmt.Sprintf("%s merge finished: %s", result.TicketKey, nonEmptyAgentWorkEventValue(result.MergeResult, result.MergeState)),
+		Message:     fmt.Sprintf("%s merge finished: %s", result.TicketKey, nonEmptyAgentWorkEventValue(string(result.MergeResult), string(result.MergeState))),
 		Refs:        agentWorkMergeRefs(result),
 	})
 }
@@ -388,8 +388,8 @@ func emitTicketBlockedAgentEvent(ctx context.Context, events ticketExecutionEven
 
 func ticketReviewAgentEventLevel(ticket ticketcore.Indexed) executioncore.AgentEventLevel {
 	warns := core.IsTicketReviewRepair(ticket) ||
-		ticket.ReviewResult == core.TicketReviewCommandResultInsufficientEvidence ||
-		ticket.ReviewResult == core.TicketReviewCommandResultNeedsHumanDecision
+		ticket.ReviewResult == ticketcore.ReviewResultInsufficientEvidence ||
+		ticket.ReviewResult == ticketcore.ReviewResultNeedsHumanDecision
 
 	if warns {
 		return executioncore.AgentEventLevelWarn

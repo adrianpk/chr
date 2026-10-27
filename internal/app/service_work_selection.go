@@ -156,7 +156,7 @@ func validateAgentWorkSelectionOptions(opts AgentWorkSelectionOptions) error {
 
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
-		Statuses:      []string{ticketcore.StatusReadyForDev},
+		Statuses:      []string{string(ticketcore.StatusReadyForDev)},
 		Order:         workflowstate.TicketOrderCreatedAt,
 		MaxIterations: maxIterations,
 	}
@@ -164,7 +164,7 @@ func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptio
 
 func agentWorkStatuses(statuses []string) []string {
 	if len(statuses) == 0 {
-		return []string{ticketcore.StatusReadyForDev}
+		return []string{string(ticketcore.StatusReadyForDev)}
 	}
 
 	return statuses

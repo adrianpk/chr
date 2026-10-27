@@ -99,7 +99,7 @@ func (s *WorkflowStore) materializationTask(input generationcore.GeneratedWorkfl
 		return record, err
 	}
 
-	record.Task = &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: ticketcore.StatusReadyForDev, UseCase: set.Set.UseCase, SetID: set.ID, SliceID: slice.ID, Order: input.Order, Phase: "pending", DependsOn: input.DependsOn}
+	record.Task = &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), UseCase: set.Set.UseCase, SetID: set.ID, SliceID: slice.ID, Order: input.Order, Phase: "pending", DependsOn: input.DependsOn}
 
 	contract, err := json.Marshal(input)
 	if err != nil {

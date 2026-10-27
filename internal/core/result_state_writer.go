@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 )
 
 // TicketResultStateWriter defines a package boundary interface.
@@ -40,7 +42,7 @@ func (w *ticketResultStateWriter) WriteResultState(ctx context.Context, opts Wri
 
 	return w.statusUpdater.UpdateStatus(ctx, UpdateTicketStatusOptions{
 		Path:      opts.Application.TicketPath,
-		Status:    opts.Application.TicketStatus,
+		Status:    ticketcore.Status(opts.Application.TicketStatus),
 		UpdatedAt: opts.UpdatedAt,
 	})
 }

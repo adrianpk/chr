@@ -162,7 +162,7 @@ func (s *WorkflowStore) checkLegacyWorkflowTicket(fields map[string]json.RawMess
 		return err
 	}
 
-	if status != ticketcore.StatusReadyForDev && status != ticketcore.StatusBacklog {
+	if status != string(ticketcore.StatusReadyForDev) && status != string(ticketcore.StatusBacklog) {
 		return fmt.Errorf("legacy task status requires explicit evidence reconciliation: %s", status)
 	}
 

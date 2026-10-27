@@ -19,7 +19,7 @@ type Ticket struct {
 	Key               string
 	Title             string
 	Synopsis          string
-	Status            string
+	Status            Status
 	Priority          string
 	Severity          string
 	Type              string
@@ -31,13 +31,13 @@ type Ticket struct {
 	Slice             string
 	Branch            string
 	ReviewRefs        []ticketmetadata.ReviewRef
-	ReviewState       string
+	ReviewState       ReviewState
 	ReviewRound       int
-	ReviewResult      string
+	ReviewResult      ReviewResult
 	ReviewCommentsURL string
 	BlockingFindings  []string
-	MergeState        string
-	MergeResult       string
+	MergeState        MergeState
+	MergeResult       MergeResult
 	MergeActor        string
 	MergeCommit       string
 	MergedAt          time.Time
@@ -121,7 +121,7 @@ func renderTicketCoreFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 		{key: "key", value: ticket.Key},
 		{key: "title", value: ticket.Title},
 		{key: "synopsis", value: ticket.Synopsis},
-		{key: "status", value: ticket.Status},
+		{key: "status", value: string(ticket.Status)},
 		{key: "priority", value: ticket.Priority},
 		{key: "severity", value: ticket.Severity},
 		{key: "type", value: ticket.Type},
@@ -145,8 +145,8 @@ func renderTicketReviewFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 	}
 
 	if err := writeTicketStringFields(output, []ticketStringField{
-		{key: "review_state", value: ticket.ReviewState},
-		{key: "review_result", value: ticket.ReviewResult},
+		{key: "review_state", value: string(ticket.ReviewState)},
+		{key: "review_result", value: string(ticket.ReviewResult)},
 		{key: "review_comments_url", value: ticket.ReviewCommentsURL},
 	}); err != nil {
 		return err
@@ -161,8 +161,8 @@ func renderTicketReviewFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 
 func renderTicketMergeFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 	if err := writeTicketStringFields(output, []ticketStringField{
-		{key: "merge_state", value: ticket.MergeState},
-		{key: "merge_result", value: ticket.MergeResult},
+		{key: "merge_state", value: string(ticket.MergeState)},
+		{key: "merge_result", value: string(ticket.MergeResult)},
 		{key: "merge_actor", value: ticket.MergeActor},
 		{key: "merge_commit", value: ticket.MergeCommit},
 		{key: "merge_blocker", value: ticket.MergeBlocker},

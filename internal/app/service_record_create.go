@@ -70,7 +70,7 @@ func (s service) prepareTicketRecord(request RecordMutationRequest) (core.Workfl
 
 	contract, err := json.Marshal(struct{ Title, Synopsis, Body string }{*request.Title, *request.Synopsis, recordString(request.Body)})
 
-	return core.WorkflowRecord{Kind: "ticket", Body: []byte(body), Task: &core.WorkflowTask{Schema: core.WorkflowSchema, Key: key, Status: ticketcore.StatusBacklog, Phase: "pending", UseCase: request.UseCase, ContractHash: recordDigest(contract)}}, err
+	return core.WorkflowRecord{Kind: "ticket", Body: []byte(body), Task: &core.WorkflowTask{Schema: core.WorkflowSchema, Key: key, Status: string(ticketcore.StatusBacklog), Phase: "pending", UseCase: request.UseCase, ContractHash: recordDigest(contract)}}, err
 }
 
 func (s service) prepareSetRecord(ctx context.Context, store *core.WorkflowStore, request RecordMutationRequest) (core.WorkflowRecord, error) {

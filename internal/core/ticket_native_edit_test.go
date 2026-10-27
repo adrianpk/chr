@@ -34,7 +34,7 @@ func TestTicketNativeEditing(t *testing.T) {
 
 	saved, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{
 		Key: created.Task.Key, Revision: original.Revision, Body: &body, Binding: ticketEditorBinding("native-save"),
-		Fields: map[string]string{"title": "Native edited", "status": ticketcore.StatusBacklog, "priority": "high", "severity": "high", "type": "feature", "owner": "Maintainer", "assignee": "Developer"},
+		Fields: map[string]string{"title": "Native edited", "status": string(ticketcore.StatusBacklog), "priority": "high", "severity": "high", "type": "feature", "owner": "Maintainer", "assignee": "Developer"},
 	})
 	if err != nil || saved.CommittedRevision == "" || saved.CommittedRevision != saved.Revision || saved.Description != body || saved.Fields["assignee"] != "Developer" || saved.Ticket.Priority != "high" {
 		t.Fatal("native save lost body or metadata", saved.Fields, err)
@@ -42,7 +42,7 @@ func TestTicketNativeEditing(t *testing.T) {
 
 	checkNativeTicketIdentity(t, store, created)
 
-	checkNativeTicketRejected(t, opts, saved, TicketEditRequest{Fields: map[string]string{"status": ticketcore.StatusDone}, Binding: ticketEditorBinding("native-done")})
+	checkNativeTicketRejected(t, opts, saved, TicketEditRequest{Fields: map[string]string{"status": string(ticketcore.StatusDone)}, Binding: ticketEditorBinding("native-done")})
 
 	if _, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{Key: created.Task.Key, Revision: original.Revision, Body: &body, Binding: ticketEditorBinding("native-stale")}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("native stale edit was accepted", err)
@@ -62,7 +62,7 @@ func checkNativeTicketIdentity(t *testing.T, store *WorkflowStore, created Workf
 func TestTicketNativeMetadataIdentity(t *testing.T) {
 	store := workflowTestStore(t)
 	record := workflowTestTask("CHR-7")
-	record.Task.Status, record.Task.UseCase = ticketcore.StatusBacklog, "retained-case"
+	record.Task.Status, record.Task.UseCase = string(ticketcore.StatusBacklog), "retained-case"
 
 	body, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{Key: "CHR-7", Title: "Actual title", Status: ticketcore.StatusReadyForDev, UseCase: "outdated-case", CreatedAt: record.CreatedAt, UpdatedAt: record.UpdatedAt, Body: "Original body."})
 	if err != nil {
@@ -89,7 +89,7 @@ func TestTicketNativeMetadataIdentity(t *testing.T) {
 	}
 
 	current, err := store.Read(t.Context(), created.Path)
-	if err != nil || current.Task.Status != ticketcore.StatusBacklog || current.Task.UseCase != "retained-case" {
+	if err != nil || current.Task.Status != string(ticketcore.StatusBacklog) || current.Task.UseCase != "retained-case" {
 		t.Fatal("metadata edit restored a stale workflow projection", err)
 	}
 }
@@ -104,7 +104,7 @@ func TestTicketNativeOwnership(t *testing.T) {
 			if owner == "contract" {
 				record.Domain = map[string]json.RawMessage{"execution_contract": json.RawMessage(`{"body":"Approved instructions"}`)}
 			} else {
-				record.Task.Phase, record.Task.Status = "running", ticketcore.StatusInProgress
+				record.Task.Phase, record.Task.Status = "running", string(ticketcore.StatusInProgress)
 				record.Task.AttemptID, record.Task.ClaimGeneration = "owned-attempt", 1
 			}
 
@@ -176,7 +176,7 @@ func TestTicketDocumentCreation(t *testing.T) {
 			body := "Full new description.\n\nSecond paragraph."
 
 			created, err := CreateTicketDocument(t.Context(), opts, "CHR-88", TicketEditRequest{
-				Fields: map[string]string{"title": "New ticket", "priority": "high", "type": "bug", "owner": "Maintainer", "assignee": "Developer", "status": ticketcore.StatusReadyForDev},
+				Fields: map[string]string{"title": "New ticket", "priority": "high", "type": "bug", "owner": "Maintainer", "assignee": "Developer", "status": string(ticketcore.StatusReadyForDev)},
 				Body:   &body, Binding: ticketEditorBinding("create"),
 			})
 			if err != nil {

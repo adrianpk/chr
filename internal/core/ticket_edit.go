@@ -144,7 +144,7 @@ func validatePreparedTicketStatus(content string, document TicketDocument, reque
 		return nil
 	}
 
-	return validateTicketStatusTransitionMetadata(content, status)
+	return validateTicketStatusTransitionMetadata(content, ticketcore.Status(status))
 }
 
 func editableTicketContent(document TicketDocument) (string, error) {
@@ -160,7 +160,7 @@ func editableTicketContent(document TicketDocument) (string, error) {
 
 	return ticketcore.NewRenderer().Render(ticketcore.Ticket{
 		Key: record.Task.Key, Title: document.Ticket.Title, Synopsis: boardDescription(record.Body),
-		Status: record.Task.Status, UseCase: record.Task.UseCase,
+		Status: ticketcore.Status(record.Task.Status), UseCase: record.Task.UseCase,
 		Priority: document.Ticket.Priority, Severity: document.Ticket.Severity, Type: document.Ticket.Type,
 		ProjectArea: document.Ticket.ProjectArea, SourceKind: document.Ticket.SourceKind, Branch: document.Ticket.Branch,
 		Body: string(record.Body), CreatedAt: record.CreatedAt, UpdatedAt: record.UpdatedAt,

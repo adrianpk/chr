@@ -43,8 +43,8 @@ type IndexedSummary struct {
 
 // IndexedClassification groups the retained classification fields without changing their wire order.
 type IndexedClassification struct {
-	Status      string
-	BoardColumn string
+	Status      Status
+	BoardColumn Status
 	Priority    string
 	Severity    string
 	Type        string
@@ -64,17 +64,17 @@ type IndexedSource struct {
 // IndexedReview groups the retained review fields without changing their wire order.
 type IndexedReview struct {
 	ReviewRefs        []ticketmetadata.ReviewRef
-	ReviewState       string
+	ReviewState       ReviewState
 	ReviewRound       int
-	ReviewResult      string
+	ReviewResult      ReviewResult
 	ReviewCommentsURL string
 	BlockingFindings  []string
 }
 
 // IndexedMerge groups the retained merge fields without changing their wire order.
 type IndexedMerge struct {
-	MergeState   string
-	MergeResult  string
+	MergeState   MergeState
+	MergeResult  MergeResult
 	MergeActor   string
 	MergeCommit  string
 	MergedAt     *time.Time

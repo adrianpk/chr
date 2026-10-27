@@ -92,14 +92,14 @@ func indexedTicketFromMetadata(
 			Branch:     opsmetadata.Unquote(metadata["branch"]),
 		}, IndexedReview: IndexedReview{
 			ReviewRefs:        frontmatter.ReviewRefs,
-			ReviewState:       opsmetadata.Unquote(metadata["review_state"]),
+			ReviewState:       ReviewState(opsmetadata.Unquote(metadata["review_state"])),
 			ReviewRound:       times.ReviewRound,
-			ReviewResult:      opsmetadata.Unquote(metadata["review_result"]),
+			ReviewResult:      ReviewResult(opsmetadata.Unquote(metadata["review_result"])),
 			ReviewCommentsURL: opsmetadata.Unquote(metadata["review_comments_url"]),
 			BlockingFindings:  opsmetadata.ParseList(metadata["blocking_findings"]),
 		}, IndexedMerge: IndexedMerge{
-			MergeState:   opsmetadata.Unquote(metadata["merge_state"]),
-			MergeResult:  opsmetadata.Unquote(metadata["merge_result"]),
+			MergeState:   MergeState(opsmetadata.Unquote(metadata["merge_state"])),
+			MergeResult:  MergeResult(opsmetadata.Unquote(metadata["merge_result"])),
 			MergeActor:   opsmetadata.Unquote(metadata["merge_actor"]),
 			MergeCommit:  opsmetadata.Unquote(metadata["merge_commit"]),
 			MergedAt:     times.MergedAt,
@@ -184,7 +184,7 @@ func indexedTicketSummaryFromMetadata(metadata map[string]string) IndexedSummary
 
 func indexedTicketClassificationFromMetadata(metadata map[string]string) IndexedClassification {
 	return IndexedClassification{
-		Status:      opsmetadata.Unquote(metadata["status"]),
+		Status:      Status(opsmetadata.Unquote(metadata["status"])),
 		Priority:    opsmetadata.Unquote(metadata["priority"]),
 		Severity:    opsmetadata.Unquote(metadata["severity"]),
 		Type:        opsmetadata.Unquote(metadata["type"]),

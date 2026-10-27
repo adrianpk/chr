@@ -199,7 +199,7 @@ func checkWorkflowTrackerProgress(t *testing.T, store *WorkflowStore, hierarchy 
 	before := workflowTestRead(t, store, id)
 
 	task, err := store.Read(t.Context(), hierarchy.Tasks[0].Path)
-	if err != nil || task.Task.Phase != "validated" || task.Task.Status == ticketcore.StatusDone {
+	if err != nil || task.Task.Phase != "validated" || task.Task.Status == string(ticketcore.StatusDone) {
 		t.Fatal("tracker error rolled back or integrated task progress", err)
 	}
 

@@ -30,7 +30,7 @@ func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID s
 	result.Excluded = excluded
 
 	for _, ticket := range tickets {
-		if slices.Contains(defaultLoopEligibleStatuses, ticket.Status) {
+		if slices.Contains(defaultLoopEligibleStatuses, string(ticket.Status)) {
 			result.Eligible = append(result.Eligible, ticket)
 		}
 	}

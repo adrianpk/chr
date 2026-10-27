@@ -171,7 +171,7 @@ func TestWorkflowClaimEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "", "pending", ticketcore.StatusReadyForDev
+	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "", "pending", string(ticketcore.StatusReadyForDev)
 	if _, err := store.Write(t.Context(), record, record.Revision); !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatalf("status edit bypassed owner: %v", err)
 	}

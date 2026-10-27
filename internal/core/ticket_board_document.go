@@ -57,12 +57,12 @@ func boardTicketMetadata(ticket ticketcore.Indexed, metadata map[string]string) 
 		ticket.AttentionReasons = append(ticket.AttentionReasons, "ticket title is missing")
 	}
 
-	ticket.Status, ticket.Synopsis = value("status"), value("synopsis")
+	ticket.Status, ticket.Synopsis = ticketcore.Status(value("status")), value("synopsis")
 	ticket.Assignee = value("assignee")
 	ticket.Priority, ticket.Severity, ticket.Type = value("priority"), value("severity"), value("type")
 	ticket.UseCase, ticket.ProjectArea, ticket.Slice = value("use_case"), value("project_area"), value("slice")
 	ticket.SourceKind, ticket.SourceRef, ticket.Branch = value("source_kind"), value("source_ref"), value("branch")
-	ticket.ReviewState, ticket.ReviewResult = value("review_state"), value("review_result")
+	ticket.ReviewState, ticket.ReviewResult = ticketcore.ReviewState(value("review_state")), ticketcore.ReviewResult(value("review_result"))
 	ticket.Tags = opsmetadata.ParseList(metadata["tags"])
 	ticket.BoardColumn, _ = ticketcore.BoardStatus(ticket.Status)
 
@@ -74,7 +74,7 @@ func boardTicketMetadata(ticket ticketcore.Indexed, metadata map[string]string) 
 			ticket.BoardColumn = ticketcore.StatusDone
 		}
 
-		if filepath.Base(filepath.Dir(ticket.Path)) != ticket.Status {
+		if filepath.Base(filepath.Dir(ticket.Path)) != string(ticket.Status) {
 			ticket.AttentionReasons = append(ticket.AttentionReasons, "ticket status does not match its directory")
 		}
 	}

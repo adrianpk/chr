@@ -71,7 +71,7 @@ func (s service) SaveTicketDocument(request core.TicketEditRequest) (core.Ticket
 }
 
 func (s service) validateTicketEditorReview(request core.TicketEditRequest) error {
-	if request.Fields["status"] != ticketcore.StatusReadyForReview {
+	if request.Fields["status"] != string(ticketcore.StatusReadyForReview) {
 		return nil
 	}
 
@@ -80,7 +80,7 @@ func (s service) validateTicketEditorReview(request core.TicketEditRequest) erro
 		return err
 	}
 
-	return s.validateReadyForReviewEvidence(document.Ticket, ticketcore.StatusReadyForReview)
+	return s.validateReadyForReviewEvidence(document.Ticket, string(ticketcore.StatusReadyForReview))
 }
 
 func (s service) validateTicketScopeChange(request core.TicketEditRequest) error {

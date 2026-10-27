@@ -38,9 +38,9 @@ type TicketMergeCommandResult struct {
 	TicketKey       string
 	Preflight       TicketMergePreflightResult
 	Merge           MergeResult
-	Status          string
-	MergeState      string
-	MergeResult     string
+	Status          ticketcore.Status
+	MergeState      ticketcore.MergeState
+	MergeResult     ticketcore.MergeResult
 	MergeActor      string
 	MergeStrategy   string
 	MergeCommit     string
@@ -83,8 +83,8 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 			Kind:   TicketMergePreflightBlockKindOperational,
 			Detail: err.Error(),
 		})
-		result.MergeState = TicketMergeStateBlocked
-		result.MergeResult = TicketMergeResultBlocked
+		result.MergeState = ticketcore.MergeStateBlocked
+		result.MergeResult = ticketcore.MergeResultBlocked
 		result.MergeBlocker = err.Error()
 
 		return result, applyTicketMergeCommandResult(ctx, opts.Ticket.Path, result, opts.MergedAt)
@@ -92,8 +92,8 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 
 	result.Merge = merge
 	result.Status = ticketcore.StatusDone
-	result.MergeState = TicketMergeStateMerged
-	result.MergeResult = TicketMergeResultMerged
+	result.MergeState = ticketcore.MergeStateMerged
+	result.MergeResult = ticketcore.MergeResultMerged
 	result.MergeCommit = merge.SHA
 
 	err = applyTicketMergeCommandResult(ctx, opts.Ticket.Path, result, opts.MergedAt)
@@ -110,7 +110,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 }
 
 func ticketMergeWorktreeCleanup(ctx context.Context, opts TicketMergeCommandOptions, result TicketMergeCommandResult) (executioncore.WorktreeCleanupResult, error) {
-	if result.MergeState != TicketMergeStateMerged || opts.Workspace.Mode != workspacecore.ExecutionWorktree {
+	if result.MergeState != ticketcore.MergeStateMerged || opts.Workspace.Mode != workspacecore.ExecutionWorktree {
 		return executioncore.WorktreeCleanupResult{}, nil
 	}
 
@@ -129,16 +129,16 @@ func ticketMergeCommandResult(ticketKey string, preflight TicketMergePreflightRe
 		TicketKey:     ticketKey,
 		Preflight:     preflight,
 		Status:        ticketcore.StatusReadyForMerge,
-		MergeState:    TicketMergeStatePending,
+		MergeState:    ticketcore.MergeStatePending,
 		MergeResult:   "",
-		MergeActor:    TicketMergeActorMerger,
+		MergeActor:    ticketcore.MergeActorMerger,
 		MergeStrategy: preflight.MergeStrategy,
 		DryRun:        dryRun,
 	}
 
 	if !preflight.Allowed {
-		result.MergeState = TicketMergeStateBlocked
-		result.MergeResult = TicketMergeResultBlocked
+		result.MergeState = ticketcore.MergeStateBlocked
+		result.MergeResult = ticketcore.MergeResultBlocked
 		result.MergeBlocker = ticketMergeCommandBlockerSummary(preflight.Blockers)
 	}
 
@@ -170,7 +170,7 @@ func applyTicketMergeCommandResult(ctx context.Context, path string, result Tick
 	}
 
 	mergedAtValue := opsmetadata.Quote("")
-	if result.MergeState == TicketMergeStateMerged {
+	if result.MergeState == ticketcore.MergeStateMerged {
 		mergedAtValue = opsmetadata.Timestamp(now)
 	}
 
@@ -180,9 +180,9 @@ func applyTicketMergeCommandResult(ctx context.Context, path string, result Tick
 		value      string
 		beforeKeys []string
 	}{
-		{key: "status", value: opsmetadata.Quote(result.Status), beforeKeys: []string{"priority", "severity", "type"}},
-		{key: "merge_state", value: opsmetadata.Quote(result.MergeState), beforeKeys: []string{"merge_result", "merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
-		{key: "merge_result", value: opsmetadata.Quote(result.MergeResult), beforeKeys: []string{"merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "status", value: opsmetadata.Quote(string(result.Status)), beforeKeys: []string{"priority", "severity", "type"}},
+		{key: "merge_state", value: opsmetadata.Quote(string(result.MergeState)), beforeKeys: []string{"merge_result", "merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
+		{key: "merge_result", value: opsmetadata.Quote(string(result.MergeResult)), beforeKeys: []string{"merge_actor", "merge_commit", "merge_blocker", "merged_at", "created_at"}},
 		{key: "merge_actor", value: opsmetadata.Quote(result.MergeActor), beforeKeys: []string{"merge_commit", "merge_blocker", "merged_at", "created_at"}},
 		{key: "merge_commit", value: opsmetadata.Quote(result.MergeCommit), beforeKeys: []string{"merge_blocker", "merged_at", "created_at"}},
 		{key: "merge_blocker", value: opsmetadata.Quote(result.MergeBlocker), beforeKeys: []string{"merged_at", "created_at"}},

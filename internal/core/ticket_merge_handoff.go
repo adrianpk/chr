@@ -8,25 +8,6 @@ import (
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
-const (
-	// TicketMergeStatePending defines a package boundary constant.
-	TicketMergeStatePending = "pending"
-	// TicketMergeStateMerged defines a package boundary constant.
-	TicketMergeStateMerged = "merged"
-	// TicketMergeStateBlocked defines a package boundary constant.
-	TicketMergeStateBlocked = "blocked"
-
-	// TicketMergeResultMerged defines a package boundary constant.
-	TicketMergeResultMerged = "merged"
-	// TicketMergeResultBlocked defines a package boundary constant.
-	TicketMergeResultBlocked = "blocked"
-	// TicketMergeResultNotMergeable defines a package boundary constant.
-	TicketMergeResultNotMergeable = "not_mergeable"
-
-	// TicketMergeActorMerger defines a package boundary constant.
-	TicketMergeActorMerger = "merger"
-)
-
 // TicketMergeHandoff describes a package boundary value.
 type TicketMergeHandoff struct {
 	TicketKey string
@@ -44,7 +25,7 @@ func ValidateTicketMergeHandoff(ticket ticketcore.Indexed) (TicketMergeHandoff, 
 		return TicketMergeHandoff{}, fmt.Errorf("ticket merge handoff requires status %s: %s", ticketcore.StatusReadyForMerge, ticket.Status)
 	}
 
-	if ticket.ReviewResult != TicketReviewCommandResultPass || ticket.ReviewState != TicketReviewCommandResultPass {
+	if ticket.ReviewResult != ticketcore.ReviewResultPass || ticket.ReviewState != ticketcore.ReviewStatePass {
 		return TicketMergeHandoff{}, fmt.Errorf("ticket merge handoff requires passed review metadata")
 	}
 

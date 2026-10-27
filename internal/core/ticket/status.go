@@ -2,37 +2,40 @@ package ticket
 
 import "strings"
 
+// Status is a ticket lifecycle value; legacy spellings remain valid input.
+type Status string
+
 const (
 	// StatusBacklog defines a package boundary constant.
-	StatusBacklog = "backlog"
+	StatusBacklog Status = "backlog"
 	// StatusReadyForDev defines a package boundary constant.
-	StatusReadyForDev = "ready_for_dev"
+	StatusReadyForDev Status = "ready_for_dev"
 	// StatusInProgress defines a package boundary constant.
-	StatusInProgress = "in_progress"
+	StatusInProgress Status = "in_progress"
 	// StatusReadyForReview defines a package boundary constant.
-	StatusReadyForReview = "ready_for_review"
+	StatusReadyForReview Status = "ready_for_review"
 	// StatusReadyForMerge defines a package boundary constant.
-	StatusReadyForMerge = "ready_for_merge"
+	StatusReadyForMerge Status = "ready_for_merge"
 	// StatusDone defines a package boundary constant.
-	StatusDone = "done"
+	StatusDone Status = "done"
 
 	// StatusOpenLegacy defines a package boundary constant.
-	StatusOpenLegacy = "open"
+	StatusOpenLegacy Status = "open"
 	// StatusReadyLegacy defines a package boundary constant.
-	StatusReadyLegacy = "ready"
+	StatusReadyLegacy Status = "ready"
 	// StatusReviewingLegacy defines a package boundary constant.
-	StatusReviewingLegacy = "reviewing"
+	StatusReviewingLegacy Status = "reviewing"
 	// StatusBlockedLegacy defines a package boundary constant.
-	StatusBlockedLegacy = "blocked"
+	StatusBlockedLegacy Status = "blocked"
 	// StatusSolvedLegacy defines a package boundary constant.
-	StatusSolvedLegacy = "solved"
+	StatusSolvedLegacy Status = "solved"
 	// StatusMergedLegacy defines a package boundary constant.
-	StatusMergedLegacy = "merged"
+	StatusMergedLegacy Status = "merged"
 	// StatusClosedLegacy defines a package boundary constant.
-	StatusClosedLegacy = "closed"
+	StatusClosedLegacy Status = "closed"
 )
 
-var normalBoardTicketStatuses = map[string]struct{}{
+var normalBoardTicketStatuses = map[Status]struct{}{
 	StatusBacklog:        {},
 	StatusReadyForDev:    {},
 	StatusInProgress:     {},
@@ -41,7 +44,7 @@ var normalBoardTicketStatuses = map[string]struct{}{
 	StatusDone:           {},
 }
 
-var legacyTicketStatusAliases = map[string]string{
+var legacyTicketStatusAliases = map[Status]Status{
 	StatusOpenLegacy:      StatusBacklog,
 	StatusReadyLegacy:     StatusReadyForDev,
 	StatusReviewingLegacy: StatusReadyForReview,
@@ -51,8 +54,8 @@ var legacyTicketStatusAliases = map[string]string{
 }
 
 // ValidStatus executes the corresponding package operation.
-func ValidStatus(status string) bool {
-	status = strings.TrimSpace(status)
+func ValidStatus(status Status) bool {
+	status = Status(strings.TrimSpace(string(status)))
 	if _, ok := normalBoardTicketStatuses[status]; ok {
 		return true
 	}
@@ -65,15 +68,15 @@ func ValidStatus(status string) bool {
 }
 
 // NormalBoardStatus executes the corresponding package operation.
-func NormalBoardStatus(status string) bool {
-	_, ok := normalBoardTicketStatuses[strings.TrimSpace(status)]
+func NormalBoardStatus(status Status) bool {
+	_, ok := normalBoardTicketStatuses[Status(strings.TrimSpace(string(status)))]
 
 	return ok
 }
 
 // BoardStatus executes the corresponding package operation.
-func BoardStatus(status string) (string, bool) {
-	status = strings.TrimSpace(status)
+func BoardStatus(status Status) (Status, bool) {
+	status = Status(strings.TrimSpace(string(status)))
 	if NormalBoardStatus(status) {
 		return status, true
 	}

@@ -128,7 +128,7 @@ func telegramAuthoringPreparedRecord(t *testing.T, records []core.WorkflowRecord
 			t.Fatal(err)
 		}
 
-		if scope != result.Scope || record.Task.Status != ticketcore.StatusBacklog || !strings.Contains(string(record.Body), "retry attempts") {
+		if scope != result.Scope || record.Task.Status != string(ticketcore.StatusBacklog) || !strings.Contains(string(record.Body), "retry attempts") {
 			t.Fatal("native scope or description lost", scope, record)
 		}
 

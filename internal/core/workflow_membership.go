@@ -108,7 +108,7 @@ func workflowLaterMembers(selection workflowSelection, run workflowInvocationFil
 			continue
 		}
 
-		if record.Task.Status != ticketcore.StatusReadyForDev || record.Task.Phase != "pending" || selection.sets[record.Task.SetID].Set.Status == "completed" {
+		if record.Task.Status != string(ticketcore.StatusReadyForDev) || record.Task.Phase != "pending" || selection.sets[record.Task.SetID].Set.Status == "completed" {
 			continue
 		}
 

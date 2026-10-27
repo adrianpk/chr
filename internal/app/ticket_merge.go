@@ -63,9 +63,9 @@ func printTicketMergeResult(stdout io.Writer, projectContext commandProjectConte
 		"project_id: " + projectContext.ProjectID,
 		"ticket: " + result.TicketKey,
 		fmt.Sprintf("allowed: %t", result.Preflight.Allowed),
-		"status: " + result.Status,
-		"merge_state: " + result.MergeState,
-		"merge_result: " + result.MergeResult,
+		"status: " + string(result.Status),
+		"merge_state: " + string(result.MergeState),
+		"merge_result: " + string(result.MergeResult),
 		"merge_strategy: " + result.MergeStrategy,
 		"merge_commit: " + result.MergeCommit,
 		"review_ref: " + result.Preflight.ReviewRef.URL,
@@ -79,7 +79,7 @@ func printTicketMergeResult(stdout io.Writer, projectContext commandProjectConte
 
 	if result.WorktreeCleanup.Status != "" {
 		lines = append(lines,
-			"worktree_cleanup: "+result.WorktreeCleanup.Status,
+			"worktree_cleanup: "+string(result.WorktreeCleanup.Status),
 			"worktree_cleanup_detail: "+result.WorktreeCleanup.Detail,
 		)
 	}

@@ -80,7 +80,7 @@ func validateWorkflowLooseInputBounds(request workflowstate.PreviewRequest) erro
 }
 
 func workflowLooseExclusion(request workflowstate.PreviewRequest, ticket ticketcore.Indexed) string {
-	if !slices.Contains(request.Statuses, ticket.Status) {
+	if !slices.Contains(request.Statuses, string(ticket.Status)) {
 		return "status_mismatch"
 	}
 

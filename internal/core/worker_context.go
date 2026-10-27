@@ -540,8 +540,8 @@ func workerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*W
 		Branch:            ticket.Branch,
 		PullRequestURL:    ref.URL,
 		ReviewCommentsURL: ticket.ReviewCommentsURL,
-		ReviewState:       ticket.ReviewState,
-		ReviewResult:      ticket.ReviewResult,
+		ReviewState:       string(ticket.ReviewState),
+		ReviewResult:      string(ticket.ReviewResult),
 		ReviewRound:       ticket.ReviewRound,
 		BlockingFindings:  append([]string(nil), ticket.BlockingFindings...),
 	}, nil

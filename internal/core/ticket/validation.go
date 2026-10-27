@@ -161,8 +161,8 @@ func ValidateReviewRef(ref ticketmetadata.ReviewRef) error {
 	return nil
 }
 
-func isValidTicketReviewState(state string) bool {
-	switch strings.TrimSpace(state) {
+func isValidTicketReviewState(state ReviewState) bool {
+	switch ReviewState(strings.TrimSpace(string(state))) {
 	case "", "pass", "changes_requested", "insufficient_evidence", "needs_human_decision":
 		return true
 	default:
@@ -170,8 +170,8 @@ func isValidTicketReviewState(state string) bool {
 	}
 }
 
-func isValidTicketReviewResult(result string) bool {
-	switch strings.TrimSpace(result) {
+func isValidTicketReviewResult(result ReviewResult) bool {
+	switch ReviewResult(strings.TrimSpace(string(result))) {
 	case "", "pass", "needs_changes", "insufficient_evidence", "needs_human_decision":
 		return true
 	default:
@@ -191,8 +191,8 @@ func validateTicketMergeMetadata(ticket Indexed) error {
 	return nil
 }
 
-func isValidTicketMergeState(state string) bool {
-	switch strings.TrimSpace(state) {
+func isValidTicketMergeState(state MergeState) bool {
+	switch MergeState(strings.TrimSpace(string(state))) {
 	case "", "pending", "merged", "blocked":
 		return true
 	default:
@@ -200,8 +200,8 @@ func isValidTicketMergeState(state string) bool {
 	}
 }
 
-func isValidTicketMergeResult(result string) bool {
-	switch strings.TrimSpace(result) {
+func isValidTicketMergeResult(result MergeResult) bool {
+	switch MergeResult(strings.TrimSpace(string(result))) {
 	case "", "merged", "blocked", "not_mergeable":
 		return true
 	default:

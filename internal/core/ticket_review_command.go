@@ -12,14 +12,6 @@ import (
 )
 
 const (
-	// TicketReviewCommandResultPass defines a package boundary constant.
-	TicketReviewCommandResultPass = "pass"
-	// TicketReviewCommandResultNeedsChanges defines a package boundary constant.
-	TicketReviewCommandResultNeedsChanges = "needs_changes"
-	// TicketReviewCommandResultInsufficientEvidence defines a package boundary constant.
-	TicketReviewCommandResultInsufficientEvidence = "insufficient_evidence"
-	// TicketReviewCommandResultNeedsHumanDecision defines a package boundary constant.
-	TicketReviewCommandResultNeedsHumanDecision = "needs_human_decision"
 	// TicketReviewCommandActorReviewer defines a package boundary constant.
 	TicketReviewCommandActorReviewer = "reviewer"
 	// TicketReviewCommandCleanPassRemoteComment defines a package boundary constant.
@@ -32,7 +24,7 @@ const (
 type TicketReviewCommandOptions struct {
 	Ticket     ticketcore.Indexed
 	Config     WorkspaceConfig
-	Result     string
+	Result     ticketcore.ReviewResult
 	Findings   []string
 	Adapter    RemoteReviewAdapter
 	DryRun     bool
@@ -44,10 +36,10 @@ type TicketReviewCommandResult struct {
 	TicketKey        string
 	ReviewRef        ticketmetadata.ReviewRef
 	RemoteSnapshot   RemoteReviewSnapshot
-	ReviewState      string
-	ReviewResult     string
+	ReviewState      ticketcore.ReviewState
+	ReviewResult     ticketcore.ReviewResult
 	ReviewRound      int
-	Status           string
+	Status           ticketcore.Status
 	BlockingFindings []string
 	RemoteComments   []RemoteReviewWrittenComment
 	DryRun           bool
@@ -59,9 +51,9 @@ func RunTicketReviewCommand(ctx context.Context, opts TicketReviewCommandOptions
 		return TicketReviewCommandResult{}, err
 	}
 
-	reviewResult := strings.TrimSpace(opts.Result)
+	reviewResult := ticketcore.ReviewResult(strings.TrimSpace(string(opts.Result)))
 	if reviewResult == "" {
-		reviewResult = TicketReviewCommandResultPass
+		reviewResult = ticketcore.ReviewResultPass
 	}
 
 	if err := validateTicketReviewCommandInput(opts.Ticket, reviewResult, opts.Findings); err != nil {
@@ -98,7 +90,7 @@ func RunTicketReviewCommand(ctx context.Context, opts TicketReviewCommandOptions
 	return plan, nil
 }
 
-func validateTicketReviewCommandInput(ticket ticketcore.Indexed, result string, findings []string) error {
+func validateTicketReviewCommandInput(ticket ticketcore.Indexed, result ticketcore.ReviewResult, findings []string) error {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return fmt.Errorf("ticket key is required")
 	}
@@ -115,19 +107,19 @@ func validateTicketReviewCommandInput(ticket ticketcore.Indexed, result string, 
 		return fmt.Errorf("invalid ticket review result: %s", result)
 	}
 
-	if result == TicketReviewCommandResultNeedsChanges && len(trimmedTicketReviewFindings(findings)) == 0 {
+	if result == ticketcore.ReviewResultNeedsChanges && len(trimmedTicketReviewFindings(findings)) == 0 {
 		return fmt.Errorf("ticket review needs_changes requires at least one finding")
 	}
 
 	return nil
 }
 
-func isValidTicketReviewCommandResult(result string) bool {
+func isValidTicketReviewCommandResult(result ticketcore.ReviewResult) bool {
 	switch result {
-	case TicketReviewCommandResultPass,
-		TicketReviewCommandResultNeedsChanges,
-		TicketReviewCommandResultInsufficientEvidence,
-		TicketReviewCommandResultNeedsHumanDecision:
+	case ticketcore.ReviewResultPass,
+		ticketcore.ReviewResultNeedsChanges,
+		ticketcore.ReviewResultInsufficientEvidence,
+		ticketcore.ReviewResultNeedsHumanDecision:
 		return true
 	default:
 		return false
@@ -144,7 +136,7 @@ func ticketReviewCommandPullRequestRef(ticket ticketcore.Indexed) (ticketmetadat
 	return ticketmetadata.ReviewRef{}, fmt.Errorf("ticket review requires a pull_request review ref")
 }
 
-func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata.ReviewRef, snapshot RemoteReviewSnapshot, result string) TicketReviewCommandResult {
+func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata.ReviewRef, snapshot RemoteReviewSnapshot, result ticketcore.ReviewResult) TicketReviewCommandResult {
 	transition := ticketReviewCommandStateAndStatus(result)
 
 	return TicketReviewCommandResult{
@@ -161,19 +153,20 @@ func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata
 }
 
 type ticketReviewTransition struct {
-	state, status string
+	state  ticketcore.ReviewState
+	status ticketcore.Status
 }
 
-func ticketReviewCommandStateAndStatus(result string) ticketReviewTransition {
+func ticketReviewCommandStateAndStatus(result ticketcore.ReviewResult) ticketReviewTransition {
 	switch result {
-	case TicketReviewCommandResultPass:
-		return ticketReviewTransition{state: "pass", status: ticketcore.StatusReadyForMerge}
-	case TicketReviewCommandResultNeedsChanges:
-		return ticketReviewTransition{state: "changes_requested", status: ticketcore.StatusReadyForDev}
-	case TicketReviewCommandResultInsufficientEvidence:
-		return ticketReviewTransition{state: "insufficient_evidence", status: ticketcore.StatusReadyForDev}
-	case TicketReviewCommandResultNeedsHumanDecision:
-		return ticketReviewTransition{state: "needs_human_decision", status: ticketcore.StatusReadyForReview}
+	case ticketcore.ReviewResultPass:
+		return ticketReviewTransition{state: ticketcore.ReviewStatePass, status: ticketcore.StatusReadyForMerge}
+	case ticketcore.ReviewResultNeedsChanges:
+		return ticketReviewTransition{state: ticketcore.ReviewStateChangesRequested, status: ticketcore.StatusReadyForDev}
+	case ticketcore.ReviewResultInsufficientEvidence:
+		return ticketReviewTransition{state: ticketcore.ReviewStateInsufficientEvidence, status: ticketcore.StatusReadyForDev}
+	case ticketcore.ReviewResultNeedsHumanDecision:
+		return ticketReviewTransition{state: ticketcore.ReviewStateNeedsHumanDecision, status: ticketcore.StatusReadyForReview}
 	default:
 		return ticketReviewTransition{status: ticketcore.StatusReadyForReview}
 	}
@@ -215,9 +208,9 @@ func applyTicketReviewCommandResult(ctx context.Context, path string, result Tic
 		value      string
 		beforeKeys []string
 	}{
-		{key: "status", value: opsmetadata.Quote(result.Status), beforeKeys: []string{"priority", "severity", "type"}},
-		{key: "review_state", value: opsmetadata.Quote(result.ReviewState), beforeKeys: []string{"review_result", "review_comments_url", "review_round", "blocking_findings", "created_at"}},
-		{key: "review_result", value: opsmetadata.Quote(result.ReviewResult), beforeKeys: []string{"review_comments_url", "review_round", "blocking_findings", "created_at"}},
+		{key: "status", value: opsmetadata.Quote(string(result.Status)), beforeKeys: []string{"priority", "severity", "type"}},
+		{key: "review_state", value: opsmetadata.Quote(string(result.ReviewState)), beforeKeys: []string{"review_result", "review_comments_url", "review_round", "blocking_findings", "created_at"}},
+		{key: "review_result", value: opsmetadata.Quote(string(result.ReviewResult)), beforeKeys: []string{"review_comments_url", "review_round", "blocking_findings", "created_at"}},
 		{key: "review_comments_url", value: opsmetadata.Quote(result.ReviewRef.URL), beforeKeys: []string{"review_round", "blocking_findings", "created_at"}},
 		{key: "review_round", value: strconvTicketReviewRound(result), beforeKeys: []string{"blocking_findings", "created_at"}},
 		{key: "blocking_findings", value: opsmetadata.QuoteList(result.BlockingFindings), beforeKeys: []string{"created_at"}},

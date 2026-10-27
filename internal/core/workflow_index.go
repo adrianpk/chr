@@ -167,7 +167,7 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 	}
 
 	display.ProjectID, display.Namespace, display.Key = r.ProjectID, r.Namespace, r.Task.Key
-	display.Status, display.UseCase = r.Task.Status, r.Task.UseCase
+	display.Status, display.UseCase = ticketcore.Status(r.Task.Status), r.Task.UseCase
 	display.Path, display.RelativePath = filepath.Join(store.layout.Root(), body), body
 	display.CreatedAt, display.UpdatedAt, display.FileMTime = &r.CreatedAt, &r.UpdatedAt, r.UpdatedAt
 	display.FileSize, display.ContentHash, display.IndexedAt = int64(len(r.Body)), r.SourceHash, time.Now().UTC()
@@ -183,7 +183,7 @@ func workflowCanonicalTicket(ctx context.Context, store *WorkflowStore, r Workfl
 		return ticketcore.Indexed{}, err
 	}
 
-	parsed.Namespace, parsed.Key, parsed.Status = r.Namespace, r.Task.Key, r.Task.Status
+	parsed.Namespace, parsed.Key, parsed.Status = r.Namespace, r.Task.Key, ticketcore.Status(r.Task.Status)
 	parsed.UseCase, parsed.ContentHash = r.Task.UseCase, r.SourceHash
 
 	return parsed, nil

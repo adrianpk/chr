@@ -104,11 +104,11 @@ func (s *WorkflowStore) workflowPullRequestTaskChanges(run *workflowInvocationFi
 	files := []workflowstate.FileChange{}
 
 	for _, record := range tasks {
-		if record.Task.Phase == "waiting_slice" && slices.Contains([]string{ticketcore.StatusReadyForReview, ticketcore.StatusReadyForMerge}, record.Task.Status) {
+		if record.Task.Phase == "waiting_slice" && slices.Contains([]string{string(ticketcore.StatusReadyForReview), string(ticketcore.StatusReadyForMerge)}, record.Task.Status) {
 			continue
 		}
 
-		record.Task.Phase, record.Task.Status = "waiting_slice", ticketcore.StatusReadyForReview
+		record.Task.Phase, record.Task.Status = "waiting_slice", string(ticketcore.StatusReadyForReview)
 
 		changes, err := s.workflowClaimRecordChanges(run, &record)
 		if err != nil {

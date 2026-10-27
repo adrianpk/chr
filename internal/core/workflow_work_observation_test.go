@@ -52,7 +52,7 @@ func TestWorkflowWorkPending(t *testing.T) {
 	record := workflowTestCreate(t, store, "PRJ-1")
 	store.afterReplace = func(int) error { return errors.New("interrupted replacement") }
 
-	record.Task.Status = ticketcore.StatusBacklog
+	record.Task.Status = string(ticketcore.StatusBacklog)
 	if _, err := store.Write(t.Context(), record, record.Revision); err == nil {
 		t.Fatal("interruption not injected")
 	}

@@ -80,7 +80,7 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 	result, err := repository.Create(s.ctx, ticketcore.CreateOptions{
 		Title:       request.Title,
 		Synopsis:    request.Synopsis,
-		Status:      request.Status,
+		Status:      ticketcore.Status(request.Status),
 		Priority:    request.Priority,
 		Severity:    request.Severity,
 		Type:        request.Type,
@@ -415,7 +415,7 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 
 	err = core.NewTicketStatusUpdater().UpdateStatus(s.ctx, core.UpdateTicketStatusOptions{
 		Path:      ticket.Path,
-		Status:    status,
+		Status:    ticketcore.Status(status),
 		UpdatedAt: time.Now().UTC(),
 	})
 	if err != nil {
@@ -434,7 +434,7 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 }
 
 func (s service) validateReadyForReviewEvidence(ticket ticketcore.Indexed, status string) error {
-	if strings.TrimSpace(status) != ticketcore.StatusReadyForReview {
+	if strings.TrimSpace(status) != string(ticketcore.StatusReadyForReview) {
 		return nil
 	}
 

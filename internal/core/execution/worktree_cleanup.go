@@ -9,13 +9,16 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
+// WorktreeCleanupStatus records the cleanup outcome, independently of worktree inspection state.
+type WorktreeCleanupStatus string
+
 const (
 	// WorktreeCleanupStatusSkipped defines a package boundary constant.
-	WorktreeCleanupStatusSkipped = "skipped"
+	WorktreeCleanupStatusSkipped WorktreeCleanupStatus = "skipped"
 	// WorktreeCleanupStatusRemoved defines a package boundary constant.
-	WorktreeCleanupStatusRemoved = "removed"
+	WorktreeCleanupStatusRemoved WorktreeCleanupStatus = "removed"
 	// WorktreeCleanupStatusBlocked defines a package boundary constant.
-	WorktreeCleanupStatusBlocked = "blocked"
+	WorktreeCleanupStatusBlocked WorktreeCleanupStatus = "blocked"
 )
 
 // WorktreeCleanupOptions describes a package boundary value.
@@ -32,7 +35,7 @@ type WorktreeCleanupOptions struct {
 type WorktreeCleanupResult struct {
 	Plan            WorktreePlan
 	Inspection      WorktreeInspection
-	Status          string
+	Status          WorktreeCleanupStatus
 	Detail          string
 	RemovedWorktree bool
 	RemovedMetadata bool

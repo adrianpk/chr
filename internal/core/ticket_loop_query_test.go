@@ -55,7 +55,7 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 
 func TestTicketLoopQueryScopesToProject(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicket(t, index, "CHR-1", ticketcore.StatusReadyForDev)
+	upsertLoopQueryTicket(t, index, "CHR-1", string(ticketcore.StatusReadyForDev))
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "other-project",
@@ -379,7 +379,7 @@ func upsertLoopQueryTicket(t *testing.T, index ticketcore.Index, key, status str
 	t.Helper()
 
 	ticket := testIndexedTicket(key, nil)
-	ticket.Status = status
+	ticket.Status = ticketcore.Status(status)
 
 	upsertLoopQueryTicketWithMetadata(t, index, ticket)
 }

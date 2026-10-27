@@ -744,3 +744,18 @@ and 724 move preimages. The existing six-input preparation attempt remains
 explicit debt assigned to Slice 12 with its updated mode type. Existing real
 task/manual/recovery, storage/wire and strict lint checks pass. Ticket/review
 state typing and final validation remain open.
+
+
+Ticket lifecycle, review state, review result, merge state and merge result now
+have separate string types. Constants retain every previous spelling; nullable
+SQL row scans and inserts preserve their existing values and order. File/CLI,
+board and native task projections convert at their original boundary. Provider
+PR status and native workflow status remain their own contracts. Review
+needs_changes still transitions to changes_requested/ready_for_dev; pass still
+requires the original merge handoff metadata. Execution cleanup has its own
+status type and retained execution metadata uses the existing execution Status.
+The unchanged frozen zero/empty/populated wire fixtures, distinct SQLite bindings,
+ticket/parser/validation/review/merge guards and selected native record/index/
+review/manual tests pass. Ten more parser/validation tests are colocated without
+production test-only exports. The ledger now records 756 exact preimages;
+owner reconciliation and exact-candidate validation remain before PR readiness.

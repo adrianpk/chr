@@ -29,8 +29,8 @@ func ApplyTrustedAutoMergeReview(ctx context.Context, opts ApplyTrustedAutoMerge
 	result := TicketReviewCommandResult{
 		TicketKey:    opts.Ticket.Key,
 		ReviewRef:    ref,
-		ReviewState:  TicketReviewCommandResultPass,
-		ReviewResult: TicketReviewCommandResultPass,
+		ReviewState:  ticketcore.ReviewStatePass,
+		ReviewResult: ticketcore.ReviewResultPass,
 		ReviewRound:  opts.Ticket.ReviewRound + 1,
 		Status:       ticketcore.StatusReadyForMerge,
 	}

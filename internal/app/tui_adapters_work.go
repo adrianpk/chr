@@ -81,7 +81,7 @@ func (e tuiWorkActionExecutor) requestStopResult() (tui.WorkActionResult, error)
 
 func agentWorkSelectionOptionsFromTUIRequest(request tui.WorkActionRequest) AgentWorkSelectionOptions {
 	opts := AgentWorkSelectionOptions{
-		Statuses: []string{ticketcore.StatusReadyForDev},
+		Statuses: []string{string(ticketcore.StatusReadyForDev)},
 		Order:    request.Order,
 	}
 	if request.PriorityFilter != "" {

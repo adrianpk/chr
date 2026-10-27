@@ -55,7 +55,7 @@ func webTicketField(view webui.TicketDetailView, field webui.TicketFieldView) we
 	field.Value, field.ReadOnly = view.Fields[field.Name], view.ReadOnly[field.Name]
 
 	field.Options = webTicketFieldOptions(view, field.Name)
-	if field.Name == "resolution" && !slices.Contains([]string{"solved", "closed", ticketcore.StatusDone}, view.Status) {
+	if field.Name == "resolution" && !slices.Contains([]string{"solved", "closed", string(ticketcore.StatusDone)}, view.Status) {
 		field.ReadOnly = "Available when the ticket is resolved."
 	}
 
@@ -111,16 +111,16 @@ func webRepositoryFieldOptions(values map[string][]string) {
 
 func webTicketStatusOptions(view webui.TicketDetailView) []webui.TicketOptionView {
 	options := []webui.TicketOptionView{
-		{Value: ticketcore.StatusBacklog, Label: "Backlog"}, {Value: ticketcore.StatusReadyForDev, Label: "Ready For Dev"},
+		{Value: string(ticketcore.StatusBacklog), Label: "Backlog"}, {Value: string(ticketcore.StatusReadyForDev), Label: "Ready For Dev"},
 	}
 	if view.New || view.NativeWorkflow && view.Phase == "pending" {
 		return options
 	}
 
 	return append(options,
-		webui.TicketOptionView{Value: ticketcore.StatusInProgress, Label: "In Progress"},
-		webui.TicketOptionView{Value: ticketcore.StatusReadyForReview, Label: "Ready For Review"},
-		webui.TicketOptionView{Value: ticketcore.StatusReadyForMerge, Label: "Ready For Merge"},
-		webui.TicketOptionView{Value: ticketcore.StatusDone, Label: "Done"},
+		webui.TicketOptionView{Value: string(ticketcore.StatusInProgress), Label: "In Progress"},
+		webui.TicketOptionView{Value: string(ticketcore.StatusReadyForReview), Label: "Ready For Review"},
+		webui.TicketOptionView{Value: string(ticketcore.StatusReadyForMerge), Label: "Ready For Merge"},
+		webui.TicketOptionView{Value: string(ticketcore.StatusDone), Label: "Done"},
 	)
 }

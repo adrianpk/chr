@@ -14,8 +14,8 @@ func TestValidateTicketMergeHandoffAcceptsPassedReview(t *testing.T) {
 	ticket := validIndexedTicket(now)
 	ticket.Status = ticketcore.StatusReadyForMerge
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
-	ticket.ReviewState = TicketReviewCommandResultPass
-	ticket.ReviewResult = TicketReviewCommandResultPass
+	ticket.ReviewState = ticketcore.ReviewStatePass
+	ticket.ReviewResult = ticketcore.ReviewResultPass
 	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
@@ -44,7 +44,7 @@ func TestValidateTicketMergeHandoffRejectsMissingPassedReview(t *testing.T) {
 	ticket.Status = ticketcore.StatusReadyForMerge
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
 	ticket.ReviewState = "changes_requested"
-	ticket.ReviewResult = TicketReviewCommandResultNeedsChanges
+	ticket.ReviewResult = ticketcore.ReviewResultNeedsChanges
 	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
@@ -66,8 +66,8 @@ func TestValidateTicketMergeHandoffRejectsMissingPullRequestRef(t *testing.T) {
 	ticket := validIndexedTicket(now)
 	ticket.Status = ticketcore.StatusReadyForMerge
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
-	ticket.ReviewState = TicketReviewCommandResultPass
-	ticket.ReviewResult = TicketReviewCommandResultPass
+	ticket.ReviewState = ticketcore.ReviewStatePass
+	ticket.ReviewResult = ticketcore.ReviewResultPass
 
 	_, err := ValidateTicketMergeHandoff(ticket)
 	if err == nil {

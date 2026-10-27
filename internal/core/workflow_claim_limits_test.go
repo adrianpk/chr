@@ -72,7 +72,7 @@ func checkWorkflowUnownedStatusWrite(t *testing.T, store *WorkflowStore, path st
 		t.Fatal(err)
 	}
 
-	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "rogue", "running", ticketcore.StatusInProgress
+	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "rogue", "running", string(ticketcore.StatusInProgress)
 	if _, err := store.Write(t.Context(), record, record.Revision); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("generic writer created an unfenced claim: %v", err)
 	}

@@ -45,7 +45,7 @@ func checkWorkflowPublicationFinalized(t *testing.T, f workflowPreparationFixtur
 
 	for _, member := range progress.Invocation.Members {
 		record, err := f.store.Read(t.Context(), member.Admission.Path)
-		if err != nil || record.Task.Status != ticketcore.StatusDone || record.Task.DeliveryRef != progress.Receipt.Path {
+		if err != nil || record.Task.Status != string(ticketcore.StatusDone) || record.Task.DeliveryRef != progress.Receipt.Path {
 			t.Fatal("member task lacks the shared verified receipt", err)
 		}
 	}

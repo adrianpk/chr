@@ -27,7 +27,7 @@ type Repository interface {
 type CreateOptions struct {
 	Title       string
 	Synopsis    string
-	Status      string
+	Status      Status
 	Priority    string
 	Severity    string
 	Type        string
@@ -162,8 +162,8 @@ func (r *fileRepository) Create(ctx context.Context, opts CreateOptions) (Create
 	return CreateResult{Key: key, Path: path}, nil
 }
 
-func ticketStatusOrDefault(status string) string {
-	status = strings.TrimSpace(status)
+func ticketStatusOrDefault(status Status) Status {
+	status = Status(strings.TrimSpace(string(status)))
 	if status == "" {
 		return StatusBacklog
 	}

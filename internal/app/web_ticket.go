@@ -53,7 +53,7 @@ func writeWebTicket(operations service, request webui.WriteActionRequest) webui.
 		TicketRevision: document.CommittedRevision,
 		Status:         webui.WriteStatusOK, Summary: "Ticket changes saved.",
 		ChangedFiles: compactChangedFiles(document.Ticket.RelativePath), RedirectURL: "/board",
-		Operation: webOperation(request.Action, "completed", document.Ticket.Key, document.Ticket.Status),
+		Operation: webOperation(request.Action, "completed", document.Ticket.Key, string(document.Ticket.Status)),
 	}
 }
 

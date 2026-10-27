@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-var defaultLoopEligibleStatuses = []string{ticketcore.StatusReadyForDev}
+var defaultLoopEligibleStatuses = []string{string(ticketcore.StatusReadyForDev)}
 
 // TicketLoopQueryOptions describes a package boundary value.
 type TicketLoopQueryOptions struct {
@@ -63,7 +63,7 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 
 	eligible := make([]ticketcore.Indexed, 0, len(tickets))
 	for _, ticket := range tickets {
-		if slices.Contains(statuses, ticket.Status) && matchesTicketLoopFilters(filters, ticket) {
+		if slices.Contains(statuses, string(ticket.Status)) && matchesTicketLoopFilters(filters, ticket) {
 			eligible = append(eligible, ticket)
 		}
 	}
@@ -230,7 +230,7 @@ func loopEligibleStatuses(statuses []string) ([]string, error) {
 
 	eligible := make([]string, 0, len(statuses))
 	for _, status := range statuses {
-		if !ticketcore.ValidStatus(status) {
+		if !ticketcore.ValidStatus(ticketcore.Status(status)) {
 			return nil, fmt.Errorf("invalid ticket status: %s", status)
 		}
 

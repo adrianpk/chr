@@ -28,7 +28,7 @@ func serviceWorkflowDependencyFixture(t *testing.T) (service, core.WorkflowRecor
 	}
 
 	task := *selected.Task
-	task.Key, task.Status = "PRJ-89", ticketcore.StatusBacklog
+	task.Key, task.Status = "PRJ-89", string(ticketcore.StatusBacklog)
 
 	outside, err := store.Create(t.Context(), "Outside prerequisite", core.WorkflowRecord{Kind: "ticket", Task: &task, Body: selected.Body, Domain: maps.Clone(selected.Domain)})
 	if err != nil {
@@ -145,7 +145,7 @@ func serviceWorkflowDependencyReceipt(t *testing.T, operations service, outside 
 		t.Fatal(err)
 	}
 
-	outside.Task.Phase, outside.Task.Status, outside.Task.DeliveryRef = "integrated", ticketcore.StatusDone, receipt.Path
+	outside.Task.Phase, outside.Task.Status, outside.Task.DeliveryRef = "integrated", string(ticketcore.StatusDone), receipt.Path
 	if _, err := store.Write(t.Context(), outside, outside.Revision); err != nil {
 		t.Fatal(err)
 	}

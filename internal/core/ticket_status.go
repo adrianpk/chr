@@ -19,7 +19,7 @@ type TicketStatusUpdater interface {
 // UpdateTicketStatusOptions describes a package boundary value.
 type UpdateTicketStatusOptions struct {
 	Path      string
-	Status    string
+	Status    ticketcore.Status
 	UpdatedAt time.Time
 }
 
@@ -37,7 +37,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 		return err
 	}
 
-	status := strings.TrimSpace(opts.Status)
+	status := ticketcore.Status(strings.TrimSpace(string(opts.Status)))
 	if !ticketcore.ValidStatus(status) {
 		return fmt.Errorf("invalid ticket status: %s", opts.Status)
 	}
@@ -58,7 +58,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 	}
 
 	updated, err := updateTicketMetadata(string(content), map[string]string{
-		"status":     opsmetadata.Quote(status),
+		"status":     opsmetadata.Quote(string(status)),
 		"updated_at": opsmetadata.Timestamp(updatedAt),
 	})
 	if err != nil {
@@ -73,7 +73,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 	return nil
 }
 
-func validateTicketStatusTransitionMetadata(content, status string) error {
+func validateTicketStatusTransitionMetadata(content string, status ticketcore.Status) error {
 	if status != ticketcore.StatusReadyForReview && status != ticketcore.StatusReadyForMerge {
 		return nil
 	}
@@ -108,8 +108,8 @@ func validateReadyForMergeTransitionMetadata(frontmatter ticketmetadata.Frontmat
 	ticket := ticketcore.Indexed{
 		IndexedIdentity: ticketcore.IndexedIdentity{Key: opsmetadata.Unquote(frontmatter.Metadata["key"])}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForMerge}, IndexedSource: ticketcore.IndexedSource{Branch: opsmetadata.Unquote(frontmatter.Metadata["branch"])}, IndexedReview: ticketcore.IndexedReview{
 			ReviewRefs:   frontmatter.ReviewRefs,
-			ReviewState:  opsmetadata.Unquote(frontmatter.Metadata["review_state"]),
-			ReviewResult: opsmetadata.Unquote(frontmatter.Metadata["review_result"]),
+			ReviewState:  ticketcore.ReviewState(opsmetadata.Unquote(frontmatter.Metadata["review_state"])),
+			ReviewResult: ticketcore.ReviewResult(opsmetadata.Unquote(frontmatter.Metadata["review_result"])),
 			ReviewRound:  reviewRound,
 		},
 	}

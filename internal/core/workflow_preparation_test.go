@@ -190,7 +190,7 @@ func checkWorkflowPreparationTaskProofs(t *testing.T, store *WorkflowStore, run 
 
 	for _, member := range run.Members {
 		record, err := store.Read(t.Context(), member.Admission.Path)
-		if err != nil || record.Task.Status == ticketcore.StatusDone || len(record.Task.Evidence) == 0 {
+		if err != nil || record.Task.Status == string(ticketcore.StatusDone) || len(record.Task.Evidence) == 0 {
 			t.Fatal("task proof was lost or finalized")
 		}
 	}
