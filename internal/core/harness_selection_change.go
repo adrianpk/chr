@@ -18,23 +18,6 @@ import (
 // selection image or receipt is published; transport failures remain distinct.
 var ErrHarnessSelectionPreparation = errors.New("harness selection preparation failed")
 
-// HarnessSelectionAudit records the last accepted change without private resources.
-type HarnessSelectionAudit struct {
-	ProjectRef    string `json:"project_ref"`
-	ChangedBy     string `json:"changed_by,omitempty"`
-	ChangedAt     string `json:"changed_at,omitempty"`
-	RequestID     string `json:"request_id,omitempty"`
-	RequestDigest string `json:"request_digest,omitempty"`
-}
-
-// HarnessSelectionSnapshot binds both role references to one full configuration image.
-type HarnessSelectionSnapshot struct {
-	HarnessSelectionAudit
-	Worker     string `json:"worker,omitempty"`
-	Generation string `json:"generation,omitempty"`
-	Revision   string `json:"revision"`
-}
-
 // HarnessSelectionChangeRequest omits unchanged roles; an explicit empty reference
 // clears a role. Transport adapters translate their null choices to empty references.
 type HarnessSelectionChangeRequest struct {
@@ -54,20 +37,20 @@ type HarnessSelectionChangeOptions struct {
 }
 
 // HarnessSelections projects one coherent workspace image and its last change.
-func (c WorkspaceConfig) HarnessSelections(project string) (HarnessSelectionSnapshot, error) {
+func (c WorkspaceConfig) HarnessSelections(project string) (harnesscore.HarnessSelectionSnapshot, error) {
 	if c.HarnessAudit.ProjectRef != "" && c.HarnessAudit.ProjectRef != project {
-		return HarnessSelectionSnapshot{}, fmt.Errorf("%w: harness selections belong to another project", workflowstate.ErrConflict)
+		return harnesscore.HarnessSelectionSnapshot{}, fmt.Errorf("%w: harness selections belong to another project", workflowstate.ErrConflict)
 	}
 
 	audit := c.HarnessAudit
 	audit.ProjectRef = project
 
-	return HarnessSelectionSnapshot{HarnessSelectionAudit: audit, Worker: c.Harnesses.Worker, Generation: c.Harnesses.Generation, Revision: c.Revision()}, nil
+	return harnesscore.HarnessSelectionSnapshot{HarnessSelectionAudit: audit, Worker: c.Harnesses.Worker, Generation: c.Harnesses.Generation, Revision: c.Revision()}, nil
 }
 
 // ChangeHarnessSelections publishes an authorized complete image under the
 // configuration owner's cross-process lock. Replays return the original snapshot.
-func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSelectionChangeOptions) (result HarnessSelectionSnapshot, err error) {
+func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSelectionChangeOptions) (result harnesscore.HarnessSelectionSnapshot, err error) {
 	if opts.Authorize == nil || opts.Validate == nil {
 		return result, errors.New("harness selection requires authority and preparation")
 	}
@@ -141,10 +124,10 @@ func validateHarnessSelectionChoices(r HarnessSelectionChangeRequest) error {
 	return nil
 }
 
-func publishHarnessSelectionChange(ctx context.Context, project string, opts HarnessSelectionChangeOptions, digest string) (HarnessSelectionSnapshot, error) {
+func publishHarnessSelectionChange(ctx context.Context, project string, opts HarnessSelectionChangeOptions, digest string) (harnesscore.HarnessSelectionSnapshot, error) {
 	journal, err := prepareHarnessSelectionChange(ctx, project, opts, digest)
 	if err != nil {
-		return HarnessSelectionSnapshot{}, err
+		return harnesscore.HarnessSelectionSnapshot{}, err
 	}
 
 	if err := checkHarnessSelectionReceiptCapacity(project); err != nil {

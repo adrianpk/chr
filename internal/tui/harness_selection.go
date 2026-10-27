@@ -7,7 +7,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
@@ -20,7 +19,7 @@ type HarnessSelectionExecutor interface {
 // HarnessSelectionView contains public selection identities, never private paths.
 type HarnessSelectionView struct {
 	RequestID          string
-	Snapshot           core.HarnessSelectionSnapshot
+	Snapshot           harnesscore.HarnessSelectionSnapshot
 	Worker, Generation harnesscore.Selection
 	Profiles           []HarnessProfileView
 	Retained           []HarnessRetainedView

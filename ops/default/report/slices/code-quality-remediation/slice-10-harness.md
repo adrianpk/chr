@@ -347,6 +347,16 @@ policy pass after naming, with these additional successful checks:
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/runtime ./internal/core/project ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 - `go test -race ./internal/core/harness/runtime ./internal/core -run '^Test(PiWorkerIsolation(Reservation|Canceled)|WorkflowCoordinatorCopies)$' -count=1 -timeout=3m`: native reservation cancellation and retained-slot checks passed; runtime compiled.
 
+Selection value move checks passed:
+
+- `go test ./internal/core/harness ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessSelection|HarnessBinding|HarnessGenerationConfigFence|QualityRecordWire|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
+
+Pure selection audit and snapshot values now live in core/harness; two exact
+declaration preimages preserve embedded fields, order and JSON tags. The native
+configuration owner retains actual full-image revision, authorization, guarded
+change/recovery and bounded receipts.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

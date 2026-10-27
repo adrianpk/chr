@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -68,7 +68,7 @@ func TestTelegramHarnessSelectionConfirm(t *testing.T) {
 	checkTelegramNoWork(t, f.receiver.env)
 }
 
-func telegramHarnessCheckSaved(t *testing.T, operations service, requestID string) core.HarnessSelectionSnapshot {
+func telegramHarnessCheckSaved(t *testing.T, operations service, requestID string) harnesscore.HarnessSelectionSnapshot {
 	t.Helper()
 
 	saved := webHarnessSnapshot(t, operations)
@@ -251,7 +251,7 @@ func TestTelegramHarnessSelectionEnvelope(t *testing.T) {
 	}
 }
 
-func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action telegramcore.Action, saved core.HarnessSelectionSnapshot) {
+func checkTelegramHarnessReplay(t *testing.T, f *telegramConversationAppFixture, operations service, action telegramcore.Action, saved harnesscore.HarnessSelectionSnapshot) {
 	t.Helper()
 
 	notice := f.send(t, "/answer "+action.Token+" confirm", 0)

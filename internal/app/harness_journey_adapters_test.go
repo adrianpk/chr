@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
@@ -68,7 +68,7 @@ func (f *harnessJourney) checkViews(t *testing.T, choice harnessJourneyChoice) {
 	f.checkTelegramView(t, choice)
 }
 
-func (f *harnessJourney) checkSharedViews(t *testing.T, snapshot core.HarnessSelectionSnapshot) {
+func (f *harnessJourney) checkSharedViews(t *testing.T, snapshot harnesscore.HarnessSelectionSnapshot) {
 	t.Helper()
 
 	web, webErr := webHarnessProvider(f.operations).HarnessSelectionView(t.Context())

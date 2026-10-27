@@ -8,7 +8,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -120,7 +119,7 @@ func harnessSaveFixture() *harnessSelectionFixture {
 	ready := harnesscore.Readiness{Supported: true, Executable: "available", Runtime: "native", Credentials: "cli_managed", RemoteAuthentication: "not_tested"}
 
 	return &harnessSelectionFixture{view: HarnessSelectionView{
-		RequestID: "exact-request", Snapshot: core.HarnessSelectionSnapshot{HarnessSelectionAudit: core.HarnessSelectionAudit{ProjectRef: "project-1"}, Revision: strings.Repeat("a", 64)},
+		RequestID: "exact-request", Snapshot: harnesscore.HarnessSelectionSnapshot{HarnessSelectionAudit: harnesscore.HarnessSelectionAudit{ProjectRef: "project-1"}, Revision: strings.Repeat("a", 64)},
 		Worker: harnesscore.Selection{Profile: "alpha", Harness: "codex", Model: "model-a", Readiness: ready}, Generation: harnesscore.Selection{Readiness: ready},
 		Profiles: []HarnessProfileView{{Name: "alpha", Harness: "codex", Model: "model-a", Worker: ready, Generation: ready}, {Name: "beta", Harness: "codex", Model: "model-b", Worker: ready, Generation: ready}},
 	}}

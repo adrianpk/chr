@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -69,7 +70,7 @@ type telegramHarnessAuthorityProbe struct {
 	change func()
 }
 
-func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
+func (s telegramHarnessAuthorityProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.HarnessSelectionSnapshot, error) {
 	calls := 0
 
 	return s.service.ChangeTelegramHarnessSelections(ctx, target, request, func(ctx context.Context) error {

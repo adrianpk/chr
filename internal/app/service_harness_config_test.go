@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -46,7 +47,7 @@ func TestHarnessSelectionServiceChange(t *testing.T) {
 	}
 }
 
-func checkHarnessSelectionServiceStatus(t *testing.T, second service, accepted core.HarnessSelectionSnapshot, configDir, command string) {
+func checkHarnessSelectionServiceStatus(t *testing.T, second service, accepted harnesscore.HarnessSelectionSnapshot, configDir, command string) {
 	t.Helper()
 
 	status, err := second.InspectHarnessSelections(t.Context(), "spec_generation")
@@ -60,7 +61,7 @@ func checkHarnessSelectionServiceStatus(t *testing.T, second service, accepted c
 	}
 }
 
-func checkHarnessSelectionServiceReplay(t *testing.T, second service, request core.HarnessSelectionChangeRequest, authority func(context.Context) error, accepted core.HarnessSelectionSnapshot) {
+func checkHarnessSelectionServiceReplay(t *testing.T, second service, request core.HarnessSelectionChangeRequest, authority func(context.Context) error, accepted harnesscore.HarnessSelectionSnapshot) {
 	t.Helper()
 
 	replay, err := second.ChangeHarnessSelections(t.Context(), request, authority)

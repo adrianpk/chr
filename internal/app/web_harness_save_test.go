@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -287,7 +288,7 @@ func webHarnessAssertWrite(t *testing.T, handler http.Handler, cookies []*http.C
 	return response.Body.String()
 }
 
-func webHarnessSnapshot(t *testing.T, operations service) core.HarnessSelectionSnapshot {
+func webHarnessSnapshot(t *testing.T, operations service) harnesscore.HarnessSelectionSnapshot {
 	t.Helper()
 
 	config, err := core.LoadWorkspaceConfig(operations.projectContext.ProjectDir)
@@ -303,7 +304,7 @@ func webHarnessSnapshot(t *testing.T, operations service) core.HarnessSelectionS
 	return snapshot
 }
 
-func webHarnessCheckProcess(t *testing.T, operations service, expected core.HarnessSelectionSnapshot) {
+func webHarnessCheckProcess(t *testing.T, operations service, expected harnesscore.HarnessSelectionSnapshot) {
 	t.Helper()
 
 	program, err := os.Executable()
@@ -320,7 +321,7 @@ func webHarnessCheckProcess(t *testing.T, operations service, expected core.Harn
 		t.Fatal(err)
 	}
 
-	var actual core.HarnessSelectionSnapshot
+	var actual harnesscore.HarnessSelectionSnapshot
 	if err := json.NewDecoder(strings.NewReader(string(output))).Decode(&actual); err != nil || actual != expected {
 		t.Fatal("independent process did not observe the saved image", actual, err)
 	}

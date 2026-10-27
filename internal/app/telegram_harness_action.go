@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -128,8 +129,8 @@ func (r telegramReceiver) finishHarnessActionFailure(ctx context.Context, claim 
 
 func (r telegramReceiver) finishHarnessAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, completion telegramHarnessCompletion) error {
 	facts, err := json.Marshal(struct {
-		State    telegramcore.OperationState    `json:"state"`
-		Snapshot *core.HarnessSelectionSnapshot `json:"snapshot,omitempty"`
+		State    telegramcore.OperationState           `json:"state"`
+		Snapshot *harnesscore.HarnessSelectionSnapshot `json:"snapshot,omitempty"`
 	}{completion.State, completion.Snapshot})
 	if err != nil {
 		return err
@@ -153,6 +154,6 @@ func telegramHarnessSavedRole(profile string) string {
 
 type telegramHarnessCompletion struct {
 	State    telegramcore.OperationState
-	Snapshot *core.HarnessSelectionSnapshot
+	Snapshot *harnesscore.HarnessSelectionSnapshot
 	Text     string
 }

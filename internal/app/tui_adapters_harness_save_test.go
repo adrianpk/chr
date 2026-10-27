@@ -8,7 +8,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -72,7 +72,7 @@ func TestTUIHarnessSelectionSave(t *testing.T) {
 	}
 }
 
-func tuiHarnessRetrySave(t *testing.T, model tea.Model, operations service, executor *tuiHarnessLostAck, saved core.HarnessSelectionSnapshot) tea.Model {
+func tuiHarnessRetrySave(t *testing.T, model tea.Model, operations service, executor *tuiHarnessLostAck, saved harnesscore.HarnessSelectionSnapshot) tea.Model {
 	t.Helper()
 
 	visible := strings.Join(strings.Fields(model.View()), " ")

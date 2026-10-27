@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -67,7 +68,7 @@ func tuiHarnessOtherProcess(t *testing.T, operations service) {
 		t.Fatal("independent Web change failed", err)
 	}
 
-	var snapshot core.HarnessSelectionSnapshot
+	var snapshot harnesscore.HarnessSelectionSnapshot
 	if err := json.NewDecoder(strings.NewReader(string(output))).Decode(&snapshot); err != nil || snapshot.Worker != "beta" {
 		t.Fatal("independent Web process did not save its choice", err)
 	}

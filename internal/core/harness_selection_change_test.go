@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -35,7 +36,7 @@ func TestHarnessSelectionChange(t *testing.T) {
 	checkHarnessSelectionChangeReplay(t, project, request, result)
 }
 
-func checkHarnessSelectionChangeReplay(t *testing.T, project string, request HarnessSelectionChangeRequest, result HarnessSelectionSnapshot) {
+func checkHarnessSelectionChangeReplay(t *testing.T, project string, request HarnessSelectionChangeRequest, result harnesscore.HarnessSelectionSnapshot) {
 	t.Helper()
 
 	next := harnessSelectionTestRequest("second", result.Revision, "beta")

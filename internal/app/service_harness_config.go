@@ -25,11 +25,11 @@ type HarnessProfileStatus struct {
 
 // HarnessSelectionStatus presents defaults for new operations, not retained runs.
 type HarnessSelectionStatus struct {
-	Snapshot   core.HarnessSelectionSnapshot `json:"snapshot"`
-	Worker     harnesscore.Selection         `json:"worker"`
-	Generation harnesscore.Selection         `json:"generation"`
-	Profiles   []HarnessProfileStatus        `json:"profiles"`
-	Problems   []string                      `json:"problems,omitempty"`
+	Snapshot   harnesscore.HarnessSelectionSnapshot `json:"snapshot"`
+	Worker     harnesscore.Selection                `json:"worker"`
+	Generation harnesscore.Selection                `json:"generation"`
+	Profiles   []HarnessProfileStatus               `json:"profiles"`
+	Problems   []string                             `json:"problems,omitempty"`
 }
 
 // InspectHarnessSelections reads both roles from one persisted configuration.
@@ -94,9 +94,9 @@ func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, pro
 
 // ChangeHarnessSelections is the shared authorized configuration mutation. The
 // trusted adapter checks its current actor/project authority even on receipt replay.
-func (s service) ChangeHarnessSelections(ctx context.Context, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
+func (s service) ChangeHarnessSelections(ctx context.Context, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.HarnessSelectionSnapshot, error) {
 	if request.ProjectRef != s.projectContext.ProjectID {
-		return core.HarnessSelectionSnapshot{}, workflowstate.ErrConflict
+		return harnesscore.HarnessSelectionSnapshot{}, workflowstate.ErrConflict
 	}
 
 	return core.ChangeHarnessSelections(ctx, s.projectContext.ProjectDir, core.HarnessSelectionChangeOptions{

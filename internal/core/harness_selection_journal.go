@@ -24,11 +24,11 @@ const (
 // The intent retains only bounded choices and digests, never a copy of unrelated
 // configuration. Recovery reconstructs the image from the exact prior hash.
 type harnessSelectionJournal struct {
-	Schema   string                        `json:"schema"`
-	Request  HarnessSelectionChangeRequest `json:"request"`
-	Result   HarnessSelectionSnapshot      `json:"result"`
-	Before   string                        `json:"before"`
-	Checksum string                        `json:"checksum"`
+	Schema   string                               `json:"schema"`
+	Request  HarnessSelectionChangeRequest        `json:"request"`
+	Result   harnesscore.HarnessSelectionSnapshot `json:"result"`
+	Before   string                               `json:"before"`
+	Checksum string                               `json:"checksum"`
 }
 
 func readHarnessSelectionConfig(project string) ([]byte, error) {
@@ -155,7 +155,7 @@ func validateHarnessSelectionJournalResult(journal harnessSelectionJournal) erro
 }
 
 type harnessSelectionReceiptLookup struct {
-	Snapshot HarnessSelectionSnapshot
+	Snapshot harnesscore.HarnessSelectionSnapshot
 	Found    bool
 }
 

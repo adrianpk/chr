@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
 // Admission and switching share exclusion across their entire configuration
@@ -83,7 +84,7 @@ type harnessBindingAdmissionResult struct {
 	err    error
 }
 type harnessBindingChangeResult struct {
-	result HarnessSelectionSnapshot
+	result harnesscore.HarnessSelectionSnapshot
 	err    error
 }
 
