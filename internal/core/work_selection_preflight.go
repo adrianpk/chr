@@ -101,22 +101,22 @@ func AcquireAgentOperationLock(ctx context.Context, opts AgentOperationLockOptio
 		return nil, err
 	}
 
-	projectDir, operation, createdAt, err := normalizeAgentOperationLockOptions(opts)
+	settings, err := normalizeAgentOperationLockOptions(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	lockPath, err := agentOperationLockPath(projectDir)
+	lockPath, err := agentOperationLockPath(settings.projectDir)
 	if err != nil {
 		return nil, err
 	}
 
-	reservation, err := acquireAgentRepositoryCapacity(ctx, projectDir)
+	reservation, err := acquireAgentRepositoryCapacity(ctx, settings.projectDir)
 	if err != nil {
 		return nil, err
 	}
 
-	lock, err := acquireAgentOperationFile(lockPath, operation, opts.Owner, createdAt)
+	lock, err := acquireAgentOperationFile(lockPath, settings.operation, opts.Owner, settings.createdAt)
 	if err != nil {
 		if reservation != nil {
 			err = errors.Join(err, reservation.Close())
@@ -156,15 +156,20 @@ func acquireAgentOperationFile(lockPath, operation, owner string, createdAt time
 	return &AgentOperationLock{path: lockPath, guard: contenthash.Sum(data)}, nil
 }
 
-func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (string, string, time.Time, error) {
+type agentOperationSettings struct {
+	projectDir, operation string
+	createdAt             time.Time
+}
+
+func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (agentOperationSettings, error) {
 	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
 	if err != nil {
-		return "", "", time.Time{}, err
+		return agentOperationSettings{}, err
 	}
 
 	operation := strings.TrimSpace(opts.Operation)
 	if operation == "" {
-		return "", "", time.Time{}, fmt.Errorf("agent operation is required")
+		return agentOperationSettings{}, fmt.Errorf("agent operation is required")
 	}
 
 	createdAt := opts.Now.UTC()
@@ -172,7 +177,7 @@ func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (string,
 		createdAt = time.Now().UTC()
 	}
 
-	return projectDir, operation, createdAt, nil
+	return agentOperationSettings{projectDir: projectDir, operation: operation, createdAt: createdAt}, nil
 }
 
 func createAgentOperationLockFile(lockPath string) (*os.File, error) {

@@ -30,10 +30,10 @@ commits with direct consumers and preserved durable/wire contracts.
 The move ledger reconciles 723 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
-meanings are unchanged. Thirty-four assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger records all 34 fixes; remaining
+meanings are unchanged. Forty-one assigned signatures now use cohesive owner state or
+named outcomes. The partial disposition ledger records 34 fixes; seven newly implemented results await commit references; remaining
 assigned signatures and watches are open. The global policy is at ceiling
-six with 174 exact debts and one external exception.
+six with 167 exact debts and one external exception.
 
 ## Files of Interest
 
@@ -269,9 +269,20 @@ exception. The signature ledger now records all 34 completed fixes.
 
 - `make check-go-style`: passed at ceiling six with the exact residual assignments.
 
+Evidence checklist blocks/lines/status detail, remote flag value/consumption,
+normalized operation-lock settings and bounded execution/loop report entries now
+return private named outcomes. Original absence versus recognized-error flags,
+non-nil list values, order, trimming, diagnostics, report limits and lock/capacity
+resource lifetime are preserved. Seven additional assigned results are fixed;
+167 exact debts remain at ceiling six.
+
+- `go test ./internal/core ./internal/app ./internal/tui -run '^Test(EvidenceStrategy|EvidenceReadiness|AgentOperationLock|WorkSelectionPreflight|ExecutionReport|NewExecutionReport|LoopReport|NewLoopReport|RemoteCommand|QualityStorage|QualityRecordWire)' -count=1 -timeout=3m`: passed; TUI compiled with no selected tests.
+- `go test ./internal/core -run '^Test(ParseEvidenceStrategyChecklist|RenderEvidenceStrategyChecklist|UpsertEvidenceStrategyChecklist|SummarizeEvidenceStrategyChecklist|RenderExecutionReport|RenderLoopReport|ParseRemoteCommand)' -count=1 -timeout=3m`: passed.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues after the evidence/report/lock result changes.
+
 ## Risks and Follow-ups
 
-Remaining work includes 25 assigned signature/watch entries, typed state and
+Remaining work includes 18 assigned signature/watch entries, typed state and
 preparation contracts, control-flag/legacy reconciliation, and ticket parser/
 validation test ownership with its merge-state dependencies. Final candidate
 validation and the Slice 11 PR remain pending.

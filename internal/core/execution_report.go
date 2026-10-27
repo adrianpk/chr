@@ -170,7 +170,8 @@ func NewExecutionReport(opts ExecutionReportOptions) (ExecutionReport, error) {
 		Summary:   opts.Result.Summary,
 	}
 
-	report.ChangedFiles, report.ChangedSummary = executionReportChangedFiles(*opts.Result)
+	changes := executionReportChangedFiles(*opts.Result)
+	report.ChangedFiles, report.ChangedSummary = changes.files, changes.summary
 
 	if opts.IncludeEvidence {
 		report.Evidence = executionReportEvidence(opts)
@@ -240,7 +241,12 @@ func validateExecutionReportResult(record executioncore.Record, result execution
 	return nil
 }
 
-func executionReportChangedFiles(result executioncore.Result) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary) {
+type executionReportChanges struct {
+	files   []ExecutionReportChangedFile
+	summary ExecutionReportChangedFilesSummary
+}
+
+func executionReportChangedFiles(result executioncore.Result) executionReportChanges {
 	changedFiles := make([]ExecutionReportChangedFile, 0, len(result.ChangedFiles))
 
 	for _, changedFile := range result.ChangedFiles {
@@ -262,7 +268,7 @@ func executionReportChangedFiles(result executioncore.Result) ([]ExecutionReport
 		summary.Truncated = true
 	}
 
-	return changedFiles, summary
+	return executionReportChanges{files: changedFiles, summary: summary}
 }
 
 func executionReportEvidence(opts ExecutionReportOptions) ExecutionReportEvidence {
@@ -349,10 +355,7 @@ func NewExecutionReportWriter() ExecutionReportWriter {
 }
 
 // WriteExecutionReport writes the requested output.
-func (w *executionReportWriter) WriteExecutionReport(
-	ctx context.Context,
-	report ExecutionReport,
-) (string, error) {
+func (w *executionReportWriter) WriteExecutionReport(ctx context.Context, report ExecutionReport) (string, error) {
 	err := ctx.Err()
 	if err != nil {
 		return "", err
@@ -543,11 +546,7 @@ func writeExecutionReportEvidenceChecklistItem(output *strings.Builder, item Exe
 	output.WriteString("\n")
 }
 
-func writeExecutionReportChangedFiles(
-	output *strings.Builder,
-	changedFiles []ExecutionReportChangedFile,
-	summary ExecutionReportChangedFilesSummary,
-) {
+func writeExecutionReportChangedFiles(output *strings.Builder, changedFiles []ExecutionReportChangedFile, summary ExecutionReportChangedFilesSummary) {
 	output.WriteString("## Changed Files\n\n")
 	writeExecutionReportField(output, "total", fmt.Sprintf("%d", summary.Total))
 	writeExecutionReportField(output, "rendered", fmt.Sprintf("%d", summary.Rendered))

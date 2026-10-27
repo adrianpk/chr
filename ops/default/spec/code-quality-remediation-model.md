@@ -710,3 +710,11 @@ approved Slices 12–15, recorded in the parameter-phase ledger and expiring in
 Slice 16. All 34 completed signatures have task-commit and validation references.
 The remaining 25 assigned entries, typed-state/preparation work and final
 controller validation are still open.
+
+Evidence parser blocks/lines/status details, remote flag consumption, normalized
+operation lock settings and bounded execution/loop report entries now use named
+outcomes. Original missing versus recognized-error flags, failure zeros, non-nil
+list values, diagnostics, order, caps and lock/capacity resource lifetime remain
+unchanged. Seven more assigned results are fixed; 167 exact debts remain at
+ceiling six. Existing parsing/rendering/lock/storage/wire regressions and pinned
+strict lint pass.

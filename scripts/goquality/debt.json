@@ -32,36 +32,6 @@
       "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/evidence_strategy_checklist.go::evidenceStrategyChecklistBlock",
-      "signature": "func(content string) (string, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/evidence_strategy_checklist.go::parseEvidenceStrategyChecklistLine",
-      "signature": "func(line string) (EvidenceStrategyChecklistItem, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/evidence_strategy_checklist.go::parseEvidenceStrategyChecklistValue",
-      "signature": "func(value string) (string, string)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/execution_report.go::executionReportChangedFiles",
-      "signature": "func(result executioncore.Result) ([]ExecutionReportChangedFile, ExecutionReportChangedFilesSummary)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/loop_report.go::loopReportExecutions",
-      "signature": "func(records []executioncore.Record) ([]LoopReportExecution, LoopReportExecutionSummary)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/remote_command.go::remoteCommandFlagValue",
-      "signature": "func(words []string, index int) (string, string, int, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/review_provider_diagnostics.go::parseReviewProviderURL",
       "signature": "func(rawURL string) (*url.URL, []string, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -84,11 +54,6 @@
     {
       "id": "internal/core/review_workflow_pull_request.go::RemoteReviewAdapter.resolveWorkflowRepository",
       "signature": "func(repository string) (ReviewProviderReference, ReviewProviderTargetConfig, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_selection_preflight.go::normalizeAgentOperationLockOptions",
-      "signature": "func(opts AgentOperationLockOptions) (string, string, time.Time, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

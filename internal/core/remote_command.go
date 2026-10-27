@@ -242,14 +242,14 @@ func parseRemoteLoopFlags(words []string, request *RemoteCommandRequest) error {
 			return fmt.Errorf("loop remote command argument must be a flag: %s", flag)
 		}
 
-		name, value, consumed, err := remoteCommandFlagValue(words, index)
+		parsed, err := remoteCommandFlagValue(words, index)
 		if err != nil {
 			return err
 		}
 
-		index += consumed
+		index += parsed.consumed
 
-		err = applyRemoteLoopFlag(request, name, value)
+		err = applyRemoteLoopFlag(request, parsed.name, parsed.value)
 		if err != nil {
 			return err
 		}
@@ -258,23 +258,28 @@ func parseRemoteLoopFlags(words []string, request *RemoteCommandRequest) error {
 	return nil
 }
 
-func remoteCommandFlagValue(words []string, index int) (string, string, int, error) {
+type remoteFlagValue struct {
+	name, value string
+	consumed    int
+}
+
+func remoteCommandFlagValue(words []string, index int) (remoteFlagValue, error) {
 	flag := strings.TrimPrefix(words[index], "--")
 
 	name, value, ok := strings.Cut(flag, "=")
 	if ok {
 		if value == "" {
-			return "", "", 0, fmt.Errorf("remote command flag value is required: --%s", name)
+			return remoteFlagValue{}, fmt.Errorf("remote command flag value is required: --%s", name)
 		}
 
-		return name, value, 0, nil
+		return remoteFlagValue{name: name, value: value}, nil
 	}
 
 	if index+1 >= len(words) {
-		return "", "", 0, fmt.Errorf("remote command flag value is required: --%s", name)
+		return remoteFlagValue{}, fmt.Errorf("remote command flag value is required: --%s", name)
 	}
 
-	return name, words[index+1], 1, nil
+	return remoteFlagValue{name: name, value: words[index+1], consumed: 1}, nil
 }
 
 func applyRemoteLoopFlag(request *RemoteCommandRequest, name, value string) error {

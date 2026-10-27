@@ -41,12 +41,12 @@ type EvidenceStrategyChecklist struct {
 
 // ParseEvidenceStrategyChecklist parses a ticket evidence strategy checklist.
 func ParseEvidenceStrategyChecklist(content string) (EvidenceStrategyChecklist, error) {
-	block, found, err := evidenceStrategyChecklistBlock(content)
-	if err != nil || !found {
-		return EvidenceStrategyChecklist{Found: found}, err
+	block, err := evidenceStrategyChecklistBlock(content)
+	if err != nil || !block.found {
+		return EvidenceStrategyChecklist{Found: block.found}, err
 	}
 
-	items, err := parseChecklistItems(block)
+	items, err := parseChecklistItems(block.content)
 	if err != nil {
 		return EvidenceStrategyChecklist{}, err
 	}
@@ -121,27 +121,32 @@ func (c EvidenceStrategyChecklist) Item(label string) (EvidenceStrategyChecklist
 	return item, ok
 }
 
-func evidenceStrategyChecklistBlock(content string) (string, bool, error) {
+type evidenceChecklistBlock struct {
+	content string
+	found   bool
+}
+
+func evidenceStrategyChecklistBlock(content string) (evidenceChecklistBlock, error) {
 	start := strings.Index(content, EvidenceStrategyChecklistStartAnchor)
 	end := strings.Index(content, EvidenceStrategyChecklistEndAnchor)
 
 	switch {
 	case start < 0 && end < 0:
-		return "", false, nil
+		return evidenceChecklistBlock{}, nil
 	case start < 0:
-		return "", false, fmt.Errorf("evidence strategy checklist end anchor without start anchor")
+		return evidenceChecklistBlock{}, fmt.Errorf("evidence strategy checklist end anchor without start anchor")
 	case end < 0:
-		return "", false, fmt.Errorf("evidence strategy checklist start anchor without end anchor")
+		return evidenceChecklistBlock{}, fmt.Errorf("evidence strategy checklist start anchor without end anchor")
 	case end < start:
-		return "", false, fmt.Errorf("evidence strategy checklist end anchor appears before start anchor")
+		return evidenceChecklistBlock{}, fmt.Errorf("evidence strategy checklist end anchor appears before start anchor")
 	}
 
 	remaining := content[start+len(EvidenceStrategyChecklistStartAnchor):]
 	if strings.Contains(remaining[:end-start-len(EvidenceStrategyChecklistStartAnchor)], EvidenceStrategyChecklistStartAnchor) {
-		return "", false, fmt.Errorf("evidence strategy checklist contains duplicate start anchor")
+		return evidenceChecklistBlock{}, fmt.Errorf("evidence strategy checklist contains duplicate start anchor")
 	}
 
-	return content[start+len(EvidenceStrategyChecklistStartAnchor) : end], true, nil
+	return evidenceChecklistBlock{content: content[start+len(EvidenceStrategyChecklistStartAnchor) : end], found: true}, nil
 }
 
 func parseChecklistItems(block string) (map[string]EvidenceStrategyChecklistItem, error) {
@@ -153,14 +158,16 @@ func parseChecklistItems(block string) (map[string]EvidenceStrategyChecklistItem
 			continue
 		}
 
-		item, ok, err := parseEvidenceStrategyChecklistLine(trimmed)
+		parsed, err := parseEvidenceStrategyChecklistLine(trimmed)
 		if err != nil {
 			return nil, fmt.Errorf("parse evidence strategy checklist line %d: %w", lineNumber+1, err)
 		}
 
-		if !ok {
+		if !parsed.recognized {
 			continue
 		}
+
+		item := parsed.item
 
 		if _, exists := items[item.Label]; exists {
 			return nil, fmt.Errorf("duplicate evidence strategy checklist label: %s", item.Label)
@@ -172,39 +179,44 @@ func parseChecklistItems(block string) (map[string]EvidenceStrategyChecklistItem
 	return requireChecklistItems(items)
 }
 
-func parseEvidenceStrategyChecklistLine(line string) (EvidenceStrategyChecklistItem, bool, error) {
+type evidenceChecklistLine struct {
+	item       EvidenceStrategyChecklistItem
+	recognized bool
+}
+
+func parseEvidenceStrategyChecklistLine(line string) (evidenceChecklistLine, error) {
 	if !strings.HasPrefix(line, "- [") {
-		return EvidenceStrategyChecklistItem{}, false, nil
+		return evidenceChecklistLine{}, nil
 	}
 
 	checked, err := parseEvidenceStrategyChecklistChecked(line)
 	if err != nil {
-		return EvidenceStrategyChecklistItem{}, true, err
+		return evidenceChecklistLine{recognized: true}, err
 	}
 
 	remainder := strings.TrimSpace(line[len("- [ ] "):])
 
 	label, value, found := strings.Cut(remainder, ":")
 	if !found {
-		return EvidenceStrategyChecklistItem{}, true, fmt.Errorf("checklist item requires label and value")
+		return evidenceChecklistLine{recognized: true}, fmt.Errorf("checklist item requires label and value")
 	}
 
 	label = strings.TrimSpace(label)
 	if !isEvidenceStrategyChecklistLabel(label) {
-		return EvidenceStrategyChecklistItem{}, true, fmt.Errorf("unknown evidence strategy checklist label: %s", label)
+		return evidenceChecklistLine{recognized: true}, fmt.Errorf("unknown evidence strategy checklist label: %s", label)
 	}
 
-	status, detail := parseEvidenceStrategyChecklistValue(value)
-	if !isValidEvidenceStrategyChecklistStatus(label, status) {
-		return EvidenceStrategyChecklistItem{}, true, fmt.Errorf("invalid %s status: %s", label, status)
+	parsed := parseEvidenceStrategyChecklistValue(value)
+	if !isValidEvidenceStrategyChecklistStatus(label, parsed.status) {
+		return evidenceChecklistLine{recognized: true}, fmt.Errorf("invalid %s status: %s", label, parsed.status)
 	}
 
-	return EvidenceStrategyChecklistItem{
+	return evidenceChecklistLine{item: EvidenceStrategyChecklistItem{
 		Label:   label,
 		Checked: checked,
-		Status:  status,
-		Detail:  detail,
-	}, true, nil
+		Status:  parsed.status,
+		Detail:  parsed.detail,
+	}, recognized: true}, nil
 }
 
 func parseEvidenceStrategyChecklistChecked(line string) (bool, error) {
@@ -222,15 +234,19 @@ func parseEvidenceStrategyChecklistChecked(line string) (bool, error) {
 	}
 }
 
-func parseEvidenceStrategyChecklistValue(value string) (string, string) {
+type evidenceChecklistValue struct {
+	status, detail string
+}
+
+func parseEvidenceStrategyChecklistValue(value string) evidenceChecklistValue {
 	value = strings.TrimSpace(value)
 
 	status, detail, found := strings.Cut(value, ";")
 	if !found {
-		return strings.TrimSpace(value), ""
+		return evidenceChecklistValue{status: strings.TrimSpace(value)}
 	}
 
-	return strings.TrimSpace(status), strings.TrimSpace(detail)
+	return evidenceChecklistValue{status: strings.TrimSpace(status), detail: strings.TrimSpace(detail)}
 }
 
 func checklistForUpsert(existing, updates EvidenceStrategyChecklist) (EvidenceStrategyChecklist, error) {

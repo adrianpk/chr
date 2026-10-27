@@ -62,7 +62,8 @@ func NewLoopReport(opts LoopReportOptions) (LoopReport, error) {
 	}
 
 	report := loopReportFromRecord(opts.Loop)
-	report.Executions, report.ExecutionSummary = loopReportExecutions(opts.Executions)
+	entries := loopReportExecutions(opts.Executions)
+	report.Executions, report.ExecutionSummary = entries.executions, entries.summary
 
 	return report, nil
 }
@@ -87,7 +88,12 @@ func loopReportFromRecord(record executioncore.LoopRunRecord) LoopReport {
 	}
 }
 
-func loopReportExecutions(records []executioncore.Record) ([]LoopReportExecution, LoopReportExecutionSummary) {
+type loopReportEntries struct {
+	executions []LoopReportExecution
+	summary    LoopReportExecutionSummary
+}
+
+func loopReportExecutions(records []executioncore.Record) loopReportEntries {
 	executions := make([]LoopReportExecution, 0, len(records))
 
 	for _, record := range records {
@@ -109,7 +115,7 @@ func loopReportExecutions(records []executioncore.Record) ([]LoopReportExecution
 		summary.Truncated = true
 	}
 
-	return executions, summary
+	return loopReportEntries{executions: executions, summary: summary}
 }
 
 // RenderLoopReportMarkdown renders the corresponding package data.
@@ -178,11 +184,7 @@ func writeLoopReportTimes(output *strings.Builder, report LoopReport) {
 	output.WriteString("\n")
 }
 
-func writeLoopReportExecutions(
-	output *strings.Builder,
-	executions []LoopReportExecution,
-	summary LoopReportExecutionSummary,
-) {
+func writeLoopReportExecutions(output *strings.Builder, executions []LoopReportExecution, summary LoopReportExecutionSummary) {
 	output.WriteString("## Executions\n\n")
 	writeLoopReportField(output, "total", fmt.Sprintf("%d", summary.Total))
 	writeLoopReportField(output, "rendered", fmt.Sprintf("%d", summary.Rendered))
