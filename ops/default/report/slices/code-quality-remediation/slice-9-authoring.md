@@ -50,8 +50,10 @@ ops from importing authoring, root core or workflow policy.
 The feature contract in docs/reference/acceptance-feature-generation.md and the
 Markdown-first document model remain authoritative. A spec stays the source of
 truth; acceptance features remain supporting evidence with mandatory static
-checks before writing. The mechanical move keeps existing public names and the
-write-result tuple until the following separate contract step. No provider,
+checks before writing. The mechanical move and contract conversion are separate commits. Package names
+now use Artifact, Paths, RoundNotes, Layout and Check. WriteResult retains checks
+without a path on static rejection, zero outcomes on other failures and confirmed
+paths plus checks on success. Direct callers preserve all original branches. No provider,
 coordinator, generic pipeline or root forwarding facade is introduced.
 
 Core/ops/metadata owns the original shared scalar quoting, bracketed lists and
@@ -85,7 +87,7 @@ caller-owned locks, durable journals and cleanup behavior retain their owners.
 
 Callers use ops.Layout, ArtifactOptions, ResolveLayout and artifact operations
 without repeated package prefixes. Sixteen debt declarations qualify their unchanged layout or journal-image types
-through their shared owners; parameter and result meanings are unchanged. Debt remains 301 with ceiling
+through their shared owners; parameter and result meanings are unchanged. Debt decreases from 301 to 300 with ceiling
 seven and the same one external-interface exception.
 
 ## Files of Interest
@@ -129,6 +131,14 @@ seven and the same one external-interface exception.
 
 - `go test ./internal/core/authoring/acceptance ./scripts/goquality ./internal/core ./internal/app -run '^Test(Acceptance|ValidateAcceptance|CheckAcceptance|WriteAcceptance|MergeAcceptance|DecodeQuizModelFeature|LeafDependencies|Service(Acceptance|Spec|Plan)|QuizArtifact)' -count=1 -timeout=3m`
   — passed at the mechanical acceptance/scope move; 301 exact debts retained.
+
+- `go test ./internal/core/authoring/acceptance ./internal/core ./internal/app -run '^Test(Acceptance|ValidateAcceptance|CheckAcceptance|WriteAcceptance|MergeAcceptance|DecodeQuizModelFeature|Service(Acceptance|Spec|Plan)|QuizArtifact)' -count=1 -timeout=3m`
+  — passed after package naming and the named write outcome.
+- `go test ./internal/core/authoring/acceptance -run '^TestWriteAcceptanceFeature' -count=1 -timeout=3m`
+  — passed with explicit rejected-path and no-envelope assertions retained beside real feature IO.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/authoring/acceptance ./internal/core/quiz ./internal/core ./internal/app ./scripts/goquality`
+  — passed with zero issues after package naming and the named write outcome.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified

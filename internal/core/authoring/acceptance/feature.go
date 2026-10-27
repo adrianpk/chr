@@ -15,12 +15,12 @@ import (
 )
 
 const (
-	// AcceptanceFeatureDirectory defines a package boundary constant.
-	AcceptanceFeatureDirectory = "acceptance"
+	// Directory defines a package boundary constant.
+	Directory = "acceptance"
 )
 
-// AcceptanceFeatureArtifact describes a generated Gherkin feature artifact.
-type AcceptanceFeatureArtifact struct {
+// Artifact describes a generated Gherkin feature artifact.
+type Artifact struct {
 	Scope            quizcore.Scope
 	SpecSlug         string
 	SpecPath         string
@@ -31,15 +31,15 @@ type AcceptanceFeatureArtifact struct {
 	CreatedAt        time.Time
 }
 
-// AcceptanceFeaturePaths describes the canonical feature artifact paths.
-type AcceptanceFeaturePaths struct {
+// Paths describes the canonical feature artifact paths.
+type Paths struct {
 	ScopeID      string
 	RelativePath string
 	Path         string
 }
 
-// AcceptanceFeatureRoundNotes describes persisted feature-round clarification notes.
-type AcceptanceFeatureRoundNotes struct {
+// RoundNotes describes persisted feature-round clarification notes.
+type RoundNotes struct {
 	Scope            quizcore.Scope
 	Status           string
 	RejectionReason  string
@@ -49,27 +49,27 @@ type AcceptanceFeatureRoundNotes struct {
 	CreatedAt        time.Time
 }
 
-// AcceptanceFeatureRoundPaths describes the canonical feature-round note paths.
-type AcceptanceFeatureRoundPaths struct {
+// RoundPaths describes the canonical feature-round note paths.
+type RoundPaths struct {
 	ScopeID      string
 	RelativePath string
 	Path         string
 }
 
-// AcceptanceFeatureCheckResult describes static feature validation output.
-type AcceptanceFeatureCheckResult struct {
+// CheckResult describes static feature validation output.
+type CheckResult struct {
 	Valid    bool
-	Findings []AcceptanceFeatureCheckFinding
+	Findings []Finding
 }
 
-// AcceptanceFeatureCheckFinding describes one static feature validation finding.
-type AcceptanceFeatureCheckFinding struct {
+// Finding describes one static feature validation finding.
+type Finding struct {
 	Code    string
 	Message string
 	Line    int
 }
 
-type acceptanceFeatureScenario struct {
+type scenario struct {
 	name    string
 	line    int
 	tags    []string
@@ -80,147 +80,150 @@ type acceptanceFeatureScenario struct {
 	hasStep bool
 }
 
-// AcceptanceFeatureLayout executes the corresponding package operation.
-func AcceptanceFeatureLayout(projectDir string, scope quizcore.Scope) (AcceptanceFeaturePaths, error) {
+// Layout executes the corresponding package operation.
+func Layout(projectDir string, scope quizcore.Scope) (Paths, error) {
 	err := quizcore.ValidateScope(scope)
 	if err != nil {
-		return AcceptanceFeaturePaths{}, err
+		return Paths{}, err
 	}
 
 	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
-		return AcceptanceFeaturePaths{}, err
+		return Paths{}, err
 	}
 
 	body, err := opscore.NamedArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature")
 	if err != nil {
-		return AcceptanceFeaturePaths{}, err
+		return Paths{}, err
 	}
 
-	return AcceptanceFeaturePaths{
+	return Paths{
 		ScopeID:      scopeID,
 		RelativePath: body.RelativePath,
 		Path:         body.Path,
 	}, nil
 }
 
-// AcceptanceFeatureRoundLayout executes the corresponding package operation.
-func AcceptanceFeatureRoundLayout(projectDir string, scope quizcore.Scope) (AcceptanceFeatureRoundPaths, error) {
+// RoundLayout executes the corresponding package operation.
+func RoundLayout(projectDir string, scope quizcore.Scope) (RoundPaths, error) {
 	err := quizcore.ValidateScope(scope)
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
 	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
 	body, err := opscore.NamedArtifactBody(projectDir, "spec", scopeID+"-acceptance-feature-round")
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
-	return AcceptanceFeatureRoundPaths{
+	return RoundPaths{
 		ScopeID:      scopeID,
 		RelativePath: body.RelativePath,
 		Path:         body.Path,
 	}, nil
 }
 
-// WriteAcceptanceFeature executes the corresponding package operation.
-func WriteAcceptanceFeature(
-	ctx context.Context,
-	projectDir string,
-	feature AcceptanceFeatureArtifact,
-) (AcceptanceFeaturePaths, AcceptanceFeatureCheckResult, error) {
+// WriteResult retains a confirmed path and the original static-check outcome.
+// Failed checks remain observable even when there is no published path.
+type WriteResult struct {
+	Paths  Paths
+	Checks CheckResult
+}
+
+// Write executes the corresponding package operation.
+func Write(ctx context.Context, projectDir string, feature Artifact) (WriteResult, error) {
 	err := ctx.Err()
 	if err != nil {
-		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+		return WriteResult{}, err
 	}
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
-		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+		return WriteResult{}, err
 	}
 
 	if !result.Valid {
-		return AcceptanceFeaturePaths{}, result, fmt.Errorf("acceptance feature static checks failed")
+		return WriteResult{Checks: result}, fmt.Errorf("acceptance feature static checks failed")
 	}
 
-	paths, err := AcceptanceFeatureLayout(projectDir, feature.Scope)
+	paths, err := Layout(projectDir, feature.Scope)
 	if err != nil {
-		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+		return WriteResult{}, err
 	}
 
 	scopeID, err := quizcore.ScopeID(feature.Scope)
 	if err != nil {
-		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+		return WriteResult{}, err
 	}
 
 	if err := opscore.EnsureNamedArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature"); err != nil {
-		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
+		return WriteResult{}, err
 	}
 
 	err = os.MkdirAll(filepath.Dir(paths.Path), 0o755)
 	if err != nil {
-		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, fmt.Errorf("create acceptance feature directory: %w", err)
+		return WriteResult{}, fmt.Errorf("create acceptance feature directory: %w", err)
 	}
 
-	err = os.WriteFile(paths.Path, []byte(RenderAcceptanceFeature(feature)), 0o644)
+	err = os.WriteFile(paths.Path, []byte(Render(feature)), 0o644)
 	if err != nil {
-		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, fmt.Errorf("write acceptance feature: %w", err)
+		return WriteResult{}, fmt.Errorf("write acceptance feature: %w", err)
 	}
 
-	return paths, result, nil
+	return WriteResult{Paths: paths, Checks: result}, nil
 }
 
-// WriteAcceptanceFeatureRoundNotes executes the corresponding package operation.
-func WriteAcceptanceFeatureRoundNotes(ctx context.Context, projectDir string, notes AcceptanceFeatureRoundNotes) (AcceptanceFeatureRoundPaths, error) {
+// WriteRoundNotes executes the corresponding package operation.
+func WriteRoundNotes(ctx context.Context, projectDir string, notes RoundNotes) (RoundPaths, error) {
 	err := ctx.Err()
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
-	err = ValidateAcceptanceFeatureRoundNotes(notes)
+	err = ValidateRoundNotes(notes)
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
-	paths, err := AcceptanceFeatureRoundLayout(projectDir, notes.Scope)
+	paths, err := RoundLayout(projectDir, notes.Scope)
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
 	scopeID, err := quizcore.ScopeID(notes.Scope)
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
 	if err := opscore.EnsureNamedArtifactMetadata(projectDir, "spec", scopeID+"-acceptance-feature-round"); err != nil {
-		return AcceptanceFeatureRoundPaths{}, err
+		return RoundPaths{}, err
 	}
 
 	err = os.MkdirAll(filepath.Dir(paths.Path), 0o755)
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, fmt.Errorf("create acceptance feature round directory: %w", err)
+		return RoundPaths{}, fmt.Errorf("create acceptance feature round directory: %w", err)
 	}
 
-	err = os.WriteFile(paths.Path, []byte(RenderAcceptanceFeatureRoundNotes(paths, notes)), 0o644)
+	err = os.WriteFile(paths.Path, []byte(RenderRoundNotes(paths, notes)), 0o644)
 	if err != nil {
-		return AcceptanceFeatureRoundPaths{}, fmt.Errorf("write acceptance feature round notes: %w", err)
+		return RoundPaths{}, fmt.Errorf("write acceptance feature round notes: %w", err)
 	}
 
 	return paths, nil
 }
 
-// RenderAcceptanceFeature renders the corresponding package data.
-func RenderAcceptanceFeature(feature AcceptanceFeatureArtifact) string {
+// Render renders the corresponding package data.
+func Render(feature Artifact) string {
 	return strings.TrimSpace(feature.Body) + "\n"
 }
 
-// RenderAcceptanceFeatureRoundNotes renders the corresponding package data.
-func RenderAcceptanceFeatureRoundNotes(paths AcceptanceFeatureRoundPaths, notes AcceptanceFeatureRoundNotes) string {
+// RenderRoundNotes renders the corresponding package data.
+func RenderRoundNotes(paths RoundPaths, notes RoundNotes) string {
 	var output strings.Builder
 
 	output.WriteString("---\n")
@@ -261,9 +264,9 @@ func RenderAcceptanceFeatureRoundNotes(paths AcceptanceFeatureRoundPaths, notes 
 	return output.String()
 }
 
-// MergeAcceptanceFeatureRoundAnswers copies existing Markdown answers into matching new prompts.
-func MergeAcceptanceFeatureRoundAnswers(notes AcceptanceFeatureRoundNotes, existingContent string) AcceptanceFeatureRoundNotes {
-	answers := acceptanceFeatureRoundAnswers(existingContent)
+// MergeRoundAnswers copies existing Markdown answers into matching new prompts.
+func MergeRoundAnswers(notes RoundNotes, existingContent string) RoundNotes {
+	answers := roundAnswers(existingContent)
 	if len(answers) == 0 {
 		return notes
 	}
@@ -286,7 +289,7 @@ func MergeAcceptanceFeatureRoundAnswers(notes AcceptanceFeatureRoundNotes, exist
 	return merged
 }
 
-func acceptanceFeatureRoundAnswers(content string) map[string]string {
+func roundAnswers(content string) map[string]string {
 	answers := map[string]string{}
 	lines := strings.Split(content, "\n")
 	currentID := ""
@@ -312,8 +315,8 @@ func acceptanceFeatureRoundAnswers(content string) map[string]string {
 	return answers
 }
 
-// ValidateAcceptanceFeatureArtifact validates the corresponding package boundary value.
-func ValidateAcceptanceFeatureArtifact(feature AcceptanceFeatureArtifact) error {
+// Validate validates the corresponding package boundary value.
+func Validate(feature Artifact) error {
 	err := quizcore.ValidateScope(feature.Scope)
 	if err != nil {
 		return err
@@ -338,8 +341,8 @@ func ValidateAcceptanceFeatureArtifact(feature AcceptanceFeatureArtifact) error 
 	return nil
 }
 
-// ValidateAcceptanceFeatureRoundNotes validates the corresponding package boundary value.
-func ValidateAcceptanceFeatureRoundNotes(notes AcceptanceFeatureRoundNotes) error {
+// ValidateRoundNotes validates the corresponding package boundary value.
+func ValidateRoundNotes(notes RoundNotes) error {
 	err := quizcore.ValidateScope(notes.Scope)
 	if err != nil {
 		return err
@@ -372,37 +375,37 @@ func ValidateAcceptanceFeatureRoundNotes(notes AcceptanceFeatureRoundNotes) erro
 	return nil
 }
 
-// CheckAcceptanceFeatureArtifact executes deterministic static feature checks.
-func CheckAcceptanceFeatureArtifact(feature AcceptanceFeatureArtifact) (AcceptanceFeatureCheckResult, error) {
-	err := ValidateAcceptanceFeatureArtifact(feature)
+// Check executes deterministic static feature checks.
+func Check(feature Artifact) (CheckResult, error) {
+	err := Validate(feature)
 	if err != nil {
-		return AcceptanceFeatureCheckResult{}, err
+		return CheckResult{}, err
 	}
 
-	checker := acceptanceFeatureChecker{
+	checker := checker{
 		lines: strings.Split(feature.Body, "\n"),
 	}
 	checker.check()
 
-	return AcceptanceFeatureCheckResult{
+	return CheckResult{
 		Valid:    len(checker.findings) == 0,
 		Findings: checker.findings,
 	}, nil
 }
 
-type acceptanceFeatureChecker struct {
+type checker struct {
 	lines        []string
-	findings     []AcceptanceFeatureCheckFinding
+	findings     []Finding
 	pendingTags  []string
 	featureTags  []string
 	featureSeen  bool
 	inBackground bool
-	background   acceptanceFeatureScenario
-	scenarios    []acceptanceFeatureScenario
+	background   scenario
+	scenarios    []scenario
 	currentIndex int
 }
 
-func (c *acceptanceFeatureChecker) check() {
+func (c *checker) check() {
 	c.currentIndex = -1
 
 	for index, line := range c.lines {
@@ -412,7 +415,7 @@ func (c *acceptanceFeatureChecker) check() {
 	c.checkDocument()
 }
 
-func (c *acceptanceFeatureChecker) checkLine(lineNumber int, line string) {
+func (c *checker) checkLine(lineNumber int, line string) {
 	if line == "" || strings.HasPrefix(line, "#") {
 		return
 	}
@@ -428,7 +431,7 @@ func (c *acceptanceFeatureChecker) checkLine(lineNumber int, line string) {
 	c.checkUnsafeLineContent(lineNumber, lower)
 }
 
-func (c *acceptanceFeatureChecker) checkStructuralLine(lineNumber int, line string) {
+func (c *checker) checkStructuralLine(lineNumber int, line string) {
 	switch {
 	case strings.HasPrefix(line, "Feature:"):
 		c.featureSeen = true
@@ -441,28 +444,28 @@ func (c *acceptanceFeatureChecker) checkStructuralLine(lineNumber int, line stri
 	case strings.HasPrefix(line, "Scenario:") || strings.HasPrefix(line, "Scenario Outline:"):
 		c.inBackground = false
 		c.addScenario(lineNumber, line)
-	case acceptanceFeatureStepKind(line) != "":
+	case stepKind(line) != "":
 		c.addStep(lineNumber, line)
 	}
 }
 
-func (c *acceptanceFeatureChecker) checkUnsafeLineContent(lineNumber int, lower string) {
-	if acceptanceFeatureHasOpenQuestion(lower) {
+func (c *checker) checkUnsafeLineContent(lineNumber int, lower string) {
+	if hasOpenQuestion(lower) {
 		c.addFinding("open_question", "feature content must not depend on open questions", lineNumber)
 	}
 
-	if acceptanceFeatureHasVagueStep(lower) {
+	if hasVagueStep(lower) {
 		c.addFinding("vague_step", "feature steps must describe concrete observable behavior", lineNumber)
 	}
 
-	if acceptanceFeatureHasImplementationDetail(lower) {
+	if hasImplementationDetail(lower) {
 		c.addFinding("implementation_detail", "feature steps must avoid internal implementation details", lineNumber)
 	}
 }
 
-func (c *acceptanceFeatureChecker) addScenario(lineNumber int, line string) {
+func (c *checker) addScenario(lineNumber int, line string) {
 	name := strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, "Scenario Outline:"), "Scenario:"))
-	c.scenarios = append(c.scenarios, acceptanceFeatureScenario{
+	c.scenarios = append(c.scenarios, scenario{
 		name: name,
 		line: lineNumber,
 		tags: append([]string(nil), c.pendingTags...),
@@ -472,7 +475,7 @@ func (c *acceptanceFeatureChecker) addScenario(lineNumber int, line string) {
 	c.pendingTags = nil
 }
 
-func (c *acceptanceFeatureChecker) addStep(lineNumber int, line string) {
+func (c *checker) addStep(lineNumber int, line string) {
 	if c.currentIndex < 0 {
 		if c.inBackground {
 			c.addBackgroundStep(line)
@@ -489,7 +492,7 @@ func (c *acceptanceFeatureChecker) addStep(lineNumber int, line string) {
 	scenario.hasStep = true
 	scenario.text = append(scenario.text, line)
 
-	switch acceptanceFeatureStepKind(line) {
+	switch stepKind(line) {
 	case "given":
 		scenario.given = true
 	case "when":
@@ -499,10 +502,10 @@ func (c *acceptanceFeatureChecker) addStep(lineNumber int, line string) {
 	}
 }
 
-func (c *acceptanceFeatureChecker) addBackgroundStep(line string) {
+func (c *checker) addBackgroundStep(line string) {
 	c.background.hasStep = true
 
-	switch acceptanceFeatureStepKind(line) {
+	switch stepKind(line) {
 	case "given":
 		c.background.given = true
 	case "when":
@@ -512,7 +515,7 @@ func (c *acceptanceFeatureChecker) addBackgroundStep(line string) {
 	}
 }
 
-func (c *acceptanceFeatureChecker) checkDocument() {
+func (c *checker) checkDocument() {
 	if !c.featureSeen {
 		c.addFinding("missing_feature", "feature must include a Feature heading", 0)
 	}
@@ -528,7 +531,7 @@ func (c *acceptanceFeatureChecker) checkDocument() {
 	}
 }
 
-func (c *acceptanceFeatureChecker) checkBehaviorDepth() {
+func (c *checker) checkBehaviorDepth() {
 	if len(c.scenarios) == 0 {
 		return
 	}
@@ -539,12 +542,12 @@ func (c *acceptanceFeatureChecker) checkBehaviorDepth() {
 		return
 	}
 
-	if !acceptanceFeatureHasContrastPath(c.scenarios) {
+	if !hasContrastPath(c.scenarios) {
 		c.addFinding("missing_contrast_path", "feature must include at least one rejection, failure, boundary, terminal, or no-change path", c.scenarios[0].line)
 	}
 }
 
-func (c *acceptanceFeatureChecker) checkScenario(scenario acceptanceFeatureScenario) {
+func (c *checker) checkScenario(scenario scenario) {
 	if strings.TrimSpace(scenario.name) == "" {
 		c.addFinding("missing_scenario_name", "scenario must have a name", scenario.line)
 	}
@@ -565,23 +568,23 @@ func (c *acceptanceFeatureChecker) checkScenario(scenario acceptanceFeatureScena
 		c.addFinding("missing_steps", "scenario must include executable steps", scenario.line)
 	}
 
-	if !acceptanceFeatureHasTraceability(append(c.featureTags, scenario.tags...)) {
+	if !hasTraceability(append(c.featureTags, scenario.tags...)) {
 		c.addFinding("missing_traceability", "scenario must link to spec behavior", scenario.line)
 	}
 }
 
-func (c *acceptanceFeatureChecker) addFinding(code, message string, line int) {
-	c.findings = append(c.findings, AcceptanceFeatureCheckFinding{
+func (c *checker) addFinding(code, message string, line int) {
+	c.findings = append(c.findings, Finding{
 		Code:    code,
 		Message: message,
 		Line:    line,
 	})
 }
 
-func acceptanceFeatureHasContrastPath(scenarios []acceptanceFeatureScenario) bool {
+func hasContrastPath(scenarios []scenario) bool {
 	for _, scenario := range scenarios {
 		text := strings.ToLower(strings.Join(scenario.text, " "))
-		if acceptanceFeatureTextHasContrastSignal(text) {
+		if textHasContrastSignal(text) {
 			return true
 		}
 	}
@@ -589,7 +592,7 @@ func acceptanceFeatureHasContrastPath(scenarios []acceptanceFeatureScenario) boo
 	return false
 }
 
-func acceptanceFeatureTextHasContrastSignal(text string) bool {
+func textHasContrastSignal(text string) bool {
 	for _, phrase := range []string{
 		"already",
 		"blocked",
@@ -624,7 +627,7 @@ func acceptanceFeatureTextHasContrastSignal(text string) bool {
 	return false
 }
 
-func acceptanceFeatureStepKind(line string) string {
+func stepKind(line string) string {
 	lower := strings.ToLower(strings.TrimSpace(line))
 	for _, kind := range []string{"given", "when", "then", "and", "but"} {
 		if lower == kind || strings.HasPrefix(lower, kind+" ") {
@@ -635,7 +638,7 @@ func acceptanceFeatureStepKind(line string) string {
 	return ""
 }
 
-func acceptanceFeatureHasTraceability(tags []string) bool {
+func hasTraceability(tags []string) bool {
 	for _, tag := range tags {
 		switch {
 		case strings.HasPrefix(tag, "@spec:"),
@@ -649,7 +652,7 @@ func acceptanceFeatureHasTraceability(tags []string) bool {
 	return false
 }
 
-func acceptanceFeatureHasOpenQuestion(line string) bool {
+func hasOpenQuestion(line string) bool {
 	for _, phrase := range []string{
 		"open question",
 		"tbd",
@@ -666,7 +669,7 @@ func acceptanceFeatureHasOpenQuestion(line string) bool {
 	return false
 }
 
-func acceptanceFeatureHasVagueStep(line string) bool {
+func hasVagueStep(line string) bool {
 	for _, phrase := range []string{
 		"works correctly",
 		"works as expected",
@@ -683,7 +686,7 @@ func acceptanceFeatureHasVagueStep(line string) bool {
 	return false
 }
 
-func acceptanceFeatureHasImplementationDetail(line string) bool {
+func hasImplementationDetail(line string) bool {
 	for _, phrase := range []string{
 		"database table",
 		"sql query",

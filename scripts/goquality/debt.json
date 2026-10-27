@@ -192,11 +192,6 @@
       "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/authoring/acceptance/feature.go::WriteAcceptanceFeature",
-      "signature": "func(ctx context.Context, projectDir string, feature AcceptanceFeatureArtifact) (AcceptanceFeaturePaths, AcceptanceFeatureCheckResult, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 mechanical acceptance owner move; tuple remediation follows in the separate contract step."
-    },
-    {
       "id": "internal/core/agent_event_stream.go::decodeAgentEventLine",
       "signature": "func(lineNumber int, line string) (AgentEvent, *AgentEventMalformedLine)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

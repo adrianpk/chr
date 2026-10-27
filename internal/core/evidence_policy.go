@@ -134,7 +134,7 @@ func EvidenceDecisionMatrixRows() []EvidenceDecisionMatrixRow {
 }
 
 func acceptanceFeaturePaths(projectDir string) ([]string, error) {
-	acceptanceDir := filepath.Join(projectDir, ".chr", "default", acceptancecore.AcceptanceFeatureDirectory)
+	acceptanceDir := filepath.Join(projectDir, ".chr", "default", acceptancecore.Directory)
 	entries := make([]string, 0)
 
 	err := filepath.WalkDir(acceptanceDir, func(path string, entry fs.DirEntry, walkErr error) error {

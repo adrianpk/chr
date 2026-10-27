@@ -17,7 +17,7 @@ import (
 func TestAcceptanceFeatureLayoutUsesCanonicalPath(t *testing.T) {
 	projectDir := t.TempDir()
 
-	paths, err := AcceptanceFeatureLayout(projectDir, quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"})
+	paths, err := Layout(projectDir, quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"})
 	if err != nil {
 		t.Fatalf("AcceptanceFeatureLayout returned error: %v", err)
 	}
@@ -37,7 +37,7 @@ func TestAcceptanceFeatureLayoutUsesCanonicalPath(t *testing.T) {
 }
 
 func TestAcceptanceFeatureLayoutRejectsNestedCaseSlug(t *testing.T) {
-	_, err := AcceptanceFeatureLayout(t.TempDir(), quizcore.Scope{ProjectID: "project-1", CaseSlug: "../bad"})
+	_, err := Layout(t.TempDir(), quizcore.Scope{ProjectID: "project-1", CaseSlug: "../bad"})
 	if err == nil {
 		t.Fatal("AcceptanceFeatureLayout returned nil error")
 	}
@@ -46,7 +46,7 @@ func TestAcceptanceFeatureLayoutRejectsNestedCaseSlug(t *testing.T) {
 func TestAcceptanceFeatureRoundLayoutUsesCanonicalPath(t *testing.T) {
 	projectDir := t.TempDir()
 
-	paths, err := AcceptanceFeatureRoundLayout(projectDir, quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"})
+	paths, err := RoundLayout(projectDir, quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"})
 	if err != nil {
 		t.Fatalf("AcceptanceFeatureRoundLayout returned error: %v", err)
 	}
@@ -65,7 +65,7 @@ func TestValidateAcceptanceFeatureArtifactRequiresTraceabilityInputs(t *testing.
 	feature := validAcceptanceFeatureArtifact()
 	feature.SpecSlug = ""
 
-	err := ValidateAcceptanceFeatureArtifact(feature)
+	err := Validate(feature)
 	if err == nil {
 		t.Fatal("ValidateAcceptanceFeatureArtifact returned nil error")
 	}
@@ -125,7 +125,7 @@ Feature: Article authoring
     Then the article remains unpublished
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -152,7 +152,7 @@ Feature: Article authoring
     Then the article remains unpublished
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -172,7 +172,7 @@ Feature: Article authoring
     Then a publication report is written
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -191,7 +191,7 @@ Feature: Article authoring
     Then a publication report is written
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -215,7 +215,7 @@ Feature: Article authoring
     Then the publication report is visible
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -234,7 +234,7 @@ Feature: Article authoring
     Then it works correctly
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -252,7 +252,7 @@ func TestCheckAcceptanceFeatureArtifactRequiresTraceability(t *testing.T) {
     Then a publication report is written
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -271,7 +271,7 @@ Feature: Article authoring
     Then an open question decides which report is written
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -290,7 +290,7 @@ Feature: Article authoring
     Then a publication report is written
 `
 
-	result, err := CheckAcceptanceFeatureArtifact(feature)
+	result, err := Check(feature)
 	if err != nil {
 		t.Fatalf("CheckAcceptanceFeatureArtifact returned error: %v", err)
 	}
@@ -303,7 +303,10 @@ func TestWriteAcceptanceFeatureWritesCheckedArtifact(t *testing.T) {
 	feature := validAcceptanceFeatureArtifact()
 	feature.Body = validAcceptanceFeatureBody()
 
-	paths, result, err := WriteAcceptanceFeature(context.Background(), projectDir, feature)
+	writeOutcome, err := Write(context.Background(), projectDir, feature)
+
+	paths, result := writeOutcome.Paths, writeOutcome.Checks
+
 	if err != nil {
 		t.Fatalf("WriteAcceptanceFeature returned error: %v", err)
 	}
@@ -336,16 +339,28 @@ func TestWriteAcceptanceFeatureRejectsInvalidArtifact(t *testing.T) {
     Then it works correctly
 `
 
-	_, result, err := WriteAcceptanceFeature(context.Background(), t.TempDir(), feature)
+	projectDir := t.TempDir()
+	writeOutcome, err := Write(context.Background(), projectDir, feature)
+
+	result := writeOutcome.Checks
+
 	if err == nil {
 		t.Fatal("WriteAcceptanceFeature returned nil error")
+	}
+
+	if writeOutcome.Paths != (Paths{}) {
+		t.Fatalf("rejected feature retained a published path: %#v", writeOutcome.Paths)
+	}
+
+	if _, err := os.Stat(filepath.Join(projectDir, "ops")); !os.IsNotExist(err) {
+		t.Fatalf("rejected feature created an artifact envelope: %v", err)
 	}
 
 	assertAcceptanceFeatureFinding(t, result, "vague_step")
 }
 
 func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T) {
-	notes := AcceptanceFeatureRoundNotes{
+	notes := RoundNotes{
 		Scope:           quizcore.Scope{ProjectID: "project-1", CaseSlug: "followups"},
 		Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "More queue behavior is needed.",
@@ -383,7 +398,7 @@ func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T
 - Answer: Old answer.
 `
 
-	merged := MergeAcceptanceFeatureRoundAnswers(notes, existing)
+	merged := MergeRoundAnswers(notes, existing)
 
 	if merged.Prompts[0].Answer != "Use an injected UTC clock." {
 		t.Fatalf("Answer = %q, want preserved answer", merged.Prompts[0].Answer)
@@ -396,7 +411,7 @@ func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T
 
 func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {
 	projectDir := t.TempDir()
-	notes := AcceptanceFeatureRoundNotes{
+	notes := RoundNotes{
 		Scope:           quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 		RejectionReason: "The failure behavior is not explicit.",
@@ -413,7 +428,7 @@ func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {
 		CreatedAt:        time.Date(2026, 5, 24, 15, 0, 0, 0, time.UTC),
 	}
 
-	paths, err := WriteAcceptanceFeatureRoundNotes(context.Background(), projectDir, notes)
+	paths, err := WriteRoundNotes(context.Background(), projectDir, notes)
 	if err != nil {
 		t.Fatalf("WriteAcceptanceFeatureRoundNotes returned error: %v", err)
 	}
@@ -436,14 +451,14 @@ func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {
 	}
 }
 
-func assertAcceptanceFeatureFinding(t *testing.T, result AcceptanceFeatureCheckResult, code string) {
+func assertAcceptanceFeatureFinding(t *testing.T, result CheckResult, code string) {
 	t.Helper()
 
 	if result.Valid {
 		t.Fatalf("valid = true, want finding %q", code)
 	}
 
-	found := slices.ContainsFunc(result.Findings, func(finding AcceptanceFeatureCheckFinding) bool {
+	found := slices.ContainsFunc(result.Findings, func(finding Finding) bool {
 		return finding.Code == code
 	})
 
@@ -452,8 +467,8 @@ func assertAcceptanceFeatureFinding(t *testing.T, result AcceptanceFeatureCheckR
 	}
 }
 
-func validAcceptanceFeatureArtifact() AcceptanceFeatureArtifact {
-	return AcceptanceFeatureArtifact{
+func validAcceptanceFeatureArtifact() Artifact {
+	return Artifact{
 		Scope:       quizcore.Scope{ProjectID: "project-1", CaseSlug: "article-authoring"},
 		SpecSlug:    "article-authoring-spec",
 		SpecPath:    ".chr/default/specs/article-authoring-spec.md",
