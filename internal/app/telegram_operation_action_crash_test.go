@@ -115,6 +115,7 @@ func TestTelegramOperationUncertainActionSend(t *testing.T) {
 	}
 
 	first := telegramOperationNotice(t, f)
+	before := telegramOperationReplyBinding(t, f, action.RequestID)
 	reopenTelegramOperationReceiver(t, f)
 	setTelegramOperationRetryAt(t, f.receiver.env, time.Now().Add(-time.Minute))
 
@@ -123,9 +124,12 @@ func TestTelegramOperationUncertainActionSend(t *testing.T) {
 	}
 
 	retry := telegramOperationNotice(t, f)
-	if calls != 1 || !strings.Contains(first.Text, action.RequestID) || !strings.Contains(retry.Text, action.RequestID) || !strings.Contains(retry.Text, "Delivery confirmation was lost") {
+	if calls != 1 || first.Text == "" || retry.Text != telegramUncertainDeliveryText+"\n"+first.Text {
 		t.Fatal("send retry changed application or uncertainty", calls, first, retry)
 	}
+
+	after := telegramOperationReplyBinding(t, f, action.RequestID)
+	checkTelegramReplyRetry(t, before, after, action.RequestID)
 
 	f.receiver.operations = operations
 	checkTelegramOperationOneRecord(t, f)
@@ -179,4 +183,53 @@ func TestTelegramOperationUncertainPrompt(t *testing.T) {
 	}
 
 	checkTelegramOperationOneRecord(t, f)
+}
+
+type telegramRetainedReply struct {
+	ID, Request, Receipt, RequestState, State string
+	Attempts                                  int
+}
+
+// Observe the actual retained binding before and after restart; display text
+// intentionally uses the canonical record reference instead of opaque requests.
+func telegramOperationReplyBinding(t *testing.T, f *telegramConversationAppFixture, request string) telegramRetainedReply {
+	t.Helper()
+
+	db, err := sql.Open("sqlite", database.UserDatabasePath(f.receiver.env))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer func() {
+		if err := db.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
+
+	var (
+		result telegramRetainedReply
+		count  int
+	)
+
+	err = db.QueryRowContext(t.Context(), `SELECT COUNT(*),MIN(o.id),MIN(o.request_id),MIN(r.domain_receipt_ref),MIN(r.state),MIN(o.state),SUM(o.attempts) FROM telegram_outbox o JOIN telegram_requests r ON r.id=o.request_id WHERE o.request_id=? AND o.action_token IS NULL`, request).Scan(&count, &result.ID, &result.Request, &result.Receipt, &result.RequestState, &result.State, &result.Attempts)
+	if err != nil || count != 1 {
+		t.Fatal("retained operation reply is not unique", count, err)
+	}
+
+	return result
+}
+
+func checkTelegramReplyRetry(t *testing.T, before, after telegramRetainedReply, request string) {
+	t.Helper()
+
+	if before.ID == "" || before.Request != request || before.Receipt == "" || before.RequestState != "confirmed" || before.State != "uncertain" || before.Attempts != 1 {
+		t.Fatal("lost acknowledgement did not retain its original confirmed request and receipt", before)
+	}
+
+	expected := before
+
+	expected.State, expected.Attempts = "delivered", 2
+	if after != expected {
+		t.Fatal("retry replaced its retained binding or delivery allowance", before, after)
+	}
 }

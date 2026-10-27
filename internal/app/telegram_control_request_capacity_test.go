@@ -32,7 +32,7 @@ func TestTelegramControlRequestCapacity(t *testing.T) {
 
 	images := workflowCLIImage(t, projects[0].Path)
 	for _, command := range []string{"/answer " + action.Token + " confirm", `/tickets create {"title":"Capacity rejected","synopsis":"No effect"}`, "/done " + c.ID, "/work ticket PRJ-1"} {
-		if text := f.send(t, command, 0).Text; !strings.Contains(text, "request capacity is full") {
+		if text := f.send(t, command, 0).Text; !strings.Contains(text, "The request queue is full. This request was not accepted. Retry after pending requests finish; existing work is unchanged.") {
 			t.Fatal("capacity failed without its durable diagnostic", text)
 		}
 	}

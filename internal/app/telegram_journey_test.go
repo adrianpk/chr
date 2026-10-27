@@ -37,7 +37,7 @@ func TestTelegramJourney(t *testing.T) {
 	operations = telegramOperationConcreteService(t, f.receiver)
 
 	action, prompt := telegramWorkOffer(t, f, "/work --conversation "+conversation+" ticket "+key)
-	if !strings.Contains(prompt.Text, "Confirmation also makes "+key) || !strings.Contains(prompt.Text, "git show HEAD:result.txt") {
+	if !strings.Contains(prompt.Text, "Confirmation also makes ticket "+key+" ready.") || !strings.Contains(prompt.Text, "git show HEAD:result.txt") {
 		t.Fatal("preview hid the readiness transition or validation command", prompt)
 	}
 

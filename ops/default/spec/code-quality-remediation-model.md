@@ -419,3 +419,16 @@ performs the same schema checks, migration, private creation and connection setu
 its retained environment supplies only exclusion paths. Read-only inspection uses
 the original database reader without configuration, state creation or locks.
 Receiver/configuration/token, recovery-environment and storage regressions pass.
+
+
+Three non-short Telegram assertions failed identically on unchanged predecessor
+c7d7040fde4385a64b20322da1bc5874a38c2deb and the Slice 7 binding prerequisite.
+The capacity diagnostic and ticket-readiness prompt now assert the current full
+wording while retaining artifact immutability, unconsumed action and actual
+native-work completion checks. The uncertain-action-send fixture checks exact
+visible retry content, then reads SQLite before/after reopen: exactly one reply,
+the same original request/receipt/delivery ID, confirmed request state and one
+uncertain-to-delivered retry (attempt one to two). One application and one canonical
+record remain required. This replaces stale visible opaque-ID assertions with
+stronger evidence at their durable owner; production behavior is unchanged.
+The focused three-test command passes, including the real HTTP/native journey.
