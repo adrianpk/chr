@@ -93,9 +93,9 @@ func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSe
 			return err
 		}
 
-		retained, found, err := readHarnessSelectionReceipt(project, opts.Request, digest)
-		if found || err != nil {
-			result = retained
+		receipt, err := readHarnessSelectionReceipt(project, opts.Request, digest)
+		if receipt.Found || err != nil {
+			result = receipt.Snapshot
 
 			return err
 		}

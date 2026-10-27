@@ -117,3 +117,10 @@ func validateGenerationBindingAPI(binding GenerationBinding) error {
 
 	return nil
 }
+
+// GenerationSelection is a value projection of one retained operation without
+// its private executable, resources or host routing.
+type GenerationSelection struct {
+	ID      string
+	Binding GenerationBinding
+}

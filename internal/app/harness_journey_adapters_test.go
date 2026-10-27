@@ -95,11 +95,11 @@ func (f *harnessJourney) checkTelegramView(t *testing.T, choice harnessJourneyCh
 func (f *harnessJourney) resumeGeneration(t *testing.T) {
 	t.Helper()
 
-	_, original, _ := core.HarnessGenerationSelection(f.active)
+	generation, _ := core.HarnessGenerationSelection(f.active)
 	resumed := telegramHarnessGenerationBinding(t.Context(), t, f.operations, "original-generation")
 
 	nested := telegramHarnessGenerationBinding(f.active, t, f.operations, "nested-generation")
-	if original.BindingHash != resumed.BindingHash || nested.BindingHash != original.BindingHash || original.Selection.Model != "fixture-model" {
+	if generation.Binding.BindingHash != resumed.BindingHash || nested.BindingHash != generation.Binding.BindingHash || generation.Binding.Selection.Model != "fixture-model" {
 		t.Fatal("nested or resumed generation replaced the active binding")
 	}
 

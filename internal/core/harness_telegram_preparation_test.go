@@ -25,7 +25,7 @@ func TestTelegramHarnessSelectionPreparation(t *testing.T) {
 		t.Fatal("rejected preparation published configuration")
 	}
 
-	if _, found, err := readHarnessSelectionReceipt(project, request, ""); err != nil || found {
+	if receipt, err := readHarnessSelectionReceipt(project, request, ""); err != nil || receipt.Found {
 		t.Fatal("rejected preparation retained a receipt", err)
 	}
 }

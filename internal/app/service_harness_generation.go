@@ -139,15 +139,15 @@ func prepareCodexGenerationBinding(selection harnesscore.Selection, program stri
 }
 
 func (s service) generationAdapters(ctx context.Context) (service, error) {
-	_, binding, bound := core.HarnessGenerationSelection(ctx)
+	generation, bound := core.HarnessGenerationSelection(ctx)
 	if !bound {
 		return s, nil
 	}
 
-	selection := binding.Selection
+	selection := generation.Binding.Selection
 	switch selection.Backend {
 	case pi.Identity:
-		if binding.ProtocolRevision != pi.ProtocolRevision {
+		if generation.Binding.ProtocolRevision != pi.ProtocolRevision {
 			return s, errors.New("unsupported retained Pi generation protocol")
 		}
 
@@ -237,8 +237,8 @@ func preparePiGenerationBinding(selection harnesscore.Selection, resolved resolv
 }
 
 func (s service) singlePassPlan(ctx context.Context) bool {
-	if _, binding, bound := core.HarnessGenerationSelection(ctx); bound {
-		return binding.Selection.Backend != "openai"
+	if generation, bound := core.HarnessGenerationSelection(ctx); bound {
+		return generation.Binding.Selection.Backend != "openai"
 	}
 
 	return codexGenerationBackend("CHR_PLAN_GENERATION_BACKEND")

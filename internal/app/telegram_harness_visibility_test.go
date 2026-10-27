@@ -96,15 +96,15 @@ func TestTelegramHarnessSelectionVisibility(t *testing.T) {
 func telegramHarnessCheckGeneration(ctx context.Context, t *testing.T, operations service, active context.Context) {
 	t.Helper()
 
-	id, original, bound := core.HarnessGenerationSelection(active)
-	if !bound || original.Selection.Profile != "alpha" {
+	generation, bound := core.HarnessGenerationSelection(active)
+	if !bound || generation.Binding.Selection.Profile != "alpha" {
 		t.Fatal("original generation fixture was not bound")
 	}
 
 	nested := telegramHarnessGenerationBinding(active, t, operations, "nested-call")
 
-	resumed := telegramHarnessGenerationBinding(ctx, t, operations, id)
-	if nested.BindingHash != original.BindingHash || resumed.BindingHash != original.BindingHash {
+	resumed := telegramHarnessGenerationBinding(ctx, t, operations, generation.ID)
+	if nested.BindingHash != generation.Binding.BindingHash || resumed.BindingHash != generation.Binding.BindingHash {
 		t.Fatal("existing generation rebound after Telegram change")
 	}
 
@@ -122,10 +122,10 @@ func telegramHarnessGenerationBinding(ctx context.Context, t *testing.T, operati
 		t.Fatal(err)
 	}
 
-	_, binding, bound := core.HarnessGenerationSelection(ctx)
+	generation, bound := core.HarnessGenerationSelection(ctx)
 	if !bound {
 		t.Fatal("generation selection was not bound")
 	}
 
-	return binding
+	return generation.Binding
 }

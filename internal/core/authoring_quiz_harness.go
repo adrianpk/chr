@@ -24,7 +24,7 @@ func (p HarnessAuthoringQuizQuestionProvider) GenerateAuthoringQuizQuestions(ctx
 	}
 
 	program := strings.TrimSpace(p.Program)
-	if _, _, bound := HarnessGenerationSelection(ctx); bound {
+	if _, bound := HarnessGenerationSelection(ctx); bound {
 		program = ""
 	}
 

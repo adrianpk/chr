@@ -49,7 +49,7 @@ type HarnessRunUsage struct {
 }
 
 func startHarnessGenerationRun(ctx context.Context, request harness.AgentRunRequest) (*HarnessRunMetadata, error) {
-	id, binding, bound := HarnessGenerationSelection(ctx)
+	generation, bound := HarnessGenerationSelection(ctx)
 	if !bound {
 		return nil, nil
 	}
@@ -60,7 +60,7 @@ func startHarnessGenerationRun(ctx context.Context, request harness.AgentRunRequ
 
 	record := &HarnessRunMetadata{
 		Schema: "chr-harness-run/v1", RequestID: request.ID, Purpose: request.Purpose,
-		OperationID: id, Selection: binding, SelectionRevision: binding.Selection.SelectionRevision,
+		OperationID: generation.ID, Selection: generation.Binding, SelectionRevision: generation.Binding.Selection.SelectionRevision,
 		InputRef:       "sha256:" + contenthash.Sum([]byte(request.Prompt)),
 		ProcessOutcome: "started", OutputValidation: "unknown", UsageStatus: "unknown", StartedAt: time.Now().UTC(),
 	}
@@ -110,7 +110,8 @@ func finishHarnessGenerationRun(request harness.AgentRunRequest, result harness.
 	finished := time.Now().UTC()
 	record.FinishedAt = &finished
 	record.ProcessOutcome = harnessRunProcessOutcome(runErr)
-	record.Usage, record.UsageStatus = harnessRunMeasuredUsage(result.Usage)
+	usage := harnessRunMeasuredUsage(result.Usage)
+	record.Usage, record.UsageStatus = usage.Usage, usage.Status
 	record.ObservedModel = result.ObservedModel
 
 	if runErr == nil {
@@ -169,9 +170,14 @@ func harnessRunProcessOutcome(err error) string {
 	}
 }
 
-func harnessRunMeasuredUsage(usage harness.Usage) (*HarnessRunUsage, string) {
+type harnessMeasuredUsage struct {
+	Usage  *HarnessRunUsage
+	Status string
+}
+
+func harnessRunMeasuredUsage(usage harness.Usage) harnessMeasuredUsage {
 	if (usage.Input != nil && *usage.Input < 0) || (usage.Output != nil && *usage.Output < 0) || (usage.Input == nil && usage.Output == nil) {
-		return nil, "unknown"
+		return harnessMeasuredUsage{Status: "unknown"}
 	}
 
 	measured := &HarnessRunUsage{Input: usage.Input, Output: usage.Output, AccountingRevision: "chr-harness-observed/v1"}
@@ -179,10 +185,10 @@ func harnessRunMeasuredUsage(usage harness.Usage) (*HarnessRunUsage, string) {
 	measured.CacheWrite = optionalMeasuredCounter(usage.CacheWrite)
 
 	if usage.Input == nil || usage.Output == nil {
-		return measured, "partial"
+		return harnessMeasuredUsage{Usage: measured, Status: "partial"}
 	}
 
-	return measured, "known"
+	return harnessMeasuredUsage{Usage: measured, Status: "known"}
 }
 
 func optionalMeasuredCounter(value *int64) *int64 {
@@ -207,7 +213,7 @@ func harnessRunMetadataPath(request harness.AgentRunRequest) string {
 func ValidateHarnessGenerationOutput(ctx context.Context, request harness.AgentRunRequest, validationErr error) error {
 	request.ID = HarnessGenerationRequestID(ctx, request.ID)
 
-	id, binding, bound := HarnessGenerationSelection(ctx)
+	generation, bound := HarnessGenerationSelection(ctx)
 	if !bound {
 		return validationErr
 	}
@@ -222,7 +228,7 @@ func ValidateHarnessGenerationOutput(ctx context.Context, request harness.AgentR
 		return errors.Join(validationErr, err)
 	}
 
-	if err := validateHarnessRunForOperation(record, request, id, binding); err != nil {
+	if err := validateHarnessRunForOperation(record, request, generation.ID, generation.Binding); err != nil {
 		return errors.Join(validationErr, err)
 	}
 

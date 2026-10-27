@@ -467,7 +467,7 @@ func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*Wo
 		return nil, fmt.Errorf("read evidence strategy ticket: %w", err)
 	}
 
-	checklist, checklistError := parseWorkerEvidenceChecklist(string(content))
+	observed := parseWorkerEvidenceChecklist(string(content))
 
 	ticket, err := NewTicketParser().ParseTicket(ctx, ParseTicketOptions{
 		ProjectDir: projectDir,
@@ -485,19 +485,24 @@ func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*Wo
 
 	return &WorkerEvidenceContext{
 		Config:         config.Evidence.Strategy,
-		Checklist:      checklist,
-		ChecklistError: checklistError,
+		Checklist:      observed.Checklist,
+		ChecklistError: observed.Problem,
 		Policy:         policy,
 	}, nil
 }
 
-func parseWorkerEvidenceChecklist(content string) (*EvidenceStrategyChecklist, string) {
+type workerChecklistObservation struct {
+	Checklist *EvidenceStrategyChecklist
+	Problem   string
+}
+
+func parseWorkerEvidenceChecklist(content string) workerChecklistObservation {
 	checklist, err := ParseEvidenceStrategyChecklist(content)
 	if err != nil {
-		return nil, err.Error()
+		return workerChecklistObservation{Problem: err.Error()}
 	}
 
-	return &checklist, ""
+	return workerChecklistObservation{Checklist: &checklist}
 }
 
 func workerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*WorkerRepairHandoff, error) {

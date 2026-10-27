@@ -153,26 +153,31 @@ func validateHarnessSelectionJournalResult(journal harnessSelectionJournal) erro
 	return validateHarnessSelectionAudit(r.HarnessSelectionAudit)
 }
 
-func readHarnessSelectionReceipt(project string, request HarnessSelectionChangeRequest, digest string) (HarnessSelectionSnapshot, bool, error) {
+type harnessSelectionReceiptLookup struct {
+	Snapshot HarnessSelectionSnapshot
+	Found    bool
+}
+
+func readHarnessSelectionReceipt(project string, request HarnessSelectionChangeRequest, digest string) (harnessSelectionReceiptLookup, error) {
 	data, err := readHarnessSelectionFile(project, harnessSelectionReceiptPath(request.Binding.RequestID))
 	if errors.Is(err, os.ErrNotExist) {
-		return HarnessSelectionSnapshot{}, false, nil
+		return harnessSelectionReceiptLookup{}, nil
 	}
 
 	if err != nil {
-		return HarnessSelectionSnapshot{}, false, err
+		return harnessSelectionReceiptLookup{}, err
 	}
 
 	journal, err := decodeHarnessSelectionJournal(data)
 	if err != nil {
-		return HarnessSelectionSnapshot{}, false, err
+		return harnessSelectionReceiptLookup{}, err
 	}
 
 	if journal.Result.RequestDigest != digest {
-		return HarnessSelectionSnapshot{}, false, workflowstate.ErrConflict
+		return harnessSelectionReceiptLookup{}, workflowstate.ErrConflict
 	}
 
-	return journal.Result, true, nil
+	return harnessSelectionReceiptLookup{Snapshot: journal.Result, Found: true}, nil
 }
 
 func recoverHarnessSelectionChange(project string, request HarnessSelectionChangeRequest, digest string) error {
@@ -253,13 +258,13 @@ func finishHarnessSelectionReceipt(project string, journal harnessSelectionJourn
 }
 
 func retainHarnessSelectionReceipt(project string, journal harnessSelectionJournal) error {
-	retained, found, err := readHarnessSelectionReceipt(project, journal.Request, journal.Result.RequestDigest)
+	receipt, err := readHarnessSelectionReceipt(project, journal.Request, journal.Result.RequestDigest)
 	if err != nil {
 		return err
 	}
 
-	if found {
-		if retained != journal.Result {
+	if receipt.Found {
+		if receipt.Snapshot != journal.Result {
 			return workflowstate.ErrConflict
 		}
 
