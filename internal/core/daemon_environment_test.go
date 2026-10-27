@@ -19,7 +19,7 @@ func TestNewDaemonStateRepositoryUsesUserEnvironmentDataDir(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := daemoncore.NewDaemonStateRepository(context.Background(), env, testMigrationFS())
+	repository, err := daemoncore.NewRepository(context.Background(), env, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewDaemonStateRepository returned error: %v", err)
 	}

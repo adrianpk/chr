@@ -26,7 +26,7 @@ func daemonWorkflowFixture(t *testing.T, output *bytes.Buffer) daemonWorkflowRun
 	repository := newDaemonStateRepositoryForTest(t, root)
 
 	now := time.Now().UTC()
-	if err := repository.UpsertDaemonState(t.Context(), daemoncore.DaemonState{Status: daemoncore.DaemonStatusRunning, PID: os.Getpid(), StartedAt: &now, HeartbeatAt: &now, UpdatedAt: now}); err != nil {
+	if err := repository.Upsert(t.Context(), daemoncore.State{Status: daemoncore.Running, PID: os.Getpid(), StartedAt: &now, HeartbeatAt: &now, UpdatedAt: now}); err != nil {
 		t.Fatal(err)
 	}
 

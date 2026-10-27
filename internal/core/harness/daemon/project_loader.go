@@ -10,119 +10,119 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// DaemonProjectStatus defines a package boundary type.
-type DaemonProjectStatus string
+// ProjectStatus defines a package boundary type.
+type ProjectStatus string
 
 const (
-	// DaemonProjectStatusReady defines a package boundary constant.
-	DaemonProjectStatusReady DaemonProjectStatus = "ready"
-	// DaemonProjectStatusMissing defines a package boundary constant.
-	DaemonProjectStatusMissing DaemonProjectStatus = "missing"
-	// DaemonProjectStatusInvalid defines a package boundary constant.
-	DaemonProjectStatusInvalid DaemonProjectStatus = "invalid"
+	// ProjectReady defines a package boundary constant.
+	ProjectReady ProjectStatus = "ready"
+	// ProjectMissing defines a package boundary constant.
+	ProjectMissing ProjectStatus = "missing"
+	// ProjectInvalid defines a package boundary constant.
+	ProjectInvalid ProjectStatus = "invalid"
 )
 
-// DaemonProject describes a package boundary value.
-type DaemonProject struct {
+// Project describes a package boundary value.
+type Project struct {
 	Project projectcore.Project
-	Status  DaemonProjectStatus
+	Status  ProjectStatus
 	Reason  string
 }
 
-// LoadDaemonProjects loads the corresponding package data.
-func LoadDaemonProjects(ctx context.Context, registry projectcore.Registry) ([]DaemonProject, error) {
+// LoadProjects loads the corresponding package data.
+func LoadProjects(ctx context.Context, registry projectcore.Registry) ([]Project, error) {
 	projects, err := registry.ListProjects(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	loaded := make([]DaemonProject, 0, len(projects))
+	loaded := make([]Project, 0, len(projects))
 	for _, project := range projects {
 		if !project.Enabled {
 			continue
 		}
 
-		loaded = append(loaded, classifyDaemonProject(project))
+		loaded = append(loaded, classifyProject(project))
 	}
 
 	return loaded, nil
 }
 
-func classifyDaemonProject(project projectcore.Project) DaemonProject {
+func classifyProject(project projectcore.Project) Project {
 	if project.Path == "" {
-		return DaemonProject{
+		return Project{
 			Project: project,
-			Status:  DaemonProjectStatusInvalid,
+			Status:  ProjectInvalid,
 			Reason:  "project path is empty",
 		}
 	}
 
 	info, err := os.Stat(project.Path)
 	if err != nil {
-		return classifyDaemonProjectStatError(project, err)
+		return classifyProjectStatError(project, err)
 	}
 
 	if !info.IsDir() {
-		return DaemonProject{
+		return Project{
 			Project: project,
-			Status:  DaemonProjectStatusInvalid,
+			Status:  ProjectInvalid,
 			Reason:  "project path is not a directory",
 		}
 	}
 
-	return classifyDaemonProjectWorkspace(project)
+	return classifyProjectWorkspace(project)
 }
 
-func classifyDaemonProjectStatError(project projectcore.Project, err error) DaemonProject {
+func classifyProjectStatError(project projectcore.Project, err error) Project {
 	if os.IsNotExist(err) {
-		return DaemonProject{
+		return Project{
 			Project: project,
-			Status:  DaemonProjectStatusMissing,
+			Status:  ProjectMissing,
 			Reason:  "project path does not exist",
 		}
 	}
 
-	return DaemonProject{
+	return Project{
 		Project: project,
-		Status:  DaemonProjectStatusInvalid,
+		Status:  ProjectInvalid,
 		Reason:  fmt.Sprintf("inspect project path: %v", err),
 	}
 }
 
-func classifyDaemonProjectWorkspace(project projectcore.Project) DaemonProject {
+func classifyProjectWorkspace(project projectcore.Project) Project {
 	workspacePath := filepath.Join(project.Path, workspacecore.DirectoryName)
 
 	info, err := os.Stat(workspacePath)
 	if err != nil {
-		return classifyDaemonProjectWorkspaceError(project, err)
+		return classifyProjectWorkspaceError(project, err)
 	}
 
 	if !info.IsDir() {
-		return DaemonProject{
+		return Project{
 			Project: project,
-			Status:  DaemonProjectStatusInvalid,
+			Status:  ProjectInvalid,
 			Reason:  "project workspace is not a directory",
 		}
 	}
 
-	return DaemonProject{
+	return Project{
 		Project: project,
-		Status:  DaemonProjectStatusReady,
+		Status:  ProjectReady,
 	}
 }
 
-func classifyDaemonProjectWorkspaceError(project projectcore.Project, err error) DaemonProject {
+func classifyProjectWorkspaceError(project projectcore.Project, err error) Project {
 	if os.IsNotExist(err) {
-		return DaemonProject{
+		return Project{
 			Project: project,
-			Status:  DaemonProjectStatusInvalid,
+			Status:  ProjectInvalid,
 			Reason:  "project workspace is missing",
 		}
 	}
 
-	return DaemonProject{
+	return Project{
 		Project: project,
-		Status:  DaemonProjectStatusInvalid,
+		Status:  ProjectInvalid,
 		Reason:  fmt.Sprintf("inspect project workspace: %v", err),
 	}
 }

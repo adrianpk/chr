@@ -282,7 +282,7 @@ func (p webViewProvider) writeWorkPreview(operations service) (webui.WriteAction
 }
 
 func (p webViewProvider) writeWorkDaemonStop(operations service) (webui.WriteActionResponse, error) {
-	result, err := operations.RequestDaemonStop()
+	result, err := operations.RequestStop()
 	if err != nil {
 		return webValidationWrite(err), nil
 	}

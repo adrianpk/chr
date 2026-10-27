@@ -9,12 +9,12 @@ import (
 func TestEvaluateDaemonStartGuardAllowsStoppedFailedAndStaleStates(t *testing.T) {
 	now := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	for _, state := range []DaemonState{
-		NewStoppedDaemonState(now),
-		{Status: DaemonStatusFailed, FailureReason: "crashed", UpdatedAt: now},
-		{Status: DaemonStatusStale, PID: 1234, FailureReason: "missing process", UpdatedAt: now},
+	for _, state := range []State{
+		NewStoppedState(now),
+		{Status: Failed, FailureReason: "crashed", UpdatedAt: now},
+		{Status: Stale, PID: 1234, FailureReason: "missing process", UpdatedAt: now},
 	} {
-		decision, err := EvaluateDaemonStartGuard(state, now, DefaultDaemonStaleAfter)
+		decision, err := EvaluateStartGuard(state, now, DefaultStaleAfter)
 		if err != nil {
 			t.Fatalf("EvaluateDaemonStartGuard returned error: %v", err)
 		}
@@ -28,15 +28,15 @@ func TestEvaluateDaemonStartGuardAllowsStoppedFailedAndStaleStates(t *testing.T)
 func TestEvaluateDaemonStartGuardRejectsActiveFreshState(t *testing.T) {
 	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 	heartbeatAt := startedAt.Add(time.Minute)
-	state := DaemonState{
-		Status:      DaemonStatusRunning,
+	state := State{
+		Status:      Running,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
 		UpdatedAt:   heartbeatAt,
 	}
 
-	decision, err := EvaluateDaemonStartGuard(state, heartbeatAt.Add(time.Minute), DefaultDaemonStaleAfter)
+	decision, err := EvaluateStartGuard(state, heartbeatAt.Add(time.Minute), DefaultStaleAfter)
 	if err != nil {
 		t.Fatalf("EvaluateDaemonStartGuard returned error: %v", err)
 	}
@@ -53,15 +53,15 @@ func TestEvaluateDaemonStartGuardRejectsActiveFreshState(t *testing.T) {
 func TestEvaluateDaemonStartGuardAllowsActiveStaleState(t *testing.T) {
 	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 	heartbeatAt := startedAt.Add(time.Minute)
-	state := DaemonState{
-		Status:      DaemonStatusRunning,
+	state := State{
+		Status:      Running,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
 		UpdatedAt:   heartbeatAt,
 	}
 
-	decision, err := EvaluateDaemonStartGuard(state, heartbeatAt.Add(10*time.Minute), DefaultDaemonStaleAfter)
+	decision, err := EvaluateStartGuard(state, heartbeatAt.Add(10*time.Minute), DefaultStaleAfter)
 	if err != nil {
 		t.Fatalf("EvaluateDaemonStartGuard returned error: %v", err)
 	}
@@ -74,7 +74,7 @@ func TestEvaluateDaemonStartGuardAllowsActiveStaleState(t *testing.T) {
 func TestEvaluateDaemonStartGuardRejectsInvalidStaleDuration(t *testing.T) {
 	now := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	_, err := EvaluateDaemonStartGuard(NewStoppedDaemonState(now), now, 0)
+	_, err := EvaluateStartGuard(NewStoppedState(now), now, 0)
 	if err == nil {
 		t.Fatal("EvaluateDaemonStartGuard returned nil error")
 	}

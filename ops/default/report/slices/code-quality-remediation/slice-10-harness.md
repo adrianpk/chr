@@ -197,9 +197,13 @@ Daemon owner move checks passed:
 - `go test ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(ValidateDaemon|EvaluateDaemon|LoadDaemon|DaemonState|NewDaemon|Daemon|Leaf)' -count=1 -timeout=3m`: TUI compiled; lifecycle, persistence, native/application and dependency checks passed.
 - `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
 
-The mechanical move exposes pre-existing Daemon prefixes under the new daemon
-namespace; the required separate naming commit removes that stuttering before
-final strict lint validation.
+A separate naming commit exposes State, Status, Repository, StartGuardDecision,
+Project and their lifecycle operations under the daemon namespace. Direct
+consumers and repository implementations use those names; retained strings and
+SQL remain unchanged.
+
+- `go test ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(ValidateDaemon|EvaluateDaemon|LoadDaemon|DaemonState|NewDaemon|Daemon|Leaf)' -count=1 -timeout=3m`: all selected checks passed; TUI compiled.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
 
 ## Risks and Follow-ups
 

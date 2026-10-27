@@ -5,27 +5,27 @@ import (
 	"time"
 )
 
-// DaemonStatus defines a package boundary type.
-type DaemonStatus string
+// Status defines a package boundary type.
+type Status string
 
 const (
-	// DaemonStatusStopped defines a package boundary constant.
-	DaemonStatusStopped DaemonStatus = "stopped"
-	// DaemonStatusStarting defines a package boundary constant.
-	DaemonStatusStarting DaemonStatus = "starting"
-	// DaemonStatusRunning defines a package boundary constant.
-	DaemonStatusRunning DaemonStatus = "running"
-	// DaemonStatusStopping defines a package boundary constant.
-	DaemonStatusStopping DaemonStatus = "stopping"
-	// DaemonStatusStale defines a package boundary constant.
-	DaemonStatusStale DaemonStatus = "stale"
-	// DaemonStatusFailed defines a package boundary constant.
-	DaemonStatusFailed DaemonStatus = "failed"
+	// Stopped defines a package boundary constant.
+	Stopped Status = "stopped"
+	// Starting defines a package boundary constant.
+	Starting Status = "starting"
+	// Running defines a package boundary constant.
+	Running Status = "running"
+	// Stopping defines a package boundary constant.
+	Stopping Status = "stopping"
+	// Stale defines a package boundary constant.
+	Stale Status = "stale"
+	// Failed defines a package boundary constant.
+	Failed Status = "failed"
 )
 
-// DaemonState describes a package boundary value.
-type DaemonState struct {
-	Status          DaemonStatus
+// State describes a package boundary value.
+type State struct {
+	Status          Status
 	PID             int
 	StartedAt       *time.Time
 	HeartbeatAt     *time.Time
@@ -34,16 +34,16 @@ type DaemonState struct {
 	UpdatedAt       time.Time
 }
 
-// NewStoppedDaemonState constructs the corresponding package service or value.
-func NewStoppedDaemonState(updatedAt time.Time) DaemonState {
-	return DaemonState{
-		Status:    DaemonStatusStopped,
+// NewStoppedState constructs the corresponding package service or value.
+func NewStoppedState(updatedAt time.Time) State {
+	return State{
+		Status:    Stopped,
 		UpdatedAt: updatedAt,
 	}
 }
 
-// ValidateDaemonState validates the corresponding package boundary value.
-func ValidateDaemonState(state DaemonState) error {
+// ValidateState validates the corresponding package boundary value.
+func ValidateState(state State) error {
 	if !state.Status.Valid() {
 		return fmt.Errorf("daemon status is invalid: %s", state.Status)
 	}
@@ -52,32 +52,32 @@ func ValidateDaemonState(state DaemonState) error {
 		return fmt.Errorf("daemon updated time is required")
 	}
 
-	err := validateDaemonStateProcess(state)
+	err := validateStateProcess(state)
 	if err != nil {
 		return err
 	}
 
-	return validateDaemonStateTimes(state)
+	return validateStateTimes(state)
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s DaemonStatus) Valid() bool {
+func (s Status) Valid() bool {
 	switch s {
-	case DaemonStatusStopped,
-		DaemonStatusStarting,
-		DaemonStatusRunning,
-		DaemonStatusStopping,
-		DaemonStatusStale,
-		DaemonStatusFailed:
+	case Stopped,
+		Starting,
+		Running,
+		Stopping,
+		Stale,
+		Failed:
 		return true
 	default:
 		return false
 	}
 }
 
-func validateDaemonStateProcess(state DaemonState) error {
+func validateStateProcess(state State) error {
 	switch state.Status {
-	case DaemonStatusStarting, DaemonStatusRunning, DaemonStatusStopping:
+	case Starting, Running, Stopping:
 		if state.PID <= 0 {
 			return fmt.Errorf("daemon pid is required for %s status", state.Status)
 		}
@@ -90,23 +90,23 @@ func validateDaemonStateProcess(state DaemonState) error {
 	return nil
 }
 
-func validateDaemonStateTimes(state DaemonState) error {
-	err := validateDaemonStateStartedAt(state)
+func validateStateTimes(state State) error {
+	err := validateStateStartedAt(state)
 	if err != nil {
 		return err
 	}
 
-	err = validateDaemonStateHeartbeatAt(state)
+	err = validateStateHeartbeatAt(state)
 	if err != nil {
 		return err
 	}
 
-	return validateDaemonStateStopRequestedAt(state)
+	return validateStateStopRequestedAt(state)
 }
 
-func validateDaemonStateStartedAt(state DaemonState) error {
+func validateStateStartedAt(state State) error {
 	switch state.Status {
-	case DaemonStatusStarting, DaemonStatusRunning, DaemonStatusStopping:
+	case Starting, Running, Stopping:
 		if state.StartedAt == nil {
 			return fmt.Errorf("daemon started time is required for %s status", state.Status)
 		}
@@ -115,7 +115,7 @@ func validateDaemonStateStartedAt(state DaemonState) error {
 	return nil
 }
 
-func validateDaemonStateHeartbeatAt(state DaemonState) error {
+func validateStateHeartbeatAt(state State) error {
 	if state.StartedAt != nil && state.HeartbeatAt != nil && state.HeartbeatAt.Before(*state.StartedAt) {
 		return fmt.Errorf("daemon heartbeat before start")
 	}
@@ -127,12 +127,12 @@ func validateDaemonStateHeartbeatAt(state DaemonState) error {
 	return nil
 }
 
-func validateDaemonStateStopRequestedAt(state DaemonState) error {
+func validateStateStopRequestedAt(state State) error {
 	if state.StartedAt != nil && state.StopRequestedAt != nil && state.StopRequestedAt.Before(*state.StartedAt) {
 		return fmt.Errorf("daemon stop requested before start")
 	}
 
-	if state.StopRequestedAt != nil && state.Status != DaemonStatusStopping && state.Status != DaemonStatusStopped {
+	if state.StopRequestedAt != nil && state.Status != Stopping && state.Status != Stopped {
 		return fmt.Errorf("daemon stop request is invalid for %s status", state.Status)
 	}
 

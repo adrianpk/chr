@@ -517,10 +517,10 @@ func latestTUILoopRun(loops []core.LoopRunRecord) core.LoopRunRecord {
 	return latest
 }
 
-func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) (daemoncore.DaemonState, error) {
-	repository, err := daemoncore.NewDaemonStateRepository(ctx, env, assetsFS)
+func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS fs.FS) (daemoncore.State, error) {
+	repository, err := daemoncore.NewRepository(ctx, env, assetsFS)
 	if err != nil {
-		return daemoncore.DaemonState{}, err
+		return daemoncore.State{}, err
 	}
 
 	defer func() {
@@ -528,13 +528,13 @@ func loadTUIDaemonState(ctx context.Context, env core.UserEnvironment, assetsFS 
 		_ = repository.Close()
 	}()
 
-	state, err := repository.GetDaemonState(ctx)
-	if errors.Is(err, daemoncore.ErrDaemonStateNotFound) {
-		return daemoncore.NewStoppedDaemonState(time.Now().UTC()), nil
+	state, err := repository.Get(ctx)
+	if errors.Is(err, daemoncore.ErrStateNotFound) {
+		return daemoncore.NewStoppedState(time.Now().UTC()), nil
 	}
 
 	if err != nil {
-		return daemoncore.DaemonState{}, err
+		return daemoncore.State{}, err
 	}
 
 	return state, nil

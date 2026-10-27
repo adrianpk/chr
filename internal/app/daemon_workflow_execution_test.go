@@ -167,7 +167,7 @@ func TestDaemonWorkflowCoordinatorStop(t *testing.T) {
 	daemonWorkflowMarker(t, filepath.Join(barrier, "ready"))
 	checkDaemonWorkflowHeartbeat(t, runner.repository)
 
-	if err := runner.repository.RequestDaemonStop(t.Context(), time.Now().UTC()); err != nil {
+	if err := runner.repository.RequestStop(t.Context(), time.Now().UTC()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -183,12 +183,12 @@ func TestDaemonWorkflowCoordinatorStop(t *testing.T) {
 	}
 }
 
-func checkDaemonWorkflowHeartbeat(t *testing.T, repository daemoncore.DaemonStateRepository) {
+func checkDaemonWorkflowHeartbeat(t *testing.T, repository daemoncore.Repository) {
 	t.Helper()
 
 	deadline := time.Now().Add(5 * time.Second)
 	for time.Now().Before(deadline) {
-		state, err := repository.GetDaemonState(t.Context())
+		state, err := repository.Get(t.Context())
 		if err != nil {
 			t.Fatal(err)
 		}

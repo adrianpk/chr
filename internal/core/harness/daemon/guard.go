@@ -6,48 +6,44 @@ import (
 	"time"
 )
 
-// DefaultDaemonStaleAfter defines a package boundary constant.
-const DefaultDaemonStaleAfter = 5 * time.Minute
+// DefaultStaleAfter defines a package boundary constant.
+const DefaultStaleAfter = 5 * time.Minute
 
-// DaemonStartGuardDecision describes a package boundary value.
-type DaemonStartGuardDecision struct {
+// StartGuardDecision describes a package boundary value.
+type StartGuardDecision struct {
 	Allowed bool
 	Stale   bool
 	Reason  string
-	State   DaemonState
+	State   State
 }
 
-// EvaluateDaemonStartGuard executes the corresponding package operation.
-func EvaluateDaemonStartGuard(state DaemonState, now time.Time, staleAfter time.Duration) (DaemonStartGuardDecision, error) {
-	err := ValidateDaemonState(state)
+// EvaluateStartGuard executes the corresponding package operation.
+func EvaluateStartGuard(state State, now time.Time, staleAfter time.Duration) (StartGuardDecision, error) {
+	err := ValidateState(state)
 	if err != nil {
-		return DaemonStartGuardDecision{}, err
+		return StartGuardDecision{}, err
 	}
 
 	if staleAfter <= 0 {
-		return DaemonStartGuardDecision{}, fmt.Errorf("daemon stale duration must be positive")
+		return StartGuardDecision{}, fmt.Errorf("daemon stale duration must be positive")
 	}
 
-	decision := DaemonStartGuardDecision{State: state}
+	decision := StartGuardDecision{State: state}
 
 	switch state.Status {
-	case DaemonStatusStopped, DaemonStatusFailed, DaemonStatusStale:
+	case Stopped, Failed, Stale:
 		decision.Allowed = true
 
 		return decision, nil
-	case DaemonStatusStarting, DaemonStatusRunning, DaemonStatusStopping:
-		return evaluateActiveDaemonStartGuard(decision, now, staleAfter), nil
+	case Starting, Running, Stopping:
+		return evaluateActiveStartGuard(decision, now, staleAfter), nil
 	default:
-		return DaemonStartGuardDecision{}, fmt.Errorf("unsupported daemon status: %s", state.Status)
+		return StartGuardDecision{}, fmt.Errorf("unsupported daemon status: %s", state.Status)
 	}
 }
 
-func evaluateActiveDaemonStartGuard(
-	decision DaemonStartGuardDecision,
-	now time.Time,
-	staleAfter time.Duration,
-) DaemonStartGuardDecision {
-	lastSeenAt := daemonStateLastSeenAt(decision.State)
+func evaluateActiveStartGuard(decision StartGuardDecision, now time.Time, staleAfter time.Duration) StartGuardDecision {
+	lastSeenAt := stateLastSeenAt(decision.State)
 	if now.Sub(lastSeenAt) > staleAfter {
 		decision.Allowed = true
 		decision.Stale = true
@@ -62,7 +58,7 @@ func evaluateActiveDaemonStartGuard(
 	return decision
 }
 
-func daemonStateLastSeenAt(state DaemonState) time.Time {
+func stateLastSeenAt(state State) time.Time {
 	if state.HeartbeatAt != nil {
 		return *state.HeartbeatAt
 	}

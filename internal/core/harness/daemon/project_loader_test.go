@@ -31,7 +31,7 @@ func TestLoadDaemonProjectsReturnsEnabledProjectsWithReadyStatus(t *testing.T) {
 		RegisteredAt: registeredAt,
 	})
 
-	projects, err := LoadDaemonProjects(context.Background(), registry)
+	projects, err := LoadProjects(context.Background(), registry)
 	if err != nil {
 		t.Fatalf("LoadDaemonProjects returned error: %v", err)
 	}
@@ -40,7 +40,7 @@ func TestLoadDaemonProjectsReturnsEnabledProjectsWithReadyStatus(t *testing.T) {
 		t.Fatalf("len(projects) = %d, want 1", len(projects))
 	}
 
-	if projects[0].Project.Name != "ready" || projects[0].Status != DaemonProjectStatusReady {
+	if projects[0].Project.Name != "ready" || projects[0].Status != ProjectReady {
 		t.Fatalf("project = %#v, want ready enabled project", projects[0])
 	}
 }
@@ -56,12 +56,12 @@ func TestLoadDaemonProjectsClassifiesMissingPath(t *testing.T) {
 		RegisteredAt: time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC),
 	})
 
-	projects, err := LoadDaemonProjects(context.Background(), registry)
+	projects, err := LoadProjects(context.Background(), registry)
 	if err != nil {
 		t.Fatalf("LoadDaemonProjects returned error: %v", err)
 	}
 
-	assertDaemonProjectStatus(t, projects, DaemonProjectStatusMissing, "project path does not exist")
+	assertDaemonProjectStatus(t, projects, ProjectMissing, "project path does not exist")
 }
 
 func TestLoadDaemonProjectsClassifiesNonDirectoryPath(t *testing.T) {
@@ -81,12 +81,12 @@ func TestLoadDaemonProjectsClassifiesNonDirectoryPath(t *testing.T) {
 		RegisteredAt: time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC),
 	})
 
-	projects, err := LoadDaemonProjects(context.Background(), registry)
+	projects, err := LoadProjects(context.Background(), registry)
 	if err != nil {
 		t.Fatalf("LoadDaemonProjects returned error: %v", err)
 	}
 
-	assertDaemonProjectStatus(t, projects, DaemonProjectStatusInvalid, "project path is not a directory")
+	assertDaemonProjectStatus(t, projects, ProjectInvalid, "project path is not a directory")
 }
 
 func TestLoadDaemonProjectsClassifiesMissingWorkspace(t *testing.T) {
@@ -100,12 +100,12 @@ func TestLoadDaemonProjectsClassifiesMissingWorkspace(t *testing.T) {
 		RegisteredAt: time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC),
 	})
 
-	projects, err := LoadDaemonProjects(context.Background(), registry)
+	projects, err := LoadProjects(context.Background(), registry)
 	if err != nil {
 		t.Fatalf("LoadDaemonProjects returned error: %v", err)
 	}
 
-	assertDaemonProjectStatus(t, projects, DaemonProjectStatusInvalid, "project workspace is missing")
+	assertDaemonProjectStatus(t, projects, ProjectInvalid, "project workspace is missing")
 }
 
 func newDaemonLoaderWorkspace(t *testing.T) string {
@@ -121,7 +121,7 @@ func newDaemonLoaderWorkspace(t *testing.T) string {
 	return projectDir
 }
 
-func assertDaemonProjectStatus(t *testing.T, projects []DaemonProject, status DaemonProjectStatus, reason string) {
+func assertDaemonProjectStatus(t *testing.T, projects []Project, status ProjectStatus, reason string) {
 	t.Helper()
 
 	if len(projects) != 1 {

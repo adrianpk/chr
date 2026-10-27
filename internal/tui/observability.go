@@ -380,7 +380,7 @@ func emptyAsUnknown(value string) string {
 
 // ObservabilityRecords contains the loaded daemon, execution, loop and runtime observations.
 type ObservabilityRecords struct {
-	Daemon     daemoncore.DaemonState
+	Daemon     daemoncore.State
 	Executions []core.ExecutionRecord
 	Loops      []core.LoopRunRecord
 	Runtime    core.RuntimeValidationResult

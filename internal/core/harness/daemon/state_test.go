@@ -7,9 +7,9 @@ import (
 )
 
 func TestValidateDaemonStateAcceptsStoppedState(t *testing.T) {
-	state := NewStoppedDaemonState(time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC))
+	state := NewStoppedState(time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC))
 
-	err := ValidateDaemonState(state)
+	err := ValidateState(state)
 	if err != nil {
 		t.Fatalf("ValidateDaemonState returned error: %v", err)
 	}
@@ -19,15 +19,15 @@ func TestValidateDaemonStateAcceptsRunningState(t *testing.T) {
 	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 	heartbeatAt := startedAt.Add(time.Minute)
 
-	state := DaemonState{
-		Status:      DaemonStatusRunning,
+	state := State{
+		Status:      Running,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
 		UpdatedAt:   heartbeatAt,
 	}
 
-	err := ValidateDaemonState(state)
+	err := ValidateState(state)
 	if err != nil {
 		t.Fatalf("ValidateDaemonState returned error: %v", err)
 	}
@@ -37,23 +37,23 @@ func TestValidateDaemonStateAcceptsStoppingState(t *testing.T) {
 	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 	stopRequestedAt := startedAt.Add(time.Minute)
 
-	state := DaemonState{
-		Status:          DaemonStatusStopping,
+	state := State{
+		Status:          Stopping,
 		PID:             1234,
 		StartedAt:       &startedAt,
 		StopRequestedAt: &stopRequestedAt,
 		UpdatedAt:       stopRequestedAt,
 	}
 
-	err := ValidateDaemonState(state)
+	err := ValidateState(state)
 	if err != nil {
 		t.Fatalf("ValidateDaemonState returned error: %v", err)
 	}
 }
 
 func TestValidateDaemonStateRejectsInvalidStatus(t *testing.T) {
-	state := NewStoppedDaemonState(time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC))
-	state.Status = DaemonStatus("unknown")
+	state := NewStoppedState(time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC))
+	state.Status = Status("unknown")
 
 	assertDaemonStateValidationError(t, state, "daemon status is invalid")
 }
@@ -61,8 +61,8 @@ func TestValidateDaemonStateRejectsInvalidStatus(t *testing.T) {
 func TestValidateDaemonStateRejectsRunningStateWithoutPID(t *testing.T) {
 	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 
-	state := DaemonState{
-		Status:    DaemonStatusRunning,
+	state := State{
+		Status:    Running,
 		StartedAt: &startedAt,
 		UpdatedAt: startedAt,
 	}
@@ -71,8 +71,8 @@ func TestValidateDaemonStateRejectsRunningStateWithoutPID(t *testing.T) {
 }
 
 func TestValidateDaemonStateRejectsRunningStateWithoutStartedAt(t *testing.T) {
-	state := DaemonState{
-		Status:    DaemonStatusRunning,
+	state := State{
+		Status:    Running,
 		PID:       1234,
 		UpdatedAt: time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC),
 	}
@@ -84,8 +84,8 @@ func TestValidateDaemonStateRejectsInvalidTimes(t *testing.T) {
 	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 	heartbeatAt := startedAt.Add(-time.Minute)
 
-	state := DaemonState{
-		Status:      DaemonStatusRunning,
+	state := State{
+		Status:      Running,
 		PID:         1234,
 		StartedAt:   &startedAt,
 		HeartbeatAt: &heartbeatAt,
@@ -99,8 +99,8 @@ func TestValidateDaemonStateRejectsStopRequestForRunningState(t *testing.T) {
 	startedAt := time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC)
 	stopRequestedAt := startedAt.Add(time.Minute)
 
-	state := DaemonState{
-		Status:          DaemonStatusRunning,
+	state := State{
+		Status:          Running,
 		PID:             1234,
 		StartedAt:       &startedAt,
 		StopRequestedAt: &stopRequestedAt,
@@ -110,10 +110,10 @@ func TestValidateDaemonStateRejectsStopRequestForRunningState(t *testing.T) {
 	assertDaemonStateValidationError(t, state, "daemon stop request is invalid")
 }
 
-func assertDaemonStateValidationError(t *testing.T, state DaemonState, want string) {
+func assertDaemonStateValidationError(t *testing.T, state State, want string) {
 	t.Helper()
 
-	err := ValidateDaemonState(state)
+	err := ValidateState(state)
 	if err == nil {
 		t.Fatal("ValidateDaemonState returned nil error")
 	}

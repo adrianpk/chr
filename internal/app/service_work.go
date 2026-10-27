@@ -260,7 +260,7 @@ func (s service) startAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWorkRe
 	}, nil
 }
 
-func (s service) RequestDaemonStop() (WorkOperationResult, error) {
+func (s service) RequestStop() (WorkOperationResult, error) {
 	requestedAt := s.now().UTC()
 
 	stopResult, err := requestDaemonStopState(s.ctx, s.env, s.assetsFS, requestedAt)

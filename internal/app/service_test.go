@@ -852,7 +852,7 @@ func TestServiceRequestDaemonStopReturnsStoppedMessage(t *testing.T) {
 
 	operations := newTestService(t, projectDir)
 
-	result, err := operations.RequestDaemonStop()
+	result, err := operations.RequestStop()
 	if err != nil {
 		t.Fatalf("RequestDaemonStop returned error: %v", err)
 	}

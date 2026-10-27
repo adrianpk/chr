@@ -21,7 +21,7 @@ func requestDaemonStopState(
 	assets fs.FS,
 	requestedAt time.Time,
 ) (daemonStopRequestResult, error) {
-	repository, err := daemoncore.NewDaemonStateRepository(ctx, env, assets)
+	repository, err := daemoncore.NewRepository(ctx, env, assets)
 	if err != nil {
 		return daemonStopRequestResult{}, err
 	}
@@ -31,8 +31,8 @@ func requestDaemonStopState(
 		_ = repository.Close()
 	}()
 
-	err = repository.RequestDaemonStop(ctx, requestedAt)
-	if errors.Is(err, daemoncore.ErrDaemonStateNotFound) {
+	err = repository.RequestStop(ctx, requestedAt)
+	if errors.Is(err, daemoncore.ErrStateNotFound) {
 		return daemonStopRequestResult{AlreadyStopped: true}, nil
 	}
 

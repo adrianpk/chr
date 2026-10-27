@@ -70,7 +70,7 @@ func (e tuiWorkActionExecutor) runAllReadyResult(request tui.WorkActionRequest) 
 }
 
 func (e tuiWorkActionExecutor) requestStopResult() (tui.WorkActionResult, error) {
-	result, err := e.operations.RequestDaemonStop()
+	result, err := e.operations.RequestStop()
 	if err != nil {
 		return tui.WorkActionResult{}, err
 	}

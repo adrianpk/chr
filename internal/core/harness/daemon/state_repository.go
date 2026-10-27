@@ -15,27 +15,27 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-const daemonStateID = "daemon"
+const stateID = "daemon"
 
-// ErrDaemonStateNotFound identifies a package boundary error.
-var ErrDaemonStateNotFound = errors.New("daemon state not found")
+// ErrStateNotFound identifies a package boundary error.
+var ErrStateNotFound = errors.New("daemon state not found")
 
-// DaemonStateRepository defines a package boundary interface.
-type DaemonStateRepository interface {
-	GetDaemonState(ctx context.Context) (DaemonState, error)
-	UpsertDaemonState(ctx context.Context, state DaemonState) error
-	UpdateDaemonHeartbeat(ctx context.Context, heartbeatAt time.Time) error
-	RequestDaemonStop(ctx context.Context, requestedAt time.Time) error
-	ClearDaemonState(ctx context.Context) error
+// Repository defines a package boundary interface.
+type Repository interface {
+	Get(ctx context.Context) (State, error)
+	Upsert(ctx context.Context, state State) error
+	UpdateHeartbeat(ctx context.Context, heartbeatAt time.Time) error
+	RequestStop(ctx context.Context, requestedAt time.Time) error
+	Clear(ctx context.Context) error
 	Close() error
 }
 
-type sqliteDaemonStateRepository struct {
+type sqliteRepository struct {
 	db *sql.DB
 }
 
-// NewDaemonStateRepository constructs the corresponding package service or value.
-func NewDaemonStateRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (DaemonStateRepository, error) {
+// NewRepository constructs the corresponding package service or value.
+func NewRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (Repository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -51,7 +51,7 @@ func NewDaemonStateRepository(ctx context.Context, env database.DataDirectory, a
 		return nil, database.CloseOnError(db, err)
 	}
 
-	repository, err := NewDaemonStateRepositoryFromDB(ctx, db, assetsFS)
+	repository, err := NewRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
 		return nil, database.CloseOnError(db, err)
 	}
@@ -59,8 +59,8 @@ func NewDaemonStateRepository(ctx context.Context, env database.DataDirectory, a
 	return repository, nil
 }
 
-// NewDaemonStateRepositoryFromDB constructs the corresponding package service or value.
-func NewDaemonStateRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (DaemonStateRepository, error) {
+// NewRepositoryFromDB constructs the corresponding package service or value.
+func NewRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (Repository, error) {
 	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
@@ -68,39 +68,39 @@ func NewDaemonStateRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs
 		return nil, fmt.Errorf("migrate daemon state database: %w", err)
 	}
 
-	return &sqliteDaemonStateRepository{db: db}, nil
+	return &sqliteRepository{db: db}, nil
 }
 
-// GetDaemonState executes the corresponding package operation.
-func (r *sqliteDaemonStateRepository) GetDaemonState(ctx context.Context) (DaemonState, error) {
-	row := r.db.QueryRowContext(ctx, selectDaemonStateSQL()+" WHERE id = ?", daemonStateID)
+// Get executes the corresponding package operation.
+func (r *sqliteRepository) Get(ctx context.Context) (State, error) {
+	row := r.db.QueryRowContext(ctx, selectStateSQL()+" WHERE id = ?", stateID)
 
-	state, err := scanDaemonState(row)
+	state, err := scanState(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return DaemonState{}, ErrDaemonStateNotFound
+		return State{}, ErrStateNotFound
 	}
 
 	if err != nil {
-		return DaemonState{}, err
+		return State{}, err
 	}
 
 	return state, nil
 }
 
-// UpsertDaemonState executes the corresponding package operation.
-func (r *sqliteDaemonStateRepository) UpsertDaemonState(ctx context.Context, state DaemonState) error {
-	err := ValidateDaemonState(state)
+// Upsert executes the corresponding package operation.
+func (r *sqliteRepository) Upsert(ctx context.Context, state State) error {
+	err := ValidateState(state)
 	if err != nil {
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, upsertDaemonStateSQL(),
-		daemonStateID,
+	_, err = r.db.ExecContext(ctx, upsertStateSQL(),
+		stateID,
 		string(state.Status),
 		state.PID,
-		formatOptionalDaemonTime(state.StartedAt),
-		formatOptionalDaemonTime(state.HeartbeatAt),
-		formatOptionalDaemonTime(state.StopRequestedAt),
+		formatOptionalTime(state.StartedAt),
+		formatOptionalTime(state.HeartbeatAt),
+		formatOptionalTime(state.StopRequestedAt),
 		state.FailureReason,
 		database.FormatTime(state.UpdatedAt),
 	)
@@ -111,14 +111,14 @@ func (r *sqliteDaemonStateRepository) UpsertDaemonState(ctx context.Context, sta
 	return nil
 }
 
-// UpdateDaemonHeartbeat executes the corresponding package operation.
-func (r *sqliteDaemonStateRepository) UpdateDaemonHeartbeat(ctx context.Context, heartbeatAt time.Time) error {
+// UpdateHeartbeat executes the corresponding package operation.
+func (r *sqliteRepository) UpdateHeartbeat(ctx context.Context, heartbeatAt time.Time) error {
 	result, err := r.db.ExecContext(
 		ctx,
 		`UPDATE daemon_state SET heartbeat_at = ?, updated_at = ? WHERE id = ?`,
 		database.FormatTime(heartbeatAt),
 		database.FormatTime(heartbeatAt),
-		daemonStateID,
+		stateID,
 	)
 	if err != nil {
 		return fmt.Errorf("update daemon heartbeat: %w", err)
@@ -130,26 +130,26 @@ func (r *sqliteDaemonStateRepository) UpdateDaemonHeartbeat(ctx context.Context,
 	}
 
 	if affected == 0 {
-		return ErrDaemonStateNotFound
+		return ErrStateNotFound
 	}
 
 	return nil
 }
 
-// RequestDaemonStop executes the corresponding package operation.
-func (r *sqliteDaemonStateRepository) RequestDaemonStop(ctx context.Context, requestedAt time.Time) error {
+// RequestStop executes the corresponding package operation.
+func (r *sqliteRepository) RequestStop(ctx context.Context, requestedAt time.Time) error {
 	result, err := r.db.ExecContext(
 		ctx,
 		`UPDATE daemon_state
 SET status = ?, stop_requested_at = ?, updated_at = ?
 WHERE id = ? AND status IN (?, ?, ?)`,
-		string(DaemonStatusStopping),
+		string(Stopping),
 		database.FormatTime(requestedAt),
 		database.FormatTime(requestedAt),
-		daemonStateID,
-		string(DaemonStatusStarting),
-		string(DaemonStatusRunning),
-		string(DaemonStatusStopping),
+		stateID,
+		string(Starting),
+		string(Running),
+		string(Stopping),
 	)
 	if err != nil {
 		return fmt.Errorf("request daemon stop: %w", err)
@@ -161,15 +161,15 @@ WHERE id = ? AND status IN (?, ?, ?)`,
 	}
 
 	if affected == 0 {
-		return ErrDaemonStateNotFound
+		return ErrStateNotFound
 	}
 
 	return nil
 }
 
-// ClearDaemonState executes the corresponding package operation.
-func (r *sqliteDaemonStateRepository) ClearDaemonState(ctx context.Context) error {
-	_, err := r.db.ExecContext(ctx, "DELETE FROM daemon_state WHERE id = ?", daemonStateID)
+// Clear executes the corresponding package operation.
+func (r *sqliteRepository) Clear(ctx context.Context) error {
+	_, err := r.db.ExecContext(ctx, "DELETE FROM daemon_state WHERE id = ?", stateID)
 	if err != nil {
 		return fmt.Errorf("clear daemon state: %w", err)
 	}
@@ -178,7 +178,7 @@ func (r *sqliteDaemonStateRepository) ClearDaemonState(ctx context.Context) erro
 }
 
 // Close executes the corresponding package operation.
-func (r *sqliteDaemonStateRepository) Close() error {
+func (r *sqliteRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {
 		return fmt.Errorf("close daemon state repository database: %w", err)
@@ -187,12 +187,12 @@ func (r *sqliteDaemonStateRepository) Close() error {
 	return nil
 }
 
-type daemonStateScanner interface {
+type stateScanner interface {
 	Scan(dest ...any) error
 }
 
-func scanDaemonState(scanner daemonStateScanner) (DaemonState, error) {
-	var state DaemonState
+func scanState(scanner stateScanner) (State, error) {
+	var state State
 
 	var id, status, updatedAt string
 
@@ -209,40 +209,40 @@ func scanDaemonState(scanner daemonStateScanner) (DaemonState, error) {
 		&updatedAt,
 	)
 	if err != nil {
-		return DaemonState{}, fmt.Errorf("scan daemon state: %w", err)
+		return State{}, fmt.Errorf("scan daemon state: %w", err)
 	}
 
-	if id != daemonStateID {
-		return DaemonState{}, fmt.Errorf("unexpected daemon state id: %s", id)
+	if id != stateID {
+		return State{}, fmt.Errorf("unexpected daemon state id: %s", id)
 	}
 
 	parsedUpdatedAt, err := database.ParseTime(updatedAt)
 	if err != nil {
-		return DaemonState{}, err
+		return State{}, err
 	}
 
-	state.Status = DaemonStatus(status)
+	state.Status = Status(status)
 	state.UpdatedAt = parsedUpdatedAt
 
-	state.StartedAt, err = parseOptionalDaemonTime(startedAt)
+	state.StartedAt, err = parseOptionalTime(startedAt)
 	if err != nil {
-		return DaemonState{}, err
+		return State{}, err
 	}
 
-	state.HeartbeatAt, err = parseOptionalDaemonTime(heartbeatAt)
+	state.HeartbeatAt, err = parseOptionalTime(heartbeatAt)
 	if err != nil {
-		return DaemonState{}, err
+		return State{}, err
 	}
 
-	state.StopRequestedAt, err = parseOptionalDaemonTime(stopRequestedAt)
+	state.StopRequestedAt, err = parseOptionalTime(stopRequestedAt)
 	if err != nil {
-		return DaemonState{}, err
+		return State{}, err
 	}
 
 	return state, nil
 }
 
-func upsertDaemonStateSQL() string {
+func upsertStateSQL() string {
 	return `INSERT INTO daemon_state (
     id, status, pid, started_at, heartbeat_at, stop_requested_at,
     failure_reason, updated_at
@@ -257,13 +257,13 @@ ON CONFLICT(id) DO UPDATE SET
     updated_at = excluded.updated_at`
 }
 
-func selectDaemonStateSQL() string {
+func selectStateSQL() string {
 	return `SELECT id, status, pid, started_at, heartbeat_at, stop_requested_at,
     failure_reason, updated_at
 FROM daemon_state`
 }
 
-func formatOptionalDaemonTime(value *time.Time) any {
+func formatOptionalTime(value *time.Time) any {
 	if value == nil {
 		return nil
 	}
@@ -271,7 +271,7 @@ func formatOptionalDaemonTime(value *time.Time) any {
 	return database.FormatTime(*value)
 }
 
-func parseOptionalDaemonTime(value sql.NullString) (*time.Time, error) {
+func parseOptionalTime(value sql.NullString) (*time.Time, error) {
 	if !value.Valid {
 		return nil, nil
 	}

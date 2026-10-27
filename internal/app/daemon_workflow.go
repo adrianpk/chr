@@ -31,12 +31,12 @@ type daemonWorkflowRunner struct {
 	stdout     io.Writer
 	env        core.UserEnvironment
 	assets     fs.FS
-	repository daemoncore.DaemonStateRepository
+	repository daemoncore.Repository
 }
 
-func (runner daemonWorkflowRunner) projects(ctx context.Context, projects []daemoncore.DaemonProject, result *daemonForegroundLoopResult) error {
+func (runner daemonWorkflowRunner) projects(ctx context.Context, projects []daemoncore.Project, result *daemonForegroundLoopResult) error {
 	for _, project := range projects {
-		if project.Status != daemoncore.DaemonProjectStatusReady {
+		if project.Status != daemoncore.ProjectReady {
 			continue
 		}
 
@@ -125,7 +125,7 @@ func (runner daemonWorkflowRunner) workflow(ctx context.Context, operations serv
 }
 
 func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry projectcore.Registry, index core.TicketIndex, result *daemonForegroundLoopResult) error {
-	if err := runner.repository.UpdateDaemonHeartbeat(ctx, time.Now().UTC()); err != nil {
+	if err := runner.repository.UpdateHeartbeat(ctx, time.Now().UTC()); err != nil {
 		return err
 	}
 
@@ -136,7 +136,7 @@ func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry proje
 		return err
 	}
 
-	projects, err := daemoncore.LoadDaemonProjects(ctx, registry)
+	projects, err := daemoncore.LoadProjects(ctx, registry)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (runner daemonWorkflowRunner) progress(project string, progress RetainedWor
 
 // Heartbeats stay fresh during owned workers. A daemon stop yields between
 // checkpoints; per-invocation pause/cancel uses the shared worker stop watcher.
-func watchDaemonHeartbeat(ctx context.Context, repository daemoncore.DaemonStateRepository) (context.Context, func() error) {
+func watchDaemonHeartbeat(ctx context.Context, repository daemoncore.Repository) (context.Context, func() error) {
 	watched, cancel := context.WithCancel(ctx)
 	finished := make(chan error, 1)
 
@@ -183,7 +183,7 @@ func watchDaemonHeartbeat(ctx context.Context, repository daemoncore.DaemonState
 
 				return
 			case now := <-ticker.C:
-				if err := repository.UpdateDaemonHeartbeat(watched, now.UTC()); err != nil {
+				if err := repository.UpdateHeartbeat(watched, now.UTC()); err != nil {
 					if watched.Err() != nil {
 						err = nil
 					}
