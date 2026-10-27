@@ -83,4 +83,7 @@ receiver preimages reconcile, for 73 recorded declarations/tests in total.
 
 ## Risks and Follow-ups
 
-T11.1–T11.6 remain open; no Slice 11 PR is prepared yet.
+Remaining work includes ticket indexing/repository rules, execution/readiness
+ownership and D03, other assigned signatures, typed state/preparation contracts,
+the six-parameter reconciliation and final exact-head controller validation.
+No Slice 11 PR has been opened.

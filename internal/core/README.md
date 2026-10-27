@@ -22,6 +22,11 @@ lifecycle state and bounded tracing respectively. Native configuration and
 workflow composition retain their actual revision, authorization and execution
 authority; consumers import the capability owners directly.
 
+Ticket and indexed records, document rendering/parsing and field/status rules
+live in `core/ticket`. Native `WorkflowTicketIndex` composes ticket storage with
+workflow projections on one SQLite handle; source/cache authority and guarded
+ticket mutations remain with their actual native owners.
+
 ## API
 
 Exported types are internal application contracts shared across adapters and
