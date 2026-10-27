@@ -145,9 +145,21 @@ test/fixture declarations reconcile unchanged after signature formatting, for
 - `make check-go-style`: 9307 declarations, ceiling seven, 203 exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
+D03's duplicated readiness settings normalization is removed before service
+splitting. Check and repair share cancellation/path admission, policy/workspace
+defaults, ticket trimming and read/worktree dependencies. Repair settings embed
+that normalized state while retaining the distinct mutation Git interface and
+original repair gating. All other readiness declarations are byte-identical.
+User checkout, ticket worktree, preview, authoritative checks and explicit repair
+remain separate operations; no preflight or repair IO moved into normalization.
+
+- `go test ./internal/core ./internal/app -run '^Test(CheckWorkReadiness|RepairWorkReadiness|OSWorkReadinessGit|NewWorktreePlan|WorktreeService|WorktreeMetadata|CleanupMergedTicketWorktree|EvidenceReadiness|WorkSelection)' -count=1 -timeout=3m`: passed in core; app compiled with no selected tests.
+- `make check-go-style`: 9307 declarations, ceiling seven, 203 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
+
 ## Risks and Follow-ups
 
 Remaining work includes remaining ticket parser/validation test ownership, execution/readiness
-ownership and D03, other assigned signatures, typed state/preparation contracts,
+ownership and readiness service splitting, other assigned signatures, typed state/preparation contracts,
 the six-parameter reconciliation and final exact-head controller validation.
 No Slice 11 PR has been opened.

@@ -174,57 +174,30 @@ func RepairWorkReadiness(ctx context.Context, opts WorkReadinessRepairOptions) (
 }
 
 type workReadinessRepairSettings struct {
-	projectDir   string
-	policy       WorkBranchPolicy
-	workspace    workspacecore.ExecutionConfig
-	ticketKey    string
-	ticketBranch string
-	git          WorkReadinessRepairGit
-	worktreeGit  WorktreeGit
+	workReadinessSettings
+	git WorkReadinessRepairGit
 }
 
 func newWorkReadinessRepairSettings(ctx context.Context, opts WorkReadinessRepairOptions) (workReadinessRepairSettings, error) {
-	err := ctx.Err()
-	if err != nil {
-		return workReadinessRepairSettings{}, err
-	}
-
-	projectDir, err := authoringcore.CleanContextProjectDir(opts.ProjectDir)
-	if err != nil {
-		return workReadinessRepairSettings{}, err
-	}
-
-	policy := opts.Policy
-	if policy == (WorkBranchPolicy{}) {
-		policy = DefaultWorkBranchPolicy()
-	}
-
-	workspace := opts.Workspace
-	if workspace == (workspacecore.ExecutionConfig{}) {
-		workspace = workspacecore.DefaultExecutionConfig()
-	} else {
-		workspace = workspacecore.FillExecutionDefaults(workspace)
-	}
-
 	git := opts.Git
 	if git == nil {
 		git = OSWorkReadinessGit{}
 	}
 
-	worktreeGit := opts.WorktreeGit
-	if worktreeGit == nil {
-		worktreeGit = OSWorktreeGit{}
+	settings, err := newWorkReadinessSettings(ctx, WorkReadinessOptions{
+		ProjectDir:   opts.ProjectDir,
+		Policy:       opts.Policy,
+		Workspace:    opts.Workspace,
+		TicketKey:    opts.TicketKey,
+		TicketBranch: opts.TicketBranch,
+		Git:          git,
+		WorktreeGit:  opts.WorktreeGit,
+	})
+	if err != nil {
+		return workReadinessRepairSettings{}, err
 	}
 
-	return workReadinessRepairSettings{
-		projectDir:   projectDir,
-		policy:       policy,
-		workspace:    workspace,
-		ticketKey:    strings.TrimSpace(opts.TicketKey),
-		ticketBranch: strings.TrimSpace(opts.TicketBranch),
-		git:          git,
-		worktreeGit:  worktreeGit,
-	}, nil
+	return workReadinessRepairSettings{workReadinessSettings: settings, git: git}, nil
 }
 
 func (settings workReadinessRepairSettings) check(ctx context.Context) (WorkReadinessReport, error) {
