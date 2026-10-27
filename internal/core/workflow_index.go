@@ -34,7 +34,7 @@ type WorkflowQuery struct {
 // WorkflowPage returns domain records rather than SQL-owned lifecycle state.
 type WorkflowPage struct {
 	Records      []WorkflowRecord
-	Slices       []WorkflowSlice
+	Slices       []workflowstate.WorkflowSlice
 	SnapshotHash string
 	NextOffset   int
 }

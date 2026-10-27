@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowClosingBinding(set WorkflowSet) error {
+func validateWorkflowClosingBinding(set workflowstate.WorkflowSet) error {
 	if set.Closing == nil {
 		return nil
 	}

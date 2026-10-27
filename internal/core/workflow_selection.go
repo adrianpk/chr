@@ -46,7 +46,7 @@ type workflowSelection struct {
 	tickets        []IndexedTicket
 	records        map[string]WorkflowRecord
 	sets           map[string]WorkflowRecord
-	slices         map[string]WorkflowSlice
+	slices         map[string]workflowstate.WorkflowSlice
 	evidenceHashes map[string]string
 }
 

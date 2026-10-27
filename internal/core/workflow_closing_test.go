@@ -165,7 +165,7 @@ func testWorkflowClosingEmpty(t *testing.T, required bool) {
 		plan.ClosingValidation = workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}
 	}
 
-	set, err := fixture.store.Create(t.Context(), "Empty set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}})
+	set, err := fixture.store.Create(t.Context(), "Empty set", WorkflowRecord{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}})
 	if err != nil {
 		t.Fatal(err)
 	}

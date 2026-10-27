@@ -29,7 +29,7 @@ func (s *WorkflowStore) observeWorkflowClosingTarget(ctx context.Context, reques
 	return target, s.checkWorkflowTarget(ctx, target)
 }
 
-func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input WorkflowClosingInput, descriptor WorkflowSlice, ports WorkflowFrontierPorts) (WorkflowClosingSlice, error) {
+func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input WorkflowClosingInput, descriptor workflowstate.WorkflowSlice, ports WorkflowFrontierPorts) (WorkflowClosingSlice, error) {
 	if descriptor.Phase != "integrated" || descriptor.DeliveryRef == "" {
 		return WorkflowClosingSlice{}, fmt.Errorf("%w: all actual slices must integrate", workflowstate.ErrConflict)
 	}
@@ -130,7 +130,7 @@ func (s *WorkflowStore) observeWorkflowClosingLegacySlice(ctx context.Context, i
 	return proof, nil
 }
 
-func (s *WorkflowStore) workflowClosingSliceMembers(ctx context.Context, descriptor WorkflowSlice, receipt WorkflowRecord, proof WorkflowSliceDeliveryProof) error {
+func (s *WorkflowStore) workflowClosingSliceMembers(ctx context.Context, descriptor workflowstate.WorkflowSlice, receipt WorkflowRecord, proof WorkflowSliceDeliveryProof) error {
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
 		return err

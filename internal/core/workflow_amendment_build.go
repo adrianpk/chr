@@ -56,7 +56,7 @@ func (s *WorkflowStore) workflowAmendmentBuilder(ctx context.Context, set Workfl
 	// prior image used by the guards and immutable amendment receipt.
 	builder.result.Set = set
 
-	builder.result.Set.Set = &WorkflowSet{}
+	builder.result.Set.Set = &workflowstate.WorkflowSet{}
 	if err := json.Unmarshal(data, builder.result.Set.Set); err != nil {
 		return builder, err
 	}

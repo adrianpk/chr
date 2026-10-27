@@ -388,7 +388,7 @@
     },
     {
       "id": "internal/core/workflow_amendment_slices.go::buildWorkflowAmendedSlice",
-      "signature": "func(builder *workflowAmendmentBuild, old map[string]WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (WorkflowSlice, int, error)",
+      "signature": "func(builder *workflowAmendmentBuild, old map[string]workflowstate.WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (workflowstate.WorkflowSlice, int, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -868,7 +868,7 @@
     },
     {
       "id": "internal/core/workflow_plan_order_publish.go::WorkflowStore.currentPlanOrderMetadata",
-      "signature": "func(binding generationcore.PlanRevisionBinding) (map[string]any, workflowstate.FileChange, bool, error)",
+      "signature": "func(binding workflowstate.PlanRevisionBinding) (map[string]any, workflowstate.FileChange, bool, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
     },
     {

@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -112,7 +111,7 @@ func TestTelegramOperationSliceRecords(t *testing.T) {
 	contract := `{"Contract":"A bounded slice","Validation":{"required":true,"commands":[["go","test","./..."]],"timeout_seconds":60}}`
 	writeServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, "ops", "default", "plan", "slice.json"), contract)
 
-	descriptor := core.WorkflowSlice{ID: "slice-1", Order: 1, Title: "First slice", ContractRef: "plan/slice.json", ContractHash: recordDigest([]byte(contract))}
+	descriptor := workflowstate.WorkflowSlice{ID: "slice-1", Order: 1, Title: "First slice", ContractRef: "plan/slice.json", ContractHash: recordDigest([]byte(contract))}
 
 	created := telegramApplyRecord(t, operations, "create-slice", RecordMutationRequest{Kind: RecordSlice, Action: "create", ParentID: set.Record.Identity, ExpectedRevision: set.Record.Revision, ExpectedHash: set.Record.SourceHash, Slice: &descriptor})
 	if created.Record.Identity != "slice-1" || created.Record.ParentID != set.Record.Identity || created.Record.Phase != "pending" {
@@ -173,7 +172,7 @@ func TestTelegramOperationRecordGuards(t *testing.T) {
 	contract := `{"Contract":"original"}`
 	writeServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, "ops", "default", "plan", "contract.json"), contract)
 
-	descriptor := core.WorkflowSlice{ID: "slice", Order: 1, ContractRef: "plan/contract.json", ContractHash: recordDigest([]byte(contract))}
+	descriptor := workflowstate.WorkflowSlice{ID: "slice", Order: 1, ContractRef: "plan/contract.json", ContractHash: recordDigest([]byte(contract))}
 
 	prepared, err := operations.PrepareRecordMutation(t.Context(), "default", workflowstate.MutationBinding{RequestID: "changed-contract", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordSlice, Action: "create", ParentID: set.Record.Identity, ExpectedRevision: set.Record.Revision, ExpectedHash: set.Record.SourceHash, Slice: &descriptor})
 	if err != nil {

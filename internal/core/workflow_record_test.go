@@ -20,7 +20,7 @@ func workflowTestTask(id string) WorkflowRecord {
 func workflowTestSet() WorkflowRecord {
 	r := workflowTestTask("set-1")
 	r.Kind, r.Path, r.Task = "plan", "plan/set-1/metadata.json", nil
-	r.Set = &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: "artifact.md", PlanHash: "plan-1", ClosingValidation: workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}, Slices: []WorkflowSlice{{ID: "slice-1", Order: 1, Title: "First", Phase: "pending", ContractRef: "artifact.md#first", ContractHash: "slice-contract", TaskInputHash: "inputs-1"}}}
+	r.Set = &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: "artifact.md", PlanHash: "plan-1", ClosingValidation: workflowstate.Validation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}, Slices: []workflowstate.WorkflowSlice{{ID: "slice-1", Order: 1, Title: "First", Phase: "pending", ContractRef: "artifact.md#first", ContractHash: "slice-contract", TaskInputHash: "inputs-1"}}}
 
 	return r
 }

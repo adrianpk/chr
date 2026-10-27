@@ -27,7 +27,7 @@ type planRevisionInput struct {
 }
 
 type planRevision struct {
-	Binding  generationcore.PlanRevisionBinding
+	Binding  workflowstate.PlanRevisionBinding
 	Document generationcore.PlanOrderDocument
 }
 
@@ -100,13 +100,13 @@ func newPlanRevision(input planRevisionInput) (planRevision, error) {
 	reference := strings.Join(parts[2:], "/")
 	hash := contenthash.Sum(body)
 	retained := filepath.ToSlash(filepath.Join(filepath.Dir(reference), "files", "plan-revisions", fmt.Sprintf("%d-%s", revision, hash)))
-	binding := generationcore.PlanRevisionBinding{Reference: reference, Revision: revision, BodyHash: hash, BodyRef: retained + "/plan.md", OrderRef: retained + "/order.json", TrackerRef: retained + "/tracker.md", CurrentTrackerRef: "tracker/00000-" + paths.ScopeID + "-tracking/artifact.md"}
+	binding := workflowstate.PlanRevisionBinding{Reference: reference, Revision: revision, BodyHash: hash, BodyRef: retained + "/plan.md", OrderRef: retained + "/order.json", TrackerRef: retained + "/tracker.md", CurrentTrackerRef: "tracker/00000-" + paths.ScopeID + "-tracking/artifact.md"}
 	document := generationcore.PlanOrderDocument{Schema: "chr-tracker/v2", ProjectID: plan.Scope.ProjectID, Namespace: parts[1], PlanRef: reference, PlanRevision: revision, PlanBodyHash: hash, SourceObservationHash: plan.SourceObservationHash, SourceInputs: plan.SourceInputs, Slices: generationcore.OrderedPlanSlices(plan.Order)}
 
 	return planRevision{Binding: binding, Document: document}, nil
 }
 
-func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding generationcore.PlanRevisionBinding, body, order, tracker []byte) ([]workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, binding workflowstate.PlanRevisionBinding, body, order, tracker []byte) ([]workflowstate.FileChange, error) {
 	var changes []workflowstate.FileChange
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
@@ -137,7 +137,7 @@ func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, bi
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding generationcore.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace string, target planTargetObservation, binding workflowstate.PlanRevisionBinding, plan generationcore.GeneratedPlan, tracker []byte) ([]workflowstate.FileChange, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err
@@ -189,7 +189,7 @@ func checkPreviousPlanTracker(target planTargetObservation, image workflowstate.
 		return nil
 	}
 
-	var previous generationcore.PlanRevisionBinding
+	var previous workflowstate.PlanRevisionBinding
 
 	encoded, err := json.Marshal(target.metadata["plan_binding"])
 	if err != nil {

@@ -94,7 +94,7 @@ func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []Workfl
 	return document, err
 }
 
-func (s *WorkflowStore) validateWorkflowOrderSource(document generationcore.PlanOrderDocument, binding generationcore.PlanRevisionBinding) error {
+func (s *WorkflowStore) validateWorkflowOrderSource(document generationcore.PlanOrderDocument, binding workflowstate.PlanRevisionBinding) error {
 	if document.Schema != "chr-tracker/v2" || document.ProjectID != s.projectID || document.Namespace != s.layout.Namespace() || document.PlanRef != binding.Reference || document.PlanRevision != binding.Revision || document.PlanBodyHash != binding.BodyHash {
 		return workflowstate.ErrConflict
 	}
@@ -164,7 +164,7 @@ func workflowRecordBodyRef(record WorkflowRecord) string {
 	return record.Path
 }
 
-func (s *WorkflowStore) workflowPlannedOrder(binding generationcore.PlanRevisionBinding) (generationcore.PlanOrderDocument, error) {
+func (s *WorkflowStore) workflowPlannedOrder(binding workflowstate.PlanRevisionBinding) (generationcore.PlanOrderDocument, error) {
 	body, err := s.readWorkflowTrackerFile(binding.BodyRef)
 	if err != nil {
 		return generationcore.PlanOrderDocument{}, err
@@ -195,7 +195,7 @@ func (s *WorkflowStore) workflowPlannedOrder(binding generationcore.PlanRevision
 	return document, nil
 }
 
-func validateWorkflowPlanRevision(namespace string, set WorkflowSet) error {
+func validateWorkflowPlanRevision(namespace string, set workflowstate.WorkflowSet) error {
 	if set.PlanRevision == nil {
 		return nil
 	}

@@ -30,7 +30,7 @@ func checkWorkflowAmendmentAddition(builder workflowAmendmentBuild, slice genera
 }
 
 func (s *WorkflowStore) buildWorkflowAmendmentSlices(builder *workflowAmendmentBuild, plan generationcore.GeneratedWorkflowPlan) error {
-	old := map[string]WorkflowSlice{}
+	old := map[string]workflowstate.WorkflowSlice{}
 	for _, descriptor := range builder.old.Set.Slices {
 		old[descriptor.ID] = descriptor
 	}
@@ -56,7 +56,7 @@ func (s *WorkflowStore) buildWorkflowAmendmentSlices(builder *workflowAmendmentB
 	return nil
 }
 
-func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (WorkflowSlice, int, error) {
+func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]workflowstate.WorkflowSlice, input generationcore.GeneratedWorkflowSlice) (workflowstate.WorkflowSlice, int, error) {
 	descriptor, err := materializationSlice(input, builder.result.Set, builder.result.Tasks, builder.keys)
 	if err != nil {
 		return descriptor, 0, err
@@ -73,7 +73,7 @@ func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]W
 	return descriptor, 0, err
 }
 
-func workflowAmendedSlice(previous, descriptor WorkflowSlice) (WorkflowSlice, error) {
+func workflowAmendedSlice(previous, descriptor workflowstate.WorkflowSlice) (workflowstate.WorkflowSlice, error) {
 	if previous.Order != descriptor.Order || previous.ContractHash != descriptor.ContractHash || !reflect.DeepEqual(previous.DependsOn, descriptor.DependsOn) {
 		return descriptor, fmt.Errorf("%w: amendment changed an existing slice contract or order", workflowstate.ErrConflict)
 	}
@@ -83,7 +83,7 @@ func workflowAmendedSlice(previous, descriptor WorkflowSlice) (WorkflowSlice, er
 	return previous, nil
 }
 
-func workflowNewAmendmentSlice(builder *workflowAmendmentBuild, input generationcore.GeneratedWorkflowSlice, descriptor *WorkflowSlice) error {
+func workflowNewAmendmentSlice(builder *workflowAmendmentBuild, input generationcore.GeneratedWorkflowSlice, descriptor *workflowstate.WorkflowSlice) error {
 	data, err := json.Marshal(workflowSliceContract{Contract: input.Contract, Validation: input.Validation})
 	if err != nil {
 		return err

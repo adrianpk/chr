@@ -11,7 +11,7 @@ import (
 
 func (s *WorkflowStore) commitWorkflowClosingStart(ctx context.Context, claim *workflowClosingClaim) error {
 	if claim.set.Set.Closing == nil {
-		claim.set.Set.Closing = &WorkflowClosingBinding{}
+		claim.set.Set.Closing = &workflowstate.WorkflowClosingBinding{}
 	}
 
 	claim.set.Set.Closing.Attempts = append(claim.set.Set.Closing.Attempts, workflowstate.ClosingEvidence{})

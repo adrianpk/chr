@@ -30,7 +30,7 @@ func (s *WorkflowStore) buildMaterialization(ctx context.Context, opts WorkflowM
 func (s *WorkflowStore) buildMaterializationForSet(ctx context.Context, opts WorkflowMaterializationOptions, plan generationcore.GeneratedWorkflowPlan, body []byte, number int, now time.Time, set WorkflowRecord) (WorkflowMaterializationResult, error) {
 	set.Metadata["materialization_id"] = json.RawMessage(fmt.Sprintf("%q", plan.MaterializationID))
 	set.Body = body
-	set.Set = &WorkflowSet{Schema: WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
+	set.Set = &workflowstate.WorkflowSet{Schema: WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
 
 	tasks, keys, err := s.buildMaterializationTasks(ctx, opts, set, plan, number, now)
 	if err != nil {
@@ -124,7 +124,7 @@ func resolveMaterializationRefs(refs []workflowstate.Ref, keys map[string]string
 	return resolved
 }
 
-func materializationSlice(input generationcore.GeneratedWorkflowSlice, set WorkflowRecord, tasks []WorkflowRecord, keys map[string]string) (WorkflowSlice, error) {
+func materializationSlice(input generationcore.GeneratedWorkflowSlice, set WorkflowRecord, tasks []WorkflowRecord, keys map[string]string) (workflowstate.WorkflowSlice, error) {
 	// Membership is a digest of ordered ticket keys and contracts, never a second
 	// editable task list on the set descriptor.
 	contract, err := json.Marshal(struct {
@@ -132,10 +132,10 @@ func materializationSlice(input generationcore.GeneratedWorkflowSlice, set Workf
 		Validation workflowstate.Validation
 	}{input.Contract, input.Validation})
 	if err != nil {
-		return WorkflowSlice{}, err
+		return workflowstate.WorkflowSlice{}, err
 	}
 
-	return WorkflowSlice{ID: input.ID, Order: input.Order, Title: input.Title, ContractRef: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", "slice-"+input.ID+".json")), ContractHash: contenthash.Sum(contract), TaskInputHash: WorkflowTaskInputHash(tasks, input.ID), DependsOn: resolveMaterializationRefs(input.DependsOn, keys), Phase: "pending"}, nil
+	return workflowstate.WorkflowSlice{ID: input.ID, Order: input.Order, Title: input.Title, ContractRef: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", "slice-"+input.ID+".json")), ContractHash: contenthash.Sum(contract), TaskInputHash: WorkflowTaskInputHash(tasks, input.ID), DependsOn: resolveMaterializationRefs(input.DependsOn, keys), Phase: "pending"}, nil
 }
 
 // WorkflowTaskInputHash detects membership or contract changes in a slice.

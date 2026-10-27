@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func guardWorkflowSetChange(old, next WorkflowSet) error {
+func guardWorkflowSetChange(old, next workflowstate.WorkflowSet) error {
 	if err := guardBoundWorkflowSetOrder(old, next); err != nil {
 		return err
 	}
@@ -28,7 +28,7 @@ func guardWorkflowSetChange(old, next WorkflowSet) error {
 	return nil
 }
 
-func guardBoundWorkflowSetOrder(old, next WorkflowSet) error {
+func guardBoundWorkflowSetOrder(old, next workflowstate.WorkflowSet) error {
 	if old.PlanRevision == nil {
 		return nil
 	}
@@ -45,7 +45,7 @@ func guardBoundWorkflowSetOrder(old, next WorkflowSet) error {
 	return nil
 }
 
-func boundWorkflowSliceOrder(set WorkflowSet) []generationcore.PlanOrderSlice {
+func boundWorkflowSliceOrder(set workflowstate.WorkflowSet) []generationcore.PlanOrderSlice {
 	result := make([]generationcore.PlanOrderSlice, 0, len(set.Slices))
 	for _, slice := range set.Slices {
 		result = append(result, generationcore.PlanOrderSlice{ID: slice.ID, Order: slice.Order, Title: slice.Title})

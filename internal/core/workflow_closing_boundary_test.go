@@ -68,7 +68,7 @@ func TestWorkflowClosingUseCase(t *testing.T) {
 	for _, order := range []int{2, 1} {
 		plan := workflowPlanFixture()
 
-		set, err := fixture.store.Create(t.Context(), "Ordered empty set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", UseCase: "empty-case", UseCaseOrder: order, PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{WaiverReason: "Approved ordered empty-set closure"}}})
+		set, err := fixture.store.Create(t.Context(), "Ordered empty set", WorkflowRecord{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", UseCase: "empty-case", UseCaseOrder: order, PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{WaiverReason: "Approved ordered empty-set closure"}}})
 		if err != nil {
 			t.Fatal(err)
 		}

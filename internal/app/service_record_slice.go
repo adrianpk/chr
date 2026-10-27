@@ -90,6 +90,6 @@ func unsupportedSliceRecordFields(request RecordMutationRequest) bool {
 	return request.Body != nil || request.Context != nil || request.Synopsis != nil || request.Validation != nil || request.PlanRef != "" || request.PlanHash != "" || request.UseCase != ""
 }
 
-func pendingSliceDescriptor(descriptor core.WorkflowSlice) bool {
+func pendingSliceDescriptor(descriptor workflowstate.WorkflowSlice) bool {
 	return (descriptor.Phase == "" || descriptor.Phase == "pending") && descriptor.Branch == "" && descriptor.CandidateRef == "" && descriptor.PullRequest == "" && descriptor.DeliveryRef == ""
 }

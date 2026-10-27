@@ -129,7 +129,7 @@ func validateWorkflowTaskEvidence(t WorkflowTask) error {
 	return validateWorkflowTaskDelivery(t)
 }
 
-func validateWorkflowSet(s WorkflowSet) error {
+func validateWorkflowSet(s workflowstate.WorkflowSet) error {
 	if err := validateWorkflowClosingBinding(s); err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func validateWorkflowSet(s WorkflowSet) error {
 	return validateWorkflowSlices(s.Slices)
 }
 
-func validateWorkflowSetContract(s WorkflowSet) error {
+func validateWorkflowSetContract(s workflowstate.WorkflowSet) error {
 	if s.Schema != WorkflowSchema || s.PlanRef == "" || s.PlanHash == "" || s.UseCaseOrder < 0 {
 		return fmt.Errorf("unsupported workflow set schema or missing plan contract")
 	}
@@ -173,7 +173,7 @@ func validateWorkflowSetContract(s WorkflowSet) error {
 	return nil
 }
 
-func validateWorkflowSlices(descriptors []WorkflowSlice) error {
+func validateWorkflowSlices(descriptors []workflowstate.WorkflowSlice) error {
 	ids, orders := map[string]bool{}, map[int]bool{}
 	for _, slice := range descriptors {
 		if ids[slice.ID] || orders[slice.Order] {
@@ -190,7 +190,7 @@ func validateWorkflowSlices(descriptors []WorkflowSlice) error {
 	return nil
 }
 
-func validateWorkflowSlice(s WorkflowSlice) error {
+func validateWorkflowSlice(s workflowstate.WorkflowSlice) error {
 	if s.ID == "" || s.Order < 1 || s.ContractRef == "" || s.ContractHash == "" || s.TaskInputHash == "" {
 		return fmt.Errorf("workflow slice identity/order/contract are required")
 	}

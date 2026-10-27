@@ -11,6 +11,7 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PlanDocument is one concrete plan body, independent of latest-in-scope
@@ -80,7 +81,7 @@ func planDocumentOrigin(metadata map[string]any) (string, error) {
 		return "", err
 	}
 
-	var set WorkflowSet
+	var set workflowstate.WorkflowSet
 	if err := json.Unmarshal(data, &set); err != nil {
 		return "", err
 	}

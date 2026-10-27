@@ -41,3 +41,10 @@ selection guard and resolver callback separately. Guided replay retains no host
 callback, command or configuration snapshot, and native admission still owns all
 normalization, authority, current-state checks, receipt identity and dispatch.
 The frozen guided/session/start/invocation fixtures retain the original bytes.
+
+The complete native set descriptors and retained plan-revision binding live here
+because native persistence and concrete authoring document reads share their
+original JSON representation. Closing attempt and amendment references move with
+the set graph; field order, defaults and tags remain exact. Native set validation,
+selection, mutation, materialization and publication still have their existing
+owners. This value layer imports neither generation nor the coordinator.

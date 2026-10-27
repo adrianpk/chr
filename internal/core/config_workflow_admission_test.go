@@ -199,7 +199,7 @@ func TestWorkflowConfigClosing(t *testing.T) {
 
 	writeWorkspaceConfig(t, fixture.store.layout.ProjectDir(), "work:\n  validation_timeout_seconds: 1\n")
 
-	set, err := fixture.store.Create(t.Context(), "Deadline closing set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
+	set, err := fixture.store.Create(t.Context(), "Deadline closing set", WorkflowRecord{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
 	if err != nil {
 		t.Fatal(err)
 	}

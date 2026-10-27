@@ -17,12 +17,12 @@ type WorkflowBlocker struct {
 type workflowDependencies struct {
 	selection     workflowSelection
 	tasks         map[string][]WorkflowRecord
-	orderedSlices map[string][]WorkflowSlice
+	orderedSlices map[string][]workflowstate.WorkflowSlice
 	refs          map[workflowstate.Ref][]workflowstate.Ref
 }
 
 func newWorkflowDependencies(selection workflowSelection) (workflowDependencies, error) {
-	dependencies := workflowDependencies{selection: selection, tasks: map[string][]WorkflowRecord{}, orderedSlices: map[string][]WorkflowSlice{}, refs: map[workflowstate.Ref][]workflowstate.Ref{}}
+	dependencies := workflowDependencies{selection: selection, tasks: map[string][]WorkflowRecord{}, orderedSlices: map[string][]workflowstate.WorkflowSlice{}, refs: map[workflowstate.Ref][]workflowstate.Ref{}}
 	for _, record := range selection.records {
 		if record.Task.SliceID != "" {
 			dependencies.tasks[record.Task.SliceID] = append(dependencies.tasks[record.Task.SliceID], record)
@@ -37,7 +37,7 @@ func newWorkflowDependencies(selection workflowSelection) (workflowDependencies,
 
 	for id, set := range selection.sets {
 		ordered := slices.Clone(set.Set.Slices)
-		slices.SortFunc(ordered, func(left, right WorkflowSlice) int { return compareRank(left.Order, right.Order) })
+		slices.SortFunc(ordered, func(left, right workflowstate.WorkflowSlice) int { return compareRank(left.Order, right.Order) })
 
 		dependencies.orderedSlices[id] = ordered
 	}

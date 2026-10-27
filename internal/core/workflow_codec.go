@@ -95,7 +95,7 @@ func decodeWorkflowDomain(r *WorkflowRecord, data []byte) error {
 
 		return json.Unmarshal(data, r.Task)
 	case "plan":
-		r.Set = &WorkflowSet{}
+		r.Set = &workflowstate.WorkflowSet{}
 
 		return json.Unmarshal(data, r.Set)
 	case "receipt":

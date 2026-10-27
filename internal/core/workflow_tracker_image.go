@@ -117,7 +117,7 @@ func renderWorkflowTracker(result WorkflowTrackerStatus, set WorkflowRecord, tas
 	output.WriteString("# Workflow tracker\n\nGenerated view. Ticket records and receipts own progress. Do not execute or import this file.\n\n")
 	fmt.Fprintf(&output, "Set: %s (%s). Closure receipt: %s.\n\n", trackerCell(set.ID), trackerCell(set.Set.Status), trackerCell(set.Set.ClosureRef))
 	output.WriteString("| Slice | Phase | Pull request | Delivery receipt |\n| --- | --- | --- | --- |\n")
-	ordered := append([]WorkflowSlice(nil), set.Set.Slices...)
+	ordered := append([]workflowstate.WorkflowSlice(nil), set.Set.Slices...)
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Order < ordered[j].Order })
 	for _, slice := range ordered {
 		fmt.Fprintf(&output, "| %s | %s | %s | %s |\n", trackerCell(slice.ID), trackerCell(slice.Phase), trackerCell(slice.PullRequest), trackerCell(slice.DeliveryRef))

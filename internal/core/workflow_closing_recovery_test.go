@@ -24,7 +24,7 @@ func workflowClosingEmptyGate(t *testing.T, gate workflowstate.Validation) (work
 	fixture := workflowDeliveryFixture(t, "rebase")
 	plan := workflowPlanFixture()
 
-	set, err := fixture.store.Create(t.Context(), "Empty closing owner", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
+	set, err := fixture.store.Create(t.Context(), "Empty closing owner", WorkflowRecord{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
 	if err != nil {
 		t.Fatal(err)
 	}

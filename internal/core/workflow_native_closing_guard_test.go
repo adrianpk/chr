@@ -148,7 +148,7 @@ func nativeClosingCorrectiveSet(t *testing.T, store *WorkflowStore) WorkflowReco
 	counter := filepath.Join(t.TempDir(), "corrective-count")
 	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "n=0; [ ! -f \"$1\" ] || read -r n <\"$1\"; n=$((n+1)); printf '%s\\n' \"$n\" >\"$1\"; [ \"$n\" -gt 1 ]", "corrective-gate", counter}}}
 
-	set, err := store.Create(t.Context(), "Corrective closing set", WorkflowRecord{Kind: "plan", Set: &WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
+	set, err := store.Create(t.Context(), "Corrective closing set", WorkflowRecord{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
 	if err != nil {
 		t.Fatal(err)
 	}

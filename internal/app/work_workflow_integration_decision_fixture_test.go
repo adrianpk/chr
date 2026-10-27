@@ -167,7 +167,7 @@ func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID st
 	return contract.Validation
 }
 
-func serviceIntegrationSliceDescriptor(t *testing.T, snapshot core.WorkflowSnapshot, sliceID string) core.WorkflowSlice {
+func serviceIntegrationSliceDescriptor(t *testing.T, snapshot core.WorkflowSnapshot, sliceID string) workflowstate.WorkflowSlice {
 	t.Helper()
 
 	for _, record := range snapshot.Records {
@@ -184,5 +184,5 @@ func serviceIntegrationSliceDescriptor(t *testing.T, snapshot core.WorkflowSnaps
 
 	t.Fatal("missing retained slice validation contract")
 
-	return core.WorkflowSlice{}
+	return workflowstate.WorkflowSlice{}
 }

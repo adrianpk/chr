@@ -62,21 +62,21 @@ const (
 // RecordMutationRequest exposes metadata changes and explicit proposed-record creation.
 // Lifecycle status, execution, review and grants require their dedicated owners.
 type RecordMutationRequest struct {
-	Kind             RecordKind                `json:"kind"`
-	Action           RecordMutationAction      `json:"action"`
-	Identity         string                    `json:"identity,omitempty"`
-	ParentID         string                    `json:"parent_id,omitempty"`
-	ExpectedRevision uint64                    `json:"revision,omitempty"`
-	ExpectedHash     string                    `json:"source_hash,omitempty"`
-	Title            *string                   `json:"title,omitempty"`
-	Synopsis         *string                   `json:"synopsis,omitempty"`
-	Body             *string                   `json:"body,omitempty"`
-	Context          *string                   `json:"context,omitempty"`
-	UseCase          string                    `json:"use_case,omitempty"`
-	PlanRef          string                    `json:"plan_ref,omitempty"`
-	PlanHash         string                    `json:"plan_hash,omitempty"`
-	Validation       *workflowstate.Validation `json:"validation,omitempty"`
-	Slice            *core.WorkflowSlice       `json:"slice,omitempty"`
+	Kind             RecordKind                   `json:"kind"`
+	Action           RecordMutationAction         `json:"action"`
+	Identity         string                       `json:"identity,omitempty"`
+	ParentID         string                       `json:"parent_id,omitempty"`
+	ExpectedRevision uint64                       `json:"revision,omitempty"`
+	ExpectedHash     string                       `json:"source_hash,omitempty"`
+	Title            *string                      `json:"title,omitempty"`
+	Synopsis         *string                      `json:"synopsis,omitempty"`
+	Body             *string                      `json:"body,omitempty"`
+	Context          *string                      `json:"context,omitempty"`
+	UseCase          string                       `json:"use_case,omitempty"`
+	PlanRef          string                       `json:"plan_ref,omitempty"`
+	PlanHash         string                       `json:"plan_hash,omitempty"`
+	Validation       *workflowstate.Validation    `json:"validation,omitempty"`
+	Slice            *workflowstate.WorkflowSlice `json:"slice,omitempty"`
 }
 
 // PreparedRecordMutation freezes the exact owner input before any canonical effect.

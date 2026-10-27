@@ -62,7 +62,7 @@ func orderedPlanCandidate() generationcore.GeneratedPlan {
 	return plan
 }
 
-func readTestPlanBinding(t *testing.T, project string, scope quizcore.Scope) generationcore.PlanRevisionBinding {
+func readTestPlanBinding(t *testing.T, project string, scope quizcore.Scope) workflowstate.PlanRevisionBinding {
 	t.Helper()
 
 	binding, err := ObservePlanRevision(t.Context(), project, scope)
@@ -84,7 +84,7 @@ func readTestPlanImage(t *testing.T, project, reference string) []byte {
 	return content
 }
 
-func verifyPlanManifest(t *testing.T, paths GeneratedPlanPaths, bindings ...generationcore.PlanRevisionBinding) {
+func verifyPlanManifest(t *testing.T, paths GeneratedPlanPaths, bindings ...workflowstate.PlanRevisionBinding) {
 	t.Helper()
 
 	encoded, err := os.ReadFile(filepath.Join(filepath.Dir(paths.Path), "metadata.json"))
@@ -232,9 +232,9 @@ func checkPlanOrderArchive(t *testing.T, project string, plan generationcore.Gen
 	}
 
 	var metadata struct {
-		Files       []string                           `json:"files"`
-		SourceFiles []string                           `json:"source_files"`
-		Binding     generationcore.PlanRevisionBinding `json:"plan_binding"`
+		Files       []string                          `json:"files"`
+		SourceFiles []string                          `json:"source_files"`
+		Binding     workflowstate.PlanRevisionBinding `json:"plan_binding"`
 	}
 	if err := json.Unmarshal(metadataBytes, &metadata); err != nil {
 		t.Fatal(err)

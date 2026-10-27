@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowAmendmentRefs(refs []WorkflowAmendmentRef) error {
+func validateWorkflowAmendmentRefs(refs []workflowstate.WorkflowAmendmentRef) error {
 	if len(refs) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow amendment history bound exceeded")
 	}

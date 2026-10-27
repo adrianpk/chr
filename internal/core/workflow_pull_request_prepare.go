@@ -84,7 +84,7 @@ func workflowPullRequestCandidateMayAdvance(binding WorkflowPullRequestBinding, 
 	return binding.CandidateID == "" || binding.CandidateID == id || binding.State == "prepared" || binding.State == "bound" && binding.URL != ""
 }
 
-func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descriptor WorkflowSlice, request WorkflowPullRequestRequest) error {
+func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descriptor workflowstate.WorkflowSlice, request WorkflowPullRequestRequest) error {
 	if run.PullRequest != nil {
 		if run.PullRequest.Request != request || run.PullRequest.Unit != run.Lane.Unit || run.PullRequest.TargetCommit != run.ExecutionSelection().Target.Commit {
 			return fmt.Errorf("%w: retained PR request changed", workflowstate.ErrConflict)

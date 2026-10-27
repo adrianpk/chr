@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
-	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -18,18 +17,18 @@ import (
 // ObservePlanRevision reads the current retained order binding without repairing
 // or rewriting artifacts. Missing or edited companions require explicit repair.
 // A legacy or absent plan returns an empty binding without migration.
-func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.Scope) (generationcore.PlanRevisionBinding, error) {
+func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.Scope) (workflowstate.PlanRevisionBinding, error) {
 	paths, err := GeneratedPlanLayout(projectDir, scope)
 	if err != nil {
-		return generationcore.PlanRevisionBinding{}, err
+		return workflowstate.PlanRevisionBinding{}, err
 	}
 
 	target, err := observePlanTarget(ctx, projectDir, paths.RelativePath)
 	if err != nil {
-		return generationcore.PlanRevisionBinding{}, err
+		return workflowstate.PlanRevisionBinding{}, err
 	}
 
-	var binding generationcore.PlanRevisionBinding
+	var binding workflowstate.PlanRevisionBinding
 	if target.metadata["plan_binding"] == nil {
 		return binding, nil
 	}
@@ -80,7 +79,7 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcor
 	return r.checkPlanImages(root, images)
 }
 
-func (r *fileAuthoringSessionRepository) validatePlanRevisionImages(namespace string, binding generationcore.PlanRevisionBinding) error {
+func (r *fileAuthoringSessionRepository) validatePlanRevisionImages(namespace string, binding workflowstate.PlanRevisionBinding) error {
 	if !validPlanBindingPaths(namespace, binding) {
 		return workflowstate.ErrConflict
 	}
@@ -106,7 +105,7 @@ func (r *fileAuthoringSessionRepository) checkPlanImages(root string, images map
 	return nil
 }
 
-func validPlanBindingPaths(namespace string, binding generationcore.PlanRevisionBinding) bool {
+func validPlanBindingPaths(namespace string, binding workflowstate.PlanRevisionBinding) bool {
 	parts := strings.Split(binding.Reference, "/")
 	if len(parts) != 3 || parts[0] != "plan" || !opscore.HasArtifactNumberPrefix(parts[1]) || parts[2] != "artifact.md" {
 		return false

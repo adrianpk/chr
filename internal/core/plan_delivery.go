@@ -59,7 +59,7 @@ func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.
 		return generationcore.GeneratedWorkflowPlan{}, err
 	}
 
-	var planned generationcore.PlanRevisionBinding
+	var planned workflowstate.PlanRevisionBinding
 	if err := authoringstate.Decode(data, &planned); err != nil {
 		return generationcore.GeneratedWorkflowPlan{}, err
 	}
@@ -71,11 +71,11 @@ func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.
 	return r.plannedWorkflowInput(ctx, layout, planned)
 }
 
-func samePlannedWorkflowBinding(planned, current generationcore.PlanRevisionBinding) bool {
+func samePlannedWorkflowBinding(planned, current workflowstate.PlanRevisionBinding) bool {
 	return planned.Reference == current.Reference && planned.Revision == current.Revision && planned.BodyHash == current.BodyHash && planned.PlannedOrderHash == current.PlannedOrderHash
 }
 
-func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Context, layout opscore.Layout, binding generationcore.PlanRevisionBinding) (generationcore.GeneratedWorkflowPlan, error) {
+func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Context, layout opscore.Layout, binding workflowstate.PlanRevisionBinding) (generationcore.GeneratedWorkflowPlan, error) {
 	reference := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), binding.Reference))
 
 	document, err := ReadPlanDocument(ctx, r.projectDir, reference)

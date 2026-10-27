@@ -91,7 +91,7 @@ func TestWorkflowPlanOrderHistory(t *testing.T) {
 	}
 }
 
-func regenerateWorkflowOrder(t *testing.T, store *WorkflowStore, plan generationcore.GeneratedWorkflowPlan, body string) generationcore.PlanRevisionBinding {
+func regenerateWorkflowOrder(t *testing.T, store *WorkflowStore, plan generationcore.GeneratedWorkflowPlan, body string) workflowstate.PlanRevisionBinding {
 	t.Helper()
 
 	generated := orderedPlanCandidate()

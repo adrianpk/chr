@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -50,39 +49,6 @@ type WorkflowTaskDelivery struct {
 	ConfirmedAt  time.Time `json:"confirmed_at"`
 }
 
-// WorkflowSlice is a set-owned descriptor; tickets alone own task membership.
-type WorkflowSlice struct {
-	ID            string              `json:"id"`
-	Order         int                 `json:"slice_order"`
-	Title         string              `json:"title"`
-	ContractRef   string              `json:"contract_ref"`
-	ContractHash  string              `json:"contract_hash"`
-	TaskInputHash string              `json:"task_input_hash"`
-	DependsOn     []workflowstate.Ref `json:"depends_on,omitempty"`
-	Phase         string              `json:"phase"`
-	Branch        string              `json:"branch,omitempty"`
-	CandidateRef  string              `json:"candidate_ref"`
-	PullRequest   string              `json:"pull_request,omitempty"`
-	DeliveryRef   string              `json:"delivery_ref,omitempty"`
-}
-
-// WorkflowSet owns ordered slices and its closing contract.
-type WorkflowSet struct {
-	PlanRevision      *generationcore.PlanRevisionBinding `json:"plan_revision,omitempty"`
-	Closing           *WorkflowClosingBinding             `json:"closing,omitempty"`
-	Amendments        []WorkflowAmendmentRef              `json:"amendments,omitempty"`
-	Schema            string                              `json:"workflow_schema"`
-	UseCase           string                              `json:"use_case,omitempty"`
-	UseCaseOrder      int                                 `json:"use_case_order,omitempty"`
-	Status            string                              `json:"status"`
-	PlanRef           string                              `json:"plan_ref"`
-	PlanHash          string                              `json:"plan_hash"`
-	Slices            []WorkflowSlice                     `json:"slices"`
-	ClosingValidation workflowstate.Validation            `json:"closing_validation"`
-	ClosureRef        string                              `json:"closure_ref,omitempty"`
-	ClosureHistory    []string                            `json:"closure_history,omitempty"`
-}
-
 // WorkflowReceipt retains immutable integration facts, separate from projections.
 type WorkflowReceipt struct {
 	Native          *WorkflowNativeReceipt `json:"native,omitempty"`
@@ -114,7 +80,7 @@ type WorkflowRecord struct {
 	Path       string
 	Body       []byte
 	Task       *WorkflowTask
-	Set        *WorkflowSet
+	Set        *workflowstate.WorkflowSet
 	Receipt    *WorkflowReceipt
 	Metadata   map[string]json.RawMessage
 	Domain     map[string]json.RawMessage

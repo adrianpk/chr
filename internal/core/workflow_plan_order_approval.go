@@ -60,7 +60,7 @@ func (s *WorkflowStore) validateApprovedOrder(plan generationcore.GeneratedWorkf
 	return s.validateApprovalOrderImages(binding, setID)
 }
 
-func (s *WorkflowStore) validatePlannedApproval(plan generationcore.GeneratedWorkflowPlan, binding generationcore.PlanRevisionBinding) error {
+func (s *WorkflowStore) validatePlannedApproval(plan generationcore.GeneratedWorkflowPlan, binding workflowstate.PlanRevisionBinding) error {
 	if !validPlanBindingPaths(s.layout.Namespace(), binding) || plan.PlanRef != binding.BodyRef || plan.PlanHash != binding.BodyHash {
 		return workflowstate.ErrConflict
 	}
@@ -81,7 +81,7 @@ func (s *WorkflowStore) validatePlannedApproval(plan generationcore.GeneratedWor
 	return nil
 }
 
-func (s *WorkflowStore) validateApprovalOrderImages(binding generationcore.PlanRevisionBinding, setID string) error {
+func (s *WorkflowStore) validateApprovalOrderImages(binding workflowstate.PlanRevisionBinding, setID string) error {
 	order, err := s.readWorkflowTrackerFile(binding.OrderRef)
 	if err != nil {
 		return err
@@ -135,8 +135,8 @@ func (s *WorkflowStore) requirePlanRevisionBinding(reference string) error {
 	return nil
 }
 
-func (s *WorkflowStore) readPlanOrderBinding(binding generationcore.PlanRevisionBinding) (generationcore.PlanRevisionBinding, error) {
-	var current generationcore.PlanRevisionBinding
+func (s *WorkflowStore) readPlanOrderBinding(binding workflowstate.PlanRevisionBinding) (workflowstate.PlanRevisionBinding, error) {
+	var current workflowstate.PlanRevisionBinding
 
 	data, err := s.readWorkflowTrackerFile(filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "binding.json")))
 	if err != nil {
@@ -148,7 +148,7 @@ func (s *WorkflowStore) readPlanOrderBinding(binding generationcore.PlanRevision
 	return current, err
 }
 
-func (s *WorkflowStore) validateOrderScope(binding generationcore.PlanRevisionBinding, useCase string) error {
+func (s *WorkflowStore) validateOrderScope(binding workflowstate.PlanRevisionBinding, useCase string) error {
 	body, err := s.readWorkflowTrackerFile(binding.BodyRef)
 	if err != nil {
 		return err

@@ -9,12 +9,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowClosingBinding retains bounded attempt history across explicit reopening.
-// Each set invocation keeps its own retry budget and immutable evidence.
-type WorkflowClosingBinding struct {
-	Attempts []workflowstate.ClosingEvidence `json:"attempts"`
-}
-
 // WorkflowSetClosureRequest requires the observed set and canonical target branch.
 // InvocationID is optional for an explicit standalone decision, including an
 // empty set. It cannot take ownership from another unfinished invocation.

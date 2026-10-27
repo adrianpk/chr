@@ -55,11 +55,11 @@ func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterialization
 	return append(append(changes, registered...), current...), nil
 }
 
-func workflowBoundTrackerStatus(s *WorkflowStore, set WorkflowRecord, binding generationcore.PlanRevisionBinding, sourceHash string) WorkflowTrackerStatus {
+func workflowBoundTrackerStatus(s *WorkflowStore, set WorkflowRecord, binding workflowstate.PlanRevisionBinding, sourceHash string) WorkflowTrackerStatus {
 	return WorkflowTrackerStatus{Schema: "chr-tracker/v2", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: set.ID, Path: "tracker/" + set.ID + ".md", PlanRevision: &binding, SourceHash: sourceHash, OutputHash: binding.TrackerHash, ObservedHash: binding.TrackerHash, GeneratedAt: time.Now().UTC(), Status: "current", Sources: []WorkflowTrackerSource{{ID: set.ID, Path: set.Path, Hash: sourceHash}, {Path: binding.BodyRef, Hash: binding.BodyHash}}}
 }
 
-func (s *WorkflowStore) retainedBoundOrderChanges(previous, next generationcore.PlanRevisionBinding, order, tracker []byte) ([]workflowstate.FileChange, error) {
+func (s *WorkflowStore) retainedBoundOrderChanges(previous, next workflowstate.PlanRevisionBinding, order, tracker []byte) ([]workflowstate.FileChange, error) {
 	data, err := json.Marshal(next)
 	if err != nil {
 		return nil, err
@@ -161,7 +161,7 @@ func (s *WorkflowStore) observedOrderImage(reference string, body []byte) (workf
 	return change, nil
 }
 
-func (s *WorkflowStore) currentPlanOrderMetadata(binding generationcore.PlanRevisionBinding) (map[string]any, workflowstate.FileChange, bool, error) {
+func (s *WorkflowStore) currentPlanOrderMetadata(binding workflowstate.PlanRevisionBinding) (map[string]any, workflowstate.FileChange, bool, error) {
 	reference := filepath.ToSlash(filepath.Join(filepath.Dir(binding.Reference), "metadata.json"))
 
 	data, err := s.readWorkflowTrackerFile(reference)
@@ -183,7 +183,7 @@ func (s *WorkflowStore) currentPlanOrderMetadata(binding generationcore.PlanRevi
 		return nil, workflowstate.FileChange{}, false, err
 	}
 
-	var current generationcore.PlanRevisionBinding
+	var current workflowstate.PlanRevisionBinding
 	if err := json.Unmarshal(encoded, &current); err != nil {
 		return nil, workflowstate.FileChange{}, false, err
 	}
@@ -197,7 +197,7 @@ func (s *WorkflowStore) currentPlanOrderMetadata(binding generationcore.PlanRevi
 	return metadata, workflowstate.FileChange{Path: reference, Before: contenthash.Sum(data)}, same, nil
 }
 
-func (s *WorkflowStore) checkCurrentOrderOutput(binding generationcore.PlanRevisionBinding) error {
+func (s *WorkflowStore) checkCurrentOrderOutput(binding workflowstate.PlanRevisionBinding) error {
 	_, _, same, err := s.currentPlanOrderMetadata(binding)
 	if err != nil || !same {
 		return err
@@ -224,7 +224,7 @@ func (s *WorkflowStore) checkCurrentOrderOutput(binding generationcore.PlanRevis
 	return nil
 }
 
-func (s *WorkflowStore) boundCurrentPlanChanges(previous, next generationcore.PlanRevisionBinding, tracker []byte) ([]workflowstate.FileChange, error) {
+func (s *WorkflowStore) boundCurrentPlanChanges(previous, next workflowstate.PlanRevisionBinding, tracker []byte) ([]workflowstate.FileChange, error) {
 	metadata, planImage, same, err := s.currentPlanOrderMetadata(previous)
 	if err != nil {
 		return nil, err
@@ -257,7 +257,7 @@ func (s *WorkflowStore) boundCurrentPlanChanges(previous, next generationcore.Pl
 	return append(changes, trackerChanges...), err
 }
 
-func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next generationcore.PlanRevisionBinding, tracker []byte) ([]workflowstate.FileChange, error) {
+func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next workflowstate.PlanRevisionBinding, tracker []byte) ([]workflowstate.FileChange, error) {
 	output, err := s.orderImageChange(next.CurrentTrackerRef, tracker, previous.TrackerHash, "")
 	if err != nil {
 		return nil, err
@@ -293,7 +293,7 @@ func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next generationcore
 	return []workflowstate.FileChange{output, {Path: metadataRef, Before: contenthash.Sum(current), After: encoded}}, nil
 }
 
-func (s *WorkflowStore) registerBoundProjection(metadata map[string]any, binding generationcore.PlanRevisionBinding) error {
+func (s *WorkflowStore) registerBoundProjection(metadata map[string]any, binding workflowstate.PlanRevisionBinding) error {
 	reference := filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "projection.json"))
 
 	relative, err := filepath.Rel(filepath.Dir(binding.Reference), reference)

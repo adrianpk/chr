@@ -85,7 +85,7 @@ func (s service) prepareSetRecord(ctx context.Context, store *core.WorkflowStore
 		return core.WorkflowRecord{}, err
 	}
 
-	return core.WorkflowRecord{Kind: "plan", Body: body, Set: &core.WorkflowSet{Schema: core.WorkflowSchema, Status: "proposed", UseCase: request.UseCase, PlanRef: request.PlanRef, PlanHash: request.PlanHash, ClosingValidation: *request.Validation}}, nil
+	return core.WorkflowRecord{Kind: "plan", Body: body, Set: &workflowstate.WorkflowSet{Schema: core.WorkflowSchema, Status: "proposed", UseCase: request.UseCase, PlanRef: request.PlanRef, PlanHash: request.PlanHash, ClosingValidation: *request.Validation}}, nil
 }
 
 func recordString(value *string) string {

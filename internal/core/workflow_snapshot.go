@@ -54,7 +54,7 @@ func (s WorkflowSnapshot) Validate() error {
 }
 
 func addWorkflowSlices(r WorkflowRecord, owners map[string]string, graph map[workflowstate.Ref][]workflowstate.Ref) error {
-	ordered := append([]WorkflowSlice(nil), r.Set.Slices...)
+	ordered := append([]workflowstate.WorkflowSlice(nil), r.Set.Slices...)
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Order < ordered[j].Order })
 
 	for i, slice := range ordered {
@@ -221,7 +221,7 @@ func validateWorkflowDeliveryBindings(records []WorkflowRecord) error {
 	return nil
 }
 
-func validateWorkflowPRBindings(slices []WorkflowSlice, bindings map[string]bool) error {
+func validateWorkflowPRBindings(slices []workflowstate.WorkflowSlice, bindings map[string]bool) error {
 	for _, descriptor := range slices {
 		if descriptor.PullRequest == "" {
 			continue

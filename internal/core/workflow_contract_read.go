@@ -82,7 +82,7 @@ func (s *WorkflowStore) guardMutationSlices(record WorkflowRecord, snapshot Work
 	return nil
 }
 
-func newMutationSlice(previous WorkflowRecord, next WorkflowSlice) bool {
+func newMutationSlice(previous WorkflowRecord, next workflowstate.WorkflowSlice) bool {
 	for _, old := range previous.Set.Slices {
 		if old.ID == next.ID {
 			return old.ContractRef != next.ContractRef || old.ContractHash != next.ContractHash || old.TaskInputHash != next.TaskInputHash

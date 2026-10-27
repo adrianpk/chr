@@ -7,6 +7,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type planPublicationReplay struct {
@@ -39,7 +40,7 @@ func (s service) replayPlanPublication(ctx context.Context, operation generation
 	return planPublicationReplay{Result: PlanOperationResult{Message: "Plan generation already committed.", Plan: s.planViewFromPath(operation.Scope, reference, filepath.Join(s.projectContext.ProjectDir, filepath.FromSlash(reference)))}, Found: true}, nil
 }
 
-func (s service) retainedPlanTracking(plan PlanView, binding generationcore.PlanRevisionBinding) (PlanTrackingResult, error) {
+func (s service) retainedPlanTracking(plan PlanView, binding workflowstate.PlanRevisionBinding) (PlanTrackingResult, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: plan.Scope.Namespace})
 	if err != nil {
 		return PlanTrackingResult{}, err

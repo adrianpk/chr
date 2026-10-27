@@ -12,7 +12,7 @@ import (
 )
 
 type workflowSliceObservation struct {
-	descriptor WorkflowSlice
+	descriptor workflowstate.WorkflowSlice
 	set        WorkflowRecord
 	tasks      []WorkflowRecord
 }
@@ -141,7 +141,7 @@ type workflowSliceContract struct {
 	Validation workflowstate.Validation
 }
 
-func (s *WorkflowStore) readWorkflowSliceContract(descriptor WorkflowSlice) (workflowSliceContract, error) {
+func (s *WorkflowStore) readWorkflowSliceContract(descriptor workflowstate.WorkflowSlice) (workflowSliceContract, error) {
 	path, err := s.safePath(descriptor.ContractRef)
 	if err != nil {
 		return workflowSliceContract{}, err

@@ -28,7 +28,7 @@ type workflowMaterializationReceipt struct {
 	SetID     string                           `json:"set_id"`
 	SetPath   string                           `json:"set_path"`
 	Tasks     []workflowMaterializationBinding `json:"tasks"`
-	Slices    []WorkflowSlice                  `json:"slices"`
+	Slices    []workflowstate.WorkflowSlice    `json:"slices"`
 }
 
 func workflowMaterializationHash(plan generationcore.GeneratedWorkflowPlan) (string, error) {

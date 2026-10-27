@@ -125,7 +125,7 @@ func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths Gene
 	}
 
 	var metadata struct {
-		Binding generationcore.PlanRevisionBinding `json:"plan_binding"`
+		Binding workflowstate.PlanRevisionBinding `json:"plan_binding"`
 	}
 
 	for _, change := range changes {

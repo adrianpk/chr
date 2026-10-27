@@ -39,7 +39,7 @@ func workflowApprovedAmendment(t *testing.T, store *WorkflowStore, set WorkflowR
 	return WorkflowSetAmendmentRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Plan: generationcore.OrderedWorkflowPlan(plan), ReserveTicketKey: func(context.Context) (string, error) { return "PRJ-7", nil }}
 }
 
-func workflowApprovedSlice(t *testing.T, store *WorkflowStore, descriptor WorkflowSlice, snapshot WorkflowSnapshot) generationcore.GeneratedWorkflowSlice {
+func workflowApprovedSlice(t *testing.T, store *WorkflowStore, descriptor workflowstate.WorkflowSlice, snapshot WorkflowSnapshot) generationcore.GeneratedWorkflowSlice {
 	t.Helper()
 
 	contract, err := store.readWorkflowSliceContract(descriptor)

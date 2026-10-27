@@ -94,7 +94,7 @@ func (s *WorkflowStore) workflowClosingInput(ctx context.Context, set WorkflowRe
 	}
 
 	descriptors := slices.Clone(set.Set.Slices)
-	slices.SortFunc(descriptors, func(a, b WorkflowSlice) int { return compareRank(a.Order, b.Order) })
+	slices.SortFunc(descriptors, func(a, b workflowstate.WorkflowSlice) int { return compareRank(a.Order, b.Order) })
 
 	for _, descriptor := range descriptors {
 		proof, err := s.workflowClosingSliceProof(ctx, input, descriptor, ports)

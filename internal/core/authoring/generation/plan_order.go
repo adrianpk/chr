@@ -26,22 +26,6 @@ type PlanOrderSlice struct {
 	Tasks []PlanOrderTask `json:"tasks"`
 }
 
-// PlanRevisionBinding identifies retained source and companion images. Hashing
-// the plan body independently prevents circular plan/tracker dependencies.
-type PlanRevisionBinding struct {
-	PlannedOrderHash   string `json:"planned_order_hash"`
-	PlannedTrackerHash string `json:"planned_tracker_hash"`
-	Reference          string `json:"plan_ref"`
-	Revision           uint64 `json:"plan_revision"`
-	BodyHash           string `json:"plan_body_hash"`
-	BodyRef            string `json:"body_ref"`
-	OrderRef           string `json:"order_ref"`
-	OrderHash          string `json:"order_hash"`
-	TrackerRef         string `json:"tracker_ref"`
-	TrackerHash        string `json:"tracker_hash"`
-	CurrentTrackerRef  string `json:"current_tracker_ref"`
-}
-
 // PlanOrderDocument is an order-only projection. Mutable processing state has
 // no representation in either its structural hash or its rendered bytes.
 type PlanOrderDocument struct {

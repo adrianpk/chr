@@ -52,7 +52,7 @@ func (j *webJourney) planAndBind(t *testing.T) {
 	}
 }
 
-func journeyApprovedPlan(t *testing.T, operations service, binding generationcore.PlanRevisionBinding) generationcore.GeneratedWorkflowPlan {
+func journeyApprovedPlan(t *testing.T, operations service, binding workflowstate.PlanRevisionBinding) generationcore.GeneratedWorkflowPlan {
 	t.Helper()
 
 	data, err := os.ReadFile(filepath.Join(operations.projectContext.ProjectDir, "ops/default", binding.OrderRef))

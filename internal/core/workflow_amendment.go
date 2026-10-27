@@ -9,13 +9,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowAmendmentRef binds an immutable approved amendment to its owning set.
-type WorkflowAmendmentRef struct {
-	Revision uint64 `json:"revision"`
-	Ref      string `json:"ref"`
-	Hash     string `json:"hash"`
-}
-
 // WorkflowSetAmendmentRequest retains existing identities and contracts while
 // adding approved future work. Reopen explicitly preserves the prior closure.
 type WorkflowSetAmendmentRequest struct {

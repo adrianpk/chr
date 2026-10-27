@@ -32,7 +32,7 @@ type GuidedWorkMember struct {
 // GuidedMaterializationReference links the original receipt and exact native membership.
 type GuidedMaterializationReference struct {
 	ID, ReceiptRef, SetID, SetPath string
-	PlanRevision                   generationcore.PlanRevisionBinding
+	PlanRevision                   workflowstate.PlanRevisionBinding
 	Members                        []GuidedWorkMember
 }
 
