@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-9
 source: review
 reported_at: 2026-10-26T08:48:29Z
-commits: [e63688b43071, a2e76eec801e]
+commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4]
 branch: refactor/slice-9-quality-authoring
 started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z
@@ -57,4 +57,9 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 
 Existing generation/source-revision/authoring publication recovery and guided preparation tests with real filesystem/Git; make verify.
 
-T9.1 is active. The shared ops envelope and project primitive prerequisites and focused validation are recorded in the Slice 9 report. Remaining tasks are pending; no PR is open.
+T9.1, T9.2 and T9.4 are active. Acceptance artifacts have their own package,
+shared prerequisites are extracted, D02/D07/D09/D10 share their proven common
+rules and the first assigned result disposition is fixed. Focused boundary
+checks, strict lint and signature/README checks pass at the recorded task
+commits. The complete session/repository move, generation sharing, remaining
+signatures and guided ports are unfinished. The report is drafting; no PR is open.
