@@ -13,21 +13,24 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowPreparationMode string
+
+const (
+	workflowPreparationAutomatic workflowPreparationMode = "automatic"
+	workflowPreparationManual    workflowPreparationMode = "manual"
+)
+
 const workflowTaskInstructions = `Complete the execution_contract in lane.worktree on the assigned lane.branch.
 Stay within the task scope and preserve unrelated work. Run the required validation commands.
 Commit the task changes with a Conventional Commit message and leave the worktree clean before returning success.
 Do not push, merge, switch branches, or edit chr workflow state. The host owns validation and integration.
 If the task, validation, or commit cannot be completed, report the failure instead of claiming success.`
 
-func (s *WorkflowStore) prepareWorkflowTask(ctx context.Context, claim *WorkflowClaim, worker []string) (prepared workflowPreparedTask, err error) {
-	return s.prepareWorkflowTaskMode(ctx, claim, worker, "automatic")
-}
-
-func (s *WorkflowStore) prepareWorkflowTaskMode(ctx context.Context, claim *WorkflowClaim, worker []string, mode string) (prepared workflowPreparedTask, err error) {
+func (s *WorkflowStore) prepareWorkflowTaskMode(ctx context.Context, claim *WorkflowClaim, worker []string, mode workflowPreparationMode) (prepared workflowPreparedTask, err error) {
 	return s.prepareWorkflowTaskHarness(ctx, claim, worker, mode, nil)
 }
 
-func (s *WorkflowStore) prepareWorkflowTaskHarness(ctx context.Context, claim *WorkflowClaim, worker []string, mode string, harness *WorkflowAgentHarness) (prepared workflowPreparedTask, err error) {
+func (s *WorkflowStore) prepareWorkflowTaskHarness(ctx context.Context, claim *WorkflowClaim, worker []string, mode workflowPreparationMode, harness *WorkflowAgentHarness) (prepared workflowPreparedTask, err error) {
 	if claim == nil || claim.purpose != "" {
 		return prepared, ErrWorkflowOwned
 	}
@@ -51,7 +54,7 @@ func (s *WorkflowStore) prepareWorkflowTaskHarness(ctx context.Context, claim *W
 	return prepared, err
 }
 
-func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string, mode string, harness *WorkflowAgentHarness) (workflowPreparedTask, error) {
+func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string, mode workflowPreparationMode, harness *WorkflowAgentHarness) (workflowPreparedTask, error) {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	if attempt.InputRef != "" {
 		return workflowPreparedTask{}, fmt.Errorf("%w: attempt input is already prepared", ErrWorkflowOwned)
@@ -81,7 +84,7 @@ func (s *WorkflowStore) prepareWorkflowAttempt(ctx context.Context, run workflow
 		return workflowPreparedTask{}, err
 	}
 
-	input.ExecutionMode = mode
+	input.ExecutionMode = string(mode)
 	input.Instructions = workflowTaskInstructions
 
 	return s.saveWorkflowTaskInput(ctx, run, input, harness)
@@ -184,12 +187,12 @@ func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile, extra .
 	return nil
 }
 
-func validateWorkflowInputWorker(mode string, worker []string) error {
-	if mode == "manual" && len(worker) == 0 {
+func validateWorkflowInputWorker(mode workflowPreparationMode, worker []string) error {
+	if mode == workflowPreparationManual && len(worker) == 0 {
 		return nil
 	}
 
-	if mode != "manual" && mode != "automatic" {
+	if mode != workflowPreparationManual && mode != workflowPreparationAutomatic {
 		return workflowstate.ErrConflict
 	}
 

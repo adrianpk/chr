@@ -81,7 +81,7 @@ func (s *WorkflowStore) readWorkflowManualInput(attempt WorkflowAttempt) (workfl
 		return workflowPreparedTask{}, ErrWorkflowOwned
 	}
 
-	if err := validateWorkflowInputWorker(input.ExecutionMode, input.Worker); err != nil {
+	if err := validateWorkflowInputWorker(workflowPreparationMode(input.ExecutionMode), input.Worker); err != nil {
 		return workflowPreparedTask{}, err
 	}
 

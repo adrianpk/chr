@@ -726,3 +726,21 @@ publisher binding, JSON fingerprints, response/pagination bounds and capability
 guards are unchanged. Existing provider/native capability/PR/local Git regressions
 and strict lint pass; five more assigned results are fixed, leaving 162 exact
 debts at ceiling six.
+
+All 59 Slice 11 signature/watch entries now have exact current identities,
+contracts, task commits and validation references: 47 fixed and 12 retained
+cohesive contracts. Thirteen concrete flag/legacy/preparation boundaries preserve
+preview/read behavior, unadopted file writes versus native revision authority,
+legacy aliases and source-only provider restrictions. No permanent exception or
+compatibility facade was added.
+
+Automatic/manual preparation uses a private named mode across its actual caller,
+harness binding and worker admission. The serialized execution_mode string still
+retains the original spellings and separate aggregate representation. Validation
+order, defaults and retained bytes/hashes are unchanged. The original automatic
+wrapper moved byte-identically to a private test fixture. Counts are 9306
+production declarations, ceiling six, 162 exact debts, one external exception
+and 724 move preimages. The existing six-input preparation attempt remains
+explicit debt assigned to Slice 12 with its updated mode type. Existing real
+task/manual/recovery, storage/wire and strict lint checks pass. Ticket/review
+state typing and final validation remain open.

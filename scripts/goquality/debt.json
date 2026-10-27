@@ -183,8 +183,8 @@
     },
     {
       "id": "internal/core/workflow_execution_prepare.go::WorkflowStore.prepareWorkflowAttempt",
-      "signature": "func(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string, mode string, harness *WorkflowAgentHarness) (workflowPreparedTask, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "signature": "func(ctx context.Context, run workflowInvocationFile, record WorkflowRecord, worker []string, mode workflowPreparationMode, harness *WorkflowAgentHarness) (workflowPreparedTask, error)",
+      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Slice 11 types automatic/manual preparation without changing this six-input workflow debt or its Slice 12 owner."
     },
     {
       "id": "internal/core/workflow_execution_prepare.go::encodeWorkflowTaskInput",

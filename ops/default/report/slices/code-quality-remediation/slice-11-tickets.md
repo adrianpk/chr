@@ -14,11 +14,13 @@ finish assigned signatures and typed states, and reconcile the six-parameter pha
 
 ## Delivered Behavior
 
-Ticket and indexed-ticket models, exact rendering, parsing and field/status
-validation now have a direct ticket owner. Indexing, discovery, reconciliation,
-key reservation and filesystem creation also use that owner. Native status mutation retains its
-actual guarded file-write and transition admission. Shared integer decoding lives
-with the existing metadata codec. Implementation remains in progress.
+Ticket models, parsing, validation, indexing, discovery, reconciliation and key/
+file creation use the ticket owner. Execution records, repositories, runner,
+events, readiness, explicit repair and worktrees use the execution owner. Native
+workflow authority retains its actual transaction and source owner. All 59
+assigned signature/watch entries are reconciled; preparation selection is typed
+and the global ceiling is six. Ticket/review typed states and final validation
+remain in progress.
 
 ## Implementation Notes
 
@@ -27,19 +29,22 @@ commits with direct consumers and preserved durable/wire contracts.
 
 ## Contracts Added or Changed
 
-The move ledger reconciles 723 declaration/test preimages after explicit contract
+The move ledger reconciles 724 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
-meanings are unchanged. Forty-six assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger records 41 fixes; five newly implemented review results await commit references; remaining
-assigned signatures and watches are open. The global policy is at ceiling
-six with 162 exact debts and one external exception.
+meanings are unchanged. All 59 assigned signatures have exact dispositions:
+47 fixed and 12 retained cohesive five-parameter contracts. The control/legacy
+ledger records 13 concrete boundaries. Preparation uses a private typed mode;
+its automatic test wrapper is no longer production code. The global policy is
+at ceiling six with 9306 production declarations, 162 exact debts and one external
+exception. Ticket/review state typing remains pending.
 
 ## Files of Interest
 
 - `internal/core/ticket/` and native ticket/indexing code.
 - `internal/core/execution/` and native workflow consumers.
 - The approved baseline inventory and core owner ledger.
+- [Control and legacy boundaries](../../../plan/code-quality-remediation-slice-11-boundaries.csv).
 - [Signature dispositions](../../../plan/code-quality-remediation-slice-11-dispositions.csv) and [parameter phase](../../../plan/code-quality-remediation-slice-11-parameter-phase.csv).
 
 ## Validation
@@ -290,10 +295,30 @@ Five additional assigned results are fixed; 162 exact debts remain at ceiling si
 - `go test ./internal/core ./internal/app ./internal/tui -run '^Test(DetectReviewProviderReference|RunReviewProviderDiagnostics|RemoteReviewAdapter|NativeCapability|NativeMergePolicy|WorkflowPRAdapter|WorkflowPRBranch|NativeHostPublication|NativeHostDenials|NativePRChanges)' -count=1 -timeout=3m`: passed, including local Git and provider fixtures; app/TUI compiled with no selected tests.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues after review result changes.
 
+The remaining 13 five-parameter watches have exact current identities and
+contracts: one redundant trace forwarder was already removed by the verified
+Slice 10 implementation, and 12 retain independent request/observation/authority
+inputs. No permanent signature exception was added. All 59 entries now have
+current signatures, task commits and validation references.
+
+Automatic/manual preparation uses a private typed mode at actual preparation,
+harness binding and worker admission. The serialized execution_mode boundary
+retains original strings and the separate aggregate representation; defaults,
+worker validation, source hashes and resource lifetime are unchanged. The exact
+unused automatic wrapper is a test-only helper, adding one move preimage for
+724 total and reducing production declarations to 9306. One existing six-input
+workflow debt signature reflects the new type and retains its Slice 12 owner.
+
+- `go test ./internal/core/ticket/... ./internal/core/harness/trace ./internal/core ./internal/app ./scripts/goquality -run '^Test(Ticket|RunTicket|ValidateIndexedTicket|WorkSelectionPreflight|HarnessGenerationBinding(CallIdentity|Privacy|Files)|StructuredHarnessOutput|RecordLLMTrace|WriteLLMTrace|Leaf)' -count=1 -timeout=3m`: passed.
+- `go test ./internal/core ./internal/app ./scripts/goquality -run '^Test(WorkflowTask|WorkflowManual|WorkflowPlanOrderContext|WorkflowPlanOrderRepair|NativeAgentPermitBudget|QualityRecordWire|QualityStorage|Leaf)' -count=1 -timeout=3m`: passed, including real task/manual/recovery paths.
+- `go test ./internal/core -run '^Test(BoardQueryMapsLegacyStatusesToBoardColumns|BoardTicketStatusForMapsNormalAndLegacyStatuses|WorkflowLegacyEntry|LegacyWorkObservation)$' -count=1 -timeout=3m`: passed.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./scripts/goquality`: zero issues after preparation typing.
+
+- `make check-go-style`: 9306 declarations, ceiling six, 162 exact debts and one external exception after preparation typing and test-helper placement.
+- `make check-package-readmes`: passed.
+
 ## Risks and Follow-ups
 
-Remaining work includes 13 assigned five-parameter watch entries, typed state and
-preparation contracts, control-flag/legacy reconciliation, and ticket parser/
-validation test ownership with its merge-state dependencies. Final candidate
-validation and the Slice 11 PR remain pending.
-No Slice 11 PR has been opened.
+Remaining work includes ticket/review typed states and parser/validation test
+ownership with its merge-state dependencies. Final candidate validation and the
+Slice 11 PR remain pending.

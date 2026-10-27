@@ -8,12 +8,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowBoundTaskWorker(run workflowInvocationFile, worker []string, mode string) ([]string, error) {
+func workflowBoundTaskWorker(run workflowInvocationFile, worker []string, mode workflowPreparationMode) ([]string, error) {
 	if run.HarnessBinding == nil {
 		return worker, validateWorkflowInputWorker(mode, worker)
 	}
 
-	if mode == "manual" && len(worker) == 0 {
+	if mode == workflowPreparationManual && len(worker) == 0 {
 		return nil, nil
 	}
 

@@ -23,7 +23,7 @@ func (s *WorkflowStore) executeWorkflowTask(ctx context.Context, claim *Workflow
 	}
 	defer endWorkflowClaimExecution(claim)
 
-	prepared, err := s.prepareWorkflowTaskHarness(ctx, claim, worker, "automatic", harness)
+	prepared, err := s.prepareWorkflowTaskHarness(ctx, claim, worker, workflowPreparationAutomatic, harness)
 	if err != nil {
 		return WorkflowTaskResult{}, err
 	}

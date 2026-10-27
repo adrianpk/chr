@@ -31,7 +31,7 @@ func (s *WorkflowStore) PrepareWorkflowManualTask(ctx context.Context, claim *Wo
 	}
 	defer endWorkflowClaimExecution(claim)
 
-	prepared, err := s.prepareWorkflowTaskMode(ctx, claim, worker, "manual")
+	prepared, err := s.prepareWorkflowTaskMode(ctx, claim, worker, workflowPreparationManual)
 
 	return WorkflowManualTask{Input: prepared.input, InputRef: prepared.inputRef, InputHash: prepared.inputHash, LeaseUntil: prepared.leaseUntil}, err
 }
