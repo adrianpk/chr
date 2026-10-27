@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -120,7 +121,7 @@ func changeGenerationFixture(ctx context.Context, operations service, profile st
 	return err
 }
 
-func generationFixtureMetadata(t *testing.T, project string) []core.HarnessRunMetadata {
+func generationFixtureMetadata(t *testing.T, project string) []harnesshost.HarnessRunMetadata {
 	t.Helper()
 
 	paths, err := filepath.Glob(workspacecore.UserPath(project, "tmp", "agent-runs", "*", "harness-run.json"))
@@ -128,7 +129,7 @@ func generationFixtureMetadata(t *testing.T, project string) []core.HarnessRunMe
 		t.Fatal(err)
 	}
 
-	var records []core.HarnessRunMetadata
+	var records []harnesshost.HarnessRunMetadata
 
 	for _, path := range paths {
 		data, err := os.ReadFile(path)
@@ -136,7 +137,7 @@ func generationFixtureMetadata(t *testing.T, project string) []core.HarnessRunMe
 			t.Fatal(err)
 		}
 
-		var record core.HarnessRunMetadata
+		var record harnesshost.HarnessRunMetadata
 		if err := json.Unmarshal(data, &record); err != nil {
 			t.Fatal(err)
 		}

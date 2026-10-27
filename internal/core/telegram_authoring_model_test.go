@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 )
@@ -37,7 +38,7 @@ func TestTelegramAuthoringModelBoundary(t *testing.T) {
 			defer server.Close()
 
 			provider := NewConfiguredStructuredModel(true)
-			provider.API = openaiquiz.Adapter{Host: QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+			provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 
 			_, err := provider.InvokeStructuredModel(t.Context(), telegramAuthoringModelRequest())
 			if (err != nil) != tt.wantErr {
@@ -69,7 +70,7 @@ func TestTelegramAuthoringModelCapacity(t *testing.T) {
 	defer server.Close()
 
 	provider := NewConfiguredStructuredModel(true)
-	provider.API = openaiquiz.Adapter{Host: QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 
 	ctx, cancel := context.WithCancel(t.Context())
 	defer cancel()

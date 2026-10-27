@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -1187,6 +1188,6 @@ func testTime() time.Time {
 
 // Domain fixtures inject their model boundary independently of private setup.
 // Harness generation fixtures use production assembly and owned executable files.
-func testGenerationBinder(_ service, _ context.Context, _, _ string) (*core.HarnessGenerationOperation, error) {
+func testGenerationBinder(_ service, _ context.Context, _, _ string) (*harnesshost.HarnessGenerationOperation, error) {
 	return nil, nil
 }

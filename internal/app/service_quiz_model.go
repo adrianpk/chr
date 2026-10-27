@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -50,7 +51,7 @@ func (s service) newQuizModelRequestWithEntries(ctx context.Context, state quizc
 	}
 
 	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
+		ID:              harnesshost.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-request-%d", state.QuestionsAsked+1)),
 		Action:          quizmodel.ActionNextQuestion,
 		Strategy:        quizModelStrategy(state.Mode),
 		Scope:           scope,

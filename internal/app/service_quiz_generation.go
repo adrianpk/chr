@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -23,7 +23,7 @@ func (s service) invokeQuizGeneration(ctx context.Context, state quizcore.Runtim
 	}
 
 	ctx = bound.context(ctx)
-	request.ID = core.HarnessGenerationRequestID(ctx, request.ID)
+	request.ID = harnesshost.HarnessGenerationRequestID(ctx, request.ID)
 
 	return quizmodel.Invoke(ctx, bound.quizModel, request)
 }

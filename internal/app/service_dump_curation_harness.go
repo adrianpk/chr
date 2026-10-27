@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -25,21 +25,21 @@ func (p harnessDumpCurationProvider) CurateDump(ctx context.Context, request Dum
 		return DumpCurationResult{}, err
 	}
 
-	run, err := core.RunAgent(ctx, p.Runner, runRequest)
+	run, err := harnesshost.RunAgent(ctx, p.Runner, runRequest)
 	if err != nil {
 		return DumpCurationResult{}, err
 	}
 
 	curation, err := decodeDumpCurationPayload(run.Output)
 
-	err = core.ValidateHarnessGenerationOutput(ctx, runRequest, err)
+	err = harnesshost.ValidateHarnessGenerationOutput(ctx, runRequest, err)
 	if err != nil {
-		core.RecordAgentRunResponseEvent(ctx, runRequest, run, "parse_error", err)
+		harnesshost.RecordAgentRunResponseEvent(ctx, runRequest, run, "parse_error", err)
 
 		return DumpCurationResult{}, err
 	}
 
-	core.RecordAgentRunResponseEvent(ctx, runRequest, run, "ready", nil)
+	harnesshost.RecordAgentRunResponseEvent(ctx, runRequest, run, "ready", nil)
 
 	return curation, nil
 }

@@ -1,4 +1,4 @@
-package core
+package host
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
-	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -55,8 +54,8 @@ type HarnessGenerationLocation struct {
 	ProjectRef   string
 }
 
-// harnessGenerationOperationResolver returns a prepared launch and configuration admission.
-type harnessGenerationOperationResolver func(context.Context, string) (HarnessGenerationPreparation, error)
+// HarnessGenerationOperationResolver returns a prepared launch and configuration admission.
+type HarnessGenerationOperationResolver func(context.Context, string) (HarnessGenerationPreparation, error)
 
 type harnessGenerationOperationFile struct {
 	Schema       string                       `json:"schema"`
@@ -77,10 +76,10 @@ type HarnessGenerationFreezeInput struct {
 	Locations []HarnessGenerationLocation
 }
 
-// FreezeHarnessGeneration resolves a new operation once. Retrying an existing
+// FreezeHarnessGenerationOperation resolves a new operation once. Retrying an existing
 // operation reads its artifact before consulting current profiles or settings.
 // This artifact retains identity only; callers still own retries and budgets.
-func freezeHarnessGenerationOperation(ctx context.Context, input HarnessGenerationFreezeInput, resolve harnessGenerationOperationResolver) (HarnessGenerationOperation, error) {
+func FreezeHarnessGenerationOperation(ctx context.Context, input HarnessGenerationFreezeInput, resolve HarnessGenerationOperationResolver) (HarnessGenerationOperation, error) {
 	project, id, purpose, locations := input.Project, input.ID, input.Purpose, input.Locations
 
 	var operation HarnessGenerationOperation
@@ -123,7 +122,7 @@ func freezeHarnessGenerationOperation(ctx context.Context, input HarnessGenerati
 	return operation, err
 }
 
-func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationFreezeInput, resolve harnessGenerationOperationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
+func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationFreezeInput, resolve HarnessGenerationOperationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
 	project, id, purpose := input.Project, input.ID, input.Purpose
 
 	operation, err := readHarnessGenerationOperation(project, id, purpose)
@@ -150,7 +149,7 @@ func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationF
 	return operation, err
 }
 
-func prepareHarnessGenerationOperation(ctx context.Context, input HarnessGenerationFreezeInput, resolve harnessGenerationOperationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
+func prepareHarnessGenerationOperation(ctx context.Context, input HarnessGenerationFreezeInput, resolve HarnessGenerationOperationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
 	project, id, purpose := input.Project, input.ID, input.Purpose
 
 	var operation HarnessGenerationOperation
@@ -237,7 +236,7 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 	}
 
 	// The generic command-image check does no worker-role or live-profile IO.
-	return harnesshost.CheckCommandImage(harnesscore.Binding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
+	return CheckCommandImage(harnesscore.Binding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
 }
 
 func validateGenerationResources(resources harness.GenerationResources, backend string) error {
@@ -280,7 +279,7 @@ func checkGenerationExecutable(operation HarnessGenerationOperation) error {
 		return errors.New("retained generation executable cannot be resolved")
 	}
 
-	hash, err := harnesshost.ExecutableHash(operation.program)
+	hash, err := ExecutableHash(operation.program)
 	if err != nil {
 		return err
 	}

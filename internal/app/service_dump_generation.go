@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -19,7 +19,7 @@ func (p openAIDumpCurationProvider) executeBoundDumpAPI(ctx context.Context, req
 
 	call := p.dumpAPIRunRequest(request, trace)
 	call.OutputSchema = schema
-	_, err = core.RunAPIGeneration(ctx, call, func(context.Context) ([]byte, error) {
+	_, err = harnesshost.RunAPIGeneration(ctx, call, func(context.Context) ([]byte, error) {
 		var err error
 
 		result, err = p.executeOpenAIRequest(httpRequest, trace.StartedAt)

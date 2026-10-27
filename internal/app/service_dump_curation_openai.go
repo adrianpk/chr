@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	harnesstrace "forge.adrianpk.com/chr/internal/core/harness/trace"
 )
 
@@ -168,7 +168,7 @@ func (p openAIDumpCurationProvider) CurateDump(
 
 	curation, err := decodeDumpCurationPayload(result.Output)
 
-	err = core.ValidateHarnessGenerationOutput(ctx, p.dumpAPIRunRequest(request, trace), err)
+	err = harnesshost.ValidateHarnessGenerationOutput(ctx, p.dumpAPIRunRequest(request, trace), err)
 	if err != nil {
 		p.recordResponse(ctx, trace, result, "parse_error", err)
 

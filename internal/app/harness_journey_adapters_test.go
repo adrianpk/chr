@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -95,7 +96,7 @@ func (f *harnessJourney) checkTelegramView(t *testing.T, choice harnessJourneyCh
 func (f *harnessJourney) resumeGeneration(t *testing.T) {
 	t.Helper()
 
-	generation, _ := core.HarnessGenerationSelection(f.active)
+	generation, _ := harnesshost.HarnessGenerationSelection(f.active)
 	resumed := telegramHarnessGenerationBinding(t.Context(), t, f.operations, "original-generation")
 
 	nested := telegramHarnessGenerationBinding(f.active, t, f.operations, "nested-generation")

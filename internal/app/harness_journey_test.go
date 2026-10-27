@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 )
 
 type harnessJourneyChoice struct{ transport, worker, generation string }
@@ -151,7 +152,7 @@ func (f *harnessJourney) generate(ctx context.Context, t *testing.T, id, profile
 		t.Fatal(err)
 	}
 
-	generation, ok := core.HarnessGenerationSelection(ctx)
+	generation, ok := harnesshost.HarnessGenerationSelection(ctx)
 	if !ok || generation.Binding.Selection.Profile != profile {
 		t.Fatal("generation resolved the wrong role", generation.Binding.Selection.Profile)
 	}

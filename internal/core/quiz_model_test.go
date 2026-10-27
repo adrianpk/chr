@@ -14,6 +14,7 @@ import (
 	"time"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	harnesstrace "forge.adrianpk.com/chr/internal/core/harness/trace"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -312,7 +313,7 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       QuizGenerationHost{},
+		Host:       harnesshost.QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -364,7 +365,7 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       QuizGenerationHost{},
+		Host:       harnesshost.QuizGenerationHost{},
 		APIKey:     apiKey,
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -407,7 +408,7 @@ func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       QuizGenerationHost{},
+		Host:       harnesshost.QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -445,7 +446,7 @@ func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 	defer server.Close()
 
 	model := openaiquiz.Adapter{
-		Host:       QuizGenerationHost{},
+		Host:       harnesshost.QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",

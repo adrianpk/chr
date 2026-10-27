@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -95,7 +96,7 @@ func (r HarnessAgenticReviewRunner) Review(ctx context.Context, review AgenticRe
 		return AgenticReviewArtifact{}, fmt.Errorf("write agentic review context: %w", err)
 	}
 
-	agentRun, err := RunAgent(ctx, r.Runner, harness.AgentRunRequest{
+	agentRun, err := harnesshost.RunAgent(ctx, r.Runner, harness.AgentRunRequest{
 		ID:            "review-" + review.Ticket.Key + "-" + review.Execution.ID,
 		Purpose:       "agentic_review",
 		ProjectDir:    review.ProjectDir,
@@ -112,7 +113,7 @@ func (r HarnessAgenticReviewRunner) Review(ctx context.Context, review AgenticRe
 
 	result, err := ParseAgenticReviewResult(agentRun.Output)
 
-	err = ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: "review-" + review.Ticket.Key + "-" + review.Execution.ID, Purpose: "agentic_review", ProjectDir: review.ProjectDir, RunDir: runDir}, err)
+	err = harnesshost.ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: "review-" + review.Ticket.Key + "-" + review.Execution.ID, Purpose: "agentic_review", ProjectDir: review.ProjectDir, RunDir: runDir}, err)
 	if err != nil {
 		return AgenticReviewArtifact{}, err
 	}

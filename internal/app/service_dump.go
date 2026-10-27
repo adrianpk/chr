@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 )
 
 // DumpScope narrows a dump operation to an optional use-case scope.
@@ -147,7 +147,7 @@ func (s service) curateDump(ctx context.Context, request DumpCreateRequest) (Dum
 		return normalizeDumpCurationResult(result, request.Content), nil
 	}
 
-	if generation, bound := core.HarnessGenerationSelection(ctx); bound && generation.Binding.Selection.Source == "project" {
+	if generation, bound := harnesshost.HarnessGenerationSelection(ctx); bound && generation.Binding.Selection.Source == "project" {
 		return DumpCurationResult{}, err
 	}
 

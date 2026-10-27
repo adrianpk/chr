@@ -9,6 +9,7 @@ import (
 	"time"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	harnesstrace "forge.adrianpk.com/chr/internal/core/harness/trace"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
@@ -176,7 +177,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	result, err := (HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	result, err := (harnesshost.HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
 	}
@@ -202,7 +203,7 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	_, err := (HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	_, err := (harnesshost.HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err != nil {
 		t.Fatalf("GenerateAuthoringQuizQuestions returned error: %v", err)
 	}
@@ -228,7 +229,7 @@ printf '%s\n' 'not-json'
 `)
 	request := validAuthoringQuizGenerationRequest(projectDir)
 
-	_, err := (HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
+	_, err := (harnesshost.HarnessAuthoringQuizQuestionProvider{Program: program, Runner: codex.Runner{}}).GenerateAuthoringQuizQuestions(context.Background(), request)
 	if err == nil {
 		t.Fatal("GenerateAuthoringQuizQuestions returned nil error")
 	}

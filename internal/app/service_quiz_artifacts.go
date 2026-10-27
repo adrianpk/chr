@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -115,7 +115,7 @@ func (s service) newQuizDraftSpecModelRequest(ctx context.Context, state quizcor
 	)
 
 	return quizmodel.Request{
-		ID:              core.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
+		ID:              harnesshost.HarnessGenerationRequestID(ctx, fmt.Sprintf("quiz-draft-spec-%s", paths.ScopeID)),
 		Action:          quizmodel.ActionDraftSpec,
 		Strategy:        "draft_spec",
 		Scope:           scope,

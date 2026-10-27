@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -46,7 +47,7 @@ func TestHarnessGenerationBindingHostProcess(t *testing.T) {
 		return
 	}
 
-	operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "operation-fixture", Purpose: "plan_generation"}, nil)
+	operation, err := FreezeHarnessGeneration(t.Context(), harnesshost.HarnessGenerationFreezeInput{Project: project, ID: "operation-fixture", Purpose: "plan_generation"}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +55,7 @@ func TestHarnessGenerationBindingHostProcess(t *testing.T) {
 	request := generationBindingRequest(project)
 	request.ID = "after-restart"
 
-	result, err := RunAgent(WithHarnessGeneration(t.Context(), operation), generationBindingProcessRunner{}, request)
+	result, err := harnesshost.RunAgent(harnesshost.WithHarnessGeneration(t.Context(), operation), generationBindingProcessRunner{}, request)
 	if err != nil || string(result.Output) != `{"ok":true}` {
 		t.Fatal("retained driver did not complete", err)
 	}

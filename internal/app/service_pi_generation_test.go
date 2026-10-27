@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -140,14 +141,14 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	op, err := core.FreezeHarnessGeneration(t.Context(), core.HarnessGenerationFreezeInput{Project: operations.projectContext.ProjectDir, ID: "unsupported-protocol", Purpose: "conversation"}, func(context.Context, core.WorkspaceConfig) (core.HarnessGenerationPreparation, error) {
-		return core.HarnessGenerationPreparation{Binding: prepared.Binding, Launch: prepared.Launch}, nil
+	op, err := core.FreezeHarnessGeneration(t.Context(), harnesshost.HarnessGenerationFreezeInput{Project: operations.projectContext.ProjectDir, ID: "unsupported-protocol", Purpose: "conversation"}, func(context.Context, core.WorkspaceConfig) (harnesshost.HarnessGenerationPreparation, error) {
+		return harnesshost.HarnessGenerationPreparation{Binding: prepared.Binding, Launch: prepared.Launch}, nil
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := operations.bindGeneration(core.WithHarnessGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := operations.bindGeneration(harnesshost.WithHarnessGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unsupported Pi protocol did not reach its dispatch fence", err)
 	}
 
@@ -250,7 +251,7 @@ func checkPiGenerationMetadata(t *testing.T, project string, valid, invalid int)
 	}
 }
 
-func validPiGenerationMetadata(record core.HarnessRunMetadata) bool {
+func validPiGenerationMetadata(record harnesshost.HarnessRunMetadata) bool {
 	return record.Selection.Selection.Harness == "pi" && record.ProcessOutcome == "completed" && record.ObservedModel == "fixture/fixture-model" && record.Usage != nil && record.UsageStatus == "known"
 }
 

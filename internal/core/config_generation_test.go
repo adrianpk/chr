@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -20,7 +21,7 @@ func TestHarnessGenerationConfigFence(t *testing.T) {
 			program := generationBindingProgram(t, project)
 			writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
 
-			_, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "configuration-fence", Purpose: "plan_generation"}, func(ctx context.Context, config WorkspaceConfig) (HarnessGenerationPreparation, error) {
+			_, err := FreezeHarnessGeneration(t.Context(), harnesshost.HarnessGenerationFreezeInput{Project: project, ID: "configuration-fence", Purpose: "plan_generation"}, func(ctx context.Context, config WorkspaceConfig) (harnesshost.HarnessGenerationPreparation, error) {
 				prepared, err := generationBindingResolver(program, "model-alpha")(ctx, config)
 				if err != nil {
 					return prepared, err

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
@@ -66,7 +66,7 @@ func (s service) newPlanningModelRequest(ctx context.Context, state quizcore.Run
 	}
 
 	request := s.documentGenerationModelRequest(scope, state, payload, sections, operation)
-	request.ID = core.HarnessGenerationRequestID(ctx, request.ID)
+	request.ID = harnesshost.HarnessGenerationRequestID(ctx, request.ID)
 
 	return request, nil
 }

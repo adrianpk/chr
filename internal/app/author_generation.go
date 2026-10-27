@@ -5,13 +5,13 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 )
 
 func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project commandProjectContext, sessionID string, use func(context.Context, authoringcore.QuizQuestionProvider) error) error {
 	provider := contextualQuizProviderFromCommand()
-	if _, native := provider.(core.HarnessAuthoringQuizQuestionProvider); !native {
+	if _, native := provider.(harnesshost.HarnessAuthoringQuizQuestionProvider); !native {
 		return use(ctx, provider)
 	}
 
@@ -25,7 +25,7 @@ func withContextualQuizGeneration(ctx context.Context, cmd *cli.Command, project
 	bound, err := operations.bindGeneration(ctx, "contextual-"+sessionID, "contextual_quiz")
 
 	callCtx := bound.context(ctx)
-	if native, ok := provider.(core.HarnessAuthoringQuizQuestionProvider); ok && bound.generationRunner != nil {
+	if native, ok := provider.(harnesshost.HarnessAuthoringQuizQuestionProvider); ok && bound.generationRunner != nil {
 		native.Runner = bound.generationRunner
 		provider = native
 	}

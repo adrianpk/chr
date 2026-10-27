@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -82,7 +83,7 @@ func TestTelegramHarnessSelectionVisibility(t *testing.T) {
 	webHarnessCheckProcess(t, operations, saved)
 	webHarnessCheckRetained(t, operations, worker)
 	webHarnessCheckNewInvocation(t, operations, record, start)
-	telegramHarnessCheckGeneration(t.Context(), t, operations, core.WithHarnessGeneration(t.Context(), *bound))
+	telegramHarnessCheckGeneration(t.Context(), t, operations, harnesshost.WithHarnessGeneration(t.Context(), *bound))
 
 	if notice := f.send(t, "/harness", 0); !strings.Contains(notice.Text, "Worker: beta") || !strings.Contains(notice.Text, "alpha · Codex · model-a") {
 		t.Fatal("Telegram confused defaults with retained worker binding", notice)
@@ -96,7 +97,7 @@ func TestTelegramHarnessSelectionVisibility(t *testing.T) {
 func telegramHarnessCheckGeneration(ctx context.Context, t *testing.T, operations service, active context.Context) {
 	t.Helper()
 
-	generation, bound := core.HarnessGenerationSelection(active)
+	generation, bound := harnesshost.HarnessGenerationSelection(active)
 	if !bound || generation.Binding.Selection.Profile != "alpha" {
 		t.Fatal("original generation fixture was not bound")
 	}
@@ -122,7 +123,7 @@ func telegramHarnessGenerationBinding(ctx context.Context, t *testing.T, operati
 		t.Fatal(err)
 	}
 
-	generation, bound := core.HarnessGenerationSelection(core.WithHarnessGeneration(ctx, *operation))
+	generation, bound := harnesshost.HarnessGenerationSelection(harnesshost.WithHarnessGeneration(ctx, *operation))
 	if !bound {
 		t.Fatal("generation selection was not bound")
 	}

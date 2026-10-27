@@ -4,23 +4,24 @@ import (
 	"context"
 
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // HarnessGenerationResolver prepares one selection from the actual configuration image.
-type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (HarnessGenerationPreparation, error)
+type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (harnesshost.HarnessGenerationPreparation, error)
 
 // FreezeHarnessGeneration composes configuration loading and admission with the
 // host's retained operation. Recovery reads the retained image before loading current settings.
-func FreezeHarnessGeneration(ctx context.Context, input HarnessGenerationFreezeInput, resolve HarnessGenerationResolver) (HarnessGenerationOperation, error) {
+func FreezeHarnessGeneration(ctx context.Context, input harnesshost.HarnessGenerationFreezeInput, resolve HarnessGenerationResolver) (harnesshost.HarnessGenerationOperation, error) {
 	if resolve == nil {
-		return freezeHarnessGenerationOperation(ctx, input, nil)
+		return harnesshost.FreezeHarnessGenerationOperation(ctx, input, nil)
 	}
 
-	prepare := func(ctx context.Context, configDir string) (HarnessGenerationPreparation, error) {
+	prepare := func(ctx context.Context, configDir string) (harnesshost.HarnessGenerationPreparation, error) {
 		config, err := LoadWorkspaceConfig(configDir)
 		if err != nil {
-			return HarnessGenerationPreparation{}, err
+			return harnesshost.HarnessGenerationPreparation{}, err
 		}
 
 		prepared, err := resolve(ctx, config)
@@ -39,5 +40,5 @@ func FreezeHarnessGeneration(ctx context.Context, input HarnessGenerationFreezeI
 		return prepared, nil
 	}
 
-	return freezeHarnessGenerationOperation(ctx, input, prepare)
+	return harnesshost.FreezeHarnessGenerationOperation(ctx, input, prepare)
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -74,7 +75,7 @@ func newDumpCurationProvider(projectDir string) DumpCurationProvider {
 }
 
 func newQuizModelAdapter(projectDir string) quizmodel.Adapter {
-	defaultAdapter := openaiquiz.Adapter{Host: core.QuizGenerationHost{}, ProjectDir: projectDir}
+	defaultAdapter := openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, ProjectDir: projectDir}
 	actionAdapters := map[quizmodel.Action]quizmodel.Adapter{}
 
 	if codexGenerationBackend("CHR_SPEC_GENERATION_BACKEND") {

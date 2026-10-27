@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 )
 
 // Canceling one caller must stop its call without pinning the retained operation
@@ -43,7 +43,7 @@ func TestHarnessGenerationCallerContext(t *testing.T) {
 
 	fresh := bound.context(t.Context())
 
-	generation, ok := core.HarnessGenerationSelection(fresh)
+	generation, ok := harnesshost.HarnessGenerationSelection(fresh)
 	if !ok || generation.ID != "caller-context" || fresh.Err() != nil {
 		t.Fatal("fresh caller did not retain the admitted operation", generation, fresh.Err())
 	}

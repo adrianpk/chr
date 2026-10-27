@@ -1,4 +1,4 @@
-package core
+package host
 
 import (
 	"context"
@@ -63,10 +63,4 @@ func writeAPIGenerationInputs(request harness.AgentRunRequest) error {
 	}
 
 	return nil
-}
-
-// ValidateStructuredModelOutput records the original caller's typed/schema
-// validation, independently of JSON framing and process/network success.
-func ValidateStructuredModelOutput(ctx context.Context, request StructuredModelRequest, validationErr error) error {
-	return ValidateHarnessGenerationOutput(ctx, harness.AgentRunRequest{ID: request.ID, Purpose: request.Purpose, ProjectDir: request.ProjectDir}, validationErr)
 }

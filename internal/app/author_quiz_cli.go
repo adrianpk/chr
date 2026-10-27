@@ -11,11 +11,12 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
 var newAuthoringQuizQuestionProvider = func() authoringcore.QuizQuestionProvider {
-	return core.HarnessAuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
+	return harnesshost.HarnessAuthoringQuizQuestionProvider{Program: codex.Program, Runner: codex.Runner{}}
 }
 
 func (factory commandFactory) authorQuizCommand() *cli.Command {

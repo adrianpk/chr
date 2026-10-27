@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
@@ -37,7 +38,7 @@ func telegramAuthoringBridgeHTTP(t *testing.T, f *telegramConversationAppFixture
 	t.Cleanup(server.Close)
 
 	provider := core.NewConfiguredStructuredModel(true)
-	provider.API = openaiquiz.Adapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations := telegramOperationConcreteService(t, f.receiver)
 	operations.conversationModel = provider
 	f.receiver.operations = operations

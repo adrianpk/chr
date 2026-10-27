@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -45,7 +46,7 @@ func telegramAuthoringServiceFixture(t *testing.T, reply func(authoringModelInpu
 
 	operations := newTestService(t, t.TempDir())
 	provider := core.NewConfiguredStructuredModel(true)
-	provider.API = openaiquiz.Adapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations.conversationModel = provider
 
 	return operations, &calls

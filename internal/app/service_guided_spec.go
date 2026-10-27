@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -162,7 +162,7 @@ func (s service) guidedSpecModelRequest(ctx context.Context, session authoringco
 
 	digest, err := authoringcore.GuidedCheckpointDigest(inputs.Checkpoint)
 	request := quizmodel.Request{
-		ID: core.HarnessGenerationRequestID(ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.ActionGenerateSpec, Strategy: "guided_committed_inputs",
+		ID: harnesshost.HarnessGenerationRequestID(ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.ActionGenerateSpec, Strategy: "guided_committed_inputs",
 		Scope: quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: quizcore.ModeDeep,
 		RuntimeState: inputs.State, Payload: payload, ContextSections: append(coreSections, inputs.Sections...), OutputContract: quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}

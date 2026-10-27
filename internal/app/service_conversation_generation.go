@@ -5,7 +5,7 @@ import (
 	"errors"
 	"path/filepath"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -47,7 +47,7 @@ func conversationGenerationProjectAllowed(id string, input ConversationIntentCon
 	return false
 }
 
-func (s service) validateIntentGenerationProject(ctx context.Context, location core.HarnessGenerationLocation, input ConversationIntentContext) error {
+func (s service) validateIntentGenerationProject(ctx context.Context, location harnesshost.HarnessGenerationLocation, input ConversationIntentContext) error {
 	if !conversationGenerationProjectAllowed(location.ProjectRef, input) {
 		return workflowstate.ErrConflict
 	}
@@ -70,7 +70,7 @@ func (s service) validateIntentGenerationProject(ctx context.Context, location c
 }
 
 func (s service) intentGenerationProject(ctx context.Context, input ConversationIntentContext) (service, error) {
-	location, bound := core.HarnessGenerationLocationFromContext(ctx)
+	location, bound := harnesshost.HarnessGenerationLocationFromContext(ctx)
 	if !bound {
 		return s, nil
 	}

@@ -119,6 +119,13 @@ locks, retained lookup before live configuration and error ordering remain.
 Native configuration tests inspect the public file layout and independently
 round-trip the exact wire image before checksum-preserving corruption.
 
+Retained generation operations, private artifact IO, context projections,
+run/usage metadata, agent execution and concrete quiz host adapters now live in
+harness/host. Sixty declarations match their pre-move bodies after namespace
+qualification. Native configuration keeps the actual loader and admission fence;
+StructuredModelRequest keeps its concrete projection into host output validation.
+Consumers use host types and operations directly, without root type aliases.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -279,6 +286,12 @@ Generation configuration port checks passed:
 - `go test ./internal/core -run '^TestHarnessGeneration(BindingFreeze|BindingCorruption|ConfigFence)$' -count=1 -timeout=3m`
 - `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
+
+Generation host move checks passed:
+
+- `go test ./internal/core/harness/host ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessGeneration|HarnessBinding|HarnessSelection|QualityRecordWire|PiGeneration|HarnessJourney|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/host ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
 ## Risks and Follow-ups
 

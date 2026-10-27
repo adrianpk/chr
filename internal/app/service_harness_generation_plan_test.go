@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 )
@@ -39,7 +40,7 @@ func generationBindingPlanCase(t *testing.T, fixture func(*testing.T, string) (s
 	}))
 	t.Cleanup(server.Close)
 
-	api := openaiquiz.Adapter{Host: core.QuizGenerationHost{}, ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	api := openaiquiz.Adapter{Host: harnesshost.QuizGenerationHost{}, ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations.quizModel = api
 	provider := core.NewConfiguredStructuredModel(true)
 	provider.API = api
