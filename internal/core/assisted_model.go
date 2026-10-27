@@ -462,7 +462,7 @@ func writeAssistedModelResponseQuestion(output *bytes.Buffer, response AssistedM
 	output.WriteString(response.Question.Rationale)
 	output.WriteString("\n")
 	output.WriteString("- required: ")
-	output.WriteString(markdownBool(response.Question.Required))
+	output.WriteString(opsmetadata.YesNo(response.Question.Required))
 	output.WriteString("\n\n")
 }
 

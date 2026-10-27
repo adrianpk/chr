@@ -272,7 +272,7 @@ func RenderContextualQuizMarkdown(
 		output.WriteString(question.Text + "\n\n")
 		output.WriteString("Tags: " + strings.Join(question.Tags, ", ") + "\n\n")
 		output.WriteString("Follow-up depth: " + fmt.Sprintf("%d", question.FollowUpDepth) + "\n\n")
-		output.WriteString("Completion recommended: " + markdownBool(question.CompletionRecommended) + "\n\n")
+		output.WriteString("Completion recommended: " + opsmetadata.YesNo(question.CompletionRecommended) + "\n\n")
 		output.WriteString("Answer:\n\n")
 	}
 

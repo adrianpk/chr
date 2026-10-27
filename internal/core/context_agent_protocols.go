@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -36,17 +38,9 @@ type AgentProtocolContext struct {
 	ProjectDir    string
 	TargetPath    string
 	AgentIdentity AgentIdentity
-	AgentFiles    []ContextDocument
-	ChrFiles      []ContextDocument
-	Sources       []ContextSourceInventoryEntry
-}
-
-// ContextDocument describes a package boundary value.
-type ContextDocument struct {
-	ID           string
-	Path         string
-	RelativePath string
-	Content      string
+	AgentFiles    []authoringcore.ContextDocument
+	ChrFiles      []authoringcore.ContextDocument
+	Sources       []authoringcore.ContextSourceInventoryEntry
 }
 
 // DefaultAgentIdentity executes the corresponding package operation.
@@ -108,11 +102,11 @@ func LoadAgentProtocolContext(opts AgentProtocolContextOptions) (AgentProtocolCo
 		return AgentProtocolContext{}, err
 	}
 
-	sources := []ContextSourceInventoryEntry{
+	sources := []authoringcore.ContextSourceInventoryEntry{
 		{
 			ID:          defaultAgentIdentityID,
-			Kind:        ContextSourceKindAgentIdentity,
-			Class:       ContextSourceClassInvariant,
+			Kind:        authoringcore.ContextSourceKindAgentIdentity,
+			Class:       authoringcore.ContextSourceClassInvariant,
 			Description: "Default Go software and infrastructure agent identity.",
 			Required:    true,
 			Included:    true,
@@ -136,13 +130,13 @@ func RenderAgentContext(identity AgentIdentity) string {
 	var output strings.Builder
 
 	output.WriteString("# Agent Context\n\n")
-	writeMarkdownField(&output, "Identity", identity.Title)
-	writeMarkdownField(&output, "Role", identity.Role)
-	writeMarkdownList(&output, "Operating Stance", identity.OperatingStance)
-	writeMarkdownList(&output, "Domain Expectations", identity.DomainExpectations)
-	writeMarkdownList(&output, "Quality Bar", identity.QualityBar)
-	writeMarkdownList(&output, "Language Rules", identity.LanguageRules)
-	writeMarkdownList(&output, "Forbidden Behaviors", identity.ForbiddenBehaviors)
+	opsmetadata.WriteMarkdownField(&output, "Identity", identity.Title)
+	opsmetadata.WriteMarkdownField(&output, "Role", identity.Role)
+	opsmetadata.WriteMarkdownList(&output, "Operating Stance", identity.OperatingStance)
+	opsmetadata.WriteMarkdownList(&output, "Domain Expectations", identity.DomainExpectations)
+	opsmetadata.WriteMarkdownList(&output, "Quality Bar", identity.QualityBar)
+	opsmetadata.WriteMarkdownList(&output, "Language Rules", identity.LanguageRules)
+	opsmetadata.WriteMarkdownList(&output, "Forbidden Behaviors", identity.ForbiddenBehaviors)
 
 	return output.String()
 }
@@ -152,8 +146,8 @@ func RenderProtocolsContext(ctx AgentProtocolContext) string {
 	var output strings.Builder
 
 	output.WriteString("# Protocol Context\n\n")
-	writeMarkdownField(&output, "Project", ctx.ProjectDir)
-	writeMarkdownField(&output, "Target", ctx.TargetPath)
+	opsmetadata.WriteMarkdownField(&output, "Project", ctx.ProjectDir)
+	opsmetadata.WriteMarkdownField(&output, "Target", ctx.TargetPath)
 
 	output.WriteString("## Applicable AGENTS.md Files\n\n")
 	writeContextDocuments(&output, ctx.AgentFiles, "No applicable AGENTS.md files were found.")
@@ -221,21 +215,21 @@ func targetDirectory(targetPath string) string {
 	return filepath.Dir(targetPath)
 }
 
-func loadApplicableAgentFiles(projectDir, targetDir string) (contextDocumentLoad, error) {
+func loadApplicableAgentFiles(projectDir, targetDir string) (authoringcore.ContextDocumentLoad, error) {
 	dirs, err := dirsFromProjectToTarget(projectDir, targetDir)
 	if err != nil {
-		return contextDocumentLoad{}, err
+		return authoringcore.ContextDocumentLoad{}, err
 	}
 
-	documents := make([]ContextDocument, 0, len(dirs))
-	sources := make([]ContextSourceInventoryEntry, 0, len(dirs))
+	documents := make([]authoringcore.ContextDocument, 0, len(dirs))
+	sources := make([]authoringcore.ContextSourceInventoryEntry, 0, len(dirs))
 
 	for _, dir := range dirs {
 		path := filepath.Join(dir, "AGENTS.md")
 
 		relPath, err := filepath.Rel(projectDir, path)
 		if err != nil {
-			return contextDocumentLoad{}, fmt.Errorf("resolve AGENTS.md relative path: %w", err)
+			return authoringcore.ContextDocumentLoad{}, fmt.Errorf("resolve AGENTS.md relative path: %w", err)
 		}
 
 		relPath = filepath.ToSlash(relPath)
@@ -244,10 +238,10 @@ func loadApplicableAgentFiles(projectDir, targetDir string) (contextDocumentLoad
 		content, err := os.ReadFile(path)
 		if err != nil {
 			if os.IsNotExist(err) {
-				sources = append(sources, ContextSourceInventoryEntry{
+				sources = append(sources, authoringcore.ContextSourceInventoryEntry{
 					ID:          id,
-					Kind:        ContextSourceKindProtocol,
-					Class:       ContextSourceClassInvariant,
+					Kind:        authoringcore.ContextSourceKindProtocol,
+					Class:       authoringcore.ContextSourceClassInvariant,
 					Path:        relPath,
 					Description: "Applicable AGENTS.md protocol file.",
 					Required:    dir == projectDir,
@@ -258,19 +252,19 @@ func loadApplicableAgentFiles(projectDir, targetDir string) (contextDocumentLoad
 				continue
 			}
 
-			return contextDocumentLoad{}, fmt.Errorf("read AGENTS.md: %w", err)
+			return authoringcore.ContextDocumentLoad{}, fmt.Errorf("read AGENTS.md: %w", err)
 		}
 
-		documents = append(documents, ContextDocument{
+		documents = append(documents, authoringcore.ContextDocument{
 			ID:           id,
 			Path:         path,
 			RelativePath: relPath,
 			Content:      string(content),
 		})
-		sources = append(sources, ContextSourceInventoryEntry{
+		sources = append(sources, authoringcore.ContextSourceInventoryEntry{
 			ID:          id,
-			Kind:        ContextSourceKindProtocol,
-			Class:       ContextSourceClassInvariant,
+			Kind:        authoringcore.ContextSourceKindProtocol,
+			Class:       authoringcore.ContextSourceClassInvariant,
 			Path:        relPath,
 			Description: "Applicable AGENTS.md protocol file.",
 			Required:    dir == projectDir,
@@ -278,7 +272,7 @@ func loadApplicableAgentFiles(projectDir, targetDir string) (contextDocumentLoad
 		})
 	}
 
-	return contextDocumentLoad{Documents: documents, Sources: sources}, nil
+	return authoringcore.ContextDocumentLoad{Documents: documents, Sources: sources}, nil
 }
 
 func dirsFromProjectToTarget(projectDir, targetDir string) ([]string, error) {
@@ -307,10 +301,10 @@ func dirsFromProjectToTarget(projectDir, targetDir string) ([]string, error) {
 	return dirs, nil
 }
 
-func loadChrProtocolFiles(projectDir string) (contextDocumentLoad, error) {
+func loadChrProtocolFiles(projectDir string) (authoringcore.ContextDocumentLoad, error) {
 	candidates, err := chrProtocolCandidates(projectDir)
 	if err != nil {
-		return contextDocumentLoad{}, err
+		return authoringcore.ContextDocumentLoad{}, err
 	}
 
 	return loadProtocolCandidateFiles(projectDir, candidates)
@@ -371,14 +365,14 @@ func directoryExists(path string) bool {
 func loadProtocolCandidateFiles(
 	projectDir string,
 	candidates []string,
-) (contextDocumentLoad, error) {
-	documents := make([]ContextDocument, 0, len(candidates))
-	sources := make([]ContextSourceInventoryEntry, 0, len(candidates))
+) (authoringcore.ContextDocumentLoad, error) {
+	documents := make([]authoringcore.ContextDocument, 0, len(candidates))
+	sources := make([]authoringcore.ContextSourceInventoryEntry, 0, len(candidates))
 
 	for _, path := range candidates {
 		relPath, err := filepath.Rel(projectDir, path)
 		if err != nil {
-			return contextDocumentLoad{}, fmt.Errorf("resolve .chr relative path: %w", err)
+			return authoringcore.ContextDocumentLoad{}, fmt.Errorf("resolve .chr relative path: %w", err)
 		}
 
 		relPath = filepath.ToSlash(relPath)
@@ -387,10 +381,10 @@ func loadProtocolCandidateFiles(
 		content, err := os.ReadFile(path)
 		if err != nil {
 			if os.IsNotExist(err) {
-				sources = append(sources, ContextSourceInventoryEntry{
+				sources = append(sources, authoringcore.ContextSourceInventoryEntry{
 					ID:          id,
-					Kind:        ContextSourceKindProtocol,
-					Class:       ContextSourceClassInvariant,
+					Kind:        authoringcore.ContextSourceKindProtocol,
+					Class:       authoringcore.ContextSourceClassInvariant,
 					Path:        relPath,
 					Description: "Selected .chr protocol or runtime file.",
 					Required:    false,
@@ -401,19 +395,19 @@ func loadProtocolCandidateFiles(
 				continue
 			}
 
-			return contextDocumentLoad{}, fmt.Errorf("read .chr protocol file: %w", err)
+			return authoringcore.ContextDocumentLoad{}, fmt.Errorf("read .chr protocol file: %w", err)
 		}
 
-		documents = append(documents, ContextDocument{
+		documents = append(documents, authoringcore.ContextDocument{
 			ID:           id,
 			Path:         path,
 			RelativePath: relPath,
 			Content:      string(content),
 		})
-		sources = append(sources, ContextSourceInventoryEntry{
+		sources = append(sources, authoringcore.ContextSourceInventoryEntry{
 			ID:          id,
-			Kind:        ContextSourceKindProtocol,
-			Class:       ContextSourceClassInvariant,
+			Kind:        authoringcore.ContextSourceKindProtocol,
+			Class:       authoringcore.ContextSourceClassInvariant,
 			Path:        relPath,
 			Description: "Selected .chr protocol or runtime file.",
 			Required:    false,
@@ -421,32 +415,10 @@ func loadProtocolCandidateFiles(
 		})
 	}
 
-	return contextDocumentLoad{Documents: documents, Sources: sources}, nil
+	return authoringcore.ContextDocumentLoad{Documents: documents, Sources: sources}, nil
 }
 
-func writeMarkdownField(output *strings.Builder, title, value string) {
-	output.WriteString("## ")
-	output.WriteString(title)
-	output.WriteString("\n\n")
-	output.WriteString(value)
-	output.WriteString("\n\n")
-}
-
-func writeMarkdownList(output *strings.Builder, title string, values []string) {
-	output.WriteString("## ")
-	output.WriteString(title)
-	output.WriteString("\n\n")
-
-	for _, value := range values {
-		output.WriteString("- ")
-		output.WriteString(value)
-		output.WriteString("\n")
-	}
-
-	output.WriteString("\n")
-}
-
-func writeContextDocuments(output *strings.Builder, documents []ContextDocument, emptyMessage string) {
+func writeContextDocuments(output *strings.Builder, documents []authoringcore.ContextDocument, emptyMessage string) {
 	if len(documents) == 0 {
 		output.WriteString(emptyMessage)
 		output.WriteString("\n\n")

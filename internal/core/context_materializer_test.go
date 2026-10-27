@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestContextPackageMaterializerWritesArtifactLayout(t *testing.T) {
@@ -97,11 +99,11 @@ func TestRenderContextPackageDryRunShowsIncludedAndSkippedSources(t *testing.T) 
 	rendered := RenderContextPackageDryRun(MaterializeContextPackageOptions{
 		Composition: composition,
 		Plan:        plan,
-		AdditionalSources: []ContextSourceInventoryEntry{
+		AdditionalSources: []authoringcore.ContextSourceInventoryEntry{
 			{
 				ID:       "missing-doc",
-				Kind:     ContextSourceKindDocument,
-				Class:    ContextSourceClassFresh,
+				Kind:     authoringcore.ContextSourceKindDocument,
+				Class:    authoringcore.ContextSourceClassFresh,
 				Path:     "docs/missing.md",
 				Included: false,
 				Reason:   "file was not found",
@@ -136,11 +138,11 @@ func testContextPackageComposition(t *testing.T, plan RuntimePlan) ContextCompos
 		TicketPath:  filepath.Join(plan.ProjectDir, ".chr", "default", "tickets", "CHR-1.md"),
 		ExecutionID: "exec-1",
 		Plan:        plan,
-		Sources: []ContextSourceInventoryEntry{
+		Sources: []authoringcore.ContextSourceInventoryEntry{
 			{
 				ID:       "agent-default",
-				Kind:     ContextSourceKindAgentIdentity,
-				Class:    ContextSourceClassInvariant,
+				Kind:     authoringcore.ContextSourceKindAgentIdentity,
+				Class:    authoringcore.ContextSourceClassInvariant,
 				Path:     "agent.md",
 				Included: true,
 				Required: true,

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // ContextPackageMaterializer defines a package boundary interface.
@@ -23,7 +25,7 @@ type MaterializeContextPackageOptions struct {
 	Documents         string
 	CodeContext       string
 	PreviousAttempt   string
-	AdditionalSources []ContextSourceInventoryEntry
+	AdditionalSources []authoringcore.ContextSourceInventoryEntry
 }
 
 type contextPackageMaterializer struct{}
@@ -198,12 +200,12 @@ func contextPackageFiles(opts MaterializeContextPackageOptions) map[string]strin
 		paths.DocumentsPath:       opts.Documents,
 		paths.CodeContextPath:     opts.CodeContext,
 		paths.PreviousAttemptPath: opts.PreviousAttempt,
-		paths.SourceInventoryPath: RenderSourceInventory(contextPackageSources(opts)),
+		paths.SourceInventoryPath: authoringcore.RenderSourceInventory(contextPackageSources(opts)),
 	}
 }
 
-func contextPackageSources(opts MaterializeContextPackageOptions) []ContextSourceInventoryEntry {
-	sources := append([]ContextSourceInventoryEntry(nil), opts.Composition.Sources...)
+func contextPackageSources(opts MaterializeContextPackageOptions) []authoringcore.ContextSourceInventoryEntry {
+	sources := append([]authoringcore.ContextSourceInventoryEntry(nil), opts.Composition.Sources...)
 	sources = append(sources, opts.AdditionalSources...)
 
 	return sources

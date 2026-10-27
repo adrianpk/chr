@@ -3,6 +3,8 @@ package core
 import (
 	"path/filepath"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestPlanContextCompositionDerivesDockerVisibleArtifactPaths(t *testing.T) {
@@ -18,11 +20,11 @@ func TestPlanContextCompositionDerivesDockerVisibleArtifactPaths(t *testing.T) {
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),
 		},
-		Sources: []ContextSourceInventoryEntry{
+		Sources: []authoringcore.ContextSourceInventoryEntry{
 			{
 				ID:       "agent-default",
-				Kind:     ContextSourceKindAgentIdentity,
-				Class:    ContextSourceClassInvariant,
+				Kind:     authoringcore.ContextSourceKindAgentIdentity,
+				Class:    authoringcore.ContextSourceClassInvariant,
 				Required: true,
 				Included: true,
 			},
@@ -62,11 +64,11 @@ func TestPlanContextCompositionBlocksWhenRequiredSourcesAreMissing(t *testing.T)
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),
 		},
-		Sources: []ContextSourceInventoryEntry{
+		Sources: []authoringcore.ContextSourceInventoryEntry{
 			{
 				ID:       "protocols",
-				Kind:     ContextSourceKindProtocol,
-				Class:    ContextSourceClassInvariant,
+				Kind:     authoringcore.ContextSourceKindProtocol,
+				Class:    authoringcore.ContextSourceClassInvariant,
 				Required: true,
 				Included: false,
 				Reason:   "AGENTS.md was not found",
@@ -103,17 +105,17 @@ func TestPlanContextCompositionPreservesInvariantAndFreshSources(t *testing.T) {
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),
 		},
-		Sources: []ContextSourceInventoryEntry{
+		Sources: []authoringcore.ContextSourceInventoryEntry{
 			{
 				ID:       "agent-default",
-				Kind:     ContextSourceKindAgentIdentity,
-				Class:    ContextSourceClassInvariant,
+				Kind:     authoringcore.ContextSourceKindAgentIdentity,
+				Class:    authoringcore.ContextSourceClassInvariant,
 				Included: true,
 			},
 			{
 				ID:       "current-tree",
-				Kind:     ContextSourceKindFilesystemTree,
-				Class:    ContextSourceClassFresh,
+				Kind:     authoringcore.ContextSourceKindFilesystemTree,
+				Class:    authoringcore.ContextSourceClassFresh,
 				Included: true,
 			},
 		},
@@ -122,11 +124,11 @@ func TestPlanContextCompositionPreservesInvariantAndFreshSources(t *testing.T) {
 		t.Fatalf("PlanContextComposition returned error: %v", err)
 	}
 
-	if plan.Sources[0].Class != ContextSourceClassInvariant {
+	if plan.Sources[0].Class != authoringcore.ContextSourceClassInvariant {
 		t.Fatalf("first source class = %q, want invariant", plan.Sources[0].Class)
 	}
 
-	if plan.Sources[1].Class != ContextSourceClassFresh {
+	if plan.Sources[1].Class != authoringcore.ContextSourceClassFresh {
 		t.Fatalf("second source class = %q, want fresh", plan.Sources[1].Class)
 	}
 }
@@ -144,11 +146,11 @@ func TestPlanContextCompositionRejectsInvalidSourceKind(t *testing.T) {
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),
 		},
-		Sources: []ContextSourceInventoryEntry{
+		Sources: []authoringcore.ContextSourceInventoryEntry{
 			{
 				ID:    "unknown",
-				Kind:  ContextSourceKind("unknown"),
-				Class: ContextSourceClassFresh,
+				Kind:  authoringcore.ContextSourceKind("unknown"),
+				Class: authoringcore.ContextSourceClassFresh,
 			},
 		},
 	})

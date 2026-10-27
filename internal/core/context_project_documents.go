@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -30,10 +32,10 @@ type ProjectDocumentContext struct {
 	ProjectDir        string
 	WorkspaceDir      string
 	Ticket            IndexedTicket
-	TicketDocument    ContextDocument
-	ReferencedDocs    []ContextDocument
+	TicketDocument    authoringcore.ContextDocument
+	ReferencedDocs    []authoringcore.ContextDocument
 	ValidationCommand string
-	Sources           []ContextSourceInventoryEntry
+	Sources           []authoringcore.ContextSourceInventoryEntry
 }
 
 type projectDocumentPaths struct {
@@ -43,12 +45,7 @@ type projectDocumentPaths struct {
 
 type contextTicketLoad struct {
 	Ticket   IndexedTicket
-	Document ContextDocument
-}
-
-type contextDocumentLoad struct {
-	Documents []ContextDocument
-	Sources   []ContextSourceInventoryEntry
+	Document authoringcore.ContextDocument
 }
 
 // LoadProjectDocumentContext loads the corresponding package data.
@@ -86,11 +83,11 @@ func RenderProjectContext(ctx ProjectDocumentContext) string {
 	var output strings.Builder
 
 	output.WriteString("# Project Context\n\n")
-	writeMarkdownField(&output, "Project Directory", ctx.ProjectDir)
-	writeMarkdownField(&output, "Workspace Directory", ctx.WorkspaceDir)
-	writeMarkdownField(&output, "Ticket", ctx.Ticket.Key+" - "+ctx.Ticket.Title)
-	writeMarkdownField(&output, "Ticket Path", ctx.TicketDocument.RelativePath)
-	writeMarkdownList(&output, "Validation Commands", []string{ctx.ValidationCommand})
+	opsmetadata.WriteMarkdownField(&output, "Project Directory", ctx.ProjectDir)
+	opsmetadata.WriteMarkdownField(&output, "Workspace Directory", ctx.WorkspaceDir)
+	opsmetadata.WriteMarkdownField(&output, "Ticket", ctx.Ticket.Key+" - "+ctx.Ticket.Title)
+	opsmetadata.WriteMarkdownField(&output, "Ticket Path", ctx.TicketDocument.RelativePath)
+	opsmetadata.WriteMarkdownList(&output, "Validation Commands", []string{ctx.ValidationCommand})
 
 	return output.String()
 }
@@ -101,42 +98,13 @@ func RenderDocumentsContext(ctx ProjectDocumentContext) string {
 
 	output.WriteString("# Document Context\n\n")
 	output.WriteString("## Ticket\n\n")
-	writeContextDocuments(&output, []ContextDocument{ctx.TicketDocument}, "Ticket document was not loaded.")
+	writeContextDocuments(&output, []authoringcore.ContextDocument{ctx.TicketDocument}, "Ticket document was not loaded.")
 
 	output.WriteString("## Referenced Documents\n\n")
 	writeContextDocuments(&output, ctx.ReferencedDocs, "No referenced project documents were found.")
 
 	output.WriteString("## Conversation History\n\n")
 	output.WriteString("Implicit conversation history is not included. Relevant prior discussion must be captured in project documents before execution.\n")
-
-	return output.String()
-}
-
-// RenderSourceInventory renders the corresponding package data.
-func RenderSourceInventory(sources []ContextSourceInventoryEntry) string {
-	var output strings.Builder
-
-	output.WriteString("# Context Source Inventory\n\n")
-	output.WriteString("| ID | Kind | Class | Path | Included | Required | Reason |\n")
-	output.WriteString("| --- | --- | --- | --- | --- | --- | --- |\n")
-
-	for _, source := range sources {
-		output.WriteString("| ")
-		output.WriteString(markdownTableCell(source.ID))
-		output.WriteString(" | ")
-		output.WriteString(markdownTableCell(string(source.Kind)))
-		output.WriteString(" | ")
-		output.WriteString(markdownTableCell(string(source.Class)))
-		output.WriteString(" | ")
-		output.WriteString(markdownTableCell(source.Path))
-		output.WriteString(" | ")
-		output.WriteString(markdownBool(source.Included))
-		output.WriteString(" | ")
-		output.WriteString(markdownBool(source.Required))
-		output.WriteString(" | ")
-		output.WriteString(markdownTableCell(source.Reason))
-		output.WriteString(" |\n")
-	}
 
 	return output.String()
 }
@@ -200,10 +168,10 @@ func loadContextTicket(
 func loadReferencedProjectDocuments(
 	projectDir string,
 	content string,
-) (contextDocumentLoad, error) {
+) (authoringcore.ContextDocumentLoad, error) {
 	refs := referencedProjectDocumentPaths(content)
-	documents := make([]ContextDocument, 0, len(refs))
-	sources := make([]ContextSourceInventoryEntry, 0, len(refs))
+	documents := make([]authoringcore.ContextDocument, 0, len(refs))
+	sources := make([]authoringcore.ContextSourceInventoryEntry, 0, len(refs))
 
 	for _, ref := range refs {
 		path := filepath.Join(projectDir, filepath.FromSlash(ref))
@@ -217,14 +185,14 @@ func loadReferencedProjectDocuments(
 				continue
 			}
 
-			return contextDocumentLoad{}, err
+			return authoringcore.ContextDocumentLoad{}, err
 		}
 
 		documents = append(documents, document)
 		sources = append(sources, includedDocumentSource(id, ref))
 	}
 
-	return contextDocumentLoad{Documents: documents, Sources: sources}, nil
+	return authoringcore.ContextDocumentLoad{Documents: documents, Sources: sources}, nil
 }
 
 func referencedProjectDocumentPaths(content string) []string {
@@ -252,18 +220,18 @@ func referencedProjectDocumentPaths(content string) []string {
 	return refs
 }
 
-func readContextDocument(projectDir, id, path string) (ContextDocument, error) {
+func readContextDocument(projectDir, id, path string) (authoringcore.ContextDocument, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return ContextDocument{}, err
+		return authoringcore.ContextDocument{}, err
 	}
 
 	relPath, err := filepath.Rel(projectDir, path)
 	if err != nil {
-		return ContextDocument{}, fmt.Errorf("resolve context document relative path: %w", err)
+		return authoringcore.ContextDocument{}, fmt.Errorf("resolve context document relative path: %w", err)
 	}
 
-	return ContextDocument{
+	return authoringcore.ContextDocument{
 		ID:           id,
 		Path:         path,
 		RelativePath: filepath.ToSlash(relPath),
@@ -273,14 +241,14 @@ func readContextDocument(projectDir, id, path string) (ContextDocument, error) {
 
 func projectDocumentSources(
 	projectDir string,
-	ticketDocument ContextDocument,
-	documentSources []ContextSourceInventoryEntry,
-) []ContextSourceInventoryEntry {
-	sources := []ContextSourceInventoryEntry{
+	ticketDocument authoringcore.ContextDocument,
+	documentSources []authoringcore.ContextSourceInventoryEntry,
+) []authoringcore.ContextSourceInventoryEntry {
+	sources := []authoringcore.ContextSourceInventoryEntry{
 		{
 			ID:          "project:" + filepath.Base(projectDir),
-			Kind:        ContextSourceKindProject,
-			Class:       ContextSourceClassInvariant,
+			Kind:        authoringcore.ContextSourceKindProject,
+			Class:       authoringcore.ContextSourceClassInvariant,
 			Path:        ".",
 			Description: "Project identity and validation context.",
 			Required:    true,
@@ -288,8 +256,8 @@ func projectDocumentSources(
 		},
 		{
 			ID:          ticketDocument.ID,
-			Kind:        ContextSourceKindDocument,
-			Class:       ContextSourceClassFresh,
+			Kind:        authoringcore.ContextSourceKindDocument,
+			Class:       authoringcore.ContextSourceClassFresh,
 			Path:        ticketDocument.RelativePath,
 			Description: "Selected ticket document.",
 			Required:    true,
@@ -300,11 +268,11 @@ func projectDocumentSources(
 	return append(sources, documentSources...)
 }
 
-func includedDocumentSource(id, path string) ContextSourceInventoryEntry {
-	return ContextSourceInventoryEntry{
+func includedDocumentSource(id, path string) authoringcore.ContextSourceInventoryEntry {
+	return authoringcore.ContextSourceInventoryEntry{
 		ID:          id,
-		Kind:        ContextSourceKindDocument,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindDocument,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        path,
 		Description: "Ticket-referenced project document.",
 		Required:    false,
@@ -312,11 +280,11 @@ func includedDocumentSource(id, path string) ContextSourceInventoryEntry {
 	}
 }
 
-func missingDocumentSource(id, path string) ContextSourceInventoryEntry {
-	return ContextSourceInventoryEntry{
+func missingDocumentSource(id, path string) authoringcore.ContextSourceInventoryEntry {
+	return authoringcore.ContextSourceInventoryEntry{
 		ID:          id,
-		Kind:        ContextSourceKindDocument,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindDocument,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        path,
 		Description: "Ticket-referenced project document.",
 		Required:    false,
@@ -331,19 +299,4 @@ func projectValidationCommand(plan RuntimePlan) string {
 	}
 
 	return DefaultRuntimeValidationCommand
-}
-
-func markdownBool(value bool) string {
-	if value {
-		return "yes"
-	}
-
-	return "no"
-}
-
-func markdownTableCell(value string) string {
-	value = strings.ReplaceAll(value, "\n", " ")
-	value = strings.ReplaceAll(value, "|", "\\|")
-
-	return strings.TrimSpace(value)
 }

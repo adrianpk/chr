@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -32,10 +34,10 @@ type WorkspaceContextAssembly struct {
 	ProjectDir               string
 	Scope                    WorkspaceContextScope
 	CaseSlug                 string
-	Project                  ContextDocument
-	Case                     ContextDocument
-	Documents                []ContextDocument
-	Sources                  []ContextSourceInventoryEntry
+	Project                  authoringcore.ContextDocument
+	Case                     authoringcore.ContextDocument
+	Documents                []authoringcore.ContextDocument
+	Sources                  []authoringcore.ContextSourceInventoryEntry
 	Diagnostics              []WorkspaceGraphDiagnostic
 	UnresolvedCaseReferences []WorkspaceCaseReference
 }
@@ -121,19 +123,19 @@ func RenderWorkspaceContextAssembly(assembly WorkspaceContextAssembly) string {
 	var output strings.Builder
 
 	output.WriteString("# Workspace Context\n\n")
-	writeMarkdownField(&output, "Project Directory", assembly.ProjectDir)
-	writeMarkdownField(&output, "Scope", string(assembly.Scope))
+	opsmetadata.WriteMarkdownField(&output, "Project Directory", assembly.ProjectDir)
+	opsmetadata.WriteMarkdownField(&output, "Scope", string(assembly.Scope))
 
 	if assembly.CaseSlug != "" {
-		writeMarkdownField(&output, "Case", assembly.CaseSlug)
+		opsmetadata.WriteMarkdownField(&output, "Case", assembly.CaseSlug)
 	}
 
 	output.WriteString("## Project\n\n")
-	writeContextDocuments(&output, []ContextDocument{assembly.Project}, "Project document was not loaded.")
+	writeContextDocuments(&output, []authoringcore.ContextDocument{assembly.Project}, "Project document was not loaded.")
 
 	if assembly.Scope == WorkspaceContextScopeCase {
 		output.WriteString("## Case\n\n")
-		writeContextDocuments(&output, []ContextDocument{assembly.Case}, "Case document was not loaded.")
+		writeContextDocuments(&output, []authoringcore.ContextDocument{assembly.Case}, "Case document was not loaded.")
 	}
 
 	output.WriteString("## Workspace Documents\n\n")
@@ -146,7 +148,7 @@ func RenderWorkspaceContextAssembly(assembly WorkspaceContextAssembly) string {
 	writeWorkspaceContextUnresolvedReferences(&output, assembly.UnresolvedCaseReferences)
 
 	output.WriteString("## Sources\n\n")
-	output.WriteString(RenderSourceInventory(assembly.Sources))
+	output.WriteString(authoringcore.RenderSourceInventory(assembly.Sources))
 
 	return output.String()
 }
@@ -272,8 +274,8 @@ func workspaceContextCaseNode(graph WorkspaceGraph, slug string) (WorkspaceNode,
 }
 
 type workspaceContextSource struct {
-	Document ContextDocument
-	Source   ContextSourceInventoryEntry
+	Document authoringcore.ContextDocument
+	Source   authoringcore.ContextSourceInventoryEntry
 }
 
 func loadWorkspaceContextNode(
@@ -321,10 +323,10 @@ func loadWorkspaceContextNode(
 		return workspaceContextSource{}, err
 	}
 
-	return workspaceContextSource{Document: document, Source: ContextSourceInventoryEntry{
+	return workspaceContextSource{Document: document, Source: authoringcore.ContextSourceInventoryEntry{
 		ID:          id,
-		Kind:        ContextSourceKindDocument,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindDocument,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        document.RelativePath,
 		Description: workspaceContextSourceDescription(node),
 		Required:    required,
@@ -338,11 +340,11 @@ func missingWorkspaceContextSource(
 	description string,
 	reason string,
 	required bool,
-) ContextSourceInventoryEntry {
-	return ContextSourceInventoryEntry{
+) authoringcore.ContextSourceInventoryEntry {
+	return authoringcore.ContextSourceInventoryEntry{
 		ID:          id,
-		Kind:        ContextSourceKindDocument,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindDocument,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        filepath.ToSlash(path),
 		Description: description,
 		Required:    required,

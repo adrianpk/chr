@@ -10,6 +10,8 @@ import (
 	"strings"
 	"unicode"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -34,7 +36,7 @@ type TreeSearchContext struct {
 	Tree       []ContextTreeEntry
 	Terms      []string
 	Hits       []ContextSearchHit
-	Sources    []ContextSourceInventoryEntry
+	Sources    []authoringcore.ContextSourceInventoryEntry
 }
 
 // ContextTreeEntry describes a package boundary value.
@@ -106,8 +108,8 @@ func RenderCodeContext(ctx TreeSearchContext) string {
 	var output strings.Builder
 
 	output.WriteString("# Code Context\n\n")
-	writeMarkdownField(&output, "Project Directory", ctx.ProjectDir)
-	writeMarkdownList(&output, "Search Terms", ctx.Terms)
+	opsmetadata.WriteMarkdownField(&output, "Project Directory", ctx.ProjectDir)
+	opsmetadata.WriteMarkdownList(&output, "Search Terms", ctx.Terms)
 
 	output.WriteString("## File Tree\n\n")
 	writeContextTree(&output, ctx.Tree)
@@ -413,20 +415,20 @@ func writeContextSearchHits(output *strings.Builder, hits []ContextSearchHit) {
 	}
 }
 
-func treeSearchSources(treeEntries, searchHits int) []ContextSourceInventoryEntry {
-	return []ContextSourceInventoryEntry{
+func treeSearchSources(treeEntries, searchHits int) []authoringcore.ContextSourceInventoryEntry {
+	return []authoringcore.ContextSourceInventoryEntry{
 		{
 			ID:          "filesystem-tree",
-			Kind:        ContextSourceKindFilesystemTree,
-			Class:       ContextSourceClassFresh,
+			Kind:        authoringcore.ContextSourceKindFilesystemTree,
+			Class:       authoringcore.ContextSourceClassFresh,
 			Description: "Bounded filesystem tree.",
 			Required:    false,
 			Included:    treeEntries > 0,
 		},
 		{
 			ID:          "text-search",
-			Kind:        ContextSourceKindTextSearch,
-			Class:       ContextSourceClassFresh,
+			Kind:        authoringcore.ContextSourceKindTextSearch,
+			Class:       authoringcore.ContextSourceClassFresh,
 			Description: "Targeted text search over source, tests, docs, and .chr files.",
 			Required:    false,
 			Included:    searchHits > 0,

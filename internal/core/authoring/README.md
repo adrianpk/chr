@@ -33,3 +33,9 @@ claim is held; native proofs and inner store locking remain with their owner.
 Plan delivery resume also remains native because it reads the locked workflow
 snapshot and original materialization contracts/receipt. No second repository or
 coordinator is introduced by the separation.
+
+Shared document context, source kind/class values, partial document/source loads
+and source inventory rendering belong here. Native runtime/execution context
+assembly stays with the original RuntimePlan, indexed ticket/parser and complete
+execution/result validation owners. That retained IO consumes these shared
+values directly; it is not authoring session or document publication behavior.

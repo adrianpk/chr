@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestLoadProjectDocumentContextLoadsTicketReferences(t *testing.T) {
@@ -110,11 +112,11 @@ Missing reference: .prj/drafts/missing.md.
 }
 
 func TestRenderSourceInventoryIncludesDocumentSources(t *testing.T) {
-	rendered := RenderSourceInventory([]ContextSourceInventoryEntry{
+	rendered := authoringcore.RenderSourceInventory([]authoringcore.ContextSourceInventoryEntry{
 		{
 			ID:       "document:docs/reference/example.md",
-			Kind:     ContextSourceKindDocument,
-			Class:    ContextSourceClassFresh,
+			Kind:     authoringcore.ContextSourceKindDocument,
+			Class:    authoringcore.ContextSourceClassFresh,
 			Path:     "docs/reference/example.md",
 			Included: true,
 			Required: false,

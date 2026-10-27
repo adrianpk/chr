@@ -4,72 +4,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
-
-// ContextSourceClass defines a package boundary type.
-type ContextSourceClass string
-
-const (
-	// ContextSourceClassInvariant defines a package boundary constant.
-	ContextSourceClassInvariant ContextSourceClass = "invariant"
-	// ContextSourceClassFresh defines a package boundary constant.
-	ContextSourceClassFresh ContextSourceClass = "fresh"
-)
-
-// Valid reports whether the value is one of the supported constants.
-func (c ContextSourceClass) Valid() bool {
-	switch c {
-	case ContextSourceClassInvariant, ContextSourceClassFresh:
-		return true
-	default:
-		return false
-	}
-}
-
-// ContextSourceKind defines a package boundary type.
-type ContextSourceKind string
-
-const (
-	// ContextSourceKindAgentIdentity defines a package boundary constant.
-	ContextSourceKindAgentIdentity ContextSourceKind = "agent_identity"
-	// ContextSourceKindProject defines a package boundary constant.
-	ContextSourceKindProject ContextSourceKind = "project"
-	// ContextSourceKindProtocol defines a package boundary constant.
-	ContextSourceKindProtocol ContextSourceKind = "protocol"
-	// ContextSourceKindDocument defines a package boundary constant.
-	ContextSourceKindDocument ContextSourceKind = "document"
-	// ContextSourceKindFilesystemTree defines a package boundary constant.
-	ContextSourceKindFilesystemTree ContextSourceKind = "filesystem_tree"
-	// ContextSourceKindTextSearch defines a package boundary constant.
-	ContextSourceKindTextSearch ContextSourceKind = "text_search"
-	// ContextSourceKindGoGraph defines a package boundary constant.
-	ContextSourceKindGoGraph ContextSourceKind = "gograph"
-	// ContextSourceKindValidation defines a package boundary constant.
-	ContextSourceKindValidation ContextSourceKind = "validation"
-	// ContextSourceKindPreviousAttempt defines a package boundary constant.
-	ContextSourceKindPreviousAttempt ContextSourceKind = "previous_attempt"
-	// ContextSourceKindOutputContract defines a package boundary constant.
-	ContextSourceKindOutputContract ContextSourceKind = "output_contract"
-)
-
-// Valid reports whether the value is one of the supported constants.
-func (k ContextSourceKind) Valid() bool {
-	switch k {
-	case ContextSourceKindAgentIdentity,
-		ContextSourceKindProject,
-		ContextSourceKindProtocol,
-		ContextSourceKindDocument,
-		ContextSourceKindFilesystemTree,
-		ContextSourceKindTextSearch,
-		ContextSourceKindGoGraph,
-		ContextSourceKindValidation,
-		ContextSourceKindPreviousAttempt,
-		ContextSourceKindOutputContract:
-		return true
-	default:
-		return false
-	}
-}
 
 // ContextComposerOptions describes a package boundary value.
 type ContextComposerOptions struct {
@@ -77,7 +14,7 @@ type ContextComposerOptions struct {
 	TicketPath  string
 	ExecutionID string
 	Plan        RuntimePlan
-	Sources     []ContextSourceInventoryEntry
+	Sources     []authoringcore.ContextSourceInventoryEntry
 }
 
 // ContextCompositionPlan describes a package boundary value.
@@ -87,7 +24,7 @@ type ContextCompositionPlan struct {
 	TicketPath  string
 	ExecutionID string
 	Paths       ContextArtifactPaths
-	Sources     []ContextSourceInventoryEntry
+	Sources     []authoringcore.ContextSourceInventoryEntry
 	Readiness   ContextReadiness
 }
 
@@ -105,18 +42,6 @@ type ContextArtifactPaths struct {
 	SourceInventoryPath string
 }
 
-// ContextSourceInventoryEntry describes a package boundary value.
-type ContextSourceInventoryEntry struct {
-	ID          string
-	Kind        ContextSourceKind
-	Class       ContextSourceClass
-	Path        string
-	Description string
-	Required    bool
-	Included    bool
-	Reason      string
-}
-
 // ContextReadinessStatus defines a package boundary type.
 type ContextReadinessStatus string
 
@@ -131,7 +56,7 @@ const (
 type ContextReadiness struct {
 	Status                 ContextReadinessStatus
 	Warnings               []string
-	MissingRequiredSources []ContextSourceInventoryEntry
+	MissingRequiredSources []authoringcore.ContextSourceInventoryEntry
 }
 
 // PlanContextComposition executes the corresponding package operation.
@@ -174,8 +99,8 @@ func contextArtifactPaths(plan RuntimePlan) ContextArtifactPaths {
 	}
 }
 
-func normalizeContextSources(sources []ContextSourceInventoryEntry) ([]ContextSourceInventoryEntry, error) {
-	normalized := make([]ContextSourceInventoryEntry, 0, len(sources))
+func normalizeContextSources(sources []authoringcore.ContextSourceInventoryEntry) ([]authoringcore.ContextSourceInventoryEntry, error) {
+	normalized := make([]authoringcore.ContextSourceInventoryEntry, 0, len(sources))
 
 	for _, source := range sources {
 		source.ID = strings.TrimSpace(source.ID)
@@ -201,7 +126,7 @@ func normalizeContextSources(sources []ContextSourceInventoryEntry) ([]ContextSo
 	return normalized, nil
 }
 
-func contextReadiness(sources []ContextSourceInventoryEntry) ContextReadiness {
+func contextReadiness(sources []authoringcore.ContextSourceInventoryEntry) ContextReadiness {
 	readiness := ContextReadiness{Status: ContextReadinessReady}
 
 	for _, source := range sources {

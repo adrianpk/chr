@@ -20,3 +20,7 @@ publication authority is inferred by parsing.
 TableCell retains the original tracker Markdown escaping and newline folding.
 ReplaceLines retains the existing half-open replacement used by ticket and
 project metadata edits. Both operate on caller-supplied values without IO.
+
+ContextTableCell keeps the original context inventory escaping and trimming,
+which differs from tracker TableCell. YesNo and the context field/list writers
+retain their existing text and spacing; no artifact contract is inferred.

@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestEvaluateContextReadinessHandoffReady(t *testing.T) {
@@ -62,11 +64,11 @@ func TestEvaluateContextReadinessHandoffBlocksMissingProtocolAndValidation(t *te
 func TestEvaluateContextReadinessHandoffSupportsCustomRequiredKinds(t *testing.T) {
 	dir := t.TempDir()
 	plan := testReadinessRuntimePlan(dir)
-	sources := []ContextSourceInventoryEntry{
+	sources := []authoringcore.ContextSourceInventoryEntry{
 		{
 			ID:       "gograph",
-			Kind:     ContextSourceKindGoGraph,
-			Class:    ContextSourceClassFresh,
+			Kind:     authoringcore.ContextSourceKindGoGraph,
+			Class:    authoringcore.ContextSourceClassFresh,
 			Included: true,
 		},
 	}
@@ -75,7 +77,7 @@ func TestEvaluateContextReadinessHandoffSupportsCustomRequiredKinds(t *testing.T
 	handoff := EvaluateContextReadinessHandoff(ContextReadinessHandoffOptions{
 		Composition:   composition,
 		Plan:          plan,
-		RequiredKinds: []ContextSourceKind{ContextSourceKindGoGraph},
+		RequiredKinds: []authoringcore.ContextSourceKind{authoringcore.ContextSourceKindGoGraph},
 	})
 
 	if handoff.Status != ContextReadinessReady {
@@ -101,7 +103,7 @@ func testReadinessRuntimePlan(dir string) RuntimePlan {
 func testReadinessComposition(
 	t *testing.T,
 	plan RuntimePlan,
-	sources []ContextSourceInventoryEntry,
+	sources []authoringcore.ContextSourceInventoryEntry,
 ) ContextCompositionPlan {
 	t.Helper()
 
@@ -119,33 +121,33 @@ func testReadinessComposition(
 	return composition
 }
 
-func completeReadinessSources() []ContextSourceInventoryEntry {
-	return []ContextSourceInventoryEntry{
+func completeReadinessSources() []authoringcore.ContextSourceInventoryEntry {
+	return []authoringcore.ContextSourceInventoryEntry{
 		{
 			ID:       "agent-default",
-			Kind:     ContextSourceKindAgentIdentity,
-			Class:    ContextSourceClassInvariant,
+			Kind:     authoringcore.ContextSourceKindAgentIdentity,
+			Class:    authoringcore.ContextSourceClassInvariant,
 			Included: true,
 			Required: true,
 		},
 		{
 			ID:       "agents:AGENTS.md",
-			Kind:     ContextSourceKindProtocol,
-			Class:    ContextSourceClassInvariant,
+			Kind:     authoringcore.ContextSourceKindProtocol,
+			Class:    authoringcore.ContextSourceClassInvariant,
 			Included: true,
 			Required: true,
 		},
 		{
 			ID:       "project:demo",
-			Kind:     ContextSourceKindProject,
-			Class:    ContextSourceClassInvariant,
+			Kind:     authoringcore.ContextSourceKindProject,
+			Class:    authoringcore.ContextSourceClassInvariant,
 			Included: true,
 			Required: true,
 		},
 		{
 			ID:       "ticket:CHR-1.md",
-			Kind:     ContextSourceKindDocument,
-			Class:    ContextSourceClassFresh,
+			Kind:     authoringcore.ContextSourceKindDocument,
+			Class:    authoringcore.ContextSourceClassFresh,
 			Included: true,
 			Required: true,
 		},

@@ -3,13 +3,16 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // ContextReadinessHandoffOptions describes a package boundary value.
 type ContextReadinessHandoffOptions struct {
 	Composition   ContextCompositionPlan
 	Plan          RuntimePlan
-	RequiredKinds []ContextSourceKind
+	RequiredKinds []authoringcore.ContextSourceKind
 }
 
 // ContextReadinessHandoff describes a package boundary value.
@@ -66,12 +69,12 @@ func RenderContextReadinessHandoff(handoff ContextReadinessHandoff) string {
 	var output strings.Builder
 
 	output.WriteString("# Context Readiness Handoff\n\n")
-	writeMarkdownField(&output, "Status", string(handoff.Status))
-	writeMarkdownField(&output, "Completeness", handoff.Completeness.String())
+	opsmetadata.WriteMarkdownField(&output, "Status", string(handoff.Status))
+	opsmetadata.WriteMarkdownField(&output, "Completeness", handoff.Completeness.String())
 	writeReadinessIssues(&output, handoff.Issues)
-	writeMarkdownList(&output, "Warnings", handoff.Warnings)
+	opsmetadata.WriteMarkdownList(&output, "Warnings", handoff.Warnings)
 	writeArtifactLinks(&output, handoff.Artifacts)
-	writeMarkdownList(&output, "Runtime Workspace Notes", handoff.RuntimeNotes)
+	opsmetadata.WriteMarkdownList(&output, "Runtime Workspace Notes", handoff.RuntimeNotes)
 
 	return output.String()
 }
@@ -123,7 +126,7 @@ func runtimeContextChecks(opts ContextReadinessHandoffOptions) []contextReadines
 	}
 }
 
-func sourceKindChecks(sources []ContextSourceInventoryEntry, requiredKinds []ContextSourceKind) []contextReadinessCheck {
+func sourceKindChecks(sources []authoringcore.ContextSourceInventoryEntry, requiredKinds []authoringcore.ContextSourceKind) []contextReadinessCheck {
 	checks := make([]contextReadinessCheck, 0, len(requiredKinds))
 
 	for _, kind := range requiredKinds {
@@ -137,7 +140,7 @@ func sourceKindChecks(sources []ContextSourceInventoryEntry, requiredKinds []Con
 	return checks
 }
 
-func requiredSourceChecks(sources []ContextSourceInventoryEntry) []contextReadinessCheck {
+func requiredSourceChecks(sources []authoringcore.ContextSourceInventoryEntry) []contextReadinessCheck {
 	checks := []contextReadinessCheck{}
 
 	for _, source := range sources {
@@ -155,20 +158,20 @@ func requiredSourceChecks(sources []ContextSourceInventoryEntry) []contextReadin
 	return checks
 }
 
-func requiredContextKinds(kinds []ContextSourceKind) []ContextSourceKind {
+func requiredContextKinds(kinds []authoringcore.ContextSourceKind) []authoringcore.ContextSourceKind {
 	if len(kinds) > 0 {
-		return append([]ContextSourceKind(nil), kinds...)
+		return append([]authoringcore.ContextSourceKind(nil), kinds...)
 	}
 
-	return []ContextSourceKind{
-		ContextSourceKindAgentIdentity,
-		ContextSourceKindProtocol,
-		ContextSourceKindProject,
-		ContextSourceKindDocument,
+	return []authoringcore.ContextSourceKind{
+		authoringcore.ContextSourceKindAgentIdentity,
+		authoringcore.ContextSourceKindProtocol,
+		authoringcore.ContextSourceKindProject,
+		authoringcore.ContextSourceKindDocument,
 	}
 }
 
-func hasIncludedSourceKind(sources []ContextSourceInventoryEntry, kind ContextSourceKind) bool {
+func hasIncludedSourceKind(sources []authoringcore.ContextSourceInventoryEntry, kind authoringcore.ContextSourceKind) bool {
 	for _, source := range sources {
 		if source.Kind == kind && source.Included {
 			return true

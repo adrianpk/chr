@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 const defaultPreviousAttemptMaxValidationLines = 12
@@ -31,17 +34,17 @@ type PreviousAttemptContext struct {
 	FailureSignatures          []string
 	RepeatedFailureSignatures  []string
 	PreviousAttemptContextPath string
-	Sources                    []ContextSourceInventoryEntry
+	Sources                    []authoringcore.ContextSourceInventoryEntry
 }
 
 type previousValidationArtifact struct {
 	Content string
-	Source  ContextSourceInventoryEntry
+	Source  authoringcore.ContextSourceInventoryEntry
 }
 
 type previousResultArtifact struct {
 	Result *ExecutionResult
-	Source ContextSourceInventoryEntry
+	Source authoringcore.ContextSourceInventoryEntry
 }
 
 // LoadPreviousAttemptContext loads the corresponding package data.
@@ -78,7 +81,7 @@ func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAtt
 		FailureSignatures:          signatures,
 		RepeatedFailureSignatures:  repeatedValidationFailureSignatures(validation.Content),
 		PreviousAttemptContextPath: strings.TrimSpace(opts.PreviousAttemptContextPath),
-		Sources:                    []ContextSourceInventoryEntry{validation.Source, loaded.Source},
+		Sources:                    []authoringcore.ContextSourceInventoryEntry{validation.Source, loaded.Source},
 	}, nil
 }
 
@@ -87,17 +90,17 @@ func RenderPreviousAttemptContext(ctx PreviousAttemptContext) string {
 	var output strings.Builder
 
 	output.WriteString("# Previous Attempt Context\n\n")
-	writeMarkdownField(&output, "Execution ID", ctx.ExecutionID)
-	writeMarkdownField(&output, "Ticket Key", ctx.TicketKey)
-	writeMarkdownField(&output, "Execution Status", string(ctx.Status))
-	writeMarkdownField(&output, "Failure Kind", string(ctx.FailureKind))
-	writeMarkdownField(&output, "Failure Reason", ctx.FailureReason)
-	writeMarkdownField(&output, "Validation Command", ctx.ValidationCommand)
-	writeMarkdownField(&output, "Validation Path", ctx.ValidationPath)
+	opsmetadata.WriteMarkdownField(&output, "Execution ID", ctx.ExecutionID)
+	opsmetadata.WriteMarkdownField(&output, "Ticket Key", ctx.TicketKey)
+	opsmetadata.WriteMarkdownField(&output, "Execution Status", string(ctx.Status))
+	opsmetadata.WriteMarkdownField(&output, "Failure Kind", string(ctx.FailureKind))
+	opsmetadata.WriteMarkdownField(&output, "Failure Reason", ctx.FailureReason)
+	opsmetadata.WriteMarkdownField(&output, "Validation Command", ctx.ValidationCommand)
+	opsmetadata.WriteMarkdownField(&output, "Validation Path", ctx.ValidationPath)
 	writePreviousAttemptResult(&output, ctx.Result)
 	writePreviousAttemptChangedFiles(&output, ctx.ChangedFiles)
-	writeMarkdownList(&output, "Failure Signatures", ctx.FailureSignatures)
-	writeMarkdownList(&output, "Repeated Failure Signatures", ctx.RepeatedFailureSignatures)
+	opsmetadata.WriteMarkdownList(&output, "Failure Signatures", ctx.FailureSignatures)
+	opsmetadata.WriteMarkdownList(&output, "Repeated Failure Signatures", ctx.RepeatedFailureSignatures)
 
 	output.WriteString("## Validation Excerpt\n\n")
 	writeTextBlock(&output, ctx.ValidationExcerpt, "No validation output was captured.")
@@ -126,10 +129,10 @@ func RenderPreviousAttemptContextLink(path string) string {
 }
 
 func loadPreviousAttemptValidation(record ExecutionRecord) (previousValidationArtifact, error) {
-	source := ContextSourceInventoryEntry{
+	source := authoringcore.ContextSourceInventoryEntry{
 		ID:          "previous-attempt:validation",
-		Kind:        ContextSourceKindPreviousAttempt,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindPreviousAttempt,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        record.Artifacts.ValidationPath,
 		Description: "Previous attempt validation artifact.",
 		Required:    false,
@@ -152,10 +155,10 @@ func loadPreviousAttemptValidation(record ExecutionRecord) (previousValidationAr
 }
 
 func loadPreviousAttemptResult(record ExecutionRecord) (previousResultArtifact, error) {
-	source := ContextSourceInventoryEntry{
+	source := authoringcore.ContextSourceInventoryEntry{
 		ID:          "previous-attempt:result",
-		Kind:        ContextSourceKindPreviousAttempt,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindPreviousAttempt,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        record.Artifacts.ResultPath,
 		Description: "Previous attempt result artifact.",
 		Required:    false,

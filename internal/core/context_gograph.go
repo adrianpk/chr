@@ -8,6 +8,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 const (
@@ -35,7 +38,7 @@ type GoGraphContext struct {
 	Build      GoGraphCommandResult
 	Queries    []GoGraphQueryResult
 	Warnings   []string
-	Sources    []ContextSourceInventoryEntry
+	Sources    []authoringcore.ContextSourceInventoryEntry
 }
 
 // GoGraphCommandResult describes a package boundary value.
@@ -148,12 +151,12 @@ func RenderGoGraphContext(ctx GoGraphContext) string {
 	var output strings.Builder
 
 	output.WriteString("## Go Graph Context\n\n")
-	writeMarkdownField(&output, "Available", markdownBool(ctx.Available))
-	writeMarkdownField(&output, "Command", ctx.Command)
-	writeMarkdownField(&output, "Precise Mode", markdownBool(ctx.Precise))
+	opsmetadata.WriteMarkdownField(&output, "Available", opsmetadata.YesNo(ctx.Available))
+	opsmetadata.WriteMarkdownField(&output, "Command", ctx.Command)
+	opsmetadata.WriteMarkdownField(&output, "Precise Mode", opsmetadata.YesNo(ctx.Precise))
 
 	if len(ctx.Warnings) > 0 {
-		writeMarkdownList(&output, "Warnings", ctx.Warnings)
+		opsmetadata.WriteMarkdownList(&output, "Warnings", ctx.Warnings)
 	}
 
 	output.WriteString("### Build\n\n")
@@ -288,11 +291,11 @@ func goGraphSymbols(terms []string, maxSymbols int) []string {
 	return symbols
 }
 
-func goGraphSources(included bool, reason string) []ContextSourceInventoryEntry {
-	source := ContextSourceInventoryEntry{
+func goGraphSources(included bool, reason string) []authoringcore.ContextSourceInventoryEntry {
+	source := authoringcore.ContextSourceInventoryEntry{
 		ID:          "gograph",
-		Kind:        ContextSourceKindGoGraph,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindGoGraph,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        ".",
 		Description: "Selected gograph CLI semantic code context.",
 		Required:    false,
@@ -302,7 +305,7 @@ func goGraphSources(included bool, reason string) []ContextSourceInventoryEntry 
 		source.Reason = reason
 	}
 
-	return []ContextSourceInventoryEntry{source}
+	return []authoringcore.ContextSourceInventoryEntry{source}
 }
 
 func writeGoGraphCommandResult(output *strings.Builder, result GoGraphCommandResult) {

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -28,9 +29,9 @@ type AssistedAuthoringContextPackage struct {
 	Session           authoringcore.Session
 	SessionPaths      AuthoringSessionPaths
 	AgentProtocol     AgentProtocolContext
-	SelectedDocuments []ContextDocument
+	SelectedDocuments []authoringcore.ContextDocument
 	TranscriptSummary AssistedTranscriptSummary
-	Sources           []ContextSourceInventoryEntry
+	Sources           []authoringcore.ContextSourceInventoryEntry
 }
 
 // AssistedTranscriptSummary describes a package boundary value.
@@ -85,7 +86,7 @@ func LoadAssistedAuthoringContextPackage(
 		return AssistedAuthoringContextPackage{}, err
 	}
 
-	sources := append([]ContextSourceInventoryEntry{}, agentProtocol.Sources...)
+	sources := append([]authoringcore.ContextSourceInventoryEntry{}, agentProtocol.Sources...)
 	sources = append(sources, authoringSessionContextSources(projectDir, sessionPaths)...)
 	sources = append(sources, transcript.Sources...)
 	sources = append(sources, selected.Sources...)
@@ -133,18 +134,18 @@ func normalizeAuthoringContextSessionPaths(
 }
 
 type authoringSelectedDocuments struct {
-	Documents []ContextDocument
-	Sources   []ContextSourceInventoryEntry
+	Documents []authoringcore.ContextDocument
+	Sources   []authoringcore.ContextSourceInventoryEntry
 }
 
 type authoringSelectedDocument struct {
-	Document ContextDocument
-	Source   ContextSourceInventoryEntry
+	Document authoringcore.ContextDocument
+	Source   authoringcore.ContextSourceInventoryEntry
 }
 
 type assistedTranscriptContext struct {
 	Summary AssistedTranscriptSummary
-	Sources []ContextSourceInventoryEntry
+	Sources []authoringcore.ContextSourceInventoryEntry
 }
 
 func loadAuthoringSelectedDocuments(projectDir string, session authoringcore.Session) (authoringSelectedDocuments, error) {
@@ -154,8 +155,8 @@ func loadAuthoringSelectedDocuments(projectDir string, session authoringcore.Ses
 		return refs[left].Path < refs[right].Path
 	})
 
-	documents := make([]ContextDocument, 0, len(refs))
-	sources := make([]ContextSourceInventoryEntry, 0, len(refs))
+	documents := make([]authoringcore.ContextDocument, 0, len(refs))
+	sources := make([]authoringcore.ContextSourceInventoryEntry, 0, len(refs))
 
 	for _, ref := range refs {
 		if ref.Path == "" {
@@ -195,10 +196,10 @@ func loadAuthoringSelectedDocument(projectDir string, ref authoringcore.Artifact
 
 	relPath = filepath.ToSlash(relPath)
 	id := "authoring-document:" + ref.ID
-	source := ContextSourceInventoryEntry{
+	source := authoringcore.ContextSourceInventoryEntry{
 		ID:          id,
-		Kind:        ContextSourceKindDocument,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindDocument,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        relPath,
 		Description: ref.Description,
 		Required:    false,
@@ -218,7 +219,7 @@ func loadAuthoringSelectedDocument(projectDir string, ref authoringcore.Artifact
 
 	source.Included = true
 
-	return authoringSelectedDocument{Document: ContextDocument{
+	return authoringSelectedDocument{Document: authoringcore.ContextDocument{
 		ID:           id,
 		Path:         path,
 		RelativePath: relPath,
@@ -269,18 +270,18 @@ func summarizeAssistedTranscript(projectDir string, paths AuthoringSessionPaths,
 		return summary.UnansweredQuestions[left].TurnIndex < summary.UnansweredQuestions[right].TurnIndex
 	})
 
-	return assistedTranscriptContext{Summary: summary, Sources: []ContextSourceInventoryEntry{assistedTranscriptSource(projectDir, paths)}}, nil
+	return assistedTranscriptContext{Summary: summary, Sources: []authoringcore.ContextSourceInventoryEntry{assistedTranscriptSource(projectDir, paths)}}, nil
 }
 
-func authoringSessionContextSources(projectDir string, paths AuthoringSessionPaths) []ContextSourceInventoryEntry {
+func authoringSessionContextSources(projectDir string, paths AuthoringSessionPaths) []authoringcore.ContextSourceInventoryEntry {
 	sessionPath := relativeContextPath(projectDir, paths.SessionPath)
 	artifactsPath := relativeContextPath(projectDir, paths.ArtifactsPath)
 
-	return []ContextSourceInventoryEntry{
+	return []authoringcore.ContextSourceInventoryEntry{
 		{
 			ID:          "authoring-session:session",
-			Kind:        ContextSourceKindDocument,
-			Class:       ContextSourceClassFresh,
+			Kind:        authoringcore.ContextSourceKindDocument,
+			Class:       authoringcore.ContextSourceClassFresh,
 			Path:        sessionPath,
 			Description: "Authoring session metadata.",
 			Required:    true,
@@ -288,8 +289,8 @@ func authoringSessionContextSources(projectDir string, paths AuthoringSessionPat
 		},
 		{
 			ID:          "authoring-session:artifacts",
-			Kind:        ContextSourceKindDocument,
-			Class:       ContextSourceClassFresh,
+			Kind:        authoringcore.ContextSourceKindDocument,
+			Class:       authoringcore.ContextSourceClassFresh,
 			Path:        artifactsPath,
 			Description: "Authoring session artifact registry.",
 			Required:    false,
@@ -298,11 +299,11 @@ func authoringSessionContextSources(projectDir string, paths AuthoringSessionPat
 	}
 }
 
-func assistedTranscriptSource(projectDir string, paths AuthoringSessionPaths) ContextSourceInventoryEntry {
-	return ContextSourceInventoryEntry{
+func assistedTranscriptSource(projectDir string, paths AuthoringSessionPaths) authoringcore.ContextSourceInventoryEntry {
+	return authoringcore.ContextSourceInventoryEntry{
 		ID:          "authoring-session:transcript",
-		Kind:        ContextSourceKindDocument,
-		Class:       ContextSourceClassFresh,
+		Kind:        authoringcore.ContextSourceKindDocument,
+		Class:       authoringcore.ContextSourceClassFresh,
 		Path:        relativeContextPath(projectDir, paths.TranscriptPath),
 		Description: "Assisted authoring transcript events.",
 		Required:    true,
@@ -330,7 +331,7 @@ func writeAssistedContextAgent(output *strings.Builder, identity AgentIdentity) 
 	output.WriteString("- role: ")
 	output.WriteString(identity.Role)
 	output.WriteString("\n\n")
-	writeMarkdownList(output, "Authoring Stance", []string{
+	opsmetadata.WriteMarkdownList(output, "Authoring Stance", []string{
 		"Act as a technical analyst for project authoring.",
 		"Ask focused follow-up questions when information is missing.",
 		"Convert captured answers into durable Markdown artifacts.",
@@ -435,7 +436,7 @@ func writeAssistedContextProtocols(output *strings.Builder, ctx AgentProtocolCon
 	writeContextDocuments(output, ctx.ChrFiles, "No selected .chr protocol files were found.")
 }
 
-func writeAssistedContextDocuments(output *strings.Builder, documents []ContextDocument) {
+func writeAssistedContextDocuments(output *strings.Builder, documents []authoringcore.ContextDocument) {
 	output.WriteString("## Selected Documents\n\n")
 	writeContextDocuments(output, documents, "No selected authoring documents were found.")
 }
@@ -445,7 +446,7 @@ func writeAssistedContextConversationBoundary(output *strings.Builder) {
 	output.WriteString("Implicit conversation history is not included. Relevant prior discussion must be captured in session transcript events or selected project documents.\n\n")
 }
 
-func writeAssistedContextSourceInventory(output *strings.Builder, sources []ContextSourceInventoryEntry) {
+func writeAssistedContextSourceInventory(output *strings.Builder, sources []authoringcore.ContextSourceInventoryEntry) {
 	output.WriteString("## Source Inventory\n\n")
-	output.WriteString(RenderSourceInventory(sources))
+	output.WriteString(authoringcore.RenderSourceInventory(sources))
 }
