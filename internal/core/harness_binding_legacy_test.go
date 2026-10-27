@@ -27,10 +27,10 @@ func TestHarnessBindingLegacy(t *testing.T) {
 
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "harnesses:\n  worker: pi-unavailable\n")
 
-	request.ResolveHarness = func(context.Context, WorkspaceConfig) (*HarnessBinding, []string, error) {
+	request.ResolveHarness = func(context.Context, WorkspaceConfig) (WorkflowHarnessResolution, error) {
 		t.Fatal("v1 retry resolved a new profile")
 
-		return nil, nil, nil
+		return WorkflowHarnessResolution{}, nil
 	}
 
 	current, err := store.ReadWorkflow(t.Context(), started.Invocation.ID)

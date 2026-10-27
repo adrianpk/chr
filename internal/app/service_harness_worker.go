@@ -11,32 +11,32 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
-func (s service) prepareWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (*core.HarnessBinding, []string, error) {
+func (s service) prepareWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (core.WorkflowHarnessResolution, error) {
 	if _, err := config.HarnessSelections(s.projectContext.ProjectID); err != nil {
-		return nil, nil, err
+		return core.WorkflowHarnessResolution{}, err
 	}
 
 	if config.Harnesses.Worker == "" {
-		return nil, nil, nil
+		return core.WorkflowHarnessResolution{}, nil
 	}
 
 	resolved, err := s.resolveHarnessSelection(ctx, config, core.HarnessWorker, "")
 	if err != nil {
-		return nil, nil, err
+		return core.WorkflowHarnessResolution{}, err
 	}
 
 	worker, runtimeRef, protocol, err := s.selectedWorkerCommand(ctx, resolved)
 	if err != nil {
-		return nil, nil, err
+		return core.WorkflowHarnessResolution{}, err
 	}
 
 	executable, command, err := core.FreezeHarnessExecutable(worker)
 	if err != nil {
-		return nil, nil, err
+		return core.WorkflowHarnessResolution{}, err
 	}
 
 	if s.workflowWorker != nil && !slices.Equal(s.workflowWorker, command) {
-		return nil, nil, workflowstate.ErrConflict
+		return core.WorkflowHarnessResolution{}, workflowstate.ErrConflict
 	}
 
 	binding, err := core.SealHarnessBinding(core.HarnessBinding{
@@ -46,7 +46,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		ExecutableRef: executable, RuntimeRef: runtimeRef, ProtocolRevision: protocol, Capabilities: resolved.View.Capabilities,
 	})
 
-	return &binding, command, err
+	return core.WorkflowHarnessResolution{Binding: &binding, Command: command}, err
 }
 
 func harnessWorkerProvider(provider string) string {

@@ -7,9 +7,16 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// WorkflowHarnessResolution binds the prepared host command to its semantic identity.
+// This transient outcome does not change retained admission or invocation records.
+type WorkflowHarnessResolution struct {
+	Binding *HarnessBinding
+	Command []string
+}
+
 // WorkflowHarnessResolver prepares the current explicit choice from the same
 // complete configuration image that owns admission. Retained requests skip it.
-type WorkflowHarnessResolver func(context.Context, WorkspaceConfig) (*HarnessBinding, []string, error)
+type WorkflowHarnessResolver func(context.Context, WorkspaceConfig) (WorkflowHarnessResolution, error)
 
 func (s *WorkflowStore) resolveWorkflowHarnessRequest(ctx context.Context, request WorkflowStartRequest) (WorkflowStartRequest, error) {
 	retained, found, err := s.retainedWorkflowHarnessRequest(ctx, request)
@@ -23,16 +30,16 @@ func (s *WorkflowStore) resolveWorkflowHarnessRequest(ctx context.Context, reque
 	}
 
 	if request.ResolveHarness != nil {
-		binding, command, err := request.ResolveHarness(ctx, config)
+		resolved, err := request.ResolveHarness(ctx, config)
 		if err != nil {
 			return request, err
 		}
 
-		if request.HarnessBinding != nil && !sameHarnessBinding(request.HarnessBinding, binding) {
+		if request.HarnessBinding != nil && !sameHarnessBinding(request.HarnessBinding, resolved.Binding) {
 			return request, workflowstate.ErrConflict
 		}
 
-		request.HarnessBinding, request.HarnessCommand = binding, command
+		request.HarnessBinding, request.HarnessCommand = resolved.Binding, resolved.Command
 	}
 
 	if err := checkCurrentWorkflowHarness(config, request); err != nil {

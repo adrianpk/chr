@@ -32,10 +32,10 @@ func TestHarnessBindingPending(t *testing.T) {
 
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "harnesses:\n  worker: unavailable\n  generation: other\n")
 
-	request.ResolveHarness = func(context.Context, WorkspaceConfig) (*HarnessBinding, []string, error) {
+	request.ResolveHarness = func(context.Context, WorkspaceConfig) (WorkflowHarnessResolution, error) {
 		t.Fatal("retained request resolved live configuration")
 
-		return nil, nil, nil
+		return WorkflowHarnessResolution{}, nil
 	}
 
 	replay := workflowTestStart(t, store, request)
@@ -63,10 +63,10 @@ func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessR
 		t.Fatal(err)
 	}
 
-	return func(_ context.Context, config WorkspaceConfig) (*HarnessBinding, []string, error) {
+	return func(_ context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
 		binding, err := SealHarnessBinding(HarnessBinding{SchemaVersion: 1, Role: HarnessWorker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
 
-		return &binding, slices.Clone(frozen), err
+		return WorkflowHarnessResolution{Binding: &binding, Command: slices.Clone(frozen)}, err
 	}
 }
 
@@ -240,20 +240,20 @@ func checkHarnessBindingBudget(t *testing.T, identity string) {
 
 	request.Policy.AgentTokenBudget = 100
 	resolver := harnessBindingTestResolver(t, workflowTaskCommand(t, "worker"))
-	request.ResolveHarness = func(ctx context.Context, config WorkspaceConfig) (*HarnessBinding, []string, error) {
-		binding, command, err := resolver(ctx, config)
+	request.ResolveHarness = func(ctx context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
+		resolved, err := resolver(ctx, config)
 		if err != nil {
-			return nil, nil, err
+			return WorkflowHarnessResolution{}, err
 		}
 
-		binding.Harness = identity
+		resolved.Binding.Harness = identity
 		if identity == "pi" {
-			binding.RuntimeRef = "sha256:" + contenthash.Sum([]byte("pi-runtime"))
+			resolved.Binding.RuntimeRef = "sha256:" + contenthash.Sum([]byte("pi-runtime"))
 		}
 
-		sealed, err := SealHarnessBinding(*binding)
+		sealed, err := SealHarnessBinding(*resolved.Binding)
 
-		return &sealed, command, err
+		return WorkflowHarnessResolution{Binding: &sealed, Command: resolved.Command}, err
 	}
 	started := workflowTestStart(t, store, request)
 

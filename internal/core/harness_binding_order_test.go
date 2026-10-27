@@ -22,12 +22,12 @@ func TestHarnessBindingSelectionOrder(t *testing.T) {
 
 	entered, release, switching := make(chan struct{}), make(chan struct{}), make(chan struct{})
 	resolver := harnessBindingTestResolver(t, workflowTaskCommand(t, "worker"))
-	request.ResolveHarness = func(ctx context.Context, config WorkspaceConfig) (*HarnessBinding, []string, error) {
+	request.ResolveHarness = func(ctx context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
 		close(entered)
 
 		select {
 		case <-ctx.Done():
-			return nil, nil, ctx.Err()
+			return WorkflowHarnessResolution{}, ctx.Err()
 		case <-release:
 			return resolver(ctx, config)
 		}

@@ -6,13 +6,13 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 )
 
-func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (*core.HarnessBinding, []string, error) {
-	binding, command, err := s.prepareWorkflowHarness(ctx, config)
+func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (core.WorkflowHarnessResolution, error) {
+	resolved, err := s.prepareWorkflowHarness(ctx, config)
 	if err != nil {
-		return nil, nil, &core.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
+		return core.WorkflowHarnessResolution{}, &core.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
 	}
 
-	return binding, command, nil
+	return resolved, nil
 }
 
 func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection core.WorkflowPreviewRequest) error {

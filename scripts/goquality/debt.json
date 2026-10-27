@@ -7,11 +7,6 @@
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/service_guided_work_readiness.go::service.prepareGuidedWorkflowHarness",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig) (*core.HarnessBinding, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/service_harness_generation.go::service.bindGeneration",
       "signature": "func(ctx context.Context, id, purpose string) (service, context.Context, error)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -59,11 +54,6 @@
     {
       "id": "internal/app/service_harness_selection.go::piWorkerReadiness",
       "signature": "func(ctx context.Context, profile core.HarnessProfile, configDir string, r core.HarnessReadiness) (core.HarnessReadiness, string)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_worker.go::service.prepareWorkflowHarness",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig) (*core.HarnessBinding, []string, error)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -665,11 +655,6 @@
       "id": "internal/core/workflow_frontier_validate.go::workflowRetainedRoleCounts",
       "signature": "func(run workflowInvocationFile) (preparation, review int)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow_harness_admission.go::WorkflowHarnessResolver",
-      "signature": "func(context.Context, WorkspaceConfig) (*HarnessBinding, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow_harness_admission.go::WorkflowStore.retainedWorkflowHarnessRequest",
