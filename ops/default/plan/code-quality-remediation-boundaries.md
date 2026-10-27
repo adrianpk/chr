@@ -704,3 +704,10 @@ with their original owners. Plan service source observation/publication, model
 requests, generation stages, tracking and views have separate files. Named plan
 and guided outcomes are ephemeral application values: persisted fields, ordering,
 JSON tags, hashes and receipt formats are unchanged.
+
+Named dump and assisted-dump results now carry the original body/metadata/history,
+mutation, session-image and retained-binding/receipt observations. The same
+fileAuthoringSessionRepository still owns allocation, source guards, journal
+publication and recovery; these result changes do not relocate or duplicate it.
+Partial error data and image order are preserved, including an existing binding
+whose validation fails. The complete authoring repository move is still pending.
