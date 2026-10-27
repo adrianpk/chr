@@ -108,7 +108,7 @@ func qualityNotificationIdentity(t *testing.T) {
 	input.Record.Event.ID = "distinct-notification"
 	input.Document.SourceHash = strings.Repeat("b", 64)
 
-	repository := &sqliteNotificationEventRepository{db: db}
+	repository := qualityNotificationRepository(t, db)
 	if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}

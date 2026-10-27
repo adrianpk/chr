@@ -15,7 +15,7 @@ import (
 // ResolveTelegramNotificationTarget uses the same canonical project-root binding
 // as receiver views. The caller retains its existing notification authorization.
 func ResolveTelegramNotificationTarget(project projectcore.Project, namespace, destination, digest string) (TelegramNotificationTarget, error) {
-	binding, err := telegramProjectBinding(project)
+	binding, err := projectcore.RootBindingDigest(project)
 	if err != nil {
 		return TelegramNotificationTarget{}, err
 	}
@@ -110,8 +110,7 @@ func (m telegramNotificationManifest) matchesTarget(target TelegramNotificationT
 }
 
 func validateTelegramNotificationManifest(m telegramNotificationManifest, presentation tgmessage.Presentation) error {
-	check := TelegramReceiverDelivery{Text: presentation.PlainFallback, DocumentID: m.document.String}
-	if err := decodeTelegramPresentationHash(m.payload.String, m.hash.String, &check); err != nil {
+	if _, err := tgmessage.DecodeRetained(tgmessage.RetainedInput{Payload: m.payload.String, Hash: m.hash.String, Text: presentation.PlainFallback, DocumentID: m.document.String}); err != nil {
 		return fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 	}
 

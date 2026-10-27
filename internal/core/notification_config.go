@@ -18,3 +18,20 @@ func ValidateNotificationConfig(config NotificationConfig) error {
 
 	return nil
 }
+
+// NotificationConfig describes a package boundary value.
+type NotificationConfig struct {
+	Telegram TelegramNotificationConfig
+}
+
+// TelegramNotificationConfig describes a package boundary value.
+type TelegramNotificationConfig struct {
+	Enabled     bool
+	BotTokenEnv string
+	ChatID      string
+}
+
+// DefaultNotificationConfig executes the corresponding package operation.
+func DefaultNotificationConfig() NotificationConfig {
+	return NotificationConfig{}
+}

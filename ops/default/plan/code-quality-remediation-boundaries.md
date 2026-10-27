@@ -246,3 +246,17 @@ notification HTTP behavior and receiver mutation ownership remain with their
 recorded transport owner. This prerequisite moves payload contracts only; no
 receiver state, delivery claim, retry allowance or storage transaction is moved
 into notification persistence.
+
+### Notification storage move prerequisites
+
+Notification configuration, document row mapping and delivery validation now live
+beside notification state. The cross-table document quota predicate is one static
+schema guard under core/database; each admission still executes its own insert
+and quota reservation inside its original transaction. Root HTTP sending calls the
+notification-owned validation contract and shares only the pure message codec.
+
+Integration fixtures keep their owned SQL connection and call the public repository
+factory. The retention fixture now triggers purge through real admission without
+adding a retained image; all original twenty/four/twenty-two/twenty-four image,
+receipt and hash assertions remain. Snapshot, changed-target, uncertainty, quota,
+retention, old-database, rollback and application notification checks pass.

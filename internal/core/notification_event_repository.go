@@ -45,7 +45,7 @@ type sqliteNotificationEventRepository struct {
 // NewNotificationEventRepository constructs the corresponding package service or value.
 func NewNotificationEventRepository(
 	ctx context.Context,
-	env UserEnvironment,
+	env database.DataDirectory,
 	assetsFS fs.FS,
 ) (NotificationEventRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)

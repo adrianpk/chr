@@ -71,7 +71,7 @@ func TestQualityStorageTelegram(t *testing.T) {
 		qualityStorageExec(t, db, "DELETE FROM telegram_notification_documents")
 		qualityStorageExec(t, db, "DELETE FROM notification_events")
 
-		if err := (&sqliteNotificationEventRepository{db: db}).CreateTelegramNotification(t.Context(), input); err != nil {
+		if err := qualityNotificationRepository(t, db).CreateTelegramNotification(t.Context(), input); err != nil {
 			t.Fatal(err)
 		}
 
@@ -134,7 +134,7 @@ func qualityNotificationFault(t *testing.T, db *sql.DB) func() error {
 	qualityStorageExec(t, db, `CREATE TEMP TRIGGER quality_abort BEFORE UPDATE OF telegram_presentation ON notification_events BEGIN SELECT RAISE(ABORT,'injected notification bind failure'); END`)
 
 	return func() error {
-		return (&sqliteNotificationEventRepository{db: db}).CreateTelegramNotification(t.Context(), input)
+		return qualityNotificationRepository(t, db).CreateTelegramNotification(t.Context(), input)
 	}
 }
 

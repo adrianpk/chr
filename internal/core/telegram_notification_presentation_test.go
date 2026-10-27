@@ -2,11 +2,13 @@ package core
 
 import (
 	"bytes"
+	"database/sql"
 	"os"
 	"testing"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	"forge.adrianpk.com/chr/internal/core/database"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
@@ -133,12 +135,30 @@ func finishTelegramNotificationTest(t *testing.T, repository NotificationEventRe
 	}
 }
 
-func openTelegramNotificationTestRepository(t *testing.T, env UserEnvironment) *sqliteNotificationEventRepository {
+type notificationTestRepository struct {
+	NotificationEventRepository
+	db *sql.DB
+}
+
+func openTelegramNotificationTestRepository(t *testing.T, env UserEnvironment) *notificationTestRepository {
 	t.Helper()
 
-	repository, err := NewNotificationEventRepository(t.Context(), env, os.DirFS("../../cmd/chr"))
+	if err := os.MkdirAll(env.DataDir(), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := sql.Open("sqlite", database.UserDatabasePath(env))
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if err := database.Configure(t.Context(), db); err != nil {
+		t.Fatal(database.CloseOnError(db, err))
+	}
+
+	repository, err := NewNotificationEventRepositoryFromDB(t.Context(), db, os.DirFS("../../cmd/chr"))
+	if err != nil {
+		t.Fatal(database.CloseOnError(db, err))
 	}
 
 	t.Cleanup(func() {
@@ -147,15 +167,10 @@ func openTelegramNotificationTestRepository(t *testing.T, env UserEnvironment) *
 		}
 	})
 
-	concrete, ok := repository.(*sqliteNotificationEventRepository)
-	if !ok {
-		t.Fatal("unexpected notification repository")
-	}
-
-	return concrete
+	return &notificationTestRepository{NotificationEventRepository: repository, db: db}
 }
 
-func checkTelegramNotificationIsolation(t *testing.T, repository *sqliteNotificationEventRepository) {
+func checkTelegramNotificationIsolation(t *testing.T, repository *notificationTestRepository) {
 	t.Helper()
 
 	for _, item := range []struct {

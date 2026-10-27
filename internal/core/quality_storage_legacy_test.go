@@ -71,7 +71,7 @@ func readQualityLegacyRecords(t *testing.T, db *sql.DB, want qualityLegacyRecord
 		t.Fatal(err)
 	}
 
-	got.Notification, err = (&sqliteNotificationEventRepository{db: db}).GetNotificationEvent(t.Context(), want.Notification.Event.ID)
+	got.Notification, err = qualityNotificationRepository(t, db).GetNotificationEvent(t.Context(), want.Notification.Event.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

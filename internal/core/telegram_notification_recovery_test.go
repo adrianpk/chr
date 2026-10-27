@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"database/sql"
 	"errors"
 	"fmt"
 	"testing"
@@ -61,7 +60,7 @@ func TestTelegramPresentationFailureSharedQuota(t *testing.T) {
 	checkTelegramNotificationQuotaRollback(t, repository, store)
 }
 
-func checkTelegramNotificationQuota(t *testing.T, repository *sqliteNotificationEventRepository) {
+func checkTelegramNotificationQuota(t *testing.T, repository *notificationTestRepository) {
 	t.Helper()
 
 	var usage int64
@@ -72,7 +71,7 @@ func checkTelegramNotificationQuota(t *testing.T, repository *sqliteNotification
 	}
 }
 
-func checkTelegramNotificationQuotaRollback(t *testing.T, repository *sqliteNotificationEventRepository, store *TelegramReceiverStore) {
+func checkTelegramNotificationQuotaRollback(t *testing.T, repository *notificationTestRepository, store *TelegramReceiverStore) {
 	t.Helper()
 
 	var events, documents, replies int
@@ -123,11 +122,17 @@ func TestTelegramPresentationNotificationRetention(t *testing.T) {
 		finishTelegramNotificationRetention(t, repository, input, index, old, now)
 	}
 
-	if err := repository.notificationTransaction(t.Context(), func(tx *sql.Tx) error { return purgeTelegramNotificationDocuments(t.Context(), tx, now) }); err != nil {
+	// A real admission triggers bounded cleanup without adding another retained image.
+	originalHash := contenthash.Sum(input.Document.Payload)
+	input.Record.Event.ID = "retention-trigger"
+	input.Record.Event.CreatedAt, input.Record.Event.UpdatedAt = now, now
+
+	input.Document = nil
+	if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}
 
-	checkTelegramNotificationRetention(t, repository, contenthash.Sum(input.Document.Payload))
+	checkTelegramNotificationRetention(t, repository, originalHash)
 }
 
 func finishTelegramNotificationRetention(t *testing.T, repository NotificationEventRepository, input TelegramNotificationInput, index int, old, now time.Time) {
@@ -155,7 +160,7 @@ func finishTelegramNotificationRetention(t *testing.T, repository NotificationEv
 	}
 }
 
-func checkTelegramNotificationRetention(t *testing.T, repository *sqliteNotificationEventRepository, hash string) {
+func checkTelegramNotificationRetention(t *testing.T, repository *notificationTestRepository, hash string) {
 	t.Helper()
 
 	var purged, retained, receipts, hashes int

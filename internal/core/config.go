@@ -38,11 +38,6 @@ type RuntimeConfig struct {
 	ValidationCommand string
 }
 
-// NotificationConfig describes a package boundary value.
-type NotificationConfig struct {
-	Telegram TelegramNotificationConfig
-}
-
 // WebConfig describes local Web UI configuration.
 type WebConfig struct {
 	Enabled                bool
@@ -154,13 +149,6 @@ type WorktreeBasePolicy string
 
 // WorktreeCleanupPolicy defines a package boundary type.
 type WorktreeCleanupPolicy string
-
-// TelegramNotificationConfig describes a package boundary value.
-type TelegramNotificationConfig struct {
-	Enabled     bool
-	BotTokenEnv string
-	ChatID      string
-}
 
 const (
 	// DefaultRuntimeImage defines a package boundary constant.
@@ -275,11 +263,6 @@ func DefaultRuntimeConfig() RuntimeConfig {
 		ArtifactDir:       DefaultRuntimeArtifactDir,
 		ValidationCommand: DefaultRuntimeValidationCommand,
 	}
-}
-
-// DefaultNotificationConfig executes the corresponding package operation.
-func DefaultNotificationConfig() NotificationConfig {
-	return NotificationConfig{}
 }
 
 // DefaultWebConfig executes the corresponding package operation.

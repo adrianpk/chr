@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core/contenthash"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -25,7 +24,7 @@ func (s TelegramSender) SendPresentation(ctx context.Context, token, destination
 		return tgmessage.Acknowledgement{}, fmt.Errorf("telegram chat id is required")
 	}
 
-	if err := validateTelegramNotificationDelivery(delivery); err != nil {
+	if err := ValidateTelegramNotificationDelivery(delivery); err != nil {
 		return tgmessage.Acknowledgement{}, err
 	}
 
@@ -119,43 +118,4 @@ func TelegramNotificationFailure(failure error) (string, bool) {
 	}
 
 	return "notification_delivery_failed", false
-}
-
-func validateTelegramNotificationDelivery(delivery TelegramNotificationDelivery) error {
-	p := delivery.Presentation
-	if p.PlainFallback == "" || len(p.InitialText)+len(p.Content)+len(p.SecondaryText)+len(p.PlainFallback) > 64<<10 || len(p.Entities) > 32 {
-		return tgmessage.ErrDocumentUnavailable
-	}
-
-	if err := validateTelegramNotificationActions(p); err != nil {
-		return err
-	}
-
-	payload, err := json.Marshal(p)
-	if err != nil {
-		return err
-	}
-
-	check := TelegramReceiverDelivery{Text: p.PlainFallback, DocumentID: p.DocumentID}
-	if err := decodeTelegramPresentationHash(string(payload), contenthash.Sum(payload), &check); err != nil {
-		return err
-	}
-
-	return validateTelegramNotificationAttachment(p, delivery.Document)
-}
-
-func validateTelegramNotificationAttachment(p tgmessage.Presentation, document *tgmessage.Document) error {
-	if document == nil {
-		if p.DocumentID != "" || p.DocumentHash != "" {
-			return tgmessage.ErrDocumentUnavailable
-		}
-
-		return nil
-	}
-
-	if p.TemplateRevision != "document-v1" || p.DocumentID == "" || p.DocumentHash != contenthash.Sum(document.Payload) {
-		return tgmessage.ErrDocumentUnavailable
-	}
-
-	return tgmessage.ValidateDocument(*document)
 }

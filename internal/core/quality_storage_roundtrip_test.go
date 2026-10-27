@@ -82,7 +82,7 @@ func qualityNotificationUpdate(t *testing.T, db *sql.DB, want qualityLegacyRecor
 	t.Helper()
 	qualityStorageExec(t, db, "UPDATE notification_events SET summary='poison-summary',detail='poison-detail',failure_reason='poison-failure',channel='poison-channel',loop_run_id='poison-loop'")
 
-	if err := (&sqliteNotificationEventRepository{db: db}).UpdateNotificationEvent(t.Context(), want.Notification); err != nil {
+	if err := qualityNotificationRepository(t, db).UpdateNotificationEvent(t.Context(), want.Notification); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -102,7 +102,7 @@ func TestQualityStorageNulls(t *testing.T) {
 	db := openQualityLegacyDB(t)
 	want := qualityLegacyExpected(t)
 	execution := &sqliteExecutionRepository{db: db}
-	notification := &sqliteNotificationEventRepository{db: db}
+	notification := qualityNotificationRepository(t, db)
 
 	for _, populated := range []bool{true, false} {
 		t.Run(map[bool]string{true: "populated", false: "null"}[populated], func(t *testing.T) {
