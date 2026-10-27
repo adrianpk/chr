@@ -12,10 +12,6 @@ import (
 // verified after journal recovery. Other errors retain uncertain stop intent.
 var ErrGuidedControlRejected = errors.New("native guided control was rejected without an accepted receipt")
 
-func boundedGuidedControls(control *authoringcore.GuidedControlState) bool {
-	return control == nil || len(control.CompletedOperations) <= 128
-}
-
 // ApplyGuidedUseCaseControl serializes one revision-bound stop/resume operation
 // independently of the pending stage. Its callback composes the native owner.
 func ApplyGuidedUseCaseControl(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand, apply GuidedUseCaseStep) (session authoringcore.Session, err error) {

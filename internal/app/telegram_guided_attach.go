@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -61,7 +60,7 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 }
 
 func telegramGuidedAssociation(session authoringcore.Session) (telegramcore.GuidedAssociation, error) {
-	if session.Guided == nil || core.ValidateGuidedUseCase(session) != nil {
+	if session.Guided == nil || authoringcore.ValidateGuidedUseCase(session) != nil {
 		return telegramcore.GuidedAssociation{}, workflowstate.ErrConflict
 	}
 

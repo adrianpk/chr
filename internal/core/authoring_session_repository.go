@@ -73,7 +73,7 @@ func (r *fileAuthoringSessionRepository) createSession(ctx context.Context, sess
 		return AuthoringSessionPaths{}, err
 	}
 
-	err = ValidateAuthoringSession(session)
+	err = authoringcore.ValidateAuthoringSession(session)
 	if err != nil {
 		return AuthoringSessionPaths{}, err
 	}
@@ -115,7 +115,7 @@ func (r *fileAuthoringSessionRepository) updateSession(ctx context.Context, sess
 		return AuthoringSessionPaths{}, err
 	}
 
-	err = ValidateAuthoringSession(session)
+	err = authoringcore.ValidateAuthoringSession(session)
 	if err != nil {
 		return AuthoringSessionPaths{}, err
 	}
@@ -297,7 +297,7 @@ func requireAuthoringSessionFile(path, sessionID string) error {
 
 // RenderAuthoringSession renders the corresponding package data.
 func RenderAuthoringSession(session authoringcore.Session, paths AuthoringSessionPaths) (string, error) {
-	err := ValidateAuthoringSession(session)
+	err := authoringcore.ValidateAuthoringSession(session)
 	if err != nil {
 		return "", err
 	}
@@ -335,7 +335,7 @@ func ParseAuthoringSession(content string) (authoringcore.Session, error) {
 	session.Outputs = parseAuthoringArtifactSection(content, "Outputs")
 	session.Provenance = parseAuthoringProvenanceSection(content)
 
-	err = ValidateAuthoringSession(session)
+	err = authoringcore.ValidateAuthoringSession(session)
 	if err != nil {
 		return authoringcore.Session{}, err
 	}

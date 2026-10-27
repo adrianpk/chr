@@ -10,7 +10,7 @@ import (
 func TestValidateAuthoringSessionAcceptsValidSession(t *testing.T) {
 	session := validAuthoringSession()
 
-	err := ValidateAuthoringSession(session)
+	err := authoringcore.ValidateAuthoringSession(session)
 	if err != nil {
 		t.Fatalf("ValidateAuthoringSession returned error: %v", err)
 	}
@@ -27,7 +27,7 @@ func TestValidateAuthoringSessionAcceptsFutureCompatibleModes(t *testing.T) {
 			session := validAuthoringSession()
 			session.Mode = mode
 
-			err := ValidateAuthoringSession(session)
+			err := authoringcore.ValidateAuthoringSession(session)
 			if err != nil {
 				t.Fatalf("ValidateAuthoringSession returned error: %v", err)
 			}
@@ -38,7 +38,7 @@ func TestValidateAuthoringSessionAcceptsFutureCompatibleModes(t *testing.T) {
 func TestValidateAuthoringSessionRejectsMissingRequiredFields(t *testing.T) {
 	for _, test := range missingRequiredAuthoringSessionTests() {
 		t.Run(test.name, func(t *testing.T) {
-			err := ValidateAuthoringSession(test.session)
+			err := authoringcore.ValidateAuthoringSession(test.session)
 			if err == nil {
 				t.Fatal("ValidateAuthoringSession returned nil error")
 			}
@@ -145,7 +145,7 @@ func missingAuthoringSessionUpdatedAtTest() struct {
 func TestValidateAuthoringSessionRejectsInvalidEnums(t *testing.T) {
 	for _, test := range invalidAuthoringSessionEnumTests() {
 		t.Run(test.name, func(t *testing.T) {
-			err := ValidateAuthoringSession(test.session)
+			err := authoringcore.ValidateAuthoringSession(test.session)
 			if err == nil {
 				t.Fatal("ValidateAuthoringSession returned nil error")
 			}
@@ -286,7 +286,7 @@ func invalidAuthoringProvenanceRelationTest() struct {
 func TestValidateAuthoringSessionRejectsInvalidArtifactRefs(t *testing.T) {
 	for _, test := range invalidAuthoringArtifactRefTests() {
 		t.Run(test.name, func(t *testing.T) {
-			err := ValidateAuthoringSession(test.session)
+			err := authoringcore.ValidateAuthoringSession(test.session)
 			if err == nil {
 				t.Fatal("ValidateAuthoringSession returned nil error")
 			}
@@ -380,7 +380,7 @@ func TestValidateAuthoringSessionRejectsFinishedBeforeStarted(t *testing.T) {
 	session.StartedAt = &startedAt
 	session.FinishedAt = &finishedAt
 
-	err := ValidateAuthoringSession(session)
+	err := authoringcore.ValidateAuthoringSession(session)
 	if err == nil {
 		t.Fatal("ValidateAuthoringSession returned nil error")
 	}

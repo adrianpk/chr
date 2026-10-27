@@ -158,7 +158,7 @@ func RenderAssistedCuratedAnswerSummary(summary AssistedCuratedAnswerSummary) st
 }
 
 func validateAssistedAnswerCurationOptions(opts AssistedAnswerCurationOptions) error {
-	err := ValidateAuthoringSession(opts.Session)
+	err := authoringcore.ValidateAuthoringSession(opts.Session)
 	if err != nil {
 		return err
 	}
