@@ -19,27 +19,27 @@ type inlineKeyboard struct {
 
 // SendAction sends plain text and optional choices for an already retained action.
 // Buttons contain only the same opaque binding used by explicit and reply answers.
-func (a ReceiverAPI) SendAction(ctx context.Context, token string, peer PeerIdentity, text, actionToken string, choices []string) (int64, error) {
-	return a.sendAction(ctx, token, peer, text, "", actionToken, choices, nil)
+func (a ReceiverAPI) SendAction(ctx context.Context, token string, send ActionSendRequest) (int64, error) {
+	return a.sendAction(ctx, token, messageSend{Peer: send.Peer, Text: send.Text, ParseMode: "", ActionToken: send.ActionToken, Choices: send.Choices, Entities: nil})
 }
 
 // SendMarkdown sends one bounded legacy-Markdown help body without retrying.
 // The durable outbox owns format fallback and every actual send attempt.
 func (a ReceiverAPI) SendMarkdown(ctx context.Context, token string, peer PeerIdentity, text string) (int64, error) {
-	return a.sendAction(ctx, token, peer, text, "Markdown", "", nil, nil)
+	return a.sendAction(ctx, token, messageSend{Peer: peer, Text: text, ParseMode: "Markdown", ActionToken: "", Choices: nil, Entities: nil})
 }
 
 // SendPresentation sends frozen visible text with explicit formatting entities.
-func (a ReceiverAPI) SendPresentation(ctx context.Context, token string, peer PeerIdentity, text string, entities []tgmessage.Entity) (int64, error) {
-	return a.sendAction(ctx, token, peer, text, "", "", nil, entities)
+func (a ReceiverAPI) SendPresentation(ctx context.Context, token string, send PresentationSendRequest) (int64, error) {
+	return a.sendAction(ctx, token, messageSend{Peer: send.Peer, Text: send.Text, ParseMode: "", ActionToken: "", Choices: nil, Entities: send.Entities})
 }
 
-func (a ReceiverAPI) sendAction(ctx context.Context, token string, peer PeerIdentity, text, parseMode, actionToken string, choices []string, entities []tgmessage.Entity, labels ...[]string) (int64, error) {
-	if !validReceiverText(text) || peer.ChatID == 0 || peer.TopicID < 0 {
+func (a ReceiverAPI) sendAction(ctx context.Context, token string, send messageSend) (int64, error) {
+	if !validReceiverText(send.Text) || send.Peer.ChatID == 0 || send.Peer.TopicID < 0 {
 		return 0, errors.New("invalid telegram delivery")
 	}
 
-	keyboard, err := actionKeyboard(actionToken, choices, labels...)
+	keyboard, err := actionKeyboard(send.ActionToken, send.Choices, send.Labels...)
 	if err != nil {
 		return 0, err
 	}
@@ -51,7 +51,7 @@ func (a ReceiverAPI) sendAction(ctx context.Context, token string, peer PeerIden
 		ParseMode string             `json:"parse_mode,omitempty"`
 		Entities  []tgmessage.Entity `json:"entities,omitempty"`
 		Keyboard  *inlineKeyboard    `json:"reply_markup,omitempty"`
-	}{peer.ChatID, peer.TopicID, text, parseMode, entities, keyboard}
+	}{send.Peer.ChatID, send.Peer.TopicID, send.Text, send.ParseMode, send.Entities, keyboard}
 
 	data, err := a.call(ctx, token, "sendMessage", payload, 10*time.Second)
 	if err != nil {
@@ -106,8 +106,8 @@ func actionLabel(choice string) string {
 }
 
 // SendActionPresentation keeps the retained action keyboard with rich text.
-func (a ReceiverAPI) SendActionPresentation(ctx context.Context, token string, peer PeerIdentity, text string, entities []tgmessage.Entity, actionToken string, choices, labels []string) (int64, error) {
-	return a.sendAction(ctx, token, peer, text, "", actionToken, choices, entities, labels)
+func (a ReceiverAPI) SendActionPresentation(ctx context.Context, token string, send ActionPresentationRequest) (int64, error) {
+	return a.sendAction(ctx, token, messageSend{Peer: send.Peer, Text: send.Text, ParseMode: "", ActionToken: send.ActionToken, Choices: send.Choices, Entities: send.Entities, Labels: [][]string{send.Labels}})
 }
 
 func keyboardLabels(choices []string, retained [][]string) ([]string, error) {

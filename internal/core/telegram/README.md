@@ -14,3 +14,7 @@ pure render/document values and cannot import this store or notification IO.
 Imports are bounded by the syntax quality check. Native domain integration tests
 remain with root core. Receiver SQL/HTTP/restart/retention tests live here;
 integration fixtures own their independent SQL inspection connections.
+
+HTTP calls take operation-specific send requests. Context and credentials remain
+explicit. Document requests retain label-list cardinality so omission and an
+explicit empty label list preserve their original validation behavior.

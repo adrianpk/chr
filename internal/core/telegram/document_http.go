@@ -16,29 +16,29 @@ import (
 
 // SendDocument uploads frozen bytes and a bounded caption through the same
 // receiver HTTP boundary. The outbox alone owns fallback and attempt allowance.
-func (a ReceiverAPI) SendDocument(ctx context.Context, token string, peer PeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, actionToken string, choices []string, labels ...[]string) (tgmessage.Acknowledgement, error) {
+func (a ReceiverAPI) SendDocument(ctx context.Context, token string, send DocumentSendRequest) (tgmessage.Acknowledgement, error) {
 	var acknowledgement tgmessage.Acknowledgement
-	if err := tgmessage.ValidateDocument(document); err != nil {
+	if err := tgmessage.ValidateDocument(send.Document); err != nil {
 		return acknowledgement, err
 	}
 
-	if !validReceiverText(caption) || tgmessage.VisibleUnits(caption) > 900 || peer.ChatID == 0 || peer.TopicID < 0 || len(entities) > 32 {
+	if !validReceiverText(send.Caption) || tgmessage.VisibleUnits(send.Caption) > 900 || send.Peer.ChatID == 0 || send.Peer.TopicID < 0 || len(send.Entities) > 32 {
 		return acknowledgement, errors.New("invalid telegram document caption")
 	}
 
-	keyboard, err := actionKeyboard(actionToken, choices, labels...)
+	keyboard, err := actionKeyboard(send.ActionToken, send.Choices, send.Labels...)
 	if err != nil {
 		return acknowledgement, err
 	}
 
-	multipart2, err := documentMultipart(peer, document, caption, entities, keyboard)
+	multipart2, err := documentMultipart(send.Peer, send.Document, send.Caption, send.Entities, keyboard)
 	body, contentType := multipart2.Payload, multipart2.ContentType
 
 	if err != nil {
 		return acknowledgement, err
 	}
 
-	data, err := a.callBody(ctx, token, "sendDocument", bytes.NewReader(body), contentType, 10*time.Second)
+	data, err := a.callBody(ctx, token, requestBody{Method: "sendDocument", Body: bytes.NewReader(body), ContentType: contentType, Timeout: 10 * time.Second})
 	if err != nil {
 		return acknowledgement, documentSendFailure(err)
 	}
@@ -64,20 +64,20 @@ func decodeDocumentAcknowledgement(data []byte) (tgmessage.Acknowledgement, erro
 }
 
 func documentMultipart(peer PeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) (multipartBody, error) {
-	return documentMultipartDestination(strconv.FormatInt(peer.ChatID, 10), peer.TopicID, document, caption, entities, keyboard)
+	return documentMultipartDestination(documentUpload{Destination: strconv.FormatInt(peer.ChatID, 10), Topic: peer.TopicID, Document: document, Caption: caption, Entities: entities, Keyboard: keyboard})
 }
 
-func documentMultipartDestination(destination string, topic int64, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) (multipartBody, error) {
+func documentMultipartDestination(upload documentUpload) (multipartBody, error) {
 	var body bytes.Buffer
 
 	writer := multipart.NewWriter(&body)
 
-	fields := map[string]string{"chat_id": destination, "caption": caption, "disable_content_type_detection": "true"}
-	if topic > 0 {
-		fields["message_thread_id"] = strconv.FormatInt(topic, 10)
+	fields := map[string]string{"chat_id": upload.Destination, "caption": upload.Caption, "disable_content_type_detection": "true"}
+	if upload.Topic > 0 {
+		fields["message_thread_id"] = strconv.FormatInt(upload.Topic, 10)
 	}
 
-	if err := documentJSONFields(fields, entities, keyboard); err != nil {
+	if err := documentJSONFields(fields, upload.Entities, upload.Keyboard); err != nil {
 		return multipartBody{Payload: nil, ContentType: ""}, err
 	}
 
@@ -88,15 +88,15 @@ func documentMultipartDestination(destination string, topic int64, document tgme
 	}
 
 	header := textproto.MIMEHeader{}
-	header.Set("Content-Disposition", fmt.Sprintf(`form-data; name="document"; filename="%s"`, document.Filename))
-	header.Set("Content-Type", document.MediaType)
+	header.Set("Content-Disposition", fmt.Sprintf(`form-data; name="document"; filename="%s"`, upload.Document.Filename))
+	header.Set("Content-Type", upload.Document.MediaType)
 
 	part, err := writer.CreatePart(header)
 	if err != nil {
 		return multipartBody{Payload: nil, ContentType: ""}, err
 	}
 
-	if _, err := part.Write(document.Payload); err != nil {
+	if _, err := part.Write(upload.Document.Payload); err != nil {
 		return multipartBody{Payload: nil, ContentType: ""}, err
 	}
 

@@ -137,7 +137,7 @@ func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery telegra
 	if delivery.Presentation != nil && !delivery.PlainFallback {
 		entities := telegramDeliveryEntities(delivery, text)
 
-		return r.api.SendActionPresentation(ctx, r.token, delivery.Peer, text, entities, delivery.ActionToken, delivery.ActionChoices, delivery.Presentation.ActionLabels)
+		return r.api.SendActionPresentation(ctx, r.token, telegramcore.ActionPresentationRequest{Peer: delivery.Peer, Text: text, Entities: entities, ActionToken: delivery.ActionToken, Choices: delivery.ActionChoices, Labels: delivery.Presentation.ActionLabels})
 	}
 
 	if delivery.ParseMode == "Markdown" && !delivery.PlainFallback {
@@ -145,10 +145,10 @@ func (r telegramReceiver) sendDeliveryBody(ctx context.Context, delivery telegra
 	}
 
 	if delivery.Presentation != nil {
-		return r.api.SendActionPresentation(ctx, r.token, delivery.Peer, text, nil, delivery.ActionToken, delivery.ActionChoices, delivery.Presentation.ActionLabels)
+		return r.api.SendActionPresentation(ctx, r.token, telegramcore.ActionPresentationRequest{Peer: delivery.Peer, Text: text, Entities: nil, ActionToken: delivery.ActionToken, Choices: delivery.ActionChoices, Labels: delivery.Presentation.ActionLabels})
 	}
 
-	return r.api.SendAction(ctx, r.token, delivery.Peer, text, delivery.ActionToken, delivery.ActionChoices)
+	return r.api.SendAction(ctx, r.token, telegramcore.ActionSendRequest{Peer: delivery.Peer, Text: text, ActionToken: delivery.ActionToken, Choices: delivery.ActionChoices})
 }
 
 func (r telegramReceiver) failedDelivery(ctx context.Context, delivery telegramcore.ReceiverDelivery, failure error) error {

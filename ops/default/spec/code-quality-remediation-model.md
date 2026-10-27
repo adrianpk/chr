@@ -493,3 +493,13 @@ No read miss becomes an error and no read grants authority. Original retained
 HTTP/SQLite/recovery/control/domain-app and frozen identity regressions pass;
 37 exact migration allowances disappear without increasing the ceiling. App
 result tuples and long operation inputs remain assigned to this active slice.
+
+
+HTTP sender requests now group each original action, rich-text, document, upload
+and bounded-body operation. Context and credentials stay explicit call arguments.
+Original label omission is still nil [][]string; an explicit label list remains
+one element, even when empty. Methods preserve the original validation order,
+request fields, timeouts and safe error/uncertainty classification. Multipart
+bytes, caption/entity fallback, missing file acknowledgement, malformed envelope
+and uncertain delivery regressions pass at real HTTP/SQLite boundaries. Six
+more exact allowances are removed; core debt is now 367 repository-wide.

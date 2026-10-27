@@ -45,14 +45,14 @@ func (s Sender) SendPresentation(ctx context.Context, token, destination string,
 }
 
 func (api ReceiverAPI) sendNotificationDocument(ctx context.Context, token, destination string, delivery notifycore.TelegramDelivery, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
-	multipart, err := documentMultipartDestination(destination, 0, *delivery.Document, delivery.Presentation.PlainFallback, entities, nil)
+	multipart, err := documentMultipartDestination(documentUpload{Destination: destination, Topic: 0, Document: *delivery.Document, Caption: delivery.Presentation.PlainFallback, Entities: entities, Keyboard: nil})
 	body, contentType := multipart.Payload, multipart.ContentType
 
 	if err != nil {
 		return tgmessage.Acknowledgement{}, err
 	}
 
-	data, err := api.postBody(ctx, token, "sendDocument", bytes.NewReader(body), contentType, 10*time.Second)
+	data, err := api.postBody(ctx, token, requestBody{Method: "sendDocument", Body: bytes.NewReader(body), ContentType: contentType, Timeout: 10 * time.Second})
 	if err != nil {
 		return tgmessage.Acknowledgement{}, documentSendFailure(err)
 	}
@@ -72,7 +72,7 @@ func (api ReceiverAPI) sendNotificationText(ctx context.Context, token, destinat
 		return tgmessage.Acknowledgement{}, err
 	}
 
-	data, err := api.postBody(ctx, token, "sendMessage", bytes.NewReader(body), "application/json", 10*time.Second)
+	data, err := api.postBody(ctx, token, requestBody{Method: "sendMessage", Body: bytes.NewReader(body), ContentType: "application/json", Timeout: 10 * time.Second})
 	if err != nil {
 		return tgmessage.Acknowledgement{}, documentSendFailure(err)
 	}

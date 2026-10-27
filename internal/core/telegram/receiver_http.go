@@ -105,7 +105,7 @@ func (a ReceiverAPI) Poll(ctx context.Context, token string, next *int64, timeou
 
 // Send sends one bounded plain-text delivery to its original chat and topic.
 func (a ReceiverAPI) Send(ctx context.Context, token string, peer PeerIdentity, text string) (int64, error) {
-	return a.SendAction(ctx, token, peer, text, "", nil)
+	return a.SendAction(ctx, token, ActionSendRequest{Peer: peer, Text: text, ActionToken: "", Choices: nil})
 }
 
 func (a ReceiverAPI) call(ctx context.Context, token, method string, payload any, timeout time.Duration) (json.RawMessage, error) {
@@ -114,31 +114,31 @@ func (a ReceiverAPI) call(ctx context.Context, token, method string, payload any
 		return nil, errors.New("cannot encode telegram request")
 	}
 
-	return a.callBody(ctx, token, method, bytes.NewReader(body), "application/json", timeout)
+	return a.callBody(ctx, token, requestBody{Method: method, Body: bytes.NewReader(body), ContentType: "application/json", Timeout: timeout})
 }
 
-func (a ReceiverAPI) callBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
+func (a ReceiverAPI) callBody(ctx context.Context, token string, call requestBody) (json.RawMessage, error) {
 	if _, err := validateReceiverToken(token); err != nil {
 		return nil, err
 	}
 
-	return a.postBody(ctx, token, method, body, contentType, timeout)
+	return a.postBody(ctx, token, call)
 }
 
-func (a ReceiverAPI) postBody(ctx context.Context, token, method string, body io.Reader, contentType string, timeout time.Duration) (json.RawMessage, error) {
-	ctx, cancel := context.WithTimeout(ctx, timeout)
+func (a ReceiverAPI) postBody(ctx context.Context, token string, call requestBody) (json.RawMessage, error) {
+	ctx, cancel := context.WithTimeout(ctx, call.Timeout)
 	defer cancel()
 
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(a.BaseURL, "/")+"/bot"+token+"/"+method, body)
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(a.BaseURL, "/")+"/bot"+token+"/"+call.Method, call.Body)
 	if err != nil {
 		return nil, errors.New("invalid telegram endpoint")
 	}
 
-	request.Header.Set("Content-Type", contentType)
+	request.Header.Set("Content-Type", call.ContentType)
 
 	response, err := a.Client.Do(request)
 	if err != nil {
-		return nil, &APIError{Code: "transport_failure", Uncertain: method == "sendMessage" || method == "sendDocument"}
+		return nil, &APIError{Code: "transport_failure", Uncertain: call.Method == "sendMessage" || call.Method == "sendDocument"}
 	}
 
 	defer func() {

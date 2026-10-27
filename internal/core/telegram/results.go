@@ -41,6 +41,7 @@ type (
 		ContentType string
 	}
 )
+
 type guidedProjection struct {
 	Conversation Conversation
 	Ready        bool
@@ -69,6 +70,7 @@ type (
 		Delay     time.Duration
 	}
 )
+
 type workReferencePage struct {
 	References []WorkReference
 	IDs        []string
