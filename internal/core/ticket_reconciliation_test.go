@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
@@ -157,6 +158,14 @@ func TestTicketReconcilerRefreshesAffectedTicket(t *testing.T) {
 func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	projectDir := t.TempDir()
 	index := newTestTicketIndex(t)
+
+	original := testIndexedTicket("CHR-1", []string{"retained"})
+	if err := index.Upsert(t.Context(), original); err != nil {
+		t.Fatal(err)
+	}
+
+	before := readReconcileTestTicket(t, index, original.Key)
+
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Bad.md")
 	writeFile(t, ticketPath, "missing frontmatter")
 
@@ -189,6 +198,16 @@ func TestTicketReconcilerSurfacesAffectedTicketParseBlocker(t *testing.T) {
 	if blocker.RelativePath != "CHR-1-Bad.md" {
 		t.Fatalf("RelativePath = %q, want CHR-1-Bad.md", blocker.RelativePath)
 	}
+
+	if blocker.Err == nil {
+		t.Fatal("parse blocker lost its error")
+	}
+
+	after := readReconcileTestTicket(t, index, original.Key)
+
+	if !reflect.DeepEqual(before, after) {
+		t.Fatal("blocked reconciliation changed the retained index row")
+	}
 }
 
 func reconcileAllProjectTickets(t *testing.T, index ticketcore.Index, projectDir string) {
@@ -205,4 +224,15 @@ func reconcileAllProjectTickets(t *testing.T, index ticketcore.Index, projectDir
 	if err != nil {
 		t.Fatalf("ReconcileProjectTickets returned error: %v", err)
 	}
+}
+
+func readReconcileTestTicket(t *testing.T, index ticketcore.Index, key string) ticketcore.Indexed {
+	t.Helper()
+
+	ticket, err := index.GetProjectByKey(t.Context(), "project-1", key)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return ticket
 }

@@ -99,6 +99,15 @@ The same focused tests and signature policy pass after naming. Strict lint passe
 with zero issues; all 162 declaration preimages reconcile after qualification
 and naming.
 
+Single-ticket reconciliation uses a private named parse result with an optional
+blocker, preserving successful upserts and the original parse-error mapping.
+The retained-row regression proves a blocked refresh changes no indexed values.
+This closes another assigned result-shape entry: 204 exact debts remain.
+
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app -run '^Test(TicketReconciler|QualityStorage|QualityRecordWire)' -count=1 -timeout=3m`: passed.
+- `make check-go-style`: 9309 declarations, ceiling seven, 204 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app`: zero issues.
+
 ## Risks and Follow-ups
 
 Remaining work includes ticket filesystem repository rules, execution/readiness
