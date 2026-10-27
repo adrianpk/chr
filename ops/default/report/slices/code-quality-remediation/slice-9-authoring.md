@@ -31,6 +31,15 @@ in progress or pending. No Slice 9 completion or PR readiness is claimed.
 
 ## Implementation Notes
 
+D02 compares concrete spec and plan catalog rules against spec authoring, plan
+materialization and the document-generation model. One typed, bounded catalog
+operation retains the same namespace and numeric-prefix selection, directory
+errors, 4096-entry inventory, aggregate 8 MiB limit, reference ordering, nil/empty
+outcome and final pending-journal inspection. Artifact readers retain their
+native validation and image accounting: spec body/metadata versus plan retained
+companions. No record is adopted by catalog inspection. Existing tests remain
+unchanged for this pair.
+
 D10 compares the shared revision-bound CLI mechanics against the documented
 Dump Mutation API. Save and append retain their separate argument guards, typed
 service requests, replacement/extension semantics and exact diagnostics. One
@@ -68,7 +77,8 @@ declaration hashes retained in the move ledger. The two shared project path and
 replacement files add three original declarations, for 44 recorded move entries. Bounded file IO, advisory lock acquisition and the
 retained FileChange value add seven extracted declarations, for 51 total entries. Six shared metadata scalar declarations bring the ledger
 to 57 entries. Acceptance feature relocation and the original ScopeID rule
-bring the current ledger to 96 entries. The current dependency map and
+bring the current ledger to 96 entries. The shared bounded catalog directory reader adds one entry,
+for 97 total. The current dependency map and
 file-owner inventory include this prerequisite. Module import checks prevent
 ops from importing authoring, root core or workflow policy.
 
@@ -185,6 +195,11 @@ owners rather than an imposed file-size cap.
 
 - `go test ./internal/app -run '^Test(DumpCLIWriteBinding|DumpNewAndShowUseServiceCommands|ServiceAppendAndOpenDump|ServiceDumpWriteGuards|ServiceDumpProjectionFailure|ServiceDumpCapture|ServiceProjectDump)' -count=1 -timeout=3m`
   — passed after D10; app strict lint and signature policy also pass with 300 debts.
+
+- `go test ./internal/core ./internal/app -run '^Test(SpecCatalog|PlanCatalog|SpecMutation|PlanPublication|ServiceSpec|ServicePlan)' -count=1 -timeout=3m`
+  — passed after D02; signature policy retains 300 exact debts.
+
+The core/app pinned strict-lint command also passed with zero issues after D02.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified
