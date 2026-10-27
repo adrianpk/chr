@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-9
 source: review
 reported_at: 2026-10-26T08:48:29Z
-commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7]
+commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7, 051c19eac8fb, bf04bf96c5d6, 7d8acfadb0ff, 1671d3ea3af1, 89898ddd5bd8, fcd5f288a097]
 branch: refactor/slice-9-quality-authoring
 started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z
@@ -61,8 +61,9 @@ T9.1 through T9.4 remain active. All six duplicate comparisons and shared
 model-request mechanics are recorded; plan and acceptance responsibilities are
 split. Nine pure native control/evidence values now have a shared state owner,
 with original guided/session/request bytes frozen before relocation.
-35 assigned tuple occurrences are fixed, and five application cohesion reviews
-are recorded. Focused real-boundary checks and pinned strict
-lint pass; exact debt is 266. The complete session/repository move, remaining
-signatures and workflow ports remain unfinished. The report is drafting; no PR
+All 89 assigned signature occurrences have exact dispositions: 60 tuple fixes,
+three parameter fixes (two already delivered by Slice 4) and 26 cohesive
+five-parameter retentions. Focused real-boundary checks and pinned strict lint
+pass; exact debt is 237 with ceiling seven and one external exception. The
+complete session/repository move and workflow ports remain unfinished. The report is drafting; no PR
 is open and final controller validation is pending.

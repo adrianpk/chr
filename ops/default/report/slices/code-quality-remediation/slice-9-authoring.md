@@ -23,9 +23,12 @@ rule; shared model payloads retain their existing generation owner.
 Acceptance WriteResult preserves static rejection findings with no published
 path, zero results on the original other error branches, and paths/checks after
 success. Real rejection tests prove that failed checks create no ops envelope.
-35 assigned tuple occurrences are fixed; debt decreases from 301 to 266, with
-the same ceiling of seven and one external-interface exception. Other assigned
-signature occurrences still require their recorded dispositions.
+All 60 assigned tuple occurrences and three parameter-count occurrences are fixed;
+26 five-parameter declarations retain their documented cohesive contracts.
+The 89 assigned signature occurrences have exact dispositions. Debt decreases
+from 301 to 237 with the same ceiling of seven and one external-interface
+exception. Three required harness/parser counterparts from later owners changed
+with their current Slice 9 consumers; no successor task is marked delivered.
 
 Shared operational layout/envelopes, metadata scalars and bounded file/lock
 primitives have explicit ops owners. The retained FileChange value belongs to
@@ -47,10 +50,10 @@ artifact rules, action/collision diagnostics, provenance, authority and receipts
 
 Mechanical relocation, package naming/result conversion and the acceptance file
 split are separate commits. The plan service separates API, generation, model
-requests, publication, tracking and views. The move ledger retains 139 declaration
-preimages with current names/files and extraction stages. 35 tuple
-dispositions, five cohesion reviews and six duplicate comparisons link exact
-source commits and validation. Original guided-session/control and workflow-start
+requests, publication, tracking and views. The move ledger retains 142 declaration
+preimages with current names/files and extraction stages. The 60 tuple
+dispositions, three parameter fixes, 26 cohesion dispositions and six duplicate
+comparisons link exact source commits and validation. Original guided-session/control and workflow-start
 wire images were frozen before the nine-value move. Mechanical relocation and
 package-qualified naming have separate commits, with no root aliases.
 
@@ -78,6 +81,14 @@ image order and journal ownership remain unchanged. None of these result values
 changes persisted schemas or hash inputs. Context results also name normalized
 paths, document/source inventory and prior attempt artifacts. Plan lookup results
 keep presence on errors, preventing matching failed reads from reallocating work.
+CLI summaries, direct scoped model callbacks, native harness resolution,
+frontmatter images, revision/order bytes, archive presence, spec preparation and
+authoring/case receipts now have explicit shapes. Optional legacy frontmatter and
+required native envelopes keep distinct presence rules and errors. Authoring
+receipt errors keep decoded partial results; case receipt errors remain zero.
+Continuation changes/events remain in the original journal with unchanged raw
+capture omission and provenance. These changes preserve original hashes and
+zero/empty outcomes without adding persisted fields.
 
 Public acceptance names use Artifact, Paths, RoundNotes, Layout, Check and Write.
 The spec remains authoritative and features remain supporting evidence. Original
@@ -134,7 +145,14 @@ The completed task checkpoints passed these focused real-boundary commands:
 - `go test ./internal/core ./internal/app ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|WorkflowControlCAS|GuidedUseCase(ControlCAS|ControlUncertain|ControlAdmissionAuthority|ResultCorrupt)|WorkflowIntegrationGrant)' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/app -run '^Test(Load(AgentProtocol|ProjectDocument|PreviousAttempt)Context|Render(AgentContext|ProtocolsContext|SourceInventory|PreviousAttempt)|WorkspaceContext|ComposeContext|MaterializeContext|ContextReadiness)' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/app -run '^Test(PlanPublication|PlanOrderPublication|PlanDelivery|ServicePlan|GuidedUseCasePreparation|WebPlanDelivery)' -count=1 -timeout=3m`
-- `make check-go-style` — passed with 266 exact debts and one external exception.
+- `go test ./internal/app -run '^Test(Author(ContextualQuiz|Assisted)|HarnessGenerationBindingAuthoring|Service(ListSpecs|ListPlans|GenerateSpec|GeneratePlan))' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(QualityRecordWire|HarnessBinding|GuidedUseCase(Admission|Preparation))' -count=1 -timeout=3m`
+- `go test ./internal/core/ops/metadata ./internal/core/workflow/state ./scripts/goquality ./internal/core ./internal/app -run '^Test(LeafDependencies|QualityRecordWire|Spec(Document|Mutation|Generation)|Plan(Catalog|Publication|Revision)|DumpMutation|ProjectDump|Workflow(RoundTrip|Adoption|Loose)|Ticket(Parser|Document|Board|Edit))' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(ArchiveGeneratedPlan|Plan(Order|Publication|Delivery|Revision)|Spec(Mutation|Generation)|GuidedUseCasePreparation|Workflow(PlanOrder|Tracker|Materialization))' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/telegram ./internal/app -run '^Test(Authoring|PlanAuthoringArtifact|Telegram(OperationCase|Authoring)|CaseMetadata|ServiceCase)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/telegram ./internal/app -run '^Test(Authoring|PlanAuthoringArtifact|LoadAssistedAuthoring|RenderAssistedAuthoring|CurateAssisted|AskNextAssisted|AnswerAssisted|TelegramAuthoring|AuthorAssisted|GuidedUseCase(Capture|Quiz|SharedQuiz))' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(LoadGoGraphContext|PlanContextualQuizGeneration|WriteContextualQuiz|PlanQuizToDraft|WriteQuizToDraft|AuthorContextual|AuthorAssistedDump)' -count=1 -timeout=3m`
+- `make check-go-style` — passed with 237 exact debts and one external exception.
 - `make check-package-readmes` — passed at the package extraction checkpoints.
 - Pinned v2.14 strict lint passed for changed core/app, acceptance/quiz and checker
   owners at their completed checkpoints; the latest core/application command was
@@ -149,6 +167,6 @@ has not run; this slice is not PR-ready.
 
 ## Risks and Follow-ups
 
-Complete the session/repository move and workflow ports, remaining assigned
-signatures and the other approved Slice 9 tasks. Then prepare the canonical PR, commit/push its
+Complete the session/repository move, workflow ports and remaining approved
+Slice 9 tasks. Then prepare the canonical PR, commit/push its
 references and record final ordered validation on its exact clean HEAD.
