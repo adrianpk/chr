@@ -5,7 +5,7 @@ Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-11-quality-tickets`
-PR: pending
+PR: [#448](https://forge.adrianpk.com/adrianpk/chr/pulls/448)
 
 ## Purpose
 
@@ -60,7 +60,7 @@ fixtures. `timePtr` and the default preparation test wrapper are test-only.
 
 - `internal/core/ticket/`, especially `index_row.go`, `review_state.go`, `merge_state.go`, `review_repair.go` and `merge_handoff.go`.
 - `internal/core/execution/`, especially readiness/worktree files, `runner.go`, `agent_event_stream.go` and `changed_files.go`.
-- `internal/core/workflow_ticket_index.go`, `workflow_execution_prepare.go` and native guarded ticket/result operations.
+- `internal/core/workflow_index_storage.go`, `workflow_execution_prepare.go` and native guarded ticket/result operations.
 - The move, owner, signature, duplicate, boundary and parameter-phase ledgers linked above and from the approved plan.
 
 ## Validation

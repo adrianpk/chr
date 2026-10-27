@@ -224,7 +224,7 @@ Focused selection: Existing harness runner/codex/pi/process contracts using owne
 ### Slice 11: Ticket, readiness and execution boundaries
 
 Findings: R1, R2, R3, R4, R6, R7, R10.
-Ticket: [TKT-20261026084831](../ticket/in_progress/20261026084831-quality-tickets.md).
+Ticket: [TKT-20261026084831](../ticket/reviewing/20261026084831-quality-tickets.md).
 
 1. **T11.1:** Move ticket models, indexing and repository-owned ticket rules into internal/core/ticket. Isolate execution/readiness logic in a focused existing or necessary capability owner rather than putting unrelated execution orchestration in the ticket package.
 2. **T11.2:** Remove duplicate readiness pair D03 before splitting work_readiness_service.go. Preserve the distinction between user checkout, ticket worktree, preview, authoritative readiness and explicit safe repair.
@@ -414,7 +414,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 8 | [TKT-20261026084828](../ticket/solved/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
 | 9 | [TKT-20261026084829](../ticket/solved/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | delivered; PR #446 |
 | 10 | [TKT-20261026084830](../ticket/solved/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | delivered; PR #447 verified |
-| 11 | [TKT-20261026084831](../ticket/in_progress/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | in_progress; predecessor verified |
+| 11 | [TKT-20261026084831](../ticket/reviewing/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | in_progress; predecessor verified |
 | 12 | [TKT-20261026084832](../ticket/ready/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | ready; predecessor applies |
 | 13 | [TKT-20261026084833](../ticket/ready/20261026084833-quality-integration.md) | Candidate validation and merge stages | ready; predecessor applies |
 | 14 | [TKT-20261026084834](../ticket/ready/20261026084834-quality-publication.md) | Forge publication and review stages | ready; predecessor applies |
