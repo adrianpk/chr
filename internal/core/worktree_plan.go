@@ -49,12 +49,12 @@ func NewWorktreePlan(opts WorktreePlanOptions) (WorktreePlan, error) {
 		return WorktreePlan{}, fmt.Errorf("ticket branch is required")
 	}
 
-	branchPolicy, workspace, err := normalizedWorktreePlanConfig(opts)
+	config, err := normalizedWorktreePlanConfig(opts)
 	if err != nil {
 		return WorktreePlan{}, err
 	}
 
-	baseRef, err := worktreeBaseRef(branchPolicy, workspace)
+	baseRef, err := worktreeBaseRef(config.branchPolicy, config.workspace)
 	if err != nil {
 		return WorktreePlan{}, err
 	}
@@ -89,14 +89,19 @@ func resolvedWorktreeRoot(projectDir string) (string, error) {
 	return layout.WorktreeRoot(), nil
 }
 
-func normalizedWorktreePlanConfig(opts WorktreePlanOptions) (WorkBranchPolicy, workspacecore.ExecutionConfig, error) {
+type worktreePlanConfig struct {
+	branchPolicy WorkBranchPolicy
+	workspace    workspacecore.ExecutionConfig
+}
+
+func normalizedWorktreePlanConfig(opts WorktreePlanOptions) (worktreePlanConfig, error) {
 	branchPolicy := opts.BranchPolicy
 	if branchPolicy == (WorkBranchPolicy{}) {
 		branchPolicy = DefaultWorkBranchPolicy()
 	}
 
 	if err := ValidateWorkBranchPolicy(branchPolicy); err != nil {
-		return WorkBranchPolicy{}, workspacecore.ExecutionConfig{}, err
+		return worktreePlanConfig{}, err
 	}
 
 	workspace := opts.Workspace
@@ -107,10 +112,10 @@ func normalizedWorktreePlanConfig(opts WorktreePlanOptions) (WorkBranchPolicy, w
 	}
 
 	if err := workspacecore.ValidateExecutionConfig(workspace); err != nil {
-		return WorkBranchPolicy{}, workspacecore.ExecutionConfig{}, err
+		return worktreePlanConfig{}, err
 	}
 
-	return branchPolicy, workspace, nil
+	return worktreePlanConfig{branchPolicy: branchPolicy, workspace: workspace}, nil
 }
 
 func worktreeBaseRef(policy WorkBranchPolicy, workspace workspacecore.ExecutionConfig) (string, error) {

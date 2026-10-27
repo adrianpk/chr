@@ -699,12 +699,12 @@ func (git fakeWorkReadinessGit) BranchContainsRef(context.Context, string, strin
 	return git.branchContainsRef, nil
 }
 
-func (git fakeWorkReadinessGit) GitStateInProgress(context.Context, string) (string, bool, error) {
+func (git fakeWorkReadinessGit) GitStateInProgress(context.Context, string) (GitOperationState, error) {
 	if git.err != nil {
-		return "", false, git.err
+		return GitOperationState{}, git.err
 	}
 
-	return git.gitState, git.gitStateActive, nil
+	return GitOperationState{Name: git.gitState, InProgress: git.gitStateActive}, nil
 }
 
 type fakeWorkReadinessRepairGit struct {
@@ -738,8 +738,8 @@ func (git *fakeWorkReadinessRepairGit) BranchContainsRef(context.Context, string
 	return git.branchContainsRef, nil
 }
 
-func (git *fakeWorkReadinessRepairGit) GitStateInProgress(context.Context, string) (string, bool, error) {
-	return git.gitState, git.gitStateActive, nil
+func (git *fakeWorkReadinessRepairGit) GitStateInProgress(context.Context, string) (GitOperationState, error) {
+	return GitOperationState{Name: git.gitState, InProgress: git.gitStateActive}, nil
 }
 
 func (git *fakeWorkReadinessRepairGit) ExcludeLocalPattern(_ context.Context, _, pattern string) (bool, error) {
@@ -749,8 +749,8 @@ func (git *fakeWorkReadinessRepairGit) ExcludeLocalPattern(_ context.Context, _,
 		}
 	}
 
-	_, userChanges := splitWorktreeStatus(git.cleanStatus)
-	git.cleanStatus = userChanges
+	changes := splitWorktreeStatus(git.cleanStatus)
+	git.cleanStatus = changes.userChanges
 	git.excludedPatterns = append(git.excludedPatterns, pattern)
 
 	return true, nil

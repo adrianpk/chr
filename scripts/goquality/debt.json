@@ -167,66 +167,6 @@
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/work_readiness_service.go::WorkReadinessGit.GitStateInProgress",
-      "signature": "func(ctx context.Context, projectDir string) (string, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applySafeRepair",
-      "signature": "func(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applyRuntimeArtifactsRepair",
-      "signature": "func(ctx context.Context, run repairRun) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applyFetchRemoteRepair",
-      "signature": "func(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applyFastForwardRepair",
-      "signature": "func(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applySwitchBranchRepair",
-      "signature": "func(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applyCreateBranchRepair",
-      "signature": "func(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applyCreateWorktreeRootRepair",
-      "signature": "func(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applyPruneWorktreeMetadataRepair",
-      "signature": "func(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::applyRemoveOrphanedWorktreeRepair",
-      "signature": "func(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::splitWorktreeStatus",
-      "signature": "func(lines []string) ([]string, []string)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/work_readiness_service.go::OSWorkReadinessGit.GitStateInProgress",
-      "signature": "func(ctx context.Context, projectDir string) (string, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/work_selection_preflight.go::normalizeAgentOperationLockOptions",
       "signature": "func(opts AgentOperationLockOptions) (string, string, time.Time, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -1010,11 +950,6 @@
       "id": "internal/core/workflow_upgrade_journal.go::WorkflowStore.retainedWorkflowUpgrade",
       "signature": "func(hash string) (workflowUpgradeJournal, bool, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/worktree_plan.go::normalizedWorktreePlanConfig",
-      "signature": "func(opts WorktreePlanOptions) (WorkBranchPolicy, workspacecore.ExecutionConfig, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     }
   ]
 }

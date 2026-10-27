@@ -655,3 +655,11 @@ its already reserved durable key. Native cross-namespace key observation retains
 its complete envelope/domain decoding and bounded path traversal with native
 workflow code; ticket-owned filename/text observation preserves number, presence
 and read-error meanings. No native schema copy is introduced in the ticket owner.
+
+Readiness Git observation keeps operation name and independent presence in
+GitOperationState plus error. Internal repair outcomes retain both the exact repair
+record and whether it was applied; worktree status classification retains separate
+non-nil runtime/user lists. Normalized worktree configuration keeps the existing
+branch policy and workspace together with zero results on admission failures.
+These in-memory results do not alter diagnostic/metadata wire fields, Git command
+order, filesystem effects, repair permission guards or workspace authority.

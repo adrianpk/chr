@@ -30,10 +30,10 @@ commits with direct consumers and preserved durable/wire contracts.
 The move ledger reconciles 226 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
-meanings are unchanged. Four assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger records those four fixes; remaining
+meanings are unchanged. Seventeen assigned signatures now use cohesive owner state or
+named outcomes. The partial disposition ledger starts with the four earlier fixes; remaining
 assigned signatures and watches are open. The global policy remains at ceiling
-seven with 203 exact debts and one external exception.
+seven with 190 exact debts and one external exception.
 
 ## Files of Interest
 
@@ -160,6 +160,18 @@ remain separate operations; no preflight or repair IO moved into normalization.
 - `go test ./internal/core ./internal/app -run '^Test(CheckWorkReadiness|RepairWorkReadiness|OSWorkReadinessGit|NewWorktreePlan|WorktreeService|WorktreeMetadata|CleanupMergedTicketWorktree|EvidenceReadiness|WorkSelection)' -count=1 -timeout=3m`: passed in core; app compiled with no selected tests.
 - `make check-go-style`: 9307 declarations, ceiling seven, 203 exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
+
+Readiness/worktree result contracts now use named values: GitOperationState keeps
+operation name and independent presence; private repair outcomes keep applied
+status and the existing repair record; worktree changes retain both non-nil status
+lists; normalized worktree configuration keeps branch/workspace settings together.
+Existing failure zeros, diagnostic mapping, repair skip/apply decisions, validation
+order and Git/filesystem operations are preserved. Thirteen additional assigned
+tuples are fixed, leaving 190 exact debts at ceiling seven.
+
+- `go test ./internal/core ./internal/app ./internal/tui -run '^Test(CheckWorkReadiness|RepairWorkReadiness|OSWorkReadinessGit|NewWorktreePlan|Worktree|CleanupMergedTicketWorktree|EvidenceReadiness|WorkSelection|QualityRecordWire)' -count=1 -timeout=3m`: passed; TUI compiled with no selected tests.
+- `make check-go-style`: 9307 declarations, ceiling seven, 190 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues.
 
 ## Risks and Follow-ups
 

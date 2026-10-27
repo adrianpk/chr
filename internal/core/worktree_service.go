@@ -48,7 +48,7 @@ type worktreeServiceSettings struct {
 }
 
 func newWorktreeServiceSettings(opts WorktreePlanOptions, git WorktreeGit) (worktreeServiceSettings, error) {
-	policy, workspace, err := normalizedWorktreePlanConfig(opts)
+	config, err := normalizedWorktreePlanConfig(opts)
 	if err != nil {
 		return worktreeServiceSettings{}, err
 	}
@@ -64,8 +64,8 @@ func newWorktreeServiceSettings(opts WorktreePlanOptions, git WorktreeGit) (work
 
 	return worktreeServiceSettings{
 		plan:      plan,
-		policy:    policy,
-		workspace: workspace,
+		policy:    config.branchPolicy,
+		workspace: config.workspace,
 		git:       git,
 	}, nil
 }

@@ -43,7 +43,13 @@ type WorkReadinessGit interface {
 	BranchExists(ctx context.Context, projectDir, branch string) (bool, error)
 	RefExists(ctx context.Context, projectDir, ref string) (bool, error)
 	BranchContainsRef(ctx context.Context, projectDir, branch, ref string) (bool, error)
-	GitStateInProgress(ctx context.Context, projectDir string) (string, bool, error)
+	GitStateInProgress(ctx context.Context, projectDir string) (GitOperationState, error)
+}
+
+// GitOperationState preserves the observed operation and its independent presence.
+type GitOperationState struct {
+	Name       string
+	InProgress bool
 }
 
 // WorkReadinessRepairGit defines a package boundary interface.
@@ -254,13 +260,13 @@ func applySafeRepairs(ctx context.Context, projectDir string, git WorkReadinessR
 			continue
 		}
 
-		repair, ok, err := applySafeRepair(ctx, run, diagnostic)
+		outcome, err := applySafeRepair(ctx, run, diagnostic)
 		if err != nil {
 			return nil, err
 		}
 
-		if ok {
-			applied = append(applied, repair)
+		if outcome.applied {
+			applied = append(applied, outcome.repair)
 		}
 	}
 
@@ -293,7 +299,12 @@ func diagnosticsContain(diagnostics []WorkReadinessDiagnostic, codes ...WorkRead
 	return false
 }
 
-func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+type repairOutcome struct {
+	repair  WorkReadinessAppliedRepair
+	applied bool
+}
+
+func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	switch diagnostic.Repair.Code {
 	case WorkReadinessRepairIgnoreRuntimeArtifacts:
 		return applyRuntimeArtifactsRepair(ctx, run)
@@ -312,149 +323,149 @@ func applySafeRepair(ctx context.Context, run repairRun, diagnostic WorkReadines
 	case WorkReadinessRepairRemoveOrphanedWorktree:
 		return applyRemoveOrphanedWorktreeRepair(diagnostic)
 	default:
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 }
 
-func applyRuntimeArtifactsRepair(ctx context.Context, run repairRun) (WorkReadinessAppliedRepair, bool, error) {
+func applyRuntimeArtifactsRepair(ctx context.Context, run repairRun) (repairOutcome, error) {
 	changed := false
 
 	for _, pattern := range runtimeArtifactIgnorePatterns() {
 		patternChanged, err := run.git.ExcludeLocalPattern(ctx, run.projectDir, pattern)
 		if err != nil {
-			return WorkReadinessAppliedRepair{}, false, fmt.Errorf("exclude runtime artifacts: %w", err)
+			return repairOutcome{}, fmt.Errorf("exclude runtime artifacts: %w", err)
 		}
 
 		changed = changed || patternChanged
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairIgnoreRuntimeArtifacts,
 		Detail: "excluded runtime artifact roots in local Git info exclude",
-	}, changed, nil
+	}, applied: changed}, nil
 }
 
-func applyFetchRemoteRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+func applyFetchRemoteRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	err := run.git.FetchRemote(ctx, run.projectDir, diagnostic.Remote)
 	if err != nil {
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("fetch remote: %w", err)
+		return repairOutcome{}, fmt.Errorf("fetch remote: %w", err)
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairFetchRemote,
 		Detail: fmt.Sprintf("fetched %s", diagnostic.Remote),
-	}, true, nil
+	}, applied: true}, nil
 }
 
-func applyFastForwardRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+func applyFastForwardRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	if !run.branchMutationSafe {
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 
 	err := run.git.FastForwardBranch(ctx, run.projectDir, diagnostic.ExpectedBranch, diagnostic.RemoteRef)
 	if err != nil {
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("fast-forward branch: %w", err)
+		return repairOutcome{}, fmt.Errorf("fast-forward branch: %w", err)
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairFastForwardBranch,
 		Detail: fmt.Sprintf("fast-forwarded %s from %s", diagnostic.ExpectedBranch, diagnostic.RemoteRef),
-	}, true, nil
+	}, applied: true}, nil
 }
 
-func applySwitchBranchRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+func applySwitchBranchRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	if !run.branchMutationSafe {
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 
 	err := run.git.SwitchBranch(ctx, run.projectDir, diagnostic.ExpectedBranch)
 	if err != nil {
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("switch branch: %w", err)
+		return repairOutcome{}, fmt.Errorf("switch branch: %w", err)
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairSwitchBranch,
 		Detail: fmt.Sprintf("switched to %s", diagnostic.ExpectedBranch),
-	}, true, nil
+	}, applied: true}, nil
 }
 
-func applyCreateBranchRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+func applyCreateBranchRepair(ctx context.Context, run repairRun, diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	if !run.branchMutationSafe {
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 
 	err := run.git.CreateBranch(ctx, run.projectDir, diagnostic.ExpectedBranch)
 	if err != nil {
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("create branch: %w", err)
+		return repairOutcome{}, fmt.Errorf("create branch: %w", err)
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairCreateBranch,
 		Detail: fmt.Sprintf("created branch %s", diagnostic.ExpectedBranch),
-	}, true, nil
+	}, applied: true}, nil
 }
 
-func applyCreateWorktreeRootRepair(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+func applyCreateWorktreeRootRepair(diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	if strings.TrimSpace(diagnostic.Path) == "" {
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 
 	if err := os.MkdirAll(diagnostic.Path, 0o755); err != nil {
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("create worktree root: %w", err)
+		return repairOutcome{}, fmt.Errorf("create worktree root: %w", err)
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairCreateWorktreeRoot,
 		Detail: fmt.Sprintf("created worktree root %s", diagnostic.Path),
-	}, true, nil
+	}, applied: true}, nil
 }
 
-func applyPruneWorktreeMetadataRepair(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+func applyPruneWorktreeMetadataRepair(diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	if strings.TrimSpace(diagnostic.Path) == "" {
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 
 	err := os.Remove(diagnostic.Path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return WorkReadinessAppliedRepair{}, false, nil
+			return repairOutcome{}, nil
 		}
 
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("prune worktree metadata: %w", err)
+		return repairOutcome{}, fmt.Errorf("prune worktree metadata: %w", err)
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairPruneWorktreeMetadata,
 		Detail: fmt.Sprintf("removed stale worktree metadata %s", diagnostic.Path),
-	}, true, nil
+	}, applied: true}, nil
 }
 
-func applyRemoveOrphanedWorktreeRepair(diagnostic WorkReadinessDiagnostic) (WorkReadinessAppliedRepair, bool, error) {
+func applyRemoveOrphanedWorktreeRepair(diagnostic WorkReadinessDiagnostic) (repairOutcome, error) {
 	if strings.TrimSpace(diagnostic.Path) == "" {
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 
 	entries, err := os.ReadDir(diagnostic.Path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			return WorkReadinessAppliedRepair{}, false, nil
+			return repairOutcome{}, nil
 		}
 
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("inspect orphaned worktree path: %w", err)
+		return repairOutcome{}, fmt.Errorf("inspect orphaned worktree path: %w", err)
 	}
 
 	if len(entries) > 0 {
-		return WorkReadinessAppliedRepair{}, false, nil
+		return repairOutcome{}, nil
 	}
 
 	if err := os.Remove(diagnostic.Path); err != nil {
-		return WorkReadinessAppliedRepair{}, false, fmt.Errorf("remove orphaned worktree path: %w", err)
+		return repairOutcome{}, fmt.Errorf("remove orphaned worktree path: %w", err)
 	}
 
-	return WorkReadinessAppliedRepair{
+	return repairOutcome{repair: WorkReadinessAppliedRepair{
 		Code:   WorkReadinessRepairRemoveOrphanedWorktree,
 		Detail: fmt.Sprintf("removed empty orphaned worktree path %s", diagnostic.Path),
-	}, true, nil
+	}, applied: true}, nil
 }
 
 type workReadinessGitStateCheck struct {
@@ -476,15 +487,15 @@ func (check workReadinessGitStateCheck) run(ctx context.Context) (WorkReadinessR
 
 	report.CurrentBranch = branch
 
-	state, inProgress, err := check.git.GitStateInProgress(ctx, check.projectDir)
+	operation, err := check.git.GitStateInProgress(ctx, check.projectDir)
 	if err != nil {
 		report.Diagnostics = append(report.Diagnostics, gitUnavailableDiagnostic(err))
 
 		return finalizeWorkReadinessReport(report), nil
 	}
 
-	if inProgress {
-		report.Diagnostics = append(report.Diagnostics, gitStateInProgressDiagnostic(state))
+	if operation.InProgress {
+		report.Diagnostics = append(report.Diagnostics, gitStateInProgressDiagnostic(operation.Name))
 	}
 
 	report, err = checkWorkReadinessWorktree(ctx, check.projectDir, check.git, report)
@@ -580,20 +591,20 @@ func checkWorkReadinessWorktree(ctx context.Context, projectDir string, git Work
 		return report, nil
 	}
 
-	runtimeArtifacts, userChanges := splitWorktreeStatus(status)
+	changes := splitWorktreeStatus(status)
 	report.UserCheckout = WorkReadinessWorkspaceState{
 		Path:        projectDir,
-		State:       workReadinessStateForStatus(userChanges),
+		State:       workReadinessStateForStatus(changes.userChanges),
 		Branch:      report.CurrentBranch,
 		StatusLines: append([]string(nil), status...),
 	}
 
-	if len(runtimeArtifacts) > 0 {
-		report.Diagnostics = append(report.Diagnostics, runtimeArtifactsVisibleDiagnostic(report.Workspace.Mode, len(runtimeArtifacts)))
+	if len(changes.runtimeArtifacts) > 0 {
+		report.Diagnostics = append(report.Diagnostics, runtimeArtifactsVisibleDiagnostic(report.Workspace.Mode, len(changes.runtimeArtifacts)))
 	}
 
-	if len(userChanges) > 0 {
-		report.Diagnostics = append(report.Diagnostics, userCheckoutDirtyDiagnostic(report.Workspace.Mode, len(userChanges)))
+	if len(changes.userChanges) > 0 {
+		report.Diagnostics = append(report.Diagnostics, userCheckoutDirtyDiagnostic(report.Workspace.Mode, len(changes.userChanges)))
 	}
 
 	return report, nil
@@ -903,7 +914,12 @@ func manualWorkReadinessRepair(detail string) WorkReadinessRepair {
 	}
 }
 
-func splitWorktreeStatus(lines []string) ([]string, []string) {
+type worktreeStatusChanges struct {
+	runtimeArtifacts []string
+	userChanges      []string
+}
+
+func splitWorktreeStatus(lines []string) worktreeStatusChanges {
 	runtimeArtifacts := make([]string, 0)
 	userChanges := make([]string, 0)
 
@@ -921,7 +937,7 @@ func splitWorktreeStatus(lines []string) ([]string, []string) {
 		userChanges = append(userChanges, line)
 	}
 
-	return runtimeArtifacts, userChanges
+	return worktreeStatusChanges{runtimeArtifacts: runtimeArtifacts, userChanges: userChanges}
 }
 
 func worktreeStatusLineIsRuntimeArtifact(line string) bool {
@@ -1150,24 +1166,24 @@ func (OSWorkReadinessGit) BranchContainsRef(ctx context.Context, projectDir, bra
 }
 
 // GitStateInProgress executes the corresponding package operation.
-func (OSWorkReadinessGit) GitStateInProgress(ctx context.Context, projectDir string) (string, bool, error) {
+func (OSWorkReadinessGit) GitStateInProgress(ctx context.Context, projectDir string) (GitOperationState, error) {
 	for _, state := range []string{"MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "rebase-merge", "rebase-apply"} {
 		path, err := gitPath(ctx, projectDir, state)
 		if err != nil {
-			return "", false, err
+			return GitOperationState{}, err
 		}
 
 		_, err = os.Stat(path)
 		if err == nil {
-			return state, true, nil
+			return GitOperationState{Name: state, InProgress: true}, nil
 		}
 
 		if !os.IsNotExist(err) {
-			return "", false, err
+			return GitOperationState{}, err
 		}
 	}
 
-	return "", false, nil
+	return GitOperationState{}, nil
 }
 
 // ExcludeLocalPattern executes the corresponding package operation.
