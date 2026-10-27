@@ -1,6 +1,6 @@
 # Slice 5: TUI model ownership and Web view sections
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -115,3 +115,5 @@ commands, results and logs; that record and PR Validation own final results.
 ## Risks and Follow-ups
 
 None recorded.
+
+Integration: PR #442 merged into dev at `5a84d1af3d6a855ac1ce1e3f767080db3ef101c3`. The controller retained successful exact-head evidence for all six ordered commands.
