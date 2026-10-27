@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func (s *WorkflowStore) acquireWorkflowWorkerSlot(ctx context.Context) (slot, guard *os.File, err error) {
@@ -24,7 +25,7 @@ func (s *WorkflowStore) acquireWorkflowWorkerSlot(ctx context.Context) (slot, gu
 		return nil, nil, err
 	}
 
-	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return nil, nil, err
 	}

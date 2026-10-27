@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"syscall"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // Quiescent recovery reacquires the attempt's exact slot. A still-open old
@@ -16,7 +18,7 @@ func acquireWorkflowRecoveryGuard(ctx context.Context, projectDir string, slot i
 		return &WorkflowClaim{reservation: file}, err
 	}
 
-	common, err := workflowRepositoryDirectory(ctx, projectDir)
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, projectDir)
 	if err != nil {
 		return nil, err
 	}

@@ -16,6 +16,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -58,12 +59,12 @@ func runPiWorker(ctx context.Context, stdin io.Reader, stdout io.Writer, options
 		return err
 	}
 
-	mounts, err := core.WorkerRuntimeMounts(ctx, directory)
+	mounts, err := harnessruntime.WorkerRuntimeMounts(ctx, directory)
 	if err != nil {
 		return err
 	}
 
-	instructions, err := core.WorkerRuntimeInstructions(directory)
+	instructions, err := harnessruntime.WorkerRuntimeInstructions(directory)
 	if err != nil {
 		return err
 	}
@@ -148,7 +149,7 @@ func (factory commandFactory) runPiBridge(ctx context.Context, cmd *cli.Command)
 		return err
 	}
 
-	release, err := core.HoldWorkerRuntimeReservation(ctx, core.WorkerRuntimeReservation{Slot: cmd.String("slot"), Guard: cmd.String("guard")})
+	release, err := harnessruntime.HoldWorkerRuntimeReservation(ctx, harnessruntime.WorkerRuntimeReservation{Slot: cmd.String("slot"), Guard: cmd.String("guard")})
 	if err != nil {
 		return err
 	}

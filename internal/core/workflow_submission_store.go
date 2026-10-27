@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -47,7 +48,7 @@ func workflowSubmissionPath(ctx context.Context, projectDir, key string) (string
 		return "", workflowstate.ErrConflict
 	}
 
-	common, err := workflowRepositoryDirectory(ctx, projectDir)
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, projectDir)
 	if err != nil {
 		return "", err
 	}

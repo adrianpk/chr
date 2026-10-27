@@ -326,6 +326,18 @@ runtime/native/app/dependency tests and production signature check passed; all
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/runtime ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
+Worker resource move checks passed:
+
+- `go test ./internal/core/harness/runtime ./internal/core/project ./internal/core ./internal/app ./scripts/goquality -run '^Test(PiWorker|WorkflowCoordinator|WorkflowIntegrationCoordinator|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
+
+Runtime owns explicit checkout/Git metadata mounts, bounded project instructions
+and shared reservation lifetime. Project owns the existing Git common-directory
+lookup consumed by runtime and workflow admission. Native capacity code retains
+actual FD3/FD5 identity checks, slot numbering and guarded lock conversion.
+Thirteen source/test preimages reconcile; existing no-follow, link, size, UTF-8,
+cancellation and early-close behavior is unchanged.
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

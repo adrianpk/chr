@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestNativeProcessTargets shares target journals between admitted work and
@@ -89,7 +90,7 @@ func TestNativeProcessUnknown(t *testing.T) {
 	otherStore, other := nativeRolePeer(t, f.store, "independent", "PRJ-92", "refs/heads/other")
 	linked := nativeCoordinatorLinked(t, f.store)
 
-	common, err := workflowRepositoryDirectory(t.Context(), f.store.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), f.store.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}

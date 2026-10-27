@@ -49,7 +49,7 @@ func (s *WorkflowStore) executeWorkflowClosing(ctx context.Context, claim *workf
 }
 
 func (s *WorkflowStore) prepareWorkflowClosingCheckout(ctx context.Context, claim *workflowClosingClaim) (string, error) {
-	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return "", err
 	}

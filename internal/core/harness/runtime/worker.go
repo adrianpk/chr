@@ -1,4 +1,4 @@
-package core
+package runtime
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"unicode/utf8"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -22,7 +23,7 @@ func WorkerRuntimeMounts(ctx context.Context, directory string) ([]harness.Runti
 		return nil, err
 	}
 
-	common, err := workflowRepositoryDirectory(ctx, root)
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, root)
 	if err != nil {
 		return nil, errors.New("worker execution checkout requires available Git metadata")
 	}

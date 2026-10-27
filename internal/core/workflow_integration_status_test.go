@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestNativeQueueCapacity observes real claim locks and unexpired process
@@ -46,7 +47,7 @@ func TestNativeQueueDeadProcess(t *testing.T) {
 
 	process := WorkflowProcess{Identity: identity, GroupID: identity.PID, CapacitySlot: 1}
 
-	common, err := workflowRepositoryDirectory(t.Context(), store.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), store.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}

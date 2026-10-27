@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -180,14 +181,14 @@ func nativeCoordinatorRegistration(t *testing.T, source, clone *WorkflowStore, m
 		return
 	}
 
-	common, err := workflowRepositoryDirectory(t.Context(), source.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), source.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	data := nativeCoordinatorImage(t, common, mode)
 
-	common, err = workflowRepositoryDirectory(t.Context(), clone.layout.ProjectDir())
+	common, err = projectcore.ResolveRepositoryDirectory(t.Context(), clone.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -11,6 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestWorkflowCoordinatorClone rejects copied authority before an invocation
@@ -24,7 +25,7 @@ func TestWorkflowCoordinatorClone(t *testing.T) {
 
 	checkWorkflowCoordinatorClone(t, clone, request)
 
-	common, err := workflowRepositoryDirectory(t.Context(), store.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), store.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +35,7 @@ func TestWorkflowCoordinatorClone(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	copyDir, err := workflowRepositoryDirectory(t.Context(), clone.layout.ProjectDir())
+	copyDir, err := projectcore.ResolveRepositoryDirectory(t.Context(), clone.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,7 +207,7 @@ func TestWorkflowCoordinatorLoss(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 
-	common, err := workflowRepositoryDirectory(t.Context(), store.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), store.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}

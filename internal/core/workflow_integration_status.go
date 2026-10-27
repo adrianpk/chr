@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -53,7 +54,7 @@ func (s *WorkflowStore) workflowIntegrationCapacity(ctx context.Context, runs []
 		return WorkflowIntegrationCapacity{}, err
 	}
 
-	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return WorkflowIntegrationCapacity{}, err
 	}

@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 const workflowCoordinatorPath = "coordinator.json"
@@ -52,7 +53,7 @@ func workflowCoordinatorOwner(common string) (string, error) {
 }
 
 func (s *WorkflowStore) workflowLocalCoordinator(ctx context.Context, register bool) (workflowCoordinator, error) {
-	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return workflowCoordinator{}, err
 	}

@@ -13,22 +13,12 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowRepositoryDirectory(ctx context.Context, projectDir string) (string, error) {
-	command := exec.CommandContext(ctx, "git", "-C", projectDir, "rev-parse", "--path-format=absolute", "--git-common-dir")
-
-	output, err := command.Output()
-	if err != nil {
-		return "", fmt.Errorf("resolve workflow repository coordinator: %w", err)
-	}
-
-	return filepath.EvalSymlinks(strings.TrimSpace(string(output)))
-}
-
 func acquireWorkflowCapacity(ctx context.Context, projectDir string) (*os.File, error) {
-	common, err := workflowRepositoryDirectory(ctx, projectDir)
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, projectDir)
 	if err != nil {
 		return nil, err
 	}

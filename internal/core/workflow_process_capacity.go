@@ -10,13 +10,14 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // A durable group ledger complements flock when the supervisor is killed before
 // its children actually stop. All work-start entrypoints consult it under flock.
 func registerWorkflowProcessCapacity(ctx context.Context, claim *WorkflowClaim, process WorkflowProcess) error {
-	common, err := workflowRepositoryDirectory(ctx, claim.store.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, claim.store.layout.ProjectDir())
 	if err != nil {
 		return err
 	}

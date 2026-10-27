@@ -14,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -152,7 +153,7 @@ func TestWorkflowUpgradeEdited(t *testing.T) {
 func TestWorkflowUpgradeOwned(t *testing.T) {
 	store, opts := workflowUpgradeFixture(t, "")
 
-	common, err := workflowRepositoryDirectory(t.Context(), store.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), store.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}

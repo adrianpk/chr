@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -172,12 +173,12 @@ func (s *WorkflowStore) checkWorkflowLaneRegistration(ctx context.Context, lane 
 		return workflowstate.ErrConflict
 	}
 
-	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return err
 	}
 
-	actual, err := workflowRepositoryDirectory(ctx, lane.Worktree)
+	actual, err := projectcore.ResolveRepositoryDirectory(ctx, lane.Worktree)
 	if err != nil || actual != common {
 		return fmt.Errorf("%w: lane belongs to a different coordinator", workflowstate.ErrConflict)
 	}

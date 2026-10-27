@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -120,7 +121,7 @@ func (git nativeMergerAcceptanceGit) ContinueWorkflowMergerRepair(ctx context.Co
 func nativeMergerProposalDirectory(t *testing.T, f workflowPreparationFixture, input WorkflowMergerInput) string {
 	t.Helper()
 
-	common, err := workflowRepositoryDirectory(t.Context(), f.store.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(t.Context(), f.store.layout.ProjectDir())
 	if err != nil {
 		t.Fatal(err)
 	}

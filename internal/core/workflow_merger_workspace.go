@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,7 +17,7 @@ func workflowMergerWorkspaceID(input WorkflowMergerInput) string {
 }
 
 func (s *WorkflowStore) workflowMergerWorkspace(ctx context.Context, input WorkflowMergerInput, seed string) (WorkflowLane, string, error) {
-	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
 		return WorkflowLane{}, "", err
 	}
