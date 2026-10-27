@@ -65,8 +65,8 @@ func assertPiBridgeGenerationRejection(t *testing.T, operations service) {
 		t.Fatal(err)
 	}
 
-	readiness, _ := piProfileReadiness(t.Context(), profiles["worker"], harnesscore.Generation, operations.env.ConfigDir())
-	if readiness.Ready() || !strings.Contains(readiness.Problem, "native Pi executable") {
+	prepared := piProfileReadiness(t.Context(), profiles["worker"], harnesscore.Generation, operations.env.ConfigDir())
+	if prepared.Readiness.Ready() || !strings.Contains(prepared.Readiness.Problem, "native Pi executable") {
 		t.Fatal("worker bridge was advertised as a generation executable")
 	}
 }

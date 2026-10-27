@@ -60,6 +60,17 @@ remain. Preparation and its owned resolver return one binding/launch value;
 Codex, Pi and legacy API paths keep their distinct readiness and dispatch rules.
 No operation context is stored in either new record.
 
+Application selection now receives one coherent selection input; the complete
+configuration remains available to the original legacy branch. Pi readiness and
+worker launch return named local readiness/image and command/runtime/protocol
+values. Original role, profile, image/architecture, private-resource and error
+checks remain in order. Invocation helpers reuse the existing complete
+HarnessInvocationOptions instead of repeating its five fields positionally.
+
+The baseline prepareWorkflowHarness result was already a conforming typed
+WorkflowHarnessResolution from an earlier approved prerequisite; current direct
+binding/launch consumers and native regressions confirm that disposition.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -100,9 +111,9 @@ Focused implementation checks passed:
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`
 
-The signature disposition ledger records twenty-two fixed occurrences and six cohesive
-five-input contracts. Ten assigned occurrences remain pending. The fixed signatures and two owned resolver contracts remove 24 exact
-debt allowances: 213 remain, with ceiling seven and one external
+The signature disposition ledger records 30 fixed occurrences and seven cohesive
+five-input contracts. Only service.bindGeneration remains pending. The fixed signatures
+and two owned resolver contracts remove 29 exact debt allowances: 208 remain, with ceiling seven and one external
 exception unchanged. No migration debt or broader allowance is introduced.
 
 Focused runtime/resource and concurrency checks passed:
@@ -142,9 +153,16 @@ Generation input/preparation checks passed:
 - `make check-go-style`: 9303 declarations, ceiling seven, 213 debts, one external exception. The first checks identified two resolved resolver/callback allowances; their exact stale entries were removed and recorded in slice-10-contracts.csv.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
 
+Selection and invocation checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(HarnessSelection|HarnessBinding|HarnessInvocation|HarnessGeneration|ServiceHarness|PiWorkerInput|PiWorkerPreparation|PiWorkerContainer|QualityRecordWire|TelegramHarness|PlanContextualQuiz|HarnessAuthoringQuiz)' -count=1 -timeout=3m`
+- `go test ./internal/core -run '^TestNewHarnessInvocation' -count=1 -timeout=3m`
+- `make check-go-style`: 9303 declarations, ceiling seven, 208 debts, one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
+
 ## Risks and Follow-ups
 
 T10.1-T10.6 remain in progress or pending; PR readiness is not established.
 Remaining work includes configuration/selection and generation admission owners,
-10 signature dispositions, host lifecycle/flag review and final exact-head
+the service.bindGeneration signature, host lifecycle/flag review and final exact-head
 controller validation. No Slice 10 PR has been opened.

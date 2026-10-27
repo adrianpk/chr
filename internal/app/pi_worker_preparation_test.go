@@ -18,9 +18,9 @@ func TestPiWorkerPreparation(t *testing.T) {
 			program, marker := piPreparationProgram(t, name)
 			profile := harnesscore.Profile{Harness: "pi", Command: program, ModelProvider: "fixture", Model: "model"}
 
-			readiness, image := piProfileReadiness(t.Context(), profile, harnesscore.Worker, "")
-			if readiness.Ready() || image != "" || !strings.Contains(readiness.Problem, "chr worker bridge") {
-				t.Fatal("unprepared worker executable was accepted", readiness)
+			prepared := piProfileReadiness(t.Context(), profile, harnesscore.Worker, "")
+			if prepared.Readiness.Ready() || prepared.RuntimeImage != "" || !strings.Contains(prepared.Readiness.Problem, "chr worker bridge") {
+				t.Fatal("unprepared worker executable was accepted", prepared.Readiness)
 			}
 
 			if _, err := os.Stat(marker); !os.IsNotExist(err) {

@@ -17,6 +17,19 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
+type harnessSelectionInput struct {
+	Config    core.WorkspaceConfig
+	Name      string
+	Role      harnesscore.Role
+	Action    string
+	ConfigDir string
+}
+
+type profileReadiness struct {
+	Readiness    harnesscore.Readiness
+	RuntimeImage string
+}
+
 type resolvedHarnessSelection struct {
 	View         harnesscore.Selection
 	Profile      harnesscore.Profile
@@ -60,10 +73,12 @@ func (s service) resolveHarnessSelection(ctx context.Context, config core.Worksp
 		return resolvedHarnessSelection{}, err
 	}
 
-	return resolveConfiguredHarnessSelection(ctx, config, profiles, name, role, action, s.env.ConfigDir())
+	return resolveConfiguredHarnessSelection(ctx, harnessSelectionInput{Config: config, Name: name, Role: role, Action: action, ConfigDir: s.env.ConfigDir()}, profiles)
 }
 
-func resolveConfiguredHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profiles map[string]harnesscore.Profile, name string, role harnesscore.Role, action, configDir string) (resolvedHarnessSelection, error) {
+func resolveConfiguredHarnessSelection(ctx context.Context, input harnessSelectionInput, profiles map[string]harnesscore.Profile) (resolvedHarnessSelection, error) {
+	config, name, role, action := input.Config, input.Name, input.Role, input.Action
+
 	if name == "" {
 		return legacyHarnessSelection(ctx, config, role, action)
 	}
@@ -75,7 +90,7 @@ func resolveConfiguredHarnessSelection(ctx context.Context, config core.Workspac
 		return resolvedHarnessSelection{View: view}, fmt.Errorf("unknown harness profile %q; configure it in private harnesses.yml", name)
 	}
 
-	resolved := prepareHarnessSelection(ctx, config, profile, role, action, configDir)
+	resolved := prepareHarnessSelection(ctx, input, profile)
 	if !resolved.View.Readiness.Ready() {
 		return resolved, fmt.Errorf("harness profile %q is not locally ready for %s: %s", name, role, resolved.View.Readiness.Problem)
 	}
@@ -83,7 +98,9 @@ func resolveConfiguredHarnessSelection(ctx context.Context, config core.Workspac
 	return resolved, nil
 }
 
-func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, profile harnesscore.Profile, role harnesscore.Role, action, configDir string) resolvedHarnessSelection {
+func prepareHarnessSelection(ctx context.Context, input harnessSelectionInput, profile harnesscore.Profile) resolvedHarnessSelection {
+	config, role, action, configDir := input.Config, input.Role, input.Action, input.ConfigDir
+
 	model := profile.Model
 	if model == "" {
 		model = "cli_default"
@@ -102,7 +119,8 @@ func prepareHarnessSelection(ctx context.Context, config core.WorkspaceConfig, p
 		view.Readiness = harnessProfileReadiness(ctx, profile, role, configDir)
 		view.Capabilities = (codex.Runner{}).Capabilities()
 	case pi.Identity:
-		view.Readiness, runtimeImage = piProfileReadiness(ctx, profile, role, configDir)
+		prepared := piProfileReadiness(ctx, profile, role, configDir)
+		view.Readiness, runtimeImage = prepared.Readiness, prepared.RuntimeImage
 		view.Capabilities = (pi.Runner{}).Capabilities()
 	}
 
@@ -145,12 +163,12 @@ func harnessProfileReadiness(ctx context.Context, profile harnesscore.Profile, r
 	return r
 }
 
-func piProfileReadiness(ctx context.Context, profile harnesscore.Profile, role harnesscore.Role, configDir string) (harnesscore.Readiness, string) {
+func piProfileReadiness(ctx context.Context, profile harnesscore.Profile, role harnesscore.Role, configDir string) profileReadiness {
 	r := harnesscore.Readiness{Executable: "available", Credentials: "missing", Runtime: "not_required", Supported: true, RemoteAuthentication: "not_tested"}
 	if err := pi.ValidateGenerationProfile(profile.ModelProvider, profile.Model, profile.Thinking); err != nil {
 		r.Supported, r.Problem = false, err.Error()
 
-		return r, ""
+		return profileReadiness{Readiness: r}
 	}
 
 	if role == harnesscore.Worker {
@@ -160,7 +178,7 @@ func piProfileReadiness(ctx context.Context, profile harnesscore.Profile, role h
 	if chr, _ := piWorkerBridgePreparation(profile.Command); chr {
 		r.Supported, r.Problem = false, "configure the native Pi executable for generation in a separate profile"
 
-		return r, ""
+		return profileReadiness{Readiness: r}
 	}
 
 	if _, err := pi.ResolveResources(configDir, profile.CredentialRef, profile.ModelConfigRef, profile.ModelProvider); err != nil {
@@ -169,27 +187,27 @@ func piProfileReadiness(ctx context.Context, profile harnesscore.Profile, role h
 		r.Credentials = "present"
 	}
 
-	return r, ""
+	return profileReadiness{Readiness: r}
 }
 
-func piWorkerReadiness(ctx context.Context, profile harnesscore.Profile, configDir string, r harnesscore.Readiness) (harnesscore.Readiness, string) {
+func piWorkerReadiness(ctx context.Context, profile harnesscore.Profile, configDir string, r harnesscore.Readiness) profileReadiness {
 	r.Runtime = "unavailable"
 	if runtime.GOOS != "linux" {
 		r.Supported, r.Problem = false, "prepare the Pi worker bridge on a supported Linux host"
 
-		return r, ""
+		return profileReadiness{Readiness: r}
 	}
 
 	if _, prepared := piWorkerBridgePreparation(profile.Command); !prepared {
 		r.Supported, r.Problem = false, "prepare the Linux chr worker bridge with CGO_ENABLED=0 and configure its executable as command"
 
-		return r, ""
+		return profileReadiness{Readiness: r}
 	}
 
 	if _, err := pi.ResolveWorkerResources(ctx, configDir, profile.CredentialRef, profile.ModelConfigRef, profile.ModelProvider); err != nil {
 		r.Problem = err.Error()
 
-		return r, ""
+		return profileReadiness{Readiness: r}
 	}
 
 	r.Credentials = "present"
@@ -198,18 +216,18 @@ func piWorkerReadiness(ctx context.Context, profile harnesscore.Profile, configD
 	if err != nil {
 		r.Problem = err.Error()
 
-		return r, ""
+		return profileReadiness{Readiness: r}
 	}
 
 	if image.Architecture != runtime.GOARCH {
 		r.Supported, r.Problem = false, "prepare a Pi image matching the Linux bridge architecture"
 
-		return r, ""
+		return profileReadiness{Readiness: r}
 	}
 
 	r.Runtime = "available"
 
-	return r, image.ID
+	return profileReadiness{Readiness: r, RuntimeImage: image.ID}
 }
 
 func harnessProfileOptionsSupported(profile harnesscore.Profile) bool {
@@ -256,7 +274,7 @@ func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, ro
 	}
 
 	profile.Revision = harnesscore.ProfileRevision(profile)
-	resolved := prepareHarnessSelection(ctx, config, profile, role, action, "")
+	resolved := prepareHarnessSelection(ctx, harnessSelectionInput{Config: config, Role: role, Action: action}, profile)
 	resolved.View.Source = "legacy"
 
 	return resolved, nil

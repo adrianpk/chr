@@ -26,12 +26,12 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		return core.WorkflowHarnessResolution{}, err
 	}
 
-	worker, runtimeRef, protocol, err := s.selectedWorkerCommand(ctx, resolved)
+	selected, err := s.selectedWorkerCommand(ctx, resolved)
 	if err != nil {
 		return core.WorkflowHarnessResolution{}, err
 	}
 
-	executable, err := core.FreezeHarnessExecutable(worker)
+	executable, err := core.FreezeHarnessExecutable(selected.Command)
 	if err != nil {
 		return core.WorkflowHarnessResolution{}, err
 	}
@@ -44,7 +44,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		SchemaVersion: 1, Role: harnesscore.Worker, Harness: resolved.View.Harness, Source: resolved.View.Source,
 		SelectionRevision: resolved.View.SelectionRevision, Profile: resolved.View.Profile, ProfileRevision: resolved.View.ProfileRevision,
 		ModelProvider: harnessWorkerProvider(resolved.View.ModelProvider), Model: resolved.View.Model, Thinking: resolved.View.Thinking,
-		ExecutableRef: executable.Reference, RuntimeRef: runtimeRef, ProtocolRevision: protocol, Capabilities: resolved.View.Capabilities,
+		ExecutableRef: executable.Reference, RuntimeRef: selected.RuntimeRef, ProtocolRevision: selected.ProtocolRevision, Capabilities: resolved.View.Capabilities,
 	})
 
 	return core.WorkflowHarnessResolution{Binding: &binding, Command: executable.Command}, err
@@ -58,20 +58,26 @@ func harnessWorkerProvider(provider string) string {
 	return provider
 }
 
-func (s service) selectedWorkerCommand(ctx context.Context, resolved resolvedHarnessSelection) ([]string, string, string, error) {
+type workerCommandPlan struct {
+	Command          []string
+	RuntimeRef       string
+	ProtocolRevision string
+}
+
+func (s service) selectedWorkerCommand(ctx context.Context, resolved resolvedHarnessSelection) (workerCommandPlan, error) {
 	if resolved.View.Harness == codex.Identity {
 		worker := (codex.Runner{WorkerProgram: resolved.Executable, WorkerModel: resolved.Profile.Model}).WorkflowWorker()
 
-		return worker, "native", codex.WorkerProtocol, nil
+		return workerCommandPlan{Command: worker, RuntimeRef: "native", ProtocolRevision: codex.WorkerProtocol}, nil
 	}
 
 	if resolved.View.Harness != pi.Identity {
-		return nil, "", "", errors.New("selected worker harness adapter is unavailable")
+		return workerCommandPlan{}, errors.New("selected worker harness adapter is unavailable")
 	}
 
 	resources, err := pi.ResolveWorkerResources(ctx, s.env.ConfigDir(), resolved.Profile.CredentialRef, resolved.Profile.ModelConfigRef, resolved.Profile.ModelProvider)
 	if err != nil {
-		return nil, "", "", err
+		return workerCommandPlan{}, err
 	}
 
 	command, err := pi.WorkerCommand(resolved.Executable, pi.WorkerRuntimeOptions{
@@ -79,5 +85,5 @@ func (s service) selectedWorkerCommand(ctx context.Context, resolved resolvedHar
 		CredentialFile: resources.CredentialFile, ModelFile: resources.ModelConfigFile, ModelHash: resources.ModelConfigHash, OAuth: resources.OAuth,
 	})
 
-	return command, resolved.RuntimeImage, pi.ProtocolRevision, err
+	return workerCommandPlan{Command: command, RuntimeRef: resolved.RuntimeImage, ProtocolRevision: pi.ProtocolRevision}, err
 }

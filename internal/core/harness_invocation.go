@@ -53,7 +53,7 @@ func NewHarnessInvocation(opts HarnessInvocationOptions) (HarnessInvocation, err
 		return HarnessInvocation{}, fmt.Errorf("runtime project dir is required")
 	}
 
-	run, err := harnessRunCommand(opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan, opts.Worker)
+	run, err := harnessRunCommand(opts)
 	if err != nil {
 		return HarnessInvocation{}, err
 	}
@@ -83,8 +83,10 @@ func harnessBuildCommand(plan RuntimePlan) HarnessCommand {
 	}
 }
 
-func harnessRunCommand(executionID, ticketKey, ticketPath string, plan RuntimePlan, worker harness.Worker) (HarnessCommand, error) {
-	workerCommand, err := harnessWorkerCommand(executionID, ticketKey, ticketPath, plan, worker)
+func harnessRunCommand(opts HarnessInvocationOptions) (HarnessCommand, error) {
+	executionID, ticketKey, ticketPath, plan := opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan
+
+	workerCommand, err := harnessWorkerCommand(opts)
 	if err != nil {
 		return HarnessCommand{}, err
 	}
@@ -155,7 +157,9 @@ func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessComma
 	}
 }
 
-func harnessWorkerCommand(executionID, ticketKey, ticketPath string, plan RuntimePlan, worker harness.Worker) (harness.WorkerCommand, error) {
+func harnessWorkerCommand(opts HarnessInvocationOptions) (harness.WorkerCommand, error) {
+	executionID, ticketKey, ticketPath, plan, worker := opts.ExecutionID, opts.TicketKey, opts.TicketPath, opts.Plan, opts.Worker
+
 	if worker == nil {
 		return harness.WorkerCommand{}, fmt.Errorf("worker adapter is required")
 	}

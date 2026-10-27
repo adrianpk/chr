@@ -12,31 +12,6 @@
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/service_harness_selection.go::resolveConfiguredHarnessSelection",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig, profiles map[string]harnesscore.Profile, name string, role harnesscore.Role, action, configDir string) (resolvedHarnessSelection, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_selection.go::prepareHarnessSelection",
-      "signature": "func(ctx context.Context, config core.WorkspaceConfig, profile harnesscore.Profile, role harnesscore.Role, action, configDir string) resolvedHarnessSelection",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_selection.go::piProfileReadiness",
-      "signature": "func(ctx context.Context, profile harnesscore.Profile, role harnesscore.Role, configDir string) (harnesscore.Readiness, string)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_selection.go::piWorkerReadiness",
-      "signature": "func(ctx context.Context, profile harnesscore.Profile, configDir string, r harnesscore.Readiness) (harnesscore.Readiness, string)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_harness_worker.go::service.selectedWorkerCommand",
-      "signature": "func(ctx context.Context, resolved resolvedHarnessSelection) ([]string, string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/service_work_observation_legacy.go::service.observeLegacyContext",
       "signature": "func(ctx context.Context, result *WorkObservation, current *WorkContext, path, executionID, loopID string, streams *int) error",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
