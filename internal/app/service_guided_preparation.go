@@ -94,16 +94,18 @@ func (s service) generateGuidedPlan(ctx context.Context, session core.AuthoringS
 		return core.GuidedPreparedPlan{}, err
 	}
 
-	sources, state, err := bound.guidedPlanSources(session)
+	observed, err := bound.guidedPlanSources(session)
 	if err != nil {
 		return core.GuidedPreparedPlan{}, err
 	}
+
+	sources := observed.Sources
 
 	if _, err := bound.assessPlanReadiness(ctx, sources); err != nil {
 		return core.GuidedPreparedPlan{}, err
 	}
 
-	generated, err := bound.generatePlanWithConfiguredBackend(ctx, sources.Scope, state, sources)
+	generated, err := bound.generatePlanWithConfiguredBackend(ctx, sources.Scope, observed.State, sources)
 	if err != nil {
 		return core.GuidedPreparedPlan{}, err
 	}

@@ -15,6 +15,11 @@ import (
 
 type guidedGenerationContext struct{ session core.AuthoringSession }
 
+type guidedQuizInput struct {
+	Action string
+	Mode   quizcore.Mode
+}
+
 // ConductGuidedQuiz applies a scoped quiz start, recovery or current answer.
 func (s service) ConductGuidedQuiz(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
 	if !guidedQuizAction(command.Action) {
@@ -125,9 +130,9 @@ func (s service) prepareGuidedQuizAction(ctx context.Context, session core.Autho
 		binding.QuestionID = observed.State.ActiveQuestion.ID
 	}
 
-	action, mode := guidedQuizNativeInput(operation, action, observed.State.Mode)
+	input := guidedQuizNativeInput(operation, action, observed.State.Mode)
 
-	return quizcore.ActionRequest{Scope: scope, Binding: binding, Action: action, Answer: strings.TrimSpace(operation.Content), Mode: mode}, nil
+	return quizcore.ActionRequest{Scope: scope, Binding: binding, Action: input.Action, Answer: strings.TrimSpace(operation.Content), Mode: input.Mode}, nil
 }
 
 func guidedDumpCheckpoint(session core.AuthoringSession) (core.GuidedStageCheckpoint, error) {
@@ -210,7 +215,7 @@ func guidedQuizAction(action string) bool {
 	}
 }
 
-func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode quizcore.Mode) (string, quizcore.Mode) {
+func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode quizcore.Mode) guidedQuizInput {
 	switch operation.Action {
 	case "answer":
 		action = "answer"
@@ -225,5 +230,5 @@ func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string
 		mode = quizcore.Mode(operation.Content)
 	}
 
-	return action, mode
+	return guidedQuizInput{Action: action, Mode: mode}
 }

@@ -15,6 +15,23 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type guidedSpecInput struct {
+	Sections   []quizmodel.ContextSection
+	State      quizcore.RuntimeState
+	Entries    []quizcore.Entry
+	Checkpoint core.GuidedStageCheckpoint
+}
+
+type guidedSpecRequest struct {
+	Request quizmodel.Request
+	Digest  string
+}
+
+type guidedCommittedQuizResult struct {
+	State      quizcore.RuntimeState
+	Checkpoint core.GuidedStageCheckpoint
+}
+
 // GenerateGuidedSpec generates, saves and approves only the current run's specification.
 func (s service) GenerateGuidedSpec(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
 	if command.Action != "spec" {
@@ -112,12 +129,12 @@ func (s service) prepareGuidedSpec(ctx context.Context, session core.AuthoringSe
 		return core.GuidedPreparedSpec{}, err
 	}
 
-	request, digest, err := bound.guidedSpecModelRequest(session)
+	prepared, err := bound.guidedSpecModelRequest(session)
 	if err != nil {
 		return core.GuidedPreparedSpec{}, err
 	}
 
-	response, err := quizmodel.Invoke(ctx, bound.quizModel, request)
+	response, err := quizmodel.Invoke(ctx, bound.quizModel, prepared.Request)
 	if err != nil {
 		return core.GuidedPreparedSpec{}, err
 	}
@@ -126,34 +143,34 @@ func (s service) prepareGuidedSpec(ctx context.Context, session core.AuthoringSe
 		return core.GuidedPreparedSpec{}, errors.New("guided specification requires valid generated content within 64 KiB")
 	}
 
-	return core.GuidedPreparedSpec{Title: response.DraftSpec.Title, Body: response.DraftSpec.Body, InputDigest: digest, RequestID: request.ID, ResponseID: response.ID}, nil
+	return core.GuidedPreparedSpec{Title: response.DraftSpec.Title, Body: response.DraftSpec.Body, InputDigest: prepared.Digest, RequestID: prepared.Request.ID, ResponseID: response.ID}, nil
 }
 
-func (s service) guidedSpecModelRequest(session core.AuthoringSession) (quizmodel.Request, string, error) {
-	sections, state, entries, checkpoint, err := s.guidedSpecInputs(session)
+func (s service) guidedSpecModelRequest(session core.AuthoringSession) (guidedSpecRequest, error) {
+	inputs, err := s.guidedSpecInputs(session)
 	if err != nil {
-		return quizmodel.Request{}, "", err
+		return guidedSpecRequest{}, err
 	}
 
-	payload := s.quizModelPayloadWithEntries(state, quizmodel.ActionGenerateSpec, entries)
+	payload := s.quizModelPayloadWithEntries(inputs.State, quizmodel.ActionGenerateSpec, inputs.Entries)
 	payload.Project = quizmodel.ProjectPayload{ID: session.ProjectID, Name: session.Guided.CaseName}
 
 	coreSections, err := quizmodel.ContextSectionsForPayload(payload)
 	if err != nil {
-		return quizmodel.Request{}, "", err
+		return guidedSpecRequest{}, err
 	}
 
-	digest, err := core.GuidedCheckpointDigest(checkpoint)
+	digest, err := core.GuidedCheckpointDigest(inputs.Checkpoint)
 	request := quizmodel.Request{
 		ID: core.HarnessGenerationRequestID(s.ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.ActionGenerateSpec, Strategy: "guided_committed_inputs",
 		Scope: quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: quizcore.ModeDeep,
-		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...), OutputContract: quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
+		RuntimeState: inputs.State, Payload: payload, ContextSections: append(coreSections, inputs.Sections...), OutputContract: quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}
 
-	return request, digest, err
+	return guidedSpecRequest{Request: request, Digest: digest}, err
 }
 
-func (s service) guidedSpecInputs(session core.AuthoringSession) ([]quizmodel.ContextSection, quizcore.RuntimeState, []quizcore.Entry, core.GuidedStageCheckpoint, error) {
+func (s service) guidedSpecInputs(session core.AuthoringSession) (guidedSpecInput, error) {
 	var (
 		state   quizcore.RuntimeState
 		entries []quizcore.Entry
@@ -162,18 +179,20 @@ func (s service) guidedSpecInputs(session core.AuthoringSession) ([]quizmodel.Co
 
 	sections, err := s.guidedCommittedSections(session, "dump")
 	if err != nil {
-		return nil, state, entries, quiz, err
+		return guidedSpecInput{State: state, Entries: entries, Checkpoint: quiz}, err
 	}
 
 	clarified, err := s.guidedCommittedSections(session, "quiz")
 	if err != nil {
-		return nil, state, entries, quiz, err
+		return guidedSpecInput{State: state, Entries: entries, Checkpoint: quiz}, err
 	}
 
-	state, quiz, err = s.guidedCommittedQuiz(session)
+	committed, err := s.guidedCommittedQuiz(session)
 	if err != nil {
-		return nil, state, entries, quiz, err
+		return guidedSpecInput{State: committed.State, Entries: entries, Checkpoint: committed.Checkpoint}, err
 	}
+
+	state, quiz = committed.State, committed.Checkpoint
 
 	for _, section := range clarified {
 		if section.Name == state.RawPath {
@@ -182,17 +201,17 @@ func (s service) guidedSpecInputs(session core.AuthoringSession) ([]quizmodel.Co
 	}
 
 	if err != nil {
-		return nil, state, entries, quiz, err
+		return guidedSpecInput{State: state, Entries: entries, Checkpoint: quiz}, err
 	}
 
 	if !state.ClarificationComplete || len(entries) == 0 {
-		return nil, state, entries, quiz, fmt.Errorf("committed quiz is not sufficiently answered")
+		return guidedSpecInput{State: state, Entries: entries, Checkpoint: quiz}, fmt.Errorf("committed quiz is not sufficiently answered")
 	}
 
-	return append(sections, clarified...), state, entries, quiz, nil
+	return guidedSpecInput{Sections: append(sections, clarified...), State: state, Entries: entries, Checkpoint: quiz}, nil
 }
 
-func (s service) guidedCommittedQuiz(session core.AuthoringSession) (quizcore.RuntimeState, core.GuidedStageCheckpoint, error) {
+func (s service) guidedCommittedQuiz(session core.AuthoringSession) (guidedCommittedQuizResult, error) {
 	var state quizcore.RuntimeState
 
 	for _, checkpoint := range session.Guided.Checkpoints {
@@ -207,14 +226,14 @@ func (s service) guidedCommittedQuiz(session core.AuthoringSession) (quizcore.Ru
 
 			data, err := core.ReadGuidedCommittedArtifact(s.ctx, s.projectContext.ProjectDir, checkpoint, artifact.Path)
 			if err != nil {
-				return state, checkpoint, err
+				return guidedCommittedQuizResult{State: state, Checkpoint: checkpoint}, err
 			}
 
 			err = json.Unmarshal(data, &state)
 
-			return state, checkpoint, err
+			return guidedCommittedQuizResult{State: state, Checkpoint: checkpoint}, err
 		}
 	}
 
-	return state, core.GuidedStageCheckpoint{}, errors.New("committed quiz runtime is unavailable")
+	return guidedCommittedQuizResult{State: state}, errors.New("committed quiz runtime is unavailable")
 }

@@ -12,30 +12,35 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) guidedPlanSources(session core.AuthoringSession) (core.PlanSourceObservation, quizcore.RuntimeState, error) {
-	sections, state, entries, _, err := s.guidedSpecInputs(session)
+type guidedPlanSourcesResult struct {
+	Sources core.PlanSourceObservation
+	State   quizcore.RuntimeState
+}
+
+func (s service) guidedPlanSources(session core.AuthoringSession) (guidedPlanSourcesResult, error) {
+	inputs, err := s.guidedSpecInputs(session)
 	if err != nil {
-		return core.PlanSourceObservation{}, state, err
+		return guidedPlanSourcesResult{State: inputs.State}, err
 	}
 
 	specification, err := s.guidedCommittedSections(session, "specification")
 	if err != nil {
-		return core.PlanSourceObservation{}, state, err
+		return guidedPlanSourcesResult{State: inputs.State}, err
 	}
 
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
-	sources := core.PlanSourceObservation{Scope: scope, Project: core.ProjectMetadata{Name: session.Guided.CaseName}, Quiz: quizcore.Observation{Exists: true, State: state, Entries: entries}, HasDiscovery: true}
+	sources := core.PlanSourceObservation{Scope: scope, Project: core.ProjectMetadata{Name: session.Guided.CaseName}, Quiz: quizcore.Observation{Exists: true, State: inputs.State, Entries: inputs.Entries}, HasDiscovery: true}
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage == "specification" {
 			sources.Hash, err = core.GuidedCheckpointDigest(checkpoint)
 			if err != nil {
-				return sources, state, err
+				return guidedPlanSourcesResult{Sources: sources, State: inputs.State}, err
 			}
 		}
 	}
 
-	for _, section := range append(sections, specification...) {
+	for _, section := range append(inputs.Sections, specification...) {
 		kind := "committed_discovery"
 
 		status := ""
@@ -46,7 +51,7 @@ func (s service) guidedPlanSources(session core.AuthoringSession) (core.PlanSour
 		sources.Inputs = append(sources.Inputs, core.PlanSourceInput{Kind: kind, Reference: section.Name, Revision: section.Metadata["commit"] + ":" + section.Metadata["hash"], Content: section.Content, Status: status})
 	}
 
-	return sources, state, nil
+	return guidedPlanSourcesResult{Sources: sources, State: inputs.State}, nil
 }
 
 func (s service) generateGuidedContracts(ctx context.Context, session core.AuthoringSession) (generationcore.GeneratedWorkflowPlan, error) {
@@ -87,12 +92,12 @@ func (s service) generateGuidedContracts(ctx context.Context, session core.Autho
 }
 
 func (s service) guidedContractsRequest(session core.AuthoringSession, input generationcore.GeneratedWorkflowPlan) (quizmodel.Request, error) {
-	sources, state, err := s.guidedPlanSources(session)
+	observed, err := s.guidedPlanSources(session)
 	if err != nil {
 		return quizmodel.Request{}, err
 	}
 
-	request, err := s.newPlanningModelRequest(state, sources, documentModelOperation{action: quizmodel.ActionMaterializePlanTracking, strategy: quizmodel.StrategyPlanDelivery, requestIDPrefix: "guided-contracts"})
+	request, err := s.newPlanningModelRequest(observed.State, observed.Sources, documentModelOperation{action: quizmodel.ActionMaterializePlanTracking, strategy: quizmodel.StrategyPlanDelivery, requestIDPrefix: "guided-contracts"})
 	if err != nil {
 		return request, err
 	}
