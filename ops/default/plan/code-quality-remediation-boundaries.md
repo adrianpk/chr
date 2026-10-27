@@ -711,3 +711,28 @@ fileAuthoringSessionRepository still owns allocation, source guards, journal
 publication and recovery; these result changes do not relocate or duplicate it.
 Partial error data and image order are preserved, including an existing binding
 whose validation fails. The complete authoring repository move is still pending.
+
+## Slice 9 retained native control/evidence value prerequisite
+
+GuidedControlState directly retained native control requests/results, and
+GuidedResultReference directly retained hashed evidence. Their pure closure is
+nine declarations: control integration guard, mutation request, confirmed result,
+integration grant/answer, guided control proof, review finding and two distinct
+evidence references. Workflow/state owns these values with no new dependencies.
+Native authority checks, receipt validation, store transactions, lock acquisition
+and recovery stay in their original owners. All consumers import the shared
+values directly; no root aliases or pass-through facade were added.
+
+Original zero/empty/populated guided-session, guided-control and workflow-start
+JSON images and field manifests were captured before relocation. The existing
+wire regression preserves their exact bytes, including order and omission. The
+move ledger records nine original declaration hashes; mechanical relocation and
+package-qualified naming have separate commits. Ten exact debt declarations were
+qualified without changing arity or debt count.
+
+WorkflowStartRequest still contains transient host resolver/selection inputs in
+addition to retained admission data. Moving it unchanged would pull workspace
+configuration/execution dependencies into authoring. That edge and the concrete
+WorkflowStore methods in assigned authoring source files still need actual
+consumer-owned ports/shared values; the nine-value move does not claim to solve
+them. No native store policy was relocated into authoring.

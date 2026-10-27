@@ -23,7 +23,7 @@ rule; shared model payloads retain their existing generation owner.
 Acceptance WriteResult preserves static rejection findings with no published
 path, zero results on the original other error branches, and paths/checks after
 success. Real rejection tests prove that failed checks create no ops envelope.
-Twenty assigned tuple occurrences are fixed; debt decreases from 301 to 281, with
+35 assigned tuple occurrences are fixed; debt decreases from 301 to 266, with
 the same ceiling of seven and one external-interface exception. Other assigned
 signature occurrences still require their recorded dispositions.
 
@@ -31,7 +31,9 @@ Shared operational layout/envelopes, metadata scalars and bounded file/lock
 primitives have explicit ops owners. The retained FileChange value belongs to
 workflow/state; project-relative spelling and adjacent replacement belong to
 project. Existing journal, transaction, permission, reclamation, release and
-recovery decisions stay with their operation owners.
+recovery decisions stay with their operation owners. Workflow/state also owns
+nine pure control/evidence values retained by guided state. Native policy,
+authority, receipt validation and store recovery remain in their existing owners.
 
 D02 shares bounded concrete catalog traversal with typed native readers. D04
 shares live payload/context preparation and D05 shares latest scoped index
@@ -45,10 +47,12 @@ artifact rules, action/collision diagnostics, provenance, authority and receipts
 
 Mechanical relocation, package naming/result conversion and the acceptance file
 split are separate commits. The plan service separates API, generation, model
-requests, publication, tracking and views. The move ledger retains 130 declaration
-preimages with current names/files and extraction stages. Twenty tuple
+requests, publication, tracking and views. The move ledger retains 139 declaration
+preimages with current names/files and extraction stages. 35 tuple
 dispositions, five cohesion reviews and six duplicate comparisons link exact
-source commits and validation.
+source commits and validation. Original guided-session/control and workflow-start
+wire images were frozen before the nine-value move. Mechanical relocation and
+package-qualified naming have separate commits, with no root aliases.
 
 The initial scan of 101 assigned root authoring files identified 78 external
 shared declarations. This is dependency evidence, not completion of the session
@@ -71,7 +75,9 @@ checkpoint and request/digest observations; original partial error values remain
 Dump and assisted-dump results name body/metadata/history images, mutation
 results, retained bindings, session images and receipt absence. Partial failures,
 image order and journal ownership remain unchanged. None of these result values
-changes persisted schemas or hash inputs.
+changes persisted schemas or hash inputs. Context results also name normalized
+paths, document/source inventory and prior attempt artifacts. Plan lookup results
+keep presence on errors, preventing matching failed reads from reallocating work.
 
 Public acceptance names use Artifact, Paths, RoundNotes, Layout, Check and Write.
 The spec remains authoritative and features remain supporting evidence. Original
@@ -124,7 +130,11 @@ The completed task checkpoints passed these focused real-boundary commands:
 - `go test ./internal/app -run '^TestGuidedUseCase(Quiz|SharedQuiz|Spec|Preparation|Recovery)' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/app -run '^Test(DumpMutation|ProjectDump|Authoring.*Dump|AuthorAssistedDump|AssistedDump|Service(Dump|AppendAndOpenDump))' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/app -run '^Test(DumpMutation|ProjectDump|Authoring.*Dump|AuthorAssistedDump|Assisted.*Dump|Service(Dump|AppendAndOpenDump))' -count=1 -timeout=3m`
-- `make check-go-style` — passed with 281 exact debts and one external exception.
+- `go test ./internal/core ./internal/core/workflow/state ./internal/app ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|GuidedUseCase(Control|Result)|Workflow(Control|Integration(Grant|Decision|Budget)|Closing)|AgenticReview)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|WorkflowControlCAS|GuidedUseCase(ControlCAS|ControlUncertain|ControlAdmissionAuthority|ResultCorrupt)|WorkflowIntegrationGrant)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(Load(AgentProtocol|ProjectDocument|PreviousAttempt)Context|Render(AgentContext|ProtocolsContext|SourceInventory|PreviousAttempt)|WorkspaceContext|ComposeContext|MaterializeContext|ContextReadiness)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app -run '^Test(PlanPublication|PlanOrderPublication|PlanDelivery|ServicePlan|GuidedUseCasePreparation|WebPlanDelivery)' -count=1 -timeout=3m`
+- `make check-go-style` — passed with 266 exact debts and one external exception.
 - `make check-package-readmes` — passed at the package extraction checkpoints.
 - Pinned v2.14 strict lint passed for changed core/app, acceptance/quiz and checker
   owners at their completed checkpoints; the latest core/application command was

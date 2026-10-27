@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-9
 source: review
 reported_at: 2026-10-26T08:48:29Z
-commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123]
+commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7]
 branch: refactor/slice-9-quality-authoring
 started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z
@@ -59,8 +59,10 @@ Existing generation/source-revision/authoring publication recovery and guided pr
 
 T9.1 through T9.4 remain active. All six duplicate comparisons and shared
 model-request mechanics are recorded; plan and acceptance responsibilities are
-split. Twenty assigned tuple occurrences are fixed, and five application
-cohesion reviews are recorded. Focused real-boundary checks and pinned strict
-lint pass; exact debt is 281. The complete session/repository move, remaining
+split. Nine pure native control/evidence values now have a shared state owner,
+with original guided/session/request bytes frozen before relocation.
+35 assigned tuple occurrences are fixed, and five application cohesion reviews
+are recorded. Focused real-boundary checks and pinned strict
+lint pass; exact debt is 266. The complete session/repository move, remaining
 signatures and workflow ports remain unfinished. The report is drafting; no PR
 is open and final controller validation is pending.
