@@ -1,15 +1,18 @@
 package core
 
-import "testing"
+import (
+	"path/filepath"
+	"testing"
+)
 
 // A host retains configuration from one project while authorizing execution in
 // its owned worktree. Recovery never follows replacement project routing.
 func TestHarnessGenerationBindingLocation(t *testing.T) {
-	project, original := generationBindingFixture(t)
+	project, _ := generationBindingFixture(t)
 	host, worktree := t.TempDir(), t.TempDir()
 	location := HarnessGenerationLocation{ConfigDir: project, ExecutionDir: worktree, ProjectRef: "sample-project"}
 
-	operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: host, ID: "review-operation", Purpose: "plan_generation", Locations: []HarnessGenerationLocation{location}}, generationBindingResolver(original.program, "original-model"))
+	operation, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: host, ID: "review-operation", Purpose: "plan_generation", Locations: []HarnessGenerationLocation{location}}, generationBindingResolver(filepath.Join(project, "fixture-driver"), "original-model"))
 	if err != nil {
 		t.Fatal(err)
 	}

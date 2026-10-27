@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -47,7 +48,7 @@ func TestHarnessGenerationBindingFreeze(t *testing.T) {
 func checkGenerationBindingFresh(t *testing.T, project string, first HarnessGenerationOperation) {
 	t.Helper()
 
-	fresh, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "independent", Purpose: first.Purpose}, generationBindingResolver(first.program, "model-beta"))
+	fresh, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "independent", Purpose: first.Purpose}, generationBindingResolver(filepath.Join(project, "fixture-driver"), "model-beta"))
 	if err != nil || fresh.Binding.Selection.Profile != "beta" || fresh.Binding.Selection.SelectionRevision == first.Binding.Selection.SelectionRevision {
 		t.Fatal("fresh operation did not resolve current configuration", err)
 	}
@@ -99,16 +100,16 @@ func generationBindingResolver(program, model string) HarnessGenerationResolver 
 func TestHarnessGenerationBindingCorruption(t *testing.T) {
 	for _, test := range []struct {
 		name   string
-		change func(*harnessGenerationOperationFile)
+		change func(*generationBindingWire)
 	}{
-		{"future schema", func(r *harnessGenerationOperationFile) { r.Schema = "chr-harness-operation/v2" }},
-		{"model mutation", func(r *harnessGenerationOperationFile) { r.Operation.Binding.Selection.Model = "other" }},
-		{"program mutation", func(r *harnessGenerationOperationFile) { r.Program = "/missing-fixture-driver" }},
-		{"operation mutation", func(r *harnessGenerationOperationFile) { r.Operation.ID = "other" }},
+		{"future schema", func(r *generationBindingWire) { r.Schema = "chr-harness-operation/v2" }},
+		{"model mutation", func(r *generationBindingWire) { r.Operation.Binding.Selection.Model = "other" }},
+		{"program mutation", func(r *generationBindingWire) { r.Program = "/missing-fixture-driver" }},
+		{"operation mutation", func(r *generationBindingWire) { r.Operation.ID = "other" }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			project, operation := generationBindingFixture(t)
-			replaceGenerationBindingRecord(t, operation, test.change)
+			replaceGenerationBindingRecord(t, project, operation, test.change)
 
 			if _, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: operation.ID, Purpose: operation.Purpose}, nil); err == nil {
 				t.Fatal("retained corruption accepted")
@@ -117,10 +118,10 @@ func TestHarnessGenerationBindingCorruption(t *testing.T) {
 	}
 }
 
-func replaceGenerationBindingRecord(t *testing.T, operation HarnessGenerationOperation, change func(*harnessGenerationOperationFile)) {
+func replaceGenerationBindingRecord(t *testing.T, project string, operation HarnessGenerationOperation, change func(*generationBindingWire)) {
 	t.Helper()
 
-	path, err := harnessGenerationOperationPath(operation.project, operation.ID)
+	path, err := generationBindingOperationPath(project, operation.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,9 +131,14 @@ func replaceGenerationBindingRecord(t *testing.T, operation HarnessGenerationOpe
 		t.Fatal(err)
 	}
 
-	var record harnessGenerationOperationFile
+	var record generationBindingWire
 	if err := json.Unmarshal(data, &record); err != nil {
 		t.Fatal(err)
+	}
+
+	image, err := json.Marshal(record)
+	if err != nil || !bytes.Equal(image, data) {
+		t.Fatal("corruption fixture changed the native wire image before mutation", err)
 	}
 
 	change(&record)
@@ -145,7 +151,13 @@ func replaceGenerationBindingRecord(t *testing.T, operation HarnessGenerationOpe
 	}
 
 	record.Checksum = contenthash.Sum(encoded)
-	if err := writeHarnessGenerationFile(path, record); err != nil {
+
+	data, err = json.Marshal(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -241,7 +253,7 @@ func TestHarnessGenerationBindingMetadata(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if runner.request.Program != operation.program || runner.request.Model != "model-alpha" || !runner.request.FrozenSelection {
+	if runner.request.Program != filepath.Join(project, "fixture-driver") || runner.request.Model != "model-alpha" || !runner.request.FrozenSelection {
 		t.Fatal("adapter request did not carry frozen selection")
 	}
 
@@ -293,13 +305,13 @@ func checkGenerationMetadataOutput(t *testing.T, record HarnessRunMetadata, oper
 func generationBindingReadMetadata(t *testing.T, request harness.AgentRunRequest) HarnessRunMetadata {
 	t.Helper()
 
-	data, err := readHarnessGenerationFile(harnessRunMetadataPath(request))
+	data, err := os.ReadFile(generationBindingMetadataPath(request))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var record HarnessRunMetadata
-	if err := decodeHarnessGenerationFile(data, &record); err != nil {
+	if err := json.Unmarshal(data, &record); err != nil {
 		t.Fatal(err)
 	}
 

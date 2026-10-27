@@ -86,7 +86,7 @@ func TestHarnessGenerationBindingPrivacy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := os.ReadFile(harnessRunMetadataPath(request))
+	data, err := os.ReadFile(generationBindingMetadataPath(request))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func checkGenerationMetadataPrivacy(t *testing.T, data []byte, request harness.A
 		t.Fatal("run metadata copied private inputs or executable paths")
 	}
 
-	info, err := os.Stat(harnessRunMetadataPath(request))
+	info, err := os.Stat(generationBindingMetadataPath(request))
 	if err != nil || info.Mode().Perm()&0o077 != 0 {
 		t.Fatal("metadata was not private", err)
 	}
@@ -138,7 +138,7 @@ func TestHarnessGenerationBindingFiles(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			project, operation := generationBindingFixture(t)
 
-			path, err := harnessGenerationOperationPath(project, operation.ID)
+			path, err := generationBindingOperationPath(project, operation.ID)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -187,7 +187,7 @@ func TestHarnessGenerationBindingCallIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	second, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "second-operation", Purpose: operation.Purpose}, generationBindingResolver(operation.program, "model-alpha"))
+	second, err := FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "second-operation", Purpose: operation.Purpose}, generationBindingResolver(filepath.Join(project, "fixture-driver"), "model-alpha"))
 	if err != nil {
 		t.Fatal(err)
 	}

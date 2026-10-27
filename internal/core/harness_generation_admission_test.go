@@ -109,7 +109,7 @@ func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 func TestHarnessGenerationBindingCapacity(t *testing.T) {
 	project, operation := generationBindingFixture(t)
 
-	path, err := harnessGenerationOperationPath(project, operation.ID)
+	path, err := generationBindingOperationPath(project, operation.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestHarnessGenerationBindingCapacity(t *testing.T) {
 		}
 	}
 
-	_, err = FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "over-capacity", Purpose: operation.Purpose}, generationBindingResolver(operation.program, "model-alpha"))
+	_, err = FreezeHarnessGeneration(t.Context(), HarnessGenerationFreezeInput{Project: project, ID: "over-capacity", Purpose: operation.Purpose}, generationBindingResolver(filepath.Join(project, "fixture-driver"), "model-alpha"))
 	if err == nil {
 		t.Fatal("identity capacity silently evicted an existing operation")
 	}

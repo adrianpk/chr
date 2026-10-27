@@ -110,6 +110,15 @@ rotation, path validation and environment contracts are unchanged; 49 declaratio
 and tests match their pre-move source after qualification. The root quiz integration
 observes the retained llm.ndjson filename without a test-only exported constant.
 
+Generation admission now has an explicit boundary between native configuration
+and retained host lifecycle. The native configuration operation loads the actual
+locked image and installs its own revision/profile/purpose fence; a preparer
+cannot replace that approval. The host validates operation values before calling
+that fence, then checks executable identity and writes the retained image. Nested
+locks, retained lookup before live configuration and error ordering remain.
+Native configuration tests inspect the public file layout and independently
+round-trip the exact wire image before checksum-preserving corruption.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -263,6 +272,13 @@ A separate naming commit exposes workspace.Userspace, ResolveUserspace,
 EnsureUserspace and ValidOperatorID, and trace.Config, LoadOptions, Load, Record
 and Write. The same focused owner/native/app checks and strict lint passed after
 renaming; all 49 preimages remain reconciled with unchanged wire/env values.
+
+Generation configuration port checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(HarnessGeneration|HarnessBinding|HarnessSelection|QualityRecordWire|PiGeneration|HarnessJourney)' -count=1 -timeout=3m`
+- `go test ./internal/core -run '^TestHarnessGeneration(BindingFreeze|BindingCorruption|ConfigFence)$' -count=1 -timeout=3m`
+- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
 
 ## Risks and Follow-ups
 

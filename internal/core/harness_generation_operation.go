@@ -42,6 +42,8 @@ type HarnessGenerationLaunch struct {
 type HarnessGenerationPreparation struct {
 	Binding harnesscore.GenerationBinding
 	Launch  HarnessGenerationLaunch
+	// Admit checks the actual configuration image after operation-value validation.
+	Admit func(harnesscore.Selection) error
 }
 
 // HarnessGenerationLocation separates an existing host's artifact owner from
@@ -53,8 +55,8 @@ type HarnessGenerationLocation struct {
 	ProjectRef   string
 }
 
-// HarnessGenerationResolver prepares one complete selection under the config owner.
-type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (HarnessGenerationPreparation, error)
+// harnessGenerationOperationResolver returns a prepared launch and configuration admission.
+type harnessGenerationOperationResolver func(context.Context, string) (HarnessGenerationPreparation, error)
 
 type harnessGenerationOperationFile struct {
 	Schema       string                       `json:"schema"`
@@ -78,7 +80,7 @@ type HarnessGenerationFreezeInput struct {
 // FreezeHarnessGeneration resolves a new operation once. Retrying an existing
 // operation reads its artifact before consulting current profiles or settings.
 // This artifact retains identity only; callers still own retries and budgets.
-func FreezeHarnessGeneration(ctx context.Context, input HarnessGenerationFreezeInput, resolve HarnessGenerationResolver) (HarnessGenerationOperation, error) {
+func freezeHarnessGenerationOperation(ctx context.Context, input HarnessGenerationFreezeInput, resolve harnessGenerationOperationResolver) (HarnessGenerationOperation, error) {
 	project, id, purpose, locations := input.Project, input.ID, input.Purpose, input.Locations
 
 	var operation HarnessGenerationOperation
@@ -121,7 +123,7 @@ func FreezeHarnessGeneration(ctx context.Context, input HarnessGenerationFreezeI
 	return operation, err
 }
 
-func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationFreezeInput, resolve HarnessGenerationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
+func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationFreezeInput, resolve harnessGenerationOperationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
 	project, id, purpose := input.Project, input.ID, input.Purpose
 
 	operation, err := readHarnessGenerationOperation(project, id, purpose)
@@ -148,17 +150,12 @@ func freezeHarnessGenerationLocked(ctx context.Context, input HarnessGenerationF
 	return operation, err
 }
 
-func prepareHarnessGenerationOperation(ctx context.Context, input HarnessGenerationFreezeInput, resolve HarnessGenerationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
+func prepareHarnessGenerationOperation(ctx context.Context, input HarnessGenerationFreezeInput, resolve harnessGenerationOperationResolver, location HarnessGenerationLocation) (HarnessGenerationOperation, error) {
 	project, id, purpose := input.Project, input.ID, input.Purpose
 
 	var operation HarnessGenerationOperation
 
-	config, err := LoadWorkspaceConfig(location.ConfigDir)
-	if err != nil {
-		return operation, err
-	}
-
-	prepared, err := resolve(ctx, config)
+	prepared, err := resolve(ctx, location.ConfigDir)
 	if err != nil {
 		return operation, err
 	}
@@ -170,8 +167,12 @@ func prepareHarnessGenerationOperation(ctx context.Context, input HarnessGenerat
 		return operation, err
 	}
 
-	if binding.Selection.SelectionRevision != config.Revision() || binding.Selection.Profile != config.Harnesses.Generation || binding.Selection.Action != purpose {
-		return operation, workflowstate.ErrConflict
+	if prepared.Admit == nil {
+		return operation, errors.New("generation configuration admission is required")
+	}
+
+	if err := prepared.Admit(binding.Selection); err != nil {
+		return operation, err
 	}
 
 	if err := checkGenerationExecutable(operation); err != nil {
