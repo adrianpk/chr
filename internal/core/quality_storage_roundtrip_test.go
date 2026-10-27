@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"database/sql"
 	"encoding/json"
@@ -9,6 +7,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 func qualityLegacyExpected(t *testing.T) qualityLegacyRecords {
@@ -84,7 +84,7 @@ func qualityNotificationUpdate(t *testing.T, db *sql.DB, want qualityLegacyRecor
 	t.Helper()
 	qualityStorageExec(t, db, "UPDATE notification_events SET summary='poison-summary',detail='poison-detail',failure_reason='poison-failure',channel='poison-channel',loop_run_id='poison-loop'")
 
-	if err := qualityNotificationRepository(t, db).UpdateNotificationEvent(t.Context(), want.Notification); err != nil {
+	if err := qualityNotificationRepository(t, db).Update(t.Context(), want.Notification); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -114,7 +114,7 @@ func TestQualityStorageNulls(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := notification.UpdateNotificationEvent(t.Context(), want.Notification); err != nil {
+			if err := notification.Update(t.Context(), want.Notification); err != nil {
 				t.Fatal(err)
 			}
 
@@ -132,7 +132,7 @@ func changeQualityOptionalTimes(records *qualityLegacyRecords, populated bool) {
 	records.Execution.StartedAt = nil
 	records.Execution.FinishedAt = nil
 	records.Notification.Event.DeliveredAt = nil
-	records.Notification.Event.Status = notifycore.NotificationStatusPending
+	records.Notification.Event.Status = notifycore.StatusPending
 
 	records.Execution.Status = ExecutionStatusPending
 	if populated {
@@ -140,7 +140,7 @@ func changeQualityOptionalTimes(records *qualityLegacyRecords, populated bool) {
 		finished := started.Add(3 * time.Minute)
 		delivered := records.Notification.Event.CreatedAt.Add(4 * time.Minute)
 		records.Execution.Status = ExecutionStatusSucceeded
-		records.Notification.Event.Status = notifycore.NotificationStatusDelivered
+		records.Notification.Event.Status = notifycore.StatusDelivered
 		records.Execution.StartedAt = &started
 		records.Execution.FinishedAt = &finished
 		records.Notification.Event.DeliveredAt = &delivered

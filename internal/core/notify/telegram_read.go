@@ -12,112 +12,114 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-// ResolveTelegramNotificationTarget uses the same canonical project-root binding
+// ResolveTelegramTarget uses the same canonical project-root binding
 // as receiver views. The caller retains its existing notification authorization.
-func ResolveTelegramNotificationTarget(project projectcore.Project, namespace, destination, digest string) (TelegramNotificationTarget, error) {
+func ResolveTelegramTarget(project projectcore.Project, namespace, destination, digest string) (TelegramTarget, error) {
 	binding, err := projectcore.RootBindingDigest(project)
 	if err != nil {
-		return TelegramNotificationTarget{}, err
+		return TelegramTarget{}, err
 	}
 
 	if !project.Enabled || !opsnamespace.Valid(namespace) || !validTelegramDigest(digest) {
-		return TelegramNotificationTarget{}, tgmessage.ErrDocumentUnavailable
+		return TelegramTarget{}, tgmessage.ErrDocumentUnavailable
 	}
 
-	return TelegramNotificationTarget{ProjectID: project.ID, Namespace: namespace, ProjectBindingDigest: binding, Destination: destination, ConfigDigest: contenthash.Sum([]byte(digest + "\x00" + binding + "\x00" + namespace))}, nil
+	return TelegramTarget{ProjectID: project.ID, Namespace: namespace, ProjectBindingDigest: binding, Destination: destination, ConfigDigest: contenthash.Sum([]byte(digest + "\x00" + binding + "\x00" + namespace))}, nil
 }
 
-type telegramNotificationManifest struct {
+type telegramManifest struct {
 	project                                      string
 	payload, hash, document, destination, digest sql.NullString
 	namespace, root                              sql.NullString
 }
 
-// ReadTelegramNotification reopens the frozen view without reading a source path
+// ReadTelegram reopens the frozen view without reading a source path
 // or resetting transport state. A NULL manifest is an untouched legacy event.
-func (r *sqliteNotificationEventRepository) ReadTelegramNotification(ctx context.Context, id string, target TelegramNotificationTarget) (TelegramNotificationDelivery, bool, error) {
+func (r *sqliteRepository) ReadTelegram(ctx context.Context, id string, target TelegramTarget) (TelegramLookup, error) {
 	var (
-		delivery TelegramNotificationDelivery
-		m        telegramNotificationManifest
+		delivery TelegramDelivery
+		m        telegramManifest
 	)
 
 	err := r.db.QueryRowContext(ctx, `SELECT project_id,telegram_presentation,telegram_presentation_hash,telegram_document_id,telegram_destination,telegram_config_digest,telegram_namespace,telegram_project_binding_digest,telegram_attempts,telegram_plain_fallback,telegram_uncertain,COALESCE(telegram_message_id,0),COALESCE(telegram_file_id,''),status FROM notification_events WHERE id=? AND channel='telegram'`, id).Scan(&m.project, &m.payload, &m.hash, &m.document, &m.destination, &m.digest, &m.namespace, &m.root, &delivery.Attempts, &delivery.PlainFallback, &delivery.Uncertain, &delivery.Acknowledgement.MessageID, &delivery.Acknowledgement.FileID, &delivery.Status)
 	if err != nil {
-		return delivery, false, err
+		return TelegramLookup{Delivery: delivery, Frozen: false}, err
 	}
 
 	if m.project != target.ProjectID {
-		return delivery, false, ErrTelegramNotificationTargetUnavailable
+		return TelegramLookup{Delivery: delivery, Frozen: false}, ErrTelegramTargetUnavailable
 	}
 
 	if !m.payload.Valid {
 		if !m.isLegacy() {
-			return delivery, true, tgmessage.ErrDocumentUnavailable
+			return TelegramLookup{Delivery: delivery, Frozen: true}, tgmessage.ErrDocumentUnavailable
 		}
 
-		return delivery, false, nil
+		return TelegramLookup{Delivery: delivery, Frozen: false}, nil
 	}
 
-	presentation, frozen, err := decodeTelegramNotificationManifest(m, target)
+	manifestLookup, err := decodeTelegramManifest(m, target)
+
+	presentation, frozen := manifestLookup.Presentation, manifestLookup.Frozen
 	if err != nil || !frozen {
-		return delivery, frozen, err
+		return TelegramLookup{Delivery: delivery, Frozen: frozen}, err
 	}
 
 	delivery.Presentation = presentation
 	if m.document.Valid {
-		document, err := r.readTelegramNotificationDocument(ctx, id, m.document.String, target, presentation.DocumentHash)
+		document, err := r.readTelegramDocument(ctx, id, m.document.String, target, presentation.DocumentHash)
 		if err != nil {
-			return delivery, true, fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
+			return TelegramLookup{Delivery: delivery, Frozen: true}, fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 		}
 
 		delivery.Document = &document
 	}
 
-	return delivery, true, nil
+	return TelegramLookup{Delivery: delivery, Frozen: true}, nil
 }
 
-func decodeTelegramNotificationManifest(m telegramNotificationManifest, target TelegramNotificationTarget) (tgmessage.Presentation, bool, error) {
+func decodeTelegramManifest(m telegramManifest, target TelegramTarget) (telegramManifestLookup, error) {
 	var presentation tgmessage.Presentation
 	if len(m.payload.String) > 64<<10 {
-		return presentation, true, tgmessage.ErrDocumentUnavailable
+		return telegramManifestLookup{Presentation: presentation, Frozen: true}, tgmessage.ErrDocumentUnavailable
 	}
 
 	if err := json.Unmarshal([]byte(m.payload.String), &presentation); err != nil {
-		return presentation, true, fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
+		return telegramManifestLookup{Presentation: presentation, Frozen: true}, fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 	}
 
 	if presentation.Version == 0 && m.isLegacy() {
-		return presentation, false, nil
+		return telegramManifestLookup{Presentation: presentation, Frozen: false}, nil
 	}
 
 	if !m.matchesTarget(target) {
-		return presentation, true, ErrTelegramNotificationTargetUnavailable
+		return telegramManifestLookup{Presentation: presentation, Frozen: true}, ErrTelegramTargetUnavailable
 	}
 
 	if !m.hash.Valid {
-		return presentation, true, tgmessage.ErrDocumentUnavailable
+		return telegramManifestLookup{Presentation: presentation, Frozen: true}, tgmessage.ErrDocumentUnavailable
 	}
 
-	return presentation, true, validateTelegramNotificationManifest(m, presentation)
+	return telegramManifestLookup{Presentation: presentation, Frozen: true}, validateTelegramManifest(m, presentation)
 }
 
-func (m telegramNotificationManifest) isLegacy() bool {
+func (m telegramManifest) isLegacy() bool {
 	return !m.hash.Valid && !m.document.Valid && !m.destination.Valid && !m.digest.Valid && !m.namespace.Valid && !m.root.Valid
 }
 
-func (m telegramNotificationManifest) matchesTarget(target TelegramNotificationTarget) bool {
+func (m telegramManifest) matchesTarget(target TelegramTarget) bool {
 	return m.destination.String == target.Destination && m.digest.String == target.ConfigDigest && m.namespace.String == target.Namespace && m.root.String == target.ProjectBindingDigest
 }
 
-func validateTelegramNotificationManifest(m telegramNotificationManifest, presentation tgmessage.Presentation) error {
+func validateTelegramManifest(m telegramManifest, presentation tgmessage.Presentation) error {
 	if _, err := tgmessage.DecodeRetained(tgmessage.RetainedInput{Payload: m.payload.String, Hash: m.hash.String, Text: presentation.PlainFallback, DocumentID: m.document.String}); err != nil {
 		return fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 	}
 
-	return validateTelegramNotificationActions(presentation)
+	return validateTelegramActions(presentation)
 }
 
-func validateTelegramNotificationActions(p tgmessage.Presentation) error {
+func validateTelegramActions(p tgmessage.Presentation) error {
 	if p.ActionRef != "" || p.ScopeDigest != "" || len(p.ActionChoices) != 0 || len(p.ActionLabels) != 0 {
 		return tgmessage.ErrDocumentUnavailable
 	}
@@ -125,7 +127,7 @@ func validateTelegramNotificationActions(p tgmessage.Presentation) error {
 	return nil
 }
 
-func (r *sqliteNotificationEventRepository) readTelegramNotificationDocument(ctx context.Context, owner, id string, target TelegramNotificationTarget, hash string) (tgmessage.Document, error) {
+func (r *sqliteRepository) readTelegramDocument(ctx context.Context, owner, id string, target TelegramTarget, hash string) (tgmessage.Document, error) {
 	var (
 		d          tgmessage.Document
 		storedHash string

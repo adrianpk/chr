@@ -13,41 +13,36 @@ import (
 	_ "modernc.org/sqlite"
 
 	"forge.adrianpk.com/chr/internal/core/database"
-	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-// ErrNotificationEventNotFound identifies a package boundary error.
-var ErrNotificationEventNotFound = errors.New("notification event not found")
+// ErrEventNotFound identifies a package boundary error.
+var ErrEventNotFound = errors.New("notification event not found")
 
-// NotificationAuditRecord describes a package boundary value.
-type NotificationAuditRecord struct {
-	Event   NotificationEvent
+// AuditRecord describes a package boundary value.
+type AuditRecord struct {
+	Event   Event
 	Channel string
 }
 
-// NotificationEventRepository defines a package boundary interface.
-type NotificationEventRepository interface {
-	CreateTelegramNotification(context.Context, TelegramNotificationInput) error
-	ReadTelegramNotification(context.Context, string, TelegramNotificationTarget) (TelegramNotificationDelivery, bool, error)
-	ReserveTelegramNotification(context.Context, string, TelegramNotificationTarget, bool) (bool, error)
-	FinishTelegramNotification(context.Context, string, TelegramNotificationTarget, tgmessage.Acknowledgement, string, bool, time.Time) error
-	CreateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
-	UpdateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
-	GetNotificationEvent(ctx context.Context, id string) (NotificationAuditRecord, error)
-	ListProjectNotificationEvents(ctx context.Context, projectID string) ([]NotificationAuditRecord, error)
+// Repository defines a package boundary interface.
+type Repository interface {
+	CreateTelegram(context.Context, TelegramInput) error
+	ReadTelegram(context.Context, string, TelegramTarget) (TelegramLookup, error)
+	ReserveTelegram(context.Context, string, TelegramTarget, bool) (bool, error)
+	FinishTelegram(context.Context, TelegramCompletion) error
+	Create(ctx context.Context, record AuditRecord) error
+	Update(ctx context.Context, record AuditRecord) error
+	Get(ctx context.Context, id string) (AuditRecord, error)
+	ListProject(ctx context.Context, projectID string) ([]AuditRecord, error)
 	Close() error
 }
 
-type sqliteNotificationEventRepository struct {
+type sqliteRepository struct {
 	db *sql.DB
 }
 
-// NewNotificationEventRepository constructs the corresponding package service or value.
-func NewNotificationEventRepository(
-	ctx context.Context,
-	env database.DataDirectory,
-	assetsFS fs.FS,
-) (NotificationEventRepository, error) {
+// NewRepository constructs the corresponding package service or value.
+func NewRepository(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (Repository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -63,7 +58,7 @@ func NewNotificationEventRepository(
 		return nil, database.CloseOnError(db, err)
 	}
 
-	repository, err := NewNotificationEventRepositoryFromDB(ctx, db, assetsFS)
+	repository, err := NewRepositoryFromDB(ctx, db, assetsFS)
 	if err != nil {
 		return nil, database.CloseOnError(db, err)
 	}
@@ -71,12 +66,8 @@ func NewNotificationEventRepository(
 	return repository, nil
 }
 
-// NewNotificationEventRepositoryFromDB constructs the corresponding package service or value.
-func NewNotificationEventRepositoryFromDB(
-	ctx context.Context,
-	db *sql.DB,
-	assetsFS fs.FS,
-) (NotificationEventRepository, error) {
+// NewRepositoryFromDB constructs the corresponding package service or value.
+func NewRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (Repository, error) {
 	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
@@ -84,20 +75,17 @@ func NewNotificationEventRepositoryFromDB(
 		return nil, fmt.Errorf("migrate notification event database: %w", err)
 	}
 
-	return &sqliteNotificationEventRepository{db: db}, nil
+	return &sqliteRepository{db: db}, nil
 }
 
-// CreateNotificationEvent executes the corresponding package operation.
-func (r *sqliteNotificationEventRepository) CreateNotificationEvent(
-	ctx context.Context,
-	record NotificationAuditRecord,
-) error {
-	err := ValidateNotificationAuditRecord(record)
+// Create executes the corresponding package operation.
+func (r *sqliteRepository) Create(ctx context.Context, record AuditRecord) error {
+	err := ValidateAuditRecord(record)
 	if err != nil {
 		return err
 	}
 
-	_, err = r.db.ExecContext(ctx, insertNotificationEventSQL(), (notificationEventRow{record: record}).values()...)
+	_, err = r.db.ExecContext(ctx, insertEventSQL(), (eventRow{record: record}).values()...)
 	if err != nil {
 		return fmt.Errorf("create notification event: %w", err)
 	}
@@ -105,21 +93,18 @@ func (r *sqliteNotificationEventRepository) CreateNotificationEvent(
 	return nil
 }
 
-// UpdateNotificationEvent executes the corresponding package operation.
-func (r *sqliteNotificationEventRepository) UpdateNotificationEvent(
-	ctx context.Context,
-	record NotificationAuditRecord,
-) error {
-	err := ValidateNotificationAuditRecord(record)
+// Update executes the corresponding package operation.
+func (r *sqliteRepository) Update(ctx context.Context, record AuditRecord) error {
+	err := ValidateAuditRecord(record)
 	if err != nil {
 		return err
 	}
 
 	event := record.Event
 
-	values := (notificationEventRow{record: record}).values()
+	values := (eventRow{record: record}).values()
 
-	result, err := r.db.ExecContext(ctx, updateNotificationEventSQL(), append(values[1:], values[0])...)
+	result, err := r.db.ExecContext(ctx, updateEventSQL(), append(values[1:], values[0])...)
 	if err != nil {
 		return fmt.Errorf("update notification event: %w", err)
 	}
@@ -130,39 +115,33 @@ func (r *sqliteNotificationEventRepository) UpdateNotificationEvent(
 	}
 
 	if affected == 0 {
-		return fmt.Errorf("%w: %s", ErrNotificationEventNotFound, event.ID)
+		return fmt.Errorf("%w: %s", ErrEventNotFound, event.ID)
 	}
 
 	return nil
 }
 
-// GetNotificationEvent executes the corresponding package operation.
-func (r *sqliteNotificationEventRepository) GetNotificationEvent(
-	ctx context.Context,
-	id string,
-) (NotificationAuditRecord, error) {
-	row := r.db.QueryRowContext(ctx, selectNotificationEventSQL()+" WHERE id = ?", id)
+// Get executes the corresponding package operation.
+func (r *sqliteRepository) Get(ctx context.Context, id string) (AuditRecord, error) {
+	row := r.db.QueryRowContext(ctx, selectEventSQL()+" WHERE id = ?", id)
 
-	record, err := scanNotificationAuditRecord(row)
+	record, err := scanAuditRecord(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return NotificationAuditRecord{}, fmt.Errorf("%w: %s", ErrNotificationEventNotFound, id)
+		return AuditRecord{}, fmt.Errorf("%w: %s", ErrEventNotFound, id)
 	}
 
 	if err != nil {
-		return NotificationAuditRecord{}, err
+		return AuditRecord{}, err
 	}
 
 	return record, nil
 }
 
-// ListProjectNotificationEvents lists the requested data.
-func (r *sqliteNotificationEventRepository) ListProjectNotificationEvents(
-	ctx context.Context,
-	projectID string,
-) ([]NotificationAuditRecord, error) {
+// ListProject lists the requested data.
+func (r *sqliteRepository) ListProject(ctx context.Context, projectID string) ([]AuditRecord, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
-		selectNotificationEventSQL()+" WHERE project_id = ? ORDER BY created_at",
+		selectEventSQL()+" WHERE project_id = ? ORDER BY created_at",
 		projectID,
 	)
 	if err != nil {
@@ -174,10 +153,10 @@ func (r *sqliteNotificationEventRepository) ListProjectNotificationEvents(
 		_ = rows.Close()
 	}()
 
-	records := []NotificationAuditRecord{}
+	records := []AuditRecord{}
 
 	for rows.Next() {
-		record, err := scanNotificationAuditRecord(rows)
+		record, err := scanAuditRecord(rows)
 		if err != nil {
 			return nil, err
 		}
@@ -194,7 +173,7 @@ func (r *sqliteNotificationEventRepository) ListProjectNotificationEvents(
 }
 
 // Close executes the corresponding package operation.
-func (r *sqliteNotificationEventRepository) Close() error {
+func (r *sqliteRepository) Close() error {
 	err := r.db.Close()
 	if err != nil {
 		return fmt.Errorf("close notification event repository database: %w", err)
@@ -203,49 +182,49 @@ func (r *sqliteNotificationEventRepository) Close() error {
 	return nil
 }
 
-// ValidateNotificationAuditRecord validates the corresponding package boundary value.
-func ValidateNotificationAuditRecord(record NotificationAuditRecord) error {
-	return ValidateNotificationEvent(record.Event)
+// ValidateAuditRecord validates the corresponding package boundary value.
+func ValidateAuditRecord(record AuditRecord) error {
+	return ValidateEvent(record.Event)
 }
 
-type notificationAuditScanner interface {
+type auditScanner interface {
 	Scan(dest ...any) error
 }
 
-func scanNotificationAuditRecord(scanner notificationAuditScanner) (NotificationAuditRecord, error) {
-	var row notificationEventRow
+func scanAuditRecord(scanner auditScanner) (AuditRecord, error) {
+	var row eventRow
 	if err := scanner.Scan(row.scanTargets()...); err != nil {
-		return NotificationAuditRecord{}, fmt.Errorf("scan notification event: %w", err)
+		return AuditRecord{}, fmt.Errorf("scan notification event: %w", err)
 	}
 
 	record := row.record
 
 	parsedCreatedAt, err := database.ParseTime(row.createdAt)
 	if err != nil {
-		return NotificationAuditRecord{}, err
+		return AuditRecord{}, err
 	}
 
 	parsedUpdatedAt, err := database.ParseTime(row.updatedAt)
 	if err != nil {
-		return NotificationAuditRecord{}, err
+		return AuditRecord{}, err
 	}
 
-	record.Event.Type = NotificationEventType(row.eventType)
-	record.Event.Severity = NotificationSeverity(row.severity)
-	record.Event.Status = NotificationStatus(row.status)
-	record.Event.Source = NotificationSource(row.source)
+	record.Event.Type = EventType(row.eventType)
+	record.Event.Severity = Severity(row.severity)
+	record.Event.Status = Status(row.status)
+	record.Event.Source = Source(row.source)
 	record.Event.CreatedAt = parsedCreatedAt
 	record.Event.UpdatedAt = parsedUpdatedAt
 
-	record.Event.DeliveredAt, err = parseOptionalNotificationTime(row.deliveredAt)
+	record.Event.DeliveredAt, err = parseOptionalTime(row.deliveredAt)
 	if err != nil {
-		return NotificationAuditRecord{}, err
+		return AuditRecord{}, err
 	}
 
 	return record, nil
 }
 
-func updateNotificationEventSQL() string {
+func updateEventSQL() string {
 	return `UPDATE notification_events
 SET project_id = ?, type = ?, severity = ?, status = ?, source = ?,
     channel = ?, ticket_key = ?, execution_id = ?, loop_run_id = ?,
@@ -254,7 +233,7 @@ SET project_id = ?, type = ?, severity = ?, status = ?, source = ?,
 WHERE id = ?`
 }
 
-func formatOptionalNotificationTime(value *time.Time) any {
+func formatOptionalTime(value *time.Time) any {
 	if value == nil {
 		return nil
 	}
@@ -262,7 +241,7 @@ func formatOptionalNotificationTime(value *time.Time) any {
 	return database.FormatTime(*value)
 }
 
-func parseOptionalNotificationTime(value sql.NullString) (*time.Time, error) {
+func parseOptionalTime(value sql.NullString) (*time.Time, error) {
 	if !value.Valid {
 		return nil, nil
 	}

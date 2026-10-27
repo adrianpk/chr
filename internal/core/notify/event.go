@@ -5,104 +5,104 @@ import (
 	"time"
 )
 
-// NotificationEventType defines a package boundary type.
-type NotificationEventType string
+// EventType defines a package boundary type.
+type EventType string
 
 const (
-	// NotificationEventTicketBlocked defines a package boundary constant.
-	NotificationEventTicketBlocked NotificationEventType = "ticket_blocked"
-	// NotificationEventValidationFailed defines a package boundary constant.
-	NotificationEventValidationFailed NotificationEventType = "validation_failed"
-	// NotificationEventLoopFinished defines a package boundary constant.
-	NotificationEventLoopFinished NotificationEventType = "loop_finished"
-	// NotificationEventLoopBlocked defines a package boundary constant.
-	NotificationEventLoopBlocked NotificationEventType = "loop_blocked"
-	// NotificationEventLoopFailed defines a package boundary constant.
-	NotificationEventLoopFailed NotificationEventType = "loop_failed"
-	// NotificationEventDaemonAttention defines a package boundary constant.
-	NotificationEventDaemonAttention NotificationEventType = "daemon_attention"
-	// NotificationEventRemoteCommand defines a package boundary constant.
-	NotificationEventRemoteCommand NotificationEventType = "remote_command"
-	// NotificationEventManualTest defines a package boundary constant.
-	NotificationEventManualTest NotificationEventType = "manual_test"
+	// EventTicketBlocked defines a package boundary constant.
+	EventTicketBlocked EventType = "ticket_blocked"
+	// EventValidationFailed defines a package boundary constant.
+	EventValidationFailed EventType = "validation_failed"
+	// EventLoopFinished defines a package boundary constant.
+	EventLoopFinished EventType = "loop_finished"
+	// EventLoopBlocked defines a package boundary constant.
+	EventLoopBlocked EventType = "loop_blocked"
+	// EventLoopFailed defines a package boundary constant.
+	EventLoopFailed EventType = "loop_failed"
+	// EventDaemonAttention defines a package boundary constant.
+	EventDaemonAttention EventType = "daemon_attention"
+	// EventRemoteCommand defines a package boundary constant.
+	EventRemoteCommand EventType = "remote_command"
+	// EventManualTest defines a package boundary constant.
+	EventManualTest EventType = "manual_test"
 )
 
-// NotificationSeverity defines a package boundary type.
-type NotificationSeverity string
+// Severity defines a package boundary type.
+type Severity string
 
 const (
-	// NotificationSeverityInfo defines a package boundary constant.
-	NotificationSeverityInfo NotificationSeverity = "info"
-	// NotificationSeverityWarning defines a package boundary constant.
-	NotificationSeverityWarning NotificationSeverity = "warning"
-	// NotificationSeverityError defines a package boundary constant.
-	NotificationSeverityError NotificationSeverity = "error"
-	// NotificationSeverityCritical defines a package boundary constant.
-	NotificationSeverityCritical NotificationSeverity = "critical"
+	// SeverityInfo defines a package boundary constant.
+	SeverityInfo Severity = "info"
+	// SeverityWarning defines a package boundary constant.
+	SeverityWarning Severity = "warning"
+	// SeverityError defines a package boundary constant.
+	SeverityError Severity = "error"
+	// SeverityCritical defines a package boundary constant.
+	SeverityCritical Severity = "critical"
 )
 
-// NotificationStatus defines a package boundary type.
-type NotificationStatus string
+// Status defines a package boundary type.
+type Status string
 
 const (
-	// NotificationStatusPending defines a package boundary constant.
-	NotificationStatusPending NotificationStatus = "pending"
-	// NotificationStatusSkipped defines a package boundary constant.
-	NotificationStatusSkipped NotificationStatus = "skipped"
-	// NotificationStatusDelivered defines a package boundary constant.
-	NotificationStatusDelivered NotificationStatus = "delivered"
-	// NotificationStatusFailed defines a package boundary constant.
-	NotificationStatusFailed NotificationStatus = "failed"
+	// StatusPending defines a package boundary constant.
+	StatusPending Status = "pending"
+	// StatusSkipped defines a package boundary constant.
+	StatusSkipped Status = "skipped"
+	// StatusDelivered defines a package boundary constant.
+	StatusDelivered Status = "delivered"
+	// StatusFailed defines a package boundary constant.
+	StatusFailed Status = "failed"
 )
 
-// NotificationSource defines a package boundary type.
-type NotificationSource string
+// Source defines a package boundary type.
+type Source string
 
 const (
-	// NotificationSourceTicketExecution defines a package boundary constant.
-	NotificationSourceTicketExecution NotificationSource = "ticket_execution"
-	// NotificationSourceTicketLoop defines a package boundary constant.
-	NotificationSourceTicketLoop NotificationSource = "ticket_loop"
-	// NotificationSourceDaemon defines a package boundary constant.
-	NotificationSourceDaemon NotificationSource = "daemon"
-	// NotificationSourceRemoteCommand defines a package boundary constant.
-	NotificationSourceRemoteCommand NotificationSource = "remote_command"
-	// NotificationSourceManual defines a package boundary constant.
-	NotificationSourceManual NotificationSource = "manual"
+	// SourceTicketExecution defines a package boundary constant.
+	SourceTicketExecution Source = "ticket_execution"
+	// SourceTicketLoop defines a package boundary constant.
+	SourceTicketLoop Source = "ticket_loop"
+	// SourceDaemon defines a package boundary constant.
+	SourceDaemon Source = "daemon"
+	// SourceRemoteCommand defines a package boundary constant.
+	SourceRemoteCommand Source = "remote_command"
+	// SourceManual defines a package boundary constant.
+	SourceManual Source = "manual"
 )
 
-// NotificationEvent describes a package boundary value.
-type NotificationEvent struct {
+// Event describes a package boundary value.
+type Event struct {
 	ID            string
 	ProjectID     string
-	Type          NotificationEventType
-	Severity      NotificationSeverity
-	Status        NotificationStatus
-	Source        NotificationSource
-	References    NotificationReferences
-	Payload       NotificationPayload
+	Type          EventType
+	Severity      Severity
+	Status        Status
+	Source        Source
+	References    References
+	Payload       Payload
 	FailureReason string
 	CreatedAt     time.Time
 	DeliveredAt   *time.Time
 	UpdatedAt     time.Time
 }
 
-// NotificationReferences describes a package boundary value.
-type NotificationReferences struct {
+// References describes a package boundary value.
+type References struct {
 	TicketKey   string
 	ExecutionID string
 	LoopRunID   string
 	DaemonPID   int
 }
 
-// NotificationPayload describes a package boundary value.
-type NotificationPayload struct {
+// Payload describes a package boundary value.
+type Payload struct {
 	Summary string
 	Detail  string
 }
 
-// ValidateNotificationEvent validates the corresponding package boundary value.
-func ValidateNotificationEvent(event NotificationEvent) error {
+// ValidateEvent validates the corresponding package boundary value.
+func ValidateEvent(event Event) error {
 	if event.ID == "" {
 		return fmt.Errorf("notification event id is required")
 	}
@@ -127,30 +127,30 @@ func ValidateNotificationEvent(event NotificationEvent) error {
 		return fmt.Errorf("notification source is invalid: %s", event.Source)
 	}
 
-	err := validateNotificationPayload(event.Payload)
+	err := validatePayload(event.Payload)
 	if err != nil {
 		return err
 	}
 
-	err = validateNotificationReferences(event)
+	err = validateReferences(event)
 	if err != nil {
 		return err
 	}
 
-	return validateNotificationTimes(event)
+	return validateTimes(event)
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (t NotificationEventType) Valid() bool {
+func (t EventType) Valid() bool {
 	switch t {
-	case NotificationEventTicketBlocked,
-		NotificationEventValidationFailed,
-		NotificationEventLoopFinished,
-		NotificationEventLoopBlocked,
-		NotificationEventLoopFailed,
-		NotificationEventDaemonAttention,
-		NotificationEventRemoteCommand,
-		NotificationEventManualTest:
+	case EventTicketBlocked,
+		EventValidationFailed,
+		EventLoopFinished,
+		EventLoopBlocked,
+		EventLoopFailed,
+		EventDaemonAttention,
+		EventRemoteCommand,
+		EventManualTest:
 		return true
 	default:
 		return false
@@ -158,12 +158,12 @@ func (t NotificationEventType) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s NotificationSeverity) Valid() bool {
+func (s Severity) Valid() bool {
 	switch s {
-	case NotificationSeverityInfo,
-		NotificationSeverityWarning,
-		NotificationSeverityError,
-		NotificationSeverityCritical:
+	case SeverityInfo,
+		SeverityWarning,
+		SeverityError,
+		SeverityCritical:
 		return true
 	default:
 		return false
@@ -171,12 +171,12 @@ func (s NotificationSeverity) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s NotificationStatus) Valid() bool {
+func (s Status) Valid() bool {
 	switch s {
-	case NotificationStatusPending,
-		NotificationStatusSkipped,
-		NotificationStatusDelivered,
-		NotificationStatusFailed:
+	case StatusPending,
+		StatusSkipped,
+		StatusDelivered,
+		StatusFailed:
 		return true
 	default:
 		return false
@@ -184,20 +184,20 @@ func (s NotificationStatus) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s NotificationSource) Valid() bool {
+func (s Source) Valid() bool {
 	switch s {
-	case NotificationSourceTicketExecution,
-		NotificationSourceTicketLoop,
-		NotificationSourceDaemon,
-		NotificationSourceRemoteCommand,
-		NotificationSourceManual:
+	case SourceTicketExecution,
+		SourceTicketLoop,
+		SourceDaemon,
+		SourceRemoteCommand,
+		SourceManual:
 		return true
 	default:
 		return false
 	}
 }
 
-func validateNotificationPayload(payload NotificationPayload) error {
+func validatePayload(payload Payload) error {
 	if payload.Summary == "" {
 		return fmt.Errorf("notification summary is required")
 	}
@@ -205,38 +205,38 @@ func validateNotificationPayload(payload NotificationPayload) error {
 	return nil
 }
 
-func validateNotificationReferences(event NotificationEvent) error {
+func validateReferences(event Event) error {
 	if event.References.DaemonPID < 0 {
 		return fmt.Errorf("notification daemon pid cannot be negative")
 	}
 
-	if event.Type == NotificationEventTicketBlocked && event.References.TicketKey == "" {
+	if event.Type == EventTicketBlocked && event.References.TicketKey == "" {
 		return fmt.Errorf("notification ticket key is required for ticket_blocked events")
 	}
 
-	if event.Type == NotificationEventValidationFailed && event.References.ExecutionID == "" {
+	if event.Type == EventValidationFailed && event.References.ExecutionID == "" {
 		return fmt.Errorf("notification execution id is required for validation_failed events")
 	}
 
-	if isLoopNotification(event.Type) && event.References.LoopRunID == "" {
+	if isLoop(event.Type) && event.References.LoopRunID == "" {
 		return fmt.Errorf("notification loop run id is required for %s events", event.Type)
 	}
 
 	return nil
 }
 
-func isLoopNotification(eventType NotificationEventType) bool {
+func isLoop(eventType EventType) bool {
 	switch eventType {
-	case NotificationEventLoopFinished,
-		NotificationEventLoopBlocked,
-		NotificationEventLoopFailed:
+	case EventLoopFinished,
+		EventLoopBlocked,
+		EventLoopFailed:
 		return true
 	default:
 		return false
 	}
 }
 
-func validateNotificationTimes(event NotificationEvent) error {
+func validateTimes(event Event) error {
 	if event.CreatedAt.IsZero() {
 		return fmt.Errorf("notification created time is required")
 	}
@@ -249,11 +249,11 @@ func validateNotificationTimes(event NotificationEvent) error {
 		return fmt.Errorf("notification delivered before it was created")
 	}
 
-	if event.DeliveredAt != nil && event.Status != NotificationStatusDelivered {
+	if event.DeliveredAt != nil && event.Status != StatusDelivered {
 		return fmt.Errorf("notification delivered time is invalid for %s status", event.Status)
 	}
 
-	if event.Status == NotificationStatusFailed && event.FailureReason == "" {
+	if event.Status == StatusFailed && event.FailureReason == "" {
 		return fmt.Errorf("notification failure reason is required for failed status")
 	}
 

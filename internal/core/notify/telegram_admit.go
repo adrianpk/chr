@@ -14,19 +14,19 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-// CreateTelegramNotification admits the event, immutable view and complete
+// CreateTelegram admits the event, immutable view and complete
 // document atomically. A failed quota reservation leaves no partial event.
-func (r *sqliteNotificationEventRepository) CreateTelegramNotification(ctx context.Context, input TelegramNotificationInput) error {
-	if err := validateTelegramNotificationInput(input); err != nil {
+func (r *sqliteRepository) CreateTelegram(ctx context.Context, input TelegramInput) error {
+	if err := validateTelegramInput(input); err != nil {
 		return err
 	}
 
-	return r.notificationTransaction(ctx, func(tx *sql.Tx) error {
-		if _, err := tx.ExecContext(ctx, insertNotificationEventSQL(), (notificationEventRow{record: input.Record}).values()...); err != nil {
+	return r.transaction(ctx, func(tx *sql.Tx) error {
+		if _, err := tx.ExecContext(ctx, insertEventSQL(), (eventRow{record: input.Record}).values()...); err != nil {
 			return err
 		}
 
-		if err := purgeTelegramNotificationDocuments(ctx, tx, input.Record.Event.CreatedAt); err != nil {
+		if err := purgeTelegramDocuments(ctx, tx, input.Record.Event.CreatedAt); err != nil {
 			return err
 		}
 
@@ -36,7 +36,7 @@ func (r *sqliteNotificationEventRepository) CreateTelegramNotification(ctx conte
 			view.DocumentID = "tgndoc-" + contenthash.Sum([]byte(input.Record.Event.ID))[:32]
 
 			view.DocumentHash = contenthash.Sum(input.Document.Payload)
-			if err := retainTelegramNotificationDocument(ctx, tx, input, view.DocumentID); err != nil {
+			if err := retainTelegramDocument(ctx, tx, input, view.DocumentID); err != nil {
 				return err
 			}
 		}
@@ -52,8 +52,8 @@ func (r *sqliteNotificationEventRepository) CreateTelegramNotification(ctx conte
 	})
 }
 
-func validateTelegramNotificationInput(input TelegramNotificationInput) error {
-	if err := ValidateNotificationAuditRecord(input.Record); err != nil {
+func validateTelegramInput(input TelegramInput) error {
+	if err := ValidateAuditRecord(input.Record); err != nil {
 		return err
 	}
 
@@ -61,7 +61,7 @@ func validateTelegramNotificationInput(input TelegramNotificationInput) error {
 		return tgmessage.ErrDocumentUnavailable
 	}
 
-	if err := validateTelegramNotificationTarget(input); err != nil {
+	if err := validateTelegramTarget(input); err != nil {
 		return err
 	}
 
@@ -69,23 +69,23 @@ func validateTelegramNotificationInput(input TelegramNotificationInput) error {
 		return tgmessage.ErrDocumentUnavailable
 	}
 
-	return validateTelegramNotificationDocument(input.Document, input.Target)
+	return validateTelegramDocument(input.Document, input.Target)
 }
 
-func validateTelegramNotificationTarget(input TelegramNotificationInput) error {
+func validateTelegramTarget(input TelegramInput) error {
 	target := input.Target
-	if input.Record.Channel != "telegram" || input.Record.Event.Status != NotificationStatusPending || input.Record.Event.ProjectID != target.ProjectID {
-		return ErrTelegramNotificationTargetUnavailable
+	if input.Record.Channel != "telegram" || input.Record.Event.Status != StatusPending || input.Record.Event.ProjectID != target.ProjectID {
+		return ErrTelegramTargetUnavailable
 	}
 
 	if !validTelegramDigest(target.ConfigDigest) || !validTelegramDigest(target.ProjectBindingDigest) || !opsnamespace.Valid(target.Namespace) || strings.TrimSpace(target.Destination) == "" || len(target.Destination) > 512 {
-		return ErrTelegramNotificationTargetUnavailable
+		return ErrTelegramTargetUnavailable
 	}
 
 	return nil
 }
 
-func validateTelegramNotificationDocument(document *tgmessage.Document, target TelegramNotificationTarget) error {
+func validateTelegramDocument(document *tgmessage.Document, target TelegramTarget) error {
 	if document == nil {
 		return nil
 	}
@@ -101,10 +101,10 @@ func validateTelegramNotificationDocument(document *tgmessage.Document, target T
 	return nil
 }
 
-func retainTelegramNotificationDocument(ctx context.Context, tx *sql.Tx, input TelegramNotificationInput, id string) error {
-	row := telegramNotificationDocumentRow{id: id, owner: input.Record.Event.ID, target: input.Target, document: *input.Document, createdAt: input.Record.Event.CreatedAt}
+func retainTelegramDocument(ctx context.Context, tx *sql.Tx, input TelegramInput, id string) error {
+	row := telegramDocumentRow{id: id, owner: input.Record.Event.ID, target: input.Target, document: *input.Document, createdAt: input.Record.Event.CreatedAt}
 
-	result, err := tx.ExecContext(ctx, insertTelegramNotificationDocumentSQL, row.values()...)
+	result, err := tx.ExecContext(ctx, insertTelegramDocumentSQL, row.values()...)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func retainTelegramNotificationDocument(ctx context.Context, tx *sql.Tx, input T
 	return nil
 }
 
-func purgeTelegramNotificationDocuments(ctx context.Context, tx *sql.Tx, now time.Time) error {
+func purgeTelegramDocuments(ctx context.Context, tx *sql.Tx, now time.Time) error {
 	_, err := tx.ExecContext(ctx, `UPDATE telegram_notification_documents SET payload=NULL,purged_at=? WHERE id IN (SELECT d.id FROM telegram_notification_documents d JOIN notification_events e ON e.id=d.owner_id WHERE d.payload IS NOT NULL AND d.terminal_at IS NOT NULL AND d.terminal_at<=? AND e.status IN ('delivered','failed') AND e.telegram_uncertain=0 ORDER BY d.terminal_at,d.id LIMIT 20)`, database.FormatTime(now), database.FormatTime(now.Add(-7*24*time.Hour)))
 
 	return err

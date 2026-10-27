@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"database/sql"
 	"encoding/json"
@@ -11,14 +9,15 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 type qualityLegacyRecords struct {
-	Execution    ExecutionRecord                    `json:"execution"`
-	Remote       RemoteCommandRecord                `json:"remote"`
-	Notification notifycore.NotificationAuditRecord `json:"notification"`
-	Ticket       IndexedTicket                      `json:"ticket"`
-	Conversation TelegramConversation               `json:"conversation"`
+	Execution    ExecutionRecord        `json:"execution"`
+	Remote       RemoteCommandRecord    `json:"remote"`
+	Notification notifycore.AuditRecord `json:"notification"`
+	Ticket       IndexedTicket          `json:"ticket"`
+	Conversation TelegramConversation   `json:"conversation"`
 }
 
 func openQualityLegacyDB(t *testing.T) *sql.DB {
@@ -73,7 +72,7 @@ func readQualityLegacyRecords(t *testing.T, db *sql.DB, want qualityLegacyRecord
 		t.Fatal(err)
 	}
 
-	got.Notification, err = qualityNotificationRepository(t, db).GetNotificationEvent(t.Context(), want.Notification.Event.ID)
+	got.Notification, err = qualityNotificationRepository(t, db).Get(t.Context(), want.Notification.Event.ID)
 	if err != nil {
 		t.Fatal(err)
 	}

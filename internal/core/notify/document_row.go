@@ -8,18 +8,18 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-type telegramNotificationDocumentRow struct {
+type telegramDocumentRow struct {
 	id, owner string
-	target    TelegramNotificationTarget
+	target    TelegramTarget
 	document  tgmessage.Document
 	createdAt time.Time
 }
 
-const telegramNotificationDocumentColumns = `id,owner_id,destination,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at`
+const telegramDocumentColumns = `id,owner_id,destination,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at`
 
-const insertTelegramNotificationDocumentSQL = `INSERT INTO telegram_notification_documents(` + telegramNotificationDocumentColumns + `) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?` + database.TelegramDocumentQuotaPredicate
+const insertTelegramDocumentSQL = `INSERT INTO telegram_notification_documents(` + telegramDocumentColumns + `) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?` + database.TelegramDocumentQuotaPredicate
 
-func (row telegramNotificationDocumentRow) values() []any {
+func (row telegramDocumentRow) values() []any {
 	d, target := row.document, row.target
 
 	return []any{

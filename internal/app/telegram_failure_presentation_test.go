@@ -1,7 +1,5 @@
 package app
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"bytes"
 	"errors"
@@ -11,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 type telegramUnavailableRead struct{ telegramReadService }
@@ -93,7 +92,7 @@ func TestTelegramPresentationFailureNativeResult(t *testing.T) {
 	}
 
 	records := listNotificationEventsForTest(t, devRoot, projectID(projectDir))
-	assertNotificationEvent(t, records, 0, notifycore.NotificationEventLoopFinished, notifycore.NotificationStatusFailed)
+	assertNotificationEvent(t, records, 0, notifycore.EventLoopFinished, notifycore.StatusFailed)
 
 	if calls.Load() != 1 || records[0].Event.DeliveredAt != nil {
 		t.Fatal("failed send claimed delivery or repeated dispatch", calls.Load(), records)

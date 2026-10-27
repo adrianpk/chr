@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"bytes"
 	"context"
@@ -11,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 // DefaultTelegramAPIBaseURL defines a package boundary constant.
@@ -40,7 +40,7 @@ type TelegramSender struct {
 }
 
 // RenderTelegramNotificationMessage renders the corresponding package data.
-func RenderTelegramNotificationMessage(event notifycore.NotificationEvent) TelegramMessage {
+func RenderTelegramNotificationMessage(event notifycore.Event) TelegramMessage {
 	text := event.Payload.Summary
 	if event.Payload.Detail != "" {
 		text = text + "\n\n" + event.Payload.Detail

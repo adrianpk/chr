@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"bytes"
 	"database/sql"
@@ -11,24 +9,25 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-func telegramNotificationTestInput(t *testing.T) notifycore.TelegramNotificationInput {
+func telegramNotificationTestInput(t *testing.T) notifycore.TelegramInput {
 	t.Helper()
 
 	record := testNotificationAuditRecord(time.Now().UTC())
 	record.Channel = "telegram"
 
-	target, err := notifycore.ResolveTelegramNotificationTarget(projectcore.Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, DefaultOpsNamespace, "@example_channel", contenthash.Sum([]byte("configured sender")))
+	target, err := notifycore.ResolveTelegramTarget(projectcore.Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, DefaultOpsNamespace, "@example_channel", contenthash.Sum([]byte("configured sender")))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	payload := []byte("# Complete worker-reported details\n\nLiteral `*_` 😀\n")
 
-	return notifycore.TelegramNotificationInput{Record: record, Target: target, Message: tgmessage.Blocks{Family: "47", InitialText: "Ticket blocked in Example project", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete original export attached. Integration requires its canonical receipt."}, Document: &tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notification.md", SourceHash: contenthash.Sum(payload), Filename: "notification.md", MediaType: "text/markdown", Payload: payload}}
+	return notifycore.TelegramInput{Record: record, Target: target, Message: tgmessage.Blocks{Family: "47", InitialText: "Ticket blocked in Example project", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete original export attached. Integration requires its canonical receipt."}, Document: &tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notification.md", SourceHash: contenthash.Sum(payload), Filename: "notification.md", MediaType: "text/markdown", Payload: payload}}
 }
 
 // A real database freezes the event's presentation and bytes together. Updating
@@ -38,14 +37,14 @@ func TestTelegramPresentationNotificationSnapshot(t *testing.T) {
 	input := telegramNotificationTestInput(t)
 
 	original := bytes.Clone(input.Document.Payload)
-	if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
+	if err := repository.CreateTelegram(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}
 
 	input.Document.Payload = []byte("different source")
 
 	input.Record.Event.Payload.Detail = "Changed after the original event"
-	if err := repository.UpdateNotificationEvent(t.Context(), input.Record); err != nil {
+	if err := repository.Update(t.Context(), input.Record); err != nil {
 		t.Fatal(err)
 	}
 
@@ -54,7 +53,7 @@ func TestTelegramPresentationNotificationSnapshot(t *testing.T) {
 		t.Fatal("notification replaced its original image", delivery)
 	}
 
-	if err := repository.CreateTelegramNotification(t.Context(), input); err == nil {
+	if err := repository.CreateTelegram(t.Context(), input); err == nil {
 		t.Fatal("replay replaced original admission")
 	}
 
@@ -62,10 +61,12 @@ func TestTelegramPresentationNotificationSnapshot(t *testing.T) {
 	checkTelegramNotificationIsolation(t, repository)
 }
 
-func telegramNotificationRetained(t *testing.T, repository notifycore.NotificationEventRepository, id string, target notifycore.TelegramNotificationTarget) notifycore.TelegramNotificationDelivery {
+func telegramNotificationRetained(t *testing.T, repository notifycore.Repository, id string, target notifycore.TelegramTarget) notifycore.TelegramDelivery {
 	t.Helper()
 
-	delivery, frozen, err := repository.ReadTelegramNotification(t.Context(), id, target)
+	lookup, err := repository.ReadTelegram(t.Context(), id, target)
+
+	delivery, frozen := lookup.Delivery, lookup.Frozen
 	if err != nil || !frozen {
 		t.Fatal("frozen notification unavailable", delivery, err)
 	}
@@ -73,7 +74,7 @@ func telegramNotificationRetained(t *testing.T, repository notifycore.Notificati
 	return delivery
 }
 
-func checkTelegramNotificationTargets(t *testing.T, repository notifycore.NotificationEventRepository, input notifycore.TelegramNotificationInput) {
+func checkTelegramNotificationTargets(t *testing.T, repository notifycore.Repository, input notifycore.TelegramInput) {
 	t.Helper()
 
 	for _, field := range []string{"destination", "project", "root", "namespace", "configuration"} {
@@ -92,7 +93,7 @@ func checkTelegramNotificationTargets(t *testing.T, repository notifycore.Notifi
 			target.ConfigDigest = contenthash.Sum([]byte("other sender"))
 		}
 
-		if _, _, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, target); err == nil {
+		if _, err := repository.ReadTelegram(t.Context(), input.Record.Event.ID, target); err == nil {
 			t.Fatal("cross-target notification accepted", field)
 		}
 	}
@@ -104,12 +105,12 @@ func TestTelegramPresentationNotificationAllowance(t *testing.T) {
 	repository := openTelegramNotificationTestRepository(t, telegramReceiverTestEnv(t))
 
 	input := telegramNotificationTestInput(t)
-	if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
+	if err := repository.CreateTelegram(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}
 
 	for _, item := range []struct{ plain, want bool }{{false, true}, {false, false}, {true, true}, {true, false}, {false, false}} {
-		got, err := repository.ReserveTelegramNotification(t.Context(), input.Record.Event.ID, input.Target, item.plain)
+		got, err := repository.ReserveTelegram(t.Context(), input.Record.Event.ID, input.Target, item.plain)
 		if err != nil || got != item.want {
 			t.Fatal("notification allowance changed", item, got, err)
 		}
@@ -123,22 +124,22 @@ func TestTelegramPresentationNotificationAllowance(t *testing.T) {
 	finishTelegramNotificationTest(t, repository, input)
 }
 
-func finishTelegramNotificationTest(t *testing.T, repository notifycore.NotificationEventRepository, input notifycore.TelegramNotificationInput) {
+func finishTelegramNotificationTest(t *testing.T, repository notifycore.Repository, input notifycore.TelegramInput) {
 	t.Helper()
 
 	ack := tgmessage.Acknowledgement{MessageID: 1001, FileID: "original-file"}
-	if err := repository.FinishTelegramNotification(t.Context(), input.Record.Event.ID, input.Target, ack, "", false, time.Now().UTC()); err != nil {
+	if err := repository.FinishTelegram(t.Context(), notifycore.TelegramCompletion{ID: input.Record.Event.ID, Target: input.Target, Acknowledgement: ack, Failure: notifycore.DeliveryFailure{Code: "", Uncertain: false}, At: time.Now().UTC()}); err != nil {
 		t.Fatal(err)
 	}
 
 	retained := telegramNotificationRetained(t, repository, input.Record.Event.ID, input.Target)
-	if retained.Acknowledgement != ack || retained.Status != notifycore.NotificationStatusDelivered || retained.Uncertain {
+	if retained.Acknowledgement != ack || retained.Status != notifycore.StatusDelivered || retained.Uncertain {
 		t.Fatal("lost transport acknowledgement", retained)
 	}
 }
 
 type notificationTestRepository struct {
-	notifycore.NotificationEventRepository
+	notifycore.Repository
 	db *sql.DB
 }
 
@@ -158,7 +159,7 @@ func openTelegramNotificationTestRepository(t *testing.T, env UserEnvironment) *
 		t.Fatal(database.CloseOnError(db, err))
 	}
 
-	repository, err := notifycore.NewNotificationEventRepositoryFromDB(t.Context(), db, os.DirFS("../../cmd/chr"))
+	repository, err := notifycore.NewRepositoryFromDB(t.Context(), db, os.DirFS("../../cmd/chr"))
 	if err != nil {
 		t.Fatal(database.CloseOnError(db, err))
 	}
@@ -169,7 +170,7 @@ func openTelegramNotificationTestRepository(t *testing.T, env UserEnvironment) *
 		}
 	})
 
-	return &notificationTestRepository{NotificationEventRepository: repository, db: db}
+	return &notificationTestRepository{Repository: repository, db: db}
 }
 
 func checkTelegramNotificationIsolation(t *testing.T, repository *notificationTestRepository) {

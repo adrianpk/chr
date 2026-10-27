@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"bufio"
 	"errors"
@@ -12,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/configvalue"
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 // WorkspaceConfig describes a package boundary value.
@@ -21,7 +20,7 @@ type WorkspaceConfig struct {
 	Workflow        WorkflowConfig
 	TicketKeyPrefix string
 	Runtime         RuntimeConfig
-	Notifications   notifycore.NotificationConfig
+	Notifications   notifycore.Config
 	Review          ReviewWorkflowConfig
 	Work            WorkConfig
 	Evidence        EvidenceConfig
@@ -371,7 +370,7 @@ func defaultWorkspaceConfig() WorkspaceConfig {
 	return WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,
 		Runtime:         DefaultRuntimeConfig(),
-		Notifications:   notifycore.DefaultNotificationConfig(),
+		Notifications:   notifycore.DefaultConfig(),
 		Review:          DefaultReviewWorkflowConfig(),
 		Work:            DefaultWorkConfig(),
 		Evidence:        DefaultEvidenceConfig(),
@@ -541,7 +540,7 @@ func setRuntimeConfigValue(config *RuntimeConfig, key, value string) {
 	}
 }
 
-func setNotificationConfigValue(config *notifycore.NotificationConfig, key, value string) {
+func setNotificationConfigValue(config *notifycore.Config, key, value string) {
 	switch key {
 	case "telegram_enabled":
 		config.Telegram.Enabled = configvalue.Bool(value)

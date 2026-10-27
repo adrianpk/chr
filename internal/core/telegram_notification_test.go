@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"context"
 	"encoding/json"
@@ -10,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 func TestRenderTelegramNotificationMessageUsesSummaryAndDetail(t *testing.T) {
@@ -132,14 +132,14 @@ func TestTelegramSenderValidatesInputs(t *testing.T) {
 
 func TestRenderTelegramNotificationMessageUsesSummaryOnly(t *testing.T) {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
-	event := notifycore.NotificationEvent{
+	event := notifycore.Event{
 		ID:        "notification-1",
 		ProjectID: "project-1",
-		Type:      notifycore.NotificationEventManualTest,
-		Severity:  notifycore.NotificationSeverityInfo,
-		Status:    notifycore.NotificationStatusPending,
-		Source:    notifycore.NotificationSourceManual,
-		Payload: notifycore.NotificationPayload{
+		Type:      notifycore.EventManualTest,
+		Severity:  notifycore.SeverityInfo,
+		Status:    notifycore.StatusPending,
+		Source:    notifycore.SourceManual,
+		Payload: notifycore.Payload{
 			Summary: "hello",
 		},
 		CreatedAt: now,

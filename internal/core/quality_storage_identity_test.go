@@ -109,11 +109,13 @@ func qualityNotificationIdentity(t *testing.T) {
 	input.Document.SourceHash = strings.Repeat("b", 64)
 
 	repository := qualityNotificationRepository(t, db)
-	if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
+	if err := repository.CreateTelegram(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}
 
-	delivery, frozen, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, input.Target)
+	lookup, err := repository.ReadTelegram(t.Context(), input.Record.Event.ID, input.Target)
+	delivery, frozen := lookup.Delivery, lookup.Frozen
+
 	if err != nil {
 		t.Fatal(err)
 	}

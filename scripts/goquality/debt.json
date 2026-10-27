@@ -343,8 +343,8 @@
     },
     {
       "id": "internal/app/telegram_notification_dispatch.go::sendTelegramNotificationWithFallback",
-      "signature": "func(ctx context.Context, repository notifycore.NotificationEventRepository, id string, project commandProjectContext, target notifycore.TelegramNotificationTarget, delivery notifycore.TelegramNotificationDelivery) (tgmessage.Acknowledgement, error)",
-      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
+      "signature": "func(ctx context.Context, repository notifycore.Repository, id string, project commandProjectContext, target notifycore.TelegramTarget, delivery notifycore.TelegramDelivery) (tgmessage.Acknowledgement, error)",
+      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger."
     },
     {
       "id": "internal/app/telegram_prepared_work_command.go::parseTelegramPreparedWork",
@@ -610,31 +610,6 @@
       "id": "internal/core/loop_report.go::loopReportExecutions",
       "signature": "func(records []ExecutionRecord) ([]LoopReportExecution, LoopReportExecutionSummary)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/notify/event_repository.go::NotificationEventRepository.ReadTelegramNotification",
-      "signature": "func(context.Context, string, TelegramNotificationTarget) (TelegramNotificationDelivery, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Mechanical Slice 6 notification move from internal/core/notification_event_repository.go; signature unchanged."
-    },
-    {
-      "id": "internal/core/notify/event_repository.go::NotificationEventRepository.FinishTelegramNotification",
-      "signature": "func(context.Context, string, TelegramNotificationTarget, tgmessage.Acknowledgement, string, bool, time.Time) error",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger. Mechanical Slice 6 notification move from internal/core/notification_event_repository.go; signature unchanged."
-    },
-    {
-      "id": "internal/core/notify/telegram_delivery.go::sqliteNotificationEventRepository.FinishTelegramNotification",
-      "signature": "func(ctx context.Context, id string, target TelegramNotificationTarget, ack tgmessage.Acknowledgement, code string, uncertain bool, now time.Time) error",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger. Mechanical Slice 6 notification move from internal/core/notification_telegram_delivery.go; signature unchanged."
-    },
-    {
-      "id": "internal/core/notify/telegram_read.go::sqliteNotificationEventRepository.ReadTelegramNotification",
-      "signature": "func(ctx context.Context, id string, target TelegramNotificationTarget) (TelegramNotificationDelivery, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Mechanical Slice 6 notification move from internal/core/notification_telegram_read.go; signature unchanged."
-    },
-    {
-      "id": "internal/core/notify/telegram_read.go::decodeTelegramNotificationManifest",
-      "signature": "func(m telegramNotificationManifest, target TelegramNotificationTarget) (tgmessage.Presentation, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 6 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 6 qualified-name transition; see slice-6-signatures ledger. Mechanical Slice 6 notification move from internal/core/notification_telegram_read.go; signature unchanged."
     },
     {
       "id": "internal/core/plan_delivery_resume.go::WorkflowStore.ResumePlanDelivery",

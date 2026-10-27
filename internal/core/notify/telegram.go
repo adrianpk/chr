@@ -9,9 +9,9 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-// TelegramNotificationTarget binds the existing configured sender, project root
+// TelegramTarget binds the existing configured sender, project root
 // and destination. ConfigDigest contains no credential values.
-type TelegramNotificationTarget struct {
+type TelegramTarget struct {
 	ProjectID            string
 	Namespace            string
 	ProjectBindingDigest string
@@ -19,28 +19,28 @@ type TelegramNotificationTarget struct {
 	ConfigDigest         string
 }
 
-// TelegramNotificationInput freezes one view and optional complete export in the
+// TelegramInput freezes one view and optional complete export in the
 // notification repository before its existing dispatch owner performs IO.
-type TelegramNotificationInput struct {
-	Record   NotificationAuditRecord
-	Target   TelegramNotificationTarget
+type TelegramInput struct {
+	Record   AuditRecord
+	Target   TelegramTarget
 	Message  tgmessage.Blocks
 	Document *tgmessage.Document
 }
 
-// TelegramNotificationDelivery is retained presentation and transport state,
+// TelegramDelivery is retained presentation and transport state,
 // independent of native work validation or integration receipts.
-type TelegramNotificationDelivery struct {
+type TelegramDelivery struct {
 	Presentation    tgmessage.Presentation
 	Document        *tgmessage.Document
 	Attempts        int
 	PlainFallback   bool
 	Uncertain       bool
 	Acknowledgement tgmessage.Acknowledgement
-	Status          NotificationStatus
+	Status          Status
 }
 
-func (r *sqliteNotificationEventRepository) notificationTransaction(ctx context.Context, action func(*sql.Tx) error) error {
+func (r *sqliteRepository) transaction(ctx context.Context, action func(*sql.Tx) error) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -53,6 +53,6 @@ func (r *sqliteNotificationEventRepository) notificationTransaction(ctx context.
 	return database.TransactionFailure(ctx, tx.Commit())
 }
 
-// ErrTelegramNotificationTargetUnavailable refuses changed or unavailable
+// ErrTelegramTargetUnavailable refuses changed or unavailable
 // sender, destination, namespace and project-root bindings before transmission.
-var ErrTelegramNotificationTargetUnavailable = errors.New("telegram notification target unavailable")
+var ErrTelegramTargetUnavailable = errors.New("telegram notification target unavailable")

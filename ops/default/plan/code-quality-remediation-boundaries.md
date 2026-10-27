@@ -260,3 +260,25 @@ factory. The retention fixture now triggers purge through real admission without
 adding a retained image; all original twenty/four/twenty-two/twenty-four image,
 receipt and hash assertions remain. Snapshot, changed-target, uncertainty, quota,
 retention, old-database, rollback and application notification checks pass.
+
+### Notification boundary delivered in T6.2
+
+core/notify owns events/configuration, audit persistence, frozen Telegram lookup,
+admission, conditional reserve/completion and bounded retained-document cleanup.
+The mechanical commit preserves all 76 complete declarations before name and
+signature changes. Direct callers use Repository, Event, Config and Telegram
+operation values; no root re-export or migration facade remains.
+
+TelegramLookup preserves delivery data and Frozen separately from errors, including
+SQL absence, untouched legacy rows, malformed manifests and partial read results.
+TelegramCompletion groups the event/target binding, transport acknowledgement,
+safe failure code/uncertainty and completion time; context stays an operation
+argument. Acknowledgement still clears failure/uncertainty, conditional updates
+keep their original guards, and completion cannot grant another dispatch attempt.
+Both locally owned interface signatures change with the implementation.
+
+Typed event/status/source/severity constants retain their stored spellings. Read
+row cleanup remains explicitly best effort after iteration errors are checked;
+transaction rollback/commit failures remain observable. Receiver HTTP sending and
+its storage keep their own owner, with notification validation over shared payload
+values. Core/notify imports no root core, adapter or workflow coordinator.

@@ -1,7 +1,5 @@
 package app
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"context"
 	"fmt"
@@ -14,6 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 var notifyTelegramSender = core.NewTelegramSender(http.DefaultClient)
@@ -228,7 +227,7 @@ func (factory commandFactory) runNotifyTelegramTest(ctx context.Context, cmd *cl
 		return err
 	}
 
-	err = notifycore.ValidateNotificationConfig(config.Notifications)
+	err = notifycore.ValidateConfig(config.Notifications)
 	if err != nil {
 		return err
 	}
@@ -267,7 +266,7 @@ func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, c
 	telegram := config.Notifications.Telegram
 	telegramStatus := "disabled"
 
-	err := notifycore.ValidateNotificationConfig(config.Notifications)
+	err := notifycore.ValidateConfig(config.Notifications)
 	if err != nil {
 		telegramStatus = "invalid"
 	} else if telegram.Enabled {
@@ -294,7 +293,7 @@ func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, c
 func printNotifyTelegramTestPlan(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	telegram notifycore.TelegramNotificationConfig,
+	telegram notifycore.TelegramConfig,
 ) error {
 	return printNotifyLines(stdout, []string{
 		"telegram_test: planned",
@@ -307,15 +306,15 @@ func printNotifyTelegramTestPlan(
 	})
 }
 
-func (factory commandFactory) runNotifyTelegramTestDispatch(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, telegram notifycore.TelegramNotificationConfig) error {
+func (factory commandFactory) runNotifyTelegramTestDispatch(ctx context.Context, env core.UserEnvironment, projectContext commandProjectContext, telegram notifycore.TelegramConfig) error {
 	now := time.Now().UTC()
 	event := notifyTelegramTestEvent(projectContext, now)
-	record := notifycore.NotificationAuditRecord{
+	record := notifycore.AuditRecord{
 		Event:   event,
 		Channel: "telegram",
 	}
 
-	repository, err := notifycore.NewNotificationEventRepository(ctx, env, factory.deps.assetsFS)
+	repository, err := notifycore.NewRepository(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -338,15 +337,15 @@ func (factory commandFactory) runNotifyTelegramTestDispatch(ctx context.Context,
 	return printNotifyTelegramTestSent(factory.io.Stdout, projectContext, record, result)
 }
 
-func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time) notifycore.NotificationEvent {
-	return notifycore.NotificationEvent{
+func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time) notifycore.Event {
+	return notifycore.Event{
 		ID:        fmt.Sprintf("telegram-test-%d", now.UnixNano()),
 		ProjectID: projectContext.ProjectID,
-		Type:      notifycore.NotificationEventManualTest,
-		Severity:  notifycore.NotificationSeverityInfo,
-		Status:    notifycore.NotificationStatusPending,
-		Source:    notifycore.NotificationSourceManual,
-		Payload: notifycore.NotificationPayload{
+		Type:      notifycore.EventManualTest,
+		Severity:  notifycore.SeverityInfo,
+		Status:    notifycore.StatusPending,
+		Source:    notifycore.SourceManual,
+		Payload: notifycore.Payload{
 			Summary: "chr Telegram notification test for " + projectContext.ProjectID,
 			Detail:  "Project directory: " + projectContext.ProjectDir,
 		},
@@ -358,7 +357,7 @@ func notifyTelegramTestEvent(projectContext commandProjectContext, now time.Time
 func printNotifyTelegramTestSent(
 	stdout io.Writer,
 	projectContext commandProjectContext,
-	record notifycore.NotificationAuditRecord,
+	record notifycore.AuditRecord,
 	result core.TelegramSendResult,
 ) error {
 	return printNotifyLines(stdout, []string{

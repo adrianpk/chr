@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"context"
 	"database/sql"
@@ -11,6 +9,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 func TestNotificationEventRepositoryCreatesGetsUpdatesAndListsEvents(t *testing.T) {
@@ -18,12 +18,12 @@ func TestNotificationEventRepositoryCreatesGetsUpdatesAndListsEvents(t *testing.
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
 	record := testNotificationAuditRecord(now)
 
-	err := repository.CreateNotificationEvent(context.Background(), record)
+	err := repository.Create(context.Background(), record)
 	if err != nil {
 		t.Fatalf("CreateNotificationEvent returned error: %v", err)
 	}
 
-	got, err := repository.GetNotificationEvent(context.Background(), record.Event.ID)
+	got, err := repository.Get(context.Background(), record.Event.ID)
 	if err != nil {
 		t.Fatalf("GetNotificationEvent returned error: %v", err)
 	}
@@ -31,24 +31,24 @@ func TestNotificationEventRepositoryCreatesGetsUpdatesAndListsEvents(t *testing.
 	assertNotificationAuditRecord(t, got, record)
 
 	deliveredAt := now.Add(time.Minute)
-	record.Event.Status = notifycore.NotificationStatusDelivered
+	record.Event.Status = notifycore.StatusDelivered
 	record.Event.DeliveredAt = &deliveredAt
 	record.Event.UpdatedAt = deliveredAt
 	record.Channel = "telegram"
 
-	err = repository.UpdateNotificationEvent(context.Background(), record)
+	err = repository.Update(context.Background(), record)
 	if err != nil {
 		t.Fatalf("UpdateNotificationEvent returned error: %v", err)
 	}
 
-	got, err = repository.GetNotificationEvent(context.Background(), record.Event.ID)
+	got, err = repository.Get(context.Background(), record.Event.ID)
 	if err != nil {
 		t.Fatalf("GetNotificationEvent after update returned error: %v", err)
 	}
 
 	assertNotificationAuditRecord(t, got, record)
 
-	records, err := repository.ListProjectNotificationEvents(context.Background(), record.Event.ProjectID)
+	records, err := repository.ListProject(context.Background(), record.Event.ProjectID)
 	if err != nil {
 		t.Fatalf("ListProjectNotificationEvents returned error: %v", err)
 	}
@@ -63,16 +63,16 @@ func TestNotificationEventRepositoryCreatesGetsUpdatesAndListsEvents(t *testing.
 func TestNotificationEventRepositoryReturnsNotFound(t *testing.T) {
 	repository := newTestNotificationEventRepository(t)
 
-	_, err := repository.GetNotificationEvent(context.Background(), "missing")
-	if !errors.Is(err, notifycore.ErrNotificationEventNotFound) {
+	_, err := repository.Get(context.Background(), "missing")
+	if !errors.Is(err, notifycore.ErrEventNotFound) {
 		t.Fatalf("GetNotificationEvent error = %v, want ErrNotificationEventNotFound", err)
 	}
 
-	err = repository.UpdateNotificationEvent(
+	err = repository.Update(
 		context.Background(),
 		testNotificationAuditRecord(time.Now().UTC()),
 	)
-	if !errors.Is(err, notifycore.ErrNotificationEventNotFound) {
+	if !errors.Is(err, notifycore.ErrEventNotFound) {
 		t.Fatalf("UpdateNotificationEvent error = %v, want ErrNotificationEventNotFound", err)
 	}
 }
@@ -82,7 +82,7 @@ func TestNotificationEventRepositoryRejectsInvalidRecords(t *testing.T) {
 	record := testNotificationAuditRecord(time.Now().UTC())
 	record.Event.Payload.Summary = ""
 
-	err := repository.CreateNotificationEvent(context.Background(), record)
+	err := repository.Create(context.Background(), record)
 	if err == nil || err.Error() != "notification summary is required" {
 		t.Fatalf("CreateNotificationEvent error = %v, want summary validation", err)
 	}
@@ -99,7 +99,7 @@ func TestNewNotificationEventRepositoryUsesUserEnvironmentDataDir(t *testing.T) 
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	repository, err := notifycore.NewNotificationEventRepository(context.Background(), env, testMigrationFS())
+	repository, err := notifycore.NewRepository(context.Background(), env, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewNotificationEventRepository returned error: %v", err)
 	}
@@ -114,7 +114,7 @@ func TestNewNotificationEventRepositoryUsesUserEnvironmentDataDir(t *testing.T) 
 	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
-func newTestNotificationEventRepository(t *testing.T) notifycore.NotificationEventRepository {
+func newTestNotificationEventRepository(t *testing.T) notifycore.Repository {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
@@ -124,7 +124,7 @@ func newTestNotificationEventRepository(t *testing.T) notifycore.NotificationEve
 
 	db.SetMaxOpenConns(1)
 
-	repository, err := notifycore.NewNotificationEventRepositoryFromDB(context.Background(), db, testMigrationFS())
+	repository, err := notifycore.NewRepositoryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		closeErr := db.Close()
 		if closeErr != nil {
@@ -144,20 +144,20 @@ func newTestNotificationEventRepository(t *testing.T) notifycore.NotificationEve
 	return repository
 }
 
-func testNotificationAuditRecord(now time.Time) notifycore.NotificationAuditRecord {
-	return notifycore.NotificationAuditRecord{
-		Event: notifycore.NotificationEvent{
+func testNotificationAuditRecord(now time.Time) notifycore.AuditRecord {
+	return notifycore.AuditRecord{
+		Event: notifycore.Event{
 			ID:        "notification-1",
 			ProjectID: "project-1",
-			Type:      notifycore.NotificationEventTicketBlocked,
-			Severity:  notifycore.NotificationSeverityWarning,
-			Status:    notifycore.NotificationStatusPending,
-			Source:    notifycore.NotificationSourceTicketExecution,
-			References: notifycore.NotificationReferences{
+			Type:      notifycore.EventTicketBlocked,
+			Severity:  notifycore.SeverityWarning,
+			Status:    notifycore.StatusPending,
+			Source:    notifycore.SourceTicketExecution,
+			References: notifycore.References{
 				TicketKey:   "CHR-1",
 				ExecutionID: "exec-1",
 			},
-			Payload: notifycore.NotificationPayload{
+			Payload: notifycore.Payload{
 				Summary: "Ticket CHR-1 is blocked",
 				Detail:  "Validation failed after repeated attempts.",
 			},
@@ -167,7 +167,7 @@ func testNotificationAuditRecord(now time.Time) notifycore.NotificationAuditReco
 	}
 }
 
-func assertNotificationAuditRecord(t *testing.T, got, want notifycore.NotificationAuditRecord) {
+func assertNotificationAuditRecord(t *testing.T, got, want notifycore.AuditRecord) {
 	t.Helper()
 
 	gotDeliveredAt := optionalTimeValue(got.Event.DeliveredAt)

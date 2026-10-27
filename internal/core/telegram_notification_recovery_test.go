@@ -1,7 +1,5 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"bytes"
 	"errors"
@@ -10,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
@@ -34,7 +33,7 @@ func TestTelegramPresentationFailureSharedQuota(t *testing.T) {
 	response.Document.SourceHash = contenthash.Sum(response.Document.Payload)
 
 	ready, results := make(chan struct{}), make(chan error, 2)
-	go func() { <-ready; results <- repository.CreateTelegramNotification(t.Context(), input) }()
+	go func() { <-ready; results <- repository.CreateTelegram(t.Context(), input) }()
 	go func() {
 		<-ready
 
@@ -96,11 +95,11 @@ func checkTelegramNotificationQuotaRollback(t *testing.T, repository *notificati
 	input := telegramNotificationTestInput(t)
 
 	input.Record.Event.ID = "rejected-notification"
-	if err := repository.CreateTelegramNotification(t.Context(), input); !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
+	if err := repository.CreateTelegram(t.Context(), input); !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		t.Fatal("full database admitted another export", err)
 	}
 
-	if _, err := repository.GetNotificationEvent(t.Context(), input.Record.Event.ID); !errors.Is(err, notifycore.ErrNotificationEventNotFound) {
+	if _, err := repository.Get(t.Context(), input.Record.Event.ID); !errors.Is(err, notifycore.ErrEventNotFound) {
 		t.Fatal("failed reservation kept its event", err)
 	}
 }
@@ -117,7 +116,7 @@ func TestTelegramPresentationNotificationRetention(t *testing.T) {
 		input.Record.Event.ID = fmt.Sprintf("retained-%02d", index)
 
 		input.Record.Event.CreatedAt, input.Record.Event.UpdatedAt = old, old
-		if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
+		if err := repository.CreateTelegram(t.Context(), input); err != nil {
 			t.Fatal(err)
 		}
 
@@ -130,21 +129,21 @@ func TestTelegramPresentationNotificationRetention(t *testing.T) {
 	input.Record.Event.CreatedAt, input.Record.Event.UpdatedAt = now, now
 
 	input.Document = nil
-	if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
+	if err := repository.CreateTelegram(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}
 
 	checkTelegramNotificationRetention(t, repository, originalHash)
 }
 
-func finishTelegramNotificationRetention(t *testing.T, repository notifycore.NotificationEventRepository, input notifycore.TelegramNotificationInput, index int, old, now time.Time) {
+func finishTelegramNotificationRetention(t *testing.T, repository notifycore.Repository, input notifycore.TelegramInput, index int, old, now time.Time) {
 	t.Helper()
 
 	if index == 22 {
 		return
 	} // Unresolved original dispatch.
 
-	if reserved, err := repository.ReserveTelegramNotification(t.Context(), input.Record.Event.ID, input.Target, false); err != nil || !reserved {
+	if reserved, err := repository.ReserveTelegram(t.Context(), input.Record.Event.ID, input.Target, false); err != nil || !reserved {
 		t.Fatal(reserved, err)
 	}
 
@@ -157,7 +156,7 @@ func finishTelegramNotificationRetention(t *testing.T, repository notifycore.Not
 		old = now
 	}
 
-	if err := repository.FinishTelegramNotification(t.Context(), input.Record.Event.ID, input.Target, ack, code, uncertain, old); err != nil {
+	if err := repository.FinishTelegram(t.Context(), notifycore.TelegramCompletion{ID: input.Record.Event.ID, Target: input.Target, Acknowledgement: ack, Failure: notifycore.DeliveryFailure{Code: code, Uncertain: uncertain}, At: old}); err != nil {
 		t.Fatal(err)
 	}
 }

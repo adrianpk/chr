@@ -1,13 +1,13 @@
 package core
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"database/sql"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
+
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 func qualityStorageNow() time.Time { return time.Date(2026, 10, 26, 11, 12, 13, 0, time.UTC) }
@@ -22,7 +22,7 @@ func qualityReceiverInput(t *testing.T) TelegramReceivedUpdate {
 	return update
 }
 
-func qualityNotificationInput(t *testing.T, db *sql.DB) notifycore.TelegramNotificationInput {
+func qualityNotificationInput(t *testing.T, db *sql.DB) notifycore.TelegramInput {
 	t.Helper()
 
 	input := telegramNotificationTestInput(t)
@@ -73,7 +73,7 @@ func TestQualityStorageTelegram(t *testing.T) {
 		qualityStorageExec(t, db, "DELETE FROM telegram_notification_documents")
 		qualityStorageExec(t, db, "DELETE FROM notification_events")
 
-		if err := qualityNotificationRepository(t, db).CreateTelegramNotification(t.Context(), input); err != nil {
+		if err := qualityNotificationRepository(t, db).CreateTelegram(t.Context(), input); err != nil {
 			t.Fatal(err)
 		}
 
@@ -136,7 +136,7 @@ func qualityNotificationFault(t *testing.T, db *sql.DB) func() error {
 	qualityStorageExec(t, db, `CREATE TEMP TRIGGER quality_abort BEFORE UPDATE OF telegram_presentation ON notification_events BEGIN SELECT RAISE(ABORT,'injected notification bind failure'); END`)
 
 	return func() error {
-		return qualityNotificationRepository(t, db).CreateTelegramNotification(t.Context(), input)
+		return qualityNotificationRepository(t, db).CreateTelegram(t.Context(), input)
 	}
 }
 

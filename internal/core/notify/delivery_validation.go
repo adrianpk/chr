@@ -7,14 +7,14 @@ import (
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
-// ValidateTelegramNotificationDelivery validates a frozen notification view and attachment.
-func ValidateTelegramNotificationDelivery(delivery TelegramNotificationDelivery) error {
+// ValidateTelegramDelivery validates a frozen notification view and attachment.
+func ValidateTelegramDelivery(delivery TelegramDelivery) error {
 	p := delivery.Presentation
 	if p.PlainFallback == "" || len(p.InitialText)+len(p.Content)+len(p.SecondaryText)+len(p.PlainFallback) > 64<<10 || len(p.Entities) > 32 {
 		return tgmessage.ErrDocumentUnavailable
 	}
 
-	if err := validateTelegramNotificationActions(p); err != nil {
+	if err := validateTelegramActions(p); err != nil {
 		return err
 	}
 
@@ -27,10 +27,10 @@ func ValidateTelegramNotificationDelivery(delivery TelegramNotificationDelivery)
 		return err
 	}
 
-	return validateTelegramNotificationAttachment(p, delivery.Document)
+	return validateTelegramAttachment(p, delivery.Document)
 }
 
-func validateTelegramNotificationAttachment(p tgmessage.Presentation, document *tgmessage.Document) error {
+func validateTelegramAttachment(p tgmessage.Presentation, document *tgmessage.Document) error {
 	if document == nil {
 		if p.DocumentID != "" || p.DocumentHash != "" {
 			return tgmessage.ErrDocumentUnavailable

@@ -6,19 +6,19 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// notificationEventRow keeps event conversions aligned with the retained audit columns.
-type notificationEventRow struct {
-	record                              NotificationAuditRecord
+// eventRow keeps event conversions aligned with the retained audit columns.
+type eventRow struct {
+	record                              AuditRecord
 	eventType, severity, status, source string
 	createdAt, updatedAt                string
 	deliveredAt                         sql.NullString
 }
 
-const notificationEventColumns = `id, project_id, type, severity, status, source, channel, ticket_key,
+const eventColumns = `id, project_id, type, severity, status, source, channel, ticket_key,
     execution_id, loop_run_id, daemon_pid, summary, detail, failure_reason,
     created_at, delivered_at, updated_at`
 
-func (row notificationEventRow) values() []any {
+func (row eventRow) values() []any {
 	record := row.record
 	event := record.Event
 
@@ -38,12 +38,12 @@ func (row notificationEventRow) values() []any {
 		event.Payload.Detail,
 		event.FailureReason,
 		database.FormatTime(event.CreatedAt),
-		formatOptionalNotificationTime(event.DeliveredAt),
+		formatOptionalTime(event.DeliveredAt),
 		database.FormatTime(event.UpdatedAt),
 	}
 }
 
-func (row *notificationEventRow) scanTargets() []any {
+func (row *eventRow) scanTargets() []any {
 	record := &row.record
 
 	return []any{
@@ -67,10 +67,10 @@ func (row *notificationEventRow) scanTargets() []any {
 	}
 }
 
-func insertNotificationEventSQL() string {
-	return `INSERT INTO notification_events (` + notificationEventColumns + `) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+func insertEventSQL() string {
+	return `INSERT INTO notification_events (` + eventColumns + `) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 }
 
-func selectNotificationEventSQL() string {
-	return `SELECT ` + notificationEventColumns + ` FROM notification_events`
+func selectEventSQL() string {
+	return `SELECT ` + eventColumns + ` FROM notification_events`
 }

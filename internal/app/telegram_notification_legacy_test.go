@@ -25,7 +25,7 @@ func checkTelegramLegacyNotificationDispatch(t *testing.T, manifest string) {
 	repository, input, project, env := newTelegramNotificationAppInput(t)
 
 	input.Record.Event.Payload.Detail = "Original legacy detail"
-	if err := repository.CreateNotificationEvent(t.Context(), input.Record); err != nil {
+	if err := repository.Create(t.Context(), input.Record); err != nil {
 		t.Fatal(err)
 	}
 

@@ -3,16 +3,15 @@ package notify
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ReserveTelegramNotification permits one original dispatch and at most one
+// ReserveTelegram permits one original dispatch and at most one
 // definite-format fallback. Reopen or uncertainty never grants a fresh attempt.
-func (r *sqliteNotificationEventRepository) ReserveTelegramNotification(ctx context.Context, id string, target TelegramNotificationTarget, plain bool) (bool, error) {
+func (r *sqliteRepository) ReserveTelegram(ctx context.Context, id string, target TelegramTarget, plain bool) (bool, error) {
 	expected := 0
 	if plain {
 		expected = 1
@@ -28,28 +27,28 @@ func (r *sqliteNotificationEventRepository) ReserveTelegramNotification(ctx cont
 	return count == 1, err
 }
 
-// FinishTelegramNotification saves only transport evidence for the original
+// FinishTelegram saves only transport evidence for the original
 // claimed event; it cannot publish work or create a native delivery receipt.
-func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx context.Context, id string, target TelegramNotificationTarget, ack tgmessage.Acknowledgement, code string, uncertain bool, now time.Time) error {
-	status := NotificationStatusFailed
+func (r *sqliteRepository) FinishTelegram(ctx context.Context, completion TelegramCompletion) error {
+	status := StatusFailed
 	minimumAttempts := 0
 
 	var delivered any
 
-	if ack.MessageID > 0 {
+	if completion.Acknowledgement.MessageID > 0 {
 		minimumAttempts = 1
-		status = NotificationStatusDelivered
-		delivered = database.FormatTime(now)
-		uncertain = false
-		code = ""
+		status = StatusDelivered
+		delivered = database.FormatTime(completion.At)
+		completion.Failure.Uncertain = false
+		completion.Failure.Code = ""
 	}
 
-	if len(code) > 128 {
+	if len(completion.Failure.Code) > 128 {
 		return tgmessage.ErrDocumentUnavailable
 	}
 
-	return r.notificationTransaction(ctx, func(tx *sql.Tx) error {
-		result, err := tx.ExecContext(ctx, `UPDATE notification_events SET status=?,failure_reason=?,delivered_at=?,updated_at=?,telegram_message_id=NULLIF(?,0),telegram_file_id=NULLIF(?,''),telegram_uncertain=? WHERE id=? AND project_id=? AND telegram_destination=? AND telegram_config_digest=? AND telegram_namespace=? AND telegram_project_binding_digest=? AND status='pending' AND telegram_attempts>=?`, string(status), code, delivered, database.FormatTime(now), ack.MessageID, ack.FileID, uncertain, id, target.ProjectID, target.Destination, target.ConfigDigest, target.Namespace, target.ProjectBindingDigest, minimumAttempts)
+	return r.transaction(ctx, func(tx *sql.Tx) error {
+		result, err := tx.ExecContext(ctx, `UPDATE notification_events SET status=?,failure_reason=?,delivered_at=?,updated_at=?,telegram_message_id=NULLIF(?,0),telegram_file_id=NULLIF(?,''),telegram_uncertain=? WHERE id=? AND project_id=? AND telegram_destination=? AND telegram_config_digest=? AND telegram_namespace=? AND telegram_project_binding_digest=? AND status='pending' AND telegram_attempts>=?`, string(status), completion.Failure.Code, delivered, database.FormatTime(completion.At), completion.Acknowledgement.MessageID, completion.Acknowledgement.FileID, completion.Failure.Uncertain, completion.ID, completion.Target.ProjectID, completion.Target.Destination, completion.Target.ConfigDigest, completion.Target.Namespace, completion.Target.ProjectBindingDigest, minimumAttempts)
 		if err != nil {
 			return err
 		}
@@ -63,11 +62,11 @@ func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx conte
 			return workflowstate.ErrConflict
 		}
 
-		if uncertain {
+		if completion.Failure.Uncertain {
 			return nil
 		}
 
-		_, err = tx.ExecContext(ctx, "UPDATE telegram_notification_documents SET terminal_at=COALESCE(terminal_at,?) WHERE owner_id=?", database.FormatTime(now), id)
+		_, err = tx.ExecContext(ctx, "UPDATE telegram_notification_documents SET terminal_at=COALESCE(terminal_at,?) WHERE owner_id=?", database.FormatTime(completion.At), completion.ID)
 
 		return err
 	})

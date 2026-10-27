@@ -1,7 +1,5 @@
 package app
 
-import notifycore "forge.adrianpk.com/chr/internal/core/notify"
-
 import (
 	"bytes"
 	"encoding/json"
@@ -15,6 +13,7 @@ import (
 	"unicode/utf16"
 
 	"forge.adrianpk.com/chr/internal/core"
+	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 )
 
 type telegramNotificationCapture struct {
@@ -74,7 +73,7 @@ func (c *telegramNotificationCapture) receive(t *testing.T) http.HandlerFunc {
 	}
 }
 
-func newTelegramNotificationAppInput(t *testing.T) (notifycore.NotificationEventRepository, notifycore.TelegramNotificationInput, commandProjectContext, core.UserEnvironment) {
+func newTelegramNotificationAppInput(t *testing.T) (notifycore.Repository, notifycore.TelegramInput, commandProjectContext, core.UserEnvironment) {
 	t.Helper()
 
 	dir := newTestWorkspace(t)
@@ -86,7 +85,7 @@ func newTelegramNotificationAppInput(t *testing.T) (notifycore.NotificationEvent
 		t.Fatal(err)
 	}
 
-	repository, err := notifycore.NewNotificationEventRepository(t.Context(), env, testAssetsFS())
+	repository, err := notifycore.NewRepository(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,7 +98,7 @@ func newTelegramNotificationAppInput(t *testing.T) (notifycore.NotificationEvent
 
 	project := commandProjectContext{ProjectID: projectID(dir), ProjectDir: dir, ProjectName: "Example project"}
 	now := time.Now().UTC()
-	record := notifycore.NotificationAuditRecord{Channel: "telegram", Event: notifycore.NotificationEvent{ID: "notice-original", ProjectID: project.ProjectID, Type: notifycore.NotificationEventLoopFinished, Severity: notifycore.NotificationSeverityInfo, Status: notifycore.NotificationStatusPending, Source: notifycore.NotificationSourceTicketLoop, References: notifycore.NotificationReferences{LoopRunID: "loop-original"}, Payload: notifycore.NotificationPayload{Summary: "Ticket loop finished", Detail: "Processed: 1; blocked: 0; failed: 0.\nWorker-reported summary: " + strings.Repeat("literal `_*` 😀\n", 500)}, CreatedAt: now, UpdatedAt: now}}
+	record := notifycore.AuditRecord{Channel: "telegram", Event: notifycore.Event{ID: "notice-original", ProjectID: project.ProjectID, Type: notifycore.EventLoopFinished, Severity: notifycore.SeverityInfo, Status: notifycore.StatusPending, Source: notifycore.SourceTicketLoop, References: notifycore.References{LoopRunID: "loop-original"}, Payload: notifycore.Payload{Summary: "Ticket loop finished", Detail: "Processed: 1; blocked: 0; failed: 0.\nWorker-reported summary: " + strings.Repeat("literal `_*` 😀\n", 500)}, CreatedAt: now, UpdatedAt: now}}
 
 	config, err := core.LoadWorkspaceConfig(dir)
 	if err != nil {
@@ -130,7 +129,7 @@ func TestTelegramPresentationNotificationDispatch(t *testing.T) {
 	t.Cleanup(func() { notifyTelegramSender = previous })
 
 	original := bytes.Clone(input.Document.Payload)
-	if err := repository.CreateTelegramNotification(t.Context(), input); err != nil {
+	if err := repository.CreateTelegram(t.Context(), input); err != nil {
 		t.Fatal(err)
 	}
 
@@ -141,8 +140,10 @@ func TestTelegramPresentationNotificationDispatch(t *testing.T) {
 
 	checkTelegramNotificationCapture(t, capture, original)
 
-	saved, found, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, input.Target)
-	if err != nil || !found || saved.Attempts != 2 || !saved.PlainFallback || saved.Acknowledgement.FileID != "saved-export" || saved.Status != notifycore.NotificationStatusDelivered {
+	lookup, err := repository.ReadTelegram(t.Context(), input.Record.Event.ID, input.Target)
+
+	saved, found := lookup.Delivery, lookup.Frozen
+	if err != nil || !found || saved.Attempts != 2 || !saved.PlainFallback || saved.Acknowledgement.FileID != "saved-export" || saved.Status != notifycore.StatusDelivered {
 		t.Fatal("notification lost its own acknowledgement", saved, err)
 	}
 }
