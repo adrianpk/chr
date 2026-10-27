@@ -25,41 +25,47 @@ func telegramExplanationUsage() string {
 	return "/" + telegramExplanationRegistry()[0].ID + " [--project <id>|--conversation <id>] <question>"
 }
 
-func parseTelegramExplanation(update telegramcore.ReceivedUpdate) (telegramExplanationCommand, bool, error) {
+func parseTelegramExplanation(update telegramcore.ReceivedUpdate) (telegramExplanationParsing, error) {
 	command := telegramExplanationCommand{Input: telegramcore.ConversationInput{Update: update}}
 
-	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
+	word := telegramCommandWord(strings.TrimSpace(update.Text))
+
+	name, body := word.Command, word.Body
 	if update.Kind != "message" || name != "/"+telegramExplanationRegistry()[0].ID {
-		return command, false, nil
+		return telegramExplanationParsing{Command: command, Recognized: false}, nil
 	}
 
-	flag, rest := telegramCommandWord(body)
+	word2 := telegramCommandWord(body)
+
+	flag, rest := word2.Command, word2.Body
 	switch flag {
 	case "--project":
-		command.Input.Project, body = telegramCommandWord(rest)
+		word3 := telegramCommandWord(rest)
+		command.Input.Project, body = word3.Command, word3.Body
 	case "--conversation":
-		command.Input.Conversation, body = telegramCommandWord(rest)
+		word4 := telegramCommandWord(rest)
+		command.Input.Conversation, body = word4.Command, word4.Body
 	}
 
 	command.Question = body
 	if strings.TrimSpace(body) == "" || len(body) > 16384 || (strings.HasPrefix(flag, "--") && flag != "--project" && flag != "--conversation") {
-		return command, true, ErrRecordUnsupported
+		return telegramExplanationParsing{Command: command, Recognized: true}, ErrRecordUnsupported
 	}
 
-	return command, true, nil
+	return telegramExplanationParsing{Command: command, Recognized: true}, nil
 }
 
-func telegramIntentExplanation(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramExplanationCommand, bool, error) {
+func telegramIntentExplanation(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramExplanationParsing, error) {
 	a := intent.Arguments
 
 	command := telegramExplanationCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: core.AuthoringArtifactKind(a.Action)}
 	if intent.OperationID != telegramExplanationRegistry()[0].ID {
-		return command, false, nil
+		return telegramExplanationParsing{Command: command, Recognized: false}, nil
 	}
 
 	if a.Text != update.Text || a.Namespace != "" || a.RecordJSON != "" || len(a.Text) > 16384 || (a.Action != "" && !validAuthoringDocumentKind(command.DocumentKind)) {
-		return command, true, ErrRecordUnsupported
+		return telegramExplanationParsing{Command: command, Recognized: true}, ErrRecordUnsupported
 	}
 
-	return command, true, nil
+	return telegramExplanationParsing{Command: command, Recognized: true}, nil
 }

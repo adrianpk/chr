@@ -27,13 +27,15 @@ func telegramRecordUsage(command telegramRecordDescriptor) string {
 	return command.Name + " [--project <id>] [--conversation <id>] [--namespace <name>] list|show|create|update <json>"
 }
 
-func parseTelegramRecord(update telegramcore.ReceivedUpdate) (telegramRecordCommand, bool, error) {
+func parseTelegramRecord(update telegramcore.ReceivedUpdate) (telegramRecordParsing, error) {
 	command := telegramRecordCommand{Input: telegramcore.ConversationInput{Update: update}}
 	if update.Kind != "message" {
-		return command, false, nil
+		return telegramRecordParsing{Command: command, Recognized: false}, nil
 	}
 
-	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
+	word := telegramCommandWord(strings.TrimSpace(update.Text))
+
+	name, body := word.Command, word.Body
 	for _, descriptor := range telegramRecordRegistry() {
 		if name == descriptor.Name {
 			command.Kind = descriptor.Kind
@@ -43,31 +45,36 @@ func parseTelegramRecord(update telegramcore.ReceivedUpdate) (telegramRecordComm
 	}
 
 	if command.Kind == "" {
-		return command, false, nil
+		return telegramRecordParsing{Command: command, Recognized: false}, nil
 	}
 
 	body, err := parseTelegramRecordScope(&command.Input, body)
 	if err != nil {
-		return command, true, err
+		return telegramRecordParsing{Command: command, Recognized: true}, err
 	}
 
-	command.Action, body = telegramCommandWord(body)
+	word2 := telegramCommandWord(body)
+
+	command.Action, body = word2.Command, word2.Body
 	if command.Action == "" {
 		command.Action = "list"
 	}
 
 	err = decodeTelegramRecord(&command, body)
 
-	return command, true, err
+	return telegramRecordParsing{Command: command, Recognized: true}, err
 }
 
 func parseTelegramRecordScope(input *telegramcore.ConversationInput, body string) (string, error) {
 	seen := map[string]bool{}
 
 	for strings.HasPrefix(body, "--") {
-		name, rest := telegramCommandWord(body)
+		word3 := telegramCommandWord(body)
+		name, rest := word3.Command, word3.Body
 
-		value, next := telegramCommandWord(rest)
+		word4 := telegramCommandWord(rest)
+
+		value, next := word4.Command, word4.Body
 		if value == "" || strings.HasPrefix(value, "--") || seen[name] {
 			return "", ErrRecordUnsupported
 		}

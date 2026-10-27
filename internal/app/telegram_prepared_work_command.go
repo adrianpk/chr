@@ -18,33 +18,35 @@ func telegramPreparedWorkUsage() string {
 	return "/" + telegramPreparedWorkRegistry()[0].ID + " [conversation]"
 }
 
-func parseTelegramPreparedWork(update telegramcore.ReceivedUpdate) (telegramcore.ConversationInput, bool, error) {
+func parseTelegramPreparedWork(update telegramcore.ReceivedUpdate) (telegramInputParsing, error) {
 	input := telegramcore.ConversationInput{Update: update}
 
-	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
+	word := telegramCommandWord(strings.TrimSpace(update.Text))
+
+	name, body := word.Command, word.Body
 	if update.Kind != "message" || name != "/"+telegramPreparedWorkRegistry()[0].ID {
-		return input, false, nil
+		return telegramInputParsing{Input: input, Recognized: false}, nil
 	}
 
 	input.Conversation = body
 	if len(strings.Fields(body)) > 1 || len(body) > 128 {
-		return input, true, ErrRecordUnsupported
+		return telegramInputParsing{Input: input, Recognized: true}, ErrRecordUnsupported
 	}
 
-	return input, true, nil
+	return telegramInputParsing{Input: input, Recognized: true}, nil
 }
 
-func telegramIntentPreparedWork(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramcore.ConversationInput, bool, error) {
+func telegramIntentPreparedWork(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramInputParsing, error) {
 	a := intent.Arguments
 
 	input := telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}
 	if intent.OperationID != telegramPreparedWorkRegistry()[0].ID {
-		return input, false, nil
+		return telegramInputParsing{Input: input, Recognized: false}, nil
 	}
 
 	if a.Text != "" || a.Action != "" || a.Namespace != "" || a.RecordJSON != "" {
-		return input, true, ErrRecordUnsupported
+		return telegramInputParsing{Input: input, Recognized: true}, ErrRecordUnsupported
 	}
 
-	return input, true, nil
+	return telegramInputParsing{Input: input, Recognized: true}, nil
 }

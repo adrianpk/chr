@@ -61,7 +61,9 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request te
 }
 
 func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request telegramcore.OperationRequest, observed GuidedUseCaseInspection, current telegramcore.ReceiverConfig, kind string) error {
-	progress, facts, err := telegramGuidedResult(observed)
+	guidedOutcome, err := telegramGuidedResult(observed)
+	progress, facts := guidedOutcome.Progress, guidedOutcome.Facts
+
 	if err != nil {
 		return err
 	}
@@ -86,16 +88,16 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request tele
 	return err
 }
 
-func telegramGuidedResult(observed GuidedUseCaseInspection) (telegramcore.GuidedProgress, json.RawMessage, error) {
+func telegramGuidedResult(observed GuidedUseCaseInspection) (telegramGuidedOutcome, error) {
 	progress, err := telegramGuidedProgress(observed)
 	if err != nil {
-		return progress, nil, err
+		return telegramGuidedOutcome{Progress: progress, Facts: nil}, err
 	}
 
 	session := observed.Session
 	facts, err := json.Marshal(map[string]any{"session": session.ID, "revision": session.Revision, "stage": session.Guided.Stage})
 
-	return progress, facts, err
+	return telegramGuidedOutcome{Progress: progress, Facts: facts}, err
 }
 
 func (r telegramReceiver) finishGuidedFailure(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig, failure error) error {

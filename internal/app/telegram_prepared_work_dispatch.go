@@ -22,7 +22,9 @@ func (r telegramReceiver) respondPreparedWork(ctx context.Context, user telegram
 		return true, r.continuePreparedWork(ctx, retained, config)
 	}
 
-	input, recognized, err := parseTelegramPreparedWork(update)
+	parsedInput, err := parseTelegramPreparedWork(update)
+
+	input, recognized := parsedInput.Input, parsedInput.Recognized
 	if !recognized {
 		return false, nil
 	}

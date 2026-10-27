@@ -43,17 +43,17 @@ func telegramIntentRegistry() []ConversationIntentOperation {
 	return result
 }
 
-func telegramIntentConversation(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramcore.ConversationInput, bool, error) {
+func telegramIntentConversation(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramInputParsing, error) {
 	a := intent.Arguments
 
 	input := telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace, Text: a.Text}
 	if intent.OperationID == "capture" {
 		input.Action = telegramcore.ConversationCapture
 		if !validTelegramIntentCapture(a, update.Text) {
-			return input, true, ErrRecordUnsupported
+			return telegramInputParsing{Input: input, Recognized: true}, ErrRecordUnsupported
 		}
 
-		return input, true, nil
+		return telegramInputParsing{Input: input, Recognized: true}, nil
 	}
 
 	for _, command := range telegramConversationRegistry() {
@@ -63,13 +63,13 @@ func telegramIntentConversation(update telegramcore.ReceivedUpdate, intent Conve
 
 		input.Action, input.Intent = command.Action, command.Intent
 		if a.Action != "" || a.RecordJSON != "" || a.Namespace != "" {
-			return input, true, ErrRecordUnsupported
+			return telegramInputParsing{Input: input, Recognized: true}, ErrRecordUnsupported
 		}
 
-		return input, true, validateTelegramIntentConversation(input)
+		return telegramInputParsing{Input: input, Recognized: true}, validateTelegramIntentConversation(input)
 	}
 
-	return input, false, nil
+	return telegramInputParsing{Input: input, Recognized: false}, nil
 }
 
 func validateTelegramIntentConversation(input telegramcore.ConversationInput) error {
@@ -116,7 +116,7 @@ func validTelegramIntentControl(input telegramcore.ConversationInput) bool {
 	}
 }
 
-func telegramIntentRecord(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramRecordCommand, bool, error) {
+func telegramIntentRecord(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramRecordParsing, error) {
 	a := intent.Arguments
 	command := telegramRecordCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action}
 
@@ -127,11 +127,11 @@ func telegramIntentRecord(update telegramcore.ReceivedUpdate, intent Conversatio
 
 		command.Kind = descriptor.Kind
 		if a.Text != "" {
-			return command, true, errors.New("unexpected record text")
+			return telegramRecordParsing{Command: command, Recognized: true}, errors.New("unexpected record text")
 		}
 
-		return command, true, decodeTelegramRecord(&command, a.RecordJSON)
+		return telegramRecordParsing{Command: command, Recognized: true}, decodeTelegramRecord(&command, a.RecordJSON)
 	}
 
-	return command, false, nil
+	return telegramRecordParsing{Command: command, Recognized: false}, nil
 }

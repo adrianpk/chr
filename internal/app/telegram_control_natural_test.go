@@ -23,14 +23,16 @@ func TestTelegramControlPayload(t *testing.T) {
 		{"unknown answer", "/answer-decision run question approve 1 Preserve intent", false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, recognized, err := parseTelegramControl(telegramcore.ReceivedUpdate{Kind: "message", Text: test.command})
+			parsedControl, err := parseTelegramControl(telegramcore.ReceivedUpdate{Kind: "message", Text: test.command})
+
+			recognized := parsedControl.Recognized
 			if !recognized || (err == nil) != test.valid {
 				t.Fatal("unexpected bounded control parse", recognized, err)
 			}
 		})
 	}
 
-	_, _, err := telegramIntentControl(telegramcore.ReceivedUpdate{}, ConversationIntent{OperationID: "control", Arguments: ConversationIntentArguments{Action: "grant", Text: "run", RecordJSON: `{"kind":"submission","amount":1,"reason":"More capacity","actor":"model-chosen"}`}})
+	_, err := telegramIntentControl(telegramcore.ReceivedUpdate{}, ConversationIntent{OperationID: "control", Arguments: ConversationIntentArguments{Action: "grant", Text: "run", RecordJSON: `{"kind":"submission","amount":1,"reason":"More capacity","actor":"model-chosen"}`}})
 	if err == nil {
 		t.Fatal("model supplied mutation authority")
 	}

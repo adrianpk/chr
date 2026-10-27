@@ -47,7 +47,9 @@ func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim telegramc
 		return ErrRecordUnsupported
 	}
 
-	input, current, err := r.prepareGuidedAction(ctx, claim)
+	preparedGuided, err := r.prepareGuidedAction(ctx, claim)
+	input, current := preparedGuided.Input, preparedGuided.Config
+
 	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishGuidedActionFailure(ctx, claim, config, err)
 	}
@@ -78,7 +80,9 @@ func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim telegramc
 }
 
 func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, observed GuidedUseCaseInspection) error {
-	progress, facts, err := telegramGuidedResult(observed)
+	guidedOutcome, err := telegramGuidedResult(observed)
+	progress, facts := guidedOutcome.Progress, guidedOutcome.Facts
+
 	if err != nil {
 		return err
 	}
@@ -106,28 +110,28 @@ func (r telegramReceiver) finishGuidedActionFailure(ctx context.Context, claim t
 	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{State: "blocked", Facts: []byte(`{"state":"blocked"}`), Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
 }
 
-func (r telegramReceiver) prepareGuidedAction(ctx context.Context, claim telegramcore.ActionClaim) (telegramGuidedInput, telegramcore.ReceiverConfig, error) {
+func (r telegramReceiver) prepareGuidedAction(ctx context.Context, claim telegramcore.ActionClaim) (telegramGuidedPreparation, error) {
 	var input telegramGuidedInput
 
 	current, err := r.validateAuthoringAuthority(ctx, claim.Request, claim.Request.State == "applying")
 	if err != nil {
-		return input, current, err
+		return telegramGuidedPreparation{Input: input, Config: current}, err
 	}
 
 	input, err = telegramRetainedGuidedInput(claim.Request)
 	if err != nil {
-		return input, current, err
+		return telegramGuidedPreparation{Input: input, Config: current}, err
 	}
 
 	if !input.Offer || !slices.Contains(input.Choices, claim.Choice) || input.Command.Action != "" {
-		return input, current, workflowstate.ErrConflict
+		return telegramGuidedPreparation{Input: input, Config: current}, workflowstate.ErrConflict
 	}
 
 	if err := r.validateGuidedRunBinding(ctx, claim.Request, current, input.Command.RunID); err != nil {
-		return input, current, err
+		return telegramGuidedPreparation{Input: input, Config: current}, err
 	}
 
 	err = r.store.BeginOperation(ctx, claim.Request, time.Now())
 
-	return input, current, err
+	return telegramGuidedPreparation{Input: input, Config: current}, err
 }

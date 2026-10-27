@@ -192,7 +192,9 @@ func TestTelegramWorkCommandBounds(t *testing.T) {
 		{"/work all", false},
 	} {
 		t.Run(test.text, func(t *testing.T) {
-			_, recognized, err := parseTelegramWork(telegramcore.ReceivedUpdate{Kind: "message", Text: test.text})
+			parsedWork, err := parseTelegramWork(telegramcore.ReceivedUpdate{Kind: "message", Text: test.text})
+
+			recognized := parsedWork.Recognized
 			if !recognized || (err == nil) != test.valid {
 				t.Fatal("unexpected command validation", recognized, err)
 			}

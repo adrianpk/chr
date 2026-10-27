@@ -29,13 +29,15 @@ func telegramAuthoringRegistry() []telegramAuthoringDescriptor {
 	}
 }
 
-func parseTelegramAuthoring(update telegramcore.ReceivedUpdate) (telegramAuthoringCommand, bool, error) {
+func parseTelegramAuthoring(update telegramcore.ReceivedUpdate) (telegramAuthoringParsing, error) {
 	command := telegramAuthoringCommand{Input: telegramcore.ConversationInput{Update: update}}
 	if update.Kind != "message" {
-		return command, false, nil
+		return telegramAuthoringParsing{Command: command, Recognized: false}, nil
 	}
 
-	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
+	word := telegramCommandWord(strings.TrimSpace(update.Text))
+
+	name, body := word.Command, word.Body
 	for _, descriptor := range telegramAuthoringRegistry() {
 		if name != descriptor.Name {
 			continue
@@ -43,17 +45,19 @@ func parseTelegramAuthoring(update telegramcore.ReceivedUpdate) (telegramAuthori
 
 		command.Action, command.Target = descriptor.Action, descriptor.Target
 		if descriptor.Action == core.AuthoringContinuationRefine {
-			kind, rest := telegramCommandWord(body)
+			word2 := telegramCommandWord(body)
+			kind, rest := word2.Command, word2.Body
 			command.Target = core.AuthoringArtifactKind(kind)
-			command.Input.Conversation, command.Instructions = telegramCommandWord(rest)
+			word3 := telegramCommandWord(rest)
+			command.Input.Conversation, command.Instructions = word3.Command, word3.Body
 		} else {
 			command.Input.Conversation = body
 		}
 
-		return command, true, validateTelegramAuthoringCommand(command)
+		return telegramAuthoringParsing{Command: command, Recognized: true}, validateTelegramAuthoringCommand(command)
 	}
 
-	return command, false, nil
+	return telegramAuthoringParsing{Command: command, Recognized: false}, nil
 }
 
 func validateTelegramAuthoringCommand(command telegramAuthoringCommand) error {
@@ -74,7 +78,7 @@ func validateTelegramAuthoringCommand(command telegramAuthoringCommand) error {
 	return nil
 }
 
-func telegramIntentAuthoring(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramAuthoringCommand, bool, error) {
+func telegramIntentAuthoring(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramAuthoringParsing, error) {
 	a := intent.Arguments
 	command := telegramAuthoringCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}}
 
@@ -85,27 +89,29 @@ func telegramIntentAuthoring(update telegramcore.ReceivedUpdate, intent Conversa
 
 		command.Action, command.Target = descriptor.Action, descriptor.Target
 		if a.Namespace != "" || a.RecordJSON != "" {
-			return command, true, ErrRecordUnsupported
+			return telegramAuthoringParsing{Command: command, Recognized: true}, ErrRecordUnsupported
 		}
 
 		if command.Action == core.AuthoringContinuationRefine {
 			if a.Text != update.Text {
-				return command, true, ErrRecordUnsupported
+				return telegramAuthoringParsing{Command: command, Recognized: true}, ErrRecordUnsupported
 			}
 
 			command.Target, command.Instructions = core.AuthoringArtifactKind(a.Action), a.Text
 		} else if a.Action != "" || a.Text != "" {
-			return command, true, ErrRecordUnsupported
+			return telegramAuthoringParsing{Command: command, Recognized: true}, ErrRecordUnsupported
 		}
 
-		return command, true, validateTelegramAuthoringCommand(command)
+		return telegramAuthoringParsing{Command: command, Recognized: true}, validateTelegramAuthoringCommand(command)
 	}
 
-	return command, false, nil
+	return telegramAuthoringParsing{Command: command, Recognized: false}, nil
 }
 
 func telegramAuthoringUsage(update telegramcore.ReceivedUpdate) string {
-	name, _ := telegramCommandWord(strings.TrimSpace(update.Text))
+	word4 := telegramCommandWord(strings.TrimSpace(update.Text))
+
+	name := word4.Command
 	for _, descriptor := range telegramAuthoringRegistry() {
 		if descriptor.Name == name {
 			return "Usage: " + telegramCommandSyntax(name, descriptor.Arguments)

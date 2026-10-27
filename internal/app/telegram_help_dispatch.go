@@ -22,7 +22,9 @@ func telegramHelpRequest(update telegramcore.ReceivedUpdate) (telegramReadReply,
 		return telegramReadReply{}, false
 	}
 
-	name, group := telegramCommandWord(strings.TrimSpace(update.Text))
+	word := telegramCommandWord(strings.TrimSpace(update.Text))
+
+	name, group := word.Command, word.Body
 	if name != "/help" {
 		return telegramReadReply{}, false
 	}

@@ -13,22 +13,22 @@ type telegramHarnessChoices struct {
 	Generation *string `json:"generation,omitempty"`
 }
 
-func parseTelegramHarness(update telegramcore.ReceivedUpdate) (telegramHarnessChoices, bool, error) {
+func parseTelegramHarness(update telegramcore.ReceivedUpdate) (telegramHarnessParsing, error) {
 	var choices telegramHarnessChoices
 
 	words := strings.Fields(update.Text)
 	if update.Kind != "message" || len(words) == 0 || words[0] != "/harness" {
-		return choices, false, nil
+		return telegramHarnessParsing{Choices: choices, Recognized: false}, nil
 	}
 
 	if len(words) > 3 {
-		return choices, true, ErrRecordUnsupported
+		return telegramHarnessParsing{Choices: choices, Recognized: true}, ErrRecordUnsupported
 	}
 
 	for _, word := range words[1:] {
 		role, value, found := strings.Cut(word, "=")
 		if !telegramHarnessAssignmentValid(found, value) {
-			return choices, true, ErrRecordUnsupported
+			return telegramHarnessParsing{Choices: choices, Recognized: true}, ErrRecordUnsupported
 		}
 
 		if value == "-" {
@@ -36,11 +36,11 @@ func parseTelegramHarness(update telegramcore.ReceivedUpdate) (telegramHarnessCh
 		}
 
 		if err := setTelegramHarnessChoice(&choices, role, value); err != nil {
-			return choices, true, err
+			return telegramHarnessParsing{Choices: choices, Recognized: true}, err
 		}
 	}
 
-	return choices, true, nil
+	return telegramHarnessParsing{Choices: choices, Recognized: true}, nil
 }
 
 func telegramHarnessAssignmentValid(found bool, value string) bool {

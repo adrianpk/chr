@@ -15,7 +15,9 @@ import (
 var errTelegramRecordTarget = errors.New("telegram record target is unavailable")
 
 func (r telegramReceiver) respondRecord(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	command, recognized, parseErr := parseTelegramRecord(update)
+	parsedRecord, parseErr := parseTelegramRecord(update)
+
+	command, recognized := parsedRecord.Command, parsedRecord.Recognized
 	if !recognized {
 		return false, nil
 	}

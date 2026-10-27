@@ -503,3 +503,15 @@ request fields, timeouts and safe error/uncertainty classification. Multipart
 bytes, caption/entity fallback, missing file acknowledgement, malformed envelope
 and uncertain delivery regressions pass at real HTTP/SQLite boundaries. Six
 more exact allowances are removed; core debt is now 367 repository-wide.
+
+
+App Telegram result records preserve parser recognition independently of errors;
+target Needed retains its existing guard semantics. Guided Start stays distinct
+from recognition, and receipt Found remains distinct from read failure. Guided
+progress/facts, prepared input/current configuration, intent context/digest,
+harness retained paging and host finished/quiesced channels keep their original
+paired values. The native control owner still exposes its existing contract;
+only its Telegram composition adapter projects the named receipt result. The
+complete selected app Telegram/guided regression set and pinned lint pass; 30
+further exact allowances disappear. App mutation and dispatch inputs, queue rows
+and typed state cleanup remain active work before final slice validation.

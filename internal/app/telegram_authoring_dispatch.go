@@ -20,7 +20,9 @@ func (r telegramReceiver) respondAuthoring(ctx context.Context, user telegramcor
 		return true, r.continueTelegramAuthoring(ctx, retained, config)
 	}
 
-	command, recognized, err := parseTelegramAuthoring(update)
+	parsedAuthoring, err := parseTelegramAuthoring(update)
+
+	command, recognized := parsedAuthoring.Command, parsedAuthoring.Recognized
 	if !recognized {
 		return r.respondAuthoringReply(ctx, user, config, update)
 	}

@@ -50,7 +50,9 @@ func (r telegramReceiver) respondGuided(ctx context.Context, user telegramcore.A
 }
 
 func (r telegramReceiver) routeTelegramGuided(ctx context.Context, operations telegramGuidedService, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	input, start, err := r.resolveTelegramGuidedInput(ctx, user, config, update)
+	guidedRouting, err := r.resolveTelegramGuidedInput(ctx, user, config, update)
+	input, start := guidedRouting.Input, guidedRouting.Start
+
 	if err != nil {
 		return true, r.guidedDiagnostic(ctx, update, config, err)
 	}
@@ -164,7 +166,9 @@ func (r telegramReceiver) guidedDiagnostic(ctx context.Context, update telegramc
 }
 
 func telegramGuidedMessage(text string) bool {
-	name, body := telegramCommandWord(strings.TrimSpace(text))
+	word := telegramCommandWord(strings.TrimSpace(text))
+
+	name, body := word.Command, word.Body
 	if !strings.HasPrefix(name, "/") {
 		return true
 	}

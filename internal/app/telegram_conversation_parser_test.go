@@ -33,7 +33,9 @@ func TestTelegramConversationCommands(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, recognized, diagnostic := telegramConversationInput(telegramcore.ReceivedUpdate{Kind: "message", Text: test.text})
+			parsedConversation := telegramConversationInput(telegramcore.ReceivedUpdate{Kind: "message", Text: test.text})
+
+			recognized, diagnostic := parsedConversation.Recognized, parsedConversation.Diagnostic
 			if recognized != test.recognized || (diagnostic == "") != test.valid {
 				t.Fatal("incorrect grammar", recognized, diagnostic)
 			}

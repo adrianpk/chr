@@ -30,20 +30,22 @@ func telegramConversationRegistry() []telegramConversationCommand {
 	}
 }
 
-func telegramConversationInput(update telegramcore.ReceivedUpdate) (telegramcore.ConversationInput, bool, string) {
+func telegramConversationInput(update telegramcore.ReceivedUpdate) telegramConversationParsing {
 	input := telegramcore.ConversationInput{Update: update}
 	if update.Kind != "message" {
-		return input, false, ""
+		return telegramConversationParsing{Input: input, Recognized: false, Diagnostic: ""}
 	}
 
 	text := strings.TrimSpace(update.Text)
 	if !strings.HasPrefix(text, "/") {
 		input.Action, input.Text = telegramcore.ConversationCapture, update.Text
 
-		return input, true, ""
+		return telegramConversationParsing{Input: input, Recognized: true, Diagnostic: ""}
 	}
 
-	name, body := telegramCommandWord(text)
+	word := telegramCommandWord(text)
+
+	name, body := word.Command, word.Body
 	for _, command := range telegramConversationRegistry() {
 		if name != command.Name {
 			continue
@@ -51,22 +53,22 @@ func telegramConversationInput(update telegramcore.ReceivedUpdate) (telegramcore
 
 		input.Action, input.Intent = command.Action, command.Intent
 		if !parseTelegramConversationArguments(&input, body) {
-			return input, true, telegramConversationUsage(command)
+			return telegramConversationParsing{Input: input, Recognized: true, Diagnostic: telegramConversationUsage(command)}
 		}
 
-		return input, true, ""
+		return telegramConversationParsing{Input: input, Recognized: true, Diagnostic: ""}
 	}
 
-	return input, false, ""
+	return telegramConversationParsing{Input: input, Recognized: false, Diagnostic: ""}
 }
 
-func telegramCommandWord(text string) (string, string) {
+func telegramCommandWord(text string) telegramCommandParts {
 	words := strings.Fields(text)
 	if len(words) == 0 {
-		return "", ""
+		return telegramCommandParts{Command: "", Body: ""}
 	}
 
-	return words[0], strings.TrimSpace(strings.TrimPrefix(text, words[0]))
+	return telegramCommandParts{Command: words[0], Body: strings.TrimSpace(strings.TrimPrefix(text, words[0]))}
 }
 
 func parseTelegramConversationArguments(input *telegramcore.ConversationInput, body string) bool {
@@ -80,7 +82,8 @@ func parseTelegramConversationArguments(input *telegramcore.ConversationInput, b
 	case telegramcore.ConversationList:
 		return body == ""
 	case telegramcore.ConversationCapture:
-		input.Conversation, input.Text = telegramCommandWord(body)
+		word2 := telegramCommandWord(body)
+		input.Conversation, input.Text = word2.Command, word2.Body
 
 		return input.Conversation != "" && input.Text != ""
 	default:
@@ -91,9 +94,13 @@ func parseTelegramConversationArguments(input *telegramcore.ConversationInput, b
 }
 
 func parseTelegramConversationStart(input *telegramcore.ConversationInput, body string) bool {
-	first, rest := telegramCommandWord(body)
+	word3 := telegramCommandWord(body)
+
+	first, rest := word3.Command, word3.Body
 	if first == "--project" {
-		input.Project, body = telegramCommandWord(rest)
+		word4 := telegramCommandWord(rest)
+
+		input.Project, body = word4.Command, word4.Body
 		if input.Project == "" || strings.HasPrefix(input.Project, "--") {
 			return false
 		}
@@ -107,7 +114,9 @@ func parseTelegramConversationStart(input *telegramcore.ConversationInput, body 
 }
 
 func (r telegramReceiver) respondConversation(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	input, recognized, diagnostic := telegramConversationInput(update)
+	parsedConversation := telegramConversationInput(update)
+
+	input, recognized, diagnostic := parsedConversation.Input, parsedConversation.Recognized, parsedConversation.Diagnostic
 	if !recognized {
 		return false, nil
 	}

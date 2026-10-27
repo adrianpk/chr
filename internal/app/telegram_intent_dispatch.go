@@ -58,7 +58,9 @@ func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegram
 	update := input.Update
 
 	return r.store.ResolveInterpretation(ctx, r.env, update, time.Now(), func(callCtx context.Context) (json.RawMessage, error) {
-		modelInput, digest, err := r.intentContext(callCtx, input)
+		intentObservation, err := r.intentContext(callCtx, input)
+		modelInput, digest := intentObservation.Context, intentObservation.Digest
+
 		if err != nil {
 			return nil, err
 		}
@@ -127,12 +129,12 @@ func (r telegramReceiver) applyIntentDecision(ctx context.Context, update telegr
 	return r.dispatchIntent(ctx, currentUser, input, decision.Intent)
 }
 
-func (r telegramReceiver) intentContext(ctx context.Context, input telegramcore.ConversationInput) (ConversationIntentContext, string, error) {
+func (r telegramReceiver) intentContext(ctx context.Context, input telegramcore.ConversationInput) (telegramIntentObservation, error) {
 	result := ConversationIntentContext{Message: input.Update.Text, Operations: telegramIntentRegistry()}
 
 	snapshot, err := r.store.IntentContext(ctx, input)
 	if err != nil {
-		return result, "", err
+		return telegramIntentObservation{Context: result, Digest: ""}, err
 	}
 
 	var allowedIDs []string
@@ -157,7 +159,7 @@ func (r telegramReceiver) intentContext(ctx context.Context, input telegramcore.
 		appendTelegramIntentSession(&result, session, snapshot)
 	}
 
-	return result, snapshot.Digest, nil
+	return telegramIntentObservation{Context: result, Digest: snapshot.Digest}, nil
 }
 
 func appendTelegramIntentSession(result *ConversationIntentContext, session telegramcore.Conversation, snapshot telegramcore.IntentSnapshot) {
@@ -188,7 +190,9 @@ func (r telegramReceiver) dispatchIntent(ctx context.Context, user telegramcore.
 		return err
 	}
 
-	conversation, recognized, err := telegramIntentConversation(input.Update, intent)
+	parsedInput, err := telegramIntentConversation(input.Update, intent)
+
+	conversation, recognized := parsedInput.Input, parsedInput.Recognized
 	if recognized {
 		if err != nil {
 			return r.intentCorrection(ctx, input.Update, input.Config)
@@ -202,7 +206,9 @@ func (r telegramReceiver) dispatchIntent(ctx context.Context, user telegramcore.
 		return r.store.ApplyConversation(ctx, conversation, time.Now())
 	}
 
-	record, recognized, err := telegramIntentRecord(input.Update, intent)
+	parsedRecord, err := telegramIntentRecord(input.Update, intent)
+
+	record, recognized := parsedRecord.Command, parsedRecord.Recognized
 	if recognized {
 		if err != nil {
 			return r.intentCorrection(ctx, input.Update, input.Config)
@@ -242,7 +248,9 @@ func (r telegramReceiver) dispatchIntentPreparation(ctx context.Context, user te
 		return handled, err
 	}
 
-	work, recognized, err := telegramIntentPreparedWork(input.Update, intent)
+	parsedInput2, err := telegramIntentPreparedWork(input.Update, intent)
+
+	work, recognized := parsedInput2.Input, parsedInput2.Recognized
 	if recognized {
 		if err != nil {
 			return true, r.intentCorrection(ctx, input.Update, input.Config)
@@ -253,7 +261,9 @@ func (r telegramReceiver) dispatchIntentPreparation(ctx context.Context, user te
 		return true, r.dispatchPreparedWork(ctx, user, work)
 	}
 
-	explanation, recognized, err := telegramIntentExplanation(input.Update, intent)
+	parsedExplanation, err := telegramIntentExplanation(input.Update, intent)
+
+	explanation, recognized := parsedExplanation.Command, parsedExplanation.Recognized
 	if recognized {
 		if err != nil {
 			return true, r.intentCorrection(ctx, input.Update, input.Config)
@@ -264,7 +274,9 @@ func (r telegramReceiver) dispatchIntentPreparation(ctx context.Context, user te
 		return true, r.dispatchExplanation(ctx, user, explanation)
 	}
 
-	authoring, recognized, err := telegramIntentAuthoring(input.Update, intent)
+	parsedAuthoring, err := telegramIntentAuthoring(input.Update, intent)
+
+	authoring, recognized := parsedAuthoring.Command, parsedAuthoring.Recognized
 	if recognized {
 		if err != nil {
 			return true, r.intentCorrection(ctx, input.Update, input.Config)

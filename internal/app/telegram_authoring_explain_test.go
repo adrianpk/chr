@@ -207,7 +207,9 @@ func telegramAuthoringExplainReserve(t *testing.T, f *telegramConversationAppFix
 
 	input := telegramOperationRetainInput(t, f, "/explain How are retries bounded?")
 
-	command, recognized, err := parseTelegramExplanation(input.Update)
+	parsedExplanation, err := parseTelegramExplanation(input.Update)
+
+	command, recognized := parsedExplanation.Command, parsedExplanation.Recognized
 	if err != nil || !recognized {
 		t.Fatal(command, err)
 	}

@@ -49,18 +49,19 @@ func (s service) InspectTelegramHarnessSelections(ctx context.Context, target te
 	}
 
 	status := telegramHarnessStatus{Selections: selections}
-	status.Retained, status.More, status.RetainedProblem = scoped.telegramHarnessRetained(ctx)
+	retainedWork := scoped.telegramHarnessRetained(ctx)
+	status.Retained, status.More, status.RetainedProblem = retainedWork.Items, retainedWork.More, retainedWork.Problem
 
 	return status, nil
 }
 
-func (s service) telegramHarnessRetained(ctx context.Context) ([]WorkflowWorkStatus, bool, string) {
+func (s service) telegramHarnessRetained(ctx context.Context) telegramHarnessRetention {
 	page, err := s.WorkflowStatusPage(ctx, 0, 4)
 	if err != nil {
-		return nil, false, "Retained work could not be loaded. Inspect workflow status locally."
+		return telegramHarnessRetention{Items: nil, More: false, Problem: "Retained work could not be loaded. Inspect workflow status locally."}
 	}
 
-	return page.Items, page.NextOffset >= 0, ""
+	return telegramHarnessRetention{Items: page.Items, More: page.NextOffset >= 0, Problem: ""}
 }
 
 // ChangeTelegramHarnessSelections resolves the registry root and delegates the

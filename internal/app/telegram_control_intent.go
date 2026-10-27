@@ -8,7 +8,9 @@ import (
 )
 
 func (r telegramReceiver) dispatchIntentControl(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput, intent ConversationIntent) (bool, error) {
-	command, recognized, err := telegramIntentControl(input.Update, intent)
+	parsedControl, err := telegramIntentControl(input.Update, intent)
+
+	command, recognized := parsedControl.Command, parsedControl.Recognized
 	if !recognized {
 		return false, nil
 	}
@@ -23,17 +25,19 @@ func (r telegramReceiver) dispatchIntentControl(ctx context.Context, user telegr
 	return true, r.dispatchControl(ctx, user, command)
 }
 
-func (r telegramReceiver) intentControlTarget(ctx context.Context, input telegramcore.ConversationInput, intent ConversationIntent) (telegramcore.OperationTarget, bool, error) {
-	command, recognized, err := telegramIntentControl(input.Update, intent)
+func (r telegramReceiver) intentControlTarget(ctx context.Context, input telegramcore.ConversationInput, intent ConversationIntent) (telegramTargetResolution, error) {
+	parsedControl2, err := telegramIntentControl(input.Update, intent)
+
+	command, recognized := parsedControl2.Command, parsedControl2.Recognized
 	if !recognized || err != nil {
-		return telegramcore.OperationTarget{}, recognized, err
+		return telegramTargetResolution{Target: telegramcore.OperationTarget{}, Needed: recognized}, err
 	}
 
 	command.Input.Config, command.Input.Projects = input.Config, input.Projects
 	command.Input.ContextDigest = input.ContextDigest
 	target, err := r.resolveControlTarget(ctx, command)
 
-	return target, true, err
+	return telegramTargetResolution{Target: target, Needed: true}, err
 }
 
 func (r telegramReceiver) dispatchIntentNativeWork(ctx context.Context, user telegramcore.AllowedUser, input telegramcore.ConversationInput, intent ConversationIntent) (bool, error) {
@@ -41,36 +45,36 @@ func (r telegramReceiver) dispatchIntentNativeWork(ctx context.Context, user tel
 		return handled, err
 	}
 
-	if work, recognized, err := telegramIntentWork(input.Update, intent); recognized {
+	if parsedWork, err := telegramIntentWork(input.Update, intent); parsedWork.Recognized {
 		if err != nil {
 			return true, r.intentCorrection(ctx, input.Update, input.Config)
 		}
 
-		work.Input.Config, work.Input.Projects, work.Input.Namespace = input.Config, input.Projects, input.Namespace
-		work.Input.ContextDigest = input.ContextDigest
+		parsedWork.Command.Input.Config, parsedWork.Command.Input.Projects, parsedWork.Command.Input.Namespace = input.Config, input.Projects, input.Namespace
+		parsedWork.Command.Input.ContextDigest = input.ContextDigest
 
-		return true, r.dispatchWork(ctx, user, work)
+		return true, r.dispatchWork(ctx, user, parsedWork.Command)
 	}
 
 	return false, nil
 }
 
-func (r telegramReceiver) intentNativeWorkTarget(ctx context.Context, input telegramcore.ConversationInput, intent ConversationIntent) (telegramcore.OperationTarget, bool, error) {
-	if target, needed, err := r.intentControlTarget(ctx, input, intent); needed || err != nil {
-		return target, needed, err
+func (r telegramReceiver) intentNativeWorkTarget(ctx context.Context, input telegramcore.ConversationInput, intent ConversationIntent) (telegramTargetResolution, error) {
+	if targetResolution, err := r.intentControlTarget(ctx, input, intent); targetResolution.Needed || err != nil {
+		return telegramTargetResolution{Target: targetResolution.Target, Needed: targetResolution.Needed}, err
 	}
 
-	if work, recognized, err := telegramIntentWork(input.Update, intent); recognized {
+	if parsedWork2, err := telegramIntentWork(input.Update, intent); parsedWork2.Recognized {
 		if err != nil {
-			return telegramcore.OperationTarget{}, true, err
+			return telegramTargetResolution{Target: telegramcore.OperationTarget{}, Needed: true}, err
 		}
 
-		work.Input.Config, work.Input.Projects = input.Config, input.Projects
-		work.Input.ContextDigest = input.ContextDigest
-		target, err := r.store.ResolveOperationTarget(ctx, work.Input, time.Now())
+		parsedWork2.Command.Input.Config, parsedWork2.Command.Input.Projects = input.Config, input.Projects
+		parsedWork2.Command.Input.ContextDigest = input.ContextDigest
+		target, err := r.store.ResolveOperationTarget(ctx, parsedWork2.Command.Input, time.Now())
 
-		return target, true, err
+		return telegramTargetResolution{Target: target, Needed: true}, err
 	}
 
-	return telegramcore.OperationTarget{}, false, nil
+	return telegramTargetResolution{Target: telegramcore.OperationTarget{}, Needed: false}, nil
 }

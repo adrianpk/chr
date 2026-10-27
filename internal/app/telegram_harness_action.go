@@ -46,7 +46,9 @@ func retainedTelegramHarnessChange(request telegramcore.OperationRequest) (teleg
 }
 
 func telegramHarnessSourceChoices(source telegramcore.ReceivedUpdate) (telegramHarnessChoices, error) {
-	choices, recognized, err := parseTelegramHarness(source)
+	parsedHarness, err := parseTelegramHarness(source)
+
+	choices, recognized := parsedHarness.Choices, parsedHarness.Recognized
 	if err != nil || !recognized || (choices.Worker == nil && choices.Generation == nil) {
 		return choices, workflowstate.ErrConflict
 	}

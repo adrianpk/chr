@@ -21,7 +21,8 @@ func runTelegramReceiverHosts(ctx context.Context, hosts []func(context.Context)
 	owned, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	finished, quiesced := startTelegramReceiverHosts(owned, hosts)
+	receiverHosts := startTelegramReceiverHosts(owned, hosts)
+	finished, quiesced := receiverHosts.Finished, receiverHosts.Quiesced
 	remaining := len(hosts)
 
 	var result error
@@ -89,7 +90,7 @@ func telegramStorageShutdownFailure(err, cancellation error) error {
 	return err
 }
 
-func startTelegramReceiverHosts(ctx context.Context, hosts []func(context.Context) error) (<-chan error, <-chan struct{}) {
+func startTelegramReceiverHosts(ctx context.Context, hosts []func(context.Context) error) telegramReceiverHosts {
 	finished, quiesced := make(chan error, len(hosts)), make(chan struct{})
 
 	var active sync.WaitGroup
@@ -99,7 +100,7 @@ func startTelegramReceiverHosts(ctx context.Context, hosts []func(context.Contex
 
 	go func() { active.Wait(); close(quiesced) }()
 
-	return finished, quiesced
+	return telegramReceiverHosts{Finished: finished, Quiesced: quiesced}
 }
 
 type telegramReceiverResources struct{ closers []io.Closer }

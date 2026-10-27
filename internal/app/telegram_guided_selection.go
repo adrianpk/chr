@@ -96,20 +96,20 @@ func telegramGuidedStartFailure(failure error, projects []projectcore.Project) e
 	return telegramGuidedRoutingFailure("Choose a project: " + strings.Join(names, ", ") + ". Say Develop a new use case in followed by its unique project name.")
 }
 
-func (r telegramReceiver) resolveTelegramGuidedInput(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (telegramcore.ConversationInput, bool, error) {
+func (r telegramReceiver) resolveTelegramGuidedInput(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (telegramGuidedRouting, error) {
 	input := telegramcore.ConversationInput{Update: update, Config: config, Text: "New guided use case"}
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
 
 	input.Projects = projects
 	if err != nil {
-		return input, false, err
+		return telegramGuidedRouting{Input: input, Start: false}, err
 	}
 
 	project, start := telegramGuidedStartProject(update.Text)
 	if project != "" {
 		input.Project, err = telegramGuidedProjectName(projects, project)
 		if err != nil {
-			return input, start, err
+			return telegramGuidedRouting{Input: input, Start: start}, err
 		}
 	}
 
@@ -117,5 +117,5 @@ func (r telegramReceiver) resolveTelegramGuidedInput(ctx context.Context, user t
 		input.Conversation, err = r.selectTelegramGuidedName(ctx, input, name)
 	}
 
-	return input, start, err
+	return telegramGuidedRouting{Input: input, Start: start}, err
 }

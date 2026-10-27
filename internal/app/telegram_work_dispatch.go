@@ -17,7 +17,8 @@ func (r telegramReceiver) respondWork(ctx context.Context, user telegramcore.All
 	route := telegramCommandRoute{
 		OperationID: "work.admit", Continue: r.prepareWorkAdmission, Help: telegramWorkHelp(),
 		Parse: func(update telegramcore.ReceivedUpdate) (telegramParsedCommand, error) {
-			command, recognized, err := parseTelegramWork(update)
+			parsedWork, err := parseTelegramWork(update)
+			command, recognized := parsedWork.Command, parsedWork.Recognized
 
 			return telegramParsedCommand{
 				Recognized: recognized, Input: &command.Input,

@@ -15,7 +15,8 @@ func (r telegramReceiver) respondExplanation(ctx context.Context, user telegramc
 	route := telegramCommandRoute{
 		OperationID: "authoring.explain", Continue: r.continueExplanation, Help: telegramExplanationHelp(),
 		Parse: func(update telegramcore.ReceivedUpdate) (telegramParsedCommand, error) {
-			command, recognized, err := parseTelegramExplanation(update)
+			parsedExplanation, err := parseTelegramExplanation(update)
+			command, recognized := parsedExplanation.Command, parsedExplanation.Recognized
 
 			return telegramParsedCommand{
 				Recognized: recognized, Input: &command.Input,

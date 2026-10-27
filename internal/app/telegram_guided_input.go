@@ -62,48 +62,49 @@ func telegramGuidedCommand(c telegramcore.Conversation, update telegramcore.Rece
 		return input, nil
 	}
 
-	action, content, err := telegramGuidedTextAction(binding, update.Text)
+	guidedText, err := telegramGuidedTextAction(binding, update.Text)
+	action, content := guidedText.Action, guidedText.Content
 	input.Command.Action, input.Command.Content = action, content
 
 	return input, err
 }
 
-func telegramGuidedTextAction(binding telegramGuidedBinding, text string) (string, string, error) {
+func telegramGuidedTextAction(binding telegramGuidedBinding, text string) (telegramGuidedText, error) {
 	normalized := strings.ToLower(strings.TrimSpace(text))
 
 	controls := map[string]string{"pause use case": "pause", "resume use case": "resume", "cancel use case": "cancel", "/pause": "pause", "/resume": "resume", "/cancel": "cancel"}
 	if action := controls[normalized]; action != "" {
-		return action, "", nil
+		return telegramGuidedText{Action: action, Content: ""}, nil
 	}
 
 	if strings.HasPrefix(normalized, "idea:") {
-		return "idea", strings.TrimSpace(strings.TrimSpace(text)[len("idea:"):]), nil
+		return telegramGuidedText{Action: "idea", Content: strings.TrimSpace(strings.TrimSpace(text)[len("idea:"):])}, nil
 	}
 
 	if strings.HasPrefix(normalized, "/") {
-		return "", "", workflowstate.ErrConflict
+		return telegramGuidedText{Action: "", Content: ""}, workflowstate.ErrConflict
 	}
 
 	return telegramGuidedStageAction(binding, text)
 }
 
-func telegramGuidedStageAction(binding telegramGuidedBinding, text string) (string, string, error) {
+func telegramGuidedStageAction(binding telegramGuidedBinding, text string) (telegramGuidedText, error) {
 	switch binding.Stage {
 	case "name":
-		return "name", text, nil
+		return telegramGuidedText{Action: "name", Content: text}, nil
 	case "dump":
 		if strings.EqualFold(strings.TrimSpace(text), "finish capture") {
-			return "finish", "", nil
+			return telegramGuidedText{Action: "finish", Content: ""}, nil
 		}
 
-		return "append", text, nil
+		return telegramGuidedText{Action: "append", Content: text}, nil
 	case "quiz":
 		if binding.QuestionID != "" {
-			return "answer", text, nil
+			return telegramGuidedText{Action: "answer", Content: text}, nil
 		}
 	}
 
-	return "", "", workflowstate.ErrConflict
+	return telegramGuidedText{Action: "", Content: ""}, workflowstate.ErrConflict
 }
 
 func telegramGuidedProgress(observed GuidedUseCaseInspection) (telegramcore.GuidedProgress, error) {

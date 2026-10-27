@@ -45,17 +45,18 @@ func telegramControlHelp() string {
 	return strings.Join(lines, "\n")
 }
 
-func parseTelegramControl(update telegramcore.ReceivedUpdate) (telegramControlCommand, bool, error) {
+func parseTelegramControl(update telegramcore.ReceivedUpdate) (telegramControlParsing, error) {
 	command := telegramControlCommand{Input: telegramcore.ConversationInput{Update: update}}
-	name, body := telegramCommandWord(strings.TrimSpace(update.Text))
+	word := telegramCommandWord(strings.TrimSpace(update.Text))
+	name, body := word.Command, word.Body
 
 	command.Action = strings.ReplaceAll(strings.TrimPrefix(name, "/"), "-", "_")
 	if update.Kind != "message" || !strings.HasPrefix(name, "/") || !validTelegramControlAction(command.Action) {
-		return command, false, nil
+		return telegramControlParsing{Command: command, Recognized: false}, nil
 	}
 
 	if body == "" && update.ReplyToMessageID == 0 && (command.Action == "cancel" || command.Action == "status") {
-		return command, false, nil
+		return telegramControlParsing{Command: command, Recognized: false}, nil
 	}
 
 	body, err := parseTelegramRecordScope(&command.Input, body)
@@ -64,10 +65,10 @@ func parseTelegramControl(update telegramcore.ReceivedUpdate) (telegramControlCo
 	}
 
 	if err != nil {
-		return command, true, err
+		return telegramControlParsing{Command: command, Recognized: true}, err
 	}
 
-	return command, true, validateTelegramControlCommand(command)
+	return telegramControlParsing{Command: command, Recognized: true}, validateTelegramControlCommand(command)
 }
 
 func validTelegramControlAction(action string) bool {
@@ -88,22 +89,22 @@ func validateTelegramControlCommand(command telegramControlCommand) error {
 	return validateTelegramControlParameters(command.Action, command.Parameters)
 }
 
-func telegramIntentControl(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramControlCommand, bool, error) {
+func telegramIntentControl(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramControlParsing, error) {
 	a := intent.Arguments
 
 	command := telegramControlCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Action: a.Action, Invocation: a.Text}
 	if intent.OperationID != "control" {
-		return command, false, nil
+		return telegramControlParsing{Command: command, Recognized: false}, nil
 	}
 
 	if a.RecordJSON != "" {
 		command.Parameters = &telegramControlParameters{}
 		if err := decodeOperationJSON(a.RecordJSON, command.Parameters); err != nil {
-			return command, true, err
+			return telegramControlParsing{Command: command, Recognized: true}, err
 		}
 	}
 
-	return command, true, validateTelegramControlCommand(command)
+	return telegramControlParsing{Command: command, Recognized: true}, validateTelegramControlCommand(command)
 }
 
 func decodeTelegramControlCommand(command *telegramControlCommand, body string) error {

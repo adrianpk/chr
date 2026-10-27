@@ -11,7 +11,9 @@ import (
 )
 
 func (r telegramReceiver) respondHarness(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	choices, recognized, err := parseTelegramHarness(update)
+	parsedHarness, err := parseTelegramHarness(update)
+
+	choices, recognized := parsedHarness.Choices, parsedHarness.Recognized
 	if !recognized {
 		return false, nil
 	}

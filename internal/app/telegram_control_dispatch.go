@@ -23,7 +23,9 @@ func (r telegramReceiver) respondControl(ctx context.Context, user telegramcore.
 		return true, r.prepareControl(ctx, retained, config)
 	}
 
-	command, recognized, err := parseTelegramControl(update)
+	parsedControl, err := parseTelegramControl(update)
+
+	command, recognized := parsedControl.Command, parsedControl.Recognized
 	if !recognized {
 		return false, nil
 	}
