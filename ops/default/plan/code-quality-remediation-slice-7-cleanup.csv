@@ -1,0 +1,9 @@
+baseline_concern,current_owner,disposition,evidence
+private Telegram error types,APIError; conversationDiagnosticError; telegramServiceError; telegramShutdownError; telegramControlReceiptPendingError; telegramGuidedRoutingError,renamed,"Original definitions, Error text and errors.Is/errors.As identity remain."
+transport state literals,ReceiverHealth; OperationState; DeliveryState; ActionState; ConversationPhase; InputState,typed,Exact stored strings; 161 type-checked state references change; SQL and JSON/native status vocabulary remain.
+read-only SQL cursor close,readConversations; readPendingRows; DueDeliveries,observable,Named error joins preserve iteration/scan failures plus rows.Close failures.
+HTTP read-only body close,closeReadBody,justified suppression,Read/acknowledgement owns delivery; a subsequent body-close failure cannot imply an unobserved send or another attempt.
+newTelegramServeCommand unused arguments,commandFactory.telegramServeCommand,previously resolved in Slice 4,Typed factory owns output/assets; no unused stdout/deps constructor arguments remain.
+D06 explanation/work dispatch,telegramCommandRoute,shared mechanics,Retained lookup and parsing are shared; actual authority/model/document/native handlers stay separate.
+telegramGuidedResultExport; telegramHelpReply,guidedResultExport; renderTelegramHelp,removed forwarding,Live exported-result guard and actual help renderer tests remain.
+typed queue column bindings,TestTelegramStorageRows,verified,"Real SQLite inserts/updates distinguish peer integers, hashes, revisions, parts, timestamps and NULLs; a positive topic/user swap is rejected."

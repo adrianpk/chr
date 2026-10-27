@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-7
 source: review
 reported_at: 2026-10-26T08:48:27Z
-commits: [734cafffcefb, 071a0e1dd62a, a11b75fa23c1, 7a845d3f83df, a055ba79f991]
+commits: [734cafff, 071a0e1d, a11b75fa, 7a845d3f, a055ba79, b77cf0e3, 450b92e4, 4fe90efe, 128bd727, 71a0527b, 6122bca8, 12afe643, cb4affbe, b9e70d85, 430ed7a6, cb61567d]
 started_at: 2026-10-27T09:28:39Z
 branch: refactor/slice-7-quality-telegram
 ready_at: 2026-10-26T08:57:09Z
@@ -57,33 +57,9 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 
 Existing receiver/action/outbox and document multipart fixtures with real local HTTP/SQLite; stale and lost-ack recovery; focused race where state ownership changes; make verify.
 
-Implementation checkpoint: T7.1 shared workflow binding/receipt contracts,
-consumer-owned directory ports and exact directory/namespace resolution are
-complete. T7.4 is implemented: D06 intake is shared through distinct typed route
-records, and the two test-only wrappers are removed while live coverage remains.
-T7.3 recovery validation now checks one retained reply, the original request and
-receipt, and finite uncertain-to-delivered attempt progression across restart.
-
-Successful task checks:
-
-- `go test ./internal/app -run '^Test(QualityRecordWire|TelegramOperation(TicketRecords|SliceRecords|CaseRecords|RecordGuards|LiveRecords)|TelegramControlReceipt)' -count=1 -timeout=3m`
-- `go test ./internal/core ./internal/app -run '^Test(TelegramReceiver|TelegramRecoveryEnvironment|TelegramRecoveryOwner|TelegramTransport|TelegramSetup|TelegramLocal|QualityStorage)' -count=1 -timeout=3m`
-- `go test ./internal/app -run '^Test(TelegramControlRequestCapacity|TelegramJourney|TelegramOperationUncertainActionSend)$' -count=1 -timeout=3m`
-- `go test ./internal/core/project ./internal/core/ops/namespace ./internal/core ./internal/app -run '^Test(Ops|ResolveOps|ProjectRegistry|WorkspaceInit|TelegramConversation|TelegramOperationTarget|TelegramControlRegistry|QualityRecordWire)' -count=1 -timeout=3m`
-- `go test ./internal/app -run '^Test(Telegram(Explanation|Work|Help|Guided.*Document)|QualityRecordWire)' -count=1 -timeout=3m`
-- `go test ./internal/app -run '^TestGuidedUseCaseTelegramResultGuard$' -count=1 -timeout=3m`
-- `go test ./scripts/goquality -count=1`
-- `make check-go-style`
-
-Pinned strict core/app/TUI/tooling lint passed at the corresponding task
-checkpoints. Temporary debt remains 410 with unchanged ceiling/external exception;
-two exact signatures explicitly follow the shared binding qualification.
-
-The initial broad app selection found three stale assertions. The exact focused
-three-test command reproduced those failures on unchanged predecessor
-c7d7040fde4385a64b20322da1bc5874a38c2deb; the model companion records the stronger
-retained-binding checks and current presentation contracts. Those focused checks
-now pass. Remaining authoring/model dependency isolation, mechanical receiver move,
-assigned request/result and production queue-row conversions, typed states and
-final controller/PR validation are pending. No Slice 7 PR or final check evidence
-is claimed by this checkpoint.
+Implementation is complete on the recorded branch. T7.1-T7.5 deliver the direct
+Telegram owner, all 156 signature dispositions, typed retained rows, D06 intake,
+state/error contracts and justified cleanup. The canonical report owns the
+focused task results and evidence links. The controller ledger owns final
+clean-HEAD validation; PR reference and integration state follow the slice
+workflow. Other recorded slices remain pending.

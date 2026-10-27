@@ -505,3 +505,14 @@ observed acknowledgement define delivery, so a later close cannot authorize a
 retry. Store/model/OS-lock cleanup remains observable. Distinct SQL row tests
 check column names independently of mapper order; a positive integer swap fails
 those assertions. No new validation allowance or dependency is introduced.
+
+
+### Slice 7 current disposition
+
+All assigned 156 occurrences conform to the final five-input/result contract;
+the 52 B rows are legal cohesion watch items, retained where one operation already
+has five explicit inputs. The final disposition/cleanup ledgers and canonical
+Slice 7 report replace the earlier checkpoint pending-work descriptions above.
+Root core exports no receiver facade. The actual graph and 714-file owner ledger
+include the receiver and its immutable prerequisite owners. Final clean PR-head
+validation is recorded through the controller before integration.
