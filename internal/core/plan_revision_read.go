@@ -15,7 +15,7 @@ import (
 // ObservePlanRevision reads the current retained order binding without repairing
 // or rewriting artifacts. Missing or edited companions require explicit repair.
 // A legacy or absent plan returns an empty binding without migration.
-func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.QuizScope) (PlanRevisionBinding, error) {
+func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.Scope) (PlanRevisionBinding, error) {
 	paths, err := GeneratedPlanLayout(projectDir, scope)
 	if err != nil {
 		return PlanRevisionBinding{}, err
@@ -54,7 +54,7 @@ func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.
 	return binding, r.checkProjectDumpInspection(ctx)
 }
 
-func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcore.QuizScope, result PlanPublicationResult) error {
+func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcore.Scope, result PlanPublicationResult) error {
 	paths, err := GeneratedPlanLayout(r.projectDir, scope)
 	if err != nil {
 		return err

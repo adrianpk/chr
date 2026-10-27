@@ -101,11 +101,11 @@ func (s service) StartWorkExtent(ctx context.Context, request core.WorkflowPrevi
 		return AgentWorkResult{}, err
 	}
 
-	if steps < 0 || steps > workflowstate.WorkflowPageLimit || request.Offset != 0 {
+	if steps < 0 || steps > workflowstate.PageLimit || request.Offset != 0 {
 		return AgentWorkResult{}, fmt.Errorf("execution requires offset zero and 0..128 checkpoint steps")
 	}
 
-	request.Limit = workflowstate.WorkflowPageLimit
+	request.Limit = workflowstate.PageLimit
 	preflight := request
 
 	preflight.SnapshotHash = ""

@@ -15,7 +15,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-const projectDumpInventoryBytes = 8 * workflowstate.WorkflowFileLimit
+const projectDumpInventoryBytes = 8 * workflowstate.FileLimit
 
 type projectDumpInventory struct {
 	repository     *fileAuthoringSessionRepository
@@ -135,7 +135,7 @@ func (scan *projectDumpInventory) readEntries(relative string) ([]os.DirEntry, e
 		return nil, err
 	}
 
-	entries, readErr := directory.ReadDir(workflowstate.WorkflowRecordLimit - scan.entries + 1)
+	entries, readErr := directory.ReadDir(workflowstate.RecordLimit - scan.entries + 1)
 
 	closeErr := directory.Close()
 	if readErr != nil && !errors.Is(readErr, io.EOF) || closeErr != nil {
@@ -143,8 +143,8 @@ func (scan *projectDumpInventory) readEntries(relative string) ([]os.DirEntry, e
 	}
 
 	scan.entries += len(entries)
-	if scan.entries > workflowstate.WorkflowRecordLimit {
-		return nil, fmt.Errorf("project dump inventory exceeds %d entries", workflowstate.WorkflowRecordLimit)
+	if scan.entries > workflowstate.RecordLimit {
+		return nil, fmt.Errorf("project dump inventory exceeds %d entries", workflowstate.RecordLimit)
 	}
 
 	return entries, nil

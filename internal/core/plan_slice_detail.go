@@ -10,7 +10,7 @@ import (
 
 // GeneratedPlanSliceDetail describes a package boundary value.
 type GeneratedPlanSliceDetail struct {
-	Scope                  quizcore.QuizScope
+	Scope                  quizcore.Scope
 	SliceID                string
 	ShortName              string
 	Objective              string
@@ -57,7 +57,7 @@ func (d GeneratedPlanSliceDetail) HasContent() bool {
 
 // ValidateGeneratedPlanSliceDetailContent validates the corresponding package boundary value.
 func ValidateGeneratedPlanSliceDetailContent(detail GeneratedPlanSliceDetail) error {
-	if err := quizcore.ValidateQuizScope(detail.Scope); err != nil {
+	if err := quizcore.ValidateScope(detail.Scope); err != nil {
 		return err
 	}
 

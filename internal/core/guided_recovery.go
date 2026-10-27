@@ -19,7 +19,7 @@ type GuidedHostPage struct {
 // RecoverGuidedHostPage reconciles the existing authoring journal before listing
 // a page. Only the managed lifecycle calls this mutating recovery operation.
 func RecoverGuidedHostPage(ctx context.Context, root, project string, offset, limit int) (page GuidedHostPage, err error) {
-	if offset < 0 || offset > workflowstate.WorkflowRecordLimit || limit < 1 || limit > workflowstate.WorkflowPageLimit {
+	if offset < 0 || offset > workflowstate.RecordLimit || limit < 1 || limit > workflowstate.PageLimit {
 		return page, workflowstate.ErrConflict
 	}
 

@@ -22,7 +22,7 @@ func TestWebQuizLayoutBrowser(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"}))
+	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func TestWebQuizFirstRetryBrowser(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.QuizScope{}))
+	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.Scope{}))
 	if err != nil {
 		t.Fatal(err)
 	}

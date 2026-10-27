@@ -125,7 +125,7 @@ func TestQuizEntryExactRoundTrip(t *testing.T) {
 			entry := validQuizEntry()
 			entry.ID, entry.Answer = "session-1-entry-1", test.answer
 
-			entries, err := quizcore.ParseQuizRawCaptureEntries(RenderQuizRawCapture(validQuizRuntimeState(), entry))
+			entries, err := quizcore.ParseRawCaptureEntries(RenderQuizRawCapture(validQuizRuntimeState(), entry))
 			if err != nil || len(entries) != 1 || !reflect.DeepEqual(entries[0], entry) {
 				t.Fatal("entry lost identity or content", entries, err)
 			}
@@ -169,7 +169,7 @@ func mutateQuizGuardFixture(t *testing.T, paths QuizArtifactPaths, change string
 	case "version":
 		writeTestFile(t, paths.RuntimePath, `{"SchemaVersion":99}`)
 	case "oversize":
-		writeTestFile(t, paths.RuntimePath, strings.Repeat("x", workflowstate.WorkflowFileLimit+1))
+		writeTestFile(t, paths.RuntimePath, strings.Repeat("x", workflowstate.FileLimit+1))
 	case "scope":
 		request.Scope.ProjectID = "other-project"
 	case "symlink":
@@ -190,7 +190,7 @@ func newQuizActionFixture(t *testing.T) (*fileQuizArtifactRepository, QuizAction
 	t.Helper()
 
 	repo := &fileQuizArtifactRepository{projectDir: t.TempDir()}
-	scope := quizcore.QuizScope{ProjectID: "project-1"}
+	scope := quizcore.Scope{ProjectID: "project-1"}
 
 	observed, err := repo.Observe(t.Context(), scope)
 	if err != nil {
@@ -209,7 +209,7 @@ func startQuizActionFixture(_ context.Context, _ QuizObservation) (QuizTransitio
 
 func quizAnswerActionFixture(observed QuizObservation) QuizActionRequest {
 	return QuizActionRequest{
-		Scope: quizcore.QuizScope{ProjectID: "project-1"}, Action: "answer", Answer: "First paragraph.\n\nSecond paragraph.",
+		Scope: quizcore.Scope{ProjectID: "project-1"}, Action: "answer", Answer: "First paragraph.\n\nSecond paragraph.",
 		Binding: QuizActionBinding{SessionID: observed.State.SessionID, QuestionID: observed.State.ActiveQuestion.ID, ExpectedRevision: observed.Revision, OperationID: "answer"},
 	}
 }
@@ -219,12 +219,12 @@ func answerQuizActionFixture(_ context.Context, observed QuizObservation) (QuizT
 	entry.ID, entry.Answer = "session-1-entry-1", "First paragraph.\n\nSecond paragraph."
 	state := observed.State
 	state.AnswersRecorded++
-	state.Status, state.ActiveQuestion = quizcore.QuizRuntimeStatusIdle, nil
+	state.Status, state.ActiveQuestion = quizcore.RuntimeStatusIdle, nil
 
 	return QuizTransition{State: state, Entry: &entry, Message: "Answer recorded."}, nil
 }
 
-func checkQuizLegacyRead(t *testing.T, repo *fileQuizArtifactRepository, scope quizcore.QuizScope, path string, before []byte) {
+func checkQuizLegacyRead(t *testing.T, repo *fileQuizArtifactRepository, scope quizcore.Scope, path string, before []byte) {
 	t.Helper()
 
 	observed, err := repo.Observe(t.Context(), scope)
@@ -272,7 +272,7 @@ func checkQuizActionRecovery(t *testing.T, index int) {
 	}
 }
 
-func quizLegacyFixtureImages(t *testing.T, repo *fileQuizArtifactRepository, scope quizcore.QuizScope) (QuizArtifactPaths, []byte) {
+func quizLegacyFixtureImages(t *testing.T, repo *fileQuizArtifactRepository, scope quizcore.Scope) (QuizArtifactPaths, []byte) {
 	t.Helper()
 
 	paths, err := repo.Paths(scope)

@@ -141,7 +141,7 @@ func TestPlanSpecApproval(t *testing.T) {
 	}
 }
 
-func planApprovalFixture(t *testing.T, status, prose string) (service, quizcore.QuizScope, core.GeneratedSpecPaths) {
+func planApprovalFixture(t *testing.T, status, prose string) (service, quizcore.Scope, core.GeneratedSpecPaths) {
 	t.Helper()
 
 	operations, scope, _ := planPublicationFixture(t, "Print hello once. Verify stdout is hello.")

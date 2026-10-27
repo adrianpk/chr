@@ -41,7 +41,7 @@ func TestWorkflowClosingBudget(t *testing.T) {
 	}
 
 	closed, err := restarted.CloseWorkflowInvocationSet(t.Context(), next.Invocation.ID, "dev", workflowFrontierPorts(fixture))
-	if err != nil || closed.Outcome != "completed" || len(closed.Set.Set.Closing.Attempts) != workflowstate.WorkflowPageLimit+1 {
+	if err != nil || closed.Outcome != "completed" || len(closed.Set.Set.Closing.Attempts) != workflowstate.PageLimit+1 {
 		t.Fatal("new invocation lost prior attempts or inherited another invocation's exhausted budget", err)
 	}
 }
@@ -101,7 +101,7 @@ func workflowClosingBudgetImages(t *testing.T, set *WorkflowRecord, state workfl
 
 	files := []workflowFileChange{}
 
-	for generation := 2; generation <= workflowstate.WorkflowPageLimit; generation++ {
+	for generation := 2; generation <= workflowstate.PageLimit; generation++ {
 		state.Generation = generation
 		state.Input.Ref = workflowClosingFile(set.ID, generation, "input.json")
 

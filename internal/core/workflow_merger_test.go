@@ -106,7 +106,7 @@ func TestNativeMergerMalformed(t *testing.T) {
 	valid := string(nativeMergerJSON(t, nativeMergerResolved(input)))
 	cases := map[string]string{
 		"empty": "", "null": "null", "array": "[]", "trailing": valid + "{}",
-		"oversized":         strings.Repeat(" ", workflowstate.WorkflowFileLimit+1),
+		"oversized":         strings.Repeat(" ", workflowstate.FileLimit+1),
 		"duplicate":         strings.Replace(valid, `"outcome":"resolved"`, `"outcome":"failed","outcome":"resolved"`, 1),
 		"nested duplicate":  strings.Replace(valid, `"conflict_id":"conflict-1"`, `"conflict_id":"other","conflict_id":"conflict-1"`, 1),
 		"approval":          strings.Replace(valid, `"outcome":"resolved"`, `"approval":true,"outcome":"resolved"`, 1),

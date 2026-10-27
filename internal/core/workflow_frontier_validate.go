@@ -10,7 +10,7 @@ import (
 )
 
 func validateWorkflowFrontier(run workflowInvocationFile) error {
-	if run.ConfirmedCursor < 0 || run.ConfirmedCursor > run.Cursor || len(run.Deliveries) > workflowstate.WorkflowRecordLimit {
+	if run.ConfirmedCursor < 0 || run.ConfirmedCursor > run.Cursor || len(run.Deliveries) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow confirmed frontier exceeds bounds")
 	}
 

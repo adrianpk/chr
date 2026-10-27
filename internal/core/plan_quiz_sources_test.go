@@ -16,7 +16,7 @@ func TestPlanQuizSourceContext(t *testing.T) {
 	project := t.TempDir()
 	state := planQuizSourceFixture(t, project, 30, "Preserve saved tasks.")
 	before := projectDumpTestImage(t, project)
-	scope := quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
+	scope := quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 
 	observed, err := ObservePlanSources(t.Context(), project, scope)
 	if err != nil {
@@ -36,7 +36,7 @@ func TestPlanQuizSourceContext(t *testing.T) {
 	checkPlanQuizSourceRevision(t, project, state, observed.Hash)
 }
 
-func planQuizSourceFixture(t *testing.T, project string, count int, answer string) quizcore.QuizRuntimeState {
+func planQuizSourceFixture(t *testing.T, project string, count int, answer string) quizcore.RuntimeState {
 	t.Helper()
 
 	writeTestFile(t, ProjectMetadataPath(project), RenderProjectMetadata(ProjectMetadata{Name: "Tasks", Description: "Manage local tasks."}))
@@ -95,17 +95,17 @@ func planQuizSourceInput(t *testing.T, observed PlanSourceObservation) PlanSourc
 	return PlanSourceInput{}
 }
 
-func checkPlanQuizSourceRevision(t *testing.T, project string, state quizcore.QuizRuntimeState, previous string) {
+func checkPlanQuizSourceRevision(t *testing.T, project string, state quizcore.RuntimeState, previous string) {
 	t.Helper()
 
 	entry := validQuizEntry()
-	entry.ID, entry.QuestionID, entry.Status, entry.Answer = "skip", "skip", quizcore.QuizEntryStatusSkipped, ""
+	entry.ID, entry.QuestionID, entry.Status, entry.Answer = "skip", "skip", quizcore.EntryStatusSkipped, ""
 
 	if _, err := NewQuizArtifactRepository(project).AppendRawCapture(t.Context(), state, entry); err != nil {
 		t.Fatal(err)
 	}
 
-	observed, err := ObservePlanSources(t.Context(), project, quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
+	observed, err := ObservePlanSources(t.Context(), project, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil || observed.Hash == previous {
 		t.Fatal("the compact payload lost full-source revision binding", err)
 	}
@@ -119,7 +119,7 @@ func TestPlanQuizSourceLimit(t *testing.T) {
 	project := t.TempDir()
 	state := planQuizSourceFixture(t, project, 1, strings.Repeat("x", 96*1024))
 
-	_, err := ObservePlanSources(t.Context(), project, quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
+	_, err := ObservePlanSources(t.Context(), project, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err == nil || !strings.Contains(err.Error(), "plan source context exceeds 96 KiB") {
 		t.Fatal("oversized user content was truncated or accepted", err)
 	}

@@ -15,7 +15,7 @@ import (
 
 // Observe reads current images without allocating artifacts or recovering a
 // pending mutation. Torn snapshots fail closed and can be explicitly reloaded.
-func (r *fileQuizArtifactRepository) Observe(ctx context.Context, scope quizcore.QuizScope) (QuizObservation, error) {
+func (r *fileQuizArtifactRepository) Observe(ctx context.Context, scope quizcore.Scope) (QuizObservation, error) {
 	var observed QuizObservation
 	if err := ctx.Err(); err != nil {
 		return observed, err
@@ -110,7 +110,7 @@ func (r *fileAuthoringSessionRepository) checkQuizImages(images []workflowFileCh
 	return r.checkQuizRead()
 }
 
-func (r *fileAuthoringSessionRepository) quizRevision(scope quizcore.QuizScope, images []workflowFileChange) (string, error) {
+func (r *fileAuthoringSessionRepository) quizRevision(scope quizcore.Scope, images []workflowFileChange) (string, error) {
 	root, err := filepath.Abs(r.projectDir)
 	if err != nil {
 		return "", err
@@ -124,8 +124,8 @@ func (r *fileAuthoringSessionRepository) quizRevision(scope quizcore.QuizScope, 
 	return contenthash.Sum([]byte(strings.Join(hashes, "\x00"))), nil
 }
 
-func decodeQuizObservation(observed *QuizObservation, scope quizcore.QuizScope, paths QuizArtifactPaths) error {
-	entries, err := quizcore.ParseQuizRawCaptureEntries(string(observed.images[1].After))
+func decodeQuizObservation(observed *QuizObservation, scope quizcore.Scope, paths QuizArtifactPaths) error {
+	entries, err := quizcore.ParseRawCaptureEntries(string(observed.images[1].After))
 	if err != nil {
 		return err
 	}
@@ -155,7 +155,7 @@ func decodeQuizObservation(observed *QuizObservation, scope quizcore.QuizScope, 
 		// Legacy reads retain their bytes and historical parser interpretation.
 		// Only an explicit guarded mutation publishes the versioned state.
 		state.SessionID = "legacy-" + observed.images[0].Before
-		if state.Mode == quizcore.QuizModeFast && len(state.Candidates) > 0 {
+		if state.Mode == quizcore.ModeFast && len(state.Candidates) > 0 {
 			state.FastBatchID, state.FastQueue = "legacy-buffer", state.Candidates
 			state.Candidates = nil
 		}
@@ -164,6 +164,6 @@ func decodeQuizObservation(observed *QuizObservation, scope quizcore.QuizScope, 
 	return nil
 }
 
-func quizStateMatchesScope(state quizcore.QuizRuntimeState, scope quizcore.QuizScope, paths QuizArtifactPaths) bool {
+func quizStateMatchesScope(state quizcore.RuntimeState, scope quizcore.Scope, paths QuizArtifactPaths) bool {
 	return state.ProjectID == scope.ProjectID && state.CaseSlug == scope.CaseSlug && state.RawPath == paths.RawRelativePath && state.CuratedPath == paths.CuratedRelativePath
 }

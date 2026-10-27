@@ -115,7 +115,7 @@ func (m *Model) planNativeWorkExtent(request *WorkActionRequest, extent string) 
 	native := request.Workflow
 	native.Preview = true
 
-	native.Selection = core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: extent}, Limit: workflowstate.WorkflowPageLimit}
+	native.Selection = core.WorkflowPreviewRequest{Selector: core.WorkflowSelector{Extent: extent}, Limit: workflowstate.PageLimit}
 	if extent == "loose" {
 		native.Selection.Statuses = []string{core.TicketStatusReadyForDev}
 

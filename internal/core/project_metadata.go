@@ -121,7 +121,7 @@ func (s ProjectMetadataService) save(metadata ProjectMetadata, bindDump bool) (P
 	path := ProjectMetadataPath(s.projectDir)
 
 	content := RenderProjectMetadata(metadata)
-	if len(content) > workflowstate.WorkflowFileLimit {
+	if len(content) > workflowstate.FileLimit {
 		return ProjectMetadata{}, fmt.Errorf("project metadata exceeds the file limit")
 	}
 

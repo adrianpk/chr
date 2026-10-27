@@ -90,7 +90,7 @@ func (s *WorkflowStore) InspectWorkflowPage(ctx context.Context, offset, limit i
 	defer cancel()
 
 	next = -1
-	if offset < 0 || offset > workflowstate.WorkflowRecordLimit || limit < 1 || limit > workflowstate.WorkflowPageLimit {
+	if offset < 0 || offset > workflowstate.RecordLimit || limit < 1 || limit > workflowstate.PageLimit {
 		return nil, next, workflowstate.ErrConflict
 	}
 

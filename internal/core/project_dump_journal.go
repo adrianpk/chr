@@ -13,7 +13,7 @@ import (
 
 const (
 	projectDumpJournalSchema = "chr-authoring-journal/v2"
-	projectDumpJournalBytes  = 24 * workflowstate.WorkflowFileLimit
+	projectDumpJournalBytes  = 24 * workflowstate.FileLimit
 	projectDumpSourceLimit   = 32
 )
 
@@ -22,7 +22,7 @@ func authoringJournalLimit(schema string) int {
 		return projectDumpJournalBytes
 	}
 
-	return workflowstate.WorkflowFileLimit
+	return workflowstate.FileLimit
 }
 
 func validAuthoringJournalBounds(journal authoringMutationJournal, size int) bool {

@@ -313,7 +313,7 @@ func DefaultWorkConfig() WorkConfig {
 		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
 		MergeStrategy:          TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
-		CheckpointStepLimit:    workflowstate.WorkflowPageLimit,
+		CheckpointStepLimit:    workflowstate.PageLimit,
 		MaxWorkerAttempts:      3,
 		MaxIntegrationAttempts: 3,
 		MaxActiveWorkers:       1,
@@ -411,7 +411,7 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 }
 
 func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
-	data, err := io.ReadAll(io.LimitReader(file, workflowstate.WorkflowFileLimit+1))
+	data, err := io.ReadAll(io.LimitReader(file, workflowstate.FileLimit+1))
 	if err != nil {
 		return fmt.Errorf("read workspace config: %w", err)
 	}

@@ -241,7 +241,7 @@ func TestWorkflowUpgradePath(t *testing.T) {
 func workflowUpgradeInvalidImage(kind string) []byte {
 	switch kind {
 	case "oversize":
-		return []byte(strings.Repeat("#", workflowstate.WorkflowFileLimit+1))
+		return []byte(strings.Repeat("#", workflowstate.FileLimit+1))
 	case "versioned":
 		return []byte("workflow:\n  version: 1\n")
 	case "invalid":

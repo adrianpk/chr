@@ -20,7 +20,7 @@ func (s *WorkflowStore) workflowPrerequisiteImages(ctx context.Context, run work
 	}
 
 	refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: record.Task.Key}]
-	if len(refs) > workflowstate.WorkflowPageLimit {
+	if len(refs) > workflowstate.PageLimit {
 		return nil, nil, fmt.Errorf("workflow prerequisite bounds exceeded")
 	}
 

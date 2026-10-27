@@ -146,7 +146,7 @@ func validateWorkflowPreparationBinding(run workflowInvocationFile) error {
 		return err
 	}
 
-	if run.PreparationCount < 0 || run.PreparationCount > workflowstate.WorkflowPageLimit {
+	if run.PreparationCount < 0 || run.PreparationCount > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
 

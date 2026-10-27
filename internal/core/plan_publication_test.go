@@ -120,5 +120,5 @@ func checkRecoveredPlanPublication(t *testing.T, project string, paths Generated
 }
 
 func planPublicationCandidate() GeneratedPlan {
-	return GeneratedPlan{Scope: quizcore.QuizScope{ProjectID: "example", CaseSlug: "chosen"}, Title: "Original plan", Body: "Original bounded work.", SourceObservationHash: "observed", SourceInputs: []PlanSourceBinding{{Kind: "dump", Reference: "ops/default/dump/00000-context/artifact.md", Revision: "observed-source"}}, CreatedAt: time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)}
+	return GeneratedPlan{Scope: quizcore.Scope{ProjectID: "example", CaseSlug: "chosen"}, Title: "Original plan", Body: "Original bounded work.", SourceObservationHash: "observed", SourceInputs: []PlanSourceBinding{{Kind: "dump", Reference: "ops/default/dump/00000-context/artifact.md", Revision: "observed-source"}}, CreatedAt: time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)}
 }

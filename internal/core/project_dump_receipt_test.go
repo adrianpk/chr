@@ -70,7 +70,7 @@ func TestProjectDumpReconcileReceipt(t *testing.T) {
 func fillProjectDumpReceiptCapacity(t *testing.T, project string) {
 	t.Helper()
 
-	for i := range workflowstate.WorkflowRecordLimit - 1 {
+	for i := range workflowstate.RecordLimit - 1 {
 		path := filepath.Join(project, authoringRuntimeRef("receipts"), fmt.Sprintf("retained-%04d.json", i))
 		if err := os.WriteFile(path, []byte("retained fixture"), 0o600); err != nil {
 			t.Fatal(err)

@@ -9,7 +9,7 @@ import (
 
 // Validate checks shared hierarchy and uniqueness independently of SQLite.
 func (s WorkflowSnapshot) Validate() error {
-	if len(s.Records) > workflowstate.WorkflowRecordLimit {
+	if len(s.Records) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow namespace record limit exceeded")
 	}
 

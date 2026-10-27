@@ -71,14 +71,14 @@ func readWorkflowUpgradeSelection(path string) (*core.WorkflowPlanAdoptionOption
 		return nil, err
 	}
 
-	data, err := io.ReadAll(io.LimitReader(file, workflowstate.WorkflowFileLimit+1))
+	data, err := io.ReadAll(io.LimitReader(file, workflowstate.FileLimit+1))
 
 	err = errors.Join(err, file.Close())
 	if err != nil {
 		return nil, err
 	}
 
-	if len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) > workflowstate.FileLimit {
 		return nil, fmt.Errorf("workflow adoption envelope exceeds 1 MiB")
 	}
 

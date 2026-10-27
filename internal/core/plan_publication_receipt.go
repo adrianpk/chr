@@ -18,7 +18,7 @@ import (
 type PlanPublicationOperation struct {
 	TicketDelivery     bool `json:",omitempty"`
 	ID                 string
-	Scope              quizcore.QuizScope
+	Scope              quizcore.Scope
 	ExpectedRevision   string
 	Replace            bool
 	TrackerReplaceHash string

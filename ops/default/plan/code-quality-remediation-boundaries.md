@@ -101,7 +101,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-716 current non-test files under internal/core, their declared symbols,
+717 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -517,3 +517,20 @@ Slice 7 report replace the earlier checkpoint pending-work descriptions above.
 Root core exports no receiver facade. The actual graph and 714-file owner ledger
 include the receiver and its immutable prerequisite owners. Final clean PR-head
 validation is recorded through the controller before integration.
+
+## Slice 8 runtime extraction checkpoint
+
+`core/quiz` owns clarification runtime values, their validation and raw-capture
+curation. Scope identifies the project/namespace/use case; RuntimeState retains
+question identity, counters, Deep/Fast mode, question/branch bounds and the exact
+existing state spellings. CuratedNotes is the domain summary, not a file writer.
+The authoring journal and provider adapter are still in their existing owners
+while the remaining T8.1 work is in progress.
+
+`core/workflow/state` owns the original RecordLimit, FileLimit and PageLimit
+constants now used by both curation and durable workflow consumers. Their values
+are unchanged. This prerequisite does not move workflow policy or transactions.
+
+The raw-turn parser returns a named metadata/body value. Missing body still
+produces an empty string and the same parsed metadata; the legacy and retained
+entry paths continue through the original parser regressions.

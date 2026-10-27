@@ -19,7 +19,7 @@ func (s *WorkflowStore) admitWorkflowLooseLater(ctx context.Context, run *workfl
 		return nil
 	}
 
-	if len(run.Members)+len(later) > workflowstate.WorkflowRecordLimit {
+	if len(run.Members)+len(later) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow loose admission member bound exceeded")
 	}
 

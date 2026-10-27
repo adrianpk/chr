@@ -181,7 +181,7 @@ func (s service) inspectGuidedQuestion(ctx context.Context, result *GuidedUseCas
 		return
 	}
 
-	observed, err := s.quizRepository().Observe(ctx, quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug})
+	observed, err := s.quizRepository().Observe(ctx, quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug})
 	if err != nil {
 		result.Problems = append(result.Problems, "Clarification could not be read. Correct its stored inputs before retrying.")
 

@@ -94,7 +94,7 @@ func regenerateWorkflowOrder(t *testing.T, store *WorkflowStore, plan GeneratedW
 	t.Helper()
 
 	generated := orderedPlanCandidate()
-	generated.Scope = quizcore.QuizScope{ProjectID: store.projectID, CaseSlug: plan.UseCase}
+	generated.Scope = quizcore.Scope{ProjectID: store.projectID, CaseSlug: plan.UseCase}
 	generated.Order = plannedWorkflowOrder(plan)
 
 	generated.Body = body
@@ -132,7 +132,7 @@ func checkWorkflowPlanOrderRecovery(t *testing.T, stage int) {
 		t.Fatal("binding did not interrupt")
 	}
 
-	if _, err := PlanTargetRevision(t.Context(), store.layout.ProjectDir(), quizcore.QuizScope{ProjectID: store.projectID}); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := PlanTargetRevision(t.Context(), store.layout.ProjectDir(), quizcore.Scope{ProjectID: store.projectID}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("pending binding was readable", err)
 	}
 

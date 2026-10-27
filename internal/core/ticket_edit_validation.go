@@ -43,7 +43,7 @@ func validateTicketDescription(document TicketDocument, body *string) error {
 		return fmt.Errorf("description is read-only: %s", reason)
 	}
 
-	if strings.TrimSpace(*body) == "" || len(*body) > workflowstate.WorkflowFileLimit/2 {
+	if strings.TrimSpace(*body) == "" || len(*body) > workflowstate.FileLimit/2 {
 		return fmt.Errorf("ticket description is required and must fit the document bounds")
 	}
 

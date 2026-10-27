@@ -42,7 +42,7 @@ func TestPiGenerationFastQuiz(t *testing.T) {
 	operations, driver := piGenerationFixture(t, output)
 	writeServiceQuizFixture(t, operations.projectContext.ProjectDir)
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeFast})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.ModeFast})
 	if err != nil || started.State.ActiveQuestion == nil {
 		t.Fatal("Pi fast batch failed", err)
 	}
@@ -68,7 +68,7 @@ func TestPiGenerationAcceptance(t *testing.T) {
 	project := operations.projectContext.ProjectDir
 	writeAcceptanceFeatureServiceFixture(t, project)
 
-	request := AcceptanceFeatureGenerateRequest{OperationID: "pi-feature", Scope: quizcore.QuizScope{CaseSlug: "blog"}}
+	request := AcceptanceFeatureGenerateRequest{OperationID: "pi-feature", Scope: quizcore.Scope{CaseSlug: "blog"}}
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), request)
 	if err != nil || result.Status != core.AcceptanceFeatureStatusGenerated {
@@ -159,7 +159,7 @@ func TestPiGenerationSpec(t *testing.T) {
 	project := operations.projectContext.ProjectDir
 	writeServiceQuizFixture(t, project)
 
-	request := SpecGenerateRequest{OperationID: "pi-spec", Scope: quizcore.QuizScope{CaseSlug: "blog"}}
+	request := SpecGenerateRequest{OperationID: "pi-spec", Scope: quizcore.Scope{CaseSlug: "blog"}}
 
 	result, err := operations.GenerateSpec(t.Context(), request)
 	if err != nil {

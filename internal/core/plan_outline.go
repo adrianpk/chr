@@ -10,7 +10,7 @@ import (
 
 // GeneratedPlanOutline describes a package boundary value.
 type GeneratedPlanOutline struct {
-	Scope              quizcore.QuizScope
+	Scope              quizcore.Scope
 	Title              string
 	Status             string
 	Summary            string
@@ -64,7 +64,7 @@ func (o GeneratedPlanOutline) Slice(sliceID string) (GeneratedPlanOutlineSlice, 
 
 // ValidateGeneratedPlanOutline validates the corresponding package boundary value.
 func ValidateGeneratedPlanOutline(outline GeneratedPlanOutline) error {
-	if err := quizcore.ValidateQuizScope(outline.Scope); err != nil {
+	if err := quizcore.ValidateScope(outline.Scope); err != nil {
 		return err
 	}
 

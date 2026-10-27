@@ -92,7 +92,7 @@ func reserveWorkflowNativeDrift(budget *WorkflowIntegrationBudget, entry Workflo
 		return nil
 	}
 
-	if len(budget.Reservations) >= workflowstate.WorkflowRecordLimit {
+	if len(budget.Reservations) >= workflowstate.RecordLimit {
 		return ErrWorkflowIntegrationBudget
 	}
 

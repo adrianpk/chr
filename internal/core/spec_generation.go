@@ -19,7 +19,7 @@ var generatedSpecChrPathPattern = regexp.MustCompile(`\.chr(?:/[^\s\])"'` + "`" 
 // GeneratedSpec describes a package boundary value.
 type GeneratedSpec struct {
 	ExpectedRevision string `json:"-"`
-	Scope            quizcore.QuizScope
+	Scope            quizcore.Scope
 	Title            string
 	Body             string
 	SourcePaths      []string
@@ -36,8 +36,8 @@ type GeneratedSpecPaths struct {
 }
 
 // GeneratedSpecLayout executes the corresponding package operation.
-func GeneratedSpecLayout(projectDir string, scope quizcore.QuizScope) (GeneratedSpecPaths, error) {
-	err := quizcore.ValidateQuizScope(scope)
+func GeneratedSpecLayout(projectDir string, scope quizcore.Scope) (GeneratedSpecPaths, error) {
+	err := quizcore.ValidateScope(scope)
 	if err != nil {
 		return GeneratedSpecPaths{}, err
 	}
@@ -138,7 +138,7 @@ func ValidateGeneratedSpec(spec GeneratedSpec) error {
 		return err
 	}
 
-	err = quizcore.ValidateQuizScope(spec.Scope)
+	err = quizcore.ValidateScope(spec.Scope)
 	if err != nil {
 		return err
 	}

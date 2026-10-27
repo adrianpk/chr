@@ -21,7 +21,7 @@ func (s *WorkflowStore) workflowClosingBudget(set WorkflowRecord, invocationID s
 		return nil
 	}
 
-	if len(set.Set.Closing.Attempts) >= workflowstate.WorkflowRecordLimit {
+	if len(set.Set.Closing.Attempts) >= workflowstate.RecordLimit {
 		return fmt.Errorf("set closing history bound exhausted")
 	}
 
@@ -39,7 +39,7 @@ func (s *WorkflowStore) workflowClosingBudget(set WorkflowRecord, invocationID s
 		}
 	}
 
-	if count >= workflowstate.WorkflowPageLimit {
+	if count >= workflowstate.PageLimit {
 		return fmt.Errorf("set invocation closing attempt budget exhausted")
 	}
 

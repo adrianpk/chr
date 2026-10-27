@@ -29,10 +29,10 @@ type TicketBoardReadOptions struct {
 // It never rebuilds SQL, adopts documents or recovers a workflow transition.
 func ReadTicketBoard(ctx context.Context, opts TicketBoardReadOptions) (board Board, err error) {
 	if opts.Limit == 0 {
-		opts.Limit = workflowstate.WorkflowPageLimit
+		opts.Limit = workflowstate.PageLimit
 	}
 
-	if opts.ProjectID == "" || opts.Layout.ProjectDir() == "" || opts.Offset < 0 || opts.Offset > workflowstate.WorkflowRecordLimit || opts.Limit < 1 || opts.Limit > workflowstate.WorkflowPageLimit {
+	if opts.ProjectID == "" || opts.Layout.ProjectDir() == "" || opts.Offset < 0 || opts.Offset > workflowstate.RecordLimit || opts.Limit < 1 || opts.Limit > workflowstate.PageLimit {
 		return Board{}, fmt.Errorf("invalid ticket Board scope or page bounds")
 	}
 
@@ -175,7 +175,7 @@ func boardMarkdownFiles(ctx context.Context, projectDir, root string) ([]string,
 		}
 
 		files = append(files, path)
-		if len(files) > workflowstate.WorkflowRecordLimit {
+		if len(files) > workflowstate.RecordLimit {
 			return fmt.Errorf("ticket Board observation bound exceeded")
 		}
 
@@ -234,7 +234,7 @@ func (s *WorkflowStore) appendLooseBoardTicket(root, path string, tickets map[st
 		return fmt.Errorf("duplicate canonical Board ticket key: %s", ticket.Key)
 	}
 
-	if len(tickets) >= workflowstate.WorkflowRecordLimit {
+	if len(tickets) >= workflowstate.RecordLimit {
 		return fmt.Errorf("ticket Board observation bound exceeded")
 	}
 

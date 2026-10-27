@@ -21,7 +21,7 @@ type planTargetObservation struct {
 
 // PlanTargetRevision binds a plan operation to the current body and envelope, or
 // their complete absence. Reading a pending or partially present target fails.
-func PlanTargetRevision(ctx context.Context, projectDir string, scope quizcore.QuizScope) (string, error) {
+func PlanTargetRevision(ctx context.Context, projectDir string, scope quizcore.Scope) (string, error) {
 	paths, err := GeneratedPlanLayout(projectDir, scope)
 	if err != nil {
 		return "", err
@@ -219,7 +219,7 @@ func validatePlanTargetMetadata(metadata map[string]any, reference string) error
 	return nil
 }
 
-func validatePlanTargetScope(target planTargetObservation, scope quizcore.QuizScope) error {
+func validatePlanTargetScope(target planTargetObservation, scope quizcore.Scope) error {
 	front, _, err := splitWorkflowMarkdown(target.images[0].After)
 	if err != nil {
 		return err

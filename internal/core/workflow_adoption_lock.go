@@ -20,7 +20,7 @@ func (s *WorkflowStore) acquireWorkflowAdoptionLocks(ctx context.Context) ([]*Ag
 		return nil, err
 	}
 
-	if len(worktrees) == 0 || len(worktrees) > workflowstate.WorkflowPageLimit {
+	if len(worktrees) == 0 || len(worktrees) > workflowstate.PageLimit {
 		return nil, fmt.Errorf("legacy worktree ownership scan bound exceeded")
 	}
 

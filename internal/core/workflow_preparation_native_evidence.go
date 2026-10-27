@@ -102,7 +102,7 @@ func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, 
 
 func workflowNativePreparationEvidenceFile(id string, value any) (workflowFileChange, WorkflowEvidenceRef, error) {
 	data, err := json.Marshal(value)
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return workflowFileChange{}, WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 

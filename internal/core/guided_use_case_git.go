@@ -70,7 +70,7 @@ func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Con
 		}
 
 		size += len(content)
-		if size > 8*workflowstate.WorkflowFileLimit {
+		if size > 8*workflowstate.FileLimit {
 			return checkpoint, errors.New("guided checkpoint exceeds 8 MiB")
 		}
 

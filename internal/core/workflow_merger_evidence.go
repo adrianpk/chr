@@ -40,7 +40,7 @@ func (input WorkflowMergerInput) evidenceRefs() []WorkflowEvidenceRef {
 
 func validateWorkflowMergerReferences(input WorkflowMergerInput) error {
 	refs := input.evidenceRefs()
-	if len(input.IntentRefs) == 0 || len(input.TargetChangeRefs) == 0 || len(refs) > workflowstate.WorkflowPageLimit {
+	if len(input.IntentRefs) == 0 || len(input.TargetChangeRefs) == 0 || len(refs) > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
 
@@ -94,7 +94,7 @@ func (s *WorkflowStore) checkWorkflowMergerManifest(input WorkflowMergerInput) e
 	expected := [4]string{"chr-native-source/v1", input.Repository, input.SourceRef, input.Source}
 
 	actual := [4]string{manifest.Schema, manifest.Repository, manifest.SourceRef, manifest.OriginalSource}
-	if actual != expected || len(manifest.Commits) == 0 || len(manifest.Commits) > workflowstate.WorkflowRecordLimit {
+	if actual != expected || len(manifest.Commits) == 0 || len(manifest.Commits) > workflowstate.RecordLimit {
 		return workflowstate.ErrConflict
 	}
 

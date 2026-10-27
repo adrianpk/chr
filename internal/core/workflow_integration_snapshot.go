@@ -149,7 +149,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationFiles(run workflowInvocationFile
 		return workflowstate.ErrConflict
 	}
 
-	if err != nil || len(files) > workflowstate.WorkflowRecordLimit+1 {
+	if err != nil || len(files) > workflowstate.RecordLimit+1 {
 		return errorsOrConflict(err)
 	}
 
@@ -182,7 +182,7 @@ func (s *WorkflowStore) workflowIntegrationJournals(ctx context.Context) ([]work
 		return nil, nil
 	}
 
-	if err != nil || len(files) > workflowstate.WorkflowRecordLimit {
+	if err != nil || len(files) > workflowstate.RecordLimit {
 		return nil, errorsOrConflict(err)
 	}
 

@@ -43,7 +43,7 @@ func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference strin
 }
 
 func (r *fileAuthoringSessionRepository) readAuthoringDocument(relative string) ([]byte, error) {
-	return r.readBoundedAuthoringDocument(relative, workflowstate.WorkflowFileLimit)
+	return r.readBoundedAuthoringDocument(relative, workflowstate.FileLimit)
 }
 
 func (r *fileAuthoringSessionRepository) readBoundedAuthoringDocument(relative string, limit int) ([]byte, error) {

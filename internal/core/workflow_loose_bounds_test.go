@@ -85,14 +85,14 @@ func TestWorkflowLooseBounded(t *testing.T) {
 	store, first, request := workflowTicketFixture(t, "loose", workflowPreparationGate("test -f result.txt"))
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "work:\n  ready_queue_capacity: 1024\n")
 
-	for i := 0; i < workflowstate.WorkflowPageLimit; i++ {
+	for i := 0; i < workflowstate.PageLimit; i++ {
 		workflowLooseCreate(t, store, first, fmt.Sprintf("PRJ-%d", 91+i), "normal", nil)
 	}
 
 	request.Policy.CheckpointStepLimit = 1
 
 	run := workflowTestStart(t, store, request).Invocation
-	if len(run.Members) != workflowstate.WorkflowPageLimit+1 || len(run.LooseQueue.Admitted) != len(run.Members) {
+	if len(run.Members) != workflowstate.PageLimit+1 || len(run.LooseQueue.Admitted) != len(run.Members) {
 		t.Fatal("initial selection truncated at the query page bound")
 	}
 

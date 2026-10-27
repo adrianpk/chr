@@ -35,7 +35,7 @@ func appendPlanQuiz(ctx context.Context, projectDir string, observed *PlanSource
 	answers := make([]planQuizAnswer, 0, len(quiz.Entries))
 
 	for _, entry := range quiz.Entries {
-		if entry.Status == quizcore.QuizEntryStatusAnswered && strings.TrimSpace(entry.Answer) != "" {
+		if entry.Status == quizcore.EntryStatusAnswered && strings.TrimSpace(entry.Answer) != "" {
 			answers = append(answers, planQuizAnswer{ID: entry.ID, QuestionID: entry.QuestionID, Question: entry.Question, Answer: entry.Answer})
 		}
 	}

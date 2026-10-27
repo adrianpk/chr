@@ -47,7 +47,7 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return fmt.Errorf("unsupported workflow invocation status")
 	}
 
-	if !slices.Contains(run.RequestKeys, run.RequestKey) || len(run.RequestKeys) > workflowstate.WorkflowPageLimit {
+	if !slices.Contains(run.RequestKeys, run.RequestKey) || len(run.RequestKeys) > workflowstate.PageLimit {
 		return fmt.Errorf("workflow request attachment keys are incomplete or oversized")
 	}
 
@@ -121,7 +121,7 @@ func validateWorkflowCandidateRef(run workflowInvocationFile) error {
 }
 
 func validWorkflowInvocationBounds(run workflowInvocationFile) bool {
-	return validWorkflowInvocationExtent(run) && len(run.Members) <= workflowstate.WorkflowRecordLimit && run.Cursor >= 0 && run.Cursor <= len(run.Members) && len(run.Attempts) <= workflowstate.WorkflowRecordLimit && len(run.SetImages) <= workflowstate.WorkflowRecordLimit
+	return validWorkflowInvocationExtent(run) && len(run.Members) <= workflowstate.RecordLimit && run.Cursor >= 0 && run.Cursor <= len(run.Members) && len(run.Attempts) <= workflowstate.RecordLimit && len(run.SetImages) <= workflowstate.RecordLimit
 }
 
 func validWorkflowInvocationExtent(run workflowInvocationFile) bool {

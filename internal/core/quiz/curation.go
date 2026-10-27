@@ -12,21 +12,21 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ParseQuizRawCaptureEntries parses the corresponding package data.
-func ParseQuizRawCaptureEntries(content string) ([]QuizEntry, error) {
-	if len(content) > workflowstate.WorkflowFileLimit {
+// ParseRawCaptureEntries parses the corresponding package data.
+func ParseRawCaptureEntries(content string) ([]Entry, error) {
+	if len(content) > workflowstate.FileLimit {
 		return nil, fmt.Errorf("quiz raw capture exceeds file limit")
 	}
 
 	blocks := strings.Split(content, "\n## Turn\n\n")
-	if len(blocks) > workflowstate.WorkflowRecordLimit+1 {
+	if len(blocks) > workflowstate.RecordLimit+1 {
 		return nil, fmt.Errorf("quiz entry capacity exceeded")
 	}
 
-	entries := []QuizEntry{}
+	entries := []Entry{}
 
 	for index, block := range blocks[1:] {
-		entry, err := parseQuizRawTurn(index+1, block)
+		entry, err := parseRawTurn(index+1, block)
 		if err != nil {
 			return nil, err
 		}
@@ -37,11 +37,11 @@ func ParseQuizRawCaptureEntries(content string) ([]QuizEntry, error) {
 	return entries, nil
 }
 
-// CurateQuizEntries executes the corresponding package operation.
-func CurateQuizEntries(scope QuizScope, entries []QuizEntry, now time.Time) QuizCuratedNotes {
+// CurateEntries executes the corresponding package operation.
+func CurateEntries(scope Scope, entries []Entry, now time.Time) CuratedNotes {
 	answered := quizAnsweredEntriesByTopic(entries)
 
-	return QuizCuratedNotes{
+	return CuratedNotes{
 		Scope:                      scope,
 		Status:                     "curated",
 		Decisions:                  quizDecisionNotes(answered),
@@ -55,7 +55,7 @@ func CurateQuizEntries(scope QuizScope, entries []QuizEntry, now time.Time) Quiz
 	}
 }
 
-func quizAcceptanceReadinessNotes(entries []QuizEntry) []string {
+func quizAcceptanceReadinessNotes(entries []Entry) []string {
 	seen := map[string]bool{}
 	notes := []string{}
 
@@ -171,11 +171,12 @@ func inferredReadinessSlots(value any) string {
 	return strings.Join(slots, ", ")
 }
 
-func parseQuizRawTurn(index int, block string) (QuizEntry, error) {
-	entry := QuizEntry{
+func parseRawTurn(index int, block string) (Entry, error) {
+	entry := Entry{
 		ID: fmt.Sprintf("entry-%03d", index),
 	}
-	metadata, body := splitQuizTurnMetadata(block)
+	turn := splitTurnMetadata(block)
+	metadata, body := turn.Metadata, turn.Body
 
 	if encoded, exists := metadata["entry_json"]; exists {
 		data, err := base64.RawStdEncoding.DecodeString(encoded)
@@ -187,31 +188,36 @@ func parseQuizRawTurn(index int, block string) (QuizEntry, error) {
 			return entry, err
 		}
 
-		return entry, ValidateQuizEntry(entry)
+		return entry, ValidateEntry(entry)
 	}
 
 	entry.QuestionID = metadata["question_id"]
-	entry.Status = QuizEntryStatus(metadata["status"])
-	entry.Mode = QuizMode(metadata["mode"])
+	entry.Status = EntryStatus(metadata["status"])
+	entry.Mode = Mode(metadata["mode"])
 	entry.Topic = metadata["topic"]
-	entry.Depth = parseQuizTurnDepth(metadata["depth"])
+	entry.Depth = parseTurnDepth(metadata["depth"])
 	entry.ParentID = metadata["parent_id"]
-	entry.Tags = parseQuizTurnTags(metadata["tags"])
+	entry.Tags = parseTurnTags(metadata["tags"])
 	entry.PromptIntent = sectionAfterLabel(body, "Prompt intent:")
 	entry.Question = sectionAfterLabel(body, "Question:")
 	entry.Answer = sectionAfterLabel(body, "Answer:")
 	entry.CreatedAt = quizRawTurnTime(block)
 	entry.AnsweredAt = entry.CreatedAt
 
-	err := ValidateQuizEntry(entry)
+	err := ValidateEntry(entry)
 	if err != nil {
-		return QuizEntry{}, err
+		return Entry{}, err
 	}
 
 	return entry, nil
 }
 
-func splitQuizTurnMetadata(block string) (map[string]string, string) {
+type turnMetadata struct {
+	Metadata map[string]string
+	Body     string
+}
+
+func splitTurnMetadata(block string) turnMetadata {
 	parts := strings.SplitN(block, "\n\n", 2)
 	metadata := map[string]string{}
 
@@ -225,10 +231,10 @@ func splitQuizTurnMetadata(block string) (map[string]string, string) {
 	}
 
 	if len(parts) == 1 {
-		return metadata, ""
+		return turnMetadata{Metadata: metadata}
 	}
 
-	return metadata, parts[1]
+	return turnMetadata{Metadata: metadata, Body: parts[1]}
 }
 
 func sectionAfterLabel(body, label string) string {
@@ -243,7 +249,7 @@ func sectionAfterLabel(body, label string) string {
 	return strings.TrimSpace(value)
 }
 
-func parseQuizTurnDepth(value string) int {
+func parseTurnDepth(value string) int {
 	depth, err := strconv.Atoi(strings.TrimSpace(value))
 	if err != nil {
 		return 1
@@ -252,7 +258,7 @@ func parseQuizTurnDepth(value string) int {
 	return depth
 }
 
-func parseQuizTurnTags(value string) []string {
+func parseTurnTags(value string) []string {
 	tags := []string{}
 
 	for _, tag := range strings.Split(value, ",") {
@@ -281,11 +287,11 @@ func quizRawTurnTime(block string) time.Time {
 	return time.Unix(1, 0).UTC()
 }
 
-func quizAnsweredEntriesByTopic(entries []QuizEntry) map[string][]QuizEntry {
-	answered := map[string][]QuizEntry{}
+func quizAnsweredEntriesByTopic(entries []Entry) map[string][]Entry {
+	answered := map[string][]Entry{}
 
 	for _, entry := range entries {
-		if entry.Status != QuizEntryStatusAnswered {
+		if entry.Status != EntryStatusAnswered {
 			continue
 		}
 
@@ -296,37 +302,37 @@ func quizAnsweredEntriesByTopic(entries []QuizEntry) map[string][]QuizEntry {
 	return answered
 }
 
-func quizDecisionNotes(answered map[string][]QuizEntry) []string {
+func quizDecisionNotes(answered map[string][]Entry) []string {
 	notes := []string{}
-	for _, topic := range sortedQuizTopics(answered) {
-		notes = append(notes, topic+": "+joinQuizAnswerInsights(answered[topic]))
+	for _, topic := range sortedTopics(answered) {
+		notes = append(notes, topic+": "+joinAnswerInsights(answered[topic]))
 	}
 
 	return notes
 }
 
-func quizKeywordNotes(entries []QuizEntry, keywords []string) []string {
+func quizKeywordNotes(entries []Entry, keywords []string) []string {
 	notes := []string{}
 
 	for _, entry := range entries {
-		if entry.Status != QuizEntryStatusAnswered {
+		if entry.Status != EntryStatusAnswered {
 			continue
 		}
 
 		answer := strings.TrimSpace(entry.Answer)
-		if containsQuizKeyword(answer, keywords) {
-			notes = append(notes, entry.Topic+": "+firstQuizSentence(answer))
+		if containsKeyword(answer, keywords) {
+			notes = append(notes, entry.Topic+": "+firstSentence(answer))
 		}
 	}
 
 	return compactUniqueStrings(notes)
 }
 
-func quizOpenQuestionNotes(entries []QuizEntry) []string {
+func quizOpenQuestionNotes(entries []Entry) []string {
 	notes := []string{}
 
 	for _, entry := range entries {
-		if entry.Status == QuizEntryStatusSkipped {
+		if entry.Status == EntryStatusSkipped {
 			notes = append(notes, entry.Topic+": "+strings.TrimSpace(entry.Question))
 		}
 	}
@@ -334,7 +340,7 @@ func quizOpenQuestionNotes(entries []QuizEntry) []string {
 	return notes
 }
 
-func quizImplementationImplications(answered map[string][]QuizEntry, entries []QuizEntry) []string {
+func quizImplementationImplications(answered map[string][]Entry, entries []Entry) []string {
 	if len(entries) == 0 {
 		return []string{"No quiz answers have been captured yet."}
 	}
@@ -345,7 +351,7 @@ func quizImplementationImplications(answered map[string][]QuizEntry, entries []Q
 	}
 }
 
-func sortedQuizTopics(entries map[string][]QuizEntry) []string {
+func sortedTopics(entries map[string][]Entry) []string {
 	topics := make([]string, 0, len(entries))
 	for topic := range entries {
 		topics = append(topics, topic)
@@ -356,11 +362,11 @@ func sortedQuizTopics(entries map[string][]QuizEntry) []string {
 	return topics
 }
 
-func joinQuizAnswerInsights(entries []QuizEntry) string {
+func joinAnswerInsights(entries []Entry) string {
 	insights := []string{}
 
 	for _, entry := range entries {
-		insights = append(insights, firstQuizSentence(entry.Answer))
+		insights = append(insights, firstSentence(entry.Answer))
 		if len(insights) == 3 {
 			break
 		}
@@ -369,7 +375,7 @@ func joinQuizAnswerInsights(entries []QuizEntry) string {
 	return strings.Join(compactUniqueStrings(insights), "; ")
 }
 
-func firstQuizSentence(value string) string {
+func firstSentence(value string) string {
 	value = strings.TrimSpace(strings.ReplaceAll(value, "\n", " "))
 	for _, marker := range []string{". ", "! ", "? "} {
 		if before, _, ok := strings.Cut(value, marker); ok {
@@ -380,7 +386,7 @@ func firstQuizSentence(value string) string {
 	return value
 }
 
-func containsQuizKeyword(value string, keywords []string) bool {
+func containsKeyword(value string, keywords []string) bool {
 	value = strings.ToLower(value)
 	for _, keyword := range keywords {
 		if strings.Contains(value, keyword) {

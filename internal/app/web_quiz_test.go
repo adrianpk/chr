@@ -21,7 +21,7 @@ func TestWebQuizActions(t *testing.T) {
 	provider, _ := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeFast})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.ModeFast})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func TestWebQuizActions(t *testing.T) {
 
 	checkWebQuizConfirmedEntry(t, operations, request.Get("answer"))
 
-	current, err := operations.quizRepository().LoadRuntimeState(t.Context(), operations.quizScope(quizcore.QuizScope{}))
+	current, err := operations.quizRepository().LoadRuntimeState(t.Context(), operations.quizScope(quizcore.Scope{}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestWebQuizActions(t *testing.T) {
 	checkWebQuizBindings(t, handler, current)
 }
 
-func checkWebQuizBindings(t *testing.T, handler http.Handler, state quizcore.QuizRuntimeState) {
+func checkWebQuizBindings(t *testing.T, handler http.Handler, state quizcore.RuntimeState) {
 	t.Helper()
 
 	for _, missing := range []string{"revision", "request_id", "session_id", "question_id"} {
@@ -72,7 +72,7 @@ func checkWebQuizBindings(t *testing.T, handler http.Handler, state quizcore.Qui
 // timestamps by stable entry identity rather than source file ordering.
 func TestWebQuizHistory(t *testing.T) {
 	now := serviceQuizClock()()
-	entries := []quizcore.QuizEntry{{ID: "a", Status: quizcore.QuizEntryStatusAnswered, AnsweredAt: now}, {ID: "c", Status: quizcore.QuizEntryStatusSkipped, AnsweredAt: now}, {ID: "b", Status: quizcore.QuizEntryStatusAnswered, AnsweredAt: now}}
+	entries := []quizcore.Entry{{ID: "a", Status: quizcore.EntryStatusAnswered, AnsweredAt: now}, {ID: "c", Status: quizcore.EntryStatusSkipped, AnsweredAt: now}, {ID: "b", Status: quizcore.EntryStatusAnswered, AnsweredAt: now}}
 
 	history := webQuizHistory(entries)
 	if len(history) != 2 || history[0].ID != "b" || history[1].ID != "a" {
@@ -116,7 +116,7 @@ func newWebQuizFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel) {
 
 	now := serviceQuizClock()()
 
-	candidates := []quizcore.QuizCandidate{}
+	candidates := []quizcore.Candidate{}
 	for index, prompt := range []string{"Which boundary must remain explicit?", "How should a failed request be retried?", "What confirms that the change succeeded?", "Which context must survive a restart?", "What is still unresolved?"} {
 		candidates = append(candidates, serviceQuizCandidate("question-"+strconv.Itoa(index+2), prompt, now))
 	}
@@ -142,7 +142,7 @@ func webQuizHandler(t *testing.T, provider webViewProvider) http.Handler {
 	return handler
 }
 
-func quizHTTPForm(state quizcore.QuizRuntimeState, action, id string) url.Values {
+func quizHTTPForm(state quizcore.RuntimeState, action, id string) url.Values {
 	question := ""
 	if state.ActiveQuestion != nil {
 		question = state.ActiveQuestion.ID
@@ -178,7 +178,7 @@ func webQuizGET(t *testing.T, handler http.Handler, reference string) string {
 func checkWebQuizConfirmedEntry(t *testing.T, operations service, want string) {
 	t.Helper()
 
-	entries, err := operations.quizRepository().LoadRawCaptureEntries(t.Context(), operations.quizScope(quizcore.QuizScope{}))
+	entries, err := operations.quizRepository().LoadRawCaptureEntries(t.Context(), operations.quizScope(quizcore.Scope{}))
 	if err != nil || len(entries) != 1 || entries[0].Answer != want {
 		t.Fatal(entries, err)
 	}
@@ -190,7 +190,7 @@ func TestWebQuizReadOnly(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.QuizScope{}))
+	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.Scope{}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,13 +213,13 @@ func TestWebQuizStartResume(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.QuizScope{}))
+	paths, err := operations.quizRepository().Paths(operations.quizScope(quizcore.Scope{}))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	detail := webQuizDetail(t, provider, paths.CuratedRelativePath)
-	state := quizcore.QuizRuntimeState{CuratedPath: detail.ID, Revision: detail.Revision}
+	state := quizcore.RuntimeState{CuratedPath: detail.ID, Revision: detail.Revision}
 	form := quizHTTPForm(state, "quiz.start", "focused-start")
 	form.Set("mode", "fast")
 
@@ -231,7 +231,7 @@ func TestWebQuizStartResume(t *testing.T) {
 		}
 	}
 
-	current, err := operations.quizRepository().LoadRuntimeState(t.Context(), operations.quizScope(quizcore.QuizScope{}))
+	current, err := operations.quizRepository().LoadRuntimeState(t.Context(), operations.quizScope(quizcore.Scope{}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -245,7 +245,7 @@ func TestWebQuizStartResume(t *testing.T) {
 // The final observation supplies mode/status, and draft context distinguishes
 // byte-identical scope/session records in different project roots.
 func TestWebQuizObservationProjection(t *testing.T) {
-	view := webQuizAnswerView(QuizView{Mode: quizcore.QuizModeDeep, Status: "idle"}, core.QuizObservation{Exists: true, State: quizcore.QuizRuntimeState{Mode: quizcore.QuizModeFast, Status: quizcore.QuizRuntimeStatusDone}})
+	view := webQuizAnswerView(QuizView{Mode: quizcore.ModeDeep, Status: "idle"}, core.QuizObservation{Exists: true, State: quizcore.RuntimeState{Mode: quizcore.ModeFast, Status: quizcore.RuntimeStatusDone}})
 	if view.Mode != "fast" || view.Status != "done" || view.Open {
 		t.Fatal("projection used an older catalog state", view)
 	}

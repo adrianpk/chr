@@ -111,7 +111,7 @@ func (s *WorkflowStore) checkWorkflowReviewAfterIO(ctx context.Context, run work
 
 func workflowReviewInputBytes(input WorkflowReviewInput) ([]byte, error) {
 	data, err := json.MarshalIndent(input, "", "  ")
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return nil, fmt.Errorf("review input exceeds file bounds")
 	}
 

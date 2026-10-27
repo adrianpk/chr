@@ -49,7 +49,7 @@ func (r WorkflowRecord) validateIdentity() error {
 }
 
 func validateWorkflowRecordBounds(r WorkflowRecord) error {
-	if len(r.Body) > workflowstate.WorkflowFileLimit || r.Revision > math.MaxInt64 {
+	if len(r.Body) > workflowstate.FileLimit || r.Revision > math.MaxInt64 {
 		return fmt.Errorf("workflow record size or revision bound exceeded")
 	}
 
@@ -58,7 +58,7 @@ func validateWorkflowRecordBounds(r WorkflowRecord) error {
 		return err
 	}
 
-	if len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) > workflowstate.FileLimit {
 		return fmt.Errorf("workflow record exceeds 1 MiB")
 	}
 
@@ -247,7 +247,7 @@ func validateWorkflowSlice(s WorkflowSlice) error {
 }
 
 func validateWorkflowDependencies(refs []WorkflowRef) error {
-	if len(refs) > workflowstate.WorkflowPageLimit {
+	if len(refs) > workflowstate.PageLimit {
 		return fmt.Errorf("workflow dependency bound exceeded")
 	}
 

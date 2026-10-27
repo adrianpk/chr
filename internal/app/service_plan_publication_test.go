@@ -37,7 +37,7 @@ func TestPlanGenerationDiscovery(t *testing.T) {
 		t.Run(item.name, func(t *testing.T) {
 			operations, scope, _ := planPublicationFixture(t, item.dump)
 			if item.answer != "" {
-				appendPlanTestAnswer(t, operations, scope, item.answer, quizcore.QuizEntryStatusAnswered)
+				appendPlanTestAnswer(t, operations, scope, item.answer, quizcore.EntryStatusAnswered)
 			}
 
 			calls := 0
@@ -117,7 +117,7 @@ func TestPlanPublicationFailures(t *testing.T) {
 	}
 }
 
-func planPublicationFixture(t *testing.T, dump string) (service, quizcore.QuizScope, string) {
+func planPublicationFixture(t *testing.T, dump string) (service, quizcore.Scope, string) {
 	t.Helper()
 
 	project := t.TempDir()
@@ -133,10 +133,10 @@ func planPublicationFixture(t *testing.T, dump string) (service, quizcore.QuizSc
 	operations.now, operations.quizModel = serviceQuizClock(), &fakeServiceQuizModel{}
 	operations.conversationModel = sufficientPlanReadinessProvider()
 
-	return operations, quizcore.QuizScope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}, reference
+	return operations, quizcore.Scope{ProjectID: operations.projectContext.ProjectID, CaseSlug: "blog"}, reference
 }
 
-func seedPlanPublicationTarget(t *testing.T, operations service, scope quizcore.QuizScope) core.GeneratedPlanPaths {
+func seedPlanPublicationTarget(t *testing.T, operations service, scope quizcore.Scope) core.GeneratedPlanPaths {
 	t.Helper()
 
 	paths, err := core.WriteGeneratedPlan(t.Context(), operations.projectContext.ProjectDir, core.GeneratedPlan{Scope: scope, Title: "Retained plan", Body: "Keep this usable until a complete replacement is ready.", CreatedAt: operations.utcNow()})
@@ -147,15 +147,15 @@ func seedPlanPublicationTarget(t *testing.T, operations service, scope quizcore.
 	return paths
 }
 
-func appendPlanTestAnswer(t *testing.T, operations service, scope quizcore.QuizScope, answer string, status quizcore.QuizEntryStatus) {
+func appendPlanTestAnswer(t *testing.T, operations service, scope quizcore.Scope, answer string, status quizcore.EntryStatus) {
 	t.Helper()
 
-	state, err := operations.newQuizRuntimeState(scope, quizcore.QuizModeDeep)
+	state, err := operations.newQuizRuntimeState(scope, quizcore.ModeDeep)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	entry := quizcore.QuizEntry{ID: "entry-1", QuestionID: "question-1", Question: "What should this case deliver and how is it verified?", Answer: answer, Status: status, Mode: quizcore.QuizModeDeep, Topic: "scope", Depth: 1, CreatedAt: operations.utcNow(), AnsweredAt: operations.utcNow()}
+	entry := quizcore.Entry{ID: "entry-1", QuestionID: "question-1", Question: "What should this case deliver and how is it verified?", Answer: answer, Status: status, Mode: quizcore.ModeDeep, Topic: "scope", Depth: 1, CreatedAt: operations.utcNow(), AnsweredAt: operations.utcNow()}
 	if _, err := operations.quizRepository().AppendRawCapture(t.Context(), state, entry); err != nil {
 		t.Fatal(err)
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 func validateWorkflowAmendmentRefs(refs []WorkflowAmendmentRef) error {
-	if len(refs) > workflowstate.WorkflowRecordLimit {
+	if len(refs) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow amendment history bound exceeded")
 	}
 
@@ -28,7 +28,7 @@ func validateWorkflowAmendmentRefs(refs []WorkflowAmendmentRef) error {
 }
 
 func validateWorkflowClosureRefs(current string, history []string) error {
-	if len(history) > workflowstate.WorkflowRecordLimit {
+	if len(history) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow closure history bound exceeded")
 	}
 

@@ -15,7 +15,7 @@ func projectGuidedWebQuiz(view *webui.GuidedUseCaseView, observed GuidedUseCaseI
 		return
 	}
 
-	quiz := QuizView{Scope: quizcore.QuizScope{ProjectID: observed.Session.ProjectID, Namespace: observed.Namespace, CaseSlug: observed.Session.Guided.CaseSlug}, Mode: quizcore.QuizModeDeep}
+	quiz := QuizView{Scope: quizcore.Scope{ProjectID: observed.Session.ProjectID, Namespace: observed.Namespace, CaseSlug: observed.Session.Guided.CaseSlug}, Mode: quizcore.ModeDeep}
 	view.Quiz = webQuizAnswerView(quiz, *observed.Quiz)
 	view.Quiz.DraftContext = observed.Namespace + ":" + observed.Session.ID
 

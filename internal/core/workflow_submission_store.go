@@ -173,7 +173,7 @@ func (s *WorkflowStore) guardWorkflowSubmissionTarget(ctx context.Context, key, 
 		return err
 	}
 
-	if len(entries) >= workflowstate.WorkflowRecordLimit {
+	if len(entries) >= workflowstate.RecordLimit {
 		return fmt.Errorf("repository publication journal bound exceeded")
 	}
 

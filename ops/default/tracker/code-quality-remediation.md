@@ -123,7 +123,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T8.1 | Move quiz state, transitions and domain payloads to internal/core/quiz; move OpenAI-specific request/schema/response behavior to internal/core/quiz/openai. Keep provider-specific IO out of the quiz domain. | pending | — | not run |
+| T8.1 | Move quiz state, transitions and domain payloads to internal/core/quiz; move OpenAI-specific request/schema/response behavior to internal/core/quiz/openai. Keep provider-specific IO out of the quiz domain. | in_progress | 2bd2c3156e3c | Runtime/curation moved with 71 exact declaration proofs and direct consumers; focused runtime/parser/model tests and import-bound fixtures pass; model, transitions and provider extraction remain |
 | T8.2 | Split quiz_openai_model.go by schema, request and response responsibilities; split quiz_model_payload.go and service_quiz.go where cohesion warrants it. Retain the justified schema-literal complexity exception rather than creating artificial fragments. | pending | — | not run |
 | T8.3 | Replace assigned quiz model argument/result tuples with domain inputs and outputs, preserving question identity, answer sufficiency, model errors, token accounting and finite round limits. | pending | — | not run |
 | T8.4 | Remove service.newQuizModelRequest if its production path is still unused; update tests to the live request path. Preserve Deep/Fast/manual/guided behavior and existing provider selection. | pending | — | not run |

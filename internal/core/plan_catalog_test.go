@@ -124,7 +124,7 @@ func mutatePlanCatalogSource(t *testing.T, path, kind string) {
 	case "frontmatter":
 		data = []byte("---\ntitle: broken\n")
 	case "size":
-		data = []byte(strings.Repeat("x", workflowstate.WorkflowFileLimit+1))
+		data = []byte(strings.Repeat("x", workflowstate.FileLimit+1))
 	case "missing envelope":
 		if err := os.Remove(filepath.Join(filepath.Dir(path), "metadata.json")); err != nil {
 			t.Fatal(err)

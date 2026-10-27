@@ -17,7 +17,7 @@ func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Contex
 	}
 
 	data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(pr.Repository, reference, "GET", "/user", false)...)
-	if err != nil || len(data) > workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) > workflowstate.FileLimit {
 		return "", fmt.Errorf("current publisher API identity could not be observed")
 	}
 

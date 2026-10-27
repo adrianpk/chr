@@ -141,7 +141,7 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 	modeResult, err := executor.ExecuteQuizAction(tui.QuizActionRequest{
 		Action: tui.QuizActionFastMode,
 		Scope:  tui.QuizScope{CaseSlug: "blog"},
-		Mode:   string(quizcore.QuizModeFast),
+		Mode:   string(quizcore.ModeFast),
 	})
 	if err != nil {
 		t.Fatalf("ExecuteQuizAction mode returned error: %v", err)

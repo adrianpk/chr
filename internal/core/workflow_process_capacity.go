@@ -51,7 +51,7 @@ func guardWorkflowProcessCapacity(common string) error {
 		return err
 	}
 
-	if len(entries) > workflowstate.WorkflowRecordLimit {
+	if len(entries) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow process observation limit exceeded")
 	}
 

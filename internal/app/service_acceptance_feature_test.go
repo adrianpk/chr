@@ -28,7 +28,7 @@ func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
@@ -91,7 +91,7 @@ Feature: Blog publishing
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
@@ -132,7 +132,7 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
@@ -193,7 +193,7 @@ func TestServiceGenerateAcceptanceFeaturePreservesExistingFeatureRoundAnswers(t 
 	operations.now = clock
 
 	_, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
@@ -249,7 +249,7 @@ func TestServiceGenerateAcceptanceFeatureReportsNotApplicable(t *testing.T) {
 	operations.now = clock
 
 	result, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)
@@ -307,7 +307,7 @@ Feature: Blog publishing
 	operations.now = clock
 
 	_, err := operations.GenerateAcceptanceFeature(t.Context(), AcceptanceFeatureGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateAcceptanceFeature returned error: %v", err)

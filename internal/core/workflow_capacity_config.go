@@ -66,7 +66,7 @@ func (s *WorkflowStore) workflowRepositoryCapacity(ctx context.Context, runs []w
 		return limits, err
 	}
 
-	if len(worktrees) == 0 || len(worktrees) > workflowstate.WorkflowPageLimit {
+	if len(worktrees) == 0 || len(worktrees) > workflowstate.PageLimit {
 		return limits, fmt.Errorf("workflow worktree capacity observation bound exceeded")
 	}
 

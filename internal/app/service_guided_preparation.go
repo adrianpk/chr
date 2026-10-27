@@ -77,7 +77,7 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *core.AuthoringS
 		return nil
 	}
 
-	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	paths, err := core.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {

@@ -24,7 +24,7 @@ func workflowDriftRevisionLimit(policy WorkflowExecutionPolicy) int {
 
 func workflowIntegrationAdmissionLimits(policy WorkflowExecutionPolicy) WorkflowIntegrationLimits {
 	return WorkflowIntegrationLimits{
-		Worker: int64(policy.MaxWorkerAttempts), Review: workflowstate.WorkflowPageLimit, Closing: workflowstate.WorkflowPageLimit,
+		Worker: int64(policy.MaxWorkerAttempts), Review: workflowstate.PageLimit, Closing: workflowstate.PageLimit,
 		Merger: int64(workflowMergerAttemptLimit(policy)), Drift: int64(workflowDriftRevisionLimit(policy)),
 		Submission: int64(workflowIntegrationAttemptLimit(policy)),
 	}

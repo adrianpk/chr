@@ -90,12 +90,12 @@ func harnessGenerationOperationCapacity(path string) error {
 
 	defer func() { _ = file.Close() }() //nolint:errcheck // Read-only directory close.
 
-	entries, err := file.ReadDir(workflowstate.WorkflowRecordLimit + 1)
+	entries, err := file.ReadDir(workflowstate.RecordLimit + 1)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 
-	if len(entries) >= workflowstate.WorkflowRecordLimit {
+	if len(entries) >= workflowstate.RecordLimit {
 		return errors.New("generation operation capacity exhausted")
 	}
 

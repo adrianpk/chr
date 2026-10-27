@@ -114,7 +114,7 @@ func quizStartFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "quiz mode: deep or fast",
-			Value: string(quizcore.QuizModeDeep),
+			Value: string(quizcore.ModeDeep),
 		},
 	)
 }
@@ -166,7 +166,7 @@ func (factory commandFactory) runQuizStart(ctx context.Context, cmd *cli.Command
 		return fmt.Errorf("quiz start does not accept positional arguments")
 	}
 
-	mode := quizcore.QuizMode(cmd.String("mode"))
+	mode := quizcore.Mode(cmd.String("mode"))
 	if !mode.Valid() {
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
@@ -279,7 +279,7 @@ func (factory commandFactory) runQuizMode(ctx context.Context, cmd *cli.Command)
 		return fmt.Errorf("quiz mode requires exactly one mode argument")
 	}
 
-	mode := quizcore.QuizMode(cmd.Args().First())
+	mode := quizcore.Mode(cmd.Args().First())
 	if !mode.Valid() {
 		return fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
@@ -297,8 +297,8 @@ func (factory commandFactory) runQuizMode(ctx context.Context, cmd *cli.Command)
 	return printQuizOperationResult(factory.io.Stdout, result)
 }
 
-func workspaceScopeFromCommand(cmd *cli.Command) quizcore.QuizScope {
-	return quizcore.QuizScope{CaseSlug: cmd.String("use-case")}
+func workspaceScopeFromCommand(cmd *cli.Command) quizcore.Scope {
+	return quizcore.Scope{CaseSlug: cmd.String("use-case")}
 }
 
 func printQuizOperationResult(stdout io.Writer, result QuizOperationResult) error {

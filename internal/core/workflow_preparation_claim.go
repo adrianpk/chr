@@ -242,7 +242,7 @@ func (s *WorkflowStore) beginWorkflowPreparationClaim(run *workflowInvocationFil
 }
 
 func (s *WorkflowStore) beginWorkflowPreparation(run *workflowInvocationFile, source WorkflowReviewInput) (WorkflowLane, error) {
-	if run.PreparationCount >= workflowstate.WorkflowPageLimit {
+	if run.PreparationCount >= workflowstate.PageLimit {
 		return WorkflowLane{}, fmt.Errorf("workflow preparation history budget exhausted")
 	}
 

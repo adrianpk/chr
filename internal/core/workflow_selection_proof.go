@@ -48,7 +48,7 @@ func (reader *workflowProofReader) prerequisiteReason(ctx context.Context, task 
 		return reason
 	}
 
-	if len(reader.observations) >= workflowstate.WorkflowPageLimit {
+	if len(reader.observations) >= workflowstate.PageLimit {
 		return "proof_observation_bound"
 	}
 

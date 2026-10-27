@@ -241,7 +241,7 @@ func (s service) singlePassPlan(ctx context.Context) bool {
 	return codexGenerationBackend("CHR_PLAN_GENERATION_BACKEND")
 }
 
-func (s service) materializeBoundPlanTracking(ctx context.Context, id string, scope quizcore.QuizScope, plan PlanView, path string) (PlanTrackingResult, error) {
+func (s service) materializeBoundPlanTracking(ctx context.Context, id string, scope quizcore.Scope, plan PlanView, path string) (PlanTrackingResult, error) {
 	bound, ctx, err := s.bindGeneration(ctx, "tracking-"+dumpRequestID(id), string(core.QuizModelActionMaterializePlanTracking))
 	if err != nil {
 		return PlanTrackingResult{}, err

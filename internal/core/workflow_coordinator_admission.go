@@ -77,7 +77,7 @@ func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, targ
 		}
 
 		markers = append(markers, marker)
-		if len(markers) > workflowstate.WorkflowPageLimit {
+		if len(markers) > workflowstate.PageLimit {
 			return fmt.Errorf("workflow target coordinator observation bound exceeded")
 		}
 	}

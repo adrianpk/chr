@@ -13,9 +13,9 @@ const (
 	quizHistoryByteLimit  = 128 * 1024
 )
 
-func (s service) quizHistoryContext(scope quizcore.QuizScope, entries []quizcore.QuizEntry) (core.QuizModelContextSection, error) {
+func (s service) quizHistoryContext(scope quizcore.Scope, entries []quizcore.Entry) (core.QuizModelContextSection, error) {
 	if scope.CaseSlug != "" {
-		general, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, quizcore.QuizScope{ProjectID: scope.ProjectID})
+		general, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, quizcore.Scope{ProjectID: scope.ProjectID})
 		if err != nil {
 			return core.QuizModelContextSection{}, err
 		}

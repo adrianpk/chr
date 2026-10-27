@@ -19,7 +19,7 @@ type workflowFileChange struct {
 }
 
 func readWorkflowFile(path string) ([]byte, error) {
-	return readBoundedWorkflowFile(path, workflowstate.WorkflowFileLimit)
+	return readBoundedWorkflowFile(path, workflowstate.FileLimit)
 }
 
 func readBoundedWorkflowFile(path string, limit int) ([]byte, error) {
@@ -66,7 +66,7 @@ func (s *WorkflowStore) safePath(relative string) (string, error) {
 }
 
 func atomicWorkflowFile(path string, content []byte) (err error) {
-	return atomicBoundedWorkflowFile(path, content, workflowstate.WorkflowFileLimit)
+	return atomicBoundedWorkflowFile(path, content, workflowstate.FileLimit)
 }
 
 func atomicBoundedWorkflowFile(path string, content []byte, limit int) (err error) {

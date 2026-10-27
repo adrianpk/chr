@@ -34,7 +34,7 @@ func TestWebSpecAuthoring(t *testing.T) {
 
 	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
-	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}})
+	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}})
 	if err != nil {
 		t.Fatal(err)
 	}

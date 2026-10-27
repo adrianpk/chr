@@ -205,7 +205,7 @@ func guardGuidedQuizCompletion(session AuthoringSession, observed QuizObservatio
 		return workflowstate.ErrConflict
 	}
 
-	if state.Status != quizcore.QuizRuntimeStatusDone || !state.ClarificationComplete || state.AnswersRecorded < 1 || state.AnswersRecorded+state.SkipsRecorded != state.QuestionsAsked || state.ActiveQuestion != nil {
+	if state.Status != quizcore.RuntimeStatusDone || !state.ClarificationComplete || state.AnswersRecorded < 1 || state.AnswersRecorded+state.SkipsRecorded != state.QuestionsAsked || state.ActiveQuestion != nil {
 		return errors.New("quiz clarification is incomplete")
 	}
 
@@ -269,7 +269,7 @@ func guidedQuizSealReferences(ctx context.Context, root string, session Authorin
 		return nil, nil
 	}
 
-	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	observed, err := NewQuizArtifactRepository(root).Observe(ctx, scope)
 	if err != nil {
@@ -305,7 +305,7 @@ func guardGuidedQuizContent(operation GuidedUseCaseOperation) error {
 		return errors.New("quiz answer is required")
 	}
 
-	if operation.Action == "quiz-mode" && !quizcore.QuizMode(operation.Content).Valid() {
+	if operation.Action == "quiz-mode" && !quizcore.Mode(operation.Content).Valid() {
 		return errors.New("quiz mode is invalid")
 	}
 

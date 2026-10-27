@@ -140,12 +140,12 @@ func (r *fileAuthoringSessionRepository) authoringStateCapacity(directory string
 		_ = dir.Close()
 	}()
 
-	entries, err := dir.ReadDir(workflowstate.WorkflowRecordLimit + 1)
+	entries, err := dir.ReadDir(workflowstate.RecordLimit + 1)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 
-	if len(entries) >= workflowstate.WorkflowRecordLimit {
+	if len(entries) >= workflowstate.RecordLimit {
 		return errors.New("authoring " + strings.TrimSuffix(directory, "s") + " capacity exhausted")
 	}
 

@@ -34,7 +34,7 @@ func workflowMergerInputHash(input WorkflowMergerInput) (string, error) {
 	input.InputHash = ""
 
 	data, err := json.Marshal(input)
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return "", fmt.Errorf("%w: merger input exceeds file bound", workflowstate.ErrConflict)
 	}
 
@@ -142,7 +142,7 @@ func validWorkflowMergerDeadline(input WorkflowMergerInput, now time.Time) bool 
 }
 
 func validateWorkflowMergerIntent(input WorkflowMergerInput) error {
-	if len(input.Requirements) == 0 || len(input.Requirements) > workflowstate.WorkflowPageLimit || len(input.Conflicts) > workflowstate.WorkflowPageLimit {
+	if len(input.Requirements) == 0 || len(input.Requirements) > workflowstate.PageLimit || len(input.Conflicts) > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
 

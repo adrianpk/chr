@@ -24,9 +24,9 @@ func TestServiceQuizInheritedHistory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	entries := []quizcore.QuizEntry{{Question: "Case constraint?", Answer: "CASE_DECISION", Status: quizcore.QuizEntryStatusAnswered}}
+	entries := []quizcore.Entry{{Question: "Case constraint?", Answer: "CASE_DECISION", Status: quizcore.EntryStatusAnswered}}
 
-	section, err := operations.quizHistoryContext(operations.quizScope(quizcore.QuizScope{CaseSlug: "blog"}), entries)
+	section, err := operations.quizHistoryContext(operations.quizScope(quizcore.Scope{CaseSlug: "blog"}), entries)
 	if err != nil || !strings.Contains(section.Content, "GENERAL_DECISION") || !strings.Contains(section.Content, "CASE_DECISION") {
 		t.Fatal("case discovery lost prior decisions", section, err)
 	}
@@ -38,12 +38,12 @@ func TestServiceQuizHistoryBounds(t *testing.T) {
 	operations, _ := newRetainedQuizFixture(t)
 	for _, name := range []string{"entries", "bytes"} {
 		t.Run(name, func(t *testing.T) {
-			entries := []quizcore.QuizEntry{{Question: "Retained decision?", Answer: strings.Repeat("x", quizHistoryByteLimit), Status: quizcore.QuizEntryStatusAnswered}}
+			entries := []quizcore.Entry{{Question: "Retained decision?", Answer: strings.Repeat("x", quizHistoryByteLimit), Status: quizcore.EntryStatusAnswered}}
 			if name == "entries" {
-				entries = make([]quizcore.QuizEntry, quizHistoryEntryLimit+1)
+				entries = make([]quizcore.Entry, quizHistoryEntryLimit+1)
 			}
 
-			_, err := operations.quizHistoryContext(operations.quizScope(quizcore.QuizScope{}), entries)
+			_, err := operations.quizHistoryContext(operations.quizScope(quizcore.Scope{}), entries)
 			if err == nil || !strings.Contains(err.Error(), "quiz discovery history exceeds") {
 				t.Fatal("oversized history was truncated or accepted", err)
 			}

@@ -142,7 +142,7 @@ func TestWorkflowPRAdapterBounds(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		data []byte
-	}{{"null", []byte("null")}, {"malformed", []byte("{")}, {"oversized", []byte(strings.Repeat("x", workflowstate.WorkflowFileLimit+1))}} {
+	}{{"null", []byte("null")}, {"malformed", []byte("{")}, {"oversized", []byte(strings.Repeat("x", workflowstate.FileLimit+1))}} {
 		t.Run(tc.name, func(t *testing.T) {
 			if _, err := decodeWorkflowPRList(tc.data); err == nil {
 				t.Fatal("invalid provider page accepted")
@@ -151,7 +151,7 @@ func TestWorkflowPRAdapterBounds(t *testing.T) {
 	}
 
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
-	for page := 1; page <= workflowstate.WorkflowPageLimit; page++ {
+	for page := 1; page <= workflowstate.PageLimit; page++ {
 		runner.outputs[fmt.Sprintf("tea api -X GET https://forge.example/api/v1/repos/test/repo/pulls?state=all&limit=50&per_page=50&page=%d", page)] = []byte(`[{"head":{"ref":"unrelated"}}]`)
 	}
 

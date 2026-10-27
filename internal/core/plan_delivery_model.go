@@ -59,7 +59,7 @@ func planDeliveryObject(properties map[string]any) map[string]any {
 }
 
 func planDeliveryArray(items map[string]any) map[string]any {
-	return map[string]any{"type": "array", "minItems": 1, "maxItems": workflowstate.WorkflowPageLimit, "items": items}
+	return map[string]any{"type": "array", "minItems": 1, "maxItems": workflowstate.PageLimit, "items": items}
 }
 
 func planDeliveryString() map[string]any { return map[string]any{"type": "string", "minLength": 1} }

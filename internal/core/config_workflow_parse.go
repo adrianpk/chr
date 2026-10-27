@@ -11,13 +11,13 @@ import (
 )
 
 func readWorkflowConfigValues(data []byte) (map[string]string, error) {
-	if len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) > workflowstate.FileLimit {
 		return nil, fmt.Errorf("workspace config exceeds 1 MiB")
 	}
 
 	values, sections := map[string]string{}, map[string]bool{}
 	scanner := bufio.NewScanner(bytes.NewReader(data))
-	scanner.Buffer(make([]byte, 4096), workflowstate.WorkflowFileLimit)
+	scanner.Buffer(make([]byte, 4096), workflowstate.FileLimit)
 
 	section := ""
 

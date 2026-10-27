@@ -136,7 +136,7 @@ func (reader workflowIntegrationReader) linearSource(ctx context.Context, proof 
 	line, err := reader.output(ctx, "rev-list", "--reverse", "--first-parent", "--max-count=4097", proof.OriginCommit+".."+proof.SourceCommit)
 
 	commits := strings.Fields(line)
-	if err != nil || len(commits) == 0 || len(commits) > workflowstate.WorkflowRecordLimit {
+	if err != nil || len(commits) == 0 || len(commits) > workflowstate.RecordLimit {
 		return nil, fmt.Errorf("integration source history is empty or exceeds commit bounds")
 	}
 
@@ -166,7 +166,7 @@ func workflowIntegrationHistoryHash(proof WorkflowIntegrationProof) (string, err
 
 func validateWorkflowIntegrationProof(query WorkflowIntegrationQuery, proof WorkflowIntegrationProof) error {
 	query.SourceDirectory = ""
-	if proof.WorkflowIntegrationQuery != query || !slices.Contains([]string{"merge", "rebase", "squash"}, proof.Method) || proof.PreparedTree != proof.VerifiedTree || len(proof.History) == 0 || len(proof.History) > workflowstate.WorkflowRecordLimit {
+	if proof.WorkflowIntegrationQuery != query || !slices.Contains([]string{"merge", "rebase", "squash"}, proof.Method) || proof.PreparedTree != proof.VerifiedTree || len(proof.History) == 0 || len(proof.History) > workflowstate.RecordLimit {
 		return workflowstate.ErrConflict
 	}
 

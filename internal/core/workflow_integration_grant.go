@@ -71,7 +71,7 @@ func (s *WorkflowStore) workflowGrantBudgetAdmission(ctx context.Context, run wo
 func boundedWorkflowIntegrationGrant(limits WorkflowIntegrationLimits) error {
 	// Explicit grants may extend automatic policy ceilings, not persistence bounds
 	// or the existing finite role owners' absolute admission capacities.
-	if limits.Worker > workflowstate.WorkflowRecordLimit || limits.Review > workflowstate.WorkflowPageLimit || limits.Closing > workflowstate.WorkflowPageLimit || limits.Merger > workflowstate.WorkflowPageLimit || limits.Drift > workflowstate.WorkflowPageLimit || limits.Submission > workflowstate.WorkflowPageLimit {
+	if limits.Worker > workflowstate.RecordLimit || limits.Review > workflowstate.PageLimit || limits.Closing > workflowstate.PageLimit || limits.Merger > workflowstate.PageLimit || limits.Drift > workflowstate.PageLimit || limits.Submission > workflowstate.PageLimit {
 		return ErrWorkflowIntegrationBudget
 	}
 

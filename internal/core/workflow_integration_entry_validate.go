@@ -108,7 +108,7 @@ func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
 		return err
 	}
 
-	if len(run.IntegrationEntries) > workflowstate.WorkflowRecordLimit {
+	if len(run.IntegrationEntries) > workflowstate.RecordLimit {
 		return workflowIntegrationConflict("history exceeds bounds")
 	}
 

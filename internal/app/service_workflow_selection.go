@@ -22,7 +22,7 @@ type WorkflowBoundPreview struct {
 // An explicit use-case identity is supplied by the case view, without a ticket.
 func (s service) PreviewSelectedWork(ctx context.Context, request core.WorkflowPreviewRequest, key string) (result WorkflowBoundPreview, err error) {
 	result.Request = request
-	result.Request.Limit = workflowstate.WorkflowPageLimit
+	result.Request.Limit = workflowstate.PageLimit
 
 	if key != "" && !validWorkflowControlIdentity(key) {
 		return result, fmt.Errorf("invalid selected workflow ticket identity")
@@ -99,7 +99,7 @@ func (s service) StartBoundWorkExtent(ctx context.Context, request core.Workflow
 		return s.admitBoundWorkExtent(ctx, request, selected, steps, admission)
 	}
 
-	if len(request.SnapshotHash) != 64 || request.Offset != 0 || steps < 0 || steps > workflowstate.WorkflowPageLimit {
+	if len(request.SnapshotHash) != 64 || request.Offset != 0 || steps < 0 || steps > workflowstate.PageLimit {
 		return AgentWorkResult{}, fmt.Errorf("confirmed workflow admission requires a snapshot, offset zero and bounded steps")
 	}
 
@@ -170,7 +170,7 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 	defer cancel()
 
 	selection := preview.View.Preview
-	if selection.Total != len(selection.Members) || len(selection.Members) > workflowstate.WorkflowPageLimit {
+	if selection.Total != len(selection.Members) || len(selection.Members) > workflowstate.PageLimit {
 		return nil, errWorkflowConfirmationBound
 	}
 
@@ -194,7 +194,7 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 		}
 
 		size += len(record.Body) + len(record.Domain["execution_contract"])
-		if size > workflowstate.WorkflowFileLimit {
+		if size > workflowstate.FileLimit {
 			return nil, errWorkflowConfirmationBound
 		}
 

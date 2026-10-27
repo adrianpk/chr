@@ -9,83 +9,83 @@ import (
 )
 
 const (
-	// DefaultQuizQuestionBudget defines a package boundary constant.
-	DefaultQuizQuestionBudget = 50
-	// MaxQuizFollowUpDepth defines a package boundary constant.
-	MaxQuizFollowUpDepth = 3
+	// DefaultQuestionBudget defines a package boundary constant.
+	DefaultQuestionBudget = 50
+	// MaxFollowUpDepth defines a package boundary constant.
+	MaxFollowUpDepth = 3
 
-	// QuizBranchReturnReasonMaxDepth defines a package boundary constant.
-	QuizBranchReturnReasonMaxDepth = "max_depth_reached"
-	// QuizBranchReturnReasonSkipped defines a package boundary constant.
-	QuizBranchReturnReasonSkipped = "skipped"
+	// BranchReturnReasonMaxDepth defines a package boundary constant.
+	BranchReturnReasonMaxDepth = "max_depth_reached"
+	// BranchReturnReasonSkipped defines a package boundary constant.
+	BranchReturnReasonSkipped = "skipped"
 )
 
-// QuizScope describes a package boundary value.
-type QuizScope struct {
+// Scope describes a package boundary value.
+type Scope struct {
 	Namespace string `json:",omitempty"`
 	ProjectID string
 	CaseSlug  string
 }
 
-// QuizRuntimeStatus defines a package boundary type.
-type QuizRuntimeStatus string
+// RuntimeStatus defines a package boundary type.
+type RuntimeStatus string
 
 const (
-	// QuizRuntimeStatusIdle defines a package boundary constant.
-	QuizRuntimeStatusIdle QuizRuntimeStatus = "idle"
-	// QuizRuntimeStatusActive defines a package boundary constant.
-	QuizRuntimeStatusActive QuizRuntimeStatus = "active"
-	// QuizRuntimeStatusDone defines a package boundary constant.
-	QuizRuntimeStatusDone QuizRuntimeStatus = "done"
-	// QuizRuntimeStatusCancelled defines a package boundary constant.
-	QuizRuntimeStatusCancelled QuizRuntimeStatus = "cancelled"
-	// QuizRuntimeStatusBlocked defines a package boundary constant.
-	QuizRuntimeStatusBlocked QuizRuntimeStatus = "blocked"
+	// RuntimeStatusIdle defines a package boundary constant.
+	RuntimeStatusIdle RuntimeStatus = "idle"
+	// RuntimeStatusActive defines a package boundary constant.
+	RuntimeStatusActive RuntimeStatus = "active"
+	// RuntimeStatusDone defines a package boundary constant.
+	RuntimeStatusDone RuntimeStatus = "done"
+	// RuntimeStatusCancelled defines a package boundary constant.
+	RuntimeStatusCancelled RuntimeStatus = "cancelled"
+	// RuntimeStatusBlocked defines a package boundary constant.
+	RuntimeStatusBlocked RuntimeStatus = "blocked"
 )
 
-// QuizMode defines a package boundary type.
-type QuizMode string
+// Mode defines a package boundary type.
+type Mode string
 
 const (
-	// QuizModeDeep defines a package boundary constant.
-	QuizModeDeep QuizMode = "deep"
-	// QuizModeFast defines a package boundary constant.
-	QuizModeFast QuizMode = "fast"
+	// ModeDeep defines a package boundary constant.
+	ModeDeep Mode = "deep"
+	// ModeFast defines a package boundary constant.
+	ModeFast Mode = "fast"
 )
 
-// QuizEntryStatus defines a package boundary type.
-type QuizEntryStatus string
+// EntryStatus defines a package boundary type.
+type EntryStatus string
 
 const (
-	// QuizEntryStatusAnswered defines a package boundary constant.
-	QuizEntryStatusAnswered QuizEntryStatus = "answered"
-	// QuizEntryStatusSkipped defines a package boundary constant.
-	QuizEntryStatusSkipped QuizEntryStatus = "skipped"
+	// EntryStatusAnswered defines a package boundary constant.
+	EntryStatusAnswered EntryStatus = "answered"
+	// EntryStatusSkipped defines a package boundary constant.
+	EntryStatusSkipped EntryStatus = "skipped"
 )
 
-// QuizCoverageStatus defines a package boundary type.
-type QuizCoverageStatus string
+// CoverageStatus defines a package boundary type.
+type CoverageStatus string
 
 const (
-	// QuizCoverageStatusPending defines a package boundary constant.
-	QuizCoverageStatusPending QuizCoverageStatus = "pending"
-	// QuizCoverageStatusActive defines a package boundary constant.
-	QuizCoverageStatusActive QuizCoverageStatus = "active"
-	// QuizCoverageStatusCovered defines a package boundary constant.
-	QuizCoverageStatusCovered QuizCoverageStatus = "covered"
-	// QuizCoverageStatusDeferred defines a package boundary constant.
-	QuizCoverageStatusDeferred QuizCoverageStatus = "deferred"
+	// CoverageStatusPending defines a package boundary constant.
+	CoverageStatusPending CoverageStatus = "pending"
+	// CoverageStatusActive defines a package boundary constant.
+	CoverageStatusActive CoverageStatus = "active"
+	// CoverageStatusCovered defines a package boundary constant.
+	CoverageStatusCovered CoverageStatus = "covered"
+	// CoverageStatusDeferred defines a package boundary constant.
+	CoverageStatusDeferred CoverageStatus = "deferred"
 )
 
-// QuizRuntimeState describes a package boundary value.
-type QuizRuntimeState struct {
+// RuntimeState describes a package boundary value.
+type RuntimeState struct {
 	ClarificationComplete bool `json:",omitempty"`
 	SchemaVersion         int
 	SessionID             string
 	Revision              string `json:"-"`
 	FastBatchID           string
 	FastSourceHash        string
-	FastQueue             []QuizCandidate
+	FastQueue             []Candidate
 	FastConsumed          []string
 	ContinuationPending   bool
 	ContinuationError     string
@@ -93,25 +93,25 @@ type QuizRuntimeState struct {
 	ID                    string
 	ProjectID             string
 	CaseSlug              string
-	Status                QuizRuntimeStatus
-	Mode                  QuizMode
+	Status                RuntimeStatus
+	Mode                  Mode
 	QuestionBudget        int
 	QuestionsAsked        int
 	AnswersRecorded       int
 	SkipsRecorded         int
 	ActiveTopic           string
-	Coverage              []QuizCoverageTopic
-	ActiveQuestion        *QuizQuestion
-	Trail                 []QuizTrailNode
+	Coverage              []CoverageTopic
+	ActiveQuestion        *Question
+	Trail                 []TrailNode
 	BranchReturnReason    string
-	Candidates            []QuizCandidate
+	Candidates            []Candidate
 	RawPath               string
 	CuratedPath           string
 	UpdatedAt             time.Time
 }
 
-// QuizQuestion describes a package boundary value.
-type QuizQuestion struct {
+// Question describes a package boundary value.
+type Question struct {
 	ID        string
 	Prompt    string
 	Required  bool
@@ -124,43 +124,43 @@ type QuizQuestion struct {
 	CreatedAt time.Time
 }
 
-// QuizEntry describes a package boundary value.
-type QuizEntry struct {
+// Entry describes a package boundary value.
+type Entry struct {
 	ID           string
 	QuestionID   string
 	Question     string
 	Answer       string
-	Status       QuizEntryStatus
+	Status       EntryStatus
 	Topic        string
 	Depth        int
 	ParentID     string
-	Mode         QuizMode
+	Mode         Mode
 	Tags         []string
 	PromptIntent string
 	CreatedAt    time.Time
 	AnsweredAt   time.Time
 }
 
-// QuizCoverageTopic describes a package boundary value.
-type QuizCoverageTopic struct {
+// CoverageTopic describes a package boundary value.
+type CoverageTopic struct {
 	ID            string
 	Label         string
-	Status        QuizCoverageStatus
+	Status        CoverageStatus
 	QuestionCount int
 	AnswerCount   int
 	SkipCount     int
 }
 
-// QuizTrailNode describes a package boundary value.
-type QuizTrailNode struct {
+// TrailNode describes a package boundary value.
+type TrailNode struct {
 	QuestionID string
 	Prompt     string
 	Topic      string
 	Depth      int
 }
 
-// QuizCandidate describes a package boundary value.
-type QuizCandidate struct {
+// Candidate describes a package boundary value.
+type Candidate struct {
 	ID        string
 	Prompt    string
 	Topic     string
@@ -171,33 +171,33 @@ type QuizCandidate struct {
 	CreatedAt time.Time
 }
 
-// ValidateQuizRuntimeState validates the corresponding package boundary value.
-func ValidateQuizRuntimeState(state QuizRuntimeState) error {
-	err := validateQuizRuntimeIdentity(state)
+// ValidateRuntimeState validates the corresponding package boundary value.
+func ValidateRuntimeState(state RuntimeState) error {
+	err := validateRuntimeIdentity(state)
 	if err != nil {
 		return err
 	}
 
-	err = validateQuizRuntimeCounts(state)
+	err = validateRuntimeCounts(state)
 	if err != nil {
 		return err
 	}
 
-	err = validateQuizRuntimeActiveQuestion(state)
+	err = validateRuntimeActiveQuestion(state)
 	if err != nil {
 		return err
 	}
 
-	err = validateQuizRuntimeCollections(state)
+	err = validateRuntimeCollections(state)
 	if err != nil {
 		return err
 	}
 
-	return validateQuizRuntimeArtifacts(state)
+	return validateRuntimeArtifacts(state)
 }
 
-// ValidateQuizScope validates the corresponding package boundary value.
-func ValidateQuizScope(scope QuizScope) error {
+// ValidateScope validates the corresponding package boundary value.
+func ValidateScope(scope Scope) error {
 	if scope.Namespace != "" && !opsnamespace.Valid(scope.Namespace) {
 		return fmt.Errorf("invalid quiz namespace")
 	}
@@ -209,33 +209,33 @@ func ValidateQuizScope(scope QuizScope) error {
 	return nil
 }
 
-// ValidateQuizQuestion validates the corresponding package boundary value.
-func ValidateQuizQuestion(question QuizQuestion) error {
-	err := validateQuizQuestionCore(question)
+// ValidateQuestion validates the corresponding package boundary value.
+func ValidateQuestion(question Question) error {
+	err := validateQuestionCore(question)
 	if err != nil {
 		return err
 	}
 
-	return validateQuizQuestionRoute(question)
+	return validateQuestionRoute(question)
 }
 
-// ValidateQuizEntry validates the corresponding package boundary value.
-func ValidateQuizEntry(entry QuizEntry) error {
-	err := validateQuizEntryCore(entry)
+// ValidateEntry validates the corresponding package boundary value.
+func ValidateEntry(entry Entry) error {
+	err := validateEntryCore(entry)
 	if err != nil {
 		return err
 	}
 
-	err = validateQuizEntryAnswer(entry)
+	err = validateEntryAnswer(entry)
 	if err != nil {
 		return err
 	}
 
-	return validateQuizEntryTimes(entry)
+	return validateEntryTimes(entry)
 }
 
-// ValidateQuizCoverageTopic validates the corresponding package boundary value.
-func ValidateQuizCoverageTopic(topic QuizCoverageTopic) error {
+// ValidateCoverageTopic validates the corresponding package boundary value.
+func ValidateCoverageTopic(topic CoverageTopic) error {
 	if strings.TrimSpace(topic.ID) == "" {
 		return fmt.Errorf("quiz coverage topic id is required")
 	}
@@ -267,8 +267,8 @@ func ValidateQuizCoverageTopic(topic QuizCoverageTopic) error {
 	return nil
 }
 
-// ValidateQuizTrailNode validates the corresponding package boundary value.
-func ValidateQuizTrailNode(node QuizTrailNode) error {
+// ValidateTrailNode validates the corresponding package boundary value.
+func ValidateTrailNode(node TrailNode) error {
 	if strings.TrimSpace(node.QuestionID) == "" {
 		return fmt.Errorf("quiz trail node question id is required")
 	}
@@ -281,11 +281,11 @@ func ValidateQuizTrailNode(node QuizTrailNode) error {
 		return fmt.Errorf("quiz trail node topic is required")
 	}
 
-	return validateQuizDepth(node.Depth)
+	return validateDepth(node.Depth)
 }
 
-// ValidateQuizCandidate validates the corresponding package boundary value.
-func ValidateQuizCandidate(candidate QuizCandidate) error {
+// ValidateCandidate validates the corresponding package boundary value.
+func ValidateCandidate(candidate Candidate) error {
 	if strings.TrimSpace(candidate.ID) == "" {
 		return fmt.Errorf("quiz candidate id is required")
 	}
@@ -298,7 +298,7 @@ func ValidateQuizCandidate(candidate QuizCandidate) error {
 		return fmt.Errorf("quiz candidate topic is required")
 	}
 
-	err := validateQuizDepth(candidate.Depth)
+	err := validateDepth(candidate.Depth)
 	if err != nil {
 		return err
 	}
@@ -315,13 +315,13 @@ func ValidateQuizCandidate(candidate QuizCandidate) error {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s QuizRuntimeStatus) Valid() bool {
+func (s RuntimeStatus) Valid() bool {
 	switch s {
-	case QuizRuntimeStatusIdle,
-		QuizRuntimeStatusActive,
-		QuizRuntimeStatusDone,
-		QuizRuntimeStatusCancelled,
-		QuizRuntimeStatusBlocked:
+	case RuntimeStatusIdle,
+		RuntimeStatusActive,
+		RuntimeStatusDone,
+		RuntimeStatusCancelled,
+		RuntimeStatusBlocked:
 		return true
 	default:
 		return false
@@ -329,9 +329,9 @@ func (s QuizRuntimeStatus) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (m QuizMode) Valid() bool {
+func (m Mode) Valid() bool {
 	switch m {
-	case QuizModeDeep, QuizModeFast:
+	case ModeDeep, ModeFast:
 		return true
 	default:
 		return false
@@ -339,9 +339,9 @@ func (m QuizMode) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s QuizEntryStatus) Valid() bool {
+func (s EntryStatus) Valid() bool {
 	switch s {
-	case QuizEntryStatusAnswered, QuizEntryStatusSkipped:
+	case EntryStatusAnswered, EntryStatusSkipped:
 		return true
 	default:
 		return false
@@ -349,19 +349,19 @@ func (s QuizEntryStatus) Valid() bool {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s QuizCoverageStatus) Valid() bool {
+func (s CoverageStatus) Valid() bool {
 	switch s {
-	case QuizCoverageStatusPending,
-		QuizCoverageStatusActive,
-		QuizCoverageStatusCovered,
-		QuizCoverageStatusDeferred:
+	case CoverageStatusPending,
+		CoverageStatusActive,
+		CoverageStatusCovered,
+		CoverageStatusDeferred:
 		return true
 	default:
 		return false
 	}
 }
 
-func validateQuizRuntimeCounts(state QuizRuntimeState) error {
+func validateRuntimeCounts(state RuntimeState) error {
 	if state.QuestionBudget <= 0 {
 		return fmt.Errorf("quiz runtime question budget must be greater than zero")
 	}
@@ -389,7 +389,7 @@ func validateQuizRuntimeCounts(state QuizRuntimeState) error {
 	return nil
 }
 
-func validateQuizRuntimeIdentity(state QuizRuntimeState) error {
+func validateRuntimeIdentity(state RuntimeState) error {
 	if strings.TrimSpace(state.ID) == "" {
 		return fmt.Errorf("quiz runtime id is required")
 	}
@@ -409,8 +409,8 @@ func validateQuizRuntimeIdentity(state QuizRuntimeState) error {
 	return nil
 }
 
-func validateQuizRuntimeActiveQuestion(state QuizRuntimeState) error {
-	if state.Status == QuizRuntimeStatusActive && state.ActiveQuestion == nil {
+func validateRuntimeActiveQuestion(state RuntimeState) error {
+	if state.Status == RuntimeStatusActive && state.ActiveQuestion == nil {
 		return fmt.Errorf("quiz runtime active question is required when active")
 	}
 
@@ -422,32 +422,32 @@ func validateQuizRuntimeActiveQuestion(state QuizRuntimeState) error {
 		return nil
 	}
 
-	return ValidateQuizQuestion(*state.ActiveQuestion)
+	return ValidateQuestion(*state.ActiveQuestion)
 }
 
-func quizRuntimeHasInvalidInactiveQuestion(state QuizRuntimeState) bool {
-	return state.Status != QuizRuntimeStatusActive &&
-		state.Status != QuizRuntimeStatusBlocked &&
+func quizRuntimeHasInvalidInactiveQuestion(state RuntimeState) bool {
+	return state.Status != RuntimeStatusActive &&
+		state.Status != RuntimeStatusBlocked &&
 		state.ActiveQuestion != nil
 }
 
-func validateQuizRuntimeCollections(state QuizRuntimeState) error {
-	err := validateQuizRuntimeCoverage(state.Coverage)
+func validateRuntimeCollections(state RuntimeState) error {
+	err := validateRuntimeCoverage(state.Coverage)
 	if err != nil {
 		return err
 	}
 
-	err = validateQuizRuntimeTrail(state.Trail)
+	err = validateRuntimeTrail(state.Trail)
 	if err != nil {
 		return err
 	}
 
-	return validateQuizRuntimeCandidates(state.Candidates)
+	return validateRuntimeCandidates(state.Candidates)
 }
 
-func validateQuizRuntimeCoverage(topics []QuizCoverageTopic) error {
+func validateRuntimeCoverage(topics []CoverageTopic) error {
 	for index, topic := range topics {
-		err := ValidateQuizCoverageTopic(topic)
+		err := ValidateCoverageTopic(topic)
 		if err != nil {
 			return fmt.Errorf("quiz runtime coverage topic %d: %w", index+1, err)
 		}
@@ -456,9 +456,9 @@ func validateQuizRuntimeCoverage(topics []QuizCoverageTopic) error {
 	return nil
 }
 
-func validateQuizRuntimeTrail(nodes []QuizTrailNode) error {
+func validateRuntimeTrail(nodes []TrailNode) error {
 	for index, node := range nodes {
-		err := ValidateQuizTrailNode(node)
+		err := ValidateTrailNode(node)
 		if err != nil {
 			return fmt.Errorf("quiz runtime trail node %d: %w", index+1, err)
 		}
@@ -467,9 +467,9 @@ func validateQuizRuntimeTrail(nodes []QuizTrailNode) error {
 	return nil
 }
 
-func validateQuizRuntimeCandidates(candidates []QuizCandidate) error {
+func validateRuntimeCandidates(candidates []Candidate) error {
 	for index, candidate := range candidates {
-		err := ValidateQuizCandidate(candidate)
+		err := ValidateCandidate(candidate)
 		if err != nil {
 			return fmt.Errorf("quiz runtime candidate %d: %w", index+1, err)
 		}
@@ -478,7 +478,7 @@ func validateQuizRuntimeCandidates(candidates []QuizCandidate) error {
 	return nil
 }
 
-func validateQuizRuntimeArtifacts(state QuizRuntimeState) error {
+func validateRuntimeArtifacts(state RuntimeState) error {
 	if strings.TrimSpace(state.RawPath) == "" {
 		return fmt.Errorf("quiz runtime raw path is required")
 	}
@@ -494,7 +494,7 @@ func validateQuizRuntimeArtifacts(state QuizRuntimeState) error {
 	return nil
 }
 
-func validateQuizQuestionCore(question QuizQuestion) error {
+func validateQuestionCore(question Question) error {
 	if strings.TrimSpace(question.ID) == "" {
 		return fmt.Errorf("quiz question id is required")
 	}
@@ -507,7 +507,7 @@ func validateQuizQuestionCore(question QuizQuestion) error {
 		return fmt.Errorf("quiz question topic is required")
 	}
 
-	err := validateQuizDepth(question.Depth)
+	err := validateDepth(question.Depth)
 	if err != nil {
 		return err
 	}
@@ -519,15 +519,15 @@ func validateQuizQuestionCore(question QuizQuestion) error {
 	return nil
 }
 
-func validateQuizQuestionRoute(question QuizQuestion) error {
+func validateQuestionRoute(question Question) error {
 	if question.Depth == 1 {
-		return validateQuizTrunkQuestion(question)
+		return validateTrunkQuestion(question)
 	}
 
-	return validateQuizFollowUpQuestion(question)
+	return validateFollowUpQuestion(question)
 }
 
-func validateQuizTrunkQuestion(question QuizQuestion) error {
+func validateTrunkQuestion(question Question) error {
 	if strings.TrimSpace(question.ParentID) != "" {
 		return fmt.Errorf("quiz trunk question parent id must be empty")
 	}
@@ -539,7 +539,7 @@ func validateQuizTrunkQuestion(question QuizQuestion) error {
 	return nil
 }
 
-func validateQuizFollowUpQuestion(question QuizQuestion) error {
+func validateFollowUpQuestion(question Question) error {
 	if strings.TrimSpace(question.ParentID) == "" {
 		return fmt.Errorf("quiz follow-up question parent id is required")
 	}
@@ -551,7 +551,7 @@ func validateQuizFollowUpQuestion(question QuizQuestion) error {
 	return nil
 }
 
-func validateQuizEntryCore(entry QuizEntry) error {
+func validateEntryCore(entry Entry) error {
 	if strings.TrimSpace(entry.ID) == "" {
 		return fmt.Errorf("quiz entry id is required")
 	}
@@ -576,7 +576,7 @@ func validateQuizEntryCore(entry QuizEntry) error {
 		return fmt.Errorf("quiz entry topic is required")
 	}
 
-	err := validateQuizDepth(entry.Depth)
+	err := validateDepth(entry.Depth)
 	if err != nil {
 		return err
 	}
@@ -588,19 +588,19 @@ func validateQuizEntryCore(entry QuizEntry) error {
 	return nil
 }
 
-func validateQuizEntryAnswer(entry QuizEntry) error {
-	if entry.Status == QuizEntryStatusAnswered && strings.TrimSpace(entry.Answer) == "" {
+func validateEntryAnswer(entry Entry) error {
+	if entry.Status == EntryStatusAnswered && strings.TrimSpace(entry.Answer) == "" {
 		return fmt.Errorf("quiz answered entry answer is required")
 	}
 
-	if entry.Status == QuizEntryStatusSkipped && strings.TrimSpace(entry.Answer) != "" {
+	if entry.Status == EntryStatusSkipped && strings.TrimSpace(entry.Answer) != "" {
 		return fmt.Errorf("quiz skipped entry answer must be empty")
 	}
 
 	return nil
 }
 
-func validateQuizEntryTimes(entry QuizEntry) error {
+func validateEntryTimes(entry Entry) error {
 	if entry.CreatedAt.IsZero() {
 		return fmt.Errorf("quiz entry created time is required")
 	}
@@ -616,9 +616,9 @@ func validateQuizEntryTimes(entry QuizEntry) error {
 	return nil
 }
 
-func validateQuizDepth(depth int) error {
-	if depth < 1 || depth > MaxQuizFollowUpDepth {
-		return fmt.Errorf("quiz depth must be between 1 and %d", MaxQuizFollowUpDepth)
+func validateDepth(depth int) error {
+	if depth < 1 || depth > MaxFollowUpDepth {
+		return fmt.Errorf("quiz depth must be between 1 and %d", MaxFollowUpDepth)
 	}
 
 	return nil

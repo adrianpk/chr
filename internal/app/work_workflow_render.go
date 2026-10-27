@@ -35,7 +35,7 @@ func (adapter workWorkflowCLI) preview(cmd *cli.Command, preview WorkflowWorkPre
 }
 
 func (adapter workWorkflowCLI) status(ctx context.Context, cmd *cli.Command, operations service, id, action string) error {
-	request := WorkflowStatusRequest{Limit: workflowstate.WorkflowPageLimit}
+	request := WorkflowStatusRequest{Limit: workflowstate.PageLimit}
 	if action == "status" {
 		request.Offset, request.Limit = cmd.Int("offset"), cmd.Int("limit")
 		request.ExpectedRevision = uint64(cmd.Int("revision"))

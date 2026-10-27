@@ -61,11 +61,11 @@ func webQuizAnswerView(quiz QuizView, observed core.QuizObservation) *webui.Quiz
 	}
 
 	view := &webui.QuizAnswerView{ScopeSlug: quiz.Scope.CaseSlug, SessionID: state.SessionID, Revision: observed.Revision, OperationID: rand.Text(), Mode: string(quiz.Mode), Status: quiz.Status, Started: observed.Exists, Error: state.ContinuationError}
-	view.Open = observed.Exists && state.Status != quizcore.QuizRuntimeStatusDone && state.Status != quizcore.QuizRuntimeStatusCancelled
-	view.CanAnswer = view.Open && state.Status == quizcore.QuizRuntimeStatusActive && state.ActiveQuestion != nil
+	view.Open = observed.Exists && state.Status != quizcore.RuntimeStatusDone && state.Status != quizcore.RuntimeStatusCancelled
+	view.CanAnswer = view.Open && state.Status == quizcore.RuntimeStatusActive && state.ActiveQuestion != nil
 
 	view.CanResume = webQuizCanResume(state, observed.Exists)
-	view.CanStart = !observed.Exists || state.Status == quizcore.QuizRuntimeStatusDone
+	view.CanStart = !observed.Exists || state.Status == quizcore.RuntimeStatusDone
 
 	if state.ActiveQuestion != nil {
 		view.QuestionID, view.Question = state.ActiveQuestion.ID, state.ActiveQuestion.Prompt
@@ -76,10 +76,10 @@ func webQuizAnswerView(quiz QuizView, observed core.QuizObservation) *webui.Quiz
 	return view
 }
 
-func webQuizHistory(entries []quizcore.QuizEntry) []webui.QuizAnswerHistoryView {
-	answered := make([]quizcore.QuizEntry, 0, len(entries))
+func webQuizHistory(entries []quizcore.Entry) []webui.QuizAnswerHistoryView {
+	answered := make([]quizcore.Entry, 0, len(entries))
 	for _, entry := range entries {
-		if entry.Status == quizcore.QuizEntryStatusAnswered {
+		if entry.Status == quizcore.EntryStatusAnswered {
 			answered = append(answered, entry)
 		}
 	}
@@ -125,7 +125,7 @@ func (p webViewProvider) writeQuizAction(operations service, request webui.Write
 		answer = strings.TrimSpace(request.Fields["answer"])
 	}
 
-	result, err := operations.applyQuizAction(core.QuizActionRequest{Scope: scope, Binding: binding, Action: action, Mode: quizcore.QuizMode(request.Fields["mode"]), Answer: answer})
+	result, err := operations.applyQuizAction(core.QuizActionRequest{Scope: scope, Binding: binding, Action: action, Mode: quizcore.Mode(request.Fields["mode"]), Answer: answer})
 	if err != nil {
 		return webQuizWriteFailure(request.ID, err), nil
 	}
@@ -152,8 +152,8 @@ func webQuizWriteFailure(id string, err error) webui.WriteActionResponse {
 	return result
 }
 
-func webQuizActionScope(operations service, request webui.WriteActionRequest) (quizcore.QuizScope, error) {
-	scope := operations.quizScope(quizcore.QuizScope{CaseSlug: request.Fields["case_slug"]})
+func webQuizActionScope(operations service, request webui.WriteActionRequest) (quizcore.Scope, error) {
+	scope := operations.quizScope(quizcore.Scope{CaseSlug: request.Fields["case_slug"]})
 
 	paths, err := operations.quizRepository().Paths(scope)
 	if err != nil {
@@ -182,14 +182,14 @@ func webQuizActionScope(operations service, request webui.WriteActionRequest) (q
 	return scope, fmt.Errorf("quiz scope not found")
 }
 
-func webQuizCanResume(state quizcore.QuizRuntimeState, exists bool) bool {
-	if !exists || state.Status == quizcore.QuizRuntimeStatusActive || state.Status == quizcore.QuizRuntimeStatusDone || state.QuestionsAsked >= state.QuestionBudget {
+func webQuizCanResume(state quizcore.RuntimeState, exists bool) bool {
+	if !exists || state.Status == quizcore.RuntimeStatusActive || state.Status == quizcore.RuntimeStatusDone || state.QuestionsAsked >= state.QuestionBudget {
 		return false
 	}
 
-	if state.Status == quizcore.QuizRuntimeStatusCancelled || state.ContinuationPending {
+	if state.Status == quizcore.RuntimeStatusCancelled || state.ContinuationPending {
 		return true
 	}
 
-	return state.Mode != quizcore.QuizModeFast || state.FastBatchID == "" || len(state.FastQueue) != 0
+	return state.Mode != quizcore.ModeFast || state.FastBatchID == "" || len(state.FastQueue) != 0
 }

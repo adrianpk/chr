@@ -46,9 +46,9 @@ type QuizModelRequest struct {
 	ID              string
 	Action          QuizModelAction
 	Strategy        string
-	Scope           quizcore.QuizScope
-	Mode            quizcore.QuizMode
-	RuntimeState    quizcore.QuizRuntimeState
+	Scope           quizcore.Scope
+	Mode            quizcore.Mode
+	RuntimeState    quizcore.RuntimeState
 	Payload         QuizModelPayload
 	ContextSections []QuizModelContextSection
 	OutputContract  QuizModelOutputContract
@@ -75,8 +75,8 @@ type QuizModelResponse struct {
 	RequestID    string
 	Provider     string
 	Status       QuizModelResponseStatus
-	Question     quizcore.QuizQuestion
-	Candidates   []quizcore.QuizCandidate
+	Question     quizcore.Question
+	Candidates   []quizcore.Candidate
 	DraftSpec    QuizDraftSpec
 	Feature      AcceptanceFeatureGeneration
 	Plan         GeneratedPlan
@@ -138,12 +138,12 @@ func ValidateQuizModelRequest(request QuizModelRequest) error {
 		return fmt.Errorf("quiz model request mode is invalid: %s", request.Mode)
 	}
 
-	err := quizcore.ValidateQuizScope(request.Scope)
+	err := quizcore.ValidateScope(request.Scope)
 	if err != nil {
 		return err
 	}
 
-	err = quizcore.ValidateQuizRuntimeState(request.RuntimeState)
+	err = quizcore.ValidateRuntimeState(request.RuntimeState)
 	if err != nil {
 		return err
 	}
@@ -198,7 +198,7 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 	}
 
 	for index, candidate := range response.Candidates {
-		err := quizcore.ValidateQuizCandidate(candidate)
+		err := quizcore.ValidateCandidate(candidate)
 		if err != nil {
 			return fmt.Errorf("quiz model response candidate %d: %w", index+1, err)
 		}
@@ -255,7 +255,7 @@ func validateQuizModelReadyResponse(response QuizModelResponse) error {
 		return ValidateGeneratedPlanTrackingModelContent(response.PlanTracking)
 	}
 
-	return quizcore.ValidateQuizQuestion(response.Question)
+	return quizcore.ValidateQuestion(response.Question)
 }
 
 // Valid reports whether the value is one of the supported constants.

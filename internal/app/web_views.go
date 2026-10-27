@@ -59,7 +59,7 @@ func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardReque
 		view.NextURL = "/board?offset=" + strconv.Itoa(board.NextOffset)
 	}
 	if request.Offset > 0 {
-		view.PreviousURL = "/board?offset=" + strconv.Itoa(max(0, request.Offset-workflowstate.WorkflowPageLimit))
+		view.PreviousURL = "/board?offset=" + strconv.Itoa(max(0, request.Offset-workflowstate.PageLimit))
 	}
 	view.Revision = webStableRevision(struct {
 		Source string

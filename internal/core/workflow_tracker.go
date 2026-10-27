@@ -153,7 +153,7 @@ func (s *WorkflowStore) workflowTrackerPrevious(setID string) (WorkflowTrackerSt
 	}
 
 	ids, err := s.workflowTrackerRegistrations()
-	if err != nil || len(ids) >= workflowstate.WorkflowPageLimit {
+	if err != nil || len(ids) >= workflowstate.PageLimit {
 		return previous, errors.Join(ErrWorkflowProjectionStale, fmt.Errorf("cannot register tracker within 128-projection bound"), err)
 	}
 

@@ -120,7 +120,7 @@ func (r *fileAuthoringSessionRepository) commitQuizTransition(ctx context.Contex
 	return result, r.recoverAuthoringMutation()
 }
 
-func (r *fileAuthoringSessionRepository) quizTransitionChanges(before QuizObservation, next QuizTransition, scope quizcore.QuizScope) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) quizTransitionChanges(before QuizObservation, next QuizTransition, scope quizcore.Scope) ([]workflowFileChange, error) {
 	changes := append([]workflowFileChange(nil), before.images...)
 
 	encoded, err := json.MarshalIndent(next.State, "", "  ")
@@ -130,7 +130,7 @@ func (r *fileAuthoringSessionRepository) quizTransitionChanges(before QuizObserv
 
 	changes[0].After = append(encoded, '\n')
 
-	entries := append([]quizcore.QuizEntry(nil), before.Entries...)
+	entries := append([]quizcore.Entry(nil), before.Entries...)
 	if next.Entry != nil {
 		entries = append(entries, *next.Entry)
 		changes[1].After = append(append([]byte(nil), changes[1].After...), []byte(RenderQuizRawCapture(next.State, *next.Entry))...)
@@ -141,7 +141,7 @@ func (r *fileAuthoringSessionRepository) quizTransitionChanges(before QuizObserv
 		return nil, err
 	}
 
-	changes[2].After = []byte(RenderQuizCuratedNotes(paths, quizcore.CurateQuizEntries(scope, entries, next.State.UpdatedAt)))
+	changes[2].After = []byte(RenderQuizCuratedNotes(paths, quizcore.CurateEntries(scope, entries, next.State.UpdatedAt)))
 	for index := 3; index < len(changes); index++ {
 		changes[index].After, err = r.quizMetadata(changes[index], next.State.UpdatedAt)
 		if err != nil {

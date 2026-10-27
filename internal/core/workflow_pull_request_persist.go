@@ -23,7 +23,7 @@ type workflowPullRequestObservation struct {
 func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFile, snapshots []WorkflowPullRequestSnapshot) (workflowFileChange, error) {
 	binding := run.PullRequest
 
-	if len(snapshots) > workflowstate.WorkflowRecordLimit {
+	if len(snapshots) > workflowstate.RecordLimit {
 		return workflowFileChange{}, fmt.Errorf("workflow PR observation bound exceeded")
 	}
 
@@ -39,12 +39,12 @@ func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFi
 		}
 	}
 
-	if binding.ObservationCount >= workflowstate.WorkflowPageLimit {
+	if binding.ObservationCount >= workflowstate.PageLimit {
 		return workflowFileChange{}, fmt.Errorf("workflow PR observation history bound exceeded")
 	}
 
 	data, err := json.MarshalIndent(observation, "", "  ")
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return workflowFileChange{}, fmt.Errorf("workflow PR observation exceeds file bounds")
 	}
 

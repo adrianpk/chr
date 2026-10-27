@@ -96,7 +96,7 @@ func (host *guidedWorkHost) release(key string) {
 func (host *guidedWorkHost) run(operations service, id string) error {
 	// The native owner applies the original finite per-task and integration
 	// budgets. This extra bound limits host scheduling across the whole extent.
-	for range workflowstate.WorkflowRecordLimit {
+	for range workflowstate.RecordLimit {
 		if host.ctx.Err() != nil {
 			return host.ctx.Err()
 		}

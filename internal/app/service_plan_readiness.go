@@ -44,7 +44,7 @@ func (s service) assessPlanReadiness(ctx context.Context, observed core.PlanSour
 	}
 
 	input, err := json.Marshal(struct {
-		Scope           quizcore.QuizScope
+		Scope           quizcore.Scope
 		Inputs          []core.PlanSourceInput
 		ObservationHash string `json:"observation_hash"`
 	}{observed.Scope, observed.Inputs, observed.Hash})

@@ -25,7 +25,7 @@ func defaultDumpCapture(request DumpMutationRequest) DumpCapturePreparer {
 }
 
 func validateDumpPreparation(binding dumpMutationBinding, prepared DumpCapturePreparation) error {
-	if len(prepared.Content) > workflowstate.WorkflowFileLimit || len(prepared.RawContent) > workflowstate.WorkflowFileLimit || strings.TrimSpace(prepared.Content) == "" || strings.TrimSpace(prepared.RawContent) == "" {
+	if len(prepared.Content) > workflowstate.FileLimit || len(prepared.RawContent) > workflowstate.FileLimit || strings.TrimSpace(prepared.Content) == "" || strings.TrimSpace(prepared.RawContent) == "" {
 		return errors.New("prepared dump components must be nonempty and at most 1 MiB each")
 	}
 

@@ -45,7 +45,7 @@ func newWebJourney(t *testing.T) *webJourney {
 
 	provider, model := webPlanFixture(t)
 	now := serviceQuizClock()()
-	model.responses = []core.QuizModelResponse{serviceQuizModelResponseWithCandidates("journey-batch", "question-1", now, []quizcore.QuizCandidate{serviceQuizCandidate("question-2", "What verifies the output?", now)})}
+	model.responses = []core.QuizModelResponse{serviceQuizModelResponseWithCandidates("journey-batch", "question-1", now, []quizcore.Candidate{serviceQuizCandidate("question-2", "What verifies the output?", now)})}
 
 	return &webJourney{provider: provider, model: model, handler: webQuizHandler(t, provider)}
 }
@@ -105,7 +105,7 @@ func (j *webJourney) quiz(t *testing.T) {
 
 	operations := j.provider.service(t.Context())
 
-	started, err := operations.StartQuiz(QuizStartRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}, Mode: quizcore.QuizModeFast})
+	started, err := operations.StartQuiz(QuizStartRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}, Mode: quizcore.ModeFast})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func (j *webJourney) quiz(t *testing.T) {
 		webJourneyPost(t, j.handler, form)
 	}
 
-	state, err := operations.quizRepository().LoadRuntimeState(t.Context(), operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"}))
+	state, err := operations.quizRepository().LoadRuntimeState(t.Context(), operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
 	if err != nil || state.ActiveQuestion == nil || state.ActiveQuestion.ID == started.State.ActiveQuestion.ID || len(j.model.requests) != 1 {
 		t.Fatal(state, err, len(j.model.requests))
 	}
@@ -145,7 +145,7 @@ func (j *webJourney) authorSpecs(t *testing.T) {
 		t.Fatal(documents, err)
 	}
 
-	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}})
+	generated, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}})
 	if err != nil {
 		t.Fatal(err)
 	}

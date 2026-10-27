@@ -18,7 +18,7 @@ func (s service) prepareGuidedQuizDone(observed core.QuizObservation) (core.Quiz
 	}
 
 	check := state
-	check.Mode = quizcore.QuizModeDeep
+	check.Mode = quizcore.ModeDeep
 
 	request, err := s.guidedQuizModelRequest(check, observed.Entries)
 	if err != nil {
@@ -36,10 +36,10 @@ func (s service) prepareGuidedQuizDone(observed core.QuizObservation) (core.Quiz
 		return core.QuizTransition{State: state, Message: state.ContinuationError}, nil
 	}
 
-	var entry *quizcore.QuizEntry
+	var entry *quizcore.Entry
 
 	if state.ActiveQuestion != nil {
-		skipped := quizEntryFromState(state, quizcore.QuizEntryStatusSkipped, "", s.utcNow())
+		skipped := quizEntryFromState(state, quizcore.EntryStatusSkipped, "", s.utcNow())
 		skipped.ID = fmt.Sprintf("%s-entry-%03d", state.SessionID, state.QuestionsAsked)
 		state = updateQuizStateAfterEntry(state, skipped)
 		entry = &skipped

@@ -26,7 +26,7 @@ func TestPiGenerationPlan(t *testing.T) {
 	writeServiceQuizFixture(t, project)
 	harnessSelectionWrite(t, filepath.Join(driver, "plan-readiness"), "enabled")
 
-	generated, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "pi-plan", Scope: quizcore.QuizScope{CaseSlug: "blog"}})
+	generated, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "pi-plan", Scope: quizcore.Scope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatal("Pi plan failed", err)
 	}
@@ -37,7 +37,7 @@ func TestPiGenerationPlan(t *testing.T) {
 
 	writePiTrackingResponse(t, driver)
 
-	tracking, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-tracking", Scope: quizcore.QuizScope{CaseSlug: "blog"}})
+	tracking, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-tracking", Scope: quizcore.Scope{CaseSlug: "blog"}})
 	if err != nil {
 		t.Fatal("Pi tracking failed", err)
 	}
@@ -73,7 +73,7 @@ func TestPiGenerationTracking(t *testing.T) {
 
 	writePiTrackingResponse(t, driver)
 
-	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-legacy-tracking", Scope: quizcore.QuizScope{CaseSlug: "blog"}})
+	result, err := operations.MaterializePlanTracking(t.Context(), PlanTrackingRequest{OperationID: "pi-legacy-tracking", Scope: quizcore.Scope{CaseSlug: "blog"}})
 	if err != nil || len(result.Tickets) != 1 {
 		t.Fatal("Pi legacy tracking failed", result.Message, err)
 	}

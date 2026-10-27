@@ -38,7 +38,7 @@ func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowC
 		applyWorkflowTaskResult(&run, &record, *result, ref)
 
 		data, err := json.MarshalIndent(result, "", "  ")
-		if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+		if err != nil || len(data) >= workflowstate.FileLimit {
 			return fmt.Errorf("workflow result exceeds file bounds: %w", errorsOrConflict(err))
 		}
 

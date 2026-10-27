@@ -49,7 +49,7 @@ func ReadLegacyWork(ctx context.Context, env UserEnvironment, projectID string) 
 }
 
 func readObservedExecutions(ctx context.Context, db *sql.DB, projectID string) ([]ExecutionRecord, error) {
-	rows, err := db.QueryContext(ctx, selectExecutionSQL()+" WHERE project_id = ? ORDER BY CASE WHEN status IN ('pending','running') THEN 0 ELSE 1 END, updated_at DESC, id LIMIT ?", projectID, workflowstate.WorkflowPageLimit)
+	rows, err := db.QueryContext(ctx, selectExecutionSQL()+" WHERE project_id = ? ORDER BY CASE WHEN status IN ('pending','running') THEN 0 ELSE 1 END, updated_at DESC, id LIMIT ?", projectID, workflowstate.PageLimit)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func readObservedExecutions(ctx context.Context, db *sql.DB, projectID string) (
 }
 
 func readObservedLoops(ctx context.Context, db *sql.DB, projectID string) ([]LoopRunRecord, error) {
-	rows, err := db.QueryContext(ctx, selectLoopRunSQL()+" WHERE project_id = ? ORDER BY CASE WHEN status IN ('pending','running') THEN 0 ELSE 1 END, updated_at DESC, id LIMIT ?", projectID, workflowstate.WorkflowPageLimit)
+	rows, err := db.QueryContext(ctx, selectLoopRunSQL()+" WHERE project_id = ? ORDER BY CASE WHEN status IN ('pending','running') THEN 0 ELSE 1 END, updated_at DESC, id LIMIT ?", projectID, workflowstate.PageLimit)
 	if err != nil {
 		return nil, err
 	}

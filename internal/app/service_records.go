@@ -18,7 +18,7 @@ func (s service) ReadRecords(ctx context.Context, namespace string, query Record
 		return RecordPage{}, err
 	}
 
-	if query.Offset < 0 || query.Offset > workflowstate.WorkflowRecordLimit || query.Limit < 0 || query.Limit > 50 {
+	if query.Offset < 0 || query.Offset > workflowstate.RecordLimit || query.Limit < 0 || query.Limit > 50 {
 		return RecordPage{}, fmt.Errorf("invalid record page bounds")
 	}
 
@@ -149,12 +149,12 @@ func filterRecordViews(views []RecordView, query RecordQuery) ([]RecordView, err
 }
 
 func (s service) caseRecordViews(ctx context.Context, query RecordQuery) ([]RecordView, error) {
-	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(cases) > workflowstate.WorkflowRecordLimit {
+	if len(cases) > workflowstate.RecordLimit {
 		return nil, fmt.Errorf("case record capacity exceeded")
 	}
 

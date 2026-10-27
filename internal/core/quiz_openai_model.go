@@ -479,7 +479,7 @@ func quizModelQuestionResponseFromOutput(
 	request QuizModelRequest,
 	output []byte,
 ) (QuizModelResponse, error) {
-	if request.Mode == quizcore.QuizModeFast {
+	if request.Mode == quizcore.ModeFast {
 		return quizModelFastQuestionResponseFromOutput(request, output)
 	}
 
@@ -694,12 +694,12 @@ func quizModelQuestionFromPayload(
 	request QuizModelRequest,
 	payload QuizModelQuestionPayload,
 	offset int,
-) quizcore.QuizQuestion {
+) quizcore.Question {
 	depth := quizModelRuntimeDepth(request.RuntimeState, payload.FollowUpDepth)
 	id := quizModelQuestionID(request, offset)
 	parentID, trunkID := quizModelRoute(request.RuntimeState, depth, id)
 
-	return quizcore.QuizQuestion{
+	return quizcore.Question{
 		ID:        id,
 		Prompt:    payload.Question,
 		Required:  !payload.CompletionRecommended,
@@ -716,8 +716,8 @@ func quizModelQuestionFromPayload(
 func quizModelCandidatesFromPayloads(
 	request QuizModelRequest,
 	payloads []QuizModelQuestionPayload,
-) []quizcore.QuizCandidate {
-	candidates := make([]quizcore.QuizCandidate, 0, len(payloads))
+) []quizcore.Candidate {
+	candidates := make([]quizcore.Candidate, 0, len(payloads))
 
 	for index, payload := range payloads {
 		offset := index + 2
@@ -725,7 +725,7 @@ func quizModelCandidatesFromPayloads(
 		id := quizModelQuestionID(request, offset)
 		parentID, trunkID := quizModelRoute(request.RuntimeState, depth, id)
 
-		candidates = append(candidates, quizcore.QuizCandidate{
+		candidates = append(candidates, quizcore.Candidate{
 			ID:        id,
 			Prompt:    payload.Question,
 			Topic:     quizModelTopic(payload.Tags),
@@ -740,7 +740,7 @@ func quizModelCandidatesFromPayloads(
 	return candidates
 }
 
-func quizModelRuntimeDepth(state quizcore.QuizRuntimeState, followUpDepth int) int {
+func quizModelRuntimeDepth(state quizcore.RuntimeState, followUpDepth int) int {
 	if state.ActiveQuestion == nil && len(state.Trail) == 0 {
 		return 1
 	}
@@ -752,7 +752,7 @@ func quizModelRuntimeDepth(state quizcore.QuizRuntimeState, followUpDepth int) i
 	return followUpDepth
 }
 
-func quizModelRoute(state quizcore.QuizRuntimeState, depth int, fallbackTrunkID string) (string, string) {
+func quizModelRoute(state quizcore.RuntimeState, depth int, fallbackTrunkID string) (string, string) {
 	if depth <= 1 {
 		return "", fallbackTrunkID
 	}
@@ -770,7 +770,7 @@ func quizModelRoute(state quizcore.QuizRuntimeState, depth int, fallbackTrunkID 
 	return "", fallbackTrunkID
 }
 
-func quizModelTrunkID(state quizcore.QuizRuntimeState, fallback string) string {
+func quizModelTrunkID(state quizcore.RuntimeState, fallback string) string {
 	if state.ActiveQuestion != nil && strings.TrimSpace(state.ActiveQuestion.TrunkID) != "" {
 		return state.ActiveQuestion.TrunkID
 	}
@@ -818,10 +818,10 @@ func quizModelRoutingState(
 	state := map[string]any{
 		"phase":                    quizModelPhase(payload),
 		"entry_count":              entryCount,
-		"remaining_questions":      quizModelMaxInt(quizcore.DefaultQuizQuestionBudget-entryCount, 0),
+		"remaining_questions":      quizModelMaxInt(quizcore.DefaultQuestionBudget-entryCount, 0),
 		"follow_up_depth":          payload.FollowUpDepth,
-		"max_follow_up_depth":      quizcore.MaxQuizFollowUpDepth,
-		"trunk_return_recommended": payload.FollowUpDepth >= quizcore.MaxQuizFollowUpDepth,
+		"max_follow_up_depth":      quizcore.MaxFollowUpDepth,
+		"trunk_return_recommended": payload.FollowUpDepth >= quizcore.MaxFollowUpDepth,
 		"covered_tags":             quizModelCoveredTags(request.Payload.RecentEntries),
 		"topic_coverage":           quizModelTopicCoverage(request.Payload.RecentEntries),
 		"recent_topic_streak":      quizModelRecentTopicStreak(request.Payload.RecentEntries),
@@ -952,7 +952,7 @@ func quizModelInstructions(request QuizModelRequest) string {
 		return quizModelFeatureGenerationInstructions()
 	case request.Action == QuizModelActionDraftSpec:
 		return quizModelDraftSpecInstructions()
-	case request.Mode == quizcore.QuizModeFast:
+	case request.Mode == quizcore.ModeFast:
 		return quizModelFastQuestionInstructions()
 	default:
 		return quizModelDeepQuestionInstructions()
@@ -1220,7 +1220,7 @@ func quizModelOpenAIFormat(request QuizModelRequest) openAIResponsesTextFormat {
 			"Draft specification generated from project quiz context.",
 			quizModelDraftSpecJSONSchema(),
 		)
-	case request.Mode == quizcore.QuizModeFast:
+	case request.Mode == quizcore.ModeFast:
 		return quizModelJSONSchemaTextFormat(
 			"quiz_fast_questions",
 			"A batch of project quiz questions.",
@@ -1344,7 +1344,7 @@ func quizModelQuestionJSONSchema() map[string]any {
 			"follow_up_depth": map[string]any{
 				"type":    "integer",
 				"minimum": 0,
-				"maximum": quizcore.MaxQuizFollowUpDepth,
+				"maximum": quizcore.MaxFollowUpDepth,
 			},
 			"completion_recommended": map[string]any{
 				"type": "boolean",

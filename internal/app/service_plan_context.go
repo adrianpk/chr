@@ -11,7 +11,7 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-func (s service) observePlanContext(ctx context.Context, scope quizcore.QuizScope) (core.PlanSourceObservation, error) {
+func (s service) observePlanContext(ctx context.Context, scope quizcore.Scope) (core.PlanSourceObservation, error) {
 	sources, err := core.ObservePlanSources(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil || scope.CaseSlug != "" {
 		return sources, err

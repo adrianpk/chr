@@ -32,7 +32,7 @@ func TestPlanOrderModelPayload(t *testing.T) {
 				return
 			}
 
-			request := QuizModelRequest{Scope: quizcore.QuizScope{ProjectID: "example"}}
+			request := QuizModelRequest{Scope: quizcore.Scope{ProjectID: "example"}}
 
 			response, err := quizModelPlanResponseFromOutput(request, content)
 			if err != nil || len(response.Plan.Order) != 1 || response.Plan.Order[0].Tasks[0].ID != "task-t1.1" {
@@ -66,7 +66,7 @@ func TestPlanOrderModelCompatibility(t *testing.T) {
 		t.Fatal("provider schema omitted map", schema)
 	}
 
-	contract := NewQuizModelOutputContract(QuizModelActionGeneratePlan, quizcore.QuizModeDeep)
+	contract := NewQuizModelOutputContract(QuizModelActionGeneratePlan, quizcore.ModeDeep)
 	if len(contract.RequiredFields) != 4 || contract.RequiredFields[3] != "order" {
 		t.Fatal("shared generation contract omitted map", contract)
 	}

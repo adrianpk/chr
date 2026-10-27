@@ -12,8 +12,8 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-func (s service) nextQuizQuestion(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) (quizcore.QuizRuntimeState, error) {
-	if state.Mode == quizcore.QuizModeFast {
+func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
+	if state.Mode == quizcore.ModeFast {
 		return s.nextFastQuizQuestion(state, entries)
 	}
 
@@ -35,7 +35,7 @@ func (s service) nextQuizQuestion(state quizcore.QuizRuntimeState, entries []qui
 	}
 
 	if response.Status == core.QuizModelResponseBlocked {
-		state.Status, state.ActiveQuestion = quizcore.QuizRuntimeStatusBlocked, nil
+		state.Status, state.ActiveQuestion = quizcore.RuntimeStatusBlocked, nil
 		state.ContinuationPending = true
 		state.ContinuationError = "More project context is required. Resume to retry."
 		state.UpdatedAt = s.utcNow()
@@ -57,7 +57,7 @@ func (s service) nextQuizQuestion(state quizcore.QuizRuntimeState, entries []qui
 	return state, nil
 }
 
-func (s service) nextFastQuizQuestion(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) (quizcore.QuizRuntimeState, error) {
+func (s service) nextFastQuizQuestion(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
 	if state.FastBatchID == "" {
 		var err error
 
@@ -72,12 +72,12 @@ func (s service) nextFastQuizQuestion(state quizcore.QuizRuntimeState, entries [
 	return s.activateNextFastQuestion(state), nil
 }
 
-func (s service) activateNextFastQuestion(state quizcore.QuizRuntimeState) quizcore.QuizRuntimeState {
+func (s service) activateNextFastQuestion(state quizcore.RuntimeState) quizcore.RuntimeState {
 	if state.ActiveQuestion != nil {
 		return state
 	}
 
-	state.Status, state.UpdatedAt = quizcore.QuizRuntimeStatusIdle, s.utcNow()
+	state.Status, state.UpdatedAt = quizcore.RuntimeStatusIdle, s.utcNow()
 
 	state.ContinuationPending, state.ContinuationError = false, ""
 	if len(state.FastQueue) == 0 || state.QuestionsAsked >= state.QuestionBudget {
@@ -91,7 +91,7 @@ func (s service) activateNextFastQuestion(state quizcore.QuizRuntimeState) quizc
 	return activateQuizCandidate(state, candidate, s.utcNow())
 }
 
-func (s service) generateFastQuizBatch(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) (quizcore.QuizRuntimeState, error) {
+func (s service) generateFastQuizBatch(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
 	request, err := s.newQuizModelRequestWithEntries(state, entries)
 	if err != nil {
 		return state, err
@@ -120,9 +120,9 @@ func (s service) generateFastQuizBatch(state quizcore.QuizRuntimeState, entries 
 	return state, nil
 }
 
-func fastQuizBatchQuestions(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry, response core.QuizModelResponse) []quizcore.QuizCandidate {
+func fastQuizBatchQuestions(state quizcore.RuntimeState, entries []quizcore.Entry, response core.QuizModelResponse) []quizcore.Candidate {
 	question := response.Question
-	questions := append([]quizcore.QuizCandidate{{ID: question.ID, Prompt: question.Prompt, Topic: question.Topic, Depth: 1, CreatedAt: question.CreatedAt}}, response.Candidates...)
+	questions := append([]quizcore.Candidate{{ID: question.ID, Prompt: question.Prompt, Topic: question.Topic, Depth: 1, CreatedAt: question.CreatedAt}}, response.Candidates...)
 
 	seen := map[string]bool{}
 	if state.ActiveQuestion != nil {
@@ -135,9 +135,9 @@ func fastQuizBatchQuestions(state quizcore.QuizRuntimeState, entries []quizcore.
 		}
 	}
 
-	remaining := min(quizcore.DefaultQuizQuestionBudget, state.QuestionBudget-state.QuestionsAsked)
+	remaining := min(quizcore.DefaultQuestionBudget, state.QuestionBudget-state.QuestionsAsked)
 
-	queue := make([]quizcore.QuizCandidate, 0, remaining)
+	queue := make([]quizcore.Candidate, 0, remaining)
 	for _, candidate := range questions {
 		if len(queue) >= remaining {
 			break
@@ -155,11 +155,11 @@ func fastQuizBatchQuestions(state quizcore.QuizRuntimeState, entries []quizcore.
 	return queue
 }
 
-func quizSessionEntry(state quizcore.QuizRuntimeState, entry quizcore.QuizEntry) bool {
+func quizSessionEntry(state quizcore.RuntimeState, entry quizcore.Entry) bool {
 	return strings.HasPrefix(entry.ID, state.SessionID+"-entry-") || strings.HasPrefix(state.SessionID, "legacy-")
 }
 
-func retainUnansweredFastQuestions(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) quizcore.QuizRuntimeState {
+func retainUnansweredFastQuestions(state quizcore.RuntimeState, entries []quizcore.Entry) quizcore.RuntimeState {
 	seen := map[string]bool{}
 	if state.ActiveQuestion != nil {
 		seen[state.ActiveQuestion.ID], seen[state.ActiveQuestion.Prompt] = true, true
@@ -171,7 +171,7 @@ func retainUnansweredFastQuestions(state quizcore.QuizRuntimeState, entries []qu
 		}
 	}
 
-	queue := make([]quizcore.QuizCandidate, 0, len(state.FastQueue))
+	queue := make([]quizcore.Candidate, 0, len(state.FastQueue))
 	for _, candidate := range state.FastQueue {
 		if !seen[candidate.ID] && !seen[candidate.Prompt] && !slices.Contains(state.FastConsumed, candidate.ID) {
 			queue = append(queue, candidate)
@@ -189,7 +189,7 @@ func retainUnansweredFastQuestions(state quizcore.QuizRuntimeState, entries []qu
 	return state
 }
 
-func (s service) completeGeneratedQuiz(state quizcore.QuizRuntimeState) (quizcore.QuizRuntimeState, error) {
+func (s service) completeGeneratedQuiz(state quizcore.RuntimeState) (quizcore.RuntimeState, error) {
 	if s.guidedContext == nil {
 		return s.finishQuiz(state), nil
 	}

@@ -477,17 +477,17 @@ func fieldPointer(fields map[string]string, name string) *string {
 	return &value
 }
 
-func webActionScope(request webui.WriteActionRequest) quizcore.QuizScope {
-	return quizcore.QuizScope{CaseSlug: strings.TrimSpace(request.Fields["case_slug"])}
+func webActionScope(request webui.WriteActionRequest) quizcore.Scope {
+	return quizcore.Scope{CaseSlug: strings.TrimSpace(request.Fields["case_slug"])}
 }
 
-func webQuizMode(value string) quizcore.QuizMode {
-	mode := quizcore.QuizMode(strings.TrimSpace(value))
+func webQuizMode(value string) quizcore.Mode {
+	mode := quizcore.Mode(strings.TrimSpace(value))
 	if mode.Valid() {
 		return mode
 	}
 
-	return quizcore.QuizModeDeep
+	return quizcore.ModeDeep
 }
 
 func webOperation(kind, status, id, detail string) webui.OperationStateView {
@@ -499,7 +499,7 @@ func webOperation(kind, status, id, detail string) webui.OperationStateView {
 	}
 }
 
-func quizOperationID(state quizcore.QuizRuntimeState) string {
+func quizOperationID(state quizcore.RuntimeState) string {
 	return firstNonEmptyString(state.CuratedPath, state.RawPath, state.CaseSlug, state.ProjectID)
 }
 

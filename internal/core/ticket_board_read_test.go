@@ -38,7 +38,7 @@ func nativeBoardStore(t *testing.T) *WorkflowStore {
 
 	store := workflowTestStore(t)
 
-	for i := 1; i <= workflowstate.WorkflowPageLimit+2; i++ {
+	for i := 1; i <= workflowstate.PageLimit+2; i++ {
 		record := workflowTestTask(fmt.Sprintf("CHR-%d", i))
 		record.Metadata = map[string]json.RawMessage{"title": json.RawMessage(fmt.Sprintf("\"Native %d\"", i))}
 
@@ -155,7 +155,7 @@ func TestTicketBoardFailures(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, offset := range []int{-1, workflowstate.WorkflowRecordLimit + 1} {
+	for _, offset := range []int{-1, workflowstate.RecordLimit + 1} {
 		if _, err := ReadTicketBoard(context.Background(), TicketBoardReadOptions{Layout: layout, ProjectID: "project-1", Offset: offset}); err == nil {
 			t.Fatal("out-of-bounds page accepted")
 		}

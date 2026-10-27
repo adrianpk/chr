@@ -41,7 +41,7 @@ func TestSpecCatalogDocuments(t *testing.T) {
 // its target, including when generation originally observed absence.
 func TestSpecGenerationRevision(t *testing.T) {
 	project := t.TempDir()
-	spec := GeneratedSpec{Scope: quizcore.QuizScope{ProjectID: "sample-project"}, Title: "Generated", Body: "Original generated body.", CreatedAt: time.Now().UTC()}
+	spec := GeneratedSpec{Scope: quizcore.Scope{ProjectID: "sample-project"}, Title: "Generated", Body: "Original generated body.", CreatedAt: time.Now().UTC()}
 
 	paths, err := GeneratedSpecLayout(project, spec.Scope)
 	if err != nil {
@@ -106,7 +106,7 @@ func checkSpecCatalogGuard(t *testing.T, kind string) {
 			t.Fatal(err)
 		}
 	case "bound":
-		if err := os.WriteFile(path, []byte(strings.Repeat("x", workflowstate.WorkflowFileLimit+1)), 0o644); err != nil {
+		if err := os.WriteFile(path, []byte(strings.Repeat("x", workflowstate.FileLimit+1)), 0o644); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -120,7 +120,7 @@ func checkSpecCatalogGuard(t *testing.T, kind string) {
 // identity whose retained scope differs from the requested generation scope.
 func TestSpecGenerationScope(t *testing.T) {
 	project := t.TempDir()
-	spec := GeneratedSpec{Scope: quizcore.QuizScope{ProjectID: "sample-project"}, Title: "Scoped", Body: "Retained requirements.", CreatedAt: time.Now().UTC()}
+	spec := GeneratedSpec{Scope: quizcore.Scope{ProjectID: "sample-project"}, Title: "Scoped", Body: "Retained requirements.", CreatedAt: time.Now().UTC()}
 
 	paths, err := WriteGeneratedSpec(t.Context(), project, spec)
 	if err != nil {

@@ -59,7 +59,7 @@ func TestGuidedUseCaseSharedQuizWeb(t *testing.T) {
 	updated := readWebGuidedSession(t, operations, current.ID)
 
 	quiz := observeGuidedQuiz(t, operations, updated)
-	if quiz.State.Mode != quizcore.QuizModeFast || quiz.State.ActiveQuestion.ID != observed.State.ActiveQuestion.ID || model.requests[1].Mode != quizcore.QuizModeFast {
+	if quiz.State.Mode != quizcore.ModeFast || quiz.State.ActiveQuestion.ID != observed.State.ActiveQuestion.ID || model.requests[1].Mode != quizcore.ModeFast {
 		t.Fatal("mode form bypassed the shared native quiz")
 	}
 }

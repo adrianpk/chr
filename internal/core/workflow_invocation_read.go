@@ -139,7 +139,7 @@ func (s *WorkflowStore) appendWorkflowInvocations(ctx context.Context, runs *[]w
 		return err
 	}
 
-	if len(entries)+len(*runs) > workflowstate.WorkflowRecordLimit {
+	if len(entries)+len(*runs) > workflowstate.RecordLimit {
 		return fmt.Errorf("repository invocation observation bound exceeded")
 	}
 
@@ -188,7 +188,7 @@ func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]OpsLay
 		return nil, err
 	}
 
-	if len(worktrees) == 0 || len(worktrees) > workflowstate.WorkflowPageLimit {
+	if len(worktrees) == 0 || len(worktrees) > workflowstate.PageLimit {
 		return nil, fmt.Errorf("workflow worktree observation bound exceeded")
 	}
 
@@ -207,7 +207,7 @@ func (s *WorkflowStore) workflowRepositoryLayouts(ctx context.Context) ([]OpsLay
 		result = append(result, layouts...)
 	}
 
-	if len(result) > workflowstate.WorkflowRecordLimit {
+	if len(result) > workflowstate.RecordLimit {
 		return nil, fmt.Errorf("workflow namespace observation bound exceeded")
 	}
 
@@ -220,7 +220,7 @@ func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]OpsLayout,
 		return nil, err
 	}
 
-	if len(entries) > workflowstate.WorkflowPageLimit {
+	if len(entries) > workflowstate.PageLimit {
 		return nil, fmt.Errorf("workflow namespace observation bound exceeded")
 	}
 

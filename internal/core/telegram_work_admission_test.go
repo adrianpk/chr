@@ -15,7 +15,7 @@ func telegramWorkAdmissionFixture(t *testing.T) (*WorkflowStore, WorkflowStartRe
 	t.Helper()
 
 	store, hierarchy, request := workflowClaimFixture(t)
-	request.Selection.Limit = workflowstate.WorkflowPageLimit
+	request.Selection.Limit = workflowstate.PageLimit
 
 	preview, err := store.Preview(t.Context(), request.Selection)
 	if err != nil {

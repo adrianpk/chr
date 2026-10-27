@@ -320,7 +320,7 @@ func validWorkflowNativeSourceHeader(b WorkflowNativeRecordBinding, source Workf
 	expected := [4]string{"chr-native-source/v1", b.SourceRepository, b.SourceRef, b.OriginalSource}
 	actual := [4]string{source.Schema, source.Repository, source.SourceRef, source.OriginalSource}
 
-	return expected == actual && len(source.Commits) > 0 && len(source.Commits) <= workflowstate.WorkflowRecordLimit
+	return expected == actual && len(source.Commits) > 0 && len(source.Commits) <= workflowstate.RecordLimit
 }
 
 func validWorkflowNativeCapabilityRecord(capability WorkflowNativeCapability) bool {

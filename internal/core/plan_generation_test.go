@@ -14,7 +14,7 @@ import (
 
 func TestArchiveGeneratedPlanCopiesCanonicalPlanWithArchiveMetadata(t *testing.T) {
 	projectDir := t.TempDir()
-	scope := quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "blog"}
+	scope := quizcore.Scope{ProjectID: "project-1", CaseSlug: "blog"}
 	createdAt := time.Date(2026, 5, 25, 10, 0, 0, 0, time.UTC)
 	archivedAt := time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC)
 
@@ -63,7 +63,7 @@ func TestArchiveGeneratedPlanCopiesCanonicalPlanWithArchiveMetadata(t *testing.T
 
 func TestArchiveGeneratedPlanReturnsFalseWhenCanonicalPlanIsMissing(t *testing.T) {
 	projectDir := t.TempDir()
-	scope := quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "blog"}
+	scope := quizcore.Scope{ProjectID: "project-1", CaseSlug: "blog"}
 	archivedAt := time.Date(2026, 5, 25, 11, 12, 13, 0, time.UTC)
 
 	_, archived, err := ArchiveGeneratedPlan(context.Background(), projectDir, scope, archivedAt)

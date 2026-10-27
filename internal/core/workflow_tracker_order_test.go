@@ -232,7 +232,7 @@ func workflowOrderPlanFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializa
 	}
 
 	generated := orderedPlanCandidate()
-	generated.Scope = quizcore.QuizScope{ProjectID: store.projectID}
+	generated.Scope = quizcore.Scope{ProjectID: store.projectID}
 
 	generated.Order = plannedWorkflowOrder(opts.Plan)
 	if _, err := WriteGeneratedPlan(t.Context(), store.layout.ProjectDir(), generated); err != nil {

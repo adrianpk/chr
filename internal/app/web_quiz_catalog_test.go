@@ -25,7 +25,7 @@ func checkWebQuizCatalogSelection(t *testing.T, stop string) {
 
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
-	scope := operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"})
+	scope := operations.quizScope(quizcore.Scope{CaseSlug: "named-work"})
 	seedQuizCatalogScope(t, operations, scope, false, false, stop)
 
 	before := quizCatalogObservation(t, operations, scope)
@@ -60,7 +60,7 @@ func checkWebQuizCatalogSelection(t *testing.T, stop string) {
 func TestWebQuizCatalogRestart(t *testing.T) {
 	provider, _ := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
-	scope := operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"})
+	scope := operations.quizScope(quizcore.Scope{CaseSlug: "named-work"})
 	seedQuizCatalogScope(t, operations, scope, false, true, "done")
 
 	before := quizCatalogObservation(t, operations, scope)
@@ -118,7 +118,7 @@ func TestWebQuizCatalogMarkup(t *testing.T) {
 
 	operations := provider.service(t.Context())
 	for _, slug := range []string{"", "named-work"} {
-		seedQuizCatalogScope(t, operations, operations.quizScope(quizcore.QuizScope{CaseSlug: slug}), true, false, "")
+		seedQuizCatalogScope(t, operations, operations.quizScope(quizcore.Scope{CaseSlug: slug}), true, false, "")
 	}
 
 	request := httptest.NewRequest(http.MethodGet, "/quizzes/fragment", nil)
@@ -132,7 +132,7 @@ func TestWebQuizCatalogMarkup(t *testing.T) {
 	}
 }
 
-func quizCatalogObservation(t *testing.T, operations service, scope quizcore.QuizScope) core.QuizObservation {
+func quizCatalogObservation(t *testing.T, operations service, scope quizcore.Scope) core.QuizObservation {
 	t.Helper()
 
 	observed, err := operations.quizRepository().Observe(t.Context(), scope)

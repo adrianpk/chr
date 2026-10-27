@@ -33,7 +33,7 @@ func (s *WorkflowStore) workflowMergerCall(input WorkflowMergerInput) (workflowM
 		}
 
 		total += len(data)
-		if total >= workflowstate.WorkflowFileLimit || !utf8.Valid(data) {
+		if total >= workflowstate.FileLimit || !utf8.Valid(data) {
 			return call, workflowstate.ErrConflict
 		}
 
@@ -45,14 +45,14 @@ func (s *WorkflowStore) workflowMergerCall(input WorkflowMergerInput) (workflowM
 
 func serveWorkflowMergerBroker(ctx context.Context, tools *workflowMergerTools, reader io.Reader, writer io.Writer) (proposal json.RawMessage, usage *WorkflowMergerUsage, err error) {
 	scanner := bufio.NewScanner(reader)
-	scanner.Buffer(make([]byte, 4096), workflowstate.WorkflowFileLimit+1)
+	scanner.Buffer(make([]byte, 4096), workflowstate.FileLimit+1)
 
 	encoder := json.NewEncoder(writer)
 
 	total, messages := 0, 0
 	for scanner.Scan() {
 		total, messages = total+len(scanner.Bytes()), messages+1
-		if total > 8*workflowstate.WorkflowFileLimit || messages > workflowstate.WorkflowPageLimit || proposal != nil {
+		if total > 8*workflowstate.FileLimit || messages > workflowstate.PageLimit || proposal != nil {
 			return nil, nil, workflowstate.ErrConflict
 		}
 

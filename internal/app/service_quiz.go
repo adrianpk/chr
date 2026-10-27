@@ -19,64 +19,64 @@ import (
 // QuizListResult contains the current quiz list and a status message.
 type QuizListResult struct {
 	Message string
-	States  []quizcore.QuizRuntimeState
+	States  []quizcore.RuntimeState
 	Views   []QuizView
 }
 
 // QuizOperationResult is the TUI-facing result for quiz mutations.
 type QuizOperationResult struct {
 	Message string
-	State   quizcore.QuizRuntimeState
+	State   quizcore.RuntimeState
 }
 
 // QuizStartRequest selects the scope for a new quiz session.
 type QuizStartRequest struct {
 	Binding core.QuizActionBinding
-	Scope   quizcore.QuizScope
-	Mode    quizcore.QuizMode
+	Scope   quizcore.Scope
+	Mode    quizcore.Mode
 }
 
 // QuizResumeRequest selects the scope for a resumed quiz session.
 type QuizResumeRequest struct {
 	Binding core.QuizActionBinding
-	Scope   quizcore.QuizScope
+	Scope   quizcore.Scope
 }
 
 // QuizAnswerRequest submits an answer for the active quiz question.
 type QuizAnswerRequest struct {
 	Binding core.QuizActionBinding
-	Scope   quizcore.QuizScope
+	Scope   quizcore.Scope
 	Answer  string
 }
 
 // QuizSkipRequest skips the active quiz question for the selected scope.
 type QuizSkipRequest struct {
 	Binding core.QuizActionBinding
-	Scope   quizcore.QuizScope
+	Scope   quizcore.Scope
 }
 
 // QuizCompleteRequest completes the quiz for the selected scope.
 type QuizCompleteRequest struct {
 	Binding core.QuizActionBinding
-	Scope   quizcore.QuizScope
+	Scope   quizcore.Scope
 }
 
 // QuizDraftSpecRequest selects the quiz scope used to draft a spec.
 type QuizDraftSpecRequest struct {
-	Scope quizcore.QuizScope
+	Scope quizcore.Scope
 }
 
 // QuizCancelRequest cancels the quiz for the selected scope.
 type QuizCancelRequest struct {
 	Binding core.QuizActionBinding
-	Scope   quizcore.QuizScope
+	Scope   quizcore.Scope
 }
 
 // QuizModeRequest changes the quiz interaction mode for the selected scope.
 type QuizModeRequest struct {
 	Binding core.QuizActionBinding
-	Scope   quizcore.QuizScope
-	Mode    quizcore.QuizMode
+	Scope   quizcore.Scope
+	Mode    quizcore.Mode
 }
 
 func (s service) ListQuizzes() (QuizListResult, error) {
@@ -96,7 +96,7 @@ func (s service) ListQuizzes() (QuizListResult, error) {
 func (s service) StartQuiz(request QuizStartRequest) (QuizOperationResult, error) {
 	mode := request.Mode
 	if mode == "" {
-		mode = quizcore.QuizModeDeep
+		mode = quizcore.ModeDeep
 	}
 
 	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "start", Mode: mode})
@@ -135,7 +135,7 @@ func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, e
 	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "mode", Mode: request.Mode})
 }
 
-func (s service) generateQuizDraftSpec(scope quizcore.QuizScope) (QuizOperationResult, error) {
+func (s service) generateQuizDraftSpec(scope quizcore.Scope) (QuizOperationResult, error) {
 	bound, _, err := s.bindGeneration(s.ctx, "", string(core.QuizModelActionDraftSpec))
 	if err != nil {
 		return QuizOperationResult{}, err
@@ -162,7 +162,7 @@ func (s service) generateQuizDraftSpec(scope quizcore.QuizScope) (QuizOperationR
 	return QuizOperationResult{Message: "Spec generated.", State: state}, nil
 }
 
-func (s service) writeQuizCuratedNotes(scope quizcore.QuizScope) (core.QuizArtifactPaths, error) {
+func (s service) writeQuizCuratedNotes(scope quizcore.Scope) (core.QuizArtifactPaths, error) {
 	repository := s.quizRepository()
 
 	entries, err := repository.LoadRawCaptureEntries(s.ctx, scope)
@@ -170,11 +170,11 @@ func (s service) writeQuizCuratedNotes(scope quizcore.QuizScope) (core.QuizArtif
 		return core.QuizArtifactPaths{}, err
 	}
 
-	return repository.WriteCuratedNotes(s.ctx, quizcore.CurateQuizEntries(scope, entries, s.utcNow()))
+	return repository.WriteCuratedNotes(s.ctx, quizcore.CurateEntries(scope, entries, s.utcNow()))
 }
 
-func (s service) newQuizModelRequest(state quizcore.QuizRuntimeState) (core.QuizModelRequest, error) {
-	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
+func (s service) newQuizModelRequest(state quizcore.RuntimeState) (core.QuizModelRequest, error) {
+	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
 		return core.QuizModelRequest{}, err
 	}
@@ -182,12 +182,12 @@ func (s service) newQuizModelRequest(state quizcore.QuizRuntimeState) (core.Quiz
 	return s.newQuizModelRequestWithEntries(state, entries)
 }
 
-func (s service) newQuizModelRequestWithEntries(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) (core.QuizModelRequest, error) {
+func (s service) newQuizModelRequestWithEntries(state quizcore.RuntimeState, entries []quizcore.Entry) (core.QuizModelRequest, error) {
 	if s.guidedContext != nil {
 		return s.guidedQuizModelRequest(state, entries)
 	}
 
-	scope := quizcore.QuizScope{
+	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
@@ -235,8 +235,8 @@ func (s service) newQuizModelRequestWithEntries(state quizcore.QuizRuntimeState,
 	}, nil
 }
 
-func (s service) writeQuizDraftSpec(state quizcore.QuizRuntimeState, paths core.QuizArtifactPaths) error {
-	target, err := core.QuizDraftSpecLayout(s.projectContext.ProjectDir, quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
+func (s service) writeQuizDraftSpec(state quizcore.RuntimeState, paths core.QuizArtifactPaths) error {
+	target, err := core.QuizDraftSpecLayout(s.projectContext.ProjectDir, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
 		return err
 	}
@@ -258,7 +258,7 @@ func (s service) writeQuizDraftSpec(state quizcore.QuizRuntimeState, paths core.
 
 	spec := response.DraftSpec
 	spec.ExpectedRevision = revision
-	spec.Scope = quizcore.QuizScope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
+	spec.Scope = quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 	spec.SourceQuizPath = paths.CuratedRelativePath
 	spec.SourceRawPath = paths.RawRelativePath
 	spec.SourceDumpPaths = quizDumpSourcePaths(request.ContextSections)
@@ -272,10 +272,10 @@ func (s service) writeQuizDraftSpec(state quizcore.QuizRuntimeState, paths core.
 }
 
 func (s service) newQuizDraftSpecModelRequest(
-	state quizcore.QuizRuntimeState,
+	state quizcore.RuntimeState,
 	paths core.QuizArtifactPaths,
 ) (core.QuizModelRequest, error) {
-	scope := quizcore.QuizScope{
+	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
@@ -320,8 +320,8 @@ func (s service) newQuizDraftSpecModelRequest(
 }
 
 func (s service) newQuizModelPayload(
-	scope quizcore.QuizScope,
-	state quizcore.QuizRuntimeState,
+	scope quizcore.Scope,
+	state quizcore.RuntimeState,
 	action core.QuizModelAction,
 ) (core.QuizModelPayload, error) {
 	entries, err := s.quizRepository().LoadRawCaptureEntries(s.ctx, scope)
@@ -332,7 +332,7 @@ func (s service) newQuizModelPayload(
 	return s.quizModelPayloadWithEntries(state, action, entries), nil
 }
 
-func (s service) quizModelPayloadWithEntries(state quizcore.QuizRuntimeState, action core.QuizModelAction, entries []quizcore.QuizEntry) core.QuizModelPayload {
+func (s service) quizModelPayloadWithEntries(state quizcore.RuntimeState, action core.QuizModelAction, entries []quizcore.Entry) core.QuizModelPayload {
 	return core.QuizModelPayload{
 		Project:         s.quizModelProjectPayload(),
 		Quiz:            quizModelQuizPayload(state),
@@ -342,22 +342,22 @@ func (s service) quizModelPayloadWithEntries(state quizcore.QuizRuntimeState, ac
 	}
 }
 
-func (s service) newQuizRuntimeState(scope quizcore.QuizScope, mode quizcore.QuizMode) (quizcore.QuizRuntimeState, error) {
+func (s service) newQuizRuntimeState(scope quizcore.Scope, mode quizcore.Mode) (quizcore.RuntimeState, error) {
 	paths, err := s.quizRepository().Paths(scope)
 	if err != nil {
-		return quizcore.QuizRuntimeState{}, err
+		return quizcore.RuntimeState{}, err
 	}
 
 	now := s.utcNow()
 
-	return quizcore.QuizRuntimeState{
+	return quizcore.RuntimeState{
 		ID:             "quiz-" + paths.ScopeID,
 		SessionID:      "quiz-" + rand.Text(),
 		ProjectID:      scope.ProjectID,
 		CaseSlug:       scope.CaseSlug,
-		Status:         quizcore.QuizRuntimeStatusIdle,
+		Status:         quizcore.RuntimeStatusIdle,
 		Mode:           mode,
-		QuestionBudget: quizcore.DefaultQuizQuestionBudget,
+		QuestionBudget: quizcore.DefaultQuestionBudget,
 		RawPath:        paths.RawRelativePath,
 		CuratedPath:    paths.CuratedRelativePath,
 		UpdatedAt:      now,
@@ -380,7 +380,7 @@ func (s service) quizModelProjectPayload() core.QuizModelProjectPayload {
 
 func (s service) appendQuizSupplementalContextSections(
 	sections []core.QuizModelContextSection,
-	scope quizcore.QuizScope,
+	scope quizcore.Scope,
 ) ([]core.QuizModelContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", core.ProjectMetadataPath(""))
@@ -416,7 +416,7 @@ func (s service) appendQuizSupplementalContextSections(
 	return sections, nil
 }
 
-func quizModelQuizPayload(state quizcore.QuizRuntimeState) core.QuizModelQuizPayload {
+func quizModelQuizPayload(state quizcore.RuntimeState) core.QuizModelQuizPayload {
 	return core.QuizModelQuizPayload{
 		ID:         state.ID,
 		UseCaseID:  state.CaseSlug,
@@ -425,7 +425,7 @@ func quizModelQuizPayload(state quizcore.QuizRuntimeState) core.QuizModelQuizPay
 	}
 }
 
-func quizModelRecentEntryPayloads(entries []quizcore.QuizEntry, limit int) []core.QuizModelEntryPayload {
+func quizModelRecentEntryPayloads(entries []quizcore.Entry, limit int) []core.QuizModelEntryPayload {
 	if limit <= 0 {
 		return []core.QuizModelEntryPayload{}
 	}
@@ -449,8 +449,8 @@ func quizModelRecentEntryPayloads(entries []quizcore.QuizEntry, limit int) []cor
 }
 
 func quizModelCurrentQuestionPayload(
-	state quizcore.QuizRuntimeState,
-	entries []quizcore.QuizEntry,
+	state quizcore.RuntimeState,
+	entries []quizcore.Entry,
 ) core.QuizModelCurrentQuestionPayload {
 	if state.ActiveQuestion != nil {
 		return quizModelQuestionPayloadFromQuestion(*state.ActiveQuestion)
@@ -479,7 +479,7 @@ func quizModelCurrentQuestionPayload(
 	}
 }
 
-func quizModelQuestionPayloadFromQuestion(question quizcore.QuizQuestion) core.QuizModelCurrentQuestionPayload {
+func quizModelQuestionPayloadFromQuestion(question quizcore.Question) core.QuizModelCurrentQuestionPayload {
 	promptIntent := quizModelPromptIntentFromJSON(question.Rationale)
 	if len(promptIntent) == 0 {
 		promptIntent = map[string]any{
@@ -514,7 +514,7 @@ func quizModelPromptIntentFromJSON(value string) map[string]any {
 }
 
 func quizAcceptanceReadinessFromContext(
-	state quizcore.QuizRuntimeState,
+	state quizcore.RuntimeState,
 	sections []core.QuizModelContextSection,
 ) core.AcceptanceReadiness {
 	content := strings.ToLower(quizContextText(sections))
@@ -642,7 +642,7 @@ func quizContainsAny(content string, values ...string) bool {
 	return false
 }
 
-func quizModelQuestionTags(question quizcore.QuizQuestion) []string {
+func quizModelQuestionTags(question quizcore.Question) []string {
 	if strings.TrimSpace(question.Topic) == "" {
 		return []string{}
 	}
@@ -650,7 +650,7 @@ func quizModelQuestionTags(question quizcore.QuizQuestion) []string {
 	return []string{question.Topic}
 }
 
-func quizModelEntryTags(entry quizcore.QuizEntry) []string {
+func quizModelEntryTags(entry quizcore.Entry) []string {
 	if len(entry.Tags) > 0 {
 		return entry.Tags
 	}
@@ -662,27 +662,27 @@ func quizModelEntryTags(entry quizcore.QuizEntry) []string {
 	return []string{entry.Topic}
 }
 
-func quizModelStrategy(mode quizcore.QuizMode) string {
-	if mode == quizcore.QuizModeFast {
+func quizModelStrategy(mode quizcore.Mode) string {
+	if mode == quizcore.ModeFast {
 		return core.QuizModelFastStrategy
 	}
 
 	return core.QuizModelDeepStrategy
 }
 
-func (s service) listQuizRuntimeStates() ([]quizcore.QuizRuntimeState, error) {
+func (s service) listQuizRuntimeStates() ([]quizcore.RuntimeState, error) {
 	root := core.UserPath(s.projectContext.ProjectDir, filepath.FromSlash(core.QuizRuntimeDirectory))
 
 	entries, err := readQuizRuntimeDirectory(root)
 	if errors.Is(err, os.ErrNotExist) {
-		return []quizcore.QuizRuntimeState{}, nil
+		return []quizcore.RuntimeState{}, nil
 	}
 
 	if err != nil {
 		return nil, fmt.Errorf("read quiz runtime directory: %w", err)
 	}
 
-	states := []quizcore.QuizRuntimeState{}
+	states := []quizcore.RuntimeState{}
 	repository := s.quizRepository()
 
 	for _, entry := range entries {
@@ -690,7 +690,7 @@ func (s service) listQuizRuntimeStates() ([]quizcore.QuizRuntimeState, error) {
 			continue
 		}
 
-		scope := quizcore.QuizScope{
+		scope := quizcore.Scope{
 			ProjectID: s.projectContext.ProjectID,
 			CaseSlug:  strings.TrimSuffix(entry.Name(), ".json"),
 		}
@@ -713,7 +713,7 @@ func (s service) quizRepository() core.QuizArtifactRepository {
 	return core.NewQuizArtifactRepository(s.projectContext.ProjectDir)
 }
 
-func (s service) quizScope(scope quizcore.QuizScope) quizcore.QuizScope {
+func (s service) quizScope(scope quizcore.Scope) quizcore.Scope {
 	scope.ProjectID = s.projectContext.ProjectID
 
 	return scope
@@ -787,14 +787,14 @@ func quizDumpSourcePaths(sections []core.QuizModelContextSection) []string {
 }
 
 func quizEntryFromState(
-	state quizcore.QuizRuntimeState,
-	status quizcore.QuizEntryStatus,
+	state quizcore.RuntimeState,
+	status quizcore.EntryStatus,
 	answer string,
 	now time.Time,
-) quizcore.QuizEntry {
+) quizcore.Entry {
 	question := *state.ActiveQuestion
 
-	return quizcore.QuizEntry{
+	return quizcore.Entry{
 		ID:           fmt.Sprintf("entry-%03d", state.QuestionsAsked),
 		QuestionID:   question.ID,
 		Question:     question.Prompt,
@@ -811,30 +811,30 @@ func quizEntryFromState(
 	}
 }
 
-func updateQuizStateAfterEntry(state quizcore.QuizRuntimeState, entry quizcore.QuizEntry) quizcore.QuizRuntimeState {
-	if entry.Status == quizcore.QuizEntryStatusAnswered {
+func updateQuizStateAfterEntry(state quizcore.RuntimeState, entry quizcore.Entry) quizcore.RuntimeState {
+	if entry.Status == quizcore.EntryStatusAnswered {
 		state.AnswersRecorded++
 	}
 
-	if entry.Status == quizcore.QuizEntryStatusSkipped {
+	if entry.Status == quizcore.EntryStatusSkipped {
 		state.SkipsRecorded++
 	}
 
-	state.Status = quizcore.QuizRuntimeStatusIdle
+	state.Status = quizcore.RuntimeStatusIdle
 	state.ActiveQuestion = nil
 	state.ActiveTopic = ""
 
-	if entry.Status == quizcore.QuizEntryStatusSkipped {
+	if entry.Status == quizcore.EntryStatusSkipped {
 		state.Trail = nil
-		state.BranchReturnReason = quizcore.QuizBranchReturnReasonSkipped
-	} else if entry.Depth >= quizcore.MaxQuizFollowUpDepth {
+		state.BranchReturnReason = quizcore.BranchReturnReasonSkipped
+	} else if entry.Depth >= quizcore.MaxFollowUpDepth {
 		state.Trail = nil
-		state.BranchReturnReason = quizcore.QuizBranchReturnReasonMaxDepth
+		state.BranchReturnReason = quizcore.BranchReturnReasonMaxDepth
 	} else {
 		state.BranchReturnReason = ""
 	}
 
-	if state.Mode == quizcore.QuizModeDeep {
+	if state.Mode == quizcore.ModeDeep {
 		state.Candidates = nil
 	}
 
@@ -842,11 +842,11 @@ func updateQuizStateAfterEntry(state quizcore.QuizRuntimeState, entry quizcore.Q
 }
 
 func activateQuizQuestion(
-	state quizcore.QuizRuntimeState,
-	question quizcore.QuizQuestion,
+	state quizcore.RuntimeState,
+	question quizcore.Question,
 	now time.Time,
-) quizcore.QuizRuntimeState {
-	state.Status = quizcore.QuizRuntimeStatusActive
+) quizcore.RuntimeState {
+	state.Status = quizcore.RuntimeStatusActive
 	state.ActiveQuestion = &question
 	state.ActiveTopic = question.Topic
 	state.Trail = quizTrailForQuestion(state.Trail, question)
@@ -858,11 +858,11 @@ func activateQuizQuestion(
 }
 
 func activateQuizCandidate(
-	state quizcore.QuizRuntimeState,
-	candidate quizcore.QuizCandidate,
+	state quizcore.RuntimeState,
+	candidate quizcore.Candidate,
 	now time.Time,
-) quizcore.QuizRuntimeState {
-	question := quizcore.QuizQuestion{
+) quizcore.RuntimeState {
+	question := quizcore.Question{
 		ID:        candidate.ID,
 		Prompt:    candidate.Prompt,
 		Required:  true,
@@ -889,8 +889,8 @@ func activateQuizCandidate(
 	return state
 }
 
-func quizTrailForQuestion(trail []quizcore.QuizTrailNode, question quizcore.QuizQuestion) []quizcore.QuizTrailNode {
-	node := quizcore.QuizTrailNode{
+func quizTrailForQuestion(trail []quizcore.TrailNode, question quizcore.Question) []quizcore.TrailNode {
+	node := quizcore.TrailNode{
 		QuestionID: question.ID,
 		Prompt:     question.Prompt,
 		Topic:      question.Topic,
@@ -898,7 +898,7 @@ func quizTrailForQuestion(trail []quizcore.QuizTrailNode, question quizcore.Quiz
 	}
 
 	if question.Depth <= 1 {
-		return []quizcore.QuizTrailNode{node}
+		return []quizcore.TrailNode{node}
 	}
 
 	parentIndex := -1
@@ -912,10 +912,10 @@ func quizTrailForQuestion(trail []quizcore.QuizTrailNode, question quizcore.Quiz
 	}
 
 	if parentIndex < 0 {
-		return []quizcore.QuizTrailNode{node}
+		return []quizcore.TrailNode{node}
 	}
 
-	next := append([]quizcore.QuizTrailNode(nil), trail[:parentIndex+1]...)
+	next := append([]quizcore.TrailNode(nil), trail[:parentIndex+1]...)
 	next = append(next, node)
 
 	return next
@@ -927,7 +927,7 @@ func readQuizRuntimeDirectory(root string) ([]os.DirEntry, error) {
 		return nil, err
 	}
 
-	entries, readErr := directory.ReadDir(workflowstate.WorkflowRecordLimit + 1)
+	entries, readErr := directory.ReadDir(workflowstate.RecordLimit + 1)
 	if errors.Is(readErr, io.EOF) {
 		readErr = nil
 	}
@@ -936,7 +936,7 @@ func readQuizRuntimeDirectory(root string) ([]os.DirEntry, error) {
 		return nil, err
 	}
 
-	if len(entries) > workflowstate.WorkflowRecordLimit {
+	if len(entries) > workflowstate.RecordLimit {
 		return nil, fmt.Errorf("quiz runtime inventory capacity exceeded")
 	}
 

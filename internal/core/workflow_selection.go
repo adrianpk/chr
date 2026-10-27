@@ -109,7 +109,7 @@ func (s *WorkflowStore) Preview(ctx context.Context, request WorkflowPreviewRequ
 }
 
 func validateWorkflowPreviewRequest(request WorkflowPreviewRequest) error {
-	if request.Limit < 1 || request.Limit > workflowstate.WorkflowPageLimit || request.Offset < 0 || request.Offset > workflowstate.WorkflowRecordLimit {
+	if request.Limit < 1 || request.Limit > workflowstate.PageLimit || request.Offset < 0 || request.Offset > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow preview page bounds exceeded")
 	}
 

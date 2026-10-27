@@ -27,7 +27,7 @@ func TestGeneratedSpecProtocolPaths(t *testing.T) {
 				t.Fatal("normalization altered the namespace", got)
 			}
 
-			err := ValidateGeneratedSpec(GeneratedSpec{Scope: quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"}, Title: "Newsletter requirements", Body: got, CreatedAt: time.Now().UTC()})
+			err := ValidateGeneratedSpec(GeneratedSpec{Scope: quizcore.Scope{ProjectID: "project-1", CaseSlug: "newsletter"}, Title: "Newsletter requirements", Body: got, CreatedAt: time.Now().UTC()})
 			if (err == nil) != item.valid {
 				t.Fatal("incorrect protocol reference validation", err)
 			}
@@ -37,7 +37,7 @@ func TestGeneratedSpecProtocolPaths(t *testing.T) {
 
 func TestRenderGeneratedSpecRemovesDuplicateTitleHeading(t *testing.T) {
 	spec := GeneratedSpec{
-		Scope:            quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Scope:            quizcore.Scope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:            "Newsletter Distribution",
 		Body:             "# Newsletter Distribution\n\nSummary\n\nPrepare local newsletter artifacts.",
 		SourceRequestID:  "request-1",
@@ -58,7 +58,7 @@ func TestRenderGeneratedSpecRemovesDuplicateTitleHeading(t *testing.T) {
 
 func TestRenderGeneratedSpecKeepsDifferentBodyHeading(t *testing.T) {
 	spec := GeneratedSpec{
-		Scope:            quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Scope:            quizcore.Scope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:            "Newsletter Distribution",
 		Body:             "# Scope\n\nPrepare local newsletter artifacts.",
 		SourceRequestID:  "request-1",
@@ -75,7 +75,7 @@ func TestRenderGeneratedSpecKeepsDifferentBodyHeading(t *testing.T) {
 
 func TestValidateGeneratedSpecRejectsUnsupportedChrPathReference(t *testing.T) {
 	spec := GeneratedSpec{
-		Scope:     quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Scope:     quizcore.Scope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:     "Newsletter Distribution",
 		Body:      "Store newsletter drafts in .chr/newsletters/drafts.",
 		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
@@ -93,7 +93,7 @@ func TestValidateGeneratedSpecRejectsUnsupportedChrPathReference(t *testing.T) {
 
 func TestValidateGeneratedSpecAllowsGherkinExample(t *testing.T) {
 	spec := GeneratedSpec{
-		Scope:     quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Scope:     quizcore.Scope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title:     "Newsletter Distribution",
 		Body:      "Acceptance Criteria\n\n```gherkin\nFeature: Newsletter distribution\n```\n",
 		CreatedAt: time.Date(2026, 5, 27, 18, 0, 0, 0, time.UTC),
@@ -107,7 +107,7 @@ func TestValidateGeneratedSpecAllowsGherkinExample(t *testing.T) {
 
 func TestValidateGeneratedSpecAllowsKnownChrPathReferences(t *testing.T) {
 	spec := GeneratedSpec{
-		Scope: quizcore.QuizScope{ProjectID: "project-1", CaseSlug: "newsletter"},
+		Scope: quizcore.Scope{ProjectID: "project-1", CaseSlug: "newsletter"},
 		Title: "Newsletter Distribution",
 		Body: strings.Join([]string{
 			"See .chr/default/project.md.",

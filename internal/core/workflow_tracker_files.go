@@ -221,7 +221,7 @@ func (s *WorkflowStore) workflowTrackerRegistrations() ([]string, error) {
 		return nil, err
 	}
 
-	entries, err := directory.ReadDir(workflowstate.WorkflowPageLimit + 1)
+	entries, err := directory.ReadDir(workflowstate.PageLimit + 1)
 	if errors.Is(err, io.EOF) {
 		err = nil
 	}
@@ -230,7 +230,7 @@ func (s *WorkflowStore) workflowTrackerRegistrations() ([]string, error) {
 		return nil, err
 	}
 
-	if len(entries) > workflowstate.WorkflowPageLimit {
+	if len(entries) > workflowstate.PageLimit {
 		return nil, fmt.Errorf("tracker projection limit exceeded")
 	}
 

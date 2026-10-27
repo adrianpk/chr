@@ -24,7 +24,7 @@ func workflowOccupiedProcessSlots(common string) (map[int]bool, error) {
 		return nil, err
 	}
 
-	if len(entries) > workflowstate.WorkflowRecordLimit {
+	if len(entries) > workflowstate.RecordLimit {
 		return nil, workflowstate.ErrConflict
 	}
 

@@ -44,7 +44,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 	switch request.Action {
 	case tui.SpecActionGenerate:
 		generated, err := e.operations.GenerateSpec(e.operations.ctx, SpecGenerateRequest{
-			Scope: quizcore.QuizScope{CaseSlug: request.Scope.CaseSlug},
+			Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			return tui.SpecActionResult{}, err
@@ -53,7 +53,7 @@ func (e tuiSpecActionExecutor) ExecuteSpecAction(
 		result.Message = generated.Message
 	case tui.SpecActionGenerateFeature:
 		generated, err := e.operations.GenerateAcceptanceFeature(e.operations.ctx, AcceptanceFeatureGenerateRequest{
-			Scope: quizcore.QuizScope{CaseSlug: request.Scope.CaseSlug},
+			Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug},
 		})
 		if err != nil {
 			return tui.SpecActionResult{}, err
@@ -127,15 +127,15 @@ func (e tuiPlanActionExecutor) ExecutePlanAction(request tui.PlanActionRequest) 
 func (e tuiPlanActionExecutor) runPlanAction(request tui.PlanActionRequest) (tui.PlanActionResult, error) {
 	switch request.Action {
 	case tui.PlanActionGenerate:
-		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: request.Scope.CaseSlug}})
+		result, err := e.operations.GeneratePlan(e.operations.ctx, PlanGenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
 
 		return tui.PlanActionResult{Message: result.Message}, err
 	case tui.PlanActionRegenerate:
-		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{Scope: quizcore.QuizScope{CaseSlug: request.Scope.CaseSlug}})
+		result, err := e.operations.RegeneratePlan(e.operations.ctx, PlanRegenerateRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
 
 		return tui.PlanActionResult{Message: result.Message}, err
 	case tui.PlanActionMaterializeTracking:
-		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{Scope: quizcore.QuizScope{CaseSlug: request.Scope.CaseSlug}})
+		result, err := e.operations.MaterializePlanTracking(e.operations.ctx, PlanTrackingRequest{Scope: quizcore.Scope{CaseSlug: request.Scope.CaseSlug}})
 
 		return tui.PlanActionResult{Message: result.Message, Tickets: result.Tickets}, err
 	case tui.PlanActionRefresh:

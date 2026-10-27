@@ -62,7 +62,7 @@ func dumpCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		return webui.ArtifactCatalogView{}, err
 	}
 
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}
@@ -106,7 +106,7 @@ func specCatalog(operations service) (webui.ArtifactCatalogView, error) {
 		cards = append(cards, card)
 	}
 
-	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(operations.projectContext.ProjectDir).LoadBounded(operations.ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return webui.ArtifactCatalogView{}, err
 	}

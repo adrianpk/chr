@@ -77,7 +77,7 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *core.AuthoringS
 	return s.finishGuidedQuizResult(ctx, session, result.State, digest)
 }
 
-func (s service) finishGuidedQuizResult(ctx context.Context, session *core.AuthoringSession, state quizcore.QuizRuntimeState, digest string) error {
+func (s service) finishGuidedQuizResult(ctx context.Context, session *core.AuthoringSession, state quizcore.RuntimeState, digest string) error {
 	session.Guided.Quiz = &core.GuidedQuizState{SessionID: state.SessionID, Revision: state.Revision, InputDigest: digest}
 	session.Guided.Status = "waiting_input"
 
@@ -91,7 +91,7 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *core.Autho
 		session.Guided.Status = "waiting_input"
 	}
 
-	if state.Status == quizcore.QuizRuntimeStatusDone {
+	if state.Status == quizcore.RuntimeStatusDone {
 		return core.SealGuidedQuiz(ctx, s.projectContext.ProjectDir, session)
 	}
 
@@ -99,7 +99,7 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *core.Autho
 }
 
 func (s service) prepareGuidedQuizAction(ctx context.Context, session core.AuthoringSession, digest string) (core.QuizActionRequest, error) {
-	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	observed, err := s.quizRepository().Observe(ctx, scope)
 	if err != nil {
@@ -139,7 +139,7 @@ func guidedDumpCheckpoint(session core.AuthoringSession) (core.GuidedStageCheckp
 	return core.GuidedStageCheckpoint{}, errors.New("guided quiz requires a retained dump checkpoint")
 }
 
-func (s service) guidedQuizModelRequest(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) (core.QuizModelRequest, error) {
+func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []quizcore.Entry) (core.QuizModelRequest, error) {
 	session := s.guidedContext.session
 
 	sections, err := s.guidedCommittedSections(session, "dump")
@@ -152,7 +152,7 @@ func (s service) guidedQuizModelRequest(state quizcore.QuizRuntimeState, entries
 		return core.QuizModelRequest{}, err
 	}
 
-	if len(history) > workflowstate.WorkflowFileLimit {
+	if len(history) > workflowstate.FileLimit {
 		return core.QuizModelRequest{}, errors.New("guided clarification history exceeds its bound")
 	}
 
@@ -167,7 +167,7 @@ func (s service) guidedQuizModelRequest(state quizcore.QuizRuntimeState, entries
 
 	return core.QuizModelRequest{
 		ID: fmt.Sprintf("guided-%s-%d", session.ID, state.QuestionsAsked+1), Action: core.QuizModelActionNextQuestion, Strategy: quizModelStrategy(state.Mode),
-		Scope: quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: state.Mode,
+		Scope: quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: state.Mode,
 		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...),
 		OutputContract: core.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}, nil
@@ -209,7 +209,7 @@ func guidedQuizAction(action string) bool {
 	}
 }
 
-func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode quizcore.QuizMode) (string, quizcore.QuizMode) {
+func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode quizcore.Mode) (string, quizcore.Mode) {
 	switch operation.Action {
 	case "answer":
 		action = "answer"
@@ -219,9 +219,9 @@ func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string
 
 	switch action {
 	case "start":
-		mode = quizcore.QuizModeDeep
+		mode = quizcore.ModeDeep
 	case "mode":
-		mode = quizcore.QuizMode(operation.Content)
+		mode = quizcore.Mode(operation.Content)
 	}
 
 	return action, mode

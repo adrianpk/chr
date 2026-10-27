@@ -108,7 +108,7 @@ func assistedDumpDigest(opts AssistedArtifactSynthesisOptions) (string, error) {
 	}{opts.ProjectDir, opts.Session.ID, opts.Session.ProjectID, opts.Session.Namespace, opts.Session.Topic, opts.SourceRef.Path, opts.TargetName, opts.AllowReplace, summary}
 
 	encoded, err := json.Marshal(input)
-	if err != nil || len(encoded) > workflowstate.WorkflowFileLimit || len(opts.Session.Topic) > 512 {
+	if err != nil || len(encoded) > workflowstate.FileLimit || len(opts.Session.Topic) > 512 {
 		return "", errors.New("assisted dump input exceeds its bound")
 	}
 

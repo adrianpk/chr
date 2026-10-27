@@ -12,7 +12,7 @@ func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentW
 		return AgentWorkResult{}, err
 	}
 
-	if opts.MaxIterations > workflowstate.WorkflowPageLimit {
+	if opts.MaxIterations > workflowstate.PageLimit {
 		return AgentWorkResult{}, fmt.Errorf("ticket authority max-iterations must contain 0..128 checkpoint steps")
 	}
 
@@ -20,7 +20,7 @@ func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentW
 }
 
 func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, selection core.WorkflowPreviewRequest) (AgentWorkResult, error) {
-	selection.Limit = workflowstate.WorkflowPageLimit
+	selection.Limit = workflowstate.PageLimit
 
 	target, err := s.nativeAgentWorkTarget(config)
 	if err != nil {

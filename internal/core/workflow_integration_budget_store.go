@@ -160,7 +160,7 @@ func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run
 	}
 
 	data, err := json.MarshalIndent(budget, "", "  ")
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 

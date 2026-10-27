@@ -55,7 +55,7 @@ func ParseWorkflowMergerResult(data []byte, input WorkflowMergerInput, current W
 }
 
 func decodeWorkflowMergerResult(data []byte, result *WorkflowMergerResult) error {
-	if len(data) == 0 || len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) == 0 || len(data) > workflowstate.FileLimit {
 		return fmt.Errorf("%w: merger result exceeds file bound", workflowstate.ErrConflict)
 	}
 

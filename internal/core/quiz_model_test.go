@@ -25,7 +25,7 @@ func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
 			Provider:  "fake",
 			Status:    QuizModelResponseReady,
 			Question:  validQuizQuestion(),
-			Candidates: []quizcore.QuizCandidate{
+			Candidates: []quizcore.Candidate{
 				validQuizCandidate(),
 			},
 			RawText:   "question",
@@ -88,7 +88,7 @@ func TestInvokeQuizModelAcceptsDraftSpecResponse(t *testing.T) {
 			Provider:  "fake",
 			Status:    QuizModelResponseReady,
 			DraftSpec: QuizDraftSpec{
-				Scope:          quizcore.QuizScope{ProjectID: "project-1"},
+				Scope:          quizcore.Scope{ProjectID: "project-1"},
 				Title:          "Generated Spec",
 				Body:           "Generated behavior.",
 				SourceQuizPath: ".chr/default/quizzes/project-quiz.md",
@@ -1008,7 +1008,7 @@ func quizModelEntryPayloadWithTags(tags ...string) QuizModelEntryPayload {
 	return QuizModelEntryPayload{
 		Question: "Question?",
 		Answer:   "Answer.",
-		Status:   string(quizcore.QuizEntryStatusAnswered),
+		Status:   string(quizcore.EntryStatusAnswered),
 		Tags:     tags,
 	}
 }
@@ -1028,8 +1028,8 @@ func TestDecodeQuizModelQuestionPayloadEnforcesRedWrightContract(t *testing.T) {
 		t.Fatalf("normalized tag = %q, want editorial-review", payload.Tags[0])
 	}
 
-	if payload.FollowUpDepth != quizcore.MaxQuizFollowUpDepth {
-		t.Fatalf("follow up depth = %d, want clamp to %d", payload.FollowUpDepth, quizcore.MaxQuizFollowUpDepth)
+	if payload.FollowUpDepth != quizcore.MaxFollowUpDepth {
+		t.Fatalf("follow up depth = %d, want clamp to %d", payload.FollowUpDepth, quizcore.MaxFollowUpDepth)
 	}
 }
 
@@ -1210,7 +1210,7 @@ func TestQuizModelResponseFromDeepOutputAfterSkippedEntry(t *testing.T) {
 	request := validQuizModelRequest()
 	request.Payload.RecentEntries = append(request.Payload.RecentEntries, QuizModelEntryPayload{
 		Question: "Which publishing branch should we avoid?",
-		Status:   string(quizcore.QuizEntryStatusSkipped),
+		Status:   string(quizcore.EntryStatusSkipped),
 		Tags:     []string{"publishing"},
 	})
 	request.Payload.Quiz.EntryCount = len(request.Payload.RecentEntries)
@@ -1264,9 +1264,9 @@ func TestQuizModelRuntimeDepthForcesTrunkAfterBranchReturn(t *testing.T) {
 	state := validQuizRuntimeState()
 	state.ActiveQuestion = nil
 	state.Trail = nil
-	state.BranchReturnReason = quizcore.QuizBranchReturnReasonSkipped
+	state.BranchReturnReason = quizcore.BranchReturnReasonSkipped
 
-	depth := quizModelRuntimeDepth(state, quizcore.MaxQuizFollowUpDepth)
+	depth := quizModelRuntimeDepth(state, quizcore.MaxFollowUpDepth)
 	if depth != 1 {
 		t.Fatalf("depth = %d, want trunk depth after branch return", depth)
 	}
@@ -1274,10 +1274,10 @@ func TestQuizModelRuntimeDepthForcesTrunkAfterBranchReturn(t *testing.T) {
 
 func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
 	request := validQuizModelRequest()
-	request.Mode = quizcore.QuizModeFast
+	request.Mode = quizcore.ModeFast
 	request.Strategy = QuizModelFastStrategy
-	request.Payload.Quiz.Mode = string(quizcore.QuizModeFast)
-	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.QuizModeFast)
+	request.Payload.Quiz.Mode = string(quizcore.ModeFast)
+	request.Payload.OutputContract = NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.ModeFast)
 
 	response, err := quizModelResponseFromOutput(request, []byte(`{
 		"questions": [
@@ -1382,7 +1382,7 @@ func TestValidateQuizModelResponseAcceptsDraftSpecBeforeServiceProvenance(t *tes
 		Provider:  "fake",
 		Status:    QuizModelResponseReady,
 		DraftSpec: QuizDraftSpec{
-			Scope:     quizcore.QuizScope{ProjectID: "project-1"},
+			Scope:     quizcore.Scope{ProjectID: "project-1"},
 			Title:     "Draft Spec",
 			Body:      "Draft body.",
 			CreatedAt: quizRuntimeTestTime(),
@@ -1407,13 +1407,13 @@ func validQuizModelRequest() QuizModelRequest {
 		Quiz: QuizModelQuizPayload{
 			ID:         state.ID,
 			EntryCount: 1,
-			Mode:       string(quizcore.QuizModeDeep),
+			Mode:       string(quizcore.ModeDeep),
 		},
 		RecentEntries: []QuizModelEntryPayload{
 			{
 				Question: "What should this workflow preserve?",
 				Answer:   "The workflow should preserve review.",
-				Status:   string(quizcore.QuizEntryStatusAnswered),
+				Status:   string(quizcore.EntryStatusAnswered),
 				Tags:     []string{"workflow"},
 			},
 		},
@@ -1424,15 +1424,15 @@ func validQuizModelRequest() QuizModelRequest {
 				"metadata": map[string]any{"follow_up_depth": 0},
 			},
 		},
-		OutputContract: NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.QuizModeDeep),
+		OutputContract: NewQuizModelOutputContract(QuizModelActionNextQuestion, quizcore.ModeDeep),
 	}
 
 	return QuizModelRequest{
 		ID:           "quiz-model-request-1",
 		Action:       QuizModelActionNextQuestion,
 		Strategy:     "deep",
-		Scope:        quizcore.QuizScope{ProjectID: "project-1"},
-		Mode:         quizcore.QuizModeDeep,
+		Scope:        quizcore.Scope{ProjectID: "project-1"},
+		Mode:         quizcore.ModeDeep,
 		RuntimeState: state,
 		Payload:      payload,
 		ContextSections: []QuizModelContextSection{
@@ -1447,7 +1447,7 @@ func validQuizModelRequest() QuizModelRequest {
 
 func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
 	return GeneratedPlanOutline{
-		Scope:              quizcore.QuizScope{ProjectID: "project-1"},
+		Scope:              quizcore.Scope{ProjectID: "project-1"},
 		Title:              "Staged Plan Generation",
 		Status:             "planned",
 		Summary:            "Generate an outline first.",
@@ -1474,7 +1474,7 @@ func validGeneratedPlanOutline(createdAt time.Time) GeneratedPlanOutline {
 
 func validGeneratedPlanSliceDetail(createdAt time.Time) GeneratedPlanSliceDetail {
 	return GeneratedPlanSliceDetail{
-		Scope:               quizcore.QuizScope{ProjectID: "project-1"},
+		Scope:               quizcore.Scope{ProjectID: "project-1"},
 		SliceID:             "Slice 1",
 		ShortName:           "outline generation contract",
 		Objective:           "Add outline contracts.",

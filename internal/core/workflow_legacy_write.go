@@ -53,7 +53,7 @@ func CheckLegacyWorkTicket(path string) error {
 // FilterLegacyWorkTickets partitions a derived queue by its actual source images.
 // It never treats an adopted projection as legacy execution authority.
 func FilterLegacyWorkTickets(ctx context.Context, tickets []IndexedTicket) ([]IndexedTicket, int, error) {
-	if len(tickets) > workflowstate.WorkflowRecordLimit {
+	if len(tickets) > workflowstate.RecordLimit {
 		return nil, 0, fmt.Errorf("legacy authority selection bound exceeded")
 	}
 

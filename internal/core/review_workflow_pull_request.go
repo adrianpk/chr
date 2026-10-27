@@ -60,7 +60,7 @@ func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context,
 	found := []WorkflowPullRequestSnapshot{}
 	count := 0
 
-	for page := 1; page <= workflowstate.WorkflowPageLimit; page++ {
+	for page := 1; page <= workflowstate.PageLimit; page++ {
 		endpoint := workflowRemotePRListPath(reference) + "?state=all&limit=50&per_page=50&page=" + strconv.Itoa(page)
 
 		items, err := adapter.readWorkflowPRPage(ctx, query.Repository, reference, config, endpoint)
@@ -69,7 +69,7 @@ func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context,
 		}
 
 		count += len(items)
-		if count > workflowstate.WorkflowRecordLimit {
+		if count > workflowstate.RecordLimit {
 			return nil, fmt.Errorf("workflow provider PR record bound exceeded")
 		}
 
@@ -100,7 +100,7 @@ func (adapter RemoteReviewAdapter) readWorkflowPRPage(ctx context.Context, repos
 }
 
 func decodeWorkflowPRList(data []byte) ([]workflowRemotePRJSON, error) {
-	if len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) > workflowstate.FileLimit {
 		return nil, fmt.Errorf("workflow provider response exceeds file bounds")
 	}
 
@@ -109,7 +109,7 @@ func decodeWorkflowPRList(data []byte) ([]workflowRemotePRJSON, error) {
 		return nil, err
 	}
 
-	if items == nil || len(items) > workflowstate.WorkflowPageLimit {
+	if items == nil || len(items) > workflowstate.PageLimit {
 		return nil, fmt.Errorf("workflow provider PR page is invalid or oversized")
 	}
 
@@ -201,7 +201,7 @@ func (adapter RemoteReviewAdapter) ReadWorkflowBranch(ctx context.Context, repos
 }
 
 func decodeWorkflowRemoteBranch(data []byte) (string, error) {
-	if len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) > workflowstate.FileLimit {
 		return "", workflowstate.ErrConflict
 	}
 
@@ -231,7 +231,7 @@ func decodeWorkflowRemoteBranch(data []byte) (string, error) {
 }
 
 func decodeWorkflowRemotePR(data []byte) (WorkflowPullRequestSnapshot, error) {
-	if len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) > workflowstate.FileLimit {
 		return WorkflowPullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 

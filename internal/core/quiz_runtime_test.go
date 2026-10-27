@@ -11,7 +11,7 @@ import (
 func TestValidateQuizRuntimeStateAcceptsProjectWideState(t *testing.T) {
 	state := validQuizRuntimeState()
 
-	err := quizcore.ValidateQuizRuntimeState(state)
+	err := quizcore.ValidateRuntimeState(state)
 	if err != nil {
 		t.Fatalf("quizcore.ValidateQuizRuntimeState returned error: %v", err)
 	}
@@ -24,7 +24,7 @@ func TestValidateQuizRuntimeStateAcceptsUseCaseScopedState(t *testing.T) {
 	state.RawPath = "ops/default/quiz/00000-blog-quiz-raw/artifact.md"
 	state.CuratedPath = "ops/default/quiz/00000-blog-quiz/artifact.md"
 
-	err := quizcore.ValidateQuizRuntimeState(state)
+	err := quizcore.ValidateRuntimeState(state)
 	if err != nil {
 		t.Fatalf("quizcore.ValidateQuizRuntimeState returned error: %v", err)
 	}
@@ -33,7 +33,7 @@ func TestValidateQuizRuntimeStateAcceptsUseCaseScopedState(t *testing.T) {
 func TestValidateQuizRuntimeStateRejectsInvalidState(t *testing.T) {
 	for _, test := range invalidQuizRuntimeStateTests() {
 		t.Run(test.name, func(t *testing.T) {
-			err := quizcore.ValidateQuizRuntimeState(test.state)
+			err := quizcore.ValidateRuntimeState(test.state)
 			if err == nil {
 				t.Fatal("quizcore.ValidateQuizRuntimeState returned nil error")
 			}
@@ -47,7 +47,7 @@ func TestValidateQuizQuestionRejectsInvalidDepth(t *testing.T) {
 			question := validQuizQuestion()
 			question.Depth = depth
 
-			err := quizcore.ValidateQuizQuestion(question)
+			err := quizcore.ValidateQuestion(question)
 			if err == nil {
 				t.Fatal("quizcore.ValidateQuizQuestion returned nil error")
 			}
@@ -58,7 +58,7 @@ func TestValidateQuizQuestionRejectsInvalidDepth(t *testing.T) {
 func TestValidateQuizEntryRejectsInvalidAnswerState(t *testing.T) {
 	for _, test := range invalidQuizEntryTests() {
 		t.Run(test.name, func(t *testing.T) {
-			err := quizcore.ValidateQuizEntry(test.entry)
+			err := quizcore.ValidateEntry(test.entry)
 			if err == nil {
 				t.Fatal("quizcore.ValidateQuizEntry returned nil error")
 			}
@@ -68,90 +68,90 @@ func TestValidateQuizEntryRejectsInvalidAnswerState(t *testing.T) {
 
 func invalidQuizRuntimeStateTests() []struct {
 	name  string
-	state quizcore.QuizRuntimeState
+	state quizcore.RuntimeState
 } {
 	return []struct {
 		name  string
-		state quizcore.QuizRuntimeState
+		state quizcore.RuntimeState
 	}{
-		{name: "status", state: quizRuntimeStateWith(func(state *quizcore.QuizRuntimeState) {
-			state.Status = quizcore.QuizRuntimeStatus("unknown")
+		{name: "status", state: quizRuntimeStateWith(func(state *quizcore.RuntimeState) {
+			state.Status = quizcore.RuntimeStatus("unknown")
 		})},
-		{name: "mode", state: quizRuntimeStateWith(func(state *quizcore.QuizRuntimeState) {
-			state.Mode = quizcore.QuizMode("unknown")
+		{name: "mode", state: quizRuntimeStateWith(func(state *quizcore.RuntimeState) {
+			state.Mode = quizcore.Mode("unknown")
 		})},
-		{name: "budget", state: quizRuntimeStateWith(func(state *quizcore.QuizRuntimeState) {
+		{name: "budget", state: quizRuntimeStateWith(func(state *quizcore.RuntimeState) {
 			state.QuestionBudget = 0
 		})},
-		{name: "budget overflow", state: quizRuntimeStateWith(func(state *quizcore.QuizRuntimeState) {
+		{name: "budget overflow", state: quizRuntimeStateWith(func(state *quizcore.RuntimeState) {
 			state.QuestionBudget = 1
 			state.QuestionsAsked = 2
 		})},
-		{name: "outcome overflow", state: quizRuntimeStateWith(func(state *quizcore.QuizRuntimeState) {
+		{name: "outcome overflow", state: quizRuntimeStateWith(func(state *quizcore.RuntimeState) {
 			state.QuestionsAsked = 1
 			state.AnswersRecorded = 1
 			state.SkipsRecorded = 1
 		})},
-		{name: "active question missing", state: quizRuntimeStateWith(func(state *quizcore.QuizRuntimeState) {
+		{name: "active question missing", state: quizRuntimeStateWith(func(state *quizcore.RuntimeState) {
 			state.ActiveQuestion = nil
 		})},
-		{name: "inactive active question", state: quizRuntimeStateWith(func(state *quizcore.QuizRuntimeState) {
-			state.Status = quizcore.QuizRuntimeStatusDone
+		{name: "inactive active question", state: quizRuntimeStateWith(func(state *quizcore.RuntimeState) {
+			state.Status = quizcore.RuntimeStatusDone
 		})},
 	}
 }
 
 func invalidQuizEntryTests() []struct {
 	name  string
-	entry quizcore.QuizEntry
+	entry quizcore.Entry
 } {
 	return []struct {
 		name  string
-		entry quizcore.QuizEntry
+		entry quizcore.Entry
 	}{
-		{name: "answered empty answer", entry: quizEntryWith(func(entry *quizcore.QuizEntry) {
+		{name: "answered empty answer", entry: quizEntryWith(func(entry *quizcore.Entry) {
 			entry.Answer = ""
 		})},
-		{name: "skipped answer", entry: quizEntryWith(func(entry *quizcore.QuizEntry) {
-			entry.Status = quizcore.QuizEntryStatusSkipped
+		{name: "skipped answer", entry: quizEntryWith(func(entry *quizcore.Entry) {
+			entry.Status = quizcore.EntryStatusSkipped
 			entry.Answer = "This should not be present."
 		})},
-		{name: "invalid mode", entry: quizEntryWith(func(entry *quizcore.QuizEntry) {
-			entry.Mode = quizcore.QuizMode("unknown")
+		{name: "invalid mode", entry: quizEntryWith(func(entry *quizcore.Entry) {
+			entry.Mode = quizcore.Mode("unknown")
 		})},
-		{name: "invalid status", entry: quizEntryWith(func(entry *quizcore.QuizEntry) {
-			entry.Status = quizcore.QuizEntryStatus("unknown")
+		{name: "invalid status", entry: quizEntryWith(func(entry *quizcore.Entry) {
+			entry.Status = quizcore.EntryStatus("unknown")
 		})},
-		{name: "invalid depth", entry: quizEntryWith(func(entry *quizcore.QuizEntry) {
+		{name: "invalid depth", entry: quizEntryWith(func(entry *quizcore.Entry) {
 			entry.Depth = 4
 		})},
 	}
 }
 
-func validQuizRuntimeState() quizcore.QuizRuntimeState {
+func validQuizRuntimeState() quizcore.RuntimeState {
 	now := quizRuntimeTestTime()
 	question := validQuizQuestion()
 
-	return quizcore.QuizRuntimeState{
+	return quizcore.RuntimeState{
 		ID:              "quiz-project",
 		ProjectID:       "project-1",
-		Status:          quizcore.QuizRuntimeStatusActive,
-		Mode:            quizcore.QuizModeDeep,
-		QuestionBudget:  quizcore.DefaultQuizQuestionBudget,
+		Status:          quizcore.RuntimeStatusActive,
+		Mode:            quizcore.ModeDeep,
+		QuestionBudget:  quizcore.DefaultQuestionBudget,
 		QuestionsAsked:  1,
 		AnswersRecorded: 0,
 		SkipsRecorded:   0,
 		ActiveTopic:     "workflow",
-		Coverage: []quizcore.QuizCoverageTopic{
+		Coverage: []quizcore.CoverageTopic{
 			{
 				ID:            "workflow",
 				Label:         "Workflow",
-				Status:        quizcore.QuizCoverageStatusActive,
+				Status:        quizcore.CoverageStatusActive,
 				QuestionCount: 1,
 			},
 		},
 		ActiveQuestion: &question,
-		Trail: []quizcore.QuizTrailNode{
+		Trail: []quizcore.TrailNode{
 			{
 				QuestionID: question.ID,
 				Prompt:     question.Prompt,
@@ -159,7 +159,7 @@ func validQuizRuntimeState() quizcore.QuizRuntimeState {
 				Depth:      question.Depth,
 			},
 		},
-		Candidates: []quizcore.QuizCandidate{
+		Candidates: []quizcore.Candidate{
 			validQuizCandidate(),
 		},
 		RawPath:     "ops/default/quiz/00000-project-quiz-raw/artifact.md",
@@ -168,17 +168,17 @@ func validQuizRuntimeState() quizcore.QuizRuntimeState {
 	}
 }
 
-func quizRuntimeStateWith(update func(*quizcore.QuizRuntimeState)) quizcore.QuizRuntimeState {
+func quizRuntimeStateWith(update func(*quizcore.RuntimeState)) quizcore.RuntimeState {
 	state := validQuizRuntimeState()
 	update(&state)
 
 	return state
 }
 
-func validQuizQuestion() quizcore.QuizQuestion {
+func validQuizQuestion() quizcore.Question {
 	now := quizRuntimeTestTime()
 
-	return quizcore.QuizQuestion{
+	return quizcore.Question{
 		ID:        "question-1",
 		Prompt:    "What should this workflow preserve?",
 		Required:  true,
@@ -190,18 +190,18 @@ func validQuizQuestion() quizcore.QuizQuestion {
 	}
 }
 
-func validQuizEntry() quizcore.QuizEntry {
+func validQuizEntry() quizcore.Entry {
 	now := quizRuntimeTestTime()
 
-	return quizcore.QuizEntry{
+	return quizcore.Entry{
 		ID:           "entry-1",
 		QuestionID:   "question-1",
 		Question:     "What should this workflow preserve?",
 		Answer:       "It should preserve one visible question at a time.",
-		Status:       quizcore.QuizEntryStatusAnswered,
+		Status:       quizcore.EntryStatusAnswered,
 		Topic:        "workflow",
 		Depth:        1,
-		Mode:         quizcore.QuizModeDeep,
+		Mode:         quizcore.ModeDeep,
 		Tags:         []string{"workflow"},
 		PromptIntent: `{"kind":"quiz_question","metadata":{"follow_up_depth":0}}`,
 		CreatedAt:    now,
@@ -209,17 +209,17 @@ func validQuizEntry() quizcore.QuizEntry {
 	}
 }
 
-func quizEntryWith(update func(*quizcore.QuizEntry)) quizcore.QuizEntry {
+func quizEntryWith(update func(*quizcore.Entry)) quizcore.Entry {
 	entry := validQuizEntry()
 	update(&entry)
 
 	return entry
 }
 
-func validQuizCandidate() quizcore.QuizCandidate {
+func validQuizCandidate() quizcore.Candidate {
 	now := quizRuntimeTestTime()
 
-	return quizcore.QuizCandidate{
+	return quizcore.Candidate{
 		ID:        "candidate-1",
 		Prompt:    "Which follow-up would clarify the workflow?",
 		Topic:     "workflow",

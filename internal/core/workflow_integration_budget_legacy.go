@@ -29,7 +29,7 @@ func (s *WorkflowStore) workflowIntegrationLegacySubmissions(ctx context.Context
 		return nil, err
 	}
 
-	if len(entries) > workflowstate.WorkflowRecordLimit {
+	if len(entries) > workflowstate.RecordLimit {
 		return nil, workflowstate.ErrConflict
 	}
 

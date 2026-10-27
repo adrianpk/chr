@@ -28,7 +28,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	operations.now = clock
 
 	result, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
@@ -86,7 +86,7 @@ Feature: Blog publishing
 	operations.now = clock
 
 	result, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
@@ -262,7 +262,7 @@ case: "blog"
 	operations.now = clock
 
 	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)
@@ -290,7 +290,7 @@ func TestServiceGenerateSpecUsesLongGenerationDeadline(t *testing.T) {
 	operations.quizModel = model
 
 	_, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{
-		Scope: quizcore.QuizScope{CaseSlug: "blog"},
+		Scope: quizcore.Scope{CaseSlug: "blog"},
 	})
 	if err != nil {
 		t.Fatalf("GenerateSpec returned error: %v", err)

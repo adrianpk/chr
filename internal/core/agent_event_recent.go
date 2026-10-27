@@ -58,8 +58,8 @@ func ReadRecentAgentEvents(ctx context.Context, path string) (stream AgentEventS
 
 		appendRecentAgentEvent(&stream, line, text)
 
-		stream.Events = stream.Events[max(0, len(stream.Events)-workflowstate.WorkflowPageLimit):]
-		stream.Malformed = stream.Malformed[max(0, len(stream.Malformed)-workflowstate.WorkflowPageLimit):]
+		stream.Events = stream.Events[max(0, len(stream.Events)-workflowstate.PageLimit):]
+		stream.Malformed = stream.Malformed[max(0, len(stream.Malformed)-workflowstate.PageLimit):]
 	}
 
 	return stream, scanner.Err()

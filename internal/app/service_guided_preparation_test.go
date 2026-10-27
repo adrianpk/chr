@@ -114,7 +114,7 @@ func TestGuidedUseCasePreparationRetry(t *testing.T) {
 // TestGuidedUseCasePreparationExisting cannot adopt an independently generated plan.
 func TestGuidedUseCasePreparationExisting(t *testing.T) {
 	operations, session, model := guidedPreparationFixture(t, "default")
-	scope := quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
+	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 	plan := serviceQuizPlanResponse("manual-plan", operations.utcNow()).Plan
 	plan.Scope, plan.CreatedAt = scope, operations.utcNow()
 

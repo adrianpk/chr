@@ -202,7 +202,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
 		MergeStrategy:          TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
-		CheckpointStepLimit:    workflowstate.WorkflowPageLimit,
+		CheckpointStepLimit:    workflowstate.PageLimit,
 		MaxWorkerAttempts:      3,
 		MaxIntegrationAttempts: 3,
 		MaxActiveWorkers:       1,

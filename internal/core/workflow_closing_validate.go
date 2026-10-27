@@ -13,7 +13,7 @@ func validateWorkflowClosingBinding(set WorkflowSet) error {
 		return nil
 	}
 
-	if len(set.Closing.Attempts) < 1 || len(set.Closing.Attempts) > workflowstate.WorkflowRecordLimit {
+	if len(set.Closing.Attempts) < 1 || len(set.Closing.Attempts) > workflowstate.RecordLimit {
 		return fmt.Errorf("set closing history bound exceeded")
 	}
 
@@ -136,7 +136,7 @@ func (s *WorkflowStore) checkWorkflowClosingEvidence(set WorkflowRecord) error {
 		}
 
 		budgets[state.BudgetID]++
-		if budgets[state.BudgetID] > workflowstate.WorkflowPageLimit {
+		if budgets[state.BudgetID] > workflowstate.PageLimit {
 			return fmt.Errorf("set invocation closing attempt budget exceeded")
 		}
 

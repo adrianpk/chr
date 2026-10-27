@@ -112,7 +112,7 @@ func TestHarnessGenerationBindingCapacity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for i := 1; i < workflowstate.WorkflowRecordLimit; i++ {
+	for i := 1; i < workflowstate.RecordLimit; i++ {
 		if err := os.WriteFile(filepath.Join(filepath.Dir(path), "fixture-"+strconv.Itoa(i)+".json"), nil, 0o600); err != nil {
 			t.Fatal(err)
 		}

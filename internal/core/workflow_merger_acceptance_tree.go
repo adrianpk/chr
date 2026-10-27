@@ -48,7 +48,7 @@ func checkWorkflowMergerSnapshotFiles(directory string) error {
 		}
 
 		count++
-		if count > workflowstate.WorkflowRecordLimit {
+		if count > workflowstate.RecordLimit {
 			return workflowstate.ErrConflict
 		}
 

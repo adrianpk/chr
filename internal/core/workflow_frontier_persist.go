@@ -58,7 +58,7 @@ func encodeWorkflowUnitDelivery(delivery WorkflowUnitDelivery) ([]byte, error) {
 	delivery.EvidenceRef, delivery.EvidenceHash = "", ""
 
 	data, err := json.MarshalIndent(delivery, "", "  ")
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return nil, fmt.Errorf("workflow frontier evidence exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

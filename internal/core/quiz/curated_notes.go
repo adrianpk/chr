@@ -1,8 +1,8 @@
 package quiz
 
-// QuizCuratedNotes describes a package boundary value.
-type QuizCuratedNotes struct {
-	Scope                      QuizScope
+// CuratedNotes describes a package boundary value.
+type CuratedNotes struct {
+	Scope                      Scope
 	Status                     string
 	Decisions                  []string
 	AcceptanceReadiness        []string
@@ -10,6 +10,6 @@ type QuizCuratedNotes struct {
 	Preferences                []string
 	OpenQuestions              []string
 	ImplementationImplications []string
-	Entries                    []QuizEntry
+	Entries                    []Entry
 	UpdatedAt                  string
 }

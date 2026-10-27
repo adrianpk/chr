@@ -91,7 +91,7 @@ func (s service) checkWorkflowAdoptionExecutions(ctx context.Context, keys []str
 			return err
 		}
 
-		if len(records) > workflowstate.WorkflowRecordLimit {
+		if len(records) > workflowstate.RecordLimit {
 			return fmt.Errorf("legacy execution observation bound exceeded")
 		}
 

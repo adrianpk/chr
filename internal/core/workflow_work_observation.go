@@ -78,7 +78,7 @@ func (s *WorkflowStore) observeWorkflowQueues(ctx context.Context, selection wor
 
 	selectors = append(selectors, WorkflowSelector{Extent: "loose"})
 	for _, selector := range selectors {
-		request, err := normalizeWorkflowPreviewRequest(WorkflowPreviewRequest{Selector: selector, Limit: workflowstate.WorkflowPageLimit, Target: target})
+		request, err := normalizeWorkflowPreviewRequest(WorkflowPreviewRequest{Selector: selector, Limit: workflowstate.PageLimit, Target: target})
 		if err != nil {
 			return err
 		}

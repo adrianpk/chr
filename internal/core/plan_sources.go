@@ -24,7 +24,7 @@ type PlanSourceInput struct {
 // includes absent quiz state and the selected source inventory, so newly added
 // discovery invalidates an in-flight generation just like an edited document.
 type PlanSourceObservation struct {
-	Scope        quizcore.QuizScope
+	Scope        quizcore.Scope
 	Project      ProjectMetadata
 	Quiz         QuizObservation
 	Inputs       []PlanSourceInput
@@ -34,8 +34,8 @@ type PlanSourceObservation struct {
 
 // ObservePlanSources checks two complete observations without acquiring a
 // mutation owner, allocating artifacts, rebuilding indexes or recovering writes.
-func ObservePlanSources(ctx context.Context, projectDir string, scope quizcore.QuizScope) (PlanSourceObservation, error) {
-	if err := quizcore.ValidateQuizScope(scope); err != nil {
+func ObservePlanSources(ctx context.Context, projectDir string, scope quizcore.Scope) (PlanSourceObservation, error) {
+	if err := quizcore.ValidateScope(scope); err != nil {
 		return PlanSourceObservation{}, err
 	}
 
@@ -52,7 +52,7 @@ func ObservePlanSources(ctx context.Context, projectDir string, scope quizcore.Q
 	return first, err
 }
 
-func observePlanSources(ctx context.Context, projectDir string, scope quizcore.QuizScope) (PlanSourceObservation, error) {
+func observePlanSources(ctx context.Context, projectDir string, scope quizcore.Scope) (PlanSourceObservation, error) {
 	dumps, err := ObserveProjectDump(ctx, projectDir)
 	if err != nil {
 		return PlanSourceObservation{}, err
@@ -88,7 +88,7 @@ func observePlanSources(ctx context.Context, projectDir string, scope quizcore.Q
 
 	encoded, err := json.Marshal(struct {
 		Root, Policy string
-		Scope        quizcore.QuizScope
+		Scope        quizcore.Scope
 		Inputs       []PlanSourceInput
 	}{root, "chr-plan-sources/v1", scope, observed.Inputs})
 	if len(encoded) > 96*1024 {

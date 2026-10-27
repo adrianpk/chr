@@ -56,7 +56,7 @@ func TestProjectDumpReconcileBounds(t *testing.T) {
 	t.Run("composed body", func(t *testing.T) {
 		project := t.TempDir()
 		for _, title := range []string{"First", "Second"} {
-			projectDumpTestArtifact(t, project, "default", title, strings.Repeat("x", workflowstate.WorkflowFileLimit/2))
+			projectDumpTestArtifact(t, project, "default", title, strings.Repeat("x", workflowstate.FileLimit/2))
 		}
 
 		before := projectDumpTestImage(t, project)
@@ -86,7 +86,7 @@ func checkProjectDumpLargeJournal(t *testing.T) {
 
 	project := t.TempDir()
 	for _, title := range []string{"First", "Second"} {
-		projectDumpTestArtifact(t, project, "default", title, strings.Repeat(title, workflowstate.WorkflowFileLimit/20))
+		projectDumpTestArtifact(t, project, "default", title, strings.Repeat(title, workflowstate.FileLimit/20))
 	}
 
 	preview, err := PreviewProjectDumpReconciliation(t.Context(), project)
@@ -102,7 +102,7 @@ func checkProjectDumpLargeJournal(t *testing.T) {
 	}
 
 	info, err := os.Stat(filepath.Join(project, authoringRuntimeRef("pending.json")))
-	if err != nil || info.Size() <= workflowstate.WorkflowFileLimit {
+	if err != nil || info.Size() <= workflowstate.FileLimit {
 		t.Fatal("fixture did not exercise a journal larger than a source file", err)
 	}
 

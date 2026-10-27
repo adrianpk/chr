@@ -19,7 +19,7 @@ func (j *webJourney) planAndBind(t *testing.T) {
 	webJourneyPost(t, j.handler, webPlanForm(webPlanDetail(t, j.provider)))
 
 	operations := j.provider.service(t.Context())
-	scope := operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"})
+	scope := operations.quizScope(quizcore.Scope{CaseSlug: "named-work"})
 
 	binding, err := core.ObservePlanRevision(t.Context(), operations.projectContext.ProjectDir, scope)
 	if err != nil {

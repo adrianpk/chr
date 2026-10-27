@@ -69,7 +69,7 @@ func ValidateGeneratedWorkflowPlan(plan GeneratedWorkflowPlan) error {
 		return err
 	}
 
-	if len(plan.Slices) == 0 || len(plan.Slices) > workflowstate.WorkflowPageLimit {
+	if len(plan.Slices) == 0 || len(plan.Slices) > workflowstate.PageLimit {
 		return fmt.Errorf("workflow slice bound exceeded or empty plan")
 	}
 
@@ -82,7 +82,7 @@ func ValidateGeneratedWorkflowPlan(plan GeneratedWorkflowPlan) error {
 		return err
 	}
 
-	if len(data) > workflowstate.WorkflowFileLimit {
+	if len(data) > workflowstate.FileLimit {
 		return fmt.Errorf("workflow materialization input exceeds 1 MiB")
 	}
 
@@ -146,7 +146,7 @@ func validateWorkflowPlanSlice(slice GeneratedWorkflowSlice, tasks map[string]bo
 }
 
 func validateWorkflowPlanSliceContract(slice GeneratedWorkflowSlice) error {
-	if strings.TrimSpace(slice.Title) == "" || strings.TrimSpace(slice.Contract) == "" || len(slice.Tasks) == 0 || len(slice.Tasks) > workflowstate.WorkflowPageLimit {
+	if strings.TrimSpace(slice.Title) == "" || strings.TrimSpace(slice.Contract) == "" || len(slice.Tasks) == 0 || len(slice.Tasks) > workflowstate.PageLimit {
 		return fmt.Errorf("slice %s requires a contract and bounded nonempty tasks", slice.ID)
 	}
 
@@ -160,7 +160,7 @@ func validateWorkflowPlanTask(task GeneratedWorkflowTask) error {
 		}
 	}
 
-	if len(task.Acceptance) == 0 || len(task.Acceptance) > workflowstate.WorkflowPageLimit {
+	if len(task.Acceptance) == 0 || len(task.Acceptance) > workflowstate.PageLimit {
 		return fmt.Errorf("task %s requires bounded acceptance", task.ID)
 	}
 

@@ -32,7 +32,7 @@ func (s *WorkflowStore) workflowResultValidations(ctx context.Context, run workf
 			continue
 		}
 
-		if len(result) >= workflowstate.WorkflowPageLimit {
+		if len(result) >= workflowstate.PageLimit {
 			return nil, ErrWorkflowCapacity
 		}
 

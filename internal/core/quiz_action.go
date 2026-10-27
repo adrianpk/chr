@@ -19,27 +19,27 @@ type QuizActionBinding struct {
 
 // QuizActionRequest binds one shared quiz transition to its observed scope.
 type QuizActionRequest struct {
-	Scope   quizcore.QuizScope
+	Scope   quizcore.Scope
 	Binding QuizActionBinding
 	Action  string
 	Answer  string
-	Mode    quizcore.QuizMode
+	Mode    quizcore.Mode
 }
 
 // QuizObservation is a bounded, read-only snapshot. An absent session still has
 // a revision so concurrent starts cannot overwrite one another.
 type QuizObservation struct {
 	Exists   bool
-	State    quizcore.QuizRuntimeState
-	Entries  []quizcore.QuizEntry
+	State    quizcore.RuntimeState
+	Entries  []quizcore.Entry
 	Revision string
 	images   []workflowFileChange
 }
 
 // QuizTransition is prepared under the shared authoring owner before publication.
 type QuizTransition struct {
-	State   quizcore.QuizRuntimeState
-	Entry   *quizcore.QuizEntry
+	State   quizcore.RuntimeState
+	Entry   *quizcore.Entry
 	Message string
 }
 
@@ -51,12 +51,12 @@ type QuizTransitionFunc func(context.Context, QuizObservation) (QuizTransition, 
 // QuizActionResult retains the exact committed acknowledgement for a retry.
 type QuizActionResult struct {
 	OperationID string
-	State       quizcore.QuizRuntimeState
+	State       quizcore.RuntimeState
 	Message     string
 }
 
 func validateQuizAction(request QuizActionRequest) error {
-	if err := quizcore.ValidateQuizScope(request.Scope); err != nil {
+	if err := quizcore.ValidateScope(request.Scope); err != nil {
 		return err
 	}
 
@@ -80,15 +80,15 @@ func validateQuizAction(request QuizActionRequest) error {
 	}
 }
 
-func validateQuizGenerationState(state quizcore.QuizRuntimeState) error {
+func validateQuizGenerationState(state quizcore.RuntimeState) error {
 	if state.GenerationOperationID != "" && !validGenerationOperationIdentity(state.GenerationOperationID) {
 		return errors.New("quiz generation operation identity exceeds its bound")
 	}
 
-	return quizcore.ValidateQuizRuntimeState(state)
+	return quizcore.ValidateRuntimeState(state)
 }
 
-func validateRetainedQuizState(state quizcore.QuizRuntimeState) error {
+func validateRetainedQuizState(state quizcore.RuntimeState) error {
 	if state.SchemaVersion != 0 && state.SchemaVersion != 2 {
 		return errors.New("unsupported quiz runtime schema")
 	}
@@ -103,12 +103,12 @@ func validateRetainedQuizState(state quizcore.QuizRuntimeState) error {
 		}
 	}
 
-	if len(state.FastQueue) > quizcore.DefaultQuizQuestionBudget || len(state.FastConsumed) > quizcore.DefaultQuizQuestionBudget {
+	if len(state.FastQueue) > quizcore.DefaultQuestionBudget || len(state.FastConsumed) > quizcore.DefaultQuestionBudget {
 		return errors.New("quiz Fast batch capacity exceeded")
 	}
 
 	for _, candidate := range state.FastQueue {
-		if err := quizcore.ValidateQuizCandidate(candidate); err != nil {
+		if err := quizcore.ValidateCandidate(candidate); err != nil {
 			return err
 		}
 	}
@@ -134,7 +134,7 @@ func prepareQuizTransition(before QuizObservation, next QuizTransition, request 
 	}
 
 	if next.Entry != nil {
-		if err := quizcore.ValidateQuizEntry(*next.Entry); err != nil {
+		if err := quizcore.ValidateEntry(*next.Entry); err != nil {
 			return next, err
 		}
 	}

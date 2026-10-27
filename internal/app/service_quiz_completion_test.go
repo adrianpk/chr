@@ -15,14 +15,14 @@ import (
 func TestServiceQuizFullHistory(t *testing.T) {
 	operations, _ := newRetainedQuizFixture(t)
 
-	state, err := operations.newQuizRuntimeState(operations.quizScope(quizcore.QuizScope{}), quizcore.QuizModeDeep)
+	state, err := operations.newQuizRuntimeState(operations.quizScope(quizcore.Scope{}), quizcore.ModeDeep)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	entries := make([]quizcore.QuizEntry, 8)
+	entries := make([]quizcore.Entry, 8)
 	for index := range entries {
-		entries[index] = quizcore.QuizEntry{Question: fmt.Sprintf("Decision %d?", index), Answer: fmt.Sprintf("Answer %d.", index), Status: quizcore.QuizEntryStatusAnswered}
+		entries[index] = quizcore.Entry{Question: fmt.Sprintf("Decision %d?", index), Answer: fmt.Sprintf("Answer %d.", index), Status: quizcore.EntryStatusAnswered}
 	}
 
 	request, err := operations.newQuizModelRequestWithEntries(state, entries)
@@ -72,7 +72,7 @@ func checkQuizNaturalStop(t *testing.T, name string) {
 
 	model.responses = []core.QuizModelResponse{first, second}
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeDeep})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.ModeDeep})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -89,9 +89,9 @@ func checkQuizNaturalStop(t *testing.T, name string) {
 		t.Fatal(err)
 	}
 
-	want := quizcore.QuizRuntimeStatusDone
+	want := quizcore.RuntimeStatusDone
 	if name == "duplicate" {
-		want = quizcore.QuizRuntimeStatusBlocked
+		want = quizcore.RuntimeStatusBlocked
 	}
 
 	checkQuizFinalAnswer(t, operations, answered.State, want)
@@ -101,7 +101,7 @@ func checkQuizNaturalStop(t *testing.T, name string) {
 	}
 }
 
-func checkQuizDuplicateRecovery(t *testing.T, operations service, model *fakeServiceQuizModel, state quizcore.QuizRuntimeState) {
+func checkQuizDuplicateRecovery(t *testing.T, operations service, model *fakeServiceQuizModel, state quizcore.RuntimeState) {
 	t.Helper()
 
 	if state.GenerationOperationID != "" {
@@ -116,14 +116,14 @@ func checkQuizDuplicateRecovery(t *testing.T, operations service, model *fakeSer
 	}
 }
 
-func checkQuizFinalAnswer(t *testing.T, operations service, state quizcore.QuizRuntimeState, want quizcore.QuizRuntimeStatus) {
+func checkQuizFinalAnswer(t *testing.T, operations service, state quizcore.RuntimeState, want quizcore.RuntimeStatus) {
 	t.Helper()
 
 	if state.Status != want || state.ActiveQuestion != nil || state.QuestionsAsked != 1 || state.AnswersRecorded != 1 {
 		t.Fatal("quiz did not stop safely", state)
 	}
 
-	entries, err := operations.quizRepository().LoadRawCaptureEntries(t.Context(), operations.quizScope(quizcore.QuizScope{}))
+	entries, err := operations.quizRepository().LoadRawCaptureEntries(t.Context(), operations.quizScope(quizcore.Scope{}))
 	if err != nil || len(entries) != 1 || entries[0].Answer != "Keep the saved decision." {
 		t.Fatal("final answer was lost", entries, err)
 	}

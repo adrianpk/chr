@@ -26,7 +26,7 @@ func (s service) specGenerationSources() (core.ProjectDumpObservation, error) {
 	return observed, nil
 }
 
-func specContextNodeIDs(index core.WorkspaceIndex, scope quizcore.QuizScope, dumps core.ProjectDumpObservation) []string {
+func specContextNodeIDs(index core.WorkspaceIndex, scope quizcore.Scope, dumps core.ProjectDumpObservation) []string {
 	allowedDumps := map[string]bool{dumps.Destination: true}
 	for _, artifact := range dumps.Scoped {
 		if scope.CaseSlug != "" && artifact.CaseSlug == scope.CaseSlug {

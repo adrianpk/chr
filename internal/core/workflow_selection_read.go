@@ -49,7 +49,7 @@ func (s *WorkflowStore) readWorkflowSelectionSources(ctx context.Context, unprep
 		paths[ticket.RelativePath] = true
 	}
 
-	if len(selection.slices) > workflowstate.WorkflowRecordLimit {
+	if len(selection.slices) > workflowstate.RecordLimit {
 		return workflowSelection{}, fmt.Errorf("workflow slice observation bound exceeded")
 	}
 
@@ -83,7 +83,7 @@ func (s *WorkflowStore) readUnpreparedTickets(ctx context.Context, selection *wo
 		}
 
 		count++
-		if count > workflowstate.WorkflowRecordLimit {
+		if count > workflowstate.RecordLimit {
 			return fmt.Errorf("workflow ticket observation bound exceeded")
 		}
 
@@ -158,7 +158,7 @@ func (selection *workflowSelection) appendObservedTicket(ticket IndexedTicket) e
 	}
 
 	selection.tickets = append(selection.tickets, ticket)
-	if len(selection.tickets) > workflowstate.WorkflowRecordLimit {
+	if len(selection.tickets) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow preview record bound exceeded")
 	}
 
@@ -192,7 +192,7 @@ func (s *WorkflowStore) hashWorkflowEvidence(ctx context.Context, selection *wor
 				continue
 			}
 
-			if len(selection.evidenceHashes) >= workflowstate.WorkflowRecordLimit {
+			if len(selection.evidenceHashes) >= workflowstate.RecordLimit {
 				return fmt.Errorf("workflow evidence observation bound exceeded")
 			}
 

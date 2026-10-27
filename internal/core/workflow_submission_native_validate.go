@@ -33,7 +33,7 @@ func validateWorkflowNativeSubmission(submission WorkflowSubmission, schema stri
 }
 
 func validWorkflowNativeSubmissionHistory(native WorkflowNativeSubmission) bool {
-	return len(native.ObservationRefs) <= workflowstate.WorkflowPageLimit && len(native.GitObservationRefs) <= workflowstate.WorkflowPageLimit && len(native.TransportResponseHistory) <= workflowstate.WorkflowPageLimit
+	return len(native.ObservationRefs) <= workflowstate.PageLimit && len(native.GitObservationRefs) <= workflowstate.PageLimit && len(native.TransportResponseHistory) <= workflowstate.PageLimit
 }
 
 func validateWorkflowLegacySubmissionSchema(submission WorkflowSubmission, schema string) error {

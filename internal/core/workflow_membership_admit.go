@@ -9,7 +9,7 @@ import (
 )
 
 func (s *WorkflowStore) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvocationFile, selection workflowSelection, later []WorkflowPreviewMember) error {
-	if len(run.Members)+len(later) > workflowstate.WorkflowRecordLimit {
+	if len(run.Members)+len(later) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow later admission member bound exceeded")
 	}
 

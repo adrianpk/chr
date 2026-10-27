@@ -16,7 +16,7 @@ import (
 type GeneratedPlanTracking struct {
 	Workflow *GeneratedWorkflowPlan
 
-	Scope       quizcore.QuizScope
+	Scope       quizcore.Scope
 	PlanPath    string
 	Title       string
 	Body        string
@@ -49,8 +49,8 @@ type GeneratedPlanTrackingPaths struct {
 }
 
 // GeneratedPlanTrackingLayout executes the corresponding package operation.
-func GeneratedPlanTrackingLayout(projectDir string, scope quizcore.QuizScope) (GeneratedPlanTrackingPaths, error) {
-	err := quizcore.ValidateQuizScope(scope)
+func GeneratedPlanTrackingLayout(projectDir string, scope quizcore.Scope) (GeneratedPlanTrackingPaths, error) {
+	err := quizcore.ValidateScope(scope)
 	if err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
@@ -175,7 +175,7 @@ func ValidateGeneratedPlanTracking(tracking GeneratedPlanTracking) error {
 		return fmt.Errorf("plan tracking plan path is required")
 	}
 
-	err := quizcore.ValidateQuizScope(tracking.Scope)
+	err := quizcore.ValidateScope(tracking.Scope)
 	if err != nil {
 		return err
 	}

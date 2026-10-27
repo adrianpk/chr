@@ -148,7 +148,7 @@ func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInpu
 	}
 
 	data, err := json.MarshalIndent(input, "", "  ")
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return workflowPreparedTask{}, workflowFileChange{}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

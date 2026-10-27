@@ -18,11 +18,11 @@ func TestWebPlanInternal(t *testing.T) {
 	addWebPlanDiscovery(t, provider)
 
 	operations := provider.service(t.Context())
-	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}}); err != nil {
+	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}}); err != nil {
 		t.Fatal(err)
 	}
 
-	binding, err := core.ObservePlanRevision(t.Context(), provider.projectContext.ProjectDir, operations.quizScope(quizcore.QuizScope{CaseSlug: "named-work"}))
+	binding, err := core.ObservePlanRevision(t.Context(), provider.projectContext.ProjectDir, operations.quizScope(quizcore.Scope{CaseSlug: "named-work"}))
 	if err != nil {
 		t.Fatal(err)
 	}

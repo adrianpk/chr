@@ -29,7 +29,7 @@ func TestSpecDocumentCatalog(t *testing.T) {
 
 	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
-	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}}); err != nil {
+	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -59,7 +59,7 @@ func checkSpecGenerationScope(t *testing.T, slug string) {
 
 	model.responses = []core.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
-	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.QuizScope{CaseSlug: slug}}); err != nil {
+	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: slug}}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -106,7 +106,7 @@ func seedSpecGenerationScopes(t *testing.T, operations service) {
 	}
 
 	for _, item := range []struct{ slug, body string }{{"", "PROJECT_QUIZ"}, {"named-work", "NAMED_QUIZ"}, {"other", "OTHER_QUIZ"}} {
-		notes := quizcore.QuizCuratedNotes{Scope: operations.quizScope(quizcore.QuizScope{CaseSlug: item.slug}), Status: "curated", Decisions: []string{item.body}, UpdatedAt: serviceQuizClock()().Format("2006-01-02T15:04:05Z")}
+		notes := quizcore.CuratedNotes{Scope: operations.quizScope(quizcore.Scope{CaseSlug: item.slug}), Status: "curated", Decisions: []string{item.body}, UpdatedAt: serviceQuizClock()().Format("2006-01-02T15:04:05Z")}
 		if _, err := operations.quizRepository().WriteCuratedNotes(t.Context(), notes); err != nil {
 			t.Fatal(err)
 		}

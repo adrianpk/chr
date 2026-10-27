@@ -27,7 +27,7 @@ func (s service) applyQuizAction(request core.QuizActionRequest) (QuizOperationR
 	return QuizOperationResult{Message: result.Message, State: result.State}, err
 }
 
-func (s service) quizActionBinding(scope quizcore.QuizScope, binding core.QuizActionBinding) (core.QuizActionBinding, error) {
+func (s service) quizActionBinding(scope quizcore.Scope, binding core.QuizActionBinding) (core.QuizActionBinding, error) {
 	if binding.ExpectedRevision != "" {
 		return binding, nil
 	}
@@ -62,7 +62,7 @@ func (s service) prepareQuizAction(request core.QuizActionRequest, observed core
 		return s.prepareQuizMode(request.Mode, observed)
 	case "resume":
 		state := observed.State
-		if state.ActiveQuestion == nil && state.Status != quizcore.QuizRuntimeStatusDone {
+		if state.ActiveQuestion == nil && state.Status != quizcore.RuntimeStatusDone {
 			state = s.continueQuiz(state, observed.Entries)
 		}
 
@@ -79,7 +79,7 @@ func (s service) prepareQuizStart(request core.QuizActionRequest, observed core.
 		return core.QuizTransition{}, fmt.Errorf("quiz mode is invalid: %s", request.Mode)
 	}
 
-	if observed.Exists && observed.State.Status != quizcore.QuizRuntimeStatusDone && observed.State.Status != quizcore.QuizRuntimeStatusCancelled {
+	if observed.Exists && observed.State.Status != quizcore.RuntimeStatusDone && observed.State.Status != quizcore.RuntimeStatusCancelled {
 		return core.QuizTransition{}, fmt.Errorf("quiz session already exists; resume it")
 	}
 
@@ -93,7 +93,7 @@ func (s service) prepareQuizStart(request core.QuizActionRequest, observed core.
 	state, err = s.nextQuizQuestion(state, observed.Entries)
 
 	message := "Quiz started."
-	if state.Status == quizcore.QuizRuntimeStatusDone {
+	if state.Status == quizcore.RuntimeStatusDone {
 		message = "Quiz completed. The saved context is sufficient."
 	}
 
@@ -102,27 +102,27 @@ func (s service) prepareQuizStart(request core.QuizActionRequest, observed core.
 
 func (s service) prepareQuizOutcome(request core.QuizActionRequest, observed core.QuizObservation) (core.QuizTransition, error) {
 	state := observed.State
-	if state.Status != quizcore.QuizRuntimeStatusActive || state.ActiveQuestion == nil {
+	if state.Status != quizcore.RuntimeStatusActive || state.ActiveQuestion == nil {
 		return core.QuizTransition{}, fmt.Errorf("quiz has no active question")
 	}
 
-	status := quizcore.QuizEntryStatusAnswered
+	status := quizcore.EntryStatusAnswered
 	if request.Action == "skip" {
-		status = quizcore.QuizEntryStatusSkipped
+		status = quizcore.EntryStatusSkipped
 	}
 
 	answer := request.Answer
-	if status == quizcore.QuizEntryStatusSkipped {
+	if status == quizcore.EntryStatusSkipped {
 		answer = ""
 	}
 
 	entry := quizEntryFromState(state, status, answer, s.utcNow())
 	entry.ID = fmt.Sprintf("%s-entry-%03d", state.SessionID, state.QuestionsAsked)
 	state = updateQuizStateAfterEntry(state, entry)
-	state = s.continueQuiz(state, append(append([]quizcore.QuizEntry(nil), observed.Entries...), entry))
+	state = s.continueQuiz(state, append(append([]quizcore.Entry(nil), observed.Entries...), entry))
 
 	message := "Quiz answer recorded."
-	if status == quizcore.QuizEntryStatusSkipped {
+	if status == quizcore.EntryStatusSkipped {
 		message = "Quiz question skipped."
 	}
 
@@ -130,14 +130,14 @@ func (s service) prepareQuizOutcome(request core.QuizActionRequest, observed cor
 		message += " Continuation failed; reload and resume to retry."
 	}
 
-	if state.Status == quizcore.QuizRuntimeStatusDone {
+	if state.Status == quizcore.RuntimeStatusDone {
 		message += " Quiz completed."
 	}
 
 	return core.QuizTransition{State: state, Entry: &entry, Message: message}, nil
 }
 
-func (s service) continueQuiz(state quizcore.QuizRuntimeState, entries []quizcore.QuizEntry) quizcore.QuizRuntimeState {
+func (s service) continueQuiz(state quizcore.RuntimeState, entries []quizcore.Entry) quizcore.RuntimeState {
 	state.ContinuationPending, state.ContinuationError = false, ""
 	if state.QuestionsAsked >= state.QuestionBudget {
 		return s.finishQuiz(state)
@@ -145,7 +145,7 @@ func (s service) continueQuiz(state quizcore.QuizRuntimeState, entries []quizcor
 
 	next, err := s.nextQuizQuestion(state, entries)
 	if err != nil {
-		state.Status, state.ActiveQuestion = quizcore.QuizRuntimeStatusBlocked, nil
+		state.Status, state.ActiveQuestion = quizcore.RuntimeStatusBlocked, nil
 		state.ContinuationPending, state.ContinuationError = true, "Question generation failed. Resume to retry."
 
 		if errors.Is(err, errRepeatedQuizQuestion) {
@@ -161,20 +161,20 @@ func (s service) continueQuiz(state quizcore.QuizRuntimeState, entries []quizcor
 	return next
 }
 
-func (s service) prepareQuizMode(mode quizcore.QuizMode, observed core.QuizObservation) (core.QuizTransition, error) {
+func (s service) prepareQuizMode(mode quizcore.Mode, observed core.QuizObservation) (core.QuizTransition, error) {
 	if !mode.Valid() {
 		return core.QuizTransition{}, fmt.Errorf("quiz mode is invalid: %s", mode)
 	}
 
 	state := observed.State
-	if state.Status == quizcore.QuizRuntimeStatusDone || state.Status == quizcore.QuizRuntimeStatusCancelled {
+	if state.Status == quizcore.RuntimeStatusDone || state.Status == quizcore.RuntimeStatusCancelled {
 		return core.QuizTransition{}, fmt.Errorf("quiz session is not open")
 	}
 
 	state.Mode = mode
 
 	state.Candidates = nil
-	if mode == quizcore.QuizModeFast && state.FastBatchID == "" {
+	if mode == quizcore.ModeFast && state.FastBatchID == "" {
 		var err error
 
 		state, err = s.generateFastQuizBatch(state, observed.Entries)
@@ -183,7 +183,7 @@ func (s service) prepareQuizMode(mode quizcore.QuizMode, observed core.QuizObser
 		}
 	}
 
-	if mode == quizcore.QuizModeFast {
+	if mode == quizcore.ModeFast {
 		state = retainUnansweredFastQuestions(state, observed.Entries)
 		state = s.activateNextFastQuestion(state)
 	}
@@ -199,11 +199,11 @@ func (s service) prepareQuizClose(action string, observed core.QuizObservation) 
 		return s.prepareGuidedQuizDone(observed)
 	}
 
-	state.Status = quizcore.QuizRuntimeStatusDone
+	state.Status = quizcore.RuntimeStatusDone
 
 	message := "Quiz completed."
 	if action == "cancel" {
-		state.Status, message = quizcore.QuizRuntimeStatusCancelled, "Quiz cancelled."
+		state.Status, message = quizcore.RuntimeStatusCancelled, "Quiz cancelled."
 	}
 
 	state.ActiveQuestion, state.Candidates = nil, nil

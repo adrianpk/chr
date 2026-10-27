@@ -110,7 +110,7 @@ func (s *WorkflowStore) retainWorkflowNativeGitObservation(ctx context.Context, 
 			return err
 		}
 
-		if len(update.Facts.GitObservationRefs) >= workflowstate.WorkflowPageLimit {
+		if len(update.Facts.GitObservationRefs) >= workflowstate.PageLimit {
 			return ErrWorkflowObservationRequired
 		}
 

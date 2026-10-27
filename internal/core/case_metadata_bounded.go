@@ -15,7 +15,7 @@ import (
 
 // LoadBounded observes at most the owner's fixed case-record ceiling.
 func (s CaseMetadataService) LoadBounded(ctx context.Context, limit int) ([]CaseMetadata, error) {
-	if limit < 1 || limit > workflowstate.WorkflowRecordLimit {
+	if limit < 1 || limit > workflowstate.RecordLimit {
 		return nil, fmt.Errorf("invalid case record bound")
 	}
 

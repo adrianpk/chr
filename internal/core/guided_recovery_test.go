@@ -17,12 +17,12 @@ func TestGuidedUseCaseRecoveryInventory(t *testing.T) {
 		t.Fatal("inventory lost namespaces or adopted manual authoring", seen)
 	}
 
-	foreign, err := RecoverGuidedHostPage(t.Context(), root, "foreign", 0, workflowstate.WorkflowPageLimit)
+	foreign, err := RecoverGuidedHostPage(t.Context(), root, "foreign", 0, workflowstate.PageLimit)
 	if err != nil || len(foreign.Runs) != 0 {
 		t.Fatal("foreign project was recovered", err)
 	}
 
-	for _, bounds := range [][2]int{{-1, 1}, {workflowstate.WorkflowRecordLimit + 1, 1}, {0, 0}, {0, workflowstate.WorkflowPageLimit + 1}} {
+	for _, bounds := range [][2]int{{-1, 1}, {workflowstate.RecordLimit + 1, 1}, {0, 0}, {0, workflowstate.PageLimit + 1}} {
 		if _, err := RecoverGuidedHostPage(t.Context(), root, original.ProjectID, bounds[0], bounds[1]); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("inventory accepted invalid bounds", bounds, err)
 		}

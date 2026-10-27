@@ -20,7 +20,7 @@ func TestPlanSources(t *testing.T) {
 	general := projectDumpTestArtifact(t, project, "team", "General", "# General\n\nPreserve explicit user actions.\n")
 	projectDumpTestArtifact(t, project, "team", "Other case", "---\ncase: other\n---\nUnrelated discovery.\n")
 
-	scope := quizcore.QuizScope{ProjectID: "example", CaseSlug: "chosen"}
+	scope := quizcore.Scope{ProjectID: "example", CaseSlug: "chosen"}
 	before := projectDumpTestImage(t, project)
 
 	observed, err := ObservePlanSources(t.Context(), project, scope)
@@ -45,7 +45,7 @@ func TestPlanSources(t *testing.T) {
 	checkPlanSourceChanges(t, project, scope, general, observed.Hash)
 }
 
-func checkPlanSourceChanges(t *testing.T, project string, scope quizcore.QuizScope, general, previousHash string) {
+func checkPlanSourceChanges(t *testing.T, project string, scope quizcore.Scope, general, previousHash string) {
 	t.Helper()
 	writeTestFile(t, filepath.Join(project, general), "# General\n\nPrint hello and verify stdout.\n")
 

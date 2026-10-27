@@ -15,7 +15,7 @@ import (
 func (p webViewProvider) specArtifactDetail(ctx context.Context, request webui.ArtifactDetailRequest) (webui.ArtifactDetailView, error) {
 	operations := p.service(ctx)
 
-	cases, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.WorkflowRecordLimit)
+	cases, err := core.NewCaseMetadataService(p.projectContext.ProjectDir).LoadBounded(ctx, workflowstate.RecordLimit)
 	if err != nil {
 		return webui.ArtifactDetailView{}, err
 	}

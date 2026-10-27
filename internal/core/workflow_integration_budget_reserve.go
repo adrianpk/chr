@@ -59,7 +59,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationReservationAdmission(ctx context
 	}
 
 	r := request.Reservation
-	if !workflowIntegrationReservationMatches(r, entry) || len(budget.Reservations) >= workflowstate.WorkflowRecordLimit {
+	if !workflowIntegrationReservationMatches(r, entry) || len(budget.Reservations) >= workflowstate.RecordLimit {
 		return workflowstate.ErrConflict
 	}
 
@@ -216,7 +216,7 @@ func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workfl
 	}
 
 	grant.PriorRevision, grant.RecordedAt = budget.Revision, time.Now().UTC()
-	if !validWorkflowIntegrationGrant(grant, budget.Revision+1) || len(budget.Grants) >= workflowstate.WorkflowPageLimit {
+	if !validWorkflowIntegrationGrant(grant, budget.Revision+1) || len(budget.Grants) >= workflowstate.PageLimit {
 		return budget, workflowstate.ErrConflict
 	}
 

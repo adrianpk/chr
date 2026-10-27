@@ -20,7 +20,7 @@ type workflowProviderOutput struct {
 func (output *workflowProviderOutput) Write(data []byte) (int, error) {
 	length := len(data)
 
-	remaining := workflowstate.WorkflowFileLimit - output.buffer.Len()
+	remaining := workflowstate.FileLimit - output.buffer.Len()
 	if length > remaining {
 		data, output.overflow = data[:remaining], true
 	}

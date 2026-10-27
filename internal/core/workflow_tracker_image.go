@@ -36,7 +36,7 @@ func (s *WorkflowStore) workflowTrackerImage(snapshot WorkflowSnapshot, setID st
 	result.SourceHash = contenthash.Sum(data)
 
 	output := renderWorkflowTracker(result, set, tasks)
-	if len(output) > workflowstate.WorkflowFileLimit {
+	if len(output) > workflowstate.FileLimit {
 		return result, nil, fmt.Errorf("tracker output exceeds 1 MiB")
 	}
 

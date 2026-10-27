@@ -44,7 +44,7 @@ func generationBindingPlanCase(t *testing.T, fixture func(*testing.T, string) (s
 	provider.API = api
 	operations.conversationModel = provider
 
-	scope := quizcore.QuizScope{CaseSlug: "blog"}
+	scope := quizcore.Scope{CaseSlug: "blog"}
 	if _, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{OperationID: "freeze", Scope: scope}); err != nil {
 		t.Fatal("later plan stages rebound after the switch", err)
 	}

@@ -34,7 +34,7 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 	checkpoint := WorkflowAttemptCheckpoint{Schema: "chr-attempt-checkpoint/v1", AttemptID: attempt.ID, Generation: attempt.Generation, Reason: reason, FinishedAt: now, Processes: attempt.Processes, Result: result}
 
 	data, err := json.MarshalIndent(checkpoint, "", "  ")
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return fmt.Errorf("workflow checkpoint exceeds file bounds: %w", errorsOrConflict(err))
 	}
 

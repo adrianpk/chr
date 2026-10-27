@@ -112,7 +112,7 @@ func TestWorkflowPreparationConflict(t *testing.T) {
 			return err
 		}
 
-		current.PreparationCount, current.Preparation.Round = workflowstate.WorkflowPageLimit, workflowstate.WorkflowPageLimit
+		current.PreparationCount, current.Preparation.Round = workflowstate.PageLimit, workflowstate.PageLimit
 
 		return f.store.commitWorkflowState(&current)
 	})

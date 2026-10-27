@@ -41,7 +41,7 @@ func (g *generationGuard) release(key string) {
 func (s service) withGenerationRuntime(
 	parent context.Context,
 	kind string,
-	scope quizcore.QuizScope,
+	scope quizcore.Scope,
 	run func(context.Context) error,
 ) error {
 	key := s.generationRuntimeKey(kind, scope)
@@ -61,6 +61,6 @@ func (s service) withGenerationRuntime(
 	return run(ctx)
 }
 
-func (s service) generationRuntimeKey(kind string, scope quizcore.QuizScope) string {
+func (s service) generationRuntimeKey(kind string, scope quizcore.Scope) string {
 	return s.projectContext.ProjectDir + ":" + kind + ":" + specScopeID(scope)
 }

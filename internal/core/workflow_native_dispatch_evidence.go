@@ -88,7 +88,7 @@ func (s *WorkflowStore) retainWorkflowNativeDispatchResponse(submission Workflow
 	}
 
 	if native.TransportResponseRef != nil && *native.TransportResponseRef != ref {
-		if len(native.TransportResponseHistory) >= workflowstate.WorkflowPageLimit {
+		if len(native.TransportResponseHistory) >= workflowstate.PageLimit {
 			return workflowstate.ErrConflict
 		}
 
@@ -102,7 +102,7 @@ func (s *WorkflowStore) retainWorkflowNativeDispatchResponse(submission Workflow
 
 func (s *WorkflowStore) writeWorkflowNativeDispatchEvidence(submission WorkflowSubmission, value any) (WorkflowEvidenceRef, error) {
 	data, err := json.Marshal(value)
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 

@@ -62,7 +62,7 @@ func (s *WorkflowStore) checkWorkflowAmendmentPlan(set WorkflowRecord, request W
 		return fmt.Errorf("completed sets require explicit reopening; active sets require amendment")
 	}
 
-	if len(set.Set.Amendments) >= workflowstate.WorkflowRecordLimit || len(set.Set.ClosureHistory) >= workflowstate.WorkflowRecordLimit {
+	if len(set.Set.Amendments) >= workflowstate.RecordLimit || len(set.Set.ClosureHistory) >= workflowstate.RecordLimit {
 		return fmt.Errorf("set amendment or closure history bound exhausted")
 	}
 

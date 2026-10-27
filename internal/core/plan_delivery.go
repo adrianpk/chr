@@ -40,7 +40,7 @@ func ScopePlanDeliveryOrder(slices []PlanOrderSlice, operation PlanPublicationOp
 
 // ObservePlanWorkflow reads the immutable planned input even after tickets have
 // been bound, so a retry uses the same materialization identity and contracts.
-func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.QuizScope) (GeneratedWorkflowPlan, error) {
+func ObservePlanWorkflow(ctx context.Context, projectDir string, scope quizcore.Scope) (GeneratedWorkflowPlan, error) {
 	binding, err := ObservePlanRevision(ctx, projectDir, scope)
 	if err != nil {
 		return GeneratedWorkflowPlan{}, err
@@ -121,7 +121,7 @@ func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Contex
 func quizModelPlanDeliveryResponse(request QuizModelRequest, output []byte) (QuizModelResponse, error) {
 	var contracts GeneratedWorkflowPlan
 
-	if len(output) > workflowstate.WorkflowFileLimit {
+	if len(output) > workflowstate.FileLimit {
 		return QuizModelResponse{}, modelcore.ErrOutput
 	}
 

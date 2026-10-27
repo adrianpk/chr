@@ -37,7 +37,7 @@ func ListPlanDocuments(ctx context.Context, projectDir string) ([]PlanDocument, 
 		}
 
 		count += len(entries)
-		if count > workflowstate.WorkflowRecordLimit {
+		if count > workflowstate.RecordLimit {
 			return nil, errors.New("plan inventory exceeds 4096 entries")
 		}
 
@@ -68,7 +68,7 @@ func (r *fileAuthoringSessionRepository) planDocumentsInDirectory(ctx context.Co
 		}
 
 		*size += document.size
-		if *size > 8*workflowstate.WorkflowFileLimit {
+		if *size > 8*workflowstate.FileLimit {
 			return nil, errors.New("plan inventory exceeds 8 MiB")
 		}
 

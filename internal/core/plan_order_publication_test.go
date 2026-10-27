@@ -61,7 +61,7 @@ func orderedPlanCandidate() GeneratedPlan {
 	return plan
 }
 
-func readTestPlanBinding(t *testing.T, project string, scope quizcore.QuizScope) PlanRevisionBinding {
+func readTestPlanBinding(t *testing.T, project string, scope quizcore.Scope) PlanRevisionBinding {
 	t.Helper()
 
 	binding, err := ObservePlanRevision(t.Context(), project, scope)

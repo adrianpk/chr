@@ -76,7 +76,7 @@ func validateSpecMutation(request SpecMutationRequest) error {
 		return err
 	}
 
-	if err := quizcore.ValidateQuizScope(quizcore.QuizScope{ProjectID: request.ProjectID, CaseSlug: request.CaseSlug}); err != nil {
+	if err := quizcore.ValidateScope(quizcore.Scope{ProjectID: request.ProjectID, CaseSlug: request.CaseSlug}); err != nil {
 		return err
 	}
 
@@ -177,7 +177,7 @@ func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationReq
 }
 
 func validateSpecMutationContent(request SpecMutationRequest) error {
-	if strings.TrimSpace(request.Title) == "" || len(request.Title) > 512 || strings.ContainsAny(request.Title, "\r\n") || strings.TrimSpace(request.Body) == "" || len(request.Body) > workflowstate.WorkflowFileLimit {
+	if strings.TrimSpace(request.Title) == "" || len(request.Title) > 512 || strings.ContainsAny(request.Title, "\r\n") || strings.TrimSpace(request.Body) == "" || len(request.Body) > workflowstate.FileLimit {
 		return errors.New("spec title and body are required; title is at most 512 bytes and body at most 1 MiB")
 	}
 

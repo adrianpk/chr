@@ -30,11 +30,11 @@ func validWorkflowContinuationPosition(checkpoint WorkflowContinuationCheckpoint
 }
 
 func validWorkflowContinuationEvidence(checkpoint WorkflowContinuationCheckpoint) bool {
-	if checkpoint.Sequence < 1 || checkpoint.Sequence > workflowstate.WorkflowRecordLimit || checkpoint.EvidenceRef != workflowContinuationCheckpointPath(checkpoint.InvocationID, checkpoint.Sequence) || len(checkpoint.EvidenceHash) != 64 {
+	if checkpoint.Sequence < 1 || checkpoint.Sequence > workflowstate.RecordLimit || checkpoint.EvidenceRef != workflowContinuationCheckpointPath(checkpoint.InvocationID, checkpoint.Sequence) || len(checkpoint.EvidenceHash) != 64 {
 		return false
 	}
 
-	if checkpoint.Steps < 0 || checkpoint.Steps > workflowstate.WorkflowPageLimit || !slices.Contains([]string{"accepted", "step_limit", "awaiting_authority", "stopped", "set_closure_required", "blocked", "waiting_capacity", "closing_validation_failed", "interrupted"}, checkpoint.Reason) {
+	if checkpoint.Steps < 0 || checkpoint.Steps > workflowstate.PageLimit || !slices.Contains([]string{"accepted", "step_limit", "awaiting_authority", "stopped", "set_closure_required", "blocked", "waiting_capacity", "closing_validation_failed", "interrupted"}, checkpoint.Reason) {
 		return false
 	}
 

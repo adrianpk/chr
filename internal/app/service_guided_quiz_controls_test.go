@@ -87,7 +87,7 @@ func TestGuidedUseCaseQuizDone(t *testing.T) {
 func observeGuidedQuiz(t *testing.T, operations service, session core.AuthoringSession) core.QuizObservation {
 	t.Helper()
 
-	observed, err := operations.quizRepository().Observe(t.Context(), quizcore.QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug})
+	observed, err := operations.quizRepository().Observe(t.Context(), quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func assertGuidedQuizControlReplay(t *testing.T, operations service, command cor
 	t.Helper()
 
 	replay, err := operations.ConductGuidedQuiz(t.Context(), command)
-	if err != nil || replay.Revision != completed.Revision || len(model.requests) != 3 || model.requests[1].Mode != quizcore.QuizModeFast {
+	if err != nil || replay.Revision != completed.Revision || len(model.requests) != 3 || model.requests[1].Mode != quizcore.ModeFast {
 		t.Fatal("controls repeated generation or used the wrong strategy", err)
 	}
 }

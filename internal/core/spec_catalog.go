@@ -39,7 +39,7 @@ func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, 
 		}
 
 		count += len(entries)
-		if count > workflowstate.WorkflowRecordLimit {
+		if count > workflowstate.RecordLimit {
 			return nil, errors.New("spec inventory exceeds 4096 entries")
 		}
 
@@ -71,15 +71,15 @@ func (r *fileAuthoringSessionRepository) authoringDirectoryEntries(reference str
 		return nil, err
 	}
 
-	entries, readErr := directory.ReadDir(workflowstate.WorkflowRecordLimit + 1)
+	entries, readErr := directory.ReadDir(workflowstate.RecordLimit + 1)
 
 	closeErr := directory.Close()
 	if readErr != nil && !errors.Is(readErr, io.EOF) || closeErr != nil {
 		return nil, errors.Join(readErr, closeErr)
 	}
 
-	if len(entries) > workflowstate.WorkflowRecordLimit {
-		return nil, fmt.Errorf("authoring directory exceeds %d entries", workflowstate.WorkflowRecordLimit)
+	if len(entries) > workflowstate.RecordLimit {
+		return nil, fmt.Errorf("authoring directory exceeds %d entries", workflowstate.RecordLimit)
 	}
 
 	return entries, nil
@@ -99,7 +99,7 @@ func (r *fileAuthoringSessionRepository) specDocumentsInDirectory(ctx context.Co
 		}
 
 		*size += len(document.images[0].After) + len(document.images[1].After)
-		if *size > 8*workflowstate.WorkflowFileLimit {
+		if *size > 8*workflowstate.FileLimit {
 			return nil, errors.New("spec inventory exceeds 8 MiB")
 		}
 

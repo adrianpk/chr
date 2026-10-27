@@ -20,7 +20,7 @@ func generationBindingQuizCase(t *testing.T, fixture func(*testing.T, string) (s
 	project := operations.projectContext.ProjectDir
 	writeServiceQuizFixture(t, project)
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeDeep})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.ModeDeep})
 	if err != nil || started.State.ActiveQuestion == nil {
 		t.Fatal("selected driver could not generate a quiz question", err)
 	}
@@ -38,7 +38,7 @@ func generationBindingQuizCase(t *testing.T, fixture func(*testing.T, string) (s
 	checkGenerationFixtureModels(t, project, map[string]string{started.State.GenerationOperationID: "fixture-model", answered.State.GenerationOperationID: "other-model", next: "fixture-model"})
 }
 
-func resumeGenerationFixture(t *testing.T, operations service, driverDir string, pending quizcore.QuizRuntimeState) string {
+func resumeGenerationFixture(t *testing.T, operations service, driverDir string, pending quizcore.RuntimeState) string {
 	t.Helper()
 	switchGenerationFixture(t, operations, "writing")
 
@@ -67,7 +67,7 @@ func resumeGenerationFixture(t *testing.T, operations service, driverDir string,
 	return independentQuizGenerationFixture(t, restarted, driverDir, pending)
 }
 
-func independentQuizGenerationFixture(t *testing.T, restarted service, driverDir string, pending quizcore.QuizRuntimeState) string {
+func independentQuizGenerationFixture(t *testing.T, restarted service, driverDir string, pending quizcore.RuntimeState) string {
 	t.Helper()
 	harnessSelectionWrite(t, filepath.Join(driverDir, "result.json"), generationQuestionFixture("Which acceptance check is still missing?"))
 

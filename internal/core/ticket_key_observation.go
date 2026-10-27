@@ -51,7 +51,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 		return nil, err
 	}
 
-	if len(entries) > workflowstate.WorkflowRecordLimit {
+	if len(entries) > workflowstate.RecordLimit {
 		return nil, fmt.Errorf("ticket namespace observation bound exceeded")
 	}
 

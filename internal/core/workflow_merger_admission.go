@@ -123,7 +123,7 @@ func (s *WorkflowStore) workflowMergerSeed(ctx context.Context, run workflowInvo
 
 func freezeWorkflowMergerRequest(request WorkflowMergerRequest) (WorkflowMergerRequest, error) {
 	data, err := json.Marshal(request)
-	if err != nil || len(data) >= workflowstate.WorkflowFileLimit {
+	if err != nil || len(data) >= workflowstate.FileLimit {
 		return WorkflowMergerRequest{}, fmt.Errorf("%w: merger admission exceeds bounds", workflowstate.ErrConflict)
 	}
 

@@ -27,7 +27,7 @@ func TestWebQuizBrowser(t *testing.T) {
 	provider, model := newWebQuizFixture(t)
 	operations := provider.service(t.Context())
 
-	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.QuizModeFast})
+	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.ModeFast})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -225,8 +225,8 @@ func webQuizBrowserDone(t *testing.T, browser *webWorkflowBrowser, provider webV
 	webBoardBrowserClick(t, browser, "[value='quiz.done']")
 	webBoardBrowserWait(t, browser, "location.pathname==='/quizzes'")
 
-	state, err := provider.service(t.Context()).quizRepository().LoadRuntimeState(t.Context(), quizcore.QuizScope{ProjectID: provider.projectContext.ProjectID})
-	if err != nil || state.Status != quizcore.QuizRuntimeStatusDone || state.AnswersRecorded != 4 || state.SkipsRecorded != 1 {
+	state, err := provider.service(t.Context()).quizRepository().LoadRuntimeState(t.Context(), quizcore.Scope{ProjectID: provider.projectContext.ProjectID})
+	if err != nil || state.Status != quizcore.RuntimeStatusDone || state.AnswersRecorded != 4 || state.SkipsRecorded != 1 {
 		t.Fatal("Done submitted the unsent answer", state, err)
 	}
 }
@@ -234,7 +234,7 @@ func webQuizBrowserDone(t *testing.T, browser *webWorkflowBrowser, provider webV
 func webQuizBrowserCancel(t *testing.T, browser *webWorkflowBrowser, provider webViewProvider, base string) {
 	t.Helper()
 
-	started, err := provider.service(t.Context()).StartQuiz(QuizStartRequest{Scope: quizcore.QuizScope{CaseSlug: "named-work"}})
+	started, err := provider.service(t.Context()).StartQuiz(QuizStartRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -245,8 +245,8 @@ func webQuizBrowserCancel(t *testing.T, browser *webWorkflowBrowser, provider we
 	webBoardBrowserClick(t, browser, "[value='quiz.cancel']")
 	webBoardBrowserWait(t, browser, "location.pathname==='/quizzes'")
 
-	state, err := provider.service(t.Context()).quizRepository().LoadRuntimeState(t.Context(), quizcore.QuizScope{ProjectID: provider.projectContext.ProjectID, CaseSlug: "named-work"})
-	if err != nil || state.Status != quizcore.QuizRuntimeStatusCancelled || state.AnswersRecorded != 0 {
+	state, err := provider.service(t.Context()).quizRepository().LoadRuntimeState(t.Context(), quizcore.Scope{ProjectID: provider.projectContext.ProjectID, CaseSlug: "named-work"})
+	if err != nil || state.Status != quizcore.RuntimeStatusCancelled || state.AnswersRecorded != 0 {
 		t.Fatal("Cancel completed or submitted the quiz", state, err)
 	}
 }

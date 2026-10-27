@@ -68,7 +68,7 @@ func TestWorkflowUpgradeCLIRejects(t *testing.T) {
 		{"unknown field", `{"unknown":true}`},
 		{"multiple objects", "{} {}"},
 		{"null", "null"},
-		{"oversize", strings.Repeat(" ", workflowstate.WorkflowFileLimit+1)},
+		{"oversize", strings.Repeat(" ", workflowstate.FileLimit+1)},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

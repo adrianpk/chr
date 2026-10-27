@@ -247,7 +247,7 @@ func observeWorkflowIntegrationProcesses(common string) ([]WorkflowProcess, erro
 		return nil, nil
 	}
 
-	if err != nil || len(files) > workflowstate.WorkflowRecordLimit {
+	if err != nil || len(files) > workflowstate.RecordLimit {
 		return nil, errorsOrConflict(err)
 	}
 

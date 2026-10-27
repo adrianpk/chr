@@ -107,7 +107,7 @@ func (dependencies workflowDependencies) validateMembers(members []WorkflowPrevi
 		task := dependencies.selection.records[member.Key].Task
 
 		refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: member.Key}]
-		if len(refs) > workflowstate.WorkflowPageLimit {
+		if len(refs) > workflowstate.PageLimit {
 			return fmt.Errorf("task prerequisite observation bound exceeded: %s", member.Key)
 		}
 
