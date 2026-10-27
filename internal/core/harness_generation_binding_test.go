@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -18,7 +19,7 @@ import (
 func TestHarnessGenerationBindingFreeze(t *testing.T) {
 	project := t.TempDir()
 	program := generationBindingProgram(t, project)
-	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
+	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
 
 	resolve := generationBindingResolver(program, "model-alpha")
 
@@ -27,7 +28,7 @@ func TestHarnessGenerationBindingFreeze(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), "harnesses:\n  generation: beta\n")
+	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: beta\n")
 
 	nested, err := FreezeHarnessGeneration(WithHarnessGeneration(t.Context(), first), project, "nested", "question", nil)
 	if err != nil || nested != first {
@@ -55,7 +56,7 @@ func checkGenerationBindingFresh(t *testing.T, project string, first HarnessGene
 	}
 
 	// Even unreadable live settings must not prevent retained identity recovery.
-	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), "harnesses:\n  unknown: invalid\n")
+	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  unknown: invalid\n")
 
 	if resumed, err := FreezeHarnessGeneration(t.Context(), project, first.ID, first.Purpose, nil); err != nil || resumed != first {
 		t.Fatal("recovery tried parsing live configuration", err)
@@ -153,7 +154,7 @@ func generationBindingFixture(t *testing.T) (string, HarnessGenerationOperation)
 
 	project := t.TempDir()
 	program := generationBindingProgram(t, project)
-	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
+	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
 
 	operation, err := FreezeHarnessGeneration(t.Context(), project, "operation-fixture", "plan_generation", generationBindingResolver(program, "model-alpha"))
 	if err != nil {
@@ -202,7 +203,7 @@ func TestHarnessGenerationBindingDispatchFence(t *testing.T) {
 }
 
 func generationBindingRequest(project string) harness.AgentRunRequest {
-	return harness.AgentRunRequest{ID: "fixture-call", Purpose: "plan_outline_generation", ProjectDir: project, RunDir: UserPath(project, "tmp", "generation-fixture"), Prompt: "Private fixture prompt.", OutputSchema: []byte(`{"type":"object"}`), OutputName: "output.json"}
+	return harness.AgentRunRequest{ID: "fixture-call", Purpose: "plan_outline_generation", ProjectDir: project, RunDir: workspacecore.UserPath(project, "tmp", "generation-fixture"), Prompt: "Private fixture prompt.", OutputSchema: []byte(`{"type":"object"}`), OutputName: "output.json"}
 }
 
 type generationBindingRunner struct {

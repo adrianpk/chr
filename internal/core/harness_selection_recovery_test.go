@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Recovery covers each durable boundary: retained intent, renamed config, and
@@ -32,7 +33,7 @@ func checkHarnessSelectionRecovery(t *testing.T, stage string) {
 	}
 
 	if stage != "intent" {
-		writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), string(image))
+		writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), string(image))
 	}
 
 	if stage == "receipt" {
@@ -49,7 +50,7 @@ func checkHarnessSelectionRecovery(t *testing.T, stage string) {
 		t.Fatal("recovery changed the accepted request", result, err)
 	}
 
-	if _, err := os.Stat(UserPath(project, harnessSelectionPending)); !errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(workspacecore.UserPath(project, harnessSelectionPending)); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("intent remained after recovery", err)
 	}
 }
@@ -98,10 +99,10 @@ func TestHarnessSelectionRecoveryConflict(t *testing.T) {
 			original := "unrelated: manual-edit\n"
 
 			if change == "corrupt checksum" {
-				writeHarnessSelectionTestFile(t, UserPath(project, harnessSelectionPending), "{}")
+				writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, harnessSelectionPending), "{}")
 			}
 
-			writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), original)
+			writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), original)
 
 			if _, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request)); err == nil {
 				t.Fatal("conflicting recovery accepted")
@@ -125,7 +126,7 @@ func TestHarnessSelectionReceiptCapacity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dir := UserPath(project, "harness-selection-receipts")
+	dir := workspacecore.UserPath(project, "harness-selection-receipts")
 	for i := 1; i < harnessSelectionReceiptCapacity; i++ {
 		writeHarnessSelectionTestFile(t, filepath.Join(dir, "reserved-"+strconv.Itoa(i)), "reserved")
 	}

@@ -13,11 +13,6 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-const (
-	// UserDirectoryName is the default pseudo-user workspace directory name.
-	UserDirectoryName = "default"
-)
-
 // DefaultProfile defines a package boundary constant.
 const DefaultProfile = "standard"
 
@@ -61,43 +56,31 @@ type entry struct {
 }
 
 var directories = []string{
-	UserDirectoryName + "/agents",
-	UserDirectoryName + "/docs",
-	UserDirectoryName + "/specs/drafts",
-	UserDirectoryName + "/specs/accepted",
-	UserDirectoryName + "/specs/archived",
-	UserDirectoryName + "/tickets/open",
-	UserDirectoryName + "/tickets/ready",
-	UserDirectoryName + "/tickets/in_progress",
-	UserDirectoryName + "/tickets/reviewing",
-	UserDirectoryName + "/tickets/blocked",
-	UserDirectoryName + "/tickets/solved",
-	UserDirectoryName + "/tickets/closed",
-	UserDirectoryName + "/comments/tickets",
-	UserDirectoryName + "/context",
-	UserDirectoryName + "/dumps/raw",
-	UserDirectoryName + "/dumps/curated",
-	UserDirectoryName + "/quizzes/raw",
-	UserDirectoryName + "/quizzes/curated",
-	UserDirectoryName + "/playbooks",
-	UserDirectoryName + "/reports/runs",
-	UserDirectoryName + "/reports/audits",
-	UserDirectoryName + "/indexes",
-	UserDirectoryName + "/runtime/locks",
-	UserDirectoryName + "/runtime/traces",
-	UserDirectoryName + "/notifications",
-}
-
-// UserRelativePath executes the corresponding package operation.
-func UserRelativePath(elements ...string) string {
-	parts := append([]string{workspacecore.DirectoryName, UserDirectoryName}, elements...)
-
-	return filepath.ToSlash(filepath.Join(parts...))
-}
-
-// UserPath executes the corresponding package operation.
-func UserPath(projectDir string, elements ...string) string {
-	return filepath.Join(projectDir, filepath.FromSlash(UserRelativePath(elements...)))
+	workspacecore.UserDirectoryName + "/agents",
+	workspacecore.UserDirectoryName + "/docs",
+	workspacecore.UserDirectoryName + "/specs/drafts",
+	workspacecore.UserDirectoryName + "/specs/accepted",
+	workspacecore.UserDirectoryName + "/specs/archived",
+	workspacecore.UserDirectoryName + "/tickets/open",
+	workspacecore.UserDirectoryName + "/tickets/ready",
+	workspacecore.UserDirectoryName + "/tickets/in_progress",
+	workspacecore.UserDirectoryName + "/tickets/reviewing",
+	workspacecore.UserDirectoryName + "/tickets/blocked",
+	workspacecore.UserDirectoryName + "/tickets/solved",
+	workspacecore.UserDirectoryName + "/tickets/closed",
+	workspacecore.UserDirectoryName + "/comments/tickets",
+	workspacecore.UserDirectoryName + "/context",
+	workspacecore.UserDirectoryName + "/dumps/raw",
+	workspacecore.UserDirectoryName + "/dumps/curated",
+	workspacecore.UserDirectoryName + "/quizzes/raw",
+	workspacecore.UserDirectoryName + "/quizzes/curated",
+	workspacecore.UserDirectoryName + "/playbooks",
+	workspacecore.UserDirectoryName + "/reports/runs",
+	workspacecore.UserDirectoryName + "/reports/audits",
+	workspacecore.UserDirectoryName + "/indexes",
+	workspacecore.UserDirectoryName + "/runtime/locks",
+	workspacecore.UserDirectoryName + "/runtime/traces",
+	workspacecore.UserDirectoryName + "/notifications",
 }
 
 // Init executes the corresponding package operation.
@@ -184,7 +167,7 @@ func (w *workspace) initWorkspaceFiles(ctx context.Context, input workspaceFileI
 			return err
 		}
 
-		rel := filepath.Join(workspacecore.DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
+		rel := filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, filepath.FromSlash(file.path))
 		target := filepath.Join(input.ProjectDir, rel)
 		// Absence is an existing policy choice, not permission to enable version one.
 		if file.path == "config.yml" && !input.NewProject {

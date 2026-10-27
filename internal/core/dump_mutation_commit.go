@@ -92,7 +92,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutatio
 	if target.Project.Name != "" && target.Project.ProjectDumpRef != target.Destination {
 		project := target.Project
 		project.ProjectDumpRef = target.Destination
-		changes = append(changes, workflowstate.FileChange{Path: filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project))})
+		changes = append(changes, workflowstate.FileChange{Path: filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project))})
 	}
 
 	return dumpMutationImages{Changes: changes, Result: result}, nil

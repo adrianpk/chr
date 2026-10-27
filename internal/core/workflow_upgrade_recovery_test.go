@@ -15,6 +15,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestWorkflowUpgradeRecovery checks each durable policy boundary. Ordinary
@@ -126,7 +127,7 @@ func TestWorkflowUpgradeEdited(t *testing.T) {
 				t.Fatal("owned fault not reached")
 			}
 
-			path := UserPath(store.layout.ProjectDir(), target)
+			path := workspacecore.UserPath(store.layout.ProjectDir(), target)
 
 			image := []byte("# Manual policy edit\n")
 			if err := os.WriteFile(path, image, 0o600); err != nil {
@@ -218,7 +219,7 @@ func TestWorkflowUpgradePath(t *testing.T) {
 		t.Run(kind, func(t *testing.T) {
 			store, opts := workflowUpgradeFixture(t, "")
 
-			path := UserPath(store.layout.ProjectDir(), "config.yml")
+			path := workspacecore.UserPath(store.layout.ProjectDir(), "config.yml")
 			if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 				t.Fatal(err)
 			}

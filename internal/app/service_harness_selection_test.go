@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Explicit workspace references outrank legacy dispatch and refresh per request.
@@ -19,7 +20,7 @@ func TestHarnessSelectionResolution(t *testing.T) {
 	view, err := operations.ResolveHarnessSelection(t.Context(), harnesscore.Generation, "spec_generation")
 	assertHarnessSelection(t, view, err, "openai", "legacy", "", "cli_default")
 
-	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: writing\n")
+	harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: writing\n")
 
 	view, err = operations.ResolveHarnessSelection(t.Context(), harnesscore.Generation, "spec_generation")
 	assertHarnessSelection(t, view, err, "codex", "project", "writing", "fixture-model")
@@ -35,7 +36,7 @@ func TestHarnessSelectionResolution(t *testing.T) {
 
 	prior := view.SelectionRevision
 
-	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: null\n")
+	harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: null\n")
 
 	view, err = operations.ResolveHarnessSelection(t.Context(), harnesscore.Generation, "spec_generation")
 	assertHarnessSelection(t, view, err, "openai", "legacy", "", "cli_default")
@@ -54,7 +55,7 @@ func TestHarnessSelectionRejections(t *testing.T) {
 	for _, name := range []string{"missing", "pi-writing", "missing-executable"} {
 		t.Run(name, func(t *testing.T) {
 			operations, project, _, _ := harnessSelectionFixture(t)
-			harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: "+name+"\n")
+			harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: "+name+"\n")
 
 			view, err := operations.ResolveHarnessSelection(t.Context(), harnesscore.Generation, "spec_generation")
 			if err == nil || view.Readiness.Ready() {

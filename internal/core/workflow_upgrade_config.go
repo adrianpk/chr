@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const workflowUpgradePending = "tmp/workflow-upgrade.json"
@@ -24,7 +25,7 @@ func workflowUpgradePath(project, relative string) (string, error) {
 		return "", err
 	}
 
-	path := UserPath(project, relative)
+	path := workspacecore.UserPath(project, relative)
 	for parent := path; parent != project; parent = filepath.Dir(parent) {
 		info, err := os.Lstat(parent)
 		if err != nil && !errors.Is(err, os.ErrNotExist) {

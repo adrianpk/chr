@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ProvingObjective describes a package boundary value.
@@ -129,7 +130,7 @@ func validateProvingObjective(objective ProvingObjective) error {
 }
 
 func findProvingTicketPath(projectDir, ticketKey string) (string, error) {
-	ticketsDir := UserPath(projectDir, "tickets")
+	ticketsDir := workspacecore.UserPath(projectDir, "tickets")
 
 	entries, err := os.ReadDir(ticketsDir)
 	if err != nil {

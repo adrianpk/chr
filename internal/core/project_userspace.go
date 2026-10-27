@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ActiveOperatorIDEnv defines a package boundary constant.
@@ -53,12 +54,12 @@ func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUsersp
 		return ProjectUserspace{}, fmt.Errorf("invalid operator id: %s", operatorID)
 	}
 
-	relativeDir := UserRelativePath()
+	relativeDir := workspacecore.UserRelativePath()
 
 	return ProjectUserspace{
 		ProjectDir:  projectDir,
 		OperatorID:  operatorID,
-		Path:        UserPath(projectDir),
+		Path:        workspacecore.UserPath(projectDir),
 		RelativeDir: relativeDir,
 	}, nil
 }

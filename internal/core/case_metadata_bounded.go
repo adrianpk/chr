@@ -12,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // LoadBounded observes at most the owner's fixed case-record ceiling.
@@ -48,7 +49,7 @@ func (s CaseMetadataService) LoadBounded(ctx context.Context, limit int) ([]Case
 }
 
 func (s CaseMetadataService) loadBoundedCase(path string) (CaseMetadata, error) {
-	relative, err := filepath.Rel(UserPath(s.projectDir), path)
+	relative, err := filepath.Rel(workspacecore.UserPath(s.projectDir), path)
 	if err != nil {
 		return CaseMetadata{}, err
 	}

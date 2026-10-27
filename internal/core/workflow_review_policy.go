@@ -8,6 +8,7 @@ import (
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (workflowstate.ReviewPolicy, error) {
@@ -15,7 +16,7 @@ func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (workfl
 		return workflowstate.ReviewPolicy{}, err
 	}
 
-	data, err := opsfile.Read(UserPath(s.layout.ProjectDir(), "config.yml"))
+	data, err := opsfile.Read(workspacecore.UserPath(s.layout.ProjectDir(), "config.yml"))
 	if errors.Is(err, os.ErrNotExist) {
 		data, err = nil, nil
 	}

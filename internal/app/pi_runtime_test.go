@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 	"forge.adrianpk.com/chr/internal/harness/process"
@@ -36,7 +37,7 @@ func initPiRuntimeProject(t *testing.T, profile string) (string, string) {
 		t.Fatal(err)
 	}
 
-	agent := core.UserPath(project, "runtime", "agent")
+	agent := workspacecore.UserPath(project, "runtime", "agent")
 	if err := os.WriteFile(filepath.Join(agent, "Dockerfile"), []byte("FROM managed-codex\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +55,7 @@ func assertPiRuntimeUpgrade(t *testing.T, project string) {
 	t.Helper()
 
 	ctx := context.Background()
-	agent := core.UserPath(project, "runtime", "agent")
+	agent := workspacecore.UserPath(project, "runtime", "agent")
 
 	assets := core.NewRuntimeAssets(testAssetsFS())
 

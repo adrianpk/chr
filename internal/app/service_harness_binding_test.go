@@ -11,6 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Actual service admissions freeze the selected executable/model before claim.
@@ -121,7 +122,7 @@ func checkServiceBoundWorkerInput(t *testing.T, worktree, hash string) {
 func TestHarnessBindingProviderReadiness(t *testing.T) {
 	operations, project, configDir, command := harnessSelectionFixture(t)
 	harnessSelectionWrite(t, filepath.Join(configDir, "harnesses.yml"), "profiles:\n  writing:\n    harness: codex\n    command: "+command+"\n    model_provider: unsupported-provider\n    model: exact-model\n")
-	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  worker: writing\n")
+	harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  worker: writing\n")
 
 	view, err := operations.ResolveHarnessSelection(t.Context(), harnesscore.Worker, "")
 	if err == nil || view.Readiness.Ready() {

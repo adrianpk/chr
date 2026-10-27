@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestWorkflowConfigDefaults keeps legacy absence distinct from version-one
@@ -41,7 +42,7 @@ func TestWorkflowConfigDefaults(t *testing.T) {
 func writeWorkflowTestConfigValue(t *testing.T, project, root, key, value string) {
 	t.Helper()
 
-	data, err := os.ReadFile(UserPath(project, "config.yml"))
+	data, err := os.ReadFile(workspacecore.UserPath(project, "config.yml"))
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		t.Fatal(err)
 	}
@@ -208,14 +209,14 @@ func checkWorkflowConfigDefaultBytes(t *testing.T, project, body string) {
 	t.Helper()
 
 	if body == "" {
-		if _, err := os.Stat(UserPath(project, "config.yml")); !os.IsNotExist(err) {
+		if _, err := os.Stat(workspacecore.UserPath(project, "config.yml")); !os.IsNotExist(err) {
 			t.Fatal("observing absent config initialized a project", err)
 		}
 
 		return
 	}
 
-	if data, err := os.ReadFile(UserPath(project, "config.yml")); err != nil || string(data) != body {
+	if data, err := os.ReadFile(workspacecore.UserPath(project, "config.yml")); err != nil || string(data) != body {
 		t.Fatal("configuration inspection changed project bytes", err)
 	}
 }

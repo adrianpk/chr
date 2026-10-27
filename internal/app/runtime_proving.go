@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (factory commandFactory) runtimeCommand() *cli.Command {
@@ -394,7 +395,7 @@ func printRuntimeValidateResult(
 ) error {
 	plan := result.Plan
 
-	_, err := fmt.Fprintf(stdout, "runtime: %s\n", displayPath(plan.ProjectDir, core.UserPath(plan.ProjectDir, "runtime")))
+	_, err := fmt.Fprintf(stdout, "runtime: %s\n", displayPath(plan.ProjectDir, workspacecore.UserPath(plan.ProjectDir, "runtime")))
 	if err != nil {
 		return fmt.Errorf("write runtime result: %w", err)
 	}

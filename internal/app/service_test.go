@@ -1060,7 +1060,7 @@ func writeServiceWorkspaceQueryFixture(t *testing.T, projectDir string) {
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, core.UserDirectoryName, "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "accepted"
 case: "blog"
@@ -1068,7 +1068,7 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, core.UserDirectoryName, "plans", "project-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---
@@ -1131,7 +1131,7 @@ func writeServiceWorkspaceFile(t *testing.T, path, content string) {
 }
 
 func canonicalServiceWorkspaceFixturePath(path string) string {
-	marker := filepath.Join(workspacecore.DirectoryName, core.UserDirectoryName)
+	marker := filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName)
 
 	parts := strings.Split(filepath.ToSlash(path), filepath.ToSlash(marker)+"/")
 	if len(parts) != 2 {

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -15,7 +16,7 @@ import (
 // after the replacement profile and live configuration become unavailable.
 func TestHarnessGenerationBindingRestart(t *testing.T) {
 	project, operation := generationBindingFixture(t)
-	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), "harnesses:\n  unknown: invalid\n")
+	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  unknown: invalid\n")
 
 	ctx, cancel := context.WithTimeout(t.Context(), 20*time.Second)
 	defer cancel()

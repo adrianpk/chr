@@ -14,6 +14,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Both transports exercise the same real authoring retry and publication owner.
@@ -220,7 +221,7 @@ func piGenerationFixture(t *testing.T, output string) (service, string) {
 
 	profiles := "profiles:\n  writing:\n    harness: pi\n    command: " + driver + "\n    model_provider: fixture\n    model: fixture-model\n    thinking: high\n    credential_ref: auth.json\n  other:\n    harness: pi\n    command: " + driver + "\n    model_provider: fixture\n    model: other-model\n    thinking: low\n    credential_ref: auth.json\n"
 	harnessSelectionWrite(t, filepath.Join(configDir, "harnesses.yml"), profiles)
-	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: writing\n")
+	harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: writing\n")
 
 	return operations, dir
 }

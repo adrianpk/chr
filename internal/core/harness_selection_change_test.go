@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // A single accepted image preserves unrelated bytes, commits both roles and
@@ -17,7 +18,7 @@ import (
 func TestHarnessSelectionChange(t *testing.T) {
 	project := t.TempDir()
 	original := "# retain comment\nunknown_extension:\n  custom: untouched\nwork:\n  max_active_workers: 2\n"
-	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), original)
+	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), original)
 
 	request := harnessSelectionTestRequest("first", contenthash.Sum([]byte(original)), "alpha")
 
@@ -88,7 +89,7 @@ func TestHarnessSelectionChangeRejects(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			project := t.TempDir()
 			original := "unknown: retained\n"
-			writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), original)
+			writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), original)
 
 			options := harnessSelectionTestOptions(harnessSelectionTestRequest("reject", contenthash.Sum([]byte(original)), "alpha"))
 			tc.change(&options)
@@ -102,7 +103,7 @@ func TestHarnessSelectionChangeRejects(t *testing.T) {
 			}
 
 			for _, relative := range []string{harnessSelectionPending, harnessSelectionReceiptPath("reject")} {
-				if _, err := os.Stat(UserPath(project, relative)); !errors.Is(err, os.ErrNotExist) {
+				if _, err := os.Stat(workspacecore.UserPath(project, relative)); !errors.Is(err, os.ErrNotExist) {
 					t.Fatal("rejection retained an accepted request", err)
 				}
 			}
@@ -134,11 +135,11 @@ func TestHarnessSelectionChangeClear(t *testing.T) {
 		t.Fatal("foreign project changed selections", err)
 	}
 
-	if err := os.Rename(UserPath(project, "config.yml"), UserPath(project, "original.yml")); err != nil {
+	if err := os.Rename(workspacecore.UserPath(project, "config.yml"), workspacecore.UserPath(project, "original.yml")); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := os.Symlink("original.yml", UserPath(project, "config.yml")); err != nil {
+	if err := os.Symlink("original.yml", workspacecore.UserPath(project, "config.yml")); err != nil {
 		t.Fatal(err)
 	}
 

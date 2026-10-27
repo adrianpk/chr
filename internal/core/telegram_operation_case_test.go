@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func telegramOperationCaseRequest() CaseMutationRequest {
@@ -90,7 +91,7 @@ func TestTelegramOperationCaseConflict(t *testing.T) {
 		t.Fatal("fault did not fire")
 	}
 
-	target := filepath.Join(UserPath(owner.projectDir), partial.Metadata.SourcePath)
+	target := filepath.Join(workspacecore.UserPath(owner.projectDir), partial.Metadata.SourcePath)
 	if err := os.WriteFile(target, []byte("divergent"), 0o644); err != nil {
 		t.Fatal(err)
 	}

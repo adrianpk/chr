@@ -155,7 +155,7 @@ func TestProjectDumpJournalPaths(t *testing.T) {
 	}{
 		{authoringReceiptRef("operation"), true, true},
 		{"ops/default/dump/00000-context/artifact.md", true, true},
-		{filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), false, true},
+		{filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, "project.md"), false, true},
 		{history, false, true},
 		{"ops/default/spec/00000-context/files/history/" + strings.Repeat("a", 64) + "/artifact.md", false, false},
 		{"README.md", false, false},

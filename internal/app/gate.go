@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/gate"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (factory commandFactory) gateCommand() *cli.Command {
@@ -166,7 +167,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return err
 	}
 
-	config, err := gate.LoadConfig(core.UserPath(projectDir, "config", "gates.yml"))
+	config, err := gate.LoadConfig(workspacecore.UserPath(projectDir, "config", "gates.yml"))
 	if err != nil {
 		return err
 	}

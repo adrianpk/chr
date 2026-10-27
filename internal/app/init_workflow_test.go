@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestInitWorkflowCLI exercises actual root-command initialization and the
@@ -78,7 +79,7 @@ func checkInitWorkflowRuntime(t *testing.T, project string) {
 // the preserved choice through both dry-run and actual command output.
 func TestInitWorkflowAbsentCLI(t *testing.T) {
 	project := t.TempDir()
-	if err := os.MkdirAll(core.UserPath(project), 0o755); err != nil {
+	if err := os.MkdirAll(workspacecore.UserPath(project), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -94,9 +95,9 @@ func TestInitWorkflowAbsentCLI(t *testing.T) {
 			t.Fatal("CLI misreported policy preservation", output.String())
 		}
 
-		assertPathNotExists(t, core.UserPath(project, "config.yml"))
+		assertPathNotExists(t, workspacecore.UserPath(project, "config.yml"))
 	}
 
 	checkInitWorkflowRuntime(t, project)
-	assertPathNotExists(t, core.UserPath(project, "config.yml"))
+	assertPathNotExists(t, workspacecore.UserPath(project, "config.yml"))
 }

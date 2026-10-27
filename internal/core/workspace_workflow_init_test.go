@@ -35,7 +35,7 @@ func checkWorkflowProfile(t *testing.T, profile string) {
 	options := InitOptions{ProjectDir: project, Profile: profile, DryRun: true}
 
 	result, err := workspace.Init(t.Context(), options)
-	if err != nil || !contains(result.Created, UserRelativePath("config.yml")) {
+	if err != nil || !contains(result.Created, workspacecore.UserRelativePath("config.yml")) {
 		t.Fatal("dry run lost planned configuration", result, err)
 	}
 
@@ -48,7 +48,7 @@ func checkWorkflowProfile(t *testing.T, profile string) {
 
 	checkInitializedWorkflow(t, project)
 
-	before, err := os.ReadFile(UserPath(project, "config.yml"))
+	before, err := os.ReadFile(workspacecore.UserPath(project, "config.yml"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func checkExistingWorkflowInitialization(t *testing.T, body string) {
 	t.Helper()
 
 	project := t.TempDir()
-	if err := os.MkdirAll(UserPath(project), 0o755); err != nil {
+	if err := os.MkdirAll(workspacecore.UserPath(project), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -151,14 +151,14 @@ func checkReinitializedWorkflow(t *testing.T, workspace Workspace, project, prof
 	t.Helper()
 
 	result, err := workspace.Init(context.Background(), InitOptions{ProjectDir: project, Profile: profile, DryRun: dryRun})
-	if err != nil || contains(result.Created, UserRelativePath("config.yml")) {
+	if err != nil || contains(result.Created, workspacecore.UserRelativePath("config.yml")) {
 		t.Fatal("reinitialization attempted to create policy", result, err)
 	}
 
 	if body == "" {
-		assertNotExists(t, project, UserRelativePath("config.yml"))
+		assertNotExists(t, project, workspacecore.UserRelativePath("config.yml"))
 
-		if !contains(result.Preserved, UserRelativePath("config.yml")) {
+		if !contains(result.Preserved, workspacecore.UserRelativePath("config.yml")) {
 			t.Fatal("missing policy preservation was not reported", result)
 		}
 	} else {

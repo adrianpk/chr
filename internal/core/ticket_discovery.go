@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TicketFileDiscoverer defines a package boundary interface.
@@ -99,5 +101,5 @@ func sortDiscoveredTicketFiles(files []DiscoveredTicketFile) []DiscoveredTicketF
 }
 
 func ticketsDirectory(projectDir string) string {
-	return UserPath(projectDir, "tickets")
+	return workspacecore.UserPath(projectDir, "tickets")
 }

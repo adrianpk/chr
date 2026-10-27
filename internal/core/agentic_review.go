@@ -10,6 +10,7 @@ import (
 	"time"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -141,7 +142,7 @@ func AgenticReviewRunDirForContext(review AgenticReviewContext) string {
 
 // AgenticReviewRunDir returns the compatibility local artifact directory for one review.
 func AgenticReviewRunDir(projectDir, ticketKey, executionID string) string {
-	return UserPath(projectDir, "runtime", "reviews", safeAgenticReviewPathPart(ticketKey), safeAgenticReviewPathPart(executionID))
+	return workspacecore.UserPath(projectDir, "runtime", "reviews", safeAgenticReviewPathPart(ticketKey), safeAgenticReviewPathPart(executionID))
 }
 
 // ValidateAgenticReviewContext validates the corresponding package boundary value.

@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // The host retains an intent's binding outside the selected project's mutable
@@ -74,7 +74,7 @@ func registerGenerationProjects(t *testing.T, operations service) string {
 		}
 	}
 
-	harnessSelectionWrite(t, core.UserPath(second, "config.yml"), "harnesses:\n  generation: other\n")
+	harnessSelectionWrite(t, workspacecore.UserPath(second, "config.yml"), "harnesses:\n  generation: other\n")
 
 	return second
 }

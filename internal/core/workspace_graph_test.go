@@ -37,7 +37,7 @@ func writeCaseRootedWorkspaceGraphFixture(t *testing.T, projectDir string) {
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "accepted"
 case: "blog"
@@ -45,14 +45,14 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "plans", "project-plan.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---
 
 # Project Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "tickets", "CHR-1-Write.md"), ticketFixture(t, Ticket{
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "tickets", "CHR-1-Write.md"), ticketFixture(t, Ticket{
 		Key:         "CHR-1",
 		Title:       "Write article",
 		Status:      "ready",
@@ -106,7 +106,7 @@ func TestWorkspaceGraphBuilderTracksInvalidFilesAndUnresolvedCases(t *testing.T)
 		Name: "Valid",
 	}))
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "broken"), "# Missing frontmatter\n")
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "dumps", "missing-case.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "dumps", "missing-case.md"), `---
 title: "Missing Case Dump"
 case: "missing"
 ---
@@ -150,7 +150,7 @@ func TestWorkspaceGraphBuilderClassifiesDumpPairMetadata(t *testing.T) {
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "dumps", "blog-notes.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "dumps", "blog-notes.md"), `---
 title: "Blog Notes"
 status: "curated"
 type: "dump"
@@ -160,7 +160,7 @@ case: "blog"
 
 # Blog Notes
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "dumps", "blog-notes-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "dumps", "blog-notes-raw.md"), `---
 title: "Blog Notes Raw Capture"
 status: "raw"
 type: "dump_raw"
@@ -206,7 +206,7 @@ func TestWorkspaceGraphBuilderClassifiesQuizPairMetadata(t *testing.T) {
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "quizzes", "blog-quiz.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "quizzes", "blog-quiz.md"), `---
 title: "Blog Quiz"
 status: "curated"
 raw_path: ".chr/default/quizzes/blog-quiz-raw.md"
@@ -215,7 +215,7 @@ case: "blog"
 
 # Blog Quiz
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "quizzes", "blog-quiz-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "quizzes", "blog-quiz-raw.md"), `---
 title: "Blog Quiz Raw Capture"
 status: "raw"
 curated_path: ".chr/default/quizzes/blog-quiz.md"
@@ -341,7 +341,7 @@ func writeWorkspaceGraphFile(t *testing.T, path, content string) {
 }
 
 func canonicalWorkspaceGraphFixturePath(path string) string {
-	marker := filepath.Join(workspacecore.DirectoryName, UserDirectoryName)
+	marker := filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName)
 
 	parts := strings.Split(filepath.ToSlash(path), filepath.ToSlash(marker)+"/")
 	if len(parts) != 2 {

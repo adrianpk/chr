@@ -91,7 +91,7 @@ cat "$driver_dir/result.json" > "$output"
 
 	profiles := "profiles:\n  writing:\n    harness: codex\n    command: " + driver + "\n    model: fixture-model\n  other:\n    harness: codex\n    command: " + driver + "\n    model: other-model\n"
 	harnessSelectionWrite(t, filepath.Join(configDir, "harnesses.yml"), profiles)
-	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  generation: writing\n")
+	harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: writing\n")
 
 	return operations, driverDir
 }
@@ -122,7 +122,7 @@ func changeGenerationFixture(ctx context.Context, operations service, profile st
 func generationFixtureMetadata(t *testing.T, project string) []core.HarnessRunMetadata {
 	t.Helper()
 
-	paths, err := filepath.Glob(core.UserPath(project, "tmp", "agent-runs", "*", "harness-run.json"))
+	paths, err := filepath.Glob(workspacecore.UserPath(project, "tmp", "agent-runs", "*", "harness-run.json"))
 	if err != nil {
 		t.Fatal(err)
 	}

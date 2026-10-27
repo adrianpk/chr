@@ -15,6 +15,7 @@ import (
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // CaseMutationRequest binds a metadata write to its caller and observed image.
@@ -71,7 +72,7 @@ func (s CaseMetadataService) SaveBound(ctx context.Context, request CaseMutation
 		return writeErr
 	})
 	if err == nil {
-		result.Metadata.SourcePath = filepath.Join(UserPath(s.projectDir), filepath.FromSlash(result.Metadata.SourcePath))
+		result.Metadata.SourcePath = filepath.Join(workspacecore.UserPath(s.projectDir), filepath.FromSlash(result.Metadata.SourcePath))
 	}
 
 	return result, err
@@ -95,7 +96,7 @@ func (s CaseMetadataService) normalizeCaseMutation(request CaseMutationRequest) 
 	}
 
 	if request.Metadata.SourcePath != "" {
-		relative, err := filepath.Rel(UserPath(s.projectDir), request.Metadata.SourcePath)
+		relative, err := filepath.Rel(workspacecore.UserPath(s.projectDir), request.Metadata.SourcePath)
 		if err != nil {
 			return normalizedCaseMutation{Request: request}, err
 		}
@@ -159,7 +160,7 @@ func (s CaseMetadataService) caseMutationPath(relative string) (string, error) {
 		return "", err
 	}
 
-	path := filepath.Join(UserPath(root), relative)
+	path := filepath.Join(workspacecore.UserPath(root), relative)
 	for parent := path; parent != root; parent = filepath.Dir(parent) {
 		info, err := os.Lstat(parent)
 		if err != nil && !errors.Is(err, os.ErrNotExist) {

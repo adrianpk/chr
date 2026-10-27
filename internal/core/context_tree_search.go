@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
@@ -327,7 +329,7 @@ func shouldSkipContextPath(path string, isDir bool) bool {
 		return true
 	}
 
-	runtimeRunsPath := UserRelativePath("runtime", "runs")
+	runtimeRunsPath := workspacecore.UserRelativePath("runtime", "runs")
 	if isDir && path == runtimeRunsPath {
 		return true
 	}

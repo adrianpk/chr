@@ -1239,7 +1239,7 @@ func validGeneratedPlanSliceDetail(createdAt time.Time) generationcore.Generated
 func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {
 	t.Helper()
 
-	path := filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "log", "llm", defaultLLMTraceFileName)
+	path := filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "log", "llm", defaultLLMTraceFileName)
 
 	content, err := os.ReadFile(path)
 	if err != nil {

@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ProjectMetadataSchemaVersion defines a package boundary constant.
@@ -156,7 +157,7 @@ func validateProjectMetadataWriteHash(current, metadata ProjectMetadata) error {
 
 // ProjectMetadataPath executes the corresponding package operation.
 func ProjectMetadataPath(projectDir string) string {
-	return UserPath(projectDir, "project.md")
+	return workspacecore.UserPath(projectDir, "project.md")
 }
 
 // ParseProjectMetadata parses the corresponding package data.

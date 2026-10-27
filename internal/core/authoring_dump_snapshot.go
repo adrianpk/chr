@@ -80,7 +80,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpImage(snapshot *Author
 }
 
 func (r *fileAuthoringSessionRepository) authoringDumpProject(images map[string][]byte) (ProjectMetadata, error) {
-	reference := filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md")
+	reference := filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, "project.md")
 	if content, found := images[reference]; found {
 		project, err := ParseProjectMetadata(string(content))
 		project.Exists, project.SourceHash = true, contenthash.Sum(content)

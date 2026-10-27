@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestWorkflowUpgradeCLI exercises the actual root command, policy observation,
@@ -84,7 +85,7 @@ func TestWorkflowUpgradeCLIRejects(t *testing.T) {
 				t.Fatal("invalid adoption accepted")
 			}
 
-			assertPathNotExists(t, core.UserPath(project, "config.yml"))
+			assertPathNotExists(t, workspacecore.UserPath(project, "config.yml"))
 		})
 	}
 }
@@ -119,7 +120,7 @@ func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 			}
 
 			if tc.blocked {
-				assertPathNotExists(t, core.UserPath(project, "config.yml"))
+				assertPathNotExists(t, workspacecore.UserPath(project, "config.yml"))
 			}
 		})
 	}

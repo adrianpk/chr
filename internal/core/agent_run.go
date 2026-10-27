@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -26,7 +27,7 @@ func RunAgent(ctx context.Context, runner harness.AgentRunner, request harness.A
 	request.ID = HarnessGenerationRequestID(ctx, request.ID)
 
 	if request.RunDir == "" {
-		request.RunDir = UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
+		request.RunDir = workspacecore.UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
 	}
 
 	metadata, err := startHarnessGenerationRun(ctx, request)

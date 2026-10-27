@@ -12,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/configvalue"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // WorkspaceConfig describes a package boundary value.
@@ -374,7 +375,7 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 	}
 
 	config := defaultWorkspaceConfig()
-	path := UserPath(projectDir, "config.yml")
+	path := workspacecore.UserPath(projectDir, "config.yml")
 
 	file, err := os.Open(path)
 	if errors.Is(err, os.ErrNotExist) {

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const workspaceSemanticDigestCacheSchemaVersion = 1
@@ -104,7 +105,7 @@ type workspaceSemanticDigestCacheFile struct {
 
 // WorkspaceSemanticDigestCachePath executes the corresponding package operation.
 func WorkspaceSemanticDigestCachePath(projectDir string) string {
-	return UserPath(projectDir, "tmp", "cache", "workspace-index", "semantic-digests.json")
+	return workspacecore.UserPath(projectDir, "tmp", "cache", "workspace-index", "semantic-digests.json")
 }
 
 // NewWorkspaceSemanticDigestCache constructs the corresponding package service or value.

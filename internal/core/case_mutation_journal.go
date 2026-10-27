@@ -11,6 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type caseMutationJournal struct {
@@ -292,7 +293,7 @@ func (s CaseMetadataService) prepareCaseMutationPath(metadata CaseMetadata) (Cas
 		return metadata, err
 	}
 
-	relative, err := filepath.Rel(UserPath(s.projectDir), path)
+	relative, err := filepath.Rel(workspacecore.UserPath(s.projectDir), path)
 	if err != nil {
 		return metadata, err
 	}

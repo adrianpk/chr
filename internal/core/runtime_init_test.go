@@ -21,7 +21,7 @@ func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	if result.Root != filepath.Join(dir, workspacecore.DirectoryName, UserDirectoryName, "runtime") {
+	if result.Root != filepath.Join(dir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "runtime") {
 		t.Fatalf("Root = %q, want runtime root", result.Root)
 	}
 

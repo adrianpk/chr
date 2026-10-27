@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/gate"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestLoadGateConfigUsesDefaultsWhenMissing(t *testing.T) {
@@ -37,7 +38,7 @@ func TestLoadGateConfigParsesDevMainConfig(t *testing.T) {
       - docs/reference/**
 `)
 
-	config, err := gate.LoadConfig(UserPath(projectDir, "config", "gates.yml"))
+	config, err := gate.LoadConfig(workspacecore.UserPath(projectDir, "config", "gates.yml"))
 	if err != nil {
 		t.Fatalf("LoadGateConfig returned error: %v", err)
 	}
@@ -70,7 +71,7 @@ func TestLoadGateConfigParsesDevMainConfig(t *testing.T) {
 func writeGateConfig(t *testing.T, projectDir, content string) {
 	t.Helper()
 
-	path := UserPath(projectDir, "config", "gates.yml")
+	path := workspacecore.UserPath(projectDir, "config", "gates.yml")
 
 	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {

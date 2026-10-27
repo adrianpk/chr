@@ -12,6 +12,7 @@ import (
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // DefaultTicketKeyPrefix defines a package boundary constant.
@@ -220,7 +221,7 @@ func (r *fileTicketRepository) ticketNumber(path string) (int, bool, error) {
 }
 
 func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
-	parts := []string{UserPath(r.projectDir, "tickets")}
+	parts := []string{workspacecore.UserPath(r.projectDir, "tickets")}
 
 	slug := slugcore.Normalize(useCase)
 	if slug != "" {

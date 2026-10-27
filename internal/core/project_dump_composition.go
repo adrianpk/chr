@@ -157,7 +157,7 @@ func (r *fileAuthoringSessionRepository) projectDumpReconciliationChanges(observ
 	project := observed.Project
 	project.ProjectDumpRef = preview.Destination
 	changes = append(changes, workflowstate.FileChange{
-		Path: filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project)),
+		Path: filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project)),
 	})
 
 	return projectDumpChanges{Changes: changes, Result: result}, nil

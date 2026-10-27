@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // The shared operation enforces current local authority and exposes one fresh
@@ -128,7 +129,7 @@ func checkHarnessSelectionStatusInvalid(t *testing.T, mode string) {
 
 	operations, project, _, _ := harnessSelectionFixture(t)
 	if mode == "explicit missing" {
-		harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "harnesses:\n  worker: missing\n")
+		harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  worker: missing\n")
 	} else {
 		t.Setenv("CHR_SPEC_GENERATION_BACKEND", "unsupported")
 	}

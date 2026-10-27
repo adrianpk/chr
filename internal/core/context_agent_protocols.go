@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const defaultAgentIdentityID = "default-go-software-infrastructure-agent"
@@ -316,7 +317,7 @@ func loadChrProtocolFiles(projectDir string) (contextDocumentLoad, error) {
 }
 
 func chrProtocolCandidates(projectDir string) ([]string, error) {
-	userDir := UserPath(projectDir)
+	userDir := workspacecore.UserPath(projectDir)
 	candidates := stableChrProtocolCandidates(userDir)
 	agentsDir := filepath.Join(userDir, "agents")
 

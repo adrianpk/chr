@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TicketParser defines a package boundary interface.
@@ -286,7 +287,7 @@ func relativeTicketPath(opts ParseTicketOptions) (string, error) {
 	}
 
 	if base == "" {
-		base = UserPath(opts.ProjectDir, "tickets")
+		base = workspacecore.UserPath(opts.ProjectDir, "tickets")
 	}
 
 	relativePath, err := filepath.Rel(base, opts.Path)

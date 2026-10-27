@@ -13,6 +13,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func workflowUpgradeFixture(t *testing.T, body string) (*WorkflowStore, WorkflowUpgradeOptions) {
@@ -118,7 +119,7 @@ func TestWorkflowUpgradePreserves(t *testing.T) {
 func checkWorkflowUpgradeUnrelated(t *testing.T, store *WorkflowStore, result WorkflowUpgradeResult, history WorkflowAdoptionTask) {
 	t.Helper()
 
-	image, err := os.ReadFile(UserPath(store.layout.ProjectDir(), "config.yml"))
+	image, err := os.ReadFile(workspacecore.UserPath(store.layout.ProjectDir(), "config.yml"))
 	if err != nil || !strings.Contains(string(image), "notifications:\n  telegram_chat_id: private-channel\n") || !strings.Contains(string(image), "  forgejo_token_env: PRIVATE_TOKEN\n") {
 		t.Fatal("unrelated configuration lost", err)
 	}
@@ -195,7 +196,7 @@ func checkWorkflowUpgradeAbsent(t *testing.T, store *WorkflowStore) {
 	t.Helper()
 
 	for _, path := range []string{"config.yml", workflowUpgradePending, "workflow-upgrades"} {
-		if _, err := os.Stat(UserPath(store.layout.ProjectDir(), path)); !errors.Is(err, os.ErrNotExist) {
+		if _, err := os.Stat(workspacecore.UserPath(store.layout.ProjectDir(), path)); !errors.Is(err, os.ErrNotExist) {
 			t.Fatal("rejected upgrade wrote policy or snapshot", path, err)
 		}
 	}

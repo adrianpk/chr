@@ -128,7 +128,7 @@ func TestReportListerUsesActiveOpsNamespace(t *testing.T) {
 	), "# Execution Report\n\n## Summary\n\n- execution: adrian-exec\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
 		workspacecore.DirectoryName,
-		UserDirectoryName,
+		workspacecore.UserDirectoryName,
 		"runtime",
 		"runs",
 		"legacy-exec",

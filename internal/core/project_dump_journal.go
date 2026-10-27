@@ -45,7 +45,7 @@ func validAuthoringJournalVersionPath(schema, reference string) bool {
 		return false
 	}
 
-	if reference == filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md") {
+	if reference == filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, "project.md") {
 		return true
 	}
 

@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // CaseMetadataSchemaVersion defines a package boundary constant.
@@ -197,7 +198,7 @@ func validateCaseMetadataWriteHash(path string, metadata CaseMetadata) error {
 
 // CaseMetadataDirectory executes the corresponding package operation.
 func CaseMetadataDirectory(projectDir string) string {
-	return UserPath(projectDir, "cases")
+	return workspacecore.UserPath(projectDir, "cases")
 }
 
 // CaseMetadataPath executes the corresponding package operation.

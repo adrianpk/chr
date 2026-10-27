@@ -8,6 +8,7 @@ import (
 
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
@@ -799,7 +800,7 @@ func assertDefaultRuntimeConfig(t *testing.T, config RuntimeConfig) {
 func writeWorkspaceConfig(t *testing.T, projectDir, content string) {
 	t.Helper()
 
-	path := UserPath(projectDir, "config.yml")
+	path := workspacecore.UserPath(projectDir, "config.yml")
 
 	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {

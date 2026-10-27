@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestWorkflowReviewChangedInputs rejects approval reuse for changed policy,
@@ -21,7 +22,7 @@ func TestWorkflowReviewChangedInputs(t *testing.T) {
 			workflowReviewConfig(t, s, workflowstate.ReviewTrustedAutoMerge)
 		}},
 		{"method", func(t *testing.T, s *WorkflowStore, _ WorkflowInvocation, _ *workflowReviewProviderFixture) {
-			workflowReviewWrite(t, UserPath(s.layout.ProjectDir(), "config.yml"), []byte("review:\n  mode: human_review\nwork:\n  merge_strategy: squash\n"))
+			workflowReviewWrite(t, workspacecore.UserPath(s.layout.ProjectDir(), "config.yml"), []byte("review:\n  mode: human_review\nwork:\n  merge_strategy: squash\n"))
 		}},
 		{"target", func(_ *testing.T, _ *WorkflowStore, _ WorkflowInvocation, p *workflowReviewProviderFixture) {
 			p.target = strings.Repeat("b", 40)

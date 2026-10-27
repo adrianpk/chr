@@ -325,8 +325,8 @@ runtime:
   artifact_dir: ops/default/run
   validation_command: make verify
 `)
-	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, UserDirectoryName, "runtime", "agent", "Dockerfile"), "FROM golang:1.22-bookworm\n")
-	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, UserDirectoryName, "tickets", "TODO-1-fix-task-id-reuse.md"), "# Ticket\n")
+	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "runtime", "agent", "Dockerfile"), "FROM golang:1.22-bookworm\n")
+	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "tickets", "TODO-1-fix-task-id-reuse.md"), "# Ticket\n")
 	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md"), `---
 objective_id: proving-TODO-1
 ticket_key: TODO-1

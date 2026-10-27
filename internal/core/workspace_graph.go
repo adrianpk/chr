@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // WorkspaceNodeKind defines a package boundary type.
@@ -479,7 +480,7 @@ func workspaceKindForPath(projectDir, path string) WorkspaceNodeKind {
 		return workspaceKindForOpsArtifactType(artifactType)
 	}
 
-	relativePath, err := filepath.Rel(UserPath(projectDir), path)
+	relativePath, err := filepath.Rel(workspacecore.UserPath(projectDir), path)
 	if err != nil {
 		return WorkspaceNodeUnknown
 	}
@@ -567,7 +568,7 @@ func IsCuratedQuizNode(node WorkspaceNode) bool {
 }
 
 func isArchivedGenerationPath(projectDir, path string) bool {
-	relativePath, err := filepath.Rel(UserPath(projectDir), path)
+	relativePath, err := filepath.Rel(workspacecore.UserPath(projectDir), path)
 	if err != nil {
 		return false
 	}

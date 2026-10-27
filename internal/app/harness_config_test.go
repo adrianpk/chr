@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Actual CLI status/select/clear adapters share the service transaction, preserve
@@ -98,7 +99,7 @@ func harnessSelectionCLIFixture(t *testing.T) (string, string) {
 	}
 
 	harnessSelectionWrite(t, filepath.Join(root, "config", "chr", "harnesses.yml"), string(profiles))
-	harnessSelectionWrite(t, core.UserPath(project, "config.yml"), "unknown_extension:\n  setting: keep\n")
+	harnessSelectionWrite(t, workspacecore.UserPath(project, "config.yml"), "unknown_extension:\n  setting: keep\n")
 
 	return project, root
 }

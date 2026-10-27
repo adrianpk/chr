@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const workspaceIndexCacheSchemaVersion = 3
@@ -96,7 +98,7 @@ func (b WorkspaceGraphBuilder) BuildCachedIndex(ctx context.Context) (CachedWork
 
 // WorkspaceIndexCachePath executes the corresponding package operation.
 func WorkspaceIndexCachePath(projectDir string) string {
-	return UserPath(projectDir, "tmp", "cache", "workspace-index", "structural-index.json")
+	return workspacecore.UserPath(projectDir, "tmp", "cache", "workspace-index", "structural-index.json")
 }
 
 type workspaceIndexCacheLookup struct {

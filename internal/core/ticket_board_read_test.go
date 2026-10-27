@@ -13,12 +13,13 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Native authority wins over its derived Markdown; every bounded page remains reachable.
 func TestTicketBoardNativePages(t *testing.T) {
 	store := nativeBoardStore(t)
-	writeTicketFile(t, UserPath(store.layout.ProjectDir(), "tickets", "projection.md"), "---\nkey: CHR-1\ntitle: Outdated projection\nstatus: done\n---\n")
+	writeTicketFile(t, workspacecore.UserPath(store.layout.ProjectDir(), "tickets", "projection.md"), "---\nkey: CHR-1\ntitle: Outdated projection\nstatus: done\n---\n")
 
 	before := nativeQueueImages(t, store.layout.Root())
 	opts := TicketBoardReadOptions{Layout: store.layout, ProjectID: store.projectID, NativeWorkflow: true}

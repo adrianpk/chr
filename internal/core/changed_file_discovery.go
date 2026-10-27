@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ChangedFileDiscoverer defines a package boundary interface.
@@ -118,7 +120,7 @@ func normalizeChangedFilePath(path string) string {
 }
 
 func operationalChangedFile(path string) bool {
-	runtimePath := UserRelativePath("runtime")
+	runtimePath := workspacecore.UserRelativePath("runtime")
 
 	return path == runtimePath || strings.HasPrefix(path, runtimePath+"/")
 }

@@ -10,6 +10,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Editing the full description preserves unknown metadata, discussion and identity.
@@ -58,7 +59,7 @@ func ticketEditorFixture(t *testing.T, kind string) (TicketBoardReadOptions, Tic
 
 	path := filepath.Join(layout.Root(), "ticket", "CHR-7.md")
 	if kind == "legacy" {
-		path = UserPath(layout.ProjectDir(), "tickets", "CHR-7.md")
+		path = workspacecore.UserPath(layout.ProjectDir(), "tickets", "CHR-7.md")
 	}
 
 	if kind == "repository" {

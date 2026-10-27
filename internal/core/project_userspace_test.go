@@ -30,7 +30,7 @@ func TestResolveProjectUserspaceUsesActiveOperatorEnvironment(t *testing.T) {
 		t.Fatalf("OperatorID = %q, want adrian", userspace.OperatorID)
 	}
 
-	if userspace.Path != filepath.Join(dir, workspacecore.DirectoryName, UserDirectoryName) {
+	if userspace.Path != filepath.Join(dir, workspacecore.DirectoryName, workspacecore.UserDirectoryName) {
 		t.Fatalf("Path = %q, want .chr/default", userspace.Path)
 	}
 

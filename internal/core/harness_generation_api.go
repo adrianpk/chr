@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -31,7 +32,7 @@ func RunAPIGeneration(ctx context.Context, request harness.AgentRunRequest, invo
 
 	request.ID = HarnessGenerationRequestID(ctx, request.ID)
 	if request.RunDir == "" {
-		request.RunDir = UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
+		request.RunDir = workspacecore.UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
 	}
 
 	if err := harness.ValidateAgentRunRequest(request); err != nil {

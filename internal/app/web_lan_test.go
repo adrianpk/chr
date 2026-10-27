@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -92,7 +93,7 @@ func assertWebLANOutput(t *testing.T, stdout string, failure error, expected []s
 func TestWebLANProjectConfig(t *testing.T) {
 	projectDir := newTestWorkspace(t)
 
-	configPath := core.UserPath(projectDir, "config.yml")
+	configPath := workspacecore.UserPath(projectDir, "config.yml")
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
 		t.Fatal(err)
 	}

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestWorkflowReviewRepairs carries the three-repair budget across real candidate
@@ -128,7 +129,7 @@ func testWorkflowReviewDuringIO(t *testing.T, name, before string) {
 
 	worker := workflowReviewWorker("pass", "", before)
 	if name == "policy" {
-		worker = append(worker, UserPath(store.layout.ProjectDir(), "config.yml"))
+		worker = append(worker, workspacecore.UserPath(store.layout.ProjectDir(), "config.yml"))
 	}
 
 	if name == "invalid pass" {

@@ -470,7 +470,7 @@ func caseRelativePath(projectDir string, metadata core.CaseMetadata) string {
 		return filepath.ToSlash(relativePath)
 	}
 
-	return filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, core.UserDirectoryName, "cases", metadata.Slug+".md"))
+	return filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, workspacecore.UserDirectoryName, "cases", metadata.Slug+".md"))
 }
 
 func firstNonEmptyString(values ...string) string {

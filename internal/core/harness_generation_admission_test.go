@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -19,7 +20,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	project := t.TempDir()
 	program := generationBindingProgram(t, project)
 	original := "harnesses:\n  worker: alpha\n  generation: alpha\n"
-	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), original)
+	writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), original)
 
 	entered, release := make(chan struct{}), make(chan struct{})
 	resolve := generationBindingResolver(program, "model-alpha")

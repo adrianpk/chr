@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestGuidedUseCaseAdmissionPrerequisites blocks real setup failures before native admission or host dispatch.
@@ -66,7 +66,7 @@ func TestGuidedUseCaseAdmissionPolicy(t *testing.T) {
 	t.Parallel()
 
 	operations, prepared, host := guidedAdmissionFixture(t)
-	path := core.UserPath(operations.projectContext.ProjectDir, "config.yml")
+	path := workspacecore.UserPath(operations.projectContext.ProjectDir, "config.yml")
 
 	original, err := os.ReadFile(path)
 	if err != nil {
@@ -102,7 +102,7 @@ func TestGuidedUseCaseAdmissionPolicy(t *testing.T) {
 func restoreGuidedAdmissionPolicy(t *testing.T, operations service, blocked authoringcore.Session, original []byte) {
 	t.Helper()
 
-	path := core.UserPath(operations.projectContext.ProjectDir, "config.yml")
+	path := workspacecore.UserPath(operations.projectContext.ProjectDir, "config.yml")
 	if err := os.WriteFile(path, original, 0o600); err != nil {
 		t.Fatal(err)
 	}

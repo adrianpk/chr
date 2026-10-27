@@ -82,7 +82,7 @@ func QuizArtifactLayout(projectDir string, scope quizcore.Scope) (QuizArtifactPa
 		return QuizArtifactPaths{}, err
 	}
 
-	runtimeRelativePath := UserRelativePath(filepath.FromSlash(QuizRuntimeDirectory), scopeID+".json")
+	runtimeRelativePath := workspacecore.UserRelativePath(filepath.FromSlash(QuizRuntimeDirectory), scopeID+".json")
 
 	return QuizArtifactPaths{
 		ScopeID:             scopeID,

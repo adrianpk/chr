@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -45,7 +46,7 @@ func TestWebBoardSources(t *testing.T) {
 
 			checkWebBoardRoutes(t, provider)
 
-			_, err = os.Stat(core.UserPath(project, "tickets"))
+			_, err = os.Stat(workspacecore.UserPath(project, "tickets"))
 			if !tc.legacy && !os.IsNotExist(err) {
 				t.Fatal("read created the legacy ticket directory", err)
 			}
@@ -131,7 +132,7 @@ func checkWebBoardContinuation(t *testing.T, provider webViewProvider, next stri
 // Storage errors must remain unavailable responses rather than empty Boards.
 func TestWebBoardFailure(t *testing.T) {
 	project := newTestWorkspace(t)
-	writeServiceWorkspaceFile(t, core.UserPath(project, "tickets"), "not a directory")
+	writeServiceWorkspaceFile(t, workspacecore.UserPath(project, "tickets"), "not a directory")
 
 	provider := newWebServeBoardTestProvider(project, newWebServeBoardTestEnv(t, t.TempDir()), newWebServeBoardProjectContext(t, project))
 	config := provider.config

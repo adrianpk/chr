@@ -10,6 +10,7 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/process"
 )
@@ -194,7 +195,7 @@ func optionalMeasuredCounter(value *int64) *int64 {
 func harnessRunMetadataPath(request harness.AgentRunRequest) string {
 	runDir := request.RunDir
 	if runDir == "" {
-		runDir = UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
+		runDir = workspacecore.UserPath(request.ProjectDir, "tmp", "agent-runs", request.ID)
 	}
 
 	return filepath.Join(runDir, "harness-run.json")

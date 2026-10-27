@@ -81,7 +81,7 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 		t.Fatalf("PolishedBody = %q", result.PolishedBody)
 	}
 
-	tracePath := filepath.Join(projectDir, workspacecore.DirectoryName, core.UserDirectoryName, "log", "llm", "llm.ndjson")
+	tracePath := filepath.Join(projectDir, workspacecore.DirectoryName, workspacecore.UserDirectoryName, "log", "llm", "llm.ndjson")
 
 	trace, err := os.ReadFile(tracePath)
 	if err != nil {

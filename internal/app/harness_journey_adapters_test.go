@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -85,7 +86,7 @@ func (f *harnessJourney) checkTelegramView(t *testing.T, choice harnessJourneyCh
 		t.Fatal("Telegram read did not observe the published defaults", notice)
 	}
 
-	data, err := os.ReadFile(core.UserPath(f.operations.projectContext.ProjectDir, "config.yml"))
+	data, err := os.ReadFile(workspacecore.UserPath(f.operations.projectContext.ProjectDir, "config.yml"))
 	if err != nil || !strings.Contains(string(data), "unknown_extension:\n  retained: yes\n") {
 		t.Fatal("selection replaced unrelated configuration", err)
 	}
