@@ -64,14 +64,20 @@ with original guided/session/request bytes frozen before relocation. Retained
 admission/selection and harness identity values also have shared owners.
 StartInput separates the durable request from host-only callbacks and commands;
 guided/native admission and recovery preserve the frozen wire bytes. The move
-ledger retains 226 declaration/extraction/transition preimages.
+ledger retains 273 declaration/extraction/transition preimages.
 The session value graph, enum methods and original session/guided validation
 belong to core/authoring. Shared default-user paths belong to workspace. Three
 read-only native observation ports retain the original store, scope/authority
 guards, quiescence, expected absence and verified result references/time.
+The exact legacy frontmatter codec, native plan binding values, projection/path
+and metadata primitives and bounded Git transport have shared owners. Native
+admission/preview/materialization/result proof operations are separate from
+authoring transitions and read sessions under the original active owner claim.
+Native plan resume, preparation, credentials and signing remain with their owner.
+Seven context/host dependency files remain before the complete repository move.
 All 89 assigned signature occurrences have exact dispositions: 60 tuple fixes,
 three parameter fixes (two already delivered by Slice 4) and 26 cohesive
 five-parameter retentions. Focused real-boundary checks and pinned strict lint
 pass; exact debt is 237 with ceiling seven and one external exception. The
-complete repository move and remaining preparation ports remain unfinished. The
+complete repository move and remaining context/host boundaries remain unfinished. The
 report is drafting; no PR is open and final controller validation is pending.

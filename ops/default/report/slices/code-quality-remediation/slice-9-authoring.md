@@ -67,7 +67,26 @@ and partial error outcomes. Stop acknowledgement remains distinct from native
 quiescence; normal admission absence remains distinct from read failure. Result
 projection reuses GuidedResultReference once, with the original native update
 time. The existing authoring lock, guard/transition order and journal writes
-remain in place. Complete repository ownership and preparation ports are pending.
+remain in place. Native admission/preview, materialization projection and result
+proofs now have separate files from authoring transitions. Native admission and
+control use ReadOwnedAuthoringSession only under the same active authoring claim;
+the original guided scope guard belongs to authoring. Native plan-delivery resume
+stays with its locked snapshot, contract and receipt owner.
+
+Ticket/metadata owns the complete original legacy frontmatter codec and review
+reference value. Session and transcript readers use it directly, preserving the
+original delimiters, commits list, review block, empty values and diagnostics.
+Workflow/state owns the complete native set/slice and plan-revision binding value
+graph used by concrete plan reads. Native validation and persistence remain in
+their original owner, with unchanged JSON decoding and wire bytes.
+
+Existing shared owners now also hold stop-status mapping, tracker metadata paths,
+the projection-stale discriminator, Markdown cell/line formatting and bounded
+artifact basenames. Project owns the existing bounded Git transport; ops/file
+owns the original provider/command buffers, overflow/truncation and optional
+per-write sync. Native preparation, credential and signing policy remains native;
+authoring keeps checkpoint selection, hashes, references and mutation order.
+The complete repository move and remaining context/host edges are pending.
 
 D02 shares bounded concrete catalog traversal with typed native readers. D04
 shares live payload/context preparation and D05 shares latest scoped index
@@ -79,26 +98,31 @@ artifact rules, action/collision diagnostics, provenance, authority and receipts
 
 ## Implementation Notes
 
-Mechanical relocation, package naming/result conversion and the acceptance file
-split are separate commits. The plan service separates API, generation, model
-requests, publication, tracking and views. The move ledger retains 226 declaration
+The early relocation, naming/result conversion and acceptance file split have
+separate commits. The plan service separates API, generation, model
+requests, publication, tracking and views. The move ledger retains 273 declaration
 preimages with current names/files and extraction stages. The 60 tuple
 dispositions, three parameter fixes, 26 cohesion dispositions and six duplicate
 comparisons link exact source commits and validation. Original guided-session,
 control and workflow-start wire images were frozen before the nine-value move.
-Mechanical relocation and
-package-qualified naming have separate commits, with no root aliases. The later
+The session value relocation and package-qualified naming have separate
+commits, with no root aliases. The later
 admission-value move retains 21 declaration/constant-spec preimages; StartInput
 retains its original complete host-request declaration before field extraction.
 All 47 keyed native request constructors use the shared value explicitly. The
 session graph contributes 44 declaration preimages, validation contributes 12,
 workspace paths three and native observation transitions three. The declaration
-ledger now retains 226 relocation/extraction/transition preimages.
+ledger now retains 273 relocation/extraction/transition preimages. The later
+codec, native separation, plan binding, primitive and Git transport checkpoints
+contribute 47 of those preimages.
 
 The initial scan of 101 assigned root authoring files identified 78 external
-shared declarations. This is dependency evidence, not completion of the session
-and repository move. Resolve remaining workflow/harness/ticket/context edges at
-their real shared owner or consumer-owned port before moving those files.
+shared declarations. After separating native-only responsibilities and resolving
+shared codecs, values, primitives and Git transport, 100 recorded authoring root
+files remain; seven still reference other root owners. These are contextual quiz
+host/index operations and six runtime/execution context files. Resolve their real
+context/host boundaries before the complete repository move. Dependency progress
+is not completion of session/repository ownership.
 
 Each duplicate comparison reads both governing contracts. Concrete spec and plan
 catalogs keep their different image accounting and native readers. Guided
@@ -148,7 +172,10 @@ bounded service context and namespace assignment at retained-step entry.
 
 - `internal/core/authoring/`: session/guided value and validation files, native
   observation contracts and acceptance artifact/round/check files.
-- `internal/core/guided_workflow_observer.go` and `workspace/paths.go`.
+- `internal/core/guided_workflow_observer.go`, the separate `guided_native_*`
+  files, `guided_stop.go` and `workspace/paths.go`.
+- `internal/core/ticket/metadata/`, `workflow/state/plan_binding.go`,
+  `project/git.go` and `ops/file/output.go`.
 - `internal/core/ops/`, `ops/file/`, `ops/metadata/`, project path/file primitives
   and `internal/core/workflow/state/file_change.go`.
 - `internal/app/service_document_model.go`, `service_document_view.go`, plan
@@ -165,6 +192,14 @@ bounded service context and namespace assignment at retained-step entry.
 ## Validation
 
 The completed task checkpoints passed these focused real-boundary commands:
+
+- `go test ./internal/core ./internal/core/ticket/metadata ./internal/app -run '^Test(TicketParser|AuthoringSession|RenderAndParseAuthoringSession|AssistedTranscript|AuthorAssistedDump|QualityRecordWire)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/authoring ./internal/app -run '^Test(QualityRecordWire|GuidedUseCase(Admission|Control|Recovery|Result|Preparation)|GuidedAdmission)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/authoring/... ./internal/core/workflow/state ./internal/app ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|PlanDocument|PlanPublication|PlanOrder|GuidedUseCasePreparation)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/authoring/... ./internal/core/ops/... ./internal/core/workflow/state ./internal/app -run '^Test(QualityRecordWire|Ticket|ProjectMetadata|AuthoringArtifact|PlanOrder|PlanPublication|GuidedUseCase(Control|Preparation))' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/project ./internal/core/ops/file ./internal/app -run '^Test(QualityRecordWire|GuidedUseCase(Capture|Quiz|Preparation)|WorkflowIntegrationHistory|WorkflowPreparation|WorkflowExecution)' -count=1 -timeout=3m`
+- `go test ./internal/core -run '^TestWorkflowIntegrationCredentials$' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/core/project ./internal/core/ops/file ./internal/app ./scripts/goquality`
 
 - `go test ./internal/core/ops/file ./internal/core/workflow/state ./scripts/goquality ./internal/core ./internal/app -run '^Test(LeafDependencies|Authoring|DumpMutation|SpecMutation|QuizAction|ProjectDump|WorkflowRoundTrip|WorkflowMaterialization|WorkflowRecoveryProcess)' -count=1 -timeout=3m`
 - `go test ./internal/core/ops/metadata ./scripts/goquality ./internal/core ./internal/app -run '^Test(LeafDependencies|Ticket(Parser|Renderer)|Spec|Plan|DumpMutation|Authoring|ProjectMetadata|ProjectDump)' -count=1 -timeout=3m`
@@ -225,6 +260,6 @@ has not run; this slice is not PR-ready.
 
 ## Risks and Follow-ups
 
-Complete the session/repository move, workflow ports and remaining approved
+Complete the session/repository move, remaining context/host boundaries and approved
 Slice 9 tasks. Then prepare the canonical PR, commit/push its
 references and record final ordered validation on its exact clean HEAD.
