@@ -151,7 +151,7 @@ func loadNotifyTelegramPollFixture(path string) ([]core.RemoteCommandRecord, err
 
 	records := make([]core.RemoteCommandRecord, 0, len(updates))
 	for _, update := range updates {
-		record, err := core.RemoteCommandRecordFromTelegramUpdate(update, now)
+		record, err := remoteCommandRecordFromTelegramUpdate(update, now)
 		if err != nil {
 			return nil, err
 		}

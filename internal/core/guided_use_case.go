@@ -99,7 +99,8 @@ type GuidedUseCaseCommand struct {
 	Content          string
 }
 
-func validateGuidedUseCase(session AuthoringSession) error {
+// ValidateGuidedUseCase checks the existing complete guided session contract.
+func ValidateGuidedUseCase(session AuthoringSession) error {
 	state := session.Guided
 	if state == nil {
 		return nil

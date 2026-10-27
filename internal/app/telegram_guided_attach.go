@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input core.TelegramConversationInput, title, projectName string) (string, error) {
@@ -45,8 +46,21 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input co
 		return "", telegramGuidedRoutingFailure("The guided use-case name is unavailable or ambiguous in the selected project. Use a unique guided name, optionally followed by in project and its registered project name. Saved work is unchanged.")
 	}
 
+	association, err := telegramGuidedAssociation(matches[0])
+	if err != nil {
+		return "", err
+	}
+
 	input.Project, input.Namespace = target.ProjectID, target.Namespace
-	conversation, _, err := r.store.BindTelegramGuidedConversation(ctx, input, matches[0], time.Now())
+	conversation, _, err := r.store.BindTelegramGuidedConversation(ctx, input, association, time.Now())
 
 	return conversation.ID, err
+}
+
+func telegramGuidedAssociation(session core.AuthoringSession) (core.TelegramGuidedAssociation, error) {
+	if session.Guided == nil || core.ValidateGuidedUseCase(session) != nil {
+		return core.TelegramGuidedAssociation{}, workflowstate.ErrConflict
+	}
+
+	return core.TelegramGuidedAssociation{SessionID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Topic: session.Topic}, nil
 }

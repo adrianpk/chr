@@ -469,3 +469,52 @@ func assertGuidedTelegramChosenProject(t *testing.T, f *telegramConversationAppF
 		t.Fatal("disabled project was adopted", rejected.Text)
 	}
 }
+
+type telegramInvalidGuidedScope struct{ service }
+
+func (s telegramInvalidGuidedScope) InspectTelegramGuided(ctx context.Context, target core.TelegramOperationTarget, id string) (GuidedUseCaseInspection, error) {
+	observed, err := s.service.InspectTelegramGuided(ctx, target, id)
+	for i := range observed.Runs {
+		if observed.Runs[i].Guided != nil && observed.Runs[i].Topic == "First guarded scope" {
+			state := *observed.Runs[i].Guided
+			state.SchemaVersion = 99
+			observed.Runs[i].Topic = "Unbound guarded scope"
+			observed.Runs[i].Guided = &state
+		}
+	}
+
+	return observed, err
+}
+
+// A narrow routing projection cannot bypass complete guided scope validation.
+// Rejected name attachment must leave the peer on its current canonical run.
+func TestGuidedUseCaseTelegramScope(t *testing.T) {
+	t.Parallel()
+
+	f, operations := guidedTelegramFixture(t)
+	first := f.send(t, "Develop a new use case in example-project", 0)
+	f.send(t, "First guarded scope", first.ID)
+
+	original := f.sessions(t)[0]
+	before := readGuidedTelegramSession(t, operations, original)
+	second := f.send(t, "Develop a new use case", 0)
+	f.send(t, "Current guarded scope", second.ID)
+
+	current := f.sessions(t)[0]
+	if current.ID == original.ID {
+		t.Fatal("fixture did not select a distinct current run")
+	}
+
+	f.receiver.operations = telegramInvalidGuidedScope{operations}
+	f.send(t, "Show use case Unbound guarded scope", 0)
+
+	f.receiver.operations = operations
+	f.send(t, "Details stay on the current valid run.", 0)
+
+	unchanged := readGuidedTelegramSession(t, operations, f.session(t, original.ID))
+
+	after := readGuidedTelegramSession(t, operations, f.session(t, current.ID))
+	if unchanged.Revision != before.Revision || strings.TrimSpace(after.Guided.Capture) != "Details stay on the current valid run." {
+		t.Fatal("invalid domain scope changed peer focus or canonical progression", unchanged.Revision, before.Revision, after.Guided.Capture)
+	}
+}

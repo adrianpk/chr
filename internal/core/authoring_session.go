@@ -362,7 +362,7 @@ func validateAuthoringSessionTimes(session AuthoringSession) error {
 }
 
 func validateManagedAuthoringRevision(session AuthoringSession) error {
-	if err := validateGuidedUseCase(session); err != nil {
+	if err := ValidateGuidedUseCase(session); err != nil {
 		return err
 	}
 

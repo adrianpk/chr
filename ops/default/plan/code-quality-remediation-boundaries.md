@@ -421,3 +421,18 @@ slots, attempts and model IO remain with their existing owners. core/workspace
 owns the unchanged .chr directory spelling shared by initialization and retained
 references. No root aliases or copies remain for these values. The production
 import policy bounds all three owners without root/coordinator/adapter imports.
+
+
+### Telegram composition boundary
+
+The app validates complete guided domain state before reducing it to
+TelegramGuidedAssociation. The store accepts only the routing projection and
+retains its original peer/project/namespace/session-identity checks. The original
+ValidateGuidedUseCase implementation stays in the domain owner. No domain-state
+copy or receiver-to-core import is needed. A negative mutation of that guard
+changes focus and fails the new scope regression. Generic remote-command record
+mapping belongs to app composition; the actual legacy wire decoder stays with
+Telegram. Its live notify consumer and original record/clock tests follow the
+mapping without adding transport dependencies on command authority. The root
+production declaration scan now finds no unresolved coordinator dependencies
+in the Telegram source set. The package move and typed signature work remain.

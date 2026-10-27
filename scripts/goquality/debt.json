@@ -898,8 +898,8 @@
     },
     {
       "id": "internal/core/telegram_guided_binding.go::TelegramReceiverStore.BindTelegramGuidedConversation",
-      "signature": "func(ctx context.Context, input TelegramConversationInput, session AuthoringSession, now time.Time) (TelegramConversation, TelegramOperationTarget, error)",
-      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "signature": "func(ctx context.Context, input TelegramConversationInput, association TelegramGuidedAssociation, now time.Time) (TelegramConversation, TelegramOperationTarget, error)",
+      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 7 validated routing projection."
     },
     {
       "id": "internal/core/telegram_guided_binding.go::TelegramReceiverStore.reserveTelegramGuidedAssociation",

@@ -159,7 +159,7 @@ func seedTelegramSavedHandoff(t *testing.T, env core.UserEnvironment) {
 		Text: "@example-project loop start --status ready --max-iterations 1",
 	}}
 
-	record, err := core.RemoteCommandRecordFromTelegramUpdate(update, time.Now())
+	record, err := remoteCommandRecordFromTelegramUpdate(update, time.Now())
 	if err != nil || record.Status != core.RemoteCommandRecordAccepted {
 		t.Fatal("historical handoff fixture is invalid", err)
 	}

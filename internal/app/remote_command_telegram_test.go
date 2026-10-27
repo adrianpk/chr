@@ -1,13 +1,15 @@
-package core
+package app
 
 import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core"
 )
 
 func TestDecodeTelegramUpdatesParsesCommandRecords(t *testing.T) {
-	updates, err := DecodeTelegramUpdates(strings.NewReader(telegramUpdateFixture()))
+	updates, err := core.DecodeTelegramUpdates(strings.NewReader(telegramUpdateFixture()))
 	if err != nil {
 		t.Fatalf("DecodeTelegramUpdates returned error: %v", err)
 	}
@@ -16,36 +18,36 @@ func TestDecodeTelegramUpdatesParsesCommandRecords(t *testing.T) {
 		t.Fatalf("len(updates) = %d, want 2", len(updates))
 	}
 
-	record, err := RemoteCommandRecordFromTelegramUpdate(updates[0], telegramCommandTestTime())
+	record, err := remoteCommandRecordFromTelegramUpdate(updates[0], telegramCommandTestTime())
 	if err != nil {
 		t.Fatalf("RemoteCommandRecordFromTelegramUpdate returned error: %v", err)
 	}
 
-	if record.Status != RemoteCommandRecordAccepted {
+	if record.Status != core.RemoteCommandRecordAccepted {
 		t.Fatalf("status = %q, want accepted", record.Status)
 	}
 
-	if record.Request.ProjectSelector != "example" || record.Request.Intent != RemoteCommandIntentLoopStart {
+	if record.Request.ProjectSelector != "example" || record.Request.Intent != core.RemoteCommandIntentLoopStart {
 		t.Fatalf("request = %#v, want example loop start", record.Request)
 	}
 }
 
 func TestRemoteCommandRecordFromTelegramUpdateRejectsUnsupportedText(t *testing.T) {
-	update := TelegramUpdate{
-		Message: TelegramUpdateMessage{
-			From: TelegramSenderUser{ID: 10, Username: "ops"},
-			Chat: TelegramChat{ID: 20},
+	update := core.TelegramUpdate{
+		Message: core.TelegramUpdateMessage{
+			From: core.TelegramSenderUser{ID: 10, Username: "ops"},
+			Chat: core.TelegramChat{ID: 20},
 			Date: 1_768_000_000,
 			Text: "merge dev",
 		},
 	}
 
-	record, err := RemoteCommandRecordFromTelegramUpdate(update, telegramCommandTestTime())
+	record, err := remoteCommandRecordFromTelegramUpdate(update, telegramCommandTestTime())
 	if err != nil {
 		t.Fatalf("RemoteCommandRecordFromTelegramUpdate returned error: %v", err)
 	}
 
-	if record.Status != RemoteCommandRecordRejected {
+	if record.Status != core.RemoteCommandRecordRejected {
 		t.Fatalf("status = %q, want rejected", record.Status)
 	}
 

@@ -461,3 +461,13 @@ owner and used directly by provider/retained operation consumers. The shared
 workspace DirectoryName stays .chr. These moves change no JSON tags, field order,
 retained references, checksum bytes, provider slots or retry allowance. Frozen
 records, old SQLite images, authoring scope, model and Telegram regressions pass.
+
+
+Guided Telegram association now receives only the validated session identity,
+project, namespace and topic. The app calls the unchanged complete guided domain
+validator before projection, then the store retains its exact binding, peer and
+scope checks. The invalid-schema regression uses a separate current conversation
+and proves failed attachment cannot change peer focus or either canonical run;
+removing the guard makes that test fail. Legacy update decoding remains transport
+owned, while generic remote-command classification and record construction move
+to app composition with their existing tests and time/error semantics.

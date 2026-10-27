@@ -15,6 +15,12 @@ import (
 // ErrTelegramNotGuided lets a transport leave existing manual conversations alone.
 var ErrTelegramNotGuided = errors.New("conversation is not a guided binding")
 
+// TelegramGuidedAssociation projects a domain-validated canonical guided session.
+// It carries routing identity only; it grants no progression or dispatch.
+type TelegramGuidedAssociation struct {
+	SessionID, ProjectID, Namespace, Topic string
+}
+
 // ReserveTelegramGuidedConversation retains only routing to a canonical session.
 // It does not acknowledge the update, create authoring state or grant dispatch.
 func (s *TelegramReceiverStore) ReserveTelegramGuidedConversation(ctx context.Context, input TelegramConversationInput, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
@@ -23,18 +29,18 @@ func (s *TelegramReceiverStore) ReserveTelegramGuidedConversation(ctx context.Co
 
 // BindTelegramGuidedConversation associates an existing guided run by its verified
 // scope. It creates no progression intent and cannot adopt a manual session.
-func (s *TelegramReceiverStore) BindTelegramGuidedConversation(ctx context.Context, input TelegramConversationInput, session AuthoringSession, now time.Time) (TelegramConversation, TelegramOperationTarget, error) {
-	if session.Guided == nil || validateGuidedUseCase(session) != nil || input.Project != session.ProjectID || input.Namespace != session.Namespace {
+func (s *TelegramReceiverStore) BindTelegramGuidedConversation(ctx context.Context, input TelegramConversationInput, association TelegramGuidedAssociation, now time.Time) (TelegramConversation, TelegramOperationTarget, error) {
+	if input.Project != association.ProjectID || input.Namespace != association.Namespace {
 		return TelegramConversation{}, TelegramOperationTarget{}, workflowstate.ErrConflict
 	}
 
-	if err := authoringstate.ValidateSessionID(session.ID); err != nil {
+	if err := authoringstate.ValidateSessionID(association.SessionID); err != nil {
 		return TelegramConversation{}, TelegramOperationTarget{}, err
 	}
 
-	input.Text = session.Topic
+	input.Text = association.Topic
 
-	return s.reserveTelegramGuidedAssociation(ctx, input, session.ID, now)
+	return s.reserveTelegramGuidedAssociation(ctx, input, association.SessionID, now)
 }
 
 func (s *TelegramReceiverStore) reserveTelegramGuidedAssociation(ctx context.Context, input TelegramConversationInput, runID string, now time.Time) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
