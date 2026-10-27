@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestNewExecutionReportBuildsSummaryFromRecord(t *testing.T) {
@@ -355,7 +357,7 @@ func testExecutionReportRecord(dir string) ExecutionRecord {
 			ValidationCommand: "make verify",
 		},
 		Workspace: ExecutionWorkspaceRef{
-			Mode:                  WorkWorkspaceModeWorktree,
+			Mode:                  workspacecore.WorkWorkspaceModeWorktree,
 			ProjectCheckoutDir:    dir,
 			ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "default", "worktrees", "CHR-1"),
 			BaseRef:               "origin/dev",

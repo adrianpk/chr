@@ -26,6 +26,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/gate"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
@@ -4801,7 +4802,7 @@ func TestTicketApplyResultDiscoversWorktreeChangedFiles(t *testing.T) {
 
 	record := testApplyResultExecutionRecord(projectDir, core.ExecutionStatusSucceeded, "")
 	record.Workspace = core.ExecutionWorkspaceRef{
-		Mode:                  core.WorkWorkspaceModeWorktree,
+		Mode:                  workspacecore.WorkWorkspaceModeWorktree,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: worktreeDir,
 		BaseRef:               "origin/dev",
@@ -7900,7 +7901,7 @@ type fakeTicketStartHarnessExecutor struct {
 
 func (e *fakeTicketStartHarnessExecutor) Run(
 	_ context.Context,
-	command core.HarnessCommand,
+	command harnessruntime.HarnessCommand,
 	stdout io.Writer,
 	stderr io.Writer,
 ) error {
@@ -7929,11 +7930,11 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 	return e.err
 }
 
-func isFakeTicketStartWorkerCommand(command core.HarnessCommand) bool {
+func isFakeTicketStartWorkerCommand(command harnessruntime.HarnessCommand) bool {
 	return command.Args[0] == "run" && harnessEnvValue(command, "CHR_RESULT_PATH") != ""
 }
 
-func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command core.HarnessCommand) error {
+func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command harnessruntime.HarnessCommand) error {
 	if command.Args[0] != "run" {
 		return nil
 	}
@@ -7959,7 +7960,7 @@ func (e *fakeTicketStartHarnessExecutor) writeFakeTicketStartResult(command core
 	return os.WriteFile(containerPathToProjectPath(command, resultPath), []byte(content), 0o644)
 }
 
-func harnessEnvValue(command core.HarnessCommand, name string) string {
+func harnessEnvValue(command harnessruntime.HarnessCommand, name string) string {
 	prefix := name + "="
 	for _, arg := range command.Args {
 		if strings.HasPrefix(arg, prefix) {
@@ -7970,7 +7971,7 @@ func harnessEnvValue(command core.HarnessCommand, name string) string {
 	return ""
 }
 
-func containerPathToProjectPath(command core.HarnessCommand, path string) string {
+func containerPathToProjectPath(command harnessruntime.HarnessCommand, path string) string {
 	for index, arg := range command.Args {
 		if arg == "--volume" && index+1 < len(command.Args) {
 			parts := strings.SplitN(command.Args[index+1], ":", 2)

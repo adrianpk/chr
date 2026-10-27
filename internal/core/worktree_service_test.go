@@ -10,6 +10,7 @@ import (
 	"time"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestNewWorktreePlanUsesRemoteBaseAndDeterministicPath(t *testing.T) {
@@ -373,9 +374,9 @@ func TestCleanupMergedTicketWorktreeBlocksBranchInUse(t *testing.T) {
 	}
 }
 
-func testCleanupWorktreeWorkspace() WorkWorkspaceConfig {
-	workspace := DefaultWorkWorkspaceConfig()
-	workspace.Mode = WorkWorkspaceModeWorktree
+func testCleanupWorktreeWorkspace() workspacecore.WorkWorkspaceConfig {
+	workspace := workspacecore.DefaultWorkWorkspaceConfig()
+	workspace.Mode = workspacecore.WorkWorkspaceModeWorktree
 
 	return workspace
 }

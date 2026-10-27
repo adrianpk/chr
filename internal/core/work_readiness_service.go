@@ -11,13 +11,14 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // WorkReadinessOptions describes a package boundary value.
 type WorkReadinessOptions struct {
 	ProjectDir   string
 	Policy       WorkBranchPolicy
-	Workspace    WorkWorkspaceConfig
+	Workspace    workspacecore.WorkWorkspaceConfig
 	TicketKey    string
 	TicketBranch string
 	Git          WorkReadinessGit
@@ -28,7 +29,7 @@ type WorkReadinessOptions struct {
 type WorkReadinessRepairOptions struct {
 	ProjectDir   string
 	Policy       WorkBranchPolicy
-	Workspace    WorkWorkspaceConfig
+	Workspace    workspacecore.WorkWorkspaceConfig
 	TicketKey    string
 	TicketBranch string
 	Git          WorkReadinessRepairGit
@@ -80,7 +81,7 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 		return finalizeWorkReadinessReport(report), nil
 	}
 
-	if err := ValidateWorkWorkspaceConfig(settings.workspace); err != nil {
+	if err := workspacecore.ValidateWorkWorkspaceConfig(settings.workspace); err != nil {
 		report.Diagnostics = append(report.Diagnostics, policyInvalidDiagnostic(err))
 
 		return finalizeWorkReadinessReport(report), nil
@@ -101,7 +102,7 @@ func CheckWorkReadiness(ctx context.Context, opts WorkReadinessOptions) (WorkRea
 type workReadinessSettings struct {
 	projectDir   string
 	policy       WorkBranchPolicy
-	workspace    WorkWorkspaceConfig
+	workspace    workspacecore.WorkWorkspaceConfig
 	ticketKey    string
 	ticketBranch string
 	git          WorkReadinessGit
@@ -125,10 +126,10 @@ func newWorkReadinessSettings(ctx context.Context, opts WorkReadinessOptions) (w
 	}
 
 	workspace := opts.Workspace
-	if workspace == (WorkWorkspaceConfig{}) {
-		workspace = DefaultWorkWorkspaceConfig()
+	if workspace == (workspacecore.WorkWorkspaceConfig{}) {
+		workspace = workspacecore.DefaultWorkWorkspaceConfig()
 	} else {
-		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+		workspace = workspacecore.FillWorkWorkspaceConfigDefaults(workspace)
 	}
 
 	git := opts.Git
@@ -175,7 +176,7 @@ func RepairWorkReadiness(ctx context.Context, opts WorkReadinessRepairOptions) (
 type workReadinessRepairSettings struct {
 	projectDir   string
 	policy       WorkBranchPolicy
-	workspace    WorkWorkspaceConfig
+	workspace    workspacecore.WorkWorkspaceConfig
 	ticketKey    string
 	ticketBranch string
 	git          WorkReadinessRepairGit
@@ -199,10 +200,10 @@ func newWorkReadinessRepairSettings(ctx context.Context, opts WorkReadinessRepai
 	}
 
 	workspace := opts.Workspace
-	if workspace == (WorkWorkspaceConfig{}) {
-		workspace = DefaultWorkWorkspaceConfig()
+	if workspace == (workspacecore.WorkWorkspaceConfig{}) {
+		workspace = workspacecore.DefaultWorkWorkspaceConfig()
 	} else {
-		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+		workspace = workspacecore.FillWorkWorkspaceConfigDefaults(workspace)
 	}
 
 	git := opts.Git
@@ -536,7 +537,7 @@ func (check workReadinessGitStateCheck) run(ctx context.Context) (WorkReadinessR
 }
 
 func (check workReadinessGitStateCheck) baseReadiness(ctx context.Context, report WorkReadinessReport) (WorkReadinessReport, error) {
-	if report.Workspace.Mode == WorkWorkspaceModeWorktree {
+	if report.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
 		report = checkWorkReadinessWorktreeRoot(check.projectDir, report)
 
 		return checkWorkReadinessRemoteBase(ctx, workReadinessWorktreeCheck{
@@ -678,7 +679,7 @@ type workReadinessWorktreeCheck struct {
 
 func checkWorkReadinessRemoteBase(ctx context.Context, check workReadinessWorktreeCheck) (WorkReadinessReport, error) {
 	report := check.report
-	if report.Workspace.WorktreeBase != WorktreeBasePolicyRemoteIntegrationBranch {
+	if report.Workspace.WorktreeBase != workspacecore.WorktreeBasePolicyRemoteIntegrationBranch {
 		return report, nil
 	}
 
@@ -724,7 +725,7 @@ func (check workReadinessWorktreeCheck) resolveBase(ctx context.Context, baseRef
 
 func checkWorkReadinessTicketWorktree(ctx context.Context, check workReadinessWorktreeCheck) (WorkReadinessReport, error) {
 	report := check.report
-	if report.Workspace.Mode != WorkWorkspaceModeWorktree {
+	if report.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
 		return report, nil
 	}
 
@@ -1002,9 +1003,9 @@ func missingBranchDiagnostic(expectedBranch, currentBranch string) WorkReadiness
 	}
 }
 
-func runtimeArtifactsVisibleDiagnostic(mode WorkWorkspaceMode, count int) WorkReadinessDiagnostic {
+func runtimeArtifactsVisibleDiagnostic(mode workspacecore.WorkWorkspaceMode, count int) WorkReadinessDiagnostic {
 	severity := WorkReadinessSeverityBlocking
-	if mode == WorkWorkspaceModeWorktree {
+	if mode == workspacecore.WorkWorkspaceModeWorktree {
 		severity = WorkReadinessSeverityInfo
 	}
 
@@ -1023,8 +1024,8 @@ func dirtyWorktreeDiagnostic(count int) WorkReadinessDiagnostic {
 	}
 }
 
-func userCheckoutDirtyDiagnostic(mode WorkWorkspaceMode, count int) WorkReadinessDiagnostic {
-	if mode != WorkWorkspaceModeWorktree {
+func userCheckoutDirtyDiagnostic(mode workspacecore.WorkWorkspaceMode, count int) WorkReadinessDiagnostic {
+	if mode != workspacecore.WorkWorkspaceModeWorktree {
 		return dirtyWorktreeDiagnostic(count)
 	}
 

@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestNewResultApplicationMapsSucceededExecutionToReviewing(t *testing.T) {
@@ -118,7 +120,7 @@ func TestNewResultApplicationBlocksEvidenceReadinessWithWorkspaceMetadata(t *tes
 	worktreeDir := t.TempDir()
 	record := testResultApplicationExecutionRecord(projectDir)
 	record.Workspace = ExecutionWorkspaceRef{
-		Mode:                  WorkWorkspaceModeWorktree,
+		Mode:                  workspacecore.WorkWorkspaceModeWorktree,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: worktreeDir,
 		BaseRef:               "origin/dev",

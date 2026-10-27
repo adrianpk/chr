@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
@@ -22,7 +24,7 @@ type WorktreeCleanupOptions struct {
 	TicketKey    string
 	Branch       string
 	BranchPolicy WorkBranchPolicy
-	Workspace    WorkWorkspaceConfig
+	Workspace    workspacecore.WorkWorkspaceConfig
 	Git          WorktreeGit
 }
 
@@ -54,13 +56,13 @@ func CleanupMergedTicketWorktree(ctx context.Context, opts WorktreeCleanupOption
 	}
 
 	result := WorktreeCleanupResult{Plan: settings.plan, Status: WorktreeCleanupStatusSkipped}
-	if settings.workspace.Mode != WorkWorkspaceModeWorktree {
+	if settings.workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
 		result.Detail = "workspace mode is project"
 
 		return result, nil
 	}
 
-	if settings.workspace.WorktreeCleanup != WorktreeCleanupPolicyAfterMerge {
+	if settings.workspace.WorktreeCleanup != workspacecore.WorktreeCleanupPolicyAfterMerge {
 		result.Detail = fmt.Sprintf("worktree cleanup policy is %s", settings.workspace.WorktreeCleanup)
 
 		return result, nil

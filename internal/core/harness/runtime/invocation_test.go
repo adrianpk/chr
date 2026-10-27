@@ -1,10 +1,11 @@
-package core
+package runtime
 
 import (
 	"path/filepath"
 	"slices"
 	"testing"
 
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -146,11 +147,11 @@ func TestNewHarnessInvocationRendersWorktreeDockerRunCommand(t *testing.T) {
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: projectDir,
-		Workspace: WorkWorkspaceConfig{
-			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    DefaultWorktreeRoot,
-			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		Workspace: workspacecore.WorkWorkspaceConfig{
+			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
+			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",
@@ -198,11 +199,11 @@ func TestNewHarnessInvocationRendersWorktreeDockerValidationCommand(t *testing.T
 		Config: RuntimeConfig{
 			ValidationCommand: "go test ./...",
 		},
-		Workspace: WorkWorkspaceConfig{
-			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    DefaultWorktreeRoot,
-			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		Workspace: workspacecore.WorkWorkspaceConfig{
+			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
+			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",

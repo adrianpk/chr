@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -45,7 +46,7 @@ func (s RuntimeArtifactCleanupPreviewService) Preview(
 		return RuntimeArtifactCleanupPreview{}, err
 	}
 
-	config.Runtime = fillRuntimeConfigDefaults(config.Runtime)
+	config.Runtime = harnessruntime.FillRuntimeConfigDefaults(config.Runtime)
 	artifactDir := projectcore.ResolvePath(projectDir, config.Runtime.ArtifactDir)
 
 	records, err := s.repository.ListProjectExecutions(ctx, projectID)

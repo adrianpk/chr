@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/configvalue"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -22,7 +23,7 @@ type WorkspaceConfig struct {
 	HarnessAudit    HarnessSelectionAudit
 	Workflow        WorkflowConfig
 	TicketKeyPrefix string
-	Runtime         RuntimeConfig
+	Runtime         harnessruntime.RuntimeConfig
 	Notifications   notifycore.Config
 	Review          ReviewWorkflowConfig
 	Work            WorkConfig
@@ -31,15 +32,6 @@ type WorkspaceConfig struct {
 
 	workflowExplicit map[string]bool
 	workflowRevision string
-}
-
-// RuntimeConfig describes a package boundary value.
-type RuntimeConfig struct {
-	Image             string
-	DockerfilePath    string
-	Workdir           string
-	ArtifactDir       string
-	ValidationCommand string
 }
 
 // WebConfig describes local Web UI configuration.
@@ -92,7 +84,7 @@ type WorkConfig struct {
 	ReadyQueueCapacity       int
 	StateAuthority           WorkStateAuthority
 	BranchPolicy             WorkBranchPolicy
-	Workspace                WorkWorkspaceConfig
+	Workspace                workspacecore.WorkWorkspaceConfig
 }
 
 // EvidenceConfig describes a package boundary value.
@@ -134,36 +126,7 @@ type WorkBranchPolicy struct {
 // WorkBranchPolicyMode defines a package boundary type.
 type WorkBranchPolicyMode string
 
-// WorkWorkspaceConfig describes workspace ownership for agent execution.
-type WorkWorkspaceConfig struct {
-	Mode            WorkWorkspaceMode
-	WorktreeRoot    string
-	WorktreeBase    WorktreeBasePolicy
-	WorktreeCleanup WorktreeCleanupPolicy
-}
-
-// WorkWorkspaceMode defines a package boundary type.
-type WorkWorkspaceMode string
-
-// WorktreeBasePolicy defines a package boundary type.
-type WorktreeBasePolicy string
-
-// WorktreeCleanupPolicy defines a package boundary type.
-type WorktreeCleanupPolicy string
-
 const (
-	// DefaultRuntimeImage defines a package boundary constant.
-	DefaultRuntimeImage = "chr-agent-runtime:local"
-	// DefaultRuntimeDockerfilePath defines a package boundary constant.
-	DefaultRuntimeDockerfilePath = ".chr/default/runtime/agent/Dockerfile"
-	// DefaultRuntimeWorkdir defines a package boundary constant.
-	DefaultRuntimeWorkdir = "/workspace"
-	// DefaultRuntimeArtifactDir defines the zero-configuration shared run artifact root.
-	DefaultRuntimeArtifactDir = "ops/default/run"
-	// PrivateRuntimeArtifactDir is the retired private run artifact root accepted only for migration to ops layout.
-	PrivateRuntimeArtifactDir = ".chr/default/runtime/runs"
-	// DefaultRuntimeValidationCommand defines a package boundary constant.
-	DefaultRuntimeValidationCommand = "make verify"
 
 	// DefaultReviewWorkflowNonBlockingCommentLimit defines a package boundary constant.
 	DefaultReviewWorkflowNonBlockingCommentLimit = 3
@@ -202,31 +165,10 @@ const (
 	// WorkBranchPolicyModeNoGitEnforcement defines a package boundary constant.
 	WorkBranchPolicyModeNoGitEnforcement WorkBranchPolicyMode = "no_git_enforcement"
 
-	// WorkWorkspaceModeProject defines a package boundary constant.
-	WorkWorkspaceModeProject WorkWorkspaceMode = "project"
-	// WorkWorkspaceModeWorktree defines a package boundary constant.
-	WorkWorkspaceModeWorktree WorkWorkspaceMode = "worktree"
-
-	// WorktreeBasePolicyRemoteIntegrationBranch defines a package boundary constant.
-	WorktreeBasePolicyRemoteIntegrationBranch WorktreeBasePolicy = "remote_integration_branch"
-	// WorktreeBasePolicyLocalIntegrationBranch defines a package boundary constant.
-	WorktreeBasePolicyLocalIntegrationBranch WorktreeBasePolicy = "local_integration_branch"
-	// WorktreeBasePolicyCurrentBranch defines a package boundary constant.
-	WorktreeBasePolicyCurrentBranch WorktreeBasePolicy = "current_branch"
-
-	// WorktreeCleanupPolicyAfterMerge defines a package boundary constant.
-	WorktreeCleanupPolicyAfterMerge WorktreeCleanupPolicy = "after_merge"
-	// WorktreeCleanupPolicyManual defines a package boundary constant.
-	WorktreeCleanupPolicyManual WorktreeCleanupPolicy = "manual"
-	// WorktreeCleanupPolicyNever defines a package boundary constant.
-	WorktreeCleanupPolicyNever WorktreeCleanupPolicy = "never"
-
 	// DefaultWorkIntegrationBranch defines a package boundary constant.
 	DefaultWorkIntegrationBranch = "dev"
 	// DefaultWorkCanonicalRemote defines a package boundary constant.
 	DefaultWorkCanonicalRemote = "origin"
-	// DefaultWorktreeRoot defines a package boundary constant.
-	DefaultWorktreeRoot = "ops/default/worktree"
 
 	// EvidenceStrategyModeInline defines a package boundary constant.
 	EvidenceStrategyModeInline EvidenceStrategyMode = "inline"
@@ -245,17 +187,6 @@ const (
 	// EvidenceGherkinPolicyManualOnly defines a package boundary constant.
 	EvidenceGherkinPolicyManualOnly EvidenceGherkinPolicy = "manual_only"
 )
-
-// DefaultRuntimeConfig executes the corresponding package operation.
-func DefaultRuntimeConfig() RuntimeConfig {
-	return RuntimeConfig{
-		Image:             DefaultRuntimeImage,
-		DockerfilePath:    DefaultRuntimeDockerfilePath,
-		Workdir:           DefaultRuntimeWorkdir,
-		ArtifactDir:       DefaultRuntimeArtifactDir,
-		ValidationCommand: DefaultRuntimeValidationCommand,
-	}
-}
 
 // DefaultWebConfig executes the corresponding package operation.
 func DefaultWebConfig() WebConfig {
@@ -309,7 +240,7 @@ func DefaultWorkConfig() WorkConfig {
 		MaxActiveWorkers:       1,
 		ReadyQueueCapacity:     64,
 		BranchPolicy:           DefaultWorkBranchPolicy(),
-		Workspace:              DefaultWorkWorkspaceConfig(),
+		Workspace:              workspacecore.DefaultWorkWorkspaceConfig(),
 	}
 }
 
@@ -346,21 +277,11 @@ func DefaultWorkBranchPolicy() WorkBranchPolicy {
 	}
 }
 
-// DefaultWorkWorkspaceConfig executes the corresponding package operation.
-func DefaultWorkWorkspaceConfig() WorkWorkspaceConfig {
-	return WorkWorkspaceConfig{
-		Mode:            WorkWorkspaceModeProject,
-		WorktreeRoot:    DefaultWorktreeRoot,
-		WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-		WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
-	}
-}
-
 // LoadWorkspaceConfig loads the corresponding package data.
 func defaultWorkspaceConfig() WorkspaceConfig {
 	return WorkspaceConfig{
 		TicketKeyPrefix: DefaultTicketKeyPrefix,
-		Runtime:         DefaultRuntimeConfig(),
+		Runtime:         harnessruntime.DefaultRuntimeConfig(),
 		Notifications:   notifycore.DefaultConfig(),
 		Review:          DefaultReviewWorkflowConfig(),
 		Work:            DefaultWorkConfig(),
@@ -516,7 +437,7 @@ func workspaceConfigSiblingSection(section string, indent int) string {
 	return section
 }
 
-func setRuntimeConfigValue(config *RuntimeConfig, key, value string) {
+func setRuntimeConfigValue(config *harnessruntime.RuntimeConfig, key, value string) {
 	switch key {
 	case "image":
 		configvalue.SetString(&config.Image, value)
@@ -608,21 +529,21 @@ func setWorkBranchPolicyConfigValue(config *WorkBranchPolicy, key, value string)
 	return true
 }
 
-func setWorkWorkspaceConfigValue(config *WorkWorkspaceConfig, key, value string) {
+func setWorkWorkspaceConfigValue(config *workspacecore.WorkWorkspaceConfig, key, value string) {
 	switch key {
 	case "workspace_mode":
 		if value != "" {
-			config.Mode = WorkWorkspaceMode(value)
+			config.Mode = workspacecore.WorkWorkspaceMode(value)
 		}
 	case "worktree_root":
 		configvalue.SetString(&config.WorktreeRoot, value)
 	case "worktree_base":
 		if value != "" {
-			config.WorktreeBase = WorktreeBasePolicy(value)
+			config.WorktreeBase = workspacecore.WorktreeBasePolicy(value)
 		}
 	case "worktree_cleanup":
 		if value != "" {
-			config.WorktreeCleanup = WorktreeCleanupPolicy(value)
+			config.WorktreeCleanup = workspacecore.WorktreeCleanupPolicy(value)
 		}
 	}
 }

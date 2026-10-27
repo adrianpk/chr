@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // WorkflowConfig selects prospective defaults without reinterpreting legacy data.
@@ -66,7 +67,7 @@ func parseWorkflowConfig(data []byte) (WorkspaceConfig, error) {
 		config.Workflow.Version = 1
 		config.Review.Mode = workflowstate.ReviewTrustedAutoMerge
 		config.Work.StateAuthority = WorkStateAuthorityTickets
-		config.Work.Workspace.Mode = WorkWorkspaceModeWorktree
+		config.Work.Workspace.Mode = workspacecore.WorkWorkspaceModeWorktree
 		config.Work.ValidationTimeoutSeconds = 3600
 	}
 

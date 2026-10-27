@@ -1,10 +1,11 @@
-package core
+package runtime
 
 import (
 	"fmt"
 	"path/filepath"
 	"strings"
 
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/process"
 )
@@ -106,11 +107,11 @@ func harnessRunCommand(opts HarnessInvocationOptions) (HarnessCommand, error) {
 		"--workdir", plan.ContainerWorkdir,
 		"--env", "CHR_EXECUTION_ID="+executionID,
 		"--env", "CHR_TICKET_KEY="+ticketKey,
-		"--env", "CHR_TICKET_PATH="+containerProjectPath(plan, ticketPath),
-		"--env", "CHR_WORKER_CONTEXT_PATH="+containerProjectPath(plan, plan.WorkerContextPath),
-		"--env", "CHR_RESULT_PATH="+containerProjectPath(plan, plan.ResultPath),
-		"--env", "CHR_LOG_PATH="+containerProjectPath(plan, plan.LogPath),
-		"--env", "CHR_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
+		"--env", "CHR_TICKET_PATH="+ContainerProjectPath(plan, ticketPath),
+		"--env", "CHR_WORKER_CONTEXT_PATH="+ContainerProjectPath(plan, plan.WorkerContextPath),
+		"--env", "CHR_RESULT_PATH="+ContainerProjectPath(plan, plan.ResultPath),
+		"--env", "CHR_LOG_PATH="+ContainerProjectPath(plan, plan.LogPath),
+		"--env", "CHR_VALIDATION_PATH="+ContainerProjectPath(plan, plan.ValidationPath),
 	)
 	for _, name := range workerCommand.ForwardEnv {
 		args = append(args, "--env", name)
@@ -144,7 +145,7 @@ func harnessValidationCommand(executionID string, plan RuntimePlan) HarnessComma
 	args = append(args,
 		"--workdir", plan.ContainerWorkdir,
 		"--env", "CHR_EXECUTION_ID="+executionID,
-		"--env", "CHR_VALIDATION_PATH="+containerProjectPath(plan, plan.ValidationPath),
+		"--env", "CHR_VALIDATION_PATH="+ContainerProjectPath(plan, plan.ValidationPath),
 		plan.Image,
 		"/bin/sh",
 		"-lc",
@@ -164,18 +165,18 @@ func harnessWorkerCommand(opts HarnessInvocationOptions) (harness.WorkerCommand,
 		return harness.WorkerCommand{}, fmt.Errorf("worker adapter is required")
 	}
 
-	contextPath := containerProjectPath(plan, plan.WorkerContextPath)
+	contextPath := ContainerProjectPath(plan, plan.WorkerContextPath)
 
 	command, err := worker.WorkerCommand(harness.WorkerRequest{
 		InputPath: contextPath,
 		Env: []harness.EnvironmentVariable{
 			{Name: "CHR_EXECUTION_ID", Value: executionID},
 			{Name: "CHR_TICKET_KEY", Value: ticketKey},
-			{Name: "CHR_TICKET_PATH", Value: containerProjectPath(plan, ticketPath)},
+			{Name: "CHR_TICKET_PATH", Value: ContainerProjectPath(plan, ticketPath)},
 			{Name: "CHR_WORKER_CONTEXT_PATH", Value: contextPath},
-			{Name: "CHR_RESULT_PATH", Value: containerProjectPath(plan, plan.ResultPath)},
-			{Name: "CHR_LOG_PATH", Value: containerProjectPath(plan, plan.LogPath)},
-			{Name: "CHR_VALIDATION_PATH", Value: containerProjectPath(plan, plan.ValidationPath)},
+			{Name: "CHR_RESULT_PATH", Value: ContainerProjectPath(plan, plan.ResultPath)},
+			{Name: "CHR_LOG_PATH", Value: ContainerProjectPath(plan, plan.LogPath)},
+			{Name: "CHR_VALIDATION_PATH", Value: ContainerProjectPath(plan, plan.ValidationPath)},
 		},
 	})
 	if err != nil {
@@ -194,7 +195,8 @@ func dockerVolumeArg(mount harness.RuntimeMount) string {
 	return arg
 }
 
-func containerProjectPath(plan RuntimePlan, path string) string {
+// ContainerProjectPath maps a mounted host path to its container path.
+func ContainerProjectPath(plan RuntimePlan, path string) string {
 	relative, err := filepath.Rel(plan.ContainerPathHostRoot(), path)
 	if err != nil || strings.HasPrefix(relative, "..") || filepath.IsAbs(relative) {
 		return filepath.ToSlash(path)
@@ -205,7 +207,7 @@ func containerProjectPath(plan RuntimePlan, path string) string {
 
 // ContainerPathHostRoot returns the host path mounted at ContainerWorkdir.
 func (plan RuntimePlan) ContainerPathHostRoot() string {
-	if plan.WorkspaceMode == WorkWorkspaceModeWorktree && strings.TrimSpace(plan.ExecutionWorkspaceDir) != "" {
+	if plan.WorkspaceMode == workspacecore.WorkWorkspaceModeWorktree && strings.TrimSpace(plan.ExecutionWorkspaceDir) != "" {
 		return plan.ExecutionWorkspaceDir
 	}
 

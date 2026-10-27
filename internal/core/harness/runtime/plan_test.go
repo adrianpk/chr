@@ -1,10 +1,11 @@
-package core
+package runtime
 
 import (
 	"path/filepath"
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
@@ -15,8 +16,8 @@ func TestPlanRuntimeUsesDefaultConfig(t *testing.T) {
 		t.Fatalf("PlanRuntime returned error: %v", err)
 	}
 
-	if plan.WorkspaceMode != WorkWorkspaceModeProject {
-		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, WorkWorkspaceModeProject)
+	if plan.WorkspaceMode != workspacecore.WorkWorkspaceModeProject {
+		t.Fatalf("WorkspaceMode = %q, want %q", plan.WorkspaceMode, workspacecore.WorkWorkspaceModeProject)
 	}
 
 	wantPaths := map[string]string{
@@ -236,11 +237,11 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: dir,
-		Workspace: WorkWorkspaceConfig{
-			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    DefaultWorktreeRoot,
-			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		Workspace: workspacecore.WorkWorkspaceConfig{
+			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
+			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",
@@ -259,7 +260,7 @@ func TestPlanRuntimeRecordsConfiguredExecutionWorkspace(t *testing.T) {
 		"WorkspaceDir":          filepath.Join(executionWorkspaceDir, ".chr"),
 		"ArtifactDir":           wantArtifactDir,
 		"ResultPath":            filepath.Join(wantArtifactDir, "result.json"),
-		"WorkspaceMode":         string(WorkWorkspaceModeWorktree),
+		"WorkspaceMode":         string(workspacecore.WorkWorkspaceModeWorktree),
 		"TicketKey":             "CHR-1",
 		"TicketBranch":          "chr/CHR-1",
 		"WorkspaceBaseRef":      "origin/dev",
@@ -295,8 +296,8 @@ func TestPlanRuntimePreservesProjectModeWorkspaceMount(t *testing.T) {
 
 	plan, err := PlanRuntime(RuntimePlanOptions{
 		ProjectDir: dir,
-		Workspace: WorkWorkspaceConfig{
-			Mode: WorkWorkspaceModeProject,
+		Workspace: workspacecore.WorkWorkspaceConfig{
+			Mode: workspacecore.WorkWorkspaceModeProject,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 	})

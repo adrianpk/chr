@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type ticketApplyResultPlan struct {
@@ -66,7 +67,7 @@ func buildTicketApplyResultPlanForRecord(ctx context.Context, projectContext com
 }
 
 func discoverTicketApplyResultChangedFiles(ctx context.Context, record core.ExecutionRecord) ([]core.ResultApplicationChangedFile, error) {
-	if record.Workspace.Mode != core.WorkWorkspaceModeWorktree || record.Workspace.ExecutionWorkspaceDir == "" {
+	if record.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree || record.Workspace.ExecutionWorkspaceDir == "" {
 		return nil, nil
 	}
 
@@ -170,7 +171,7 @@ func refreshTicketArtifactMetadata(record core.ExecutionRecord) error {
 }
 
 func refreshAppliedTicketIndex(ctx context.Context, env core.UserEnvironment, plan ticketApplyResultPlan, appliedAt time.Time, assetsFS fs.FS) error {
-	if plan.Record.Workspace.Mode == core.WorkWorkspaceModeWorktree {
+	if plan.Record.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
 		return nil
 	}
 

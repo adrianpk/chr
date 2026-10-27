@@ -1,9 +1,11 @@
-package core
+package runtime
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestValidateRuntimePassesWhenRequiredPathsExist(t *testing.T) {
@@ -95,11 +97,11 @@ func TestValidateRuntimeChecksExecutionWorkspace(t *testing.T) {
 
 	result, err := ValidateRuntime(RuntimeValidationOptions{
 		ProjectDir: projectDir,
-		Workspace: WorkWorkspaceConfig{
-			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    DefaultWorktreeRoot,
-			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		Workspace: workspacecore.WorkWorkspaceConfig{
+			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
+			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
 		},
 		ExecutionWorkspaceDir: executionWorkspaceDir,
 		TicketKey:             "CHR-1",
@@ -165,4 +167,11 @@ func assertRuntimeValidationCheck(t *testing.T, checks []RuntimeValidationCheck,
 	}
 
 	t.Fatalf("missing runtime validation check %s", name)
+}
+
+func createWorkspaceRoot(t *testing.T, dir string) {
+	t.Helper()
+	if err := os.Mkdir(filepath.Join(dir, workspacecore.DirectoryName), 0o755); err != nil {
+		t.Fatalf("create workspace root: %v", err)
+	}
 }

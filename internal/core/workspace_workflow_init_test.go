@@ -81,7 +81,7 @@ func checkInitializedWorkflow(t *testing.T, project string) {
 		t.Fatal("initialized workflow differs from approved defaults", config, err)
 	}
 
-	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTickets, WorkWorkspaceModeWorktree})
+	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTickets, workspacecore.WorkWorkspaceModeWorktree})
 
 	effective, err := ResolveWorkflowConfiguration(project, "")
 	if err != nil || len(effective.Values) != 15 {

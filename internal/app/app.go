@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -384,7 +385,7 @@ func loadTUIObservability(
 		return tui.ObservabilityView{}, err
 	}
 
-	runtime, err := validateCodexRuntime(core.RuntimeValidationOptions{
+	runtime, err := validateCodexRuntime(harnessruntime.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -422,12 +423,12 @@ func loadTUIWorkReadiness(ctx context.Context, projectContext commandProjectCont
 	return tui.NewWorkReadinessView(report), nil
 }
 
-func loadTUIAgentEvents(ctx context.Context, projectDir string, config core.RuntimeConfig, executions []core.ExecutionRecord, loops []core.LoopRunRecord) []core.AgentEvent {
+func loadTUIAgentEvents(ctx context.Context, projectDir string, config harnessruntime.RuntimeConfig, executions []core.ExecutionRecord, loops []core.LoopRunRecord) []core.AgentEvent {
 	events := []core.AgentEvent{}
 
 	loop := latestTUILoopRun(loops)
 	if loop.ID != "" {
-		plan, err := core.PlanRuntime(core.RuntimePlanOptions{
+		plan, err := harnessruntime.PlanRuntime(harnessruntime.RuntimePlanOptions{
 			ExtraMounts: legacyCodexMounts(),
 			ProjectDir:  projectDir,
 			Config:      config,

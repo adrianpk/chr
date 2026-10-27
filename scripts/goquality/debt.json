@@ -1033,7 +1033,7 @@
     },
     {
       "id": "internal/core/worktree_plan.go::normalizedWorktreePlanConfig",
-      "signature": "func(opts WorktreePlanOptions) (WorkBranchPolicy, WorkWorkspaceConfig, error)",
+      "signature": "func(opts WorktreePlanOptions) (WorkBranchPolicy, workspacecore.WorkWorkspaceConfig, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     }
   ]

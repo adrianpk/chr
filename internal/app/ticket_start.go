@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 func (factory commandFactory) ticketStartCommand() *cli.Command {
@@ -42,7 +43,7 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 		return core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
-	if !core.RuntimeValidationPassed(preflight.Runtime.Checks) {
+	if !harnessruntime.RuntimeValidationPassed(preflight.Runtime.Checks) {
 		preflight.Record.Status = core.ExecutionStatusBlocked
 		preflight.Record.FailureReason = core.NewExecutionFailure(
 			core.ExecutionFailureRuntime,
@@ -85,7 +86,7 @@ func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, pref
 	return record, err
 }
 
-func printTicketStartResult(stdout io.Writer, ticket core.IndexedTicket, record core.ExecutionRecord, result core.RuntimeValidationResult, dryRun bool) error {
+func printTicketStartResult(stdout io.Writer, ticket core.IndexedTicket, record core.ExecutionRecord, result harnessruntime.RuntimeValidationResult, dryRun bool) error {
 	lines := []string{
 		fmt.Sprintf("execution: %s", record.ID),
 		fmt.Sprintf("ticket: %s", ticket.Key),

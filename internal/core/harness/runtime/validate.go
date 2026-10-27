@@ -1,10 +1,11 @@
-package core
+package runtime
 
 import (
 	"fmt"
 	"os"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -13,7 +14,7 @@ type RuntimeValidationOptions struct {
 	ExtraMounts           []harness.RuntimeMount
 	ProjectDir            string
 	Config                RuntimeConfig
-	Workspace             WorkWorkspaceConfig
+	Workspace             workspacecore.WorkWorkspaceConfig
 	ExecutionWorkspaceDir string
 	TicketKey             string
 	TicketBranch          string

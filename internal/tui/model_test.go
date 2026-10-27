@@ -15,6 +15,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -3662,15 +3663,15 @@ func TestNewObservabilityViewSelectsLatestRecords(t *testing.T) {
 	}
 }
 
-func testObservabilityRuntimeResult(projectDir string) core.RuntimeValidationResult {
-	return core.RuntimeValidationResult{
-		Plan: core.RuntimePlan{
+func testObservabilityRuntimeResult(projectDir string) harnessruntime.RuntimeValidationResult {
+	return harnessruntime.RuntimeValidationResult{
+		Plan: harnessruntime.RuntimePlan{
 			Image:             "image",
 			DockerfilePath:    filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 			ArtifactDir:       filepath.Join(projectDir, ".chr", "default", "runtime", "runs"),
 			ValidationCommand: "make verify",
 		},
-		Checks: []core.RuntimeValidationCheck{
+		Checks: []harnessruntime.RuntimeValidationCheck{
 			{Name: "dockerfile", Path: filepath.Join(projectDir, ".chr", "default", "runtime", "agent", "Dockerfile"), OK: true, Message: "ok"},
 		},
 	}

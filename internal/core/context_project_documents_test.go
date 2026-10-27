@@ -7,6 +7,7 @@ import (
 	"time"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 func TestLoadProjectDocumentContextLoadsTicketReferences(t *testing.T) {
@@ -36,7 +37,7 @@ Use .prj/specs/specs/feature.md and docs/reference/feature.md.
 		ProjectID:  "project-1",
 		ProjectDir: dir,
 		TicketPath: ticketPath,
-		Plan: RuntimePlan{
+		Plan: harnessruntime.RuntimePlan{
 			ValidationCommand: "go test ./...",
 		},
 		IndexedAt: time.Date(2026, 5, 20, 12, 0, 0, 0, time.UTC),

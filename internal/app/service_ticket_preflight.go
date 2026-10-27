@@ -5,6 +5,7 @@ import (
 	"io/fs"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 )
 
@@ -14,7 +15,7 @@ type ticketStartPreflight struct {
 	ProjectContext commandProjectContext
 	Ticket         core.IndexedTicket
 	Record         core.ExecutionRecord
-	Runtime        core.RuntimeValidationResult
+	Runtime        harnessruntime.RuntimeValidationResult
 }
 
 type ticketStartPreflightOptions struct {
@@ -73,7 +74,7 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket cor
 
 	record.Artifacts.ArtifactID = artifact.ID
 
-	result, err := validateCodexRuntime(core.RuntimeValidationOptions{
+	result, err := validateCodexRuntime(harnessruntime.RuntimeValidationOptions{
 		ProjectDir:            s.projectContext.ProjectDir,
 		Config:                config.Runtime,
 		Workspace:             config.Work.Workspace,

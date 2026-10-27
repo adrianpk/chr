@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestCheckWorkReadinessReportsMissingRemoteRef(t *testing.T) {
@@ -348,7 +350,7 @@ func TestRepairWorkReadinessCreatesAllowedMissingBranch(t *testing.T) {
 func TestRepairWorkReadinessCreatesMissingWorktreeRoot(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = DefaultWorktreeRoot
+	workspace.WorktreeRoot = workspacecore.DefaultWorktreeRoot
 	root := filepath.Join(projectDir, workspace.WorktreeRoot)
 
 	result, err := RepairWorkReadiness(context.Background(), WorkReadinessRepairOptions{
@@ -371,7 +373,7 @@ func TestRepairWorkReadinessCreatesMissingWorktreeRoot(t *testing.T) {
 func TestRepairWorkReadinessPrunesStaleWorktreeMetadata(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = DefaultWorktreeRoot
+	workspace.WorktreeRoot = workspacecore.DefaultWorktreeRoot
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{
 		ProjectDir:   projectDir,
@@ -415,7 +417,7 @@ func TestRepairWorkReadinessPrunesStaleWorktreeMetadata(t *testing.T) {
 func TestRepairWorkReadinessRemovesEmptyOrphanedTicketWorktree(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = DefaultWorktreeRoot
+	workspace.WorktreeRoot = workspacecore.DefaultWorktreeRoot
 	plan := testWorkReadinessPlan(t, projectDir, workspace)
 
 	if err := os.MkdirAll(plan.WorktreePath, 0o755); err != nil {
@@ -444,7 +446,7 @@ func TestRepairWorkReadinessRemovesEmptyOrphanedTicketWorktree(t *testing.T) {
 func TestRepairWorkReadinessDoesNotRemoveNonEmptyOrphanedTicketWorktree(t *testing.T) {
 	projectDir := t.TempDir()
 	workspace := testWorktreeWorkspaceConfig()
-	workspace.WorktreeRoot = DefaultWorktreeRoot
+	workspace.WorktreeRoot = workspacecore.DefaultWorktreeRoot
 	plan := testWorkReadinessPlan(t, projectDir, workspace)
 
 	if err := os.MkdirAll(plan.WorktreePath, 0o755); err != nil {
@@ -583,16 +585,16 @@ func assertNotAppliedWorkReadinessRepair(t *testing.T, result WorkReadinessRepai
 	}
 }
 
-func testWorktreeWorkspaceConfig() WorkWorkspaceConfig {
-	return WorkWorkspaceConfig{
-		Mode:            WorkWorkspaceModeWorktree,
-		WorktreeRoot:    DefaultWorktreeRoot,
-		WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-		WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+func testWorktreeWorkspaceConfig() workspacecore.WorkWorkspaceConfig {
+	return workspacecore.WorkWorkspaceConfig{
+		Mode:            workspacecore.WorkWorkspaceModeWorktree,
+		WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
+		WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
+		WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
 	}
 }
 
-func testWorkReadinessPlan(t *testing.T, projectDir string, workspace WorkWorkspaceConfig) WorktreePlan {
+func testWorkReadinessPlan(t *testing.T, projectDir string, workspace workspacecore.WorkWorkspaceConfig) WorktreePlan {
 	t.Helper()
 
 	plan, err := NewWorktreePlan(WorktreePlanOptions{

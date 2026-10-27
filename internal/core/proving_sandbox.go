@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -29,9 +30,9 @@ type ProvingSandboxRunOptions struct {
 // ProvingSandboxRunResult describes a package boundary value.
 type ProvingSandboxRunResult struct {
 	Objective  ProvingObjective
-	Plan       RuntimePlan
-	Build      HarnessCommand
-	Run        HarnessCommand
+	Plan       harnessruntime.RuntimePlan
+	Build      harnessruntime.HarnessCommand
+	Run        harnessruntime.HarnessCommand
 	TicketPath string
 	DryRun     bool
 }
@@ -155,7 +156,7 @@ func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjec
 		return ProvingSandboxRunResult{}, err
 	}
 
-	invocation, err := NewHarnessInvocation(HarnessInvocationOptions{
+	invocation, err := harnessruntime.NewHarnessInvocation(harnessruntime.HarnessInvocationOptions{
 		ExecutionID: objective.ID, TicketKey: objective.TicketKey,
 		TicketPath: result.TicketPath, Plan: result.Plan, Worker: worker,
 	})
@@ -174,7 +175,7 @@ func planProvingRuntime(projectDir string, objective ProvingObjective, mounts []
 		return ProvingSandboxRunResult{}, err
 	}
 
-	plan, err := PlanRuntime(RuntimePlanOptions{
+	plan, err := harnessruntime.PlanRuntime(harnessruntime.RuntimePlanOptions{
 		ExtraMounts: mounts,
 		ProjectDir:  projectDir,
 		Config:      config.Runtime,
@@ -233,16 +234,16 @@ func RenderProvingWorkerContext(result ProvingSandboxRunResult) string {
 	output.WriteString("\n\n")
 	output.WriteString("## Artifact Paths\n\n")
 	output.WriteString("- context_path: ")
-	output.WriteString(containerProjectPath(result.Plan, result.Plan.WorkerContextPath))
+	output.WriteString(harnessruntime.ContainerProjectPath(result.Plan, result.Plan.WorkerContextPath))
 	output.WriteString("\n")
 	output.WriteString("- result_path: ")
-	output.WriteString(containerProjectPath(result.Plan, result.Plan.ResultPath))
+	output.WriteString(harnessruntime.ContainerProjectPath(result.Plan, result.Plan.ResultPath))
 	output.WriteString("\n")
 	output.WriteString("- log_path: ")
-	output.WriteString(containerProjectPath(result.Plan, result.Plan.LogPath))
+	output.WriteString(harnessruntime.ContainerProjectPath(result.Plan, result.Plan.LogPath))
 	output.WriteString("\n")
 	output.WriteString("- validation_path: ")
-	output.WriteString(containerProjectPath(result.Plan, result.Plan.ValidationPath))
+	output.WriteString(harnessruntime.ContainerProjectPath(result.Plan, result.Plan.ValidationPath))
 	output.WriteString("\n\n")
 	output.WriteString("## Objective\n\n")
 	output.WriteString(result.Objective.Body)

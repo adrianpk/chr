@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func agentWorkLoopEventSink(projectDir string, record core.LoopRunRecord) core.AgentEventSink {
@@ -19,7 +21,7 @@ func agentWorkLoopEventSink(projectDir string, record core.LoopRunRecord) core.A
 		return nil
 	}
 
-	plan, err := core.PlanRuntime(core.RuntimePlanOptions{
+	plan, err := harnessruntime.PlanRuntime(harnessruntime.RuntimePlanOptions{
 		ExtraMounts: legacyCodexMounts(),
 		ProjectDir:  projectDir,
 		Config:      config.Runtime,
@@ -270,7 +272,7 @@ func emitMergeFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, 
 }
 
 func emitBranchPreparedAgentEvent(ctx context.Context, events ticketExecutionEvents, record core.ExecutionRecord) {
-	if record.Workspace.Mode != core.WorkWorkspaceModeWorktree {
+	if record.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
 		return
 	}
 

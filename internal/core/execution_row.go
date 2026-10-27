@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // executionRow pairs the stored column order with domain values and raw scan conversions.
@@ -94,7 +95,7 @@ func (row executionRow) decoded() (ExecutionRecord, error) {
 
 	record := row.record
 	record.Status = ExecutionStatus(row.status)
-	record.Workspace.Mode = WorkWorkspaceMode(row.workspaceMode)
+	record.Workspace.Mode = workspacecore.WorkWorkspaceMode(row.workspaceMode)
 	record.CreatedAt, record.UpdatedAt = times.CreatedAt, times.UpdatedAt
 	record.StartedAt, record.FinishedAt = times.StartedAt, times.FinishedAt
 

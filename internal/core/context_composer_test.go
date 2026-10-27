@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 func TestPlanContextCompositionDerivesDockerVisibleArtifactPaths(t *testing.T) {
@@ -15,7 +16,7 @@ func TestPlanContextCompositionDerivesDockerVisibleArtifactPaths(t *testing.T) {
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(dir, ".chr", "default", "tickets", "CHR-1-example.md"),
 		ExecutionID: "exec-1",
-		Plan: RuntimePlan{
+		Plan: harnessruntime.RuntimePlan{
 			ProjectDir:        dir,
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),
@@ -59,7 +60,7 @@ func TestPlanContextCompositionBlocksWhenRequiredSourcesAreMissing(t *testing.T)
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(dir, ".chr", "default", "tickets", "CHR-1-example.md"),
 		ExecutionID: "exec-1",
-		Plan: RuntimePlan{
+		Plan: harnessruntime.RuntimePlan{
 			ProjectDir:        dir,
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),
@@ -100,7 +101,7 @@ func TestPlanContextCompositionPreservesInvariantAndFreshSources(t *testing.T) {
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(dir, ".chr", "default", "tickets", "CHR-1-example.md"),
 		ExecutionID: "exec-1",
-		Plan: RuntimePlan{
+		Plan: harnessruntime.RuntimePlan{
 			ProjectDir:        dir,
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),
@@ -141,7 +142,7 @@ func TestPlanContextCompositionRejectsInvalidSourceKind(t *testing.T) {
 		TicketKey:   "CHR-1",
 		TicketPath:  filepath.Join(dir, ".chr", "default", "tickets", "CHR-1-example.md"),
 		ExecutionID: "exec-1",
-		Plan: RuntimePlan{
+		Plan: harnessruntime.RuntimePlan{
 			ProjectDir:        dir,
 			RunArtifactDir:    runDir,
 			WorkerContextPath: filepath.Join(runDir, "context.md"),

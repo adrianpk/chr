@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -126,7 +127,7 @@ func assertPreparedTicketWorktreeWorkspace(t *testing.T, ticketPath string, prep
 		t.Fatalf("prepared branch = %q, want derived branch", prepared.Plan.Branch)
 	}
 
-	if execution.Workspace.Mode != core.WorkWorkspaceModeWorktree {
+	if execution.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
 		t.Fatalf("Workspace.Mode = %q, want worktree", execution.Workspace.Mode)
 	}
 

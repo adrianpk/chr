@@ -2,8 +2,9 @@ package core
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ValidateWorkConfig validates the corresponding package boundary value.
@@ -20,7 +21,7 @@ func ValidateWorkConfig(config WorkConfig) error {
 		return err
 	}
 
-	return ValidateWorkWorkspaceConfig(config.Workspace)
+	return workspacecore.ValidateWorkWorkspaceConfig(config.Workspace)
 }
 
 // ValidateWorkBranchPolicy validates the corresponding package boundary value.
@@ -48,74 +49,6 @@ func IsValidWorkBranchPolicyMode(mode WorkBranchPolicyMode) bool {
 	case WorkBranchPolicyModeIntegrationBranch,
 		WorkBranchPolicyModeCurrentBranch,
 		WorkBranchPolicyModeNoGitEnforcement:
-		return true
-	default:
-		return false
-	}
-}
-
-// ValidateWorkWorkspaceConfig validates the corresponding package boundary value.
-func ValidateWorkWorkspaceConfig(config WorkWorkspaceConfig) error {
-	if config == (WorkWorkspaceConfig{}) {
-		return nil
-	}
-
-	if !IsValidWorkWorkspaceMode(config.Mode) {
-		return fmt.Errorf("invalid work workspace_mode: %s", config.Mode)
-	}
-
-	if config.Mode != WorkWorkspaceModeWorktree {
-		return nil
-	}
-
-	if strings.TrimSpace(config.WorktreeRoot) == "" {
-		return fmt.Errorf("work worktree_root is required")
-	}
-
-	if filepath.ToSlash(filepath.Clean(config.WorktreeRoot)) != DefaultWorktreeRoot {
-		return fmt.Errorf("work worktree_root must be %s", DefaultWorktreeRoot)
-	}
-
-	if !IsValidWorktreeBasePolicy(config.WorktreeBase) {
-		return fmt.Errorf("invalid work worktree_base: %s", config.WorktreeBase)
-	}
-
-	if !IsValidWorktreeCleanupPolicy(config.WorktreeCleanup) {
-		return fmt.Errorf("invalid work worktree_cleanup: %s", config.WorktreeCleanup)
-	}
-
-	return nil
-}
-
-// IsValidWorkWorkspaceMode executes the corresponding package operation.
-func IsValidWorkWorkspaceMode(mode WorkWorkspaceMode) bool {
-	switch WorkWorkspaceMode(strings.TrimSpace(string(mode))) {
-	case WorkWorkspaceModeProject,
-		WorkWorkspaceModeWorktree:
-		return true
-	default:
-		return false
-	}
-}
-
-// IsValidWorktreeBasePolicy executes the corresponding package operation.
-func IsValidWorktreeBasePolicy(policy WorktreeBasePolicy) bool {
-	switch WorktreeBasePolicy(strings.TrimSpace(string(policy))) {
-	case WorktreeBasePolicyRemoteIntegrationBranch,
-		WorktreeBasePolicyLocalIntegrationBranch,
-		WorktreeBasePolicyCurrentBranch:
-		return true
-	default:
-		return false
-	}
-}
-
-// IsValidWorktreeCleanupPolicy executes the corresponding package operation.
-func IsValidWorktreeCleanupPolicy(policy WorktreeCleanupPolicy) bool {
-	switch WorktreeCleanupPolicy(strings.TrimSpace(string(policy))) {
-	case WorktreeCleanupPolicyAfterMerge,
-		WorktreeCleanupPolicyManual,
-		WorktreeCleanupPolicyNever:
 		return true
 	default:
 		return false

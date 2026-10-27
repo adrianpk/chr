@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestContextPackageMaterializerWritesArtifactLayout(t *testing.T) {
@@ -70,7 +72,7 @@ func TestRenderMainContextPackageUsesWorktreeDockerVisiblePaths(t *testing.T) {
 	plan := testContextPackageRuntimePlan(projectDir, runDir)
 	plan.ProjectCheckoutDir = projectDir
 	plan.ExecutionWorkspaceDir = executionWorkspaceDir
-	plan.WorkspaceMode = WorkWorkspaceModeWorktree
+	plan.WorkspaceMode = workspacecore.WorkWorkspaceModeWorktree
 	composition := testContextPackageComposition(t, plan)
 
 	rendered := RenderMainContextPackage(MaterializeContextPackageOptions{
@@ -118,8 +120,8 @@ func TestRenderContextPackageDryRunShowsIncludedAndSkippedSources(t *testing.T) 
 	}
 }
 
-func testContextPackageRuntimePlan(dir, runDir string) RuntimePlan {
-	return RuntimePlan{
+func testContextPackageRuntimePlan(dir, runDir string) harnessruntime.RuntimePlan {
+	return harnessruntime.RuntimePlan{
 		ProjectDir:        dir,
 		ContainerWorkdir:  "/workspace",
 		RunArtifactDir:    runDir,
@@ -130,7 +132,7 @@ func testContextPackageRuntimePlan(dir, runDir string) RuntimePlan {
 	}
 }
 
-func testContextPackageComposition(t *testing.T, plan RuntimePlan) ContextCompositionPlan {
+func testContextPackageComposition(t *testing.T, plan harnessruntime.RuntimePlan) ContextCompositionPlan {
 	t.Helper()
 
 	composition, err := PlanContextComposition(ContextComposerOptions{

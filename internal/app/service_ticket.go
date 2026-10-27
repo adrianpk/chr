@@ -1,10 +1,13 @@
 package app
 
-import "forge.adrianpk.com/chr/internal/core"
+import (
+	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+)
 
 type ticketExecutionInput struct {
 	Record  core.ExecutionRecord
-	Runtime core.RuntimeValidationResult
+	Runtime harnessruntime.RuntimeValidationResult
 	Events  ticketExecutionEvents
 }
 

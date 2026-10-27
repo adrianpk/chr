@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // WorktreeService describes a package boundary value.
@@ -41,7 +43,7 @@ func (s WorktreeService) Prepare(ctx context.Context, opts WorktreePlanOptions) 
 type worktreeServiceSettings struct {
 	plan      WorktreePlan
 	policy    WorkBranchPolicy
-	workspace WorkWorkspaceConfig
+	workspace workspacecore.WorkWorkspaceConfig
 	git       WorktreeGit
 }
 
@@ -90,7 +92,7 @@ func prepareWorktree(ctx context.Context, settings worktreeServiceSettings) (Wor
 }
 
 func (settings worktreeServiceSettings) prepareBase(ctx context.Context, result *WorktreePrepareResult) error {
-	if settings.workspace.WorktreeBase == WorktreeBasePolicyRemoteIntegrationBranch {
+	if settings.workspace.WorktreeBase == workspacecore.WorktreeBasePolicyRemoteIntegrationBranch {
 		if err := settings.git.FetchRemote(ctx, settings.plan.ProjectDir, settings.policy.CanonicalRemote); err != nil {
 			return fmt.Errorf("fetch worktree base: %w", err)
 		}

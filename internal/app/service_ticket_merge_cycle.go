@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type agentWorkMergeCycleOptions struct {
@@ -44,7 +45,7 @@ func (s service) runAgentWorkMergeCycle(opts agentWorkMergeCycleOptions) (core.T
 }
 
 func (s service) agentWorkMergeTickets(execution core.ExecutionRecord, indexedAt time.Time) ([]core.IndexedTicket, error) {
-	if execution.Workspace.Mode == core.WorkWorkspaceModeWorktree {
+	if execution.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
 		return parseProjectTicketsFromDir(s.ctx, s.projectContext.ProjectID, agenticReviewProjectDir(s.projectContext, execution), indexedAt)
 	}
 

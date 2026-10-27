@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 // ContextPackageMaterializer defines a package boundary interface.
@@ -18,7 +19,7 @@ type ContextPackageMaterializer interface {
 // MaterializeContextPackageOptions describes a package boundary value.
 type MaterializeContextPackageOptions struct {
 	Composition       ContextCompositionPlan
-	Plan              RuntimePlan
+	Plan              harnessruntime.RuntimePlan
 	Agent             string
 	Project           string
 	Protocols         string
@@ -139,7 +140,7 @@ func writeMainContextExecution(output *strings.Builder, opts MaterializeContextP
 	output.WriteString(opts.Composition.TicketKey)
 	output.WriteString("\n")
 	output.WriteString("- ticket_path: ")
-	output.WriteString(containerProjectPath(opts.Plan, opts.Composition.TicketPath))
+	output.WriteString(harnessruntime.ContainerProjectPath(opts.Plan, opts.Composition.TicketPath))
 	output.WriteString("\n\n")
 }
 
@@ -240,11 +241,11 @@ func validateMaterializeContextPackageOptions(opts MaterializeContextPackageOpti
 	return nil
 }
 
-func writeContextArtifactLink(output *strings.Builder, plan RuntimePlan, name, hostPath string) {
+func writeContextArtifactLink(output *strings.Builder, plan harnessruntime.RuntimePlan, name, hostPath string) {
 	output.WriteString("- ")
 	output.WriteString(name)
 	output.WriteString(": `")
-	output.WriteString(containerProjectPath(plan, hostPath))
+	output.WriteString(harnessruntime.ContainerProjectPath(plan, hostPath))
 	output.WriteString("`")
 	output.WriteString(" (host: `")
 	output.WriteString(hostPath)

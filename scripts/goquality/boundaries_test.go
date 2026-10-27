@@ -78,6 +78,8 @@ func harnessLifecycleDependencyCases() []leafDependencyCase {
 		{"daemon coordinator", "internal/core/harness/daemon/state_repository.go", "package daemon\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"host retained binding", "internal/core/harness/host/executable.go", "package host\nimport _ \"" + coreImportPath + "workflow/state\"\n", false},
 		{"host coordinator", "internal/core/harness/host/executable.go", "package host\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"runtime layout", "internal/core/harness/runtime/plan.go", "package runtime\nimport _ \"" + coreImportPath + "ops\"\n", false},
+		{"runtime coordinator", "internal/core/harness/runtime/plan.go", "package runtime\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"trace workspace", "internal/core/harness/trace/trace.go", "package trace\nimport _ \"" + coreImportPath + "workspace\"\n", false},
 		{"trace coordinator", "internal/core/harness/trace/trace.go", "package trace\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"identity host cycle", "internal/core/harness/binding.go", "package harness\nimport _ \"" + coreImportPath + "harness/host\"\n", true},

@@ -3,6 +3,9 @@ package core
 import (
 	"fmt"
 	"time"
+
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ExecutionStatus defines a package boundary type.
@@ -48,7 +51,7 @@ type ExecutionRuntimeRef struct {
 
 // ExecutionWorkspaceRef describes where the agent work ran.
 type ExecutionWorkspaceRef struct {
-	Mode                  WorkWorkspaceMode
+	Mode                  workspacecore.WorkWorkspaceMode
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
 	BaseRef               string
@@ -66,7 +69,7 @@ type ExecutionArtifacts struct {
 }
 
 // ExecutionRecordFromRuntimePlan executes the corresponding package operation.
-func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan RuntimePlan) ExecutionRecord {
+func ExecutionRecordFromRuntimePlan(record ExecutionRecord, plan harnessruntime.RuntimePlan) ExecutionRecord {
 	record.Runtime = ExecutionRuntimeRef{
 		Image:             plan.Image,
 		DockerfilePath:    plan.DockerfilePath,

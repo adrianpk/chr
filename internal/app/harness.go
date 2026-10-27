@@ -3,7 +3,7 @@ package app
 import (
 	"os"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -21,8 +21,8 @@ func newCodexWorker() codex.Runner {
 	return codex.Runner{Mounts: legacyCodexMounts()}
 }
 
-func validateCodexRuntime(opts core.RuntimeValidationOptions) (core.RuntimeValidationResult, error) {
+func validateCodexRuntime(opts harnessruntime.RuntimeValidationOptions) (harnessruntime.RuntimeValidationResult, error) {
 	opts.ExtraMounts = legacyCodexMounts()
 
-	return core.ValidateRuntime(opts)
+	return harnessruntime.ValidateRuntime(opts)
 }

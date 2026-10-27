@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -190,7 +191,7 @@ func (factory commandFactory) runRuntimeValidate(ctx context.Context, cmd *cli.C
 		return err
 	}
 
-	result, err := validateCodexRuntime(core.RuntimeValidationOptions{
+	result, err := validateCodexRuntime(harnessruntime.RuntimeValidationOptions{
 		ProjectDir: projectContext.ProjectDir,
 		Config:     config.Runtime,
 	})
@@ -203,7 +204,7 @@ func (factory commandFactory) runRuntimeValidate(ctx context.Context, cmd *cli.C
 		return err
 	}
 
-	if !core.RuntimeValidationPassed(result.Checks) {
+	if !harnessruntime.RuntimeValidationPassed(result.Checks) {
 		return fmt.Errorf("runtime validation failed")
 	}
 
@@ -382,7 +383,7 @@ func printProvingValidationResult(stdout io.Writer, result core.ProvingValidatio
 	return nil
 }
 
-func formatHarnessCommand(command core.HarnessCommand) string {
+func formatHarnessCommand(command harnessruntime.HarnessCommand) string {
 	parts := append([]string{command.Program}, command.Args...)
 
 	return strings.Join(parts, " ")
@@ -390,7 +391,7 @@ func formatHarnessCommand(command core.HarnessCommand) string {
 
 func printRuntimeValidateResult(
 	stdout io.Writer,
-	result core.RuntimeValidationResult,
+	result harnessruntime.RuntimeValidationResult,
 	dryRun bool,
 ) error {
 	plan := result.Plan
@@ -435,7 +436,7 @@ func printRuntimeValidateResult(
 func printRuntimeValidationChecks(
 	stdout io.Writer,
 	projectDir string,
-	checks []core.RuntimeValidationCheck,
+	checks []harnessruntime.RuntimeValidationCheck,
 ) error {
 	_, err := fmt.Fprintln(stdout, "checks:")
 	if err != nil {

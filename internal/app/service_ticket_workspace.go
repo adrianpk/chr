@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type ticketStartWorktreePreparer interface {
@@ -25,7 +26,7 @@ func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProj
 		Ticket:     ticket,
 		TicketPath: ticket.Path,
 	}
-	if config.Work.Workspace.Mode != core.WorkWorkspaceModeWorktree {
+	if config.Work.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
 		return workspace, nil
 	}
 

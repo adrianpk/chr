@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
@@ -14,8 +15,8 @@ func TestNewWorkReadinessViewProjectsWorkspaceState(t *testing.T) {
 			IntegrationBranch: "dev",
 			CanonicalRemote:   "origin",
 		},
-		Workspace: core.WorkWorkspaceConfig{
-			Mode: core.WorkWorkspaceModeWorktree,
+		Workspace: workspacecore.WorkWorkspaceConfig{
+			Mode: workspacecore.WorkWorkspaceModeWorktree,
 		},
 		CurrentBranch: "feature/user-work",
 		TicketKey:     "CHR-1",

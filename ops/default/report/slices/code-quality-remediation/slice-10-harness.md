@@ -300,6 +300,23 @@ Concrete QuizGeneration and AuthoringQuizQuestionProvider adapters keep their
 existing contracts. The same host/native/app/wire regressions, production style
 check and strict lint passed after naming; all 60 source declarations reconcile.
 
+Runtime planning move checks passed:
+
+- `go test ./internal/core/harness/runtime ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality -run '^Test(PlanRuntime|ValidateRuntime|NewHarnessInvocation|WorkWorkspace|WorktreePlan|WorkReadiness|RuntimeArtifactCleanup|RuntimeInit|PiWorkerRuntime|QualityRecordWire|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
+
+The runtime owner now contains plans, artifact layouts, Docker command assembly
+and filesystem validation. Workspace owns the shared execution workspace policy
+values, defaults and validators; native configuration parsing stays with its
+actual configuration owner. Eighty-five moved declarations and constant
+specifications reconcile exactly after owner qualification. Runtime tests own
+their small filesystem fixture; context materializers import ContainerProjectPath
+directly. No compatibility alias or new policy exception was introduced.
+
+Generation lifecycle concurrency checks passed:
+
+- `go test -race ./internal/core ./internal/app -run '^Test(HarnessGenerationBindingSelectionOrder|HarnessGenerationCallerContext|PiGenerationCapacity)$' -count=1 -timeout=3m`
+
 ## Risks and Follow-ups
 
 The slice remains in progress; PR readiness is not established. All assigned

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -67,7 +68,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 		return core.ExecutionRecord{}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
-	invocation, err := core.NewHarnessInvocation(core.HarnessInvocationOptions{
+	invocation, err := harnessruntime.NewHarnessInvocation(harnessruntime.HarnessInvocationOptions{
 		Worker:      codex.Runner{},
 		ExecutionID: input.Record.ID,
 		TicketKey:   input.Record.TicketKey,

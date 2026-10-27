@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
@@ -360,12 +361,12 @@ func writeTestFile(t *testing.T, path, content string) {
 }
 
 type recordingHarnessExecutor struct {
-	commands []HarnessCommand
+	commands []harnessruntime.HarnessCommand
 }
 
 func (e *recordingHarnessExecutor) Run(
 	_ context.Context,
-	command HarnessCommand,
+	command harnessruntime.HarnessCommand,
 	_, _ io.Writer,
 ) error {
 	e.commands = append(e.commands, command)

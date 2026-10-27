@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -26,7 +28,7 @@ type MaterializeWorkerContextOptions struct {
 	ResultPath            string
 	LogPath               string
 	ValidationPath        string
-	WorkspaceMode         WorkWorkspaceMode
+	WorkspaceMode         workspacecore.WorkWorkspaceMode
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
 	TicketBranch          string
@@ -63,7 +65,7 @@ func NewWorkerContextMaterializer() WorkerContextMaterializer {
 }
 
 // MaterializeWorkerContextForExecution executes the corresponding package operation.
-func MaterializeWorkerContextForExecution(ctx context.Context, record ExecutionRecord, plan RuntimePlan) error {
+func MaterializeWorkerContextForExecution(ctx context.Context, record ExecutionRecord, plan harnessruntime.RuntimePlan) error {
 	repairHandoff, err := workerRepairHandoff(ctx, plan.ProjectDir, record.TicketPath)
 	if err != nil {
 		return err
@@ -78,10 +80,10 @@ func MaterializeWorkerContextForExecution(ctx context.Context, record ExecutionR
 		Path:                  plan.WorkerContextPath,
 		ExecutionID:           record.ID,
 		TicketKey:             record.TicketKey,
-		TicketPath:            containerProjectPath(plan, record.TicketPath),
-		ResultPath:            containerProjectPath(plan, plan.ResultPath),
-		LogPath:               containerProjectPath(plan, plan.LogPath),
-		ValidationPath:        containerProjectPath(plan, plan.ValidationPath),
+		TicketPath:            harnessruntime.ContainerProjectPath(plan, record.TicketPath),
+		ResultPath:            harnessruntime.ContainerProjectPath(plan, plan.ResultPath),
+		LogPath:               harnessruntime.ContainerProjectPath(plan, plan.LogPath),
+		ValidationPath:        harnessruntime.ContainerProjectPath(plan, plan.ValidationPath),
 		WorkspaceMode:         plan.WorkspaceMode,
 		ProjectCheckoutDir:    plan.ProjectCheckoutDir,
 		ExecutionWorkspaceDir: plan.ExecutionWorkspaceDir,
@@ -168,7 +170,7 @@ func RenderWorkerContext(opts MaterializeWorkerContextOptions) string {
 func writeWorkerWorkspaceContext(output *strings.Builder, opts MaterializeWorkerContextOptions) {
 	output.WriteString("## Workspace\n\n")
 	output.WriteString("- workspace_mode: ")
-	output.WriteString(nonEmptyWorkerContextValue(string(opts.WorkspaceMode), string(WorkWorkspaceModeProject)))
+	output.WriteString(nonEmptyWorkerContextValue(string(opts.WorkspaceMode), string(workspacecore.WorkWorkspaceModeProject)))
 	output.WriteString("\n")
 	output.WriteString("- project_checkout_dir: ")
 	output.WriteString(nonEmptyWorkerContextValue(opts.ProjectCheckoutDir, "unknown"))

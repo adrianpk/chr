@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -42,8 +43,8 @@ func (s service) InspectProjectReadiness(project projectcore.Project) projectRea
 		return result
 	}
 
-	runtime, err := core.ValidateRuntime(core.RuntimeValidationOptions{ExtraMounts: legacyCodexMounts(), ProjectDir: project.Path, Config: config.Runtime, Workspace: config.Work.Workspace})
-	result.RuntimeReady = err == nil && core.RuntimeValidationPassed(runtime.Checks)
+	runtime, err := harnessruntime.ValidateRuntime(harnessruntime.RuntimeValidationOptions{ExtraMounts: legacyCodexMounts(), ProjectDir: project.Path, Config: config.Runtime, Workspace: config.Work.Workspace})
+	result.RuntimeReady = err == nil && harnessruntime.RuntimeValidationPassed(runtime.Checks)
 
 	return result
 }

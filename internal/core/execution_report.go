@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const executionReportChangedFileLimit = 25
@@ -50,7 +52,7 @@ type ExecutionReportRuntime struct {
 
 // ExecutionReportWorkspace describes execution workspace metadata.
 type ExecutionReportWorkspace struct {
-	Mode                  WorkWorkspaceMode
+	Mode                  workspacecore.WorkWorkspaceMode
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
 	BaseRef               string

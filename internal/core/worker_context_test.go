@@ -8,7 +8,9 @@ import (
 	"testing"
 	"time"
 
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestWorkerContextMaterializerWritesContext(t *testing.T) {
@@ -58,7 +60,7 @@ func TestWorkerContextMaterializerWritesContext(t *testing.T) {
 func TestMaterializeWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
 	projectDir := t.TempDir()
 	runDir := filepath.Join(projectDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
-	plan := RuntimePlan{
+	plan := harnessruntime.RuntimePlan{
 		ProjectDir:            projectDir,
 		ContainerWorkdir:      "/workspace",
 		WorkerContextPath:     filepath.Join(runDir, "context.md"),
@@ -72,7 +74,7 @@ func TestMaterializeWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
 		Image:                 "chr-agent-runtime:local",
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: projectDir,
-		WorkspaceMode:         WorkWorkspaceModeProject,
+		WorkspaceMode:         workspacecore.WorkWorkspaceModeProject,
 		TicketBranch:          "chr/CHR-1",
 		WorkspaceBaseRef:      "origin/dev",
 		WorkspaceBaseSHA:      "abc123",
@@ -482,7 +484,7 @@ func testWorkerContextOptions(path string) MaterializeWorkerContextOptions {
 		ResultPath:            "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/result.json",
 		LogPath:               "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/runtime.log",
 		ValidationPath:        "/workspace/.chr/default/runtime/runs/CHR-1/exec-1/validation.log",
-		WorkspaceMode:         WorkWorkspaceModeProject,
+		WorkspaceMode:         workspacecore.WorkWorkspaceModeProject,
 		ProjectCheckoutDir:    "/project",
 		ExecutionWorkspaceDir: "/project",
 		TicketBranch:          "chr/CHR-1",
@@ -491,12 +493,12 @@ func testWorkerContextOptions(path string) MaterializeWorkerContextOptions {
 	}
 }
 
-func testWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
-	return RuntimePlan{
+func testWorkerContextRuntimePlan(projectDir, runDir string) harnessruntime.RuntimePlan {
+	return harnessruntime.RuntimePlan{
 		ProjectDir:            projectDir,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: projectDir,
-		WorkspaceMode:         WorkWorkspaceModeProject,
+		WorkspaceMode:         workspacecore.WorkWorkspaceModeProject,
 		TicketBranch:          "chr/CHR-1",
 		WorkspaceBaseRef:      "origin/dev",
 		WorkspaceBaseSHA:      "abc123",
@@ -513,14 +515,14 @@ func testWorkerContextRuntimePlan(projectDir, runDir string) RuntimePlan {
 	}
 }
 
-func testWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir string) RuntimePlan {
+func testWorkerContextWorktreeRuntimePlan(projectDir, executionWorkspaceDir string) harnessruntime.RuntimePlan {
 	runDir := filepath.Join(executionWorkspaceDir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 
-	return RuntimePlan{
+	return harnessruntime.RuntimePlan{
 		ProjectDir:            projectDir,
 		ProjectCheckoutDir:    projectDir,
 		ExecutionWorkspaceDir: executionWorkspaceDir,
-		WorkspaceMode:         WorkWorkspaceModeWorktree,
+		WorkspaceMode:         workspacecore.WorkWorkspaceModeWorktree,
 		TicketBranch:          "chr/CHR-1",
 		WorkspaceBaseRef:      "origin/dev",
 		WorkspaceBaseSHA:      "abc123",

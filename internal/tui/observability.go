@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 // ObservabilityView summarizes execution, loop, and runtime observability.
@@ -311,7 +312,7 @@ func newLoopRunView(loop core.LoopRunRecord) LoopRunView {
 	}
 }
 
-func newRuntimeCheckViews(projectDir string, checks []core.RuntimeValidationCheck) []RuntimeCheckView {
+func newRuntimeCheckViews(projectDir string, checks []harnessruntime.RuntimeValidationCheck) []RuntimeCheckView {
 	views := make([]RuntimeCheckView, 0, len(checks))
 	for _, check := range checks {
 		views = append(views, RuntimeCheckView{
@@ -383,6 +384,6 @@ type ObservabilityRecords struct {
 	Daemon     daemoncore.State
 	Executions []core.ExecutionRecord
 	Loops      []core.LoopRunRecord
-	Runtime    core.RuntimeValidationResult
+	Runtime    harnessruntime.RuntimeValidationResult
 	Events     []core.AgentEvent
 }

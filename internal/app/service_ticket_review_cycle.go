@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -245,7 +246,7 @@ func renderAgenticReviewNonBlockingComment(note workflowstate.ReviewFinding) str
 }
 
 func (s service) refreshAgenticReviewTicketIndex(execution core.ExecutionRecord, ticketPath string, reviewedAt time.Time) error {
-	if execution.Workspace.Mode == core.WorkWorkspaceModeWorktree {
+	if execution.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
 		return nil
 	}
 
@@ -270,7 +271,7 @@ func (s service) refreshAgenticReviewTicketIndex(execution core.ExecutionRecord,
 }
 
 func agenticReviewProjectDir(projectContext commandProjectContext, execution core.ExecutionRecord) string {
-	if execution.Workspace.Mode == core.WorkWorkspaceModeWorktree && execution.Workspace.ExecutionWorkspaceDir != "" {
+	if execution.Workspace.Mode == workspacecore.WorkWorkspaceModeWorktree && execution.Workspace.ExecutionWorkspaceDir != "" {
 		return execution.Workspace.ExecutionWorkspaceDir
 	}
 

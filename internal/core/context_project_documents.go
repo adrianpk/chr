@@ -11,6 +11,7 @@ import (
 	"time"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -23,7 +24,7 @@ type ProjectDocumentContextOptions struct {
 	ProjectID  string
 	ProjectDir string
 	TicketPath string
-	Plan       RuntimePlan
+	Plan       harnessruntime.RuntimePlan
 	IndexedAt  time.Time
 }
 
@@ -293,10 +294,10 @@ func missingDocumentSource(id, path string) authoringcore.ContextSourceInventory
 	}
 }
 
-func projectValidationCommand(plan RuntimePlan) string {
+func projectValidationCommand(plan harnessruntime.RuntimePlan) string {
 	if strings.TrimSpace(plan.ValidationCommand) != "" {
 		return plan.ValidationCommand
 	}
 
-	return DefaultRuntimeValidationCommand
+	return harnessruntime.DefaultRuntimeValidationCommand
 }

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 func TestEvaluateContextReadinessHandoffReady(t *testing.T) {
@@ -85,10 +86,10 @@ func TestEvaluateContextReadinessHandoffSupportsCustomRequiredKinds(t *testing.T
 	}
 }
 
-func testReadinessRuntimePlan(dir string) RuntimePlan {
+func testReadinessRuntimePlan(dir string) harnessruntime.RuntimePlan {
 	runDir := filepath.Join(dir, ".chr", "default", "runtime", "runs", "CHR-1", "exec-1")
 
-	return RuntimePlan{
+	return harnessruntime.RuntimePlan{
 		ProjectDir:        dir,
 		ContainerWorkdir:  "/workspace",
 		RunArtifactDir:    runDir,
@@ -102,7 +103,7 @@ func testReadinessRuntimePlan(dir string) RuntimePlan {
 
 func testReadinessComposition(
 	t *testing.T,
-	plan RuntimePlan,
+	plan harnessruntime.RuntimePlan,
 	sources []authoringcore.ContextSourceInventoryEntry,
 ) ContextCompositionPlan {
 	t.Helper()

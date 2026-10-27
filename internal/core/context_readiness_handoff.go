@@ -5,13 +5,14 @@ import (
 	"strings"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // ContextReadinessHandoffOptions describes a package boundary value.
 type ContextReadinessHandoffOptions struct {
 	Composition   ContextCompositionPlan
-	Plan          RuntimePlan
+	Plan          harnessruntime.RuntimePlan
 	RequiredKinds []authoringcore.ContextSourceKind
 }
 
@@ -219,7 +220,7 @@ func contextReadinessWarnings(composition ContextCompositionPlan) []string {
 	return warnings
 }
 
-func contextArtifactLinks(plan RuntimePlan, paths ContextArtifactPaths) []ContextArtifactLink {
+func contextArtifactLinks(plan harnessruntime.RuntimePlan, paths ContextArtifactPaths) []ContextArtifactLink {
 	return []ContextArtifactLink{
 		contextArtifactLink(plan, "context", paths.MainContextPath),
 		contextArtifactLink(plan, "agent", paths.AgentPath),
@@ -235,11 +236,11 @@ func contextArtifactLinks(plan RuntimePlan, paths ContextArtifactPaths) []Contex
 	}
 }
 
-func contextArtifactLink(plan RuntimePlan, name, hostPath string) ContextArtifactLink {
+func contextArtifactLink(plan harnessruntime.RuntimePlan, name, hostPath string) ContextArtifactLink {
 	return ContextArtifactLink{
 		Name:          name,
 		HostPath:      hostPath,
-		ContainerPath: containerProjectPath(plan, hostPath),
+		ContainerPath: harnessruntime.ContainerProjectPath(plan, hostPath),
 	}
 }
 

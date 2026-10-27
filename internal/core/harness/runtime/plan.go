@@ -1,4 +1,4 @@
-package core
+package runtime
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type RuntimePlanOptions struct {
 	ExtraMounts           []harness.RuntimeMount
 	ProjectDir            string
 	Config                RuntimeConfig
-	Workspace             WorkWorkspaceConfig
+	Workspace             workspacecore.WorkWorkspaceConfig
 	ExecutionWorkspaceDir string
 	TicketKey             string
 	TicketBranch          string
@@ -32,7 +32,7 @@ type RuntimePlan struct {
 	ProjectDir            string
 	ProjectCheckoutDir    string
 	ExecutionWorkspaceDir string
-	WorkspaceMode         WorkWorkspaceMode
+	WorkspaceMode         workspacecore.WorkWorkspaceMode
 	TicketKey             string
 	TicketBranch          string
 	WorkspaceBaseRef      string
@@ -64,16 +64,16 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		config = DefaultRuntimeConfig()
 	}
 
-	config = fillRuntimeConfigDefaults(config)
+	config = FillRuntimeConfigDefaults(config)
 
 	workspace := opts.Workspace
-	if workspace == (WorkWorkspaceConfig{}) {
-		workspace = DefaultWorkWorkspaceConfig()
+	if workspace == (workspacecore.WorkWorkspaceConfig{}) {
+		workspace = workspacecore.DefaultWorkWorkspaceConfig()
 	} else {
-		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+		workspace = workspacecore.FillWorkWorkspaceConfigDefaults(workspace)
 	}
 
-	if err := ValidateWorkWorkspaceConfig(workspace); err != nil {
+	if err := workspacecore.ValidateWorkWorkspaceConfig(workspace); err != nil {
 		return RuntimePlan{}, err
 	}
 
@@ -112,7 +112,8 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	}, nil
 }
 
-func fillRuntimeConfigDefaults(config RuntimeConfig) RuntimeConfig {
+// FillRuntimeConfigDefaults preserves the existing field defaults.
+func FillRuntimeConfigDefaults(config RuntimeConfig) RuntimeConfig {
 	defaults := DefaultRuntimeConfig()
 
 	if config.Image == "" {
@@ -138,30 +139,8 @@ func fillRuntimeConfigDefaults(config RuntimeConfig) RuntimeConfig {
 	return config
 }
 
-func fillWorkWorkspaceConfigDefaults(config WorkWorkspaceConfig) WorkWorkspaceConfig {
-	defaults := DefaultWorkWorkspaceConfig()
-
-	if config.Mode == "" {
-		config.Mode = defaults.Mode
-	}
-
-	if config.WorktreeRoot == "" {
-		config.WorktreeRoot = defaults.WorktreeRoot
-	}
-
-	if config.WorktreeBase == "" {
-		config.WorktreeBase = defaults.WorktreeBase
-	}
-
-	if config.WorktreeCleanup == "" {
-		config.WorktreeCleanup = defaults.WorktreeCleanup
-	}
-
-	return config
-}
-
-func runtimeExecutionWorkspaceDir(projectDir string, mode WorkWorkspaceMode, configuredPath string) string {
-	if mode != WorkWorkspaceModeWorktree || strings.TrimSpace(configuredPath) == "" {
+func runtimeExecutionWorkspaceDir(projectDir string, mode workspacecore.WorkWorkspaceMode, configuredPath string) string {
+	if mode != workspacecore.WorkWorkspaceModeWorktree || strings.TrimSpace(configuredPath) == "" {
 		return projectDir
 	}
 
@@ -278,11 +257,11 @@ func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlan
 	return runtimeArtifactLayout{}, nil
 }
 
-func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceMode, workdir string) []harness.RuntimeMount {
+func runtimeMounts(projectDir, executionWorkspaceDir string, mode workspacecore.WorkWorkspaceMode, workdir string) []harness.RuntimeMount {
 	mountSource := projectDir
 	mountDescription := "project workspace"
 
-	if mode == WorkWorkspaceModeWorktree {
+	if mode == workspacecore.WorkWorkspaceModeWorktree {
 		mountSource = executionWorkspaceDir
 		mountDescription = "execution workspace"
 	}

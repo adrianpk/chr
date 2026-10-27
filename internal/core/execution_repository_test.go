@@ -9,6 +9,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestExecutionRepositoryCreatesGetsUpdatesAndListsExecutions(t *testing.T) {
@@ -155,7 +157,7 @@ func testExecutionRecord(now time.Time) ExecutionRecord {
 			ValidationCommand: "make verify",
 		},
 		Workspace: ExecutionWorkspaceRef{
-			Mode:                  WorkWorkspaceModeWorktree,
+			Mode:                  workspacecore.WorkWorkspaceModeWorktree,
 			ProjectCheckoutDir:    "/tmp/project",
 			ExecutionWorkspaceDir: "/tmp/project/.chr/default/worktrees/CHR-1",
 			BaseRef:               "origin/dev",

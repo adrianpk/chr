@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -48,7 +49,7 @@ type closedProvingLogExecutor struct {
 	err error
 }
 
-func (e closedProvingLogExecutor) Run(_ context.Context, _ HarnessCommand, stdout, _ io.Writer) error {
+func (e closedProvingLogExecutor) Run(_ context.Context, _ harnessruntime.HarnessCommand, stdout, _ io.Writer) error {
 	file, ok := stdout.(*os.File)
 	if !ok {
 		return fmt.Errorf("expected owned log file, got %T", stdout)

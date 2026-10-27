@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -83,7 +84,7 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 
 	defer release()
 
-	if !core.RuntimeValidationPassed(preflight.Runtime.Checks) {
+	if !harnessruntime.RuntimeValidationPassed(preflight.Runtime.Checks) {
 		return AgentWorkResult{}, core.NewExecutionFailure(
 			core.ExecutionFailureRuntime,
 			errors.New("runtime validation failed"),

@@ -9,6 +9,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestAgentOperationLockBlocksConcurrentOperation(t *testing.T) {
@@ -254,11 +255,11 @@ func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T)
 			RequireCleanWorktree:  true,
 			RequireRemoteTracking: true,
 		},
-		Workspace: WorkWorkspaceConfig{
-			Mode:            WorkWorkspaceModeWorktree,
-			WorktreeRoot:    DefaultWorktreeRoot,
-			WorktreeBase:    WorktreeBasePolicyRemoteIntegrationBranch,
-			WorktreeCleanup: WorktreeCleanupPolicyAfterMerge,
+		Workspace: workspacecore.WorkWorkspaceConfig{
+			Mode:            workspacecore.WorkWorkspaceModeWorktree,
+			WorktreeRoot:    workspacecore.DefaultWorktreeRoot,
+			WorktreeBase:    workspacecore.WorktreeBasePolicyRemoteIntegrationBranch,
+			WorktreeCleanup: workspacecore.WorktreeCleanupPolicyAfterMerge,
 		},
 		Git: fakeWorkSelectionGit{
 			branch:      "feature/user-work",

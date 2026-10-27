@@ -16,6 +16,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
@@ -62,7 +63,7 @@ type WorkSelectionPreflightOptions struct {
 	Tickets             []IndexedTicket
 	SelectedTicketKey   string
 	BranchPolicy        WorkBranchPolicy
-	Workspace           WorkWorkspaceConfig
+	Workspace           workspacecore.WorkWorkspaceConfig
 	RequireBranchPolicy bool
 	Git                 WorkSelectionGit
 }
@@ -374,10 +375,10 @@ func workBranchPolicyBlockReason(ctx context.Context, opts WorkSelectionPrefligh
 	}
 
 	workspace := opts.Workspace
-	if workspace == (WorkWorkspaceConfig{}) {
-		workspace = DefaultWorkWorkspaceConfig()
+	if workspace == (workspacecore.WorkWorkspaceConfig{}) {
+		workspace = workspacecore.DefaultWorkWorkspaceConfig()
 	} else {
-		workspace = fillWorkWorkspaceConfigDefaults(workspace)
+		workspace = workspacecore.FillWorkWorkspaceConfigDefaults(workspace)
 	}
 
 	return workBranchPolicyBlockReasonForGit(ctx, workBranchPolicyCheck{
@@ -392,7 +393,7 @@ type workBranchPolicyCheck struct {
 	projectDir string
 	git        WorkSelectionGit
 	policy     WorkBranchPolicy
-	workspace  WorkWorkspaceConfig
+	workspace  workspacecore.WorkWorkspaceConfig
 }
 
 func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
@@ -401,7 +402,7 @@ func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPoli
 		return nil, err
 	}
 
-	err = ValidateWorkWorkspaceConfig(check.workspace)
+	err = workspacecore.ValidateWorkWorkspaceConfig(check.workspace)
 	if err != nil {
 		return nil, err
 	}
@@ -414,7 +415,7 @@ func workBranchPolicyBlockReasonForGit(ctx context.Context, check workBranchPoli
 }
 
 func runWorkBranchPolicyChecks(ctx context.Context, check workBranchPolicyCheck) (*WorkSelectionBlockReason, error) {
-	if check.workspace.Mode == WorkWorkspaceModeWorktree {
+	if check.workspace.Mode == workspacecore.WorkWorkspaceModeWorktree {
 		return nil, nil
 	}
 

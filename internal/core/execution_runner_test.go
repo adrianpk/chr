@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 func TestExecutionRunnerRunsHarnessAndMarksSucceeded(t *testing.T) {
@@ -355,7 +357,7 @@ type fakeHarnessExecutor struct {
 	resultContent  string
 }
 
-func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, stdout, stderr io.Writer) error {
+func (e *fakeHarnessExecutor) Run(_ context.Context, command harnessruntime.HarnessCommand, stdout, stderr io.Writer) error {
 	name := command.Program + " " + command.Args[0]
 	e.commands = append(e.commands, name)
 
@@ -389,7 +391,7 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command HarnessCommand, std
 	return nil
 }
 
-func (e *fakeHarnessExecutor) writeResultForWorkerRun(command HarnessCommand) error {
+func (e *fakeHarnessExecutor) writeResultForWorkerRun(command harnessruntime.HarnessCommand) error {
 	if command.Args[0] != "run" || isValidationHarnessCommand(command) || e.resultPath == "" {
 		return nil
 	}
@@ -402,11 +404,11 @@ func (e *fakeHarnessExecutor) writeResultForWorkerRun(command HarnessCommand) er
 	return os.WriteFile(e.resultPath, []byte(content), 0o644)
 }
 
-func isWorkerHarnessCommand(command HarnessCommand) bool {
+func isWorkerHarnessCommand(command harnessruntime.HarnessCommand) bool {
 	return command.Args[0] == "run" && !isValidationHarnessCommand(command)
 }
 
-func isValidationHarnessCommand(command HarnessCommand) bool {
+func isValidationHarnessCommand(command harnessruntime.HarnessCommand) bool {
 	return slices.Contains(command.Args, "chr-exec-1-validation")
 }
 
@@ -460,19 +462,19 @@ func testRunnerExecutionRecord(dir string) ExecutionRecord {
 	}
 }
 
-func testRunnerInvocation(record ExecutionRecord) HarnessInvocation {
-	return HarnessInvocation{
+func testRunnerInvocation(record ExecutionRecord) harnessruntime.HarnessInvocation {
+	return harnessruntime.HarnessInvocation{
 		ExecutionID: record.ID,
 		TicketKey:   record.TicketKey,
-		Build: HarnessCommand{
+		Build: harnessruntime.HarnessCommand{
 			Program: "docker",
 			Args:    []string{"build"},
 		},
-		Run: HarnessCommand{
+		Run: harnessruntime.HarnessCommand{
 			Program: "docker",
 			Args:    []string{"run"},
 		},
-		Validation: HarnessCommand{
+		Validation: harnessruntime.HarnessCommand{
 			Program: "docker",
 			Args:    []string{"run", "--name", "chr-exec-1-validation"},
 		},

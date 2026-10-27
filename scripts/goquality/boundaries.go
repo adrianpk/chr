@@ -20,6 +20,7 @@ var leafImports = map[string]map[string]bool{
 	"internal/core/harness":              {coreImportPath + "contenthash": true, moduleImportPath + "/internal/harness": true},
 	"internal/core/harness/daemon":       {coreImportPath + "database": true, coreImportPath + "project": true, coreImportPath + "workspace": true},
 	"internal/core/harness/host":         {coreImportPath + "harness": true, coreImportPath + "contenthash": true, coreImportPath + "workflow/state": true, coreImportPath + "authoring": true, coreImportPath + "authoring/state": true, coreImportPath + "ops/file": true, coreImportPath + "workspace": true, coreImportPath + "harness/trace": true, moduleImportPath + "/internal/harness": true, moduleImportPath + "/internal/harness/process": true},
+	"internal/core/harness/runtime":      {coreImportPath + "workspace": true, coreImportPath + "project": true, coreImportPath + "ops": true, moduleImportPath + "/internal/harness": true, moduleImportPath + "/internal/harness/process": true},
 	"internal/core/harness/trace":        {coreImportPath + "workspace": true},
 	"internal/core/authoring/acceptance": {coreImportPath + "authoring/generation": true, coreImportPath + "ops": true, coreImportPath + "ops/metadata": true, coreImportPath + "quiz": true},
 	"internal/core/ops/metadata":         {},

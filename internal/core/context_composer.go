@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 )
 
 // ContextComposerOptions describes a package boundary value.
@@ -13,7 +14,7 @@ type ContextComposerOptions struct {
 	TicketKey   string
 	TicketPath  string
 	ExecutionID string
-	Plan        RuntimePlan
+	Plan        harnessruntime.RuntimePlan
 	Sources     []authoringcore.ContextSourceInventoryEntry
 }
 
@@ -82,7 +83,7 @@ func PlanContextComposition(opts ContextComposerOptions) (ContextCompositionPlan
 	}, nil
 }
 
-func contextArtifactPaths(plan RuntimePlan) ContextArtifactPaths {
+func contextArtifactPaths(plan harnessruntime.RuntimePlan) ContextArtifactPaths {
 	contextDir := filepath.Join(plan.RunArtifactDir, "context")
 
 	return ContextArtifactPaths{

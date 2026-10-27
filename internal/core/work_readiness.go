@@ -1,5 +1,7 @@
 package core
 
+import workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+
 // WorkReadinessStatus defines a package boundary type.
 type WorkReadinessStatus string
 
@@ -82,7 +84,7 @@ type WorkReadinessRepairCode string
 type WorkReadinessReport struct {
 	ProjectDir     string
 	Policy         WorkBranchPolicy
-	Workspace      WorkWorkspaceConfig
+	Workspace      workspacecore.WorkWorkspaceConfig
 	Status         WorkReadinessStatus
 	Diagnostics    []WorkReadinessDiagnostic
 	CurrentBranch  string

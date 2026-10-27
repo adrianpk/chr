@@ -4,6 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestValidateExecutionRecordAcceptsValidRecord(t *testing.T) {
@@ -190,12 +193,12 @@ func TestValidateExecutionRecordRejectsFinishedBeforeStarted(t *testing.T) {
 
 func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 	dir := t.TempDir()
-	plan := RuntimePlan{
+	plan := harnessruntime.RuntimePlan{
 		ArtifactID:            "00001-ticket-run",
 		Image:                 "chr-agent-runtime:local",
 		DockerfilePath:        filepath.Join(dir, ".chr", "default", "runtime", "agent", "Dockerfile"),
 		ContainerWorkdir:      "/workspace",
-		WorkspaceMode:         WorkWorkspaceModeWorktree,
+		WorkspaceMode:         workspacecore.WorkWorkspaceModeWorktree,
 		ProjectCheckoutDir:    dir,
 		ExecutionWorkspaceDir: filepath.Join(dir, ".chr", "default", "worktrees", "CHR-1"),
 		WorkspaceBaseRef:      "origin/dev",
@@ -231,7 +234,7 @@ func TestExecutionRecordFromRuntimePlanCopiesRuntimeReferences(t *testing.T) {
 		t.Fatalf("Artifacts.ValidationPath = %q, want %q", record.Artifacts.ValidationPath, plan.ValidationPath)
 	}
 
-	if record.Workspace.Mode != WorkWorkspaceModeWorktree {
+	if record.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
 		t.Fatalf("Workspace.Mode = %q, want worktree", record.Workspace.Mode)
 	}
 

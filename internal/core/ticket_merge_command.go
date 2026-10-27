@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TicketMergeCommandRemote defines a package boundary interface.
@@ -24,7 +25,7 @@ type TicketMergeCommandOptions struct {
 	MergeStrategy string
 	ProjectDir    string
 	BranchPolicy  WorkBranchPolicy
-	Workspace     WorkWorkspaceConfig
+	Workspace     workspacecore.WorkWorkspaceConfig
 	WorktreeGit   WorktreeGit
 	DryRun        bool
 	MergedAt      time.Time
@@ -107,7 +108,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 }
 
 func ticketMergeWorktreeCleanup(ctx context.Context, opts TicketMergeCommandOptions, result TicketMergeCommandResult) (WorktreeCleanupResult, error) {
-	if result.MergeState != TicketMergeStateMerged || opts.Workspace.Mode != WorkWorkspaceModeWorktree {
+	if result.MergeState != TicketMergeStateMerged || opts.Workspace.Mode != workspacecore.WorkWorkspaceModeWorktree {
 		return WorktreeCleanupResult{}, nil
 	}
 
