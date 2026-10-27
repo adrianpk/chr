@@ -16,9 +16,14 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringContinuationRequest, string, error) {
+type normalizedAuthoringRequest struct {
+	Request AuthoringContinuationRequest
+	Digest  string
+}
+
+func normalizeAuthoringRequest(request AuthoringContinuationRequest) (normalizedAuthoringRequest, error) {
 	if err := request.Binding.Validate(); err != nil {
-		return request, "", err
+		return normalizedAuthoringRequest{Request: request}, err
 	}
 
 	if request.Action == "create" && request.SessionID == "" {
@@ -26,23 +31,23 @@ func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringC
 	}
 
 	if err := authoringstate.ValidateSessionID(request.SessionID); err != nil {
-		return request, "", err
+		return normalizedAuthoringRequest{Request: request}, err
 	}
 
 	if request.ProjectID == "" || !opsnamespace.Valid(request.Namespace) {
-		return request, "", errors.New("authoring requires project and namespace")
+		return normalizedAuthoringRequest{Request: request}, errors.New("authoring requires project and namespace")
 	}
 
 	encoded, err := json.Marshal(request)
 	if err != nil {
-		return request, "", err
+		return normalizedAuthoringRequest{Request: request}, err
 	}
 
 	if len(encoded) > 512*1024 {
-		return request, "", errors.New("authoring request exceeds 512 KiB")
+		return normalizedAuthoringRequest{Request: request}, errors.New("authoring request exceeds 512 KiB")
 	}
 
-	return request, contenthash.Sum(encoded), nil
+	return normalizedAuthoringRequest{Request: request, Digest: contenthash.Sum(encoded)}, nil
 }
 
 func validateAuthoringRequest(request AuthoringContinuationRequest) error {
@@ -153,27 +158,32 @@ func (r *fileAuthoringSessionRepository) authoringStateCapacity(directory string
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) readAuthoringReceipt(request AuthoringContinuationRequest, digest string) (AuthoringContinuationResult, bool, error) {
+type authoringReceiptLookup struct {
+	Result AuthoringContinuationResult
+	Found  bool
+}
+
+func (r *fileAuthoringSessionRepository) readAuthoringReceipt(request AuthoringContinuationRequest, digest string) (authoringReceiptLookup, error) {
 	var receipt authoringMutationReceipt
 
 	data, err := r.authoringRead(authoringReceiptRef(request.Binding.RequestID))
 	if errors.Is(err, os.ErrNotExist) {
-		return receipt.Result, false, nil
+		return authoringReceiptLookup{Result: receipt.Result}, nil
 	}
 
 	if err != nil {
-		return receipt.Result, false, err
+		return authoringReceiptLookup{Result: receipt.Result}, err
 	}
 
 	if err := authoringstate.Decode(data, &receipt); err != nil {
-		return receipt.Result, false, err
+		return authoringReceiptLookup{Result: receipt.Result}, err
 	}
 
 	if err := validateAuthoringReceipt(receipt, request, digest); err != nil {
-		return receipt.Result, false, err
+		return authoringReceiptLookup{Result: receipt.Result}, err
 	}
 
-	return receipt.Result, true, nil
+	return authoringReceiptLookup{Result: receipt.Result, Found: true}, nil
 }
 
 func readExistingAuthoringBinding(data []byte, digest string) (authoringRequestBinding, error) {

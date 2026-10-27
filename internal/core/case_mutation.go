@@ -41,15 +41,17 @@ type caseMutationReceipt struct {
 
 // SaveBound reuses the case owner and its exclusion for an immutable request.
 func (s CaseMetadataService) SaveBound(ctx context.Context, request CaseMutationRequest) (result CaseMutationResult, err error) {
-	request, digest, err := s.normalizeCaseMutation(request)
+	normalized, err := s.normalizeCaseMutation(request)
 	if err != nil {
 		return result, err
 	}
 
+	request, digest := normalized.Request, normalized.Digest
+
 	err = s.withMutationLock(ctx, func() error {
-		retained, found, readErr := s.readCaseMutationReceipt(request, digest)
-		if readErr != nil || found {
-			result = retained
+		lookup, readErr := s.readCaseMutationReceipt(request, digest)
+		if readErr != nil || lookup.Found {
+			result = lookup.Result
 
 			return readErr
 		}
@@ -75,26 +77,31 @@ func (s CaseMetadataService) SaveBound(ctx context.Context, request CaseMutation
 	return result, err
 }
 
-func (s CaseMetadataService) normalizeCaseMutation(request CaseMutationRequest) (CaseMutationRequest, string, error) {
+type normalizedCaseMutation struct {
+	Request CaseMutationRequest
+	Digest  string
+}
+
+func (s CaseMetadataService) normalizeCaseMutation(request CaseMutationRequest) (normalizedCaseMutation, error) {
 	request.Binding.RequestID = strings.TrimSpace(request.Binding.RequestID)
 
 	request.Binding.Operator = strings.TrimSpace(request.Binding.Operator)
 	if err := request.Binding.Validate(); err != nil {
-		return request, "", err
+		return normalizedCaseMutation{Request: request}, err
 	}
 
 	if request.ProjectID == "" || !opsnamespace.Valid(request.Namespace) {
-		return request, "", errors.New("case mutation requires its target scope")
+		return normalizedCaseMutation{Request: request}, errors.New("case mutation requires its target scope")
 	}
 
 	if request.Metadata.SourcePath != "" {
 		relative, err := filepath.Rel(UserPath(s.projectDir), request.Metadata.SourcePath)
 		if err != nil {
-			return request, "", err
+			return normalizedCaseMutation{Request: request}, err
 		}
 
 		if _, err := s.caseMutationPath(relative); err != nil {
-			return request, "", err
+			return normalizedCaseMutation{Request: request}, err
 		}
 
 		request.Metadata.SourcePath = filepath.ToSlash(relative)
@@ -104,14 +111,14 @@ func (s CaseMetadataService) normalizeCaseMutation(request CaseMutationRequest) 
 
 	data, err := json.Marshal(request)
 	if err != nil {
-		return request, "", err
+		return normalizedCaseMutation{Request: request}, err
 	}
 
 	if len(data) > 64*1024 {
-		return request, "", errors.New("case mutation arguments exceed 64 KiB")
+		return normalizedCaseMutation{Request: request}, errors.New("case mutation arguments exceed 64 KiB")
 	}
 
-	return request, contenthash.Sum(data), nil
+	return normalizedCaseMutation{Request: request, Digest: contenthash.Sum(data)}, nil
 }
 
 func (s CaseMetadataService) withMutationLock(ctx context.Context, action func() error) (err error) {

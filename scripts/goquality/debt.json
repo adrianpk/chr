@@ -127,11 +127,6 @@
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/authoring_artifact_layout.go::authoringArtifactPath",
-      "signature": "func(opts AuthoringArtifactLayoutOptions) (string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/authoring_dump.go::fileAuthoringSessionRepository.prepareAuthoringDump",
       "signature": "func(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session AuthoringSession, body string) (AuthoringArtifactRef, []workflowstate.FileChange, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
@@ -145,26 +140,6 @@
       "id": "internal/core/authoring_prepare.go::fileAuthoringSessionRepository.prepareAuthoringOutputChanges",
       "signature": "func(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session *AuthoringSession, body string) (AuthoringArtifactRef, []workflowstate.FileChange, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
-    },
-    {
-      "id": "internal/core/authoring_request.go::normalizeAuthoringRequest",
-      "signature": "func(request AuthoringContinuationRequest) (AuthoringContinuationRequest, string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/authoring_request.go::fileAuthoringSessionRepository.readAuthoringReceipt",
-      "signature": "func(request AuthoringContinuationRequest, digest string) (AuthoringContinuationResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/case_mutation.go::CaseMetadataService.normalizeCaseMutation",
-      "signature": "func(request CaseMutationRequest) (CaseMutationRequest, string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/case_mutation_journal.go::CaseMetadataService.readCaseMutationReceipt",
-      "signature": "func(request CaseMutationRequest, digest string) (CaseMutationResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/evidence_strategy_checklist.go::evidenceStrategyChecklistBlock",

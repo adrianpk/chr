@@ -19,10 +19,12 @@ func (r *fileAuthoringSessionRepository) ContinueAuthoring(ctx context.Context, 
 		return result, errors.New("authoring accepts at most one current commit guard")
 	}
 
-	request, digest, err := normalizeAuthoringRequest(request)
+	normalized, err := normalizeAuthoringRequest(request)
 	if err != nil {
 		return result, err
 	}
+
+	request, digest := normalized.Request, normalized.Digest
 
 	var guard AuthoringCommitGuard
 	if len(guards) == 1 {
@@ -46,8 +48,10 @@ func (r *fileAuthoringSessionRepository) continueAuthoring(ctx context.Context, 
 		return AuthoringContinuationResult{}, err
 	}
 
-	retained, found, err := r.readAuthoringReceipt(request, digest)
-	if err != nil || found {
+	lookup, err := r.readAuthoringReceipt(request, digest)
+	retained := lookup.Result
+
+	if err != nil || lookup.Found {
 		return retained, err
 	}
 

@@ -189,31 +189,36 @@ func (s CaseMetadataService) caseJournalImage(change workflowstate.FileChange) (
 	return false, nil
 }
 
-func (s CaseMetadataService) readCaseMutationReceipt(request CaseMutationRequest, digest string) (CaseMutationResult, bool, error) {
+type caseMutationReceiptLookup struct {
+	Result CaseMutationResult
+	Found  bool
+}
+
+func (s CaseMetadataService) readCaseMutationReceipt(request CaseMutationRequest, digest string) (caseMutationReceiptLookup, error) {
 	path, err := s.caseMutationPath(caseMutationReceiptRef(request.Binding.RequestID))
 	if err != nil {
-		return CaseMutationResult{}, false, err
+		return caseMutationReceiptLookup{}, err
 	}
 
 	data, err := opsfile.Read(path)
 	if errors.Is(err, os.ErrNotExist) {
-		return CaseMutationResult{}, false, nil
+		return caseMutationReceiptLookup{}, nil
 	}
 
 	if err != nil {
-		return CaseMutationResult{}, false, err
+		return caseMutationReceiptLookup{}, err
 	}
 
 	var receipt caseMutationReceipt
 	if err := json.Unmarshal(data, &receipt); err != nil {
-		return CaseMutationResult{}, false, err
+		return caseMutationReceiptLookup{}, err
 	}
 
 	if err := validateCaseMutationReceipt(receipt, request, digest); err != nil {
-		return CaseMutationResult{}, false, err
+		return caseMutationReceiptLookup{}, err
 	}
 
-	return receipt.Result, true, nil
+	return caseMutationReceiptLookup{Result: receipt.Result, Found: true}, nil
 }
 
 func validateCaseMutationReceipt(receipt caseMutationReceipt, request CaseMutationRequest, digest string) error {

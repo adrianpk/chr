@@ -54,12 +54,12 @@ func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (Authoring
 		return AuthoringArtifactLayout{}, err
 	}
 
-	relativePath, fullPath, err := authoringArtifactPath(opts)
+	body, err := authoringArtifactPath(opts)
 	if err != nil {
 		return AuthoringArtifactLayout{}, err
 	}
 
-	collision, err := authoringArtifactCollision(fullPath, opts.AllowReplace)
+	collision, err := authoringArtifactCollision(body.Path, opts.AllowReplace)
 	if err != nil {
 		return AuthoringArtifactLayout{}, err
 	}
@@ -69,11 +69,11 @@ func PlanAuthoringArtifactLayout(opts AuthoringArtifactLayoutOptions) (Authoring
 			ID:          authoringArtifactID(opts),
 			Kind:        opts.Kind,
 			Role:        opts.Role,
-			Path:        relativePath,
+			Path:        body.RelativePath,
 			Description: strings.TrimSpace(opts.Description),
 		},
-		FullPath:  fullPath,
-		Dir:       filepath.Dir(fullPath),
+		FullPath:  body.Path,
+		Dir:       filepath.Dir(body.Path),
 		Collision: collision,
 	}, nil
 }
@@ -130,7 +130,7 @@ func EnsureAuthoringArtifactMetadata(projectDir string, ref AuthoringArtifactRef
 	return opscore.EnsureArtifactBodyMetadata(projectDir, ref.Path)
 }
 
-func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string, error) {
+func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (opscore.NamedArtifactPath, error) {
 	name := strings.TrimSpace(opts.Name)
 	if name == "" {
 		name = opts.Topic
@@ -139,9 +139,7 @@ func authoringArtifactPath(opts AuthoringArtifactLayoutOptions) (string, string,
 	fileName := authoringArtifactFileName(opts.SessionID, name)
 	artifactType := authoringArtifactType(opts.Kind)
 
-	body, err := opscore.NamedArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
-
-	return body.RelativePath, body.Path, err
+	return opscore.NamedArtifactBody(opts.ProjectDir, artifactType, strings.TrimSuffix(fileName, ".md"))
 }
 
 func authoringArtifactType(kind AuthoringArtifactKind) string {
