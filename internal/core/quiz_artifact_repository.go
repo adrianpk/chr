@@ -67,7 +67,7 @@ func QuizArtifactLayout(projectDir string, scope quizcore.Scope) (QuizArtifactPa
 		return scopedQuizArtifactLayout(projectDir, scope)
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -156,7 +156,7 @@ func (r *fileQuizArtifactRepository) prepareRawCaptureArtifact(state quizcore.Ru
 		return QuizArtifactPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -192,7 +192,7 @@ func (r *fileQuizArtifactRepository) writeCuratedNotes(ctx context.Context, note
 		return QuizArtifactPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(notes.Scope)
+	scopeID, err := quizcore.ScopeID(notes.Scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}
@@ -395,20 +395,6 @@ func quizScopeFromRuntime(state quizcore.RuntimeState) quizcore.Scope {
 	return quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug}
 }
 
-func quizScopeID(scope quizcore.Scope) (string, error) {
-	caseSlug := strings.TrimSpace(scope.CaseSlug)
-	if caseSlug == "" {
-		return "project", nil
-	}
-
-	clean := filepath.ToSlash(filepath.Clean(filepath.FromSlash(caseSlug)))
-	if clean == "." || clean == ".." || strings.Contains(clean, "/") {
-		return "", fmt.Errorf("quiz scope case slug must be a single path segment")
-	}
-
-	return clean, nil
-}
-
 func quizScopeName(caseSlug string) string {
 	if strings.TrimSpace(caseSlug) == "" {
 		return "project"
@@ -429,7 +415,7 @@ func quizRawText(value string) string {
 }
 
 func scopedQuizArtifactLayout(projectDir string, scope quizcore.Scope) (QuizArtifactPaths, error) {
-	id, err := quizScopeID(scope)
+	id, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return QuizArtifactPaths{}, err
 	}

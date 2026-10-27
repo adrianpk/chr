@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	acceptancecore "forge.adrianpk.com/chr/internal/core/authoring/acceptance"
 )
 
 // EvidenceGherkinContext describes project and ticket-level Gherkin policy.
@@ -132,7 +134,7 @@ func EvidenceDecisionMatrixRows() []EvidenceDecisionMatrixRow {
 }
 
 func acceptanceFeaturePaths(projectDir string) ([]string, error) {
-	acceptanceDir := filepath.Join(projectDir, ".chr", "default", AcceptanceFeatureDirectory)
+	acceptanceDir := filepath.Join(projectDir, ".chr", "default", acceptancecore.AcceptanceFeatureDirectory)
 	entries := make([]string, 0)
 
 	err := filepath.WalkDir(acceptanceDir, func(path string, entry fs.DirEntry, walkErr error) error {

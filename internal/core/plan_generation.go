@@ -40,7 +40,7 @@ func GeneratedPlanLayout(projectDir string, scope quizcore.Scope) (GeneratedPlan
 		return GeneratedPlanPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return GeneratedPlanPaths{}, err
 	}
@@ -68,7 +68,7 @@ func ArchivedPlanLayout(projectDir string, scope quizcore.Scope, archivedAt time
 		return ArchivedPlanPaths{}, fmt.Errorf("plan archive time is required")
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return ArchivedPlanPaths{}, err
 	}

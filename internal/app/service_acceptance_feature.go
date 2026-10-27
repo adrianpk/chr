@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	acceptancecore "forge.adrianpk.com/chr/internal/core/authoring/acceptance"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -25,7 +26,7 @@ type AcceptanceFeatureOperationResult struct {
 	Feature         string
 	FeatureRound    string
 	RejectionReason string
-	Check           core.AcceptanceFeatureCheckResult
+	Check           acceptancecore.AcceptanceFeatureCheckResult
 }
 
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
@@ -110,7 +111,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 		return s.acceptanceFeatureNonGeneratedResult(ctx, scope, modelRequest, response, feature)
 	}
 
-	artifact := core.AcceptanceFeatureArtifact{
+	artifact := acceptancecore.AcceptanceFeatureArtifact{
 		Scope:            scope,
 		SpecSlug:         specNodeSlug(specNode),
 		SpecPath:         specNode.RelativePath,
@@ -121,7 +122,7 @@ func (s service) generateAcceptanceFeature(ctx context.Context, scope quizcore.S
 		CreatedAt:        response.CreatedAt.UTC(),
 	}
 
-	paths, check, err := core.WriteAcceptanceFeature(ctx, s.projectContext.ProjectDir, artifact)
+	paths, check, err := acceptancecore.WriteAcceptanceFeature(ctx, s.projectContext.ProjectDir, artifact)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_rejected", map[string]string{
 			"case_slug": scope.CaseSlug,
@@ -242,7 +243,7 @@ func (s service) appendAcceptanceFeatureGenerationContextSections(sections []qui
 }
 
 func (s service) appendAcceptanceFeatureRoundContextSection(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
-	paths, err := core.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
+	paths, err := acceptancecore.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return nil, err
 	}
@@ -269,8 +270,8 @@ func (s service) appendAcceptanceFeatureRoundContextSection(sections []quizmodel
 	return sections, nil
 }
 
-func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope quizcore.Scope, request quizmodel.Request, response quizmodel.Response, feature generationcore.AcceptanceFeatureGeneration) (core.AcceptanceFeatureRoundPaths, error) {
-	notes := core.AcceptanceFeatureRoundNotes{
+func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope quizcore.Scope, request quizmodel.Request, response quizmodel.Response, feature generationcore.AcceptanceFeatureGeneration) (acceptancecore.AcceptanceFeatureRoundPaths, error) {
+	notes := acceptancecore.AcceptanceFeatureRoundNotes{
 		Scope:            scope,
 		Status:           feature.Status,
 		RejectionReason:  feature.RejectionReason,
@@ -282,19 +283,19 @@ func (s service) writeAcceptanceFeatureRoundNotes(ctx context.Context, scope qui
 
 	existing, err := s.existingAcceptanceFeatureRoundNotes(ctx, scope)
 	if err != nil {
-		return core.AcceptanceFeatureRoundPaths{}, err
+		return acceptancecore.AcceptanceFeatureRoundPaths{}, err
 	}
 
-	notes = core.MergeAcceptanceFeatureRoundAnswers(notes, existing)
+	notes = acceptancecore.MergeAcceptanceFeatureRoundAnswers(notes, existing)
 
-	paths, err := core.WriteAcceptanceFeatureRoundNotes(ctx, s.projectContext.ProjectDir, notes)
+	paths, err := acceptancecore.WriteAcceptanceFeatureRoundNotes(ctx, s.projectContext.ProjectDir, notes)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_acceptance_feature_round_notes_failed", map[string]string{
 			"case_slug": scope.CaseSlug,
 			"error":     err.Error(),
 		})
 
-		return core.AcceptanceFeatureRoundPaths{}, err
+		return acceptancecore.AcceptanceFeatureRoundPaths{}, err
 	}
 
 	s.appendPlanGenerationLog("generate_acceptance_feature_round_notes_written", map[string]string{
@@ -312,7 +313,7 @@ func (s service) existingAcceptanceFeatureRoundNotes(ctx context.Context, scope 
 		return "", err
 	}
 
-	paths, err := core.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
+	paths, err := acceptancecore.AcceptanceFeatureRoundLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
 		return "", err
 	}
@@ -343,7 +344,7 @@ func specNodeSlug(node core.WorkspaceNode) string {
 	return name[:len(name)-len(filepath.Ext(name))]
 }
 
-func rejectedAcceptanceFeatureResult(check core.AcceptanceFeatureCheckResult, err error) (AcceptanceFeatureOperationResult, error) {
+func rejectedAcceptanceFeatureResult(check acceptancecore.AcceptanceFeatureCheckResult, err error) (AcceptanceFeatureOperationResult, error) {
 	return AcceptanceFeatureOperationResult{
 		Message:         acceptanceFeatureResultMessage(generationcore.AcceptanceFeatureStatusRejected),
 		Status:          generationcore.AcceptanceFeatureStatusRejected,

@@ -12,9 +12,10 @@ are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
-| app | core, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
+| app | core, core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops, core/ops/namespace, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/telegram, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| core | core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
+| core | core/authoring/acceptance, core/authoring/generation, core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops, core/ops/file, core/ops/metadata, core/ops/namespace, core/ops/slug, core/project, core/quiz, core/quiz/model, core/quiz/openai, core/workflow/state, core/workspace, harness, harness/process |
+| core/authoring/acceptance | core/authoring/generation, core/ops, core/ops/metadata, core/quiz |
 | core/authoring/generation | core/quiz, core/workflow/state |
 | core/authoring/state | none |
 | core/configvalue | none |
@@ -108,7 +109,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-764 current non-test files under internal/core, their declared symbols,
+766 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -657,3 +658,16 @@ splitting/omission and permissive scalar fallback remain unchanged. There is no
 new YAML parser, schema, dependency or persistence authority. Production import
 checks keep this leaf limited to the standard library. Artifact-specific parser,
 publication and retry contracts remain separate.
+
+### Acceptance feature owner
+
+The acceptance-feature-generation reference and document-generation model define
+features as supporting evidence derived from an authoritative spec, with static
+checks before writing and separate focused clarification notes. T9.1 moves the
+existing implementation and all feature tests into core/authoring/acceptance.
+Its only production edges are shared generation values, ops layout/metadata and
+quiz scope. Model IO, context and generation admission remain in their existing
+owners. Private parser state stays local; root facades are removed by direct
+consumer qualification. The unchanged scope-path rule moves to quiz.ScopeID.
+The original feature tuple and public names are recorded at this mechanical
+checkpoint; their separate package contract step follows before PR readiness.

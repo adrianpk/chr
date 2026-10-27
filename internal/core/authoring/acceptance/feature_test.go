@@ -1,4 +1,4 @@
-package core
+package acceptance
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -362,7 +363,7 @@ func TestMergeAcceptanceFeatureRoundAnswersPreservesExistingAnswers(t *testing.T
 		},
 		SourceRequestID:  "request-1",
 		SourceResponseID: "response-1",
-		CreatedAt:        quizRuntimeTestTime(),
+		CreatedAt:        time.Date(2026, 5, 24, 15, 0, 0, 0, time.UTC),
 	}
 
 	existing := `# Acceptance Feature Round
@@ -409,7 +410,7 @@ func TestWriteAcceptanceFeatureRoundNotesWritesDefaultPrompts(t *testing.T) {
 		},
 		SourceRequestID:  "request-feature",
 		SourceResponseID: "response-feature",
-		CreatedAt:        quizRuntimeTestTime(),
+		CreatedAt:        time.Date(2026, 5, 24, 15, 0, 0, 0, time.UTC),
 	}
 
 	paths, err := WriteAcceptanceFeatureRoundNotes(context.Background(), projectDir, notes)
@@ -458,7 +459,7 @@ func validAcceptanceFeatureArtifact() AcceptanceFeatureArtifact {
 		SpecPath:    ".chr/default/specs/article-authoring-spec.md",
 		UseCaseSlug: "article-authoring",
 		Body:        "Feature: Article authoring\n",
-		CreatedAt:   quizRuntimeTestTime(),
+		CreatedAt:   time.Date(2026, 5, 24, 15, 0, 0, 0, time.UTC),
 	}
 }
 

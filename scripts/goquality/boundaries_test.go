@@ -12,6 +12,8 @@ func TestLeafDependencies(t *testing.T) {
 		name, path, source string
 		blocked            bool
 	}{
+		{"acceptance coordinator", "internal/core/authoring/acceptance/feature.go", "package acceptance\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"acceptance payload", "internal/core/authoring/acceptance/feature.go", "package acceptance\nimport _ \"" + coreImportPath + "authoring/generation\"\n", false},
 		{"metadata coordinator", "internal/core/ops/metadata/scalar.go", "package metadata\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"file coordinator", "internal/core/ops/file/io.go", "package file\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"file bounds", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "workflow/state\"\n", false},

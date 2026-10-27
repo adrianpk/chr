@@ -28,7 +28,7 @@ func GeneratedPlanTrackingLayout(projectDir string, scope quizcore.Scope) (Gener
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}
@@ -66,7 +66,7 @@ func WriteGeneratedPlanTracking(
 		return GeneratedPlanTrackingPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(tracking.Scope)
+	scopeID, err := quizcore.ScopeID(tracking.Scope)
 	if err != nil {
 		return GeneratedPlanTrackingPaths{}, err
 	}

@@ -44,7 +44,7 @@ func GeneratedSpecLayout(projectDir string, scope quizcore.Scope) (GeneratedSpec
 		return GeneratedSpecPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return GeneratedSpecPaths{}, err
 	}

@@ -14,13 +14,18 @@ owners while preserving artifact-specific approval, source and retry contracts.
 
 ## Delivered Behavior
 
+Core/authoring/acceptance now owns feature artifacts, static Gherkin checks,
+canonical feature/round-note paths, rendering, answer retention and existing
+writes. Its consumers import it directly. Quiz owns the same ScopeID path rule.
+The shared generation payloads retain their existing separate owner.
+
 The shared operational artifact layout and envelope behavior now belongs to
 core/ops. Authoring, workflow and application callers import that owner directly.
 Namespace precedence, canonical paths, ID allocation, metadata and private-file
 exclusion retain their original behavior. Workflow keeps allocator reclamation,
 owner proofs, guarded release and durable transaction ownership.
 
-This is the initial T9.1 prerequisite. The complete authoring move, six duplicate
+This is the initial T9.1 prerequisite. The complete session/repository move, six duplicate
 comparisons, generation sharing, signature conversions and guided ports remain
 in progress or pending. No Slice 9 completion or PR readiness is claimed.
 
@@ -35,11 +40,19 @@ Four ops production files and their two focused test files move with 41 original
 declaration hashes retained in the move ledger. The two shared project path and
 replacement files add three original declarations, for 44 recorded move entries. Bounded file IO, advisory lock acquisition and the
 retained FileChange value add seven extracted declarations, for 51 total entries. Six shared metadata scalar declarations bring the ledger
-to 57 entries. The current dependency map and
+to 57 entries. Acceptance feature relocation and the original ScopeID rule
+bring the current ledger to 96 entries. The current dependency map and
 file-owner inventory include this prerequisite. Module import checks prevent
 ops from importing authoring, root core or workflow policy.
 
 ## Contracts Added or Changed
+
+The feature contract in docs/reference/acceptance-feature-generation.md and the
+Markdown-first document model remain authoritative. A spec stays the source of
+truth; acceptance features remain supporting evidence with mandatory static
+checks before writing. The mechanical move keeps existing public names and the
+write-result tuple until the following separate contract step. No provider,
+coordinator, generic pipeline or root forwarding facade is introduced.
 
 Core/ops/metadata owns the original shared scalar quoting, bracketed lists and
 optional timestamps. Its six functions preserve UTC/zero-time behavior, trimming,
@@ -113,6 +126,9 @@ seven and the same one external-interface exception.
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ops/metadata ./internal/core ./internal/app ./scripts/goquality`
   — passed with zero issues after scalar extraction.
+
+- `go test ./internal/core/authoring/acceptance ./scripts/goquality ./internal/core ./internal/app -run '^Test(Acceptance|ValidateAcceptance|CheckAcceptance|WriteAcceptance|MergeAcceptance|DecodeQuizModelFeature|LeafDependencies|Service(Acceptance|Spec|Plan)|QuizArtifact)' -count=1 -timeout=3m`
+  — passed at the mechanical acceptance/scope move; 301 exact debts retained.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified

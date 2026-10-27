@@ -28,7 +28,7 @@ func QuizDraftSpecLayout(projectDir string, scope quizcore.Scope) (QuizDraftSpec
 		return QuizDraftSpecPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return QuizDraftSpecPaths{}, err
 	}

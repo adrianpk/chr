@@ -1,4 +1,4 @@
-package core
+package acceptance
 
 import (
 	"context"
@@ -87,7 +87,7 @@ func AcceptanceFeatureLayout(projectDir string, scope quizcore.Scope) (Acceptanc
 		return AcceptanceFeaturePaths{}, err
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return AcceptanceFeaturePaths{}, err
 	}
@@ -111,7 +111,7 @@ func AcceptanceFeatureRoundLayout(projectDir string, scope quizcore.Scope) (Acce
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(scope)
+	scopeID, err := quizcore.ScopeID(scope)
 	if err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
@@ -153,7 +153,7 @@ func WriteAcceptanceFeature(
 		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
 	}
 
-	scopeID, err := quizScopeID(feature.Scope)
+	scopeID, err := quizcore.ScopeID(feature.Scope)
 	if err != nil {
 		return AcceptanceFeaturePaths{}, AcceptanceFeatureCheckResult{}, err
 	}
@@ -192,7 +192,7 @@ func WriteAcceptanceFeatureRoundNotes(ctx context.Context, projectDir string, no
 		return AcceptanceFeatureRoundPaths{}, err
 	}
 
-	scopeID, err := quizScopeID(notes.Scope)
+	scopeID, err := quizcore.ScopeID(notes.Scope)
 	if err != nil {
 		return AcceptanceFeatureRoundPaths{}, err
 	}
