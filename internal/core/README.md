@@ -15,8 +15,12 @@ Adapters such as `internal/app` and `internal/tui` may call this package,
 but this package should not import UI, CLI, or transport adapters.
 
 Agent callers depend on `internal/harness` contracts. App injects the concrete
-generation runner and worker command adapter. Core retains prompts, schemas,
-semantic validation, artifact layout, tracing and workflow execution authority.
+generation runner and worker command adapter. Core capability owners retain prompts, schemas and semantic validation.
+`core/harness` owns binding/profile/selection identity. Its `host`, `runtime`,
+`daemon` and `trace` children own retained generation execution, runtime plans,
+lifecycle state and bounded tracing respectively. Native configuration and
+workflow composition retain their actual revision, authorization and execution
+authority; consumers import the capability owners directly.
 
 ## API
 

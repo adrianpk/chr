@@ -1,6 +1,6 @@
 # Slice 10: Harness contracts and runtime lifecycle
 
-Status: drafting
+Status: reviewing
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -9,380 +9,102 @@ PR: pending
 
 ## Purpose
 
-Separate adapter-neutral execution from project admission, binding and host
-lifecycle policy while preserving frozen identities and bounded child resources.
+Separate adapter-neutral runners from project binding, configuration admission
+and host execution policy while preserving retained identities and resources.
 
 ## Delivered Behavior
 
-Binding sealing and validation now live beside the retained binding values in
-core/harness. Capability and binding hashes use the original JSON representation;
-profile-name and selection-digest checks have one owner. Root and app consumers
-call the owner directly. Native command fencing retains its original workflow
-errors and execution checks.
-
-Runtime planning consumes its existing named artifact path set directly; the
-seven-result facade is removed. Canonical layout selection has a named outcome.
-Pi preparation returns distinct credential, call-resource, model-mount, container
-and publication records. Expected absence and publication stability remain
-separate from failure. Output limits, digest guards, credential refresh exclusion,
-cleanup ordering and finite deadlines are unchanged.
-
-The bridge derives and defers its own cancellation before input reading. The
-input watcher receives that exact cancellation handle and returns prompt/error;
-there is no stored operation context or context hidden inside a result record.
-The real malformed-input test now verifies cancellation on every error branch.
-The process exchange groups its two owned spools and retains explicit context,
-cancellation and protocol handler arguments.
-
-Executable freezing now returns one host-only value pairing its retained public
-reference with its private resolved command. Binding fields and serialized
-executable/argv hashes are unchanged; the new value is never serialized into a
-retained binding. Every native and application consumer uses its explicit fields.
-
-Profile parsing, role references, readiness/selection projections and generation
-binding sealing/validation now live under core/harness. Workspace configuration
-field interpretation and whole-image Revision stay with their actual configuration
-owner. Three profile tests move beside the parser. The 29 moved declarations and
-tests match their source preimages after namespace qualification and equivalent
-standard-library enum membership. No serialized field or profile hash changes.
-
-Generation selection now projects its ID and binding without private host data.
-Receipt lookup retains Found separately from read/decode/conflict errors. Measured
-usage retains unknown/partial/known status and absent counters, while checklist
-observation retains a nonfatal parse problem. Their callers consume named fields
-at the same original observation and guarded mutation points.
-
-Generation freezing now accepts one request for project/operation identity and
-host routing, with context and resolution kept explicit. The original zero-or-one
-location check, retained lookup before current selection, nested configuration
-locks, config revision/profile guards, executable checks and artifact write order
-remain. Preparation and its owned resolver return one binding/launch value;
-Codex, Pi and legacy API paths keep their distinct readiness and dispatch rules.
-No operation context is stored in either new record.
-
-Application selection now receives one coherent selection input; the complete
-configuration remains available to the original legacy branch. Pi readiness and
-worker launch return named local readiness/image and command/runtime/protocol
-values. Original role, profile, image/architecture, private-resource and error
-checks remain in order. Invocation helpers reuse the existing complete
-HarnessInvocationOptions instead of repeating its five fields positionally.
-
-The baseline prepareWorkflowHarness result was already a conforming typed
-WorkflowHarnessResolution from an earlier approved prerequisite; current direct
-binding/launch consumers and native regressions confirm that disposition.
-
-The original configuration path guard and config.lock owner are shared workspace
-filesystem operations. Native upgrade, selection changes and generation admission
-call that owner directly, preserving path checks, permissions, locking order,
-callback timing and joined unlock/close errors. Three exact function preimages
-are recorded. Workspace dependency guards admit only the concrete file owner;
-coordinator imports remain rejected.
-
-Daemon lifecycle values, start guards, SQLite state persistence and enabled-project
-classification now live under core/harness/daemon. Application and TUI consumers
-call that owner directly. The constructor uses the existing database.DataDirectory
-port; SQL text, state fields, timing, stop requests and failure messages are
-unchanged. Four existing test files follow their owner; the real user-environment
-integration stays beside its environment, and package fixtures use production
-migration assets against owned in-memory databases. The 68 moved declarations and
-tests retain their source preimages after namespace qualification.
-
-Host executable resolution, streaming fingerprints, retained command-image
-validation and worker executable checks now live under core/harness/host. The
-parent harness owner contains the original pure binding copy. Native and app
-consumers call each owner directly; no root forwarding API remains. The existing
-large, symlink, FIFO, directory and oversized executable tests follow their host
-owner. Native admission still owns its distinct omitted-command request case.
-
-Application generation binding now returns one boundGeneration value containing
-selected adapters and the admitted operation, without an operation context. Its
-callers derive contexts from their own parents. Model IDs, source observations,
-quiz transitions, guided reads and review dispatch receive that explicit context.
-The guarded quiz/spec paths no longer copy their writer context into a service.
-The original binding, protocol checks, fallback behavior and finite budgets remain.
-A real Pi peer regression cancels one caller and then dispatches the same admitted
-operation from a fresh caller; capacity peers retain independent cancellation.
-
-Shared operator/userspace resolution now lives in workspace, and bounded model
-traces live in harness/trace. This prerequisite removes the root dependency from
-host trace recording. Existing configuration, redaction, payload retention,
-rotation, path validation and environment contracts are unchanged; 49 declarations
-and tests match their pre-move source after qualification. The root quiz integration
-observes the retained llm.ndjson filename without a test-only exported constant.
-
-Generation admission now has an explicit boundary between native configuration
-and retained host lifecycle. The native configuration operation loads the actual
-locked image and installs its own revision/profile/purpose fence; a preparer
-cannot replace that approval. The host validates operation values before calling
-that fence, then checks executable identity and writes the retained image. Nested
-locks, retained lookup before live configuration and error ordering remain.
-Native configuration tests inspect the public file layout and independently
-round-trip the exact wire image before checksum-preserving corruption.
-
-Retained generation operations, private artifact IO, context projections,
-run/usage metadata, agent execution and concrete quiz host adapters now live in
-harness/host. Sixty declarations match their pre-move bodies after namespace
-qualification. Native configuration keeps the actual loader and admission fence;
-StructuredModelRequest keeps its concrete projection into host output validation.
-Consumers use host types and operations directly, without root type aliases.
+- Core harness owns exact binding/profile/selection values, semantic revisions,
+  capability sealing and bounded private profile loading. Neutral runner/provider
+  packages retain their independent contracts and dependency direction.
+- Harness host owns executable fingerprints, frozen launch admission, retained
+  generation operations, artifact IO, model dispatch, usage/validation metadata
+  and concrete authoring/quiz host adapters. Runtime owns launch plans, artifact
+  paths, Docker commands, filesystem checks, mounts and explicit instructions.
+- Daemon owns lifecycle/project loading and SQLite heartbeat/stop state. Trace
+  owns bounded, redacted JSONL records and rotation. Workspace owns shared config
+  path/lock IO, operator userspace and execution workspace policy values.
+- Generation callers retain selected adapters and operation values and derive
+  contexts from their own callers. The Pi bridge owns cancellation and cleanup;
+  process exchange groups its owned bounded output spools.
+- Runtime retains shared references to existing admitted capacity files. Native
+  workflow retains inherited-slot validation, identity/limits and coordinated
+  lock conversion. Cancellation and early errors release owned resources.
 
 ## Implementation Notes
 
-The approved inventory assigns 38 signature occurrences and 30 initial root
-files to this slice. Each current owner and consumer is checked before moving.
-The seven binding and 29 profile/selection declaration/test preimages in
-slice-10-moves.csv match after namespace
-qualification and the equivalent standard-library membership predicate.
-Dependency guards allow only the existing neutral capability and exact digest
-owner; workflow/coordinator imports remain forbidden.
+Moves and package naming are separate commits. App, native configuration,
+workflow and view consumers import the actual owners directly. There are no
+migration aliases or root forwarding APIs for moved capabilities. The redundant
+response trace export now exposes the original implementation directly.
 
-A separate naming commit shortens the moved types and operations to Profile,
-Selection, Readiness, SelectionConfig, GenerationBinding, LoadProfiles,
-ProfileRevision, SealGenerationBinding and ValidateGenerationBinding. Native
-configuration-only files now use configuration names. Direct consumers retain
-all field names and JSON tags; the preimage ledger follows each current name.
+The [move ledger](../../../plan/code-quality-remediation-slice-10-moves.csv)
+reconciles 327 declaration/test preimages and constant specifications after
+owner qualification/naming. All current hashes resolve to actual declarations.
+The [signature dispositions](../../../plan/code-quality-remediation-slice-10-dispositions.csv)
+cover all 38 assigned occurrences: 31 fixed and seven cohesive five-input
+contracts retained. Two additional owned resolver contracts are reconciled in
+[the contract ledger](../../../plan/code-quality-remediation-slice-10-contracts.csv).
+Production policy reports 9308 declarations, 207 exact debts, ceiling seven and
+one unchanged external exception.
 
-A separate naming commit exposes workspace.ConfigPath and WithConfigLock for
-those shared filesystem operations. Original error messages, authority decisions
-and configuration interpretation remain at their existing boundaries. Native
-upgrade and host consumers use the shared operations directly.
+The [boundary ledger](../../../plan/code-quality-remediation-slice-10-boundaries.csv)
+records actual flag meanings and retained native composition. Full WorkspaceConfig
+parsing/revision, authorized selection changes/journals, native generation fences,
+workspace template initialization, execution diagnostics, ticket/evidence context
+and workflow capacity remain with their actual owners. These implementations
+compose concrete types and authority; they are not compatibility facades.
 
 ## Contracts Added or Changed
 
-Pure binding validation and lexical identity predicates moved without a root
-forwarding API. A separate naming commit shortens the public contracts to
-harness.SealBinding, ValidateBinding and ValidProfileName; the focused binding,
-selection and wire regressions passed again after that rename.
+Named runtime path/layout, executable, generation preparation/selection, usage,
+readiness, launch command and private Pi resource values replace repeated inputs
+and tuples while preserving found/unknown/partial states separately from errors.
+The same parent context reaches model dispatch and guarded quiz/spec/review paths;
+no operation context is stored in the bound generation result.
+
+Bindings and generation records preserve JSON field order/tags, checksum/hash
+bytes, profile/capability identity, file modes, bounds and original error meanings.
+The native config bridge independently fences revision/profile/purpose under the
+original lock; a preparer cannot substitute a forged successful admission callback.
+An independent wire fixture verifies exact encoded bytes before semantic corruption
+and checksum repair. Existing retained-operation, process-restart and selection
+journal/receipt tests exercise the real host/configuration boundary.
+
+Runtime and workspace retain enum/default strings, canonical/private artifact
+paths, Docker argv and mounts. Daemon SQL/state semantics are unchanged. CLI
+select/clear, file-created outcomes, API/runner dispatch and known usage retain
+their distinct binary contracts and actual call-path coverage.
 
 ## Files of Interest
 
-- `internal/core/harness/`: existing binding values and planned project policy.
-- `internal/harness/`: existing adapter-neutral execution and process owners.
+- `internal/core/harness/` and its host/runtime/daemon/trace children, each with
+  direct dependencies and package documentation.
+- `internal/core/workspace/` and `project/repository_directory.go` for shared
+  configuration/identity/filesystem contracts.
+- `internal/core/config_generation.go`, `config_harness_selection_*.go`,
+  `workflow_runtime_reservation.go` and `internal/app/service_harness_generation.go`
+  for concrete configuration, admission and caller-context composition.
+- `scripts/goquality/boundaries.go` for enforced child-to-parent dependency
+  direction; `scripts/goquality/debt.json` retains only exact remaining debt.
 
 ## Validation
 
-Slice 9 closure uses its existing
-three-command controller evidence at `0ce066b1599b55f6efc3f151bb960a74b75d5e91`.
-
-Focused implementation checks passed:
-
-- `go test ./internal/core/harness ./internal/core ./internal/app -run '^Test(HarnessBinding|HarnessSelection|QualityRecordWire)' -count=1 -timeout=3m`
-- `go test ./scripts/goquality -run '^Test' -count=1`
-- `make check-go-style`: 9304 declarations, ceiling seven, 237 debts, one external exception.
-
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`
-
-The signature disposition ledger records 31 fixed occurrences and seven cohesive
-five-input contracts. All 38 assigned occurrences now have a concrete disposition.
-Together with the two additional owned resolver contracts, these changes remove
-30 exact debt allowances: 207 remain, with ceiling seven and one external
-exception unchanged. No migration debt or broader allowance is introduced.
-
-Focused runtime/resource and concurrency checks passed:
-
-- `go test ./internal/harness/pi ./internal/harness/process ./internal/core ./internal/app -run '^Test(Pi|AgentRunProcess|RuntimePlan|QualityRecordWire)' -count=1 -timeout=3m`
-- `go test ./internal/core ./internal/app ./internal/harness/pi ./internal/harness/codex -run '^Test(PlanRuntime|ValidateRuntime|RuntimeArtifactCleanup|HarnessBinding|QualityRecordWire|PiWorkerInput|PiWorkerPreparation|PiGenerationResources|PiGenerationResourceIdentity|Codex)' -count=1 -timeout=3m`: Codex compiled with no matching tests; runtime paths, resources and bridge preparation exercised directly.
-- `go test -race ./internal/harness/pi ./internal/harness/process -run '^Test(PiWorkerConnection(Bounds)?|PiCredentialRefresh(Failure|Reject|Deadline|Resources|Canceled|Home)?|PiTransportDriver|AgentRunProcess(Streams|Cancellation))$' -count=1 -timeout=3m`
-- `make check-go-style`: 9303 production declarations, 227 debts, unchanged ceiling and external exception.
-
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`: zero issues.
-
-Executable preparation checks passed:
-
-- `go test ./internal/core ./internal/app -run '^Test(HarnessBinding|HarnessGenerationBinding|HarnessGenerationIdentity|HarnessGenerationCommand|ServiceHarness|PiWorkerPreparation|QualityRecordWire)' -count=1 -timeout=3m`
-
-- `make check-go-style`: 9303 declarations, ceiling seven, 226 exact debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
-
-Profile owner move checks passed:
-
-- `go test ./internal/core/harness ./internal/core ./internal/app ./internal/tui ./internal/webui -run '^Test(Harness|ServiceHarness|QualityRecordWire|TelegramHarness|WebHarness)' -count=1 -timeout=3m`: TUI compiled with no matching tests; domain, native, app and Web checks passed.
-
-Profile naming checks passed:
-
-- `go test ./internal/core/harness ./internal/core ./internal/app -run '^Test(HarnessSelection|HarnessGenerationBinding|QualityRecordWire|ServiceHarness)' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app ./internal/tui ./internal/webui`: zero issues.
-
-Observation checks passed:
-
-- `go test ./internal/core/harness ./internal/core ./internal/app -run '^Test(HarnessGeneration|HarnessSelection|HarnessBinding|HarnessRun|WorkerContext|BuildWorker|QualityRecordWire|ServiceHarness|TelegramHarness)' -count=1 -timeout=3m`
-- `make check-go-style`: 9303 declarations, ceiling seven, 222 debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
-
-Generation input/preparation checks passed:
-
-- `go test ./internal/core ./internal/app -run '^Test(HarnessGeneration|HarnessBinding|QualityRecordWire|ServiceHarness|PiGeneration|PlanContextualQuiz|HarnessAuthoringQuiz|TelegramHarness)' -count=1 -timeout=3m`
-- `make check-go-style`: 9303 declarations, ceiling seven, 213 debts, one external exception. The first checks identified two resolved resolver/callback allowances; their exact stale entries were removed and recorded in slice-10-contracts.csv.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
-
-Selection and invocation checks passed:
-
-- `go test ./internal/core ./internal/app -run '^Test(HarnessSelection|HarnessBinding|HarnessInvocation|HarnessGeneration|ServiceHarness|PiWorkerInput|PiWorkerPreparation|PiWorkerContainer|QualityRecordWire|TelegramHarness|PlanContextualQuiz|HarnessAuthoringQuiz)' -count=1 -timeout=3m`
-- `go test ./internal/core -run '^TestNewHarnessInvocation' -count=1 -timeout=3m`
-- `make check-go-style`: 9303 declarations, ceiling seven, 208 debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
-
-Shared configuration filesystem checks passed:
-
-- `go test ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality -run '^Test(WorkflowUpgrade|WorkspaceConfig|HarnessSelection|HarnessGeneration|HarnessBinding|QualityRecordWire|ServiceHarness|Leaf|Dependency)' -count=1 -timeout=3m`
-- `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
-
-Configuration API naming check passed:
-
-- `go test ./internal/core/workspace ./internal/core ./internal/app -run '^Test(WorkflowUpgrade|HarnessSelection|HarnessGeneration)' -count=1 -timeout=3m`
-
-Daemon owner move checks passed:
-
-- `go test ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(ValidateDaemon|EvaluateDaemon|LoadDaemon|DaemonState|NewDaemon|Daemon|Leaf)' -count=1 -timeout=3m`: TUI compiled; lifecycle, persistence, native/application and dependency checks passed.
-- `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
-
-A separate naming commit exposes State, Status, Repository, StartGuardDecision,
-Project and their lifecycle operations under the daemon namespace. Direct
-consumers and repository implementations use those names; retained strings and
-SQL remain unchanged.
-
-- `go test ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(ValidateDaemon|EvaluateDaemon|LoadDaemon|DaemonState|NewDaemon|Daemon|Leaf)' -count=1 -timeout=3m`: all selected checks passed; TUI compiled.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
-
-Executable owner move checks passed:
-
-- `go test ./internal/core/harness/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessBinding|HarnessGeneration|HarnessSelection|QualityRecordWire|ServiceHarness|Leaf)' -count=1 -timeout=3m`
-- `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
-
-Executable API naming check passed:
-
-The separate naming commit exposes host.FreezeExecutable, ExecutableHash,
-CheckCommandImage, CheckExecutable and ValidateBindingCommand, and the pure
-harness.CloneBinding. Twelve declaration/test preimages still match; direct
-consumers and the baseline disposition follow the moved operation.
-
-- `go test ./internal/core/harness/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessBinding|HarnessGeneration|HarnessSelection|QualityRecordWire|ServiceHarness|Leaf)' -count=1 -timeout=3m`
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
-
-Generation caller context checks passed:
-
-- `go test ./internal/app -run '^Test(HarnessGenerationCallerContext|HarnessGenerationBinding|HarnessJourney|PiGeneration|GuidedUseCase(Spec|Quiz|Plan|Admission)|TelegramHarness)' -count=1 -timeout=3m`
-- `go test ./internal/app -run '^Test(AgentWork|StartAgent|Work|FastQuiz|Quiz|Generate|Spec|Plan|Dump)' -count=1 -timeout=3m`
-- `go test -race ./internal/app -run '^Test(HarnessGenerationCallerContext|PiGenerationCapacity)$' -count=1 -timeout=3m`
-- `make check-go-style`: 9304 declarations, ceiling seven, 207 exact debts, one external exception.
-
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/app`: zero issues.
-
-Workspace and trace owner move checks passed:
-
-- `go test ./internal/core/workspace ./internal/core/harness/trace ./internal/core ./internal/app ./scripts/goquality -run '^Test(ResolveProjectUserspace|EnsureProjectUserspace|IsValidOperatorID|LoadLLMTrace|WriteLLMTrace|RecordLLMTrace|HarnessGeneration|QualityRecordWire|Leaf)' -count=1 -timeout=3m`
-- `make check-go-style`: 9304 declarations, ceiling seven, 207 exact debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace ./internal/core/harness/trace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
-
-A separate naming commit exposes workspace.Userspace, ResolveUserspace,
-EnsureUserspace and ValidOperatorID, and trace.Config, LoadOptions, Load, Record
-and Write. The same focused owner/native/app checks and strict lint passed after
-renaming; all 49 preimages remain reconciled with unchanged wire/env values.
-
-Generation configuration port checks passed:
-
-- `go test ./internal/core ./internal/app -run '^Test(HarnessGeneration|HarnessBinding|HarnessSelection|QualityRecordWire|PiGeneration|HarnessJourney)' -count=1 -timeout=3m`
-- `go test ./internal/core -run '^TestHarnessGeneration(BindingFreeze|BindingCorruption|ConfigFence)$' -count=1 -timeout=3m`
-- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app`: zero issues.
-
-Generation host move checks passed:
-
-- `go test ./internal/core/harness/host ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessGeneration|HarnessBinding|HarnessSelection|QualityRecordWire|PiGeneration|HarnessJourney|Leaf)' -count=1 -timeout=3m`
-- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/host ./internal/core ./internal/app ./scripts/goquality`: zero issues.
-
-The separate generation naming commit exposes host.GenerationOperation,
-GenerationPreparation, GenerationLaunch, GenerationLocation, GenerationFreezeInput,
-GenerationResolver, FreezeGeneration, WithGeneration, RunMetadata and RunUsage.
-Concrete QuizGeneration and AuthoringQuizQuestionProvider adapters keep their
-existing contracts. The same host/native/app/wire regressions, production style
-check and strict lint passed after naming; all 60 source declarations reconcile.
-
-Runtime planning move checks passed:
-
-- `go test ./internal/core/harness/runtime ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality -run '^Test(PlanRuntime|ValidateRuntime|NewHarnessInvocation|WorkWorkspace|WorktreePlan|WorkReadiness|RuntimeArtifactCleanup|RuntimeInit|PiWorkerRuntime|QualityRecordWire|Leaf)' -count=1 -timeout=3m`
-- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
-
-The runtime owner now contains plans, artifact layouts, Docker command assembly
-and filesystem validation. Workspace owns the shared execution workspace policy
-values, defaults and validators; native configuration parsing stays with its
-actual configuration owner. Eighty-five moved declarations and constant
-specifications reconcile exactly after owner qualification. Runtime tests own
-their small filesystem fixture; context materializers import ContainerProjectPath
-directly. No compatibility alias or new policy exception was introduced.
-
-Generation lifecycle concurrency checks passed:
-
-- `go test -race ./internal/core ./internal/app -run '^Test(HarnessGenerationBindingSelectionOrder|HarnessGenerationCallerContext|PiGenerationCapacity)$' -count=1 -timeout=3m`
-
-The separate runtime naming change exposes Config, Plan, PlanOptions,
-ResolvePlan, Invocation, Command, NewInvocation and ValidationResult in the
-runtime namespace. Workspace exposes ExecutionConfig, ExecutionMode, BasePolicy
-and CleanupPolicy with explicit default/validation operations. The same focused
-runtime/native/app/dependency tests and production signature check passed; all
-85 declaration/constant preimages remain reconciled.
-
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/runtime ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
-
-Worker resource move checks passed:
-
-- `go test ./internal/core/harness/runtime ./internal/core/project ./internal/core ./internal/app ./scripts/goquality -run '^Test(PiWorker|WorkflowCoordinator|WorkflowIntegrationCoordinator|Leaf)' -count=1 -timeout=3m`
-- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
-
-Runtime owns explicit checkout/Git metadata mounts, bounded project instructions
-and shared reservation lifetime. Project owns the existing Git common-directory
-lookup consumed by runtime and workflow admission. Native capacity code retains
-actual FD3/FD5 identity checks, slot numbering and guarded lock conversion.
-Thirteen source/test preimages reconcile; existing no-follow, link, size, UTF-8,
-cancellation and early-close behavior is unchanged.
-
-A separate naming commit exposes runtime.WorkerMounts, WorkerInstructions,
-Reservation and HoldReservation. The native capacity implementation is named
-workflow_runtime_reservation.go; it retains its actual authority and behavior.
-The same focused owner/native/app/dependency tests and production signature
-policy pass after naming, with these additional successful checks:
-
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/runtime ./internal/core/project ./internal/core ./internal/app ./scripts/goquality`: zero issues.
-- `go test -race ./internal/core/harness/runtime ./internal/core -run '^Test(PiWorkerIsolation(Reservation|Canceled)|WorkflowCoordinatorCopies)$' -count=1 -timeout=3m`: native reservation cancellation and retained-slot checks passed; runtime compiled.
-
-Selection value move checks passed:
-
-- `go test ./internal/core/harness ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessSelection|HarnessBinding|HarnessGenerationConfigFence|QualityRecordWire|Leaf)' -count=1 -timeout=3m`
-- `make check-go-style`: 9309 declarations, ceiling seven, 207 exact debts, one external exception.
-
-Pure selection audit and snapshot values now live in core/harness; two exact
-declaration preimages preserve embedded fields, order and JSON tags. The native
-configuration owner retains actual full-image revision, authorization, guarded
-change/recovery and bounded receipts.
-
-The separate selection naming commit exposes harness.SelectionAudit and
-SelectionSnapshot. Native selection files are named config_harness_selection_*
-to reflect their actual whole-image transaction owner. The same selected tests
-and production signature checks pass after naming; pinned strict lint passes:
-
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness ./internal/core ./internal/app ./scripts/goquality`: zero issues.
-
-Real flag and wrapper call-path checks passed:
-
-- `go test ./internal/core/harness/host ./internal/core/harness/trace ./internal/core ./internal/app ./internal/harness/pi -run '^Test(HarnessGeneration|StructuredHarness|RuntimeInit|HarnessSelectionCLI|PiTransportUsage|RecordLLMTrace|WriteLLMTrace|LoadLLMTrace)' -count=1 -timeout=3m`
-- `make check-go-style`: 9308 declarations, ceiling seven, 207 exact debts, one external exception.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/host ./internal/core ./internal/app ./internal/harness/pi`: zero issues.
-
-The boundary ledger records binary CLI command kind, filesystem creation outcome,
-API/runner selection and measurement validity as distinct real contracts. The
-redundant response trace forwarder is removed; internal host and external quiz
-adapters now invoke the same implementation directly. The move ledger retains
-327 verified declarations/constant specifications after removing that facade.
-Native asset initialization, configuration transactions, execution diagnostics,
-ticket context and capacity admission retain their actual composition owners,
-with explicit dependencies rather than compatibility re-exports.
+Task checks passed for real profile/config/selection journals and receipts,
+executable files, retained generation/restart/metadata, workspace/runtime paths,
+SQLite daemon lifecycle, trace redaction/rotation, CLI/service adapters and
+strict pinned lint. Focused race checks passed for caller cancellation/retry,
+shared provider capacity, process/Pi cleanup and retained reservation lifetime.
+
+Controller evidence is keyed to the exact clean PR HEAD and this ordered final
+command list, with required repository commands first:
+
+- `make verify`
+- `go test ./internal/harness/... ./internal/core/harness/... ./internal/core/workspace ./internal/core ./internal/app ./scripts/goquality -run '^Test(Harness|AgentRun|Pi|StructuredHarness|Runtime|PlanRuntime|ValidateRuntime|NewHarnessInvocation|WorkWorkspace|WorktreePlan|WorkReadiness|WorkerContext|MaterializeWorkerContext|ResolveProjectUserspace|EnsureProjectUserspace|IsValidOperatorID|LoadLLMTrace|WriteLLMTrace|RecordLLMTrace|Daemon|ValidateDaemon|EvaluateDaemon|LoadDaemon|NewDaemon|WorkflowCoordinator|WorkflowIntegrationCoordinator|QualityRecordWire|Leaf|GuidedUseCase(Spec|Quiz|Plan|Admission))' -count=1 -timeout=3m`
+- `go test -race ./internal/harness/process ./internal/harness/pi ./internal/core ./internal/app -run '^Test(AgentRunProcess(Cancellation|Streams|Bounds|Reaper)|PiTransport(Cancellation|Usage)|PiCredentialRefresh(Canceled|Deadline)|PiWorkerIsolation(Reservation|Canceled)|HarnessGenerationBindingSelectionOrder|HarnessGenerationCallerContext|PiGenerationCapacity)$' -count=1 -timeout=3m`
+- `git diff --check`
 
 ## Risks and Follow-ups
 
-The slice remains in progress; PR readiness is not established. All assigned
-signature occurrences are reconciled. Remaining work includes runtime planning
-and worker resource ownership, configuration selection projections, the remaining
-lifecycle/flag/wrapper dispositions, and final exact-HEAD controller validation.
-No Slice 10 PR has been opened.
+Controller validation and integration into dev determine final delivery state.
+The report and ticket remain reviewing until that integration is verified.

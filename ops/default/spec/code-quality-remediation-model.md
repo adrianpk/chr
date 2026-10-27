@@ -586,3 +586,34 @@ and the 90-second journal transition context are unchanged. Real HTTP checks
 verify authorization and absence of the configured key from provider and opted-in
 trace payloads. The original close-error policy remains justified after checked
 bounded reads; it does not trigger another acknowledged request.
+
+## Slice 10 harness identity and host compatibility
+
+Core harness identity/profile/selection values have no workflow or configuration
+coordinator dependency. Host executable admission and retained generation IO,
+runtime plans/launch commands, daemon persistence and trace retention live in
+cohesive children. Native configuration retains full-image revision, authorized
+selection changes/recovery and independent generation admission fences.
+
+Bindings, capabilities, semantic profile revisions, generation operation/launch
+records, metadata and daemon SQL preserve original fields, JSON order/tags, hash
+bytes, absence distinctions and state spellings. Runtime/workspace defaults,
+canonical and private artifact paths, Docker argv, executable/input/output bounds,
+private resource rules and provider errors retain their original meanings.
+The declaration move ledger reconciles 327 current source/test declarations and
+constant specifications; its current hashes resolve to the actual declarations.
+The redundant response trace facade was removed after direct callers moved.
+
+Generation binding returns operation values and selected adapters. Each caller
+passes or derives its context; cancellation of one caller cannot poison a fresh
+call to the retained operation. The Pi bridge owns and defers its cancellation;
+process exchange owns both bounded spools. Runtime holds shared references to an
+already admitted slot/guard while native workflow owns inherited FD3/FD5
+validation, slot identity/limits and coordinated conversion. No capacity pool or
+retained authority was duplicated.
+
+All 38 assigned signatures have precise dispositions: 31 fixed, seven cohesive
+five-input contracts retained. Two additional owned resolver contracts return
+one preparation value plus error. The global exact debt count is 207 with the
+same ceiling seven and one external exception. Boundary dispositions distinguish
+actual binary data/dispatch from redundant forwarding and record real regressions.

@@ -208,7 +208,7 @@ Focused selection: Existing generation/source-revision/authoring publication rec
 ### Slice 10: Harness contracts and runtime lifecycle
 
 Findings: R1, R2, R3, R7, R10.
-Ticket: [TKT-20261026084830](../ticket/in_progress/20261026084830-quality-harness.md).
+Ticket: [TKT-20261026084830](../ticket/reviewing/20261026084830-quality-harness.md).
 
 1. **T10.1:** Use the existing internal/harness packages for adapter-neutral runner contracts and provider/process adapters. Move core-owned admission/binding policy to internal/core/harness when required; do not make the runner library import project workflow policy.
 2. **T10.2:** Convert runtimeArtifactPaths and runtime command/path/result tuples into existing or new precise values. Refactor supervised-process repeated inputs and harness/process exchange signatures with explicit resource ownership.
@@ -413,7 +413,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 7 | [TKT-20261026084827](../ticket/solved/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | ready; predecessor applies |
 | 8 | [TKT-20261026084828](../ticket/solved/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
 | 9 | [TKT-20261026084829](../ticket/solved/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | delivered; PR #446 |
-| 10 | [TKT-20261026084830](../ticket/in_progress/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | in_progress; predecessor verified |
+| 10 | [TKT-20261026084830](../ticket/reviewing/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | reviewing; predecessor verified |
 | 11 | [TKT-20261026084831](../ticket/ready/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | ready; predecessor applies |
 | 12 | [TKT-20261026084832](../ticket/ready/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | ready; predecessor applies |
 | 13 | [TKT-20261026084833](../ticket/ready/20261026084833-quality-integration.md) | Candidate validation and merge stages | ready; predecessor applies |
