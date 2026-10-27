@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
@@ -56,7 +57,7 @@ func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.
 	return binding, r.checkProjectDumpInspection(ctx)
 }
 
-func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcore.Scope, result PlanPublicationResult) error {
+func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope quizcore.Scope, result authoringcore.PlanPublicationResult) error {
 	paths, err := GeneratedPlanLayout(r.projectDir, scope)
 	if err != nil {
 		return err

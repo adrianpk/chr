@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -755,11 +756,11 @@ func TestServiceCreateTUIAuthoringSessionReloadsSessions(t *testing.T) {
 		t.Fatalf("AuthoringSessions = %#v, want one session", result.AuthoringSessions)
 	}
 
-	if result.AuthoringSessions[0].Mode != core.AuthoringSessionModeTUI {
+	if result.AuthoringSessions[0].Mode != authoringcore.AuthoringSessionModeTUI {
 		t.Fatalf("session mode = %q, want tui", result.AuthoringSessions[0].Mode)
 	}
 
-	if result.AuthoringSessions[0].Target != core.AuthoringTargetSpec {
+	if result.AuthoringSessions[0].Target != authoringcore.AuthoringTargetSpec {
 		t.Fatalf("session target = %q, want spec", result.AuthoringSessions[0].Target)
 	}
 

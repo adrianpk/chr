@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -86,13 +87,13 @@ func (r *fileAuthoringSessionRepository) readAuthoringImage(relative string, ima
 }
 
 func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *AuthoringSnapshot, images map[string][]byte) error {
-	refs := append(append([]AuthoringArtifactRef{}, snapshot.Session.Inputs...), snapshot.Session.Outputs...)
+	refs := append(append([]authoringcore.AuthoringArtifactRef{}, snapshot.Session.Inputs...), snapshot.Session.Outputs...)
 	if len(refs) > 16 {
 		return errors.New("authoring artifact context capacity exceeded")
 	}
 
 	for _, ref := range refs {
-		if ref.Kind == AuthoringArtifactKindDump {
+		if ref.Kind == authoringcore.AuthoringArtifactKindDump {
 			if _, err := r.readAuthoringDumpObservations(snapshot, ref, images); err != nil {
 				return err
 			}
@@ -188,7 +189,7 @@ func (r *fileAuthoringSessionRepository) guardAuthoringSnapshot(request Authorin
 		return snapshot, workflowstate.ErrConflict
 	}
 
-	if request.Action == "create" || snapshot.Session.Status != AuthoringSessionStatusActive {
+	if request.Action == "create" || snapshot.Session.Status != authoringcore.AuthoringSessionStatusActive {
 		return snapshot, workflowstate.ErrConflict
 	}
 
@@ -199,7 +200,7 @@ func (r *fileAuthoringSessionRepository) guardAuthoringSnapshot(request Authorin
 	return snapshot, nil
 }
 
-func parseManagedAuthoringSession(content []byte, id string) (AuthoringSession, error) {
+func parseManagedAuthoringSession(content []byte, id string) (authoringcore.AuthoringSession, error) {
 	session, err := ParseAuthoringSession(string(content))
 	if err != nil {
 		return session, err

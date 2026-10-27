@@ -12,6 +12,9 @@ type leafDependencyCase struct {
 
 func leafDependencyCases() []leafDependencyCase {
 	return []leafDependencyCase{
+		{"authoring coordinator", "internal/core/authoring/session_value.go", "package authoring\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"authoring retained inputs", "internal/core/authoring/guided_value.go", "package authoring\nimport _ \"" + coreImportPath + "workflow/state\"\n", false},
+		{"quiz authoring cycle", "internal/core/quiz/runtime.go", "package quiz\nimport _ \"" + coreImportPath + "authoring\"\n", true},
 		{"acceptance coordinator", "internal/core/authoring/acceptance/feature.go", "package acceptance\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"acceptance payload", "internal/core/authoring/acceptance/feature.go", "package acceptance\nimport _ \"" + coreImportPath + "authoring/generation\"\n", false},
 		{"metadata coordinator", "internal/core/ops/metadata/scalar.go", "package metadata\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},

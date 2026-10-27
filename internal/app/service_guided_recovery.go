@@ -4,10 +4,11 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 type guidedProgressActivator interface {
-	schedule(service, core.GuidedUseCaseScope) error
+	schedule(service, authoringcore.GuidedUseCaseScope) error
 }
 
 func guidedControlAction(action string) bool {
@@ -23,7 +24,7 @@ func guidedProviderAction(action string) bool {
 	}
 }
 
-func (s service) changeGuidedControl(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
+func (s service) changeGuidedControl(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
 	session, err := s.ControlGuidedUseCase(ctx, command)
 	if err != nil || command.Action != "resume" {
 		return session, err
@@ -36,9 +37,9 @@ func (s service) changeGuidedControl(ctx context.Context, command core.GuidedUse
 	return s.advanceGuidedUseCase(ctx, session)
 }
 
-func (s service) changeGuidedOnHost(ctx context.Context, command core.GuidedUseCaseCommand, host guidedProgressActivator) (core.AuthoringSession, error) {
+func (s service) changeGuidedOnHost(ctx context.Context, command authoringcore.GuidedUseCaseCommand, host guidedProgressActivator) (authoringcore.AuthoringSession, error) {
 	var (
-		session core.AuthoringSession
+		session authoringcore.AuthoringSession
 		err     error
 	)
 	if guidedProviderAction(command.Action) {
@@ -56,10 +57,10 @@ func (s service) changeGuidedOnHost(ctx context.Context, command core.GuidedUseC
 
 // RecoverGuidedUseCase reconciles pending control and stage operations before
 // continuing the same scope. It is a lifecycle operation, never a query effect.
-func (s service) RecoverGuidedUseCase(ctx context.Context, scope core.GuidedUseCaseScope) (core.AuthoringSession, error) {
+func (s service) RecoverGuidedUseCase(ctx context.Context, scope authoringcore.GuidedUseCaseScope) (authoringcore.AuthoringSession, error) {
 	if s.guidedHostCheck != nil {
 		if err := s.guidedHostCheck(ctx); err != nil {
-			return core.AuthoringSession{}, err
+			return authoringcore.AuthoringSession{}, err
 		}
 	}
 
@@ -83,7 +84,7 @@ func (s service) RecoverGuidedUseCase(ctx context.Context, scope core.GuidedUseC
 	return s.advanceGuidedUseCase(ctx, session)
 }
 
-func (s service) recoverGuidedStop(ctx context.Context, session core.AuthoringSession, scope core.GuidedUseCaseScope) (core.AuthoringSession, error) {
+func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.AuthoringSession, scope authoringcore.GuidedUseCaseScope) (authoringcore.AuthoringSession, error) {
 	control := session.Guided.Control
 	if control.NativeReceipt == nil || control.AcknowledgedRevision != 0 {
 		return session, nil

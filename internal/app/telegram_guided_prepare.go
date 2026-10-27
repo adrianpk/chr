@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -46,11 +46,11 @@ func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedSe
 
 func telegramGuidedOwner(c telegramcore.Conversation, input telegramcore.ConversationInput, start bool, actor string) (telegramGuidedInput, error) {
 	if start {
-		return telegramGuidedInput{Actor: actor, Start: true, Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.ID, ProjectID: c.ProjectID, Namespace: c.Namespace}}}, nil
+		return telegramGuidedInput{Actor: actor, Start: true, Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: c.ID, ProjectID: c.ProjectID, Namespace: c.Namespace}}}, nil
 	}
 
 	if input.Conversation != "" {
-		return telegramGuidedInput{Actor: actor, Inspect: true, Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace}, OperationID: telegramcore.OperationID(input.Update, 0)}}, nil
+		return telegramGuidedInput{Actor: actor, Inspect: true, Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace}, OperationID: telegramcore.OperationID(input.Update, 0)}}, nil
 	}
 
 	return telegramGuidedCommand(c, input.Update, actor)

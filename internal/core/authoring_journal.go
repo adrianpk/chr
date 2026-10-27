@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
@@ -231,5 +232,5 @@ func validAuthoringOpsJournalPath(path string) bool {
 		return false
 	}
 
-	return validAuthoringContinuationKind(AuthoringArtifactKind(parts[2]))
+	return validAuthoringContinuationKind(authoringcore.AuthoringArtifactKind(parts[2]))
 }

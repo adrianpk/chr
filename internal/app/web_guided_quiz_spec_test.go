@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestGuidedUseCaseQuizWeb advances from capture to only the current question without read-side effects.
@@ -70,7 +70,7 @@ func TestGuidedUseCaseSpecWeb(t *testing.T) {
 	}
 }
 
-func assertGuidedWebOriginals(t *testing.T, provider webViewProvider, handler http.Handler, completed core.AuthoringSession) {
+func assertGuidedWebOriginals(t *testing.T, provider webViewProvider, handler http.Handler, completed authoringcore.AuthoringSession) {
 	t.Helper()
 	replaceGuidedWebDocuments(t, provider.projectContext.ProjectDir, completed)
 
@@ -146,7 +146,7 @@ func guidedWebHandler(t *testing.T, provider webViewProvider) http.Handler {
 	return handler
 }
 
-func captureGuidedWebInput(t *testing.T, provider webViewProvider, handler http.Handler) core.AuthoringSession {
+func captureGuidedWebInput(t *testing.T, provider webViewProvider, handler http.Handler) authoringcore.AuthoringSession {
 	t.Helper()
 
 	operations := provider.service(t.Context())
@@ -172,11 +172,11 @@ func captureGuidedWebInput(t *testing.T, provider webViewProvider, handler http.
 	return readWebGuidedSession(t, operations, current.ID)
 }
 
-func guidedWebCommandForm(command core.GuidedUseCaseCommand) url.Values {
+func guidedWebCommandForm(command authoringcore.GuidedUseCaseCommand) url.Values {
 	return url.Values{"action": {"guided.input"}, "surface": {"guided"}, "confirm": {"true"}, "id": {command.RunID}, "namespace": {command.Namespace}, "request_id": {command.OperationID}, "revision": {strconv.FormatInt(command.ExpectedRevision, 10)}, "native_revision": {strconv.FormatUint(command.NativeRevision, 10)}, "step": {command.Action}, "content": {command.Content}, "question_id": {command.QuestionID}, "input_digest": {command.InputDigest}}
 }
 
-func replaceGuidedWebDocuments(t *testing.T, root string, session core.AuthoringSession) {
+func replaceGuidedWebDocuments(t *testing.T, root string, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	for _, checkpoint := range session.Guided.Checkpoints {
@@ -192,7 +192,7 @@ func replaceGuidedWebDocuments(t *testing.T, root string, session core.Authoring
 	}
 }
 
-func assertGuidedWebRetryBinding(t *testing.T, provider webViewProvider, pending core.AuthoringSession) {
+func assertGuidedWebRetryBinding(t *testing.T, provider webViewProvider, pending authoringcore.AuthoringSession) {
 	t.Helper()
 
 	view, err := provider.GuidedUseCaseView(t.Context(), pending.ID, pending.Namespace)

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
@@ -224,9 +225,9 @@ func validateAuthoringReceipt(receipt authoringMutationReceipt, request Authorin
 	return nil
 }
 
-func validAuthoringContinuationKind(kind AuthoringArtifactKind) bool {
+func validAuthoringContinuationKind(kind authoringcore.AuthoringArtifactKind) bool {
 	switch kind {
-	case AuthoringArtifactKindDump, AuthoringArtifactKindQuiz, AuthoringArtifactKindSpec, AuthoringArtifactKindPlan:
+	case authoringcore.AuthoringArtifactKindDump, authoringcore.AuthoringArtifactKindQuiz, authoringcore.AuthoringArtifactKindSpec, authoringcore.AuthoringArtifactKindPlan:
 		return true
 	default:
 		return false

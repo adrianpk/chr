@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -42,7 +43,7 @@ func (host *guidedAdmissionHost) activate(_ service, id string) error {
 	return nil
 }
 
-func guidedAdmissionFixture(t *testing.T) (service, core.AuthoringSession, *guidedAdmissionHost) {
+func guidedAdmissionFixture(t *testing.T) (service, authoringcore.AuthoringSession, *guidedAdmissionHost) {
 	t.Helper()
 
 	operations, session, _ := guidedPreparationFixture(t, "default")
@@ -105,7 +106,7 @@ func TestGuidedUseCaseAdmissionExact(t *testing.T) {
 	}
 }
 
-func assertGuidedNativeAdmission(t *testing.T, operations service, session core.AuthoringSession) core.WorkflowInvocation {
+func assertGuidedNativeAdmission(t *testing.T, operations service, session authoringcore.AuthoringSession) core.WorkflowInvocation {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -123,7 +124,7 @@ func assertGuidedNativeAdmission(t *testing.T, operations service, session core.
 	return run
 }
 
-func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, session core.AuthoringSession) {
+func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -140,7 +141,7 @@ func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, sessio
 	assertGuidedNativeProvenance(t, run, session)
 }
 
-func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, session core.AuthoringSession) {
+func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -151,7 +152,7 @@ func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, ses
 	}
 }
 
-func addGuidedUnrelatedTicket(t *testing.T, operations service, session core.AuthoringSession, key string) {
+func addGuidedUnrelatedTicket(t *testing.T, operations service, session authoringcore.AuthoringSession, key string) {
 	t.Helper()
 
 	store, err := operations.workflowStore()

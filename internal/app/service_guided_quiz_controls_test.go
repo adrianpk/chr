@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -84,7 +84,7 @@ func TestGuidedUseCaseQuizDone(t *testing.T) {
 	assertGuidedQuizCompletion(t, current, session.Guided.Checkpoints[0])
 }
 
-func observeGuidedQuiz(t *testing.T, operations service, session core.AuthoringSession) quizcore.Observation {
+func observeGuidedQuiz(t *testing.T, operations service, session authoringcore.AuthoringSession) quizcore.Observation {
 	t.Helper()
 
 	observed, err := operations.quizRepository().Observe(t.Context(), quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug})
@@ -95,7 +95,7 @@ func observeGuidedQuiz(t *testing.T, operations service, session core.AuthoringS
 	return observed
 }
 
-func switchGuidedQuizModes(t *testing.T, operations service, current core.AuthoringSession) core.AuthoringSession {
+func switchGuidedQuizModes(t *testing.T, operations service, current authoringcore.AuthoringSession) authoringcore.AuthoringSession {
 	t.Helper()
 
 	var err error
@@ -114,7 +114,7 @@ func switchGuidedQuizModes(t *testing.T, operations service, current core.Author
 	return current
 }
 
-func assertGuidedQuizControlReplay(t *testing.T, operations service, command core.GuidedUseCaseCommand, completed core.AuthoringSession, model *fakeServiceQuizModel) {
+func assertGuidedQuizControlReplay(t *testing.T, operations service, command authoringcore.GuidedUseCaseCommand, completed authoringcore.AuthoringSession, model *fakeServiceQuizModel) {
 	t.Helper()
 
 	replay, err := operations.ConductGuidedQuiz(t.Context(), command)

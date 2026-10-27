@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -15,7 +16,7 @@ import (
 type AssistedAuthoringContextPackageOptions struct {
 	ProjectDir       string
 	TargetPath       string
-	Session          AuthoringSession
+	Session          authoringcore.AuthoringSession
 	SessionPaths     AuthoringSessionPaths
 	TranscriptEvents []AssistedTranscriptEvent
 }
@@ -24,7 +25,7 @@ type AssistedAuthoringContextPackageOptions struct {
 type AssistedAuthoringContextPackage struct {
 	ProjectDir        string
 	WorkspaceDir      string
-	Session           AuthoringSession
+	Session           authoringcore.AuthoringSession
 	SessionPaths      AuthoringSessionPaths
 	AgentProtocol     AgentProtocolContext
 	SelectedDocuments []ContextDocument
@@ -146,8 +147,8 @@ type assistedTranscriptContext struct {
 	Sources []ContextSourceInventoryEntry
 }
 
-func loadAuthoringSelectedDocuments(projectDir string, session AuthoringSession) (authoringSelectedDocuments, error) {
-	refs := append([]AuthoringArtifactRef{}, session.Inputs...)
+func loadAuthoringSelectedDocuments(projectDir string, session authoringcore.AuthoringSession) (authoringSelectedDocuments, error) {
+	refs := append([]authoringcore.AuthoringArtifactRef{}, session.Inputs...)
 	refs = append(refs, session.Outputs...)
 	sort.SliceStable(refs, func(left, right int) bool {
 		return refs[left].Path < refs[right].Path
@@ -176,7 +177,7 @@ func loadAuthoringSelectedDocuments(projectDir string, session AuthoringSession)
 	return authoringSelectedDocuments{Documents: documents, Sources: sources}, nil
 }
 
-func loadAuthoringSelectedDocument(projectDir string, ref AuthoringArtifactRef) (authoringSelectedDocument, error) {
+func loadAuthoringSelectedDocument(projectDir string, ref authoringcore.AuthoringArtifactRef) (authoringSelectedDocument, error) {
 	path := ref.Path
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(projectDir, filepath.FromSlash(path))

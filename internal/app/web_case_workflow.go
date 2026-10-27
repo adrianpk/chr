@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -42,7 +43,7 @@ func (p webViewProvider) CaseWorkflowView(ctx context.Context, slug, namespace s
 	return p.GuidedUseCaseView(ctx, id, scope.Namespace)
 }
 
-func guidedSessionURL(session core.AuthoringSession) string {
+func guidedSessionURL(session authoringcore.AuthoringSession) string {
 	if session.Guided == nil || session.Guided.CaseSlug == "" {
 		return guidedUseCaseURL(session.ID, session.Namespace)
 	}

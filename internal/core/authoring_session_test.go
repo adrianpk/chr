@@ -3,6 +3,8 @@ package core
 import (
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestValidateAuthoringSessionAcceptsValidSession(t *testing.T) {
@@ -15,11 +17,11 @@ func TestValidateAuthoringSessionAcceptsValidSession(t *testing.T) {
 }
 
 func TestValidateAuthoringSessionAcceptsFutureCompatibleModes(t *testing.T) {
-	for _, mode := range []AuthoringSessionMode{
-		AuthoringSessionModeMarkdownDirect,
-		AuthoringSessionModeContextual,
-		AuthoringSessionModeAssisted,
-		AuthoringSessionModeTUI,
+	for _, mode := range []authoringcore.AuthoringSessionMode{
+		authoringcore.AuthoringSessionModeMarkdownDirect,
+		authoringcore.AuthoringSessionModeContextual,
+		authoringcore.AuthoringSessionModeAssisted,
+		authoringcore.AuthoringSessionModeTUI,
 	} {
 		t.Run(string(mode), func(t *testing.T) {
 			session := validAuthoringSession()
@@ -46,11 +48,11 @@ func TestValidateAuthoringSessionRejectsMissingRequiredFields(t *testing.T) {
 
 func missingRequiredAuthoringSessionTests() []struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	return []struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		missingAuthoringSessionIDTest(),
 		missingAuthoringSessionProjectIDTest(),
@@ -62,14 +64,14 @@ func missingRequiredAuthoringSessionTests() []struct {
 
 func missingAuthoringSessionIDTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.ID = ""
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "id",
 		session: session,
@@ -78,14 +80,14 @@ func missingAuthoringSessionIDTest() struct {
 
 func missingAuthoringSessionProjectIDTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.ProjectID = ""
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "project id",
 		session: session,
@@ -94,14 +96,14 @@ func missingAuthoringSessionProjectIDTest() struct {
 
 func missingAuthoringSessionTopicTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.Topic = ""
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "topic",
 		session: session,
@@ -110,14 +112,14 @@ func missingAuthoringSessionTopicTest() struct {
 
 func missingAuthoringSessionCreatedAtTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.CreatedAt = time.Time{}
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "created at",
 		session: session,
@@ -126,14 +128,14 @@ func missingAuthoringSessionCreatedAtTest() struct {
 
 func missingAuthoringSessionUpdatedAtTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.UpdatedAt = time.Time{}
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "updated at",
 		session: session,
@@ -153,11 +155,11 @@ func TestValidateAuthoringSessionRejectsInvalidEnums(t *testing.T) {
 
 func invalidAuthoringSessionEnumTests() []struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	return []struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		invalidAuthoringSessionStatusTest(),
 		invalidAuthoringSessionModeTest(),
@@ -171,14 +173,14 @@ func invalidAuthoringSessionEnumTests() []struct {
 
 func invalidAuthoringSessionStatusTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
-	session.Status = AuthoringSessionStatus("unknown")
+	session.Status = authoringcore.AuthoringSessionStatus("unknown")
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "status",
 		session: session,
@@ -187,14 +189,14 @@ func invalidAuthoringSessionStatusTest() struct {
 
 func invalidAuthoringSessionModeTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
-	session.Mode = AuthoringSessionMode("unknown")
+	session.Mode = authoringcore.AuthoringSessionMode("unknown")
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "mode",
 		session: session,
@@ -203,14 +205,14 @@ func invalidAuthoringSessionModeTest() struct {
 
 func invalidAuthoringSessionTargetTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
-	session.Target = AuthoringTarget("unknown")
+	session.Target = authoringcore.AuthoringTarget("unknown")
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "target",
 		session: session,
@@ -219,14 +221,14 @@ func invalidAuthoringSessionTargetTest() struct {
 
 func invalidAuthoringInputKindTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
-	session.Inputs[0].Kind = AuthoringArtifactKind("unknown")
+	session.Inputs[0].Kind = authoringcore.AuthoringArtifactKind("unknown")
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "input kind",
 		session: session,
@@ -235,14 +237,14 @@ func invalidAuthoringInputKindTest() struct {
 
 func invalidAuthoringInputRoleTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
-	session.Inputs[0].Role = AuthoringArtifactRoleOutput
+	session.Inputs[0].Role = authoringcore.AuthoringArtifactRoleOutput
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "input role",
 		session: session,
@@ -251,14 +253,14 @@ func invalidAuthoringInputRoleTest() struct {
 
 func invalidAuthoringOutputRoleTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
-	session.Outputs[0].Role = AuthoringArtifactRoleInput
+	session.Outputs[0].Role = authoringcore.AuthoringArtifactRoleInput
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "output role",
 		session: session,
@@ -267,14 +269,14 @@ func invalidAuthoringOutputRoleTest() struct {
 
 func invalidAuthoringProvenanceRelationTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
-	session.Provenance[0].Relation = AuthoringProvenanceRelation("unknown")
+	session.Provenance[0].Relation = authoringcore.AuthoringProvenanceRelation("unknown")
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "provenance relation",
 		session: session,
@@ -294,11 +296,11 @@ func TestValidateAuthoringSessionRejectsInvalidArtifactRefs(t *testing.T) {
 
 func invalidAuthoringArtifactRefTests() []struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	return []struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		missingAuthoringInputIDTest(),
 		missingAuthoringInputPathTest(),
@@ -309,14 +311,14 @@ func invalidAuthoringArtifactRefTests() []struct {
 
 func missingAuthoringInputIDTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.Inputs[0].ID = ""
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "input id",
 		session: session,
@@ -325,14 +327,14 @@ func missingAuthoringInputIDTest() struct {
 
 func missingAuthoringInputPathTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.Inputs[0].Path = ""
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "input path",
 		session: session,
@@ -341,14 +343,14 @@ func missingAuthoringInputPathTest() struct {
 
 func missingAuthoringProvenanceSourcePathTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.Provenance[0].Source.Path = ""
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "provenance source path",
 		session: session,
@@ -357,14 +359,14 @@ func missingAuthoringProvenanceSourcePathTest() struct {
 
 func missingAuthoringProvenanceRecordedAtTest() struct {
 	name    string
-	session AuthoringSession
+	session authoringcore.AuthoringSession
 } {
 	session := validAuthoringSession()
 	session.Provenance[0].RecordedAt = time.Time{}
 
 	return struct {
 		name    string
-		session AuthoringSession
+		session authoringcore.AuthoringSession
 	}{
 		name:    "provenance recorded at",
 		session: session,
@@ -384,35 +386,35 @@ func TestValidateAuthoringSessionRejectsFinishedBeforeStarted(t *testing.T) {
 	}
 }
 
-func validAuthoringSession() AuthoringSession {
+func validAuthoringSession() authoringcore.AuthoringSession {
 	now := time.Date(2026, 5, 21, 12, 0, 0, 0, time.UTC)
-	input := AuthoringArtifactRef{
+	input := authoringcore.AuthoringArtifactRef{
 		ID:          "dump-1",
-		Kind:        AuthoringArtifactKindDump,
-		Role:        AuthoringArtifactRoleInput,
+		Kind:        authoringcore.AuthoringArtifactKindDump,
+		Role:        authoringcore.AuthoringArtifactRoleInput,
 		Path:        ".chr/default/dumps/auth-context.md",
 		Description: "Initial operator context dump.",
 	}
-	output := AuthoringArtifactRef{
+	output := authoringcore.AuthoringArtifactRef{
 		ID:          "quiz-1",
-		Kind:        AuthoringArtifactKindQuiz,
-		Role:        AuthoringArtifactRoleOutput,
+		Kind:        authoringcore.AuthoringArtifactKindQuiz,
+		Role:        authoringcore.AuthoringArtifactRoleOutput,
 		Path:        ".chr/default/quizzes/auth-context-quiz.md",
 		Description: "Questionnaire generated from project context.",
 	}
 
-	return AuthoringSession{
+	return authoringcore.AuthoringSession{
 		ID:        "auth-20260521-120000",
 		ProjectID: "project-1",
-		Status:    AuthoringSessionStatusDraft,
-		Mode:      AuthoringSessionModeContextual,
-		Target:    AuthoringTargetQuiz,
+		Status:    authoringcore.AuthoringSessionStatusDraft,
+		Mode:      authoringcore.AuthoringSessionModeContextual,
+		Target:    authoringcore.AuthoringTargetQuiz,
 		Topic:     "Markdown-first authoring workflow",
-		Inputs:    []AuthoringArtifactRef{input},
-		Outputs:   []AuthoringArtifactRef{output},
-		Provenance: []AuthoringProvenanceLink{
+		Inputs:    []authoringcore.AuthoringArtifactRef{input},
+		Outputs:   []authoringcore.AuthoringArtifactRef{output},
+		Provenance: []authoringcore.AuthoringProvenanceLink{
 			{
-				Relation:   AuthoringProvenanceRelationGenerated,
+				Relation:   authoringcore.AuthoringProvenanceRelationGenerated,
 				Source:     input,
 				Target:     output,
 				Decision:   "Generate a quiz from project context.",

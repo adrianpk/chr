@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestGuidedUseCaseAdmissionPrerequisites blocks real setup failures before native admission or host dispatch.
@@ -32,7 +33,7 @@ func TestGuidedUseCaseAdmissionPrerequisites(t *testing.T) {
 	}
 }
 
-func breakGuidedPrerequisite(t *testing.T, operations *service, prepared core.AuthoringSession, name string) {
+func breakGuidedPrerequisite(t *testing.T, operations *service, prepared authoringcore.AuthoringSession, name string) {
 	t.Helper()
 
 	config := "workflow:\n  version: 1\nreview:\n  mode: human_review\nwork:\n  state_authority: tickets\n"
@@ -98,7 +99,7 @@ func TestGuidedUseCaseAdmissionPolicy(t *testing.T) {
 	}
 }
 
-func restoreGuidedAdmissionPolicy(t *testing.T, operations service, blocked core.AuthoringSession, original []byte) {
+func restoreGuidedAdmissionPolicy(t *testing.T, operations service, blocked authoringcore.AuthoringSession, original []byte) {
 	t.Helper()
 
 	path := core.UserPath(operations.projectContext.ProjectDir, "config.yml")

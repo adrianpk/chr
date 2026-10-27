@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"os"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func recordWireFactories() map[string]func() any {
 	return map[string]func() any{
-		"guided-session":  func() any { return &AuthoringSession{} },
-		"guided-control":  func() any { return &GuidedControlState{} },
+		"guided-session":  func() any { return &authoringcore.AuthoringSession{} },
+		"guided-control":  func() any { return &authoringcore.GuidedControlState{} },
 		"workflow-start":  func() any { return &WorkflowStartRequest{} },
 		"invocation":      func() any { return &WorkflowInvocation{} },
 		"merger-input":    func() any { return &WorkflowMergerInput{} },

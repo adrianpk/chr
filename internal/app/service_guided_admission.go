@@ -5,19 +5,20 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AdmitGuidedWork binds original progression intent to one exact native invocation.
-func (s service) AdmitGuidedWork(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
+func (s service) AdmitGuidedWork(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
 	if command.Action != "admit" {
-		return core.AuthoringSession{}, errors.New("unsupported guided admission command")
+		return authoringcore.AuthoringSession{}, errors.New("unsupported guided admission command")
 	}
 
 	return s.applyGuidedWorkStep(ctx, command, service.admitGuidedWork)
 }
 
-func (s service) admitGuidedWork(ctx context.Context, session *core.AuthoringSession) error {
+func (s service) admitGuidedWork(ctx context.Context, session *authoringcore.AuthoringSession) error {
 	if s.guidedWorkHost == nil {
 		return &core.GuidedPrerequisiteError{Action: "Start a managed workflow host, then retry this retained operation."}
 	}
@@ -54,7 +55,7 @@ func (s service) admitGuidedWork(ctx context.Context, session *core.AuthoringSes
 	return nil
 }
 
-func (s service) ensureGuidedInvocation(ctx context.Context, session *core.AuthoringSession) error {
+func (s service) ensureGuidedInvocation(ctx context.Context, session *authoringcore.AuthoringSession) error {
 	if session.Guided.Work.Invocation != nil {
 		return nil
 	}
@@ -62,7 +63,7 @@ func (s service) ensureGuidedInvocation(ctx context.Context, session *core.Autho
 	return s.retainGuidedInvocation(ctx, session)
 }
 
-func (s service) reserveGuidedAdmission(ctx context.Context, session *core.AuthoringSession) error {
+func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringcore.AuthoringSession) error {
 	checkpoint, err := core.GuidedPreparationCheckpoint(*session)
 	if err != nil {
 		return err
@@ -102,7 +103,7 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *core.Autho
 	return s.guidedAdmissionEffect("preview")
 }
 
-func (s service) retainGuidedInvocation(ctx context.Context, session *core.AuthoringSession) error {
+func (s service) retainGuidedInvocation(ctx context.Context, session *authoringcore.AuthoringSession) error {
 	store, err := s.workflowStore()
 	if err != nil {
 		return err
@@ -127,7 +128,7 @@ func (s service) retainGuidedInvocation(ctx context.Context, session *core.Autho
 	}
 
 	run := started.Invocation
-	session.Guided.Work.Invocation = &core.GuidedInvocationReference{ID: run.ID, RequestKey: run.RequestKey, Revision: run.Revision}
+	session.Guided.Work.Invocation = &authoringcore.GuidedInvocationReference{ID: run.ID, RequestKey: run.RequestKey, Revision: run.Revision}
 
 	return core.RetainGuidedUseCaseProgress(ctx, s.projectContext.ProjectDir, session)
 }

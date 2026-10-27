@@ -5,11 +5,12 @@ import (
 	"strconv"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
-func guidedWebCommand(request webui.WriteActionRequest) (core.GuidedUseCaseCommand, error) {
-	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: request.ID, Namespace: request.Fields["namespace"]}, OperationID: request.Fields["request_id"], Action: request.Fields["step"], Content: request.Fields["content"], QuestionID: request.Fields["question_id"], InputDigest: request.Fields["input_digest"]}
+func guidedWebCommand(request webui.WriteActionRequest) (authoringcore.GuidedUseCaseCommand, error) {
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: request.ID, Namespace: request.Fields["namespace"]}, OperationID: request.Fields["request_id"], Action: request.Fields["step"], Content: request.Fields["content"], QuestionID: request.Fields["question_id"], InputDigest: request.Fields["input_digest"]}
 
 	var err error
 
@@ -21,11 +22,11 @@ func guidedWebCommand(request webui.WriteActionRequest) (core.GuidedUseCaseComma
 	return command, err
 }
 
-func guidedWebPending(session core.AuthoringSession) bool {
+func guidedWebPending(session authoringcore.AuthoringSession) bool {
 	return session.Guided != nil && (session.Guided.PendingOperation != nil || session.Guided.Control != nil && session.Guided.Control.PendingOperation != nil)
 }
 
-func guidedWebControls(view *webui.GuidedUseCaseView, session core.AuthoringSession, work *WorkflowWorkStatus) {
+func guidedWebControls(view *webui.GuidedUseCaseView, session authoringcore.AuthoringSession, work *WorkflowWorkStatus) {
 	view.Suspended = !core.GuidedDispatchAllowed(session)
 	if command, ready := guidedControlCommand(session); ready {
 		view.Controls = []webui.GuidedUseCaseControl{guidedWebControl(command, "Retry "+command.Action)}
@@ -41,7 +42,7 @@ func guidedWebControls(view *webui.GuidedUseCaseView, session core.AuthoringSess
 	actions := guidedWebControlActions(view, session.Guided)
 
 	for _, action := range actions {
-		command := core.GuidedUseCaseCommand{Action: action, OperationID: action + "-" + rand.Text(), ExpectedRevision: session.Revision}
+		command := authoringcore.GuidedUseCaseCommand{Action: action, OperationID: action + "-" + rand.Text(), ExpectedRevision: session.Revision}
 		if work != nil {
 			command.NativeRevision = work.Revision
 		}
@@ -50,7 +51,7 @@ func guidedWebControls(view *webui.GuidedUseCaseView, session core.AuthoringSess
 	}
 }
 
-func guidedWebControl(command core.GuidedUseCaseCommand, label string) webui.GuidedUseCaseControl {
+func guidedWebControl(command authoringcore.GuidedUseCaseCommand, label string) webui.GuidedUseCaseControl {
 	return webui.GuidedUseCaseControl{Action: command.Action, Label: label, RequestID: command.OperationID, Revision: strconv.FormatInt(command.ExpectedRevision, 10), NativeRevision: strconv.FormatUint(command.NativeRevision, 10), Content: command.Content, QuestionID: command.QuestionID, InputDigest: command.InputDigest}
 }
 
@@ -65,7 +66,7 @@ func guidedControlLabel(action string) string {
 	}
 }
 
-func guidedWebControlActions(view *webui.GuidedUseCaseView, state *core.GuidedUseCaseState) []string {
+func guidedWebControlActions(view *webui.GuidedUseCaseView, state *authoringcore.GuidedUseCaseState) []string {
 	if state.Control == nil || state.Control.StopIntent == "" {
 		return []string{"pause", "cancel"}
 	}

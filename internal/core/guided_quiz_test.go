@@ -6,6 +6,7 @@ import (
 	"errors"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -16,7 +17,7 @@ func TestGuidedUseCaseQuizSufficiency(t *testing.T) {
 	for _, variant := range []string{"complete", "complete-with-skip", "unconfirmed-skip", "empty", "budget", "skipped", "foreign"} {
 		t.Run(variant, func(t *testing.T) {
 			state := quizcore.RuntimeState{SessionID: "quiz", Status: quizcore.RuntimeStatusDone, ClarificationComplete: true, QuestionsAsked: 1, AnswersRecorded: 1}
-			session := AuthoringSession{Guided: &GuidedUseCaseState{Quiz: &GuidedQuizState{SessionID: "quiz", Revision: "revision"}}}
+			session := authoringcore.AuthoringSession{Guided: &authoringcore.GuidedUseCaseState{Quiz: &authoringcore.GuidedQuizState{SessionID: "quiz", Revision: "revision"}}}
 
 			switch variant {
 			case "complete-with-skip", "unconfirmed-skip":
@@ -81,8 +82,8 @@ func TestGuidedUseCaseQuizCheckpoint(t *testing.T) {
 
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 	paths, result := completedGuidedQuizFixture(t, root, scope)
-	session.Guided.Quiz = &GuidedQuizState{SessionID: result.State.SessionID, Revision: result.State.Revision}
-	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-quiz", Action: "answer", Digest: contenthash.Sum([]byte("seal-quiz"))}
+	session.Guided.Quiz = &authoringcore.GuidedQuizState{SessionID: result.State.SessionID, Revision: result.State.Revision}
+	session.Guided.PendingOperation = &authoringcore.GuidedUseCaseOperation{ID: "seal-quiz", Action: "answer", Digest: contenthash.Sum([]byte("seal-quiz"))}
 	r := &fileAuthoringSessionRepository{projectDir: root}
 
 	var original string

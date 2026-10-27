@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +21,7 @@ type AuthoringQuestionBinding struct {
 
 // AuthoringArtifactObservation binds a body and metadata image read by the owner.
 type AuthoringArtifactObservation struct {
-	Ref          AuthoringArtifactRef
+	Ref          authoringcore.AuthoringArtifactRef
 	SourceHash   string
 	MetadataHash string
 	Body         string
@@ -28,7 +29,7 @@ type AuthoringArtifactObservation struct {
 
 // AuthoringSnapshot contains bounded canonical inputs and their complete image guard.
 type AuthoringSnapshot struct {
-	Session             AuthoringSession
+	Session             authoringcore.AuthoringSession
 	SessionRef          string
 	SourceHash          string
 	SessionHash         string
@@ -58,19 +59,19 @@ const (
 // AuthoringContinuationRequest binds creation, a question, an answer, generation
 // or refinement to one immutable caller-neutral request and observed image.
 type AuthoringContinuationRequest struct {
-	Binding             workflowstate.MutationBinding `json:"binding"`
-	ProjectID           string                        `json:"project_id"`
-	Namespace           string                        `json:"namespace"`
-	SessionID           string                        `json:"session_id"`
-	Action              AuthoringContinuationAction   `json:"action"`
-	Target              AuthoringArtifactKind         `json:"target"`
-	Topic               string                        `json:"topic"`
-	Capture             string                        `json:"capture"`
-	OriginalInstruction string                        `json:"original_instruction,omitempty"`
-	Instructions        string                        `json:"instructions"`
-	ExpectedRevision    int64                         `json:"expected_revision"`
-	ExpectedSourceHash  string                        `json:"expected_source_hash"`
-	Question            *AuthoringQuestionBinding     `json:"question,omitempty"`
+	Binding             workflowstate.MutationBinding       `json:"binding"`
+	ProjectID           string                              `json:"project_id"`
+	Namespace           string                              `json:"namespace"`
+	SessionID           string                              `json:"session_id"`
+	Action              AuthoringContinuationAction         `json:"action"`
+	Target              authoringcore.AuthoringArtifactKind `json:"target"`
+	Topic               string                              `json:"topic"`
+	Capture             string                              `json:"capture"`
+	OriginalInstruction string                              `json:"original_instruction,omitempty"`
+	Instructions        string                              `json:"instructions"`
+	ExpectedRevision    int64                               `json:"expected_revision"`
+	ExpectedSourceHash  string                              `json:"expected_source_hash"`
+	Question            *AuthoringQuestionBinding           `json:"question,omitempty"`
 }
 
 // AuthoringDraft is generated data; the owner assigns identities, paths, revisions
@@ -92,14 +93,14 @@ type AuthoringCommitGuard func(context.Context) error
 // AuthoringContinuationResult retains original confirmed facts without transcripts
 // or artifact bodies. It can be reconciled after an adapter loses acknowledgement.
 type AuthoringContinuationResult struct {
-	RequestID      string                    `json:"request_id"`
-	ArgumentDigest string                    `json:"argument_digest"`
-	ReceiptRef     string                    `json:"receipt_ref"`
-	Session        AuthoringSession          `json:"session"`
-	SessionRef     string                    `json:"session_ref"`
-	SourceHash     string                    `json:"source_hash"`
-	Question       *AuthoringQuestionBinding `json:"question,omitempty"`
-	Prompt         string                    `json:"prompt"`
+	RequestID      string                         `json:"request_id"`
+	ArgumentDigest string                         `json:"argument_digest"`
+	ReceiptRef     string                         `json:"receipt_ref"`
+	Session        authoringcore.AuthoringSession `json:"session"`
+	SessionRef     string                         `json:"session_ref"`
+	SourceHash     string                         `json:"source_hash"`
+	Question       *AuthoringQuestionBinding      `json:"question,omitempty"`
+	Prompt         string                         `json:"prompt"`
 }
 
 // The shared authoring owner retains provider budgets independently of transport.

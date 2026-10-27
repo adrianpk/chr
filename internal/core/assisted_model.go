@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
@@ -43,7 +44,7 @@ type AssistedModelRequest struct {
 	SessionID string
 	TurnID    string
 	Intent    AssistedAuthoringIntent
-	Target    AuthoringTarget
+	Target    authoringcore.AuthoringTarget
 	Context   string
 	Prompt    string
 	CreatedAt time.Time

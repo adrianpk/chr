@@ -7,12 +7,13 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // FinishGuidedUseCaseDump seals meaningful capture without dispatching later stages.
-func FinishGuidedUseCaseDump(ctx context.Context, root string, command GuidedUseCaseCommand) (session AuthoringSession, err error) {
+func FinishGuidedUseCaseDump(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.AuthoringSession, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.finishGuidedUseCaseDump(ctx, command)
@@ -23,7 +24,7 @@ func FinishGuidedUseCaseDump(ctx context.Context, root string, command GuidedUse
 	return session, err
 }
 
-func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Context, command GuidedUseCaseCommand) (AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
 	session, err := r.getGuardedSession(ctx, command.RunID)
 	if err != nil {
 		return session, err
@@ -46,7 +47,7 @@ func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Con
 	return r.completeGuidedCapture(ctx, session, command, operation)
 }
 
-func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Context, session AuthoringSession, command GuidedUseCaseCommand, operation GuidedUseCaseOperation) (AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Context, session authoringcore.AuthoringSession, command authoringcore.GuidedUseCaseCommand, operation authoringcore.GuidedUseCaseOperation) (authoringcore.AuthoringSession, error) {
 	if command.Action != "finish" || session.Guided.Stage != "dump" {
 		return session, workflowstate.ErrConflict
 	}
@@ -75,7 +76,7 @@ func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Conte
 
 	session.Guided.Checkpoints = append(session.Guided.Checkpoints, checkpoint)
 	session.Guided.PendingOperation, session.Guided.PendingCheckpoint = nil, nil
-	session.Guided.CompletedOperations = append(session.Guided.CompletedOperations, GuidedUseCaseOperation{ID: operation.ID, Action: operation.Action, Digest: operation.Digest})
+	session.Guided.CompletedOperations = append(session.Guided.CompletedOperations, authoringcore.GuidedUseCaseOperation{ID: operation.ID, Action: operation.Action, Digest: operation.Digest})
 	session.Guided.Stage, session.Guided.Status = "quiz", "blocked"
 	session.Revision++
 
@@ -87,7 +88,7 @@ func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Conte
 	return r.getGuardedSession(ctx, session.ID)
 }
 
-func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, session *AuthoringSession, operation GuidedUseCaseOperation) (GuidedStageCheckpoint, error) {
+func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (authoringcore.GuidedStageCheckpoint, error) {
 	if session.Guided.PendingCheckpoint == nil {
 		checkpoint, err := r.prepareGuidedDump(ctx, *session, operation)
 		if err != nil {
@@ -119,26 +120,26 @@ func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, ses
 	return checkpoint, nil
 }
 
-func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, session AuthoringSession, operation GuidedUseCaseOperation) (GuidedStageCheckpoint, error) {
+func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (authoringcore.GuidedStageCheckpoint, error) {
 	request := DumpMutationRequest{OperationID: "guided-" + contenthash.Sum([]byte(session.ID+"-dump")), Action: "capture", Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug, Title: session.Guided.CaseName, Content: session.Guided.Capture, ExpectedRevision: session.Guided.CaseHash}
 
 	result, err := MutateDump(ctx, r.projectDir, request, nil)
 	if err != nil {
-		return GuidedStageCheckpoint{}, err
+		return authoringcore.GuidedStageCheckpoint{}, err
 	}
 
 	artifact, err := ReadDumpDocument(ctx, r.projectDir, result.Destination)
 	if err != nil {
-		return GuidedStageCheckpoint{}, err
+		return authoringcore.GuidedStageCheckpoint{}, err
 	}
 
 	if artifact.Artifact.SourceHash != result.SourceHash || artifact.Artifact.MetadataHash != result.MetadataHash {
-		return GuidedStageCheckpoint{}, workflowstate.ErrConflict
+		return authoringcore.GuidedStageCheckpoint{}, workflowstate.ErrConflict
 	}
 
 	fields, err := projectDumpBodyFields([]byte(artifact.Content))
 	if err != nil {
-		return GuidedStageCheckpoint{}, err
+		return authoringcore.GuidedStageCheckpoint{}, err
 	}
 
 	paths := []string{result.Destination, filepath.ToSlash(filepath.Join(filepath.Dir(result.Destination), "metadata.json")), fields["source"], filepath.ToSlash(filepath.Join(filepath.Dir(fields["source"]), "metadata.json"))}
@@ -146,7 +147,7 @@ func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, 
 
 	relative, err := filepath.Rel(r.projectDir, casePath)
 	if err != nil {
-		return GuidedStageCheckpoint{}, err
+		return authoringcore.GuidedStageCheckpoint{}, err
 	}
 
 	paths = append(paths, filepath.ToSlash(relative))
@@ -159,7 +160,7 @@ func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, 
 	return checkpoint, guardGuidedCaseImage(checkpoint, filepath.ToSlash(relative), session.Guided.CaseHash)
 }
 
-func guardGuidedCaseImage(checkpoint GuidedStageCheckpoint, path, hash string) error {
+func guardGuidedCaseImage(checkpoint authoringcore.GuidedStageCheckpoint, path, hash string) error {
 	for _, image := range checkpoint.Artifacts {
 		if image.Path == path && image.Hash != hash {
 			return workflowstate.ErrConflict

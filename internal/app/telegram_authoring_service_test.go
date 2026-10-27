@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -62,10 +63,10 @@ func telegramAuthoringServiceOutput(t *testing.T, body, question string) string 
 }
 
 func telegramAuthoringServiceRequest() core.AuthoringContinuationRequest {
-	return core.AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "service-capture", Operator: "maintainer"}, ProjectID: "service-project", Namespace: "original", Action: "create", Target: core.AuthoringArtifactKindDump, Topic: "Bounded request retries", Capture: "Preserve the retry ceiling and existing defaults."}
+	return core.AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "service-capture", Operator: "maintainer"}, ProjectID: "service-project", Namespace: "original", Action: "create", Target: authoringcore.AuthoringArtifactKindDump, Topic: "Bounded request retries", Capture: "Preserve the retry ceiling and existing defaults."}
 }
 
-func telegramAuthoringServiceNext(previous core.AuthoringContinuationResult, id, action string, target core.AuthoringArtifactKind) core.AuthoringContinuationRequest {
+func telegramAuthoringServiceNext(previous core.AuthoringContinuationResult, id, action string, target authoringcore.AuthoringArtifactKind) core.AuthoringContinuationRequest {
 	return core.AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: previous.Session.ProjectID, Namespace: previous.Session.Namespace, SessionID: previous.Session.ID, ExpectedRevision: previous.Session.Revision, ExpectedSourceHash: previous.SourceHash, Action: core.AuthoringContinuationAction(action), Target: target}
 }
 
@@ -86,12 +87,12 @@ func TestTelegramAuthoringServiceJourney(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	asked, err := operations.ContinueAuthoring(t.Context(), telegramAuthoringServiceNext(first, "ask", "ask", core.AuthoringArtifactKindQuiz))
+	asked, err := operations.ContinueAuthoring(t.Context(), telegramAuthoringServiceNext(first, "ask", "ask", authoringcore.AuthoringArtifactKindQuiz))
 	if err != nil || asked.Question == nil {
 		t.Fatalf("question=%+v err=%v", asked, err)
 	}
 
-	answer := telegramAuthoringServiceNext(asked, "answer", "answer", core.AuthoringArtifactKindQuiz)
+	answer := telegramAuthoringServiceNext(asked, "answer", "answer", authoringcore.AuthoringArtifactKindQuiz)
 	answer.Question = asked.Question
 	answer.Instructions = "Keep the configured timeout and five attempts."
 
@@ -100,10 +101,10 @@ func TestTelegramAuthoringServiceJourney(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	spec := telegramAuthoringServiceGenerate(t, operations, answered, "spec", "generate", core.AuthoringArtifactKindSpec)
-	refined := telegramAuthoringServiceGenerate(t, operations, spec, "refine", "refine", core.AuthoringArtifactKindSpec)
+	spec := telegramAuthoringServiceGenerate(t, operations, answered, "spec", "generate", authoringcore.AuthoringArtifactKindSpec)
+	refined := telegramAuthoringServiceGenerate(t, operations, spec, "refine", "refine", authoringcore.AuthoringArtifactKindSpec)
 
-	plan := telegramAuthoringServiceGenerate(t, operations, refined, "plan", "generate", core.AuthoringArtifactKindPlan)
+	plan := telegramAuthoringServiceGenerate(t, operations, refined, "plan", "generate", authoringcore.AuthoringArtifactKindPlan)
 	if calls.Load() != 5 || plan.Session.Namespace != "original" {
 		t.Fatalf("calls=%d session=%+v", calls.Load(), plan.Session)
 	}
@@ -112,7 +113,7 @@ func TestTelegramAuthoringServiceJourney(t *testing.T) {
 	telegramAuthoringServiceNoWork(t, operations)
 }
 
-func telegramAuthoringServiceGenerate(t *testing.T, operations service, previous core.AuthoringContinuationResult, id, action string, target core.AuthoringArtifactKind) core.AuthoringContinuationResult {
+func telegramAuthoringServiceGenerate(t *testing.T, operations service, previous core.AuthoringContinuationResult, id, action string, target authoringcore.AuthoringArtifactKind) core.AuthoringContinuationResult {
 	t.Helper()
 
 	result, err := operations.ContinueAuthoring(t.Context(), telegramAuthoringServiceNext(previous, id, action, target))
@@ -151,7 +152,7 @@ func telegramAuthoringCheckArtifacts(t *testing.T, operations service, result co
 			t.Fatal(err)
 		}
 
-		if artifact.Ref.Kind == core.AuthoringArtifactKindSpec && !strings.Contains(artifact.Body, "source_request_id: \"refine\"") {
+		if artifact.Ref.Kind == authoringcore.AuthoringArtifactKindSpec && !strings.Contains(artifact.Body, "source_request_id: \"refine\"") {
 			t.Fatalf("missing refinement provenance: %s", artifact.Body)
 		}
 	}
@@ -182,7 +183,7 @@ func TestTelegramAuthoringServiceInvalid(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			request := telegramAuthoringServiceNext(before, "invalid", "generate", core.AuthoringArtifactKindSpec)
+			request := telegramAuthoringServiceNext(before, "invalid", "generate", authoringcore.AuthoringArtifactKindSpec)
 			if _, err := operations.ContinueAuthoring(t.Context(), request); err == nil {
 				t.Fatal("invalid output applied")
 			}
@@ -220,7 +221,7 @@ func TestTelegramAuthoringServiceObservedEdit(t *testing.T) {
 
 	retained := readServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, path))
 
-	request := telegramAuthoringServiceNext(before, "stale", "generate", core.AuthoringArtifactKindSpec)
+	request := telegramAuthoringServiceNext(before, "stale", "generate", authoringcore.AuthoringArtifactKindSpec)
 	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale image err=%v", err)
 	}
@@ -270,7 +271,7 @@ func telegramAuthoringServiceNoWork(t *testing.T, operations service) {
 // canonical answer and records its transcript provenance without fake inputs.
 func TestTelegramAuthoringServiceClarification(t *testing.T) {
 	operations, calls := telegramAuthoringServiceFixture(t, func(input authoringModelInput) string {
-		if input.Target == core.AuthoringArtifactKindSpec && len(input.Answers) == 0 {
+		if input.Target == authoringcore.AuthoringArtifactKindSpec && len(input.Answers) == 0 {
 			return telegramAuthoringServiceOutput(t, "", "Which behavior is required?")
 		}
 
@@ -282,12 +283,12 @@ func TestTelegramAuthoringServiceClarification(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	pending := telegramAuthoringServiceGenerate(t, operations, initial, "spec-question", "generate", core.AuthoringArtifactKindSpec)
+	pending := telegramAuthoringServiceGenerate(t, operations, initial, "spec-question", "generate", authoringcore.AuthoringArtifactKindSpec)
 	if pending.Question == nil || len(pending.Session.Outputs) != 1 {
 		t.Fatalf("question produced an artifact: %+v", pending)
 	}
 
-	answer := telegramAuthoringServiceNext(pending, "spec-answer", "answer", core.AuthoringArtifactKindSpec)
+	answer := telegramAuthoringServiceNext(pending, "spec-answer", "answer", authoringcore.AuthoringArtifactKindSpec)
 	answer.Question = pending.Question
 	answer.Instructions = "Preserve the configured limits."
 
@@ -296,7 +297,7 @@ func TestTelegramAuthoringServiceClarification(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	generated := telegramAuthoringServiceGenerate(t, operations, answered, "spec-result", "generate", core.AuthoringArtifactKindSpec)
+	generated := telegramAuthoringServiceGenerate(t, operations, answered, "spec-result", "generate", authoringcore.AuthoringArtifactKindSpec)
 
 	snapshot, err := operations.ObserveAuthoring(t.Context(), generated.Session.ID)
 	if err != nil {
@@ -310,10 +311,10 @@ func TestTelegramAuthoringServiceClarification(t *testing.T) {
 	telegramAuthoringServiceNoWork(t, operations)
 }
 
-func telegramAuthoringCheckArtifactNamespace(t *testing.T, ref core.AuthoringArtifactRef, destination string) {
+func telegramAuthoringCheckArtifactNamespace(t *testing.T, ref authoringcore.AuthoringArtifactRef, destination string) {
 	t.Helper()
 
-	if ref.Kind == core.AuthoringArtifactKindDump && ref.Role == core.AuthoringArtifactRoleOutput {
+	if ref.Kind == authoringcore.AuthoringArtifactKindDump && ref.Role == authoringcore.AuthoringArtifactRoleOutput {
 		if ref.Path != destination {
 			t.Fatal("dump output does not match project destination", ref)
 		}

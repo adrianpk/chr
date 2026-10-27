@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestPlanQuizToDraftPromotionCreatesDraftWithProvenance(t *testing.T) {
@@ -29,7 +31,7 @@ func TestPlanQuizToDraftPromotionCreatesDraftWithProvenance(t *testing.T) {
 		t.Fatal("WouldWrite = true, want false for dry run")
 	}
 
-	if plan.Layout.Ref.Kind != AuthoringArtifactKindDraft {
+	if plan.Layout.Ref.Kind != authoringcore.AuthoringArtifactKindDraft {
 		t.Fatalf("Layout.Ref.Kind = %q, want draft", plan.Layout.Ref.Kind)
 	}
 
@@ -113,7 +115,7 @@ func TestPlanQuizToDraftPromotionRejectsInvalidInput(t *testing.T) {
 	}
 }
 
-func writePromotionQuizFixture(t *testing.T, projectDir string, now time.Time) (AuthoringSession, string) {
+func writePromotionQuizFixture(t *testing.T, projectDir string, now time.Time) (authoringcore.AuthoringSession, string) {
 	t.Helper()
 
 	session := validContextualQuizSession(now)
@@ -137,7 +139,7 @@ func writePromotionQuizFixture(t *testing.T, projectDir string, now time.Time) (
 func mustPlanContextualQuiz(
 	t *testing.T,
 	projectDir string,
-	session AuthoringSession,
+	session authoringcore.AuthoringSession,
 	now time.Time,
 	allowReplace bool,
 ) ContextualQuizGenerationPlan {
@@ -162,7 +164,7 @@ func mustPlanContextualQuiz(
 func mustPlanQuizToDraftPromotion(
 	t *testing.T,
 	projectDir string,
-	session AuthoringSession,
+	session authoringcore.AuthoringSession,
 	quizPath string,
 	now time.Time,
 	allowReplace bool,

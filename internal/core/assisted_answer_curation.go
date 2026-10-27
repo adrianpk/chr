@@ -10,12 +10,13 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
 // AssistedAnswerCurationOptions describes a package boundary value.
 type AssistedAnswerCurationOptions struct {
-	Session          AuthoringSession
+	Session          authoringcore.AuthoringSession
 	SessionPaths     AuthoringSessionPaths
 	TranscriptEvents []AssistedTranscriptEvent
 	Repository       AuthoringSessionRepository
@@ -25,11 +26,11 @@ type AssistedAnswerCurationOptions struct {
 
 // AssistedAnswerCurationResult describes a package boundary value.
 type AssistedAnswerCurationResult struct {
-	Session      AuthoringSession
+	Session      authoringcore.AuthoringSession
 	Request      AssistedModelRequest
 	Response     AssistedModelResponse
 	Summary      AssistedCuratedAnswerSummary
-	ArtifactRef  AuthoringArtifactRef
+	ArtifactRef  authoringcore.AuthoringArtifactRef
 	ArtifactPath string
 }
 
@@ -184,7 +185,7 @@ func validateAssistedAnswerCurationOptions(opts AssistedAnswerCurationOptions) e
 }
 
 func assistedAnswerCurationRequest(
-	session AuthoringSession,
+	session authoringcore.AuthoringSession,
 	events []AssistedTranscriptEvent,
 	draft AssistedCuratedAnswerSummary,
 	now time.Time,
@@ -201,7 +202,7 @@ func assistedAnswerCurationRequest(
 	}
 }
 
-func assistedAnswerCurationPrompt(session AuthoringSession, events []AssistedTranscriptEvent) string {
+func assistedAnswerCurationPrompt(session authoringcore.AuthoringSession, events []AssistedTranscriptEvent) string {
 	return fmt.Sprintf(
 		"Curate the assisted authoring transcript for session %s into a concise reusable summary. Transcript events: %d.",
 		session.ID,
@@ -210,11 +211,11 @@ func assistedAnswerCurationPrompt(session AuthoringSession, events []AssistedTra
 }
 
 type assistedCurationArtifact struct {
-	Ref  AuthoringArtifactRef
+	Ref  authoringcore.AuthoringArtifactRef
 	Path string
 }
 
-func writeAssistedAnswerCurationArtifact(session AuthoringSession, paths AuthoringSessionPaths, summary AssistedCuratedAnswerSummary) (assistedCurationArtifact, error) {
+func writeAssistedAnswerCurationArtifact(session authoringcore.AuthoringSession, paths AuthoringSessionPaths, summary AssistedCuratedAnswerSummary) (assistedCurationArtifact, error) {
 	artifactPath := filepath.Join(paths.SessionDir, "curated-summary.md")
 
 	_, err := os.Stat(artifactPath)
@@ -231,10 +232,10 @@ func writeAssistedAnswerCurationArtifact(session AuthoringSession, paths Authori
 		return assistedCurationArtifact{}, fmt.Errorf("write assisted answer curation artifact: %w", err)
 	}
 
-	ref := AuthoringArtifactRef{
+	ref := authoringcore.AuthoringArtifactRef{
 		ID:          "curated-summary-" + session.ID,
-		Kind:        AuthoringArtifactKindDraft,
-		Role:        AuthoringArtifactRoleOutput,
+		Kind:        authoringcore.AuthoringArtifactKindDraft,
+		Role:        authoringcore.AuthoringArtifactRoleOutput,
 		Path:        filepath.ToSlash(artifactPath),
 		Description: "Curated assisted authoring answer summary.",
 	}
@@ -245,17 +246,17 @@ func writeAssistedAnswerCurationArtifact(session AuthoringSession, paths Authori
 func updateAssistedAnswerCurationSession(
 	ctx context.Context,
 	repository AuthoringSessionRepository,
-	session AuthoringSession,
-	ref AuthoringArtifactRef,
+	session authoringcore.AuthoringSession,
+	ref authoringcore.AuthoringArtifactRef,
 	now time.Time,
-) (AuthoringSession, error) {
+) (authoringcore.AuthoringSession, error) {
 	session.Outputs = append(session.Outputs, ref)
-	session.Provenance = append(session.Provenance, AuthoringProvenanceLink{
-		Relation: AuthoringProvenanceRelationGenerated,
-		Source: AuthoringArtifactRef{
+	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{
+		Relation: authoringcore.AuthoringProvenanceRelationGenerated,
+		Source: authoringcore.AuthoringArtifactRef{
 			ID:          "transcript-" + session.ID,
-			Kind:        AuthoringArtifactKindTranscript,
-			Role:        AuthoringArtifactRoleInput,
+			Kind:        authoringcore.AuthoringArtifactKindTranscript,
+			Role:        authoringcore.AuthoringArtifactRoleInput,
 			Path:        filepath.ToSlash(AuthoringSessionLayout("", session.ID).TranscriptPath),
 			Description: "Assisted authoring transcript.",
 		},
@@ -267,7 +268,7 @@ func updateAssistedAnswerCurationSession(
 
 	_, err := repository.UpdateSession(ctx, session)
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return session, nil

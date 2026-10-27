@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -81,12 +81,12 @@ func sendForeignGuidedTelegramReply(t *testing.T, f *telegramConversationAppFixt
 	}
 }
 
-func changeGuidedTelegramFromWeb(t *testing.T, operations service, before core.AuthoringSession) core.AuthoringSession {
+func changeGuidedTelegramFromWeb(t *testing.T, operations service, before authoringcore.AuthoringSession) authoringcore.AuthoringSession {
 	t.Helper()
 
 	operations.projectContext = commandProjectContext{ProjectID: before.ProjectID, ProjectDir: guidedTelegramProject(t, operations, before.ProjectID)}
 
-	after, err := operations.ChangeGuidedUseCase(t.Context(), core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: before.ID, ProjectID: before.ProjectID, Namespace: before.Namespace}, ExpectedRevision: before.Revision, OperationID: "web-independent-capture", Action: "append", Content: "Independent Web capture."})
+	after, err := operations.ChangeGuidedUseCase(t.Context(), authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: before.ID, ProjectID: before.ProjectID, Namespace: before.Namespace}, ExpectedRevision: before.Revision, OperationID: "web-independent-capture", Action: "append", Content: "Independent Web capture."})
 	if err != nil {
 		t.Fatal(err)
 	}

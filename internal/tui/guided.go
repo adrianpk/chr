@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // GuidedExecutor maps terminal requests to the shared guided application owner.
@@ -18,7 +18,7 @@ type GuidedExecutor interface {
 // GuidedRequest freezes a selected run, input revision and operation before IO.
 type GuidedRequest struct {
 	Action, Document string
-	Command          core.GuidedUseCaseCommand
+	Command          authoringcore.GuidedUseCaseCommand
 }
 
 // GuidedDocument is a complete original, verified by the application reader.
@@ -35,8 +35,8 @@ type GuidedView struct {
 	Retry                                   *GuidedRequest
 	Native                                  *WorkflowView
 	CanRetainIdea, CanApprove               bool
-	Session                                 *core.AuthoringSession
-	Runs                                    []core.AuthoringSession
+	Session                                 *authoringcore.AuthoringSession
+	Runs                                    []authoringcore.AuthoringSession
 	Policy, Problems, Progress              []string
 	Document                                *GuidedDocument
 }
@@ -62,7 +62,7 @@ type guidedFinishedMsg struct {
 func (m *Model) openGuided() tea.Cmd {
 	m.guided = guidedState{Active: true}
 
-	return m.startGuidedRequest(GuidedRequest{Action: "inspect", Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{ProjectID: m.projectID}}})
+	return m.startGuidedRequest(GuidedRequest{Action: "inspect", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{ProjectID: m.projectID}}})
 }
 
 func (m *Model) startGuidedRequest(request GuidedRequest) tea.Cmd {
@@ -121,7 +121,7 @@ func sameGuidedTerminalRun(before, after GuidedView) bool {
 }
 
 func (m *Model) guidedRequest(action string) GuidedRequest {
-	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{ProjectID: m.projectID, Namespace: m.guided.View.Namespace}}
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{ProjectID: m.projectID, Namespace: m.guided.View.Namespace}}
 
 	command.NativeRevision = m.guided.View.NativeRevision
 	if session := m.guided.View.Session; session != nil {

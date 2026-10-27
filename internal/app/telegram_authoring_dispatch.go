@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -62,7 +63,7 @@ func (r telegramReceiver) dispatchAuthoringConversation(ctx context.Context, use
 	command := telegramAuthoringCommand{Input: input}
 	switch input.Action {
 	case telegramcore.ConversationDone:
-		command.Action, command.Target = core.AuthoringContinuationGenerate, core.AuthoringArtifactKindDump
+		command.Action, command.Target = core.AuthoringContinuationGenerate, authoringcore.AuthoringArtifactKindDump
 	case telegramcore.ConversationCapture:
 		bindingResult, err := r.store.ResolveAuthoringTarget(ctx, input)
 		c := bindingResult.Conversation

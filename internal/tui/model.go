@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -85,7 +86,7 @@ type Options struct {
 	Quizzes              []QuizView
 	Specs                []SpecView
 	Plans                []PlanView
-	AuthoringSessions    []core.AuthoringSession
+	AuthoringSessions    []authoringcore.AuthoringSession
 	Observability        ObservabilityView
 	WorkReadiness        WorkReadinessView
 	WorkspaceGraph       core.WorkspaceGraph

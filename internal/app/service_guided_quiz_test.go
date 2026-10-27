@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -136,7 +137,7 @@ func TestGuidedUseCaseQuizInvalid(t *testing.T) {
 	}
 }
 
-func guidedQuizFixture(t *testing.T, namespace string) (service, core.AuthoringSession, *fakeServiceQuizModel) {
+func guidedQuizFixture(t *testing.T, namespace string) (service, authoringcore.AuthoringSession, *fakeServiceQuizModel) {
 	t.Helper()
 
 	if testing.Short() {
@@ -148,21 +149,21 @@ func guidedQuizFixture(t *testing.T, namespace string) (service, core.AuthoringS
 	initializeGuidedWebGit(t, root)
 
 	operations := newTestService(t, root)
-	scope := core.GuidedUseCaseScope{RunID: "guided-quiz", ProjectID: operations.projectContext.ProjectID, Namespace: namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: "guided-quiz", ProjectID: operations.projectContext.ProjectID, Namespace: namespace}
 
-	session, err := core.StartGuidedUseCase(t.Context(), root, core.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true})
+	session, err := core.StartGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, input := range []struct{ action, content string }{{"name", "Guided clarification"}, {"append", "Deliver a bounded workflow."}} {
-		session, err = core.MutateGuidedUseCase(t.Context(), root, core.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: input.action, ExpectedRevision: session.Revision, Action: input.action, Content: input.content})
+		session, err = core.MutateGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: input.action, ExpectedRevision: session.Revision, Action: input.action, Content: input.content})
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	session, err = core.FinishGuidedUseCaseDump(t.Context(), root, core.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "finish", ExpectedRevision: session.Revision, Action: "finish"})
+	session, err = core.FinishGuidedUseCaseDump(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "finish", ExpectedRevision: session.Revision, Action: "finish"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -177,8 +178,8 @@ func guidedQuizFixture(t *testing.T, namespace string) (service, core.AuthoringS
 	return operations, session, model
 }
 
-func guidedQuizCommand(session core.AuthoringSession, id, action, content string) core.GuidedUseCaseCommand {
-	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: id, Action: action, Content: content}
+func guidedQuizCommand(session authoringcore.AuthoringSession, id, action, content string) authoringcore.GuidedUseCaseCommand {
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: id, Action: action, Content: content}
 	if session.Guided.Quiz != nil {
 		command.QuestionID, command.InputDigest = session.Guided.Quiz.QuestionID, session.Guided.Quiz.InputDigest
 	}
@@ -241,7 +242,7 @@ func TestGuidedUseCaseQuizConcurrent(t *testing.T) {
 	}
 }
 
-func replaceGuidedWorkingDump(t *testing.T, root string, dump core.GuidedStageCheckpoint) {
+func replaceGuidedWorkingDump(t *testing.T, root string, dump authoringcore.GuidedStageCheckpoint) {
 	t.Helper()
 
 	for _, artifact := range dump.Artifacts {
@@ -253,7 +254,7 @@ func replaceGuidedWorkingDump(t *testing.T, root string, dump core.GuidedStageCh
 	}
 }
 
-func invalidGuidedQuizAnswer(command core.GuidedUseCaseCommand, variant string) core.GuidedUseCaseCommand {
+func invalidGuidedQuizAnswer(command authoringcore.GuidedUseCaseCommand, variant string) authoringcore.GuidedUseCaseCommand {
 	switch variant {
 	case "question":
 		command.QuestionID = "other"
@@ -270,7 +271,7 @@ func invalidGuidedQuizAnswer(command core.GuidedUseCaseCommand, variant string) 
 	return command
 }
 
-func assertGuidedQuizCompletion(t *testing.T, completed core.AuthoringSession, dump core.GuidedStageCheckpoint) {
+func assertGuidedQuizCompletion(t *testing.T, completed authoringcore.AuthoringSession, dump authoringcore.GuidedStageCheckpoint) {
 	t.Helper()
 
 	if completed.Guided.Stage != "specification" || len(completed.Guided.Checkpoints) != 2 {

@@ -6,12 +6,13 @@ import (
 	"path/filepath"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref AuthoringArtifactRef, body string) ([]workflowstate.FileChange, error) {
+func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref authoringcore.AuthoringArtifactRef, body string) ([]workflowstate.FileChange, error) {
 	if !validAuthoringArtifactRef(binding.Request.Namespace, ref) {
 		return nil, workflowstate.ErrConflict
 	}
@@ -40,7 +41,7 @@ func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding author
 	return changes, nil
 }
 
-func (r *fileAuthoringSessionRepository) authoringArtifactMetadata(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref AuthoringArtifactRef, observed *AuthoringArtifactObservation) ([]byte, error) {
+func (r *fileAuthoringSessionRepository) authoringArtifactMetadata(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref authoringcore.AuthoringArtifactRef, observed *AuthoringArtifactObservation) ([]byte, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: r.projectDir, Namespace: binding.Request.Namespace})
 	if err != nil {
 		return nil, err
@@ -83,7 +84,7 @@ func authoringArtifactObservation(snapshot AuthoringSnapshot, path string) *Auth
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) observedAuthoringMetadata(ref AuthoringArtifactRef, observed AuthoringArtifactObservation) (map[string]any, error) {
+func (r *fileAuthoringSessionRepository) observedAuthoringMetadata(ref authoringcore.AuthoringArtifactRef, observed AuthoringArtifactObservation) (map[string]any, error) {
 	encoded, err := r.authoringRead(filepath.Join(filepath.Dir(ref.Path), "metadata.json"))
 	if err != nil {
 		return nil, err

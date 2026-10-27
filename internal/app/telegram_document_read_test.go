@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -151,7 +151,7 @@ func reserveTelegramOriginalDocument(t *testing.T, f *telegramConversationAppFix
 
 	input := telegramOperationRetainInput(t, f, "Show the "+kind+" document.")
 	input.Conversation = conversation
-	command := telegramExplanationCommand{Input: input, Question: input.Update.Text, DocumentKind: core.AuthoringArtifactKind(kind)}
+	command := telegramExplanationCommand{Input: input, Question: input.Update.Text, DocumentKind: authoringcore.AuthoringArtifactKind(kind)}
 	user := input.Config.AllowedUsers[0]
 	operations := telegramOperationConcreteService(t, f.receiver)
 

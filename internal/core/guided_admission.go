@@ -6,17 +6,12 @@ import (
 	"path/filepath"
 	"reflect"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedWorkAdmissionPolicy binds existing progression intent to native admission.
 const GuidedWorkAdmissionPolicy = "guided-work/v1"
-
-// GuidedInvocationReference addresses the native owner; its mutable state stays there.
-type GuidedInvocationReference struct {
-	ID, RequestKey string
-	Revision       uint64
-}
 
 // GuidedPrerequisiteError carries a fixed, user-facing corrective action.
 // Underlying provider diagnostics must not be interpolated into Action.
@@ -29,7 +24,7 @@ func (e *GuidedPrerequisiteError) Error() string { return e.Action }
 func (e *GuidedPrerequisiteError) Unwrap() error { return e.Cause }
 
 // RetainGuidedHostBlocker reports a stopped activation without changing native facts.
-func RetainGuidedHostBlocker(ctx context.Context, root string, scope GuidedUseCaseScope, invocation string) error {
+func RetainGuidedHostBlocker(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope, invocation string) error {
 	return WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		r := &fileAuthoringSessionRepository{projectDir: root}
 
@@ -59,16 +54,16 @@ func RetainGuidedHostBlocker(ctx context.Context, root string, scope GuidedUseCa
 }
 
 // GuidedPreparationCheckpoint returns the sealed canonical preparation input.
-func GuidedPreparationCheckpoint(session AuthoringSession) (GuidedStageCheckpoint, error) {
+func GuidedPreparationCheckpoint(session authoringcore.AuthoringSession) (authoringcore.GuidedStageCheckpoint, error) {
 	if session.Guided == nil {
-		return GuidedStageCheckpoint{}, workflowstate.ErrConflict
+		return authoringcore.GuidedStageCheckpoint{}, workflowstate.ErrConflict
 	}
 
 	return guidedStageCheckpoint(session, "preparation")
 }
 
 // ValidateGuidedWorkPreview rejects omissions, additions and replaced initial contracts.
-func ValidateGuidedWorkPreview(reference GuidedMaterializationReference, preview WorkflowPreview) error {
+func ValidateGuidedWorkPreview(reference authoringcore.GuidedMaterializationReference, preview WorkflowPreview) error {
 	if preview.Selector != (workflowstate.Selector{Extent: "slice_set", Identity: reference.SetID}) || preview.Total != len(reference.Members) || len(preview.Members) != preview.Total || preview.Total == 0 || preview.Total > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
@@ -83,7 +78,7 @@ func ValidateGuidedWorkPreview(reference GuidedMaterializationReference, preview
 	return nil
 }
 
-func guidedInitialMemberMatches(member WorkflowPreviewMember, expected GuidedWorkMember, set string) bool {
+func guidedInitialMemberMatches(member WorkflowPreviewMember, expected authoringcore.GuidedWorkMember, set string) bool {
 	return member.Key == expected.Key && member.Path == expected.Path && member.Revision == expected.Revision && member.SourceHash == expected.SourceHash && member.ContractHash == expected.ContractHash && member.SetID == set
 }
 
@@ -125,7 +120,7 @@ func (s *WorkflowStore) checkGuidedWorkflowTarget(ctx context.Context, request W
 	return s.checkWorkflowCoordinatorTarget(ctx, request.Selection.Target)
 }
 
-func guardGuidedAdmissionProof(session AuthoringSession, project, namespace string, request WorkflowStartRequest) error {
+func guardGuidedAdmissionProof(session authoringcore.AuthoringSession, project, namespace string, request WorkflowStartRequest) error {
 	if err := guardGuidedAdmissionState(session, project, namespace); err != nil {
 		return err
 	}
@@ -159,7 +154,7 @@ func guardGuidedAdmissionProof(session AuthoringSession, project, namespace stri
 	return nil
 }
 
-func guardGuidedAdmissionCheckpoint(session AuthoringSession, expected string) error {
+func guardGuidedAdmissionCheckpoint(session authoringcore.AuthoringSession, expected string) error {
 	checkpoint, err := GuidedPreparationCheckpoint(session)
 	if err != nil {
 		return err
@@ -173,7 +168,7 @@ func guardGuidedAdmissionCheckpoint(session AuthoringSession, expected string) e
 	return nil
 }
 
-func guardGuidedAdmissionState(session AuthoringSession, project, namespace string) error {
+func guardGuidedAdmissionState(session authoringcore.AuthoringSession, project, namespace string) error {
 	state := session.Guided
 	if state == nil || !validGuidedIntent(session) || session.ProjectID != project || session.Namespace != namespace || state.Stage != "preparation" || state.Work == nil || state.Work.Materialization == nil || state.Work.Admission == nil || state.PendingOperation == nil {
 		return workflowstate.ErrConflict
@@ -182,7 +177,7 @@ func guardGuidedAdmissionState(session AuthoringSession, project, namespace stri
 	return nil
 }
 
-func guardGuidedAdmissionIntent(session AuthoringSession, proof workflowstate.GuidedAdmission) error {
+func guardGuidedAdmissionIntent(session authoringcore.AuthoringSession, proof workflowstate.GuidedAdmission) error {
 	state := session.Guided
 	if proof.Policy != GuidedWorkAdmissionPolicy || proof.Actor != state.Actor || proof.RunID != session.ID || state.PendingOperation.Action != "admit" || proof.OperationDigest != state.PendingOperation.Digest || proof.MaterializationID != state.Work.Materialization.ID {
 		return workflowstate.ErrConflict

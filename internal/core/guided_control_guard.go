@@ -1,8 +1,11 @@
 package core
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
-func guardGuidedControl(session AuthoringSession, operation GuidedUseCaseOperation) (bool, error) {
+func guardGuidedControl(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
 	state := session.Guided
 
 	if !guidedControlAction(operation.Action) {
@@ -28,7 +31,7 @@ func guardGuidedControl(session AuthoringSession, operation GuidedUseCaseOperati
 	return false, nil
 }
 
-func replayGuidedControl(receipt GuidedControlReceipt, operation GuidedUseCaseOperation) (bool, error) {
+func replayGuidedControl(receipt authoringcore.GuidedControlReceipt, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
 	if receipt.Rejected {
 		return false, workflowstate.ErrConflict
 	}
@@ -40,7 +43,7 @@ func guidedControlAction(action string) bool {
 	return action == "pause" || action == "resume" || action == "cancel"
 }
 
-func guidedControlOwnsID(control *GuidedControlState, id string) bool {
+func guidedControlOwnsID(control *authoringcore.GuidedControlState, id string) bool {
 	if control == nil {
 		return false
 	}
@@ -58,7 +61,7 @@ func guidedControlOwnsID(control *GuidedControlState, id string) bool {
 	return false
 }
 
-func guardFreshGuidedControl(session AuthoringSession, operation GuidedUseCaseOperation) error {
+func guardFreshGuidedControl(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
 	state := session.Guided
 	if session.Revision != operation.ExpectedRevision {
 		return workflowstate.ErrConflict
@@ -75,7 +78,7 @@ func guardFreshGuidedControl(session AuthoringSession, operation GuidedUseCaseOp
 	return guardGuidedControlNativeRevision(state.Work, operation.NativeRevision)
 }
 
-func guardGuidedControlIdentity(state *GuidedUseCaseState, id string) error {
+func guardGuidedControlIdentity(state *authoringcore.GuidedUseCaseState, id string) error {
 	if guidedIdeaOwnsID(state, id) {
 		return workflowstate.ErrConflict
 	}
@@ -93,7 +96,7 @@ func guardGuidedControlIdentity(state *GuidedUseCaseState, id string) error {
 	return nil
 }
 
-func guardGuidedControlNativeRevision(work *GuidedWorkState, revision uint64) error {
+func guardGuidedControlNativeRevision(work *authoringcore.GuidedWorkState, revision uint64) error {
 	hasNative := work != nil && work.Invocation != nil
 	if hasNative != (revision != 0) {
 		return workflowstate.ErrConflict
@@ -102,7 +105,7 @@ func guardGuidedControlNativeRevision(work *GuidedWorkState, revision uint64) er
 	return nil
 }
 
-func guardGuidedControlStatus(state *GuidedUseCaseState, action string) error {
+func guardGuidedControlStatus(state *authoringcore.GuidedUseCaseState, action string) error {
 	if state.Status == "cancelled" || state.Status == "completed" || state.Status == "failed" {
 		return workflowstate.ErrConflict
 	}

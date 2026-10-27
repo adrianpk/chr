@@ -5,21 +5,22 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var errAuthoringDocumentUnavailable = errors.New("requested original authoring document is unavailable")
 
-func validAuthoringDocumentKind(kind core.AuthoringArtifactKind) bool {
+func validAuthoringDocumentKind(kind authoringcore.AuthoringArtifactKind) bool {
 	switch kind {
-	case core.AuthoringArtifactKindDump, core.AuthoringArtifactKindSpec, core.AuthoringArtifactKindPlan:
+	case authoringcore.AuthoringArtifactKindDump, authoringcore.AuthoringArtifactKindSpec, authoringcore.AuthoringArtifactKindPlan:
 		return true
 	default:
 		return false
 	}
 }
 
-func (s service) authoringDocument(ctx context.Context, sessionID string, kind core.AuthoringArtifactKind) (core.AuthoringArtifactObservation, error) {
+func (s service) authoringDocument(ctx context.Context, sessionID string, kind authoringcore.AuthoringArtifactKind) (core.AuthoringArtifactObservation, error) {
 	snapshot, err := s.ObserveAuthoring(ctx, sessionID)
 	if err != nil {
 		return core.AuthoringArtifactObservation{}, err

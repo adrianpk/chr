@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -57,9 +57,9 @@ func (p webViewProvider) writeGuidedQuizAction(operations service, request webui
 	}, nil
 }
 
-func guidedQuizWebCommand(request webui.WriteActionRequest) (core.GuidedUseCaseCommand, error) {
-	command := core.GuidedUseCaseCommand{
-		GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: request.Fields["guided_run"], Namespace: request.Fields["namespace"]},
+func guidedQuizWebCommand(request webui.WriteActionRequest) (authoringcore.GuidedUseCaseCommand, error) {
+	command := authoringcore.GuidedUseCaseCommand{
+		GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: request.Fields["guided_run"], Namespace: request.Fields["namespace"]},
 		OperationID:        request.Fields["request_id"], QuestionID: request.Fields["question_id"], InputDigest: request.Fields["input_digest"],
 		Action: strings.TrimPrefix(request.Action, "quiz."),
 	}

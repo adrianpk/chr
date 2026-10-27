@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -45,7 +46,7 @@ func guardGuidedApprovalDocument(request SpecMutationRequest, document SpecDocum
 	return nil
 }
 
-func guardGuidedApprovalSource(session AuthoringSession, request SpecMutationRequest, document SpecDocument) error {
+func guardGuidedApprovalSource(session authoringcore.AuthoringSession, request SpecMutationRequest, document SpecDocument) error {
 	approval := request.GuidedApproval
 
 	draft := session.Guided.SpecDraft
@@ -70,26 +71,26 @@ func guardGuidedApprovalSource(session AuthoringSession, request SpecMutationReq
 	return nil
 }
 
-func guardGuidedApprovalRun(session AuthoringSession, request SpecMutationRequest) error {
+func guardGuidedApprovalRun(session authoringcore.AuthoringSession, request SpecMutationRequest) error {
 	approval := request.GuidedApproval
 	if approval == nil || validateSpecReference(request.Reference) != nil {
 		return workflowstate.ErrConflict
 	}
 
-	scope := GuidedUseCaseScope{RunID: approval.RunID, ProjectID: request.ProjectID, Namespace: strings.Split(request.Reference, "/")[1]}
+	scope := authoringcore.GuidedUseCaseScope{RunID: approval.RunID, ProjectID: request.ProjectID, Namespace: strings.Split(request.Reference, "/")[1]}
 	if err := guardGuidedScope(session, scope); err != nil {
 		return err
 	}
 
 	state := session.Guided
-	if state.Stage != "specification" || !state.ProgressionIntent || state.Actor != approval.Actor || approval.Policy != GuidedSpecApprovalPolicy {
+	if state.Stage != "specification" || !state.ProgressionIntent || state.Actor != approval.Actor || approval.Policy != authoringcore.GuidedSpecApprovalPolicy {
 		return workflowstate.ErrConflict
 	}
 
 	return guardGuidedPreparedSpec(state.PendingOperation, request)
 }
 
-func guardGuidedPreparedSpec(operation *GuidedUseCaseOperation, request SpecMutationRequest) error {
+func guardGuidedPreparedSpec(operation *authoringcore.GuidedUseCaseOperation, request SpecMutationRequest) error {
 	approval := request.GuidedApproval
 
 	if operation == nil || operation.Action != "spec" || operation.PreparedSpec == nil {
@@ -104,18 +105,18 @@ func guardGuidedPreparedSpec(operation *GuidedUseCaseOperation, request SpecMuta
 	return nil
 }
 
-func guidedStageCheckpoint(session AuthoringSession, stage string) (GuidedStageCheckpoint, error) {
+func guidedStageCheckpoint(session authoringcore.AuthoringSession, stage string) (authoringcore.GuidedStageCheckpoint, error) {
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage == stage && len(checkpoint.Artifacts) > 0 {
 			return checkpoint, nil
 		}
 	}
 
-	return GuidedStageCheckpoint{}, errors.New("required guided checkpoint is unavailable")
+	return authoringcore.GuidedStageCheckpoint{}, errors.New("required guided checkpoint is unavailable")
 }
 
 // SealGuidedSpec retains the exact approved revision and committed dependency chain.
-func SealGuidedSpec(ctx context.Context, root string, session *AuthoringSession) error {
+func SealGuidedSpec(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
 	approval := session.Guided.SpecApproval
 	if approval == nil || session.Guided.PendingOperation == nil {
 		return workflowstate.ErrConflict

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -28,7 +29,7 @@ const (
 // ContextualQuizGenerationOptions describes a package boundary value.
 type ContextualQuizGenerationOptions struct {
 	ProjectDir    string
-	Session       AuthoringSession
+	Session       authoringcore.AuthoringSession
 	Now           time.Time
 	AllowReplace  bool
 	DryRun        bool
@@ -38,7 +39,7 @@ type ContextualQuizGenerationOptions struct {
 
 // ContextualQuizGenerationPlan describes a package boundary value.
 type ContextualQuizGenerationPlan struct {
-	Session                AuthoringSession
+	Session                authoringcore.AuthoringSession
 	Layout                 AuthoringArtifactLayout
 	Request                AuthoringQuizGenerationRequest
 	Result                 AuthoringQuizGenerationResult
@@ -63,7 +64,7 @@ type AuthoringQuizGenerationRequest struct {
 	Strategy        string
 	ProjectDir      string
 	SessionID       string
-	Target          AuthoringTarget
+	Target          authoringcore.AuthoringTarget
 	Topic           string
 	QuestionCount   int
 	ContextSections []AuthoringQuizContextSection
@@ -172,7 +173,7 @@ func writeContextualQuiz(plan ContextualQuizGenerationPlan) error {
 func NewAuthoringQuizGenerationRequest(
 	ctx context.Context,
 	projectDir string,
-	session AuthoringSession,
+	session authoringcore.AuthoringSession,
 	questionCount int,
 	now time.Time,
 ) (AuthoringQuizGenerationRequest, error) {
@@ -208,7 +209,7 @@ func NewAuthoringQuizGenerationRequest(
 func LoadAuthoringQuizContextSections(
 	ctx context.Context,
 	projectDir string,
-	session AuthoringSession,
+	session authoringcore.AuthoringSession,
 ) ([]AuthoringQuizContextSection, error) {
 	projectDir, err := cleanAbsProjectDir(projectDir)
 	if err != nil {
@@ -242,8 +243,8 @@ func LoadAuthoringQuizContextSections(
 
 // RenderContextualQuizMarkdown renders the corresponding package data.
 func RenderContextualQuizMarkdown(
-	session AuthoringSession,
-	artifact AuthoringArtifactRef,
+	session authoringcore.AuthoringSession,
+	artifact authoringcore.AuthoringArtifactRef,
 	request AuthoringQuizGenerationRequest,
 	result AuthoringQuizGenerationResult,
 ) string {
@@ -519,8 +520,8 @@ func contextualQuizLayoutOptions(opts ContextualQuizGenerationOptions) Authoring
 	return AuthoringArtifactLayoutOptions{
 		ProjectDir:   opts.ProjectDir,
 		SessionID:    opts.Session.ID,
-		Kind:         AuthoringArtifactKindQuiz,
-		Role:         AuthoringArtifactRoleOutput,
+		Kind:         authoringcore.AuthoringArtifactKindQuiz,
+		Role:         authoringcore.AuthoringArtifactRoleOutput,
 		Topic:        opts.Session.Topic,
 		Description:  "Context-aware questionnaire generated for " + string(opts.Session.Target) + " authoring.",
 		AllowReplace: opts.AllowReplace,
@@ -528,14 +529,14 @@ func contextualQuizLayoutOptions(opts ContextualQuizGenerationOptions) Authoring
 }
 
 func appendContextualQuizOutput(
-	session AuthoringSession,
-	artifact AuthoringArtifactRef,
+	session authoringcore.AuthoringSession,
+	artifact authoringcore.AuthoringArtifactRef,
 	recordedAt time.Time,
-) AuthoringSession {
-	artifact.Role = AuthoringArtifactRoleOutput
+) authoringcore.AuthoringSession {
+	artifact.Role = authoringcore.AuthoringArtifactRoleOutput
 	session.Outputs = append(session.Outputs, artifact)
-	session.Provenance = append(session.Provenance, AuthoringProvenanceLink{
-		Relation:   AuthoringProvenanceRelationGenerated,
+	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{
+		Relation:   authoringcore.AuthoringProvenanceRelationGenerated,
 		Source:     authoringQuizSourceArtifact(session),
 		Target:     artifact,
 		Decision:   "Generate a context-aware questionnaire for the authoring target.",
@@ -546,21 +547,21 @@ func appendContextualQuizOutput(
 	return session
 }
 
-func authoringQuizSourceArtifact(session AuthoringSession) AuthoringArtifactRef {
+func authoringQuizSourceArtifact(session authoringcore.AuthoringSession) authoringcore.AuthoringArtifactRef {
 	if len(session.Inputs) > 0 {
 		return session.Inputs[0]
 	}
 
-	return AuthoringArtifactRef{
+	return authoringcore.AuthoringArtifactRef{
 		ID:          "session:" + session.ID,
-		Kind:        AuthoringArtifactKindSession,
-		Role:        AuthoringArtifactRoleInput,
+		Kind:        authoringcore.AuthoringArtifactKindSession,
+		Role:        authoringcore.AuthoringArtifactRoleInput,
 		Path:        filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), session.ID, "session.md")),
 		Description: "Authoring session metadata.",
 	}
 }
 
-func authoringQuizSessionContext(session AuthoringSession) string {
+func authoringQuizSessionContext(session authoringcore.AuthoringSession) string {
 	lines := []string{
 		"session_id: " + session.ID,
 		"target: " + string(session.Target),

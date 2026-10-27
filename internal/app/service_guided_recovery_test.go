@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
@@ -56,10 +57,10 @@ func TestGuidedUseCaseRecoveryDisconnect(t *testing.T) {
 	}
 }
 
-func assertGuidedRecoveryInspection(t *testing.T, operations service, session core.AuthoringSession) {
+func assertGuidedRecoveryInspection(t *testing.T, operations service, session authoringcore.AuthoringSession) {
 	t.Helper()
 
-	scope := core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
 
 	before, err := core.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
 	if err != nil {
@@ -97,7 +98,7 @@ func TestGuidedUseCaseRecoveryStage(t *testing.T) {
 	operations.guidedWorkHost = host
 	host.start(func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy })
 
-	recovered := waitGuidedRecovery(t, operations, session, func(current core.AuthoringSession) bool {
+	recovered := waitGuidedRecovery(t, operations, session, func(current authoringcore.AuthoringSession) bool {
 		return current.Guided.Quiz != nil && current.Guided.PendingOperation == nil
 	})
 
@@ -167,7 +168,7 @@ func TestGuidedUseCaseRecoveryAdmission(t *testing.T) {
 	operations.guidedWorkHost = host
 	host.start(func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy })
 
-	current := waitGuidedRecovery(t, operations, pending, func(current core.AuthoringSession) bool {
+	current := waitGuidedRecovery(t, operations, pending, func(current authoringcore.AuthoringSession) bool {
 		run, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
 
 		return err == nil && current.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"
@@ -181,10 +182,10 @@ func TestGuidedUseCaseRecoveryAdmission(t *testing.T) {
 	}
 }
 
-func waitGuidedRecovery(t *testing.T, operations service, session core.AuthoringSession, ready func(core.AuthoringSession) bool) core.AuthoringSession {
+func waitGuidedRecovery(t *testing.T, operations service, session authoringcore.AuthoringSession, ready func(authoringcore.AuthoringSession) bool) authoringcore.AuthoringSession {
 	t.Helper()
 
-	scope := core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
 
 	deadline := time.Now().Add(30 * time.Second)
 	for time.Now().Before(deadline) {
@@ -202,10 +203,10 @@ func waitGuidedRecovery(t *testing.T, operations service, session core.Authoring
 
 	failGuidedRecovery(t, operations, scope)
 
-	return core.AuthoringSession{}
+	return authoringcore.AuthoringSession{}
 }
 
-func failGuidedRecovery(t *testing.T, operations service, scope core.GuidedUseCaseScope) {
+func failGuidedRecovery(t *testing.T, operations service, scope authoringcore.GuidedUseCaseScope) {
 	t.Helper()
 
 	current, readErr := core.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
@@ -240,7 +241,7 @@ func guidedBlockedRecoveryModel(t *testing.T, operations *service, model *fakeSe
 	return entered, unblock
 }
 
-func guidedLostStartFixture(t *testing.T) (service, core.AuthoringSession, core.WorkflowInvocation) {
+func guidedLostStartFixture(t *testing.T) (service, authoringcore.AuthoringSession, core.WorkflowInvocation) {
 	t.Helper()
 
 	operations, prepared, _ := guidedAdmissionFixture(t)
@@ -266,7 +267,7 @@ func guidedLostStartFixture(t *testing.T) (service, core.AuthoringSession, core.
 	return operations, pending, before
 }
 
-func guidedRecoveryReviewReady(ctx context.Context, operations service, session core.AuthoringSession) bool {
+func guidedRecoveryReviewReady(ctx context.Context, operations service, session authoringcore.AuthoringSession) bool {
 	run, err := core.ReadGuidedInvocation(ctx, operations.projectContext.ProjectDir, session)
 
 	return err == nil && session.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"

@@ -7,12 +7,13 @@ import (
 	"path/filepath"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // StartGuidedUseCase creates or replays one explicitly authorized guided session.
-func StartGuidedUseCase(ctx context.Context, root string, request GuidedUseCaseStart) (session AuthoringSession, err error) {
+func StartGuidedUseCase(ctx context.Context, root string, request authoringcore.GuidedUseCaseStart) (session authoringcore.AuthoringSession, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		var startErr error
@@ -25,9 +26,9 @@ func StartGuidedUseCase(ctx context.Context, root string, request GuidedUseCaseS
 	return session, err
 }
 
-func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context, request GuidedUseCaseStart) (AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context, request authoringcore.GuidedUseCaseStart) (authoringcore.AuthoringSession, error) {
 	if _, err := r.authoringSessionPaths(request.RunID); err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	current, err := r.getGuardedSession(ctx, request.RunID)
@@ -49,12 +50,12 @@ func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context,
 
 	now := time.Now().UTC().Truncate(time.Second)
 
-	current = AuthoringSession{
+	current = authoringcore.AuthoringSession{
 		ID: request.RunID, ProjectID: request.ProjectID, Namespace: request.Namespace,
-		Revision: 1, Topic: "New use case", Status: AuthoringSessionStatusActive,
-		Mode: AuthoringSessionModeAssisted, Target: AuthoringTargetDump,
+		Revision: 1, Topic: "New use case", Status: authoringcore.AuthoringSessionStatusActive,
+		Mode: authoringcore.AuthoringSessionModeAssisted, Target: authoringcore.AuthoringTargetDump,
 		CreatedAt: now, StartedAt: &now, UpdatedAt: now,
-		Guided: &GuidedUseCaseState{
+		Guided: &authoringcore.GuidedUseCaseState{
 			SchemaVersion: 1, Actor: request.Actor,
 			ProgressionIntent: request.ProgressionIntent, Stage: "name", Status: "waiting_input",
 		},
@@ -67,7 +68,7 @@ func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context,
 }
 
 // ReadGuidedUseCase reads retained state without recovery, writes or dispatch.
-func ReadGuidedUseCase(ctx context.Context, root string, scope GuidedUseCaseScope) (AuthoringSession, error) {
+func ReadGuidedUseCase(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (authoringcore.AuthoringSession, error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 
 	session, err := r.getGuardedSession(ctx, scope.RunID)
@@ -78,7 +79,7 @@ func ReadGuidedUseCase(ctx context.Context, root string, scope GuidedUseCaseScop
 	return session, guardGuidedScope(session, scope)
 }
 
-func guardGuidedScope(session AuthoringSession, scope GuidedUseCaseScope) error {
+func guardGuidedScope(session authoringcore.AuthoringSession, scope authoringcore.GuidedUseCaseScope) error {
 	if session.Guided == nil || session.ProjectID != scope.ProjectID || session.Namespace != scope.Namespace || session.ID != scope.RunID {
 		return workflowstate.ErrConflict
 	}
@@ -107,7 +108,7 @@ func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content [
 	return change, nil
 }
 
-func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSession, create bool, extra ...workflowstate.FileChange) error {
+func (r *fileAuthoringSessionRepository) saveGuidedSession(session authoringcore.AuthoringSession, create bool, extra ...workflowstate.FileChange) error {
 	paths, err := r.authoringSessionPaths(session.ID)
 	if err != nil {
 		return err
@@ -147,7 +148,7 @@ func (r *fileAuthoringSessionRepository) saveGuidedSession(session AuthoringSess
 }
 
 // MutateGuidedUseCase serializes name and dump input with the authoring owner.
-func MutateGuidedUseCase(ctx context.Context, root string, command GuidedUseCaseCommand) (session AuthoringSession, err error) {
+func MutateGuidedUseCase(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.AuthoringSession, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil {
 		return session, err
@@ -181,7 +182,7 @@ func MutateGuidedUseCase(ctx context.Context, root string, command GuidedUseCase
 	return session, err
 }
 
-func guardGuidedCommand(session AuthoringSession, command GuidedUseCaseCommand, operation GuidedUseCaseOperation) (bool, error) {
+func guardGuidedCommand(session authoringcore.AuthoringSession, command authoringcore.GuidedUseCaseCommand, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
 	for _, completed := range session.Guided.CompletedOperations {
 		if completed.ID == operation.ID {
 			return completed.Digest == operation.Digest, guidedDigestConflict(completed, operation)
@@ -211,7 +212,7 @@ func guardGuidedCommand(session AuthoringSession, command GuidedUseCaseCommand, 
 	return false, nil
 }
 
-func guidedDigestConflict(retained, received GuidedUseCaseOperation) error {
+func guidedDigestConflict(retained, received authoringcore.GuidedUseCaseOperation) error {
 	if retained.ID != received.ID || retained.Digest != received.Digest {
 		return workflowstate.ErrConflict
 	}
@@ -219,7 +220,7 @@ func guidedDigestConflict(retained, received GuidedUseCaseOperation) error {
 	return nil
 }
 
-func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, session *AuthoringSession, command GuidedUseCaseCommand, operation GuidedUseCaseOperation) error {
+func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, session *authoringcore.AuthoringSession, command authoringcore.GuidedUseCaseCommand, operation authoringcore.GuidedUseCaseOperation) error {
 	switch command.Action {
 	case "name":
 		if session.Guided.Stage != "name" {
@@ -243,7 +244,7 @@ func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, s
 		return errors.New("unsupported guided input action")
 	}
 
-	session.Guided.CompletedOperations = append(session.Guided.CompletedOperations, GuidedUseCaseOperation{ID: operation.ID, Action: operation.Action, Digest: operation.Digest})
+	session.Guided.CompletedOperations = append(session.Guided.CompletedOperations, authoringcore.GuidedUseCaseOperation{ID: operation.ID, Action: operation.Action, Digest: operation.Digest})
 	session.Guided.PendingOperation = nil
 	session.Revision++
 	session.UpdatedAt = time.Now().UTC().Truncate(time.Second)
@@ -251,7 +252,7 @@ func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, s
 	return r.saveGuidedSession(*session, false)
 }
 
-func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, session *AuthoringSession, operation GuidedUseCaseOperation) error {
+func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
 	metadata := CaseMetadata{SchemaVersion: CaseMetadataSchemaVersion, Name: operation.Content}
 	if len(operation.Content) > 512 {
 		return errors.New("use-case name exceeds 512 bytes")
@@ -288,7 +289,7 @@ func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, 
 }
 
 // ListGuidedUseCases inspects scoped sessions without recovering effects.
-func ListGuidedUseCases(ctx context.Context, root, project, namespace string) ([]AuthoringSession, error) {
+func ListGuidedUseCases(ctx context.Context, root, project, namespace string) ([]authoringcore.AuthoringSession, error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	if _, err := r.authoringPath(authoringRuntimeRef("sessions")); err != nil {
 		return nil, err
@@ -303,7 +304,7 @@ func ListGuidedUseCases(ctx context.Context, root, project, namespace string) ([
 		return nil, err
 	}
 
-	result := []AuthoringSession{}
+	result := []authoringcore.AuthoringSession{}
 
 	for _, session := range sessions {
 		if session.Guided != nil && session.ProjectID == project && session.Namespace == namespace {

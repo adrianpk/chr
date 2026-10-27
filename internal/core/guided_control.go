@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -11,35 +12,13 @@ import (
 // verified after journal recovery. Other errors retain uncertain stop intent.
 var ErrGuidedControlRejected = errors.New("native guided control was rejected without an accepted receipt")
 
-// GuidedControlState keeps stop intent separate from an interrupted stage.
-// Native receipts prove acceptance; native quiescence is acknowledged separately.
-type GuidedControlState struct {
-	StopIntent           string                                `json:"stop_intent,omitempty"`
-	ResumeStatus         string                                `json:"resume_status,omitempty"`
-	PreviousStatus       string                                `json:"previous_status,omitempty"`
-	PreviousIntent       string                                `json:"previous_intent,omitempty"`
-	PreviousBlocker      string                                `json:"previous_blocker,omitempty"`
-	AcknowledgedRevision uint64                                `json:"acknowledged_revision,omitempty"`
-	PendingOperation     *GuidedUseCaseOperation               `json:"pending_operation,omitempty"`
-	NativeRequest        *workflowstate.ControlMutationRequest `json:"native_request,omitempty"`
-	NativeReceipt        *workflowstate.ControlResult          `json:"native_receipt,omitempty"`
-	CompletedOperations  []GuidedControlReceipt                `json:"completed_operations,omitempty"`
-}
-
-// GuidedControlReceipt retains the original control outcome across later changes.
-type GuidedControlReceipt struct {
-	GuidedUseCaseOperation
-	Native   *workflowstate.ControlResult `json:"native,omitempty"`
-	Rejected bool                         `json:"rejected,omitempty"`
-}
-
-func boundedGuidedControls(control *GuidedControlState) bool {
+func boundedGuidedControls(control *authoringcore.GuidedControlState) bool {
 	return control == nil || len(control.CompletedOperations) <= 128
 }
 
 // ApplyGuidedUseCaseControl serializes one revision-bound stop/resume operation
 // independently of the pending stage. Its callback composes the native owner.
-func ApplyGuidedUseCaseControl(ctx context.Context, root string, command GuidedUseCaseCommand, apply GuidedUseCaseStep) (session AuthoringSession, err error) {
+func ApplyGuidedUseCaseControl(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand, apply GuidedUseCaseStep) (session authoringcore.AuthoringSession, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil || apply == nil {
 		return session, errors.Join(workflowstate.ErrConflict, err)
@@ -77,14 +56,14 @@ func ApplyGuidedUseCaseControl(ctx context.Context, root string, command GuidedU
 	return session, err
 }
 
-func reserveGuidedControl(ctx context.Context, root string, session *AuthoringSession, operation GuidedUseCaseOperation) error {
+func reserveGuidedControl(ctx context.Context, root string, session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
 	state := session.Guided
 	if state.Control != nil && state.Control.PendingOperation != nil {
 		return nil
 	}
 
 	if state.Control == nil {
-		state.Control = &GuidedControlState{}
+		state.Control = &authoringcore.GuidedControlState{}
 	}
 
 	control := state.Control
@@ -105,7 +84,7 @@ func reserveGuidedControl(ctx context.Context, root string, session *AuthoringSe
 	return RetainGuidedUseCaseProgress(ctx, root, session)
 }
 
-func guidedNativeControlRequest(session AuthoringSession, operation GuidedUseCaseOperation) *workflowstate.ControlMutationRequest {
+func guidedNativeControlRequest(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) *workflowstate.ControlMutationRequest {
 	work := session.Guided.Work
 	if work == nil || work.Invocation == nil {
 		return nil
@@ -114,7 +93,7 @@ func guidedNativeControlRequest(session AuthoringSession, operation GuidedUseCas
 	return &workflowstate.ControlMutationRequest{Guided: &workflowstate.GuidedControlProof{RunID: session.ID, OperationDigest: operation.Digest}, Binding: workflowstate.MutationBinding{RequestID: "guided-control-" + operation.Digest, Operator: session.Guided.Actor}, Action: operation.Action, ID: work.Invocation.ID, ExpectedRevision: operation.NativeRevision}
 }
 
-func (r *fileAuthoringSessionRepository) retainGuidedControlFailure(ctx context.Context, session *AuthoringSession, operation GuidedUseCaseOperation, cause error) error {
+func (r *fileAuthoringSessionRepository) retainGuidedControlFailure(ctx context.Context, session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation, cause error) error {
 	if errors.Is(cause, ErrGuidedControlRejected) {
 		completeGuidedControl(session, operation, true)
 	} else {
@@ -124,10 +103,10 @@ func (r *fileAuthoringSessionRepository) retainGuidedControlFailure(ctx context.
 	return errors.Join(cause, RetainGuidedUseCaseProgress(ctx, r.projectDir, session))
 }
 
-func completeGuidedControl(session *AuthoringSession, operation GuidedUseCaseOperation, rejected bool) {
+func completeGuidedControl(session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation, rejected bool) {
 	state := session.Guided
 	control := state.Control
-	control.CompletedOperations = append(control.CompletedOperations, GuidedControlReceipt{GuidedUseCaseOperation: operation, Native: control.NativeReceipt, Rejected: rejected})
+	control.CompletedOperations = append(control.CompletedOperations, authoringcore.GuidedControlReceipt{GuidedUseCaseOperation: operation, Native: control.NativeReceipt, Rejected: rejected})
 
 	control.PendingOperation, control.NativeRequest = nil, nil
 	if rejected {

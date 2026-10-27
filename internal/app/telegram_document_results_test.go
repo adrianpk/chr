@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -51,12 +52,12 @@ func TestTelegramPresentationDocumentAuthoring(t *testing.T) {
 	c := f.sessions(t)[0]
 	for _, step := range []struct {
 		command string
-		kind    core.AuthoringArtifactKind
+		kind    authoringcore.AuthoringArtifactKind
 	}{
-		{"/done", core.AuthoringArtifactKindDump},
-		{"/spec", core.AuthoringArtifactKindSpec},
-		{"/refine spec", core.AuthoringArtifactKindSpec},
-		{"/plan", core.AuthoringArtifactKindPlan},
+		{"/done", authoringcore.AuthoringArtifactKindDump},
+		{"/spec", authoringcore.AuthoringArtifactKindSpec},
+		{"/refine spec", authoringcore.AuthoringArtifactKindSpec},
+		{"/plan", authoringcore.AuthoringArtifactKindPlan},
 	} {
 		t.Run(step.command, func(t *testing.T) {
 			command := step.command + " " + c.ID
@@ -86,7 +87,7 @@ func TestTelegramPresentationDocumentAuthoring(t *testing.T) {
 	checkTelegramNoWork(t, f.receiver.env)
 }
 
-func checkTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind, conversation string) {
+func checkTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppFixture, snapshot core.AuthoringSnapshot, kind authoringcore.AuthoringArtifactKind, conversation string) {
 	t.Helper()
 
 	notice := f.send(t, "Show the "+string(kind)+" document.", 0)
@@ -102,7 +103,7 @@ func checkTelegramOriginalDocumentRead(t *testing.T, f *telegramConversationAppF
 	}
 }
 
-func assertTelegramArtifactUpload(t *testing.T, document telegramDocumentUpload, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) {
+func assertTelegramArtifactUpload(t *testing.T, document telegramDocumentUpload, snapshot core.AuthoringSnapshot, kind authoringcore.AuthoringArtifactKind) {
 	t.Helper()
 
 	for _, artifact := range snapshot.Artifacts {

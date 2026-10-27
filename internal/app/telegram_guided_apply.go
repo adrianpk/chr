@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -166,7 +167,7 @@ func telegramGuidedSourceMatches(owner telegramGuidedInput, request telegramcore
 	return owner.Command.OperationID == request.ID
 }
 
-func applyTelegramGuided(ctx context.Context, operations telegramGuidedService, target telegramcore.OperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func applyTelegramGuided(ctx context.Context, operations telegramGuidedService, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
 	session, err := operations.ApplyTelegramGuided(ctx, target, input)
 	// A missing prerequisite is a retained stage outcome, not a failed input.
 	var prerequisite *core.GuidedPrerequisiteError

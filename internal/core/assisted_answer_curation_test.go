@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestBuildAssistedCuratedAnswerSummaryPreservesAnswersDecisionsAndOpenQuestions(t *testing.T) {
@@ -137,7 +139,7 @@ func TestRenderAssistedCuratedAnswerSummaryIsDeterministic(t *testing.T) {
 func setupAssistedAnswerCurationTest(
 	t *testing.T,
 	dir string,
-) (AuthoringSessionRepository, AuthoringSession, AuthoringSessionPaths) {
+) (AuthoringSessionRepository, authoringcore.AuthoringSession, AuthoringSessionPaths) {
 	t.Helper()
 
 	repository := NewAuthoringSessionRepository(dir)

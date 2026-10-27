@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestGuidedUseCaseRecoveryProcess fences a real dead child owner on startup,
@@ -40,7 +40,7 @@ func testGuidedProcessRecovery(t *testing.T, action string) {
 	}
 
 	host := startGuidedRecoveryHost(t, operations)
-	current := waitGuidedRecovery(t, operations, session, func(current core.AuthoringSession) bool {
+	current := waitGuidedRecovery(t, operations, session, func(current authoringcore.AuthoringSession) bool {
 		if action == "continue" {
 			return guidedRecoveryReviewReady(t.Context(), operations, current)
 		}
@@ -87,7 +87,7 @@ func TestGuidedUseCaseRecoveryShutdown(t *testing.T) {
 	}
 
 	host := startGuidedRecoveryHost(t, operations)
-	current := waitGuidedRecovery(t, operations, session, func(current core.AuthoringSession) bool {
+	current := waitGuidedRecovery(t, operations, session, func(current authoringcore.AuthoringSession) bool {
 		return guidedRecoveryReviewReady(t.Context(), operations, current)
 	})
 

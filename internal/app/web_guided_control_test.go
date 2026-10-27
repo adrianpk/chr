@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestGuidedUseCaseControlWeb submits rendered control guards independently of
@@ -82,7 +83,7 @@ func assertGuidedWebControlStale(t *testing.T, handler http.Handler, original ur
 	}
 }
 
-func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler) (core.AuthoringSession, url.Values) {
+func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler) (authoringcore.AuthoringSession, url.Values) {
 	t.Helper()
 
 	operations := provider.service(t.Context())
@@ -101,7 +102,7 @@ func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Ha
 	}
 
 	// A persisted pause from another adapter must remain resumable in the Web UI.
-	pause := guidedWebCommandForm(core.GuidedUseCaseCommand{GuidedUseCaseScope: answer.GuidedUseCaseScope, OperationID: "external-pause", ExpectedRevision: pending.Revision, Action: "pause"})
+	pause := guidedWebCommandForm(authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: answer.GuidedUseCaseScope, OperationID: "external-pause", ExpectedRevision: pending.Revision, Action: "pause"})
 	pause.Set("native_revision", "0")
 
 	response := guidedCaptureHTTP(t, handler, http.MethodPost, "/guided/actions", pause)
@@ -114,7 +115,7 @@ func pauseGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Ha
 	return paused, pause
 }
 
-func resumeGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler, paused core.AuthoringSession, body string) core.AuthoringSession {
+func resumeGuidedWebStage(t *testing.T, provider webViewProvider, handler http.Handler, paused authoringcore.AuthoringSession, body string) authoringcore.AuthoringSession {
 	t.Helper()
 
 	operations := provider.service(t.Context())

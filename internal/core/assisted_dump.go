@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -221,7 +222,7 @@ func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectD
 	}
 
 	now := assistedArtifactSynthesisNow(opts.Now)
-	session.Provenance = append(session.Provenance, AuthoringProvenanceLink{Relation: AuthoringProvenanceRelationGenerated, Source: opts.SourceRef, Target: ref, Decision: "Synthesized assisted dump " + mutation.OperationID, RecordedAt: now})
+	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{Relation: authoringcore.AuthoringProvenanceRelationGenerated, Source: opts.SourceRef, Target: ref, Decision: "Synthesized assisted dump " + mutation.OperationID, RecordedAt: now})
 
 	session.UpdatedAt = now
 	if session.Revision > 0 {
@@ -243,7 +244,7 @@ func assistedDumpResult(opts AssistedArtifactSynthesisOptions, mutation ProjectD
 	return assistedDumpSessionImage{Result: result, Session: sessionImage}, nil
 }
 
-func assistedSessionHasOutput(session AuthoringSession, reference string) bool {
+func assistedSessionHasOutput(session authoringcore.AuthoringSession, reference string) bool {
 	for _, ref := range session.Outputs {
 		if ref.Path == reference {
 			return true

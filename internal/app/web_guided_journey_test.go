@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // The owned canonical fixture applies the exact prepared Git result but loses
@@ -111,7 +112,7 @@ func TestGuidedUseCaseWebJourney(t *testing.T) {
 	assertGuidedJourneyResult(t, handler, completed, publication)
 }
 
-func guidedWebJourneyControls(t *testing.T, provider webViewProvider, host *guidedWorkHost, handler http.Handler, session core.AuthoringSession) core.AuthoringSession {
+func guidedWebJourneyControls(t *testing.T, provider webViewProvider, host *guidedWorkHost, handler http.Handler, session authoringcore.AuthoringSession) authoringcore.AuthoringSession {
 	t.Helper()
 
 	for _, action := range []string{"pause", "resume"} {
@@ -131,7 +132,7 @@ func guidedWebJourneyControls(t *testing.T, provider webViewProvider, host *guid
 	return readWebGuidedSession(t, provider.service(t.Context()), session.ID)
 }
 
-func completeGuidedWebPublication(t *testing.T, provider webViewProvider, host *guidedWorkHost, publication *guidedWebPublicationFixture, session core.AuthoringSession) {
+func completeGuidedWebPublication(t *testing.T, provider webViewProvider, host *guidedWorkHost, publication *guidedWebPublicationFixture, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	operations := provider.service(t.Context())
@@ -181,7 +182,7 @@ func assertGuidedUnknownPublication(t *testing.T, operations service, id string)
 	}
 }
 
-func assertGuidedJourneyResult(t *testing.T, handler http.Handler, session core.AuthoringSession, publication *guidedWebPublicationFixture) {
+func assertGuidedJourneyResult(t *testing.T, handler http.Handler, session authoringcore.AuthoringSession, publication *guidedWebPublicationFixture) {
 	t.Helper()
 
 	if session.Guided.Stage != "results" || session.Guided.Result == nil || len(publication.submissions) != 1 || publication.creates != 1 {

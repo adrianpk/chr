@@ -4,27 +4,28 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramAuthoringDescriptor struct {
 	Name, Arguments, Help string
 	Action                core.AuthoringContinuationAction
-	Target                core.AuthoringArtifactKind
+	Target                authoringcore.AuthoringArtifactKind
 }
 
 type telegramAuthoringCommand struct {
 	Input        telegramcore.ConversationInput
 	Action       core.AuthoringContinuationAction
-	Target       core.AuthoringArtifactKind
+	Target       authoringcore.AuthoringArtifactKind
 	Instructions string
 }
 
 func telegramAuthoringRegistry() []telegramAuthoringDescriptor {
 	return []telegramAuthoringDescriptor{
-		{"/quiz", "[conversation]", "Ask one real clarification question", core.AuthoringContinuationAsk, core.AuthoringArtifactKindQuiz},
-		{"/spec", "[conversation]", "Generate a draft specification or ask missing information", core.AuthoringContinuationGenerate, core.AuthoringArtifactKindSpec},
-		{"/plan", "[conversation]", "Generate a plan from canonical context", core.AuthoringContinuationGenerate, core.AuthoringArtifactKindPlan},
+		{"/quiz", "[conversation]", "Ask one real clarification question", core.AuthoringContinuationAsk, authoringcore.AuthoringArtifactKindQuiz},
+		{"/spec", "[conversation]", "Generate a draft specification or ask missing information", core.AuthoringContinuationGenerate, authoringcore.AuthoringArtifactKindSpec},
+		{"/plan", "[conversation]", "Generate a plan from canonical context", core.AuthoringContinuationGenerate, authoringcore.AuthoringArtifactKindPlan},
 		{"/refine", "<dump|spec|plan> <conversation> <instructions>", "Refine an observed artifact with explicit replacement authority", core.AuthoringContinuationRefine, ""},
 	}
 }
@@ -47,7 +48,7 @@ func parseTelegramAuthoring(update telegramcore.ReceivedUpdate) (telegramAuthori
 		if descriptor.Action == core.AuthoringContinuationRefine {
 			word2 := telegramCommandWord(body)
 			kind, rest := word2.Command, word2.Body
-			command.Target = core.AuthoringArtifactKind(kind)
+			command.Target = authoringcore.AuthoringArtifactKind(kind)
 			word3 := telegramCommandWord(rest)
 			command.Input.Conversation, command.Instructions = word3.Command, word3.Body
 		} else {
@@ -70,7 +71,7 @@ func validateTelegramAuthoringCommand(command telegramAuthoringCommand) error {
 			return ErrRecordUnsupported
 		}
 
-		if command.Target != core.AuthoringArtifactKindDump && command.Target != core.AuthoringArtifactKindSpec && command.Target != core.AuthoringArtifactKindPlan {
+		if command.Target != authoringcore.AuthoringArtifactKindDump && command.Target != authoringcore.AuthoringArtifactKindSpec && command.Target != authoringcore.AuthoringArtifactKindPlan {
 			return ErrRecordUnsupported
 		}
 	}
@@ -97,7 +98,7 @@ func telegramIntentAuthoring(update telegramcore.ReceivedUpdate, intent Conversa
 				return telegramAuthoringParsing{Command: command, Recognized: true}, ErrRecordUnsupported
 			}
 
-			command.Target, command.Instructions = core.AuthoringArtifactKind(a.Action), a.Text
+			command.Target, command.Instructions = authoringcore.AuthoringArtifactKind(a.Action), a.Text
 		} else if a.Action != "" || a.Text != "" {
 			return telegramAuthoringParsing{Command: command, Recognized: true}, ErrRecordUnsupported
 		}

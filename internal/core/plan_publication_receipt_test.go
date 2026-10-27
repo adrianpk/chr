@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -54,7 +55,7 @@ func TestPlanPublicationRetry(t *testing.T) {
 func TestPlanPublicationReceiptGuards(t *testing.T) {
 	cases := []struct {
 		name   string
-		mutate func(*testing.T, string, PlanPublicationResult) string
+		mutate func(*testing.T, string, authoringcore.PlanPublicationResult) string
 	}{
 		{"another root", copyPlanReceiptProject},
 		{"corrupt receipt", corruptPlanReceipt},
@@ -84,7 +85,7 @@ func TestPlanPublicationReceiptGuards(t *testing.T) {
 	}
 }
 
-func copyPlanReceiptProject(t *testing.T, project string, result PlanPublicationResult) string {
+func copyPlanReceiptProject(t *testing.T, project string, result authoringcore.PlanPublicationResult) string {
 	t.Helper()
 
 	target := t.TempDir()
@@ -99,14 +100,14 @@ func copyPlanReceiptProject(t *testing.T, project string, result PlanPublication
 	return target
 }
 
-func corruptPlanReceipt(t *testing.T, project string, result PlanPublicationResult) string {
+func corruptPlanReceipt(t *testing.T, project string, result authoringcore.PlanPublicationResult) string {
 	t.Helper()
 	writeTestFile(t, filepath.Join(project, authoringReceiptRef(result.OperationID)), "{}")
 
 	return project
 }
 
-func removePlanReceiptBody(t *testing.T, project string, result PlanPublicationResult) string {
+func removePlanReceiptBody(t *testing.T, project string, result authoringcore.PlanPublicationResult) string {
 	t.Helper()
 
 	if err := os.Remove(filepath.Join(project, "ops", "default", result.Binding.BodyRef)); err != nil {

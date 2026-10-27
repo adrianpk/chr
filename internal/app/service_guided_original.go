@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -38,7 +39,7 @@ func (s service) ReadGuidedUseCaseOriginal(ctx context.Context, id, namespace, k
 	return GuidedUseCaseArtifact{}, workflowstate.ErrConflict
 }
 
-func guidedOriginalMatches(session core.AuthoringSession, stage, path, kind string) bool {
+func guidedOriginalMatches(session authoringcore.AuthoringSession, stage, path, kind string) bool {
 	if kind == "tracker" {
 		if session.Guided.Work == nil || session.Guided.Work.Materialization == nil {
 			return false

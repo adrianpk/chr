@@ -13,6 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -1981,13 +1982,13 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 			Documents: []DocumentView{
 				{Index: 0, Title: "TUI Plan"},
 			},
-			AuthoringSessions: []core.AuthoringSession{
+			AuthoringSessions: []authoringcore.AuthoringSession{
 				{
 					ID:        "author-20260522-100000",
 					ProjectID: "project-1",
-					Status:    core.AuthoringSessionStatusDraft,
-					Mode:      core.AuthoringSessionModeTUI,
-					Target:    core.AuthoringTargetSpec,
+					Status:    authoringcore.AuthoringSessionStatusDraft,
+					Mode:      authoringcore.AuthoringSessionModeTUI,
+					Target:    authoringcore.AuthoringTargetSpec,
 					Topic:     "TUI artifact creation",
 				},
 			},
@@ -3491,19 +3492,19 @@ func TestLoadDocumentViewsDiscoversProjectMarkdown(t *testing.T) {
 func TestModelRendersAuthoringSessionsAndDetail(t *testing.T) {
 	updated := time.Date(2026, 5, 22, 10, 0, 0, 0, time.UTC)
 	model := NewModel(Options{
-		AuthoringSessions: []core.AuthoringSession{
+		AuthoringSessions: []authoringcore.AuthoringSession{
 			{
 				ID:        "auth-1",
 				ProjectID: "project-1",
-				Status:    core.AuthoringSessionStatusActive,
-				Mode:      core.AuthoringSessionModeAssisted,
-				Target:    core.AuthoringTargetSpec,
+				Status:    authoringcore.AuthoringSessionStatusActive,
+				Mode:      authoringcore.AuthoringSessionModeAssisted,
+				Target:    authoringcore.AuthoringTargetSpec,
 				Topic:     "Billing sync",
 				UpdatedAt: updated,
-				Inputs: []core.AuthoringArtifactRef{
+				Inputs: []authoringcore.AuthoringArtifactRef{
 					{Path: ".prj/dumps/billing.md"},
 				},
-				Outputs: []core.AuthoringArtifactRef{
+				Outputs: []authoringcore.AuthoringArtifactRef{
 					{Path: ".chr/default/specs/auth-1-billing-sync.md"},
 				},
 			},

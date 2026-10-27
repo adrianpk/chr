@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestPlanAuthoringArtifactLayoutResolvesCanonicalPaths(t *testing.T) {
@@ -15,7 +17,7 @@ func TestPlanAuthoringArtifactLayoutResolvesCanonicalPaths(t *testing.T) {
 				ProjectDir:  projectDir,
 				SessionID:   "auth-20260521-120000",
 				Kind:        test.kind,
-				Role:        AuthoringArtifactRoleOutput,
+				Role:        authoringcore.AuthoringArtifactRoleOutput,
 				Topic:       "Billing Sync",
 				Description: "Generated artifact.",
 			})
@@ -36,49 +38,49 @@ func TestPlanAuthoringArtifactLayoutResolvesCanonicalPaths(t *testing.T) {
 }
 
 func authoringArtifactKindPathTests(projectDir string) []struct {
-	kind             AuthoringArtifactKind
+	kind             authoringcore.AuthoringArtifactKind
 	wantRelativePath string
 } {
 	_ = projectDir
 
 	return []struct {
-		kind             AuthoringArtifactKind
+		kind             authoringcore.AuthoringArtifactKind
 		wantRelativePath string
 	}{
 		{
-			kind:             AuthoringArtifactKindDump,
+			kind:             authoringcore.AuthoringArtifactKindDump,
 			wantRelativePath: "ops/default/dump/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindQuiz,
+			kind:             authoringcore.AuthoringArtifactKindQuiz,
 			wantRelativePath: "ops/default/quiz/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindDraft,
+			kind:             authoringcore.AuthoringArtifactKindDraft,
 			wantRelativePath: "ops/default/spec/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindSpec,
+			kind:             authoringcore.AuthoringArtifactKindSpec,
 			wantRelativePath: "ops/default/spec/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindPlan,
+			kind:             authoringcore.AuthoringArtifactKindPlan,
 			wantRelativePath: "ops/default/plan/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindSliceSet,
+			kind:             authoringcore.AuthoringArtifactKindSliceSet,
 			wantRelativePath: "ops/default/plan/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindSlice,
+			kind:             authoringcore.AuthoringArtifactKindSlice,
 			wantRelativePath: "ops/default/plan/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindTracker,
+			kind:             authoringcore.AuthoringArtifactKindTracker,
 			wantRelativePath: "ops/default/tracker/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 		{
-			kind:             AuthoringArtifactKindTicket,
+			kind:             authoringcore.AuthoringArtifactKindTicket,
 			wantRelativePath: "ops/default/ticket/00000-auth-20260521-120000-billing-sync/artifact.md",
 		},
 	}
@@ -155,8 +157,8 @@ func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 			name: "project dir",
 			opts: AuthoringArtifactLayoutOptions{
 				SessionID: "auth-1",
-				Kind:      AuthoringArtifactKindQuiz,
-				Role:      AuthoringArtifactRoleOutput,
+				Kind:      authoringcore.AuthoringArtifactKindQuiz,
+				Role:      authoringcore.AuthoringArtifactRoleOutput,
 				Topic:     "Topic",
 			},
 		},
@@ -164,8 +166,8 @@ func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 			name: "session id",
 			opts: AuthoringArtifactLayoutOptions{
 				ProjectDir: projectDir,
-				Kind:       AuthoringArtifactKindQuiz,
-				Role:       AuthoringArtifactRoleOutput,
+				Kind:       authoringcore.AuthoringArtifactKindQuiz,
+				Role:       authoringcore.AuthoringArtifactRoleOutput,
 				Topic:      "Topic",
 			},
 		},
@@ -174,8 +176,8 @@ func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 			opts: AuthoringArtifactLayoutOptions{
 				ProjectDir: projectDir,
 				SessionID:  "auth-1",
-				Kind:       AuthoringArtifactKindSession,
-				Role:       AuthoringArtifactRoleOutput,
+				Kind:       authoringcore.AuthoringArtifactKindSession,
+				Role:       authoringcore.AuthoringArtifactRoleOutput,
 				Topic:      "Topic",
 			},
 		},
@@ -184,8 +186,8 @@ func invalidAuthoringArtifactLayoutTests(projectDir string) []struct {
 			opts: AuthoringArtifactLayoutOptions{
 				ProjectDir: projectDir,
 				SessionID:  "auth-1",
-				Kind:       AuthoringArtifactKindQuiz,
-				Role:       AuthoringArtifactRoleOutput,
+				Kind:       authoringcore.AuthoringArtifactKindQuiz,
+				Role:       authoringcore.AuthoringArtifactRoleOutput,
 			},
 		},
 	}
@@ -217,8 +219,8 @@ func planAuthoringArtifactLayoutForTest(
 	layout, err := PlanAuthoringArtifactLayout(AuthoringArtifactLayoutOptions{
 		ProjectDir:   projectDir,
 		SessionID:    "auth-1",
-		Kind:         AuthoringArtifactKindQuiz,
-		Role:         AuthoringArtifactRoleOutput,
+		Kind:         authoringcore.AuthoringArtifactKindQuiz,
+		Role:         authoringcore.AuthoringArtifactRoleOutput,
 		Topic:        "Billing Sync",
 		AllowReplace: allowReplace,
 	})

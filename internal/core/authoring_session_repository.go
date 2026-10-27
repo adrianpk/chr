@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -24,10 +25,10 @@ var ErrAuthoringSessionNotFound = errors.New("authoring session not found")
 
 // AuthoringSessionRepository defines a package boundary interface.
 type AuthoringSessionRepository interface {
-	CreateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error)
-	UpdateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error)
-	GetSession(ctx context.Context, id string) (AuthoringSession, error)
-	ListSessions(ctx context.Context) ([]AuthoringSession, error)
+	CreateSession(ctx context.Context, session authoringcore.AuthoringSession) (AuthoringSessionPaths, error)
+	UpdateSession(ctx context.Context, session authoringcore.AuthoringSession) (AuthoringSessionPaths, error)
+	GetSession(ctx context.Context, id string) (authoringcore.AuthoringSession, error)
+	ListSessions(ctx context.Context) ([]authoringcore.AuthoringSession, error)
 	AppendTranscriptEvents(ctx context.Context, sessionID string, events []AssistedTranscriptEvent) error
 	ListTranscriptEvents(ctx context.Context, sessionID string) ([]AssistedTranscriptEvent, error)
 	ObserveContinuation(context.Context, string) (AuthoringSnapshot, error)
@@ -66,7 +67,7 @@ func AuthoringSessionLayout(projectDir, id string) AuthoringSessionPaths {
 }
 
 // CreateSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) createSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error) {
+func (r *fileAuthoringSessionRepository) createSession(ctx context.Context, session authoringcore.AuthoringSession) (AuthoringSessionPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return AuthoringSessionPaths{}, err
@@ -108,7 +109,7 @@ func (r *fileAuthoringSessionRepository) createSession(ctx context.Context, sess
 }
 
 // UpdateSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) updateSession(ctx context.Context, session AuthoringSession) (AuthoringSessionPaths, error) {
+func (r *fileAuthoringSessionRepository) updateSession(ctx context.Context, session authoringcore.AuthoringSession) (AuthoringSessionPaths, error) {
 	err := ctx.Err()
 	if err != nil {
 		return AuthoringSessionPaths{}, err
@@ -144,35 +145,35 @@ func (r *fileAuthoringSessionRepository) updateSession(ctx context.Context, sess
 }
 
 // GetSession executes the corresponding package operation.
-func (r *fileAuthoringSessionRepository) getSession(ctx context.Context, id string) (AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) getSession(ctx context.Context, id string) (authoringcore.AuthoringSession, error) {
 	err := ctx.Err()
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	paths := AuthoringSessionLayout(r.projectDir, id)
 
 	content, err := opsfile.Read(paths.SessionPath)
 	if errors.Is(err, os.ErrNotExist) {
-		return AuthoringSession{}, fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, id)
+		return authoringcore.AuthoringSession{}, fmt.Errorf("%w: %s", ErrAuthoringSessionNotFound, id)
 	}
 
 	if err != nil {
-		return AuthoringSession{}, fmt.Errorf("read authoring session: %w", err)
+		return authoringcore.AuthoringSession{}, fmt.Errorf("read authoring session: %w", err)
 	}
 
 	session, err := ParseAuthoringSession(string(content))
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return session, nil
 }
 
 // ListSessions lists the requested data.
-func (r *fileAuthoringSessionRepository) listSessions(ctx context.Context) ([]AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) listSessions(ctx context.Context) ([]authoringcore.AuthoringSession, error) {
 	sessionsDir := filepath.Join(r.projectDir, workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory))
-	sessions := []AuthoringSession{}
+	sessions := []authoringcore.AuthoringSession{}
 
 	visited := 0
 
@@ -295,7 +296,7 @@ func requireAuthoringSessionFile(path, sessionID string) error {
 }
 
 // RenderAuthoringSession renders the corresponding package data.
-func RenderAuthoringSession(session AuthoringSession, paths AuthoringSessionPaths) (string, error) {
+func RenderAuthoringSession(session authoringcore.AuthoringSession, paths AuthoringSessionPaths) (string, error) {
 	err := ValidateAuthoringSession(session)
 	if err != nil {
 		return "", err
@@ -314,20 +315,20 @@ func RenderAuthoringSession(session AuthoringSession, paths AuthoringSessionPath
 }
 
 // ParseAuthoringSession parses the corresponding package data.
-func ParseAuthoringSession(content string) (AuthoringSession, error) {
+func ParseAuthoringSession(content string) (authoringcore.AuthoringSession, error) {
 	metadata, err := parseTicketFrontmatter(content)
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	session, err := authoringSessionFromMetadata(metadata.Metadata)
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	session.Guided, err = parseGuidedUseCase(metadata.Metadata["guided_state"])
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	session.Inputs = parseAuthoringArtifactSection(content, "Inputs")
@@ -336,13 +337,13 @@ func ParseAuthoringSession(content string) (AuthoringSession, error) {
 
 	err = ValidateAuthoringSession(session)
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return session, nil
 }
 
-func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session AuthoringSession) error {
+func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session authoringcore.AuthoringSession) error {
 	_, err := output.WriteString("---\n")
 	if err != nil {
 		return fmt.Errorf("write authoring session frontmatter: %w", err)
@@ -400,7 +401,7 @@ func renderAuthoringSessionFrontmatter(output *bytes.Buffer, session AuthoringSe
 	return nil
 }
 
-func renderAuthoringSessionBody(output *bytes.Buffer, session AuthoringSession, paths AuthoringSessionPaths) {
+func renderAuthoringSessionBody(output *bytes.Buffer, session authoringcore.AuthoringSession, paths AuthoringSessionPaths) {
 	output.WriteString("# Authoring Session\n\n")
 	output.WriteString("## Files\n\n")
 	output.WriteString("| Role | Path |\n")
@@ -413,7 +414,7 @@ func renderAuthoringSessionBody(output *bytes.Buffer, session AuthoringSession, 
 	renderAuthoringProvenanceTable(output, session.Provenance)
 }
 
-func renderAuthoringArtifactTable(output *bytes.Buffer, title string, refs []AuthoringArtifactRef) {
+func renderAuthoringArtifactTable(output *bytes.Buffer, title string, refs []authoringcore.AuthoringArtifactRef) {
 	output.WriteString("## " + title + "\n\n")
 	output.WriteString("| ID | Kind | Role | Path | Description |\n")
 	output.WriteString("| --- | --- | --- | --- | --- |\n")
@@ -427,7 +428,7 @@ func renderAuthoringArtifactTable(output *bytes.Buffer, title string, refs []Aut
 	output.WriteString("\n")
 }
 
-func renderAuthoringProvenanceTable(output *bytes.Buffer, links []AuthoringProvenanceLink) {
+func renderAuthoringProvenanceTable(output *bytes.Buffer, links []authoringcore.AuthoringProvenanceLink) {
 	output.WriteString("## Provenance\n\n")
 	output.WriteString("| Relation | Source ID | Source Kind | Source Role | Source Path | Target ID | Target Kind | Target Role | Target Path | Decision | Recorded At |\n")
 	output.WriteString("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
@@ -452,40 +453,40 @@ func renderAuthoringProvenanceTable(output *bytes.Buffer, links []AuthoringProve
 	output.WriteString("\n")
 }
 
-func authoringSessionFromMetadata(metadata map[string]string) (AuthoringSession, error) {
+func authoringSessionFromMetadata(metadata map[string]string) (authoringcore.AuthoringSession, error) {
 	revision, err := optionalAuthoringRevision(metadata)
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	createdAt, err := requiredAuthoringTime(metadata["created_at"], "created_at")
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	startedAt, err := opsmetadata.OptionalTimestamp(metadata["started_at"])
 	if err != nil {
-		return AuthoringSession{}, fmt.Errorf("parse authoring session started_at: %w", err)
+		return authoringcore.AuthoringSession{}, fmt.Errorf("parse authoring session started_at: %w", err)
 	}
 
 	finishedAt, err := opsmetadata.OptionalTimestamp(metadata["finished_at"])
 	if err != nil {
-		return AuthoringSession{}, fmt.Errorf("parse authoring session finished_at: %w", err)
+		return authoringcore.AuthoringSession{}, fmt.Errorf("parse authoring session finished_at: %w", err)
 	}
 
 	updatedAt, err := requiredAuthoringTime(metadata["updated_at"], "updated_at")
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
-	return AuthoringSession{
+	return authoringcore.AuthoringSession{
 		ID:          opsmetadata.Unquote(metadata["id"]),
 		Namespace:   opsmetadata.Unquote(metadata["namespace"]),
 		Revision:    revision,
 		ProjectID:   opsmetadata.Unquote(metadata["project_id"]),
-		Status:      AuthoringSessionStatus(opsmetadata.Unquote(metadata["status"])),
-		Mode:        AuthoringSessionMode(opsmetadata.Unquote(metadata["mode"])),
-		Target:      AuthoringTarget(opsmetadata.Unquote(metadata["target"])),
+		Status:      authoringcore.AuthoringSessionStatus(opsmetadata.Unquote(metadata["status"])),
+		Mode:        authoringcore.AuthoringSessionMode(opsmetadata.Unquote(metadata["mode"])),
+		Target:      authoringcore.AuthoringTarget(opsmetadata.Unquote(metadata["target"])),
 		Topic:       opsmetadata.Unquote(metadata["topic"]),
 		CreatedAt:   createdAt,
 		StartedAt:   startedAt,
@@ -495,19 +496,19 @@ func authoringSessionFromMetadata(metadata map[string]string) (AuthoringSession,
 	}, nil
 }
 
-func parseAuthoringArtifactSection(content, title string) []AuthoringArtifactRef {
+func parseAuthoringArtifactSection(content, title string) []authoringcore.AuthoringArtifactRef {
 	rows := parseMarkdownTableRows(sectionContent(content, "## "+title))
-	refs := make([]AuthoringArtifactRef, 0, len(rows))
+	refs := make([]authoringcore.AuthoringArtifactRef, 0, len(rows))
 
 	for _, row := range rows {
 		if len(row) != 5 {
 			continue
 		}
 
-		refs = append(refs, AuthoringArtifactRef{
+		refs = append(refs, authoringcore.AuthoringArtifactRef{
 			ID:          row[0],
-			Kind:        AuthoringArtifactKind(row[1]),
-			Role:        AuthoringArtifactRole(row[2]),
+			Kind:        authoringcore.AuthoringArtifactKind(row[1]),
+			Role:        authoringcore.AuthoringArtifactRole(row[2]),
 			Path:        row[3],
 			Description: row[4],
 		})
@@ -516,9 +517,9 @@ func parseAuthoringArtifactSection(content, title string) []AuthoringArtifactRef
 	return refs
 }
 
-func parseAuthoringProvenanceSection(content string) []AuthoringProvenanceLink {
+func parseAuthoringProvenanceSection(content string) []authoringcore.AuthoringProvenanceLink {
 	rows := parseMarkdownTableRows(sectionContent(content, "## Provenance"))
-	links := make([]AuthoringProvenanceLink, 0, len(rows))
+	links := make([]authoringcore.AuthoringProvenanceLink, 0, len(rows))
 
 	for _, row := range rows {
 		if len(row) != 11 {
@@ -530,18 +531,18 @@ func parseAuthoringProvenanceSection(content string) []AuthoringProvenanceLink {
 			continue
 		}
 
-		links = append(links, AuthoringProvenanceLink{
-			Relation: AuthoringProvenanceRelation(row[0]),
-			Source: AuthoringArtifactRef{
+		links = append(links, authoringcore.AuthoringProvenanceLink{
+			Relation: authoringcore.AuthoringProvenanceRelation(row[0]),
+			Source: authoringcore.AuthoringArtifactRef{
 				ID:   row[1],
-				Kind: AuthoringArtifactKind(row[2]),
-				Role: AuthoringArtifactRole(row[3]),
+				Kind: authoringcore.AuthoringArtifactKind(row[2]),
+				Role: authoringcore.AuthoringArtifactRole(row[3]),
 				Path: row[4],
 			},
-			Target: AuthoringArtifactRef{
+			Target: authoringcore.AuthoringArtifactRef{
 				ID:   row[5],
-				Kind: AuthoringArtifactKind(row[6]),
-				Role: AuthoringArtifactRole(row[7]),
+				Kind: authoringcore.AuthoringArtifactKind(row[6]),
+				Role: authoringcore.AuthoringArtifactRole(row[7]),
 				Path: row[8],
 			},
 			Decision:   row[9],
@@ -680,7 +681,7 @@ func optionalAuthoringRevision(metadata map[string]string) (int64, error) {
 	return revision, nil
 }
 
-func (r *fileAuthoringSessionRepository) appendListedAuthoringSession(ctx context.Context, sessions *[]AuthoringSession, path string, entry os.DirEntry) error {
+func (r *fileAuthoringSessionRepository) appendListedAuthoringSession(ctx context.Context, sessions *[]authoringcore.AuthoringSession, path string, entry os.DirEntry) error {
 	err := ctx.Err()
 	if err != nil {
 		return err

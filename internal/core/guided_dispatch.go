@@ -3,13 +3,15 @@ package core
 import (
 	"context"
 	"errors"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // ErrGuidedUseCaseStopped prevents new dispatch after a guided stop is accepted.
 var ErrGuidedUseCaseStopped = errors.New("guided progression is paused or terminal")
 
 // GuidedDispatchAllowed observes retained authorization without recovering state.
-func GuidedDispatchAllowed(session AuthoringSession) bool {
+func GuidedDispatchAllowed(session authoringcore.AuthoringSession) bool {
 	state := session.Guided
 	if state == nil || !state.ProgressionIntent {
 		return false
@@ -29,7 +31,7 @@ func GuidedDispatchAllowed(session AuthoringSession) bool {
 
 // ReserveGuidedUseCaseStep retains accepted input before asynchronous provider
 // dispatch. Replays retain the original arguments and owner request identity.
-func ReserveGuidedUseCaseStep(ctx context.Context, root string, command GuidedUseCaseCommand) (session AuthoringSession, err error) {
+func ReserveGuidedUseCaseStep(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.AuthoringSession, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil {
 		return session, err

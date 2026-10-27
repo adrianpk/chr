@@ -4,20 +4,13 @@ import (
 	"context"
 	"reflect"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// GuidedResultReference retains only native completion references, not new receipts.
-type GuidedResultReference struct {
-	InvocationID string
-	Revision     uint64
-	Receipts     []workflowstate.EvidenceRef
-	Closures     []workflowstate.ClosingEvidence
-}
-
 // ReadGuidedResult verifies the exact native binding and its original evidence.
-func ReadGuidedResult(ctx context.Context, root string, session AuthoringSession) (WorkflowResultInspection, error) {
+func ReadGuidedResult(ctx context.Context, root string, session authoringcore.AuthoringSession) (WorkflowResultInspection, error) {
 	if session.Guided == nil || session.Guided.Work == nil || session.Guided.Work.Invocation == nil {
 		return WorkflowResultInspection{}, workflowstate.ErrConflict
 	}
@@ -39,7 +32,7 @@ func ReadGuidedResult(ctx context.Context, root string, session AuthoringSession
 	return result, nil
 }
 
-func guardGuidedResultBinding(session AuthoringSession, run WorkflowInvocation) error {
+func guardGuidedResultBinding(session authoringcore.AuthoringSession, run WorkflowInvocation) error {
 	work := session.Guided.Work
 	if work.Materialization == nil || work.Admission == nil {
 		return workflowstate.ErrConflict
@@ -56,7 +49,7 @@ func guardGuidedResultBinding(session AuthoringSession, run WorkflowInvocation) 
 	return guardGuidedResultMembers(work, run)
 }
 
-func guardGuidedResultMembers(work *GuidedWorkState, run WorkflowInvocation) error {
+func guardGuidedResultMembers(work *authoringcore.GuidedWorkState, run WorkflowInvocation) error {
 	for i, member := range run.Members {
 		frozen := work.Materialization.Members[i]
 		if member.Admission.Key != frozen.Key || member.Admission.ContractHash != frozen.ContractHash {
@@ -69,7 +62,7 @@ func guardGuidedResultMembers(work *GuidedWorkState, run WorkflowInvocation) err
 
 // ReconcileGuidedResult is an owned lifecycle transition. Only complete native
 // receipts can finish a run; pending operations and explicit stops take priority.
-func ReconcileGuidedResult(ctx context.Context, root string, scope GuidedUseCaseScope) (session AuthoringSession, err error) {
+func ReconcileGuidedResult(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (session authoringcore.AuthoringSession, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, scope.RunID)
@@ -90,7 +83,7 @@ func ReconcileGuidedResult(ctx context.Context, root string, scope GuidedUseCase
 			return err
 		}
 
-		reference := GuidedResultReference{InvocationID: result.Invocation.ID, Revision: result.Invocation.Revision}
+		reference := authoringcore.GuidedResultReference{InvocationID: result.Invocation.ID, Revision: result.Invocation.Revision}
 		for _, receipt := range result.Receipts {
 			reference.Receipts = append(reference.Receipts, receipt.Reference)
 		}
@@ -101,7 +94,7 @@ func ReconcileGuidedResult(ctx context.Context, root string, scope GuidedUseCase
 
 		session.Guided.Result = &reference
 		session.Guided.Stage, session.Guided.Status, session.Guided.Blocker = "results", "completed", ""
-		session.Status, session.FinishedAt = AuthoringSessionStatusFinalized, &result.Invocation.UpdatedAt
+		session.Status, session.FinishedAt = authoringcore.AuthoringSessionStatusFinalized, &result.Invocation.UpdatedAt
 
 		return RetainGuidedUseCaseProgress(ctx, root, &session)
 	})
@@ -109,7 +102,7 @@ func ReconcileGuidedResult(ctx context.Context, root string, scope GuidedUseCase
 	return session, err
 }
 
-func guidedResultReady(session AuthoringSession) bool {
+func guidedResultReady(session authoringcore.AuthoringSession) bool {
 	state := session.Guided
 	if !GuidedDispatchAllowed(session) || state.PendingOperation != nil || state.Stage != "execution" {
 		return false

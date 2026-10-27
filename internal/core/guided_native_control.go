@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"reflect"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -27,14 +28,14 @@ func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run Work
 		return err
 	}
 
-	if err := guardGuidedScope(session, GuidedUseCaseScope{RunID: request.Guided.RunID, ProjectID: s.projectID, Namespace: s.layout.Namespace()}); err != nil {
+	if err := guardGuidedScope(session, authoringcore.GuidedUseCaseScope{RunID: request.Guided.RunID, ProjectID: s.projectID, Namespace: s.layout.Namespace()}); err != nil {
 		return err
 	}
 
 	return guardGuidedNativeControl(session, run, request)
 }
 
-func guardGuidedNativeControl(session AuthoringSession, run WorkflowInvocation, request workflowstate.ControlMutationRequest) error {
+func guardGuidedNativeControl(session authoringcore.AuthoringSession, run WorkflowInvocation, request workflowstate.ControlMutationRequest) error {
 	state := session.Guided
 	if state.Work == nil || state.Work.Invocation == nil || state.Work.Materialization == nil || state.Control == nil || state.Control.PendingOperation == nil {
 		return workflowstate.ErrConflict
@@ -52,7 +53,7 @@ func guardGuidedNativeControl(session AuthoringSession, run WorkflowInvocation, 
 }
 
 // ReadGuidedInvocation checks the exact native reference without claiming work.
-func ReadGuidedInvocation(ctx context.Context, root string, session AuthoringSession) (WorkflowInvocation, error) {
+func ReadGuidedInvocation(ctx context.Context, root string, session authoringcore.AuthoringSession) (WorkflowInvocation, error) {
 	if session.Guided == nil {
 		return WorkflowInvocation{}, workflowstate.ErrConflict
 	}
@@ -79,7 +80,7 @@ func ReadGuidedInvocation(ctx context.Context, root string, session AuthoringSes
 	return run, nil
 }
 
-func guidedNativeReferenceMatches(run WorkflowInvocation, session AuthoringSession) bool {
+func guidedNativeReferenceMatches(run WorkflowInvocation, session authoringcore.AuthoringSession) bool {
 	if run.Admission == nil || run.Admission.Guided == nil {
 		return false
 	}
@@ -90,7 +91,7 @@ func guidedNativeReferenceMatches(run WorkflowInvocation, session AuthoringSessi
 }
 
 // ReconcileGuidedStop acknowledges quiescence only from the original native owner.
-func ReconcileGuidedStop(ctx context.Context, root string, scope GuidedUseCaseScope) (session AuthoringSession, err error) {
+func ReconcileGuidedStop(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (session authoringcore.AuthoringSession, err error) {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, scope.RunID)
@@ -125,11 +126,11 @@ func ReconcileGuidedStop(ctx context.Context, root string, scope GuidedUseCaseSc
 	return session, err
 }
 
-func guidedStopNeedsAcknowledgement(control *GuidedControlState) bool {
+func guidedStopNeedsAcknowledgement(control *authoringcore.GuidedControlState) bool {
 	return control != nil && control.PendingOperation == nil && control.StopIntent != "" && control.NativeReceipt != nil && control.AcknowledgedRevision == 0
 }
 
-func guidedNativeControlAuthority(session AuthoringSession, run WorkflowInvocation, request workflowstate.ControlMutationRequest) bool {
+func guidedNativeControlAuthority(session authoringcore.AuthoringSession, run WorkflowInvocation, request workflowstate.ControlMutationRequest) bool {
 	state := session.Guided
 
 	return guidedNativeReferenceMatches(run, session) && run.Status != "completed" && request.Binding.Operator == state.Actor && request.Guided.OperationDigest == state.Control.PendingOperation.Digest

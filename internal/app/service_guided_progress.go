@@ -8,9 +8,10 @@ import (
 	"strconv"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-func (s service) applyGuidedCommand(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
+func (s service) applyGuidedCommand(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
 	switch command.Action {
 	case "finish":
 		return core.FinishGuidedUseCaseDump(ctx, s.projectContext.ProjectDir, command)
@@ -27,7 +28,7 @@ func (s service) applyGuidedCommand(ctx context.Context, command core.GuidedUseC
 	}
 }
 
-func (s service) advanceGuidedUseCase(ctx context.Context, session core.AuthoringSession) (core.AuthoringSession, error) {
+func (s service) advanceGuidedUseCase(ctx context.Context, session authoringcore.AuthoringSession) (authoringcore.AuthoringSession, error) {
 	for range 6 {
 		command, ready := guidedProgressCommand(session)
 		if !ready {
@@ -45,8 +46,8 @@ func (s service) advanceGuidedUseCase(ctx context.Context, session core.Authorin
 	return session, errors.New("guided authoring progression reached its bounded step limit")
 }
 
-func guidedProgressCommand(session core.AuthoringSession) (core.GuidedUseCaseCommand, bool) {
-	command := core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision}
+func guidedProgressCommand(session authoringcore.AuthoringSession) (authoringcore.GuidedUseCaseCommand, bool) {
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision}
 	if !core.GuidedDispatchAllowed(session) {
 		return command, false
 	}
@@ -72,7 +73,7 @@ func guidedProgressCommand(session core.AuthoringSession) (core.GuidedUseCaseCom
 	return command, true
 }
 
-func guidedAutomaticAction(session core.AuthoringSession) (string, bool) {
+func guidedAutomaticAction(session authoringcore.AuthoringSession) (string, bool) {
 	switch session.Guided.Stage {
 	case "quiz":
 		if session.Guided.Quiz != nil {

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -75,7 +75,7 @@ func TestGuidedUseCaseParityNative(t *testing.T) {
 	assertGuidedTUIFinalParity(t, executor, f, operations, provider, completed)
 }
 
-func assertGuidedTUIStaleScope(t *testing.T, executor tuiGuidedExecutor, operations service, old core.AuthoringSession) {
+func assertGuidedTUIStaleScope(t *testing.T, executor tuiGuidedExecutor, operations service, old authoringcore.AuthoringSession) {
 	t.Helper()
 
 	for _, foreign := range []string{"revision", "project", "namespace"} {
@@ -98,10 +98,10 @@ func assertGuidedTUIStaleScope(t *testing.T, executor tuiGuidedExecutor, operati
 	}
 }
 
-func assertGuidedTUIExport(t *testing.T, executor tuiGuidedExecutor, session core.AuthoringSession, complete bool) {
+func assertGuidedTUIExport(t *testing.T, executor tuiGuidedExecutor, session authoringcore.AuthoringSession, complete bool) {
 	t.Helper()
 
-	view, err := executor.ExecuteGuided(tui.GuidedRequest{Action: "document", Document: "results", Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}})
+	view, err := executor.ExecuteGuided(tui.GuidedRequest{Action: "document", Document: "results", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}})
 	if err != nil || view.Document == nil {
 		t.Fatal("verified terminal result export unavailable", err)
 	}
@@ -120,10 +120,10 @@ func assertGuidedTUIExport(t *testing.T, executor tuiGuidedExecutor, session cor
 	}
 }
 
-func assertGuidedTUIFinalParity(t *testing.T, executor tuiGuidedExecutor, f *telegramConversationAppFixture, operations service, provider webViewProvider, session core.AuthoringSession) {
+func assertGuidedTUIFinalParity(t *testing.T, executor tuiGuidedExecutor, f *telegramConversationAppFixture, operations service, provider webViewProvider, session authoringcore.AuthoringSession) {
 	t.Helper()
 
-	request := tui.GuidedRequest{Action: "inspect", Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}}
+	request := tui.GuidedRequest{Action: "inspect", Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}}
 
 	terminal, err := executor.ExecuteGuided(request)
 	if err != nil || terminal.Status != "completed" || !strings.Contains(strings.Join(terminal.Progress, "\n"), "Code:") {
@@ -147,7 +147,7 @@ func assertGuidedTUIFinalParity(t *testing.T, executor tuiGuidedExecutor, f *tel
 	}
 }
 
-func guidedTUIRunMatches(terminal tui.GuidedView, telegram core.AuthoringSession, runID string) bool {
+func guidedTUIRunMatches(terminal tui.GuidedView, telegram authoringcore.AuthoringSession, runID string) bool {
 	return terminal.Session.ID == telegram.ID && telegram.ID == runID && terminal.Session.Guided.Actor == telegram.Guided.Actor && len(telegram.Guided.LaterIdeas) == 1
 }
 

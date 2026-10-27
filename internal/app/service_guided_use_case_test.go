@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -69,7 +69,7 @@ func TestGuidedUseCaseCaptureWeb(t *testing.T) {
 	assertWebGuidedCheckpoint(t, provider, handler, session.ID)
 }
 
-func webGuidedInput(t *testing.T, handler http.Handler, session core.AuthoringSession, action, content string, status int) {
+func webGuidedInput(t *testing.T, handler http.Handler, session authoringcore.AuthoringSession, action, content string, status int) {
 	t.Helper()
 
 	form := url.Values{"question_id": {""}, "input_digest": {""}, "action": {"guided.input"}, "surface": {"guided"}, "confirm": {"true"}, "id": {session.ID}, "namespace": {session.Namespace}, "revision": {strconv.FormatInt(session.Revision, 10)}, "request_id": {action + "-" + strconv.FormatInt(session.Revision, 10)}, "step": {action}, "content": {content}}
@@ -85,7 +85,7 @@ func webGuidedInput(t *testing.T, handler http.Handler, session core.AuthoringSe
 	}
 }
 
-func readWebGuidedSession(t *testing.T, operations service, id string) core.AuthoringSession {
+func readWebGuidedSession(t *testing.T, operations service, id string) authoringcore.AuthoringSession {
 	t.Helper()
 
 	result, err := operations.InspectGuidedUseCase(t.Context(), id, "default")
@@ -210,7 +210,7 @@ func guidedWebFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel) {
 }
 
 // assertCaseWorkflowReference checks scoped lookup without passing artifact payloads.
-func assertCaseWorkflowReference(t *testing.T, provider webViewProvider, handler http.Handler, session core.AuthoringSession) {
+func assertCaseWorkflowReference(t *testing.T, provider webViewProvider, handler http.Handler, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	selected, err := provider.CaseWorkflowView(t.Context(), session.Guided.CaseSlug, session.Namespace)

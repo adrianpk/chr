@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -22,12 +23,12 @@ func testGuidedControlCAS(t *testing.T, action string) {
 	t.Helper()
 
 	root, session := guidedCaptureFixture(t)
-	scope := GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
-	command := GuidedUseCaseCommand{GuidedUseCaseScope: scope, ExpectedRevision: session.Revision, Action: action}
+	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, ExpectedRevision: session.Revision, Action: action}
 
 	var calls atomic.Int32
 
-	apply := func(context.Context, *AuthoringSession) error { calls.Add(1); return nil }
+	apply := func(context.Context, *authoringcore.AuthoringSession) error { calls.Add(1); return nil }
 
 	var wait sync.WaitGroup
 
@@ -86,7 +87,7 @@ func assertGuidedControlRace(t *testing.T, results <-chan error) {
 	}
 }
 
-func assertGuidedStoppedInput(t *testing.T, root string, session AuthoringSession, command GuidedUseCaseCommand) {
+func assertGuidedStoppedInput(t *testing.T, root string, session authoringcore.AuthoringSession, command authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
 	command.ExpectedRevision, command.OperationID, command.Action, command.Content = session.Revision, "stopped-input", "append", "Cannot enter the frozen scope."
@@ -96,7 +97,7 @@ func assertGuidedStoppedInput(t *testing.T, root string, session AuthoringSessio
 
 	command.OperationID, command.Action, command.Content = "resume", "resume", ""
 
-	resumed, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *AuthoringSession) error { return nil })
+	resumed, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *authoringcore.AuthoringSession) error { return nil })
 	if session.Guided.Status == "cancelled" {
 		if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("cancelled run resumed", err)
@@ -127,14 +128,14 @@ func testGuidedUncertainControl(t *testing.T, rejected bool) {
 	t.Helper()
 
 	root, session := guidedCaptureFixture(t)
-	command := GuidedUseCaseCommand{GuidedUseCaseScope: GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: "original-stop", Action: "pause"}
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: "original-stop", Action: "pause"}
 
 	cause := workflowstate.ErrConflict
 	if rejected {
 		cause = errors.Join(cause, ErrGuidedControlRejected)
 	}
 
-	retained, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *AuthoringSession) error { return cause })
+	retained, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *authoringcore.AuthoringSession) error { return cause })
 	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("owner failure was lost", err)
 	}
@@ -154,10 +155,10 @@ func testGuidedUncertainControl(t *testing.T, rejected bool) {
 	assertGuidedControlReconciled(t, root, command)
 }
 
-func assertGuidedControlReconciled(t *testing.T, root string, command GuidedUseCaseCommand) {
+func assertGuidedControlReconciled(t *testing.T, root string, command authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
-	recovered, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *AuthoringSession) error { return nil })
+	recovered, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *authoringcore.AuthoringSession) error { return nil })
 	if err != nil || recovered.Guided.Status != "paused" || recovered.Guided.Control.PendingOperation != nil {
 		t.Fatal("original uncertain control did not reconcile", err)
 	}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func (s service) inspectGuidedResult(ctx context.Context, result *GuidedUseCaseInspection) {
@@ -38,7 +39,7 @@ func (host *guidedWorkHost) reconcileResult(ctx context.Context, operations serv
 		return
 	}
 
-	scope := core.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
 	if _, err := core.ReconcileGuidedResult(ctx, operations.projectContext.ProjectDir, scope); err != nil {
 		slog.WarnContext(ctx, "Guided result evidence needs recovery", "code", "guided_result_blocked")
 	}

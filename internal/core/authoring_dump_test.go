@@ -10,6 +10,7 @@ import (
 	"sync"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -120,7 +121,7 @@ func TestAuthoringDumpRefine(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := telegramAuthoringNextOwner(first, "stale", "refine", AuthoringArtifactKindDump)
+	request := telegramAuthoringNextOwner(first, "stale", "refine", authoringcore.AuthoringArtifactKindDump)
 	if _, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
 		t.Fatal("stale continuation invoked its provider")
 
@@ -175,7 +176,7 @@ func TestAuthoringDumpQuestion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	next := telegramAuthoringNextOwner(first, "response", "respond", AuthoringArtifactKindDump)
+	next := telegramAuthoringNextOwner(first, "response", "respond", authoringcore.AuthoringArtifactKindDump)
 	next.Question, next.Instructions = first.Question, "Five attempts."
 
 	result, err := repo.ContinueAuthoring(t.Context(), next, telegramAuthoringOwnerDraft)
@@ -225,7 +226,7 @@ func TestAuthoringDumpAlias(t *testing.T) {
 		t.Fatal("session context did not resolve retained alias", observed, err)
 	}
 
-	request := telegramAuthoringNextOwner(first, "alias-refine", "refine", AuthoringArtifactKindDump)
+	request := telegramAuthoringNextOwner(first, "alias-refine", "refine", authoringcore.AuthoringArtifactKindDump)
 	request.ExpectedSourceHash = observed.SourceHash
 
 	result, err := repo.ContinueAuthoring(t.Context(), request, telegramAuthoringOwnerDraft)
@@ -320,7 +321,7 @@ func authoringDumpRecoveryRequest(t *testing.T, repo AuthoringSessionRepository,
 
 	previous := telegramAuthoringCreateOwner(t, repo, "initial")
 	if mode == "refine" {
-		return telegramAuthoringNextOwner(previous, "refine", "refine", AuthoringArtifactKindDump)
+		return telegramAuthoringNextOwner(previous, "refine", "refine", authoringcore.AuthoringArtifactKindDump)
 	}
 
 	return request
@@ -390,7 +391,7 @@ func TestAuthoringDumpMissingOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	answer := telegramAuthoringNextOwner(first, "answer", "answer", AuthoringArtifactKindDump)
+	answer := telegramAuthoringNextOwner(first, "answer", "answer", authoringcore.AuthoringArtifactKindDump)
 	answer.Question, answer.Instructions = first.Question, "Five attempts."
 
 	answered, err := repo.ContinueAuthoring(t.Context(), answer, nil)
@@ -398,7 +399,7 @@ func TestAuthoringDumpMissingOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := telegramAuthoringNextOwner(answered, "refine", "refine", AuthoringArtifactKindDump)
+	request := telegramAuthoringNextOwner(answered, "refine", "refine", authoringcore.AuthoringArtifactKindDump)
 
 	_, err = repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
 		t.Fatal("refinement without an output invoked provider")

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
@@ -42,7 +43,7 @@ func SynthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		return result, err
 	}
 
-	if opts.TargetKind == AuthoringArtifactKindDump {
+	if opts.TargetKind == authoringcore.AuthoringArtifactKindDump {
 		var cancel context.CancelFunc
 
 		ctx, cancel = context.WithTimeout(ctx, 90*time.Second)

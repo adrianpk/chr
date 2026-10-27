@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -21,9 +22,9 @@ func assistedDumpTestOptions(t *testing.T, root, id string) AssistedArtifactSynt
 	session := testAssistedContextSession(root)
 	session.ID = id
 	path := filepath.Join(AuthoringSessionLayout(root, id).SessionDir, "curated-summary.md")
-	ref := AuthoringArtifactRef{ID: "curated-summary-" + id, Kind: AuthoringArtifactKindDraft, Role: AuthoringArtifactRoleOutput, Path: filepath.ToSlash(path)}
+	ref := authoringcore.AuthoringArtifactRef{ID: "curated-summary-" + id, Kind: authoringcore.AuthoringArtifactKindDraft, Role: authoringcore.AuthoringArtifactRoleOutput, Path: filepath.ToSlash(path)}
 
-	session.Outputs = []AuthoringArtifactRef{ref}
+	session.Outputs = []authoringcore.AuthoringArtifactRef{ref}
 	if _, err := repository.CreateSession(t.Context(), session); err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +33,7 @@ func assistedDumpTestOptions(t *testing.T, root, id string) AssistedArtifactSynt
 	summary.ModelSummary = id + " prepared material."
 	writeTestFile(t, path, RenderAssistedCuratedAnswerSummary(summary))
 
-	return AssistedArtifactSynthesisOptions{ProjectDir: root, Session: session, CuratedSummary: summary, SourceRef: ref, TargetKind: AuthoringArtifactKindDump, Repository: repository}
+	return AssistedArtifactSynthesisOptions{ProjectDir: root, Session: session, CuratedSummary: summary, SourceRef: ref, TargetKind: authoringcore.AuthoringArtifactKindDump, Repository: repository}
 }
 
 // Assisted and ordinary captures serialize through one canonical identity; a

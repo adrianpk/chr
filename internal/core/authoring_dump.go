@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -13,7 +14,7 @@ import (
 
 // The continuation builds dump images, never a nested publication. Its existing
 // session/transcript/receipt journal owns the entire resulting change set.
-func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session AuthoringSession, body string) (authoringOutputImages, error) {
+func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, session authoringcore.AuthoringSession, body string) (authoringOutputImages, error) {
 	observed, err := r.observeAuthoringDump(ctx, snapshot)
 	if err != nil {
 		return authoringOutputImages{}, err
@@ -48,9 +49,9 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Contex
 	return authoringOutputImages{Ref: authoringDumpRef(target.Destination), Changes: changes}, nil
 }
 
-func (r *fileAuthoringSessionRepository) authoringDumpTarget(session AuthoringSession, observed ProjectDumpObservation) (dumpMutationTarget, error) {
+func (r *fileAuthoringSessionRepository) authoringDumpTarget(session authoringcore.AuthoringSession, observed ProjectDumpObservation) (dumpMutationTarget, error) {
 	target := dumpMutationTarget{Project: observed.Project, Destination: observed.Destination}
-	if len(session.Inputs) == 0 || session.Inputs[0].Kind != AuthoringArtifactKindDump || !validAuthoringArtifactRef(session.Namespace, session.Inputs[0]) {
+	if len(session.Inputs) == 0 || session.Inputs[0].Kind != authoringcore.AuthoringArtifactKindDump || !validAuthoringArtifactRef(session.Namespace, session.Inputs[0]) {
 		return target, workflowstate.ErrConflict
 	}
 
@@ -71,7 +72,7 @@ func (r *fileAuthoringSessionRepository) authoringDumpTarget(session AuthoringSe
 }
 
 func (r *fileAuthoringSessionRepository) prepareAuthoringDumpSnapshot(ctx context.Context, snapshot *AuthoringSnapshot, request AuthoringContinuationRequest) error {
-	if request.Target != AuthoringArtifactKindDump || request.Action == "answer" {
+	if request.Target != authoringcore.AuthoringArtifactKindDump || request.Action == "answer" {
 		return nil
 	}
 
@@ -82,7 +83,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringDumpSnapshot(ctx contex
 
 	if request.Action == "refine" {
 		output := authoringArtifactObservation(*snapshot, observed.Destination)
-		if output == nil || output.Ref.Role != AuthoringArtifactRoleOutput {
+		if output == nil || output.Ref.Role != authoringcore.AuthoringArtifactRoleOutput {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -123,7 +124,7 @@ func authoringOwnsRawComponents(snapshot AuthoringSnapshot, components []Project
 
 	for _, component := range components {
 		observed := authoringArtifactObservation(snapshot, component.Reference)
-		if observed == nil || observed.Ref.Role != AuthoringArtifactRoleInput || observed.SourceHash != component.SourceHash || observed.MetadataHash != component.MetadataHash {
+		if observed == nil || observed.Ref.Role != authoringcore.AuthoringArtifactRoleInput || observed.SourceHash != component.SourceHash || observed.MetadataHash != component.MetadataHash {
 			return false
 		}
 	}
@@ -131,7 +132,7 @@ func authoringOwnsRawComponents(snapshot AuthoringSnapshot, components []Project
 	return true
 }
 
-func authoringDumpPreparation(snapshot AuthoringSnapshot, session AuthoringSession, request AuthoringContinuationRequest, target dumpMutationTarget, body string) (*DumpCapturePreparation, error) {
+func authoringDumpPreparation(snapshot AuthoringSnapshot, session authoringcore.AuthoringSession, request AuthoringContinuationRequest, target dumpMutationTarget, body string) (*DumpCapturePreparation, error) {
 	if err := validateDumpPreparedScope(DumpMutationRequest{}, body); err != nil {
 		return nil, err
 	}
@@ -171,11 +172,11 @@ func withoutAuthoringRawChanges(changes []workflowstate.FileChange, raw string) 
 	return retained
 }
 
-func authoringDumpRef(reference string) AuthoringArtifactRef {
-	return AuthoringArtifactRef{ID: strings.Split(reference, "/")[3], Kind: AuthoringArtifactKindDump, Role: AuthoringArtifactRoleOutput, Path: reference, Description: "Shared project-wide dump."}
+func authoringDumpRef(reference string) authoringcore.AuthoringArtifactRef {
+	return authoringcore.AuthoringArtifactRef{ID: strings.Split(reference, "/")[3], Kind: authoringcore.AuthoringArtifactKindDump, Role: authoringcore.AuthoringArtifactRoleOutput, Path: reference, Description: "Shared project-wide dump."}
 }
 
-func authoringDumpBinding(binding authoringRequestBinding, snapshot AuthoringSnapshot, session AuthoringSession, target dumpMutationTarget, body string) (dumpMutationBinding, error) {
+func authoringDumpBinding(binding authoringRequestBinding, snapshot AuthoringSnapshot, session authoringcore.AuthoringSession, target dumpMutationTarget, body string) (dumpMutationBinding, error) {
 	request := DumpMutationRequest{OperationID: binding.Request.Binding.RequestID, Action: "capture", Title: session.Topic, Content: binding.Request.Capture}
 
 	mutation := dumpMutationBinding{Request: request, Destination: target.Destination, RawReference: target.RawReference}

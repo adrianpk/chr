@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -29,13 +30,13 @@ func TestGuidedUseCaseRecoveryInventory(t *testing.T) {
 	}
 }
 
-func guidedRecoveryInventoryFixture(t *testing.T) (string, AuthoringSession) {
+func guidedRecoveryInventoryFixture(t *testing.T) (string, authoringcore.AuthoringSession) {
 	t.Helper()
 
 	root, original := guidedCaptureFixture(t)
 	for _, namespace := range []string{"research", "other"} {
-		scope := GuidedUseCaseScope{RunID: namespace, ProjectID: original.ProjectID, Namespace: namespace}
-		if _, err := StartGuidedUseCase(t.Context(), root, GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}); err != nil {
+		scope := authoringcore.GuidedUseCaseScope{RunID: namespace, ProjectID: original.ProjectID, Namespace: namespace}
+		if _, err := StartGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}); err != nil {
 			t.Fatal(err)
 		}
 	}

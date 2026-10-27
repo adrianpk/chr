@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // Fail one request before admission so the real browser must retain its exact
@@ -88,7 +88,7 @@ func assertGuidedQuizAcceptedAnswer(t *testing.T, browser *webWorkflowBrowser, f
 	}
 }
 
-func assertGuidedQuizHistory(t *testing.T, browser *webWorkflowBrowser, operations service, session core.AuthoringSession) {
+func assertGuidedQuizHistory(t *testing.T, browser *webWorkflowBrowser, operations service, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	if got := browser.evaluate(t, `sessionStorage.getItem('test-guarded-unloads')||'0'`); got != "0" {

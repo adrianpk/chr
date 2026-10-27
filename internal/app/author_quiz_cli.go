@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -41,7 +42,7 @@ func authorQuizNewFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(core.AuthoringTargetSpec),
+			Value: string(authoringcore.AuthoringTargetSpec),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -82,7 +83,7 @@ func (factory commandFactory) runAuthorQuizNew(ctx context.Context, cmd *cli.Com
 	return factory.runAuthorContextualQuizNew(ctx, cmd, projectContext, session, now)
 }
 
-func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session core.AuthoringSession, now time.Time) error {
+func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cmd *cli.Command, projectContext commandProjectContext, session authoringcore.AuthoringSession, now time.Time) error {
 	return withContextualQuizGeneration(ctx, cmd, projectContext, session.ID, func(ctx context.Context, provider core.AuthoringQuizQuestionProvider) error {
 		plan, err := core.PlanContextualQuizGeneration(ctx, core.ContextualQuizGenerationOptions{
 			ProjectDir:    projectContext.ProjectDir,
@@ -115,18 +116,18 @@ func (factory commandFactory) runAuthorContextualQuizNew(ctx context.Context, cm
 	})
 }
 
-func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (core.AuthoringSession, error) {
+func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (authoringcore.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return core.AuthoringSession{}, fmt.Errorf("quiz topic is required")
+		return authoringcore.AuthoringSession{}, fmt.Errorf("quiz topic is required")
 	}
 
-	session := core.AuthoringSession{
+	session := authoringcore.AuthoringSession{
 		ID:        authoringSessionID(now),
 		ProjectID: projectContext.ProjectID,
-		Status:    core.AuthoringSessionStatusDraft,
-		Mode:      core.AuthoringSessionModeContextual,
-		Target:    core.AuthoringTarget(cmd.String("target")),
+		Status:    authoringcore.AuthoringSessionStatusDraft,
+		Mode:      authoringcore.AuthoringSessionModeContextual,
+		Target:    authoringcore.AuthoringTarget(cmd.String("target")),
 		Topic:     topic,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -134,7 +135,7 @@ func quizSessionFromCommand(cmd *cli.Command, projectContext commandProjectConte
 
 	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return session, nil

@@ -4,19 +4,20 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-type guidedWorkStep func(service, context.Context, *core.AuthoringSession) error
+type guidedWorkStep func(service, context.Context, *authoringcore.AuthoringSession) error
 
-func (s service) applyGuidedWorkStep(ctx context.Context, command core.GuidedUseCaseCommand, apply guidedWorkStep) (core.AuthoringSession, error) {
+func (s service) applyGuidedWorkStep(ctx context.Context, command authoringcore.GuidedUseCaseCommand, apply guidedWorkStep) (authoringcore.AuthoringSession, error) {
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *core.AuthoringSession) error {
+	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.AuthoringSession) error {
 		bounded := s
 		bounded.ctx, bounded.workflowNamespace = ctx, session.Namespace
 

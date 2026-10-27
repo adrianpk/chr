@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
@@ -111,10 +112,10 @@ func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, ans
 		return request, workflowstate.ErrConflict
 	}
 
-	request.Target = core.AuthoringArtifactKind(snapshot.Session.Target)
+	request.Target = authoringcore.AuthoringArtifactKind(snapshot.Session.Target)
 
 	request.Question, request.Instructions = snapshot.Question, answer
-	if request.Target != core.AuthoringArtifactKindQuiz {
+	if request.Target != authoringcore.AuthoringArtifactKindQuiz {
 		request.Action = core.AuthoringContinuationRespond
 	}
 

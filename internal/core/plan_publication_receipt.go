@@ -7,29 +7,22 @@ import (
 	"os"
 	"path/filepath"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// PlanPublicationResult identifies the retained revision from one committed
-// operation. Reference is project-relative; binding paths are namespace-relative.
-type PlanPublicationResult struct {
-	OperationID string
-	Reference   string
-	Binding     generationcore.PlanRevisionBinding
-}
-
 type planPublicationReceipt struct {
 	Schema, Digest, Checksum string
-	Result                   PlanPublicationResult
+	Result                   authoringcore.PlanPublicationResult
 }
 
 // PlanPublicationLookup distinguishes a retained publication from expected absence.
 // Result preserves any original partial observation when a lookup fails.
 type PlanPublicationLookup struct {
-	Result PlanPublicationResult
+	Result authoringcore.PlanPublicationResult
 	Found  bool
 }
 
@@ -143,7 +136,7 @@ func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths Gene
 		}
 	}
 
-	receipt := planPublicationReceipt{Schema: "chr-plan-publication/v1", Digest: digest, Result: PlanPublicationResult{OperationID: plan.Operation.ID, Reference: paths.RelativePath, Binding: metadata.Binding}}
+	receipt := planPublicationReceipt{Schema: "chr-plan-publication/v1", Digest: digest, Result: authoringcore.PlanPublicationResult{OperationID: plan.Operation.ID, Reference: paths.RelativePath, Binding: metadata.Binding}}
 
 	encoded, err := json.Marshal(receipt)
 	if err != nil {

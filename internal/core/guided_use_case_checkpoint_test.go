@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestGuidedUseCaseCheckpointPreserves keeps the caller's branch, index and dirty work.
@@ -50,7 +52,7 @@ func TestGuidedUseCaseCheckpointPreserves(t *testing.T) {
 	assertGuidedCheckpointInput(t, root, session)
 }
 
-func assertGuidedCheckpointInput(t *testing.T, root string, session AuthoringSession) {
+func assertGuidedCheckpointInput(t *testing.T, root string, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	if session.Guided.Stage != "quiz" || session.Guided.Status != "blocked" || len(session.Guided.Checkpoints) != 1 {
@@ -88,7 +90,7 @@ func TestGuidedUseCaseCheckpointRecovery(t *testing.T) {
 	}
 }
 
-func assertGuidedCheckpointRecovery(t *testing.T, root string, command GuidedUseCaseCommand) {
+func assertGuidedCheckpointRecovery(t *testing.T, root string, command authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
 	lost := errors.New("lost Git acknowledgement")
@@ -147,13 +149,13 @@ func TestGuidedUseCaseCheckpointUnavailable(t *testing.T) {
 func TestGuidedUseCaseCheckpointEmpty(t *testing.T) {
 	root, session := guidedCaptureFixture(t)
 
-	command := GuidedUseCaseCommand{GuidedUseCaseScope: GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: "finish", Action: "finish"}
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: "finish", Action: "finish"}
 	if _, err := FinishGuidedUseCaseDump(t.Context(), root, command); err == nil {
 		t.Fatal("empty capture sealed")
 	}
 }
 
-func guidedCheckpointFixture(t *testing.T) (string, GuidedUseCaseCommand) {
+func guidedCheckpointFixture(t *testing.T) (string, authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
 	if testing.Short() {
@@ -168,14 +170,14 @@ func guidedCheckpointFixture(t *testing.T) (string, GuidedUseCaseCommand) {
 	guidedGitCommand(t, root, "add", "staged.txt")
 	guidedGitCommand(t, root, "commit", "-m", "Initial fixture")
 
-	scope := GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
 
-	session, err := MutateGuidedUseCase(t.Context(), root, GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "capture-input", ExpectedRevision: session.Revision, Action: "append", Content: "Deliver a bounded workflow."})
+	session, err := MutateGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "capture-input", ExpectedRevision: session.Revision, Action: "append", Content: "Deliver a bounded workflow."})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return root, GuidedUseCaseCommand{GuidedUseCaseScope: scope, ExpectedRevision: session.Revision, OperationID: "finish", Action: "finish"}
+	return root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, ExpectedRevision: session.Revision, OperationID: "finish", Action: "finish"}
 }
 
 func guidedGitCommand(t *testing.T, root string, args ...string) string {
@@ -199,7 +201,7 @@ func guidedWriteFile(t *testing.T, root, path, content string) {
 	}
 }
 
-func damageGuidedCheckpoint(t *testing.T, root string, checkpoint *GuidedStageCheckpoint, variant string) {
+func damageGuidedCheckpoint(t *testing.T, root string, checkpoint *authoringcore.GuidedStageCheckpoint, variant string) {
 	t.Helper()
 
 	switch variant {

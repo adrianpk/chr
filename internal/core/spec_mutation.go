@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
@@ -20,7 +21,7 @@ import (
 // SpecMutationRequest creates an independent document or saves the exact
 // observed identity. Empty Status on save preserves its native lifecycle.
 type SpecMutationRequest struct {
-	GuidedApproval                                              *GuidedSpecApproval `json:",omitempty"`
+	GuidedApproval                                              *authoringcore.GuidedSpecApproval `json:",omitempty"`
 	OperationID, Action, Namespace, Reference, ExpectedRevision string
 	ProjectID, CaseSlug, Title, Body, Status                    string
 }

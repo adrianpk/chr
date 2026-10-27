@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
@@ -17,7 +18,7 @@ type guidedPlanSourcesResult struct {
 	State   quizcore.RuntimeState
 }
 
-func (s service) guidedPlanSources(session core.AuthoringSession) (guidedPlanSourcesResult, error) {
+func (s service) guidedPlanSources(session authoringcore.AuthoringSession) (guidedPlanSourcesResult, error) {
 	inputs, err := s.guidedSpecInputs(session)
 	if err != nil {
 		return guidedPlanSourcesResult{State: inputs.State}, err
@@ -54,7 +55,7 @@ func (s service) guidedPlanSources(session core.AuthoringSession) (guidedPlanSou
 	return guidedPlanSourcesResult{Sources: sources, State: inputs.State}, nil
 }
 
-func (s service) generateGuidedContracts(ctx context.Context, session core.AuthoringSession) (generationcore.GeneratedWorkflowPlan, error) {
+func (s service) generateGuidedContracts(ctx context.Context, session authoringcore.AuthoringSession) (generationcore.GeneratedWorkflowPlan, error) {
 	scope := session.Guided.Work.PublicationOperation.Scope
 
 	input, err := core.ObservePlanWorkflow(ctx, s.projectContext.ProjectDir, scope)
@@ -91,7 +92,7 @@ func (s service) generateGuidedContracts(ctx context.Context, session core.Autho
 	return generated, nil
 }
 
-func (s service) guidedContractsRequest(session core.AuthoringSession, input generationcore.GeneratedWorkflowPlan) (quizmodel.Request, error) {
+func (s service) guidedContractsRequest(session authoringcore.AuthoringSession, input generationcore.GeneratedWorkflowPlan) (quizmodel.Request, error) {
 	observed, err := s.guidedPlanSources(session)
 	if err != nil {
 		return quizmodel.Request{}, err

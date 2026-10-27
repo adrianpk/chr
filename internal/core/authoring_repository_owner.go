@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (r *fileAuthoringSessionRepository) CreateSession(ctx context.Context, session AuthoringSession) (paths AuthoringSessionPaths, err error) {
+func (r *fileAuthoringSessionRepository) CreateSession(ctx context.Context, session authoringcore.AuthoringSession) (paths AuthoringSessionPaths, err error) {
 	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		if _, err := r.authoringSessionPaths(session.ID); err != nil {
 			return err
@@ -21,7 +22,7 @@ func (r *fileAuthoringSessionRepository) CreateSession(ctx context.Context, sess
 	return paths, err
 }
 
-func (r *fileAuthoringSessionRepository) UpdateSession(ctx context.Context, session AuthoringSession) (paths AuthoringSessionPaths, err error) {
+func (r *fileAuthoringSessionRepository) UpdateSession(ctx context.Context, session authoringcore.AuthoringSession) (paths AuthoringSessionPaths, err error) {
 	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		current, err := r.getGuardedSession(ctx, session.ID)
 		if err != nil {
@@ -48,7 +49,7 @@ func (r *fileAuthoringSessionRepository) UpdateSession(ctx context.Context, sess
 	return paths, err
 }
 
-func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id string) (session AuthoringSession, err error) {
+func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id string) (session authoringcore.AuthoringSession, err error) {
 	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		session, err = r.getGuardedSession(ctx, id)
 
@@ -58,15 +59,15 @@ func (r *fileAuthoringSessionRepository) GetSession(ctx context.Context, id stri
 	return session, err
 }
 
-func (r *fileAuthoringSessionRepository) getGuardedSession(ctx context.Context, id string) (AuthoringSession, error) {
+func (r *fileAuthoringSessionRepository) getGuardedSession(ctx context.Context, id string) (authoringcore.AuthoringSession, error) {
 	if _, err := r.authoringSessionPaths(id); err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return r.getSession(ctx, id)
 }
 
-func (r *fileAuthoringSessionRepository) ListSessions(ctx context.Context) (sessions []AuthoringSession, err error) {
+func (r *fileAuthoringSessionRepository) ListSessions(ctx context.Context) (sessions []authoringcore.AuthoringSession, err error) {
 	err = WithAuthoringMutation(ctx, r.projectDir, func(ctx context.Context) error {
 		if _, err := r.authoringPath(authoringRuntimeRef("sessions")); err != nil {
 			return err

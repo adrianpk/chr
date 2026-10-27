@@ -7,14 +7,15 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func guidedProgressKey(operations service, scope core.GuidedUseCaseScope) string {
+func guidedProgressKey(operations service, scope authoringcore.GuidedUseCaseScope) string {
 	return operations.projectContext.ProjectDir + "\x00" + scope.ProjectID + "\x00" + scope.Namespace + "\x00" + scope.RunID
 }
 
-func guidedProgressFingerprint(session core.AuthoringSession) string {
+func guidedProgressFingerprint(session authoringcore.AuthoringSession) string {
 	if command, ready := guidedControlCommand(session); ready {
 		return "control/" + command.OperationID
 	}
@@ -26,11 +27,11 @@ func guidedProgressFingerprint(session core.AuthoringSession) string {
 	return ""
 }
 
-func (host *guidedWorkHost) schedule(operations service, scope core.GuidedUseCaseScope) error {
+func (host *guidedWorkHost) schedule(operations service, scope authoringcore.GuidedUseCaseScope) error {
 	return host.scheduleProgress(operations, scope, true)
 }
 
-func (host *guidedWorkHost) scheduleProgress(operations service, scope core.GuidedUseCaseScope, explicit bool) error {
+func (host *guidedWorkHost) scheduleProgress(operations service, scope authoringcore.GuidedUseCaseScope, explicit bool) error {
 	if err := host.ready(); err != nil {
 		return err
 	}
@@ -50,7 +51,7 @@ func (host *guidedWorkHost) scheduleProgress(operations service, scope core.Guid
 	return host.dispatchProgress(operations, scope, fingerprint, explicit)
 }
 
-func (host *guidedWorkHost) dispatchProgress(operations service, scope core.GuidedUseCaseScope, fingerprint string, explicit bool) error {
+func (host *guidedWorkHost) dispatchProgress(operations service, scope authoringcore.GuidedUseCaseScope, fingerprint string, explicit bool) error {
 	host.mu.Lock()
 	defer host.mu.Unlock()
 
@@ -80,7 +81,7 @@ func (host *guidedWorkHost) dispatchProgress(operations service, scope core.Guid
 	return nil
 }
 
-func (host *guidedWorkHost) runProgress(ctx context.Context, operations service, scope core.GuidedUseCaseScope, key string) {
+func (host *guidedWorkHost) runProgress(ctx context.Context, operations service, scope authoringcore.GuidedUseCaseScope, key string) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 
@@ -100,7 +101,7 @@ func (host *guidedWorkHost) runProgress(ctx context.Context, operations service,
 	}
 }
 
-func (host *guidedWorkHost) retainProgressAttempt(key string, session core.AuthoringSession) {
+func (host *guidedWorkHost) retainProgressAttempt(key string, session authoringcore.AuthoringSession) {
 	if session.Guided == nil {
 		return
 	}
@@ -120,7 +121,7 @@ func (host *guidedWorkHost) releaseProgress(key string) {
 	delete(host.progress, key)
 }
 
-func (host *guidedWorkHost) activateRetained(operations service, session core.AuthoringSession) error {
+func (host *guidedWorkHost) activateRetained(operations service, session authoringcore.AuthoringSession) error {
 	if !core.GuidedDispatchAllowed(session) || session.Guided.Work == nil || session.Guided.Work.Invocation == nil {
 		return nil
 	}
@@ -136,7 +137,7 @@ func (host *guidedWorkHost) activateRetained(operations service, session core.Au
 
 	status, err := operations.WorkflowStatus(host.ctx, run.ID, WorkflowStatusRequest{Limit: 8})
 	if err == nil && status.Status == "completed" {
-		_, err = core.ReconcileGuidedResult(host.ctx, operations.projectContext.ProjectDir, core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})
+		_, err = core.ReconcileGuidedResult(host.ctx, operations.projectContext.ProjectDir, authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})
 
 		return err
 	}
@@ -153,7 +154,7 @@ func (operations service) checkGuidedActivation(ctx context.Context, run core.Wo
 		return workflowstate.ErrConflict
 	}
 
-	scope := core.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
 
 	session, err := core.ReadGuidedUseCase(ctx, operations.projectContext.ProjectDir, scope)
 	if err != nil {
@@ -188,7 +189,7 @@ func (host *guidedWorkHost) acknowledgeStop(ctx context.Context, operations serv
 		return
 	}
 
-	scope := core.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
 
 	_, err = core.ReconcileGuidedStop(ctx, operations.projectContext.ProjectDir, scope)
 	if err != nil && !errors.Is(err, context.Canceled) {

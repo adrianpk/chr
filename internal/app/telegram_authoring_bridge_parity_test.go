@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestTelegramAuthoringBridgeParity reaches the same generation/refinement
@@ -92,7 +93,7 @@ func telegramAuthoringParityAssertions(t *testing.T, f *telegramConversationAppF
 	t.Helper()
 
 	for _, artifact := range snapshot.Artifacts {
-		if artifact.Ref.Kind == core.AuthoringArtifactKindSpec && !strings.Contains(artifact.Body, "Clarify the existing validation") {
+		if artifact.Ref.Kind == authoringcore.AuthoringArtifactKindSpec && !strings.Contains(artifact.Body, "Clarify the existing validation") {
 			t.Fatal("refinement did not reach the shared writer")
 		}
 	}

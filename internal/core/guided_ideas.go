@@ -8,27 +8,22 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// GuidedIdeaReference locates a separately retained request pending later review.
-type GuidedIdeaReference struct {
-	ID, Digest, Path, Hash, Actor string
-	CreatedAt                     time.Time
-}
-
 // GuidedLaterIdea is an attributable request, excluded from all sealed inputs.
 type GuidedLaterIdea struct {
-	GuidedIdeaReference
+	authoringcore.GuidedIdeaReference
 	Content string
 	State   string
 }
 
 // RetainGuidedIdea writes one bounded idea and its reference through the authoring
 // journal, without replacing a pending stage, control, checkpoint or native scope.
-func RetainGuidedIdea(ctx context.Context, root string, command GuidedUseCaseCommand) (session AuthoringSession, err error) {
+func RetainGuidedIdea(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand) (session authoringcore.AuthoringSession, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil || command.Action != "idea" || strings.TrimSpace(command.Content) == "" || len(command.Content) > 8192 {
 		return session, errors.Join(workflowstate.ErrConflict, err)
@@ -56,7 +51,7 @@ func RetainGuidedIdea(ctx context.Context, root string, command GuidedUseCaseCom
 	return session, err
 }
 
-func guardGuidedIdea(session AuthoringSession, operation GuidedUseCaseOperation) (bool, error) {
+func guardGuidedIdea(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) (bool, error) {
 	for _, idea := range session.Guided.LaterIdeas {
 		if idea.ID == operation.ID {
 			if idea.Digest != operation.Digest {
@@ -78,7 +73,7 @@ func guardGuidedIdea(session AuthoringSession, operation GuidedUseCaseOperation)
 	return false, guardGuidedControlIdentity(session.Guided, operation.ID)
 }
 
-func guidedIdeaOwnsID(state *GuidedUseCaseState, id string) bool {
+func guidedIdeaOwnsID(state *authoringcore.GuidedUseCaseState, id string) bool {
 	for _, idea := range state.LaterIdeas {
 		if idea.ID == id {
 			return true
@@ -88,8 +83,8 @@ func guidedIdeaOwnsID(state *GuidedUseCaseState, id string) bool {
 	return false
 }
 
-func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *AuthoringSession, operation GuidedUseCaseOperation) error {
-	idea := GuidedLaterIdea{GuidedIdeaReference: GuidedIdeaReference{ID: operation.ID, Digest: operation.Digest, Actor: session.Guided.Actor, CreatedAt: time.Now().UTC()}, Content: operation.Content, State: "pending_review"}
+func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
+	idea := GuidedLaterIdea{GuidedIdeaReference: authoringcore.GuidedIdeaReference{ID: operation.ID, Digest: operation.Digest, Actor: session.Guided.Actor, CreatedAt: time.Now().UTC()}, Content: operation.Content, State: "pending_review"}
 	idea.Path = authoringRuntimeRef(filepath.Join("sessions", session.ID, "later-ideas", operation.ID+".json"))
 
 	encoded, err := json.Marshal(idea)
@@ -117,7 +112,7 @@ func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *AuthoringSess
 }
 
 // ReadGuidedIdeas verifies original separately retained entries without recovery.
-func ReadGuidedIdeas(ctx context.Context, root string, session AuthoringSession) ([]GuidedLaterIdea, error) {
+func ReadGuidedIdeas(ctx context.Context, root string, session authoringcore.AuthoringSession) ([]GuidedLaterIdea, error) {
 	if session.Guided == nil {
 		return nil, workflowstate.ErrConflict
 	}
@@ -141,7 +136,7 @@ func ReadGuidedIdeas(ctx context.Context, root string, session AuthoringSession)
 	return result, nil
 }
 
-func (r *fileAuthoringSessionRepository) readGuidedIdea(id string, ref GuidedIdeaReference) (GuidedLaterIdea, error) {
+func (r *fileAuthoringSessionRepository) readGuidedIdea(id string, ref authoringcore.GuidedIdeaReference) (GuidedLaterIdea, error) {
 	if ref.Path != authoringRuntimeRef(filepath.Join("sessions", id, "later-ideas", ref.ID+".json")) {
 		return GuidedLaterIdea{}, workflowstate.ErrConflict
 	}

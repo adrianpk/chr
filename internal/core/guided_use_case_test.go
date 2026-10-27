@@ -11,14 +11,15 @@ import (
 	"sync"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseCaptureStart preserves identity and rejects changed start scope.
 func TestGuidedUseCaseCaptureStart(t *testing.T) {
 	root := t.TempDir()
-	scope := GuidedUseCaseScope{RunID: "capture", ProjectID: "project", Namespace: "default"}
-	request := GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}
+	scope := authoringcore.GuidedUseCaseScope{RunID: "capture", ProjectID: "project", Namespace: "default"}
+	request := authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}
 
 	first, err := StartGuidedUseCase(t.Context(), root, request)
 	if err != nil {
@@ -30,7 +31,7 @@ func TestGuidedUseCaseCaptureStart(t *testing.T) {
 		t.Fatalf("replay changed session: %v", err)
 	}
 
-	variants := map[string]GuidedUseCaseStart{"project": request, "namespace": request, "actor": request, "intent": request}
+	variants := map[string]authoringcore.GuidedUseCaseStart{"project": request, "namespace": request, "actor": request, "intent": request}
 	changed := request
 	changed.ProjectID = "other"
 	variants["project"] = changed
@@ -62,8 +63,8 @@ func TestGuidedUseCaseCaptureManual(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	scope := GuidedUseCaseScope{RunID: first.ID, ProjectID: first.ProjectID, Namespace: first.Namespace}
-	if _, err := StartGuidedUseCase(t.Context(), root, GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}); !errors.Is(err, workflowstate.ErrConflict) {
+	scope := authoringcore.GuidedUseCaseScope{RunID: first.ID, ProjectID: first.ProjectID, Namespace: first.Namespace}
+	if _, err := StartGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("adopted manual session: %v", err)
 	}
 
@@ -76,8 +77,8 @@ func TestGuidedUseCaseCaptureManual(t *testing.T) {
 // TestGuidedUseCaseCaptureWrites allows one concurrent revision and replays its receipt.
 func TestGuidedUseCaseCaptureWrites(t *testing.T) {
 	root, session := guidedCaptureFixture(t)
-	scope := GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
-	command := GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "first", ExpectedRevision: session.Revision, Action: "append", Content: "A meaningful requirement."}
+	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "first", ExpectedRevision: session.Revision, Action: "append", Content: "A meaningful requirement."}
 	assertGuidedConcurrentWrites(t, root, command)
 
 	current, err := ReadGuidedUseCase(t.Context(), root, scope)
@@ -98,7 +99,7 @@ func TestGuidedUseCaseCaptureWrites(t *testing.T) {
 	}
 }
 
-func assertGuidedConcurrentWrites(t *testing.T, root string, command GuidedUseCaseCommand) {
+func assertGuidedConcurrentWrites(t *testing.T, root string, command authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
 	var wait sync.WaitGroup
@@ -142,7 +143,7 @@ func assertGuidedConcurrentWrites(t *testing.T, root string, command GuidedUseCa
 func TestGuidedUseCaseCaptureInspect(t *testing.T) {
 	root := t.TempDir()
 
-	scope := GuidedUseCaseScope{RunID: "missing", ProjectID: "project", Namespace: "default"}
+	scope := authoringcore.GuidedUseCaseScope{RunID: "missing", ProjectID: "project", Namespace: "default"}
 	if _, err := ReadGuidedUseCase(t.Context(), root, scope); !errors.Is(err, ErrAuthoringSessionNotFound) {
 		t.Fatalf("missing query: %v", err)
 	}
@@ -152,18 +153,18 @@ func TestGuidedUseCaseCaptureInspect(t *testing.T) {
 	}
 }
 
-func guidedCaptureFixture(t *testing.T) (string, AuthoringSession) {
+func guidedCaptureFixture(t *testing.T) (string, authoringcore.AuthoringSession) {
 	t.Helper()
 
 	root := t.TempDir()
-	scope := GuidedUseCaseScope{RunID: "capture", ProjectID: "project", Namespace: "default"}
+	scope := authoringcore.GuidedUseCaseScope{RunID: "capture", ProjectID: "project", Namespace: "default"}
 
-	session, err := StartGuidedUseCase(t.Context(), root, GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true})
+	session, err := StartGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	session, err = MutateGuidedUseCase(t.Context(), root, GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "name", ExpectedRevision: session.Revision, Action: "name", Content: "Named work"})
+	session, err = MutateGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: scope, OperationID: "name", ExpectedRevision: session.Revision, Action: "name", Content: "Named work"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,7 +177,7 @@ func TestGuidedUseCaseCaptureRecovery(t *testing.T) {
 	for _, phase := range []int{0, 1} {
 		t.Run(fmt.Sprintf("replace-%d", phase), func(t *testing.T) {
 			root, session := guidedCaptureFixture(t)
-			command := GuidedUseCaseCommand{GuidedUseCaseScope: GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, OperationID: "append", ExpectedRevision: session.Revision, Action: "append", Content: "Retained requirement."}
+			command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, OperationID: "append", ExpectedRevision: session.Revision, Action: "append", Content: "Retained requirement."}
 
 			operation, err := guidedOperation(command)
 			if err != nil {
@@ -209,7 +210,7 @@ func TestGuidedUseCaseCaptureRecovery(t *testing.T) {
 func TestGuidedUseCaseCaptureLegacyJSON(t *testing.T) {
 	legacy := []byte(`{"ID":"legacy","Namespace":"","Revision":0,"ProjectID":"project","Status":"draft","Mode":"assisted","Target":"dump","Topic":"Legacy","Inputs":null,"Outputs":null,"Provenance":null,"CreatedAt":"2026-10-22T00:00:00Z","StartedAt":null,"FinishedAt":null,"UpdatedAt":"2026-10-22T00:00:00Z","Description":""}`)
 
-	var session AuthoringSession
+	var session authoringcore.AuthoringSession
 	if err := json.Unmarshal(legacy, &session); err != nil {
 		t.Fatal(err)
 	}

@@ -6,13 +6,14 @@ import (
 	"io"
 	"os"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedHostPage is a bounded inventory for a managed host, across namespaces.
 // Directory offsets are observational; repeated sweeps recover concurrent additions.
 type GuidedHostPage struct {
-	Runs       []AuthoringSession
+	Runs       []authoringcore.AuthoringSession
 	NextOffset int
 }
 
@@ -106,7 +107,7 @@ func (r *fileAuthoringSessionRepository) appendGuidedHostRun(ctx context.Context
 
 // RecoverGuidedHostRun reconciles the authoring journal before reading one exact
 // association. Only a managed lifecycle calls this mutating recovery operation.
-func RecoverGuidedHostRun(ctx context.Context, root string, scope GuidedUseCaseScope) (session AuthoringSession, err error) {
+func RecoverGuidedHostRun(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (session authoringcore.AuthoringSession, err error) {
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		repository := &fileAuthoringSessionRepository{projectDir: root}
 

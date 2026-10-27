@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
@@ -14,10 +15,10 @@ import (
 type AssistedArtifactSynthesisOptions struct {
 	ProjectDir     string
 	OperationID    string
-	Session        AuthoringSession
+	Session        authoringcore.AuthoringSession
 	CuratedSummary AssistedCuratedAnswerSummary
-	SourceRef      AuthoringArtifactRef
-	TargetKind     AuthoringArtifactKind
+	SourceRef      authoringcore.AuthoringArtifactRef
+	TargetKind     authoringcore.AuthoringArtifactKind
 	TargetName     string
 	AllowReplace   bool
 	Repository     AuthoringSessionRepository
@@ -26,7 +27,7 @@ type AssistedArtifactSynthesisOptions struct {
 
 // AssistedArtifactSynthesisResult describes a package boundary value.
 type AssistedArtifactSynthesisResult struct {
-	Session AuthoringSession
+	Session authoringcore.AuthoringSession
 	Layout  AuthoringArtifactLayout
 	Content string
 	// Mutation retains committed dump hashes independently of later edits.
@@ -40,7 +41,7 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		return AssistedArtifactSynthesisResult{}, err
 	}
 
-	if opts.TargetKind == AuthoringArtifactKindDump {
+	if opts.TargetKind == authoringcore.AuthoringArtifactKindDump {
 		return synthesizeAssistedDump(ctx, opts)
 	}
 
@@ -48,7 +49,7 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 		ProjectDir:   opts.ProjectDir,
 		SessionID:    opts.Session.ID,
 		Kind:         opts.TargetKind,
-		Role:         AuthoringArtifactRoleOutput,
+		Role:         authoringcore.AuthoringArtifactRoleOutput,
 		Topic:        opts.Session.Topic,
 		Name:         opts.TargetName,
 		Description:  "Synthesized assisted authoring artifact.",
@@ -92,10 +93,10 @@ func synthesizeAssistedArtifact(ctx context.Context, opts AssistedArtifactSynthe
 
 // RenderAssistedSynthesizedArtifact renders the corresponding package data.
 func RenderAssistedSynthesizedArtifact(
-	session AuthoringSession,
+	session authoringcore.AuthoringSession,
 	summary AssistedCuratedAnswerSummary,
-	sourceRef AuthoringArtifactRef,
-	targetRef AuthoringArtifactRef,
+	sourceRef authoringcore.AuthoringArtifactRef,
+	targetRef authoringcore.AuthoringArtifactRef,
 ) string {
 	var output strings.Builder
 
@@ -147,7 +148,7 @@ func validateAssistedArtifactSynthesisOptions(opts AssistedArtifactSynthesisOpti
 		return fmt.Errorf("assisted artifact synthesis target kind is invalid: %s", opts.TargetKind)
 	}
 
-	if opts.TargetKind == AuthoringArtifactKindSession || opts.TargetKind == AuthoringArtifactKindTranscript {
+	if opts.TargetKind == authoringcore.AuthoringArtifactKindSession || opts.TargetKind == authoringcore.AuthoringArtifactKindTranscript {
 		return fmt.Errorf("assisted artifact synthesis target kind is session-owned: %s", opts.TargetKind)
 	}
 
@@ -161,14 +162,14 @@ func validateAssistedArtifactSynthesisOptions(opts AssistedArtifactSynthesisOpti
 func updateAssistedArtifactSynthesisSession(
 	ctx context.Context,
 	opts AssistedArtifactSynthesisOptions,
-	targetRef AuthoringArtifactRef,
-) (AuthoringSession, error) {
+	targetRef authoringcore.AuthoringArtifactRef,
+) (authoringcore.AuthoringSession, error) {
 	now := assistedArtifactSynthesisNow(opts.Now)
 	session := opts.Session
 
 	session.Outputs = append(session.Outputs, targetRef)
-	session.Provenance = append(session.Provenance, AuthoringProvenanceLink{
-		Relation:   AuthoringProvenanceRelationGenerated,
+	session.Provenance = append(session.Provenance, authoringcore.AuthoringProvenanceLink{
+		Relation:   authoringcore.AuthoringProvenanceRelationGenerated,
 		Source:     opts.SourceRef,
 		Target:     targetRef,
 		Decision:   "Synthesized assisted authoring artifact from curated summary.",
@@ -178,7 +179,7 @@ func updateAssistedArtifactSynthesisSession(
 
 	_, err := opts.Repository.UpdateSession(ctx, session)
 	if err != nil {
-		return AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return session, nil

@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // AssistedAuthoringIntent defines a package boundary type.
@@ -63,7 +65,7 @@ const (
 type AssistedAuthoringConfig struct {
 	SessionID        string
 	ProjectID        string
-	Target           AuthoringTarget
+	Target           authoringcore.AuthoringTarget
 	Intent           AssistedAuthoringIntent
 	MaxTurns         int
 	MaxFollowUps     int

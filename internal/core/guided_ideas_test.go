@@ -6,10 +6,11 @@ import (
 	"reflect"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func guidedIdeasFixture(t *testing.T) (string, AuthoringSession, GuidedUseCaseCommand) {
+func guidedIdeasFixture(t *testing.T) (string, authoringcore.AuthoringSession, authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
 	root, finish := guidedCheckpointFixture(t)
@@ -19,7 +20,7 @@ func guidedIdeasFixture(t *testing.T) (string, AuthoringSession, GuidedUseCaseCo
 		t.Fatal(err)
 	}
 
-	command := GuidedUseCaseCommand{GuidedUseCaseScope: finish.GuidedUseCaseScope, ExpectedRevision: session.Revision, OperationID: "later-idea", Action: "idea", Content: "Add a separately reviewed export later."}
+	command := authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: finish.GuidedUseCaseScope, ExpectedRevision: session.Revision, OperationID: "later-idea", Action: "idea", Content: "Add a separately reviewed export later."}
 
 	return root, session, command
 }
@@ -48,7 +49,7 @@ func TestGuidedUseCaseIdeasSeparate(t *testing.T) {
 	assertGuidedIdeaGuards(t, root, command)
 }
 
-func assertGuidedIdeaProvenance(t *testing.T, root string, saved AuthoringSession, actor, content string) {
+func assertGuidedIdeaProvenance(t *testing.T, root string, saved authoringcore.AuthoringSession, actor, content string) {
 	t.Helper()
 
 	ideas, err := ReadGuidedIdeas(t.Context(), root, saved)
@@ -57,7 +58,7 @@ func assertGuidedIdeaProvenance(t *testing.T, root string, saved AuthoringSessio
 	}
 }
 
-func assertGuidedIdeaGuards(t *testing.T, root string, command GuidedUseCaseCommand) {
+func assertGuidedIdeaGuards(t *testing.T, root string, command authoringcore.GuidedUseCaseCommand) {
 	t.Helper()
 
 	for _, variant := range []string{"content", "stale", "namespace", "empty"} {
@@ -131,7 +132,7 @@ func TestGuidedUseCaseIdeasControl(t *testing.T) {
 	pause := idea
 	pause.Action, pause.Content, pause.OperationID = "pause", "", "pause-before-idea"
 
-	stopped, err := ApplyGuidedUseCaseControl(t.Context(), root, pause, func(context.Context, *AuthoringSession) error { return nil })
+	stopped, err := ApplyGuidedUseCaseControl(t.Context(), root, pause, func(context.Context, *authoringcore.AuthoringSession) error { return nil })
 	if err != nil {
 		t.Fatal(err)
 	}

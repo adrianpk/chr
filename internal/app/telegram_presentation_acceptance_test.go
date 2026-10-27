@@ -10,7 +10,7 @@ import (
 	"unicode/utf16"
 	"unicode/utf8"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
@@ -126,7 +126,7 @@ func checkTelegramPresentationJourneyArtifacts(t *testing.T, f *telegramConversa
 	t.Helper()
 
 	snapshot := telegramAuthoringBridgeSnapshot(t, f, conversation)
-	matched := map[core.AuthoringArtifactKind]bool{}
+	matched := map[authoringcore.AuthoringArtifactKind]bool{}
 
 	for len(f.documents) > 0 {
 		upload := <-f.documents
@@ -141,7 +141,7 @@ func checkTelegramPresentationJourneyArtifacts(t *testing.T, f *telegramConversa
 		}
 	}
 
-	for _, kind := range []core.AuthoringArtifactKind{core.AuthoringArtifactKindDump, core.AuthoringArtifactKindSpec, core.AuthoringArtifactKindPlan} {
+	for _, kind := range []authoringcore.AuthoringArtifactKind{authoringcore.AuthoringArtifactKindDump, authoringcore.AuthoringArtifactKindSpec, authoringcore.AuthoringArtifactKindPlan} {
 		if !matched[kind] {
 			t.Fatal("generated artifact was not attached completely", kind)
 		}

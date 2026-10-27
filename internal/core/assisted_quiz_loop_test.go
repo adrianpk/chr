@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestAskNextAssistedQuizQuestionInvokesModelAndPersistsTurn(t *testing.T) {
@@ -195,7 +197,7 @@ func TestAskNextAssistedQuizQuestionStopsOnBlockedModelResponse(t *testing.T) {
 func setupAssistedQuizLoopTest(
 	t *testing.T,
 	dir string,
-) (AuthoringSessionRepository, AuthoringSession, AuthoringSessionPaths, AssistedAuthoringContextPackage) {
+) (AuthoringSessionRepository, authoringcore.AuthoringSession, AuthoringSessionPaths, AssistedAuthoringContextPackage) {
 	t.Helper()
 
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Workspace Protocol\n")
@@ -222,7 +224,7 @@ func setupAssistedQuizLoopTest(
 	return repository, session, paths, pkg
 }
 
-func testAssistedQuizConfig(session AuthoringSession) AssistedAuthoringConfig {
+func testAssistedQuizConfig(session authoringcore.AuthoringSession) AssistedAuthoringConfig {
 	return AssistedAuthoringConfig{
 		SessionID:    session.ID,
 		ProjectID:    session.ProjectID,

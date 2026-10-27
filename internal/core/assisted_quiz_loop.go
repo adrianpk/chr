@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // AssistedQuizLoopStopReason defines a package boundary type.
@@ -28,7 +30,7 @@ const (
 // AssistedQuizLoopOptions describes a package boundary value.
 type AssistedQuizLoopOptions struct {
 	Config           AssistedAuthoringConfig
-	Session          AuthoringSession
+	Session          authoringcore.AuthoringSession
 	SessionPaths     AuthoringSessionPaths
 	ContextPackage   AssistedAuthoringContextPackage
 	TranscriptEvents []AssistedTranscriptEvent

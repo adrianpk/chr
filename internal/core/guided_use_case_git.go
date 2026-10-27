@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -42,24 +43,24 @@ func guidedRepositoryIdentity(ctx context.Context, reader workflowIntegrationRea
 	return "git-common:" + contenthash.Sum([]byte(common)), nil
 }
 
-func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Context, id string, operation GuidedUseCaseOperation, stage string, paths []string) (GuidedStageCheckpoint, error) {
+func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Context, id string, operation authoringcore.GuidedUseCaseOperation, stage string, paths []string) (authoringcore.GuidedStageCheckpoint, error) {
 	if len(paths) == 0 || len(paths) > 1024 {
-		return GuidedStageCheckpoint{}, errors.New("guided checkpoint requires 1..1024 owned files")
+		return authoringcore.GuidedStageCheckpoint{}, errors.New("guided checkpoint requires 1..1024 owned files")
 	}
 
 	reader := guidedGitReader(r.projectDir)
 
 	repository, err := guidedRepositoryIdentity(ctx, reader)
 	if err != nil {
-		return GuidedStageCheckpoint{}, err
+		return authoringcore.GuidedStageCheckpoint{}, err
 	}
 
 	base, err := reader.output(ctx, "rev-parse", "--verify", "HEAD^{commit}")
 	if err != nil {
-		return GuidedStageCheckpoint{}, err
+		return authoringcore.GuidedStageCheckpoint{}, err
 	}
 
-	checkpoint := GuidedStageCheckpoint{OperationID: operation.ID, Stage: stage, Repository: repository, BaseCommit: base, Ref: guidedCheckpointRef(id, operation.Digest)}
+	checkpoint := authoringcore.GuidedStageCheckpoint{OperationID: operation.ID, Stage: stage, Repository: repository, BaseCommit: base, Ref: guidedCheckpointRef(id, operation.Digest)}
 
 	size := 0
 
@@ -74,13 +75,13 @@ func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Con
 			return checkpoint, errors.New("guided checkpoint exceeds 8 MiB")
 		}
 
-		checkpoint.Artifacts = append(checkpoint.Artifacts, GuidedCommittedArtifact{Path: path, Hash: contenthash.Sum(content)})
+		checkpoint.Artifacts = append(checkpoint.Artifacts, authoringcore.GuidedCommittedArtifact{Path: path, Hash: contenthash.Sum(content)})
 	}
 
 	return checkpoint, nil
 }
 
-func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Context, checkpoint GuidedStageCheckpoint, digest string) (result GuidedStageCheckpoint, err error) {
+func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Context, checkpoint authoringcore.GuidedStageCheckpoint, digest string) (result authoringcore.GuidedStageCheckpoint, err error) {
 	if !validGuidedCheckpointRef(checkpoint.Ref, digest) {
 		return checkpoint, workflowstate.ErrConflict
 	}
@@ -136,7 +137,7 @@ func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Cont
 	return result, validateGuidedCheckpoint(ctx, r.projectDir, result)
 }
 
-func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Context, reader workflowIntegrationReader, checkpoint GuidedStageCheckpoint) (string, error) {
+func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Context, reader workflowIntegrationReader, checkpoint authoringcore.GuidedStageCheckpoint) (string, error) {
 	if _, err := reader.output(ctx, "read-tree", checkpoint.BaseCommit); err != nil {
 		return "", err
 	}
@@ -165,7 +166,7 @@ func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Contex
 	return reader.output(ctx, "write-tree")
 }
 
-func validateGuidedCheckpoint(ctx context.Context, root string, checkpoint GuidedStageCheckpoint) error {
+func validateGuidedCheckpoint(ctx context.Context, root string, checkpoint authoringcore.GuidedStageCheckpoint) error {
 	for _, artifact := range checkpoint.Artifacts {
 		if _, err := ReadGuidedCommittedArtifact(ctx, root, checkpoint, artifact.Path); err != nil {
 			return err
@@ -176,7 +177,7 @@ func validateGuidedCheckpoint(ctx context.Context, root string, checkpoint Guide
 }
 
 // ReadGuidedCommittedArtifact verifies retained Git bytes without reading a working copy.
-func ReadGuidedCommittedArtifact(ctx context.Context, root string, checkpoint GuidedStageCheckpoint, path string) ([]byte, error) {
+func ReadGuidedCommittedArtifact(ctx context.Context, root string, checkpoint authoringcore.GuidedStageCheckpoint, path string) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -15,10 +16,10 @@ import (
 
 // GuidedUseCaseStep composes canonical owners under the existing authoring exclusion.
 // Effects must retain their own request identity before dispatch, and reconcile it on retry.
-type GuidedUseCaseStep func(context.Context, *AuthoringSession) error
+type GuidedUseCaseStep func(context.Context, *authoringcore.AuthoringSession) error
 
 // ApplyGuidedUseCaseStep reserves and replays one revision-bound progression command.
-func ApplyGuidedUseCaseStep(ctx context.Context, root string, command GuidedUseCaseCommand, apply GuidedUseCaseStep) (session AuthoringSession, err error) {
+func ApplyGuidedUseCaseStep(ctx context.Context, root string, command authoringcore.GuidedUseCaseCommand, apply GuidedUseCaseStep) (session authoringcore.AuthoringSession, err error) {
 	if apply == nil {
 		return session, errors.New("guided step owner is required")
 	}
@@ -50,7 +51,7 @@ func ApplyGuidedUseCaseStep(ctx context.Context, root string, command GuidedUseC
 	return session, err
 }
 
-func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, session *AuthoringSession, operation GuidedUseCaseOperation, apply GuidedUseCaseStep) error {
+func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, session *authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation, apply GuidedUseCaseStep) error {
 	if session.Guided.PendingOperation == nil {
 		if err := guardGuidedStepInput(*session, operation); err != nil {
 			return err
@@ -76,7 +77,7 @@ func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, se
 		return errors.Join(err, RetainGuidedUseCaseProgress(ctx, r.projectDir, session))
 	}
 
-	session.Guided.CompletedOperations = append(session.Guided.CompletedOperations, GuidedUseCaseOperation{ID: operation.ID, Action: operation.Action, Digest: operation.Digest})
+	session.Guided.CompletedOperations = append(session.Guided.CompletedOperations, authoringcore.GuidedUseCaseOperation{ID: operation.ID, Action: operation.Action, Digest: operation.Digest})
 
 	session.Guided.PendingOperation = nil
 	if session.Guided.Status != "blocked" {
@@ -86,7 +87,7 @@ func (r *fileAuthoringSessionRepository) applyGuidedStep(ctx context.Context, se
 	return RetainGuidedUseCaseProgress(ctx, r.projectDir, session)
 }
 
-func guardGuidedStepInput(session AuthoringSession, operation GuidedUseCaseOperation) error {
+func guardGuidedStepInput(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
 	switch operation.Action {
 	case "quiz":
 		if session.Guided.Stage != "quiz" {
@@ -117,7 +118,7 @@ func guardGuidedStepInput(session AuthoringSession, operation GuidedUseCaseOpera
 	}
 }
 
-func guardGuidedQuizInput(session AuthoringSession, operation GuidedUseCaseOperation) error {
+func guardGuidedQuizInput(session authoringcore.AuthoringSession, operation authoringcore.GuidedUseCaseOperation) error {
 	if err := guardGuidedQuizContent(operation); err != nil {
 		return err
 	}
@@ -135,7 +136,7 @@ func guardGuidedQuizInput(session AuthoringSession, operation GuidedUseCaseOpera
 }
 
 // RetainGuidedUseCaseProgress is available only inside the canonical mutation claim.
-func RetainGuidedUseCaseProgress(ctx context.Context, root string, session *AuthoringSession) error {
+func RetainGuidedUseCaseProgress(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
 	if session == nil || session.Guided == nil {
 		return workflowstate.ErrConflict
 	}
@@ -170,14 +171,14 @@ func RetainGuidedUseCaseProgress(ctx context.Context, root string, session *Auth
 }
 
 // GuidedCheckpointDigest identifies the complete retained committed input binding.
-func GuidedCheckpointDigest(checkpoint GuidedStageCheckpoint) (string, error) {
+func GuidedCheckpointDigest(checkpoint authoringcore.GuidedStageCheckpoint) (string, error) {
 	encoded, err := json.Marshal(checkpoint)
 
 	return contenthash.Sum(encoded), err
 }
 
 // SealGuidedQuiz checks canonical sufficiency and seals the answered owner artifacts.
-func SealGuidedQuiz(ctx context.Context, root string, session *AuthoringSession) error {
+func SealGuidedQuiz(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
 	if len(session.Guided.Checkpoints) == 0 || session.Guided.PendingOperation == nil {
 		return workflowstate.ErrConflict
 	}
@@ -197,7 +198,7 @@ func SealGuidedQuiz(ctx context.Context, root string, session *AuthoringSession)
 	return nil
 }
 
-func guardGuidedQuizCompletion(session AuthoringSession, observed quizcore.Observation) error {
+func guardGuidedQuizCompletion(session authoringcore.AuthoringSession, observed quizcore.Observation) error {
 	quiz := session.Guided.Quiz
 
 	state := observed.State
@@ -215,10 +216,10 @@ func guardGuidedQuizCompletion(session AuthoringSession, observed quizcore.Obser
 type guidedStageSeal struct {
 	Stage  string
 	Paths  []string
-	Source GuidedStageCheckpoint
+	Source authoringcore.GuidedStageCheckpoint
 }
 
-func sealGuidedStage(ctx context.Context, root string, session *AuthoringSession, seal guidedStageSeal) error {
+func sealGuidedStage(ctx context.Context, root string, session *authoringcore.AuthoringSession, seal guidedStageSeal) error {
 	r := &fileAuthoringSessionRepository{projectDir: root}
 
 	operation := session.Guided.PendingOperation
@@ -260,11 +261,11 @@ func sealGuidedStage(ctx context.Context, root string, session *AuthoringSession
 	return nil
 }
 
-func sameGuidedRevision(current, next AuthoringSession) bool {
+func sameGuidedRevision(current, next authoringcore.AuthoringSession) bool {
 	return current.Guided != nil && current.ProjectID == next.ProjectID && current.Namespace == next.Namespace && current.Guided.Actor == next.Guided.Actor && current.Revision == next.Revision
 }
 
-func guidedQuizSealReferences(ctx context.Context, root string, session AuthoringSession) ([]string, error) {
+func guidedQuizSealReferences(ctx context.Context, root string, session authoringcore.AuthoringSession) ([]string, error) {
 	if session.Guided.PendingCheckpoint != nil {
 		return nil, nil
 	}
@@ -288,7 +289,7 @@ func guidedQuizSealReferences(ctx context.Context, root string, session Authorin
 	return quizImageReferences(paths), nil
 }
 
-func guardGuidedPreparationInput(session AuthoringSession) error {
+func guardGuidedPreparationInput(session authoringcore.AuthoringSession) error {
 	if session.Guided.Stage != "preparation" {
 		return workflowstate.ErrConflict
 	}
@@ -300,7 +301,7 @@ func guardGuidedPreparationInput(session AuthoringSession) error {
 	return nil
 }
 
-func guardGuidedQuizContent(operation GuidedUseCaseOperation) error {
+func guardGuidedQuizContent(operation authoringcore.GuidedUseCaseOperation) error {
 	if operation.Action == "answer" && strings.TrimSpace(operation.Content) == "" {
 		return errors.New("quiz answer is required")
 	}

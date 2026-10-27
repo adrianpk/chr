@@ -8,12 +8,15 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-type guidedGenerationContext struct{ session core.AuthoringSession }
+type guidedGenerationContext struct {
+	session authoringcore.AuthoringSession
+}
 
 type guidedQuizInput struct {
 	Action string
@@ -21,19 +24,19 @@ type guidedQuizInput struct {
 }
 
 // ConductGuidedQuiz applies a scoped quiz start, recovery or current answer.
-func (s service) ConductGuidedQuiz(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
+func (s service) ConductGuidedQuiz(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
 	if !guidedQuizAction(command.Action) {
-		return core.AuthoringSession{}, errors.New("unsupported guided quiz command")
+		return authoringcore.AuthoringSession{}, errors.New("unsupported guided quiz command")
 	}
 
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *core.AuthoringSession) error {
+	return core.ApplyGuidedUseCaseStep(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.AuthoringSession) error {
 		bounded := s
 		bounded.ctx = ctx
 		bounded.guidedContext = &guidedGenerationContext{session: *session}
@@ -42,7 +45,7 @@ func (s service) ConductGuidedQuiz(ctx context.Context, command core.GuidedUseCa
 	})
 }
 
-func (s service) conductGuidedQuiz(ctx context.Context, session *core.AuthoringSession) error {
+func (s service) conductGuidedQuiz(ctx context.Context, session *authoringcore.AuthoringSession) error {
 	if session.Guided.Stage != "quiz" {
 		return workflowstate.ErrConflict
 	}
@@ -83,8 +86,8 @@ func (s service) conductGuidedQuiz(ctx context.Context, session *core.AuthoringS
 	return s.finishGuidedQuizResult(ctx, session, result.State, digest)
 }
 
-func (s service) finishGuidedQuizResult(ctx context.Context, session *core.AuthoringSession, state quizcore.RuntimeState, digest string) error {
-	session.Guided.Quiz = &core.GuidedQuizState{SessionID: state.SessionID, Revision: state.Revision, InputDigest: digest}
+func (s service) finishGuidedQuizResult(ctx context.Context, session *authoringcore.AuthoringSession, state quizcore.RuntimeState, digest string) error {
+	session.Guided.Quiz = &authoringcore.GuidedQuizState{SessionID: state.SessionID, Revision: state.Revision, InputDigest: digest}
 	session.Guided.Status = "waiting_input"
 
 	session.Guided.Blocker = "Question generation needs corrected setup or more context. Retry clarification."
@@ -104,7 +107,7 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *core.Autho
 	return nil
 }
 
-func (s service) prepareGuidedQuizAction(ctx context.Context, session core.AuthoringSession, digest string) (quizcore.ActionRequest, error) {
+func (s service) prepareGuidedQuizAction(ctx context.Context, session authoringcore.AuthoringSession, digest string) (quizcore.ActionRequest, error) {
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	observed, err := s.quizRepository().Observe(ctx, scope)
@@ -135,14 +138,14 @@ func (s service) prepareGuidedQuizAction(ctx context.Context, session core.Autho
 	return quizcore.ActionRequest{Scope: scope, Binding: binding, Action: input.Action, Answer: strings.TrimSpace(operation.Content), Mode: input.Mode}, nil
 }
 
-func guidedDumpCheckpoint(session core.AuthoringSession) (core.GuidedStageCheckpoint, error) {
+func guidedDumpCheckpoint(session authoringcore.AuthoringSession) (authoringcore.GuidedStageCheckpoint, error) {
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage == "dump" && len(checkpoint.Artifacts) > 0 {
 			return checkpoint, nil
 		}
 	}
 
-	return core.GuidedStageCheckpoint{}, errors.New("guided quiz requires a retained dump checkpoint")
+	return authoringcore.GuidedStageCheckpoint{}, errors.New("guided quiz requires a retained dump checkpoint")
 }
 
 func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.Request, error) {
@@ -179,7 +182,7 @@ func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []q
 	}, nil
 }
 
-func (s service) guidedCommittedSections(session core.AuthoringSession, stage string) ([]quizmodel.ContextSection, error) {
+func (s service) guidedCommittedSections(session authoringcore.AuthoringSession, stage string) ([]quizmodel.ContextSection, error) {
 	sections := []quizmodel.ContextSection{}
 
 	for _, checkpoint := range session.Guided.Checkpoints {
@@ -215,7 +218,7 @@ func guidedQuizAction(action string) bool {
 	}
 }
 
-func guidedQuizNativeInput(operation *core.GuidedUseCaseOperation, action string, mode quizcore.Mode) guidedQuizInput {
+func guidedQuizNativeInput(operation *authoringcore.GuidedUseCaseOperation, action string, mode quizcore.Mode) guidedQuizInput {
 	switch operation.Action {
 	case "answer":
 		action = "answer"

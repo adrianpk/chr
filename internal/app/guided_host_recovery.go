@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -59,8 +60,8 @@ func (host *guidedWorkHost) recoverPage(ctx context.Context, operations service,
 	return page.NextOffset
 }
 
-func (host *guidedWorkHost) recoverRun(ctx context.Context, operations service, session core.AuthoringSession) {
-	scope := core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
+func (host *guidedWorkHost) recoverRun(ctx context.Context, operations service, session authoringcore.AuthoringSession) {
+	scope := authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}
 	operations.workflowNamespace = session.Namespace
 
 	var err error

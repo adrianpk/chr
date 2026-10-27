@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -13,8 +14,8 @@ import (
 
 type assistedDumpMutationReceipt struct {
 	Schema, Digest, Checksum string
-	Session                  AuthoringSession
-	Reference                AuthoringArtifactRef
+	Session                  authoringcore.AuthoringSession
+	Reference                authoringcore.AuthoringArtifactRef
 	Mutation                 ProjectDumpMutationResult
 }
 

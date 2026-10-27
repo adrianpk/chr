@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -205,11 +206,11 @@ func authoringWorkDescription(snapshot core.AuthoringSnapshot) (core.AuthoringAr
 	var selected core.AuthoringArtifactObservation
 
 	for _, artifact := range snapshot.Artifacts {
-		if artifact.Ref.Role != core.AuthoringArtifactRoleOutput {
+		if artifact.Ref.Role != authoringcore.AuthoringArtifactRoleOutput {
 			continue
 		}
 
-		if artifact.Ref.Kind == core.AuthoringArtifactKindSpec || (selected.Ref.Path == "" && artifact.Ref.Kind == core.AuthoringArtifactKindDump) {
+		if artifact.Ref.Kind == authoringcore.AuthoringArtifactKindSpec || (selected.Ref.Path == "" && artifact.Ref.Kind == authoringcore.AuthoringArtifactKindDump) {
 			selected = artifact
 		}
 	}

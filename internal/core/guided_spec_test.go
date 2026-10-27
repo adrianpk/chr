@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
@@ -13,9 +14,9 @@ import (
 func TestGuidedUseCaseSpecAuthority(t *testing.T) {
 	for _, variant := range []string{"valid", "actor", "policy", "project", "namespace", "run", "body"} {
 		t.Run(variant, func(t *testing.T) {
-			approval := &GuidedSpecApproval{RunID: "run", Actor: "operator", Policy: GuidedSpecApprovalPolicy, InputDigest: "inputs"}
+			approval := &authoringcore.GuidedSpecApproval{RunID: "run", Actor: "operator", Policy: authoringcore.GuidedSpecApprovalPolicy, InputDigest: "inputs"}
 			request := SpecMutationRequest{GuidedApproval: approval, ProjectID: "project", Reference: "ops/default/spec/spec/artifact.md", Title: "Generated", Body: "Exact generated body"}
-			session := AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Guided: &GuidedUseCaseState{Stage: "specification", Actor: "operator", ProgressionIntent: true, PendingOperation: &GuidedUseCaseOperation{Action: "spec", PreparedSpec: &GuidedPreparedSpec{Title: request.Title, Body: request.Body, InputDigest: "inputs"}}}}
+			session := authoringcore.AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Guided: &authoringcore.GuidedUseCaseState{Stage: "specification", Actor: "operator", ProgressionIntent: true, PendingOperation: &authoringcore.GuidedUseCaseOperation{Action: "spec", PreparedSpec: &authoringcore.GuidedPreparedSpec{Title: request.Title, Body: request.Body, InputDigest: "inputs"}}}}
 
 			switch variant {
 			case "actor":
@@ -88,7 +89,7 @@ func TestGuidedUseCaseSpecCheckpoint(t *testing.T) {
 	}
 }
 
-func guidedSpecSealFixture(t *testing.T) (string, AuthoringSession) {
+func guidedSpecSealFixture(t *testing.T) (string, authoringcore.AuthoringSession) {
 	t.Helper()
 
 	root, command := guidedCheckpointFixture(t)
@@ -108,8 +109,8 @@ func guidedSpecSealFixture(t *testing.T) (string, AuthoringSession) {
 	}
 
 	session.Guided.Stage = "specification"
-	session.Guided.SpecApproval = &GuidedSpecApprovalReference{Reference: result.Reference, Revision: result.Revision, GuidedSpecApproval: GuidedSpecApproval{ContentHash: contenthash.Sum([]byte("Exact approved content"))}}
-	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-spec", Action: "spec", Digest: contenthash.Sum([]byte("seal-spec"))}
+	session.Guided.SpecApproval = &authoringcore.GuidedSpecApprovalReference{Reference: result.Reference, Revision: result.Revision, GuidedSpecApproval: authoringcore.GuidedSpecApproval{ContentHash: contenthash.Sum([]byte("Exact approved content"))}}
+	session.Guided.PendingOperation = &authoringcore.GuidedUseCaseOperation{ID: "seal-spec", Action: "spec", Digest: contenthash.Sum([]byte("seal-spec"))}
 
 	return root, session
 }

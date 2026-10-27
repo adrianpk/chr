@@ -7,7 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +19,7 @@ func (execute guidedTestExecutor) ExecuteGuided(request GuidedRequest) (GuidedVi
 
 func guidedTerminalFixture() *Model {
 	m := NewModel(Options{ProjectID: "project"})
-	session := &core.AuthoringSession{ID: "guided-one", ProjectID: "project", Namespace: "default", Revision: 2, Topic: "Bounded audit", Guided: &core.GuidedUseCaseState{Stage: "quiz", Status: "waiting_input", Quiz: &core.GuidedQuizState{QuestionID: "first", InputDigest: "original"}}}
+	session := &authoringcore.AuthoringSession{ID: "guided-one", ProjectID: "project", Namespace: "default", Revision: 2, Topic: "Bounded audit", Guided: &authoringcore.GuidedUseCaseState{Stage: "quiz", Status: "waiting_input", Quiz: &authoringcore.GuidedQuizState{QuestionID: "first", InputDigest: "original"}}}
 	m.guided = guidedState{Active: true, View: GuidedView{Session: session, Project: "Example", Namespace: "default", InputAction: "answer", Prompt: "What should remain bounded?"}}
 
 	return m

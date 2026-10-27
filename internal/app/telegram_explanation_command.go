@@ -3,14 +3,14 @@ package app
 import (
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
 type telegramExplanationCommand struct {
 	Input        telegramcore.ConversationInput
 	Question     string
-	DocumentKind core.AuthoringArtifactKind
+	DocumentKind authoringcore.AuthoringArtifactKind
 }
 
 func telegramExplanationRegistry() []ConversationIntentOperation {
@@ -58,7 +58,7 @@ func parseTelegramExplanation(update telegramcore.ReceivedUpdate) (telegramExpla
 func telegramIntentExplanation(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramExplanationParsing, error) {
 	a := intent.Arguments
 
-	command := telegramExplanationCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: core.AuthoringArtifactKind(a.Action)}
+	command := telegramExplanationCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation}, Question: update.Text, DocumentKind: authoringcore.AuthoringArtifactKind(a.Action)}
 	if intent.OperationID != telegramExplanationRegistry()[0].ID {
 		return telegramExplanationParsing{Command: command, Recognized: false}, nil
 	}

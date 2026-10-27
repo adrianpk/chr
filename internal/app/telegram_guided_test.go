@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -73,7 +74,7 @@ func TestGuidedUseCaseTelegramCapture(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	scope := core.GuidedUseCaseScope{RunID: id, ProjectID: c.ProjectID, Namespace: c.Namespace}
+	scope := authoringcore.GuidedUseCaseScope{RunID: id, ProjectID: c.ProjectID, Namespace: c.Namespace}
 	root := guidedTelegramProject(t, operations, c.ProjectID)
 
 	before, err := core.ReadGuidedUseCase(t.Context(), root, scope)
@@ -88,7 +89,7 @@ func TestGuidedUseCaseTelegramCapture(t *testing.T) {
 	}
 }
 
-func assertGuidedTelegramReplay(t *testing.T, f *telegramConversationAppFixture, root string, scope core.GuidedUseCaseScope, before core.AuthoringSession, startID int64) {
+func assertGuidedTelegramReplay(t *testing.T, f *telegramConversationAppFixture, root string, scope authoringcore.GuidedUseCaseScope, before authoringcore.AuthoringSession, startID int64) {
 	t.Helper()
 
 	f.updates <- f.last
@@ -181,7 +182,7 @@ func TestGuidedUseCaseTelegramClarification(t *testing.T) {
 	assertGuidedTelegramIdeaPause(t, f, operations, model, before, 0)
 }
 
-func assertGuidedTelegramIdeaPause(t *testing.T, f *telegramConversationAppFixture, operations service, model *fakeServiceQuizModel, before core.AuthoringSession, reply int64) {
+func assertGuidedTelegramIdeaPause(t *testing.T, f *telegramConversationAppFixture, operations service, model *fakeServiceQuizModel, before authoringcore.AuthoringSession, reply int64) {
 	t.Helper()
 
 	idea := f.send(t, "Idea: add an unrelated export later", reply)
@@ -205,12 +206,12 @@ func guidedTelegramModel(t *testing.T, operations *service) *fakeServiceQuizMode
 	return model
 }
 
-func readGuidedTelegramSession(t *testing.T, operations service, c telegramcore.Conversation) core.AuthoringSession {
+func readGuidedTelegramSession(t *testing.T, operations service, c telegramcore.Conversation) authoringcore.AuthoringSession {
 	t.Helper()
 
 	root := guidedTelegramProject(t, operations, c.ProjectID)
 
-	session, err := core.ReadGuidedUseCase(t.Context(), root, core.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace})
+	session, err := core.ReadGuidedUseCase(t.Context(), root, authoringcore.GuidedUseCaseScope{RunID: c.GuidedRunID, ProjectID: c.ProjectID, Namespace: c.Namespace})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -382,12 +383,12 @@ type telegramGuidedLostAck struct {
 	calls int
 }
 
-func (s *telegramGuidedLostAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func (s *telegramGuidedLostAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
 	session, err := s.service.ApplyTelegramGuided(ctx, target, input)
 	if err == nil && input.Command.Action == "pause" {
 		s.calls++
 		if s.calls == 1 {
-			return core.AuthoringSession{}, s.lost
+			return authoringcore.AuthoringSession{}, s.lost
 		}
 	}
 

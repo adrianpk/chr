@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
@@ -145,11 +146,11 @@ func TestTelegramAuthoringBridgeJourney(t *testing.T) {
 func telegramAuthoringBridgeGeneration(t *testing.T, input authoringModelInput) string {
 	t.Helper()
 
-	if input.Target == core.AuthoringArtifactKindQuiz {
+	if input.Target == authoringcore.AuthoringArtifactKindQuiz {
 		return telegramAuthoringServiceOutput(t, "", "Which retry ceiling applies?")
 	}
 
-	if input.Target == core.AuthoringArtifactKindSpec && len(input.Answers) != 1 {
+	if input.Target == authoringcore.AuthoringArtifactKindSpec && len(input.Answers) != 1 {
 		t.Error("canonical answer missing from generation")
 	}
 
@@ -220,7 +221,7 @@ func TestTelegramAuthoringBridgeClarification(t *testing.T) {
 	f.send(t, "/reply "+c.ID+" Keep sixty seconds.", 0)
 
 	snapshot := telegramAuthoringBridgeSnapshot(t, f, c.ID)
-	if snapshot.Question != nil || len(snapshot.Session.Outputs) != 1 || snapshot.Session.Outputs[0].Kind != core.AuthoringArtifactKindSpec || calls.Load() != 2 {
+	if snapshot.Question != nil || len(snapshot.Session.Outputs) != 1 || snapshot.Session.Outputs[0].Kind != authoringcore.AuthoringArtifactKindSpec || calls.Load() != 2 {
 		t.Fatalf("answer did not complete the requested artifact: %+v calls=%d", snapshot, calls.Load())
 	}
 

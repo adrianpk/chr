@@ -8,6 +8,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
@@ -153,7 +154,7 @@ func validateAuthoringWorkPaths(scope AuthoringWorkScope) error {
 		return workflowstate.ErrConflict
 	}
 
-	if !filepath.IsLocal(scope.DescriptionRef) || filepath.Clean(scope.DescriptionRef) != scope.DescriptionRef || (!validAuthoringArtifactRef(scope.Namespace, AuthoringArtifactRef{Path: scope.DescriptionRef, Kind: AuthoringArtifactKindSpec}) && ValidateProjectDumpReference(scope.DescriptionRef) != nil) {
+	if !filepath.IsLocal(scope.DescriptionRef) || filepath.Clean(scope.DescriptionRef) != scope.DescriptionRef || (!validAuthoringArtifactRef(scope.Namespace, authoringcore.AuthoringArtifactRef{Path: scope.DescriptionRef, Kind: authoringcore.AuthoringArtifactKindSpec}) && ValidateProjectDumpReference(scope.DescriptionRef) != nil) {
 		return workflowstate.ErrConflict
 	}
 

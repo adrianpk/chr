@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestLoadAssistedAuthoringContextPackageIncludesProtocolsDocumentsAndTranscriptSummary(t *testing.T) {
@@ -89,10 +91,10 @@ func TestLoadAssistedAuthoringContextPackageRecordsMissingSelectedDocuments(t *t
 	writeTestFile(t, filepath.Join(dir, "AGENTS.md"), "# Workspace Protocol\n")
 
 	session := testAssistedContextSession(dir)
-	session.Inputs = append(session.Inputs, AuthoringArtifactRef{
+	session.Inputs = append(session.Inputs, authoringcore.AuthoringArtifactRef{
 		ID:          "missing-doc",
-		Kind:        AuthoringArtifactKindDraft,
-		Role:        AuthoringArtifactRoleInput,
+		Kind:        authoringcore.AuthoringArtifactKindDraft,
+		Role:        authoringcore.AuthoringArtifactRoleInput,
 		Path:        "docs/missing.md",
 		Description: "Missing document.",
 	})
@@ -145,21 +147,21 @@ func TestLoadAssistedAuthoringContextPackageRejectsTranscriptSessionMismatch(t *
 	}
 }
 
-func testAssistedContextSession(dir string) AuthoringSession {
+func testAssistedContextSession(dir string) authoringcore.AuthoringSession {
 	now := time.Date(2026, 5, 21, 10, 0, 0, 0, time.UTC)
 
-	return AuthoringSession{
+	return authoringcore.AuthoringSession{
 		ID:        "session-1",
 		ProjectID: "project-1",
-		Status:    AuthoringSessionStatusActive,
-		Mode:      AuthoringSessionModeAssisted,
-		Target:    AuthoringTargetSpec,
+		Status:    authoringcore.AuthoringSessionStatusActive,
+		Mode:      authoringcore.AuthoringSessionModeAssisted,
+		Target:    authoringcore.AuthoringTargetSpec,
 		Topic:     "Assisted authoring",
-		Inputs: []AuthoringArtifactRef{
+		Inputs: []authoringcore.AuthoringArtifactRef{
 			{
 				ID:          "authoring-reference",
-				Kind:        AuthoringArtifactKindDraft,
-				Role:        AuthoringArtifactRoleInput,
+				Kind:        authoringcore.AuthoringArtifactKindDraft,
+				Role:        authoringcore.AuthoringArtifactRoleInput,
 				Path:        filepath.ToSlash(filepath.Join("docs", "reference", "authoring.md")),
 				Description: "Authoring reference.",
 			},

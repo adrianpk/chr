@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -42,7 +43,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request telegra
 		return nil, err
 	}
 
-	if owner.Target != core.AuthoringArtifactKindDump && owner.Target != core.AuthoringArtifactKindSpec && owner.Target != core.AuthoringArtifactKindPlan {
+	if owner.Target != authoringcore.AuthoringArtifactKindDump && owner.Target != authoringcore.AuthoringArtifactKindSpec && owner.Target != authoringcore.AuthoringArtifactKindPlan {
 		return nil, nil
 	}
 
@@ -68,7 +69,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request telegra
 	return telegramPrimaryAuthoringDocument(request.Target, result, snapshot, owner.Target)
 }
 
-func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) (*tgmessage.DocumentResponse, error) {
+func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind authoringcore.AuthoringArtifactKind) (*tgmessage.DocumentResponse, error) {
 	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
 		artifact := snapshot.Artifacts[index]
 		if artifact.Ref.Kind != kind || artifact.Body == "" {
@@ -79,9 +80,9 @@ func telegramPrimaryAuthoringDocument(target telegramcore.OperationTarget, resul
 
 		headline := string(kind) + " ready for " + result.Session.Topic + "."
 		switch kind {
-		case core.AuthoringArtifactKindSpec:
+		case authoringcore.AuthoringArtifactKindSpec:
 			headline = "Draft specification ready for " + result.Session.Topic + "."
-		case core.AuthoringArtifactKindDump:
+		case authoringcore.AuthoringArtifactKindDump:
 			headline = "Your request and details are saved as a dump for " + result.Session.Topic + "."
 		}
 

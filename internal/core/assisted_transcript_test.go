@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestAssistedTranscriptEventsFromTurnCreatesExpectedEvents(t *testing.T) {
@@ -180,15 +182,15 @@ func assistedTranscriptEventWith(update func(*AssistedTranscriptEvent)) Assisted
 	return event
 }
 
-func validAssistedTranscriptSession() AuthoringSession {
+func validAssistedTranscriptSession() authoringcore.AuthoringSession {
 	now := time.Date(2026, 5, 21, 17, 0, 0, 0, time.UTC)
 
-	return AuthoringSession{
+	return authoringcore.AuthoringSession{
 		ID:        "auth-1",
 		ProjectID: "project-1",
-		Status:    AuthoringSessionStatusDraft,
-		Mode:      AuthoringSessionModeAssisted,
-		Target:    AuthoringTargetSpec,
+		Status:    authoringcore.AuthoringSessionStatusDraft,
+		Mode:      authoringcore.AuthoringSessionModeAssisted,
+		Target:    authoringcore.AuthoringTargetSpec,
 		Topic:     "Retry behavior",
 		CreatedAt: now,
 		UpdatedAt: now,

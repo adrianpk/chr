@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -12,19 +12,19 @@ import (
 type telegramGuidedService interface {
 	InspectTelegramGuided(context.Context, telegramcore.OperationTarget, string) (GuidedUseCaseInspection, error)
 	ReadTelegramGuidedOriginal(context.Context, telegramcore.OperationTarget, string, string) (GuidedUseCaseArtifact, error)
-	ApplyTelegramGuided(context.Context, telegramcore.OperationTarget, telegramGuidedInput) (core.AuthoringSession, error)
+	ApplyTelegramGuided(context.Context, telegramcore.OperationTarget, telegramGuidedInput) (authoringcore.AuthoringSession, error)
 }
 
 type telegramGuidedInput struct {
-	Document string                    `json:"document,omitempty"`
-	Name     string                    `json:"name,omitempty"`
-	Choices  []string                  `json:"choices,omitempty"`
-	Actor    string                    `json:"actor"`
-	Inspect  bool                      `json:"inspect,omitempty"`
-	Retry    bool                      `json:"retry,omitempty"`
-	Offer    bool                      `json:"offer,omitempty"`
-	Start    bool                      `json:"start,omitempty"`
-	Command  core.GuidedUseCaseCommand `json:"command"`
+	Document string                             `json:"document,omitempty"`
+	Name     string                             `json:"name,omitempty"`
+	Choices  []string                           `json:"choices,omitempty"`
+	Actor    string                             `json:"actor"`
+	Inspect  bool                               `json:"inspect,omitempty"`
+	Retry    bool                               `json:"retry,omitempty"`
+	Offer    bool                               `json:"offer,omitempty"`
+	Start    bool                               `json:"start,omitempty"`
+	Command  authoringcore.GuidedUseCaseCommand `json:"command"`
 }
 
 func (s service) telegramGuidedProject(ctx context.Context, target telegramcore.OperationTarget) (service, error) {
@@ -49,21 +49,21 @@ func (s service) InspectTelegramGuided(ctx context.Context, target telegramcore.
 }
 
 // ApplyTelegramGuided maps a frozen transport request to shared guided commands.
-func (s service) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func (s service) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
 	command := input.Command
 	if command.ProjectID != target.ProjectID || command.Namespace != target.Namespace || command.RunID == "" {
-		return core.AuthoringSession{}, workflowstate.ErrConflict
+		return authoringcore.AuthoringSession{}, workflowstate.ErrConflict
 	}
 
 	scoped, err := s.telegramGuidedProject(ctx, target)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	if input.Inspect {
 		observed, err := scoped.InspectGuidedUseCase(ctx, command.RunID, command.Namespace)
 		if err != nil {
-			return core.AuthoringSession{}, err
+			return authoringcore.AuthoringSession{}, err
 		}
 
 		return *observed.Session, nil

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -41,11 +42,11 @@ func TestGuidedUseCaseSpecApproval(t *testing.T) {
 	}
 }
 
-func assertGuidedSpecApproval(t *testing.T, operations service, session core.AuthoringSession) {
+func assertGuidedSpecApproval(t *testing.T, operations service, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	approval := session.Guided.SpecApproval
-	if session.Guided.Stage != "preparation" || approval == nil || approval.Policy != core.GuidedSpecApprovalPolicy || approval.Actor != "operator" {
+	if session.Guided.Stage != "preparation" || approval == nil || approval.Policy != authoringcore.GuidedSpecApprovalPolicy || approval.Actor != "operator" {
 		t.Fatalf("exact approval missing: %#v", session.Guided)
 	}
 
@@ -56,7 +57,7 @@ func assertGuidedSpecApproval(t *testing.T, operations service, session core.Aut
 	assertGuidedSpecCheckpoint(t, operations, session)
 }
 
-func assertGuidedSpecCheckpoint(t *testing.T, operations service, session core.AuthoringSession) {
+func assertGuidedSpecCheckpoint(t *testing.T, operations service, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	approval := session.Guided.SpecApproval
@@ -155,7 +156,7 @@ func TestGuidedUseCaseSpecInvalid(t *testing.T) {
 	}
 }
 
-func guidedSpecFixture(t *testing.T) (service, core.AuthoringSession, *fakeServiceQuizModel) {
+func guidedSpecFixture(t *testing.T) (service, authoringcore.AuthoringSession, *fakeServiceQuizModel) {
 	t.Helper()
 
 	operations, session, model := guidedQuizFixture(t, "default")

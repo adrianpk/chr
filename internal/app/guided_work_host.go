@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -123,7 +124,7 @@ func (host *guidedWorkHost) reportFailure(ctx context.Context, operations servic
 
 	run, err := operations.ReadWorkflow(ctx, id)
 	if err == nil && run.Admission != nil && run.Admission.Guided != nil {
-		scope := core.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: operations.projectContext.ProjectID, Namespace: operations.workflowNamespace}
+		scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: operations.projectContext.ProjectID, Namespace: operations.workflowNamespace}
 		err = core.RetainGuidedHostBlocker(ctx, operations.projectContext.ProjectDir, scope, id)
 	}
 

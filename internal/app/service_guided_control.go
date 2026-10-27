@@ -5,20 +5,21 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ControlGuidedUseCase preserves interrupted stages and delegates native work
 // controls with their displayed revision and a durable original request.
-func (s service) ControlGuidedUseCase(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
+func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	command.GuidedUseCaseScope = scope
 
-	return core.ApplyGuidedUseCaseControl(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *core.AuthoringSession) error {
+	return core.ApplyGuidedUseCaseControl(ctx, s.projectContext.ProjectDir, command, func(ctx context.Context, session *authoringcore.AuthoringSession) error {
 		bounded := s
 		bounded.ctx, bounded.workflowNamespace = ctx, session.Namespace
 
@@ -26,7 +27,7 @@ func (s service) ControlGuidedUseCase(ctx context.Context, command core.GuidedUs
 	})
 }
 
-func (s service) controlGuidedWork(ctx context.Context, session *core.AuthoringSession) error {
+func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.AuthoringSession) error {
 	if err := core.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session); err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (s service) controlGuidedWork(ctx context.Context, session *core.AuthoringS
 	return s.acknowledgeGuidedNativeControl(ctx, session)
 }
 
-func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *core.AuthoringSession) error {
+func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *authoringcore.AuthoringSession) error {
 	control := session.Guided.Control
 
 	run, err := core.ReadGuidedInvocation(ctx, s.projectContext.ProjectDir, *session)
@@ -103,17 +104,17 @@ func (s service) applyGuidedNativeControl(ctx context.Context, store *core.Workf
 	return result, errors.Join(core.ErrGuidedControlRejected, err)
 }
 
-func guidedControlCommand(session core.AuthoringSession) (core.GuidedUseCaseCommand, bool) {
+func guidedControlCommand(session authoringcore.AuthoringSession) (authoringcore.GuidedUseCaseCommand, bool) {
 	if session.Guided == nil {
-		return core.GuidedUseCaseCommand{}, false
+		return authoringcore.GuidedUseCaseCommand{}, false
 	}
 
 	control := session.Guided.Control
 	if control == nil || control.PendingOperation == nil {
-		return core.GuidedUseCaseCommand{}, false
+		return authoringcore.GuidedUseCaseCommand{}, false
 	}
 
 	operation := control.PendingOperation
 
-	return core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, OperationID: operation.ID, Action: operation.Action, NativeRevision: operation.NativeRevision, ExpectedRevision: operation.ExpectedRevision, Content: operation.Content, QuestionID: operation.QuestionID, InputDigest: operation.InputDigest}, true
+	return authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, OperationID: operation.ID, Action: operation.Action, NativeRevision: operation.NativeRevision, ExpectedRevision: operation.ExpectedRevision, Content: operation.Content, QuestionID: operation.QuestionID, InputDigest: operation.InputDigest}, true
 }

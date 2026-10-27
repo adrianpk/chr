@@ -6,7 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -71,7 +71,7 @@ func guidedTUIModel(operations service) (tuiGuidedExecutor, *tui.Model) {
 	return executor, tui.NewModel(tui.Options{ProjectID: operations.projectContext.ProjectID, GuidedExecutor: executor})
 }
 
-func onlyGuidedTUIRun(t *testing.T, operations service) core.AuthoringSession {
+func onlyGuidedTUIRun(t *testing.T, operations service) authoringcore.AuthoringSession {
 	t.Helper()
 
 	view, err := operations.InspectGuidedUseCase(t.Context(), "", "default")
@@ -130,7 +130,7 @@ func guidedTUIUpdatedModel(t *testing.T, model tea.Model) *tui.Model {
 	return value
 }
 
-func assertGuidedTUIOriginals(t *testing.T, operations service, session core.AuthoringSession) {
+func assertGuidedTUIOriginals(t *testing.T, operations service, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	replaceGuidedWebDocuments(t, operations.projectContext.ProjectDir, session)
@@ -140,7 +140,7 @@ func assertGuidedTUIOriginals(t *testing.T, operations service, session core.Aut
 	for _, kind := range []string{"dump", "quiz", "specification"} {
 		executor := tuiGuidedExecutor{operations: operations}
 
-		view, err := executor.ExecuteGuided(tui.GuidedRequest{Action: "document", Document: kind, Command: core.GuidedUseCaseCommand{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}})
+		view, err := executor.ExecuteGuided(tui.GuidedRequest{Action: "document", Document: kind, Command: authoringcore.GuidedUseCaseCommand{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}}})
 		if err != nil || view.Document == nil {
 			t.Fatal("committed original unavailable", kind, err)
 		}

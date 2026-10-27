@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -39,7 +40,7 @@ func TestGuidedUseCasePreparationCommitted(t *testing.T) {
 	}
 }
 
-func assertGuidedPreparation(t *testing.T, operations service, session core.AuthoringSession) {
+func assertGuidedPreparation(t *testing.T, operations service, session authoringcore.AuthoringSession) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -139,7 +140,7 @@ func TestGuidedUseCasePreparationExisting(t *testing.T) {
 	}
 }
 
-func guidedPreparationFixture(t *testing.T, namespace string) (service, core.AuthoringSession, *planDeliveryTestModel) {
+func guidedPreparationFixture(t *testing.T, namespace string) (service, authoringcore.AuthoringSession, *planDeliveryTestModel) {
 	t.Helper()
 
 	operations, session, _ := guidedQuizFixture(t, namespace)
@@ -252,7 +253,7 @@ func assertGuidedPlanSources(t *testing.T, model *planDeliveryTestModel) {
 	}
 }
 
-func assertGuidedInitialContracts(t *testing.T, operations service, checkpoint core.GuidedStageCheckpoint, prefix string, ref *core.GuidedMaterializationReference) {
+func assertGuidedInitialContracts(t *testing.T, operations service, checkpoint authoringcore.GuidedStageCheckpoint, prefix string, ref *authoringcore.GuidedMaterializationReference) {
 	t.Helper()
 
 	for _, member := range ref.Members {

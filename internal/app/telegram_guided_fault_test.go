@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -26,10 +26,10 @@ func applyGuidedTelegramControls(t *testing.T, f *telegramConversationAppFixture
 	}
 }
 
-func (s telegramGuidedAppendAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
+func (s telegramGuidedAppendAck) ApplyTelegramGuided(ctx context.Context, target telegramcore.OperationTarget, input telegramGuidedInput) (authoringcore.AuthoringSession, error) {
 	session, err := s.service.ApplyTelegramGuided(ctx, target, input)
 	if err == nil && input.Command.Action == "append" {
-		return core.AuthoringSession{}, s.lost
+		return authoringcore.AuthoringSession{}, s.lost
 	}
 
 	return session, err

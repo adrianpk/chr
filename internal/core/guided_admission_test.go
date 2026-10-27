@@ -5,13 +5,14 @@ import (
 	"strings"
 	"testing"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseAdmissionMembership refuses replaced, missing, foreign or additional native work.
 func TestGuidedUseCaseAdmissionMembership(t *testing.T) {
 	member := WorkflowPreviewMember{Key: "PRJ-1", Path: "ticket/one/metadata.json", Revision: 1, SourceHash: strings.Repeat("a", 64), ContractHash: strings.Repeat("b", 64), SetID: "set-one"}
-	reference := GuidedMaterializationReference{SetID: member.SetID, Members: []GuidedWorkMember{{Key: member.Key, Path: member.Path, Revision: member.Revision, SourceHash: member.SourceHash, ContractHash: member.ContractHash}}}
+	reference := authoringcore.GuidedMaterializationReference{SetID: member.SetID, Members: []authoringcore.GuidedWorkMember{{Key: member.Key, Path: member.Path, Revision: member.Revision, SourceHash: member.SourceHash, ContractHash: member.ContractHash}}}
 
 	for _, variant := range []string{"exact", "revision", "source", "contract", "path", "set", "missing", "additional"} {
 		t.Run(variant, func(t *testing.T) {
@@ -61,10 +62,10 @@ func TestGuidedUseCaseAdmissionAuthority(t *testing.T) {
 	}
 }
 
-func guidedAdmissionProofFixture(t *testing.T) (AuthoringSession, WorkflowStartRequest) {
+func guidedAdmissionProofFixture(t *testing.T) (authoringcore.AuthoringSession, WorkflowStartRequest) {
 	t.Helper()
 
-	checkpoint := GuidedStageCheckpoint{Stage: "preparation", Commit: strings.Repeat("a", 40), Artifacts: []GuidedCommittedArtifact{{Path: "ops/default/ticket/one/metadata.json", Hash: strings.Repeat("b", 64)}}}
+	checkpoint := authoringcore.GuidedStageCheckpoint{Stage: "preparation", Commit: strings.Repeat("a", 40), Artifacts: []authoringcore.GuidedCommittedArtifact{{Path: "ops/default/ticket/one/metadata.json", Hash: strings.Repeat("b", 64)}}}
 
 	digest, err := GuidedCheckpointDigest(checkpoint)
 	if err != nil {
@@ -83,12 +84,12 @@ func guidedAdmissionProofFixture(t *testing.T) (AuthoringSession, WorkflowStartR
 		Selection:  selection,
 		Admission:  &workflowstate.AdmissionGuard{Guided: &proof},
 	}}
-	session := AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Revision: 1, Guided: &GuidedUseCaseState{SchemaVersion: 1, Actor: "operator", ProgressionIntent: true, Stage: "preparation", Work: &GuidedWorkState{Materialization: &GuidedMaterializationReference{ID: "materialized"}, Admission: &request.StartInput}, PendingOperation: &GuidedUseCaseOperation{Action: "admit", Digest: "operation"}, Checkpoints: []GuidedStageCheckpoint{checkpoint}}}
+	session := authoringcore.AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Revision: 1, Guided: &authoringcore.GuidedUseCaseState{SchemaVersion: 1, Actor: "operator", ProgressionIntent: true, Stage: "preparation", Work: &authoringcore.GuidedWorkState{Materialization: &authoringcore.GuidedMaterializationReference{ID: "materialized"}, Admission: &request.StartInput}, PendingOperation: &authoringcore.GuidedUseCaseOperation{Action: "admit", Digest: "operation"}, Checkpoints: []authoringcore.GuidedStageCheckpoint{checkpoint}}}
 
 	return session, request
 }
 
-func changeGuidedAdmissionProof(session *AuthoringSession, request *WorkflowStartRequest, variant string) {
+func changeGuidedAdmissionProof(session *authoringcore.AuthoringSession, request *WorkflowStartRequest, variant string) {
 	switch variant {
 	case "intent":
 		session.Guided.ProgressionIntent = false
@@ -116,7 +117,7 @@ func TestGuidedUseCaseControlAdmissionAuthority(t *testing.T) {
 		t.Run(status, func(t *testing.T) {
 			session, request := guidedAdmissionProofFixture(t)
 			if status == "stop_intent" {
-				session.Guided.Control = &GuidedControlState{StopIntent: "pause"}
+				session.Guided.Control = &authoringcore.GuidedControlState{StopIntent: "pause"}
 			} else {
 				session.Guided.Status = status
 			}

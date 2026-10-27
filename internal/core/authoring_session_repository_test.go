@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestAuthoringSessionRepositoryCreatesSessionFiles(t *testing.T) {
@@ -165,14 +167,14 @@ func TestRenderAndParseAuthoringSession(t *testing.T) {
 	assertAuthoringSessionRoundTrip(t, parsed, session)
 }
 
-func assertAuthoringSessionRoundTrip(t *testing.T, got, want AuthoringSession) {
+func assertAuthoringSessionRoundTrip(t *testing.T, got, want authoringcore.AuthoringSession) {
 	t.Helper()
 	assertAuthoringSessionMetadata(t, got, want)
 	assertAuthoringSessionArtifacts(t, got, want)
 	assertAuthoringSessionProvenance(t, got, want)
 }
 
-func assertAuthoringSessionMetadata(t *testing.T, got, want AuthoringSession) {
+func assertAuthoringSessionMetadata(t *testing.T, got, want authoringcore.AuthoringSession) {
 	t.Helper()
 
 	if got.ID != want.ID {
@@ -200,7 +202,7 @@ func assertAuthoringSessionMetadata(t *testing.T, got, want AuthoringSession) {
 	}
 }
 
-func assertAuthoringSessionArtifacts(t *testing.T, got, want AuthoringSession) {
+func assertAuthoringSessionArtifacts(t *testing.T, got, want authoringcore.AuthoringSession) {
 	t.Helper()
 
 	if len(got.Inputs) != len(want.Inputs) {
@@ -220,7 +222,7 @@ func assertAuthoringSessionArtifacts(t *testing.T, got, want AuthoringSession) {
 	}
 }
 
-func assertAuthoringSessionProvenance(t *testing.T, got, want AuthoringSession) {
+func assertAuthoringSessionProvenance(t *testing.T, got, want authoringcore.AuthoringSession) {
 	t.Helper()
 
 	if len(got.Provenance) != len(want.Provenance) {

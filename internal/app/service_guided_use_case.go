@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -21,8 +22,8 @@ type GuidedUseCaseInspection struct {
 	Work          *WorkflowWorkStatus
 	ProjectName   string
 	Namespace     string
-	Session       *core.AuthoringSession
-	Runs          []core.AuthoringSession
+	Session       *authoringcore.AuthoringSession
+	Runs          []authoringcore.AuthoringSession
 	Policy        []string
 	Problems      []string
 	CommittedDump string
@@ -30,30 +31,30 @@ type GuidedUseCaseInspection struct {
 	Artifacts     []GuidedUseCaseArtifact
 }
 
-func (s service) guidedUseCaseScope(id, namespace string) (core.GuidedUseCaseScope, error) {
+func (s service) guidedUseCaseScope(id, namespace string) (authoringcore.GuidedUseCaseScope, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
-		return core.GuidedUseCaseScope{}, err
+		return authoringcore.GuidedUseCaseScope{}, err
 	}
 
-	return core.GuidedUseCaseScope{RunID: id, ProjectID: s.projectContext.ProjectID, Namespace: layout.Namespace()}, nil
+	return authoringcore.GuidedUseCaseScope{RunID: id, ProjectID: s.projectContext.ProjectID, Namespace: layout.Namespace()}, nil
 }
 
 // StartGuidedUseCase retains explicit progression intent in the selected scope.
-func (s service) StartGuidedUseCase(ctx context.Context, id, namespace, actor string) (core.AuthoringSession, error) {
+func (s service) StartGuidedUseCase(ctx context.Context, id, namespace, actor string) (authoringcore.AuthoringSession, error) {
 	scope, err := s.guidedUseCaseScope(id, namespace)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
-	return core.StartGuidedUseCase(ctx, s.projectContext.ProjectDir, core.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: actor, ProgressionIntent: true})
+	return core.StartGuidedUseCase(ctx, s.projectContext.ProjectDir, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: actor, ProgressionIntent: true})
 }
 
 // ChangeGuidedUseCase applies current input and advances through available authoring stages.
-func (s service) ChangeGuidedUseCase(ctx context.Context, command core.GuidedUseCaseCommand) (core.AuthoringSession, error) {
+func (s service) ChangeGuidedUseCase(ctx context.Context, command authoringcore.GuidedUseCaseCommand) (authoringcore.AuthoringSession, error) {
 	scope, err := s.guidedUseCaseScope(command.RunID, command.Namespace)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	command.GuidedUseCaseScope = scope

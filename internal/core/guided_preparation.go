@@ -9,43 +9,15 @@ import (
 	"reflect"
 	"strings"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// GuidedPreparedPlan retains validated generation before revision-bound publication.
-type GuidedPreparedPlan struct {
-	Plan           generationcore.GeneratedPlan `json:"plan"`
-	TargetRevision string                       `json:"target_revision"`
-	InputDigest    string                       `json:"input_digest"`
-}
-
-// GuidedWorkState links the canonical plan, materialization and native invocation owners.
-type GuidedWorkState struct {
-	Admission            *workflowstate.StartInput               `json:"admission,omitempty"`
-	Invocation           *GuidedInvocationReference              `json:"invocation,omitempty"`
-	PublicationOperation generationcore.PlanPublicationOperation `json:"publication_operation"`
-	Publication          *PlanPublicationResult                  `json:"publication,omitempty"`
-	Materialization      *GuidedMaterializationReference         `json:"materialization,omitempty"`
-}
-
-// GuidedWorkMember identifies one exact initial native task contract.
-type GuidedWorkMember struct {
-	Key, Path, ContractHash, SourceHash string
-	Revision                            uint64
-}
-
-// GuidedMaterializationReference links the original receipt and exact native membership.
-type GuidedMaterializationReference struct {
-	ID, ReceiptRef, SetID, SetPath string
-	PlanRevision                   generationcore.PlanRevisionBinding
-	Members                        []GuidedWorkMember
-}
-
 // PublishGuidedPlan composes the canonical publication owner using only retained run inputs.
-func PublishGuidedPlan(ctx context.Context, root string, scope GuidedUseCaseScope) (result PlanPublicationResult, err error) {
+func PublishGuidedPlan(ctx context.Context, root string, scope authoringcore.GuidedUseCaseScope) (result authoringcore.PlanPublicationResult, err error) {
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		r := &fileAuthoringSessionRepository{projectDir: root}
 
@@ -87,7 +59,7 @@ func PublishGuidedPlan(ctx context.Context, root string, scope GuidedUseCaseScop
 	return result, err
 }
 
-func guidedPublicationPlan(session AuthoringSession) (generationcore.GeneratedPlan, error) {
+func guidedPublicationPlan(session authoringcore.AuthoringSession) (generationcore.GeneratedPlan, error) {
 	state := session.Guided
 	if err := guardGuidedPreparationState(state); err != nil {
 		return generationcore.GeneratedPlan{}, err
@@ -123,25 +95,25 @@ func guidedPublicationPlan(session AuthoringSession) (generationcore.GeneratedPl
 }
 
 // GuidedMaterializationBinding retains owner identities without copying native task state.
-func GuidedMaterializationBinding(result WorkflowMaterializationResult, input generationcore.GeneratedWorkflowPlan) (GuidedMaterializationReference, error) {
+func GuidedMaterializationBinding(result WorkflowMaterializationResult, input generationcore.GeneratedWorkflowPlan) (authoringcore.GuidedMaterializationReference, error) {
 	if result.Set.Set == nil || result.Set.Set.PlanRevision == nil || result.Set.Set.UseCase != input.UseCase || len(result.Tasks) == 0 || len(result.Tasks) > workflowstate.PageLimit {
-		return GuidedMaterializationReference{}, workflowstate.ErrConflict
+		return authoringcore.GuidedMaterializationReference{}, workflowstate.ErrConflict
 	}
 
-	ref := GuidedMaterializationReference{ID: input.MaterializationID, ReceiptRef: result.ReceiptRef, SetID: result.Set.ID, SetPath: result.Set.Path, PlanRevision: *result.Set.Set.PlanRevision}
+	ref := authoringcore.GuidedMaterializationReference{ID: input.MaterializationID, ReceiptRef: result.ReceiptRef, SetID: result.Set.ID, SetPath: result.Set.Path, PlanRevision: *result.Set.Set.PlanRevision}
 	for _, task := range result.Tasks {
 		if task.Task == nil || task.Task.SetID != ref.SetID {
 			return ref, workflowstate.ErrConflict
 		}
 
-		ref.Members = append(ref.Members, GuidedWorkMember{Key: task.Task.Key, Path: task.Path, ContractHash: task.Task.ContractHash, SourceHash: task.SourceHash, Revision: task.Revision})
+		ref.Members = append(ref.Members, authoringcore.GuidedWorkMember{Key: task.Task.Key, Path: task.Path, ContractHash: task.Task.ContractHash, SourceHash: task.SourceHash, Revision: task.Revision})
 	}
 
 	return ref, nil
 }
 
 // SealGuidedPreparation freezes the initial plan, bound tracker and native contracts.
-func SealGuidedPreparation(ctx context.Context, root string, session *AuthoringSession) error {
+func SealGuidedPreparation(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
 	if session.Guided.Work == nil || session.Guided.Work.Materialization == nil || session.Guided.PendingOperation == nil {
 		return workflowstate.ErrConflict
 	}
@@ -168,7 +140,7 @@ func SealGuidedPreparation(ctx context.Context, root string, session *AuthoringS
 	return nil
 }
 
-func guidedPreparationPaths(session AuthoringSession) ([]string, error) {
+func guidedPreparationPaths(session authoringcore.AuthoringSession) ([]string, error) {
 	work := session.Guided.Work
 	if work.Publication == nil {
 		return nil, workflowstate.ErrConflict
@@ -207,7 +179,7 @@ func guidedPreparationPaths(session AuthoringSession) ([]string, error) {
 	return paths, nil
 }
 
-func workSliceContracts(session AuthoringSession) []string {
+func workSliceContracts(session authoringcore.AuthoringSession) []string {
 	input := session.Guided.PendingOperation.PreparedWorkflow
 	if input == nil {
 		return nil
@@ -254,7 +226,7 @@ func ValidateGuidedContracts(input, generated generationcore.GeneratedWorkflowPl
 	return err
 }
 
-func guardGuidedPlanScope(session AuthoringSession) error {
+func guardGuidedPlanScope(session authoringcore.AuthoringSession) error {
 	state := session.Guided
 	operation := state.Work.PublicationOperation
 	prepared := state.PendingOperation.PreparedPlan
@@ -267,10 +239,10 @@ func guardGuidedPlanScope(session AuthoringSession) error {
 	return nil
 }
 
-func guidedPlanSourceBindings(checkpoint GuidedStageCheckpoint) []generationcore.PlanSourceBinding {
+func guidedPlanSourceBindings(checkpoint authoringcore.GuidedStageCheckpoint) []generationcore.PlanSourceBinding {
 	var inputs []generationcore.PlanSourceBinding
 
-	for _, source := range append(append([]GuidedCommittedArtifact{}, checkpoint.Sources...), checkpoint.Artifacts...) {
+	for _, source := range append(append([]authoringcore.GuidedCommittedArtifact{}, checkpoint.Sources...), checkpoint.Artifacts...) {
 		commit := source.Commit
 		if commit == "" {
 			commit = checkpoint.Commit
@@ -334,7 +306,7 @@ func guardGuidedDependencies(refs []workflowstate.Ref, allowed map[workflowstate
 	return nil
 }
 
-func guardGuidedPreparationState(state *GuidedUseCaseState) error {
+func guardGuidedPreparationState(state *authoringcore.GuidedUseCaseState) error {
 	if state == nil {
 		return workflowstate.ErrConflict
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -284,7 +285,7 @@ type tuiOptionsData struct {
 	plans                []tui.PlanView
 	projectMetadata      core.ProjectMetadata
 	cases                []core.CaseMetadata
-	authoringSessions    []core.AuthoringSession
+	authoringSessions    []authoringcore.AuthoringSession
 	observability        tui.ObservabilityView
 	workReadiness        tui.WorkReadinessView
 	workspaceGraph       core.WorkspaceGraph
@@ -347,7 +348,7 @@ func loadTUITickets(
 func loadTUIAuthoringSessions(
 	ctx context.Context,
 	projectContext commandProjectContext,
-) ([]core.AuthoringSession, error) {
+) ([]authoringcore.AuthoringSession, error) {
 	sessions, err := core.NewAuthoringSessionRepository(projectContext.ProjectDir).ListSessions(ctx)
 	if err != nil {
 		return nil, err

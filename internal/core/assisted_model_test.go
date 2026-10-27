@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func TestInvokeAssistedModelUsesAdapterBoundary(t *testing.T) {
@@ -152,7 +154,7 @@ func testAssistedModelRequest() AssistedModelRequest {
 		SessionID: "session-1",
 		TurnID:    "turn-1",
 		Intent:    AssistedAuthoringIntentDiscover,
-		Target:    AuthoringTargetSpec,
+		Target:    authoringcore.AuthoringTargetSpec,
 		Context:   "# Assisted Authoring Context\n\nSession context.",
 		Prompt:    "Build the next question.",
 		CreatedAt: now,

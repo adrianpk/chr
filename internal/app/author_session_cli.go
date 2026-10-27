@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func (factory commandFactory) authorSessionCommand() *cli.Command {
@@ -58,12 +59,12 @@ func authorSessionFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "mode",
 			Usage: "authoring mode",
-			Value: string(core.AuthoringSessionModeMarkdownDirect),
+			Value: string(authoringcore.AuthoringSessionModeMarkdownDirect),
 		},
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(core.AuthoringTargetDraft),
+			Value: string(authoringcore.AuthoringTargetDraft),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -166,18 +167,18 @@ func (factory commandFactory) runAuthorSessionShow(ctx context.Context, cmd *cli
 	return printAuthorSession(factory.io.Stdout, session)
 }
 
-func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (core.AuthoringSession, error) {
+func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (authoringcore.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return core.AuthoringSession{}, fmt.Errorf("authoring topic is required")
+		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring topic is required")
 	}
 
-	session := core.AuthoringSession{
+	session := authoringcore.AuthoringSession{
 		ID:          authoringSessionID(now),
 		ProjectID:   projectContext.ProjectID,
-		Status:      core.AuthoringSessionStatusDraft,
-		Mode:        core.AuthoringSessionMode(cmd.String("mode")),
-		Target:      core.AuthoringTarget(cmd.String("target")),
+		Status:      authoringcore.AuthoringSessionStatusDraft,
+		Mode:        authoringcore.AuthoringSessionMode(cmd.String("mode")),
+		Target:      authoringcore.AuthoringTarget(cmd.String("target")),
 		Topic:       topic,
 		CreatedAt:   now,
 		UpdatedAt:   now,
@@ -186,7 +187,7 @@ func authoringSessionFromCommand(cmd *cli.Command, projectContext commandProject
 
 	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return session, nil
@@ -196,10 +197,10 @@ func authoringSessionID(now time.Time) string {
 	return "author-" + now.UTC().Format("20060102-150405")
 }
 
-func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessionRepository, handle string) (core.AuthoringSession, error) {
+func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessionRepository, handle string) (authoringcore.AuthoringSession, error) {
 	handle = strings.TrimSpace(handle)
 	if handle == "" {
-		return core.AuthoringSession{}, fmt.Errorf("authoring session is required")
+		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring session is required")
 	}
 
 	session, err := repository.GetSession(ctx, handle)
@@ -208,12 +209,12 @@ func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessi
 	}
 
 	if !errors.Is(err, core.ErrAuthoringSessionNotFound) {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	sessions, listErr := repository.ListSessions(ctx)
 	if listErr != nil {
-		return core.AuthoringSession{}, listErr
+		return authoringcore.AuthoringSession{}, listErr
 	}
 
 	matches := matchingAuthoringSessions(sessions, handle)
@@ -222,15 +223,15 @@ func resolveAuthoringSession(ctx context.Context, repository core.AuthoringSessi
 	}
 
 	if len(matches) > 1 {
-		return core.AuthoringSession{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
+		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring session handle is ambiguous: %s", handle)
 	}
 
-	return core.AuthoringSession{}, fmt.Errorf("%w: %s", core.ErrAuthoringSessionNotFound, handle)
+	return authoringcore.AuthoringSession{}, fmt.Errorf("%w: %s", core.ErrAuthoringSessionNotFound, handle)
 }
 
-func matchingAuthoringSessions(sessions []core.AuthoringSession, handle string) []core.AuthoringSession {
+func matchingAuthoringSessions(sessions []authoringcore.AuthoringSession, handle string) []authoringcore.AuthoringSession {
 	handleSlug := authoringHandleSlug(handle)
-	matches := []core.AuthoringSession{}
+	matches := []authoringcore.AuthoringSession{}
 
 	for _, session := range sessions {
 		if authoringSessionMatchesHandle(session, handle, handleSlug) {
@@ -241,7 +242,7 @@ func matchingAuthoringSessions(sessions []core.AuthoringSession, handle string) 
 	return matches
 }
 
-func authoringSessionMatchesHandle(session core.AuthoringSession, handle, handleSlug string) bool {
+func authoringSessionMatchesHandle(session authoringcore.AuthoringSession, handle, handleSlug string) bool {
 	if strings.EqualFold(session.ID, handle) {
 		return true
 	}
@@ -279,7 +280,7 @@ func authoringHandleSlug(value string) string {
 	return strings.Trim(builder.String(), "-")
 }
 
-func printAuthorSessionCreated(stdout io.Writer, session core.AuthoringSession, paths core.AuthoringSessionPaths, projectDir string) error {
+func printAuthorSessionCreated(stdout io.Writer, session authoringcore.AuthoringSession, paths core.AuthoringSessionPaths, projectDir string) error {
 	lines := []string{
 		"session: created " + session.ID,
 		"target: " + string(session.Target),
@@ -293,7 +294,7 @@ func printAuthorSessionCreated(stdout io.Writer, session core.AuthoringSession, 
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorSession(stdout io.Writer, session core.AuthoringSession) error {
+func printAuthorSession(stdout io.Writer, session authoringcore.AuthoringSession) error {
 	lines := []string{
 		"session: " + session.ID,
 		"status: " + string(session.Status),

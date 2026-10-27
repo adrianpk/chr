@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
-func guidedInvocationMatches(run core.WorkflowInvocation, session core.AuthoringSession) bool {
+func guidedInvocationMatches(run core.WorkflowInvocation, session authoringcore.AuthoringSession) bool {
 	if run.Admission == nil || run.Admission.Guided == nil || session.Guided.Work.Materialization == nil {
 		return false
 	}

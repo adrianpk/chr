@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -40,7 +41,7 @@ func (p webViewProvider) GuidedUseCaseView(ctx context.Context, id, namespace st
 
 	if host, ok := p.config.guidedHost.(*guidedWorkHost); ok {
 		host.mu.Lock()
-		view.Processing = host.progress[guidedProgressKey(p.service(ctx), core.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})]
+		view.Processing = host.progress[guidedProgressKey(p.service(ctx), authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace})]
 		host.mu.Unlock()
 	}
 
@@ -66,7 +67,7 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 	}
 
 	var (
-		session core.AuthoringSession
+		session authoringcore.AuthoringSession
 		err     error
 	)
 
@@ -74,7 +75,7 @@ func (p webViewProvider) writeGuidedUseCase(operations service, request webui.Wr
 	if request.Action == "guided.start" {
 		session, err = startGuidedWebUseCase(operations, request)
 	} else {
-		var command core.GuidedUseCaseCommand
+		var command authoringcore.GuidedUseCaseCommand
 
 		command, err = guidedWebCommand(request)
 		if err == nil {
@@ -107,7 +108,7 @@ func guidedUseCaseURL(id, namespace string) string {
 	return "/cases/workflow?" + url.Values{"id": {id}, "namespace": {namespace}}.Encode()
 }
 
-func guidedWebInputBinding(view *webui.GuidedUseCaseView, state *core.GuidedUseCaseState) {
+func guidedWebInputBinding(view *webui.GuidedUseCaseView, state *authoringcore.GuidedUseCaseState) {
 	if state.Quiz != nil {
 		view.QuestionID, view.InputDigest = state.Quiz.QuestionID, state.Quiz.InputDigest
 	}
@@ -137,10 +138,10 @@ func guidedWebInputBinding(view *webui.GuidedUseCaseView, state *core.GuidedUseC
 	}
 }
 
-func startGuidedWebUseCase(operations service, request webui.WriteActionRequest) (core.AuthoringSession, error) {
+func startGuidedWebUseCase(operations service, request webui.WriteActionRequest) (authoringcore.AuthoringSession, error) {
 	if request.Fields["step"] != "name" {
 		return operations.StartGuidedUseCase(operations.ctx, request.Fields["request_id"], request.Fields["namespace"], "local")
 	}
 
-	return operations.StartNamedGuidedUseCase(operations.ctx, core.GuidedUseCaseStart{GuidedUseCaseScope: core.GuidedUseCaseScope{RunID: request.Fields["request_id"], Namespace: request.Fields["namespace"]}, Actor: "local"}, request.Fields["content"])
+	return operations.StartNamedGuidedUseCase(operations.ctx, authoringcore.GuidedUseCaseStart{GuidedUseCaseScope: authoringcore.GuidedUseCaseScope{RunID: request.Fields["request_id"], Namespace: request.Fields["namespace"]}, Actor: "local"}, request.Fields["content"])
 }

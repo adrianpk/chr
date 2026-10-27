@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
@@ -148,7 +148,7 @@ func assertGuidedTelegramNativeControls(t *testing.T, f *telegramConversationApp
 	}
 }
 
-func assertGuidedTelegramCompleted(t *testing.T, f *telegramConversationAppFixture, operations service, original core.AuthoringSession) core.AuthoringSession {
+func assertGuidedTelegramCompleted(t *testing.T, f *telegramConversationAppFixture, operations service, original authoringcore.AuthoringSession) authoringcore.AuthoringSession {
 	t.Helper()
 
 	completed := readGuidedTelegramSession(t, operations, f.sessions(t)[0])

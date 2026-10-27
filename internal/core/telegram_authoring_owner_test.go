@@ -9,12 +9,13 @@ import (
 	"testing"
 	"time"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramAuthoringOwnerRequest() AuthoringContinuationRequest {
-	return AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "authoring-fixture", Operator: "maintainer"}, ProjectID: "example-project", Namespace: "default", Action: "create", Target: AuthoringArtifactKindDump, Topic: "Timeout behavior", Capture: "Keep bounded retries."}
+	return AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "authoring-fixture", Operator: "maintainer"}, ProjectID: "example-project", Namespace: "default", Action: "create", Target: authoringcore.AuthoringArtifactKindDump, Topic: "Timeout behavior", Capture: "Keep bounded retries."}
 }
 
 func telegramAuthoringOwnerDraft(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
@@ -55,7 +56,7 @@ func TestTelegramAuthoringOwnerQuestions(t *testing.T) {
 		t.Fatalf("prompt lost: %+v", snapshot.Events)
 	}
 
-	answer := telegramAuthoringNextOwner(question, "answer", "answer", AuthoringArtifactKindQuiz)
+	answer := telegramAuthoringNextOwner(question, "answer", "answer", authoringcore.AuthoringArtifactKindQuiz)
 	answer.Question = question.Question
 	answer.Instructions = "Keep the old default.\n\n---\nid: not-an-event\n---\nAnd retain limits."
 
@@ -91,14 +92,14 @@ func telegramAuthoringCreateOwner(t *testing.T, repo AuthoringSessionRepository,
 	return result
 }
 
-func telegramAuthoringNextOwner(result AuthoringContinuationResult, id, action string, target AuthoringArtifactKind) AuthoringContinuationRequest {
+func telegramAuthoringNextOwner(result AuthoringContinuationResult, id, action string, target authoringcore.AuthoringArtifactKind) AuthoringContinuationRequest {
 	return AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: result.Session.ProjectID, Namespace: result.Session.Namespace, SessionID: result.Session.ID, Action: AuthoringContinuationAction(action), Target: target, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash}
 }
 
 func telegramAuthoringQuestionOwner(t *testing.T, repo AuthoringSessionRepository, previous AuthoringContinuationResult) AuthoringContinuationResult {
 	t.Helper()
 
-	request := telegramAuthoringNextOwner(previous, "question-"+previous.Session.ID, "ask", AuthoringArtifactKindQuiz)
+	request := telegramAuthoringNextOwner(previous, "question-"+previous.Session.ID, "ask", authoringcore.AuthoringArtifactKindQuiz)
 
 	result, err := repo.ContinueAuthoring(t.Context(), request, func(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
 		return AuthoringDraft{Question: "Which policy?\nKeep the old default?", Rationale: "Avoid scope expansion."}, nil

@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 func (factory commandFactory) authorAssistedCommand() *cli.Command {
@@ -76,7 +77,7 @@ func authorAssistedStartFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "target",
 			Usage: "authoring target",
-			Value: string(core.AuthoringTargetSpec),
+			Value: string(authoringcore.AuthoringTargetSpec),
 		},
 		&cli.StringFlag{
 			Name:  "topic",
@@ -159,7 +160,7 @@ func authorAssistedFinalizeFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "target-kind",
 			Usage: "target artifact kind",
-			Value: string(core.AuthoringArtifactKindSpec),
+			Value: string(authoringcore.AuthoringArtifactKindSpec),
 		},
 		&cli.StringFlag{
 			Name:  "target-name",
@@ -327,7 +328,7 @@ func (factory commandFactory) runAuthorAssistedFinalize(ctx context.Context, cmd
 		Session:        curation.Session,
 		CuratedSummary: curation.Summary,
 		SourceRef:      curation.ArtifactRef,
-		TargetKind:     core.AuthoringArtifactKind(cmd.String("target-kind")),
+		TargetKind:     authoringcore.AuthoringArtifactKind(cmd.String("target-kind")),
 		TargetName:     strings.TrimSpace(cmd.String("target-name")),
 		AllowReplace:   cmd.Bool("allow-replace"),
 		Repository:     state.Repository,
@@ -342,7 +343,7 @@ func (factory commandFactory) runAuthorAssistedFinalize(ctx context.Context, cmd
 
 type authorAssistedState struct {
 	ProjectDir     string
-	Session        core.AuthoringSession
+	Session        authoringcore.AuthoringSession
 	Paths          core.AuthoringSessionPaths
 	Events         []core.AssistedTranscriptEvent
 	ContextPackage core.AssistedAuthoringContextPackage
@@ -394,18 +395,18 @@ func (factory commandFactory) loadAuthorAssistedState(ctx context.Context, cmd *
 	}, nil
 }
 
-func assistedSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (core.AuthoringSession, error) {
+func assistedSessionFromCommand(cmd *cli.Command, projectContext commandProjectContext, now time.Time) (authoringcore.AuthoringSession, error) {
 	topic := strings.TrimSpace(cmd.String("topic"))
 	if topic == "" {
-		return core.AuthoringSession{}, fmt.Errorf("authoring topic is required")
+		return authoringcore.AuthoringSession{}, fmt.Errorf("authoring topic is required")
 	}
 
-	session := core.AuthoringSession{
+	session := authoringcore.AuthoringSession{
 		ID:          authoringSessionID(now),
 		ProjectID:   projectContext.ProjectID,
-		Status:      core.AuthoringSessionStatusActive,
-		Mode:        core.AuthoringSessionModeAssisted,
-		Target:      core.AuthoringTarget(cmd.String("target")),
+		Status:      authoringcore.AuthoringSessionStatusActive,
+		Mode:        authoringcore.AuthoringSessionModeAssisted,
+		Target:      authoringcore.AuthoringTarget(cmd.String("target")),
 		Topic:       topic,
 		CreatedAt:   now,
 		StartedAt:   &now,
@@ -415,13 +416,13 @@ func assistedSessionFromCommand(cmd *cli.Command, projectContext commandProjectC
 
 	err := core.ValidateAuthoringSession(session)
 	if err != nil {
-		return core.AuthoringSession{}, err
+		return authoringcore.AuthoringSession{}, err
 	}
 
 	return session, nil
 }
 
-func assistedConfigFromCommand(cmd *cli.Command, session core.AuthoringSession) core.AssistedAuthoringConfig {
+func assistedConfigFromCommand(cmd *cli.Command, session authoringcore.AuthoringSession) core.AssistedAuthoringConfig {
 	return core.AssistedAuthoringConfig{
 		SessionID:    session.ID,
 		ProjectID:    session.ProjectID,
@@ -432,7 +433,7 @@ func assistedConfigFromCommand(cmd *cli.Command, session core.AuthoringSession) 
 	}
 }
 
-func authorAssistedCurationResponse(session core.AuthoringSession, summary string, now time.Time) core.AssistedModelResponse {
+func authorAssistedCurationResponse(session authoringcore.AuthoringSession, summary string, now time.Time) core.AssistedModelResponse {
 	return core.AssistedModelResponse{
 		ID:        "curation-response-" + session.ID,
 		RequestID: "curation-" + session.ID,
@@ -483,7 +484,7 @@ func printAuthorAssistedAnswer(stdout io.Writer, result core.AssistedQuizAnswerR
 	return writeAuthorLines(stdout, lines)
 }
 
-func printAuthorAssistedStatus(stdout io.Writer, session core.AuthoringSession, events []core.AssistedTranscriptEvent) error {
+func printAuthorAssistedStatus(stdout io.Writer, session authoringcore.AuthoringSession, events []core.AssistedTranscriptEvent) error {
 	counts := assistedEventCounts(events)
 
 	return writeAuthorLines(stdout, []string{

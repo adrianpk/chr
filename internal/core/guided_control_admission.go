@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"slices"
 
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -26,7 +27,7 @@ func validateGuidedControlProof(request workflowstate.ControlMutationRequest) er
 
 // BindGuidedControlInvocation reconciles uncertain admission without admitting
 // new work. Only an existing exact request can become the control target.
-func BindGuidedControlInvocation(ctx context.Context, root string, session *AuthoringSession) error {
+func BindGuidedControlInvocation(ctx context.Context, root string, session *authoringcore.AuthoringSession) error {
 	absolute, err := filepath.Abs(root)
 	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
 		return workflowstate.ErrConflict
@@ -51,7 +52,7 @@ func BindGuidedControlInvocation(ctx context.Context, root string, session *Auth
 	}
 
 	run := lookup.Invocation
-	state.Work.Invocation = &GuidedInvocationReference{ID: run.ID, RequestKey: run.RequestKey, Revision: run.Revision}
+	state.Work.Invocation = &authoringcore.GuidedInvocationReference{ID: run.ID, RequestKey: run.RequestKey, Revision: run.Revision}
 	operation := *state.Control.PendingOperation
 	operation.NativeRevision = run.Revision
 	state.Control.NativeRequest = guidedNativeControlRequest(*session, operation)
@@ -64,7 +65,7 @@ type guidedAdmissionLookup struct {
 	Found      bool
 }
 
-func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session AuthoringSession) (result guidedAdmissionLookup, err error) {
+func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session authoringcore.AuthoringSession) (result guidedAdmissionLookup, err error) {
 	err = s.withLock(ctx, func() error {
 		runs, err := s.repositoryWorkflowInvocations(ctx)
 		if err != nil {
@@ -92,7 +93,7 @@ func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session Autho
 	return result, err
 }
 
-func findGuidedControlInvocation(ctx context.Context, root string, session AuthoringSession) (guidedAdmissionLookup, error) {
+func findGuidedControlInvocation(ctx context.Context, root string, session authoringcore.AuthoringSession) (guidedAdmissionLookup, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
 		return guidedAdmissionLookup{}, err
@@ -101,6 +102,6 @@ func findGuidedControlInvocation(ctx context.Context, root string, session Autho
 	return NewWorkflowStore(layout, session.ProjectID).lookupGuidedAdmission(ctx, session)
 }
 
-func guidedControlNeedsInvocation(state *GuidedUseCaseState) bool {
+func guidedControlNeedsInvocation(state *authoringcore.GuidedUseCaseState) bool {
 	return state.Work != nil && state.Work.Admission != nil && state.Work.Invocation == nil
 }

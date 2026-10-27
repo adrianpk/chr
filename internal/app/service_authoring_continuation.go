@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
@@ -59,13 +60,13 @@ type authoringModelAnswer struct {
 }
 
 type authoringModelInput struct {
-	Action              string                     `json:"action"`
-	Target              core.AuthoringArtifactKind `json:"target"`
-	Topic               string                     `json:"topic"`
-	Instructions        string                     `json:"instructions"`
-	OriginalInstruction string                     `json:"original_instruction,omitempty"`
-	Sources             []authoringModelSource     `json:"sources"`
-	Answers             []authoringModelAnswer     `json:"answers"`
+	Action              string                              `json:"action"`
+	Target              authoringcore.AuthoringArtifactKind `json:"target"`
+	Topic               string                              `json:"topic"`
+	Instructions        string                              `json:"instructions"`
+	OriginalInstruction string                              `json:"original_instruction,omitempty"`
+	Sources             []authoringModelSource              `json:"sources"`
+	Answers             []authoringModelAnswer              `json:"answers"`
 }
 
 func (s service) generateAuthoringDraft(ctx context.Context, snapshot core.AuthoringSnapshot, request core.AuthoringContinuationRequest) (core.AuthoringDraft, error) {
@@ -133,7 +134,7 @@ func authoringGenerationInput(snapshot core.AuthoringSnapshot, request core.Auth
 	result := authoringModelInput{Action: string(request.Action), Target: request.Target, Topic: snapshot.Session.Topic, Instructions: request.Instructions, Sources: []authoringModelSource{}, Answers: []authoringModelAnswer{}}
 	if request.Action == "create" {
 		result.OriginalInstruction = request.OriginalInstruction
-		ref := core.AuthoringContinuationArtifact(request.Namespace, request.SessionID, core.AuthoringArtifactKindDump, true)
+		ref := core.AuthoringContinuationArtifact(request.Namespace, request.SessionID, authoringcore.AuthoringArtifactKindDump, true)
 		result.Sources = append(result.Sources, authoringModelSource{Reference: ref.Path, Content: request.Capture})
 	}
 
@@ -143,7 +144,7 @@ func authoringGenerationInput(snapshot core.AuthoringSnapshot, request core.Auth
 			content, truncated = artifact.Body, false
 		}
 
-		if request.Target == core.AuthoringArtifactKindPlan && artifact.Ref.Kind == core.AuthoringArtifactKindSpec {
+		if request.Target == authoringcore.AuthoringArtifactKindPlan && artifact.Ref.Kind == authoringcore.AuthoringArtifactKindSpec {
 			content, truncated = artifact.Body, false
 		}
 
@@ -197,18 +198,18 @@ func renderAuthoringGeneration(snapshot core.AuthoringSnapshot, request core.Aut
 
 	paths := authoringGenerationSources(snapshot, request)
 	switch request.Target {
-	case core.AuthoringArtifactKindDump:
-		raw := core.AuthoringContinuationArtifact(request.Namespace, request.SessionID, core.AuthoringArtifactKindDump, true)
+	case authoringcore.AuthoringArtifactKindDump:
+		raw := core.AuthoringContinuationArtifact(request.Namespace, request.SessionID, authoringcore.AuthoringArtifactKindDump, true)
 
 		return renderCuratedDumpMarkdown(snapshot.Session.Topic, DumpScope{}, raw.Path, DumpCurationResult{PolishedBody: body}), nil
-	case core.AuthoringArtifactKindSpec:
+	case authoringcore.AuthoringArtifactKindSpec:
 		spec := core.GeneratedSpec{Scope: quizcore.Scope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: core.NormalizeGeneratedSpecChrPathReferences(body), SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
 		if err := core.ValidateGeneratedSpec(spec); err != nil {
 			return "", err
 		}
 
 		return core.RenderGeneratedSpec(spec), nil
-	case core.AuthoringArtifactKindPlan:
+	case authoringcore.AuthoringArtifactKindPlan:
 		plan := generationcore.GeneratedPlan{Scope: quizcore.Scope{ProjectID: request.ProjectID}, Title: snapshot.Session.Topic, Body: body, SourcePaths: paths, SourceRequestID: request.Binding.RequestID, SourceResponseID: request.Binding.RequestID + "-response", CreatedAt: time.Now().UTC()}
 		if err := generationcore.ValidateGeneratedPlan(plan); err != nil {
 			return "", err
@@ -235,7 +236,7 @@ func authoringGenerationSources(snapshot core.AuthoringSnapshot, request core.Au
 	}
 
 	if request.Action == "create" {
-		result = append(result, core.AuthoringContinuationArtifact(request.Namespace, request.SessionID, core.AuthoringArtifactKindDump, true).Path)
+		result = append(result, core.AuthoringContinuationArtifact(request.Namespace, request.SessionID, authoringcore.AuthoringArtifactKindDump, true).Path)
 	}
 
 	return result

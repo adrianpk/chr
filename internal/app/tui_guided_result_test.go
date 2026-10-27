@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 )
 
 // TestGuidedUseCaseTUIResultGuard refuses a completed label when the native
@@ -11,7 +12,7 @@ import (
 func TestGuidedUseCaseTUIResultGuard(t *testing.T) {
 	for _, name := range []string{"missing", "partial", "invalid", "verified"} {
 		t.Run(name, func(t *testing.T) {
-			session := &core.AuthoringSession{Guided: &core.GuidedUseCaseState{Status: "completed", Stage: "results"}}
+			session := &authoringcore.AuthoringSession{Guided: &authoringcore.GuidedUseCaseState{Status: "completed", Stage: "results"}}
 
 			observed := GuidedUseCaseInspection{Session: session}
 			if name != "missing" {
