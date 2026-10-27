@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"database/sql"
@@ -12,6 +10,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func TestProjectRegistryAddsListsAndGetsProjects(t *testing.T) {
@@ -125,7 +125,7 @@ func TestProjectRegistryReturnsNotFoundError(t *testing.T) {
 	registry := newTestProjectRegistry(t)
 
 	_, err := registry.GetProjectByName(context.Background(), "missing")
-	if !errors.Is(err, projectcore.ErrProjectNotFound) {
+	if !errors.Is(err, projectcore.ErrNotFound) {
 		t.Fatalf("GetProjectByName error = %v, want ErrProjectNotFound", err)
 	}
 }
@@ -191,7 +191,7 @@ func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	registry, err := projectcore.NewProjectRegistry(context.Background(), env, testMigrationFS())
+	registry, err := projectcore.NewRegistry(context.Background(), env, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewProjectRegistry returned error: %v", err)
 	}
@@ -206,7 +206,7 @@ func TestNewProjectRegistryUsesUserEnvironmentDataDir(t *testing.T) {
 	assertPathExists(t, filepath.Join(root, "data", "chr", "core.db"))
 }
 
-func newTestProjectRegistry(t *testing.T) projectcore.ProjectRegistry {
+func newTestProjectRegistry(t *testing.T) projectcore.Registry {
 	t.Helper()
 
 	db, err := sql.Open("sqlite", ":memory:")
@@ -216,7 +216,7 @@ func newTestProjectRegistry(t *testing.T) projectcore.ProjectRegistry {
 
 	db.SetMaxOpenConns(1)
 
-	registry, err := projectcore.NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
+	registry, err := projectcore.NewRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		closeErr := db.Close()
 		if closeErr != nil {
@@ -236,7 +236,7 @@ func newTestProjectRegistry(t *testing.T) projectcore.ProjectRegistry {
 	return registry
 }
 
-func addTestProject(t *testing.T, registry projectcore.ProjectRegistry, project projectcore.Project) {
+func addTestProject(t *testing.T, registry projectcore.Registry, project projectcore.Project) {
 	t.Helper()
 
 	err := registry.AddProject(context.Background(), project)

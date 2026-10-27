@@ -187,3 +187,32 @@ Database directory inputs use only DataDir; the root UserEnvironment remains the
 host configuration boundary. The schema-status fixture explicitly constructs an
 old database instead of calling a private migration helper. Existing migration,
 real-SQLite record, notification quota/retention and registry regressions pass.
+
+### Project identity boundary delivered in T6.3
+
+core/project owns registered identities, the registry, active selection and registry
+diagnostics. It imports core/database and no root core, adapter or coordinator.
+DataDir and ConfigDir are separate consumer-owned directory capabilities. App
+composition supplies the workspace directory name. Root host/workspace configuration
+still owns the broader environment and configuration policies used by many domains.
+
+Registry and ActiveStore are the actual implementations, with direct callers and
+no re-export layer. Registry diagnostic status spellings, SQLite columns/order,
+active-project file bytes and atomic replacement remain unchanged. The 39 moved
+declarations have exact mechanical hashes before package-qualified name changes.
+The indexed-ticket row reader now owns its one-method scanner port, consistent
+with the existing notification and execution row ports.
+
+RootBindingDigest hashes project ID, registered absolute root and resolved root,
+separated by NUL bytes. Both registered and resolved paths remain in the digest.
+Telegram conversation mapping retains its original safe diagnostic type and text
+when the shared identity operation reports an unavailable root.
+
+The project_dump files and project_metadata service are authoring behavior, not
+registry behavior. Their actual fileAuthoringSessionRepository receivers use
+shared authoring mutation locks, durable receipts and project-dump reconciliation.
+Their final package owner is core/authoring in Slice 9; moving those operations
+into the identity package would split that existing transactional owner. All
+baseline signature rows assigned to Slice 6 remain assigned here and must be
+resolved by T6.5. project_userspace remains shared workspace/operator configuration
+at the core root. No helper implementation is copied to make the graph compile.

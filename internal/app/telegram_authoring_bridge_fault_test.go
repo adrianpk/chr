@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"errors"
@@ -11,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 var errTelegramAuthoringLostAck = errors.New("injected lost authoring acknowledgement")
@@ -188,7 +187,7 @@ func telegramAuthoringChangeAuthority(t *testing.T, f *telegramConversationAppFi
 		return
 	}
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Error(err)
 

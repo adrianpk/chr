@@ -1,12 +1,12 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"fmt"
 	"strings"
 	"testing"
 	"time"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 type telegramConversationFixture struct {

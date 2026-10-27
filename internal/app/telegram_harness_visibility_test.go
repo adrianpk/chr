@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"os"
@@ -10,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture, service, core.WorkflowRecord, core.WorkflowStartRequest, string) {
@@ -18,7 +17,7 @@ func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture
 	operations, record, request := serviceWorkflowTicketFixture(t)
 	f := newTelegramConversationAppFixture(t)
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"encoding/json"
 	"os"
@@ -10,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramHarnessOffer(t *testing.T, f *telegramConversationAppFixture, text string) (core.TelegramOperationRequest, core.TelegramAction, telegramConversationNotice) {
@@ -158,7 +157,7 @@ func telegramHarnessOtherProject(t *testing.T, f *telegramConversationAppFixture
 func telegramHarnessOtherRoot(t *testing.T, f *telegramConversationAppFixture, _ service) {
 	t.Helper()
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -174,7 +173,7 @@ func telegramHarnessOtherRoot(t *testing.T, f *telegramConversationAppFixture, _
 func telegramHarnessDisableProject(t *testing.T, f *telegramConversationAppFixture, _ service) {
 	t.Helper()
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

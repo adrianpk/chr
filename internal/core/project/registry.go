@@ -14,11 +14,11 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// ErrProjectNotFound identifies a package boundary error.
-var ErrProjectNotFound = errors.New("project not found")
+// ErrNotFound identifies a package boundary error.
+var ErrNotFound = errors.New("project not found")
 
-// ProjectRegistry defines a package boundary interface.
-type ProjectRegistry interface {
+// Registry defines a package boundary interface.
+type Registry interface {
 	AddProject(ctx context.Context, project Project) error
 	ListProjects(ctx context.Context) ([]Project, error)
 	GetProjectByID(ctx context.Context, id string) (Project, error)
@@ -29,15 +29,15 @@ type ProjectRegistry interface {
 	Close() error
 }
 
-// ProjectRegistryOption defines a package boundary type.
-type ProjectRegistryOption func(*sqliteProjectRegistry)
+// RegistryOption defines a package boundary type.
+type RegistryOption func(*sqliteRegistry)
 
-type sqliteProjectRegistry struct {
+type sqliteRegistry struct {
 	db *sql.DB
 }
 
-// NewProjectRegistry constructs the corresponding package service or value.
-func NewProjectRegistry(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (ProjectRegistry, error) {
+// NewRegistry constructs the corresponding package service or value.
+func NewRegistry(ctx context.Context, env database.DataDirectory, assetsFS fs.FS) (Registry, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -60,11 +60,11 @@ func NewProjectRegistry(ctx context.Context, env database.DataDirectory, assetsF
 		return nil, database.CloseOnError(db, fmt.Errorf("migrate project registry database: %w", err))
 	}
 
-	return &sqliteProjectRegistry{db: db}, nil
+	return &sqliteRegistry{db: db}, nil
 }
 
-// NewProjectRegistryFromDB constructs the corresponding package service or value.
-func NewProjectRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (ProjectRegistry, error) {
+// NewRegistryFromDB constructs the corresponding package service or value.
+func NewRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (Registry, error) {
 	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
@@ -72,11 +72,11 @@ func NewProjectRegistryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (
 		return nil, fmt.Errorf("migrate project registry database: %w", err)
 	}
 
-	return &sqliteProjectRegistry{db: db}, nil
+	return &sqliteRegistry{db: db}, nil
 }
 
 // AddProject executes the corresponding package operation.
-func (r *sqliteProjectRegistry) AddProject(ctx context.Context, project Project) error {
+func (r *sqliteRegistry) AddProject(ctx context.Context, project Project) error {
 	err := validateProject(project)
 	if err != nil {
 		return err
@@ -107,7 +107,7 @@ func (r *sqliteProjectRegistry) AddProject(ctx context.Context, project Project)
 }
 
 // ListProjects lists the requested data.
-func (r *sqliteProjectRegistry) ListProjects(ctx context.Context) ([]Project, error) {
+func (r *sqliteRegistry) ListProjects(ctx context.Context) ([]Project, error) {
 	rows, err := r.db.QueryContext(
 		ctx,
 		`SELECT id, name, path, enabled, registered_at, last_indexed_at
@@ -143,22 +143,22 @@ ORDER BY name`,
 }
 
 // GetProjectByName executes the corresponding package operation.
-func (r *sqliteProjectRegistry) GetProjectByName(ctx context.Context, name string) (Project, error) {
+func (r *sqliteRegistry) GetProjectByName(ctx context.Context, name string) (Project, error) {
 	return r.getProject(ctx, "name", name)
 }
 
 // GetProjectByID executes the corresponding package operation.
-func (r *sqliteProjectRegistry) GetProjectByID(ctx context.Context, id string) (Project, error) {
+func (r *sqliteRegistry) GetProjectByID(ctx context.Context, id string) (Project, error) {
 	return r.getProject(ctx, "id", id)
 }
 
 // GetProjectByPath executes the corresponding package operation.
-func (r *sqliteProjectRegistry) GetProjectByPath(ctx context.Context, path string) (Project, error) {
+func (r *sqliteRegistry) GetProjectByPath(ctx context.Context, path string) (Project, error) {
 	return r.getProject(ctx, "path", path)
 }
 
 // DisableProject executes the corresponding package operation.
-func (r *sqliteProjectRegistry) DisableProject(ctx context.Context, name string) (Project, error) {
+func (r *sqliteRegistry) DisableProject(ctx context.Context, name string) (Project, error) {
 	project, err := r.GetProjectByName(ctx, name)
 	if err != nil {
 		return Project{}, err
@@ -175,7 +175,7 @@ func (r *sqliteProjectRegistry) DisableProject(ctx context.Context, name string)
 }
 
 // UpdateProjectPath executes the corresponding package operation.
-func (r *sqliteProjectRegistry) UpdateProjectPath(ctx context.Context, name, path string) (Project, error) {
+func (r *sqliteRegistry) UpdateProjectPath(ctx context.Context, name, path string) (Project, error) {
 	if path == "" {
 		return Project{}, fmt.Errorf("project path is required")
 	}
@@ -195,7 +195,7 @@ func (r *sqliteProjectRegistry) UpdateProjectPath(ctx context.Context, name, pat
 	return project, nil
 }
 
-func (r *sqliteProjectRegistry) getProject(ctx context.Context, field, value string) (Project, error) {
+func (r *sqliteRegistry) getProject(ctx context.Context, field, value string) (Project, error) {
 	column, err := projectLookupColumn(field)
 	if err != nil {
 		return Project{}, err
@@ -211,7 +211,7 @@ WHERE %s = ?`, column),
 
 	project, err := scanProject(row)
 	if errors.Is(err, sql.ErrNoRows) {
-		return Project{}, fmt.Errorf("%w: %s=%s", ErrProjectNotFound, field, value)
+		return Project{}, fmt.Errorf("%w: %s=%s", ErrNotFound, field, value)
 	}
 
 	if err != nil {
@@ -231,7 +231,7 @@ func projectLookupColumn(field string) (string, error) {
 }
 
 // Close executes the corresponding package operation.
-func (r *sqliteProjectRegistry) Close() error {
+func (r *sqliteRegistry) Close() error {
 	err := r.db.Close()
 	if err != nil {
 		return fmt.Errorf("close project registry database: %w", err)

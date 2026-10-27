@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"encoding/json"
 	"net/http"
@@ -11,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramAuthoringIntentHTTP(t *testing.T, f *telegramConversationAppFixture, reply func(ConversationIntentContext) string) *atomic.Int64 {
@@ -243,7 +242,7 @@ func TestTelegramAuthoringIntentRootChange(t *testing.T) {
 	f := newTelegramConversationAppFixture(t)
 	replacement := t.TempDir()
 	telegramAuthoringIntentHTTP(t, f, func(ConversationIntentContext) string {
-		registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+		registry, err := projectcore.NewRegistry(t.Context(), f.receiver.env, testAssetsFS())
 		if err != nil {
 			t.Error(err)
 

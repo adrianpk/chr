@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"errors"
@@ -10,6 +8,8 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v3"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func (factory commandFactory) projectCommand() *cli.Command {
@@ -57,7 +57,7 @@ func (factory commandFactory) runProjectAdd(ctx context.Context, cmd *cli.Comman
 		return err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -113,7 +113,7 @@ func (factory commandFactory) runProjectList(ctx context.Context, cmd *cli.Comma
 		return err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -158,12 +158,12 @@ func (factory commandFactory) runProjectCurrent(ctx context.Context, cmd *cli.Co
 		return err
 	}
 
-	activeProject, err := projectcore.NewActiveProjectStore(env).LoadActiveProject()
+	activeProject, err := projectcore.NewActiveStore(env).LoadActiveProject()
 	if err != nil {
 		return err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -206,7 +206,7 @@ func (factory commandFactory) runProjectSelect(ctx context.Context, cmd *cli.Com
 		return err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -230,12 +230,12 @@ func (factory commandFactory) runProjectSelect(ctx context.Context, cmd *cli.Com
 		return err
 	}
 
-	activeProject, err := projectcore.NewActiveProject(project.ID)
+	activeProject, err := projectcore.NewActive(project.ID)
 	if err != nil {
 		return err
 	}
 
-	store := projectcore.NewActiveProjectStore(env)
+	store := projectcore.NewActiveStore(env)
 
 	err = store.SetActiveProject(activeProject)
 	if err != nil {
@@ -251,13 +251,13 @@ func (factory commandFactory) runProjectSelect(ctx context.Context, cmd *cli.Com
 	return nil
 }
 
-func resolveProjectSelection(ctx context.Context, registry projectcore.ProjectRegistry, selector string) (projectcore.Project, error) {
+func resolveProjectSelection(ctx context.Context, registry projectcore.Registry, selector string) (projectcore.Project, error) {
 	project, err := registry.GetProjectByName(ctx, selector)
 	if err == nil {
 		return project, nil
 	}
 
-	if !errors.Is(err, projectcore.ErrProjectNotFound) {
+	if !errors.Is(err, projectcore.ErrNotFound) {
 		return projectcore.Project{}, err
 	}
 

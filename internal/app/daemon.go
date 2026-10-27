@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"errors"
@@ -14,6 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func (factory commandFactory) daemonCommand() *cli.Command {
@@ -260,7 +259,7 @@ func (factory commandFactory) runDaemonForegroundLoop(ctx context.Context, env c
 }
 
 func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, maxIterations int) (result daemonForegroundLoopResult, err error) {
-	registry, err := projectcore.NewProjectRegistry(ctx, runner.env, runner.assets)
+	registry, err := projectcore.NewRegistry(ctx, runner.env, runner.assets)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}

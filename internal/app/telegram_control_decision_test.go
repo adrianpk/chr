@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"fmt"
 	"strings"
@@ -9,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramControlDecisionFixture(t *testing.T, action string) (*telegramConversationAppFixture, service, string) {
@@ -26,7 +25,7 @@ func telegramControlDecisionFixture(t *testing.T, action string) (*telegramConve
 
 	f := newTelegramConversationAppFixture(t)
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

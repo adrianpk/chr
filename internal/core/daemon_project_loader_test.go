@@ -1,13 +1,13 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func TestLoadDaemonProjectsReturnsEnabledProjectsWithReadyStatus(t *testing.T) {

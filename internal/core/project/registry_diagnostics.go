@@ -7,43 +7,39 @@ import (
 	"path/filepath"
 )
 
-// ProjectRegistryDiagnostic describes a package boundary value.
-type ProjectRegistryDiagnostic struct {
+// Diagnostic describes a package boundary value.
+type Diagnostic struct {
 	Project         Project
 	Active          bool
 	PathExists      bool
 	WorkspaceExists bool
-	Status          ProjectRegistryDiagnosticStatus
+	Status          DiagnosticStatus
 }
 
-// ProjectRegistryDiagnosticStatus defines a package boundary type.
-type ProjectRegistryDiagnosticStatus string
+// DiagnosticStatus defines a package boundary type.
+type DiagnosticStatus string
 
 const (
-	// ProjectRegistryDiagnosticOK defines a package boundary constant.
-	ProjectRegistryDiagnosticOK ProjectRegistryDiagnosticStatus = "ok"
-	// ProjectRegistryDiagnosticDisabled defines a package boundary constant.
-	ProjectRegistryDiagnosticDisabled ProjectRegistryDiagnosticStatus = "disabled"
-	// ProjectRegistryDiagnosticMissingPath defines a package boundary constant.
-	ProjectRegistryDiagnosticMissingPath ProjectRegistryDiagnosticStatus = "missing_path"
-	// ProjectRegistryDiagnosticNoWorkspace defines a package boundary constant.
-	ProjectRegistryDiagnosticNoWorkspace ProjectRegistryDiagnosticStatus = "missing_workspace"
+	// DiagnosticOK defines a package boundary constant.
+	DiagnosticOK DiagnosticStatus = "ok"
+	// DiagnosticDisabled defines a package boundary constant.
+	DiagnosticDisabled DiagnosticStatus = "disabled"
+	// DiagnosticMissingPath defines a package boundary constant.
+	DiagnosticMissingPath DiagnosticStatus = "missing_path"
+	// DiagnosticNoWorkspace defines a package boundary constant.
+	DiagnosticNoWorkspace DiagnosticStatus = "missing_workspace"
 )
 
-// ProjectRegistryDiagnosticsService describes a package boundary value.
-type ProjectRegistryDiagnosticsService struct {
-	registry           ProjectRegistry
-	store              ActiveProjectStore
+// DiagnosticsService describes a package boundary value.
+type DiagnosticsService struct {
+	registry           Registry
+	store              ActiveStore
 	workspaceDirectory string
 }
 
-// NewProjectRegistryDiagnosticsService constructs the corresponding package service or value.
-func NewProjectRegistryDiagnosticsService(
-	registry ProjectRegistry,
-	store ActiveProjectStore,
-	workspaceDirectory string,
-) ProjectRegistryDiagnosticsService {
-	return ProjectRegistryDiagnosticsService{
+// NewDiagnosticsService constructs the corresponding package service or value.
+func NewDiagnosticsService(registry Registry, store ActiveStore, workspaceDirectory string) DiagnosticsService {
+	return DiagnosticsService{
 		registry:           registry,
 		store:              store,
 		workspaceDirectory: workspaceDirectory,
@@ -51,29 +47,27 @@ func NewProjectRegistryDiagnosticsService(
 }
 
 // ListDiagnostics lists the requested data.
-func (s ProjectRegistryDiagnosticsService) ListDiagnostics(
-	ctx context.Context,
-) ([]ProjectRegistryDiagnostic, error) {
+func (s DiagnosticsService) ListDiagnostics(ctx context.Context) ([]Diagnostic, error) {
 	projects, err := s.registry.ListProjects(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	activeProject, err := s.store.LoadActiveProject()
-	if err != nil && !errors.Is(err, ErrActiveProjectNotSelected) {
+	if err != nil && !errors.Is(err, ErrActiveNotSelected) {
 		return nil, err
 	}
 
-	diagnostics := make([]ProjectRegistryDiagnostic, 0, len(projects))
+	diagnostics := make([]Diagnostic, 0, len(projects))
 	for _, project := range projects {
-		diagnostics = append(diagnostics, diagnoseProjectRegistryEntry(project, activeProject.ProjectID, s.workspaceDirectory))
+		diagnostics = append(diagnostics, diagnoseRegistryEntry(project, activeProject.ProjectID, s.workspaceDirectory))
 	}
 
 	return diagnostics, nil
 }
 
-func diagnoseProjectRegistryEntry(project Project, activeProjectID, workspaceDirectory string) ProjectRegistryDiagnostic {
-	diagnostic := ProjectRegistryDiagnostic{
+func diagnoseRegistryEntry(project Project, activeProjectID, workspaceDirectory string) Diagnostic {
+	diagnostic := Diagnostic{
 		Project: project,
 		Active:  project.ID == activeProjectID,
 	}
@@ -90,26 +84,23 @@ func diagnoseProjectRegistryEntry(project Project, activeProjectID, workspaceDir
 		diagnostic.WorkspaceExists = true
 	}
 
-	diagnostic.Status = projectRegistryDiagnosticStatus(project, diagnostic)
+	diagnostic.Status = registryDiagnosticStatus(project, diagnostic)
 
 	return diagnostic
 }
 
-func projectRegistryDiagnosticStatus(
-	project Project,
-	diagnostic ProjectRegistryDiagnostic,
-) ProjectRegistryDiagnosticStatus {
+func registryDiagnosticStatus(project Project, diagnostic Diagnostic) DiagnosticStatus {
 	if !project.Enabled {
-		return ProjectRegistryDiagnosticDisabled
+		return DiagnosticDisabled
 	}
 
 	if !diagnostic.PathExists {
-		return ProjectRegistryDiagnosticMissingPath
+		return DiagnosticMissingPath
 	}
 
 	if !diagnostic.WorkspaceExists {
-		return ProjectRegistryDiagnosticNoWorkspace
+		return DiagnosticNoWorkspace
 	}
 
-	return ProjectRegistryDiagnosticOK
+	return DiagnosticOK
 }

@@ -1,27 +1,27 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"errors"
 	"os"
 	"path/filepath"
 	"testing"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func TestActiveProjectStoreLoadsEmptyState(t *testing.T) {
-	store := projectcore.NewActiveProjectStore(newTestUserEnvironment(t))
+	store := projectcore.NewActiveStore(newTestUserEnvironment(t))
 
 	_, err := store.LoadActiveProject()
-	if !errors.Is(err, projectcore.ErrActiveProjectNotSelected) {
+	if !errors.Is(err, projectcore.ErrActiveNotSelected) {
 		t.Fatalf("LoadActiveProject error = %v, want ErrActiveProjectNotSelected", err)
 	}
 }
 
 func TestActiveProjectStoreSetsAndLoadsActiveProject(t *testing.T) {
-	store := projectcore.NewActiveProjectStore(newTestUserEnvironment(t))
+	store := projectcore.NewActiveStore(newTestUserEnvironment(t))
 
-	activeProject, err := projectcore.NewActiveProject("project-1")
+	activeProject, err := projectcore.NewActive("project-1")
 	if err != nil {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
@@ -40,14 +40,14 @@ func TestActiveProjectStoreSetsAndLoadsActiveProject(t *testing.T) {
 }
 
 func TestActiveProjectStoreReplacesActiveProject(t *testing.T) {
-	store := projectcore.NewActiveProjectStore(newTestUserEnvironment(t))
+	store := projectcore.NewActiveStore(newTestUserEnvironment(t))
 
-	first, err := projectcore.NewActiveProject("project-1")
+	first, err := projectcore.NewActive("project-1")
 	if err != nil {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
 
-	second, err := projectcore.NewActiveProject("project-2")
+	second, err := projectcore.NewActive("project-2")
 	if err != nil {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
@@ -71,18 +71,18 @@ func TestActiveProjectStoreReplacesActiveProject(t *testing.T) {
 }
 
 func TestActiveProjectStoreRejectsEmptyProjectID(t *testing.T) {
-	store := projectcore.NewActiveProjectStore(newTestUserEnvironment(t))
+	store := projectcore.NewActiveStore(newTestUserEnvironment(t))
 
-	err := store.SetActiveProject(projectcore.ActiveProject{})
+	err := store.SetActiveProject(projectcore.Active{})
 	if err == nil {
 		t.Fatal("SetActiveProject returned nil error")
 	}
 }
 
 func TestActiveProjectStoreClearsActiveProject(t *testing.T) {
-	store := projectcore.NewActiveProjectStore(newTestUserEnvironment(t))
+	store := projectcore.NewActiveStore(newTestUserEnvironment(t))
 
-	activeProject, err := projectcore.NewActiveProject("project-1")
+	activeProject, err := projectcore.NewActive("project-1")
 	if err != nil {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
@@ -98,7 +98,7 @@ func TestActiveProjectStoreClearsActiveProject(t *testing.T) {
 	}
 
 	_, err = store.LoadActiveProject()
-	if !errors.Is(err, projectcore.ErrActiveProjectNotSelected) {
+	if !errors.Is(err, projectcore.ErrActiveNotSelected) {
 		t.Fatalf("LoadActiveProject error = %v, want ErrActiveProjectNotSelected", err)
 	}
 }
@@ -114,9 +114,9 @@ func TestActiveProjectStoreUsesDevelopmentConfigPath(t *testing.T) {
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	store := projectcore.NewActiveProjectStore(env)
+	store := projectcore.NewActiveStore(env)
 
-	activeProject, err := projectcore.NewActiveProject("project-1")
+	activeProject, err := projectcore.NewActive("project-1")
 	if err != nil {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
@@ -146,7 +146,7 @@ func newTestUserEnvironment(t *testing.T) UserEnvironment {
 	return env
 }
 
-func assertActiveProject(t *testing.T, got, want projectcore.ActiveProject) {
+func assertActiveProject(t *testing.T, got, want projectcore.Active) {
 	t.Helper()
 
 	if got.ProjectID != want.ProjectID {

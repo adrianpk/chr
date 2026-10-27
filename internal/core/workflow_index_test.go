@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"database/sql"
@@ -10,6 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func workflowTestIndex(t *testing.T, path string) WorkflowIndex {
@@ -22,7 +22,7 @@ func workflowTestIndex(t *testing.T, path string) WorkflowIndex {
 
 	db.SetMaxOpenConns(1)
 
-	registry, err := projectcore.NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
+	registry, err := projectcore.NewRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,63 +8,63 @@ import (
 	"strings"
 )
 
-// ErrActiveProjectNotSelected identifies a package boundary error.
-var ErrActiveProjectNotSelected = errors.New("active project is not selected")
+// ErrActiveNotSelected identifies a package boundary error.
+var ErrActiveNotSelected = errors.New("active project is not selected")
 
-// ActiveProject describes a package boundary value.
-type ActiveProject struct {
+// Active describes a package boundary value.
+type Active struct {
 	ProjectID string
 }
 
-// ActiveProjectStore defines a package boundary interface.
-type ActiveProjectStore interface {
-	LoadActiveProject() (ActiveProject, error)
-	SetActiveProject(activeProject ActiveProject) error
+// ActiveStore defines a package boundary interface.
+type ActiveStore interface {
+	LoadActiveProject() (Active, error)
+	SetActiveProject(activeProject Active) error
 	ClearActiveProject() error
 }
 
-type activeProjectStore struct {
+type activeStore struct {
 	path string
 }
 
-// NewActiveProjectStore constructs the corresponding package service or value.
-func NewActiveProjectStore(env ConfigDirectory) ActiveProjectStore {
-	return &activeProjectStore{
+// NewActiveStore constructs the corresponding package service or value.
+func NewActiveStore(env ConfigDirectory) ActiveStore {
+	return &activeStore{
 		path: filepath.Join(env.ConfigDir(), "active-project"),
 	}
 }
 
-// NewActiveProject constructs the corresponding package service or value.
-func NewActiveProject(projectID string) (ActiveProject, error) {
+// NewActive constructs the corresponding package service or value.
+func NewActive(projectID string) (Active, error) {
 	if projectID == "" {
-		return ActiveProject{}, fmt.Errorf("active project id is required")
+		return Active{}, fmt.Errorf("active project id is required")
 	}
 
-	return ActiveProject{ProjectID: projectID}, nil
+	return Active{ProjectID: projectID}, nil
 }
 
 // LoadActiveProject loads the requested data.
-func (s *activeProjectStore) LoadActiveProject() (ActiveProject, error) {
+func (s *activeStore) LoadActiveProject() (Active, error) {
 	content, err := os.ReadFile(s.path)
 	if errors.Is(err, os.ErrNotExist) {
-		return ActiveProject{}, ErrActiveProjectNotSelected
+		return Active{}, ErrActiveNotSelected
 	}
 
 	if err != nil {
-		return ActiveProject{}, fmt.Errorf("load active project: %w", err)
+		return Active{}, fmt.Errorf("load active project: %w", err)
 	}
 
-	activeProject, err := NewActiveProject(strings.TrimSpace(string(content)))
+	activeProject, err := NewActive(strings.TrimSpace(string(content)))
 	if err != nil {
-		return ActiveProject{}, fmt.Errorf("load active project: %w", err)
+		return Active{}, fmt.Errorf("load active project: %w", err)
 	}
 
 	return activeProject, nil
 }
 
 // SetActiveProject executes the corresponding package operation.
-func (s *activeProjectStore) SetActiveProject(activeProject ActiveProject) error {
-	_, err := NewActiveProject(activeProject.ProjectID)
+func (s *activeStore) SetActiveProject(activeProject Active) error {
+	_, err := NewActive(activeProject.ProjectID)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (s *activeProjectStore) SetActiveProject(activeProject ActiveProject) error
 }
 
 // ClearActiveProject executes the corresponding package operation.
-func (s *activeProjectStore) ClearActiveProject() error {
+func (s *activeStore) ClearActiveProject() error {
 	err := os.Remove(s.path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil

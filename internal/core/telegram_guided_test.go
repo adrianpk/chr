@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"os"
 	"path/filepath"
@@ -9,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestGuidedUseCaseTelegramBinding reserves one peer-scoped association without

@@ -47,10 +47,7 @@ func UserDatabasePath(env DataDirectory) string {
 }
 
 // Check executes the corresponding package operation.
-func (c MigrationStatusChecker) Check(
-	ctx context.Context,
-	env DataDirectory,
-) (MigrationStatus, error) {
+func (c MigrationStatusChecker) Check(ctx context.Context, env DataDirectory) (MigrationStatus, error) {
 	err := ctx.Err()
 	if err != nil {
 		return MigrationStatus{}, err

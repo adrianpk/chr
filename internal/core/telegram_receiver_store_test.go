@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"fmt"
 	"os"
@@ -11,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func openTelegramReceiverTestStore(t *testing.T, env UserEnvironment) *TelegramReceiverStore {
@@ -197,7 +196,7 @@ func TestTelegramReceiverPollBudget(t *testing.T) {
 func TestTelegramReceiverMigration(t *testing.T) {
 	env := telegramReceiverTestEnv(t)
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), env, testMigrationFS())
+	registry, err := projectcore.NewRegistry(t.Context(), env, testMigrationFS())
 	if err != nil {
 		t.Fatal(err)
 	}

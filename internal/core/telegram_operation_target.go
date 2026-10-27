@@ -1,12 +1,12 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"time"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TelegramOperationTarget freezes an authorized registry root and namespace.

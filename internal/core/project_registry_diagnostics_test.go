@@ -1,19 +1,19 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func TestProjectRegistryDiagnosticsReportsProjectState(t *testing.T) {
 	env := newTestUserEnvironment(t)
 
-	registry, err := projectcore.NewProjectRegistry(context.Background(), env, testMigrationFS())
+	registry, err := projectcore.NewRegistry(context.Background(), env, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewProjectRegistry returned error: %v", err)
 	}
@@ -33,24 +33,24 @@ func TestProjectRegistryDiagnosticsReportsProjectState(t *testing.T) {
 	addDiagnosticProjects(t, registry, okDir, disabledDir, missingWorkspaceDir, missingDir)
 	selectDiagnosticActiveProject(t, env, "project-ok")
 
-	diagnostics, err := projectcore.NewProjectRegistryDiagnosticsService(
+	diagnostics, err := projectcore.NewDiagnosticsService(
 		registry,
-		projectcore.NewActiveProjectStore(env),
+		projectcore.NewActiveStore(env),
 		DirectoryName,
 	).ListDiagnostics(context.Background())
 	if err != nil {
 		t.Fatalf("ListDiagnostics returned error: %v", err)
 	}
 
-	assertDiagnosticStatus(t, diagnostics, "ok", projectcore.ProjectRegistryDiagnosticOK, true, true, true)
-	assertDiagnosticStatus(t, diagnostics, "disabled", projectcore.ProjectRegistryDiagnosticDisabled, false, true, true)
-	assertDiagnosticStatus(t, diagnostics, "no-workspace", projectcore.ProjectRegistryDiagnosticNoWorkspace, false, true, false)
-	assertDiagnosticStatus(t, diagnostics, "missing", projectcore.ProjectRegistryDiagnosticMissingPath, false, false, false)
+	assertDiagnosticStatus(t, diagnostics, "ok", projectcore.DiagnosticOK, true, true, true)
+	assertDiagnosticStatus(t, diagnostics, "disabled", projectcore.DiagnosticDisabled, false, true, true)
+	assertDiagnosticStatus(t, diagnostics, "no-workspace", projectcore.DiagnosticNoWorkspace, false, true, false)
+	assertDiagnosticStatus(t, diagnostics, "missing", projectcore.DiagnosticMissingPath, false, false, false)
 }
 
 func addDiagnosticProjects(
 	t *testing.T,
-	registry projectcore.ProjectRegistry,
+	registry projectcore.Registry,
 	okDir string,
 	disabledDir string,
 	missingWorkspaceDir string,
@@ -77,12 +77,12 @@ func diagnosticProject(id, name, path string, enabled bool) projectcore.Project 
 func selectDiagnosticActiveProject(t *testing.T, env UserEnvironment, id string) {
 	t.Helper()
 
-	activeProject, err := projectcore.NewActiveProject(id)
+	activeProject, err := projectcore.NewActive(id)
 	if err != nil {
 		t.Fatalf("NewActiveProject returned error: %v", err)
 	}
 
-	err = projectcore.NewActiveProjectStore(env).SetActiveProject(activeProject)
+	err = projectcore.NewActiveStore(env).SetActiveProject(activeProject)
 	if err != nil {
 		t.Fatalf("SetActiveProject returned error: %v", err)
 	}
@@ -101,7 +101,7 @@ func newDiagnosticProjectWorkspace(t *testing.T) string {
 	return projectDir
 }
 
-func addDiagnosticProject(t *testing.T, registry projectcore.ProjectRegistry, project projectcore.Project) {
+func addDiagnosticProject(t *testing.T, registry projectcore.Registry, project projectcore.Project) {
 	t.Helper()
 
 	err := registry.AddProject(context.Background(), project)
@@ -112,9 +112,9 @@ func addDiagnosticProject(t *testing.T, registry projectcore.ProjectRegistry, pr
 
 func assertDiagnosticStatus(
 	t *testing.T,
-	diagnostics []projectcore.ProjectRegistryDiagnostic,
+	diagnostics []projectcore.Diagnostic,
 	name string,
-	status projectcore.ProjectRegistryDiagnosticStatus,
+	status projectcore.DiagnosticStatus,
 	active bool,
 	pathExists bool,
 	workspaceExists bool,

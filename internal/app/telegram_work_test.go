@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"encoding/json"
 	"strings"
@@ -9,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramWorkFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
@@ -19,7 +18,7 @@ func telegramWorkFixture(t *testing.T, plans ...core.GeneratedWorkflowPlan) (*te
 
 	f := newTelegramConversationAppFixture(t)
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), f.receiver.env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), f.receiver.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"errors"
@@ -13,6 +11,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 const daemonWorkflowActivationLimit = 16
@@ -123,7 +122,7 @@ func (runner daemonWorkflowRunner) workflow(ctx context.Context, operations serv
 	return progress.Attempted, err
 }
 
-func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry projectcore.ProjectRegistry, index core.TicketIndex, result *daemonForegroundLoopResult) error {
+func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry projectcore.Registry, index core.TicketIndex, result *daemonForegroundLoopResult) error {
 	if err := runner.repository.UpdateDaemonHeartbeat(ctx, time.Now().UTC()); err != nil {
 		return err
 	}

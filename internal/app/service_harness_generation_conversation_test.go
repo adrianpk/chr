@@ -1,13 +1,12 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"errors"
 	"testing"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // The host retains an intent's binding outside the selected project's mutable
@@ -53,7 +52,7 @@ func generationBindingConversationCase(t *testing.T, fixture func(*testing.T, st
 func registerGenerationProjects(t *testing.T, operations service) string {
 	t.Helper()
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), operations.env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), operations.env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

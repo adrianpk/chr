@@ -1,12 +1,12 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"bytes"
 	"os"
 	"testing"
 	"time"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramNotificationTestInput(t *testing.T) TelegramNotificationInput {

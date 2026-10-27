@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"errors"
@@ -11,6 +9,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 type commandProjectContext struct {
@@ -42,12 +41,12 @@ func (r commandProjectContextResolver) Resolve(
 		return resolveProjectDirectory(opts.ExplicitDir)
 	}
 
-	activeProject, err := projectcore.NewActiveProjectStore(r.env).LoadActiveProject()
+	activeProject, err := projectcore.NewActiveStore(r.env).LoadActiveProject()
 	if err == nil {
 		return r.resolveActiveProject(ctx, activeProject)
 	}
 
-	if !errors.Is(err, projectcore.ErrActiveProjectNotSelected) {
+	if !errors.Is(err, projectcore.ErrActiveNotSelected) {
 		return commandProjectContext{}, err
 	}
 
@@ -60,9 +59,9 @@ func (r commandProjectContextResolver) Resolve(
 
 func (r commandProjectContextResolver) resolveActiveProject(
 	ctx context.Context,
-	activeProject projectcore.ActiveProject,
+	activeProject projectcore.Active,
 ) (commandProjectContext, error) {
-	registry, err := projectcore.NewProjectRegistry(ctx, r.env, r.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, r.env, r.assetsFS)
 	if err != nil {
 		return commandProjectContext{}, err
 	}

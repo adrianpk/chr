@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"database/sql"
@@ -10,6 +8,8 @@ import (
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func TestTicketIndexUpsertsAndListsTickets(t *testing.T) {
@@ -155,7 +155,7 @@ func newTestTicketIndex(t *testing.T) TicketIndex {
 
 	db.SetMaxOpenConns(1)
 
-	registry, err := projectcore.NewProjectRegistryFromDB(context.Background(), db, testMigrationFS())
+	registry, err := projectcore.NewRegistryFromDB(context.Background(), db, testMigrationFS())
 	if err != nil {
 		t.Fatalf("NewProjectRegistryFromDB returned error: %v", err)
 	}

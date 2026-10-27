@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"fmt"
@@ -10,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 const diagnosticBundleRelativePath = ".chr/maintenance/diagnostic-bundle.md"
@@ -19,7 +18,7 @@ type DiagnosticBundle struct {
 	ProjectDir             string
 	ProjectID              string
 	MigrationStatus        database.MigrationStatus
-	RegistryDiagnostics    []projectcore.ProjectRegistryDiagnostic
+	RegistryDiagnostics    []projectcore.Diagnostic
 	ExecutionArtifactDrift []ExecutionArtifactDriftDiagnostic
 	RuntimeCleanupPreview  RuntimeArtifactCleanupPreview
 	Reports                []ReportListEntry
@@ -95,7 +94,7 @@ func writeDiagnosticBundleDatabase(output *strings.Builder, status database.Migr
 	output.WriteString("\n")
 }
 
-func writeDiagnosticBundleRegistry(output *strings.Builder, diagnostics []projectcore.ProjectRegistryDiagnostic) {
+func writeDiagnosticBundleRegistry(output *strings.Builder, diagnostics []projectcore.Diagnostic) {
 	output.WriteString("## Project Registry\n\n")
 
 	for _, diagnostic := range diagnostics {

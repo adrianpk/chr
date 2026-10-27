@@ -1,3 +1,4 @@
+// Package project owns registered identity, active selection and registry diagnostics.
 package project
 
 import "time"

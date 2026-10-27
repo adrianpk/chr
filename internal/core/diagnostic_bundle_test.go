@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"os"
@@ -10,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) {
@@ -23,14 +22,14 @@ func TestRenderDiagnosticBundleOmitsSecretsAndIncludesDiagnostics(t *testing.T) 
 			Available:         []database.Migration{{Version: "1", Name: "create_projects"}},
 			Applied:           []database.AppliedMigration{{Version: "1", Name: "create_projects"}},
 		},
-		RegistryDiagnostics: []projectcore.ProjectRegistryDiagnostic{{
+		RegistryDiagnostics: []projectcore.Diagnostic{{
 			Project: projectcore.Project{
 				Name:    "example",
 				Path:    "/tmp/project",
 				Enabled: true,
 			},
 			Active: true,
-			Status: projectcore.ProjectRegistryDiagnosticOK,
+			Status: projectcore.DiagnosticOK,
 		}},
 		RuntimeCleanupPreview: RuntimeArtifactCleanupPreview{
 			ArtifactDir: "/tmp/project/.chr/default/runtime/runs",

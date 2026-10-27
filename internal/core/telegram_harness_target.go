@@ -1,11 +1,11 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"database/sql"
 	"time"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // ResolveTelegramHarnessTarget observes the explicitly selected registered

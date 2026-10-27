@@ -7,8 +7,8 @@ import (
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
-// ReadRegisteredProjects reads explicit identities without migrating or creating a registry.
-func ReadRegisteredProjects(ctx context.Context, env database.DataDirectory, ids []string) (projects []Project, err error) {
+// ReadRegistered reads explicit identities without migrating or creating a registry.
+func ReadRegistered(ctx context.Context, env database.DataDirectory, ids []string) (projects []Project, err error) {
 	if len(ids) == 0 || len(ids) > 50 {
 		return nil, errors.New("one to 50 explicit project identities are required")
 	}
@@ -19,10 +19,10 @@ func ReadRegisteredProjects(ctx context.Context, env database.DataDirectory, ids
 	}
 	defer func() { err = errors.Join(err, db.Close()) }()
 
-	registry := sqliteProjectRegistry{db: db}
+	registry := sqliteRegistry{db: db}
 	for _, id := range ids {
 		project, readErr := registry.GetProjectByID(ctx, id)
-		if errors.Is(readErr, ErrProjectNotFound) {
+		if errors.Is(readErr, ErrNotFound) {
 			continue
 		}
 

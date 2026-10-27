@@ -1,12 +1,12 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // DaemonProjectStatus defines a package boundary type.
@@ -29,7 +29,7 @@ type DaemonProject struct {
 }
 
 // LoadDaemonProjects loads the corresponding package data.
-func LoadDaemonProjects(ctx context.Context, registry projectcore.ProjectRegistry) ([]DaemonProject, error) {
+func LoadDaemonProjects(ctx context.Context, registry projectcore.Registry) ([]DaemonProject, error) {
 	projects, err := registry.ListProjects(ctx)
 	if err != nil {
 		return nil, err

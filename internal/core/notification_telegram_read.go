@@ -1,12 +1,12 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // ResolveTelegramNotificationTarget uses the same canonical project-root binding

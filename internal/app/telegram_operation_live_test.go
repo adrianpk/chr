@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"encoding/json"
@@ -12,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramOperationAppFixture(t *testing.T) *telegramConversationAppFixture {
@@ -192,7 +191,7 @@ func (s telegramMoveRecordRoot) PrepareTelegramRecord(ctx context.Context, targe
 		return prepared, err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, s.env, s.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return prepared, err
 	}

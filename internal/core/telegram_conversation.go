@@ -1,7 +1,5 @@
 package core
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"crypto/sha256"
@@ -9,12 +7,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"path/filepath"
 	"slices"
 	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TelegramConversationAction enumerates local routing and capture operations.
@@ -212,22 +210,13 @@ func exactTelegramProject(projects []projectcore.Project, target string) (projec
 	return matches[0], nil
 }
 
-func telegramProjectBinding(project projectcore.Project) (string, error) {
-	root, err := filepath.Abs(project.Path)
-	if err != nil {
-		return "", err
-	}
-
-	registeredRoot := root
-
-	root, err = filepath.EvalSymlinks(root)
-	if err != nil {
+func telegramProjectBinding(registered projectcore.Project) (string, error) {
+	binding, err := projectcore.RootBindingDigest(registered)
+	if errors.Is(err, projectcore.ErrRootUnavailable) {
 		return "", telegramConversationDiagnostic("The project folder is unavailable. Saved conversations are unchanged. A local operator must restore the registered folder before you continue.")
 	}
 
-	sum := sha256.Sum256([]byte(project.ID + "\x00" + registeredRoot + "\x00" + root))
-
-	return hex.EncodeToString(sum[:]), nil
+	return binding, err
 }
 
 func (op telegramConversationTransaction) resolveProject(bound *TelegramConversation) (projectcore.Project, error) {

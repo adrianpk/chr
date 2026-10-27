@@ -1,12 +1,11 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"strings"
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestTelegramConversationCommands checks deterministic grammar without consulting semantic resolution.

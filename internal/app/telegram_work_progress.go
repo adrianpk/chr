@@ -1,12 +1,11 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"fmt"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramWorkObservation(status WorkflowWorkStatus, projectName string) core.TelegramWorkObservation {

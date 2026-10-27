@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"fmt"
@@ -16,6 +14,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 type harnessJourney struct {
@@ -46,7 +45,7 @@ func newHarnessJourney(t *testing.T) *harnessJourney {
 	_, pi := piGenerationFixture(t, `{"ok":true}`)
 
 	f := &harnessJourney{operations: operations, telegram: telegram, record: record, start: start, code: code, pi: pi, worker: profiles["writing"].Command, auth: filepath.Join(operations.env.ConfigDir(), "auth.json"), image: "sha256:" + strings.Repeat("a", 64), barrier: t.TempDir()}
-	if err := projectcore.NewActiveProjectStore(operations.env).SetActiveProject(projectcore.ActiveProject{ProjectID: operations.projectContext.ProjectID}); err != nil {
+	if err := projectcore.NewActiveStore(operations.env).SetActiveProject(projectcore.Active{ProjectID: operations.projectContext.ProjectID}); err != nil {
 		t.Fatal(err)
 	}
 

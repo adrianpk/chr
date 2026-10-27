@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"crypto/sha256"
@@ -16,6 +14,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramAppTestReceiver(t *testing.T, api core.TelegramReceiverAPI) (telegramReceiver, core.TelegramReceiverConfig) {
@@ -69,7 +68,7 @@ func telegramAppTestReceiver(t *testing.T, api core.TelegramReceiverAPI) (telegr
 func addTelegramAppTestProjects(t *testing.T, env core.UserEnvironment) {
 	t.Helper()
 
-	registry, err := projectcore.NewProjectRegistry(t.Context(), env, testAssetsFS())
+	registry, err := projectcore.NewRegistry(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,7 +1,5 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"context"
 	"fmt"
@@ -11,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func (factory commandFactory) maintenanceRegistryCommand() *cli.Command {
@@ -70,7 +69,7 @@ func (factory commandFactory) runMaintenanceRegistryStatus(ctx context.Context, 
 		return err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -80,9 +79,9 @@ func (factory commandFactory) runMaintenanceRegistryStatus(ctx context.Context, 
 		_ = registry.Close()
 	}()
 
-	diagnostics, err := projectcore.NewProjectRegistryDiagnosticsService(
+	diagnostics, err := projectcore.NewDiagnosticsService(
 		registry,
-		projectcore.NewActiveProjectStore(env),
+		projectcore.NewActiveStore(env),
 		core.DirectoryName,
 	).ListDiagnostics(ctx)
 	if err != nil {
@@ -102,7 +101,7 @@ func (factory commandFactory) runMaintenanceRegistryDisable(ctx context.Context,
 		return err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -151,7 +150,7 @@ func (factory commandFactory) runMaintenanceRegistrySetPath(ctx context.Context,
 		return err
 	}
 
-	registry, err := projectcore.NewProjectRegistry(ctx, env, factory.deps.assetsFS)
+	registry, err := projectcore.NewRegistry(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -183,7 +182,7 @@ func (factory commandFactory) runMaintenanceRegistrySetPath(ctx context.Context,
 	return printProjectRegistrySetPath(factory.io.Stdout, project, previousPath, false)
 }
 
-func printProjectRegistryDiagnostics(stdout io.Writer, diagnostics []projectcore.ProjectRegistryDiagnostic) error {
+func printProjectRegistryDiagnostics(stdout io.Writer, diagnostics []projectcore.Diagnostic) error {
 	_, err := fmt.Fprintf(stdout, "projects: %d\n", len(diagnostics))
 	if err != nil {
 		return fmt.Errorf("write project registry diagnostics: %w", err)

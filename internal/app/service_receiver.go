@@ -1,18 +1,17 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"os"
 	"os/exec"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // ListRegisteredProjects is a bounded, read-only registry operation for explicit IDs.
 func (s service) ListRegisteredProjects(ids []string) ([]projectcore.Project, error) {
-	return projectcore.ReadRegisteredProjects(s.ctx, s.env, ids)
+	return projectcore.ReadRegistered(s.ctx, s.env, ids)
 }
 
 // InspectTelegramReceiver exposes transport health to local and remote readers.

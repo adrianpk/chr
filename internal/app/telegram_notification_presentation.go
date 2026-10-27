@@ -1,13 +1,12 @@
 package app
 
-import projectcore "forge.adrianpk.com/chr/internal/core/project"
-
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 
 	"forge.adrianpk.com/chr/internal/core"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 func telegramNotificationTarget(project commandProjectContext, config core.TelegramNotificationConfig) (core.TelegramNotificationTarget, error) {
