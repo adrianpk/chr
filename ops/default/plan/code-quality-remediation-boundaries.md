@@ -738,3 +738,33 @@ configuration/execution dependencies into authoring. That edge and the concrete
 WorkflowStore methods in assigned authoring source files still need actual
 consumer-owned ports/shared values; the nine-value move does not claim to solve
 them. No native store policy was relocated into authoring.
+
+
+## Slice 9 session contracts and native observations
+
+The retained session graph now has its actual authoring owner: session identity,
+artifact/provenance values, guided state and native references. All 31 types,
+enum constants and six Valid methods retain their original fields, tags, order,
+spelling and behavior. Complete session/reference/guided validation follows that
+owner; the native admission guard deliberately keeps its original narrower
+intent predicate. Native and app callers import the real owner directly.
+
+The default pseudo-user name and UserPath/UserRelativePath composition belong
+to workspace, with the same append/Join/FromSlash/ToSlash operations. Workspace
+remains stdlib-only. Initialization, authoring and native consumers keep their
+own layout, permission, authority, transaction and recovery decisions.
+
+GuidedWorkflowObserver defines three actual consumer-owned reads: stop
+acknowledgement, original admission and verified result. The native adapter is
+retained with its workflow owner for Slice 12. It delegates the original bound
+native reader, guarded original-request lookup and evidence inspection, preserving
+locks, scope/authority checks, normal absence and partial errors. Result projection
+reuses the existing durable reference and native update time exactly once.
+Authoring transitions retain their current mutation owner and guard/write order;
+the observer neither admits work nor dispatches, publishes or coordinates it.
+
+The complete session/artifact repository and the remaining preparation/native
+ports still need their cohesive owner move. The initial file-name inventory is
+not permission to move native store methods into authoring or to expose unrelated
+private helpers. The current dependency graph and owner ledger remain normative
+evidence for those remaining boundaries.

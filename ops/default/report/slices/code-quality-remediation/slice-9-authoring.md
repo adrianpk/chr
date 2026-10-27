@@ -47,6 +47,28 @@ StartInput, and app supplies its existing resolver at native admission. Frozen
 guided-session, workflow-start and invocation bytes remain unchanged. The one-way
 state-to-harness dependency has positive and cycle-rejection checks.
 
+Core/authoring owns the complete retained session graph: 31 session, artifact,
+provenance and guided types, their enum constants and six Valid methods. The
+original session/reference and guided validators move with their values. Native
+admission retains its narrower intent predicate; it does not substitute full
+validation. Field order/tags, enum spelling, bounds, guard order and diagnostics
+stay unchanged. Root aliases and forwarding validation APIs are absent.
+
+Workspace owns the existing default-user spelling and lexical UserPath and
+UserRelativePath operations. The original variadic append/join/slash conversion
+sequence remains unchanged; initialization, authoring and native consumers use
+the shared owner directly. Permission, layout, journal and recovery stay with
+their existing operation owners.
+
+GuidedWorkflowObserver supplies authoring-owned stop, original-admission and
+verified-result observation ports. The existing native owner implements them
+with its original bound reads, request lookup, proof inspection, locks, guards
+and partial error outcomes. Stop acknowledgement remains distinct from native
+quiescence; normal admission absence remains distinct from read failure. Result
+projection reuses GuidedResultReference once, with the original native update
+time. The existing authoring lock, guard/transition order and journal writes
+remain in place. Complete repository ownership and preparation ports are pending.
+
 D02 shares bounded concrete catalog traversal with typed native readers. D04
 shares live payload/context preparation and D05 shares latest scoped index
 selection. Final model request assembly serves spec, acceptance, observed plan
@@ -59,7 +81,7 @@ artifact rules, action/collision diagnostics, provenance, authority and receipts
 
 Mechanical relocation, package naming/result conversion and the acceptance file
 split are separate commits. The plan service separates API, generation, model
-requests, publication, tracking and views. The move ledger retains 164 declaration
+requests, publication, tracking and views. The move ledger retains 226 declaration
 preimages with current names/files and extraction stages. The 60 tuple
 dispositions, three parameter fixes, 26 cohesion dispositions and six duplicate
 comparisons link exact source commits and validation. Original guided-session,
@@ -68,7 +90,10 @@ Mechanical relocation and
 package-qualified naming have separate commits, with no root aliases. The later
 admission-value move retains 21 declaration/constant-spec preimages; StartInput
 retains its original complete host-request declaration before field extraction.
-All 47 keyed native request constructors use the shared value explicitly.
+All 47 keyed native request constructors use the shared value explicitly. The
+session graph contributes 44 declaration preimages, validation contributes 12,
+workspace paths three and native observation transitions three. The declaration
+ledger now retains 226 relocation/extraction/transition preimages.
 
 The initial scan of 101 assigned root authoring files identified 78 external
 shared declarations. This is dependency evidence, not completion of the session
@@ -121,7 +146,9 @@ bounded service context and namespace assignment at retained-step entry.
 
 ## Files of Interest
 
-- `internal/core/authoring/acceptance/`: artifact.go, round.go and check.go.
+- `internal/core/authoring/`: session/guided value and validation files, native
+  observation contracts and acceptance artifact/round/check files.
+- `internal/core/guided_workflow_observer.go` and `workspace/paths.go`.
 - `internal/core/ops/`, `ops/file/`, `ops/metadata/`, project path/file primitives
   and `internal/core/workflow/state/file_change.go`.
 - `internal/app/service_document_model.go`, `service_document_view.go`, plan
@@ -169,18 +196,28 @@ The completed task checkpoints passed these focused real-boundary commands:
 - `go test ./internal/core ./internal/core/harness ./internal/core/workflow/state ./internal/app ./internal/tui ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|HarnessBinding|HarnessSelection|GuidedUseCase(Admission|Preparation|Capture)|Workflow(Config|Admission|ControlCAS|Selection|Loose)|TicketLoop|LegacyWorkObservation)' -count=1 -timeout=3m`
 - `go test ./internal/core ./internal/core/harness ./internal/core/workflow/state ./internal/app ./internal/tui ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|GuidedUseCase(Admission|Preparation|RecoveryAdmission|ControlAdmission|ControlCAS|Capture)|HarnessBinding|Workflow(Admission|ConfigAdmission|Selection|Start|Request))' -count=1 -timeout=3m`
 - `go test ./scripts/goquality -run '^TestLeafDependencies$' -count=1`
+- `go test ./internal/core ./internal/core/authoring ./internal/app ./internal/tui ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|AuthoringSession|ValidateAuthoringSession|RenderAndParseAuthoringSession|GuidedUseCase(Capture|Admission|Control|Preparation|Result)|AuthorAssistedDump)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/authoring ./internal/app ./scripts/goquality -run '^Test(QualityRecordWire|LeafDependencies|ValidateAuthoringSession|AuthoringSession|RenderAndParseAuthoringSession|SynthesizeAssisted|GuidedUseCase(Admission|Capture|Control)|GuidedAdmission)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/workspace ./internal/app -run '^Test(Workspace|User(Path|RelativePath)|CaseMetadata|ProjectMetadata|AuthoringSession|ProjectDump|LegacyWorkObservation)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/authoring ./internal/app -run '^Test(QualityRecordWire|GuidedUseCase(Admission|Control|Recovery|Result)|GuidedAdmission)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/core/authoring ./internal/app -run '^Test(QualityRecordWire|GuidedUseCaseResult)' -count=1 -timeout=3m`
 - `make check-go-style` — passed with 237 exact debts and one external exception.
 - `make check-package-readmes` — passed at the package extraction checkpoints.
 - Pinned v2.14 strict lint passed for changed core/app, acceptance/quiz and checker
   owners at their completed checkpoints; the latest core/application command was
-  `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/core/harness ./internal/core/workflow/state ./internal/app ./internal/tui ./scripts/goquality`.
+  `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/core/authoring ./internal/app`.
+  The session move also passed strict TUI/checker lint and workspace paths passed
+  strict workspace/TUI lint at their completed checkpoints.
 - `git diff --check` — passed at task commits.
 
 Initial compile/style diagnostics for moved allocator privacy, exact type debt
 qualification, package naming, signature layout, direct-caller adaptation and
 whitespace were corrected
-without suppressions or relaxed checks. Original harness name prefixes were
-retained in the mechanical move and corrected in the separate naming commit. The
+without suppressions or relaxed checks. Original harness and session name prefixes were
+retained in mechanical moves and corrected in separate naming commits. The
+session relocation qualified nine enum map keys without changing their mapping.
+Native result projection reuses the retained reference value, removing redundant
+copy loops without a suppression. The
 expanded dependency case table moved into a fixture helper to keep its test
 within the existing function bound, preserving every case and assertion.
 Final clean-head controller validation

@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-9
 source: review
 reported_at: 2026-10-26T08:48:29Z
-commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7, 051c19eac8fb, bf04bf96c5d6, 7d8acfadb0ff, 1671d3ea3af1, 89898ddd5bd8, fcd5f288a097, 2527d57f8339, 8490f7aeb303, 4e8ed9c2792b, b263991b7f52]
+commits: [e63688b43071, a2e76eec801e, 2f9e9717c027, 0e1d949a3fca, f7df89655484, dbdb1ac183be, 1d108d03c5c2, d577def590fa, ae88f240639d, e2d01335ce70, 129fb1b9d256, 678d9e6abaf4, bba7d53e5f34, 712e812ac131, 571c431a25d8, d647834c037d, 701bbd85d763, 65353580359a, 34d663404459, 0adb83936123, ea96e86c861a, d8b7a9921cb5, eac5ca5dd8e1, 115897594fc5, 969eba2252d7, 051c19eac8fb, bf04bf96c5d6, 7d8acfadb0ff, 1671d3ea3af1, 89898ddd5bd8, fcd5f288a097, 2527d57f8339, 8490f7aeb303, 4e8ed9c2792b, b263991b7f52, 769e2047686c, 23b7fe8d1a9b, 5c533bfdb8cf, 64376e9f69c1, ce0f625d1ca1, 59c5e103482c, 63a843aa48a6]
 branch: refactor/slice-9-quality-authoring
 started_at: 2026-10-27T13:06:46Z
 ready_at: 2026-10-26T08:57:09Z
@@ -57,17 +57,21 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 
 Existing generation/source-revision/authoring publication recovery and guided preparation tests with real filesystem/Git; make verify.
 
-T9.1 through T9.4 remain active. All six duplicate comparisons and shared
+T9.1 through T9.5 remain active. All six duplicate comparisons and shared
 model-request mechanics are recorded; plan and acceptance responsibilities are
 split. Nine pure native control/evidence values now have a shared state owner,
 with original guided/session/request bytes frozen before relocation. Retained
 admission/selection and harness identity values also have shared owners.
 StartInput separates the durable request from host-only callbacks and commands;
 guided/native admission and recovery preserve the frozen wire bytes. The move
-ledger retains 164 declaration/extraction preimages.
+ledger retains 226 declaration/extraction/transition preimages.
+The session value graph, enum methods and original session/guided validation
+belong to core/authoring. Shared default-user paths belong to workspace. Three
+read-only native observation ports retain the original store, scope/authority
+guards, quiescence, expected absence and verified result references/time.
 All 89 assigned signature occurrences have exact dispositions: 60 tuple fixes,
 three parameter fixes (two already delivered by Slice 4) and 26 cohesive
 five-parameter retentions. Focused real-boundary checks and pinned strict lint
 pass; exact debt is 237 with ceiling seven and one external exception. The
-complete session/repository move and workflow ports remain unfinished. The report
-is drafting; no PR is open and final controller validation is pending.
+complete repository move and remaining preparation ports remain unfinished. The
+report is drafting; no PR is open and final controller validation is pending.
