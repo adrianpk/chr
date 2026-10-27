@@ -32,7 +32,7 @@ type OperationRequest struct {
 	Arguments      json.RawMessage
 	ArgumentDigest string
 	PreparedInput  json.RawMessage
-	State          string
+	State          OperationState
 	ReceiptRef     string
 	Result         json.RawMessage
 }

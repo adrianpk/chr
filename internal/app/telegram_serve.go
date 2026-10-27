@@ -55,12 +55,12 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 
 	config, err := telegramcore.LoadReceiverConfig(env)
 	if err != nil {
-		return &telegramServiceFailure{code: "configuration_invalid", permanent: true}
+		return &telegramServiceError{code: "configuration_invalid", permanent: true}
 	}
 
 	token, err := telegramcore.ReceiverToken(env, config)
 	if err != nil {
-		return &telegramServiceFailure{code: "token_unavailable_or_invalid", permanent: true}
+		return &telegramServiceError{code: "token_unavailable_or_invalid", permanent: true}
 	}
 
 	botID, err := api.CheckConnection(ctx, token)
@@ -81,7 +81,7 @@ func serveTelegramReceiver(ctx context.Context, env core.UserEnvironment, assets
 
 	store, err := telegramcore.NewReceiverStore(ctx, env, assets)
 	if err != nil {
-		return &telegramServiceFailure{code: "retained_schema_or_store_invalid", permanent: true}
+		return &telegramServiceError{code: "retained_schema_or_store_invalid", permanent: true}
 	}
 
 	resources.closers = append(resources.closers, store)
@@ -143,8 +143,8 @@ func (r telegramReceiver) step(ctx context.Context) (time.Duration, error) {
 		return 0, err
 	}
 
-	if state.Health == "blocked" || state.RetryAttempt >= 5 {
-		return 0, &telegramServiceFailure{code: "poll_retry_blocked_or_exhausted", permanent: true}
+	if state.Health == telegramcore.HealthBlocked || state.RetryAttempt >= 5 {
+		return 0, &telegramServiceError{code: "poll_retry_blocked_or_exhausted", permanent: true}
 	}
 
 	if delay := time.Until(state.RetryAt); delay > 0 {
@@ -200,7 +200,7 @@ func (r telegramReceiver) pollFailed(ctx context.Context, prior telegramcore.Rec
 	var apiErr *telegramcore.APIError
 
 	if prior.RetryAttempt+1 >= 5 {
-		return 0, &telegramServiceFailure{code: "poll_retry_exhausted", permanent: true}
+		return 0, &telegramServiceError{code: "poll_retry_exhausted", permanent: true}
 	}
 
 	if !errors.As(failure, &apiErr) || apiErr.Permanent {
@@ -213,16 +213,16 @@ func (r telegramReceiver) pollFailed(ctx context.Context, prior telegramcore.Rec
 func (r telegramReceiver) currentConfig() (telegramcore.ReceiverConfig, error) {
 	config, err := telegramcore.LoadReceiverConfig(r.env)
 	if err != nil {
-		return config, &telegramServiceFailure{code: "configuration_or_token_invalid", permanent: true}
+		return config, &telegramServiceError{code: "configuration_or_token_invalid", permanent: true}
 	}
 
 	token, err := telegramcore.ReceiverToken(r.env, config)
 	if err != nil {
-		return config, &telegramServiceFailure{code: "configuration_or_token_invalid", permanent: true}
+		return config, &telegramServiceError{code: "configuration_or_token_invalid", permanent: true}
 	}
 
 	if token != r.token {
-		return config, &telegramServiceFailure{code: "credentials_changed_restart_required", permanent: true}
+		return config, &telegramServiceError{code: "credentials_changed_restart_required", permanent: true}
 	}
 
 	return config, nil

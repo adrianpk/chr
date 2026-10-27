@@ -121,5 +121,5 @@ func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim telegra
 
 	text := fmt.Sprintf("Work admitted: %s %s.\n\nState: %s; selected tickets: %d. Execution, validation and integration are reported separately.\nUse /status %s to inspect this work.", run.Selection.Selector.Extent, run.Selection.Selector.Identity, run.Status, len(run.Members), run.ID)
 
-	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("32", text), State: "confirmed", ReceiptRef: "workflow:" + run.ID, Facts: facts, Text: text, ConfigDigest: config.Digest(), Invocation: &binding}, time.Now())
+	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("32", text), State: telegramcore.OperationConfirmed, ReceiptRef: "workflow:" + run.ID, Facts: facts, Text: text, ConfigDigest: config.Digest(), Invocation: &binding}, time.Now())
 }

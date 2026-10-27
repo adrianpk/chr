@@ -52,7 +52,7 @@ func (r telegramReceiver) offerConfirmationDocument(ctx context.Context, request
 func (r telegramReceiver) unavailableConfirmationDocument(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	text := "The complete confirmation scope is unavailable under the document or storage limits. No action was offered. Inspect the scope locally or request a smaller selection."
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked","reason":"confirmation_document_unavailable"}`), Text: text, ConfigDigest: config.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationBlocked, ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked","reason":"confirmation_document_unavailable"}`), Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 type telegramWorkConfirmationService interface {

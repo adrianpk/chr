@@ -58,21 +58,21 @@ func (r telegramReceiver) prepareWorkAdmission(ctx context.Context, request tele
 
 	operations, ok := r.operations.(telegramWorkService)
 	if !ok {
-		return r.finishWorkFailure(ctx, request, "blocked", ErrRecordUnsupported, config)
+		return r.finishWorkFailure(ctx, request, telegramcore.OperationBlocked, ErrRecordUnsupported, config)
 	}
 
 	if err := r.validateWorkAdmissionAuthority(ctx, request); err != nil {
-		return r.finishWorkFailure(ctx, request, "blocked", err, config)
+		return r.finishWorkFailure(ctx, request, telegramcore.OperationBlocked, err, config)
 	}
 
-	if request.State == "prepared" {
+	if request.State == telegramcore.OperationPrepared {
 		prepared, err := r.previewWorkAdmission(ctx, operations, request)
 		if err != nil {
-			return r.finishWorkFailure(ctx, request, "rejected", err, config)
+			return r.finishWorkFailure(ctx, request, telegramcore.OperationRejected, err, config)
 		}
 
 		request.PreparedInput = prepared
-		request.State = "ready"
+		request.State = telegramcore.OperationReady
 	}
 
 	return r.offerWorkAdmission(ctx, request)
@@ -114,7 +114,7 @@ func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request telegr
 	}
 
 	if errors.Is(err, workflowstate.ErrConflict) {
-		return r.finishWorkFailure(ctx, request, "blocked", err, input.Config)
+		return r.finishWorkFailure(ctx, request, telegramcore.OperationBlocked, err, input.Config)
 	}
 
 	if err != nil {

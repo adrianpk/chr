@@ -12,7 +12,7 @@ import (
 // DeliveryDiagnostic exposes bounded metadata, never message bodies.
 type DeliveryDiagnostic struct {
 	ID             string
-	State          string
+	State          DeliveryState
 	Attempts       int
 	Cycle          int64
 	TotalAttempts  int64

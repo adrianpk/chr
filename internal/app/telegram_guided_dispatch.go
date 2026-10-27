@@ -153,7 +153,7 @@ func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations 
 func (r telegramReceiver) guidedDiagnostic(ctx context.Context, update telegramcore.ReceivedUpdate, config telegramcore.ReceiverConfig, failure error) error {
 	text := "The guided use case changed or is waiting for its current owner. Reopen its current prompt; saved input is unchanged."
 
-	var routing telegramGuidedRoutingFailure
+	var routing telegramGuidedRoutingError
 	if errors.As(failure, &routing) {
 		text = string(routing)
 	}

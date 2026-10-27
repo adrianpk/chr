@@ -189,13 +189,8 @@ ORDER BY CASE WHEN u.processing_lane='decision' THEN u.control_input ELSE 0 END 
 	return readPendingRows(rows, botID)
 }
 
-func readPendingRows(rows *sql.Rows, botID int64) ([]ReceivedUpdate, error) {
-	defer func() {
-		//nolint:errcheck // rows.Err is checked after the bounded iteration.
-		_ = rows.Close()
-	}()
-
-	var result []ReceivedUpdate
+func readPendingRows(rows *sql.Rows, botID int64) (result []ReceivedUpdate, err error) {
+	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
 		update := ReceivedUpdate{Peer: PeerIdentity{BotID: botID}}

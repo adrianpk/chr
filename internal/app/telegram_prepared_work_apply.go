@@ -16,7 +16,7 @@ func (r telegramReceiver) continuePreparedWork(ctx context.Context, request tele
 		return nil
 	}
 
-	current, err := r.validateAuthoringAuthority(ctx, request, request.State == "applying")
+	current, err := r.validateAuthoringAuthority(ctx, request, request.State == telegramcore.OperationApplying)
 	if err != nil {
 		return r.finishAuthoringFailure(ctx, request, config, err)
 	}
@@ -125,12 +125,12 @@ func (r telegramReceiver) offerPreparedWorkScope(ctx context.Context, request te
 		complete = "## Complete proposed ticket\n\n" + string(prepared.Mutation.Native.Record.Body)
 	}
 
-	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: "awaiting_confirmation"}, telegramConfirmationDocument{Family: "25", Text: telegramPreparedWorkPreview(prepared), Complete: complete})
+	return r.offerConfirmationDocument(ctx, request, telegramcore.ActionOffer{Input: input, RequestID: request.ID, Choices: []string{"develop"}, ExpiresAt: time.Now().Add(time.Hour), ConversationPhase: telegramcore.ConversationAwaitingConfirmation}, telegramConfirmationDocument{Family: "25", Text: telegramPreparedWorkPreview(prepared), Complete: complete})
 }
 
-func telegramPreparedWorkFinished(state string) bool {
+func telegramPreparedWorkFinished(state telegramcore.OperationState) bool {
 	switch state {
-	case "confirmed", "blocked", "rejected", "awaiting_confirmation":
+	case telegramcore.OperationConfirmed, telegramcore.OperationBlocked, telegramcore.OperationRejected, telegramcore.OperationAwaitingConfirmation:
 		return true
 	default:
 		return false

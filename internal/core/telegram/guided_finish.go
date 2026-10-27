@@ -12,7 +12,10 @@ import (
 // GuidedProgress contains only verified display and owner references.
 // Canonical stage, control, work and result state remain in the project owners.
 type GuidedProgress struct {
-	SessionRef, Topic, Binding, Phase string
+	SessionRef string
+	Topic      string
+	Binding    string
+	Phase      ConversationPhase
 }
 
 // FinishGuided atomically binds a confirmed application result, replies,
@@ -34,7 +37,7 @@ func (s *ReceiverStore) FinishGuided(ctx context.Context, request OperationReque
 		}
 
 		request.Target.ConversationRevision = updated.Revision
-		if err := finishOperation(ctx, tx, request, OperationCompletion{State: "confirmed", ReceiptRef: completion.Progress.SessionRef, Facts: completion.Facts, Text: completion.Text, ConfigDigest: completion.ConfigDigest, At: completion.At}); err != nil {
+		if err := finishOperation(ctx, tx, request, OperationCompletion{State: OperationConfirmed, ReceiptRef: completion.Progress.SessionRef, Facts: completion.Facts, Text: completion.Text, ConfigDigest: completion.ConfigDigest, At: completion.At}); err != nil {
 			return err
 		}
 
@@ -77,11 +80,11 @@ func validateGuidedProgress(progress GuidedProgress, facts json.RawMessage) erro
 		return workflowstate.ErrConflict
 	}
 
-	if progress.Phase != "collecting" && progress.Phase != "completed" && progress.Phase != "canceled" && progress.Phase != "failed" {
+	if progress.Phase != ConversationCollecting && progress.Phase != ConversationCompleted && progress.Phase != ConversationCanceled && progress.Phase != ConversationFailed {
 		return workflowstate.ErrConflict
 	}
 
-	if !validOperationFinish("confirmed", progress.SessionRef, facts) {
+	if !validOperationFinish(OperationConfirmed, progress.SessionRef, facts) {
 		return workflowstate.ErrConflict
 	}
 
@@ -93,7 +96,7 @@ func projectGuidedAction(ctx context.Context, tx *sql.Tx, retained ActionClaim, 
 		return retained, nil
 	}
 
-	if result.State != "confirmed" || retained.Request.OperationID != "guided.step" {
+	if result.State != OperationConfirmed || retained.Request.OperationID != "guided.step" {
 		return retained, workflowstate.ErrConflict
 	}
 

@@ -61,7 +61,7 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request telegr
 	if errors.Is(err, workflowstate.ErrConflict) {
 		request.Message = telegramOutcomeMessage("26", "Ticket preparation is confirmed; the advanced conversation is unchanged.\n"+text)
 
-		return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: "Canonical work preparation is confirmed; the advanced conversation is unchanged.\n" + text, ConfigDigest: config.Digest(), At: time.Now()})
+		return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationConfirmed, ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: "Canonical work preparation is confirmed; the advanced conversation is unchanged.\n" + text, ConfigDigest: config.Digest(), At: time.Now()})
 	}
 
 	return err

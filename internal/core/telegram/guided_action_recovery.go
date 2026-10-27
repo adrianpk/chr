@@ -3,7 +3,7 @@ package telegram
 import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 
 func guidedActionRecovering(claim *ActionClaim) bool {
-	return claim.Request.OperationID == "guided.step" && claim.Action.State == "applying" && claim.Request.State == "applying"
+	return claim.Request.OperationID == "guided.step" && claim.Action.State == ActionApplying && claim.Request.State == OperationApplying
 }
 
 // Recovery of an accepted guided choice keeps its immutable request and answer.
@@ -11,12 +11,12 @@ func guidedActionRecovering(claim *ActionClaim) bool {
 // command. The shared owner still requires its original operation and revisions.
 func claimGuidedRecovery(op conversationTransaction, claim *ActionClaim) error {
 	if !actionDigestMatches(claim.Action, claim.Request) || claim.Action.ConversationRevision != claim.Request.Target.ConversationRevision {
-		return supersedeAction(op, claim, "superseded")
+		return supersedeAction(op, claim, ActionSuperseded)
 	}
 
 	if err := validateActionPresentation(op.ctx, op.tx, claim.Action, claim.Request, op.input.Config.Digest()); err != nil {
 		if actionUnavailable(err) {
-			return supersedeAction(op, claim, "superseded")
+			return supersedeAction(op, claim, ActionSuperseded)
 		}
 
 		return err
@@ -35,7 +35,7 @@ func claimGuidedRecovery(op conversationTransaction, claim *ActionClaim) error {
 
 	if err := validateGuidedRecoveryTarget(op, current, claim.Request); err != nil {
 		if actionTargetConflict(err) {
-			return supersedeAction(op, claim, "superseded")
+			return supersedeAction(op, claim, ActionSuperseded)
 		}
 
 		return err

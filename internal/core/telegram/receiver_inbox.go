@@ -94,9 +94,9 @@ func retainUpdate(ctx context.Context, tx *sql.Tx, input inboxInput) error {
 		return err
 	}
 
-	state := "pending"
+	state := InputPending
 	if input.Update.Kind == "ignored" || input.Update.Kind == "rejected" {
-		state = input.Update.Kind
+		state = InputState(input.Update.Kind)
 	}
 
 	lane2, err := inputLane(ctx, tx, input.Update)
@@ -113,7 +113,7 @@ func retainUpdate(ctx context.Context, tx *sql.Tx, input inboxInput) error {
 		return err
 	}
 
-	if state == "pending" {
+	if state == InputPending {
 		return rejectIntakeOverflow(ctx, tx, input.Update, control, input.At)
 	}
 

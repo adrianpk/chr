@@ -18,3 +18,8 @@ integration fixtures own their independent SQL inspection connections.
 HTTP calls take operation-specific send requests. Context and credentials remain
 explicit. Document requests retain label-list cardinality so omission and an
 explicit empty label list preserve their original validation behavior.
+
+Transport health, operation, delivery, action, conversation and inbox vocabularies
+have distinct string types with unchanged stored constants. SQL cursor cleanup
+errors are returned; HTTP body cleanup preserves the already observed send
+acknowledgement. No cleanup outcome grants another delivery attempt.

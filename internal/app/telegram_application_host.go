@@ -90,7 +90,7 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 	delete(h.active, result.updateID)
 	h.receiver.slots.release(result.lane)
 
-	var pending *telegramControlReceiptPending
+	var pending *telegramControlReceiptPendingError
 	if errors.As(result.err, &pending) && telegramControlExpectedFailure(pending.failure) {
 		return nil
 	}

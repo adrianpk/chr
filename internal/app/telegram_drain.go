@@ -113,7 +113,7 @@ func (r telegramReceiver) sendReservedDelivery(ctx context.Context, delivery tel
 		text = delivery.PlainText
 	}
 
-	if delivery.State == "sending" || delivery.State == "uncertain" {
+	if delivery.State == telegramcore.DeliverySending || delivery.State == telegramcore.DeliveryUncertain {
 		text = telegramcore.BoundReceiverText(telegramUncertainDeliveryText + "\n" + text)
 	}
 
@@ -160,7 +160,7 @@ func (r telegramReceiver) failedDelivery(ctx context.Context, delivery telegramc
 		}
 
 		if selected {
-			delivery.PlainFallback, delivery.State = true, "pending"
+			delivery.PlainFallback, delivery.State = true, telegramcore.DeliveryPending
 			delivery.Attempts++
 
 			return r.deliver(ctx, delivery)

@@ -62,7 +62,7 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim telegram
 
 func (r telegramReceiver) completeControlAction(ctx context.Context, claim telegramcore.ActionClaim, status WorkflowWorkStatus, err error, config telegramcore.ReceiverConfig) error {
 	if err != nil && status.ControlReceipt != nil {
-		return &telegramControlReceiptPending{failure: err}
+		return &telegramControlReceiptPendingError{failure: err}
 	}
 
 	if err != nil && !telegramControlExpectedFailure(err) {
@@ -86,18 +86,19 @@ func (r telegramReceiver) controlRecoveryFailure(ctx context.Context, claim tele
 
 // A native receipt proves acceptance while the inbox still needs its outcome.
 // The receiver may retry expected domain barriers without stopping intake.
-type telegramControlReceiptPending struct{ failure error }
+type telegramControlReceiptPendingError struct{ failure error }
 
-func (e *telegramControlReceiptPending) Error() string { return e.failure.Error() }
+func (e *telegramControlReceiptPendingError) Error() string { return e.failure.Error() }
 
-func (e *telegramControlReceiptPending) Unwrap() error { return e.failure }
+func (e *telegramControlReceiptPendingError) Unwrap() error { return e.failure }
 
 func (r telegramReceiver) finishControlAction(ctx context.Context, claim telegramcore.ActionClaim, status WorkflowWorkStatus, failure error, config telegramcore.ReceiverConfig) error {
-	state, receipt := "blocked", ""
+	state := telegramcore.OperationBlocked
+	receipt := ""
 	text := "Native control is unavailable or stale. Read current state before requesting a new control."
 
 	if failure == nil {
-		state = "confirmed"
+		state = telegramcore.OperationConfirmed
 		receipt = fmt.Sprintf("workflow:%s:revision:%d", status.ID, status.Revision)
 		text = "Control confirmed: " + telegramControlTitle(claim.Choice) + "."
 
@@ -117,7 +118,7 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim telegra
 	}
 
 	result := telegramcore.ActionResult{Message: telegramOutcomeMessage("36", text), State: state, ReceiptRef: receipt, Facts: facts, Text: text, ConfigDigest: config.Digest()}
-	if state == "confirmed" {
+	if state == telegramcore.OperationConfirmed {
 		result.Invocation = &telegramcore.InvocationBinding{ID: status.ID, Revision: status.Revision}
 		result.InvocationPhase = telegramWorkObservation(status, "").Phase
 	}

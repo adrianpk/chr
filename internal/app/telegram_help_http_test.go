@@ -253,7 +253,7 @@ func assertTelegramHelpDelivery(t *testing.T, receiver telegramReceiver, state s
 		return
 	}
 
-	if len(diagnostics.Deliveries) != 1 || diagnostics.Deliveries[0].State != state || diagnostics.Deliveries[0].Attempts != attempts {
+	if len(diagnostics.Deliveries) != 1 || string(diagnostics.Deliveries[0].State) != state || diagnostics.Deliveries[0].Attempts != attempts {
 		t.Fatal("failed send lost its state or attempt budget", diagnostics.Deliveries)
 	}
 }

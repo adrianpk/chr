@@ -61,12 +61,12 @@ func (s *ReceiverStore) LatestAuthoringWork(ctx context.Context, input Conversat
 	return OperationLookup{Request: request, Found: err == nil}, err
 }
 
-func projectAuthoringWorkPhase(ctx context.Context, tx *sql.Tx, request OperationRequest, phase, now string) error {
+func projectAuthoringWorkPhase(ctx context.Context, tx *sql.Tx, request OperationRequest, phase ConversationPhase, now string) error {
 	if phase == "" {
 		return nil
 	}
 
-	if request.OperationID != "authoring.work" || (phase != "prepared" && phase != "awaiting_confirmation") {
+	if request.OperationID != "authoring.work" || (phase != ConversationPrepared && phase != ConversationAwaitingConfirmation) {
 		return workflowstate.ErrConflict
 	}
 

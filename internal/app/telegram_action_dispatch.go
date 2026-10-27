@@ -51,9 +51,9 @@ func (r telegramReceiver) respondActionClaim(ctx context.Context, update telegra
 	}
 
 	switch claim.Action.State {
-	case "expired", "superseded":
+	case telegramcore.ActionExpired, telegramcore.ActionSuperseded:
 		return r.staleActionDiagnostic(ctx, update, telegramcore.ActionAnswer{Token: claim.Action.Token, Choice: claim.Choice}, config)
-	case "consumed":
+	case telegramcore.ActionConsumed:
 		return r.store.QueuePresentationResponse(ctx, update, *telegramOutcomeMessage("40", telegramActionReplayText(claim.Request)), config.Digest(), time.Now())
 	default:
 		return r.dispatchTelegramAction(ctx, claim, config)

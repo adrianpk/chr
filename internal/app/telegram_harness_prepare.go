@@ -37,7 +37,7 @@ func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations t
 		return workflowstate.ErrConflict
 	}
 
-	if request.State != "ready" {
+	if request.State != telegramcore.OperationReady {
 		return nil
 	}
 
@@ -143,7 +143,7 @@ func (r telegramReceiver) finishHarnessPreparationFailure(ctx context.Context, r
 
 	text := "The selected project or confirmation binding changed. Inspect /harness before issuing a new change."
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked"}`), Text: text, ConfigDigest: config.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationBlocked, ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked"}`), Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func (r telegramReceiver) harnessAuthorityInput(request telegramcore.OperationRequest) (telegramcore.ConversationInput, error) {

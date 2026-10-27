@@ -35,13 +35,13 @@ func (r telegramReceiver) prepareControl(ctx context.Context, request telegramco
 		return r.finishControlPreparation(ctx, request, config)
 	}
 
-	if request.State == "prepared" {
+	if request.State == telegramcore.OperationPrepared {
 		input, err := r.previewControl(ctx, operations, request)
 		if err != nil {
 			return r.finishControlPreparation(ctx, request, config)
 		}
 
-		request.PreparedInput, request.State = input, "ready"
+		request.PreparedInput, request.State = input, telegramcore.OperationReady
 	}
 
 	return r.offerControl(ctx, request)
@@ -121,5 +121,5 @@ func (r telegramReceiver) offerControl(ctx context.Context, request telegramcore
 }
 
 func (r telegramReceiver) finishControlPreparation(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked"}`), Text: "The exact native control is unavailable for this peer, project or revision. Read current state before requesting a new control.", ConfigDigest: config.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationBlocked, ReceiptRef: "", Facts: json.RawMessage(`{"state":"blocked"}`), Text: "The exact native control is unavailable for this peer, project or revision. Read current state before requesting a new control.", ConfigDigest: config.Digest(), At: time.Now()})
 }

@@ -86,7 +86,7 @@ func (op conversationTransaction) appendCapture(c *Conversation) (conversationRe
 }
 
 func (op conversationTransaction) finishCapture(c *Conversation) (conversationReply, error) {
-	c.Phase = "preparing"
+	c.Phase = ConversationPreparing
 	if err := op.saveCapture(c); err != nil {
 		return conversationReply{Text: "", Conversation: nil}, err
 	}
@@ -95,7 +95,7 @@ func (op conversationTransaction) finishCapture(c *Conversation) (conversationRe
 }
 
 func (op conversationTransaction) cancelCapture(c *Conversation) (conversationReply, error) {
-	c.Phase, c.Capture, c.QuestionBinding = "canceled", "", ""
+	c.Phase, c.Capture, c.QuestionBinding = ConversationCanceled, "", ""
 	if _, err := op.tx.ExecContext(op.ctx, `DELETE FROM telegram_capture_parts WHERE conversation_id=?`, c.ID); err != nil {
 		return conversationReply{Text: "", Conversation: nil}, err
 	}
@@ -108,7 +108,7 @@ func (op conversationTransaction) cancelCapture(c *Conversation) (conversationRe
 }
 
 func (op conversationTransaction) saveCapture(c *Conversation) error {
-	finished := sql.NullString{String: database.FormatTime(op.now), Valid: c.Phase == "canceled"}
+	finished := sql.NullString{String: database.FormatTime(op.now), Valid: c.Phase == ConversationCanceled}
 
 	result, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_conversations SET capture=?,phase=?,question_binding=?,revision=revision+1,updated_at=?,finished_at=? WHERE id=? AND revision=?`, c.Capture, c.Phase, c.QuestionBinding, database.FormatTime(op.now), finished, c.ID, c.Revision)
 	if err != nil {
@@ -126,5 +126,5 @@ func (op conversationTransaction) saveCapture(c *Conversation) error {
 }
 
 func cancelable(c Conversation) bool {
-	return captureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation"
+	return captureEligible(c) || c.Phase == ConversationPreparing || c.Phase == ConversationPrepared || c.Phase == ConversationAwaitingConfirmation
 }

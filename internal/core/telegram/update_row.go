@@ -9,7 +9,7 @@ import (
 type updateRow struct {
 	botID, epoch int64
 	update       ReceivedUpdate
-	state        string
+	state        InputState
 	lane         ProcessingLane
 	control      bool
 	receivedAt   time.Time

@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-type telegramShutdownFailure struct{ quiesced <-chan struct{} }
+type telegramShutdownError struct{ quiesced <-chan struct{} }
 
-func (*telegramShutdownFailure) Error() string {
+func (*telegramShutdownError) Error() string {
 	return "telegram shutdown deadline exceeded; owned activations remain live"
 }
 
@@ -48,7 +48,7 @@ func runTelegramReceiverHosts(ctx context.Context, hosts []func(context.Context)
 			result = errors.Join(result, telegramHostFailure(err, owned.Err()))
 			remaining--
 		case <-timer.C:
-			return errors.Join(result, &telegramShutdownFailure{quiesced: quiesced})
+			return errors.Join(result, &telegramShutdownError{quiesced: quiesced})
 		}
 	}
 
@@ -108,7 +108,7 @@ type telegramReceiverResources struct{ closers []io.Closer }
 // Uncooperative calls keep their database and OS exclusions until quiescence or
 // process exit. A bounded error return must not permit a second live receiver.
 func (r telegramReceiverResources) finish(failure error) error {
-	var pending *telegramShutdownFailure
+	var pending *telegramShutdownError
 	if errors.As(failure, &pending) {
 		go func() {
 			<-pending.quiesced

@@ -6,19 +6,19 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-type telegramServiceFailure struct {
+type telegramServiceError struct {
 	code      string
 	permanent bool
 }
 
-func (e *telegramServiceFailure) Error() string {
+func (e *telegramServiceError) Error() string {
 	return "telegram receiver: " + e.code + "; inspect telegram status and telegram doctor"
 }
 
 // ExitCode preserves the Telegram service's explicit correction-required exit
 // status without letting a command library terminate an embedded application.
 func ExitCode(err error) int {
-	var failure *telegramServiceFailure
+	var failure *telegramServiceError
 	if errors.As(err, &failure) && failure.permanent {
 		return 78
 	}
@@ -31,22 +31,22 @@ func telegramCommandFailure(err error) error {
 		return nil
 	}
 
-	var serviceFailure *telegramServiceFailure
+	var serviceFailure *telegramServiceError
 	if errors.As(err, &serviceFailure) {
 		return serviceFailure
 	}
 
 	var apiFailure *telegramcore.APIError
 	if errors.As(err, &apiFailure) {
-		return &telegramServiceFailure{code: telegramAPIFailureCode(apiFailure.Code), permanent: apiFailure.Permanent}
+		return &telegramServiceError{code: telegramAPIFailureCode(apiFailure.Code), permanent: apiFailure.Permanent}
 	}
 
-	var shutdown *telegramShutdownFailure
+	var shutdown *telegramShutdownError
 	if errors.As(err, &shutdown) {
-		return &telegramServiceFailure{code: "shutdown_not_quiescent"}
+		return &telegramServiceError{code: "shutdown_not_quiescent"}
 	}
 
-	return &telegramServiceFailure{code: "local_process_failure"}
+	return &telegramServiceError{code: "local_process_failure"}
 }
 
 func telegramAPIFailureCode(code string) string {

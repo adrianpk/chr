@@ -100,7 +100,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-713 current non-test files under internal/core, their declared symbols,
+714 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -487,3 +487,21 @@ Explicit assignments preserve partial results on error and outer callback state.
 The work-page iterator keeps its named error for the existing close-error join.
 All existing early guards, SQL, source acknowledgement, quotas and transactions
 remain. Direct integration consumers destructure the named contracts.
+
+
+### Typed transport states and cleanup
+
+ReceiverHealth, OperationState, DeliveryState, ActionState, ConversationPhase and
+InputState own the existing transport vocabularies. Native workflow status and
+provider state keep their distinct owners. The constants retain exact stored
+strings; only type-checked state references change. Routing/input projections
+keep recognition, start, need, pending and found flags separate because their
+governing contracts differ. Four app error types gain Error suffixes; no new
+sentinel or altered errors.Is/errors.As identity is introduced.
+
+SQL read cursors join cleanup errors into their existing returned failure.
+HTTP read-body cleanup has one documented suppression: the bounded read and
+observed acknowledgement define delivery, so a later close cannot authorize a
+retry. Store/model/OS-lock cleanup remains observable. Distinct SQL row tests
+check column names independently of mapper order; a positive integer swap fails
+those assertions. No new validation allowance or dependency is introduced.

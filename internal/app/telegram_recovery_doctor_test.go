@@ -97,7 +97,7 @@ func TestTelegramRecoveryFailures(t *testing.T) {
 		code    int
 		want    string
 	}{
-		{"configuration", &telegramServiceFailure{code: "configuration_invalid", permanent: true}, 78, "configuration_invalid"},
+		{"configuration", &telegramServiceError{code: "configuration_invalid", permanent: true}, 78, "configuration_invalid"},
 		{"credentials", &telegramcore.APIError{Code: "credentials_or_access", Permanent: true}, 78, "credentials_or_access"},
 		{"ownership", &telegramcore.APIError{Code: "receiver_conflict", Permanent: true}, 78, "receiver_conflict"},
 		{"network", &telegramcore.APIError{Code: "transport_failure"}, 1, "transport_failure"},

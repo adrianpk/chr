@@ -21,17 +21,17 @@ func (op conversationTransaction) projectLabel(id string) string {
 	return "an unavailable project"
 }
 
-func conversationState(phase string) string {
-	states := map[string]string{
-		"collecting": "collecting details", "clarifying": "waiting for your answer",
-		"preparing": "capture saved", "prepared": "prepared", "awaiting_confirmation": "waiting for confirmation",
-		"completed": "completed", "canceled": "canceled", "failed": "failed",
+func conversationState(phase ConversationPhase) string {
+	states := map[ConversationPhase]string{
+		ConversationCollecting: "collecting details", ConversationClarifying: "waiting for your answer",
+		ConversationPreparing: "capture saved", ConversationPrepared: "prepared", ConversationAwaitingConfirmation: "waiting for confirmation",
+		ConversationCompleted: "completed", ConversationCanceled: "canceled", ConversationFailed: "failed",
 	}
 	if state, ok := states[phase]; ok {
 		return state
 	}
 
-	return phase
+	return string(phase)
 }
 
 func (op conversationTransaction) presentation(text string, c *Conversation) tgmessage.Blocks {

@@ -88,10 +88,7 @@ func (s Sender) SendMessage(ctx context.Context, token string, message Message) 
 		return SendResult{}, fmt.Errorf("send telegram message: %w", err)
 	}
 
-	defer func() {
-		//nolint:errcheck // Response body read errors are returned below.
-		_ = response.Body.Close()
-	}()
+	defer closeReadBody(response.Body)
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 )
 
 func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations telegramPreparedWorkService, request telegramcore.OperationRequest) (PreparedAuthoringWork, error) {
-	if request.State != "prepared" {
+	if request.State != telegramcore.OperationPrepared {
 		return telegramRetainedPreparedWork(request)
 	}
 

@@ -63,12 +63,12 @@ func (r telegramReceiver) dispatchPreparedWorkAction(ctx context.Context, operat
 		return err
 	}
 
-	phase := ""
+	var phase telegramcore.ConversationPhase
 	if _, err := r.validateAuthoringAuthority(ctx, claim.Request, false); err == nil {
-		phase = "prepared"
+		phase = telegramcore.ConversationPrepared
 	}
 
-	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("26", telegramPreparedWorkResultText(result)), State: "confirmed", ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: telegramPreparedWorkResultText(result), ConfigDigest: config.Digest(), ConversationPhase: phase}, time.Now())
+	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("26", telegramPreparedWorkResultText(result)), State: telegramcore.OperationConfirmed, ReceiptRef: result.Result.ReceiptRef, Facts: facts, Text: telegramPreparedWorkResultText(result), ConfigDigest: config.Digest(), ConversationPhase: phase}, time.Now())
 }
 
 func (r telegramReceiver) finishPreparedWorkActionFailure(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, failure error) error {
@@ -79,5 +79,5 @@ func (r telegramReceiver) finishPreparedWorkActionFailure(ctx context.Context, c
 		return err
 	}
 
-	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("27", text), State: "blocked", Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{Message: telegramOutcomeMessage("27", text), State: telegramcore.OperationBlocked, Facts: facts, Text: text, ConfigDigest: config.Digest()}, time.Now())
 }

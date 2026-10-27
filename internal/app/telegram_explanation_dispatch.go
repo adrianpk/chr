@@ -79,7 +79,7 @@ func (r telegramReceiver) reserveExplanation(ctx context.Context, operations tel
 
 func (r telegramReceiver) continueExplanation(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	switch request.State {
-	case "confirmed", "blocked", "rejected":
+	case telegramcore.OperationConfirmed, telegramcore.OperationBlocked, telegramcore.OperationRejected:
 		return nil
 	}
 
@@ -148,7 +148,7 @@ func (r telegramReceiver) finishExplanationModel(ctx context.Context, request te
 	request.Delivery = &response
 	text := response.Message.InitialText
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: "telegram-model:" + request.ID, Facts: model.Response, Text: text, ConfigDigest: current.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationConfirmed, ReceiptRef: "telegram-model:" + request.ID, Facts: model.Response, Text: text, ConfigDigest: current.Digest(), At: time.Now()})
 }
 
 func telegramRetainedExplanation(request telegramcore.OperationRequest) (PreparedAuthoringExplanation, error) {

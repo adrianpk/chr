@@ -28,7 +28,7 @@ func (s *ReceiverStore) FinishAuthoring(ctx context.Context, request OperationRe
 		return err
 	}
 
-	if !validOperationFinish("confirmed", completion.ReceiptRef, completion.Facts) {
+	if !validOperationFinish(OperationConfirmed, completion.ReceiptRef, completion.Facts) {
 		return workflowstate.ErrConflict
 	}
 
@@ -44,7 +44,7 @@ func (s *ReceiverStore) FinishAuthoring(ctx context.Context, request OperationRe
 		}
 
 		request.Target.ConversationRevision = updated.Revision
-		if err := finishOperation(ctx, tx, request, OperationCompletion{State: "confirmed", ReceiptRef: completion.ReceiptRef, Facts: completion.Facts, Text: completion.Text, ConfigDigest: completion.ConfigDigest, At: completion.At}); err != nil {
+		if err := finishOperation(ctx, tx, request, OperationCompletion{State: OperationConfirmed, ReceiptRef: completion.ReceiptRef, Facts: completion.Facts, Text: completion.Text, ConfigDigest: completion.ConfigDigest, At: completion.At}); err != nil {
 			return err
 		}
 
@@ -70,7 +70,7 @@ func updateAuthoringConversation(ctx context.Context, tx *sql.Tx, request Operat
 		return c, workflowstate.ErrConflict
 	}
 
-	c.Phase, c.QuestionBinding = "prepared", ""
+	c.Phase, c.QuestionBinding = ConversationPrepared, ""
 
 	if progress.Question != nil {
 		encoded, err := json.Marshal(progress.Question)
@@ -78,7 +78,7 @@ func updateAuthoringConversation(ctx context.Context, tx *sql.Tx, request Operat
 			return c, err
 		}
 
-		c.Phase, c.QuestionBinding = "clarifying", string(encoded)
+		c.Phase, c.QuestionBinding = ConversationClarifying, string(encoded)
 	}
 
 	op := conversationTransaction{ctx: ctx, tx: tx, now: now}

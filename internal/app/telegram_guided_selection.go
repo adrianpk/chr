@@ -9,9 +9,9 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
-type telegramGuidedRoutingFailure string
+type telegramGuidedRoutingError string
 
-func (e telegramGuidedRoutingFailure) Error() string { return string(e) }
+func (e telegramGuidedRoutingError) Error() string { return string(e) }
 
 func telegramGuidedProjectName(projects []projectcore.Project, name string) (string, error) {
 	var matches []string
@@ -23,7 +23,7 @@ func telegramGuidedProjectName(projects []projectcore.Project, name string) (str
 	}
 
 	if len(matches) != 1 {
-		return "", telegramGuidedRoutingFailure("The project name is unavailable or ambiguous. Use a unique registered project name.")
+		return "", telegramGuidedRoutingError("The project name is unavailable or ambiguous. Use a unique registered project name.")
 	}
 
 	return matches[0], nil
@@ -74,7 +74,7 @@ func (r telegramReceiver) selectTelegramGuidedName(ctx context.Context, input te
 	}
 
 	if len(matches) != 1 {
-		return "", telegramGuidedRoutingFailure("The use-case name is unavailable or ambiguous here. Use a unique name, optionally followed by in project and its registered project name. Saved inputs are unchanged.")
+		return "", telegramGuidedRoutingError("The use-case name is unavailable or ambiguous here. Use a unique name, optionally followed by in project and its registered project name. Saved inputs are unchanged.")
 	}
 
 	return matches[0], nil
@@ -93,7 +93,7 @@ func telegramGuidedStartFailure(failure error, projects []projectcore.Project) e
 		}
 	}
 
-	return telegramGuidedRoutingFailure("Choose a project: " + strings.Join(names, ", ") + ". Say Develop a new use case in followed by its unique project name.")
+	return telegramGuidedRoutingError("Choose a project: " + strings.Join(names, ", ") + ". Say Develop a new use case in followed by its unique project name.")
 }
 
 func (r telegramReceiver) resolveTelegramGuidedInput(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (telegramGuidedRouting, error) {

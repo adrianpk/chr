@@ -163,7 +163,7 @@ func (r telegramReceiver) intentContext(ctx context.Context, input telegramcore.
 }
 
 func appendTelegramIntentSession(result *ConversationIntentContext, session telegramcore.Conversation, snapshot telegramcore.IntentSnapshot) {
-	result.Sessions = append(result.Sessions, ConversationIntentSession{ID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Intent: session.Intent, Phase: session.Phase, Topic: session.Topic, QuestionBinding: session.QuestionBinding, InvocationID: session.InvocationID, Revision: session.Revision})
+	result.Sessions = append(result.Sessions, ConversationIntentSession{ID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace, Intent: session.Intent, Phase: string(session.Phase), Topic: session.Topic, QuestionBinding: session.QuestionBinding, InvocationID: session.InvocationID, Revision: session.Revision})
 	if session.ID == snapshot.Focused {
 		result.FocusedConversation = session.ID
 	}

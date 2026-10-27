@@ -130,17 +130,17 @@ func telegramGuidedDocumentKind(text string) string {
 	return kinds[text]
 }
 
-func telegramGuidedTransportPhase(observed GuidedUseCaseInspection) string {
+func telegramGuidedTransportPhase(observed GuidedUseCaseInspection) telegramcore.ConversationPhase {
 	if observed.Result != nil && observed.Result.Complete {
-		return "completed"
+		return telegramcore.ConversationCompleted
 	}
 
 	switch observed.Session.Guided.Status {
 	case "cancelled":
-		return "canceled"
+		return telegramcore.ConversationCanceled
 	case "failed":
-		return "failed"
+		return telegramcore.ConversationFailed
 	default:
-		return "collecting"
+		return telegramcore.ConversationCollecting
 	}
 }

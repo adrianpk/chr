@@ -141,10 +141,7 @@ func (a ReceiverAPI) postBody(ctx context.Context, token string, call requestBod
 		return nil, &APIError{Code: "transport_failure", Uncertain: call.Method == "sendMessage" || call.Method == "sendDocument"}
 	}
 
-	defer func() {
-		//nolint:errcheck // The bounded body reader reports response failures.
-		_ = response.Body.Close()
-	}()
+	defer closeReadBody(response.Body)
 
 	return decodeReceiverResponse(response)
 }
@@ -214,4 +211,11 @@ func classifyBadRequest(status int, envelope receiverEnvelope) error {
 	}
 
 	return &APIError{Code: "request_failed", Permanent: true}
+}
+
+// closeReadBody releases a read-only HTTP body. Its read/acknowledgement already
+// determines delivery; a cleanup failure cannot imply an unobserved send outcome.
+func closeReadBody(body io.Closer) {
+	//nolint:errcheck // The body read and observed acknowledgement define the retained outcome.
+	_ = body.Close()
 }

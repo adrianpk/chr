@@ -540,3 +540,21 @@ policy. The non-short receiver/domain/app Telegram/guided suite, frozen wire and
 SQLite fixtures and pinned lint pass; 28 allowances disappear, leaving 307 for
 other recorded owners. State/error names, close handling, final reporting and
 clean-head controller evidence remain before opening the Slice 7 PR.
+
+
+Receiver health, operation, delivery, action, conversation and inbox states now
+have separate string types and the exact original constants. Type-checked
+replacement updates 161 actual state references; SQL, JSON keys and native
+workflow status vocabulary remain unchanged. App rendering/model projections
+convert the same stored strings at their boundary. Four app error identities
+use Error names with unchanged definitions, messages and matching behavior.
+
+Read cursor cleanup joins Close errors into named error results, including early
+scan exits. One documented HTTP read-body helper preserves the observed read and
+acknowledgement outcome; cleanup cannot turn an acknowledged send into a retry.
+The unused serve constructor arguments were already removed by Slice 4's typed
+factory. Distinct-column SQLite tests cover new action/notice/response writes and
+action/delivery/document reads after updates, including different source/content
+hashes and conversation revisions. Swapping positive topic/user IDs makes the
+column-name assertions fail; the original mapper was restored. Focused storage,
+wire, HTTP, recovery lifecycle and lost-ack tests plus pinned lint pass.

@@ -36,7 +36,7 @@ func TestTelegramRecoveryGrace(t *testing.T) {
 	host := func(context.Context) error { close(entered); <-release; return nil }
 	failure := runTelegramReceiverHosts(ctx, []func(context.Context) error{host}, 10*time.Millisecond)
 
-	var pending *telegramShutdownFailure
+	var pending *telegramShutdownError
 	if !errors.As(failure, &pending) {
 		t.Fatal("unquiesced shutdown was reported successful", failure)
 	}

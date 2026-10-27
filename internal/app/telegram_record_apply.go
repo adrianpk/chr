@@ -58,14 +58,14 @@ func (r telegramReceiver) prepareRecord(ctx context.Context, operations telegram
 		return request, err
 	}
 
-	request.PreparedInput, request.State = input, "ready"
+	request.PreparedInput, request.State = input, telegramcore.OperationReady
 
 	return request, nil
 }
 
 func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRecordService, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	if err := r.validateRecordAuthority(ctx, request); err != nil {
-		return r.finishRecordFailure(ctx, request, "blocked", err, config)
+		return r.finishRecordFailure(ctx, request, telegramcore.OperationBlocked, err, config)
 	}
 
 	var prepared PreparedRecordMutation
@@ -83,7 +83,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 
 	result, err := operations.ApplyTelegramRecord(ctx, request.Target, prepared)
 	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) {
-		return r.finishRecordFailure(ctx, request, "blocked", err, config)
+		return r.finishRecordFailure(ctx, request, telegramcore.OperationBlocked, err, config)
 	}
 
 	if err != nil {
@@ -100,7 +100,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 	text := telegramRecordResultText(result)
 	request.Message = telegramOutcomeMessage("29", text)
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationConfirmed, ReceiptRef: result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func telegramPreparedRecordBinding(prepared PreparedRecordMutation, request telegramcore.OperationRequest) bool {
@@ -112,14 +112,14 @@ func telegramPreparedRecordBinding(prepared PreparedRecordMutation, request tele
 	return prepared.Case != nil && prepared.Case.Binding == expected
 }
 
-func (r telegramReceiver) finishRecordFailure(ctx context.Context, request telegramcore.OperationRequest, state string, failure error, config telegramcore.ReceiverConfig) error {
+func (r telegramReceiver) finishRecordFailure(ctx context.Context, request telegramcore.OperationRequest, state telegramcore.OperationState, failure error, config telegramcore.ReceiverConfig) error {
 	text := telegramRecordFailure(failure)
 	request.Message = telegramOutcomeMessage("30", text)
 
 	facts, err := json.Marshal(struct {
 		State   string `json:"state"`
 		Message string `json:"message"`
-	}{state, text})
+	}{string(state), text})
 	if err != nil {
 		return err
 	}

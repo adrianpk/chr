@@ -15,7 +15,7 @@ import (
 )
 
 func (r telegramReceiver) continueTelegramAuthoring(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
-	if request.State == "confirmed" || request.State == "rejected" || request.State == "blocked" {
+	if request.State == telegramcore.OperationConfirmed || request.State == telegramcore.OperationRejected || request.State == telegramcore.OperationBlocked {
 		return nil
 	}
 
@@ -24,7 +24,7 @@ func (r telegramReceiver) continueTelegramAuthoring(ctx context.Context, request
 		return r.finishAuthoringFailure(ctx, request, config, ErrRecordUnsupported)
 	}
 
-	current, err := r.validateAuthoringAuthority(ctx, request, request.State == "applying")
+	current, err := r.validateAuthoringAuthority(ctx, request, request.State == telegramcore.OperationApplying)
 	if err != nil {
 		return r.finishAuthoringFailure(ctx, request, config, err)
 	}
@@ -118,7 +118,7 @@ func (r telegramReceiver) finishAuthoringFailure(ctx context.Context, request te
 		return err
 	}
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationBlocked, ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func telegramAuthoringFailure(err error) string {
@@ -178,7 +178,7 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request telegramc
 			request.Delivery.Message.SecondaryText = "Complete document attached. This conversation has moved on; its current selection is preserved."
 		}
 
-		return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
+		return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationConfirmed, ReceiptRef: result.ReceiptRef, Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 	}
 
 	return err

@@ -61,7 +61,7 @@ func projectAdmissionBinding(ctx context.Context, tx *sql.Tx, request OperationR
 		return workflowstate.ErrConflict
 	}
 
-	if request.OperationID != "work.admit" || result.State != "confirmed" || !workflowstate.ValidRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 || result.ReceiptRef != "workflow:"+bound.ID {
+	if request.OperationID != "work.admit" || result.State != OperationConfirmed || !workflowstate.ValidRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 || result.ReceiptRef != "workflow:"+bound.ID {
 		return workflowstate.ErrConflict
 	}
 
@@ -107,11 +107,11 @@ func projectControlBinding(ctx context.Context, tx *sql.Tx, request OperationReq
 
 func validateControlBinding(request OperationRequest, result ActionResult) error {
 	bound := result.Invocation
-	if result.State != "confirmed" || !workflowstate.ValidRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 {
+	if result.State != OperationConfirmed || !workflowstate.ValidRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 {
 		return workflowstate.ErrConflict
 	}
 
-	if !slices.Contains([]string{"executing", "waiting", "completed", "canceled"}, result.InvocationPhase) {
+	if !slices.Contains([]ConversationPhase{ConversationExecuting, ConversationWaiting, ConversationCompleted, ConversationCanceled}, result.InvocationPhase) {
 		return workflowstate.ErrConflict
 	}
 

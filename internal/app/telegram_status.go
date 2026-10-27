@@ -69,7 +69,7 @@ func printTelegramLocalState(ctx context.Context, env core.UserEnvironment, stdo
 	}
 
 	_, err = fmt.Fprintf(stdout, "receiver: %s\nbot_id: %d\ncursor_epoch: %d\nnext_update_id: %s\nlast_poll_at: %s\nretry_attempt: %d\nretry_at: %s\nlast_error_code: %s\n",
-		telegramDiagnosticAtom(state.Health), botID, state.Epoch, cursor, telegramDiagnosticTime(state.LastPollAt), state.RetryAttempt, telegramDiagnosticTime(state.RetryAt), telegramDiagnosticAtom(state.LastErrorCode))
+		telegramDiagnosticAtom(string(state.Health)), botID, state.Epoch, cursor, telegramDiagnosticTime(state.LastPollAt), state.RetryAttempt, telegramDiagnosticTime(state.RetryAt), telegramDiagnosticAtom(state.LastErrorCode))
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func printTelegramDiagnostics(stdout io.Writer, diagnostics telegramcore.Receive
 	}
 
 	for _, item := range diagnostics.Deliveries {
-		if _, err := fmt.Fprintf(stdout, "delivery: %s state=%s attempt=%d cycle=%d lifetime_attempts=%d retry_at=%s error=%s retry_actor=%s retry_started_at=%s\n", telegramDiagnosticAtom(item.ID), telegramDiagnosticAtom(item.State), item.Attempts, item.Cycle, item.TotalAttempts, telegramDiagnosticTime(item.RetryAt), telegramDiagnosticAtom(item.ErrorCode), telegramDiagnosticAtom(item.RetryActor), telegramDiagnosticTime(item.RetryStartedAt)); err != nil {
+		if _, err := fmt.Fprintf(stdout, "delivery: %s state=%s attempt=%d cycle=%d lifetime_attempts=%d retry_at=%s error=%s retry_actor=%s retry_started_at=%s\n", telegramDiagnosticAtom(item.ID), telegramDiagnosticAtom(string(item.State)), item.Attempts, item.Cycle, item.TotalAttempts, telegramDiagnosticTime(item.RetryAt), telegramDiagnosticAtom(item.ErrorCode), telegramDiagnosticAtom(item.RetryActor), telegramDiagnosticTime(item.RetryStartedAt)); err != nil {
 			return err
 		}
 	}

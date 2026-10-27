@@ -27,7 +27,7 @@ type Action struct {
 	GuardVersion         int
 	PresentationHash     string
 	Choices              []string
-	State                string
+	State                ActionState
 	ExpiresAt            time.Time
 	AnswerRequestID      string
 }
@@ -41,7 +41,7 @@ type ActionOffer struct {
 	Choices           []string
 	Text              string
 	ExpiresAt         time.Time
-	ConversationPhase string
+	ConversationPhase ConversationPhase
 }
 
 // ActionClaim retains the original effect binding and the first answer request.
@@ -140,7 +140,7 @@ func validateActionTarget(op conversationTransaction, request OperationRequest) 
 		return err
 	}
 
-	if slices.Contains([]string{"completed", "canceled", "failed"}, conversation.Phase) {
+	if slices.Contains([]ConversationPhase{ConversationCompleted, ConversationCanceled, ConversationFailed}, conversation.Phase) {
 		return workflowstate.ErrConflict
 	}
 

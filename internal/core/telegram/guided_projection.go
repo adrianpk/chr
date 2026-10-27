@@ -38,7 +38,7 @@ func (s *ReceiverStore) ProjectGuided(ctx context.Context, projectionInput Guide
 		native.Request.Target.ConversationRevision = updated.Revision
 
 		kind := "progress"
-		if projectionInput.Progress.Phase != "collecting" {
+		if projectionInput.Progress.Phase != ConversationCollecting {
 			kind = "result"
 		} else if projectionInput.Delivery != nil {
 			kind = "question"

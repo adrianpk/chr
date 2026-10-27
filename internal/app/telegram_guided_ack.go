@@ -24,7 +24,7 @@ func (r telegramReceiver) finishOvertakenGuided(ctx context.Context, request tel
 		request.Delivery.Message.SecondaryText = telegramGuidedOvertakenAck
 	}
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: progress.SessionRef, Facts: facts, Text: telegramGuidedOvertakenAck, ConfigDigest: config.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationConfirmed, ReceiptRef: progress.SessionRef, Facts: facts, Text: telegramGuidedOvertakenAck, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func (r telegramReceiver) finishOvertakenGuidedAction(ctx context.Context, claim telegramcore.ActionClaim, result telegramcore.ActionResult) error {

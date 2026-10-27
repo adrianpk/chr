@@ -126,7 +126,7 @@ func (s *ReceiverStore) ValidateHarnessTarget(ctx context.Context, input Convers
 	})
 }
 
-func finishHarnessConversation(ctx context.Context, tx *sql.Tx, request OperationRequest, state string, now time.Time) error {
+func finishHarnessConversation(ctx context.Context, tx *sql.Tx, request OperationRequest, state OperationState, now time.Time) error {
 	if request.OperationID != HarnessSelectionOperation {
 		return nil
 	}
@@ -136,7 +136,7 @@ func finishHarnessConversation(ctx context.Context, tx *sql.Tx, request Operatio
 	}
 
 	phase := "failed"
-	if state == "confirmed" {
+	if state == OperationConfirmed {
 		phase = "completed"
 	}
 

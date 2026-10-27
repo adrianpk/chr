@@ -113,7 +113,7 @@ func (r telegramReceiver) reusePreparedWork(ctx context.Context, input telegramc
 		return true, err
 	}
 
-	if !found || (previous.State != "confirmed" && previous.State != "awaiting_confirmation") {
+	if !found || (previous.State != telegramcore.OperationConfirmed && previous.State != telegramcore.OperationAwaitingConfirmation) {
 		return false, nil
 	}
 
@@ -133,7 +133,7 @@ func (r telegramReceiver) reusePreparedWork(ctx context.Context, input telegramc
 }
 
 func (r telegramReceiver) reusePreparedWorkResult(ctx context.Context, input telegramcore.ConversationInput, previous telegramcore.OperationRequest, prepared PreparedAuthoringWork) (bool, error) {
-	if previous.State == "confirmed" {
+	if previous.State == telegramcore.OperationConfirmed {
 		return true, r.store.QueuePresentationResponse(ctx, input.Update, *telegramOutcomeMessage("26", telegramPreparedWorkReplay(previous)), input.Config.Digest(), time.Now())
 	}
 
@@ -142,7 +142,7 @@ func (r telegramReceiver) reusePreparedWorkResult(ctx context.Context, input tel
 		return true, err
 	}
 
-	if action.State != "pending" || !action.ExpiresAt.After(time.Now()) {
+	if action.State != telegramcore.ActionPending || !action.ExpiresAt.After(time.Now()) {
 		return false, nil
 	}
 

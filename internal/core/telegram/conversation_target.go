@@ -21,17 +21,12 @@ func (s *ReceiverStore) Conversations(ctx context.Context, peer PeerIdentity) ([
 	return readConversations(ctx, s.db, peer)
 }
 
-func readConversations(ctx context.Context, reader conversationReader, peer PeerIdentity) ([]Conversation, error) {
+func readConversations(ctx context.Context, reader conversationReader, peer PeerIdentity) (result []Conversation, err error) {
 	rows, err := reader.QueryContext(ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? ORDER BY phase IN ('completed','canceled','failed'),updated_at DESC,id LIMIT 50`, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		//nolint:errcheck // rows.Err is checked below.
-		_ = rows.Close()
-	}()
-
-	var result []Conversation
+	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
 		c, err := scanConversation(rows)
@@ -114,7 +109,7 @@ func (op conversationTransaction) replyTarget() (*Conversation, error) {
 }
 
 func captureEligible(c Conversation) bool {
-	return c.GuidedRunID != "" || c.Phase == "collecting" || c.Phase == "clarifying"
+	return c.GuidedRunID != "" || c.Phase == ConversationCollecting || c.Phase == ConversationClarifying
 }
 
 func (op conversationTransaction) target() (*Conversation, error) {
@@ -254,5 +249,5 @@ func (op conversationTransaction) targetEligible(c Conversation) bool {
 }
 
 func authoringEligible(c Conversation) bool {
-	return c.GuidedRunID == "" && (captureEligible(c) || c.Phase == "preparing" || c.Phase == "prepared" || c.Phase == "awaiting_confirmation")
+	return c.GuidedRunID == "" && (captureEligible(c) || c.Phase == ConversationPreparing || c.Phase == ConversationPrepared || c.Phase == ConversationAwaitingConfirmation)
 }

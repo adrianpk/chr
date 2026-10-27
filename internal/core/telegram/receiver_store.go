@@ -22,7 +22,7 @@ type ReceiverState struct {
 	BotID              int64
 	Epoch              int64
 	NextUpdateID       *int64
-	Health             string
+	Health             ReceiverHealth
 	RetryAttempt       int
 	RetryCycle         int64
 	TotalRetryAttempts int64
@@ -209,9 +209,9 @@ func (s *ReceiverStore) PollFailed(ctx context.Context, botID int64, failure err
 	policy := failureState(failure, state.RetryAttempt)
 	code, permanent, delay := policy.Code, policy.Permanent, policy.Delay
 
-	health := "degraded"
+	health := HealthDegraded
 	if permanent {
-		health = "blocked"
+		health = HealthBlocked
 	}
 
 	_, err = s.db.ExecContext(ctx, `UPDATE telegram_receivers SET health=?,last_error_code=?,retry_at=?,updated_at=? WHERE bot_id=?`,

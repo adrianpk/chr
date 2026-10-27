@@ -19,7 +19,7 @@ type ReceiverDelivery struct {
 	ID            string
 	Peer          PeerIdentity
 	Text          string
-	State         string
+	State         DeliveryState
 	Attempts      int
 	ConfigDigest  string
 	ActionToken   string
@@ -101,7 +101,10 @@ func readResponsePending(ctx context.Context, tx *sql.Tx, update ReceivedUpdate)
 		return false, err
 	}
 
-	var digest, state string
+	var (
+		digest string
+		state  InputState
+	)
 	if err := tx.QueryRowContext(ctx, "SELECT payload_digest,state FROM telegram_updates WHERE bot_id=? AND update_id=?", update.Peer.BotID, update.UpdateID).Scan(&digest, &state); err != nil {
 		return false, err
 	}
@@ -110,11 +113,11 @@ func readResponsePending(ctx context.Context, tx *sql.Tx, update ReceivedUpdate)
 		return false, errReceiverConflict
 	}
 
-	if state == "processed" {
+	if state == InputProcessed {
 		return false, nil
 	}
 
-	if state != "pending" {
+	if state != InputPending {
 		return false, errors.New("telegram source cannot produce a read response")
 	}
 
@@ -135,7 +138,7 @@ func (s *ReceiverStore) RejectPendingUpdate(ctx context.Context, update Received
 }
 
 // DueDeliveries is bounded; sending rows after a crash retain uncertainty and budgets.
-func (s *ReceiverStore) DueDeliveries(ctx context.Context, botID int64, now time.Time) ([]ReceiverDelivery, error) {
+func (s *ReceiverStore) DueDeliveries(ctx context.Context, botID int64, now time.Time) (result []ReceiverDelivery, err error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT `+receiverDeliveryColumns+` FROM telegram_outbox o
 WHERE o.bot_id=? AND o.state IN ('pending','sending','uncertain') AND o.attempts<5 AND (o.retry_at IS NULL OR o.retry_at<=?)
 AND NOT EXISTS(SELECT 1 FROM telegram_outbox earlier WHERE earlier.bot_id=o.bot_id AND earlier.chat_id=o.chat_id AND earlier.topic_id=o.topic_id AND earlier.user_id=o.user_id AND earlier.event_key=o.event_key AND earlier.part_index<o.part_index AND earlier.state!='delivered')
@@ -144,12 +147,7 @@ ORDER BY CASE (SELECT u.processing_lane FROM telegram_updates u WHERE u.bot_id=o
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		//nolint:errcheck // rows.Err is checked after the bounded iteration.
-		_ = rows.Close()
-	}()
-
-	var result []ReceiverDelivery
+	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
 		row := receiverDeliveryRow{delivery: ReceiverDelivery{Peer: PeerIdentity{BotID: botID}}}
@@ -250,15 +248,15 @@ func (s *ReceiverStore) deliverySent(ctx context.Context, id string, messageID i
 func (s *ReceiverStore) DeliveryFailed(ctx context.Context, delivery ReceiverDelivery, failure error, now time.Time) error {
 	policy := failureState(failure, delivery.Attempts+1)
 	code, permanent, delay := policy.Code, policy.Permanent, policy.Delay
-	state := "pending"
+	state := DeliveryPending
 
 	var apiErr *APIError
 	if errors.As(failure, &apiErr) && apiErr.Uncertain {
-		state = "uncertain"
+		state = DeliveryUncertain
 	}
 
 	if permanent || delivery.Attempts+1 >= 5 {
-		state = "blocked"
+		state = DeliveryBlocked
 	}
 
 	_, err := s.db.ExecContext(ctx, "UPDATE telegram_outbox SET state=?,last_error_code=?,retry_at=?,updated_at=? WHERE id=? AND state='sending'", state, code, database.FormatTime(now.Add(delay)), database.FormatTime(now), delivery.ID)

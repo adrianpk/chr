@@ -58,10 +58,10 @@ func (s *ReceiverStore) ClaimAction(ctx context.Context, input ConversationInput
 func claimAction(op conversationTransaction, claim *ActionClaim) error {
 	user, ok := op.input.Config.AuthorizedUser(op.input.Update.Peer.ChatID, op.input.Update.Peer.TopicID, op.input.Update.Peer.UserID, op.input.Update.ChatType)
 	if !ok || user.OperatorID != claim.Request.Operator {
-		return supersedeAction(op, claim, "superseded")
+		return supersedeAction(op, claim, ActionSuperseded)
 	}
 
-	if claim.Action.State == "consumed" {
+	if claim.Action.State == ActionConsumed {
 		return readActionClaimAnswer(op, claim)
 	}
 
@@ -73,7 +73,7 @@ func claimAction(op conversationTransaction, claim *ActionClaim) error {
 		return claimGuidedRecovery(op, claim)
 	}
 
-	if claim.Action.State == "expired" || claim.Action.State == "superseded" {
+	if claim.Action.State == ActionExpired || claim.Action.State == ActionSuperseded {
 		return nil
 	}
 
@@ -90,7 +90,7 @@ func claimPendingAction(op conversationTransaction, claim *ActionClaim) error {
 		return supersedeAction(op, claim, state)
 	}
 
-	if claim.Action.State == "applying" {
+	if claim.Action.State == ActionApplying {
 		return readActionClaimAnswer(op, claim)
 	}
 
@@ -102,7 +102,7 @@ func claimControlReceipt(op conversationTransaction, claim *ActionClaim) error {
 		return err
 	}
 
-	if claim.Action.State == "expired" || claim.Action.State == "superseded" {
+	if claim.Action.State == ActionExpired || claim.Action.State == ActionSuperseded {
 		claim.ReceiptOnly = true
 
 		return nil
@@ -174,9 +174,9 @@ func createActionAnswer(op conversationTransaction, claim *ActionClaim) error {
 		return err
 	}
 
-	answer.State = "applying"
-	claim.Answer, claim.Action.AnswerRequestID, claim.Action.State = answer, answer.ID, "applying"
-	claim.Request.State = "applying"
+	answer.State = OperationApplying
+	claim.Answer, claim.Action.AnswerRequestID, claim.Action.State = answer, answer.ID, ActionApplying
+	claim.Request.State = OperationApplying
 
 	return checkIntakeCapacity(op.ctx, op.tx, answer.Source.Peer.BotID)
 }
@@ -208,7 +208,7 @@ func beginActionClaim(op conversationTransaction, claim *ActionClaim, answer Ope
 	return nil
 }
 
-func supersedeAction(op conversationTransaction, claim *ActionClaim, state string) error {
+func supersedeAction(op conversationTransaction, claim *ActionClaim, state ActionState) error {
 	_, err := op.tx.ExecContext(op.ctx, `UPDATE telegram_actions SET state=?,updated_at=? WHERE token=? AND state IN ('pending','applying')`, state, database.FormatTime(op.now), claim.Action.Token)
 	if err != nil {
 		return err
@@ -221,21 +221,21 @@ func supersedeAction(op conversationTransaction, claim *ActionClaim, state strin
 		return err
 	}
 
-	return finishHarnessConversation(op.ctx, op.tx, claim.Request, "blocked", op.now)
+	return finishHarnessConversation(op.ctx, op.tx, claim.Request, OperationBlocked, op.now)
 }
 
-func guardActionClaim(op conversationTransaction, claim *ActionClaim) (string, error) {
+func guardActionClaim(op conversationTransaction, claim *ActionClaim) (ActionState, error) {
 	if !claim.Action.ExpiresAt.After(op.now) {
-		return "expired", nil
+		return ActionExpired, nil
 	}
 
 	if !actionDigestMatches(claim.Action, claim.Request) || claim.Action.ConversationRevision != claim.Request.Target.ConversationRevision {
-		return "superseded", nil
+		return ActionSuperseded, nil
 	}
 
 	if err := validateActionPresentation(op.ctx, op.tx, claim.Action, claim.Request, op.input.Config.Digest()); err != nil {
 		if actionUnavailable(err) {
-			return "superseded", nil
+			return ActionSuperseded, nil
 		}
 
 		return "", err
@@ -246,7 +246,7 @@ func guardActionClaim(op conversationTransaction, claim *ActionClaim) (string, e
 			return "", err
 		}
 
-		return "superseded", nil
+		return ActionSuperseded, nil
 	}
 
 	return "", nil

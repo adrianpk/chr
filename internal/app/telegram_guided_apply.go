@@ -14,7 +14,7 @@ import (
 
 func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request telegramcore.OperationRequest, config telegramcore.ReceiverConfig) error {
 	switch request.State {
-	case "confirmed", "blocked":
+	case telegramcore.OperationConfirmed, telegramcore.OperationBlocked:
 		return nil
 	}
 
@@ -23,7 +23,7 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request te
 		return ErrRecordUnsupported
 	}
 
-	current, err := r.validateAuthoringAuthority(ctx, request, request.State == "applying")
+	current, err := r.validateAuthoringAuthority(ctx, request, request.State == telegramcore.OperationApplying)
 	if err != nil {
 		return r.finishGuidedFailure(ctx, request, config, err)
 	}
@@ -73,7 +73,7 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request tele
 
 	request.Delivery, err = r.guidedDocument(ctx, request, observed, kind)
 	if errors.Is(err, workflowstate.ErrConflict) {
-		return r.finishGuidedFailure(ctx, request, current, telegramGuidedRoutingFailure("That original has not been sealed for this run. Send Show current step to continue; saved inputs are unchanged."))
+		return r.finishGuidedFailure(ctx, request, current, telegramGuidedRoutingError("That original has not been sealed for this run. Send Show current step to continue; saved inputs are unchanged."))
 	}
 
 	if err != nil {
@@ -110,11 +110,11 @@ func (r telegramReceiver) finishGuidedFailure(ctx context.Context, request teleg
 
 	request.Message = telegramOutcomeMessage("43", text)
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "blocked", ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationBlocked, ReceiptRef: "", Facts: facts, Text: text, ConfigDigest: config.Digest(), At: time.Now()})
 }
 
 func telegramGuidedFailure(failure error) string {
-	var routing telegramGuidedRoutingFailure
+	var routing telegramGuidedRoutingError
 	if errors.As(failure, &routing) {
 		return string(routing)
 	}

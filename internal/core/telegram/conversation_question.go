@@ -67,7 +67,7 @@ func (s *ReceiverStore) BindConversationQuestion(ctx context.Context, input Conv
 			return err
 		}
 
-		c.QuestionBinding, c.Phase = string(encoded), "clarifying"
+		c.QuestionBinding, c.Phase = string(encoded), ConversationClarifying
 		if err := op.saveCapture(c); err != nil {
 			return err
 		}

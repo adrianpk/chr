@@ -46,7 +46,7 @@ func (s *ReceiverStore) OfferAction(ctx context.Context, offer ActionOffer, now 
 		}
 
 		action, err = retainAction(op, request, offer, token)
-		if err != nil || action.State != "pending" {
+		if err != nil || action.State != ActionPending {
 			return err
 		}
 
@@ -68,7 +68,7 @@ func retainAction(op conversationTransaction, request OperationRequest, offer Ac
 		return Action{}, err
 	}
 
-	if request.State != "ready" || len(request.PreparedInput) == 0 {
+	if request.State != OperationReady || len(request.PreparedInput) == 0 {
 		return Action{}, errReceiverConflict
 	}
 

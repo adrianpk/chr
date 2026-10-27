@@ -79,12 +79,12 @@ func finishOperation(ctx context.Context, tx *sql.Tx, request OperationRequest, 
 	return bindOperationResponse(ctx, tx, request)
 }
 
-func validOperationFinish(state, receipt string, facts json.RawMessage) bool {
-	if state != "confirmed" && state != "rejected" && state != "blocked" {
+func validOperationFinish(state OperationState, receipt string, facts json.RawMessage) bool {
+	if state != OperationConfirmed && state != OperationRejected && state != OperationBlocked {
 		return false
 	}
 
-	if state == "confirmed" && receipt == "" {
+	if state == OperationConfirmed && receipt == "" {
 		return false
 	}
 
@@ -102,7 +102,8 @@ func bindOperationResponse(ctx context.Context, tx *sql.Tx, request OperationReq
 
 // OperationCompletion records one guarded owner outcome and its retained reply.
 type OperationCompletion struct {
-	State, ReceiptRef  string
+	State              OperationState
+	ReceiptRef         string
 	Facts              json.RawMessage
 	Text, ConfigDigest string
 	At                 time.Time

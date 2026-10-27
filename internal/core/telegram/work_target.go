@@ -75,7 +75,7 @@ func (op conversationTransaction) sourceActionConversation(intent, topic string)
 	}
 
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_conversations SET phase='prepared' WHERE id=?`, c.ID)
-	c.Phase = "prepared"
+	c.Phase = ConversationPrepared
 
 	return c, err
 }

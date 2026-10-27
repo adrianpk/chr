@@ -117,18 +117,18 @@ func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramR
 	}
 
 	switch request.State {
-	case "confirmed", "rejected", "blocked":
+	case telegramcore.OperationConfirmed, telegramcore.OperationRejected, telegramcore.OperationBlocked:
 		return nil
 	}
 
 	if err := r.validateRecordAuthority(ctx, request); err != nil {
-		return r.finishRecordFailure(ctx, request, "blocked", err, command.Input.Config)
+		return r.finishRecordFailure(ctx, request, telegramcore.OperationBlocked, err, command.Input.Config)
 	}
 
-	if request.State == "prepared" {
+	if request.State == telegramcore.OperationPrepared {
 		request, err = r.prepareRecord(ctx, operations, request)
 		if err != nil {
-			return r.finishRecordFailure(ctx, request, "rejected", err, command.Input.Config)
+			return r.finishRecordFailure(ctx, request, telegramcore.OperationRejected, err, command.Input.Config)
 		}
 	}
 

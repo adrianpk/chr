@@ -44,7 +44,7 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 	}
 
 	if len(matches) != 1 {
-		return "", telegramGuidedRoutingFailure("The guided use-case name is unavailable or ambiguous in the selected project. Use a unique guided name, optionally followed by in project and its registered project name. Saved work is unchanged.")
+		return "", telegramGuidedRoutingError("The guided use-case name is unavailable or ambiguous in the selected project. Use a unique guided name, optionally followed by in project and its registered project name. Saved work is unchanged.")
 	}
 
 	association, err := telegramGuidedAssociation(matches[0])

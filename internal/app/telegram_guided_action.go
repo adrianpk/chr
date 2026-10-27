@@ -94,7 +94,7 @@ func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim telegram
 		return err
 	}
 
-	result := telegramcore.ActionResult{State: "confirmed", Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}
+	result := telegramcore.ActionResult{State: telegramcore.OperationConfirmed, Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}
 
 	err = r.store.FinishAction(ctx, claim, result, time.Now())
 	if errors.Is(err, workflowstate.ErrConflict) {
@@ -107,13 +107,13 @@ func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim telegram
 func (r telegramReceiver) finishGuidedActionFailure(ctx context.Context, claim telegramcore.ActionClaim, config telegramcore.ReceiverConfig, failure error) error {
 	text := telegramGuidedFailure(failure)
 
-	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{State: "blocked", Facts: []byte(`{"state":"blocked"}`), Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
+	return r.store.FinishAction(ctx, claim, telegramcore.ActionResult{State: telegramcore.OperationBlocked, Facts: []byte(`{"state":"blocked"}`), Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}, time.Now())
 }
 
 func (r telegramReceiver) prepareGuidedAction(ctx context.Context, claim telegramcore.ActionClaim) (telegramGuidedPreparation, error) {
 	var input telegramGuidedInput
 
-	current, err := r.validateAuthoringAuthority(ctx, claim.Request, claim.Request.State == "applying")
+	current, err := r.validateAuthoringAuthority(ctx, claim.Request, claim.Request.State == telegramcore.OperationApplying)
 	if err != nil {
 		return telegramGuidedPreparation{Input: input, Config: current}, err
 	}

@@ -19,7 +19,7 @@ import (
 // It cannot grant authority or change native execution state.
 type WorkObservation struct {
 	Revision uint64
-	Phase    string
+	Phase    ConversationPhase
 	Kind     string
 	Text     string
 	Message  *tgmessage.Blocks
@@ -68,7 +68,10 @@ func sameWorkNotice(ctx context.Context, tx *sql.Tx, ref WorkReference, observat
 		return false, nil
 	}
 
-	var kind, text, presentationHash, phase string
+	var (
+		kind, text, presentationHash string
+		phase                        ConversationPhase
+	)
 
 	err := tx.QueryRowContext(ctx, `SELECT o.kind,o.text,COALESCE(o.presentation_hash,''),c.phase FROM telegram_outbox o JOIN telegram_conversations c ON c.id=o.conversation_id WHERE o.conversation_id=? AND o.request_id=? AND o.event_key LIKE 'work:%' ORDER BY o.rowid DESC LIMIT 1`, ref.Request.Target.ConversationID, ref.Request.ID).Scan(&kind, &text, &presentationHash, &phase)
 	if errors.Is(err, sql.ErrNoRows) {
@@ -95,9 +98,9 @@ func sameWorkNotice(ctx context.Context, tx *sql.Tx, ref WorkReference, observat
 
 func validWorkObservation(observation WorkObservation) bool {
 	switch observation.Phase {
-	case "completed", "canceled", "failed":
+	case ConversationCompleted, ConversationCanceled, ConversationFailed:
 		return observation.Kind == "result"
-	case "executing", "waiting":
+	case ConversationExecuting, ConversationWaiting:
 		return observation.Kind == "progress" || observation.Kind == "diagnostic"
 	default:
 		return false

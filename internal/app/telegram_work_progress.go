@@ -10,21 +10,22 @@ import (
 )
 
 func telegramWorkObservation(status WorkflowWorkStatus, projectName string) telegramcore.WorkObservation {
-	phase, kind := "executing", "progress"
+	phase := telegramcore.ConversationExecuting
+	kind := "progress"
 
 	switch status.Status {
 	case "completed":
-		phase, kind = "completed", "result"
+		phase, kind = telegramcore.ConversationCompleted, "result"
 	case "cancelled":
-		phase, kind = "canceled", "result"
+		phase, kind = telegramcore.ConversationCanceled, "result"
 	case "failed":
-		phase, kind = "failed", "result"
+		phase, kind = telegramcore.ConversationFailed, "result"
 	case "paused", "blocked", "waiting_capacity", "waiting_review", "waiting_integration":
-		phase = "waiting"
+		phase = telegramcore.ConversationWaiting
 	}
 
 	if kind != "result" && retainedWorkAwaitingAuthority(status) {
-		phase, kind = "waiting", "diagnostic"
+		phase, kind = telegramcore.ConversationWaiting, "diagnostic"
 	}
 
 	message := telegramWorkProgressMessage(status, projectName)

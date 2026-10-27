@@ -35,5 +35,5 @@ func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations
 	}
 	request.Delivery = &response
 
-	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: "confirmed", ReceiptRef: "authoring-document:" + request.ID, Facts: result, Text: response.Message.InitialText, ConfigDigest: current.Digest(), At: time.Now()})
+	return r.store.FinishOperation(ctx, request, telegramcore.OperationCompletion{State: telegramcore.OperationConfirmed, ReceiptRef: "authoring-document:" + request.ID, Facts: result, Text: response.Message.InitialText, ConfigDigest: current.Digest(), At: time.Now()})
 }

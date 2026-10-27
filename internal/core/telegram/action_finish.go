@@ -17,19 +17,19 @@ type ActionResult struct {
 	Guided            *GuidedProgress
 	Message           *tgmessage.Blocks
 	Invocation        *InvocationBinding
-	InvocationPhase   string
-	State             string
+	InvocationPhase   ConversationPhase
+	State             OperationState
 	ReceiptRef        string
 	Facts             json.RawMessage
 	Text              string
 	ConfigDigest      string
-	ConversationPhase string
+	ConversationPhase ConversationPhase
 }
 
 // FinishAction commits both requests, action consumption, input acknowledgement
 // and result delivery atomically. A blocked result supersedes rather than consumes.
 func (s *ReceiverStore) FinishAction(ctx context.Context, claim ActionClaim, result ActionResult, now time.Time) error {
-	if result.State != "confirmed" && result.State != "blocked" {
+	if result.State != OperationConfirmed && result.State != OperationBlocked {
 		return errReceiverConflict
 	}
 
@@ -50,7 +50,7 @@ func (s *ReceiverStore) FinishAction(ctx context.Context, claim ActionClaim, res
 			return err
 		}
 
-		if retained.Action.State != "applying" && !confirmedControlReceipt(retained, result) {
+		if retained.Action.State != ActionApplying && !confirmedControlReceipt(retained, result) {
 			return errReceiverConflict
 		}
 
@@ -99,7 +99,7 @@ func finishActionRequests(ctx context.Context, tx *sql.Tx, claim ActionClaim, re
 
 func finishActionState(ctx context.Context, tx *sql.Tx, claim ActionClaim, result ActionResult, now time.Time) error {
 	actionState := "consumed"
-	if result.State != "confirmed" {
+	if result.State != OperationConfirmed {
 		actionState = "superseded"
 	}
 
@@ -126,7 +126,7 @@ func finishActionResult(ctx context.Context, tx *sql.Tx, retained ActionClaim, r
 		return err
 	}
 
-	if result.ConversationPhase != "" && result.State != "confirmed" {
+	if result.ConversationPhase != "" && result.State != OperationConfirmed {
 		return workflowstate.ErrConflict
 	}
 
@@ -181,7 +181,7 @@ func actionResponseSource(ctx context.Context, tx *sql.Tx, claim ActionClaim, re
 		return responseSource{Update: original, Pending: pending}, err
 	}
 
-	if !confirmedControlReceipt(claim, result) || claim.ResponseSource.Peer != original.Peer || claim.ResponseSource.UpdateID == 0 || claim.Action.State == "consumed" {
+	if !confirmedControlReceipt(claim, result) || claim.ResponseSource.Peer != original.Peer || claim.ResponseSource.UpdateID == 0 || claim.Action.State == ActionConsumed {
 		return responseSource{Update: original, Pending: false}, nil
 	}
 
@@ -191,7 +191,7 @@ func actionResponseSource(ctx context.Context, tx *sql.Tx, claim ActionClaim, re
 }
 
 func confirmedControlReceipt(claim ActionClaim, result ActionResult) bool {
-	return claim.Request.OperationID == "work.control" && claim.Answer.ID != "" && result.State == "confirmed" && result.ReceiptRef == workflowstate.MutationReceiptPath(claim.Request.ID)
+	return claim.Request.OperationID == "work.control" && claim.Answer.ID != "" && result.State == OperationConfirmed && result.ReceiptRef == workflowstate.MutationReceiptPath(claim.Request.ID)
 }
 
 func queueActionResultResponse(ctx context.Context, tx *sql.Tx, retained ActionClaim, result ActionResult, now time.Time) error {

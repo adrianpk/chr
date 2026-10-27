@@ -60,7 +60,7 @@ type Conversation struct {
 	ProjectBindingDigest string
 	Namespace            string
 	Intent               string
-	Phase                string
+	Phase                ConversationPhase
 	Topic                string
 	Capture              string
 	QuestionBinding      string
@@ -359,7 +359,7 @@ func (op conversationTransaction) insertConversation(project projectcore.Project
 		return conversationReply{Text: "", Conversation: nil}, conversationDiagnosticError("Start with a nonempty topic of at most 512 UTF-8 bytes. This conversation was not created.")
 	}
 
-	c := Conversation{ID: conversationID(op.input.Update), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: "collecting", Topic: op.input.Text, Revision: 1}
+	c := Conversation{ID: conversationID(op.input.Update), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: ConversationCollecting, Topic: op.input.Text, Revision: 1}
 	c.AuthorizationRef = op.developmentInstructionRef(c)
 	_, err := op.tx.ExecContext(op.ctx, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,authorization_ref,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, c.ID, c.Peer.BotID, c.Peer.ChatID, c.Peer.TopicID, c.Peer.UserID, c.ProjectID, c.ProjectBindingDigest, c.Namespace, c.Intent, c.Phase, c.Topic, c.AuthorizationRef, database.FormatTime(op.now), database.FormatTime(op.now))
 
