@@ -7,10 +7,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
-	ref := TicketReviewRef{
+	ref := ticketmetadata.ReviewRef{
 		Type:     "pull_request",
 		Provider: "forgejo",
 		URL:      "https://forge.example.com/owner/repo/pulls/300",
@@ -22,7 +24,7 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 		Title:      "Trusted ticket",
 		Status:     TicketResultStatusReviewing,
 		Branch:     "feat/chr-1",
-		ReviewRefs: []TicketReviewRef{ref},
+		ReviewRefs: []ticketmetadata.ReviewRef{ref},
 		CreatedAt:  testTrustedAutoMergeTime(),
 		UpdatedAt:  testTrustedAutoMergeTime(),
 	})
@@ -32,7 +34,7 @@ func TestApplyTrustedAutoMergeReviewMovesTicketToReadyForMerge(t *testing.T) {
 			IndexedTicketIdentity: IndexedTicketIdentity{
 				Key:  "CHR-1",
 				Path: path,
-			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []TicketReviewRef{ref}},
+			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketResultStatusReviewing}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []ticketmetadata.ReviewRef{ref}},
 		},
 		ReviewedAt: testTrustedAutoMergeTime(),
 	})

@@ -12,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -168,7 +169,7 @@ func (selection *workflowSelection) appendObservedTicket(ticket IndexedTicket) e
 }
 
 func workflowUnpreparedTicket(content []byte) (IndexedTicket, error) {
-	frontmatter, err := parseTicketFrontmatter(string(content))
+	frontmatter, err := ticketmetadata.Parse(string(content))
 	if err != nil {
 		return IndexedTicket{}, err
 	}

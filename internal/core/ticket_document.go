@@ -11,6 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -123,7 +124,7 @@ func completeTicketDocument(document TicketDocument, body []byte) TicketDocument
 }
 
 func loadTicketDocumentFields(document *TicketDocument) error {
-	fields, err := parseTicketFrontmatter(string(document.content))
+	fields, err := ticketmetadata.Parse(string(document.content))
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func loadTicketDocumentFields(document *TicketDocument) error {
 	return nil
 }
 
-func documentFields(document *TicketDocument, parsed ticketFrontmatter) {
+func documentFields(document *TicketDocument, parsed ticketmetadata.Frontmatter) {
 	for name, value := range parsed.Metadata {
 		document.Fields[name] = opsmetadata.Unquote(value)
 	}

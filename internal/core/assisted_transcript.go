@@ -8,6 +8,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // AssistedTranscriptEventType defines a package boundary type.
@@ -266,7 +267,7 @@ func splitAssistedTranscriptBlocks(content string) []string {
 }
 
 func parseAssistedTranscriptEvent(block string) (AssistedTranscriptEvent, error) {
-	metadata, err := parseTicketFrontmatter(block)
+	metadata, err := ticketmetadata.Parse(block)
 	if err != nil {
 		return AssistedTranscriptEvent{}, err
 	}

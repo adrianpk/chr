@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestValidateIndexedTicketAcceptsBoardMetadata(t *testing.T) {
@@ -50,7 +52,7 @@ func TestValidateIndexedTicketAcceptsReviewMetadata(t *testing.T) {
 	now := time.Date(2026, 5, 26, 10, 0, 0, 0, time.UTC)
 	ticket := validIndexedTicket(now)
 	ticket.Branch = "feat/slice-1-ticket-review-metadata-contract"
-	ticket.ReviewRefs = []TicketReviewRef{{
+	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
 		URL:      "https://forge.example.com/owner/repo/pulls/123",
@@ -117,7 +119,7 @@ func TestValidateIndexedTicketRejectsInvalidReviewMetadata(t *testing.T) {
 		{
 			name: "review ref missing url",
 			mutate: func(ticket *IndexedTicket) {
-				ticket.ReviewRefs = []TicketReviewRef{{Type: "pull_request", Provider: "forgejo"}}
+				ticket.ReviewRefs = []ticketmetadata.ReviewRef{{Type: "pull_request", Provider: "forgejo"}}
 			},
 			wantErr: "ticket review ref url is required",
 		},

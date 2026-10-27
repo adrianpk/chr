@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // ArtifactOperationResult is the TUI-facing result for artifact creation
@@ -264,7 +265,7 @@ type TicketMetadataUpdateRequest struct {
 type TicketReviewReferenceRequest struct {
 	Key    string
 	Branch string
-	Ref    *core.TicketReviewRef
+	Ref    *ticketmetadata.ReviewRef
 }
 
 // TicketEvidenceStrategyChecklistRequest describes a ticket strategy checklist write.

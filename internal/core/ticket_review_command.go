@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 const (
@@ -40,7 +41,7 @@ type TicketReviewCommandOptions struct {
 // TicketReviewCommandResult describes a package boundary value.
 type TicketReviewCommandResult struct {
 	TicketKey        string
-	ReviewRef        TicketReviewRef
+	ReviewRef        ticketmetadata.ReviewRef
 	RemoteSnapshot   RemoteReviewSnapshot
 	ReviewState      string
 	ReviewResult     string
@@ -132,19 +133,19 @@ func isValidTicketReviewCommandResult(result string) bool {
 	}
 }
 
-func ticketReviewCommandPullRequestRef(ticket IndexedTicket) (TicketReviewRef, error) {
+func ticketReviewCommandPullRequestRef(ticket IndexedTicket) (ticketmetadata.ReviewRef, error) {
 	for _, ref := range ticket.ReviewRefs {
 		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
 			return ref, nil
 		}
 	}
 
-	return TicketReviewRef{}, fmt.Errorf("ticket review requires a pull_request review ref")
+	return ticketmetadata.ReviewRef{}, fmt.Errorf("ticket review requires a pull_request review ref")
 }
 
 func ticketReviewCommandPlan(
 	ticket IndexedTicket,
-	ref TicketReviewRef,
+	ref ticketmetadata.ReviewRef,
 	snapshot RemoteReviewSnapshot,
 	result string,
 	findings []string,

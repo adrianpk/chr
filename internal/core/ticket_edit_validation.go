@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -202,7 +203,7 @@ func ticketEditPullRequest(content string, document TicketDocument, value string
 		return "", fmt.Errorf("pull request reference requires an HTTP URL")
 	}
 
-	front, err := parseTicketFrontmatter(content)
+	front, err := ticketmetadata.Parse(content)
 	if err != nil {
 		return "", err
 	}
@@ -213,7 +214,7 @@ func ticketEditPullRequest(content string, document TicketDocument, value string
 		}
 	}
 
-	return upsertTicketReviewRef(content, TicketReviewRef{Type: "pull_request", Provider: parsed.Hostname(), URL: value})
+	return upsertTicketReviewRef(content, ticketmetadata.ReviewRef{Type: "pull_request", Provider: parsed.Hostname(), URL: value})
 }
 
 func validTicketPullRequestURL(parsed *url.URL) bool {

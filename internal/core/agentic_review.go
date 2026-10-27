@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -432,12 +433,12 @@ func ticketReviewStatusForResult(result string) string {
 	return status
 }
 
-func agenticReviewMetadataRef(ticket IndexedTicket, artifact AgenticReviewArtifact) TicketReviewRef {
+func agenticReviewMetadataRef(ticket IndexedTicket, artifact AgenticReviewArtifact) ticketmetadata.ReviewRef {
 	if ref, ok := firstTicketPullRequestReviewRef(ticket.ReviewRefs); ok {
 		return ref
 	}
 
-	return TicketReviewRef{
+	return ticketmetadata.ReviewRef{
 		Type:     "local_review",
 		Provider: "chr",
 		URL:      artifact.SummaryPath,
@@ -446,14 +447,14 @@ func agenticReviewMetadataRef(ticket IndexedTicket, artifact AgenticReviewArtifa
 	}
 }
 
-func firstTicketPullRequestReviewRef(refs []TicketReviewRef) (TicketReviewRef, bool) {
+func firstTicketPullRequestReviewRef(refs []ticketmetadata.ReviewRef) (ticketmetadata.ReviewRef, bool) {
 	for _, ref := range refs {
 		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
 			return ref, true
 		}
 	}
 
-	return TicketReviewRef{}, false
+	return ticketmetadata.ReviewRef{}, false
 }
 
 func agenticReviewBlockingFindingBodies(result AgenticReviewResult) []string {

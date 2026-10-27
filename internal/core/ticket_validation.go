@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // ValidateIndexedTicket validates the corresponding package boundary value.
@@ -139,7 +141,7 @@ func validateTicketReviewMetadata(ticket IndexedTicket) error {
 	return nil
 }
 
-func validateTicketReviewRef(ref TicketReviewRef) error {
+func validateTicketReviewRef(ref ticketmetadata.ReviewRef) error {
 	if strings.TrimSpace(ref.Type) == "" {
 		return fmt.Errorf("ticket review ref type is required")
 	}

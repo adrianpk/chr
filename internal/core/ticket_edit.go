@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -241,7 +242,7 @@ func prepareNativeTicketEdit(document TicketDocument, request TicketEditRequest,
 		return record, err
 	}
 
-	fields, err := parseTicketFrontmatter(content)
+	fields, err := ticketmetadata.Parse(content)
 	if err != nil {
 		return record, err
 	}
@@ -295,7 +296,7 @@ func setNativeTicketBody(record *WorkflowRecord, document TicketDocument, reques
 	return nil
 }
 
-func setNativeTicketMetadata(record *WorkflowRecord, fields ticketFrontmatter) error {
+func setNativeTicketMetadata(record *WorkflowRecord, fields ticketmetadata.Frontmatter) error {
 	for _, name := range []string{"title", "synopsis", "priority", "severity", "type", "project_area", "assignee", "owner", "branch", "pr", "source_kind", "resolution"} {
 		if _, exists := fields.Metadata[name]; !exists {
 			continue

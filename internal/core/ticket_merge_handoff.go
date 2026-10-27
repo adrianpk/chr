@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 const (
@@ -28,7 +30,7 @@ const (
 type TicketMergeHandoff struct {
 	TicketKey string
 	Branch    string
-	ReviewRef TicketReviewRef
+	ReviewRef ticketmetadata.ReviewRef
 }
 
 // ValidateTicketMergeHandoff validates the corresponding package boundary value.
@@ -61,12 +63,12 @@ func ValidateTicketMergeHandoff(ticket IndexedTicket) (TicketMergeHandoff, error
 	}, nil
 }
 
-func ticketMergeHandoffPullRequestRef(refs []TicketReviewRef) (TicketReviewRef, error) {
+func ticketMergeHandoffPullRequestRef(refs []ticketmetadata.ReviewRef) (ticketmetadata.ReviewRef, error) {
 	for _, ref := range refs {
 		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
 			return ref, nil
 		}
 	}
 
-	return TicketReviewRef{}, fmt.Errorf("ticket merge handoff requires a pull_request review ref")
+	return ticketmetadata.ReviewRef{}, fmt.Errorf("ticket merge handoff requires a pull_request review ref")
 }

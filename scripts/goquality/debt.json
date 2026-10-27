@@ -242,18 +242,18 @@
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/ticket_parser.go::ticketFrontmatterField",
+      "id": "internal/core/ticket/metadata/parse.go::ticketFrontmatterField",
       "signature": "func(line string) (string, string, bool)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/ticket_parser.go::parseTicketScalarList",
+      "id": "internal/core/ticket/metadata/parse.go::parseTicketScalarList",
       "signature": "func(lines []string, start int) ([]string, int)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/ticket_parser.go::parseTicketReviewRefsBlock",
-      "signature": "func(lines []string, start int) ([]TicketReviewRef, int)",
+      "id": "internal/core/ticket/metadata/parse.go::parseTicketReviewRefsBlock",
+      "signature": "func(lines []string, start int) ([]ReviewRef, int)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -273,7 +273,7 @@
     },
     {
       "id": "internal/core/ticket_review_command.go::ticketReviewCommandPlan",
-      "signature": "func(ticket IndexedTicket, ref TicketReviewRef, snapshot RemoteReviewSnapshot, result string, findings []string, dryRun bool) TicketReviewCommandResult",
+      "signature": "func(ticket IndexedTicket, ref ticketmetadata.ReviewRef, snapshot RemoteReviewSnapshot, result string, findings []string, dryRun bool) TicketReviewCommandResult",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

@@ -12,6 +12,8 @@ type leafDependencyCase struct {
 
 func leafDependencyCases() []leafDependencyCase {
 	return []leafDependencyCase{
+		{"legacy fields scalar codec", "internal/core/ticket/metadata/parse.go", "package metadata\nimport _ \"" + coreImportPath + "ops/metadata\"\n", false},
+		{"legacy fields authoring cycle", "internal/core/ticket/metadata/parse.go", "package metadata\nimport _ \"" + coreImportPath + "authoring\"\n", true},
 		{"authoring coordinator", "internal/core/authoring/session_value.go", "package authoring\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"authoring namespace", "internal/core/authoring/session_check.go", "package authoring\nimport _ \"" + coreImportPath + "ops/namespace\"\n", false},
 		{"namespace authoring cycle", "internal/core/ops/namespace/namespace.go", "package namespace\nimport _ \"" + coreImportPath + "authoring\"\n", true},

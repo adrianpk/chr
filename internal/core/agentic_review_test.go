@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -183,7 +184,7 @@ func TestApplyAgenticReviewResultPassRequiresMergeHandoff(t *testing.T) {
 }
 
 func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
-	ref := TicketReviewRef{
+	ref := ticketmetadata.ReviewRef{
 		Type:     "pull_request",
 		Provider: "forgejo",
 		URL:      "https://forge.example.com/owner/repo/pulls/1",
@@ -195,7 +196,7 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 		Title:      "Ready",
 		Status:     TicketStatusReadyForReview,
 		Branch:     "feat/chr-1",
-		ReviewRefs: []TicketReviewRef{ref},
+		ReviewRefs: []ticketmetadata.ReviewRef{ref},
 	})
 
 	_, err := ApplyAgenticReviewResult(context.Background(), ApplyAgenticReviewResultOptions{
@@ -203,7 +204,7 @@ func TestApplyAgenticReviewResultPassMovesTicketToReadyForMerge(t *testing.T) {
 			IndexedTicketIdentity: IndexedTicketIdentity{
 				Key:  "CHR-1",
 				Path: ticketPath,
-			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []TicketReviewRef{ref}},
+			}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForReview}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/chr-1"}, IndexedTicketReview: IndexedTicketReview{ReviewRefs: []ticketmetadata.ReviewRef{ref}},
 		},
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionPass,

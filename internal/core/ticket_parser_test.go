@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestTicketParserParsesRenderedTicket(t *testing.T) {
@@ -57,7 +59,7 @@ func testParserRenderedTicket(createdAt, updatedAt time.Time) Ticket {
 		SourceRef:   ".chr/default/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
 		Branch:      "feat/slice-1-onboarding",
-		ReviewRefs: []TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -328,7 +330,7 @@ func assertParsedTicketReviewMetadata(t *testing.T, ticket IndexedTicket) {
 	}
 }
 
-func assertParsedTicketReviewRef(t *testing.T, ref TicketReviewRef) {
+func assertParsedTicketReviewRef(t *testing.T, ref ticketmetadata.ReviewRef) {
 	t.Helper()
 
 	matches := ref.Type == "pull_request" &&

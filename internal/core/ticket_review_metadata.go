@@ -8,6 +8,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // TicketReviewMetadataUpdater defines a package boundary interface.
@@ -19,7 +20,7 @@ type TicketReviewMetadataUpdater interface {
 type UpdateTicketReviewMetadataOptions struct {
 	Path      string
 	Branch    string
-	ReviewRef *TicketReviewRef
+	ReviewRef *ticketmetadata.ReviewRef
 	UpdatedAt time.Time
 }
 
@@ -98,12 +99,12 @@ func updateTicketReviewMetadataContent(
 	return setTicketFrontmatterScalarField(updated, "updated_at", opsmetadata.Timestamp(updatedAt), nil)
 }
 
-func upsertTicketReviewRef(content string, ref TicketReviewRef) (string, error) {
+func upsertTicketReviewRef(content string, ref ticketmetadata.ReviewRef) (string, error) {
 	if err := validateTicketReviewRef(ref); err != nil {
 		return "", err
 	}
 
-	frontmatter, err := parseTicketFrontmatter(content)
+	frontmatter, err := ticketmetadata.Parse(content)
 	if err != nil {
 		return "", err
 	}
@@ -113,8 +114,8 @@ func upsertTicketReviewRef(content string, ref TicketReviewRef) (string, error) 
 	return setTicketReviewRefsField(content, refs)
 }
 
-func upsertReviewRef(refs []TicketReviewRef, ref TicketReviewRef) []TicketReviewRef {
-	refs = append([]TicketReviewRef(nil), refs...)
+func upsertReviewRef(refs []ticketmetadata.ReviewRef, ref ticketmetadata.ReviewRef) []ticketmetadata.ReviewRef {
+	refs = append([]ticketmetadata.ReviewRef(nil), refs...)
 
 	for index, existing := range refs {
 		if reviewRefsMatch(existing, ref) {
@@ -127,7 +128,7 @@ func upsertReviewRef(refs []TicketReviewRef, ref TicketReviewRef) []TicketReview
 	return append(refs, ref)
 }
 
-func reviewRefsMatch(existing, next TicketReviewRef) bool {
+func reviewRefsMatch(existing, next ticketmetadata.ReviewRef) bool {
 	if existing.URL != "" && existing.URL == next.URL {
 		return true
 	}
@@ -138,7 +139,7 @@ func reviewRefsMatch(existing, next TicketReviewRef) bool {
 		existing.ID == next.ID
 }
 
-func setTicketReviewRefsField(content string, refs []TicketReviewRef) (string, error) {
+func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (string, error) {
 	var rendered bytes.Buffer
 
 	err := writeTicketReviewRefsField(&rendered, refs)

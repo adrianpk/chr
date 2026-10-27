@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // TicketActionID identifies a ticket action awaiting TUI confirmation.
@@ -32,7 +33,7 @@ type TicketActionRequest struct {
 	Key       string
 	Status    string
 	Branch    string
-	ReviewRef *core.TicketReviewRef
+	ReviewRef *ticketmetadata.ReviewRef
 }
 
 // TicketActionResult contains refreshed ticket state after an action.

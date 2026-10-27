@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -30,11 +30,6 @@ type ParseTicketOptions struct {
 }
 
 type ticketParser struct{}
-
-type ticketFrontmatter struct {
-	Metadata   map[string]string
-	ReviewRefs []TicketReviewRef
-}
 
 // NewTicketParser constructs the corresponding package service or value.
 func NewTicketParser() TicketParser {
@@ -58,7 +53,7 @@ func (p *ticketParser) ParseTicket(ctx context.Context, opts ParseTicketOptions)
 		return IndexedTicket{}, fmt.Errorf("stat ticket file: %w", err)
 	}
 
-	frontmatter, err := parseTicketFrontmatter(string(content))
+	frontmatter, err := ticketmetadata.Parse(string(content))
 	if err != nil {
 		return IndexedTicket{}, err
 	}
@@ -71,137 +66,12 @@ func (p *ticketParser) ParseTicket(ctx context.Context, opts ParseTicketOptions)
 	return indexedTicketFromMetadata(opts, relativePath, info, content, frontmatter)
 }
 
-func parseTicketFrontmatter(content string) (ticketFrontmatter, error) {
-	if !strings.HasPrefix(content, "---\n") {
-		return ticketFrontmatter{}, fmt.Errorf("ticket frontmatter opening delimiter is required")
-	}
-
-	remaining := strings.TrimPrefix(content, "---\n")
-
-	end := strings.Index(remaining, "\n---")
-	if end < 0 {
-		return ticketFrontmatter{}, fmt.Errorf("ticket frontmatter closing delimiter is required")
-	}
-
-	frontmatter := remaining[:end]
-	metadata := map[string]string{}
-	reviewRefs := []TicketReviewRef{}
-
-	lines := strings.Split(frontmatter, "\n")
-	for index := 0; index < len(lines); index++ {
-		key, value, ok := ticketFrontmatterField(lines[index])
-		if !ok {
-			continue
-		}
-
-		if key == "commits" && value == "" {
-			values, next := parseTicketScalarList(lines, index+1)
-			metadata[key], index = opsmetadata.QuoteList(values), next-1
-
-			continue
-		}
-
-		if key == "review_refs" && value != "[]" {
-			parsedRefs, nextIndex := parseTicketReviewRefsBlock(lines, index+1)
-			reviewRefs = parsedRefs
-			index = nextIndex - 1
-
-			continue
-		}
-
-		metadata[key] = value
-	}
-
-	return ticketFrontmatter{Metadata: metadata, ReviewRefs: reviewRefs}, nil
-}
-
-func ticketFrontmatterField(line string) (string, string, bool) {
-	if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "\t") {
-		return "", "", false
-	}
-
-	key, value, found := strings.Cut(line, ":")
-
-	return strings.TrimSpace(key), strings.TrimSpace(value), found
-}
-
-func parseTicketScalarList(lines []string, start int) ([]string, int) {
-	values := []string{}
-	index := start
-
-	for ; index < len(lines); index++ {
-		line := lines[index]
-		if !strings.HasPrefix(line, " ") && !strings.HasPrefix(line, "\t") {
-			break
-		}
-
-		if value, found := strings.CutPrefix(strings.TrimSpace(line), "- "); found {
-			values = append(values, opsmetadata.Unquote(value))
-		}
-	}
-
-	return values, index
-}
-
-func parseTicketReviewRefsBlock(lines []string, start int) ([]TicketReviewRef, int) {
-	refs := []TicketReviewRef{}
-	current := TicketReviewRef{}
-	hasCurrent := false
-	index := start
-
-	for ; index < len(lines); index++ {
-		line := lines[index]
-		if !strings.HasPrefix(line, "  ") {
-			break
-		}
-
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "- ") {
-			if hasCurrent {
-				refs = append(refs, current)
-			}
-
-			current = TicketReviewRef{}
-			hasCurrent = true
-			trimmed = strings.TrimSpace(strings.TrimPrefix(trimmed, "- "))
-		}
-
-		key, value, ok := strings.Cut(trimmed, ":")
-		if !ok || !hasCurrent {
-			continue
-		}
-
-		assignTicketReviewRefField(&current, strings.TrimSpace(key), opsmetadata.Unquote(value))
-	}
-
-	if hasCurrent {
-		refs = append(refs, current)
-	}
-
-	return refs, index
-}
-
-func assignTicketReviewRefField(ref *TicketReviewRef, key, value string) {
-	switch key {
-	case "type":
-		ref.Type = value
-	case "provider":
-		ref.Provider = value
-	case "url":
-		ref.URL = value
-	case "id":
-		ref.ID = value
-	case "status":
-		ref.Status = value
-	}
-}
-
 func indexedTicketFromMetadata(
 	opts ParseTicketOptions,
 	relativePath string,
 	info os.FileInfo,
 	content []byte,
-	frontmatter ticketFrontmatter,
+	frontmatter ticketmetadata.Frontmatter,
 ) (IndexedTicket, error) {
 	metadata := frontmatter.Metadata
 

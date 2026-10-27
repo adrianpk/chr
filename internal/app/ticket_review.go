@@ -9,6 +9,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func (factory commandFactory) ticketReviewRefCommand() *cli.Command {
@@ -189,7 +190,7 @@ func ticketReviewReferenceRequestFromCommand(cmd *cli.Command) (TicketReviewRefe
 		return TicketReviewReferenceRequest{}, fmt.Errorf("ticket review-ref provider is required when url is set")
 	}
 
-	request.Ref = &core.TicketReviewRef{
+	request.Ref = &ticketmetadata.ReviewRef{
 		Type:     cmd.String("type"),
 		Provider: cmd.String("provider"),
 		URL:      cmd.String("url"),

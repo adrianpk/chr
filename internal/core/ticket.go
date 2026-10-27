@@ -8,6 +8,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // DefaultTicketStatus defines a package boundary constant.
@@ -29,7 +30,7 @@ type Ticket struct {
 	SourceRef         string
 	Slice             string
 	Branch            string
-	ReviewRefs        []TicketReviewRef
+	ReviewRefs        []ticketmetadata.ReviewRef
 	ReviewState       string
 	ReviewRound       int
 	ReviewResult      string
@@ -44,15 +45,6 @@ type Ticket struct {
 	Body              string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
-}
-
-// TicketReviewRef describes a package boundary value.
-type TicketReviewRef struct {
-	Type     string
-	Provider string
-	URL      string
-	ID       string
-	Status   string
 }
 
 // TicketRenderer defines a package boundary interface.
@@ -228,7 +220,7 @@ func writeTicketReviewRoundField(output *bytes.Buffer, value int) error {
 	return writeTicketEncodedField(output, "review_round", strconv.Itoa(value))
 }
 
-func writeTicketReviewRefsField(output *bytes.Buffer, refs []TicketReviewRef) error {
+func writeTicketReviewRefsField(output *bytes.Buffer, refs []ticketmetadata.ReviewRef) error {
 	if len(refs) == 0 {
 		return writeTicketEncodedField(output, "review_refs", "[]")
 	}

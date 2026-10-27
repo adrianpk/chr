@@ -10,6 +10,7 @@ import (
 	_ "modernc.org/sqlite"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestTicketIndexUpsertsAndListsTickets(t *testing.T) {
@@ -85,7 +86,7 @@ func TestTicketIndexRoundTripsReviewMetadata(t *testing.T) {
 	index := newTestTicketIndex(t)
 	ticket := testIndexedTicket("CHR-1", []string{"uxui"})
 	ticket.Branch = "feat/slice-4-indexed-ticket-enrichment"
-	ticket.ReviewRefs = []TicketReviewRef{
+	ticket.ReviewRefs = []ticketmetadata.ReviewRef{
 		{
 			Type:     "pull_request",
 			Provider: "forgejo",
@@ -276,7 +277,7 @@ func assertIndexedTicketReviewMetadata(t *testing.T, got, want IndexedTicket) {
 	assertBlockingFindings(t, got.BlockingFindings, want.BlockingFindings)
 }
 
-func assertTicketReviewRefs(t *testing.T, got, want []TicketReviewRef) {
+func assertTicketReviewRefs(t *testing.T, got, want []ticketmetadata.ReviewRef) {
 	t.Helper()
 
 	if len(got) != len(want) {

@@ -14,6 +14,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -316,7 +317,7 @@ func RenderAuthoringSession(session authoringcore.Session, paths AuthoringSessio
 
 // ParseAuthoringSession parses the corresponding package data.
 func ParseAuthoringSession(content string) (authoringcore.Session, error) {
-	metadata, err := parseTicketFrontmatter(content)
+	metadata, err := ticketmetadata.Parse(content)
 	if err != nil {
 		return authoringcore.Session{}, err
 	}

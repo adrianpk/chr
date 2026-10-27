@@ -1,6 +1,10 @@
 package core
 
-import "time"
+import (
+	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+)
 
 // IndexedTicket describes a package boundary value.
 type IndexedTicket struct {
@@ -59,7 +63,7 @@ type IndexedTicketSource struct {
 
 // IndexedTicketReview groups the retained review fields without changing their wire order.
 type IndexedTicketReview struct {
-	ReviewRefs        []TicketReviewRef
+	ReviewRefs        []ticketmetadata.ReviewRef
 	ReviewState       string
 	ReviewRound       int
 	ReviewResult      string

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestWorkerContextMaterializerWritesContext(t *testing.T) {
@@ -169,7 +171,7 @@ func TestMaterializeWorkerContextForExecutionIncludesRepairHandoff(t *testing.T)
 		ReviewResult:      "needs_changes",
 		ReviewCommentsURL: "https://forge.example.com/adrianpk/chr/pulls/279",
 		BlockingFindings:  []string{"correctness: Missing invalid input handling"},
-		ReviewRefs: []TicketReviewRef{{
+		ReviewRefs: []ticketmetadata.ReviewRef{{
 			Type:     "pull_request",
 			Provider: "forgejo",
 			URL:      "https://forge.example.com/adrianpk/chr/pulls/279",
@@ -433,7 +435,7 @@ func TestMaterializeWorkerContextForExecutionBlocksRepairWithoutReviewComments(t
 		Branch:       "feat/slice-8-repair-handoff-docs",
 		ReviewState:  "changes_requested",
 		ReviewResult: "needs_changes",
-		ReviewRefs: []TicketReviewRef{{
+		ReviewRefs: []ticketmetadata.ReviewRef{{
 			Type:     "pull_request",
 			Provider: "forgejo",
 			URL:      "https://forge.example.com/adrianpk/chr/pulls/279",

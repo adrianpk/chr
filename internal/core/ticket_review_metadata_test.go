@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
@@ -21,7 +23,7 @@ func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 	err := NewTicketReviewMetadataUpdater().UpdateReviewMetadata(context.Background(), UpdateTicketReviewMetadataOptions{
 		Path:   path,
 		Branch: "feat/slice-2-pr-reference-workflow",
-		ReviewRef: &TicketReviewRef{
+		ReviewRef: &ticketmetadata.ReviewRef{
 			Type:     "pull_request",
 			Provider: "forgejo",
 			URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
@@ -56,7 +58,7 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 		Key:    "CHR-1",
 		Title:  "Do something",
 		Status: TicketStatusInProgress,
-		ReviewRefs: []TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -71,7 +73,7 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 
 	err := NewTicketReviewMetadataUpdater().UpdateReviewMetadata(context.Background(), UpdateTicketReviewMetadataOptions{
 		Path: path,
-		ReviewRef: &TicketReviewRef{
+		ReviewRef: &ticketmetadata.ReviewRef{
 			Type:     "pull_request",
 			Provider: "forgejo",
 			URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
@@ -123,7 +125,7 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 		Title:  "Do something",
 		Status: TicketStatusInProgress,
 		Branch: "feat/slice-2-pr-reference-workflow",
-		ReviewRefs: []TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -158,7 +160,7 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 		Status:      TicketStatusReadyForReview,
 		Branch:      "feat/slice-1-merger-handoff-contract",
 		ReviewState: "changes_requested",
-		ReviewRefs: []TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -193,7 +195,7 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 		Branch:       "feat/slice-1-merger-handoff-contract",
 		ReviewState:  TicketReviewCommandResultPass,
 		ReviewResult: TicketReviewCommandResultPass,
-		ReviewRefs: []TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",

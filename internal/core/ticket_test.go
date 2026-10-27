@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestTicketRendererRendersFrontmatterAndBody(t *testing.T) {
@@ -37,7 +39,7 @@ func testRenderedTicket() Ticket {
 		SourceRef:   ".chr/default/plans/onboarding-plan.md",
 		Slice:       "Slice 1",
 		Branch:      "feat/slice-1-onboarding",
-		ReviewRefs: []TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",

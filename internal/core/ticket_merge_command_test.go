@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestRunTicketMergeCommandDryRunDoesNotMutateTicket(t *testing.T) {
@@ -211,7 +213,7 @@ func writeMergeCommandTicket(t *testing.T) (IndexedTicket, string) {
 		Branch:       "feat/slice-3-merge-execution-command",
 		ReviewState:  TicketReviewCommandResultPass,
 		ReviewResult: TicketReviewCommandResultPass,
-		ReviewRefs: []TicketReviewRef{{
+		ReviewRefs: []ticketmetadata.ReviewRef{{
 			Type:     "pull_request",
 			Provider: "forgejo",
 			URL:      "https://forge.example.com/owner/repo/pulls/285",

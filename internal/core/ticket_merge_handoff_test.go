@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestValidateTicketMergeHandoffAcceptsPassedReview(t *testing.T) {
@@ -13,7 +15,7 @@ func TestValidateTicketMergeHandoffAcceptsPassedReview(t *testing.T) {
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
 	ticket.ReviewState = TicketReviewCommandResultPass
 	ticket.ReviewResult = TicketReviewCommandResultPass
-	ticket.ReviewRefs = []TicketReviewRef{{
+	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
 		URL:      "https://forge.example.com/owner/repo/pulls/281",
@@ -42,7 +44,7 @@ func TestValidateTicketMergeHandoffRejectsMissingPassedReview(t *testing.T) {
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
 	ticket.ReviewState = "changes_requested"
 	ticket.ReviewResult = TicketReviewCommandResultNeedsChanges
-	ticket.ReviewRefs = []TicketReviewRef{{
+	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
 		URL:      "https://forge.example.com/owner/repo/pulls/281",

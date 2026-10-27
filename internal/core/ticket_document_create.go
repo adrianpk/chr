@@ -11,6 +11,7 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // CreateTicketDocument allocates through the existing canonical envelope owner.
@@ -80,7 +81,7 @@ func validateTicketCreationInput(opts TicketBoardReadOptions, key string, reques
 }
 
 func createNativeTicketDocument(ctx context.Context, opts TicketBoardReadOptions, key string, request TicketEditRequest, content string) (TicketDocument, error) {
-	front, err := parseTicketFrontmatter(content)
+	front, err := ticketmetadata.Parse(content)
 	if err != nil {
 		return TicketDocument{}, err
 	}

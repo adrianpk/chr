@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -931,7 +932,7 @@ func writeTrustedAutoMergeLoopConfig(t *testing.T, projectDir string) {
 func testLoopTicketWithPullRequestRef(key, title string) core.Ticket {
 	ticket := testLoopTicket(key, title, core.TicketStatusReadyForDev, "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"})
 	ticket.Branch = "feat/slice-2-pr-reference-workflow"
-	ticket.ReviewRefs = []core.TicketReviewRef{{
+	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
 		URL:      "https://forge.example.com/adrianpk/chr/pulls/274",

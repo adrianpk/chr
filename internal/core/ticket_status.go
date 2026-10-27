@@ -7,6 +7,7 @@ import (
 	"time"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // TicketStatusUpdater defines a package boundary interface.
@@ -124,7 +125,7 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 		return nil
 	}
 
-	frontmatter, err := parseTicketFrontmatter(content)
+	frontmatter, err := ticketmetadata.Parse(content)
 	if err != nil {
 		return err
 	}
@@ -145,7 +146,7 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 	return nil
 }
 
-func validateReadyForMergeTransitionMetadata(frontmatter ticketFrontmatter) error {
+func validateReadyForMergeTransitionMetadata(frontmatter ticketmetadata.Frontmatter) error {
 	reviewRound, err := optionalTicketInt(frontmatter.Metadata["review_round"])
 	if err != nil {
 		return err
@@ -165,7 +166,7 @@ func validateReadyForMergeTransitionMetadata(frontmatter ticketFrontmatter) erro
 	return err
 }
 
-func hasPullRequestReviewRef(refs []TicketReviewRef) bool {
+func hasPullRequestReviewRef(refs []ticketmetadata.ReviewRef) bool {
 	for _, ref := range refs {
 		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
 			return true

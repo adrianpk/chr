@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 const (
@@ -56,7 +58,7 @@ type TicketMergePreflightOptions struct {
 type TicketMergePreflightResult struct {
 	Allowed       bool
 	TicketKey     string
-	ReviewRef     TicketReviewRef
+	ReviewRef     ticketmetadata.ReviewRef
 	Remote        RemoteReviewSnapshot
 	ExpectedBase  string
 	MergeStrategy string

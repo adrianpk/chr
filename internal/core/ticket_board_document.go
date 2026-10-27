@@ -8,6 +8,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -24,7 +25,7 @@ func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
 
 	ticket := IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Path: path, RelativePath: filepath.ToSlash(relative), Key: filepath.ToSlash(relative)}, IndexedTicketSummary: IndexedTicketSummary{Title: filepath.Base(path)}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: contenthash.Sum(data)}}
 
-	front, err := parseTicketFrontmatter(string(data))
+	front, err := ticketmetadata.Parse(string(data))
 	if err != nil {
 		ticket.AttentionReasons = []string{err.Error()}
 

@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // EvidenceReadinessRequest describes inputs for ready-for-review evidence checks.
@@ -13,7 +15,7 @@ type EvidenceReadinessRequest struct {
 	Execution      *ExecutionRecord
 	Result         *ExecutionResult
 	Gherkin        EvidenceGherkinContext
-	ReviewRefs     []TicketReviewRef
+	ReviewRefs     []ticketmetadata.ReviewRef
 }
 
 // EvidenceReadinessResult describes the ready-for-review evidence decision.

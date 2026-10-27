@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
@@ -158,7 +160,7 @@ func testMergePreflightTicket() IndexedTicket {
 		}, IndexedTicketSummary: IndexedTicketSummary{Title: "Test ticket"}, IndexedTicketClassification: IndexedTicketClassification{Status: TicketStatusReadyForMerge}, IndexedTicketSource: IndexedTicketSource{Branch: "feat/slice-2-merger-preflight"}, IndexedTicketReview: IndexedTicketReview{
 			ReviewState:  TicketReviewCommandResultPass,
 			ReviewResult: TicketReviewCommandResultPass,
-			ReviewRefs: []TicketReviewRef{{
+			ReviewRefs: []ticketmetadata.ReviewRef{{
 				Type:     "pull_request",
 				Provider: "forgejo",
 				URL:      "https://forge.example.com/owner/repo/pulls/284",

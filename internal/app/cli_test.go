@@ -29,6 +29,7 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -3422,7 +3423,7 @@ func testReviewRepairTicket() core.Ticket {
 	ticket.ReviewResult = core.TicketReviewCommandResultNeedsChanges
 	ticket.ReviewRound = 1
 	ticket.ReviewCommentsURL = "https://forge.example.com/adrianpk/chr/pulls/274"
-	ticket.ReviewRefs = []core.TicketReviewRef{{
+	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
 		Provider: "forgejo",
 		URL:      "https://forge.example.com/adrianpk/chr/pulls/274",
@@ -4361,7 +4362,7 @@ func TestTicketShowPrintsIndexedTicket(t *testing.T) {
 		UseCase:     "onboarding",
 		ProjectArea: "uxui",
 		Branch:      "feat/slice-1-ticket-review-metadata-contract",
-		ReviewRefs: []core.TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -4442,7 +4443,7 @@ func testTicketShowReviewTicket() core.Ticket {
 		UseCase:     "onboarding",
 		ProjectArea: "uxui",
 		Branch:      "feat/slice-1-ticket-review-metadata-contract",
-		ReviewRefs: []core.TicketReviewRef{
+		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
 				Provider: "forgejo",
@@ -5044,7 +5045,7 @@ func assertApplyResultExecutionReportEvidence(t *testing.T, content string) {
 func testTicketWithReviewRef() core.Ticket {
 	ticket := testTicket()
 	ticket.Branch = "feat/slice-2-pr-reference-workflow"
-	ticket.ReviewRefs = []core.TicketReviewRef{
+	ticket.ReviewRefs = []ticketmetadata.ReviewRef{
 		{
 			Type:     "pull_request",
 			Provider: "forgejo",

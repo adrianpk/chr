@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -342,7 +343,7 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 }
 
 func (b WorkspaceGraphBuilder) ticketNode(path string, info os.FileInfo, content []byte) (WorkspaceNode, error) {
-	fields, err := parseTicketFrontmatter(string(content))
+	fields, err := ticketmetadata.Parse(string(content))
 	if err != nil {
 		return WorkspaceNode{}, err
 	}
