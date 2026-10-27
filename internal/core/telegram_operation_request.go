@@ -111,7 +111,7 @@ func normalizeTelegramOperation(request TelegramOperationRequest) (TelegramOpera
 		return request, errTelegramReceiverConflict
 	}
 
-	if err := validateWorkflowMutationBinding(WorkflowMutationBinding{RequestID: "request", Operator: request.Operator}); err != nil {
+	if err := (workflowstate.MutationBinding{RequestID: "request", Operator: request.Operator}).Validate(); err != nil {
 		return request, err
 	}
 

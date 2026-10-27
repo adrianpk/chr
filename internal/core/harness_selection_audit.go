@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func applyHarnessSelectionAudit(config *WorkspaceConfig, values map[string]string) error {
@@ -34,11 +36,11 @@ func applyHarnessSelectionAudit(config *WorkspaceConfig, values map[string]strin
 }
 
 func validateHarnessSelectionAudit(audit HarnessSelectionAudit) error {
-	if (WorkflowMutationBinding{RequestID: audit.ProjectRef, Operator: audit.ChangedBy}).Validate() != nil || !IsValidOperatorID(audit.ChangedBy) {
+	if (workflowstate.MutationBinding{RequestID: audit.ProjectRef, Operator: audit.ChangedBy}).Validate() != nil || !IsValidOperatorID(audit.ChangedBy) {
 		return errors.New("invalid harness selection project or actor")
 	}
 
-	if (WorkflowMutationBinding{RequestID: audit.RequestID, Operator: audit.ChangedBy}).Validate() != nil || !harnessSelectionDigest(audit.RequestDigest) {
+	if (workflowstate.MutationBinding{RequestID: audit.RequestID, Operator: audit.ChangedBy}).Validate() != nil || !harnessSelectionDigest(audit.RequestDigest) {
 		return errors.New("invalid harness selection request metadata")
 	}
 

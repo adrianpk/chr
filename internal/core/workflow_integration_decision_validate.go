@@ -83,7 +83,7 @@ func validateWorkflowReplayPayload(answer WorkflowIntegrationAnswer) error {
 }
 
 func validWorkflowDecisionHeader(record WorkflowIntegrationDecisions) bool {
-	return record.SchemaVersion == 1 && validWorkflowRequestKey(record.ID) && record.Revision >= 1 && record.Revision <= WorkflowPageLimit && record.CandidateRevision >= 1 && slices.Contains([]string{"waiting", "resolved"}, record.State) && len(record.Requests) != 0 && len(record.Answers) <= WorkflowPageLimit
+	return record.SchemaVersion == 1 && workflowstate.ValidRequestKey(record.ID) && record.Revision >= 1 && record.Revision <= WorkflowPageLimit && record.CandidateRevision >= 1 && slices.Contains([]string{"waiting", "resolved"}, record.State) && len(record.Requests) != 0 && len(record.Answers) <= WorkflowPageLimit
 }
 
 func validateWorkflowDecisionHistory(record WorkflowIntegrationDecisions) error {
@@ -108,7 +108,7 @@ func validWorkflowDecisionAnswerSeal(record WorkflowIntegrationDecisions, answer
 }
 
 func validWorkflowDecisionAnswerActor(answer WorkflowIntegrationAnswer) bool {
-	return validWorkflowRequestKey(answer.ID) && validWorkflowRequestKey(answer.Actor) && validWorkflowMergerText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
+	return workflowstate.ValidRequestKey(answer.ID) && workflowstate.ValidRequestKey(answer.Actor) && validWorkflowMergerText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
 }
 
 func validWorkflowDecisionInterpretation(question WorkflowMergerDecision, answer WorkflowIntegrationAnswer) bool {

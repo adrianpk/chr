@@ -71,7 +71,7 @@ type WorkflowNativeReceipt struct {
 }
 
 func validateWorkflowEvidenceRef(id string, ref WorkflowEvidenceRef) error {
-	if !validWorkflowRequestKey(id) || filepath.Base(id) != id || strings.ContainsAny(ref.Path, "\\\x00") || !filepath.IsLocal(ref.Path) || filepath.ToSlash(filepath.Clean(ref.Path)) != ref.Path || !validWorkflowNativeFingerprint(ref.Hash) {
+	if !workflowstate.ValidRequestKey(id) || filepath.Base(id) != id || strings.ContainsAny(ref.Path, "\\\x00") || !filepath.IsLocal(ref.Path) || filepath.ToSlash(filepath.Clean(ref.Path)) != ref.Path || !validWorkflowNativeFingerprint(ref.Hash) {
 		return workflowstate.ErrConflict
 	}
 
@@ -266,7 +266,7 @@ func validateWorkflowNativeReceiptSchema(receipt WorkflowReceipt) error {
 }
 
 func validWorkflowNativeRecordOwner(b WorkflowNativeRecordBinding) bool {
-	return b.SchemaVersion == 1 && validWorkflowRequestKey(b.EntryID) && b.Unit.ID != "" && (b.Unit.Kind == "slice" || b.Unit.Kind == "ticket")
+	return b.SchemaVersion == 1 && workflowstate.ValidRequestKey(b.EntryID) && b.Unit.ID != "" && (b.Unit.Kind == "slice" || b.Unit.Kind == "ticket")
 }
 
 func validWorkflowNativeCandidateHeader(candidate WorkflowIntegrationCandidate) bool {

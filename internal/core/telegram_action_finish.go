@@ -189,7 +189,7 @@ func telegramActionResponseSource(ctx context.Context, tx *sql.Tx, claim Telegra
 }
 
 func confirmedTelegramControlReceipt(claim TelegramActionClaim, result TelegramActionResult) bool {
-	return claim.Request.OperationID == "work.control" && claim.Answer.ID != "" && result.State == "confirmed" && result.ReceiptRef == workflowMutationReceiptPath(claim.Request.ID)
+	return claim.Request.OperationID == "work.control" && claim.Answer.ID != "" && result.State == "confirmed" && result.ReceiptRef == workflowstate.MutationReceiptPath(claim.Request.ID)
 }
 
 func queueTelegramActionResultResponse(ctx context.Context, tx *sql.Tx, retained TelegramActionClaim, result TelegramActionResult, now time.Time) error {

@@ -10,7 +10,7 @@ import (
 func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore, WorkflowControlMutationRequest, WorkflowPullRequestProvider) {
 	t.Helper()
 
-	binding := WorkflowMutationBinding{RequestID: "control-receipt", Operator: "operator"}
+	binding := workflowstate.MutationBinding{RequestID: "control-receipt", Operator: "operator"}
 	request := WorkflowControlMutationRequest{Binding: binding, Action: action}
 
 	var (

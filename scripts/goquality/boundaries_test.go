@@ -12,6 +12,8 @@ func TestLeafDependencies(t *testing.T) {
 		name, path, source string
 		blocked            bool
 	}{
+		{"receipt digest", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "contenthash\"\n", false},
+		{"state coordinator", "internal/core/workflow/state/mutation.go", "package state\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"shared values", "internal/core/notify/store.go", "package notify\nimport db \"" + coreImportPath + "database\"\n", false},
 		{"root", "internal/core/notify/store.go", "package notify\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"coordinator", "internal/core/gate/policy.go", "package gate\nimport w \"" + coreImportPath + "workflow\"\n", true},

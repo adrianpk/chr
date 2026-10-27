@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) prepareSliceRecordMutation(ctx context.Context, store *core.WorkflowStore, binding core.WorkflowMutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
+func (s service) prepareSliceRecordMutation(ctx context.Context, store *core.WorkflowStore, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
 	parent, err := s.nativeMutationTarget(ctx, store, RecordSliceSet, request.ParentID)
 	if err != nil {
 		return core.WorkflowMutationRequest{}, err

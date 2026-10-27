@@ -19,7 +19,7 @@ func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations te
 		return PreparedAuthoringWork{}, err
 	}
 
-	if owner.Binding != (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) {
+	if owner.Binding != (workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}) {
 		return PreparedAuthoringWork{}, workflowstate.ErrConflict
 	}
 
@@ -69,7 +69,7 @@ func (r telegramReceiver) bindInitialPreparedWorkAuthority(ctx context.Context, 
 		return prepared, nil
 	}
 
-	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, core.WorkflowMutationBinding{RequestID: instruction.DevelopmentRef, Operator: request.Operator}, prepared.Scope.Hash)
+	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: instruction.DevelopmentRef, Operator: request.Operator}, prepared.Scope.Hash)
 	prepared.Authorization = &grant
 
 	return prepared, err
@@ -107,7 +107,7 @@ func telegramRetainedPreparedWork(request core.TelegramOperationRequest) (Prepar
 		return prepared, err
 	}
 
-	if scope.Binding != (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) || scope.ProjectID != request.Target.ProjectID || scope.Namespace != request.Target.Namespace || telegramWorkScopeRequest(scope) != owner {
+	if scope.Binding != (workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}) || scope.ProjectID != request.Target.ProjectID || scope.Namespace != request.Target.Namespace || telegramWorkScopeRequest(scope) != owner {
 		return prepared, workflowstate.ErrConflict
 	}
 

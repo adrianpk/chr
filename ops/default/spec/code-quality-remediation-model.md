@@ -397,3 +397,16 @@ locally owned notification interfaces change with their implementations. The
 existing external-interface exception remains unchanged. Static import fixtures
 cover forbidden aliases, descendants, generated sources and build variants; real
 SQLite/HTTP/Git/child/filesystem fixtures cover the behavior of direct consumers.
+
+
+## Slice 7 shared binding prerequisite
+
+workflow/state.MutationBinding preserves the original request_id/operator fields,
+JSON tags and order. Its validation uses the exact original predicates and error.
+ValidRequestKey retains whitespace, length and control-character rules.
+MutationReceiptPath retains the same SHA-256/hex receipt filename and slash path.
+Root workflow and Telegram callers share this pure owner; receipt serialization,
+verification, containment, locks and durable mutation remain in the existing store.
+Two outstanding debt signatures explicitly follow the qualified type name, with
+no allowance or ceiling change. Frozen record and real receipt regressions
+protect the representations before the Telegram package move.

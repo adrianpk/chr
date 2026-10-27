@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (factory commandFactory) harnessCommand() *cli.Command {
@@ -98,7 +99,7 @@ func (factory commandFactory) harnessChangeCommand(clearChoice bool) *cli.Comman
 }
 
 func harnessChangeFromCommand(cmd *cli.Command, clearChoice bool) (core.HarnessSelectionChangeRequest, error) {
-	result := core.HarnessSelectionChangeRequest{ExpectedRevision: cmd.String("config-revision"), Binding: core.WorkflowMutationBinding{RequestID: cmd.String("request-id")}}
+	result := core.HarnessSelectionChangeRequest{ExpectedRevision: cmd.String("config-revision"), Binding: workflowstate.MutationBinding{RequestID: cmd.String("request-id")}}
 	if cmd.NArg() != 0 {
 		return result, fmt.Errorf("harness changes do not accept positional arguments")
 	}

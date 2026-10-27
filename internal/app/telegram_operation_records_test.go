@@ -35,7 +35,7 @@ func telegramRecordText(value string) *string { return &value }
 func telegramApplyRecord(t *testing.T, s service, id string, request RecordMutationRequest) RecordMutationResult {
 	t.Helper()
 
-	prepared, err := s.PrepareRecordMutation(t.Context(), "default", core.WorkflowMutationBinding{RequestID: id, Operator: "maintainer"}, request)
+	prepared, err := s.PrepareRecordMutation(t.Context(), "default", workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, request)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +83,7 @@ func TestTelegramOperationTicketRecords(t *testing.T) {
 		t.Fatal("metadata update lost requirements")
 	}
 
-	_, err = operations.PrepareRecordMutation(t.Context(), "default", core.WorkflowMutationBinding{RequestID: "stale", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordTicket, Action: "update", Identity: first.Record.Identity, ExpectedRevision: first.Record.Revision, ExpectedHash: first.Record.SourceHash, Title: telegramRecordText("stale")})
+	_, err = operations.PrepareRecordMutation(t.Context(), "default", workflowstate.MutationBinding{RequestID: "stale", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordTicket, Action: "update", Identity: first.Record.Identity, ExpectedRevision: first.Record.Revision, ExpectedHash: first.Record.SourceHash, Title: telegramRecordText("stale")})
 	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale ticket observation accepted", err)
 	}
@@ -134,7 +134,7 @@ func TestTelegramOperationSliceRecords(t *testing.T) {
 func TestTelegramOperationCaseRecords(t *testing.T) {
 	operations := telegramOperationTestService(t)
 
-	prepared, err := operations.PrepareRecordMutation(t.Context(), "team", core.WorkflowMutationBinding{RequestID: "case", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordUseCase, Action: "create", Title: telegramRecordText("Example case"), Synopsis: telegramRecordText("A description"), Context: telegramRecordText("Initial context")})
+	prepared, err := operations.PrepareRecordMutation(t.Context(), "team", workflowstate.MutationBinding{RequestID: "case", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordUseCase, Action: "create", Title: telegramRecordText("Example case"), Synopsis: telegramRecordText("A description"), Context: telegramRecordText("Initial context")})
 	if err != nil || prepared.Case.Namespace != "team" {
 		t.Fatal("case namespace was retargeted", prepared, err)
 	}
@@ -165,7 +165,7 @@ func TestTelegramOperationRecordGuards(t *testing.T) {
 	}
 
 	request := RecordMutationRequest{Kind: RecordTicket, Action: "pause", Title: telegramRecordText("forged")}
-	if _, err := operations.PrepareRecordMutation(t.Context(), "default", core.WorkflowMutationBinding{RequestID: "unsupported", Operator: "maintainer"}, request); !errors.Is(err, ErrRecordUnsupported) {
+	if _, err := operations.PrepareRecordMutation(t.Context(), "default", workflowstate.MutationBinding{RequestID: "unsupported", Operator: "maintainer"}, request); !errors.Is(err, ErrRecordUnsupported) {
 		t.Fatal("unsupported lifecycle action accepted", err)
 	}
 
@@ -175,7 +175,7 @@ func TestTelegramOperationRecordGuards(t *testing.T) {
 
 	descriptor := core.WorkflowSlice{ID: "slice", Order: 1, ContractRef: "plan/contract.json", ContractHash: recordDigest([]byte(contract))}
 
-	prepared, err := operations.PrepareRecordMutation(t.Context(), "default", core.WorkflowMutationBinding{RequestID: "changed-contract", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordSlice, Action: "create", ParentID: set.Record.Identity, ExpectedRevision: set.Record.Revision, ExpectedHash: set.Record.SourceHash, Slice: &descriptor})
+	prepared, err := operations.PrepareRecordMutation(t.Context(), "default", workflowstate.MutationBinding{RequestID: "changed-contract", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordSlice, Action: "create", ParentID: set.Record.Identity, ExpectedRevision: set.Record.Revision, ExpectedHash: set.Record.SourceHash, Slice: &descriptor})
 	if err != nil {
 		t.Fatal(err)
 	}

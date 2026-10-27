@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Actual authoring admission, provider failure and a rebuilt service retain the
@@ -109,7 +110,7 @@ func changeGenerationFixture(ctx context.Context, operations service, profile st
 	}
 
 	request := core.HarnessSelectionChangeRequest{
-		Binding:    core.WorkflowMutationBinding{RequestID: "switch-" + profile, Operator: "maintainer"},
+		Binding:    workflowstate.MutationBinding{RequestID: "switch-" + profile, Operator: "maintainer"},
 		ProjectRef: operations.projectContext.ProjectID, ExpectedRevision: config.Revision(), Generation: &profile,
 	}
 	_, err = operations.ChangeHarnessSelections(ctx, request, func(context.Context) error { return nil })

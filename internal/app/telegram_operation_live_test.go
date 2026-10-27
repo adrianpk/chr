@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramOperationAppFixture(t *testing.T) *telegramConversationAppFixture {
@@ -185,7 +186,7 @@ type telegramMoveRecordRoot struct {
 	replacement string
 }
 
-func (s telegramMoveRecordRoot) PrepareTelegramRecord(ctx context.Context, target core.TelegramOperationTarget, binding core.WorkflowMutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
+func (s telegramMoveRecordRoot) PrepareTelegramRecord(ctx context.Context, target core.TelegramOperationTarget, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
 	prepared, err := s.service.PrepareTelegramRecord(ctx, target, binding, request)
 	if err != nil {
 		return prepared, err

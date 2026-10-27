@@ -15,7 +15,7 @@ import (
 )
 
 func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringContinuationRequest, string, error) {
-	if err := validateWorkflowMutationBinding(request.Binding); err != nil {
+	if err := request.Binding.Validate(); err != nil {
 		return request, "", err
 	}
 

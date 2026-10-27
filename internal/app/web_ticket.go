@@ -75,12 +75,12 @@ func webTicketPatch(fields map[string]string) map[string]string {
 	return patch
 }
 
-func webTicketMutationBinding(requestID string) core.WorkflowMutationBinding {
+func webTicketMutationBinding(requestID string) workflowstate.MutationBinding {
 	if strings.TrimSpace(requestID) == "" {
 		requestID = rand.Text()
 	}
 
-	return core.WorkflowMutationBinding{RequestID: requestID, Operator: "web"}
+	return workflowstate.MutationBinding{RequestID: requestID, Operator: "web"}
 }
 
 func webTicketFailure(err error) webui.WriteActionResponse {

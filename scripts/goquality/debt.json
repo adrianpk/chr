@@ -228,13 +228,13 @@
     },
     {
       "id": "internal/app/telegram_control_service.go::telegramControlService.ReadTelegramControlReceipt",
-      "signature": "func(context.Context, core.TelegramOperationTarget, core.WorkflowMutationBinding, WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "signature": "func(context.Context, core.TelegramOperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
+      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 7 shared binding qualification; see slice-7-signatures ledger."
     },
     {
       "id": "internal/app/telegram_control_service.go::service.ReadTelegramControlReceipt",
-      "signature": "func(ctx context.Context, target core.TelegramOperationTarget, binding core.WorkflowMutationBinding, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "signature": "func(ctx context.Context, target core.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
+      "reason": "Existing production debt; assigned to Slice 7 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. Explicit Slice 7 shared binding qualification; see slice-7-signatures ledger."
     },
     {
       "id": "internal/app/telegram_conversation.go::telegramConversationInput",

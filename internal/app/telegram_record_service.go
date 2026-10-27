@@ -10,7 +10,7 @@ import (
 
 type telegramRecordService interface {
 	ReadTelegramRecords(context.Context, core.TelegramOperationTarget, RecordQuery) (RecordPage, error)
-	PrepareTelegramRecord(context.Context, core.TelegramOperationTarget, core.WorkflowMutationBinding, RecordMutationRequest) (PreparedRecordMutation, error)
+	PrepareTelegramRecord(context.Context, core.TelegramOperationTarget, workflowstate.MutationBinding, RecordMutationRequest) (PreparedRecordMutation, error)
 	ApplyTelegramRecord(context.Context, core.TelegramOperationTarget, PreparedRecordMutation) (RecordMutationResult, error)
 }
 
@@ -43,7 +43,7 @@ func (s service) ReadTelegramRecords(ctx context.Context, target core.TelegramOp
 }
 
 // PrepareTelegramRecord uses the central owner boundary after project resolution.
-func (s service) PrepareTelegramRecord(ctx context.Context, target core.TelegramOperationTarget, binding core.WorkflowMutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
+func (s service) PrepareTelegramRecord(ctx context.Context, target core.TelegramOperationTarget, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
 	scoped, err := s.telegramProjectService(ctx, target)
 	if err != nil {
 		return PreparedRecordMutation{}, err

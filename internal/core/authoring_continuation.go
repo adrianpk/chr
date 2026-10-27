@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AuthoringQuestionBinding identifies the canonical current prompt, independently
@@ -56,19 +58,19 @@ const (
 // AuthoringContinuationRequest binds creation, a question, an answer, generation
 // or refinement to one immutable caller-neutral request and observed image.
 type AuthoringContinuationRequest struct {
-	Binding             WorkflowMutationBinding     `json:"binding"`
-	ProjectID           string                      `json:"project_id"`
-	Namespace           string                      `json:"namespace"`
-	SessionID           string                      `json:"session_id"`
-	Action              AuthoringContinuationAction `json:"action"`
-	Target              AuthoringArtifactKind       `json:"target"`
-	Topic               string                      `json:"topic"`
-	Capture             string                      `json:"capture"`
-	OriginalInstruction string                      `json:"original_instruction,omitempty"`
-	Instructions        string                      `json:"instructions"`
-	ExpectedRevision    int64                       `json:"expected_revision"`
-	ExpectedSourceHash  string                      `json:"expected_source_hash"`
-	Question            *AuthoringQuestionBinding   `json:"question,omitempty"`
+	Binding             workflowstate.MutationBinding `json:"binding"`
+	ProjectID           string                        `json:"project_id"`
+	Namespace           string                        `json:"namespace"`
+	SessionID           string                        `json:"session_id"`
+	Action              AuthoringContinuationAction   `json:"action"`
+	Target              AuthoringArtifactKind         `json:"target"`
+	Topic               string                        `json:"topic"`
+	Capture             string                        `json:"capture"`
+	OriginalInstruction string                        `json:"original_instruction,omitempty"`
+	Instructions        string                        `json:"instructions"`
+	ExpectedRevision    int64                         `json:"expected_revision"`
+	ExpectedSourceHash  string                        `json:"expected_source_hash"`
+	Question            *AuthoringQuestionBinding     `json:"question,omitempty"`
 }
 
 // AuthoringDraft is generated data; the owner assigns identities, paths, revisions

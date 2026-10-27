@@ -120,7 +120,7 @@ func TestHarnessSelectionChangeClear(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := HarnessSelectionChangeRequest{Binding: WorkflowMutationBinding{RequestID: "clear", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: first.Revision, Generation: harnessSelectionTestChoice("")}
+	request := HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "clear", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: first.Revision, Generation: harnessSelectionTestChoice("")}
 
 	result, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
 	if err != nil || result.Worker != "alpha" || result.Generation != "" {
@@ -173,7 +173,7 @@ func TestHarnessSelectionNullProfile(t *testing.T) {
 }
 
 func harnessSelectionTestRequest(id, revision, profile string) HarnessSelectionChangeRequest {
-	return HarnessSelectionChangeRequest{Binding: WorkflowMutationBinding{RequestID: id, Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: revision, Worker: harnessSelectionTestChoice(profile), Generation: harnessSelectionTestChoice(profile)}
+	return HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: revision, Worker: harnessSelectionTestChoice(profile), Generation: harnessSelectionTestChoice(profile)}
 }
 
 func harnessSelectionTestOptions(request HarnessSelectionChangeRequest) HarnessSelectionChangeOptions {

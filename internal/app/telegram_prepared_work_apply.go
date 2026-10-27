@@ -103,7 +103,7 @@ func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, 
 		return err
 	}
 
-	if instruction.DevelopmentRef == "" || prepared.Authorization.Binding != (core.WorkflowMutationBinding{RequestID: instruction.DevelopmentRef, Operator: request.Operator}) {
+	if instruction.DevelopmentRef == "" || prepared.Authorization.Binding != (workflowstate.MutationBinding{RequestID: instruction.DevelopmentRef, Operator: request.Operator}) {
 		return workflowstate.ErrConflict
 	}
 

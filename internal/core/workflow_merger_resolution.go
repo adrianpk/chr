@@ -59,7 +59,7 @@ func validateWorkflowMergerDecisions(decisions []WorkflowMergerDecision, input W
 
 	seen := map[string]bool{}
 	for _, decision := range decisions {
-		if !validWorkflowRequestKey(decision.ID) || seen[decision.ID] || !validWorkflowMergerText(decision.Issue) || !validWorkflowRequestKey(decision.Authority) {
+		if !workflowstate.ValidRequestKey(decision.ID) || seen[decision.ID] || !validWorkflowMergerText(decision.Issue) || !workflowstate.ValidRequestKey(decision.Authority) {
 			return workflowstate.ErrConflict
 		}
 

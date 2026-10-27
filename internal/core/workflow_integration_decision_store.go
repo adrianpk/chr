@@ -75,7 +75,7 @@ func (s *WorkflowStore) recordWorkflowDecisions(ctx context.Context, run workflo
 }
 
 func (s *WorkflowStore) checkWorkflowDecisionAdmission(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, request WorkflowIntegrationDecisionRequest, provider WorkflowPullRequestProvider) error {
-	if !workflowMergerRunnable(run, entry) || !validWorkflowRequestKey(request.ID) || len(request.Decisions) == 0 {
+	if !workflowMergerRunnable(run, entry) || !workflowstate.ValidRequestKey(request.ID) || len(request.Decisions) == 0 {
 		return workflowstate.ErrConflict
 	}
 

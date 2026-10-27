@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) prepareNativeRecordCreation(ctx context.Context, store *core.WorkflowStore, binding core.WorkflowMutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
+func (s service) prepareNativeRecordCreation(ctx context.Context, store *core.WorkflowStore, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
 	if request.Title == nil || strings.TrimSpace(*request.Title) == "" {
 		return core.WorkflowMutationRequest{}, errors.New("record creation requires a title")
 	}
@@ -98,7 +98,7 @@ func recordString(value *string) string {
 
 func recordDigest(data []byte) string { sum := sha256.Sum256(data); return hex.EncodeToString(sum[:]) }
 
-func (s service) prepareCaseRecordMutation(ctx context.Context, binding core.WorkflowMutationBinding, request RecordMutationRequest) (core.CaseMutationRequest, error) {
+func (s service) prepareCaseRecordMutation(ctx context.Context, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.CaseMutationRequest, error) {
 	result := core.CaseMutationRequest{Binding: binding, ProjectID: s.projectContext.ProjectID, Namespace: "default"}
 	if unsupportedCaseRecordFields(request) {
 		return result, ErrRecordUnsupported

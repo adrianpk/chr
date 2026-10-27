@@ -5,6 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type unavailableNativePreparation struct{}
@@ -39,7 +41,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 		t.Fatal("unbound continuation retried preparation")
 	}
 
-	request := WorkflowControlMutationRequest{Binding: WorkflowMutationBinding{RequestID: "native-preparation-retry", Operator: "operator"}, Action: "continue", ID: f.run.ID, ExpectedRevision: blocked.Revision, StepLimit: 1}
+	request := WorkflowControlMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "native-preparation-retry", Operator: "operator"}, Action: "continue", ID: f.run.ID, ExpectedRevision: blocked.Revision, StepLimit: 1}
 
 	control := WorkflowLifecycleControlPorts{Execution: ports}
 	if _, err := f.store.ControlWorkflowLifecycle(t.Context(), request, control, nil); err != nil {

@@ -26,7 +26,7 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 		return r.controlRecoveryFailure(ctx, claim, err, config)
 	}
 
-	binding := core.WorkflowMutationBinding{RequestID: claim.Request.ID, Operator: claim.Request.Operator}
+	binding := workflowstate.MutationBinding{RequestID: claim.Request.ID, Operator: claim.Request.Operator}
 
 	status, found, err := operations.ReadTelegramControlReceipt(ctx, claim.Request.Target, binding, preview.Request)
 	if found {

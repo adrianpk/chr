@@ -13,7 +13,7 @@ import (
 )
 
 func telegramAuthoringOwnerRequest() AuthoringContinuationRequest {
-	return AuthoringContinuationRequest{Binding: WorkflowMutationBinding{RequestID: "authoring-fixture", Operator: "maintainer"}, ProjectID: "example-project", Namespace: "default", Action: "create", Target: AuthoringArtifactKindDump, Topic: "Timeout behavior", Capture: "Keep bounded retries."}
+	return AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "authoring-fixture", Operator: "maintainer"}, ProjectID: "example-project", Namespace: "default", Action: "create", Target: AuthoringArtifactKindDump, Topic: "Timeout behavior", Capture: "Keep bounded retries."}
 }
 
 func telegramAuthoringOwnerDraft(context.Context, AuthoringSnapshot, AuthoringContinuationRequest) (AuthoringDraft, error) {
@@ -91,7 +91,7 @@ func telegramAuthoringCreateOwner(t *testing.T, repo AuthoringSessionRepository,
 }
 
 func telegramAuthoringNextOwner(result AuthoringContinuationResult, id, action string, target AuthoringArtifactKind) AuthoringContinuationRequest {
-	return AuthoringContinuationRequest{Binding: WorkflowMutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: result.Session.ProjectID, Namespace: result.Session.Namespace, SessionID: result.Session.ID, Action: AuthoringContinuationAction(action), Target: target, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash}
+	return AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: result.Session.ProjectID, Namespace: result.Session.Namespace, SessionID: result.Session.ID, Action: AuthoringContinuationAction(action), Target: target, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash}
 }
 
 func telegramAuthoringQuestionOwner(t *testing.T, repo AuthoringSessionRepository, previous AuthoringContinuationResult) AuthoringContinuationResult {

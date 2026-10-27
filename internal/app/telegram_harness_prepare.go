@@ -47,7 +47,7 @@ func (r telegramReceiver) reserveHarnessChange(ctx context.Context, operations t
 		return core.TelegramOperationRequest{}, err
 	}
 
-	prepared, err := prepareTelegramHarnessChange(status.Selections, core.WorkflowMutationBinding{RequestID: core.TelegramOperationID(input.Update, 0), Operator: user.OperatorID}, choices)
+	prepared, err := prepareTelegramHarnessChange(status.Selections, workflowstate.MutationBinding{RequestID: core.TelegramOperationID(input.Update, 0), Operator: user.OperatorID}, choices)
 	if err != nil {
 		return core.TelegramOperationRequest{}, err
 	}
@@ -65,7 +65,7 @@ func (r telegramReceiver) reserveHarnessChange(ctx context.Context, operations t
 	return r.store.ReserveTelegramHarnessOperation(ctx, input, core.TelegramOperationRequest{Source: input.Update, Operator: user.OperatorID, Target: target, OperationID: core.TelegramHarnessSelectionOperation, Arguments: arguments}, data, time.Now())
 }
 
-func prepareTelegramHarnessChange(status HarnessSelectionStatus, binding core.WorkflowMutationBinding, choices telegramHarnessChoices) (telegramHarnessPrepared, error) {
+func prepareTelegramHarnessChange(status HarnessSelectionStatus, binding workflowstate.MutationBinding, choices telegramHarnessChoices) (telegramHarnessPrepared, error) {
 	worker, err := telegramHarnessChosenLabel(status, choices.Worker, false)
 	if err != nil {
 		return telegramHarnessPrepared{}, err

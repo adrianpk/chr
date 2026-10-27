@@ -30,7 +30,7 @@ func validateWorkflowAdmissionGuard(guard *WorkflowAdmissionGuard, selection Wor
 		return workflowstate.ErrConflict
 	}
 
-	if guard.Selected != nil && (!validWorkflowRequestKey(guard.Selected.Key) || guard.Selected.Revision == 0) {
+	if guard.Selected != nil && (!workflowstate.ValidRequestKey(guard.Selected.Key) || guard.Selected.Revision == 0) {
 		return workflowstate.ErrConflict
 	}
 

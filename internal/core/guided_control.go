@@ -111,7 +111,7 @@ func guidedNativeControlRequest(session AuthoringSession, operation GuidedUseCas
 		return nil
 	}
 
-	return &WorkflowControlMutationRequest{Guided: &GuidedWorkflowControlProof{RunID: session.ID, OperationDigest: operation.Digest}, Binding: WorkflowMutationBinding{RequestID: "guided-control-" + operation.Digest, Operator: session.Guided.Actor}, Action: operation.Action, ID: work.Invocation.ID, ExpectedRevision: operation.NativeRevision}
+	return &WorkflowControlMutationRequest{Guided: &GuidedWorkflowControlProof{RunID: session.ID, OperationDigest: operation.Digest}, Binding: workflowstate.MutationBinding{RequestID: "guided-control-" + operation.Digest, Operator: session.Guided.Actor}, Action: operation.Action, ID: work.Invocation.ID, ExpectedRevision: operation.NativeRevision}
 }
 
 func (r *fileAuthoringSessionRepository) retainGuidedControlFailure(ctx context.Context, session *AuthoringSession, operation GuidedUseCaseOperation, cause error) error {

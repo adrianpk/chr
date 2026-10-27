@@ -42,7 +42,7 @@ func telegramAuthoringWorkFixture(t *testing.T) (service, core.AuthoringContinua
 }
 
 func telegramAuthoringWorkRequest(result core.AuthoringContinuationResult, intent core.AuthoringIntent) AuthoringWorkRequest {
-	return AuthoringWorkRequest{Binding: core.WorkflowMutationBinding{RequestID: "work-description", Operator: "maintainer"}, SessionID: result.Session.ID, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash, Intent: intent, Instruction: "Retain the retry ceiling and existing defaults."}
+	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: "work-description", Operator: "maintainer"}, SessionID: result.Session.ID, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash, Intent: intent, Instruction: "Retain the retry ceiling and existing defaults."}
 }
 
 // TestTelegramAuthoringWorkPreparation materializes a real native backlog ticket
@@ -93,7 +93,7 @@ func telegramAuthoringWorkGrant(t *testing.T, operations service, prepared Prepa
 		t.Fatal("missing development authority accepted", err)
 	}
 
-	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, core.WorkflowMutationBinding{RequestID: "explicit-instruction", Operator: "maintainer"}, prepared.Scope.Hash)
+	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: "explicit-instruction", Operator: "maintainer"}, prepared.Scope.Hash)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -147,7 +147,7 @@ func telegramAuthoringWorkCheckReplay(t *testing.T, operations service, prepared
 
 	title := "Independent later title"
 
-	patch, err := operations.PrepareRecordMutation(t.Context(), "original", core.WorkflowMutationBinding{RequestID: "later-display", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordTicket, Action: RecordUpdate, Identity: original.Result.Record.Identity, ExpectedRevision: original.Result.Record.Revision, ExpectedHash: original.Result.Record.SourceHash, Title: &title})
+	patch, err := operations.PrepareRecordMutation(t.Context(), "original", workflowstate.MutationBinding{RequestID: "later-display", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordTicket, Action: RecordUpdate, Identity: original.Result.Record.Identity, ExpectedRevision: original.Result.Record.Revision, ExpectedHash: original.Result.Record.SourceHash, Title: &title})
 	if err != nil {
 		t.Fatal(err)
 	}

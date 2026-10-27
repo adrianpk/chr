@@ -12,7 +12,7 @@ import (
 )
 
 func telegramOperationCaseRequest() CaseMutationRequest {
-	return CaseMutationRequest{Binding: WorkflowMutationBinding{RequestID: "case-request", Operator: "maintainer"}, ProjectID: "project-1", Namespace: "default", Metadata: CaseMetadata{Name: "Example case", Description: "Original description", Context: "Original context"}}
+	return CaseMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "case-request", Operator: "maintainer"}, ProjectID: "project-1", Namespace: "default", Metadata: CaseMetadata{Name: "Example case", Description: "Original description", Context: "Original context"}}
 }
 
 // TestTelegramOperationCaseReplay returns the original case after reopening and a later independent edit.

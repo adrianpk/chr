@@ -61,7 +61,7 @@ func projectTelegramAdmissionBinding(ctx context.Context, tx *sql.Tx, request Te
 		return workflowstate.ErrConflict
 	}
 
-	if request.OperationID != "work.admit" || result.State != "confirmed" || !validWorkflowRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 || result.ReceiptRef != "workflow:"+bound.ID {
+	if request.OperationID != "work.admit" || result.State != "confirmed" || !workflowstate.ValidRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 || result.ReceiptRef != "workflow:"+bound.ID {
 		return workflowstate.ErrConflict
 	}
 
@@ -98,7 +98,7 @@ func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request Tele
 
 	// A committed native receipt remains reportable after a newer conversation
 	// replaces this projection. Acknowledgement must not retarget that conversation.
-	if result.ReceiptRef == workflowMutationReceiptPath(request.ID) {
+	if result.ReceiptRef == workflowstate.MutationReceiptPath(request.ID) {
 		return nil
 	}
 
@@ -107,7 +107,7 @@ func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request Tele
 
 func validateTelegramControlBinding(request TelegramOperationRequest, result TelegramActionResult) error {
 	bound := result.Invocation
-	if result.State != "confirmed" || !validWorkflowRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 {
+	if result.State != "confirmed" || !workflowstate.ValidRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 {
 		return workflowstate.ErrConflict
 	}
 
@@ -115,7 +115,7 @@ func validateTelegramControlBinding(request TelegramOperationRequest, result Tel
 		return workflowstate.ErrConflict
 	}
 
-	if result.ReceiptRef != workflowMutationReceiptPath(request.ID) && result.ReceiptRef != fmt.Sprintf("workflow:%s:revision:%d", bound.ID, bound.Revision) {
+	if result.ReceiptRef != workflowstate.MutationReceiptPath(request.ID) && result.ReceiptRef != fmt.Sprintf("workflow:%s:revision:%d", bound.ID, bound.Revision) {
 		return workflowstate.ErrConflict
 	}
 

@@ -14,7 +14,7 @@ func telegramAuthoringScope(t *testing.T) AuthoringWorkScope {
 
 	digest := contenthash.Sum([]byte("canonical source"))
 
-	scope, err := SealAuthoringWorkScope(AuthoringWorkScope{Binding: WorkflowMutationBinding{RequestID: "description", Operator: "maintainer"}, Intent: AuthoringIntentDevelop, Instruction: "Develop the bounded retry fix.", ProjectID: "example", Namespace: "team", SessionID: "session", SessionRef: ".chr/authoring/sessions/session/session.md", SessionRevision: 3, SourceHash: digest, DescriptionRef: "ops/team/spec/00000-source/artifact.md", DescriptionHash: digest, ContractHash: digest, RecordHash: digest})
+	scope, err := SealAuthoringWorkScope(AuthoringWorkScope{Binding: workflowstate.MutationBinding{RequestID: "description", Operator: "maintainer"}, Intent: AuthoringIntentDevelop, Instruction: "Develop the bounded retry fix.", ProjectID: "example", Namespace: "team", SessionID: "session", SessionRef: ".chr/authoring/sessions/session/session.md", SessionRevision: 3, SourceHash: digest, DescriptionRef: "ops/team/spec/00000-source/artifact.md", DescriptionHash: digest, ContractHash: digest, RecordHash: digest})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func telegramAuthoringScope(t *testing.T) AuthoringWorkScope {
 // and operator; preparing or explaining cannot acquire authority from a proposal.
 func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 	scope := telegramAuthoringScope(t)
-	decision := WorkflowMutationBinding{RequestID: "explicit-decision", Operator: "maintainer"}
+	decision := workflowstate.MutationBinding{RequestID: "explicit-decision", Operator: "maintainer"}
 
 	if err := ValidateAuthoringWorkAuthorization(scope, nil); !errors.Is(err, ErrAuthoringAuthorityRequired) {
 		t.Fatalf("missing authority: %v", err)

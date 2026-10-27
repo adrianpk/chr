@@ -21,7 +21,7 @@ type WorkflowControlIntegrationGuard struct {
 // displayed invocation and any required candidate, budget or question images.
 type WorkflowControlMutationRequest struct {
 	Guided           *GuidedWorkflowControlProof `json:"guided,omitempty"`
-	Binding          WorkflowMutationBinding
+	Binding          workflowstate.MutationBinding
 	Integration      *WorkflowControlIntegrationGuard
 	Grant            *WorkflowIntegrationGrant
 	Answer           *WorkflowIntegrationAnswer
@@ -55,7 +55,7 @@ func freezeWorkflowControlMutation(request WorkflowControlMutationRequest) (Work
 		return request, "", err
 	}
 
-	if !validWorkflowRequestKey(request.ID) || request.ExpectedRevision == 0 || !slices.Contains([]string{"approve", "grant", "answer_decision", "pause", "cancel", "resume", "continue", "reconcile"}, request.Action) {
+	if !workflowstate.ValidRequestKey(request.ID) || request.ExpectedRevision == 0 || !slices.Contains([]string{"approve", "grant", "answer_decision", "pause", "cancel", "resume", "continue", "reconcile"}, request.Action) {
 		return request, "", workflowstate.ErrConflict
 	}
 

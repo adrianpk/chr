@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramPreparedWorkLostAck struct {
@@ -99,7 +100,7 @@ func telegramAuthoringPreparedIndependentEdit(t *testing.T, f *telegramConversat
 
 	title := "Independent native title"
 
-	patch, err := operations.PrepareRecordMutation(t.Context(), "original", core.WorkflowMutationBinding{RequestID: "independent-ticket-edit", Operator: request.Operator}, RecordMutationRequest{Kind: RecordTicket, Action: RecordUpdate, Identity: nativeRecordView(records[0], RecordTicket).Identity, ExpectedRevision: records[0].Revision, ExpectedHash: records[0].SourceHash, Title: &title})
+	patch, err := operations.PrepareRecordMutation(t.Context(), "original", workflowstate.MutationBinding{RequestID: "independent-ticket-edit", Operator: request.Operator}, RecordMutationRequest{Kind: RecordTicket, Action: RecordUpdate, Identity: nativeRecordView(records[0], RecordTicket).Identity, ExpectedRevision: records[0].Revision, ExpectedHash: records[0].SourceHash, Title: &title})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -38,7 +38,7 @@ func validWorkflowIntegrationEntryHeader(entry WorkflowIntegrationEntry) bool {
 }
 
 func validWorkflowIntegrationIdentity(entry WorkflowIntegrationEntry) bool {
-	return entry.SchemaVersion == 1 && validWorkflowNativeFingerprint(entry.ID) && validWorkflowRequestKey(entry.InvocationID) && entry.ProjectID != "" && opsnamespace.Valid(entry.Namespace) && validWorkflowNativeFingerprint(entry.CoordinatorID) && validWorkflowNativeFingerprint(entry.FrozenScopeHash) && validWorkflowRequestKey(entry.AdmissionKey)
+	return entry.SchemaVersion == 1 && validWorkflowNativeFingerprint(entry.ID) && workflowstate.ValidRequestKey(entry.InvocationID) && entry.ProjectID != "" && opsnamespace.Valid(entry.Namespace) && validWorkflowNativeFingerprint(entry.CoordinatorID) && validWorkflowNativeFingerprint(entry.FrozenScopeHash) && workflowstate.ValidRequestKey(entry.AdmissionKey)
 }
 
 func validWorkflowIntegrationRevisions(entry WorkflowIntegrationEntry) bool {
@@ -100,7 +100,7 @@ func validateWorkflowIntegrationBlocker(entry WorkflowIntegrationEntry) error {
 }
 
 func validWorkflowIntegrationBlocker(blocker *WorkflowIntegrationBlocker) bool {
-	return blocker != nil && validWorkflowRequestKey(blocker.Reason) && validWorkflowRequestKey(blocker.RequiredAction) && validWorkflowIntegrationState(blocker.ResumeState) && !slices.Contains([]string{"blocked", "cancelled", "integrated"}, blocker.ResumeState)
+	return blocker != nil && workflowstate.ValidRequestKey(blocker.Reason) && workflowstate.ValidRequestKey(blocker.RequiredAction) && validWorkflowIntegrationState(blocker.ResumeState) && !slices.Contains([]string{"blocked", "cancelled", "integrated"}, blocker.ResumeState)
 }
 
 func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {

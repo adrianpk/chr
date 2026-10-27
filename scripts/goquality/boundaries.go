@@ -30,7 +30,7 @@ var leafImports = map[string]map[string]bool{
 	"internal/core/configvalue":      {},
 	"internal/core/contenthash":      {},
 	"internal/core/ops/namespace":    {},
-	"internal/core/workflow/state":   {},
+	"internal/core/workflow/state":   {coreImportPath + "contenthash": true},
 }
 
 func checkLeafDependencies(importsByFile map[string][]string) []string {

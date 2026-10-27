@@ -168,8 +168,8 @@ func TestTicketDocumentConcurrent(t *testing.T) {
 	}
 }
 
-func ticketEditorBinding(id string) WorkflowMutationBinding {
-	return WorkflowMutationBinding{RequestID: id, Operator: "editor"}
+func ticketEditorBinding(id string) workflowstate.MutationBinding {
+	return workflowstate.MutationBinding{RequestID: id, Operator: "editor"}
 }
 
 func ticketEditorBytes(t *testing.T, path string) string {

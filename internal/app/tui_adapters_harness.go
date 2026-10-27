@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -64,7 +65,7 @@ func (e tuiHarnessSelectionExecutor) SaveHarnessSelections(request tui.HarnessSe
 	defer cancel()
 
 	_, err = e.operations.ChangeHarnessSelections(ctx, core.HarnessSelectionChangeRequest{
-		Binding:    core.WorkflowMutationBinding{RequestID: request.RequestID, Operator: actor.OperatorID},
+		Binding:    workflowstate.MutationBinding{RequestID: request.RequestID, Operator: actor.OperatorID},
 		ProjectRef: request.ProjectRef, ExpectedRevision: request.Revision, Worker: request.Worker, Generation: request.Generation,
 	}, localHarnessSelectionAuthority(e.operations.projectContext.ProjectDir, actor.OperatorID))
 	if err != nil {

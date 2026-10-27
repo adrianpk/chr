@@ -13,7 +13,7 @@ import (
 )
 
 func telegramOperationMutationRequest() WorkflowMutationRequest {
-	return WorkflowMutationRequest{Binding: WorkflowMutationBinding{RequestID: "opaque-request-1", Operator: "maintainer"}, Title: "Retained task", Record: workflowTestTask("CHR-1")}
+	return WorkflowMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "opaque-request-1", Operator: "maintainer"}, Title: "Retained task", Record: workflowTestTask("CHR-1")}
 }
 
 // TestTelegramOperationOwnerReplay retains the original result after reopening and later edits.

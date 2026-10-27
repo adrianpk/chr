@@ -12,7 +12,7 @@ import (
 )
 
 // PrepareRecordMutation freezes validated owner input before durable dispatch.
-func (s service) PrepareRecordMutation(ctx context.Context, namespace string, binding core.WorkflowMutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
+func (s service) PrepareRecordMutation(ctx context.Context, namespace string, binding workflowstate.MutationBinding, request RecordMutationRequest) (PreparedRecordMutation, error) {
 	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
 		return PreparedRecordMutation{}, err
@@ -84,7 +84,7 @@ func (s service) ApplyPreparedRecordMutation(ctx context.Context, prepared Prepa
 	return RecordMutationResult{Record: view, ReceiptRef: result.ReceiptRef, ArgumentDigest: result.ArgumentDigest}, nil
 }
 
-func (s service) prepareNativeRecordUpdate(ctx context.Context, store *core.WorkflowStore, binding core.WorkflowMutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
+func (s service) prepareNativeRecordUpdate(ctx context.Context, store *core.WorkflowStore, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
 	record, err := s.nativeMutationTarget(ctx, store, request.Kind, request.Identity)
 	if err != nil {
 		return core.WorkflowMutationRequest{}, err
@@ -156,7 +156,7 @@ func (s service) applyPreparedCaseMutation(ctx context.Context, prepared Prepare
 	return RecordMutationResult{Record: view, ReceiptRef: result.ReceiptRef, ArgumentDigest: result.ArgumentDigest}, nil
 }
 
-func (s service) prepareNativeMutation(ctx context.Context, store *core.WorkflowStore, binding core.WorkflowMutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
+func (s service) prepareNativeMutation(ctx context.Context, store *core.WorkflowStore, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
 	if request.Kind == RecordSlice {
 		return s.prepareSliceRecordMutation(ctx, store, binding, request)
 	}

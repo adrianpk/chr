@@ -30,7 +30,7 @@ func (r telegramReceiver) applyPreparedWorkAction(ctx context.Context, claim cor
 		return r.finishPreparedWorkActionFailure(ctx, claim, current, workflowstate.ErrConflict)
 	}
 
-	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, core.WorkflowMutationBinding{RequestID: claim.Answer.ID, Operator: claim.Answer.Operator}, prepared.Scope.Hash)
+	grant, err := core.AuthorizeAuthoringWork(prepared.Scope, workflowstate.MutationBinding{RequestID: claim.Answer.ID, Operator: claim.Answer.Operator}, prepared.Scope.Hash)
 	if err != nil {
 		return r.finishPreparedWorkActionFailure(ctx, claim, current, err)
 	}

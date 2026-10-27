@@ -23,7 +23,7 @@ are omitted here; tests do not define production ownership.
 | core/ops/namespace | none |
 | core/project | core/database |
 | core/telegram/message | core/contenthash, core/ops/namespace |
-| core/workflow/state | none |
+| core/workflow/state | core/contenthash |
 | harness | none |
 | harness/codex | harness, harness/process |
 | harness/pi | harness, harness/process |
@@ -96,7 +96,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-699 current non-test files under internal/core, their declared symbols,
+701 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -332,3 +332,20 @@ ledger records current declarations, while baseline signature ownership remains
 unchanged. The schema assets, original source review and detections are unchanged.
 Global temporary debt is 410 with ceiling seven and the same single external
 exception; no assigned Slice 6 declaration remains in that manifest.
+
+
+## Slice 7 Telegram move prerequisites
+
+The actual 70 root Telegram production files share workflow binding validation,
+receipt reference derivation, authoring session identity, model error identities,
+operational namespace resolution and directory access with other capabilities.
+Those edges are resolved before the receiver/transport move. A root import or a
+copy of private validators is not a permitted cycle repair.
+
+workflow/state now owns MutationBinding, its original validation, ValidRequestKey
+and MutationReceiptPath. The existing JSON field order/tags, validation errors,
+request spelling and receipt hash/path are unchanged. Store safe-path checks,
+receipt IO, locking and atomic updates remain with the workflow mutation owner.
+Both receiver and workflow consumers use these actual value contracts directly.
+The state import bound admits only contenthash for the canonical receipt digest;
+it still rejects the coordinator, persistence and transport.

@@ -26,7 +26,7 @@ func (r telegramReceiver) reserveAuthoring(ctx context.Context, operations teleg
 		return core.TelegramOperationRequest{}, err
 	}
 
-	owner.Binding = core.WorkflowMutationBinding{RequestID: core.TelegramOperationID(command.Input.Update, 0), Operator: user.OperatorID}
+	owner.Binding = workflowstate.MutationBinding{RequestID: core.TelegramOperationID(command.Input.Update, 0), Operator: user.OperatorID}
 
 	input, err := json.Marshal(owner)
 	if err != nil {

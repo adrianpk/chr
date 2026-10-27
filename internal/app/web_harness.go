@@ -97,7 +97,7 @@ func (p webViewProvider) writeHarnessSelection(ctx context.Context, operations s
 	defer cancel()
 
 	_, err = operations.ChangeHarnessSelections(ctx, core.HarnessSelectionChangeRequest{
-		Binding:    core.WorkflowMutationBinding{RequestID: request.Fields["request_id"], Operator: actor.OperatorID},
+		Binding:    workflowstate.MutationBinding{RequestID: request.Fields["request_id"], Operator: actor.OperatorID},
 		ProjectRef: request.Fields["project_ref"], ExpectedRevision: request.Revision, Worker: worker, Generation: generation,
 	}, localHarnessSelectionAuthority(operations.projectContext.ProjectDir, actor.OperatorID))
 	if errors.Is(err, workflowstate.ErrConflict) {

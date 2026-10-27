@@ -12,22 +12,22 @@ import (
 )
 
 type workflowMutationReservation struct {
-	Schema             string                  `json:"schema"`
-	State              string                  `json:"state"`
-	ProjectID          string                  `json:"project_id"`
-	Namespace          string                  `json:"namespace"`
-	Binding            WorkflowMutationBinding `json:"binding"`
-	Operation          string                  `json:"operation"`
-	ArgumentDigest     string                  `json:"argument_digest"`
-	ExpectedRevision   uint64                  `json:"expected_revision"`
-	ObservedSourceHash string                  `json:"observed_source_hash"`
-	ReceiptRef         string                  `json:"receipt_ref"`
+	Schema             string                        `json:"schema"`
+	State              string                        `json:"state"`
+	ProjectID          string                        `json:"project_id"`
+	Namespace          string                        `json:"namespace"`
+	Binding            workflowstate.MutationBinding `json:"binding"`
+	Operation          string                        `json:"operation"`
+	ArgumentDigest     string                        `json:"argument_digest"`
+	ExpectedRevision   uint64                        `json:"expected_revision"`
+	ObservedSourceHash string                        `json:"observed_source_hash"`
+	ReceiptRef         string                        `json:"receipt_ref"`
 }
 
 // Reserve accepted identities before preparing any effect. A failed preparation
 // can retry its original payload, but cannot exchange it for another operation.
 func (s *WorkflowStore) reserveMutationBinding(request WorkflowMutationRequest, digest string) error {
-	reservation := workflowMutationReservation{Schema: "chr-record-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Operation: workflowMutationOperation(request), ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ObservedSourceHash: request.Record.SourceHash, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID)}
+	reservation := workflowMutationReservation{Schema: "chr-record-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Operation: workflowMutationOperation(request), ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ObservedSourceHash: request.Record.SourceHash, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID)}
 
 	path, err := s.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))
 	if err != nil {

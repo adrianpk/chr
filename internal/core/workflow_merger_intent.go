@@ -11,7 +11,7 @@ func validateWorkflowMergerRequirements(requirements []WorkflowMergerRequirement
 	source, target := false, false
 
 	for _, requirement := range requirements {
-		if !validWorkflowRequestKey(requirement.ID) || seen[requirement.ID] || !slices.Contains([]string{"source", "target"}, requirement.Origin) {
+		if !workflowstate.ValidRequestKey(requirement.ID) || seen[requirement.ID] || !slices.Contains([]string{"source", "target"}, requirement.Origin) {
 			return workflowstate.ErrConflict
 		}
 
@@ -47,7 +47,7 @@ func validateWorkflowMergerRequirementIDs(ids []string, requirements []WorkflowM
 func validateWorkflowMergerConflicts(input WorkflowMergerInput) error {
 	seen := map[string]bool{}
 	for _, conflict := range input.Conflicts {
-		if !validWorkflowRequestKey(conflict.ID) || seen[conflict.ID] || !workflowMergerPathAllowed(input, conflict.Path) {
+		if !workflowstate.ValidRequestKey(conflict.ID) || seen[conflict.ID] || !workflowMergerPathAllowed(input, conflict.Path) {
 			return workflowstate.ErrConflict
 		}
 

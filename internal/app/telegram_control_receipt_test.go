@@ -17,7 +17,7 @@ type telegramControlLostAck struct {
 	lost atomic.Bool
 }
 
-func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, target core.TelegramOperationTarget, binding core.WorkflowMutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, target core.TelegramOperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
 	status, err := s.service.ApplyTelegramControl(ctx, target, binding, request, check)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return status, errors.Join(errTelegramLostRecordAck, workflowstate.ErrConflict)

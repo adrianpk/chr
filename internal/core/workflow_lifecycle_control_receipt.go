@@ -8,7 +8,7 @@ import (
 )
 
 func (s *WorkflowStore) newWorkflowControlCommit(request WorkflowControlMutationRequest, digest string, check WorkflowAdmissionCheck) *workflowControlCommit {
-	result := WorkflowControlResult{RequestID: request.Binding.RequestID, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID), PriorRevision: request.ExpectedRevision, Revision: request.ExpectedRevision + 1}
+	result := WorkflowControlResult{RequestID: request.Binding.RequestID, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), PriorRevision: request.ExpectedRevision, Revision: request.ExpectedRevision + 1}
 
 	return &workflowControlCommit{receipt: workflowControlReceipt{Schema: "chr-workflow-control/v1", State: "confirmed", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Operator: request.Binding.Operator, Result: result}, check: check}
 }

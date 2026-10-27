@@ -108,7 +108,7 @@ func (s *WorkflowStore) admitWorkflowIntegration(ctx context.Context, runs []wor
 }
 
 func (s *WorkflowStore) admitWorkflowIntegrationUnit(ctx context.Context, run workflowInvocationFile, runs []workflowInvocationFile, entries []WorkflowIntegrationEntry, request WorkflowIntegrationAdmission, coordinator workflowCoordinator) (WorkflowIntegrationEntry, error) {
-	if !slices.Contains(run.RequestKeys, request.AdmissionKey) || !validWorkflowRequestKey(request.AdmissionKey) {
+	if !slices.Contains(run.RequestKeys, request.AdmissionKey) || !workflowstate.ValidRequestKey(request.AdmissionKey) {
 		return WorkflowIntegrationEntry{}, workflowIntegrationConflict("retry key is not attached to its invocation")
 	}
 

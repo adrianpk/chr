@@ -19,7 +19,7 @@ type TicketEditRequest struct {
 	Fields   map[string]string
 	Body     *string
 	Comment  string
-	Binding  WorkflowMutationBinding
+	Binding  workflowstate.MutationBinding
 }
 
 // UpdateTicketDocument keeps document edits behind existing persistence owners.

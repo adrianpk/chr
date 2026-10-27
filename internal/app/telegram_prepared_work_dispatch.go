@@ -95,7 +95,7 @@ func (r telegramReceiver) preparedWorkInput(ctx context.Context, operations tele
 		return owner, err
 	}
 
-	return AuthoringWorkRequest{Binding: core.WorkflowMutationBinding{RequestID: core.TelegramOperationID(input.Update, 0), Operator: operator}, SessionID: id, ExpectedRevision: snapshot.Session.Revision, ExpectedSourceHash: snapshot.SourceHash, Intent: core.AuthoringIntent(c.Intent), Instruction: instruction.Text}, nil
+	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: core.TelegramOperationID(input.Update, 0), Operator: operator}, SessionID: id, ExpectedRevision: snapshot.Session.Revision, ExpectedSourceHash: snapshot.SourceHash, Intent: core.AuthoringIntent(c.Intent), Instruction: instruction.Text}, nil
 }
 
 func (r telegramReceiver) reusePreparedWork(ctx context.Context, input core.TelegramConversationInput, target core.TelegramOperationTarget, owner AuthoringWorkRequest) (bool, error) {

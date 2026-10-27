@@ -273,7 +273,7 @@ func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, 
 	owner := NewCaseMetadataService(r.projectDir)
 
 	result, err := owner.SaveBound(ctx, CaseMutationRequest{
-		Binding:   WorkflowMutationBinding{RequestID: "guided-" + contenthash.Sum([]byte(session.ID+"-name")), Operator: session.Guided.Actor},
+		Binding:   workflowstate.MutationBinding{RequestID: "guided-" + contenthash.Sum([]byte(session.ID+"-name")), Operator: session.Guided.Actor},
 		ProjectID: session.ProjectID, Namespace: session.Namespace, Metadata: metadata,
 	})
 	if err != nil {

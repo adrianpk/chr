@@ -18,10 +18,10 @@ import (
 
 // CaseMutationRequest binds a metadata write to its caller and observed image.
 type CaseMutationRequest struct {
-	Binding   WorkflowMutationBinding `json:"binding"`
-	ProjectID string                  `json:"project_id"`
-	Namespace string                  `json:"namespace"`
-	Metadata  CaseMetadata            `json:"metadata"`
+	Binding   workflowstate.MutationBinding `json:"binding"`
+	ProjectID string                        `json:"project_id"`
+	Namespace string                        `json:"namespace"`
+	Metadata  CaseMetadata                  `json:"metadata"`
 }
 
 // CaseMutationResult retains the original metadata and a project-relative receipt.
@@ -78,7 +78,7 @@ func (s CaseMetadataService) normalizeCaseMutation(request CaseMutationRequest) 
 	request.Binding.RequestID = strings.TrimSpace(request.Binding.RequestID)
 
 	request.Binding.Operator = strings.TrimSpace(request.Binding.Operator)
-	if err := validateWorkflowMutationBinding(request.Binding); err != nil {
+	if err := request.Binding.Validate(); err != nil {
 		return request, "", err
 	}
 
@@ -178,7 +178,7 @@ func (s CaseMetadataService) reserveCaseMutation(request CaseMutationRequest, di
 
 	encoded, err := json.Marshal(struct {
 		Schema, ProjectID, Namespace, Digest string
-		Binding                              WorkflowMutationBinding
+		Binding                              workflowstate.MutationBinding
 	}{"chr-case-binding/v1", request.ProjectID, request.Namespace, digest, request.Binding})
 	if err != nil {
 		return err

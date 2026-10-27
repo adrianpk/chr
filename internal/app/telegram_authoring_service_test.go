@@ -61,11 +61,11 @@ func telegramAuthoringServiceOutput(t *testing.T, body, question string) string 
 }
 
 func telegramAuthoringServiceRequest() core.AuthoringContinuationRequest {
-	return core.AuthoringContinuationRequest{Binding: core.WorkflowMutationBinding{RequestID: "service-capture", Operator: "maintainer"}, ProjectID: "service-project", Namespace: "original", Action: "create", Target: core.AuthoringArtifactKindDump, Topic: "Bounded request retries", Capture: "Preserve the retry ceiling and existing defaults."}
+	return core.AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: "service-capture", Operator: "maintainer"}, ProjectID: "service-project", Namespace: "original", Action: "create", Target: core.AuthoringArtifactKindDump, Topic: "Bounded request retries", Capture: "Preserve the retry ceiling and existing defaults."}
 }
 
 func telegramAuthoringServiceNext(previous core.AuthoringContinuationResult, id, action string, target core.AuthoringArtifactKind) core.AuthoringContinuationRequest {
-	return core.AuthoringContinuationRequest{Binding: core.WorkflowMutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: previous.Session.ProjectID, Namespace: previous.Session.Namespace, SessionID: previous.Session.ID, ExpectedRevision: previous.Session.Revision, ExpectedSourceHash: previous.SourceHash, Action: core.AuthoringContinuationAction(action), Target: target}
+	return core.AuthoringContinuationRequest{Binding: workflowstate.MutationBinding{RequestID: id, Operator: "maintainer"}, ProjectID: previous.Session.ProjectID, Namespace: previous.Session.Namespace, SessionID: previous.Session.ID, ExpectedRevision: previous.Session.Revision, ExpectedSourceHash: previous.SourceHash, Action: core.AuthoringContinuationAction(action), Target: target}
 }
 
 // TestTelegramAuthoringServiceJourney generates real canonical dump/quiz/spec/plan

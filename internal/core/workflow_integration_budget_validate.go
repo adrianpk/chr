@@ -89,7 +89,7 @@ func validateWorkflowIntegrationGrants(b WorkflowIntegrationBudget) error {
 }
 
 func validWorkflowIntegrationGrant(grant WorkflowIntegrationGrant, revision uint64) bool {
-	return validWorkflowRequestKey(grant.ID) && grant.Amount > 0 && grant.PriorRevision < revision && grant.PriorRevision > 0 && !grant.RecordedAt.IsZero() && validWorkflowRequestKey(grant.Actor) && validWorkflowRequestKey(grant.Reason)
+	return workflowstate.ValidRequestKey(grant.ID) && grant.Amount > 0 && grant.PriorRevision < revision && grant.PriorRevision > 0 && !grant.RecordedAt.IsZero() && workflowstate.ValidRequestKey(grant.Actor) && workflowstate.ValidRequestKey(grant.Reason)
 }
 
 func validateWorkflowIntegrationTokenGrants(b WorkflowIntegrationBudget) error {
@@ -217,7 +217,7 @@ func validateWorkflowIntegrationReservation(r WorkflowIntegrationReservation) er
 }
 
 func validWorkflowIntegrationReservationOwner(r WorkflowIntegrationReservation) bool {
-	return validWorkflowRequestKey(r.ID) && validWorkflowNativeFingerprint(r.EntryID) && validWorkflowRequestKey(r.AttemptID) && r.Unit.ID != "" && slices.Contains([]string{"reserved", "launched", "unknown", "settled", "released_before_launch"}, r.State)
+	return workflowstate.ValidRequestKey(r.ID) && validWorkflowNativeFingerprint(r.EntryID) && workflowstate.ValidRequestKey(r.AttemptID) && r.Unit.ID != "" && slices.Contains([]string{"reserved", "launched", "unknown", "settled", "released_before_launch"}, r.State)
 }
 
 func validWorkflowTokenAllowance(a WorkflowTokenAllowance) bool {

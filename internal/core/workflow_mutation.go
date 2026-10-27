@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
@@ -16,25 +15,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowMutationBinding identifies a caller-neutral, immutable mutation payload.
-// Routing identities belong to adapters and must never enter domain receipts.
-type WorkflowMutationBinding struct {
-	RequestID string `json:"request_id"`
-	Operator  string `json:"operator"`
-}
-
-// Validate checks the opaque request and configured operator identities.
-func (binding WorkflowMutationBinding) Validate() error {
-	return validateWorkflowMutationBinding(binding)
-}
-
 // WorkflowMutationRequest creates or replaces a record through its existing owner.
 // A zero expected revision means creation; replacement requires its exact source image.
 type WorkflowMutationRequest struct {
-	Binding          WorkflowMutationBinding `json:"binding"`
-	Title            string                  `json:"title"`
-	Record           WorkflowRecord          `json:"record"`
-	ExpectedRevision uint64                  `json:"expected_revision"`
+	Binding          workflowstate.MutationBinding `json:"binding"`
+	Title            string                        `json:"title"`
+	Record           WorkflowRecord                `json:"record"`
+	ExpectedRevision uint64                        `json:"expected_revision"`
 }
 
 // WorkflowMutationResult is the original confirmed record and its durable receipt.
@@ -97,7 +84,7 @@ func (s *WorkflowStore) normalizeMutation(request WorkflowMutationRequest) (Work
 		return request, "", errors.New("mutation owner requires a project identity")
 	}
 
-	if err := validateWorkflowMutationBinding(request.Binding); err != nil {
+	if err := request.Binding.Validate(); err != nil {
 		return request, "", err
 	}
 
@@ -124,20 +111,8 @@ func (s *WorkflowStore) normalizeMutation(request WorkflowMutationRequest) (Work
 	return request, contenthash.Sum(data), nil
 }
 
-func validateWorkflowMutationBinding(binding WorkflowMutationBinding) error {
-	if !regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`).MatchString(binding.RequestID) || binding.Operator == "" || len(binding.Operator) > 128 || strings.ContainsAny(binding.Operator, "\x00\r\n") {
-		return errors.New("opaque mutation request and operator identities are required")
-	}
-
-	return nil
-}
-
-func workflowMutationReceiptPath(requestID string) string {
-	return filepath.ToSlash(filepath.Join("run", "operation-receipts", contenthash.Sum([]byte(requestID))+".json"))
-}
-
 func (s *WorkflowStore) readMutationReceipt(request WorkflowMutationRequest, digest string) (WorkflowMutationResult, bool, error) {
-	path, err := s.safePath(workflowMutationReceiptPath(request.Binding.RequestID))
+	path, err := s.safePath(workflowstate.MutationReceiptPath(request.Binding.RequestID))
 	if err != nil {
 		return WorkflowMutationResult{}, false, err
 	}
@@ -185,7 +160,7 @@ func validateWorkflowMutationResult(receipt workflowMutationReceipt, request Wor
 		return fmt.Errorf("%w: mutation receipt guard changed", workflowstate.ErrConflict)
 	}
 
-	if result.RequestID != request.Binding.RequestID || result.ArgumentDigest != digest || receipt.Operator != request.Binding.Operator || result.ReceiptRef != workflowMutationReceiptPath(request.Binding.RequestID) {
+	if result.RequestID != request.Binding.RequestID || result.ArgumentDigest != digest || receipt.Operator != request.Binding.Operator || result.ReceiptRef != workflowstate.MutationReceiptPath(request.Binding.RequestID) {
 		return fmt.Errorf("%w: mutation request payload changed", workflowstate.ErrConflict)
 	}
 
@@ -221,7 +196,7 @@ func (s *WorkflowStore) applyNewMutation(ctx context.Context, request WorkflowMu
 		return result, err
 	}
 
-	result = WorkflowMutationResult{RequestID: request.Binding.RequestID, ArgumentDigest: digest, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID), Record: record}
+	result = WorkflowMutationResult{RequestID: request.Binding.RequestID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), Record: record}
 
 	receipt, err := s.mutationReceiptChange(request, result)
 	if err != nil {

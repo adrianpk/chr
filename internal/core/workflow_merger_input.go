@@ -96,7 +96,7 @@ func validateWorkflowMergerRepository(input WorkflowMergerInput) error {
 func validWorkflowMergerIdentity(input WorkflowMergerInput) bool {
 	keys := []string{input.ID, input.InvocationID, input.Unit.ID, input.CapacityReservationID, input.BudgetReservationID}
 	for _, key := range keys {
-		if !validWorkflowRequestKey(key) || !filepath.IsLocal(key) || filepath.Base(key) != key || strings.ContainsRune(key, '\\') || key == "." {
+		if !workflowstate.ValidRequestKey(key) || !filepath.IsLocal(key) || filepath.Base(key) != key || strings.ContainsRune(key, '\\') || key == "." {
 			return false
 		}
 	}

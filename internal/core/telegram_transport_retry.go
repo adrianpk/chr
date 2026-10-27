@@ -61,7 +61,7 @@ func (s *TelegramReceiverStore) retryTelegramTransport(ctx context.Context, requ
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowMutationBinding(WorkflowMutationBinding{RequestID: "telegram-transport-retry", Operator: request.Actor}); err != nil {
+	if err := (workflowstate.MutationBinding{RequestID: "telegram-transport-retry", Operator: request.Actor}).Validate(); err != nil {
 		return err
 	}
 

@@ -44,7 +44,7 @@ func (r telegramReceiver) prepareRecord(ctx context.Context, operations telegram
 		return request, err
 	}
 
-	prepared, err := operations.PrepareTelegramRecord(ctx, request.Target, core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}, mutation)
+	prepared, err := operations.PrepareTelegramRecord(ctx, request.Target, workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}, mutation)
 	if err != nil {
 		return request, err
 	}
@@ -104,7 +104,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 }
 
 func telegramPreparedRecordBinding(prepared PreparedRecordMutation, request core.TelegramOperationRequest) bool {
-	expected := core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}
+	expected := workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}
 	if prepared.Native != nil {
 		return prepared.Native.Binding == expected && prepared.Case == nil
 	}

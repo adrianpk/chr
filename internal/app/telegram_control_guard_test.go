@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -82,7 +81,7 @@ func telegramControlClone(t *testing.T, source WorkflowControlRequest, id string
 		t.Fatal(err)
 	}
 
-	request.RequestBinding = &core.WorkflowMutationBinding{RequestID: id, Operator: "operator"}
+	request.RequestBinding = &workflowstate.MutationBinding{RequestID: id, Operator: "operator"}
 	request.DecisionAnswer.ID = id
 
 	return request

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // The shared operation enforces current local authority and exposes one fresh
@@ -24,7 +25,7 @@ func TestHarnessSelectionServiceChange(t *testing.T) {
 	}
 
 	choice := "writing"
-	request := core.HarnessSelectionChangeRequest{Binding: core.WorkflowMutationBinding{RequestID: "select-both", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Worker: &choice, Generation: &choice}
+	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "select-both", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Worker: &choice, Generation: &choice}
 	authority := localHarnessSelectionAuthority(project, request.Binding.Operator)
 
 	accepted, err := operations.ChangeHarnessSelections(t.Context(), request, authority)
@@ -91,7 +92,7 @@ func checkHarnessSelectionServiceRejection(t *testing.T, name string) {
 		t.Fatal(err)
 	}
 
-	request := core.HarnessSelectionChangeRequest{Binding: core.WorkflowMutationBinding{RequestID: "invalid", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Generation: &name}
+	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "invalid", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Generation: &name}
 	authority := localHarnessSelectionAuthority(project, "operator")
 
 	if name == "foreign-project" {
@@ -150,7 +151,7 @@ func checkHarnessSelectionStatusInvalid(t *testing.T, mode string) {
 func TestHarnessSelectionAuthorityRechecked(t *testing.T) {
 	operations, _, _, _ := harnessSelectionFixture(t)
 	count := 0
-	request := core.HarnessSelectionChangeRequest{Binding: core.WorkflowMutationBinding{RequestID: "revoked", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: core.WorkflowContentHash(nil), Worker: harnessChoiceTestPointer("writing")}
+	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "revoked", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: core.WorkflowContentHash(nil), Worker: harnessChoiceTestPointer("writing")}
 
 	_, err := operations.ChangeHarnessSelections(t.Context(), request, func(_ context.Context) error {
 		count++

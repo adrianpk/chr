@@ -86,7 +86,7 @@ func telegramRetainedAuthoringInput(request core.TelegramOperationRequest) (core
 		return owner, err
 	}
 
-	if owner.Binding != (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) || owner.ProjectID != request.Target.ProjectID || owner.Namespace != request.Target.Namespace || arguments.PayloadHash != recordDigest(request.PreparedInput) {
+	if owner.Binding != (workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}) || owner.ProjectID != request.Target.ProjectID || owner.Namespace != request.Target.Namespace || arguments.PayloadHash != recordDigest(request.PreparedInput) {
 		return owner, workflowstate.ErrConflict
 	}
 

@@ -45,7 +45,7 @@ func telegramLifecycleJournalFixture(t *testing.T, kind string) (*WorkflowStore,
 
 	run := workflowTestRead(t, store, id)
 
-	request := WorkflowControlMutationRequest{Binding: WorkflowMutationBinding{RequestID: "lifecycle-receipt", Operator: "operator"}, Action: action, ID: id, ExpectedRevision: run.Revision}
+	request := WorkflowControlMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "lifecycle-receipt", Operator: "operator"}, Action: action, ID: id, ExpectedRevision: run.Revision}
 	if action == "continue" {
 		request.StepLimit = 1
 	}

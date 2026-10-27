@@ -14,12 +14,12 @@ import (
 // AuthoringWorkRequest proposes a native description from observed authoring
 // sources. Instruction is the retained user instruction, never a model summary.
 type AuthoringWorkRequest struct {
-	Binding            core.WorkflowMutationBinding `json:"binding"`
-	SessionID          string                       `json:"session_id"`
-	ExpectedRevision   int64                        `json:"expected_revision"`
-	ExpectedSourceHash string                       `json:"expected_source_hash"`
-	Intent             core.AuthoringIntent         `json:"intent"`
-	Instruction        string                       `json:"instruction"`
+	Binding            workflowstate.MutationBinding `json:"binding"`
+	SessionID          string                        `json:"session_id"`
+	ExpectedRevision   int64                         `json:"expected_revision"`
+	ExpectedSourceHash string                        `json:"expected_source_hash"`
+	Intent             core.AuthoringIntent          `json:"intent"`
+	Instruction        string                        `json:"instruction"`
 }
 
 // PreparedAuthoringWork is a preview to retain before dispatch. Preparing again

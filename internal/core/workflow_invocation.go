@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"slices"
-	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
@@ -259,7 +258,7 @@ func normalizeWorkflowStart(request WorkflowStartRequest) (WorkflowStartRequest,
 		return request, fmt.Errorf("an invocation may restrict review to human_review only")
 	}
 
-	if !validWorkflowRequestKey(request.RequestKey) {
+	if !workflowstate.ValidRequestKey(request.RequestKey) {
 		return request, fmt.Errorf("workflow request key must contain 1..128 plain bytes")
 	}
 
@@ -307,10 +306,6 @@ func normalizeWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) WorkflowEx
 	}
 
 	return policy
-}
-
-func validWorkflowRequestKey(key string) bool {
-	return strings.TrimSpace(key) == key && key != "" && len(key) <= 128 && !strings.ContainsAny(key, "\x00\n\r")
 }
 
 func validWorkflowExecutionPolicy(policy WorkflowExecutionPolicy) bool {

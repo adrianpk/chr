@@ -54,7 +54,7 @@ func telegramHarnessSourceChoices(source core.TelegramReceivedUpdate) (telegramH
 }
 
 func telegramHarnessPreparedBinding(change core.HarnessSelectionChangeRequest, request core.TelegramOperationRequest, choices telegramHarnessChoices) bool {
-	return request.OperationID == core.TelegramHarnessSelectionOperation && change.Binding == (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) && change.ProjectRef == request.Target.ProjectID && len(change.ExpectedRevision) == 64 && sameTelegramHarnessChoice(change.Worker, choices.Worker) && sameTelegramHarnessChoice(change.Generation, choices.Generation)
+	return request.OperationID == core.TelegramHarnessSelectionOperation && change.Binding == (workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}) && change.ProjectRef == request.Target.ProjectID && len(change.ExpectedRevision) == 64 && sameTelegramHarnessChoice(change.Worker, choices.Worker) && sameTelegramHarnessChoice(change.Generation, choices.Generation)
 }
 
 func sameTelegramHarnessChoice(a, b *string) bool {

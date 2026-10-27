@@ -44,7 +44,7 @@ func telegramPreparedWorkResultText(result AuthoringWorkResult) string {
 }
 
 func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.TelegramOperationRequest, result AuthoringWorkResult, config core.TelegramReceiverConfig) error {
-	if result.Scope.Binding != (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) || result.Result.ReceiptRef == "" {
+	if result.Scope.Binding != (workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}) || result.Result.ReceiptRef == "" {
 		return workflowstate.ErrConflict
 	}
 

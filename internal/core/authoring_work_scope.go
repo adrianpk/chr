@@ -26,28 +26,28 @@ const (
 // AuthoringWorkScope binds a proposed native description to canonical inputs.
 // It does not authorize admission, alter policy or replace a workflow preview.
 type AuthoringWorkScope struct {
-	Schema          string                  `json:"schema"`
-	Binding         WorkflowMutationBinding `json:"binding"`
-	Intent          AuthoringIntent         `json:"intent"`
-	Instruction     string                  `json:"instruction"`
-	ProjectID       string                  `json:"project_id"`
-	Namespace       string                  `json:"namespace"`
-	SessionID       string                  `json:"session_id"`
-	SessionRef      string                  `json:"session_ref"`
-	SessionRevision int64                   `json:"session_revision"`
-	SourceHash      string                  `json:"source_hash"`
-	DescriptionRef  string                  `json:"description_ref"`
-	DescriptionHash string                  `json:"description_hash"`
-	ContractHash    string                  `json:"contract_hash"`
-	RecordHash      string                  `json:"record_hash"`
-	Hash            string                  `json:"scope_hash"`
+	Schema          string                        `json:"schema"`
+	Binding         workflowstate.MutationBinding `json:"binding"`
+	Intent          AuthoringIntent               `json:"intent"`
+	Instruction     string                        `json:"instruction"`
+	ProjectID       string                        `json:"project_id"`
+	Namespace       string                        `json:"namespace"`
+	SessionID       string                        `json:"session_id"`
+	SessionRef      string                        `json:"session_ref"`
+	SessionRevision int64                         `json:"session_revision"`
+	SourceHash      string                        `json:"source_hash"`
+	DescriptionRef  string                        `json:"description_ref"`
+	DescriptionHash string                        `json:"description_hash"`
+	ContractHash    string                        `json:"contract_hash"`
+	RecordHash      string                        `json:"record_hash"`
+	Hash            string                        `json:"scope_hash"`
 }
 
 // AuthoringWorkAuthorization retains a host-validated explicit decision for the
 // exact displayed scope. Provider output cannot supply this value.
 type AuthoringWorkAuthorization struct {
-	Binding   WorkflowMutationBinding `json:"binding"`
-	ScopeHash string                  `json:"scope_hash"`
+	Binding   workflowstate.MutationBinding `json:"binding"`
+	ScopeHash string                        `json:"scope_hash"`
 }
 
 // SealAuthoringWorkScope computes the immutable scope binding after validation.
@@ -79,12 +79,12 @@ func ValidateAuthoringWorkScope(scope AuthoringWorkScope) error {
 
 // AuthorizeAuthoringWork binds an explicit caller decision to the observed scope.
 // A changed description or source requires a new decision for the changed hash.
-func AuthorizeAuthoringWork(scope AuthoringWorkScope, decision WorkflowMutationBinding, observed string) (AuthoringWorkAuthorization, error) {
+func AuthorizeAuthoringWork(scope AuthoringWorkScope, decision workflowstate.MutationBinding, observed string) (AuthoringWorkAuthorization, error) {
 	if err := ValidateAuthoringWorkScope(scope); err != nil {
 		return AuthoringWorkAuthorization{}, err
 	}
 
-	if err := validateWorkflowMutationBinding(decision); err != nil {
+	if err := decision.Validate(); err != nil {
 		return AuthoringWorkAuthorization{}, err
 	}
 
@@ -123,7 +123,7 @@ func ValidateAuthoringWorkAuthorization(scope AuthoringWorkScope, authority *Aut
 var ErrAuthoringAuthorityRequired = errors.New("the prepared scope requires explicit development authority")
 
 func validateAuthoringWorkScope(scope AuthoringWorkScope) error {
-	if err := validateWorkflowMutationBinding(scope.Binding); err != nil {
+	if err := scope.Binding.Validate(); err != nil {
 		return err
 	}
 

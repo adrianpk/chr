@@ -37,11 +37,11 @@ type HarnessSelectionSnapshot struct {
 // HarnessSelectionChangeRequest omits unchanged roles; an explicit empty reference
 // clears a role. Transport adapters translate their null choices to empty references.
 type HarnessSelectionChangeRequest struct {
-	Binding          WorkflowMutationBinding `json:"binding"`
-	ProjectRef       string                  `json:"project_ref"`
-	ExpectedRevision string                  `json:"expected_revision"`
-	Worker           *string                 `json:"worker,omitempty"`
-	Generation       *string                 `json:"generation,omitempty"`
+	Binding          workflowstate.MutationBinding `json:"binding"`
+	ProjectRef       string                        `json:"project_ref"`
+	ExpectedRevision string                        `json:"expected_revision"`
+	Worker           *string                       `json:"worker,omitempty"`
+	Generation       *string                       `json:"generation,omitempty"`
 }
 
 // HarnessSelectionChangeOptions supplies trusted authority and local preparation.
@@ -113,7 +113,7 @@ func harnessSelectionRequestDigest(r HarnessSelectionChangeRequest) (string, err
 		return "", errors.New("harness selection requires an authorized actor and preparation")
 	}
 
-	if (WorkflowMutationBinding{RequestID: r.ProjectRef, Operator: r.Binding.Operator}).Validate() != nil || !harnessSelectionDigest(r.ExpectedRevision) {
+	if (workflowstate.MutationBinding{RequestID: r.ProjectRef, Operator: r.Binding.Operator}).Validate() != nil || !harnessSelectionDigest(r.ExpectedRevision) {
 		return "", errors.New("harness selection requires an exact project and configuration revision")
 	}
 
