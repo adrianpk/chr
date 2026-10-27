@@ -20,7 +20,7 @@ func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore,
 
 	switch action {
 	case "approve":
-		current, _, run, ports := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
+		current, _, run, ports := workflowReviewFixture(t, workflowstate.ReviewHuman)
 		store, provider, request.ID = current, ports, run.ID
 
 		review, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)

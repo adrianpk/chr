@@ -39,10 +39,10 @@ func workflowDeliveryFixture(t *testing.T, method string) workflowIntegrationFix
 func workflowDeliveryExtentFixture(t *testing.T, method, extent string) workflowIntegrationFixture {
 	t.Helper()
 
-	return workflowDeliveryPolicyFixture(t, method, extent, workflowstate.WorkflowExecutionPolicy{})
+	return workflowDeliveryPolicyFixture(t, method, extent, workflowstate.ExecutionPolicy{})
 }
 
-func workflowDeliveryPolicyFixture(t *testing.T, method, extent string, policy workflowstate.WorkflowExecutionPolicy) workflowIntegrationFixture {
+func workflowDeliveryPolicyFixture(t *testing.T, method, extent string, policy workflowstate.ExecutionPolicy) workflowIntegrationFixture {
 	t.Helper()
 
 	store, hierarchy, run, provider := workflowPRPolicyFixture(t, extent, policy)

@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, target workflowstate.WorkflowPreviewTarget, proof WorkflowIntegrationProof) error {
+func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, target workflowstate.PreviewTarget, proof WorkflowIntegrationProof) error {
 	delivery := workflowUnitDelivery(*run, target, proof)
 
 	data, err := encodeWorkflowUnitDelivery(delivery)
@@ -34,7 +34,7 @@ func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, targ
 	return s.commitWorkflowPullRequestFiles(run, nil, workflowstate.FileChange{Path: delivery.EvidenceRef, After: data})
 }
 
-func workflowUnitDelivery(run workflowInvocationFile, target workflowstate.WorkflowPreviewTarget, proof WorkflowIntegrationProof) WorkflowUnitDelivery {
+func workflowUnitDelivery(run workflowInvocationFile, target workflowstate.PreviewTarget, proof WorkflowIntegrationProof) WorkflowUnitDelivery {
 	return WorkflowUnitDelivery{
 		Schema: "chr-unit-frontier/v1", InvocationID: run.ID, Unit: run.Lane.Unit,
 		SetID: run.Members[run.Cursor-1].Admission.SetID, Cursor: run.Cursor,

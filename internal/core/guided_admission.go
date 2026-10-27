@@ -69,7 +69,7 @@ func GuidedPreparationCheckpoint(session AuthoringSession) (GuidedStageCheckpoin
 
 // ValidateGuidedWorkPreview rejects omissions, additions and replaced initial contracts.
 func ValidateGuidedWorkPreview(reference GuidedMaterializationReference, preview WorkflowPreview) error {
-	if preview.Selector != (workflowstate.WorkflowSelector{Extent: "slice_set", Identity: reference.SetID}) || preview.Total != len(reference.Members) || len(preview.Members) != preview.Total || preview.Total == 0 || preview.Total > workflowstate.PageLimit {
+	if preview.Selector != (workflowstate.Selector{Extent: "slice_set", Identity: reference.SetID}) || preview.Total != len(reference.Members) || len(preview.Members) != preview.Total || preview.Total == 0 || preview.Total > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
 
@@ -182,7 +182,7 @@ func guardGuidedAdmissionState(session AuthoringSession, project, namespace stri
 	return nil
 }
 
-func guardGuidedAdmissionIntent(session AuthoringSession, proof workflowstate.GuidedWorkflowAdmission) error {
+func guardGuidedAdmissionIntent(session AuthoringSession, proof workflowstate.GuidedAdmission) error {
 	state := session.Guided
 	if proof.Policy != GuidedWorkAdmissionPolicy || proof.Actor != state.Actor || proof.RunID != session.ID || state.PendingOperation.Action != "admit" || proof.OperationDigest != state.PendingOperation.Digest || proof.MaterializationID != state.Work.Materialization.ID {
 		return workflowstate.ErrConflict

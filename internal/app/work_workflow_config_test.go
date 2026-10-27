@@ -88,7 +88,7 @@ func TestWorkflowConfigRestriction(t *testing.T) {
 	project := operations.projectContext.ProjectDir
 	writeCLIWorkspaceConfig(t, project, "workflow:\n  version: 1\n")
 
-	preview, err := operations.PreviewWorkExtent(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Limit: 1})
+	preview, err := operations.PreviewWorkExtent(t.Context(), workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: record.Task.Key}, Limit: 1})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +109,7 @@ func TestWorkflowConfigRestriction(t *testing.T) {
 	checkWorkflowConfigRestricted(t, operations, status, provider.creates)
 
 	before := workflowCLIImage(t, project)
-	if _, err := operations.StartWorkExtent(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: status.Selector}, 1, workflowstate.ReviewWorkflowModeTrustedAutoMerge); err == nil {
+	if _, err := operations.StartWorkExtent(t.Context(), workflowstate.PreviewRequest{Selector: status.Selector}, 1, workflowstate.ReviewTrustedAutoMerge); err == nil {
 		t.Fatal("invocation override enabled automatic publication")
 	}
 
@@ -122,11 +122,11 @@ func checkWorkflowConfigRestricted(t *testing.T, operations service, status Work
 	t.Helper()
 
 	retained, err := operations.ReadWorkflow(t.Context(), status.ID)
-	if err != nil || retained.ReviewRestriction != workflowstate.ReviewWorkflowModeHumanReview {
+	if err != nil || retained.ReviewRestriction != workflowstate.ReviewHuman {
 		t.Fatal("CLI restriction was not frozen at admission", retained, err)
 	}
 
-	if status.Policy.Mode != workflowstate.ReviewWorkflowModeHumanReview || status.Policy.Source != "invocation_restriction" || status.ValidatedTasks != 1 || creates != 0 {
+	if status.Policy.Mode != workflowstate.ReviewHuman || status.Policy.Source != "invocation_restriction" || status.ValidatedTasks != 1 || creates != 0 {
 		t.Fatal("restriction changed validation or publication", status)
 	}
 }

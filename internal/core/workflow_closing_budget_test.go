@@ -33,7 +33,7 @@ func TestWorkflowClosingBudget(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	start := WorkflowStartRequest{RequestKey: "new-closing-budget", Policy: workflowstate.WorkflowExecutionPolicy{CheckpointStepLimit: 1}, Selection: run.Selection}
+	start := WorkflowStartRequest{RequestKey: "new-closing-budget", Policy: workflowstate.ExecutionPolicy{CheckpointStepLimit: 1}, Selection: run.Selection}
 
 	next := workflowTestStart(t, restarted, start)
 	if next.Invocation.ID == run.ID {

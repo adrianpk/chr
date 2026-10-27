@@ -46,10 +46,10 @@ func piWorkerInputFixture(t *testing.T) (core.WorkflowTaskInput, pi.WorkerRuntim
 
 	digest := strings.Repeat("a", 64)
 
-	binding, err := core.SealHarnessBinding(harnesscore.HarnessBinding{
-		SchemaVersion: 1, Role: harnesscore.HarnessWorker, Harness: pi.Identity, Source: "project", SelectionRevision: digest,
+	binding, err := core.SealHarnessBinding(harnesscore.Binding{
+		SchemaVersion: 1, Role: harnesscore.Worker, Harness: pi.Identity, Source: "project", SelectionRevision: digest,
 		Profile: "worker", ProfileRevision: digest, ModelProvider: "fixture", Model: "model", RuntimeRef: "sha256:" + digest, ProtocolRevision: pi.ProtocolRevision,
-		ExecutableRef: harnesscore.HarnessExecutableRef{Hash: digest, CommandHash: digest}, Capabilities: harness.Capabilities{Worker: true},
+		ExecutableRef: harnesscore.ExecutableRef{Hash: digest, CommandHash: digest}, Capabilities: harness.Capabilities{Worker: true},
 	})
 	if err != nil {
 		t.Fatal(err)

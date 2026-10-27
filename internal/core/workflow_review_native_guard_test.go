@@ -46,7 +46,7 @@ func TestNativeReviewInputs(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			f, candidate := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
+			f, candidate := nativeReviewFixture(t, workflowstate.ReviewHuman)
 			binding := nativeReviewAuthorize(t, f)
 			test.change(t, f, candidate)
 			nativeReviewRejectEntryPoints(t, f, binding, f.provider)
@@ -58,7 +58,7 @@ func TestNativeReviewInputs(t *testing.T) {
 // valid candidate and current human wait already exist. Source-only observation
 // cannot approve the exact rewrite, and refusal consumes no review attempt.
 func TestNativeReviewObserver(t *testing.T) {
-	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewHuman)
 	store, id := f.f.store, f.f.run.ID
 
 	binding, err := store.ReviewWorkflowSlice(t.Context(), id, f.provider, nil)
@@ -82,14 +82,14 @@ func TestNativeReviewObserver(t *testing.T) {
 func TestNativeReviewPolicyIO(t *testing.T) {
 	for _, change := range []string{"profile", "review"} {
 		t.Run(change, func(t *testing.T) {
-			f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+			f, _ := nativeReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 			store, id := f.f.store, f.f.run.ID
 			before := workflowTestRead(t, store, id)
 			provider := &nativeReviewProviderFixture{f.provider, func(_ *WorkflowNativeCapability) {
 				if change == "profile" {
 					writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationDisabled)
 				} else {
-					writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "review", "mode", string(workflowstate.ReviewWorkflowModeHumanReview))
+					writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "review", "mode", string(workflowstate.ReviewHuman))
 				}
 			}}
 

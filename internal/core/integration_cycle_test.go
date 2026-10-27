@@ -10,12 +10,12 @@ import (
 func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 	for _, testCase := range []struct {
 		name   string
-		mode   workflowstate.ReviewWorkflowMode
+		mode   workflowstate.ReviewMode
 		policy IntegrationCyclePolicy
 	}{
 		{
 			name: "human review",
-			mode: workflowstate.ReviewWorkflowModeHumanReview,
+			mode: workflowstate.ReviewHuman,
 			policy: IntegrationCyclePolicy{
 				Mode:                IntegrationCycleModeHumanReview,
 				RequiresReview:      true,
@@ -25,7 +25,7 @@ func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 		},
 		{
 			name: "agentic review",
-			mode: workflowstate.ReviewWorkflowModeAgenticReview,
+			mode: workflowstate.ReviewAgentic,
 			policy: IntegrationCyclePolicy{
 				Mode:           IntegrationCycleModeAgenticReview,
 				RequiresReview: true,
@@ -34,7 +34,7 @@ func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 		},
 		{
 			name: "trusted auto merge",
-			mode: workflowstate.ReviewWorkflowModeTrustedAutoMerge,
+			mode: workflowstate.ReviewTrustedAutoMerge,
 			policy: IntegrationCyclePolicy{
 				Mode:          IntegrationCycleModeTrustedAutoMerge,
 				RequiresMerge: true,
@@ -72,7 +72,7 @@ func TestPlanIntegrationCycleBuildsSelectedPendingPlan(t *testing.T) {
 		ProjectID: "project-1",
 		Ticket:    ticket,
 		ReviewConfig: ReviewWorkflowConfig{
-			Mode: workflowstate.ReviewWorkflowModeAgenticReview,
+			Mode: workflowstate.ReviewAgentic,
 		},
 	})
 	if err != nil {
@@ -102,7 +102,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 			name: "missing project id",
 			opts: IntegrationCyclePlanOptions{
 				Ticket:       IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: "CHR-1"}},
-				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewWorkflowModeHumanReview},
+				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
 			},
 			want: "integration cycle project id is required",
 		},
@@ -110,7 +110,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 			name: "missing ticket key",
 			opts: IntegrationCyclePlanOptions{
 				ProjectID:    "project-1",
-				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewWorkflowModeHumanReview},
+				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
 			},
 			want: "integration cycle ticket key is required",
 		},

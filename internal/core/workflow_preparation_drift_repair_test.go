@@ -63,7 +63,7 @@ func nativeRepairedDriftFacts(t *testing.T, f nativePreparationFixture, store *W
 // TestNativeDriftLimit retains the invocation-wide bound through reconstruction.
 // Exhaustion cannot launch a sixth replacement or refill earlier consumption.
 func TestNativeDriftLimit(t *testing.T) {
-	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 
 	store, id := f.f.store, f.f.run.ID
 	for round := range 5 {

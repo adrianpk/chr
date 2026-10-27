@@ -40,7 +40,7 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
 		Statuses:  []string{"open", "ready"},
-		Order:     workflowstate.TicketLoopOrderKey,
+		Order:     workflowstate.TicketOrderKey,
 	})
 	if err != nil {
 		t.Fatalf("EligibleTickets returned error: %v", err)
@@ -106,7 +106,7 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
-		Filters: workflowstate.TicketLoopFilters{
+		Filters: workflowstate.TicketFilters{
 			Priorities:   []string{"high"},
 			Severities:   []string{"critical"},
 			ProjectAreas: []string{"frontend"},
@@ -146,7 +146,7 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
-		Filters: workflowstate.TicketLoopFilters{
+		Filters: workflowstate.TicketFilters{
 			Priorities: []string{"normal"},
 		},
 	})
@@ -183,7 +183,7 @@ func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
-		Order:     workflowstate.TicketLoopOrderPriority,
+		Order:     workflowstate.TicketOrderPriority,
 	})
 	if err != nil {
 		t.Fatalf("EligibleTickets returned error: %v", err)
@@ -218,7 +218,7 @@ func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
-		Order:     workflowstate.TicketLoopOrderSeverity,
+		Order:     workflowstate.TicketOrderSeverity,
 	})
 	if err != nil {
 		t.Fatalf("EligibleTickets returned error: %v", err)
@@ -256,7 +256,7 @@ func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
-		Order:     workflowstate.TicketLoopOrderPrioritySeverity,
+		Order:     workflowstate.TicketOrderPrioritySeverity,
 	})
 	if err != nil {
 		t.Fatalf("EligibleTickets returned error: %v", err)
@@ -280,7 +280,7 @@ func TestTicketLoopQueryOrdersByCreatedAt(t *testing.T) {
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
-		Order:     workflowstate.TicketLoopOrderCreatedAt,
+		Order:     workflowstate.TicketOrderCreatedAt,
 	})
 	if err != nil {
 		t.Fatalf("EligibleTickets returned error: %v", err)
@@ -302,7 +302,7 @@ func TestTicketLoopQueryOrdersByCreatedAtThenKey(t *testing.T) {
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
-		Order:     workflowstate.TicketLoopOrderCreatedAt,
+		Order:     workflowstate.TicketOrderCreatedAt,
 	})
 	if err != nil {
 		t.Fatalf("EligibleTickets returned error: %v", err)
@@ -336,7 +336,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 			name: "invalid priority",
 			opts: TicketLoopQueryOptions{
 				ProjectID: "project-1",
-				Filters:   workflowstate.TicketLoopFilters{Priorities: []string{"urgent"}},
+				Filters:   workflowstate.TicketFilters{Priorities: []string{"urgent"}},
 			},
 			want: "invalid ticket priority: urgent",
 		},
@@ -344,7 +344,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 			name: "invalid severity",
 			opts: TicketLoopQueryOptions{
 				ProjectID: "project-1",
-				Filters:   workflowstate.TicketLoopFilters{Severities: []string{"maximum"}},
+				Filters:   workflowstate.TicketFilters{Severities: []string{"maximum"}},
 			},
 			want: "invalid ticket severity: maximum",
 		},
@@ -352,7 +352,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 			name: "invalid type",
 			opts: TicketLoopQueryOptions{
 				ProjectID: "project-1",
-				Filters:   workflowstate.TicketLoopFilters{Types: []string{"unknown"}},
+				Filters:   workflowstate.TicketFilters{Types: []string{"unknown"}},
 			},
 			want: "invalid ticket type: unknown",
 		},
@@ -360,7 +360,7 @@ func TestTicketLoopQueryRejectsInvalidOptions(t *testing.T) {
 			name: "invalid order",
 			opts: TicketLoopQueryOptions{
 				ProjectID: "project-1",
-				Order:     workflowstate.TicketLoopOrder("unknown"),
+				Order:     workflowstate.TicketOrder("unknown"),
 			},
 			want: "invalid ticket loop order: unknown",
 		},

@@ -80,7 +80,7 @@ func (adapter workWorkflowCLI) extent(ctx context.Context, cmd *cli.Command, ope
 		return err
 	}
 
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: extent, Identity: cmd.Args().First()}, Offset: cmd.Int("offset"), Limit: cmd.Int("limit"), SnapshotHash: cmd.String("snapshot")}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: extent, Identity: cmd.Args().First()}, Offset: cmd.Int("offset"), Limit: cmd.Int("limit"), SnapshotHash: cmd.String("snapshot")}
 	if extent == "loose" {
 		selection := agentWorkSelectionOptionsFromCommand(cmd)
 		request.Statuses, request.Filters, request.Order = selection.Statuses, selection.Filters, selection.Order
@@ -96,9 +96,9 @@ func (adapter workWorkflowCLI) extent(ctx context.Context, cmd *cli.Command, ope
 		return adapter.preview(cmd, preview)
 	}
 
-	restriction := workflowstate.ReviewWorkflowMode("")
+	restriction := workflowstate.ReviewMode("")
 	if cmd.Bool("human-review") {
-		restriction = workflowstate.ReviewWorkflowModeHumanReview
+		restriction = workflowstate.ReviewHuman
 	}
 
 	result, err := operations.StartWorkExtent(ctx, request, cmd.Int("max-steps"), restriction)

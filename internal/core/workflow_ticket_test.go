@@ -33,12 +33,12 @@ func workflowTicketFixture(t *testing.T, extent string, gate workflowstate.Valid
 
 	commit, _ := workflowSelectionCommit(t, store)
 
-	selector := workflowstate.WorkflowSelector{Extent: extent}
+	selector := workflowstate.Selector{Extent: extent}
 	if extent == "ticket" {
 		selector.Identity = record.Task.Key
 	}
 
-	request := WorkflowStartRequest{RequestKey: "independent", Selection: workflowstate.WorkflowPreviewRequest{Selector: selector, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "independent", Selection: workflowstate.PreviewRequest{Selector: selector, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 
 	return store, record, request
 }
@@ -135,7 +135,7 @@ func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup 
 		t.Fatal(err)
 	}
 
-	workflowTicketReviewConfig(t, store, method, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+	workflowTicketReviewConfig(t, store, method, workflowstate.ReviewTrustedAutoMerge)
 
 	pr := WorkflowPullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}
 	provider := &workflowPreparationProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}, target: pr.BaseCommit}, guarded: true, revision: "guard-v1"}
@@ -166,20 +166,20 @@ func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup 
 func TestWorkflowTicketDelivery(t *testing.T) {
 	cases := []struct {
 		method, extent string
-		mode           workflowstate.ReviewWorkflowMode
+		mode           workflowstate.ReviewMode
 	}{
-		{"merge", "ticket", workflowstate.ReviewWorkflowModeTrustedAutoMerge},
-		{"rebase", "ticket", workflowstate.ReviewWorkflowModeTrustedAutoMerge},
-		{"squash", "loose", workflowstate.ReviewWorkflowModeTrustedAutoMerge},
-		{"rebase", "ticket", workflowstate.ReviewWorkflowModeHumanReview},
-		{"rebase", "ticket", workflowstate.ReviewWorkflowModeAgenticReview},
+		{"merge", "ticket", workflowstate.ReviewTrustedAutoMerge},
+		{"rebase", "ticket", workflowstate.ReviewTrustedAutoMerge},
+		{"squash", "loose", workflowstate.ReviewTrustedAutoMerge},
+		{"rebase", "ticket", workflowstate.ReviewHuman},
+		{"rebase", "ticket", workflowstate.ReviewAgentic},
 	}
 	for _, tc := range cases {
 		t.Run(tc.method+"/"+string(tc.mode), func(t *testing.T) { testWorkflowTicketDelivery(t, tc.method, tc.extent, tc.mode) })
 	}
 }
 
-func testWorkflowTicketDelivery(t *testing.T, method, extent string, mode workflowstate.ReviewWorkflowMode) {
+func testWorkflowTicketDelivery(t *testing.T, method, extent string, mode workflowstate.ReviewMode) {
 	t.Helper()
 
 	f, request := workflowTicketPreparationFixture(t, method, extent)
@@ -248,7 +248,7 @@ func checkWorkflowTicketCombinedGate(t *testing.T, store *WorkflowStore, f workf
 	}
 }
 
-func workflowTicketReviewConfig(t *testing.T, store *WorkflowStore, method string, mode workflowstate.ReviewWorkflowMode) {
+func workflowTicketReviewConfig(t *testing.T, store *WorkflowStore, method string, mode workflowstate.ReviewMode) {
 	t.Helper()
 
 	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "review", "mode", string(mode))

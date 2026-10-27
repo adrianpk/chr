@@ -80,7 +80,7 @@ func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 	operation, err := FreezeHarnessGeneration(t.Context(), project, "api-operation", "quiz_next_question", func(_ context.Context, c WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error) {
 		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{
 			Selection: HarnessSelection{
-				Role: harnesscore.HarnessGeneration, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",
+				Role: harnesscore.Generation, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",
 				SelectionRevision: c.Revision(), ProfileRevision: contenthash.Sum([]byte("fixture-api-profile")),
 				Readiness: HarnessReadiness{Supported: true, Executable: "not_required", Credentials: "api_managed", Runtime: "not_required"},
 			}, ProtocolRevision: "responses/v1",

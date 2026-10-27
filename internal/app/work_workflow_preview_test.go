@@ -128,7 +128,7 @@ func TestWorkflowCLIExtents(t *testing.T) {
 			}
 
 			preview, err := workflowCLIPreview(t, project, args...)
-			if err != nil || preview.Preview.Selector.Extent != tc.extent || preview.Preview.Total != tc.total || len(preview.Preview.Members) > 1 || preview.Policy.Mode != workflowstate.ReviewWorkflowModeHumanReview {
+			if err != nil || preview.Preview.Selector.Extent != tc.extent || preview.Preview.Total != tc.total || len(preview.Preview.Members) > 1 || preview.Policy.Mode != workflowstate.ReviewHuman {
 				t.Fatalf("extent preview: %+v, %v", preview, err)
 			}
 		})

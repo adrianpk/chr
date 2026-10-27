@@ -20,7 +20,7 @@ type WorkflowLane struct {
 
 // WorkflowTaskInput is the immutable, credential-free input supplied to a worker.
 type WorkflowTaskInput struct {
-	HarnessBinding           *harnesscore.HarnessBinding          `json:"harness_binding,omitempty"`
+	HarnessBinding           *harnesscore.Binding                 `json:"harness_binding,omitempty"`
 	OrderMap                 *WorkflowOrderMapInput               `json:"order_map,omitempty"`
 	AgentCall                *WorkflowAgentCall                   `json:"agent_call,omitempty"`
 	Merger                   *WorkflowMergerInput                 `json:"merger,omitempty"`
@@ -42,7 +42,7 @@ type WorkflowTaskInput struct {
 	ScopeHash                string                               `json:"scope_hash"`
 	Contract                 generationcore.GeneratedWorkflowTask `json:"execution_contract"`
 	Body                     string                               `json:"body"`
-	Target                   workflowstate.WorkflowPreviewTarget  `json:"target"`
+	Target                   workflowstate.PreviewTarget          `json:"target"`
 	Lane                     WorkflowLane                         `json:"lane"`
 	Prerequisites            []WorkflowInputImage                 `json:"prerequisites"`
 	EvidenceHashes           map[string]string                    `json:"prerequisite_evidence_hashes"`

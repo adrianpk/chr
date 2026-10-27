@@ -18,7 +18,7 @@ func TestWorkflowReviewChangedInputs(t *testing.T) {
 		mutate func(*testing.T, *WorkflowStore, WorkflowInvocation, *workflowReviewProviderFixture)
 	}{
 		{"policy", func(t *testing.T, s *WorkflowStore, _ WorkflowInvocation, _ *workflowReviewProviderFixture) {
-			workflowReviewConfig(t, s, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+			workflowReviewConfig(t, s, workflowstate.ReviewTrustedAutoMerge)
 		}},
 		{"method", func(t *testing.T, s *WorkflowStore, _ WorkflowInvocation, _ *workflowReviewProviderFixture) {
 			workflowReviewWrite(t, UserPath(s.layout.ProjectDir(), "config.yml"), []byte("review:\n  mode: human_review\nwork:\n  merge_strategy: squash\n"))
@@ -51,7 +51,7 @@ func TestWorkflowReviewChangedInputs(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
+			store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewHuman)
 
 			binding, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
 			if err != nil {
@@ -81,12 +81,12 @@ func workflowReviewWrite(t *testing.T, path string, data []byte) {
 func TestWorkflowReviewPolicy(t *testing.T) {
 	for _, test := range []struct {
 		name, body string
-		mode       workflowstate.ReviewWorkflowMode
+		mode       workflowstate.ReviewMode
 		source     string
 		valid      bool
 	}{
-		{"legacy", "", workflowstate.ReviewWorkflowModeHumanReview, "legacy_default", true},
-		{"project", "review:\n  mode: trusted_auto_merge\n", workflowstate.ReviewWorkflowModeTrustedAutoMerge, "project", true},
+		{"legacy", "", workflowstate.ReviewHuman, "legacy_default", true},
+		{"project", "review:\n  mode: trusted_auto_merge\n", workflowstate.ReviewTrustedAutoMerge, "project", true},
 		{"invalid", "review:\n  mode: automatic\n", "", "", false},
 		{"method", "work:\n  merge_strategy: fast\n", "", "", false},
 	} {
@@ -114,9 +114,9 @@ func TestWorkflowReviewRestriction(t *testing.T) {
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "restricted", ReviewRestriction: workflowstate.ReviewWorkflowModeHumanReview, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "restricted", ReviewRestriction: workflowstate.ReviewHuman, Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 	run := workflowTestStart(t, store, request)
-	workflowReviewConfig(t, store, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+	workflowReviewConfig(t, store, workflowstate.ReviewTrustedAutoMerge)
 
 	file, err := store.readWorkflowInvocation(run.Invocation.ID)
 	if err != nil {
@@ -124,11 +124,11 @@ func TestWorkflowReviewRestriction(t *testing.T) {
 	}
 
 	policy, err := store.workflowReviewPolicy(file)
-	if err != nil || policy.Mode != workflowstate.ReviewWorkflowModeHumanReview || policy.Source != "invocation_restriction" {
+	if err != nil || policy.Mode != workflowstate.ReviewHuman || policy.Source != "invocation_restriction" {
 		t.Fatal("invocation relaxed project policy")
 	}
 
-	request.ReviewRestriction = workflowstate.ReviewWorkflowModeTrustedAutoMerge
+	request.ReviewRestriction = workflowstate.ReviewTrustedAutoMerge
 	if _, err := store.StartWorkflow(t.Context(), request); err == nil {
 		t.Fatal("relaxing invocation override accepted")
 	}

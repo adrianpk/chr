@@ -381,7 +381,7 @@ func resolveWorkEventStreamPath(projectDir, path string) string {
 func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
 		Statuses: cmd.StringSlice("status"),
-		Filters: workflowstate.TicketLoopFilters{
+		Filters: workflowstate.TicketFilters{
 			Priorities:   cmd.StringSlice("priority"),
 			Severities:   cmd.StringSlice("severity"),
 			ProjectAreas: cmd.StringSlice("project-area"),
@@ -389,7 +389,7 @@ func agentWorkSelectionOptionsFromCommand(cmd *cli.Command) AgentWorkSelectionOp
 			Types:        cmd.StringSlice("type"),
 			UseCases:     cmd.StringSlice("use-case"),
 		},
-		Order:         workflowstate.TicketLoopOrder(cmd.String("order")),
+		Order:         workflowstate.TicketOrder(cmd.String("order")),
 		MaxIterations: cmd.Int("max-iterations"),
 	}
 }

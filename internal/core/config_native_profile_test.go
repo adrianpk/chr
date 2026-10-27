@@ -34,7 +34,7 @@ func TestNativeProfileConfig(t *testing.T) {
 				t.Fatal("publication policy default or explicit selection changed")
 			}
 
-			if test.name == "explicit" && (config.Work.MergeStrategy != "squash" || config.Review.Mode != workflowstate.ReviewWorkflowModeHumanReview) {
+			if test.name == "explicit" && (config.Work.MergeStrategy != "squash" || config.Review.Mode != workflowstate.ReviewHuman) {
 				t.Fatal("nested publication config changed adjacent method or review policy")
 			}
 		})
@@ -57,7 +57,7 @@ func TestNativeProfileUpgrade(t *testing.T) {
 	}
 
 	upgraded, err := parseWorkflowConfig(image)
-	if err != nil || upgraded.Work.Integration.PublicationProfile != WorkflowPublicationDisabled || upgraded.Review.Mode != workflowstate.ReviewWorkflowModeHumanReview || upgraded.Work.MergeStrategy != "squash" {
+	if err != nil || upgraded.Work.Integration.PublicationProfile != WorkflowPublicationDisabled || upgraded.Review.Mode != workflowstate.ReviewHuman || upgraded.Work.MergeStrategy != "squash" {
 		t.Fatal("upgrade activated publication or changed existing policy")
 	}
 }

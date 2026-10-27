@@ -45,19 +45,19 @@ func TestWorkflowSelectionLooseExamples(t *testing.T) {
 
 	cases := []struct {
 		name, area string
-		order      workflowstate.TicketLoopOrder
+		order      workflowstate.TicketOrder
 		ranks      []string
 		severity   bool
 		expected   []string
 	}{
-		{"filtered frontend severity", "frontend", workflowstate.TicketLoopOrderSeverity, []string{"critical", "high"}, true, []string{"PRJ-2"}},
-		{"filtered persistence priority", "persistence", workflowstate.TicketLoopOrderPriority, []string{"critical", "high"}, false, []string{"PRJ-3", "PRJ-4"}},
-		{"area by severity", "frontend", workflowstate.TicketLoopOrderSeverity, nil, true, []string{"PRJ-2", "PRJ-1", "PRJ-5"}},
-		{"area by priority", "frontend", workflowstate.TicketLoopOrderPriority, nil, false, []string{"PRJ-1", "PRJ-2", "PRJ-5"}},
+		{"filtered frontend severity", "frontend", workflowstate.TicketOrderSeverity, []string{"critical", "high"}, true, []string{"PRJ-2"}},
+		{"filtered persistence priority", "persistence", workflowstate.TicketOrderPriority, []string{"critical", "high"}, false, []string{"PRJ-3", "PRJ-4"}},
+		{"area by severity", "frontend", workflowstate.TicketOrderSeverity, nil, true, []string{"PRJ-2", "PRJ-1", "PRJ-5"}},
+		{"area by priority", "frontend", workflowstate.TicketOrderPriority, nil, false, []string{"PRJ-1", "PRJ-2", "PRJ-5"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "loose"}, Limit: 128, Order: tc.order, Filters: workflowstate.TicketLoopFilters{ProjectAreas: []string{" " + tc.area + " "}, Tags: []string{"delivery", "ui"}, Types: []string{"task"}}}
+			request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Order: tc.order, Filters: workflowstate.TicketFilters{ProjectAreas: []string{" " + tc.area + " "}, Tags: []string{"delivery", "ui"}, Types: []string{"task"}}}
 			if tc.severity {
 				request.Filters.Severities = tc.ranks
 			} else {
@@ -78,23 +78,23 @@ func TestWorkflowSelectionLooseFilters(t *testing.T) {
 
 	cases := []struct {
 		name               string
-		filters            workflowstate.TicketLoopFilters
+		filters            workflowstate.TicketFilters
 		priority, severity string
 		expected           []string
 		fail               bool
 	}{
 		{name: "both thresholds", priority: "high", severity: "normal", expected: []string{"PRJ-3", "PRJ-4"}},
-		{name: "unclassified exact", filters: workflowstate.TicketLoopFilters{Priorities: []string{"unclassified"}}, expected: []string{"PRJ-5"}},
-		{name: "case sensitive", filters: workflowstate.TicketLoopFilters{ProjectAreas: []string{"Frontend"}}, expected: []string{}},
-		{name: "all tags required", filters: workflowstate.TicketLoopFilters{Tags: []string{"delivery", "absent"}}, expected: []string{}},
+		{name: "unclassified exact", filters: workflowstate.TicketFilters{Priorities: []string{"unclassified"}}, expected: []string{"PRJ-5"}},
+		{name: "case sensitive", filters: workflowstate.TicketFilters{ProjectAreas: []string{"Frontend"}}, expected: []string{}},
+		{name: "all tags required", filters: workflowstate.TicketFilters{Tags: []string{"delivery", "absent"}}, expected: []string{}},
 		{name: "invalid priority", priority: "urgent", fail: true},
 		{name: "unclassified minimum", severity: "unclassified", fail: true},
-		{name: "invalid severity", filters: workflowstate.TicketLoopFilters{Severities: []string{"medium"}}, fail: true},
-		{name: "oversized list", filters: workflowstate.TicketLoopFilters{Tags: make([]string, 129)}, fail: true},
+		{name: "invalid severity", filters: workflowstate.TicketFilters{Severities: []string{"medium"}}, fail: true},
+		{name: "oversized list", filters: workflowstate.TicketFilters{Tags: make([]string, 129)}, fail: true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "loose"}, Limit: 128, Filters: tc.filters, MinPriority: tc.priority, MinSeverity: tc.severity}
+			request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Filters: tc.filters, MinPriority: tc.priority, MinSeverity: tc.severity}
 
 			preview, err := store.Preview(t.Context(), request)
 			if (err != nil) != tc.fail {
@@ -114,7 +114,7 @@ func TestWorkflowSelectionNativeTies(t *testing.T) {
 	later := known.Add(time.Hour)
 	tickets := []IndexedTicket{{IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-10"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "critical"}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: &later}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-3"}, IndexedTicketClassification: IndexedTicketClassification{Priority: "high", Severity: "normal"}}, {IndexedTicketIdentity: IndexedTicketIdentity{Key: "PRJ-4"}}}
 	slices.SortFunc(tickets, func(left, right IndexedTicket) int {
-		return compareTicketLoopOrder(workflowstate.TicketLoopOrderPrioritySeverity, left, right)
+		return compareTicketLoopOrder(workflowstate.TicketOrderPrioritySeverity, left, right)
 	})
 
 	expected := []string{"PRJ-1", "PRJ-2", "PRJ-10", "PRJ-3", "PRJ-4"}
@@ -136,14 +136,14 @@ func TestWorkflowSelectionLooseOwnership(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "loose"}, Limit: 128, Statuses: []string{TicketStatusReadyForDev, TicketStatusDone}, Filters: workflowstate.TicketLoopFilters{UseCases: []string{"example"}}}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Statuses: []string{TicketStatusReadyForDev, TicketStatusDone}, Filters: workflowstate.TicketFilters{UseCases: []string{"example"}}}
 
 	preview, err := store.Preview(t.Context(), request)
 	if err != nil || preview.Total != 0 || preview.Excluded["slice_owned"] != len(result.Tasks) || preview.Excluded["integrated"] != 1 {
 		t.Fatalf("owned work entered loose scope: %+v, %v", preview, err)
 	}
 
-	request.Selector = workflowstate.WorkflowSelector{Extent: "slice", Identity: result.Set.Set.Slices[0].ID}
+	request.Selector = workflowstate.Selector{Extent: "slice", Identity: result.Set.Set.Slices[0].ID}
 	if _, err := store.Preview(t.Context(), request); err == nil {
 		t.Fatal("filters can reorder hierarchy")
 	}
@@ -186,11 +186,11 @@ func TestWorkflowSelectionConcurrent(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 
-	if _, err := store.Preview(ctx, workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "loose"}, Limit: 1}); err == nil {
+	if _, err := store.Preview(ctx, workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 1}); err == nil {
 		t.Fatal("cancelled preview continued")
 	}
 
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "loose"}, Limit: 1, MinPriority: strings.Repeat("x", 33)}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 1, MinPriority: strings.Repeat("x", 33)}
 	if _, err := store.Preview(t.Context(), request); err == nil {
 		t.Fatal("oversized threshold accepted")
 	}

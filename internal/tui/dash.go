@@ -303,23 +303,23 @@ func (m *Model) cycleAgentWorkPriorityFilter() {
 }
 
 func (m *Model) cycleAgentWorkOrder() {
-	orders := []workflowstate.TicketLoopOrder{
-		workflowstate.TicketLoopOrderCreatedAt,
-		workflowstate.TicketLoopOrderPriority,
-		workflowstate.TicketLoopOrderSeverity,
-		workflowstate.TicketLoopOrderPrioritySeverity,
-		workflowstate.TicketLoopOrderKey,
+	orders := []workflowstate.TicketOrder{
+		workflowstate.TicketOrderCreatedAt,
+		workflowstate.TicketOrderPriority,
+		workflowstate.TicketOrderSeverity,
+		workflowstate.TicketOrderPrioritySeverity,
+		workflowstate.TicketOrderKey,
 	}
 	m.agentWorkOrder = nextTicketLoopOrder(orders, m.agentWorkOrder)
 }
 
-func sortReadyAgentWorkTickets(tickets []TicketView, order workflowstate.TicketLoopOrder) {
+func sortReadyAgentWorkTickets(tickets []TicketView, order workflowstate.TicketOrder) {
 	switch order {
-	case workflowstate.TicketLoopOrderPriority:
+	case workflowstate.TicketOrderPriority:
 		slices.SortFunc(tickets, compareTicketViewsByPriority)
-	case workflowstate.TicketLoopOrderSeverity:
+	case workflowstate.TicketOrderSeverity:
 		slices.SortFunc(tickets, compareTicketViewsBySeverity)
-	case workflowstate.TicketLoopOrderPrioritySeverity:
+	case workflowstate.TicketOrderPrioritySeverity:
 		slices.SortFunc(tickets, func(left, right TicketView) int {
 			return firstNonZeroInt(
 				compareTicketViewsByPriority(left, right),
@@ -327,7 +327,7 @@ func sortReadyAgentWorkTickets(tickets []TicketView, order workflowstate.TicketL
 				strings.Compare(left.Key, right.Key),
 			)
 		})
-	case workflowstate.TicketLoopOrderKey:
+	case workflowstate.TicketOrderKey:
 		slices.SortFunc(tickets, func(left, right TicketView) int {
 			return strings.Compare(left.Key, right.Key)
 		})
@@ -358,7 +358,7 @@ func nextStringValue(values []string, current string) string {
 	return values[0]
 }
 
-func nextTicketLoopOrder(values []workflowstate.TicketLoopOrder, current workflowstate.TicketLoopOrder) workflowstate.TicketLoopOrder {
+func nextTicketLoopOrder(values []workflowstate.TicketOrder, current workflowstate.TicketOrder) workflowstate.TicketOrder {
 	for index, value := range values {
 		if value == current {
 			return values[(index+1)%len(values)]
@@ -376,9 +376,9 @@ func displayDashPriorityFilter(priority string) string {
 	return priority
 }
 
-func displayDashAgentWorkOrder(order workflowstate.TicketLoopOrder) string {
+func displayDashAgentWorkOrder(order workflowstate.TicketOrder) string {
 	switch order {
-	case "", workflowstate.TicketLoopOrderCreatedAt:
+	case "", workflowstate.TicketOrderCreatedAt:
 		return "oldest first"
 	default:
 		return string(order)

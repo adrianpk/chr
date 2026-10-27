@@ -19,7 +19,7 @@ func workflowLooseConfiguredQueue(t *testing.T, includeLater bool, setup func(*W
 	t.Helper()
 
 	f, _ := workflowTicketConfiguredFixture(t, "rebase", "loose", func(store *WorkflowStore, first WorkflowRecord, request *WorkflowStartRequest) {
-		request.Selection.Order = workflowstate.TicketLoopOrderPriority
+		request.Selection.Order = workflowstate.TicketOrderPriority
 		request.Policy.IncludeLaterTickets = includeLater
 
 		workflowLooseClassify(t, store, first, "critical", TicketStatusReadyForDev)

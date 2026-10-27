@@ -15,7 +15,7 @@ func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceCon
 		return err
 	}
 
-	var target workflowstate.WorkflowPreviewTarget
+	var target workflowstate.PreviewTarget
 
 	identity, targetErr := s.nativeAgentWorkTarget(config)
 	if targetErr == nil {
@@ -24,7 +24,7 @@ func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceCon
 	// Queue records remain inspectable when Git readiness is blocked. Missing
 	// target proof is still evaluated by the shared prerequisite owner.
 	if targetErr != nil {
-		target = workflowstate.WorkflowPreviewTarget{}
+		target = workflowstate.PreviewTarget{}
 		result.Readiness.Status = core.WorkReadinessStatusBlocked
 		result.Readiness.Diagnostics = append(result.Readiness.Diagnostics, core.WorkReadinessDiagnostic{Code: "target_unavailable", Severity: core.WorkReadinessSeverityBlocking, Detail: "Integration target proof is unavailable."})
 	}

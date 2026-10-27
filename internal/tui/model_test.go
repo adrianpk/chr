@@ -2443,7 +2443,7 @@ func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 		t.Fatalf("PriorityFilter = %q, want critical", request.PriorityFilter)
 	}
 
-	if request.Order != workflowstate.TicketLoopOrderPriority {
+	if request.Order != workflowstate.TicketOrderPriority {
 		t.Fatalf("Order = %q, want priority", request.Order)
 	}
 

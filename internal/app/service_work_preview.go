@@ -19,7 +19,7 @@ func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentW
 	return s.previewNativeAgentWorkSelection(config, nativeAgentWorkSelection(opts))
 }
 
-func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, selection workflowstate.WorkflowPreviewRequest) (AgentWorkResult, error) {
+func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, selection workflowstate.PreviewRequest) (AgentWorkResult, error) {
 	selection.Limit = workflowstate.PageLimit
 
 	target, err := s.nativeAgentWorkTarget(config)

@@ -36,7 +36,7 @@ func nativeRolePeer(t *testing.T, store *WorkflowStore, namespace, key, target s
 	}
 
 	commit, _ := workflowSelectionCommit(t, peer)
-	run := workflowTestStart(t, peer, WorkflowStartRequest{RequestKey: namespace, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}).Invocation
+	run := workflowTestStart(t, peer, WorkflowStartRequest{RequestKey: namespace, Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}).Invocation
 	entry := nativeEntryAdmit(t, peer, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}, AdmissionKey: run.RequestKey, TargetRef: target})
 
 	return peer, entry

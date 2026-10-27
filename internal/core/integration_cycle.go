@@ -203,20 +203,20 @@ func IntegrationCyclePolicyFromReviewConfig(config ReviewWorkflowConfig) (Integr
 	}
 
 	switch config.Mode {
-	case workflowstate.ReviewWorkflowModeHumanReview:
+	case workflowstate.ReviewHuman:
 		return IntegrationCyclePolicy{
 			Mode:                IntegrationCycleModeHumanReview,
 			RequiresReview:      true,
 			RequiresHumanReview: true,
 			RequiresMerge:       false,
 		}, nil
-	case workflowstate.ReviewWorkflowModeAgenticReview:
+	case workflowstate.ReviewAgentic:
 		return IntegrationCyclePolicy{
 			Mode:           IntegrationCycleModeAgenticReview,
 			RequiresReview: true,
 			RequiresMerge:  true,
 		}, nil
-	case workflowstate.ReviewWorkflowModeTrustedAutoMerge:
+	case workflowstate.ReviewTrustedAutoMerge:
 		return IntegrationCyclePolicy{
 			Mode:          IntegrationCycleModeTrustedAutoMerge,
 			RequiresMerge: true,

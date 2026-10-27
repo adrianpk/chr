@@ -74,7 +74,7 @@ func telegramWorkHoldCapacity(t *testing.T, operations service, ref telegramcore
 
 	for _, record := range snapshot.Records {
 		if record.Task != nil && record.Task.SetID != "" {
-			selection := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: record.Task.Key}, Target: preview.Request.Target}
+			selection := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: record.Task.Key}, Target: preview.Request.Target}
 
 			run, err := operations.StartWorkflow(t.Context(), core.WorkflowStartRequest{RequestKey: "another-adapter", Selection: selection})
 			if err != nil {

@@ -34,8 +34,8 @@ type AgentWorkResult struct {
 // AgentWorkSelectionOptions filters agent work selection.
 type AgentWorkSelectionOptions struct {
 	Statuses      []string
-	Filters       workflowstate.TicketLoopFilters
-	Order         workflowstate.TicketLoopOrder
+	Filters       workflowstate.TicketFilters
+	Order         workflowstate.TicketOrder
 	MaxIterations int
 }
 
@@ -64,7 +64,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 	}
 
 	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
-		return s.startNativeAgentWork(config, workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: ticketKey}}, 0, "")
+		return s.startNativeAgentWork(config, workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: ticketKey}}, 0, "")
 	}
 
 	result, err := s.startLegacyAgentWorkTicket(ticketKey)

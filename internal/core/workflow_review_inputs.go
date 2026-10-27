@@ -96,7 +96,7 @@ func observeWorkflowReviewPR(ctx context.Context, run workflowInvocationFile, pr
 	return pr, target, nil
 }
 
-func (s *WorkflowStore) checkWorkflowReviewAfterIO(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, policy workflowstate.WorkflowReviewPolicy) error {
+func (s *WorkflowStore) checkWorkflowReviewAfterIO(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, policy workflowstate.ReviewPolicy) error {
 	if _, err := s.readWorkflowSliceCandidate(ctx, run, observation); err != nil {
 		return err
 	}

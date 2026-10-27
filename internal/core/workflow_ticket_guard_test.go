@@ -245,7 +245,7 @@ func checkWorkflowTicketBoundedRestart(t *testing.T, store *WorkflowStore, recor
 // review and retains its PR and consumed repair budget for the next candidate.
 func TestWorkflowTicketRepair(t *testing.T) {
 	f, _ := workflowTicketPreparationFixture(t, "rebase", "ticket")
-	workflowTicketReviewConfig(t, f.store, "rebase", workflowstate.ReviewWorkflowModeAgenticReview)
+	workflowTicketReviewConfig(t, f.store, "rebase", workflowstate.ReviewAgentic)
 
 	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err != nil {
 		t.Fatal(err)

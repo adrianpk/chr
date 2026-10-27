@@ -70,7 +70,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationReservationAdmission(ctx context
 	return checkWorkflowIntegrationCallDeadline(run.Policy, budget, r)
 }
 
-func checkWorkflowIntegrationCallDeadline(policy workflowstate.WorkflowExecutionPolicy, budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
+func checkWorkflowIntegrationCallDeadline(policy workflowstate.ExecutionPolicy, budget WorkflowIntegrationBudget, reservation WorkflowIntegrationReservation) error {
 	if reservation.Kind != "agent_call" {
 		return nil
 	}

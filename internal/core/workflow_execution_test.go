@@ -31,7 +31,7 @@ func workflowExecutionGateFixture(t *testing.T, gate workflowstate.Validation) (
 	}
 
 	commit, _ := workflowSelectionCommit(t, store)
-	request := WorkflowStartRequest{RequestKey: "execution-1", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+	request := WorkflowStartRequest{RequestKey: "execution-1", Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "ticket"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 
 	return store, hierarchy, request
 }

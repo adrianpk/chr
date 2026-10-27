@@ -9,7 +9,7 @@ import (
 // TestNativeCandidateReviewRepair keeps accepted source tasks intact when a
 // candidate reviewer requests integration repair instead of task execution.
 func TestNativeCandidateReviewRepair(t *testing.T) {
-	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewAgentic)
 	store, id := f.f.store, f.f.run.ID
 	before := workflowTestRead(t, store, id)
 	key := before.Members[len(before.Members)-1].Admission.Key

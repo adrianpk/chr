@@ -17,8 +17,8 @@ import (
 )
 
 type webWorkflowBinding struct {
-	Request  workflowstate.WorkflowPreviewRequest
-	Selected *workflowstate.WorkflowSelectionGuard
+	Request  workflowstate.PreviewRequest
+	Selected *workflowstate.SelectionGuard
 }
 
 func (p webViewProvider) workflowEnabled() bool {
@@ -72,7 +72,7 @@ func webWorkflowPreview(ctx context.Context, operations service, request webui.W
 		return webui.WorkflowView{Enabled: true}, fmt.Errorf("admission preview requires offset zero")
 	}
 
-	selection := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: request.Extent, Identity: request.Identity}, Filters: workflowstate.TicketLoopFilters{ProjectAreas: webWorkflowFilter(request.ProjectArea), Severities: webWorkflowFilter(request.Severity), Priorities: webWorkflowFilter(request.Priority)}, Order: workflowstate.TicketLoopOrder(request.Order)}
+	selection := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: request.Extent, Identity: request.Identity}, Filters: workflowstate.TicketFilters{ProjectAreas: webWorkflowFilter(request.ProjectArea), Severities: webWorkflowFilter(request.Severity), Priorities: webWorkflowFilter(request.Priority)}, Order: workflowstate.TicketOrder(request.Order)}
 
 	bound, err := operations.PreviewSelectedWork(ctx, selection, request.TicketKey)
 	if err != nil {

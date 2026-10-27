@@ -11,7 +11,7 @@ import (
 )
 
 type telegramWorkService interface {
-	PreviewTelegramWork(context.Context, telegramcore.OperationTarget, workflowstate.WorkflowSelector) (WorkflowBoundPreview, error)
+	PreviewTelegramWork(context.Context, telegramcore.OperationTarget, workflowstate.Selector) (WorkflowBoundPreview, error)
 	StartTelegramWork(context.Context, telegramcore.OperationTarget, WorkflowBoundPreview, WorkflowBoundAdmission) (AgentWorkResult, error)
 }
 
@@ -33,7 +33,7 @@ func (s service) ResumeTelegramWork(ctx context.Context, target telegramcore.Ope
 }
 
 // PreviewTelegramWork delegates exact selection and policy to the common service.
-func (s service) PreviewTelegramWork(ctx context.Context, target telegramcore.OperationTarget, selector workflowstate.WorkflowSelector) (WorkflowBoundPreview, error) {
+func (s service) PreviewTelegramWork(ctx context.Context, target telegramcore.OperationTarget, selector workflowstate.Selector) (WorkflowBoundPreview, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return WorkflowBoundPreview{}, err
@@ -46,7 +46,7 @@ func (s service) PreviewTelegramWork(ctx context.Context, target telegramcore.Op
 		selected = selector.Identity
 	}
 
-	return scoped.PreviewSelectedWork(ctx, workflowstate.WorkflowPreviewRequest{Selector: selector}, selected)
+	return scoped.PreviewSelectedWork(ctx, workflowstate.PreviewRequest{Selector: selector}, selected)
 }
 
 // StartTelegramWork performs admission only, using the retained common request key.

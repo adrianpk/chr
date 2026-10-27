@@ -11,21 +11,21 @@ import (
 // WorkflowBoundAdmission supplies a durable request key and the displayed policy.
 // This mode admits without continuation; hosts activate the shared owner later.
 type WorkflowBoundAdmission struct {
-	ReadyTicket     *workflowstate.WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
-	ExecutionPolicy workflowstate.WorkflowExecutionPolicy  `json:"execution_policy"`
-	RequestKey      string                                 `json:"request_key"`
-	Policy          workflowstate.WorkflowReviewPolicy     `json:"publication_policy"`
-	Check           core.WorkflowAdmissionCheck            `json:"-"`
+	ReadyTicket     *workflowstate.TicketAdmission `json:"ready_ticket,omitempty"`
+	ExecutionPolicy workflowstate.ExecutionPolicy  `json:"execution_policy"`
+	RequestKey      string                         `json:"request_key"`
+	Policy          workflowstate.ReviewPolicy     `json:"publication_policy"`
+	Check           core.WorkflowAdmissionCheck    `json:"-"`
 }
 
-func (s service) admitBoundWorkExtent(ctx context.Context, selection workflowstate.WorkflowPreviewRequest, selected *workflowstate.WorkflowSelectionGuard, steps int, bindings []WorkflowBoundAdmission) (AgentWorkResult, error) {
+func (s service) admitBoundWorkExtent(ctx context.Context, selection workflowstate.PreviewRequest, selected *workflowstate.SelectionGuard, steps int, bindings []WorkflowBoundAdmission) (AgentWorkResult, error) {
 	if len(bindings) != 1 || steps != 0 || len(selection.SnapshotHash) != 64 || selection.Offset != 0 {
 		return AgentWorkResult{}, workflowstate.ErrConflict
 	}
 
 	// Retained requests must reach the owner before re-reading mutable records,
 	// targets or policy. The owner checks every guard for a new admission.
-	request := core.WorkflowStartRequest{RequestKey: bindings[0].RequestKey, Selection: selection, Admission: &workflowstate.WorkflowAdmissionGuard{SnapshotHash: selection.SnapshotHash, Selected: selected, Policy: bindings[0].Policy, ExecutionPolicy: bindings[0].ExecutionPolicy, ReadyTicket: bindings[0].ReadyTicket}}
+	request := core.WorkflowStartRequest{RequestKey: bindings[0].RequestKey, Selection: selection, Admission: &workflowstate.AdmissionGuard{SnapshotHash: selection.SnapshotHash, Selected: selected, Policy: bindings[0].Policy, ExecutionPolicy: bindings[0].ExecutionPolicy, ReadyTicket: bindings[0].ReadyTicket}}
 
 	store, err := s.workflowStore()
 	if err != nil {
@@ -42,7 +42,7 @@ func (s service) admitBoundWorkExtent(ctx context.Context, selection workflowsta
 	return s.nativeAgentWorkResult(started.Invocation)
 }
 
-func (s service) boundAdmissionCheck(selection workflowstate.WorkflowPreviewRequest, check core.WorkflowAdmissionCheck) core.WorkflowAdmissionCheck {
+func (s service) boundAdmissionCheck(selection workflowstate.PreviewRequest, check core.WorkflowAdmissionCheck) core.WorkflowAdmissionCheck {
 	return func(ctx context.Context) error {
 		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()

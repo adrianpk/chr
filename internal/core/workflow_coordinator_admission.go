@@ -47,7 +47,7 @@ func (s *WorkflowStore) workflowCoordinatorFiles(ctx context.Context) ([]workflo
 	return []workflowstate.FileChange{{Path: workflowCoordinatorPath, After: data}}, err
 }
 
-func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, target workflowstate.WorkflowPreviewTarget) error {
+func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, target workflowstate.PreviewTarget) error {
 	owner, err := s.checkWorkflowCoordinator(ctx)
 	if err != nil {
 		return err

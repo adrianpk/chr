@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowTicketAdmission(guard *workflowstate.WorkflowAdmissionGuard, selection workflowstate.WorkflowPreviewRequest) error {
+func validateWorkflowTicketAdmission(guard *workflowstate.AdmissionGuard, selection workflowstate.PreviewRequest) error {
 	ticket := guard.ReadyTicket
 	if ticket == nil {
 		return nil
@@ -24,7 +24,7 @@ func validateWorkflowTicketAdmission(guard *workflowstate.WorkflowAdmissionGuard
 
 // PreviewWorkflowTicketAdmission observes a proposed readiness transition. It
 // never changes the ticket or admits work; non-backlog tickets need no transition.
-func (s *WorkflowStore) PreviewWorkflowTicketAdmission(ctx context.Context, member WorkflowPreviewMember) (result *workflowstate.WorkflowTicketAdmission, err error) {
+func (s *WorkflowStore) PreviewWorkflowTicketAdmission(ctx context.Context, member WorkflowPreviewMember) (result *workflowstate.TicketAdmission, err error) {
 	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
 		record, err := s.readRecord(member.Path)
 		if err != nil {
@@ -47,7 +47,7 @@ func (s *WorkflowStore) PreviewWorkflowTicketAdmission(ctx context.Context, memb
 	return result, err
 }
 
-func workflowTicketAdmission(record WorkflowRecord) (*workflowstate.WorkflowTicketAdmission, error) {
+func workflowTicketAdmission(record WorkflowRecord) (*workflowstate.TicketAdmission, error) {
 	if err := validateWorkflowClaimContract(record); err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func workflowTicketAdmission(record WorkflowRecord) (*workflowstate.WorkflowTick
 		return nil, err
 	}
 
-	return &workflowstate.WorkflowTicketAdmission{Key: record.Task.Key, Revision: record.Revision, ContractHash: record.Task.ContractHash, Validation: contract.Validation}, nil
+	return &workflowstate.TicketAdmission{Key: record.Task.Key, Revision: record.Revision, ContractHash: record.Task.ContractHash, Validation: contract.Validation}, nil
 }
 
 func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile) ([]workflowstate.FileChange, error) {

@@ -9,7 +9,7 @@ import (
 
 type telegramWorkCommand struct {
 	Input    telegramcore.ConversationInput
-	Selector workflowstate.WorkflowSelector
+	Selector workflowstate.Selector
 }
 
 func telegramWorkRegistry() []ConversationIntentOperation {
@@ -46,7 +46,7 @@ func parseTelegramWork(update telegramcore.ReceivedUpdate) (telegramWorkParsing,
 	return telegramWorkParsing{Command: command, Recognized: true}, validateTelegramWorkSelector(command.Selector)
 }
 
-func validateTelegramWorkSelector(selector workflowstate.WorkflowSelector) error {
+func validateTelegramWorkSelector(selector workflowstate.Selector) error {
 	if selector.Extent == "loose" && selector.Identity == "" {
 		return nil
 	}
@@ -65,7 +65,7 @@ func validateTelegramWorkSelector(selector workflowstate.WorkflowSelector) error
 func telegramIntentWork(update telegramcore.ReceivedUpdate, intent ConversationIntent) (telegramWorkParsing, error) {
 	a := intent.Arguments
 
-	command := telegramWorkCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Selector: workflowstate.WorkflowSelector{Extent: a.Action, Identity: a.Text}}
+	command := telegramWorkCommand{Input: telegramcore.ConversationInput{Update: update, Project: a.Project, Conversation: a.Conversation, Namespace: a.Namespace}, Selector: workflowstate.Selector{Extent: a.Action, Identity: a.Text}}
 	if intent.OperationID != telegramWorkRegistry()[0].ID {
 		return telegramWorkParsing{Command: command, Recognized: false}, nil
 	}

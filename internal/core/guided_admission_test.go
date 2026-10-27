@@ -15,7 +15,7 @@ func TestGuidedUseCaseAdmissionMembership(t *testing.T) {
 
 	for _, variant := range []string{"exact", "revision", "source", "contract", "path", "set", "missing", "additional"} {
 		t.Run(variant, func(t *testing.T) {
-			preview := WorkflowPreview{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: reference.SetID}, Members: []WorkflowPreviewMember{member}, Total: 1}
+			preview := WorkflowPreview{Selector: workflowstate.Selector{Extent: "slice_set", Identity: reference.SetID}, Members: []WorkflowPreviewMember{member}, Total: 1}
 			changeGuidedPreview(&preview, variant)
 
 			err := ValidateGuidedWorkPreview(reference, preview)
@@ -71,14 +71,14 @@ func guidedAdmissionProofFixture(t *testing.T) (AuthoringSession, WorkflowStartR
 		t.Fatal(err)
 	}
 
-	proof := workflowstate.GuidedWorkflowAdmission{RunID: "run", Actor: "operator", Policy: GuidedWorkAdmissionPolicy, OperationDigest: "operation", CheckpointDigest: digest, MaterializationID: "materialized"}
+	proof := workflowstate.GuidedAdmission{RunID: "run", Actor: "operator", Policy: GuidedWorkAdmissionPolicy, OperationDigest: "operation", CheckpointDigest: digest, MaterializationID: "materialized"}
 
-	selection, err := normalizeWorkflowPreviewRequest(workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: "set"}, Limit: workflowstate.PageLimit})
+	selection, err := normalizeWorkflowPreviewRequest(workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: "set"}, Limit: workflowstate.PageLimit})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request := WorkflowStartRequest{RequestKey: "admission", Selection: selection, Admission: &workflowstate.WorkflowAdmissionGuard{Guided: &proof}}
+	request := WorkflowStartRequest{RequestKey: "admission", Selection: selection, Admission: &workflowstate.AdmissionGuard{Guided: &proof}}
 	session := AuthoringSession{ID: "run", ProjectID: "project", Namespace: "default", Revision: 1, Guided: &GuidedUseCaseState{SchemaVersion: 1, Actor: "operator", ProgressionIntent: true, Stage: "preparation", Work: &GuidedWorkState{Materialization: &GuidedMaterializationReference{ID: "materialized"}, Admission: &request}, PendingOperation: &GuidedUseCaseOperation{Action: "admit", Digest: "operation"}, Checkpoints: []GuidedStageCheckpoint{checkpoint}}}
 
 	return session, request

@@ -10,7 +10,7 @@ import (
 )
 
 // SealHarnessBinding hashes a prepared identity without incorporating credentials.
-func SealHarnessBinding(binding harnesscore.HarnessBinding) (harnesscore.HarnessBinding, error) {
+func SealHarnessBinding(binding harnesscore.Binding) (harnesscore.Binding, error) {
 	binding.BindingHash = ""
 
 	capabilities, err := json.Marshal(binding.Capabilities)
@@ -31,7 +31,7 @@ func SealHarnessBinding(binding harnesscore.HarnessBinding) (harnesscore.Harness
 }
 
 // ValidateHarnessBinding validates retained semantics without installing or running IO.
-func ValidateHarnessBinding(binding harnesscore.HarnessBinding) error {
+func ValidateHarnessBinding(binding harnesscore.Binding) error {
 	if err := validateHarnessBindingProtocol(binding); err != nil {
 		return err
 	}
@@ -60,8 +60,8 @@ func ValidateHarnessBinding(binding harnesscore.HarnessBinding) error {
 	return nil
 }
 
-func validateHarnessBindingProtocol(binding harnesscore.HarnessBinding) error {
-	if binding.SchemaVersion != 1 || binding.Role != harnesscore.HarnessWorker || !workflowConfigChoice(binding.Harness, []string{"codex", "pi"}) {
+func validateHarnessBindingProtocol(binding harnesscore.Binding) error {
+	if binding.SchemaVersion != 1 || binding.Role != harnesscore.Worker || !workflowConfigChoice(binding.Harness, []string{"codex", "pi"}) {
 		return errors.New("unsupported worker harness binding")
 	}
 
@@ -72,7 +72,7 @@ func validateHarnessBindingProtocol(binding harnesscore.HarnessBinding) error {
 	return nil
 }
 
-func validateHarnessBindingSelection(b harnesscore.HarnessBinding) error {
+func validateHarnessBindingSelection(b harnesscore.Binding) error {
 	if err := validateHarnessBindingSource(b); err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func validateHarnessBindingSelection(b harnesscore.HarnessBinding) error {
 	return nil
 }
 
-func validateHarnessBindingSource(b harnesscore.HarnessBinding) error {
+func validateHarnessBindingSource(b harnesscore.Binding) error {
 	if !workflowConfigChoice(b.Source, []string{"project", "legacy"}) || !harnessSelectionDigest(b.SelectionRevision) || !harnessSelectionDigest(b.ProfileRevision) {
 		return errors.New("harness binding requires selection and profile revisions")
 	}
@@ -106,7 +106,7 @@ func validateHarnessBindingSource(b harnesscore.HarnessBinding) error {
 	return nil
 }
 
-func cloneHarnessBinding(binding *harnesscore.HarnessBinding) *harnesscore.HarnessBinding {
+func cloneHarnessBinding(binding *harnesscore.Binding) *harnesscore.Binding {
 	if binding == nil {
 		return nil
 	}
@@ -116,7 +116,7 @@ func cloneHarnessBinding(binding *harnesscore.HarnessBinding) *harnesscore.Harne
 	return &copy
 }
 
-func validateWorkflowHarnessPair(binding *harnesscore.HarnessBinding, command []string) error {
+func validateWorkflowHarnessPair(binding *harnesscore.Binding, command []string) error {
 	if binding == nil {
 		if len(command) != 0 {
 			return errors.New("unbound workflow cannot retain a harness command")
@@ -132,7 +132,7 @@ func validateWorkflowHarnessPair(binding *harnesscore.HarnessBinding, command []
 	return checkHarnessCommandImage(*binding, command)
 }
 
-func validateWorkflowRequestedHarness(binding *harnesscore.HarnessBinding, command []string) error {
+func validateWorkflowRequestedHarness(binding *harnesscore.Binding, command []string) error {
 	if binding != nil && len(command) == 0 {
 		return ValidateHarnessBinding(*binding)
 	}

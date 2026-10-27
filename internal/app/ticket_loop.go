@@ -101,7 +101,7 @@ func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.
 	return core.TicketLoopQueryOptions{
 		ProjectID: projectID,
 		Statuses:  cmd.StringSlice("status"),
-		Filters: workflowstate.TicketLoopFilters{
+		Filters: workflowstate.TicketFilters{
 			Priorities:   cmd.StringSlice("priority"),
 			Severities:   cmd.StringSlice("severity"),
 			ProjectAreas: cmd.StringSlice("project-area"),
@@ -109,14 +109,14 @@ func ticketLoopQueryOptionsFromCommand(cmd *cli.Command, projectID string) core.
 			Types:        cmd.StringSlice("type"),
 			UseCases:     cmd.StringSlice("use-case"),
 		},
-		Order: workflowstate.TicketLoopOrder(cmd.String("order")),
+		Order: workflowstate.TicketOrder(cmd.String("order")),
 	}
 }
 
 func printTicketLoopPlan(stdout io.Writer, projectContext commandProjectContext, opts core.TicketLoopQueryOptions, tickets []core.IndexedTicket, dryRun bool) error {
 	order := opts.Order
 	if order == "" {
-		order = workflowstate.TicketLoopOrderCreatedAt
+		order = workflowstate.TicketOrderCreatedAt
 	}
 
 	lines := []string{

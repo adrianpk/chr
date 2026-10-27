@@ -156,7 +156,7 @@ func validateAgentWorkSelectionOptions(opts AgentWorkSelectionOptions) error {
 func defaultAgentWorkSelectionOptions(maxIterations int) AgentWorkSelectionOptions {
 	return AgentWorkSelectionOptions{
 		Statuses:      []string{core.TicketStatusReadyForDev},
-		Order:         workflowstate.TicketLoopOrderCreatedAt,
+		Order:         workflowstate.TicketOrderCreatedAt,
 		MaxIterations: maxIterations,
 	}
 }
@@ -169,9 +169,9 @@ func agentWorkStatuses(statuses []string) []string {
 	return statuses
 }
 
-func agentWorkOrder(order workflowstate.TicketLoopOrder) workflowstate.TicketLoopOrder {
+func agentWorkOrder(order workflowstate.TicketOrder) workflowstate.TicketOrder {
 	if order == "" {
-		return workflowstate.TicketLoopOrderCreatedAt
+		return workflowstate.TicketOrderCreatedAt
 	}
 
 	return order

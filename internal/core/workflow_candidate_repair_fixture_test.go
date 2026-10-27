@@ -104,7 +104,7 @@ func nativeCandidateRepairStart(t *testing.T, method, reason string) (nativePrep
 
 	f := newNativePreparationFixture(t, method, gate)
 	if reason == "actionable_review_finding" {
-		writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "review", "mode", string(workflowstate.ReviewWorkflowModeAgenticReview))
+		writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "review", "mode", string(workflowstate.ReviewAgentic))
 	}
 
 	candidate, err := f.f.store.PrepareWorkflowSliceIntegration(t.Context(), f.f.run.ID, f.provider, f.f.git)

@@ -18,20 +18,20 @@ var ErrWorkflowReviewRepairBudget = errors.New("automatic review repair budget e
 
 // WorkflowReviewInput binds a decision to host validation and canonical inputs.
 type WorkflowReviewInput struct {
-	Schema          string                             `json:"schema"`
-	InvocationID    string                             `json:"invocation_id"`
-	Unit            workflowstate.Ref                  `json:"unit"`
-	CandidateID     string                             `json:"candidate_id"`
-	CandidateRef    string                             `json:"candidate_ref"`
-	CandidateHash   string                             `json:"candidate_hash"`
-	Slice           WorkflowSliceInput                 `json:"slice"`
-	PullRequest     WorkflowPullRequestSnapshot        `json:"pull_request"`
-	TargetCommit    string                             `json:"target_commit"`
-	Policy          workflowstate.WorkflowReviewPolicy `json:"policy"`
-	PreparationRef  string                             `json:"preparation_ref,omitempty"`
-	PreparationHash string                             `json:"preparation_hash,omitempty"`
-	PreparedGit     *WorkflowIntegrationProof          `json:"prepared_git,omitempty"`
-	Native          *WorkflowNativeReviewInput         `json:"native,omitempty"`
+	Schema          string                      `json:"schema"`
+	InvocationID    string                      `json:"invocation_id"`
+	Unit            workflowstate.Ref           `json:"unit"`
+	CandidateID     string                      `json:"candidate_id"`
+	CandidateRef    string                      `json:"candidate_ref"`
+	CandidateHash   string                      `json:"candidate_hash"`
+	Slice           WorkflowSliceInput          `json:"slice"`
+	PullRequest     WorkflowPullRequestSnapshot `json:"pull_request"`
+	TargetCommit    string                      `json:"target_commit"`
+	Policy          workflowstate.ReviewPolicy  `json:"policy"`
+	PreparationRef  string                      `json:"preparation_ref,omitempty"`
+	PreparationHash string                      `json:"preparation_hash,omitempty"`
+	PreparedGit     *WorkflowIntegrationProof   `json:"prepared_git,omitempty"`
+	Native          *WorkflowNativeReviewInput  `json:"native,omitempty"`
 }
 
 // WorkflowReviewDecision is returned by the distinct supervised review role.

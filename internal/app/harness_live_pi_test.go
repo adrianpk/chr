@@ -50,7 +50,7 @@ func TestHarnessLivePi(t *testing.T) {
 		t.Fatal("prepare both live roles and Docker access before any model call", err)
 	}
 
-	request := core.WorkflowStartRequest{RequestKey: "live-pi-worker", Policy: workflowstate.WorkflowExecutionPolicy{WorkerTimeoutSeconds: 90, MaxWorkerAttempts: 1, CheckpointStepLimit: 1}, Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/fixture/disposable", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "live-pi-worker", Policy: workflowstate.ExecutionPolicy{WorkerTimeoutSeconds: 90, MaxWorkerAttempts: 1, CheckpointStepLimit: 1}, Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/fixture/disposable", Commit: target}}}
 	generation := harnessLivePiGeneration(t, operations)
 	started, result := harnessLivePiWorker(t, operations, request)
 	writeHarnessLivePiEvidence(t, options, generation, started, result)

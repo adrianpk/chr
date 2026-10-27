@@ -77,7 +77,7 @@ func TestWorkflowSelectionPrerequisites(t *testing.T) {
 	proof := WorkflowTaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
 	writeSelectionProof(t, store, result.Tasks[0], proof)
 
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: result.Tasks[1].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: result.Tasks[1].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
 
 	accepted, err := store.Preview(t.Context(), request)
 	if err != nil || accepted.Members[0].Blocker != nil {
@@ -121,7 +121,7 @@ func TestWorkflowSelectionInvalidDependencies(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, err := store.Preview(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 128}); err == nil {
+			if _, err := store.Preview(t.Context(), workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 128}); err == nil {
 				t.Fatal("forward dependency admitted")
 			}
 		})
@@ -157,7 +157,7 @@ func TestWorkflowSelectionTargetProof(t *testing.T) {
 	set.Set.Slices[0].Phase, set.Set.Slices[0].DeliveryRef = "integrated", receipt.Path
 	workflowTestWrite(t, store, set)
 
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice", Identity: result.Set.Set.Slices[1].ID}, Limit: 1, Target: workflowstate.WorkflowPreviewTarget{Repository: receipt.Receipt.Repository, Commit: commit}}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice", Identity: result.Set.Set.Slices[1].ID}, Limit: 1, Target: workflowstate.PreviewTarget{Repository: receipt.Receipt.Repository, Commit: commit}}
 
 	confirmed, err := store.Preview(t.Context(), request)
 	if err != nil || confirmed.Members[0].Blocker != nil {
@@ -202,7 +202,7 @@ func TestWorkflowSelectionBadProof(t *testing.T) {
 			tc.mutate(&proof)
 			writeSelectionProof(t, store, result.Tasks[0], proof)
 
-			request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: result.Tasks[1].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
+			request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: result.Tasks[1].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
 
 			preview, err := store.Preview(t.Context(), request)
 			if err != nil || preview.Members[0].Blocker == nil {
@@ -219,7 +219,7 @@ func TestWorkflowSelectionEvidencePages(t *testing.T) {
 	branch := workflowSelectionGit(t, store, "symbolic-ref", "HEAD")
 	proof := WorkflowTaskValidation{Schema: "chr-task-validation/v1", Key: result.Tasks[0].Task.Key, ContractHash: result.Tasks[0].Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
 	task := writeSelectionProof(t, store, result.Tasks[0], proof)
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
 
 	first, err := store.Preview(t.Context(), request)
 	if err != nil {
@@ -252,7 +252,7 @@ func TestWorkflowSelectionEarlierTasks(t *testing.T) {
 	proof := WorkflowTaskValidation{Schema: "chr-task-validation/v1", Key: task.Task.Key, ContractHash: task.Task.ContractHash, Branch: branch, Commit: commit, Tree: tree, Successful: true}
 	writeSelectionProof(t, store, task, proof)
 
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: result.Tasks[2].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: result.Tasks[2].Task.Key}, Limit: 1, CumulativeBranch: branch, CumulativeCommit: commit}
 
 	preview, err := store.Preview(t.Context(), request)
 	if err != nil || preview.Members[0].Blocker == nil || preview.Members[0].Blocker.Dependency.ID != result.Tasks[0].Task.Key {

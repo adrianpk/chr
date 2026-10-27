@@ -58,7 +58,7 @@ type WebTokenMode string
 
 // ReviewWorkflowConfig describes a package boundary value.
 type ReviewWorkflowConfig struct {
-	Mode                    workflowstate.ReviewWorkflowMode
+	Mode                    workflowstate.ReviewMode
 	NonBlockingCommentLimit int
 	Providers               ReviewProviderConfig
 }
@@ -273,7 +273,7 @@ func DefaultWebConfig() WebConfig {
 // DefaultReviewWorkflowConfig executes the corresponding package operation.
 func DefaultReviewWorkflowConfig() ReviewWorkflowConfig {
 	return ReviewWorkflowConfig{
-		Mode:                    workflowstate.DefaultReviewWorkflowMode,
+		Mode:                    workflowstate.DefaultReviewMode,
 		NonBlockingCommentLimit: DefaultReviewWorkflowNonBlockingCommentLimit,
 		Providers:               DefaultReviewProviderConfig(),
 	}
@@ -544,7 +544,7 @@ func setReviewWorkflowConfigValue(config *ReviewWorkflowConfig, key, value strin
 	switch key {
 	case "mode":
 		if value != "" {
-			config.Mode = workflowstate.ReviewWorkflowMode(value)
+			config.Mode = workflowstate.ReviewMode(value)
 		}
 	case "non_blocking_comment_limit":
 		setPositiveInt(&config.NonBlockingCommentLimit, value)

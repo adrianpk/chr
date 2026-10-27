@@ -28,7 +28,7 @@ type WorkflowTaskValidation struct {
 type workflowProofReader struct {
 	store        *WorkflowStore
 	selection    workflowSelection
-	request      workflowstate.WorkflowPreviewRequest
+	request      workflowstate.PreviewRequest
 	observations map[workflowProofKey]string
 }
 
@@ -216,7 +216,7 @@ func workflowCommitID(value string) bool {
 	return true
 }
 
-func (s *WorkflowStore) observePrerequisites(ctx context.Context, selection workflowSelection, request workflowstate.WorkflowPreviewRequest, preview *WorkflowPreview) error {
+func (s *WorkflowStore) observePrerequisites(ctx context.Context, selection workflowSelection, request workflowstate.PreviewRequest, preview *WorkflowPreview) error {
 	dependencies, err := newWorkflowDependencies(selection)
 	if err != nil {
 		return fmt.Errorf("workflow prerequisites: %w", err)

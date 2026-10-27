@@ -31,7 +31,7 @@ func TestPiWorkerContainer(t *testing.T) {
 	configurePiWorkerFixture(t, operations, bridge, image, endpoint.URL)
 	assertPiBridgeGenerationRejection(t, operations)
 
-	request := core.WorkflowStartRequest{RequestKey: "pi-worker", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "pi-worker", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}}}
 
 	restarted, started := recoverPiWorkerFixture(t, operations, request)
 
@@ -62,7 +62,7 @@ func assertPiBridgeGenerationRejection(t *testing.T, operations service) {
 		t.Fatal(err)
 	}
 
-	readiness, _ := piProfileReadiness(t.Context(), profiles["worker"], harnesscore.HarnessGeneration, operations.env.ConfigDir())
+	readiness, _ := piProfileReadiness(t.Context(), profiles["worker"], harnesscore.Generation, operations.env.ConfigDir())
 	if readiness.Ready() || !strings.Contains(readiness.Problem, "native Pi executable") {
 		t.Fatal("worker bridge was advertised as a generation executable")
 	}

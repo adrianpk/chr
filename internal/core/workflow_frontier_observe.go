@@ -7,9 +7,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, ports WorkflowFrontierPorts) (workflowstate.WorkflowPreviewTarget, WorkflowIntegrationProof, error) {
+func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, ports WorkflowFrontierPorts) (workflowstate.PreviewTarget, WorkflowIntegrationProof, error) {
 	if ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
-		return workflowstate.WorkflowPreviewTarget{}, WorkflowIntegrationProof{}, ErrWorkflowObservationRequired
+		return workflowstate.PreviewTarget{}, WorkflowIntegrationProof{}, ErrWorkflowObservationRequired
 	}
 
 	binding := run.PullRequest
@@ -37,7 +37,7 @@ func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflo
 	return target, proof, s.checkWorkflowTarget(ctx, target)
 }
 
-func (s *WorkflowStore) workflowFrontierReceiptProof(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target workflowstate.WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
+func (s *WorkflowStore) workflowFrontierReceiptProof(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target workflowstate.PreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
 	if receipt.Receipt.Native == nil {
 		return observeWorkflowFrontierProof(ctx, run, receipt, candidate, target, ports)
 	}
@@ -56,7 +56,7 @@ func (s *WorkflowStore) workflowFrontierReceiptProof(ctx context.Context, run wo
 	return *observation.Git, nil
 }
 
-func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target workflowstate.WorkflowPreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
+func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, target workflowstate.PreviewTarget, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
 	pr, err := ports.Provider.ReadWorkflowPullRequest(ctx, run.PullRequest.URL)
 	if err != nil {
 		return WorkflowIntegrationProof{}, err
@@ -84,6 +84,6 @@ func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFil
 	return proof, nil
 }
 
-func workflowFrontierReceiptProofMatches(proof WorkflowIntegrationProof, receipt WorkflowRecord, target workflowstate.WorkflowPreviewTarget) bool {
+func workflowFrontierReceiptProofMatches(proof WorkflowIntegrationProof, receipt WorkflowRecord, target workflowstate.PreviewTarget) bool {
 	return proof.ObservedTarget == target.Commit && proof.HistoryHash == receipt.Receipt.HistoryProof && proof.VerifiedTree == receipt.Receipt.VerifiedTree
 }

@@ -33,7 +33,7 @@ type WorkActionRequest struct {
 	Action         WorkActionID
 	TicketKey      string
 	PriorityFilter string
-	Order          workflowstate.TicketLoopOrder
+	Order          workflowstate.TicketOrder
 }
 
 // WorkActionResult contains refreshed agent work state after an action.

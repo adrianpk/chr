@@ -134,7 +134,7 @@ func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCa
 		result.Problems = append(result.Problems, err.Error())
 	}
 
-	for _, role := range []harnesscore.HarnessRole{harnesscore.HarnessGeneration, harnesscore.HarnessWorker} {
+	for _, role := range []harnesscore.Role{harnesscore.Generation, harnesscore.Worker} {
 		selection, err := s.ResolveHarnessSelection(ctx, role, string(quizmodel.ActionNextQuestion))
 		if err != nil {
 			result.Problems = append(result.Problems, string(role)+" setup: "+err.Error())

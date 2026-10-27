@@ -34,7 +34,7 @@ func TestNativeReviewCapabilities(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
+			f, _ := nativeReviewFixture(t, workflowstate.ReviewHuman)
 			binding := nativeReviewAuthorize(t, f)
 			provider := &nativeReviewProviderFixture{f.provider, test.change}
 			nativeReviewRejectEntryPoints(t, f, binding, provider)

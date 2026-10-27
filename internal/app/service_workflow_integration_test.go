@@ -27,7 +27,7 @@ func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service,
 		identity = hierarchy.Set.ID
 	}
 
-	request := core.WorkflowStartRequest{RequestKey: "external-delivery", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: extent, Identity: identity}, Target: workflowstate.WorkflowPreviewTarget{Repository: repository, Commit: target}}}
+	request := core.WorkflowStartRequest{RequestKey: "external-delivery", Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: extent, Identity: identity}, Target: workflowstate.PreviewTarget{Repository: repository, Commit: target}}}
 
 	run, err := operations.StartWorkflow(t.Context(), request)
 	if err != nil {

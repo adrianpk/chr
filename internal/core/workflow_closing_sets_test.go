@@ -39,7 +39,7 @@ func workflowClosingLaterSet(t *testing.T, fixture workflowIntegrationFixture) W
 // real PR histories. The second set cannot claim work before closure of the
 // first, and its lane uses the confirmed closing target without replaying work.
 func TestWorkflowClosingSetAdvance(t *testing.T) {
-	fixture, ports := workflowClosingExtentFixture(t, "use_case", workflowstate.WorkflowExecutionPolicy{IncludeLaterTickets: true})
+	fixture, ports := workflowClosingExtentFixture(t, "use_case", workflowstate.ExecutionPolicy{IncludeLaterTickets: true})
 	workflowClosingContract(t, fixture, workflowstate.Validation{WaiverReason: "Approved first set closing waiver"})
 
 	later := workflowClosingLaterSet(t, fixture)

@@ -54,7 +54,7 @@ func serviceWorkflowDependencyFixture(t *testing.T) (service, core.WorkflowRecor
 		t.Fatal(err)
 	}
 
-	request.Selection.Selector = workflowstate.WorkflowSelector{Extent: "loose"}
+	request.Selection.Selector = workflowstate.Selector{Extent: "loose"}
 
 	return operations, outside, request
 }

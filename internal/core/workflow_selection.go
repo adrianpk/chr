@@ -30,7 +30,7 @@ type WorkflowPreviewMember struct {
 // WorkflowPreview returns one bounded page and counts for the whole extent.
 // Exclusion reasons are mutually exclusive; excluded work is never admitted.
 type WorkflowPreview struct {
-	Selector     workflowstate.WorkflowSelector
+	Selector     workflowstate.Selector
 	Authority    string
 	Members      []WorkflowPreviewMember
 	Total        int
@@ -52,7 +52,7 @@ type workflowSelection struct {
 
 // Preview resolves exact scope under the same exclusion used by domain writes.
 // It does not claim work, create invocations, refresh SQL or edit a tracker.
-func (s *WorkflowStore) Preview(ctx context.Context, request workflowstate.WorkflowPreviewRequest) (preview WorkflowPreview, err error) {
+func (s *WorkflowStore) Preview(ctx context.Context, request workflowstate.PreviewRequest) (preview WorkflowPreview, err error) {
 	request, err = normalizeWorkflowPreviewRequest(request)
 	if err != nil {
 		return WorkflowPreview{}, err
@@ -86,7 +86,7 @@ func (s *WorkflowStore) Preview(ctx context.Context, request workflowstate.Workf
 	return preview, err
 }
 
-func validateWorkflowPreviewRequest(request workflowstate.WorkflowPreviewRequest) error {
+func validateWorkflowPreviewRequest(request workflowstate.PreviewRequest) error {
 	if request.Limit < 1 || request.Limit > workflowstate.PageLimit || request.Offset < 0 || request.Offset > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow preview page bounds exceeded")
 	}
@@ -103,7 +103,7 @@ func validateWorkflowPreviewRequest(request workflowstate.WorkflowPreviewRequest
 	return validateWorkflowSelector(selector)
 }
 
-func validateWorkflowSelector(selector workflowstate.WorkflowSelector) error {
+func validateWorkflowSelector(selector workflowstate.Selector) error {
 	switch selector.Extent {
 	case "ticket", "slice", "slice_set", "use_case":
 		if selector.Identity == "" {
@@ -120,7 +120,7 @@ func validateWorkflowSelector(selector workflowstate.WorkflowSelector) error {
 	return nil
 }
 
-func (selection workflowSelection) preview(request workflowstate.WorkflowPreviewRequest) (WorkflowPreview, error) {
+func (selection workflowSelection) preview(request workflowstate.PreviewRequest) (WorkflowPreview, error) {
 	if err := selection.resolveSelector(request.Selector); err != nil {
 		return WorkflowPreview{}, err
 	}
@@ -173,7 +173,7 @@ func (selection workflowSelection) preview(request workflowstate.WorkflowPreview
 	return preview, nil
 }
 
-func (selection workflowSelection) resolveSelector(selector workflowstate.WorkflowSelector) error {
+func (selection workflowSelection) resolveSelector(selector workflowstate.Selector) error {
 	found := selector.Extent == "loose"
 	switch selector.Extent {
 	case "ticket":
@@ -201,7 +201,7 @@ func (selection workflowSelection) resolveSelector(selector workflowstate.Workfl
 	return nil
 }
 
-func (selection workflowSelection) matches(selector workflowstate.WorkflowSelector, ticket IndexedTicket, record WorkflowRecord) bool {
+func (selection workflowSelection) matches(selector workflowstate.Selector, ticket IndexedTicket, record WorkflowRecord) bool {
 	switch selector.Extent {
 	case "ticket":
 		return ticket.Key == selector.Identity
@@ -220,7 +220,7 @@ func (selection workflowSelection) matches(selector workflowstate.WorkflowSelect
 	}
 }
 
-func workflowSelectionExclusion(selector workflowstate.WorkflowSelector, record WorkflowRecord, prepared bool) string {
+func workflowSelectionExclusion(selector workflowstate.Selector, record WorkflowRecord, prepared bool) string {
 	if !prepared {
 		return "unprepared"
 	}
@@ -246,7 +246,7 @@ func workflowPreviewMember(record WorkflowRecord) WorkflowPreviewMember {
 	return WorkflowPreviewMember{Key: task.Key, Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, ContractHash: task.ContractHash, SetID: task.SetID, SliceID: task.SliceID, TaskOrder: task.Order, Status: task.Status, Phase: task.Phase}
 }
 
-func workflowAdmittedRefs(members []WorkflowPreviewMember, selector workflowstate.WorkflowSelector) map[workflowstate.Ref]bool {
+func workflowAdmittedRefs(members []WorkflowPreviewMember, selector workflowstate.Selector) map[workflowstate.Ref]bool {
 	admitted := map[workflowstate.Ref]bool{}
 	for _, member := range members {
 		admitted[workflowstate.Ref{Kind: "ticket", ID: member.Key}] = true
@@ -258,7 +258,7 @@ func workflowAdmittedRefs(members []WorkflowPreviewMember, selector workflowstat
 	return admitted
 }
 
-func workflowPreviewRequestHash(request workflowstate.WorkflowPreviewRequest) (string, error) {
+func workflowPreviewRequestHash(request workflowstate.PreviewRequest) (string, error) {
 	request.Offset, request.Limit, request.SnapshotHash = 0, 0, ""
 
 	encoded, err := json.Marshal(request)
@@ -269,7 +269,7 @@ func workflowPreviewRequestHash(request workflowstate.WorkflowPreviewRequest) (s
 	return contenthash.Sum(encoded), nil
 }
 
-func validateWorkflowPreviewContext(request workflowstate.WorkflowPreviewRequest) error {
+func validateWorkflowPreviewContext(request workflowstate.PreviewRequest) error {
 	if len(request.Target.Repository) > 2048 || strings.ContainsAny(request.Target.Repository, "\x00\n\r") {
 		return fmt.Errorf("invalid workflow target repository")
 	}
@@ -288,7 +288,7 @@ func validateWorkflowPreviewContext(request workflowstate.WorkflowPreviewRequest
 	return nil
 }
 
-func workflowPreviewExclusion(request workflowstate.WorkflowPreviewRequest, ticket IndexedTicket, record WorkflowRecord, prepared bool) string {
+func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket IndexedTicket, record WorkflowRecord, prepared bool) string {
 	reason := workflowSelectionExclusion(request.Selector, record, prepared)
 	if reason == "" && request.Selector.Extent == "loose" {
 		return workflowLooseExclusion(request, ticket)
@@ -297,7 +297,7 @@ func workflowPreviewExclusion(request workflowstate.WorkflowPreviewRequest, tick
 	return reason
 }
 
-func (selection workflowSelection) resolveOrder(members []WorkflowPreviewMember, request workflowstate.WorkflowPreviewRequest) (string, error) {
+func (selection workflowSelection) resolveOrder(members []WorkflowPreviewMember, request workflowstate.PreviewRequest) (string, error) {
 	if request.Selector.Extent == "loose" {
 		selection.orderLooseMembers(members, request.Order)
 

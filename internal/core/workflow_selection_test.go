@@ -26,7 +26,7 @@ func workflowSelectionFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializa
 func workflowTestPreview(t *testing.T, store *WorkflowStore, extent, identity string) WorkflowPreview {
 	t.Helper()
 
-	result, err := store.Preview(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: extent, Identity: identity}, Limit: 128})
+	result, err := store.Preview(t.Context(), workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: extent, Identity: identity}, Limit: 128})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -57,8 +57,8 @@ func TestWorkflowSelectionExtents(t *testing.T) {
 		})
 	}
 
-	for _, selector := range []workflowstate.WorkflowSelector{{}, {Extent: "ticket"}, {Extent: "ticket", Identity: "absent"}, {Extent: "slice", Identity: "absent"}, {Extent: "slice_set", Identity: "absent"}, {Extent: "use_case", Identity: "absent"}, {Extent: "loose", Identity: "unexpected"}} {
-		if _, err := store.Preview(t.Context(), workflowstate.WorkflowPreviewRequest{Selector: selector, Limit: 1}); err == nil {
+	for _, selector := range []workflowstate.Selector{{}, {Extent: "ticket"}, {Extent: "ticket", Identity: "absent"}, {Extent: "slice", Identity: "absent"}, {Extent: "slice_set", Identity: "absent"}, {Extent: "use_case", Identity: "absent"}, {Extent: "loose", Identity: "unexpected"}} {
+		if _, err := store.Preview(t.Context(), workflowstate.PreviewRequest{Selector: selector, Limit: 1}); err == nil {
 			t.Fatalf("invalid selector accepted: %+v", selector)
 		}
 	}
@@ -67,7 +67,7 @@ func TestWorkflowSelectionExtents(t *testing.T) {
 // TestWorkflowSelectionPages rejects stale continuation and oversized pages.
 func TestWorkflowSelectionPages(t *testing.T) {
 	store, result := workflowSelectionFixture(t)
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 2}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: result.Set.ID}, Limit: 2}
 
 	first, err := store.Preview(t.Context(), request)
 	if err != nil || first.Total != 6 || len(first.Members) != 2 || first.NextOffset != 2 {
@@ -148,7 +148,7 @@ func TestWorkflowSelectionPendingJournal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: "PRJ-1"}, Limit: 1}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: "PRJ-1"}, Limit: 1}
 	if _, err := store.Preview(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("pending journal preview = %v", err)
 	}

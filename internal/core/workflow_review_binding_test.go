@@ -11,14 +11,14 @@ import (
 // TestWorkflowReviewRevocation re-resolves project policy and the current target,
 // preserving historical decisions while replacing a stale grant with a new wait.
 func TestWorkflowReviewRevocation(t *testing.T) {
-	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 
 	old, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	workflowReviewConfig(t, store, workflowstate.ReviewWorkflowModeHumanReview)
+	workflowReviewConfig(t, store, workflowstate.ReviewHuman)
 
 	if _, err := store.CheckWorkflowReviewGrant(t.Context(), run.ID, provider); err == nil {
 		t.Fatal("policy change retained old grant")
@@ -45,7 +45,7 @@ func TestWorkflowReviewRevocation(t *testing.T) {
 // TestWorkflowReviewDecisionChecks rejects fabricated pass evidence, repair
 // outside membership, subjective blocking notes and decisions for another input.
 func TestWorkflowReviewDecisionChecks(t *testing.T) {
-	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeHumanReview)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewHuman)
 	if _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil); err != nil {
 		t.Fatal(err)
 	}

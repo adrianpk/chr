@@ -16,7 +16,7 @@ import (
 // TestWorkflowMembershipFrontier admits a later slice only after finalized
 // delivery and fresh target hydration, without replaying its integrated prefix.
 func TestWorkflowMembershipFrontier(t *testing.T) {
-	fixture := workflowDeliveryPolicyFixture(t, "rebase", "slice_set", workflowstate.WorkflowExecutionPolicy{IncludeLaterTickets: true})
+	fixture := workflowDeliveryPolicyFixture(t, "rebase", "slice_set", workflowstate.ExecutionPolicy{IncludeLaterTickets: true})
 	workflowFinalizeFrontier(t, fixture)
 
 	before := workflowAdvanceFrontier(t, fixture)
@@ -78,7 +78,7 @@ func checkWorkflowMembershipFrontier(t *testing.T, fixture workflowIntegrationFi
 func TestWorkflowMembershipLaterSet(t *testing.T) {
 	for _, retroactive := range []bool{false, true} {
 		t.Run(map[bool]string{false: "later", true: "retroactive"}[retroactive], func(t *testing.T) {
-			fixture := workflowDeliveryPolicyFixture(t, "rebase", "use_case", workflowstate.WorkflowExecutionPolicy{IncludeLaterTickets: true})
+			fixture := workflowDeliveryPolicyFixture(t, "rebase", "use_case", workflowstate.ExecutionPolicy{IncludeLaterTickets: true})
 			workflowFinalizeFrontier(t, fixture)
 
 			before := workflowAdvanceFrontier(t, fixture)

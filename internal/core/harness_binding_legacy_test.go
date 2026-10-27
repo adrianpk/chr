@@ -53,12 +53,12 @@ func checkHarnessBindingLegacyHash(t *testing.T, run WorkflowInvocation) {
 	t.Helper()
 	// Field order and tags are the pre-binding WorkflowStartRequest contract.
 	legacy := struct {
-		Admission           *workflowstate.WorkflowAdmissionGuard `json:"admission_guard,omitempty"`
-		IncludeLaterTickets *bool                                 `json:"include_later_tickets_override,omitempty"`
+		Admission           *workflowstate.AdmissionGuard `json:"admission_guard,omitempty"`
+		IncludeLaterTickets *bool                         `json:"include_later_tickets_override,omitempty"`
 		RequestKey          string
-		Selection           workflowstate.WorkflowPreviewRequest
-		Policy              workflowstate.WorkflowExecutionPolicy
-		ReviewRestriction   workflowstate.ReviewWorkflowMode `json:"review_restriction,omitempty"`
+		Selection           workflowstate.PreviewRequest
+		Policy              workflowstate.ExecutionPolicy
+		ReviewRestriction   workflowstate.ReviewMode `json:"review_restriction,omitempty"`
 	}{Admission: run.Admission, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction}
 
 	data, err := json.Marshal(legacy)

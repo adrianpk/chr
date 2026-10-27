@@ -23,7 +23,7 @@ func (p *nativeReviewProviderFixture) WorkflowPreparedNativeCapability(ctx conte
 	return sealWorkflowNativeCapability(capability)
 }
 
-func nativeReviewFixture(t *testing.T, mode workflowstate.ReviewWorkflowMode) (nativePreparationFixture, WorkflowIntegrationCandidate) {
+func nativeReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (nativePreparationFixture, WorkflowIntegrationCandidate) {
 	t.Helper()
 
 	f := newNativePreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
@@ -40,7 +40,7 @@ func nativeReviewFixture(t *testing.T, mode workflowstate.ReviewWorkflowMode) (n
 // TestNativeReviewPolicy rejects a previously authorized result after its
 // trusted publication policy changes, including after store reconstruction.
 func TestNativeReviewPolicy(t *testing.T) {
-	f, _ := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+	f, _ := nativeReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 	store, id := f.f.store, f.f.run.ID
 
 	if _, err := store.ReviewWorkflowSlice(t.Context(), id, f.provider, nil); err != nil {
@@ -71,12 +71,12 @@ func TestNativeReviewSourceOnly(t *testing.T) {
 // for every review mode. Restart and queue readiness cannot transfer or repeat
 // decisions, while publication rechecks the result-bound capability.
 func TestNativeReviewModes(t *testing.T) {
-	for _, mode := range []workflowstate.ReviewWorkflowMode{workflowstate.ReviewWorkflowModeHumanReview, workflowstate.ReviewWorkflowModeTrustedAutoMerge, workflowstate.ReviewWorkflowModeAgenticReview} {
+	for _, mode := range []workflowstate.ReviewMode{workflowstate.ReviewHuman, workflowstate.ReviewTrustedAutoMerge, workflowstate.ReviewAgentic} {
 		t.Run(string(mode), func(t *testing.T) { nativeReviewMode(t, mode) })
 	}
 }
 
-func nativeReviewMode(t *testing.T, mode workflowstate.ReviewWorkflowMode) {
+func nativeReviewMode(t *testing.T, mode workflowstate.ReviewMode) {
 	t.Helper()
 
 	f, candidate := nativeReviewFixture(t, mode)

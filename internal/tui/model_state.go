@@ -117,7 +117,7 @@ type workState struct {
 	observability           ObservabilityView
 	workReadiness           WorkReadinessView
 	agentWorkPriorityFilter string
-	agentWorkOrder          workflowstate.TicketLoopOrder
+	agentWorkOrder          workflowstate.TicketOrder
 	workflow                WorkflowView
 	workflowPage            WorkflowPageView
 	workAction              WorkActionState

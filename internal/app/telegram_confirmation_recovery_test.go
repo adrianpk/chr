@@ -48,7 +48,7 @@ func TestTelegramPresentationControlQuestions(t *testing.T) {
 // Source reads, policy, persistence and admission continue to use the real service.
 type telegramPartialWorkPreview struct{ service }
 
-func (s telegramPartialWorkPreview) PreviewTelegramWork(ctx context.Context, target telegramcore.OperationTarget, selector workflowstate.WorkflowSelector) (WorkflowBoundPreview, error) {
+func (s telegramPartialWorkPreview) PreviewTelegramWork(ctx context.Context, target telegramcore.OperationTarget, selector workflowstate.Selector) (WorkflowBoundPreview, error) {
 	preview, err := s.service.PreviewTelegramWork(ctx, target, selector)
 	if err == nil {
 		preview.View.Preview.Total = len(preview.View.Preview.Members) + 1

@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *WorkflowStore) observeWorkflowClosingTarget(ctx context.Context, request WorkflowSetClosureRequest, ports WorkflowFrontierPorts) (workflowstate.WorkflowPreviewTarget, error) {
+func (s *WorkflowStore) observeWorkflowClosingTarget(ctx context.Context, request WorkflowSetClosureRequest, ports WorkflowFrontierPorts) (workflowstate.PreviewTarget, error) {
 	query := WorkflowTargetQuery{Repository: request.Repository, Branch: request.Branch, Directory: s.layout.ProjectDir()}
 
 	target, err := ports.Target.ObserveWorkflowTarget(ctx, query)

@@ -11,7 +11,7 @@ import (
 // tickets without rewriting order bytes or generation metadata. Approved future
 // work then retains those completions, receipt references and historical maps.
 func TestWorkflowPlanOrderDelivery(t *testing.T) {
-	store, hierarchy, run, provider := workflowPRPlanFixture(t, "slice", workflowstate.WorkflowExecutionPolicy{}, workflowOrderPlanFixture)
+	store, hierarchy, run, provider := workflowPRPlanFixture(t, "slice", workflowstate.ExecutionPolicy{}, workflowOrderPlanFixture)
 
 	status, err := store.InspectWorkflowTracker(t.Context(), hierarchy.Set.ID)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 // or a guarded retained activation. Original admission replay bypasses the check.
 type WorkflowAdmissionCheck func(context.Context) error
 
-func validateWorkflowAdmissionGuard(guard *workflowstate.WorkflowAdmissionGuard, selection workflowstate.WorkflowPreviewRequest) error {
+func validateWorkflowAdmissionGuard(guard *workflowstate.AdmissionGuard, selection workflowstate.PreviewRequest) error {
 	if guard == nil {
 		return nil
 	}
@@ -30,7 +30,7 @@ func validateWorkflowAdmissionGuard(guard *workflowstate.WorkflowAdmissionGuard,
 	return validateWorkflowAdmissionPolicy(guard)
 }
 
-func validateWorkflowAdmissionPolicy(guard *workflowstate.WorkflowAdmissionGuard) error {
+func validateWorkflowAdmissionPolicy(guard *workflowstate.AdmissionGuard) error {
 	if !validWorkflowExecutionPolicy(guard.ExecutionPolicy) || guard.ExecutionPolicy.ConfigRevision != guard.Policy.Revision {
 		return workflowstate.ErrConflict
 	}

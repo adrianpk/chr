@@ -99,15 +99,15 @@ func (s *WorkflowStore) replaceWorkflowReviewInput(run *workflowInvocationFile, 
 
 func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input WorkflowReviewInput, reviewer []string, harness *WorkflowAgentHarness) (*WorkflowClaim, workflowPreparedTask, error) {
 	switch input.Policy.Mode {
-	case workflowstate.ReviewWorkflowModeHumanReview:
+	case workflowstate.ReviewHuman:
 		run.Review.State, run.Outcome = "waiting_approval", "slice_review_waiting_approval"
 
 		return nil, workflowPreparedTask{}, s.commitWorkflowState(run)
-	case workflowstate.ReviewWorkflowModeTrustedAutoMerge:
+	case workflowstate.ReviewTrustedAutoMerge:
 		decision := WorkflowReviewDecision{BindingHash: run.Review.InputHash, Result: AgenticReviewResult{Decision: IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
 
 		return nil, workflowPreparedTask{}, s.persistWorkflowReviewDecision(run, observation, decision, "authorized")
-	case workflowstate.ReviewWorkflowModeAgenticReview:
+	case workflowstate.ReviewAgentic:
 		if err := workflowstate.ValidateCommand(reviewer); err != nil {
 			return nil, workflowPreparedTask{}, fmt.Errorf("separate workflow review command required: %w", err)
 		}

@@ -222,7 +222,7 @@ func NewModel(opts Options) *Model {
 		workState: workState{
 			observability:  opts.Observability,
 			workReadiness:  opts.WorkReadiness,
-			agentWorkOrder: workflowstate.TicketLoopOrderCreatedAt,
+			agentWorkOrder: workflowstate.TicketOrderCreatedAt,
 			workExecutor:   opts.WorkExecutor,
 		},
 		backgroundWorkState: backgroundWorkState{

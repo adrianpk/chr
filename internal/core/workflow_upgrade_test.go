@@ -54,7 +54,7 @@ func TestWorkflowUpgradePolicy(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			store, opts := workflowUpgradeFixture(t, tc.body)
-			opts.ReviewMode = workflowstate.ReviewWorkflowMode(tc.choice)
+			opts.ReviewMode = workflowstate.ReviewMode(tc.choice)
 
 			prior, err := ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
 			if err != nil {

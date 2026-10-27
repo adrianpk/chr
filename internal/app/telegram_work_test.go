@@ -74,10 +74,10 @@ func telegramWorkBindCase(t *testing.T, operations service) {
 	}
 }
 
-func telegramWorkSelector(t *testing.T, operations service, independent core.WorkflowRecord, extent string) workflowstate.WorkflowSelector {
+func telegramWorkSelector(t *testing.T, operations service, independent core.WorkflowRecord, extent string) workflowstate.Selector {
 	t.Helper()
 
-	selector := workflowstate.WorkflowSelector{Extent: extent}
+	selector := workflowstate.Selector{Extent: extent}
 	if extent == "ticket" {
 		selector.Identity = independent.Task.Key
 	}
@@ -230,7 +230,7 @@ func telegramWorkDecodeResult(t *testing.T, request telegramcore.OperationReques
 	return result
 }
 
-func checkTelegramWorkNative(t *testing.T, operations service, selector workflowstate.WorkflowSelector) {
+func checkTelegramWorkNative(t *testing.T, operations service, selector workflowstate.Selector) {
 	t.Helper()
 
 	run := checkTelegramWorkRunCount(t, operations, 1)

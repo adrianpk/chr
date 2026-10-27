@@ -28,7 +28,7 @@ func (factory commandFactory) workConfigCommand() *cli.Command {
 			return err
 		}
 
-		result, err := operations.WorkflowConfiguration(ctx, workflowstate.ReviewWorkflowMode(cmd.String("review-restriction")))
+		result, err := operations.WorkflowConfiguration(ctx, workflowstate.ReviewMode(cmd.String("review-restriction")))
 		if err != nil {
 			return err
 		}

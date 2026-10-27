@@ -73,7 +73,7 @@ func workflowUpgradeConfig(data []byte, prior WorkflowConfiguration, opts Workfl
 	if review == "" {
 		for _, value := range prior.Values {
 			if value.Key == "review.mode" {
-				review = workflowstate.ReviewWorkflowMode(value.Value)
+				review = workflowstate.ReviewMode(value.Value)
 			}
 		}
 	}

@@ -12,7 +12,7 @@ import (
 // TestWorkflowReviewRepairs carries the three-repair budget across real candidate
 // changes and fresh store instances, retaining the validated prefix and one PR.
 func TestWorkflowReviewRepairs(t *testing.T) {
-	store, hierarchy, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
+	store, hierarchy, run, provider := workflowReviewFixture(t, workflowstate.ReviewAgentic)
 
 	key := hierarchy.Tasks[2].Task.Key
 	for count := 0; count < 3; count++ {
@@ -124,7 +124,7 @@ func TestWorkflowReviewStop(t *testing.T) {
 func testWorkflowReviewDuringIO(t *testing.T, name, before string) {
 	t.Helper()
 
-	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewAgentic)
 
 	worker := workflowReviewWorker("pass", "", before)
 	if name == "policy" {
@@ -156,7 +156,7 @@ func testWorkflowReviewDuringIO(t *testing.T, name, before string) {
 func testWorkflowReviewStop(t *testing.T, intent string) {
 	t.Helper()
 
-	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeAgenticReview)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewAgentic)
 	marker := filepath.Join(t.TempDir(), "started")
 	worker := []string{"sh", "-c", "printf started > \"$1\"; sleep 20", "review", marker}
 	done := make(chan error, 1)

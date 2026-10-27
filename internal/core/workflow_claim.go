@@ -133,7 +133,7 @@ func (s *WorkflowStore) observeWorkflowClaim(ctx context.Context, run workflowIn
 
 	member := run.Members[run.Cursor]
 	request := run.ExecutionSelection()
-	request.Selector = workflowstate.WorkflowSelector{Extent: "ticket", Identity: member.Admission.Key}
+	request.Selector = workflowstate.Selector{Extent: "ticket", Identity: member.Admission.Key}
 
 	request, err = s.workflowLaneSelection(ctx, run, selection.records[member.Admission.Key], request)
 	if err != nil {

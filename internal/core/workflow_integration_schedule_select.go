@@ -135,7 +135,7 @@ func workflowIntegrationExecutorFrontier(run workflowInvocationFile, entry Workf
 
 func (s *WorkflowStore) workflowIntegrationScheduledTask(ctx context.Context, run workflowInvocationFile, selection workflowSelection) (WorkflowPreviewMember, error) {
 	request := run.ExecutionSelection()
-	request.Selector = workflowstate.WorkflowSelector{Extent: "ticket", Identity: run.Members[run.Cursor].Admission.Key}
+	request.Selector = workflowstate.Selector{Extent: "ticket", Identity: run.Members[run.Cursor].Admission.Key}
 	request.Offset, request.Limit, request.SnapshotHash = 0, 1, ""
 
 	if run.Lane != nil {

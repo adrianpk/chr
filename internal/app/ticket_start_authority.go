@@ -44,7 +44,7 @@ func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *
 }
 
 func printNativeTicketStartPreview(operations service, config core.WorkspaceConfig, key string, stdout io.Writer) error {
-	result, err := operations.previewNativeAgentWorkSelection(config, workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "ticket", Identity: key}})
+	result, err := operations.previewNativeAgentWorkSelection(config, workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: key}})
 	if err != nil {
 		return err
 	}

@@ -60,7 +60,7 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
 	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
 	policy := WorkflowNativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: contenthash.Sum([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
-	policy.ReviewMode = workflowstate.ReviewWorkflowModeHumanReview
+	policy.ReviewMode = workflowstate.ReviewHuman
 	result := nativeCapabilityFixture{adapter: adapter, runner: runner, request: WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: publication}, policy: &nativePolicyFixture{policy: policy}, git: &nativeInspectorFixture{WorkflowGitPublicationInspector: NewWorkflowGitPublisher(repository, fixture.remote)}, remote: fixture.remote}
 	result.prefix = nativePolicyCommand(t, result, "")
 

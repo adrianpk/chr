@@ -24,10 +24,10 @@ func (p *workflowReviewProviderFixture) ReadWorkflowBranch(_ context.Context, _,
 	return p.pr.HeadCommit, nil
 }
 
-func workflowReviewFixture(t *testing.T, mode workflowstate.ReviewWorkflowMode) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowReviewProviderFixture) {
+func workflowReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (*WorkflowStore, WorkflowMaterializationResult, WorkflowInvocation, *workflowReviewProviderFixture) {
 	t.Helper()
 
-	store, hierarchy, run, provider := workflowPRPolicyFixture(t, "slice", workflowstate.WorkflowExecutionPolicy{MaxWorkerAttempts: 128})
+	store, hierarchy, run, provider := workflowPRPolicyFixture(t, "slice", workflowstate.ExecutionPolicy{MaxWorkerAttempts: 128})
 	workflowReviewConfig(t, store, mode)
 
 	observed := &workflowReviewProviderFixture{workflowPRProviderFixture: provider, target: provider.pr.BaseCommit}
@@ -38,7 +38,7 @@ func workflowReviewFixture(t *testing.T, mode workflowstate.ReviewWorkflowMode) 
 	return store, hierarchy, workflowTestRead(t, store, run.ID), observed
 }
 
-func workflowReviewConfig(t *testing.T, store *WorkflowStore, mode workflowstate.ReviewWorkflowMode) {
+func workflowReviewConfig(t *testing.T, store *WorkflowStore, mode workflowstate.ReviewMode) {
 	t.Helper()
 
 	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "review", "mode", string(mode))
@@ -61,14 +61,14 @@ func workflowReviewWorker(decision, key, before string) []string {
 func TestWorkflowReviewModes(t *testing.T) {
 	cases := []struct {
 		name                    string
-		mode                    workflowstate.ReviewWorkflowMode
+		mode                    workflowstate.ReviewMode
 		decision, state, status string
 	}{
-		{"human", workflowstate.ReviewWorkflowModeHumanReview, "", "waiting_approval", "waiting_review"},
-		{"trusted", workflowstate.ReviewWorkflowModeTrustedAutoMerge, "", "authorized", "waiting_integration"},
-		{"agent pass", workflowstate.ReviewWorkflowModeAgenticReview, "pass", "authorized", "waiting_integration"},
-		{"agent evidence", workflowstate.ReviewWorkflowModeAgenticReview, "insufficient_evidence", "insufficient_evidence", "waiting_review"},
-		{"agent human", workflowstate.ReviewWorkflowModeAgenticReview, "human_required", "human_required", "waiting_review"},
+		{"human", workflowstate.ReviewHuman, "", "waiting_approval", "waiting_review"},
+		{"trusted", workflowstate.ReviewTrustedAutoMerge, "", "authorized", "waiting_integration"},
+		{"agent pass", workflowstate.ReviewAgentic, "pass", "authorized", "waiting_integration"},
+		{"agent evidence", workflowstate.ReviewAgentic, "insufficient_evidence", "insufficient_evidence", "waiting_review"},
+		{"agent human", workflowstate.ReviewAgentic, "human_required", "human_required", "waiting_review"},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -80,14 +80,14 @@ func TestWorkflowReviewModes(t *testing.T) {
 // TestWorkflowReviewApproval requires the displayed hash, retains both agentic
 // human-required evidence and explicit approval, and does not rewrite retries.
 func TestWorkflowReviewApproval(t *testing.T) {
-	for _, mode := range []workflowstate.ReviewWorkflowMode{workflowstate.ReviewWorkflowModeHumanReview, workflowstate.ReviewWorkflowModeAgenticReview} {
+	for _, mode := range []workflowstate.ReviewMode{workflowstate.ReviewHuman, workflowstate.ReviewAgentic} {
 		t.Run(string(mode), func(t *testing.T) {
 			testWorkflowReviewApproval(t, mode)
 		})
 	}
 }
 
-func testWorkflowReviewMode(t *testing.T, mode workflowstate.ReviewWorkflowMode, decision, state, status string) {
+func testWorkflowReviewMode(t *testing.T, mode workflowstate.ReviewMode, decision, state, status string) {
 	t.Helper()
 
 	store, hierarchy, run, provider := workflowReviewFixture(t, mode)
@@ -112,7 +112,7 @@ func testWorkflowReviewMode(t *testing.T, mode workflowstate.ReviewWorkflowMode,
 	checkWorkflowReviewAuthorized(t, store, run.ID, provider, binding)
 }
 
-func testWorkflowReviewApproval(t *testing.T, mode workflowstate.ReviewWorkflowMode) {
+func testWorkflowReviewApproval(t *testing.T, mode workflowstate.ReviewMode) {
 	t.Helper()
 
 	store, _, run, provider := workflowReviewFixture(t, mode)
@@ -137,7 +137,7 @@ func testWorkflowReviewApproval(t *testing.T, mode workflowstate.ReviewWorkflowM
 
 	checkWorkflowApprovalRetry(t, store, run.ID, provider, binding)
 
-	if mode == workflowstate.ReviewWorkflowModeAgenticReview && approved.DecisionCount != 2 {
+	if mode == workflowstate.ReviewAgentic && approved.DecisionCount != 2 {
 		t.Fatal("human approval discarded the agentic stop")
 	}
 }

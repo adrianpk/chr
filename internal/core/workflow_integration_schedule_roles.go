@@ -190,7 +190,7 @@ func (s *WorkflowStore) workflowIntegrationPreparedRole(ctx context.Context, run
 		return "", err
 	}
 
-	if policy.Mode != workflowstate.ReviewWorkflowModeAgenticReview {
+	if policy.Mode != workflowstate.ReviewAgentic {
 		return "", nil
 	}
 

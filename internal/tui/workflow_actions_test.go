@@ -17,7 +17,7 @@ import (
 func TestModelWorkflowBinding(t *testing.T) {
 	for _, action := range []WorkActionID{WorkActionWorkflowSlice, WorkActionWorkflowApprove} {
 		t.Run(string(action), func(t *testing.T) {
-			native := &WorkflowActionRequest{ID: "run-selected", ExpectedRevision: 7, BindingHash: strings.Repeat("a", 64), Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "slice", Identity: "selected-slice"}, SnapshotHash: strings.Repeat("b", 64)}, Selected: &workflowstate.WorkflowSelectionGuard{Key: "CHR-1", Revision: 3}}
+			native := &WorkflowActionRequest{ID: "run-selected", ExpectedRevision: 7, BindingHash: strings.Repeat("a", 64), Selection: workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice", Identity: "selected-slice"}, SnapshotHash: strings.Repeat("b", 64)}, Selected: &workflowstate.SelectionGuard{Key: "CHR-1", Revision: 3}}
 			executor := &fakeWorkActionExecutor{}
 			model := NewModel(Options{WorkExecutor: executor})
 			model.workAction = WorkActionState{Pending: true, Request: WorkActionRequest{Action: action, Workflow: native}}

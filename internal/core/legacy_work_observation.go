@@ -106,7 +106,7 @@ func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID s
 		}
 	}
 
-	order, err := normalizeTicketLoopOrder(workflowstate.TicketLoopOrderCreatedAt)
+	order, err := normalizeTicketLoopOrder(workflowstate.TicketOrderCreatedAt)
 	if err != nil {
 		return result, err
 	}

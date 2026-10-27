@@ -21,11 +21,11 @@ func ValidateReviewWorkflowConfig(config ReviewWorkflowConfig) error {
 }
 
 // IsValidReviewWorkflowMode executes the corresponding package operation.
-func IsValidReviewWorkflowMode(mode workflowstate.ReviewWorkflowMode) bool {
-	switch workflowstate.ReviewWorkflowMode(strings.TrimSpace(string(mode))) {
-	case workflowstate.ReviewWorkflowModeAgenticReview,
-		workflowstate.ReviewWorkflowModeHumanReview,
-		workflowstate.ReviewWorkflowModeTrustedAutoMerge:
+func IsValidReviewWorkflowMode(mode workflowstate.ReviewMode) bool {
+	switch workflowstate.ReviewMode(strings.TrimSpace(string(mode))) {
+	case workflowstate.ReviewAgentic,
+		workflowstate.ReviewHuman,
+		workflowstate.ReviewTrustedAutoMerge:
 		return true
 	default:
 		return false
@@ -33,13 +33,13 @@ func IsValidReviewWorkflowMode(mode workflowstate.ReviewWorkflowMode) bool {
 }
 
 // ReviewWorkflowModeDescription executes the corresponding package operation.
-func ReviewWorkflowModeDescription(mode workflowstate.ReviewWorkflowMode) string {
+func ReviewWorkflowModeDescription(mode workflowstate.ReviewMode) string {
 	switch mode {
-	case workflowstate.ReviewWorkflowModeAgenticReview:
+	case workflowstate.ReviewAgentic:
 		return "agentic review inspects pull request evidence before merge"
-	case workflowstate.ReviewWorkflowModeHumanReview:
+	case workflowstate.ReviewHuman:
 		return "human review waits for a person to inspect and approve the diff"
-	case workflowstate.ReviewWorkflowModeTrustedAutoMerge:
+	case workflowstate.ReviewTrustedAutoMerge:
 		return "trusted auto-merge relies on the configured process without a review stop"
 	default:
 		return "unknown review mode"

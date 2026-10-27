@@ -61,7 +61,7 @@ func nativeCandidateRepairGuard(t *testing.T, change string) {
 // TestNativeCandidateClean proves a passing candidate has no implicit merger
 // call, repair binding or charged merger allowance.
 func TestNativeCandidateClean(t *testing.T) {
-	f, candidate := nativeReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+	f, candidate := nativeReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 	store, id := f.f.store, f.f.run.ID
 	nativeReviewAuthorize(t, f)
 

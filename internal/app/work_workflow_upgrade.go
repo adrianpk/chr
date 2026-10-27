@@ -45,7 +45,7 @@ func (factory commandFactory) workUpgradeAction(ctx context.Context, cmd *cli.Co
 		return err
 	}
 
-	opts := core.WorkflowUpgradeOptions{ExpectedRevision: cmd.String("config-revision"), StateAuthority: core.WorkStateAuthority(cmd.String("state-authority")), ReviewMode: workflowstate.ReviewWorkflowMode(cmd.String("review-mode")), Adoption: adoption}
+	opts := core.WorkflowUpgradeOptions{ExpectedRevision: cmd.String("config-revision"), StateAuthority: core.WorkStateAuthority(cmd.String("state-authority")), ReviewMode: workflowstate.ReviewMode(cmd.String("review-mode")), Adoption: adoption}
 
 	result, err := operations.UpgradeWorkflowConfiguration(ctx, opts)
 	if err != nil {

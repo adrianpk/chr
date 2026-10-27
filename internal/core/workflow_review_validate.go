@@ -195,9 +195,9 @@ func (s *WorkflowStore) readWorkflowReviewEvidence(run workflowInvocationFile, i
 	return evidence, nil
 }
 
-func validateWorkflowReviewOrigin(mode workflowstate.ReviewWorkflowMode, count int, evidence workflowReviewEvidence) error {
+func validateWorkflowReviewOrigin(mode workflowstate.ReviewMode, count int, evidence workflowReviewEvidence) error {
 	if count == 2 {
-		if mode != workflowstate.ReviewWorkflowModeAgenticReview || evidence.Origin != "human" || evidence.Decision.Result.Decision != IntegrationReviewDecisionPass {
+		if mode != workflowstate.ReviewAgentic || evidence.Origin != "human" || evidence.Decision.Result.Decision != IntegrationReviewDecisionPass {
 			return workflowstate.ErrConflict
 		}
 
@@ -205,11 +205,11 @@ func validateWorkflowReviewOrigin(mode workflowstate.ReviewWorkflowMode, count i
 	}
 
 	expected := "agentic"
-	if mode == workflowstate.ReviewWorkflowModeHumanReview {
+	if mode == workflowstate.ReviewHuman {
 		expected = "human"
 	}
 
-	if mode == workflowstate.ReviewWorkflowModeTrustedAutoMerge {
+	if mode == workflowstate.ReviewTrustedAutoMerge {
 		expected = "trusted"
 	}
 

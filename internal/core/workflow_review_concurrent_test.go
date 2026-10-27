@@ -9,7 +9,7 @@ import (
 // TestWorkflowReviewConcurrent serializes independent trusted-policy callers
 // and creates one immutable decision without consuming worker capacity.
 func TestWorkflowReviewConcurrent(t *testing.T) {
-	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewWorkflowModeTrustedAutoMerge)
+	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 	start := make(chan struct{})
 	results := make(chan error, 2)
 

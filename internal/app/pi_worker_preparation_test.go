@@ -19,7 +19,7 @@ func TestPiWorkerPreparation(t *testing.T) {
 			program, marker := piPreparationProgram(t, name)
 			profile := core.HarnessProfile{Harness: "pi", Command: program, ModelProvider: "fixture", Model: "model"}
 
-			readiness, image := piProfileReadiness(t.Context(), profile, harnesscore.HarnessWorker, "")
+			readiness, image := piProfileReadiness(t.Context(), profile, harnesscore.Worker, "")
 			if readiness.Ready() || image != "" || !strings.Contains(readiness.Problem, "chr worker bridge") {
 				t.Fatal("unprepared worker executable was accepted", readiness)
 			}

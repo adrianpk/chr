@@ -103,7 +103,7 @@ func TestWorkflowPreparationProviderPaths(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				if err := validateWorkflowPublicationCapability(WorkflowReviewInput{PullRequest: pr, Policy: workflowstate.WorkflowReviewPolicy{Method: method}}, capability); !errors.Is(err, ErrWorkflowAtomicGuard) {
+				if err := validateWorkflowPublicationCapability(WorkflowReviewInput{PullRequest: pr, Policy: workflowstate.ReviewPolicy{Method: method}}, capability); !errors.Is(err, ErrWorkflowAtomicGuard) {
 					t.Fatalf("provider falsely claimed guard: %v", err)
 				}
 

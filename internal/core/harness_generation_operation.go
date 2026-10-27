@@ -208,7 +208,7 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 	}
 
 	// The generic command-image check does no worker-role or live-profile IO.
-	return checkHarnessCommandImage(harnesscore.HarnessBinding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
+	return checkHarnessCommandImage(harnesscore.Binding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
 }
 
 func validateGenerationResources(resources harness.GenerationResources, backend string) error {

@@ -171,9 +171,9 @@ func printTicketReviewModeStatus(stdout io.Writer, projectContext commandProject
 		"mode_status: " + status,
 		"description: " + core.ReviewWorkflowModeDescription(config.Mode),
 		fmt.Sprintf("dry_run: %t", dryRun),
-		fmt.Sprintf("requires_remote_review: %t", config.Mode == workflowstate.ReviewWorkflowModeAgenticReview),
-		fmt.Sprintf("requires_human_review: %t", config.Mode == workflowstate.ReviewWorkflowModeHumanReview),
-		fmt.Sprintf("trusted_auto_merge: %t", config.Mode == workflowstate.ReviewWorkflowModeTrustedAutoMerge),
+		fmt.Sprintf("requires_remote_review: %t", config.Mode == workflowstate.ReviewAgentic),
+		fmt.Sprintf("requires_human_review: %t", config.Mode == workflowstate.ReviewHuman),
+		fmt.Sprintf("trusted_auto_merge: %t", config.Mode == workflowstate.ReviewTrustedAutoMerge),
 		"clean_pass_remote_comment: false",
 		fmt.Sprintf("non_blocking_comment_limit: %d", config.NonBlockingCommentLimit),
 	}

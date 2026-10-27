@@ -16,12 +16,12 @@ func workflowPublicationPorts(f workflowPreparationFixture, p WorkflowPullReques
 // actual guarded publication. Lost responses finalize from canonical Git on the
 // next call; a completed checkpoint reuses the receipt without new IO or work.
 func TestWorkflowPublicationModes(t *testing.T) {
-	for _, mode := range []workflowstate.ReviewWorkflowMode{workflowstate.ReviewWorkflowModeHumanReview, workflowstate.ReviewWorkflowModeAgenticReview, workflowstate.ReviewWorkflowModeTrustedAutoMerge} {
+	for _, mode := range []workflowstate.ReviewMode{workflowstate.ReviewHuman, workflowstate.ReviewAgentic, workflowstate.ReviewTrustedAutoMerge} {
 		t.Run(string(mode), func(t *testing.T) { testWorkflowPublicationMode(t, mode) })
 	}
 }
 
-func testWorkflowPublicationMode(t *testing.T, mode workflowstate.ReviewWorkflowMode) {
+func testWorkflowPublicationMode(t *testing.T, mode workflowstate.ReviewMode) {
 	t.Helper()
 
 	f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Publication fixture observes actual Git"})
@@ -59,7 +59,7 @@ func checkWorkflowPublicationFinalized(t *testing.T, f workflowPreparationFixtur
 // and waits for approval of that new binding before any provider mutation.
 func TestWorkflowPublicationMovedBase(t *testing.T) {
 	f, p := newWorkflowSubmissionFixture(t, "rebase")
-	workflowReviewConfig(t, f.store, workflowstate.ReviewWorkflowModeHumanReview)
+	workflowReviewConfig(t, f.store, workflowstate.ReviewHuman)
 
 	ports := workflowPublicationPorts(f, p)
 
@@ -118,11 +118,11 @@ func assertWorkflowPublicationMoved(t *testing.T, f workflowPreparationFixture, 
 	}
 }
 
-func workflowPublicationModeStart(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, ports WorkflowPublicationPorts, mode workflowstate.ReviewWorkflowMode) (WorkflowIntegrationProgress, error) {
+func workflowPublicationModeStart(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, ports WorkflowPublicationPorts, mode workflowstate.ReviewMode) (WorkflowIntegrationProgress, error) {
 	t.Helper()
 
 	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
-	if mode == workflowstate.ReviewWorkflowModeHumanReview {
+	if mode == workflowstate.ReviewHuman {
 		if err != nil || progress.Invocation.Review.State != "waiting_approval" || p.calls != 0 {
 			t.Fatal("human policy skipped exact approval", err)
 		}

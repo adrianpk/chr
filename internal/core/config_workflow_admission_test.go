@@ -44,14 +44,14 @@ func TestWorkflowConfigPublication(t *testing.T) {
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "workflow:\n  version: 1\nreview:\n  mode: human_review\n")
 
 	policy, err := store.workflowReviewPolicy(workflowInvocationFile{})
-	if err != nil || policy.Mode != workflowstate.ReviewWorkflowModeHumanReview || policy.Source != "project" {
+	if err != nil || policy.Mode != workflowstate.ReviewHuman || policy.Source != "project" {
 		t.Fatal("publication read policy from the wrong owner", policy, err)
 	}
 
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "workflow:\n  version: 1\n")
 
 	policy, err = store.workflowReviewPolicy(workflowInvocationFile{})
-	if err != nil || policy.Mode != workflowstate.ReviewWorkflowModeTrustedAutoMerge || policy.Source != "version_default" {
+	if err != nil || policy.Mode != workflowstate.ReviewTrustedAutoMerge || policy.Source != "version_default" {
 		t.Fatal("publication missed version defaults", policy, err)
 	}
 
@@ -104,7 +104,7 @@ func workflowConfigDeadlineFixture(t *testing.T, extent string, gate workflowsta
 		}
 
 		commit, _ := workflowSelectionCommit(t, store)
-		request := WorkflowStartRequest{RequestKey: "config-slice-deadline", Selection: workflowstate.WorkflowPreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.WorkflowPreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
+		request := WorkflowStartRequest{RequestKey: "config-slice-deadline", Selection: workflowstate.PreviewRequest{Selector: workflowClaimSelector(hierarchy, "slice"), Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: commit}}}
 
 		return store, request
 	}
@@ -136,7 +136,7 @@ func executeWorkflowConfigDeadline(t *testing.T, extent string, store *WorkflowS
 	return err
 }
 
-func checkWorkflowConfigFrozen(t *testing.T, policy workflowstate.WorkflowExecutionPolicy, body string) {
+func checkWorkflowConfigFrozen(t *testing.T, policy workflowstate.ExecutionPolicy, body string) {
 	t.Helper()
 
 	if policy.WorkerTimeoutSeconds != 60 || policy.ValidationTimeoutSeconds != 10 || policy.CheckpointStepLimit != 2 || policy.MaxWorkerAttempts != 1 || policy.MaxIntegrationAttempts != 2 || policy.IncludeLaterTickets || policy.ConfigRevision != contenthash.Sum([]byte(body)) {
@@ -144,7 +144,7 @@ func checkWorkflowConfigFrozen(t *testing.T, policy workflowstate.WorkflowExecut
 	}
 }
 
-func checkWorkflowConfigRetry(t *testing.T, store *WorkflowStore, request WorkflowStartRequest, policy workflowstate.WorkflowExecutionPolicy) {
+func checkWorkflowConfigRetry(t *testing.T, store *WorkflowStore, request WorkflowStartRequest, policy workflowstate.ExecutionPolicy) {
 	t.Helper()
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "workflow:\n  version: 1\nwork:\n  max_worker_attempts: 1\n  worker_timeout_seconds: 120\n")
 
@@ -165,7 +165,7 @@ func checkWorkflowConfigRetry(t *testing.T, store *WorkflowStore, request Workfl
 		t.Fatal("caller forged a retained configuration snapshot", err)
 	}
 
-	request.Policy = workflowstate.WorkflowExecutionPolicy{MaxWorkerAttempts: 2}
+	request.Policy = workflowstate.ExecutionPolicy{MaxWorkerAttempts: 2}
 	if _, err := store.StartWorkflow(t.Context(), request); err == nil {
 		t.Fatal("invocation relaxed explicit project attempts")
 	}
@@ -174,14 +174,14 @@ func checkWorkflowConfigRetry(t *testing.T, store *WorkflowStore, request Workfl
 func checkWorkflowConfigRestriction(t *testing.T, project string) {
 	t.Helper()
 
-	restricted, err := ResolveWorkflowConfiguration(project, workflowstate.ReviewWorkflowModeHumanReview)
+	restricted, err := ResolveWorkflowConfiguration(project, workflowstate.ReviewHuman)
 
 	mode := workflowConfigTestValue(t, restricted, "review.mode")
 	if err != nil || mode.Value != "human_review" || mode.Source != "invocation_restriction" {
 		t.Fatal("human restriction did not take precedence", restricted, err)
 	}
 
-	if _, err := ResolveWorkflowConfiguration(project, workflowstate.ReviewWorkflowModeTrustedAutoMerge); err == nil {
+	if _, err := ResolveWorkflowConfiguration(project, workflowstate.ReviewTrustedAutoMerge); err == nil {
 		t.Fatal("a restriction enabled automatic policy")
 	}
 }

@@ -137,7 +137,7 @@ func (s *WorkflowStore) checkWorkflowSubmissionAdmission(run *workflowInvocation
 	return nil
 }
 
-func workflowIntegrationAttemptLimit(policy workflowstate.WorkflowExecutionPolicy) int {
+func workflowIntegrationAttemptLimit(policy workflowstate.ExecutionPolicy) int {
 	if policy.MaxIntegrationAttempts == 0 {
 		return 3
 	}

@@ -165,7 +165,7 @@ func TestWorkflowParallelPublicationConflict(t *testing.T) {
 func TestWorkflowParallelPublicationHuman(t *testing.T) {
 	lanes := workflowParallelPublicationFixture(t, false)
 	first := lanes[0]
-	workflowTicketReviewConfig(t, first.fixture.store, "rebase", workflowstate.ReviewWorkflowModeHumanReview)
+	workflowTicketReviewConfig(t, first.fixture.store, "rebase", workflowstate.ReviewHuman)
 
 	if _, err := first.fixture.store.PrepareWorkflowSliceIntegration(t.Context(), first.fixture.run.ID, first.provider, first.fixture.git); err != nil {
 		t.Fatal(err)

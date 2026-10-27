@@ -95,7 +95,7 @@ func TestWorkflowStopBarrier(t *testing.T) {
 // TestWorkflowOwnerExpiry rejects stale results and keeps a held reservation counted.
 func TestWorkflowOwnerExpiry(t *testing.T) {
 	store, _, request := workflowClaimFixture(t)
-	request.Policy = workflowstate.WorkflowExecutionPolicy{WorkerTimeoutSeconds: 1, MaxWorkerAttempts: 1}
+	request.Policy = workflowstate.ExecutionPolicy{WorkerTimeoutSeconds: 1, MaxWorkerAttempts: 1}
 	run := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 

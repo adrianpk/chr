@@ -37,7 +37,7 @@ type HarnessProfileView struct {
 // HarnessRetainedView separates a retained worker binding from current defaults.
 type HarnessRetainedView struct {
 	ID, Status string
-	Binding    *harnesscore.HarnessBinding
+	Binding    *harnesscore.Binding
 }
 
 const harnessKeepProfile = ":keep"

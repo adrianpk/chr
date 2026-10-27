@@ -8,14 +8,14 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func normalizeWorkflowPreviewRequest(request workflowstate.WorkflowPreviewRequest) (workflowstate.WorkflowPreviewRequest, error) {
+func normalizeWorkflowPreviewRequest(request workflowstate.PreviewRequest) (workflowstate.PreviewRequest, error) {
 	if err := validateWorkflowLooseInputBounds(request); err != nil {
-		return workflowstate.WorkflowPreviewRequest{}, err
+		return workflowstate.PreviewRequest{}, err
 	}
 
 	if request.Selector.Extent != "loose" {
 		if workflowHasLooseOptions(request) {
-			return workflowstate.WorkflowPreviewRequest{}, fmt.Errorf("loose filters and rank order require the loose extent")
+			return workflowstate.PreviewRequest{}, fmt.Errorf("loose filters and rank order require the loose extent")
 		}
 
 		return request, nil
@@ -25,22 +25,22 @@ func normalizeWorkflowPreviewRequest(request workflowstate.WorkflowPreviewReques
 
 	request.Filters, err = normalizeTicketLoopFilters(request.Filters)
 	if err != nil {
-		return workflowstate.WorkflowPreviewRequest{}, err
+		return workflowstate.PreviewRequest{}, err
 	}
 
 	request.Statuses, err = loopEligibleStatuses(request.Statuses)
 	if err != nil {
-		return workflowstate.WorkflowPreviewRequest{}, err
+		return workflowstate.PreviewRequest{}, err
 	}
 
 	request.Order, err = normalizeTicketLoopOrder(request.Order)
 	if err != nil {
-		return workflowstate.WorkflowPreviewRequest{}, err
+		return workflowstate.PreviewRequest{}, err
 	}
 
 	request.MinPriority, request.MinSeverity = strings.TrimSpace(request.MinPriority), strings.TrimSpace(request.MinSeverity)
 	if err := validateWorkflowMinimumRanks(request); err != nil {
-		return workflowstate.WorkflowPreviewRequest{}, err
+		return workflowstate.PreviewRequest{}, err
 	}
 
 	for _, values := range [][]string{request.Filters.Priorities, request.Filters.Severities, request.Filters.ProjectAreas, request.Filters.Tags, request.Filters.Types, request.Filters.UseCases, request.Statuses} {
@@ -50,14 +50,14 @@ func normalizeWorkflowPreviewRequest(request workflowstate.WorkflowPreviewReques
 	return request, nil
 }
 
-func workflowHasLooseOptions(request workflowstate.WorkflowPreviewRequest) bool {
+func workflowHasLooseOptions(request workflowstate.PreviewRequest) bool {
 	filters := request.Filters
 	count := len(filters.Priorities) + len(filters.Severities) + len(filters.ProjectAreas) + len(filters.Tags) + len(filters.Types) + len(filters.UseCases) + len(request.Statuses)
 
 	return count > 0 || request.Order != "" || request.MinPriority != "" || request.MinSeverity != ""
 }
 
-func validateWorkflowLooseInputBounds(request workflowstate.WorkflowPreviewRequest) error {
+func validateWorkflowLooseInputBounds(request workflowstate.PreviewRequest) error {
 	filters := request.Filters
 	for _, values := range [][]string{filters.Priorities, filters.Severities, filters.ProjectAreas, filters.Tags, filters.Types, filters.UseCases, request.Statuses} {
 		if len(values) > workflowstate.PageLimit {
@@ -78,7 +78,7 @@ func validateWorkflowLooseInputBounds(request workflowstate.WorkflowPreviewReque
 	return nil
 }
 
-func workflowLooseExclusion(request workflowstate.WorkflowPreviewRequest, ticket IndexedTicket) string {
+func workflowLooseExclusion(request workflowstate.PreviewRequest, ticket IndexedTicket) string {
 	if !slices.Contains(request.Statuses, ticket.Status) {
 		return "status_mismatch"
 	}
@@ -114,7 +114,7 @@ func workflowMeetsMinimum(value, minimum string) bool {
 	return value != "unclassified" && priorityRank(value) <= priorityRank(minimum)
 }
 
-func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMember, order workflowstate.TicketLoopOrder) {
+func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMember, order workflowstate.TicketOrder) {
 	tickets := map[string]IndexedTicket{}
 	for _, ticket := range selection.tickets {
 		ticket.Priority, ticket.Severity = workflowRank(ticket.Priority), workflowRank(ticket.Severity)
@@ -126,7 +126,7 @@ func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMe
 	})
 }
 
-func validateWorkflowMinimumRanks(request workflowstate.WorkflowPreviewRequest) error {
+func validateWorkflowMinimumRanks(request workflowstate.PreviewRequest) error {
 	for _, rank := range []string{request.MinPriority, request.MinSeverity} {
 		if rank != "" && (!isValidTicketPriority(rank) || rank == "unclassified") {
 			return fmt.Errorf("minimum rank must be critical, high, normal or low")

@@ -31,8 +31,8 @@ const (
 // WorkflowActionRequest retains service-supplied identities and revisions.
 type WorkflowActionRequest struct {
 	Preview          bool
-	Selection        workflowstate.WorkflowPreviewRequest
-	Selected         *workflowstate.WorkflowSelectionGuard
+	Selection        workflowstate.PreviewRequest
+	Selected         *workflowstate.SelectionGuard
 	ID               string
 	ExpectedRevision uint64
 	BindingHash      string
@@ -115,7 +115,7 @@ func (m *Model) planNativeWorkExtent(request *WorkActionRequest, extent string) 
 	native := request.Workflow
 	native.Preview = true
 
-	native.Selection = workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: extent}, Limit: workflowstate.PageLimit}
+	native.Selection = workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: extent}, Limit: workflowstate.PageLimit}
 	if extent == "loose" {
 		native.Selection.Statuses = []string{core.TicketStatusReadyForDev}
 

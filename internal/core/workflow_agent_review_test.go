@@ -16,7 +16,7 @@ func TestNativeAgentReview(t *testing.T) {
 	request.Policy.AgentTokenBudget = 300
 	request.Policy.MaxWorkerAttempts = 3
 
-	workflowReviewConfig(t, store, workflowstate.ReviewWorkflowModeAgenticReview)
+	workflowReviewConfig(t, store, workflowstate.ReviewAgentic)
 
 	run := workflowTestStart(t, store, request)
 

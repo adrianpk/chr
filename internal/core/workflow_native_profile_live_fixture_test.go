@@ -174,7 +174,7 @@ func (reader nativeLivePolicyReader) policy(profile nativeLiveProfile, method st
 		SourceRewriteAuthorized:       profile.Policy.Rewrite && profile.Policy.RewriteCondition == "Only the exact test-owned source ref at its expected prior SHA",
 		FastForwardTargetAuthorized:   profile.Policy.TargetPublication == "Explicitly authorized fast-forward Git publication",
 		HostCandidateReview:           profile.Policy.Review == "CHR-managed validation and review of the prepared candidate" && !profile.Policy.NativeApproval && !profile.Policy.NativeProtection && !profile.Policy.Signing,
-		ReviewMode:                    workflowstate.ReviewWorkflowModeHumanReview,
+		ReviewMode:                    workflowstate.ReviewHuman,
 		CredentialIdentityFingerprint: contenthash.Sum([]byte(identity)), ObservationContract: profile.Certification.Contract, CertifiedMethods: profile.Certification.Methods,
 	}, nil
 }

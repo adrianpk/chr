@@ -78,7 +78,7 @@ func (r telegramReceiver) prepareWorkAdmission(ctx context.Context, request tele
 }
 
 func (r telegramReceiver) previewWorkAdmission(ctx context.Context, operations telegramWorkService, request telegramcore.OperationRequest) (json.RawMessage, error) {
-	var selector workflowstate.WorkflowSelector
+	var selector workflowstate.Selector
 	if err := decodeOperationJSON(string(request.Arguments), &selector); err != nil {
 		return nil, err
 	}

@@ -21,24 +21,24 @@ const harnessExecutableLimit = 512 << 20
 
 // FreezeHarnessExecutable resolves a host-selected program once and binds its
 // regular executable file and argv. It never launches the executable.
-func FreezeHarnessExecutable(command []string) (harnesscore.HarnessExecutableRef, []string, error) {
+func FreezeHarnessExecutable(command []string) (harnesscore.ExecutableRef, []string, error) {
 	if err := workflowstate.ValidateCommand(command); err != nil {
-		return harnesscore.HarnessExecutableRef{}, nil, err
+		return harnesscore.ExecutableRef{}, nil, err
 	}
 
 	program, err := exec.LookPath(command[0])
 	if err != nil {
-		return harnesscore.HarnessExecutableRef{}, nil, errors.New("selected harness executable is unavailable")
+		return harnesscore.ExecutableRef{}, nil, errors.New("selected harness executable is unavailable")
 	}
 
 	program, err = filepath.Abs(program)
 	if err != nil {
-		return harnesscore.HarnessExecutableRef{}, nil, err
+		return harnesscore.ExecutableRef{}, nil, err
 	}
 
 	program, err = filepath.EvalSymlinks(program)
 	if err != nil {
-		return harnesscore.HarnessExecutableRef{}, nil, errors.New("selected harness executable cannot be resolved")
+		return harnesscore.ExecutableRef{}, nil, errors.New("selected harness executable cannot be resolved")
 	}
 
 	retained := slices.Clone(command)
@@ -46,12 +46,12 @@ func FreezeHarnessExecutable(command []string) (harnesscore.HarnessExecutableRef
 
 	hash, err := harnessExecutableHash(program)
 	if err != nil {
-		return harnesscore.HarnessExecutableRef{}, nil, err
+		return harnesscore.ExecutableRef{}, nil, err
 	}
 
 	data, err := json.Marshal(retained)
 
-	return harnesscore.HarnessExecutableRef{Hash: hash, CommandHash: contenthash.Sum(data)}, retained, err
+	return harnesscore.ExecutableRef{Hash: hash, CommandHash: contenthash.Sum(data)}, retained, err
 }
 
 func harnessExecutableHash(program string) (string, error) {
@@ -86,7 +86,7 @@ func openHarnessExecutable(program string) (*os.File, error) {
 	return os.OpenFile(program, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
 }
 
-func checkHarnessCommandImage(binding harnesscore.HarnessBinding, command []string) error {
+func checkHarnessCommandImage(binding harnesscore.Binding, command []string) error {
 	if err := workflowstate.ValidateCommand(command); err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func checkHarnessCommandImage(binding harnesscore.HarnessBinding, command []stri
 	return nil
 }
 
-func checkHarnessExecutable(binding *harnesscore.HarnessBinding, command []string) error {
+func checkHarnessExecutable(binding *harnesscore.Binding, command []string) error {
 	if binding == nil {
 		return nil
 	}

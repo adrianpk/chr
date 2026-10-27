@@ -17,7 +17,7 @@ func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.W
 	return resolved, nil
 }
 
-func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection workflowstate.WorkflowPreviewRequest) error {
+func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection workflowstate.PreviewRequest) error {
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (s service) checkGuidedWorker(ctx context.Context, config core.WorkspaceCon
 		return nil
 	}
 
-	selection, err := s.resolveHarnessSelection(ctx, config, harnesscore.HarnessWorker, "")
+	selection, err := s.resolveHarnessSelection(ctx, config, harnesscore.Worker, "")
 	if err != nil || !selection.View.Readiness.Ready() {
 		return &core.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
 	}

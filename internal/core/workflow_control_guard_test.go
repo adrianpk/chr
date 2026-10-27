@@ -67,7 +67,7 @@ func testWorkflowGuardedAdmission(t *testing.T, name string) {
 
 	store, hierarchy, request := workflowClaimFixture(t)
 	selected := hierarchy.Tasks[0]
-	request.Selected = &workflowstate.WorkflowSelectionGuard{Key: selected.Task.Key, Revision: selected.Revision}
+	request.Selected = &workflowstate.SelectionGuard{Key: selected.Task.Key, Revision: selected.Revision}
 
 	switch name {
 	case "revision":

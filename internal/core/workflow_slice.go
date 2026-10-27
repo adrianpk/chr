@@ -34,14 +34,14 @@ type WorkflowSliceInput struct {
 // WorkflowSliceCandidate retains immutable host evidence for a slice or an
 // independent ticket; the ticket field preserves its actual integration unit.
 type WorkflowSliceCandidate struct {
-	Schema       string                              `json:"schema"`
-	ID           string                              `json:"id"`
-	InvocationID string                              `json:"invocation_id"`
-	Slice        WorkflowSliceInput                  `json:"slice,omitzero"`
-	Ticket       *WorkflowSliceInput                 `json:"ticket,omitempty"`
-	Target       workflowstate.WorkflowPreviewTarget `json:"target"`
-	Lane         WorkflowLane                        `json:"lane"`
-	Result       WorkflowTaskResult                  `json:"result"`
+	Schema       string                      `json:"schema"`
+	ID           string                      `json:"id"`
+	InvocationID string                      `json:"invocation_id"`
+	Slice        WorkflowSliceInput          `json:"slice,omitzero"`
+	Ticket       *WorkflowSliceInput         `json:"ticket,omitempty"`
+	Target       workflowstate.PreviewTarget `json:"target"`
+	Lane         WorkflowLane                `json:"lane"`
+	Result       WorkflowTaskResult          `json:"result"`
 }
 
 // ExecuteWorkflowSlice runs remaining tasks on the retained lane and validates

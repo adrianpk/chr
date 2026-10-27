@@ -111,7 +111,7 @@ func workflowRetainedEntryRequest(request WorkflowStartRequest, run WorkflowInvo
 	return request
 }
 
-func workflowRequestedRetainedPolicy(requested, policy workflowstate.WorkflowExecutionPolicy, later *bool) workflowstate.WorkflowExecutionPolicy {
+func workflowRequestedRetainedPolicy(requested, policy workflowstate.ExecutionPolicy, later *bool) workflowstate.ExecutionPolicy {
 	for _, field := range []struct {
 		requested int
 		retained  *int

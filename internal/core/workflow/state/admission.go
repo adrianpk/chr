@@ -1,15 +1,15 @@
 package state
 
-// GuidedWorkflowAdmission records authority provenance without extending native policy.
-type GuidedWorkflowAdmission struct {
+// GuidedAdmission records authority provenance without extending native policy.
+type GuidedAdmission struct {
 	RunID, Actor, Policy, OperationDigest, CheckpointDigest, MaterializationID string
 }
 
-// ReviewWorkflowMode defines a package boundary type.
-type ReviewWorkflowMode string
+// ReviewMode defines a package boundary type.
+type ReviewMode string
 
-// TicketLoopFilters describes a package boundary value.
-type TicketLoopFilters struct {
+// TicketFilters describes a package boundary value.
+type TicketFilters struct {
 	Priorities   []string
 	Severities   []string
 	ProjectAreas []string
@@ -18,35 +18,35 @@ type TicketLoopFilters struct {
 	UseCases     []string
 }
 
-// TicketLoopOrder defines a package boundary type.
-type TicketLoopOrder string
+// TicketOrder defines a package boundary type.
+type TicketOrder string
 
 const (
-	// TicketLoopOrderKey defines a package boundary constant.
-	TicketLoopOrderKey TicketLoopOrder = "key"
-	// TicketLoopOrderCreatedAt defines a package boundary constant.
-	TicketLoopOrderCreatedAt TicketLoopOrder = "created_at"
-	// TicketLoopOrderPriority defines a package boundary constant.
-	TicketLoopOrderPriority TicketLoopOrder = "priority"
-	// TicketLoopOrderSeverity defines a package boundary constant.
-	TicketLoopOrderSeverity TicketLoopOrder = "severity"
-	// TicketLoopOrderPrioritySeverity defines a package boundary constant.
-	TicketLoopOrderPrioritySeverity TicketLoopOrder = "priority_severity"
+	// TicketOrderKey defines a package boundary constant.
+	TicketOrderKey TicketOrder = "key"
+	// TicketOrderCreatedAt defines a package boundary constant.
+	TicketOrderCreatedAt TicketOrder = "created_at"
+	// TicketOrderPriority defines a package boundary constant.
+	TicketOrderPriority TicketOrder = "priority"
+	// TicketOrderSeverity defines a package boundary constant.
+	TicketOrderSeverity TicketOrder = "severity"
+	// TicketOrderPrioritySeverity defines a package boundary constant.
+	TicketOrderPrioritySeverity TicketOrder = "priority_severity"
 )
 
-// WorkflowAdmissionGuard retains exactly what a caller displayed before admission.
+// AdmissionGuard retains exactly what a caller displayed before admission.
 // It is part of the request identity; replay observes the original invocation.
-type WorkflowAdmissionGuard struct {
-	Guided          *GuidedWorkflowAdmission `json:"guided,omitempty"`
-	ReadyTicket     *WorkflowTicketAdmission `json:"ready_ticket,omitempty"`
-	ExecutionPolicy WorkflowExecutionPolicy  `json:"execution_policy"`
-	SnapshotHash    string                   `json:"snapshot_hash"`
-	Selected        *WorkflowSelectionGuard  `json:"selected,omitempty"`
-	Policy          WorkflowReviewPolicy     `json:"publication_policy"`
+type AdmissionGuard struct {
+	Guided          *GuidedAdmission `json:"guided,omitempty"`
+	ReadyTicket     *TicketAdmission `json:"ready_ticket,omitempty"`
+	ExecutionPolicy ExecutionPolicy  `json:"execution_policy"`
+	SnapshotHash    string           `json:"snapshot_hash"`
+	Selected        *SelectionGuard  `json:"selected,omitempty"`
+	Policy          ReviewPolicy     `json:"publication_policy"`
 }
 
-// WorkflowExecutionPolicy freezes finite execution limits at admission.
-type WorkflowExecutionPolicy struct {
+// ExecutionPolicy freezes finite execution limits at admission.
+type ExecutionPolicy struct {
 	AgentTokenBudget         int64  `json:"agent_token_budget,omitempty"`
 	ConfigRevision           string `json:"config_revision,omitempty"`
 	ValidationTimeoutSeconds int    `json:"validation_timeout_seconds,omitempty"`
@@ -59,66 +59,66 @@ type WorkflowExecutionPolicy struct {
 	CheckpointStepLimit      int    `json:"checkpoint_step_limit,omitempty"`
 }
 
-// WorkflowSelector names an exact extent. Only loose work omits Identity.
-type WorkflowSelector struct {
+// Selector names an exact extent. Only loose work omits Identity.
+type Selector struct {
 	Extent   string
 	Identity string
 }
 
-// WorkflowPreviewRequest bounds a read-only selection of authoritative records.
-type WorkflowPreviewRequest struct {
-	Selector         WorkflowSelector
+// PreviewRequest bounds a read-only selection of authoritative records.
+type PreviewRequest struct {
+	Selector         Selector
 	Offset           int
 	Limit            int
 	SnapshotHash     string
-	Target           WorkflowPreviewTarget
+	Target           PreviewTarget
 	CumulativeBranch string
 	CumulativeCommit string
-	Filters          TicketLoopFilters
+	Filters          TicketFilters
 	Statuses         []string
-	Order            TicketLoopOrder
+	Order            TicketOrder
 	MinPriority      string
 	MinSeverity      string
 }
 
-// WorkflowPreviewTarget binds proof to an observed immutable canonical target.
-type WorkflowPreviewTarget struct {
+// PreviewTarget binds proof to an observed immutable canonical target.
+type PreviewTarget struct {
 	Repository string
 	Commit     string
 }
 
-// WorkflowReviewPolicy identifies the current effective publication policy.
-type WorkflowReviewPolicy struct {
-	Mode     ReviewWorkflowMode `json:"mode"`
-	Method   string             `json:"method"`
-	Source   string             `json:"source"`
-	Revision string             `json:"revision"`
+// ReviewPolicy identifies the current effective publication policy.
+type ReviewPolicy struct {
+	Mode     ReviewMode `json:"mode"`
+	Method   string     `json:"method"`
+	Source   string     `json:"source"`
+	Revision string     `json:"revision"`
 }
 
-// WorkflowSelectionGuard binds admission to the selected native ticket image.
+// SelectionGuard binds admission to the selected native ticket image.
 // It is admission input, not a retained credential or an execution override.
-type WorkflowSelectionGuard struct {
+type SelectionGuard struct {
 	Key      string
 	Revision uint64
 }
 
-// WorkflowTicketAdmission binds the explicit transition of one independent
+// TicketAdmission binds the explicit transition of one independent
 // backlog ticket to ready, together with its existing executable contract.
-type WorkflowTicketAdmission struct {
+type TicketAdmission struct {
 	Key          string     `json:"key"`
 	Revision     uint64     `json:"revision"`
 	ContractHash string     `json:"contract_hash"`
 	Validation   Validation `json:"validation"`
 }
 
-// ReviewWorkflowModeAgenticReview defines a package boundary constant.
-const ReviewWorkflowModeAgenticReview ReviewWorkflowMode = "agentic_review"
+// ReviewAgentic defines a package boundary constant.
+const ReviewAgentic ReviewMode = "agentic_review"
 
-// ReviewWorkflowModeHumanReview defines a package boundary constant.
-const ReviewWorkflowModeHumanReview ReviewWorkflowMode = "human_review"
+// ReviewHuman defines a package boundary constant.
+const ReviewHuman ReviewMode = "human_review"
 
-// ReviewWorkflowModeTrustedAutoMerge defines a package boundary constant.
-const ReviewWorkflowModeTrustedAutoMerge ReviewWorkflowMode = "trusted_auto_merge"
+// ReviewTrustedAutoMerge defines a package boundary constant.
+const ReviewTrustedAutoMerge ReviewMode = "trusted_auto_merge"
 
-// DefaultReviewWorkflowMode defines a package boundary constant.
-const DefaultReviewWorkflowMode = ReviewWorkflowModeHumanReview
+// DefaultReviewMode defines a package boundary constant.
+const DefaultReviewMode = ReviewHuman

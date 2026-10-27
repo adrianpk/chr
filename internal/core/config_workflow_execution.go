@@ -10,11 +10,11 @@ import (
 )
 
 type retainedExecutionPolicy struct {
-	Policy workflowstate.WorkflowExecutionPolicy
+	Policy workflowstate.ExecutionPolicy
 	Found  bool
 }
 
-func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key string, policy workflowstate.WorkflowExecutionPolicy, later *bool) (retainedExecutionPolicy, error) {
+func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key string, policy workflowstate.ExecutionPolicy, later *bool) (retainedExecutionPolicy, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
 		return retainedExecutionPolicy{Policy: policy}, err
@@ -39,7 +39,7 @@ func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key
 	return retainedExecutionPolicy{Policy: policy}, nil
 }
 
-func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key string, policy workflowstate.WorkflowExecutionPolicy, later *bool) (workflowstate.WorkflowExecutionPolicy, error) {
+func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key string, policy workflowstate.ExecutionPolicy, later *bool) (workflowstate.ExecutionPolicy, error) {
 	config, err := LoadWorkspaceConfig(s.layout.ProjectDir())
 	if err != nil {
 		return policy, err
@@ -58,14 +58,14 @@ func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key 
 
 // InspectWorkflowExecutionPolicy reads finite admission defaults without
 // allocating an invocation, refilling a budget or claiming a worker.
-func (s *WorkflowStore) InspectWorkflowExecutionPolicy(ctx context.Context) (policy workflowstate.WorkflowExecutionPolicy, err error) {
+func (s *WorkflowStore) InspectWorkflowExecutionPolicy(ctx context.Context) (policy workflowstate.ExecutionPolicy, err error) {
 	err = s.withWorkflowInspection(ctx, func() error {
 		config, readErr := LoadWorkspaceConfig(s.layout.ProjectDir())
 		if readErr != nil {
 			return readErr
 		}
 
-		policy, readErr = configuredWorkflowExecutionPolicy(config, workflowstate.WorkflowExecutionPolicy{}, nil)
+		policy, readErr = configuredWorkflowExecutionPolicy(config, workflowstate.ExecutionPolicy{}, nil)
 
 		return readErr
 	})
@@ -73,7 +73,7 @@ func (s *WorkflowStore) InspectWorkflowExecutionPolicy(ctx context.Context) (pol
 	return policy, err
 }
 
-func configuredWorkflowExecutionPolicy(config WorkspaceConfig, policy workflowstate.WorkflowExecutionPolicy, later *bool) (workflowstate.WorkflowExecutionPolicy, error) {
+func configuredWorkflowExecutionPolicy(config WorkspaceConfig, policy workflowstate.ExecutionPolicy, later *bool) (workflowstate.ExecutionPolicy, error) {
 	var err error
 
 	policy, err = applyWorkflowExecutionLimits(config, policy)
@@ -127,7 +127,7 @@ func (s *WorkflowStore) workflowClosingValidationTimeout(ctx context.Context, id
 	return workflowValidationTimeout(contract, seconds), nil
 }
 
-func applyWorkflowExecutionLimits(config WorkspaceConfig, policy workflowstate.WorkflowExecutionPolicy) (workflowstate.WorkflowExecutionPolicy, error) {
+func applyWorkflowExecutionLimits(config WorkspaceConfig, policy workflowstate.ExecutionPolicy) (workflowstate.ExecutionPolicy, error) {
 	integration := config.Work.MaxIntegrationAttempts
 	if config.Workflow.Version == 0 && !config.workflowExplicit["work.max_integration_attempts"] {
 		// Legacy zero already means the finite default. Retain that original

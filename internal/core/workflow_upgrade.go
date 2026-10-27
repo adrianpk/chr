@@ -13,11 +13,11 @@ import (
 // WorkflowUpgradeOptions explicitly selects a project policy and, optionally,
 // one approved legacy plan. Omitting ReviewMode preserves its effective policy.
 type WorkflowUpgradeOptions struct {
-	ExpectedRevision string                           `json:"expected_revision"`
-	StateAuthority   WorkStateAuthority               `json:"state_authority"`
-	ReviewMode       workflowstate.ReviewWorkflowMode `json:"review_mode,omitempty"`
-	Adoption         *WorkflowPlanAdoptionOptions     `json:"adoption,omitempty"`
-	CheckQuiescent   func(context.Context) error      `json:"-"`
+	ExpectedRevision string                       `json:"expected_revision"`
+	StateAuthority   WorkStateAuthority           `json:"state_authority"`
+	ReviewMode       workflowstate.ReviewMode     `json:"review_mode,omitempty"`
+	Adoption         *WorkflowPlanAdoptionOptions `json:"adoption,omitempty"`
+	CheckQuiescent   func(context.Context) error  `json:"-"`
 }
 
 // WorkflowUpgradeResult retains the policy observed before the version marker.

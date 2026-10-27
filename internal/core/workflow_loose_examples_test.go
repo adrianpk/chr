@@ -10,7 +10,7 @@ import (
 
 type workflowLooseExample struct {
 	name, area, priority, severity string
-	order                          workflowstate.TicketLoopOrder
+	order                          workflowstate.TicketOrder
 	filtered                       bool
 	expected                       []string
 }
@@ -19,10 +19,10 @@ type workflowLooseExample struct {
 // after real canonical delivery, using changed pending ranks rather than aliases.
 func TestWorkflowLooseExamples(t *testing.T) {
 	cases := []workflowLooseExample{
-		{"frontend severity filter", "frontend", "high", "low", workflowstate.TicketLoopOrderSeverity, true, []string{"PRJ-91"}},
-		{"persistence priority filter", "persistence", "critical", "high", workflowstate.TicketLoopOrderPriority, true, []string{"PRJ-91"}},
-		{"area priority", "frontend", "critical", "normal", workflowstate.TicketLoopOrderPriority, false, []string{"PRJ-92", "PRJ-91"}},
-		{"area severity", "frontend", "normal", "critical", workflowstate.TicketLoopOrderSeverity, false, []string{"PRJ-92", "PRJ-91"}},
+		{"frontend severity filter", "frontend", "high", "low", workflowstate.TicketOrderSeverity, true, []string{"PRJ-91"}},
+		{"persistence priority filter", "persistence", "critical", "high", workflowstate.TicketOrderPriority, true, []string{"PRJ-91"}},
+		{"area priority", "frontend", "critical", "normal", workflowstate.TicketOrderPriority, false, []string{"PRJ-92", "PRJ-91"}},
+		{"area severity", "frontend", "normal", "critical", workflowstate.TicketOrderSeverity, false, []string{"PRJ-92", "PRJ-91"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -46,9 +46,9 @@ func configureWorkflowLooseExample(t *testing.T, store *WorkflowStore, request *
 
 	request.Selection.Order = example.order
 
-	request.Selection.Filters = workflowstate.TicketLoopFilters{ProjectAreas: []string{example.area}, Types: []string{"task"}, Tags: []string{"delivery", "ui"}}
+	request.Selection.Filters = workflowstate.TicketFilters{ProjectAreas: []string{example.area}, Types: []string{"task"}, Tags: []string{"delivery", "ui"}}
 	if example.filtered {
-		if example.order == workflowstate.TicketLoopOrderSeverity {
+		if example.order == workflowstate.TicketOrderSeverity {
 			request.Selection.Filters.Severities = []string{"high"}
 		} else {
 			request.Selection.Filters.Priorities = []string{"high"}

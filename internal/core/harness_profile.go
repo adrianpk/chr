@@ -23,11 +23,11 @@ type HarnessSelectionConfig struct {
 }
 
 // Profile returns the selected reference for one recognized role.
-func (c HarnessSelectionConfig) Profile(role harnesscore.HarnessRole) (string, error) {
+func (c HarnessSelectionConfig) Profile(role harnesscore.Role) (string, error) {
 	switch role {
-	case harnesscore.HarnessWorker:
+	case harnesscore.Worker:
 		return c.Worker, nil
-	case harnesscore.HarnessGeneration:
+	case harnesscore.Generation:
 		return c.Generation, nil
 	default:
 		return "", errors.New("unsupported harness role")

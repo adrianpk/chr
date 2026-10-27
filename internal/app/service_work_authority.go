@@ -11,8 +11,8 @@ import (
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
-func nativeAgentWorkSelection(opts AgentWorkSelectionOptions) workflowstate.WorkflowPreviewRequest {
-	return workflowstate.WorkflowPreviewRequest{Selector: workflowstate.WorkflowSelector{Extent: "loose"}, Statuses: agentWorkStatuses(opts.Statuses), Filters: opts.Filters, Order: agentWorkOrder(opts.Order), Limit: workflowstate.PageLimit}
+func nativeAgentWorkSelection(opts AgentWorkSelectionOptions) workflowstate.PreviewRequest {
+	return workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Statuses: agentWorkStatuses(opts.Statuses), Filters: opts.Filters, Order: agentWorkOrder(opts.Order), Limit: workflowstate.PageLimit}
 }
 
 func legacyAgentWorkResult(result AgentWorkResult) AgentWorkResult {
@@ -32,18 +32,18 @@ func (s service) checkLegacyAgentWorkKey(key string) error {
 	return store.CheckLegacyWorkKey(s.ctx, key)
 }
 
-func (s service) nativeAgentWorkTarget(config core.WorkspaceConfig) (workflowstate.WorkflowPreviewTarget, error) {
+func (s service) nativeAgentWorkTarget(config core.WorkspaceConfig) (workflowstate.PreviewTarget, error) {
 	if config.Work.BranchPolicy.Mode != core.WorkBranchPolicyModeIntegrationBranch {
-		return workflowstate.WorkflowPreviewTarget{}, fmt.Errorf("ticket authority requires an explicit integration branch")
+		return workflowstate.PreviewTarget{}, fmt.Errorf("ticket authority requires an explicit integration branch")
 	}
 
 	repository, err := core.WorkflowEntryRepository(s.ctx, s.projectContext.ProjectDir, config.Work.BranchPolicy.CanonicalRemote)
 
-	return workflowstate.WorkflowPreviewTarget{Repository: repository}, err
+	return workflowstate.PreviewTarget{Repository: repository}, err
 }
 
-func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, identity workflowstate.WorkflowPreviewTarget) (workflowstate.WorkflowPreviewTarget, error) {
-	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.WorkflowPreviewRequest{Target: identity}}}
+func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
+	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
 
 	observer, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetGit)
 	if !ok {
@@ -53,7 +53,7 @@ func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, ident
 	return observer.ObserveWorkflowTarget(s.ctx, core.WorkflowTargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
 }
 
-func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection workflowstate.WorkflowPreviewRequest, restriction workflowstate.ReviewWorkflowMode, selected ...*workflowstate.WorkflowSelectionGuard) (core.WorkflowStartResult, error) {
+func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection workflowstate.PreviewRequest, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (core.WorkflowStartResult, error) {
 	target, err := s.nativeAgentWorkTarget(config)
 	if err != nil {
 		return core.WorkflowStartResult{}, err
@@ -109,7 +109,7 @@ func retainedNativeAgentWorkRequest(request core.WorkflowStartRequest, previous 
 	return request, nil
 }
 
-func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection workflowstate.WorkflowPreviewRequest, limit int, restriction workflowstate.ReviewWorkflowMode, selected ...*workflowstate.WorkflowSelectionGuard) (AgentWorkResult, error) {
+func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection workflowstate.PreviewRequest, limit int, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (AgentWorkResult, error) {
 	if limit < 0 || limit > workflowstate.PageLimit {
 		return AgentWorkResult{}, fmt.Errorf("ticket authority max-iterations must contain 0..128 checkpoint steps")
 	}

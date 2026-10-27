@@ -53,7 +53,7 @@ func TestNativeAgentCeiling(t *testing.T) {
 		t.Fatal("rejected grant mutated consumption", err)
 	}
 
-	if _, err := store.StartWorkflow(t.Context(), WorkflowStartRequest{RequestKey: request.RequestKey, Selection: request.Selection, Policy: workflowstate.WorkflowExecutionPolicy{AgentTokenBudget: 91}}); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := store.StartWorkflow(t.Context(), WorkflowStartRequest{RequestKey: request.RequestKey, Selection: request.Selection, Policy: workflowstate.ExecutionPolicy{AgentTokenBudget: 91}}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("entry retry replaced admission ceiling", err)
 	}
 }

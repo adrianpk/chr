@@ -8,7 +8,7 @@ import (
 )
 
 // WorkflowConfiguration reports current values and sources without state changes.
-func (s service) WorkflowConfiguration(ctx context.Context, restriction workflowstate.ReviewWorkflowMode) (core.WorkflowConfiguration, error) {
+func (s service) WorkflowConfiguration(ctx context.Context, restriction workflowstate.ReviewMode) (core.WorkflowConfiguration, error) {
 	if err := ctx.Err(); err != nil {
 		return core.WorkflowConfiguration{}, err
 	}

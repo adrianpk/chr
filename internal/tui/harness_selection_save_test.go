@@ -80,7 +80,7 @@ func TestTUIHarnessSelectionLayout(t *testing.T) {
 		t.Run(size.name, func(t *testing.T) {
 			executor := harnessSaveFixture()
 			executor.view.Profiles[1].Model = strings.Repeat("long-model", 12)
-			executor.view.Retained = []HarnessRetainedView{{ID: "original-worker", Status: "running", Binding: &harnesscore.HarnessBinding{Profile: "alpha", Harness: "codex", Model: "model-a"}}}
+			executor.view.Retained = []HarnessRetainedView{{ID: "original-worker", Status: "running", Binding: &harnesscore.Binding{Profile: "alpha", Harness: "codex", Model: "model-a"}}}
 			model := NewModel(Options{HarnessExecutor: executor})
 			model.width, model.height = size.width, size.height
 			model.harnessSelection = harnessSelectionState{Active: true, View: executor.view, Worker: "beta", Generation: "", Message: "Choices retained; reload before saving."}
