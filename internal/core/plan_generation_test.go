@@ -31,20 +31,20 @@ func TestArchiveGeneratedPlanCopiesCanonicalPlanWithArchiveMetadata(t *testing.T
 		t.Fatalf("WriteGeneratedPlan returned error: %v", err)
 	}
 
-	paths, archived, err := ArchiveGeneratedPlan(context.Background(), projectDir, scope, archivedAt)
+	archive, err := ArchiveGeneratedPlan(context.Background(), projectDir, scope, archivedAt)
 	if err != nil {
 		t.Fatalf("ArchiveGeneratedPlan returned error: %v", err)
 	}
 
-	if !archived {
+	if !archive.Found {
 		t.Fatal("archived = false, want true")
 	}
 
-	if paths.RelativePath != "ops/default/plan/00000-blog-plan-20260525-111213000000014/artifact.md" {
-		t.Fatalf("RelativePath = %q, want deterministic archive path", paths.RelativePath)
+	if archive.Paths.RelativePath != "ops/default/plan/00000-blog-plan-20260525-111213000000014/artifact.md" {
+		t.Fatalf("RelativePath = %q, want deterministic archive path", archive.Paths.RelativePath)
 	}
 
-	content, err := os.ReadFile(paths.Path)
+	content, err := os.ReadFile(archive.Paths.Path)
 	if err != nil {
 		t.Fatalf("ReadFile returned error: %v", err)
 	}
@@ -67,12 +67,12 @@ func TestArchiveGeneratedPlanReturnsFalseWhenCanonicalPlanIsMissing(t *testing.T
 	scope := quizcore.Scope{ProjectID: "project-1", CaseSlug: "blog"}
 	archivedAt := time.Date(2026, 5, 25, 11, 12, 13, 0, time.UTC)
 
-	_, archived, err := ArchiveGeneratedPlan(context.Background(), projectDir, scope, archivedAt)
+	archive, err := ArchiveGeneratedPlan(context.Background(), projectDir, scope, archivedAt)
 	if err != nil {
 		t.Fatalf("ArchiveGeneratedPlan returned error: %v", err)
 	}
 
-	if archived {
+	if archive.Found {
 		t.Fatal("archived = true, want false")
 	}
 

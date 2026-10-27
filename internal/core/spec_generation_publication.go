@@ -64,12 +64,12 @@ func publishSpecContent(ctx context.Context, projectDir string, paths GeneratedS
 		return err
 	}
 
-	document, action, err := prepareGeneratedSpecDocument(projectDir, paths, document, spec, content)
+	prepared, err := prepareGeneratedSpecDocument(projectDir, paths, document, spec, content)
 	if err != nil {
 		return err
 	}
 
-	changes, err := specDocumentChanges(document, SpecMutationRequest{Action: action, ProjectID: spec.Scope.ProjectID, CaseSlug: spec.Scope.CaseSlug, Title: spec.Title, Body: document.Body, Status: "draft"})
+	changes, err := specDocumentChanges(prepared.Document, SpecMutationRequest{Action: prepared.Action, ProjectID: spec.Scope.ProjectID, CaseSlug: spec.Scope.CaseSlug, Title: spec.Title, Body: prepared.Document.Body, Status: "draft"})
 	if err != nil {
 		return err
 	}
@@ -107,7 +107,12 @@ func mergeGeneratedSpecFields(front string, fields map[string]string) string {
 	return strings.Join(replaceProjectMetadataField(lines, "updated_at", time.Now().UTC().Format(time.RFC3339Nano)), "\n")
 }
 
-func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, document SpecDocument, spec GeneratedSpec, content string) (SpecDocument, string, error) {
+type generatedSpecPreparation struct {
+	Document SpecDocument
+	Action   string
+}
+
+func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, document SpecDocument, spec GeneratedSpec, content string) (generatedSpecPreparation, error) {
 	action := "save"
 	if document.metadata == nil {
 		action = "create"
@@ -115,7 +120,7 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 
 		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: parts[1]})
 		if err != nil {
-			return document, action, err
+			return generatedSpecPreparation{Document: document, Action: action}, err
 		}
 
 		document.metadata = opscore.NewArtifactMetadata(opscore.ArtifactOptions{Layout: layout, Type: "spec", Title: spec.Title, Producer: "chr"}, parts[3], spec.CreatedAt)
@@ -125,12 +130,12 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 	front, body := parsedMarkdown.Front, parsedMarkdown.Body
 
 	if err != nil {
-		return document, action, err
+		return generatedSpecPreparation{Document: document, Action: action}, err
 	}
 
 	fields, err := projectDocumentFields(front)
 	if err != nil {
-		return document, action, err
+		return generatedSpecPreparation{Document: document, Action: action}, err
 	}
 
 	document.front = mergeGeneratedSpecFields(document.front, fields)
@@ -138,7 +143,7 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 	document.provenance, document.heading = "", false
 	separateSpecProvenance(&document)
 
-	return document, action, nil
+	return generatedSpecPreparation{Document: document, Action: action}, nil
 }
 
 func validateSpecGenerationTarget(document SpecDocument, spec GeneratedSpec) error {

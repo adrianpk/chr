@@ -201,7 +201,7 @@ func (s *WorkflowStore) requiredOrderRepairImages(snapshot WorkflowSnapshot, sou
 		return nil, err
 	}
 
-	order, _, err := planOrderBytes(document)
+	orderImages, err := planOrderBytes(document)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func (s *WorkflowStore) requiredOrderRepairImages(snapshot WorkflowSnapshot, sou
 		return nil, err
 	}
 
-	images := []workflowOrderRepairImage{{binding.OrderRef, binding.OrderHash, order}, {binding.TrackerRef, binding.TrackerHash, output}, {filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "binding.json")), contenthash.Sum(encoded), encoded}}
+	images := []workflowOrderRepairImage{{binding.OrderRef, binding.OrderHash, orderImages.Order}, {binding.TrackerRef, binding.TrackerHash, output}, {filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "binding.json")), contenthash.Sum(encoded), encoded}}
 
 	return images, nil
 }

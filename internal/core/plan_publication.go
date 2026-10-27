@@ -138,7 +138,7 @@ func generatedPlanChanges(projectDir string, paths GeneratedPlanPaths, target pl
 
 	body := []byte(RenderGeneratedPlan(plan))
 
-	companions, err := preparePlanOrderChanges(projectDir, paths, target, metadata, plan, body)
+	companions, err := preparePlanOrderChanges(projectDir, target, planRevisionInput{Paths: paths, Metadata: metadata, Plan: plan, Body: body})
 	if err != nil {
 		return nil, err
 	}

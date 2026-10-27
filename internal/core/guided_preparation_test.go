@@ -82,12 +82,12 @@ func TestGuidedUseCasePreparationManualArchive(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	archive, found, err := ArchiveGeneratedPlan(t.Context(), root, scoped.Scope, time.Now().UTC())
-	if err != nil || !found {
+	archive, err := ArchiveGeneratedPlan(t.Context(), root, scoped.Scope, time.Now().UTC())
+	if err != nil || !archive.Found {
 		t.Fatal("scoped manual archive failed", err)
 	}
 
-	document, err := ReadPlanDocument(t.Context(), root, archive.RelativePath)
+	document, err := ReadPlanDocument(t.Context(), root, archive.Paths.RelativePath)
 	if err != nil || !strings.Contains(document.Body, scoped.Body) {
 		t.Fatal("scoped plan archived without its canonical envelope", err)
 	}

@@ -27,11 +27,12 @@ func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterialization
 		return nil, err
 	}
 
-	order, tracker, err := planOrderBytes(document)
+	images, err := planOrderBytes(document)
 	if err != nil {
 		return nil, err
 	}
 
+	order, tracker := images.Order, images.Tracker
 	binding.OrderHash, binding.TrackerHash = contenthash.Sum(order), contenthash.Sum(tracker)
 
 	changes, err := s.retainedBoundOrderChanges(previous, binding, order, tracker)

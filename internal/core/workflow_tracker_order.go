@@ -58,15 +58,15 @@ func (s *WorkflowStore) workflowOrderTrackerImage(snapshot WorkflowSnapshot, set
 		return result, nil, err
 	}
 
-	encoded, output, err := planOrderBytes(document)
+	images, err := planOrderBytes(document)
 	if err != nil {
 		return result, nil, err
 	}
 
-	result.SourceHash = contenthash.Sum(encoded)
+	result.SourceHash = contenthash.Sum(images.Order)
 	result.Sources = []WorkflowTrackerSource{{ID: set.ID, Path: set.Path, Hash: result.SourceHash}, {Path: set.Set.PlanRevision.BodyRef, Hash: set.Set.PlanRevision.BodyHash}}
 
-	return result, output, nil
+	return result, images.Tracker, nil
 }
 
 func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []WorkflowRecord) (generationcore.PlanOrderDocument, error) {

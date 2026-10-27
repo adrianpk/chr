@@ -75,20 +75,25 @@ func specReceiptChange(digest string, result SpecMutationResult) (workflowstate.
 	return workflowstate.FileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
 }
 
-func (r *fileAuthoringSessionRepository) specReceipt(operationID, digest string) (SpecMutationResult, bool, error) {
+type specReceiptLookup struct {
+	Result SpecMutationResult
+	Found  bool
+}
+
+func (r *fileAuthoringSessionRepository) specReceipt(operationID, digest string) (specReceiptLookup, error) {
 	var receipt specMutationReceipt
 
 	encoded, err := r.readAuthoringDocument(authoringReceiptRef(operationID))
 	if errors.Is(err, os.ErrNotExist) {
-		return receipt.Result, false, nil
+		return specReceiptLookup{Result: receipt.Result}, nil
 	}
 
 	if err != nil {
-		return receipt.Result, false, err
+		return specReceiptLookup{Result: receipt.Result}, err
 	}
 
 	if err := authoringstate.Decode(encoded, &receipt); err != nil {
-		return receipt.Result, false, err
+		return specReceiptLookup{Result: receipt.Result}, err
 	}
 
 	checksum := receipt.Checksum
@@ -96,14 +101,14 @@ func (r *fileAuthoringSessionRepository) specReceipt(operationID, digest string)
 
 	encoded, err = json.Marshal(receipt)
 	if err != nil {
-		return receipt.Result, false, err
+		return specReceiptLookup{Result: receipt.Result}, err
 	}
 
 	if receipt.Schema != "chr-spec-receipt/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || contenthash.Sum(encoded) != checksum {
-		return receipt.Result, false, workflowstate.ErrConflict
+		return specReceiptLookup{Result: receipt.Result}, workflowstate.ErrConflict
 	}
 
-	return receipt.Result, true, nil
+	return specReceiptLookup{Result: receipt.Result, Found: true}, nil
 }
 
 func specDocumentFront(document SpecDocument, request SpecMutationRequest, status, now string) ([]string, error) {

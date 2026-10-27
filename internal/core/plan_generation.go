@@ -33,6 +33,12 @@ type ArchivedPlanPaths struct {
 	Path         string
 }
 
+// ArchivedPlanLookup distinguishes a missing canonical plan from an archive.
+type ArchivedPlanLookup struct {
+	Paths ArchivedPlanPaths
+	Found bool
+}
+
 // GeneratedPlanLayout executes the corresponding package operation.
 func GeneratedPlanLayout(projectDir string, scope quizcore.Scope) (GeneratedPlanPaths, error) {
 	err := quizcore.ValidateScope(scope)
@@ -45,15 +51,15 @@ func GeneratedPlanLayout(projectDir string, scope quizcore.Scope) (GeneratedPlan
 		return GeneratedPlanPaths{}, err
 	}
 
-	relativePath, path, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan")
+	body, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan")
 	if err != nil {
 		return GeneratedPlanPaths{}, err
 	}
 
 	return GeneratedPlanPaths{
 		ScopeID:      scopeID,
-		RelativePath: relativePath,
-		Path:         path,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
 	}, nil
 }
 
@@ -76,15 +82,15 @@ func ArchivedPlanLayout(projectDir string, scope quizcore.Scope, archivedAt time
 	archivedAt = archivedAt.UTC()
 	timestamp := archivedAt.Format("20060102-150405") + fmt.Sprintf("%09d", archivedAt.Nanosecond())
 
-	relativePath, path, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan-"+timestamp)
+	body, err := scopedPlanArtifactBody(projectDir, scope.Namespace, scopeID+"-plan-"+timestamp)
 	if err != nil {
 		return ArchivedPlanPaths{}, err
 	}
 
 	return ArchivedPlanPaths{
 		ScopeID:      scopeID,
-		RelativePath: relativePath,
-		Path:         path,
+		RelativePath: body.RelativePath,
+		Path:         body.Path,
 	}, nil
 }
 
@@ -113,48 +119,48 @@ func writeGeneratedPlan(ctx context.Context, projectDir string, plan generationc
 }
 
 // ArchiveGeneratedPlan executes the corresponding package operation.
-func archiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore.Scope, archivedAt time.Time) (ArchivedPlanPaths, bool, error) {
+func archiveGeneratedPlan(ctx context.Context, projectDir string, scope quizcore.Scope, archivedAt time.Time) (ArchivedPlanLookup, error) {
 	err := ctx.Err()
 	if err != nil {
-		return ArchivedPlanPaths{}, false, err
+		return ArchivedPlanLookup{}, err
 	}
 
 	canonicalPaths, err := GeneratedPlanLayout(projectDir, scope)
 	if err != nil {
-		return ArchivedPlanPaths{}, false, err
+		return ArchivedPlanLookup{}, err
 	}
 
 	content, err := os.ReadFile(canonicalPaths.Path)
 	if errors.Is(err, os.ErrNotExist) {
-		return ArchivedPlanPaths{}, false, nil
+		return ArchivedPlanLookup{}, nil
 	}
 
 	if err != nil {
-		return ArchivedPlanPaths{}, false, fmt.Errorf("read generated plan before archive: %w", err)
+		return ArchivedPlanLookup{}, fmt.Errorf("read generated plan before archive: %w", err)
 	}
 
 	archivePaths, err := ArchivedPlanLayout(projectDir, scope, archivedAt)
 	if err != nil {
-		return ArchivedPlanPaths{}, false, err
+		return ArchivedPlanLookup{}, err
 	}
 
 	if err := opscore.EnsureArtifactBodyMetadata(projectDir, archivePaths.RelativePath); err != nil {
-		return ArchivedPlanPaths{}, false, err
+		return ArchivedPlanLookup{}, err
 	}
 
 	err = os.MkdirAll(filepath.Dir(archivePaths.Path), 0o755)
 	if err != nil {
-		return ArchivedPlanPaths{}, false, fmt.Errorf("create plan archive directory: %w", err)
+		return ArchivedPlanLookup{}, fmt.Errorf("create plan archive directory: %w", err)
 	}
 
 	archiveContent := RenderArchivedPlan(string(content), canonicalPaths.RelativePath, archivedAt)
 
 	err = os.WriteFile(archivePaths.Path, []byte(archiveContent), 0o644)
 	if err != nil {
-		return ArchivedPlanPaths{}, false, fmt.Errorf("write archived plan: %w", err)
+		return ArchivedPlanLookup{}, fmt.Errorf("write archived plan: %w", err)
 	}
 
-	return archivePaths, true, nil
+	return ArchivedPlanLookup{Paths: archivePaths, Found: true}, nil
 }
 
 // RenderArchivedPlan renders the corresponding package data.
@@ -203,25 +209,23 @@ func RenderGeneratedPlan(plan generationcore.GeneratedPlan) string {
 	return output.String()
 }
 
-func scopedPlanArtifactBody(projectDir, namespace, name string) (string, string, error) {
+func scopedPlanArtifactBody(projectDir, namespace, name string) (opscore.NamedArtifactPath, error) {
 	if namespace == "" {
-		body, err := opscore.NamedArtifactBody(projectDir, "plan", name)
-
-		return body.RelativePath, body.Path, err
+		return opscore.NamedArtifactBody(projectDir, "plan", name)
 	}
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir, Namespace: namespace})
 	if err != nil {
-		return "", "", err
+		return opscore.NamedArtifactPath{}, err
 	}
 
 	dir, err := layout.ArtifactDirectory("plan", "00000-"+opscore.ArtifactSlugOrDefault(name))
 	if err != nil {
-		return "", "", err
+		return opscore.NamedArtifactPath{}, err
 	}
 
 	path := filepath.Join(dir, opscore.ArtifactBodyFile())
 	relative, err := filepath.Rel(projectDir, path)
 
-	return filepath.ToSlash(relative), path, err
+	return opscore.NamedArtifactPath{RelativePath: filepath.ToSlash(relative), Path: path}, err
 }

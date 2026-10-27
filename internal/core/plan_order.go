@@ -11,12 +11,18 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func planOrderBytes(document generationcore.PlanOrderDocument) ([]byte, []byte, error) {
+// planOrderImages retains the exact order and tracker bytes hashed together.
+type planOrderImages struct {
+	Order   []byte
+	Tracker []byte
+}
+
+func planOrderBytes(document generationcore.PlanOrderDocument) (planOrderImages, error) {
 	document.Slices = generationcore.OrderedPlanSlices(document.Slices)
 
 	encoded, err := json.Marshal(document)
 	if err != nil {
-		return nil, nil, err
+		return planOrderImages{}, err
 	}
 
 	var output bytes.Buffer
@@ -48,8 +54,8 @@ func planOrderBytes(document generationcore.PlanOrderDocument) ([]byte, []byte, 
 	}
 
 	if len(encoded) > workflowstate.FileLimit || output.Len() > workflowstate.FileLimit {
-		return nil, nil, fmt.Errorf("order map exceeds 1 MiB")
+		return planOrderImages{}, fmt.Errorf("order map exceeds 1 MiB")
 	}
 
-	return encoded, output.Bytes(), nil
+	return planOrderImages{Order: encoded, Tracker: output.Bytes()}, nil
 }

@@ -53,10 +53,10 @@ func MutateSpec(ctx context.Context, projectDir string, request SpecMutationRequ
 	digest := contenthash.Sum(append([]byte(root+"\x00spec-write\x00"), encoded...))
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
-		var found bool
+		lookup, readErr := r.specReceipt(request.OperationID, digest)
+		result, err = lookup.Result, readErr
 
-		result, found, err = r.specReceipt(request.OperationID, digest)
-		if err != nil || found {
+		if err != nil || lookup.Found {
 			return err
 		}
 
