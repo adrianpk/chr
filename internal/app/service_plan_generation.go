@@ -10,7 +10,26 @@ import (
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
-func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error) {
+type planGenerationResult struct {
+	Plan        generationcore.GeneratedPlan
+	RequestIDs  []string
+	ResponseIDs []string
+}
+
+type planOutlineGenerationResult struct {
+	Outline     generationcore.GeneratedPlanOutline
+	SourcePaths []string
+	RequestIDs  []string
+	ResponseIDs []string
+}
+
+type planSliceDetailGenerationResult struct {
+	Detail     generationcore.GeneratedPlanSliceDetail
+	RequestID  string
+	ResponseID string
+}
+
+func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planGenerationResult, error) {
 	if s.singlePassPlan(ctx) {
 		return s.generateSinglePassPlan(ctx, scope, state, sources)
 	}
@@ -18,10 +37,10 @@ func (s service) generatePlanWithConfiguredBackend(ctx context.Context, scope qu
 	return s.generateStagedPlan(ctx, scope, state, sources)
 }
 
-func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error) {
+func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planGenerationResult, error) {
 	modelRequest, err := s.newPlanGenerationModelRequest(state, sources)
 	if err != nil {
-		return generationcore.GeneratedPlan{}, nil, nil, err
+		return planGenerationResult{}, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_single_pass_started", map[string]string{
@@ -32,7 +51,7 @@ func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scop
 
 	response, err := quizmodel.Invoke(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return generationcore.GeneratedPlan{}, nil, nil, err
+		return planGenerationResult{}, err
 	}
 
 	plan := response.Plan
@@ -47,30 +66,33 @@ func (s service) generateSinglePassPlan(ctx context.Context, scope quizcore.Scop
 		"title":       plan.Title,
 	})
 
-	return plan, []string{modelRequest.ID}, []string{response.ID}, nil
+	return planGenerationResult{Plan: plan, RequestIDs: []string{modelRequest.ID}, ResponseIDs: []string{response.ID}}, nil
 }
 
-func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error) {
-	outline, sourcePaths, requestIDs, responseIDs, err := s.generatePlanOutline(ctx, scope, state, sources)
+func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planGenerationResult, error) {
+	generatedOutline, err := s.generatePlanOutline(ctx, scope, state, sources)
 	if err != nil {
-		return generationcore.GeneratedPlan{}, nil, nil, err
+		return planGenerationResult{}, err
 	}
+
+	outline := generatedOutline.Outline
+	requestIDs, responseIDs := generatedOutline.RequestIDs, generatedOutline.ResponseIDs
 
 	details := make([]generationcore.GeneratedPlanSliceDetail, 0, len(outline.Slices))
 	for _, slice := range outline.Slices {
-		detail, requestID, responseID, err := s.generatePlanSliceDetail(ctx, state, sources, outline, slice.ID)
+		generatedDetail, err := s.generatePlanSliceDetail(ctx, state, sources, outline, slice.ID)
 		if err != nil {
-			return generationcore.GeneratedPlan{}, nil, nil, err
+			return planGenerationResult{}, err
 		}
 
-		details = append(details, detail)
-		requestIDs = append(requestIDs, requestID)
-		responseIDs = append(responseIDs, responseID)
+		details = append(details, generatedDetail.Detail)
+		requestIDs = append(requestIDs, generatedDetail.RequestID)
+		responseIDs = append(responseIDs, generatedDetail.ResponseID)
 	}
 
 	body, err := core.AssembleGeneratedPlanBody(outline, details, requestIDs, responseIDs)
 	if err != nil {
-		return generationcore.GeneratedPlan{}, nil, nil, err
+		return planGenerationResult{}, err
 	}
 
 	plan := generationcore.GeneratedPlan{
@@ -78,17 +100,17 @@ func (s service) generateStagedPlan(ctx context.Context, scope quizcore.Scope, s
 		Title:       outline.Title,
 		Body:        body,
 		Order:       core.PlannedOrderFromDetails(details),
-		SourcePaths: sourcePaths,
+		SourcePaths: generatedOutline.SourcePaths,
 		CreatedAt:   outline.CreatedAt.UTC(),
 	}
 
-	return plan, requestIDs, responseIDs, nil
+	return planGenerationResult{Plan: plan, RequestIDs: requestIDs, ResponseIDs: responseIDs}, nil
 }
 
-func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlanOutline, []string, []string, []string, error) {
+func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (planOutlineGenerationResult, error) {
 	modelRequest, err := s.newPlanOutlineGenerationModelRequest(state, sources)
 	if err != nil {
-		return generationcore.GeneratedPlanOutline{}, nil, nil, nil, err
+		return planOutlineGenerationResult{}, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_outline_started", map[string]string{
@@ -99,7 +121,7 @@ func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, 
 
 	response, err := quizmodel.Invoke(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return generationcore.GeneratedPlanOutline{}, nil, nil, nil, err
+		return planOutlineGenerationResult{}, err
 	}
 
 	outline := response.PlanOutline
@@ -114,17 +136,16 @@ func (s service) generatePlanOutline(ctx context.Context, scope quizcore.Scope, 
 		"slices":      fmt.Sprintf("%d", len(outline.Slices)),
 	})
 
-	return outline,
-		specSourcePaths(modelRequest.ContextSections),
-		[]string{modelRequest.ID},
-		[]string{response.ID},
-		nil
+	return planOutlineGenerationResult{
+		Outline: outline, SourcePaths: specSourcePaths(modelRequest.ContextSections),
+		RequestIDs: []string{modelRequest.ID}, ResponseIDs: []string{response.ID},
+	}, nil
 }
 
-func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (generationcore.GeneratedPlanSliceDetail, string, string, error) {
+func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (planSliceDetailGenerationResult, error) {
 	modelRequest, err := s.newPlanSliceDetailGenerationModelRequest(state, sources, outline, targetSliceID)
 	if err != nil {
-		return generationcore.GeneratedPlanSliceDetail{}, "", "", err
+		return planSliceDetailGenerationResult{}, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_slice_detail_started", map[string]string{
@@ -135,7 +156,7 @@ func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.Run
 
 	response, err := quizmodel.Invoke(ctx, s.quizModel, modelRequest)
 	if err != nil {
-		return generationcore.GeneratedPlanSliceDetail{}, "", "", err
+		return planSliceDetailGenerationResult{}, err
 	}
 
 	detail := response.SliceDetail
@@ -143,7 +164,7 @@ func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.Run
 	detail.CreatedAt = response.CreatedAt.UTC()
 
 	if err := generationcore.ValidateGeneratedPlanSliceDetailAgainstOutline(detail, outline, targetSliceID); err != nil {
-		return generationcore.GeneratedPlanSliceDetail{}, "", "", err
+		return planSliceDetailGenerationResult{}, err
 	}
 
 	s.appendPlanGenerationLog("generate_plan_slice_detail_finished", map[string]string{
@@ -153,5 +174,5 @@ func (s service) generatePlanSliceDetail(ctx context.Context, state quizcore.Run
 		"slice_id":    targetSliceID,
 	})
 
-	return detail, modelRequest.ID, response.ID, nil
+	return planSliceDetailGenerationResult{Detail: detail, RequestID: modelRequest.ID, ResponseID: response.ID}, nil
 }

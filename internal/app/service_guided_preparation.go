@@ -103,12 +103,13 @@ func (s service) generateGuidedPlan(ctx context.Context, session core.AuthoringS
 		return core.GuidedPreparedPlan{}, err
 	}
 
-	plan, requests, responses, err := bound.generatePlanWithConfiguredBackend(ctx, sources.Scope, state, sources)
+	generated, err := bound.generatePlanWithConfiguredBackend(ctx, sources.Scope, state, sources)
 	if err != nil {
 		return core.GuidedPreparedPlan{}, err
 	}
 
-	plan.SourceRequestID, plan.SourceResponseID = strings.Join(requests, ","), strings.Join(responses, ",")
+	plan := generated.Plan
+	plan.SourceRequestID, plan.SourceResponseID = strings.Join(generated.RequestIDs, ","), strings.Join(generated.ResponseIDs, ",")
 	plan.Order = core.ScopePlanDeliveryOrder(plan.Order, session.Guided.Work.PublicationOperation)
 
 	plan.RequireOrderMap = true

@@ -38,14 +38,16 @@ func (s service) MaterializePlanTracking(ctx context.Context, request PlanTracki
 
 	scope := s.quizScope(request.Scope)
 
-	plan, exists, err := s.existingGeneratedPlan(scope)
+	existing, err := s.existingGeneratedPlan(scope)
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}
 
-	if !exists {
+	if !existing.Exists {
 		return PlanTrackingResult{}, fmt.Errorf("plan is required before tracking can be created")
 	}
+
+	plan := existing.Plan
 
 	binding, err := core.ObservePlanRevision(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {

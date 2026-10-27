@@ -56,15 +56,15 @@ func (p webViewProvider) observeCasePlan(ctx context.Context, operations service
 		return err
 	}
 
-	plan, exists, err := operations.existingGeneratedPlan(scope)
+	existing, err := operations.existingGeneratedPlan(scope)
 	if err != nil {
 		return err
 	}
 
 	view.Revision = revision
-	if exists {
+	if existing.Exists {
 		view.Action, view.Label = webActionPlanRegenerate, "Regenerate Plan"
-		view.PlanURL = "/plans/detail?id=" + url.QueryEscape(plan.RelativePath)
+		view.PlanURL = "/plans/detail?id=" + url.QueryEscape(existing.Plan.RelativePath)
 	}
 
 	return nil

@@ -65,8 +65,8 @@ func TestServicePlanRequiresOrder(t *testing.T) {
 		t.Fatal("body-only generation succeeded", err)
 	}
 
-	if _, exists, err := operations.existingGeneratedPlan(operations.quizScope(quizcore.Scope{CaseSlug: "blog"})); err != nil || exists {
-		t.Fatal("invalid output was published", exists, err)
+	if existing, err := operations.existingGeneratedPlan(operations.quizScope(quizcore.Scope{CaseSlug: "blog"})); err != nil || existing.Exists {
+		t.Fatal("invalid output was published", existing.Exists, err)
 	}
 }
 

@@ -12,6 +12,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type planGenerationInputs struct {
+	Sources        core.PlanSourceObservation
+	State          quizcore.RuntimeState
+	TargetRevision string
+}
+
 func (s service) prepareAndPublishPlan(ctx context.Context, operation generationcore.PlanPublicationOperation) (PlanOperationResult, error) {
 	bound, ctx, err := s.bindGeneration(ctx, "plan-"+dumpRequestID(operation.ID), string(quizmodel.ActionGeneratePlan))
 	if err != nil {
@@ -22,18 +28,21 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation generation
 	scope, expected, replace := operation.Scope, operation.ExpectedRevision, operation.Replace
 	s.appendPlanGenerationLog("generate_plan_started", map[string]string{"case_slug": scope.CaseSlug, "timeout": longGenerationTimeout.String()})
 
-	sources, state, target, err := s.preparePlanGeneration(ctx, scope, expected)
+	inputs, err := s.preparePlanGeneration(ctx, scope, expected)
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
 
-	plan, requests, responses, err := s.generatePlanWithConfiguredBackend(ctx, scope, state, sources)
+	sources := inputs.Sources
+
+	generated, err := s.generatePlanWithConfiguredBackend(ctx, scope, inputs.State, sources)
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
 
-	plan.SourceRequestID, plan.SourceResponseID = strings.Join(requests, ","), strings.Join(responses, ",")
-	plan.ExpectedRevision, plan.SourceObservationHash = target, sources.Hash
+	plan := generated.Plan
+	plan.SourceRequestID, plan.SourceResponseID = strings.Join(generated.RequestIDs, ","), strings.Join(generated.ResponseIDs, ",")
+	plan.ExpectedRevision, plan.SourceObservationHash = inputs.TargetRevision, sources.Hash
 
 	plan.RequireOrderMap = true
 	plan.Order = core.ScopePlanDeliveryOrder(plan.Order, operation)
@@ -71,7 +80,7 @@ func (s service) prepareAndPublishPlan(ctx context.Context, operation generation
 	return PlanOperationResult{Message: message, Plan: s.planViewFromPath(scope, paths.RelativePath, paths.Path)}, nil
 }
 
-func (s service) preparePlanGeneration(ctx context.Context, scope quizcore.Scope, expected string) (core.PlanSourceObservation, quizcore.RuntimeState, string, error) {
+func (s service) preparePlanGeneration(ctx context.Context, scope quizcore.Scope, expected string) (planGenerationInputs, error) {
 	var (
 		sources core.PlanSourceObservation
 		state   quizcore.RuntimeState
@@ -79,25 +88,25 @@ func (s service) preparePlanGeneration(ctx context.Context, scope quizcore.Scope
 
 	target, err := core.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)
 	if err != nil {
-		return sources, state, target, err
+		return planGenerationInputs{Sources: sources, State: state, TargetRevision: target}, err
 	}
 
 	if expected != "" && expected != target {
-		return sources, state, target, workflowstate.ErrConflict
+		return planGenerationInputs{Sources: sources, State: state, TargetRevision: target}, workflowstate.ErrConflict
 	}
 
 	sources, err = s.observePlanContext(ctx, scope)
 	if err != nil {
-		return sources, state, target, err
+		return planGenerationInputs{Sources: sources, State: state, TargetRevision: target}, err
 	}
 
 	if _, err := s.assessPlanReadiness(ctx, sources); err != nil {
-		return sources, state, target, err
+		return planGenerationInputs{Sources: sources, State: state, TargetRevision: target}, err
 	}
 
 	state, err = s.planObservedRuntimeState(sources)
 
-	return sources, state, target, err
+	return planGenerationInputs{Sources: sources, State: state, TargetRevision: target}, err
 }
 
 func (s service) planObservedRuntimeState(sources core.PlanSourceObservation) (quizcore.RuntimeState, error) {

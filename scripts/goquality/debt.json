@@ -107,41 +107,6 @@
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/service_plan.go::service.existingGeneratedPlan",
-      "signature": "func(scope quizcore.Scope) (PlanView, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_plan_publication.go::service.preparePlanGeneration",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, expected string) (core.PlanSourceObservation, quizcore.RuntimeState, string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_plan_generation.go::service.generatePlanWithConfiguredBackend",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_plan_generation.go::service.generateSinglePassPlan",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_plan_generation.go::service.generateStagedPlan",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlan, []string, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_plan_generation.go::service.generatePlanOutline",
-      "signature": "func(ctx context.Context, scope quizcore.Scope, state quizcore.RuntimeState, sources core.PlanSourceObservation) (generationcore.GeneratedPlanOutline, []string, []string, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_plan_generation.go::service.generatePlanSliceDetail",
-      "signature": "func(ctx context.Context, state quizcore.RuntimeState, sources core.PlanSourceObservation, outline generationcore.GeneratedPlanOutline, targetSliceID string) (generationcore.GeneratedPlanSliceDetail, string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/service_plan_delivery.go::service.planDeliveryInput",
       "signature": "func(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (generationcore.GeneratedWorkflowPlan, opscore.Layout, error)",
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 qualifies the same layout type through its shared ops owner; no allowance growth."

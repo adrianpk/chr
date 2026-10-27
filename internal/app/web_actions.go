@@ -208,12 +208,12 @@ func (p webViewProvider) writePlanRegenerate(ctx context.Context, operations ser
 		return webValidationWrite(err), nil
 	}
 
-	_, exists, err := operations.existingGeneratedPlan(operations.quizScope(scope))
+	existing, err := operations.existingGeneratedPlan(operations.quizScope(scope))
 	if err != nil {
 		return webPlanWriteFailure(err, request.ID), nil
 	}
 
-	if !exists {
+	if !existing.Exists {
 		return webBlockedWrite("No current plan exists. Reload this case and use Generate Plan."), nil
 	}
 

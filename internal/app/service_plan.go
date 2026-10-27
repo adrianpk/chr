@@ -35,6 +35,11 @@ type PlanOperationResult struct {
 	Plan     PlanView
 }
 
+type existingPlanResult struct {
+	Plan   PlanView
+	Exists bool
+}
+
 //nolint:wsl_v5 // Guard clauses read clearer in this service flow.
 func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) (PlanOperationResult, error) {
 	scope := s.quizScope(request.Scope)
@@ -42,16 +47,16 @@ func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) 
 	if result, found, err := s.replayPlanPublication(ctx, operation); found || err != nil {
 		return result, err
 	}
-	existing, exists, err := s.existingGeneratedPlan(scope)
+	existing, err := s.existingGeneratedPlan(scope)
 	if err != nil {
 		return PlanOperationResult{}, err
 	}
 
-	if exists {
+	if existing.Exists {
 		return PlanOperationResult{
 			Existing: true,
 			Message:  "Plan already exists. Use regenerate plan to replace it.",
-			Plan:     existing,
+			Plan:     existing.Plan,
 		}, nil
 	}
 
@@ -68,22 +73,22 @@ func (s service) GeneratePlan(ctx context.Context, request PlanGenerateRequest) 
 	return result, err
 }
 
-func (s service) existingGeneratedPlan(scope quizcore.Scope) (PlanView, bool, error) {
+func (s service) existingGeneratedPlan(scope quizcore.Scope) (existingPlanResult, error) {
 	paths, err := core.GeneratedPlanLayout(s.projectContext.ProjectDir, scope)
 	if err != nil {
-		return PlanView{}, false, err
+		return existingPlanResult{}, err
 	}
 
 	_, err = os.Stat(paths.Path)
 	if errors.Is(err, os.ErrNotExist) {
-		return PlanView{}, false, nil
+		return existingPlanResult{}, nil
 	}
 
 	if err != nil {
-		return PlanView{}, false, fmt.Errorf("stat generated plan: %w", err)
+		return existingPlanResult{}, fmt.Errorf("stat generated plan: %w", err)
 	}
 
-	return s.planViewFromPath(scope, paths.RelativePath, paths.Path), true, nil
+	return existingPlanResult{Plan: s.planViewFromPath(scope, paths.RelativePath, paths.Path), Exists: true}, nil
 }
 
 //nolint:wsl_v5 // Keeps result capture adjacent to the guarded runtime call.
