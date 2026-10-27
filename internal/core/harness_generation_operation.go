@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -77,7 +78,7 @@ func FreezeHarnessGeneration(ctx context.Context, project, id, purpose string, r
 		return retained, validateGenerationOperation(retained)
 	}
 
-	if !validGenerationOperationIdentity(id) || !validGenerationOperationIdentity(purpose) {
+	if !authoringstate.ValidOperationIdentity(id) || !authoringstate.ValidOperationIdentity(purpose) {
 		return operation, errors.New("generation requires bounded operation and purpose identities")
 	}
 
@@ -178,10 +179,6 @@ func generationOperationLocation(root string, locations []HarnessGenerationLocat
 	location.ExecutionDir, err = filepath.Abs(location.ExecutionDir)
 
 	return location, err
-}
-
-func validGenerationOperationIdentity(value string) bool {
-	return strings.TrimSpace(value) != "" && len(value) <= 256 && !strings.ContainsAny(value, "\x00\r\n")
 }
 
 func validateGenerationOperation(operation HarnessGenerationOperation) error {

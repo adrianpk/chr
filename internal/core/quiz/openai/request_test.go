@@ -2,12 +2,11 @@ package openai
 
 import (
 	"encoding/json"
+	"testing"
+	"time"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
-	"testing"
-	"time"
 )
 
 func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *testing.T) {
@@ -19,7 +18,7 @@ func TestOpenAIQuizModelRequestBodySerializesContextualNextQuestionPayload(t *te
 		Content:   "Detailed project dump that should guide next-question generation.",
 	})
 
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	body, err := (Adapter{APIKey: "test-key", Model: "test-model"}).requestBody(request)
 	if err != nil {
 		t.Fatalf("openAIRequestBody returned error: %v", err)
 	}
@@ -67,7 +66,7 @@ func TestOpenAIQuizModelRequestBodySerializesDraftSpecContextSections(t *testing
 		Metadata:  map[string]string{"source": "dump"},
 	})
 
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	body, err := (Adapter{APIKey: "test-key", Model: "test-model"}).requestBody(request)
 	if err != nil {
 		t.Fatalf("openAIRequestBody returned error: %v", err)
 	}
@@ -99,7 +98,7 @@ func TestOpenAIQuizModelRequestBodySerializesGeneratedSpecSchemaWithoutFeature(t
 	request.Payload.OutputContract = quizmodel.NewOutputContract(quizmodel.ActionGenerateSpec, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	body, err := (Adapter{APIKey: "test-key", Model: "test-model"}).requestBody(request)
 	if err != nil {
 		t.Fatalf("openAIRequestBody returned error: %v", err)
 	}
@@ -127,7 +126,7 @@ func TestOpenAIQuizModelRequestBodySerializesPlanOutlineContract(t *testing.T) {
 	request.Payload.OutputContract = quizmodel.NewOutputContract(quizmodel.ActionGeneratePlanOutline, request.Mode)
 	request.OutputContract.RequiredFields = request.Payload.OutputContract.RequiredFields
 
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	body, err := (Adapter{APIKey: "test-key", Model: "test-model"}).requestBody(request)
 	if err != nil {
 		t.Fatalf("openAIRequestBody returned error: %v", err)
 	}
@@ -164,7 +163,7 @@ func TestOpenAIQuizModelRequestBodySerializesPlanSliceDetailContract(t *testing.
 		Content:   "Outline context.",
 	})
 
-	body, err := (OpenAIQuizModelAdapter{APIKey: "test-key", Model: "test-model"}).openAIRequestBody(request)
+	body, err := (Adapter{APIKey: "test-key", Model: "test-model"}).requestBody(request)
 	if err != nil {
 		t.Fatalf("openAIRequestBody returned error: %v", err)
 	}
@@ -194,31 +193,31 @@ func TestOpenAIQuizModelRequestBodySerializesPlanSliceDetailContract(t *testing.
 }
 
 func TestOpenAIQuizModelTimeoutUsesLongerTimeoutForGeneration(t *testing.T) {
-	if got := openAIQuizModelTimeout(quizmodel.ActionNextQuestion); got != 60*time.Second {
+	if got := timeout(quizmodel.ActionNextQuestion); got != 60*time.Second {
 		t.Fatalf("next question timeout = %s, want 60s", got)
 	}
 
-	if got := openAIQuizModelTimeout(quizmodel.ActionGenerateSpec); got != 5*time.Minute {
+	if got := timeout(quizmodel.ActionGenerateSpec); got != 5*time.Minute {
 		t.Fatalf("spec generation timeout = %s, want 5m", got)
 	}
 
-	if got := openAIQuizModelTimeout(quizmodel.ActionGeneratePlan); got != 5*time.Minute {
+	if got := timeout(quizmodel.ActionGeneratePlan); got != 5*time.Minute {
 		t.Fatalf("plan generation timeout = %s, want 5m", got)
 	}
 
-	if got := openAIQuizModelTimeout(quizmodel.ActionGeneratePlanOutline); got != 5*time.Minute {
+	if got := timeout(quizmodel.ActionGeneratePlanOutline); got != 5*time.Minute {
 		t.Fatalf("plan outline generation timeout = %s, want 5m", got)
 	}
 
-	if got := openAIQuizModelTimeout(quizmodel.ActionGeneratePlanSliceDetail); got != 5*time.Minute {
+	if got := timeout(quizmodel.ActionGeneratePlanSliceDetail); got != 5*time.Minute {
 		t.Fatalf("plan slice detail generation timeout = %s, want 5m", got)
 	}
 }
 
-func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (openAIResponsesRequest, map[string]any) {
+func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (responsesRequest, map[string]any) {
 	t.Helper()
 
-	var envelope openAIResponsesRequest
+	var envelope responsesRequest
 
 	err := json.Unmarshal(body, &envelope)
 	if err != nil {
@@ -283,6 +282,7 @@ func validQuizModelRequest() quizmodel.Request {
 		CreatedAt: quizRuntimeTestTime(),
 	}
 }
+
 func containsAnyString(values []any, want string) bool {
 	for _, value := range values {
 		if value == want {
@@ -292,6 +292,7 @@ func containsAnyString(values []any, want string) bool {
 
 	return false
 }
+
 func validQuizRuntimeState() quizcore.RuntimeState {
 	now := quizRuntimeTestTime()
 	question := validQuizQuestion()
@@ -331,9 +332,11 @@ func validQuizRuntimeState() quizcore.RuntimeState {
 		UpdatedAt:   now,
 	}
 }
+
 func quizRuntimeTestTime() time.Time {
 	return time.Date(2026, 5, 24, 15, 0, 0, 0, time.UTC)
 }
+
 func validQuizQuestion() quizcore.Question {
 	now := quizRuntimeTestTime()
 
@@ -348,6 +351,7 @@ func validQuizQuestion() quizcore.Question {
 		CreatedAt: now,
 	}
 }
+
 func validQuizCandidate() quizcore.Candidate {
 	now := quizRuntimeTestTime()
 

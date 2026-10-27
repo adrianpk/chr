@@ -32,7 +32,7 @@ func TestGuidedUseCaseQuizSufficiency(t *testing.T) {
 				state.SessionID = "other"
 			}
 
-			err := guardGuidedQuizCompletion(session, QuizObservation{State: state, Revision: "revision"})
+			err := guardGuidedQuizCompletion(session, quizcore.Observation{State: state, Revision: "revision"})
 			if (err == nil) != (variant == "complete" || variant == "complete-with-skip") {
 				t.Fatalf("unexpected sufficiency: %v", err)
 			}
@@ -115,7 +115,7 @@ func TestGuidedUseCaseQuizCheckpoint(t *testing.T) {
 	}
 }
 
-func completedGuidedQuizFixture(t *testing.T, root string, scope quizcore.Scope) (QuizArtifactPaths, QuizActionResult) {
+func completedGuidedQuizFixture(t *testing.T, root string, scope quizcore.Scope) (QuizArtifactPaths, quizcore.ActionResult) {
 	t.Helper()
 
 	repo := NewQuizArtifactRepository(root)
@@ -130,9 +130,9 @@ func completedGuidedQuizFixture(t *testing.T, root string, scope quizcore.Scope)
 		t.Fatal(err)
 	}
 
-	start := QuizActionRequest{Scope: scope, Action: "start", Binding: QuizActionBinding{OperationID: "quiz-start", ExpectedRevision: observed.Revision}}
+	start := quizcore.ActionRequest{Scope: scope, Action: "start", Binding: quizcore.ActionBinding{OperationID: "quiz-start", ExpectedRevision: observed.Revision}}
 
-	_, err = repo.ApplyAction(t.Context(), start, func(ctx context.Context, before QuizObservation) (QuizTransition, error) {
+	_, err = repo.ApplyAction(t.Context(), start, func(ctx context.Context, before quizcore.Observation) (quizcore.Transition, error) {
 		next, err := startQuizActionFixture(ctx, before)
 		next.State.ProjectID, next.State.CaseSlug = scope.ProjectID, scope.CaseSlug
 		next.State.RawPath, next.State.CuratedPath = paths.RawRelativePath, paths.CuratedRelativePath
@@ -151,7 +151,7 @@ func completedGuidedQuizFixture(t *testing.T, root string, scope quizcore.Scope)
 	answer := quizAnswerActionFixture(observed)
 	answer.Scope = scope
 
-	result, err := repo.ApplyAction(t.Context(), answer, func(ctx context.Context, before QuizObservation) (QuizTransition, error) {
+	result, err := repo.ApplyAction(t.Context(), answer, func(ctx context.Context, before quizcore.Observation) (quizcore.Transition, error) {
 		next, err := answerQuizActionFixture(ctx, before)
 		next.State.Status, next.State.ClarificationComplete = quizcore.RuntimeStatusDone, true
 		next.State.Candidates = nil

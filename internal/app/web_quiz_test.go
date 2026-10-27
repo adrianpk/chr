@@ -246,7 +246,7 @@ func TestWebQuizStartResume(t *testing.T) {
 // The final observation supplies mode/status, and draft context distinguishes
 // byte-identical scope/session records in different project roots.
 func TestWebQuizObservationProjection(t *testing.T) {
-	view := webQuizAnswerView(QuizView{Mode: quizcore.ModeDeep, Status: "idle"}, core.QuizObservation{Exists: true, State: quizcore.RuntimeState{Mode: quizcore.ModeFast, Status: quizcore.RuntimeStatusDone}})
+	view := webQuizAnswerView(QuizView{Mode: quizcore.ModeDeep, Status: "idle"}, quizcore.Observation{Exists: true, State: quizcore.RuntimeState{Mode: quizcore.ModeFast, Status: quizcore.RuntimeStatusDone}})
 	if view.Mode != "fast" || view.Status != "done" || view.Open {
 		t.Fatal("projection used an older catalog state", view)
 	}

@@ -18,7 +18,7 @@ const QuizViewStatusNotStarted = "not_started"
 
 // QuizView is the TUI-facing projection of a quiz session or available scope.
 type QuizView struct {
-	Binding               core.QuizActionBinding
+	Binding               quizcore.ActionBinding
 	Index                 int
 	Title                 string
 	Scope                 quizcore.Scope
@@ -199,7 +199,7 @@ func (s service) notStartedQuizView(title string, scope quizcore.Scope) (QuizVie
 		}
 
 		return QuizView{
-			Binding: core.QuizActionBinding{ExpectedRevision: observed.Revision},
+			Binding: quizcore.ActionBinding{ExpectedRevision: observed.Revision},
 		}, err
 	}
 
@@ -298,8 +298,8 @@ type quizReadScope struct {
 	scope quizcore.Scope
 }
 
-func quizStateObservationBinding(state quizcore.RuntimeState) core.QuizActionBinding {
-	binding := core.QuizActionBinding{SessionID: state.SessionID, ExpectedRevision: state.Revision}
+func quizStateObservationBinding(state quizcore.RuntimeState) quizcore.ActionBinding {
+	binding := quizcore.ActionBinding{SessionID: state.SessionID, ExpectedRevision: state.Revision}
 	if state.ActiveQuestion != nil {
 		binding.QuestionID = state.ActiveQuestion.ID
 	}

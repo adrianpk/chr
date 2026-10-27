@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/process"
@@ -50,7 +51,7 @@ func startHarnessGenerationRun(ctx context.Context, request harness.AgentRunRequ
 		return nil, nil
 	}
 
-	if !validGenerationOperationIdentity(request.ID) || !validGenerationOperationIdentity(request.Purpose) {
+	if !authoringstate.ValidOperationIdentity(request.ID) || !authoringstate.ValidOperationIdentity(request.Purpose) {
 		return nil, errors.New("generation call requires bounded request and purpose identities")
 	}
 

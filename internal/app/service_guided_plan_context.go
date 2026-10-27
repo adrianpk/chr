@@ -25,7 +25,7 @@ func (s service) guidedPlanSources(session core.AuthoringSession) (core.PlanSour
 
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
-	sources := core.PlanSourceObservation{Scope: scope, Project: core.ProjectMetadata{Name: session.Guided.CaseName}, Quiz: core.QuizObservation{Exists: true, State: state, Entries: entries}, HasDiscovery: true}
+	sources := core.PlanSourceObservation{Scope: scope, Project: core.ProjectMetadata{Name: session.Guided.CaseName}, Quiz: quizcore.Observation{Exists: true, State: state, Entries: entries}, HasDiscovery: true}
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage == "specification" {
 			sources.Hash, err = core.GuidedCheckpointDigest(checkpoint)

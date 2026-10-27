@@ -1,7 +1,5 @@
 package app
 
-import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
-
 import (
 	"encoding/json"
 	"net/http"
@@ -12,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 )
 
@@ -49,7 +48,7 @@ func telegramAuthoringIntentHTTP(t *testing.T, f *telegramConversationAppFixture
 	t.Cleanup(server.Close)
 
 	provider := core.NewConfiguredStructuredModel(true)
-	provider.API = openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 
 	operations, ok := f.receiver.operations.(service)
 	if !ok {
@@ -311,7 +310,7 @@ func TestTelegramAuthoringIntentProviderFailure(t *testing.T) {
 	defer server.Close()
 
 	provider := core.NewConfiguredStructuredModel(true)
-	provider.API = openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 
 	operations, ok := f.receiver.operations.(service)
 	if !ok {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os/exec"
 
-	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -316,6 +315,6 @@ func dumpActionResult(result DumpOperationResult, operations service) (tui.DumpA
 	return actionResult, nil
 }
 
-func tuiQuizBinding(binding tui.QuizActionBinding) core.QuizActionBinding {
-	return core.QuizActionBinding{SessionID: binding.SessionID, QuestionID: binding.QuestionID, ExpectedRevision: binding.ExpectedRevision, OperationID: binding.OperationID}
+func tuiQuizBinding(binding tui.QuizActionBinding) quizcore.ActionBinding {
+	return quizcore.ActionBinding{SessionID: binding.SessionID, QuestionID: binding.QuestionID, ExpectedRevision: binding.ExpectedRevision, OperationID: binding.OperationID}
 }

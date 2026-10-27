@@ -1,62 +1,60 @@
-package core
+package quiz
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
-	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// QuizActionBinding guards a retained question and makes retries idempotent.
-type QuizActionBinding struct {
+// ActionBinding guards a retained question and makes retries idempotent.
+type ActionBinding struct {
 	SessionID, QuestionID, ExpectedRevision, OperationID string
 }
 
-// QuizActionRequest binds one shared quiz transition to its observed scope.
-type QuizActionRequest struct {
-	Scope   quizcore.Scope
-	Binding QuizActionBinding
+// ActionRequest binds one shared quiz transition to its observed scope.
+type ActionRequest struct {
+	Scope   Scope
+	Binding ActionBinding
 	Action  string
 	Answer  string
-	Mode    quizcore.Mode
+	Mode    Mode
 }
 
-// QuizObservation is a bounded, read-only snapshot. An absent session still has
+// Observation is a bounded, read-only snapshot. An absent session still has
 // a revision so concurrent starts cannot overwrite one another.
-type QuizObservation struct {
+type Observation struct {
 	Exists   bool
-	State    quizcore.RuntimeState
-	Entries  []quizcore.Entry
+	State    RuntimeState
+	Entries  []Entry
 	Revision string
-	images   []workflowFileChange
 }
 
-// QuizTransition is prepared under the shared authoring owner before publication.
-type QuizTransition struct {
-	State   quizcore.RuntimeState
-	Entry   *quizcore.Entry
+// Transition is prepared under the shared authoring owner before publication.
+type Transition struct {
+	State   RuntimeState
+	Entry   *Entry
 	Message string
 }
 
-// QuizTransitionFunc prepares model-dependent state with a bounded context.
+// TransitionFunc prepares model-dependent state with a bounded context.
 // An answer followed by a provider failure must return a blocked transition,
 // allowing the confirmed entry to publish independently of continuation.
-type QuizTransitionFunc func(context.Context, QuizObservation) (QuizTransition, error)
+type TransitionFunc func(context.Context, Observation) (Transition, error)
 
-// QuizActionResult retains the exact committed acknowledgement for a retry.
-type QuizActionResult struct {
+// ActionResult retains the exact committed acknowledgement for a retry.
+type ActionResult struct {
 	OperationID string
-	State       quizcore.RuntimeState
+	State       RuntimeState
 	Message     string
 }
 
-func validateQuizAction(request QuizActionRequest) error {
-	if err := quizcore.ValidateScope(request.Scope); err != nil {
+// ValidateAction checks the original scope, operation identity and action binding.
+func ValidateAction(request ActionRequest) error {
+	if err := ValidateScope(request.Scope); err != nil {
 		return err
 	}
 
@@ -80,20 +78,22 @@ func validateQuizAction(request QuizActionRequest) error {
 	}
 }
 
-func validateQuizGenerationState(state quizcore.RuntimeState) error {
-	if state.GenerationOperationID != "" && !validGenerationOperationIdentity(state.GenerationOperationID) {
+// ValidateGenerationState retains the generation identity and runtime validation bounds.
+func ValidateGenerationState(state RuntimeState) error {
+	if state.GenerationOperationID != "" && !authoringstate.ValidOperationIdentity(state.GenerationOperationID) {
 		return errors.New("quiz generation operation identity exceeds its bound")
 	}
 
-	return quizcore.ValidateRuntimeState(state)
+	return ValidateRuntimeState(state)
 }
 
-func validateRetainedQuizState(state quizcore.RuntimeState) error {
+// ValidateRetainedState checks supported schemas and retained Fast question capacity.
+func ValidateRetainedState(state RuntimeState) error {
 	if state.SchemaVersion != 0 && state.SchemaVersion != 2 {
 		return errors.New("unsupported quiz runtime schema")
 	}
 
-	if err := validateQuizGenerationState(state); err != nil {
+	if err := ValidateGenerationState(state); err != nil {
 		return err
 	}
 
@@ -103,12 +103,12 @@ func validateRetainedQuizState(state quizcore.RuntimeState) error {
 		}
 	}
 
-	if len(state.FastQueue) > quizcore.DefaultQuestionBudget || len(state.FastConsumed) > quizcore.DefaultQuestionBudget {
+	if len(state.FastQueue) > DefaultQuestionBudget || len(state.FastConsumed) > DefaultQuestionBudget {
 		return errors.New("quiz Fast batch capacity exceeded")
 	}
 
 	for _, candidate := range state.FastQueue {
-		if err := quizcore.ValidateCandidate(candidate); err != nil {
+		if err := ValidateCandidate(candidate); err != nil {
 			return err
 		}
 	}
@@ -116,7 +116,8 @@ func validateRetainedQuizState(state quizcore.RuntimeState) error {
 	return nil
 }
 
-func prepareQuizTransition(before QuizObservation, next QuizTransition, request QuizActionRequest) (QuizTransition, error) {
+// PrepareTransition validates a transition against the original observed binding.
+func PrepareTransition(before Observation, next Transition, request ActionRequest) (Transition, error) {
 	state := &next.State
 	state.SchemaVersion = 2
 	state.Revision = ""
@@ -129,17 +130,15 @@ func prepareQuizTransition(before QuizObservation, next QuizTransition, request 
 		return next, workflowstate.ErrConflict
 	}
 
-	if err := validateRetainedQuizState(*state); err != nil {
+	if err := ValidateRetainedState(*state); err != nil {
 		return next, err
 	}
 
 	if next.Entry != nil {
-		if err := quizcore.ValidateEntry(*next.Entry); err != nil {
+		if err := ValidateEntry(*next.Entry); err != nil {
 			return next, err
 		}
 	}
 
 	return next, nil
 }
-
-const quizProviderTimeout = 90 * time.Second

@@ -35,7 +35,7 @@ func TestPlanOrderModelPayload(t *testing.T) {
 
 			request := quizmodel.Request{Action: quizmodel.ActionGeneratePlan, Scope: quizcore.Scope{ProjectID: "example"}}
 
-			response, err := quizmodel.ResponseFromOutput(request, content)
+			response, err := quizmodel.ResponseFromOutput(request, content, "openai")
 			if err != nil || len(response.Plan.Order) != 1 || response.Plan.Order[0].Tasks[0].ID != "task-t1.1" {
 				t.Fatal(response, err)
 			}
@@ -51,7 +51,7 @@ func TestPlanOrderModelCompatibility(t *testing.T) {
 		t.Fatal(payload, err)
 	}
 
-	encoded, err := json.Marshal(quizmodel.OutputFormat(quizmodel.Request{Action: quizmodel.ActionGeneratePlan}).Schema)
+	encoded, err := json.Marshal(quizmodel.OutputSchema(quizmodel.Request{Action: quizmodel.ActionGeneratePlan}).Schema)
 	if err != nil {
 		t.Fatal(err)
 	}

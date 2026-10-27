@@ -26,7 +26,7 @@ type PlanSourceInput struct {
 type PlanSourceObservation struct {
 	Scope        quizcore.Scope
 	Project      ProjectMetadata
-	Quiz         QuizObservation
+	Quiz         quizcore.Observation
 	Inputs       []PlanSourceInput
 	Hash         string
 	HasDiscovery bool

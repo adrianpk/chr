@@ -1,7 +1,5 @@
 package core
 
-import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
-
 import (
 	"context"
 	"encoding/json"
@@ -9,6 +7,7 @@ import (
 	"time"
 
 	modelcore "forge.adrianpk.com/chr/internal/core/model"
+	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -31,7 +30,7 @@ type StructuredModelProvider interface {
 // One shared instance limits all of its callers to two concurrent model requests.
 type ConfiguredStructuredModel struct {
 	OpenAI bool
-	API    openaiquiz.OpenAIQuizModelAdapter
+	API    openaiquiz.Adapter
 	Runner harness.AgentRunner
 	slots  chan struct{}
 }

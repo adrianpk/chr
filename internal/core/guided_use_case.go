@@ -11,6 +11,7 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
 // GuidedUseCaseState extends a canonical authoring session without adopting manual sessions.
@@ -44,7 +45,7 @@ type GuidedUseCaseOperation struct {
 	PreparedPlan     *GuidedPreparedPlan                   `json:"prepared_plan,omitempty"`
 	PreparedWorkflow *generationcore.GeneratedWorkflowPlan `json:"prepared_workflow,omitempty"`
 	PreparedSpec     *GuidedPreparedSpec                   `json:"prepared_spec,omitempty"`
-	QuizRequest      *QuizActionRequest                    `json:"quiz_request,omitempty"`
+	QuizRequest      *quizcore.ActionRequest               `json:"quiz_request,omitempty"`
 	QuestionID       string                                `json:"question_id,omitempty"`
 	InputDigest      string                                `json:"input_digest,omitempty"`
 	ExpectedRevision int64                                 `json:"expected_revision,omitempty"`

@@ -76,10 +76,10 @@ func trackingInstructions(request Request) string {
 	return planTrackingInstructions()
 }
 
-func trackingFormat(request Request) OutputFormatDefinition {
+func trackingFormat(request Request) SchemaDefinition {
 	if request.Strategy == StrategyPlanDelivery {
-		return NewOutputFormat("plan_delivery", "Ticket contracts for the retained plan and declared order.", planDeliveryJSONSchema())
+		return newSchemaDefinition("plan_delivery", "Ticket contracts for the retained plan and declared order.", planDeliveryJSONSchema())
 	}
 
-	return NewOutputFormat("plan_tracking_artifacts", "Plan tracking and ticket payloads derived from an existing implementation plan.", planTrackingJSONSchema())
+	return newSchemaDefinition("plan_tracking_artifacts", "Plan tracking and ticket payloads derived from an existing implementation plan.", planTrackingJSONSchema())
 }

@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -54,7 +53,7 @@ func (p webViewProvider) quizArtifactDetail(ctx context.Context, request webui.A
 	return webui.ArtifactDetailView{Family: "quizzes", ID: request.ID, Title: quiz.Title, Scope: webScopeLabel(quiz.Scope.CaseSlug, quiz.Title), Status: view.Status, Revision: observed.Revision, Quiz: view}, nil
 }
 
-func webQuizAnswerView(quiz QuizView, observed core.QuizObservation) *webui.QuizAnswerView {
+func webQuizAnswerView(quiz QuizView, observed quizcore.Observation) *webui.QuizAnswerView {
 	state := observed.State
 	if observed.Exists {
 		quiz.Mode, quiz.Status = state.Mode, string(state.Status)
@@ -110,7 +109,7 @@ func (p webViewProvider) writeQuizAction(operations service, request webui.Write
 		return webQuizWriteFailure(request.ID, err), nil
 	}
 
-	binding := core.QuizActionBinding{SessionID: request.Fields["session_id"], QuestionID: request.Fields["question_id"], ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]}
+	binding := quizcore.ActionBinding{SessionID: request.Fields["session_id"], QuestionID: request.Fields["question_id"], ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]}
 	if binding.ExpectedRevision == "" || binding.OperationID == "" {
 		return webValidationWrite(fmt.Errorf("complete quiz action binding is required")), nil
 	}
@@ -125,7 +124,7 @@ func (p webViewProvider) writeQuizAction(operations service, request webui.Write
 		answer = strings.TrimSpace(request.Fields["answer"])
 	}
 
-	result, err := operations.applyQuizAction(core.QuizActionRequest{Scope: scope, Binding: binding, Action: action, Mode: quizcore.Mode(request.Fields["mode"]), Answer: answer})
+	result, err := operations.applyQuizAction(quizcore.ActionRequest{Scope: scope, Binding: binding, Action: action, Mode: quizcore.Mode(request.Fields["mode"]), Answer: answer})
 	if err != nil {
 		return webQuizWriteFailure(request.ID, err), nil
 	}

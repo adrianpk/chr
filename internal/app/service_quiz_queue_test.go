@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -193,8 +192,8 @@ func newRetainedQuizFixture(t *testing.T) (service, *fakeServiceQuizModel) {
 	return operations, model
 }
 
-func quizStateBinding(state quizcore.RuntimeState, operationID string) core.QuizActionBinding {
-	binding := core.QuizActionBinding{SessionID: state.SessionID, ExpectedRevision: state.Revision, OperationID: operationID}
+func quizStateBinding(state quizcore.RuntimeState, operationID string) quizcore.ActionBinding {
+	binding := quizcore.ActionBinding{SessionID: state.SessionID, ExpectedRevision: state.Revision, OperationID: operationID}
 	if state.ActiveQuestion != nil {
 		binding.QuestionID = state.ActiveQuestion.ID
 	}

@@ -99,12 +99,12 @@ func (s service) finishGuidedQuizResult(ctx context.Context, session *core.Autho
 	return nil
 }
 
-func (s service) prepareGuidedQuizAction(ctx context.Context, session core.AuthoringSession, digest string) (core.QuizActionRequest, error) {
+func (s service) prepareGuidedQuizAction(ctx context.Context, session core.AuthoringSession, digest string) (quizcore.ActionRequest, error) {
 	scope := quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 
 	observed, err := s.quizRepository().Observe(ctx, scope)
 	if err != nil {
-		return core.QuizActionRequest{}, err
+		return quizcore.ActionRequest{}, err
 	}
 
 	operation := session.Guided.PendingOperation
@@ -112,22 +112,22 @@ func (s service) prepareGuidedQuizAction(ctx context.Context, session core.Autho
 
 	if session.Guided.Quiz == nil {
 		if observed.Exists {
-			return core.QuizActionRequest{}, errors.New("guided quiz cannot adopt an existing manual session")
+			return quizcore.ActionRequest{}, errors.New("guided quiz cannot adopt an existing manual session")
 		}
 
 		action = "start"
 	} else if session.Guided.Quiz.SessionID != observed.State.SessionID || session.Guided.Quiz.Revision != observed.Revision || session.Guided.Quiz.InputDigest != digest {
-		return core.QuizActionRequest{}, workflowstate.ErrConflict
+		return quizcore.ActionRequest{}, workflowstate.ErrConflict
 	}
 
-	binding := core.QuizActionBinding{SessionID: observed.State.SessionID, ExpectedRevision: observed.Revision, OperationID: "guided-" + operation.Digest}
+	binding := quizcore.ActionBinding{SessionID: observed.State.SessionID, ExpectedRevision: observed.Revision, OperationID: "guided-" + operation.Digest}
 	if observed.State.ActiveQuestion != nil {
 		binding.QuestionID = observed.State.ActiveQuestion.ID
 	}
 
 	action, mode := guidedQuizNativeInput(operation, action, observed.State.Mode)
 
-	return core.QuizActionRequest{Scope: scope, Binding: binding, Action: action, Answer: strings.TrimSpace(operation.Content), Mode: mode}, nil
+	return quizcore.ActionRequest{Scope: scope, Binding: binding, Action: action, Answer: strings.TrimSpace(operation.Content), Mode: mode}, nil
 }
 
 func guidedDumpCheckpoint(session core.AuthoringSession) (core.GuidedStageCheckpoint, error) {

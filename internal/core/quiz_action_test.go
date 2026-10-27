@@ -80,7 +80,7 @@ func TestQuizActionBindings(t *testing.T) {
 	checkQuizActionReplay(t, repo, request)
 }
 
-func checkQuizActionReplay(t *testing.T, repo *fileQuizArtifactRepository, request QuizActionRequest) {
+func checkQuizActionReplay(t *testing.T, repo *fileQuizArtifactRepository, request quizcore.ActionRequest) {
 	t.Helper()
 
 	observed, err := repo.Observe(t.Context(), request.Scope)
@@ -162,7 +162,7 @@ func TestQuizObservationGuards(t *testing.T) {
 	}
 }
 
-func mutateQuizGuardFixture(t *testing.T, paths QuizArtifactPaths, change string, request *QuizActionRequest) {
+func mutateQuizGuardFixture(t *testing.T, paths QuizArtifactPaths, change string, request *quizcore.ActionRequest) {
 	t.Helper()
 
 	switch change {
@@ -186,7 +186,7 @@ func mutateQuizGuardFixture(t *testing.T, paths QuizArtifactPaths, change string
 	}
 }
 
-func newQuizActionFixture(t *testing.T) (*fileQuizArtifactRepository, QuizActionRequest) {
+func newQuizActionFixture(t *testing.T) (*fileQuizArtifactRepository, quizcore.ActionRequest) {
 	t.Helper()
 
 	repo := &fileQuizArtifactRepository{projectDir: t.TempDir()}
@@ -197,31 +197,31 @@ func newQuizActionFixture(t *testing.T) (*fileQuizArtifactRepository, QuizAction
 		t.Fatal(err)
 	}
 
-	return repo, QuizActionRequest{Scope: scope, Action: "start", Binding: QuizActionBinding{OperationID: "start", ExpectedRevision: observed.Revision}}
+	return repo, quizcore.ActionRequest{Scope: scope, Action: "start", Binding: quizcore.ActionBinding{OperationID: "start", ExpectedRevision: observed.Revision}}
 }
 
-func startQuizActionFixture(_ context.Context, _ QuizObservation) (QuizTransition, error) {
+func startQuizActionFixture(_ context.Context, _ quizcore.Observation) (quizcore.Transition, error) {
 	state := validQuizRuntimeState()
 	state.SessionID = "session-1"
 
-	return QuizTransition{State: state, Message: "Started."}, nil
+	return quizcore.Transition{State: state, Message: "Started."}, nil
 }
 
-func quizAnswerActionFixture(observed QuizObservation) QuizActionRequest {
-	return QuizActionRequest{
+func quizAnswerActionFixture(observed quizcore.Observation) quizcore.ActionRequest {
+	return quizcore.ActionRequest{
 		Scope: quizcore.Scope{ProjectID: "project-1"}, Action: "answer", Answer: "First paragraph.\n\nSecond paragraph.",
-		Binding: QuizActionBinding{SessionID: observed.State.SessionID, QuestionID: observed.State.ActiveQuestion.ID, ExpectedRevision: observed.Revision, OperationID: "answer"},
+		Binding: quizcore.ActionBinding{SessionID: observed.State.SessionID, QuestionID: observed.State.ActiveQuestion.ID, ExpectedRevision: observed.Revision, OperationID: "answer"},
 	}
 }
 
-func answerQuizActionFixture(_ context.Context, observed QuizObservation) (QuizTransition, error) {
+func answerQuizActionFixture(_ context.Context, observed quizcore.Observation) (quizcore.Transition, error) {
 	entry := validQuizEntry()
 	entry.ID, entry.Answer = "session-1-entry-1", "First paragraph.\n\nSecond paragraph."
 	state := observed.State
 	state.AnswersRecorded++
 	state.Status, state.ActiveQuestion = quizcore.RuntimeStatusIdle, nil
 
-	return QuizTransition{State: state, Entry: &entry, Message: "Answer recorded."}, nil
+	return quizcore.Transition{State: state, Entry: &entry, Message: "Answer recorded."}, nil
 }
 
 func checkQuizLegacyRead(t *testing.T, repo *fileQuizArtifactRepository, scope quizcore.Scope, path string, before []byte) {
@@ -257,10 +257,10 @@ func checkQuizActionRecovery(t *testing.T, index int) {
 
 	fresh := &fileQuizArtifactRepository{projectDir: repo.projectDir}
 
-	result, err := fresh.ApplyAction(t.Context(), request, func(context.Context, QuizObservation) (QuizTransition, error) {
+	result, err := fresh.ApplyAction(t.Context(), request, func(context.Context, quizcore.Observation) (quizcore.Transition, error) {
 		t.Fatal("retry repeated the transition")
 
-		return QuizTransition{}, nil
+		return quizcore.Transition{}, nil
 	})
 	if err != nil {
 		t.Fatal(err)

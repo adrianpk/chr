@@ -1,10 +1,9 @@
 package core
 
-import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
-
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -17,6 +16,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -310,7 +310,8 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 	}))
 	defer server.Close()
 
-	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
+	model := openaiquiz.Adapter{
+		Host:       QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -336,18 +337,34 @@ func TestOpenAIQuizModelAdapterRecordsTraceEvents(t *testing.T) {
 
 func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	dir := t.TempDir()
+	apiKey := "sk-header-only-test-secret"
+
 	t.Setenv(ActiveOperatorIDEnv, "adrian")
 	t.Setenv(LLMTraceEnabledEnv, "1")
 	t.Setenv(LLMTracePayloadsEnv, "1")
 
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.Header.Get("Authorization") != "Bearer "+apiKey {
+			t.Error("missing configured authorization header")
+		}
+
+		body, err := io.ReadAll(request.Body)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if strings.Contains(string(body), apiKey) {
+			t.Error("credential leaked into provider payload")
+		}
+
 		writer.Header().Set("Content-Type", "application/json")
 		writeQuizModelHTTPResponse(t, writer, `{"output_text":"{\"question\":\"What should happen next?\",\"tags\":[\"workflow\"],\"follow_up_depth\":1,\"completion_recommended\":false}"}`)
 	}))
 	defer server.Close()
 
-	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
-		APIKey:     "test-key",
+	model := openaiquiz.Adapter{
+		Host:       QuizGenerationHost{},
+		APIKey:     apiKey,
 		BaseURL:    server.URL,
 		Model:      "test-model",
 		ProjectDir: dir,
@@ -360,16 +377,20 @@ func TestOpenAIQuizModelAdapterRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	}
 
 	events := readLLMTraceEvents(t, dir)
-	if _, ok := events[0]["request_payload"]; !ok {
-		t.Fatalf("request payload missing with payload opt-in: %#v", events[0])
+
+	encoded, err := json.Marshal(events)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if _, ok := events[1]["response_payload"]; !ok {
-		t.Fatalf("response payload missing with payload opt-in: %#v", events[1])
+	if strings.Contains(string(encoded), apiKey) {
+		t.Fatal("credential leaked into trace payloads")
 	}
 
-	if _, ok := events[1]["output_payload"]; !ok {
-		t.Fatalf("output payload missing with payload opt-in: %#v", events[1])
+	for key, event := range map[string]map[string]any{"request_payload": events[0], "response_payload": events[1], "output_payload": events[1]} {
+		if _, ok := event[key]; !ok {
+			t.Fatalf("%s missing with payload opt-in: %#v", key, event)
+		}
 	}
 }
 
@@ -384,7 +405,8 @@ func TestOpenAIQuizModelAdapterRecordsParseFailureTrace(t *testing.T) {
 	}))
 	defer server.Close()
 
-	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
+	model := openaiquiz.Adapter{
+		Host:       QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -421,7 +443,8 @@ func TestOpenAIQuizModelAdapterRecordsProviderFailureTrace(t *testing.T) {
 	}))
 	defer server.Close()
 
-	model := openaiquiz.OpenAIQuizModelAdapter{Host: QuizGenerationHost{},
+	model := openaiquiz.Adapter{
+		Host:       QuizGenerationHost{},
 		APIKey:     "test-key",
 		BaseURL:    server.URL,
 		Model:      "test-model",
@@ -480,7 +503,7 @@ func TestQuizModelPlanOutlineResponseFromOutput(t *testing.T) {
 			"implementation_boundary":"Contracts only."
 		}],
 		"dependencies":[]
-	}`))
+	}`), "openai")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
 	}
@@ -549,7 +572,7 @@ func TestQuizModelPlanSliceDetailResponseFromOutput(t *testing.T) {
 		"validation_expectations":["Run focused tests."],
 		"dependencies":[],
 		"non_goals":["Do not connect runtime orchestration."]
-	}`))
+	}`), "openai")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
 	}
@@ -622,7 +645,7 @@ func TestQuizModelSpecGenerationInstructionsDoNotMentionFeatureGeneration(t *tes
 }
 
 func TestQuizModelFeatureSchemaRequiresAllStrictProperties(t *testing.T) {
-	schema := quizmodel.OutputFormat(quizmodel.Request{Action: quizmodel.ActionGenerateAcceptanceFeature}).Schema
+	schema := quizmodel.OutputSchema(quizmodel.Request{Action: quizmodel.ActionGenerateAcceptanceFeature}).Schema
 
 	required, ok := schema["required"].([]string)
 	if !ok {
@@ -904,9 +927,13 @@ func TestQuizModelResponseFromDeepOutput(t *testing.T) {
 		"tags": ["Editorial Review"],
 		"follow_up_depth": 2,
 		"completion_recommended": false
-	}`))
+	}`), "fixture-provider")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
+	}
+
+	if response.Provider != "fixture-provider" {
+		t.Fatalf("provider = %q", response.Provider)
 	}
 
 	if response.Question.Prompt != "What should editorial review clarify before publishing?" {
@@ -936,7 +963,7 @@ func TestQuizModelResponseFromDeepOutputAfterSkippedEntry(t *testing.T) {
 		"tags": ["publishing"],
 		"follow_up_depth": 0,
 		"completion_recommended": false
-	}`))
+	}`), "openai")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
 	}
@@ -962,7 +989,7 @@ func TestQuizModelResponseFromDeepOutputCarriesCompletionRecommendation(t *testi
 		"tags": ["completion"],
 		"follow_up_depth": 1,
 		"completion_recommended": true
-	}`))
+	}`), "openai")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
 	}
@@ -998,7 +1025,7 @@ func TestQuizModelResponseFromFastOutputBuffersCandidates(t *testing.T) {
 				"completion_recommended": false
 			}
 		]
-	}`))
+	}`), "openai")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
 	}
@@ -1027,7 +1054,7 @@ func TestQuizModelResponseFromDraftSpecOutput(t *testing.T) {
 		"title": "Editorial Review Spec",
 		"body": "The workflow must preserve editorial review.",
 		"status": "draft"
-	}`))
+	}`), "openai")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
 	}
@@ -1052,7 +1079,7 @@ func TestQuizModelResponseFromGeneratedSpecOutputRejectsFeatureField(t *testing.
 			"status": "generated",
 			"body": "@spec:editorial-review-spec\nFeature: Editorial review\n\n  Scenario: Review is preserved\n    Given an article draft exists\n    When the editor publishes it\n    Then the review status is preserved\n"
 		}
-	}`))
+	}`), "openai")
 	if err == nil {
 		t.Fatal("quizModelResponseFromOutput returned nil error")
 	}
@@ -1069,7 +1096,7 @@ func TestQuizModelResponseFromGeneratedSpecOutputAllowsGherkinExampleInBody(t *t
 		`"title": "Editorial Review Spec",`+"\n"+
 		`"body": "Acceptance Criteria\n\n`+"```gherkin"+`\nFeature: Editorial review\n`+"```"+`\n",`+"\n"+
 		`"status": "draft"`+"\n"+
-		"}"))
+		"}"), "openai")
 	if err != nil {
 		t.Fatalf("quizModelResponseFromOutput returned error: %v", err)
 	}
@@ -1207,16 +1234,6 @@ func validGeneratedPlanSliceDetail(createdAt time.Time) generationcore.Generated
 		NonGoals:               []string{"Do not connect runtime orchestration."},
 		CreatedAt:              createdAt,
 	}
-}
-
-func containsAnyString(values []any, want string) bool {
-	for _, value := range values {
-		if value == want {
-			return true
-		}
-	}
-
-	return false
 }
 
 func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {

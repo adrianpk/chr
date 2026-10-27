@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -132,7 +131,7 @@ func TestWebQuizCatalogMarkup(t *testing.T) {
 	}
 }
 
-func quizCatalogObservation(t *testing.T, operations service, scope quizcore.Scope) core.QuizObservation {
+func quizCatalogObservation(t *testing.T, operations service, scope quizcore.Scope) quizcore.Observation {
 	t.Helper()
 
 	observed, err := operations.quizRepository().Observe(t.Context(), scope)

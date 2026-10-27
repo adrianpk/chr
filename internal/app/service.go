@@ -1,7 +1,5 @@
 package app
 
-import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
-
 import (
 	"context"
 	"io/fs"
@@ -11,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -75,7 +74,7 @@ func newDumpCurationProvider(projectDir string) DumpCurationProvider {
 }
 
 func newQuizModelAdapter(projectDir string) quizmodel.Adapter {
-	defaultAdapter := openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, ProjectDir: projectDir}
+	defaultAdapter := openaiquiz.Adapter{Host: core.QuizGenerationHost{}, ProjectDir: projectDir}
 	actionAdapters := map[quizmodel.Action]quizmodel.Adapter{}
 
 	if codexGenerationBackend("CHR_SPEC_GENERATION_BACKEND") {

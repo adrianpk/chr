@@ -1,7 +1,5 @@
 package app
 
-import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
-
 import (
 	"context"
 	"errors"
@@ -14,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -130,7 +129,7 @@ func TestNewQuizModelAdapterCanRouteArtifactGenerationToOpenAI(t *testing.T) {
 
 	adapter := newQuizModelAdapter(t.TempDir())
 
-	if _, ok := adapter.(openaiquiz.OpenAIQuizModelAdapter); !ok {
+	if _, ok := adapter.(openaiquiz.Adapter); !ok {
 		t.Fatalf("adapter = %T, want OpenAI adapter", adapter)
 	}
 }

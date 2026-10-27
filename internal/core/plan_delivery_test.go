@@ -41,7 +41,7 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 		t.Fatal(err)
 	}
 
-	response, err := quizmodel.ResponseFromOutput(request, output)
+	response, err := quizmodel.ResponseFromOutput(request, output, "openai")
 	if changed {
 		if err == nil {
 			t.Fatal("changed hierarchy was accepted")
@@ -54,7 +54,7 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 		t.Fatal(response, err)
 	}
 
-	if quizmodel.OutputFormat(request).Name != "plan_delivery" {
+	if quizmodel.OutputSchema(request).Name != "plan_delivery" {
 		t.Fatal("native contracts used the legacy tracking schema")
 	}
 }

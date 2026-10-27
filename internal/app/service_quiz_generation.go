@@ -6,7 +6,7 @@ import (
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
-func quizGenerationOperationID(request core.QuizActionRequest, state quizcore.RuntimeState) string {
+func quizGenerationOperationID(request quizcore.ActionRequest, state quizcore.RuntimeState) string {
 	if request.Action == "resume" && state.ContinuationPending && state.GenerationOperationID != "" {
 		return state.GenerationOperationID
 	}

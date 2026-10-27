@@ -45,7 +45,7 @@ func planDeliveryResponse(request Request, output []byte) (Response, error) {
 		return Response{}, err
 	}
 
-	return Response{ID: responseID(request), RequestID: request.ID, Provider: ProviderOpenAI, Status: ResponseReady, PlanTracking: generationcore.GeneratedPlanTracking{Workflow: &plan}, RawText: string(output), CreatedAt: request.CreatedAt.UTC()}, nil
+	return Response{ID: responseID(request), RequestID: request.ID, Status: ResponseReady, PlanTracking: generationcore.GeneratedPlanTracking{Workflow: &plan}, RawText: string(output), CreatedAt: request.CreatedAt.UTC()}, nil
 }
 
 func planDeliveryRequestInput(request Request) (generationcore.GeneratedWorkflowPlan, error) {

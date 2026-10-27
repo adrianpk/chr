@@ -2,6 +2,7 @@ package openai
 
 import (
 	"context"
+
 	"forge.adrianpk.com/chr/internal/harness"
 )
 

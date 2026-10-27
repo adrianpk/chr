@@ -11,7 +11,16 @@ import (
 )
 
 // ResponseFromOutput decodes generated output and retains question and artifact identity.
-func ResponseFromOutput(request Request, output []byte) (Response, error) {
+func ResponseFromOutput(request Request, output []byte, provider string) (Response, error) {
+	response, err := responseFromOutput(request, output)
+	if err == nil {
+		response.Provider = provider
+	}
+
+	return response, err
+}
+
+func responseFromOutput(request Request, output []byte) (Response, error) {
 	switch request.Action {
 	case ActionNextQuestion:
 		return questionResponseFromOutput(request, output)
@@ -45,7 +54,6 @@ func questionResponseFromOutput(request Request, output []byte) (Response, error
 	return Response{
 		ID:        responseID(request),
 		RequestID: request.ID,
-		Provider:  ProviderOpenAI,
 		Status:    ResponseReady,
 		Question:  questionFromPayload(request, payload, 1),
 		RawText:   string(output),
@@ -67,7 +75,6 @@ func fastQuestionResponseFromOutput(request Request, output []byte) (Response, e
 	return Response{
 		ID:         responseID(request),
 		RequestID:  request.ID,
-		Provider:   ProviderOpenAI,
 		Status:     ResponseReady,
 		Question:   questionFromPayload(request, questions[0], 1),
 		Candidates: candidatesFromPayloads(request, questions[1:]),
@@ -85,7 +92,6 @@ func draftSpecResponseFromOutput(request Request, output []byte) (Response, erro
 	return Response{
 		ID:        responseID(request),
 		RequestID: request.ID,
-		Provider:  ProviderOpenAI,
 		Status:    ResponseReady,
 		DraftSpec: generationcore.QuizDraftSpec{
 			Scope:     request.Scope,
@@ -112,7 +118,6 @@ func featureResponseFromOutput(request Request, output []byte) (Response, error)
 	return Response{
 		ID:        responseID(request),
 		RequestID: request.ID,
-		Provider:  "openai",
 		Status:    ResponseReady,
 		Feature:   generationcore.AcceptanceFeatureGeneration(payload),
 		RawText:   strings.TrimSpace(string(output)),
@@ -129,7 +134,6 @@ func planResponseFromOutput(request Request, output []byte) (Response, error) {
 	return Response{
 		ID:        responseID(request),
 		RequestID: request.ID,
-		Provider:  ProviderOpenAI,
 		Status:    ResponseReady,
 		Plan: generationcore.GeneratedPlan{
 			Scope:     request.Scope,
@@ -155,7 +159,6 @@ func planOutlineResponseFromOutput(request Request, output []byte) (Response, er
 	return Response{
 		ID:          responseID(request),
 		RequestID:   request.ID,
-		Provider:    ProviderOpenAI,
 		Status:      ResponseReady,
 		PlanOutline: outline,
 		RawText:     string(output),
@@ -175,7 +178,6 @@ func planSliceDetailResponseFromOutput(request Request, output []byte) (Response
 	return Response{
 		ID:          responseID(request),
 		RequestID:   request.ID,
-		Provider:    ProviderOpenAI,
 		Status:      ResponseReady,
 		SliceDetail: detail,
 		RawText:     string(output),
@@ -212,7 +214,6 @@ func planTrackingResponseFromOutput(request Request, output []byte) (Response, e
 	return Response{
 		ID:        responseID(request),
 		RequestID: request.ID,
-		Provider:  ProviderOpenAI,
 		Status:    ResponseReady,
 		PlanTracking: generationcore.GeneratedPlanTracking{
 			Scope:     request.Scope,

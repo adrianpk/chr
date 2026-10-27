@@ -1,7 +1,5 @@
 package app
 
-import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
-
 import (
 	"encoding/json"
 	"net/http"
@@ -11,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 )
 
 // Readiness, outline and slice detail are one real plan operation. A switch
@@ -40,7 +39,7 @@ func generationBindingPlanCase(t *testing.T, fixture func(*testing.T, string) (s
 	}))
 	t.Cleanup(server.Close)
 
-	api := openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	api := openaiquiz.Adapter{Host: core.QuizGenerationHost{}, ProjectDir: project, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations.quizModel = api
 	provider := core.NewConfiguredStructuredModel(true)
 	provider.API = api

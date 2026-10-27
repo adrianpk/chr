@@ -12,7 +12,7 @@ import (
 
 // GuidedUseCaseInspection contains retained state and prospective local readiness.
 type GuidedUseCaseInspection struct {
-	Quiz          *core.QuizObservation
+	Quiz          *quizcore.Observation
 	Ideas         []core.GuidedLaterIdea
 	Result        *core.WorkflowResultInspection
 	ResultProblem string

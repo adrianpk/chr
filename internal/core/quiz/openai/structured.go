@@ -13,32 +13,33 @@ import (
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
-func (a OpenAIQuizModelAdapter) InvokeStructured(ctx context.Context, request StructuredRequest) ([]byte, error) {
-	if a.openAIAPIKey() == "" {
+// InvokeStructured performs the original bounded transport call after caller-owned admission.
+func (a Adapter) InvokeStructured(ctx context.Context, request StructuredRequest) ([]byte, error) {
+	if a.apiKey() == "" {
 		return nil, errors.New("configured model credentials are unavailable")
 	}
 
-	body, err := json.Marshal(openAIResponsesRequest{
-		Model: a.openAIModel(), Instructions: request.Instructions,
+	body, err := json.Marshal(responsesRequest{
+		Model: a.model(), Instructions: request.Instructions,
 		Input: string(request.Input), Store: false,
-		Text: openAIResponsesText{Format: quizmodel.NewOutputFormat(request.Purpose, "Typed application response", request.Schema)},
+		Text: responsesText{Format: responseFormat(quizmodel.SchemaDefinition{Name: request.Purpose, Description: "Typed application response", Schema: request.Schema})},
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(a.openAIBaseURL(), "/")+"/responses", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimRight(a.baseURL(), "/")+"/responses", bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", "Bearer "+a.openAIAPIKey())
+	req.Header.Set("Authorization", "Bearer "+a.apiKey())
 	req.Header.Set("Content-Type", "application/json")
 
 	return a.readStructured(ctx, req)
 }
 
-func (a OpenAIQuizModelAdapter) readStructured(ctx context.Context, req *http.Request) ([]byte, error) {
+func (a Adapter) readStructured(ctx context.Context, req *http.Request) ([]byte, error) {
 	client := a.Client
 	if client == nil {
 		client = &http.Client{}
@@ -63,7 +64,7 @@ func (a OpenAIQuizModelAdapter) readStructured(ctx context.Context, req *http.Re
 		return nil, fmt.Errorf("configured model HTTP status %d", response.StatusCode)
 	}
 
-	text, err := openAIResponseText(body)
+	text, err := responseText(body)
 	if err != nil {
 		return nil, errors.New("configured model response has no usable text")
 	}

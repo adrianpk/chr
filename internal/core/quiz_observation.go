@@ -15,8 +15,19 @@ import (
 
 // Observe reads current images without allocating artifacts or recovering a
 // pending mutation. Torn snapshots fail closed and can be explicitly reloaded.
-func (r *fileQuizArtifactRepository) Observe(ctx context.Context, scope quizcore.Scope) (QuizObservation, error) {
-	var observed QuizObservation
+type observedQuizImages struct {
+	quizcore.Observation
+	images []workflowFileChange
+}
+
+func (r *fileQuizArtifactRepository) Observe(ctx context.Context, scope quizcore.Scope) (quizcore.Observation, error) {
+	observed, err := r.observeImages(ctx, scope)
+
+	return observed.Observation, err
+}
+
+func (r *fileQuizArtifactRepository) observeImages(ctx context.Context, scope quizcore.Scope) (observedQuizImages, error) {
+	var observed observedQuizImages
 	if err := ctx.Err(); err != nil {
 		return observed, err
 	}
@@ -124,7 +135,7 @@ func (r *fileAuthoringSessionRepository) quizRevision(scope quizcore.Scope, imag
 	return contenthash.Sum([]byte(strings.Join(hashes, "\x00"))), nil
 }
 
-func decodeQuizObservation(observed *QuizObservation, scope quizcore.Scope, paths QuizArtifactPaths) error {
+func decodeQuizObservation(observed *observedQuizImages, scope quizcore.Scope, paths QuizArtifactPaths) error {
 	entries, err := quizcore.ParseRawCaptureEntries(string(observed.images[1].After))
 	if err != nil {
 		return err
@@ -140,7 +151,7 @@ func decodeQuizObservation(observed *QuizObservation, scope quizcore.Scope, path
 		return err
 	}
 
-	if err := validateRetainedQuizState(*state); err != nil {
+	if err := quizcore.ValidateRetainedState(*state); err != nil {
 		return err
 	}
 

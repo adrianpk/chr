@@ -1,7 +1,5 @@
 package app
 
-import openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
-
 import (
 	"encoding/json"
 	"errors"
@@ -14,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -45,7 +44,7 @@ func telegramAuthoringServiceFixture(t *testing.T, reply func(authoringModelInpu
 
 	operations := newTestService(t, t.TempDir())
 	provider := core.NewConfiguredStructuredModel(true)
-	provider.API = openaiquiz.OpenAIQuizModelAdapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
+	provider.API = openaiquiz.Adapter{Host: core.QuizGenerationHost{}, APIKey: "fixture", BaseURL: server.URL, Client: server.Client()}
 	operations.conversationModel = provider
 
 	return operations, &calls

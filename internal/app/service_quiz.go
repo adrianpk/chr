@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
@@ -23,33 +22,33 @@ type QuizOperationResult struct {
 
 // QuizStartRequest selects the scope for a new quiz session.
 type QuizStartRequest struct {
-	Binding core.QuizActionBinding
+	Binding quizcore.ActionBinding
 	Scope   quizcore.Scope
 	Mode    quizcore.Mode
 }
 
 // QuizResumeRequest selects the scope for a resumed quiz session.
 type QuizResumeRequest struct {
-	Binding core.QuizActionBinding
+	Binding quizcore.ActionBinding
 	Scope   quizcore.Scope
 }
 
 // QuizAnswerRequest submits an answer for the active quiz question.
 type QuizAnswerRequest struct {
-	Binding core.QuizActionBinding
+	Binding quizcore.ActionBinding
 	Scope   quizcore.Scope
 	Answer  string
 }
 
 // QuizSkipRequest skips the active quiz question for the selected scope.
 type QuizSkipRequest struct {
-	Binding core.QuizActionBinding
+	Binding quizcore.ActionBinding
 	Scope   quizcore.Scope
 }
 
 // QuizCompleteRequest completes the quiz for the selected scope.
 type QuizCompleteRequest struct {
-	Binding core.QuizActionBinding
+	Binding quizcore.ActionBinding
 	Scope   quizcore.Scope
 }
 
@@ -60,13 +59,13 @@ type QuizDraftSpecRequest struct {
 
 // QuizCancelRequest cancels the quiz for the selected scope.
 type QuizCancelRequest struct {
-	Binding core.QuizActionBinding
+	Binding quizcore.ActionBinding
 	Scope   quizcore.Scope
 }
 
 // QuizModeRequest changes the quiz interaction mode for the selected scope.
 type QuizModeRequest struct {
-	Binding core.QuizActionBinding
+	Binding quizcore.ActionBinding
 	Scope   quizcore.Scope
 	Mode    quizcore.Mode
 }
@@ -91,11 +90,11 @@ func (s service) StartQuiz(request QuizStartRequest) (QuizOperationResult, error
 		mode = quizcore.ModeDeep
 	}
 
-	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "start", Mode: mode})
+	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "start", Mode: mode})
 }
 
 func (s service) ResumeQuiz(request QuizResumeRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "resume"})
+	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "resume"})
 }
 
 func (s service) AnswerQuiz(request QuizAnswerRequest) (QuizOperationResult, error) {
@@ -104,15 +103,15 @@ func (s service) AnswerQuiz(request QuizAnswerRequest) (QuizOperationResult, err
 		return QuizOperationResult{}, fmt.Errorf("quiz answer is required")
 	}
 
-	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "answer", Answer: answer})
+	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "answer", Answer: answer})
 }
 
 func (s service) SkipQuiz(request QuizSkipRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "skip"})
+	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "skip"})
 }
 
 func (s service) CompleteQuiz(request QuizCompleteRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "done"})
+	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "done"})
 }
 
 func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperationResult, error) {
@@ -120,9 +119,9 @@ func (s service) GenerateQuizDraftSpec(request QuizDraftSpecRequest) (QuizOperat
 }
 
 func (s service) CancelQuiz(request QuizCancelRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "cancel"})
+	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "cancel"})
 }
 
 func (s service) SwitchQuizMode(request QuizModeRequest) (QuizOperationResult, error) {
-	return s.applyQuizAction(core.QuizActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "mode", Mode: request.Mode})
+	return s.applyQuizAction(quizcore.ActionRequest{Scope: s.quizScope(request.Scope), Binding: request.Binding, Action: "mode", Mode: request.Mode})
 }

@@ -84,7 +84,7 @@ func TestGuidedUseCaseQuizDone(t *testing.T) {
 	assertGuidedQuizCompletion(t, current, session.Guided.Checkpoints[0])
 }
 
-func observeGuidedQuiz(t *testing.T, operations service, session core.AuthoringSession) core.QuizObservation {
+func observeGuidedQuiz(t *testing.T, operations service, session core.AuthoringSession) quizcore.Observation {
 	t.Helper()
 
 	observed, err := operations.quizRepository().Observe(t.Context(), quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug})

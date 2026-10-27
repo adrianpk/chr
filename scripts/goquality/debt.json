@@ -472,26 +472,6 @@
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/quiz_action_receipt.go::fileAuthoringSessionRepository.quizReceipt",
-      "signature": "func(operationID, digest string) (QuizActionResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/quiz/openai/generation.go::OpenAIQuizModelAdapter.invokeBoundQuizAPI",
-      "signature": "func(ctx context.Context, request quizmodel.Request, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error)",
-      "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/quiz/openai/adapter.go::OpenAIQuizModelAdapter.invokeOpenAI",
-      "signature": "func(ctx context.Context, request quizmodel.Request, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error)",
-      "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/quiz/openai/adapter.go::OpenAIQuizModelAdapter.recordOpenAIQuizResponse",
-      "signature": "func(ctx context.Context, request quizmodel.Request, trace openAIQuizTrace, result openAIQuizExecutionResult, status string, responseErr error, response quizmodel.Response)",
-      "reason": "Existing production debt; assigned to Slice 8 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/remote_command.go::remoteCommandFlagValue",
       "signature": "func(words []string, index int) (string, string, int, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

@@ -77,8 +77,7 @@ func (a HarnessQuizModelAdapter) Invoke(ctx context.Context, request quizmodel.R
 		return quizmodel.Response{}, err
 	}
 
-	response, err := quizmodel.ResponseFromOutput(request, run.Output)
-	response.Provider = run.Provider
+	response, err := quizmodel.ResponseFromOutput(request, run.Output, run.Provider)
 	err = quizmodel.ValidateParsedResponse(response, err)
 
 	err = ValidateHarnessGenerationOutput(ctx, a.agentRunRequest(request), err)
@@ -102,7 +101,7 @@ func (a HarnessQuizModelAdapter) agentRunRequest(request quizmodel.Request) harn
 }
 
 func harnessQuizModelOutputSchema(request quizmodel.Request) ([]byte, error) {
-	schema := quizmodel.OutputFormat(request).Schema
+	schema := quizmodel.OutputSchema(request).Schema
 
 	content, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {

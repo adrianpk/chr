@@ -14,9 +14,9 @@ import (
 
 // ApplyAction compares the original binding and publishes all quiz images and
 // its acknowledgement through the existing recoverable authoring journal.
-func (r *fileQuizArtifactRepository) ApplyAction(ctx context.Context, request QuizActionRequest, transition QuizTransitionFunc) (QuizActionResult, error) {
-	var result QuizActionResult
-	if err := validateQuizAction(request); err != nil {
+func (r *fileQuizArtifactRepository) ApplyAction(ctx context.Context, request quizcore.ActionRequest, transition quizcore.TransitionFunc) (quizcore.ActionResult, error) {
+	var result quizcore.ActionResult
+	if err := quizcore.ValidateAction(request); err != nil {
 		return result, err
 	}
 
@@ -28,9 +28,9 @@ func (r *fileQuizArtifactRepository) ApplyAction(ctx context.Context, request Qu
 			return err
 		}
 
-		retained, exists, err := owner.quizReceipt(request.Binding.OperationID, digest)
-		if err != nil || exists {
-			result = retained
+		retained, err := owner.quizReceipt(request.Binding.OperationID, digest)
+		if err != nil || retained.Found {
+			result = retained.Result
 
 			return err
 		}
@@ -39,16 +39,16 @@ func (r *fileQuizArtifactRepository) ApplyAction(ctx context.Context, request Qu
 			return err
 		}
 
-		before, err := r.Observe(owned, request.Scope)
+		before, err := r.observeImages(owned, request.Scope)
 		if err != nil {
 			return err
 		}
 
-		if err := compareQuizBinding(before, request); err != nil {
+		if err := compareQuizBinding(before.Observation, request); err != nil {
 			return err
 		}
 
-		next, err := prepareBoundedQuizTransition(owned, before, request, transition)
+		next, err := prepareBoundedQuizTransition(owned, before.Observation, request, transition)
 		if err != nil {
 			return err
 		}
@@ -61,7 +61,7 @@ func (r *fileQuizArtifactRepository) ApplyAction(ctx context.Context, request Qu
 	return result, err
 }
 
-func compareQuizBinding(before QuizObservation, request QuizActionRequest) error {
+func compareQuizBinding(before quizcore.Observation, request quizcore.ActionRequest) error {
 	binding := request.Binding
 	if binding.ExpectedRevision != before.Revision || binding.SessionID != before.State.SessionID {
 		return workflowstate.ErrConflict
@@ -79,7 +79,7 @@ func compareQuizBinding(before QuizObservation, request QuizActionRequest) error
 	return nil
 }
 
-func prepareBoundedQuizTransition(ctx context.Context, before QuizObservation, request QuizActionRequest, transition QuizTransitionFunc) (QuizTransition, error) {
+func prepareBoundedQuizTransition(ctx context.Context, before quizcore.Observation, request quizcore.ActionRequest, transition quizcore.TransitionFunc) (quizcore.Transition, error) {
 	bounded, cancel := context.WithTimeout(ctx, quizProviderTimeout)
 	defer cancel()
 
@@ -88,11 +88,11 @@ func prepareBoundedQuizTransition(ctx context.Context, before QuizObservation, r
 		return next, err
 	}
 
-	return prepareQuizTransition(before, next, request)
+	return quizcore.PrepareTransition(before, next, request)
 }
 
-func (r *fileAuthoringSessionRepository) commitQuizTransition(ctx context.Context, before QuizObservation, next QuizTransition, request QuizActionRequest, digest string) (QuizActionResult, error) {
-	result := QuizActionResult{OperationID: request.Binding.OperationID, State: next.State, Message: next.Message}
+func (r *fileAuthoringSessionRepository) commitQuizTransition(ctx context.Context, before observedQuizImages, next quizcore.Transition, request quizcore.ActionRequest, digest string) (quizcore.ActionResult, error) {
+	result := quizcore.ActionResult{OperationID: request.Binding.OperationID, State: next.State, Message: next.Message}
 
 	changes, err := r.quizTransitionChanges(before, next, request.Scope)
 	if err != nil {
@@ -120,7 +120,7 @@ func (r *fileAuthoringSessionRepository) commitQuizTransition(ctx context.Contex
 	return result, r.recoverAuthoringMutation()
 }
 
-func (r *fileAuthoringSessionRepository) quizTransitionChanges(before QuizObservation, next QuizTransition, scope quizcore.Scope) ([]workflowFileChange, error) {
+func (r *fileAuthoringSessionRepository) quizTransitionChanges(before observedQuizImages, next quizcore.Transition, scope quizcore.Scope) ([]workflowFileChange, error) {
 	changes := append([]workflowFileChange(nil), before.images...)
 
 	encoded, err := json.MarshalIndent(next.State, "", "  ")
@@ -200,3 +200,5 @@ func (r *fileAuthoringSessionRepository) newQuizMetadata(reference string, now t
 
 	return newOpsArtifactMetadata(CreateOpsArtifactOptions{Layout: layout, Type: "quiz", Title: strings.TrimPrefix(parts[3], "00000-"), Producer: "chr"}, parts[3], now), nil
 }
+
+const quizProviderTimeout = 90 * time.Second

@@ -197,7 +197,7 @@ func SealGuidedQuiz(ctx context.Context, root string, session *AuthoringSession)
 	return nil
 }
 
-func guardGuidedQuizCompletion(session AuthoringSession, observed QuizObservation) error {
+func guardGuidedQuizCompletion(session AuthoringSession, observed quizcore.Observation) error {
 	quiz := session.Guided.Quiz
 
 	state := observed.State

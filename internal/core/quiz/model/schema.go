@@ -5,64 +5,62 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-// OutputFormatDefinition retains the named schema used by generation backends.
-type OutputFormatDefinition struct {
-	Type        string         `json:"type"`
+// SchemaDefinition retains the named schema used by generation backends.
+type SchemaDefinition struct {
 	Name        string         `json:"name"`
 	Description string         `json:"description,omitempty"`
-	Strict      bool           `json:"strict"`
 	Schema      map[string]any `json:"schema"`
 }
 
-// OutputFormat selects the shared strict output contract for an action.
-func OutputFormat(request Request) OutputFormatDefinition {
+// OutputSchema selects the shared strict output contract for an action.
+func OutputSchema(request Request) SchemaDefinition {
 	switch {
 	case request.Action == ActionMaterializePlanTracking:
 		return trackingFormat(request)
 	case request.Action == ActionGeneratePlan:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"generated_plan",
 			"Implementation plan generated from project and use-case context.",
 			planJSONSchema(),
 		)
 	case request.Action == ActionGeneratePlanOutline:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"generated_plan_outline",
 			"Plan outline generated from project and use-case context.",
 			planOutlineJSONSchema(),
 		)
 	case request.Action == ActionGeneratePlanSliceDetail:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"generated_plan_slice_detail",
 			"Implementation details generated for one outline slice.",
 			planSliceDetailJSONSchema(),
 		)
 	case request.Action == ActionGenerateSpec:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"generated_spec",
 			"Draft specification generated from project and use-case context.",
 			specJSONSchema(),
 		)
 	case request.Action == ActionGenerateAcceptanceFeature:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"acceptance_feature",
 			"Acceptance feature generated from project, use-case, quiz, dump, and spec context.",
 			featureJSONSchema(),
 		)
 	case request.Action == ActionDraftSpec:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"quiz_draft_spec",
 			"Draft specification generated from project quiz context.",
 			draftSpecJSONSchema(),
 		)
 	case request.Mode == quizcore.ModeFast:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"quiz_fast_questions",
 			"A batch of project quiz questions.",
 			fastQuestionJSONSchema(),
 		)
 	default:
-		return NewOutputFormat(
+		return newSchemaDefinition(
 			"quiz_next_question",
 			"The next project quiz question.",
 			questionJSONSchema(),
@@ -70,13 +68,11 @@ func OutputFormat(request Request) OutputFormatDefinition {
 	}
 }
 
-// NewOutputFormat binds one named JSON schema without changing its fields.
-func NewOutputFormat(name, description string, schema map[string]any) OutputFormatDefinition {
-	return OutputFormatDefinition{
-		Type:        "json_schema",
+// newSchemaDefinition binds one named JSON schema without changing its fields.
+func newSchemaDefinition(name, description string, schema map[string]any) SchemaDefinition {
+	return SchemaDefinition{
 		Name:        name,
 		Description: description,
-		Strict:      true,
 		Schema:      schema,
 	}
 }

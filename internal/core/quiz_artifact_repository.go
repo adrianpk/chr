@@ -40,8 +40,8 @@ type QuizArtifactRepository interface {
 	WriteCuratedNotes(ctx context.Context, notes quizcore.CuratedNotes) (QuizArtifactPaths, error)
 	SaveRuntimeState(ctx context.Context, state quizcore.RuntimeState) (QuizArtifactPaths, error)
 	LoadRuntimeState(ctx context.Context, scope quizcore.Scope) (quizcore.RuntimeState, error)
-	Observe(ctx context.Context, scope quizcore.Scope) (QuizObservation, error)
-	ApplyAction(ctx context.Context, request QuizActionRequest, transition QuizTransitionFunc) (QuizActionResult, error)
+	Observe(ctx context.Context, scope quizcore.Scope) (quizcore.Observation, error)
+	ApplyAction(ctx context.Context, request quizcore.ActionRequest, transition quizcore.TransitionFunc) (quizcore.ActionResult, error)
 }
 
 type fileQuizArtifactRepository struct {
