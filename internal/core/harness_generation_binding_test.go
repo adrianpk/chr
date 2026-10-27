@@ -75,20 +75,20 @@ func generationBindingProgram(t *testing.T, project string) string {
 }
 
 func generationBindingResolver(program, model string) HarnessGenerationResolver {
-	return func(_ context.Context, config WorkspaceConfig) (harnesscore.HarnessGenerationBinding, HarnessGenerationLaunch, error) {
+	return func(_ context.Context, config WorkspaceConfig) (harnesscore.GenerationBinding, HarnessGenerationLaunch, error) {
 		executable, err := FreezeHarnessExecutable([]string{program})
 		if err != nil {
-			return harnesscore.HarnessGenerationBinding{}, HarnessGenerationLaunch{}, err
+			return harnesscore.GenerationBinding{}, HarnessGenerationLaunch{}, err
 		}
 
-		selection := harnesscore.HarnessSelection{
+		selection := harnesscore.Selection{
 			Role: harnesscore.Generation, Action: "plan_generation", Source: "project", Profile: config.Harnesses.Generation,
 			Harness: "codex", Backend: "codex", ModelProvider: "cli_default", Model: model,
 			SelectionRevision: config.Revision(), ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + model)),
 			Capabilities: harness.Capabilities{Generation: true},
-			Readiness:    harnesscore.HarnessReadiness{Supported: true, Executable: "available", Credentials: "cli_managed", Runtime: "native"},
+			Readiness:    harnesscore.Readiness{Supported: true, Executable: "available", Credentials: "cli_managed", Runtime: "native"},
 		}
-		binding, err := harnesscore.SealHarnessGenerationBinding(harnesscore.HarnessGenerationBinding{Selection: selection, ExecutableRef: executable.Reference, ProtocolRevision: "fixture-generation/v1"})
+		binding, err := harnesscore.SealGenerationBinding(harnesscore.GenerationBinding{Selection: selection, ExecutableRef: executable.Reference, ProtocolRevision: "fixture-generation/v1"})
 
 		return binding, HarnessGenerationLaunch{Program: executable.Command[0]}, err
 	}

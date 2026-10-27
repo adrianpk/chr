@@ -30,7 +30,7 @@ func TestHarnessSelectionProfiles(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			profiles, err := LoadHarnessProfiles(dir)
+			profiles, err := LoadProfiles(dir)
 			if (err != nil) != test.invalid || (err != nil && strings.Contains(err.Error(), "fixture-private-value")) {
 				t.Fatalf("profile error = %v", err)
 			}
@@ -44,8 +44,8 @@ func TestHarnessSelectionProfiles(t *testing.T) {
 
 // Private references are never projected, and credentials do not enter revisions.
 func TestHarnessSelectionProfileIdentity(t *testing.T) {
-	profile := HarnessProfile{Name: "coding", Harness: "codex", Command: "/private/driver", CredentialRef: "/private/auth", ModelConfigRef: "/private/models", RuntimeRef: "private-runtime", Model: "example-model"}
-	profile.Revision = HarnessProfileRevision(profile)
+	profile := Profile{Name: "coding", Harness: "codex", Command: "/private/driver", CredentialRef: "/private/auth", ModelConfigRef: "/private/models", RuntimeRef: "private-runtime", Model: "example-model"}
+	profile.Revision = ProfileRevision(profile)
 
 	data, err := json.Marshal(profile)
 	if err != nil || strings.Contains(string(data), "/private/") || strings.Contains(string(data), "private-runtime") {
@@ -53,7 +53,7 @@ func TestHarnessSelectionProfileIdentity(t *testing.T) {
 	}
 
 	profile.Model = "another-model"
-	if HarnessProfileRevision(profile) == profile.Revision {
+	if ProfileRevision(profile) == profile.Revision {
 		t.Fatal("changed semantic model kept its revision")
 	}
 }
@@ -61,16 +61,16 @@ func TestHarnessSelectionProfileIdentity(t *testing.T) {
 // Bound reads and permissions before parsing a private document.
 func TestHarnessSelectionPrivateFile(t *testing.T) {
 	dir := t.TempDir()
-	if profiles, err := LoadHarnessProfiles(dir); err != nil || len(profiles) != 0 {
+	if profiles, err := LoadProfiles(dir); err != nil || len(profiles) != 0 {
 		t.Fatalf("absent private setup = %v", err)
 	}
 
 	path := filepath.Join(dir, "harnesses.yml")
-	if err := os.WriteFile(path, []byte(strings.Repeat("x", harnessProfilesLimit+1)), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte(strings.Repeat("x", profileLimit+1)), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := LoadHarnessProfiles(dir); err == nil {
+	if _, err := LoadProfiles(dir); err == nil {
 		t.Fatal("oversized private setup accepted")
 	}
 
@@ -82,7 +82,7 @@ func TestHarnessSelectionPrivateFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := LoadHarnessProfiles(dir); err == nil {
+	if _, err := LoadProfiles(dir); err == nil {
 		t.Fatal("non-private setup accepted")
 	}
 }

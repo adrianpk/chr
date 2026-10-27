@@ -21,7 +21,7 @@ func WithHarnessGeneration(ctx context.Context, operation HarnessGenerationOpera
 }
 
 // HarnessGenerationSelection returns a value copy without the private executable.
-func HarnessGenerationSelection(ctx context.Context) (string, harnesscore.HarnessGenerationBinding, bool) {
+func HarnessGenerationSelection(ctx context.Context) (string, harnesscore.GenerationBinding, bool) {
 	operation, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation)
 
 	return operation.ID, operation.Binding, ok

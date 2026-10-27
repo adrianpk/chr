@@ -18,10 +18,10 @@ const harnessGenerationRecordLimit = 16 * 1024
 // HarnessGenerationOperation is an immutable host-owned operation identity.
 // The private executable path is retained locally and omitted from projections.
 type HarnessGenerationOperation struct {
-	ID           string                               `json:"id"`
-	Purpose      string                               `json:"purpose"`
-	ProjectRef   string                               `json:"project_ref,omitempty"`
-	Binding      harnesscore.HarnessGenerationBinding `json:"binding"`
+	ID           string                        `json:"id"`
+	Purpose      string                        `json:"purpose"`
+	ProjectRef   string                        `json:"project_ref,omitempty"`
+	Binding      harnesscore.GenerationBinding `json:"binding"`
 	program      string
 	project      string
 	configDir    string
@@ -45,7 +45,7 @@ type HarnessGenerationLocation struct {
 }
 
 // HarnessGenerationResolver prepares one complete selection under the config owner.
-type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (harnesscore.HarnessGenerationBinding, HarnessGenerationLaunch, error)
+type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (harnesscore.GenerationBinding, HarnessGenerationLaunch, error)
 
 type harnessGenerationOperationFile struct {
 	Schema       string                       `json:"schema"`
@@ -183,7 +183,7 @@ func generationOperationLocation(root string, locations []HarnessGenerationLocat
 }
 
 func validateGenerationOperation(operation HarnessGenerationOperation) error {
-	if err := harnesscore.ValidateHarnessGenerationBinding(operation.Binding); err != nil {
+	if err := harnesscore.ValidateGenerationBinding(operation.Binding); err != nil {
 		return err
 	}
 

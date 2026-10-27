@@ -158,7 +158,7 @@ func renderHarnessSelectionStatus(stdout io.Writer, status HarnessSelectionStatu
 		return err
 	}
 
-	for _, role := range []harnesscore.HarnessSelection{status.Worker, status.Generation} {
+	for _, role := range []harnesscore.Selection{status.Worker, status.Generation} {
 		if _, err := fmt.Fprintf(stdout, "%s: %s; backend: %s; provider: %s; model: %s; locally ready: %t\n", role.Role, harnessChoiceLabel(role.Profile), role.Backend, role.ModelProvider, role.Model, role.Readiness.Ready()); err != nil {
 			return err
 		}

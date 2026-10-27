@@ -98,7 +98,7 @@ func prepareHarnessLivePi(t *testing.T, operations service, options harnessLiveP
 	profiles := "profiles:\n"
 
 	for _, role := range []struct{ name, program string }{{"proof-generation", options.native}, {"proof-worker", options.bridge}} {
-		profile := harnesscore.HarnessProfile{Name: role.name, Harness: "pi", Command: role.program, ModelProvider: options.provider, Model: options.model, Thinking: "off", CredentialRef: "live-provider/auth.json"}
+		profile := harnesscore.Profile{Name: role.name, Harness: "pi", Command: role.program, ModelProvider: options.provider, Model: options.model, Thinking: "off", CredentialRef: "live-provider/auth.json"}
 		if role.name == "proof-worker" {
 			profile.RuntimeRef = options.image
 		}
@@ -189,7 +189,7 @@ func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, gene
 	t.Logf("real Pi proof passed: candidate=%s provider=%s model=%s runtime=%s worker_commit=%s generation_usage=%s", evidence.Candidate, options.provider, options.model, evidence.Runtime, evidence.WorkerCommit, generation.UsageStatus)
 }
 
-func harnessLivePiProfile(profile harnesscore.HarnessProfile) string {
+func harnessLivePiProfile(profile harnesscore.Profile) string {
 	text := fmt.Sprintf("  %s:\n    harness: pi\n    command: %q\n    model_provider: %q\n    model: %q\n    thinking: off\n    credential_ref: %q\n", profile.Name, profile.Command, profile.ModelProvider, profile.Model, profile.CredentialRef)
 	if profile.RuntimeRef != "" {
 		text += fmt.Sprintf("    runtime_ref: %q\n", profile.RuntimeRef)

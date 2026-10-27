@@ -6,8 +6,8 @@ import (
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-// HarnessReadiness describes local preparation separately from remote authentication.
-type HarnessReadiness struct {
+// Readiness describes local preparation separately from remote authentication.
+type Readiness struct {
 	Executable           string `json:"executable"`
 	Credentials          string `json:"credentials"`
 	Runtime              string `json:"runtime"`
@@ -17,13 +17,13 @@ type HarnessReadiness struct {
 }
 
 // Ready reports whether local dispatch is supported; it makes no remote call.
-func (r HarnessReadiness) Ready() bool {
+func (r Readiness) Ready() bool {
 	return r.Supported && slices.Contains([]string{"available", "not_required"}, r.Executable) && slices.Contains([]string{"native", "not_required", "available"}, r.Runtime) &&
 		(r.Credentials == "present" || r.Credentials == "cli_managed" || r.Credentials == "api_managed")
 }
 
-// HarnessSelection is a readable projection without executable or credential paths.
-type HarnessSelection struct {
+// Selection is a readable projection without executable or credential paths.
+type Selection struct {
 	Role              Role                 `json:"role"`
 	Action            string               `json:"action,omitempty"`
 	Profile           string               `json:"profile,omitempty"`
@@ -36,5 +36,5 @@ type HarnessSelection struct {
 	SelectionRevision string               `json:"selection_revision"`
 	ProfileRevision   string               `json:"profile_revision,omitempty"`
 	Capabilities      harness.Capabilities `json:"capabilities"`
-	Readiness         HarnessReadiness     `json:"readiness"`
+	Readiness         Readiness            `json:"readiness"`
 }

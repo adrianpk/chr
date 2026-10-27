@@ -125,7 +125,7 @@ func harnessSelectionWrite(t *testing.T, path, body string) {
 	}
 }
 
-func assertHarnessSelection(t *testing.T, view harnesscore.HarnessSelection, err error, backend, source, profile, model string) {
+func assertHarnessSelection(t *testing.T, view harnesscore.Selection, err error, backend, source, profile, model string) {
 	t.Helper()
 
 	if err != nil || view.Backend != backend || view.Source != source || view.Profile != profile || view.Model != model {

@@ -55,6 +55,12 @@ qualification and the equivalent standard-library membership predicate.
 Dependency guards allow only the existing neutral capability and exact digest
 owner; workflow/coordinator imports remain forbidden.
 
+A separate naming commit shortens the moved types and operations to Profile,
+Selection, Readiness, SelectionConfig, GenerationBinding, LoadProfiles,
+ProfileRevision, SealGenerationBinding and ValidateGenerationBinding. Native
+configuration-only files now use configuration names. Direct consumers retain
+all field names and JSON tags; the preimage ledger follows each current name.
+
 ## Contracts Added or Changed
 
 Pure binding validation and lexical identity predicates moved without a root
@@ -104,6 +110,11 @@ Executable preparation checks passed:
 Profile owner move checks passed:
 
 - `go test ./internal/core/harness ./internal/core ./internal/app ./internal/tui ./internal/webui -run '^Test(Harness|ServiceHarness|QualityRecordWire|TelegramHarness|WebHarness)' -count=1 -timeout=3m`: TUI compiled with no matching tests; domain, native, app and Web checks passed.
+
+Profile naming checks passed:
+
+- `go test ./internal/core/harness ./internal/core ./internal/app -run '^Test(HarnessSelection|HarnessGenerationBinding|QualityRecordWire|ServiceHarness)' -count=1 -timeout=3m`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app ./internal/tui ./internal/webui`: zero issues.
 
 ## Risks and Follow-ups
 

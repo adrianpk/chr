@@ -9,17 +9,17 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
-// HarnessGenerationBinding retains a non-secret selection for one operation.
+// GenerationBinding retains a non-secret selection for one operation.
 // Readiness records admission-time local evidence, never remote authentication.
-type HarnessGenerationBinding struct {
-	Selection        HarnessSelection `json:"selection"`
-	ExecutableRef    ExecutableRef    `json:"executable_ref"`
-	ProtocolRevision string           `json:"protocol_revision"`
-	BindingHash      string           `json:"binding_hash"`
+type GenerationBinding struct {
+	Selection        Selection     `json:"selection"`
+	ExecutableRef    ExecutableRef `json:"executable_ref"`
+	ProtocolRevision string        `json:"protocol_revision"`
+	BindingHash      string        `json:"binding_hash"`
 }
 
-// SealHarnessGenerationBinding seals the complete admitted selection.
-func SealHarnessGenerationBinding(binding HarnessGenerationBinding) (HarnessGenerationBinding, error) {
+// SealGenerationBinding seals the complete admitted selection.
+func SealGenerationBinding(binding GenerationBinding) (GenerationBinding, error) {
 	binding.BindingHash = ""
 
 	data, err := json.Marshal(binding)
@@ -29,11 +29,11 @@ func SealHarnessGenerationBinding(binding HarnessGenerationBinding) (HarnessGene
 
 	binding.BindingHash = contenthash.Sum(data)
 
-	return binding, ValidateHarnessGenerationBinding(binding)
+	return binding, ValidateGenerationBinding(binding)
 }
 
-// ValidateHarnessGenerationBinding checks retained identity without reading live settings.
-func ValidateHarnessGenerationBinding(binding HarnessGenerationBinding) error {
+// ValidateGenerationBinding checks retained identity without reading live settings.
+func ValidateGenerationBinding(binding GenerationBinding) error {
 	if err := validateGenerationBindingSelection(binding.Selection); err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func ValidateHarnessGenerationBinding(binding HarnessGenerationBinding) error {
 	return nil
 }
 
-func validateGenerationBindingSelection(s HarnessSelection) error {
+func validateGenerationBindingSelection(s Selection) error {
 	if s.Role != Generation || !s.Readiness.Ready() || !SelectionDigest(s.SelectionRevision) || !SelectionDigest(s.ProfileRevision) {
 		return errors.New("generation binding requires a ready versioned selection")
 	}
@@ -65,7 +65,7 @@ func validateGenerationBindingSelection(s HarnessSelection) error {
 	return validateGenerationBindingSource(s)
 }
 
-func validateGenerationBindingText(binding HarnessGenerationBinding) error {
+func validateGenerationBindingText(binding GenerationBinding) error {
 	s := binding.Selection
 	for _, value := range []string{s.Action, s.ModelProvider, s.Model, binding.ProtocolRevision} {
 		if value == "" || len(value) > 4096 || strings.ContainsAny(value, "\x00\r\n") {
@@ -80,7 +80,7 @@ func validateGenerationBindingText(binding HarnessGenerationBinding) error {
 	return nil
 }
 
-func validateGenerationBindingSource(s HarnessSelection) error {
+func validateGenerationBindingSource(s Selection) error {
 	if s.Source == "project" && ValidProfileName(s.Profile) {
 		return nil
 	}
@@ -92,7 +92,7 @@ func validateGenerationBindingSource(s HarnessSelection) error {
 	return errors.New("generation binding requires an explicit profile or legacy provenance")
 }
 
-func validateGenerationBindingTransport(binding HarnessGenerationBinding) error {
+func validateGenerationBindingTransport(binding GenerationBinding) error {
 	s := binding.Selection
 	if s.Backend == "openai" {
 		return validateGenerationBindingAPI(binding)
@@ -109,7 +109,7 @@ func validateGenerationBindingTransport(binding HarnessGenerationBinding) error 
 	return nil
 }
 
-func validateGenerationBindingAPI(binding HarnessGenerationBinding) error {
+func validateGenerationBindingAPI(binding GenerationBinding) error {
 	s := binding.Selection
 	if s.Harness != "" || s.Source != "legacy" || s.ModelProvider != "openai" || binding.ExecutableRef != (ExecutableRef{}) {
 		return errors.New("direct API generation cannot claim a harness executable")

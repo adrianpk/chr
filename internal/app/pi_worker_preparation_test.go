@@ -16,7 +16,7 @@ func TestPiWorkerPreparation(t *testing.T) {
 	for _, name := range []string{"missing", "native script", "directory", "pipe", "oversize"} {
 		t.Run(name, func(t *testing.T) {
 			program, marker := piPreparationProgram(t, name)
-			profile := harnesscore.HarnessProfile{Harness: "pi", Command: program, ModelProvider: "fixture", Model: "model"}
+			profile := harnesscore.Profile{Harness: "pi", Command: program, ModelProvider: "fixture", Model: "model"}
 
 			readiness, image := piProfileReadiness(t.Context(), profile, harnesscore.Worker, "")
 			if readiness.Ready() || image != "" || !strings.Contains(readiness.Problem, "chr worker bridge") {

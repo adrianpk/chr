@@ -114,7 +114,7 @@ func telegramHarnessCheckGeneration(ctx context.Context, t *testing.T, operation
 	}
 }
 
-func telegramHarnessGenerationBinding(ctx context.Context, t *testing.T, operations service, id string) harnesscore.HarnessGenerationBinding {
+func telegramHarnessGenerationBinding(ctx context.Context, t *testing.T, operations service, id string) harnesscore.GenerationBinding {
 	t.Helper()
 
 	ctx, err := operations.bindHarnessGeneration(ctx, id, "spec_generation")

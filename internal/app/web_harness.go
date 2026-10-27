@@ -58,7 +58,7 @@ func (p webViewProvider) HarnessSelectionView(ctx context.Context) (webui.Harnes
 	return view, nil
 }
 
-func webHarnessRole(selection harnesscore.HarnessSelection, profile string, generation bool) webui.HarnessRoleView {
+func webHarnessRole(selection harnesscore.Selection, profile string, generation bool) webui.HarnessRoleView {
 	view := webui.HarnessRoleView{Current: webHarnessLabel(profile, selection.Harness, selection.ModelProvider, selection.Model), Problem: selection.Readiness.Problem}
 
 	view.Selected = webui.HarnessKeepProfile
@@ -136,7 +136,7 @@ func webHarnessChoice(value string) *string {
 	return &value
 }
 
-func webHarnessChoiceSetup(readiness harnesscore.HarnessReadiness) string {
+func webHarnessChoiceSetup(readiness harnesscore.Readiness) string {
 	if readiness.Ready() {
 		return " · ready"
 	}

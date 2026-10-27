@@ -38,7 +38,7 @@ func newHarnessJourney(t *testing.T) *harnessJourney {
 	telegram, operations, record, start, _ := telegramHarnessWorkerFixture(t)
 	workerProfiles := prepareServiceHarnessBinding(t, operations)
 
-	profiles, err := harnesscore.LoadHarnessProfiles(filepath.Dir(workerProfiles))
+	profiles, err := harnesscore.LoadProfiles(filepath.Dir(workerProfiles))
 	if err != nil {
 		t.Fatal(err)
 	}

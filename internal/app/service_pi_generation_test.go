@@ -135,12 +135,12 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 
 	binding.ProtocolRevision = "pi-rpc/future"
 
-	binding, err = harnesscore.SealHarnessGenerationBinding(binding)
+	binding, err = harnesscore.SealGenerationBinding(binding)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	op, err := core.FreezeHarnessGeneration(t.Context(), operations.projectContext.ProjectDir, "unsupported-protocol", "conversation", func(context.Context, core.WorkspaceConfig) (harnesscore.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
+	op, err := core.FreezeHarnessGeneration(t.Context(), operations.projectContext.ProjectDir, "unsupported-protocol", "conversation", func(context.Context, core.WorkspaceConfig) (harnesscore.GenerationBinding, core.HarnessGenerationLaunch, error) {
 		return binding, launch, nil
 	})
 	if err != nil {
