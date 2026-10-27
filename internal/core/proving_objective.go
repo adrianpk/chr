@@ -92,7 +92,7 @@ func loadProvingObjectiveForProject(projectDir, objectivePath string) (provingOb
 		return provingObjectiveSource{}, err
 	}
 
-	objective, err := LoadProvingObjective(resolveProjectPath(projectDir, objectivePath))
+	objective, err := LoadProvingObjective(projectcore.ResolvePath(projectDir, objectivePath))
 	if err != nil {
 		return provingObjectiveSource{}, err
 	}

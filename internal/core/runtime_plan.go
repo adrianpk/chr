@@ -80,7 +80,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	executionWorkspaceDir := runtimeExecutionWorkspaceDir(projectDir, workspace.Mode, opts.ExecutionWorkspaceDir)
 
 	workspaceDir := filepath.Join(executionWorkspaceDir, workspacecore.DirectoryName)
-	dockerfilePath := resolveProjectPath(projectDir, config.DockerfilePath)
+	dockerfilePath := projectcore.ResolvePath(projectDir, config.DockerfilePath)
 
 	artifactDir, runArtifactDir, workerContextPath, resultPath, logPath, validationPath, err := runtimeArtifactPaths(projectDir, executionWorkspaceDir, config.ArtifactDir, opts)
 	if err != nil {
@@ -165,7 +165,7 @@ func runtimeExecutionWorkspaceDir(projectDir string, mode WorkWorkspaceMode, con
 		return projectDir
 	}
 
-	return resolveProjectPath(projectDir, configuredPath)
+	return projectcore.ResolvePath(projectDir, configuredPath)
 }
 
 type runtimeArtifactPathSet struct {
@@ -245,7 +245,7 @@ func canonicalRunArtifactDir(layout opscore.Layout, artifactDir, artifactID stri
 }
 
 func privateRuntimeArtifactPaths(executionWorkspaceDir, configuredArtifactDir string, opts RuntimePlanOptions) runtimeArtifactPathSet {
-	artifactDir := resolveProjectPath(executionWorkspaceDir, configuredArtifactDir)
+	artifactDir := projectcore.ResolvePath(executionWorkspaceDir, configuredArtifactDir)
 	runArtifactDir := privateRunArtifactDir(artifactDir, opts)
 
 	return runtimeArtifactPathSet{

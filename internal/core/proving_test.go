@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -174,7 +175,7 @@ func TestRunProvingRalphLoopStopsOnValidationPass(t *testing.T) {
 			return ProvingValidationResult{
 				Objective: objective,
 				Passed:    true,
-				LogPath:   resolveProjectPath(projectDir, objective.ValidationPath),
+				LogPath:   projectcore.ResolvePath(projectDir, objective.ValidationPath),
 				Commands: []ProvingValidationCommandResult{
 					{Command: "make verify", ExitCode: 0},
 				},
@@ -236,7 +237,7 @@ func TestRunProvingRalphLoopFeedsFailureIntoNextAttempt(t *testing.T) {
 			return ProvingValidationResult{
 				Objective: objective,
 				Passed:    passed,
-				LogPath:   resolveProjectPath(projectDir, objective.ValidationPath),
+				LogPath:   projectcore.ResolvePath(projectDir, objective.ValidationPath),
 				Commands: []ProvingValidationCommandResult{
 					{Command: "make test", ExitCode: exitCode, Stdout: stdout},
 				},
@@ -284,7 +285,7 @@ func TestRunProvingRalphLoopStopsOnRepeatedFailure(t *testing.T) {
 			return ProvingValidationResult{
 				Objective: objective,
 				Passed:    false,
-				LogPath:   resolveProjectPath(projectDir, objective.ValidationPath),
+				LogPath:   projectcore.ResolvePath(projectDir, objective.ValidationPath),
 				Commands: []ProvingValidationCommandResult{
 					{Command: "make test", ExitCode: 2, Stdout: "same failure\n"},
 				},

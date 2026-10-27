@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -173,7 +174,7 @@ func loadAuthoringSelectedDocument(
 	}
 
 	path = filepath.Clean(path)
-	if !pathIsInsideProject(projectDir, path) {
+	if !projectcore.ContainsPath(projectDir, path) {
 		return ContextDocument{}, ContextSourceInventoryEntry{}, fmt.Errorf("authoring context document is outside project: %s", path)
 	}
 

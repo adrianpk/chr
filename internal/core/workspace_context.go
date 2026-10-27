@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // WorkspaceContextScope defines a package boundary type.
@@ -300,7 +302,7 @@ func loadWorkspaceContextNode(
 	}
 
 	path = filepath.Clean(path)
-	if !pathIsInsideProject(projectDir, path) {
+	if !projectcore.ContainsPath(projectDir, path) {
 		return workspaceContextSource{}, fmt.Errorf("workspace context document is outside project: %s", path)
 	}
 

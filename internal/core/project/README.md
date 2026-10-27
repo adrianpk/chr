@@ -13,3 +13,9 @@ coordinator is imported. Callers use this package directly.
 ResolveDirectory validates the existing shared project directory contract. It
 returns the absolute path after the original existence/type checks; workspace
 initialization and operational namespace callers use that same operation.
+
+ResolvePath and ContainsPath own project-relative spelling and lexical containment.
+ContainsPath does not resolve symlinks or replace a caller's authoritative path
+guard. WriteFileAtomically retains the existing adjacent .tmp replacement and
+errors; it does not replace bounded, synced workflow writes or authoring journals.
+Those remain distinct durability contracts owned by their callers.

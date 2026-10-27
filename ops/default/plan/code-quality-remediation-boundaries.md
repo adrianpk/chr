@@ -620,3 +620,15 @@ namespace, preserving default versus path-owned namespace and avoiding OPS_USER.
 The distinct ASCII artifact-ID slug rule stays separate from the Unicode quiz
 slug rule. The metadata body schema, type list, namespace precedence, directories,
 number scan, file omission and allocation lock cleanup remain unchanged.
+
+### Shared project operations required by authoring
+
+The existing core/project owner now contains the original project-relative path
+resolution, lexical containment and adjacent-file replacement operations. Their
+three original declaration hashes and direct consumers are recorded in the
+Slice 9 move ledger. No root aliases, wrappers or additional dependencies are
+introduced. Lexical containment is not a symlink-security check. The adjacent
+.tmp replacement remains distinct from bounded and synced workflow writes;
+transaction permission, locking, failure handling and journals stay with their
+original operation owners. This resolves concrete edges in the authoring source
+scan without introducing a generic helper package.

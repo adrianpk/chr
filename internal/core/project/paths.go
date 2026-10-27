@@ -1,11 +1,12 @@
-package core
+package project
 
 import (
 	"path/filepath"
 	"strings"
 )
 
-func pathIsInsideProject(projectDir, targetPath string) bool {
+// ContainsPath compares project-relative spelling without resolving symlinks.
+func ContainsPath(projectDir, targetPath string) bool {
 	rel, err := filepath.Rel(projectDir, targetPath)
 	if err != nil {
 		return false
@@ -14,7 +15,8 @@ func pathIsInsideProject(projectDir, targetPath string) bool {
 	return rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))
 }
 
-func resolveProjectPath(projectDir, configuredPath string) string {
+// ResolvePath resolves a configured absolute or project-relative path.
+func ResolvePath(projectDir, configuredPath string) string {
 	path := filepath.Clean(filepath.FromSlash(configuredPath))
 	if filepath.IsAbs(path) {
 		return path

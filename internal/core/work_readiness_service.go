@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // WorkReadinessOptions describes a package boundary value.
@@ -552,7 +554,7 @@ func (check workReadinessGitStateCheck) baseReadiness(ctx context.Context, repor
 }
 
 func checkWorkReadinessWorktreeRoot(projectDir string, report WorkReadinessReport) WorkReadinessReport {
-	root := resolveProjectPath(projectDir, report.Workspace.WorktreeRoot)
+	root := projectcore.ResolvePath(projectDir, report.Workspace.WorktreeRoot)
 	if pathExists(root) {
 		return report
 	}

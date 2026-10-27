@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // RuntimeArtifactCleanupPreview describes a package boundary value.
@@ -44,7 +46,7 @@ func (s RuntimeArtifactCleanupPreviewService) Preview(
 	}
 
 	config.Runtime = fillRuntimeConfigDefaults(config.Runtime)
-	artifactDir := resolveProjectPath(projectDir, config.Runtime.ArtifactDir)
+	artifactDir := projectcore.ResolvePath(projectDir, config.Runtime.ArtifactDir)
 
 	records, err := s.repository.ListProjectExecutions(ctx, projectID)
 	if err != nil {

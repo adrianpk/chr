@@ -11,6 +11,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -184,11 +185,11 @@ func planProvingRuntime(projectDir string, objective ProvingObjective, mounts []
 		return ProvingSandboxRunResult{}, err
 	}
 
-	plan.RunArtifactDir = resolveProjectPath(projectDir, objective.ArtifactRoot)
-	plan.WorkerContextPath = resolveProjectPath(projectDir, objective.ContextPath)
-	plan.ResultPath = resolveProjectPath(projectDir, objective.ResultPath)
-	plan.LogPath = resolveProjectPath(projectDir, objective.LogPath)
-	plan.ValidationPath = resolveProjectPath(projectDir, objective.ValidationPath)
+	plan.RunArtifactDir = projectcore.ResolvePath(projectDir, objective.ArtifactRoot)
+	plan.WorkerContextPath = projectcore.ResolvePath(projectDir, objective.ContextPath)
+	plan.ResultPath = projectcore.ResolvePath(projectDir, objective.ResultPath)
+	plan.LogPath = projectcore.ResolvePath(projectDir, objective.LogPath)
+	plan.ValidationPath = projectcore.ResolvePath(projectDir, objective.ValidationPath)
 
 	ticketPath, err := findProvingTicketPath(projectDir, objective.TicketKey)
 	if err != nil {

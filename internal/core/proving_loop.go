@@ -11,6 +11,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -146,7 +147,7 @@ func newProvingRalphLoopResult(projectDir string, objective ProvingObjective) Pr
 		Objective:   objective,
 		Status:      ProvingRalphLoopStatusFailed,
 		StopReason:  ProvingRalphLoopStopMaxAttempts,
-		SummaryPath: resolveProjectPath(projectDir, summaryPath),
+		SummaryPath: projectcore.ResolvePath(projectDir, summaryPath),
 	}
 }
 

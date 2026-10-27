@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -146,7 +147,7 @@ func normalizeProjectDocumentContextOptions(opts ProjectDocumentContextOptions) 
 	}
 
 	ticketPath = filepath.Clean(ticketPath)
-	if !pathIsInsideProject(projectDir, ticketPath) {
+	if !projectcore.ContainsPath(projectDir, ticketPath) {
 		return "", "", fmt.Errorf("ticket path is outside project: %s", ticketPath)
 	}
 

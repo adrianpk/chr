@@ -32,7 +32,8 @@ consumer-owned operation port before moving session code. Root core must not
 become an imported coordinator dependency of authoring.
 
 Four ops production files and their two focused test files move with 41 original
-declaration hashes retained in the move ledger. The current dependency map and
+declaration hashes retained in the move ledger. The two shared project path and
+replacement files add three original declarations, for 44 recorded move entries. The current dependency map and
 file-owner inventory include this prerequisite. Module import checks prevent
 ops from importing authoring, root core or workflow policy.
 
@@ -46,6 +47,12 @@ artifact IDs. The distinct ASCII artifact slug and Unicode quiz slug rules stay
 separate. Legacy ticket writers resolve an explicit path-owned/default namespace
 without consulting OPS_USER.
 
+Project-relative resolution, lexical containment and adjacent .tmp replacement
+now belong to core/project. Authoring and workflow callers use that existing
+owner directly. Lexical containment does not become a symlink guard. The adjacent
+replacement is kept distinct from bounded, synced workflow file writes; all
+caller-owned locks, durable journals and cleanup behavior retain their owners.
+
 Callers use ops.Layout, ArtifactOptions, ResolveLayout and artifact operations
 without repeated package prefixes. Two debt signatures qualify their unchanged
 layout type through its new owner;
@@ -55,6 +62,7 @@ seven and the same one external-interface exception.
 ## Files of Interest
 
 - `internal/core/ops/` owns layout, paths, shared envelopes and allocation primitives.
+- `internal/core/project/paths.go` and `files.go` own the existing shared project primitives.
 - [Move evidence](../../../plan/code-quality-remediation-slice-9-moves.csv).
 - [Signature reassociations](../../../plan/code-quality-remediation-slice-9-signatures.csv).
 - [Current owners](../../../plan/code-quality-remediation-core-owners.csv) and
@@ -70,6 +78,12 @@ seven and the same one external-interface exception.
   — passed after the explicit legacy namespace resolver.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ops ./internal/core ./internal/app ./internal/tui ./scripts/goquality`
   — passed with zero issues after package naming and import formatting.
+
+- `go test ./internal/core/project ./internal/core ./internal/app -run '^Test(Authoring|DumpMutation|SpecMutation|PlanSources|ProjectMetadata|ProjectDump|ContextPackageMaterializer)' -count=1 -timeout=3m`
+  — passed after project primitive ownership; the app package compiled with no matching tests.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/project ./internal/core ./internal/app`
+  — passed with zero issues after project primitive ownership.
+- `git diff --check` — passed at the task checkpoints.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 const defaultAgentIdentityID = "default-go-software-infrastructure-agent"
@@ -166,7 +168,7 @@ func normalizeAgentProtocolContextOptions(opts AgentProtocolContextOptions) (str
 		return "", "", "", err
 	}
 
-	if !pathIsInsideProject(projectDir, targetPath) {
+	if !projectcore.ContainsPath(projectDir, targetPath) {
 		return "", "", "", fmt.Errorf("target path is outside project: %s", targetPath)
 	}
 

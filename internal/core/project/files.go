@@ -1,4 +1,4 @@
-package core
+package project
 
 import (
 	"fmt"
@@ -6,7 +6,9 @@ import (
 	"path/filepath"
 )
 
-func writeFileAtomically(path string, content []byte) error {
+// WriteFileAtomically preserves the existing adjacent temporary-file replacement.
+// Callers retain mutation permission, locking and transaction ownership.
+func WriteFileAtomically(path string, content []byte) error {
 	err := os.MkdirAll(filepath.Dir(path), 0o755)
 	if err != nil {
 		return fmt.Errorf("create parent directory: %w", err)

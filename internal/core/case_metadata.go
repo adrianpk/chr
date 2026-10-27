@@ -12,6 +12,7 @@ import (
 	"unicode"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // CaseMetadataSchemaVersion defines a package boundary constant.
@@ -147,7 +148,7 @@ func (s CaseMetadataService) save(metadata CaseMetadata) (CaseMetadata, error) {
 
 	content := RenderCaseMetadata(metadata)
 
-	err = writeFileAtomically(path, []byte(content))
+	err = projectcore.WriteFileAtomically(path, []byte(content))
 	if err != nil {
 		return CaseMetadata{}, fmt.Errorf("write case metadata: %w", err)
 	}
