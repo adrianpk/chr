@@ -1,5 +1,7 @@
 package app
 
+import "forge.adrianpk.com/chr/internal/core/gate"
+
 import (
 	"os"
 	"path/filepath"
@@ -9,10 +11,10 @@ import (
 )
 
 // newGateReportArtifacts constructs the corresponding package service or value.
-func newGateReportArtifacts(projectDir string, createdAt time.Time) (core.GateReportArtifacts, error) {
+func newGateReportArtifacts(projectDir string, createdAt time.Time) (gate.GateReportArtifacts, error) {
 	layout, err := core.ResolveOpsLayout(core.ResolveOpsLayoutOptions{ProjectDir: projectDir})
 	if err != nil {
-		return core.GateReportArtifacts{}, err
+		return gate.GateReportArtifacts{}, err
 	}
 
 	artifact, err := core.CreateOpsArtifact(core.CreateOpsArtifactOptions{
@@ -24,10 +26,10 @@ func newGateReportArtifacts(projectDir string, createdAt time.Time) (core.GateRe
 		Now:         func() time.Time { return createdAt },
 	})
 	if err != nil {
-		return core.GateReportArtifacts{}, err
+		return gate.GateReportArtifacts{}, err
 	}
 
-	return core.GateReportArtifacts{
+	return gate.GateReportArtifacts{
 		JSONPath:     filepath.Join(artifact.Dir, "evidence", "gate-report.json"),
 		MarkdownPath: filepath.Join(artifact.Dir, core.OpsArtifactBodyFile()),
 	}, nil

@@ -1,5 +1,7 @@
 package core
 
+import "forge.adrianpk.com/chr/internal/core/gate"
+
 import (
 	"context"
 	"encoding/json"
@@ -20,23 +22,23 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 		t.Fatalf("NewGateReportArtifacts returned error: %v", err)
 	}
 
-	report := NewGateReport(createdAt, GateGitEvidence{
-		Base:      GateGitRef{Ref: "main", SHA: "base-sha"},
-		Head:      GateGitRef{Ref: "dev", SHA: "head-sha"},
+	report := gate.NewGateReport(createdAt, gate.GateGitEvidence{
+		Base:      gate.GateGitRef{Ref: "main", SHA: "base-sha"},
+		Head:      gate.GateGitRef{Ref: "dev", SHA: "head-sha"},
 		MergeBase: "base-sha",
-		Commits: []GateGitCommit{
+		Commits: []gate.GateGitCommit{
 			{SHA: "head-sha", Subject: "add gate"},
 		},
-		Files: []GateGitChangedFile{
+		Files: []gate.GateGitChangedFile{
 			{Status: "M", Path: "internal/core/gate.go"},
 		},
 		DiffStat: "1 file changed, 1 insertion(+)",
-	}, GateValidationResult{
-		Command: DefaultGateValidationCommand,
+	}, gate.GateValidationResult{
+		Command: gate.DefaultGateValidationCommand,
 		Passed:  true,
-	}, GateEvidenceClassification{}, artifacts)
+	}, gate.GateEvidenceClassification{}, artifacts)
 
-	path, err := NewGateReportWriter().WriteJSON(context.Background(), report)
+	path, err := gate.NewGateReportWriter().WriteJSON(context.Background(), report)
 	if err != nil {
 		t.Fatalf("WriteJSON returned error: %v", err)
 	}
@@ -51,14 +53,14 @@ func TestGateReportWriterWritesJSON(t *testing.T) {
 		t.Fatalf("read report: %v", err)
 	}
 
-	var decoded GateReport
+	var decoded gate.GateReport
 
 	err = json.Unmarshal(content, &decoded)
 	if err != nil {
 		t.Fatalf("decode report: %v", err)
 	}
 
-	if decoded.Status != GateReportStatusPassed {
+	if decoded.Status != gate.GateReportStatusPassed {
 		t.Fatalf("Status = %q, want passed", decoded.Status)
 	}
 
@@ -80,7 +82,7 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 	report := gateReportMarkdownFixture(createdAt, artifacts)
 	report.Failures = []string{"validation failed"}
 
-	path, err := NewGateReportWriter().WriteMarkdown(context.Background(), report)
+	path, err := gate.NewGateReportWriter().WriteMarkdown(context.Background(), report)
 	if err != nil {
 		t.Fatalf("WriteMarkdown returned error: %v", err)
 	}
@@ -112,23 +114,23 @@ func TestGateReportWriterWritesMarkdown(t *testing.T) {
 	}
 }
 
-func gateReportMarkdownFixture(createdAt time.Time, artifacts GateReportArtifacts) GateReport {
-	return NewGateReport(createdAt, GateGitEvidence{
-		Base:      GateGitRef{Ref: "main", SHA: "base-sha"},
-		Head:      GateGitRef{Ref: "dev", SHA: "head-sha"},
+func gateReportMarkdownFixture(createdAt time.Time, artifacts gate.GateReportArtifacts) gate.GateReport {
+	return gate.NewGateReport(createdAt, gate.GateGitEvidence{
+		Base:      gate.GateGitRef{Ref: "main", SHA: "base-sha"},
+		Head:      gate.GateGitRef{Ref: "dev", SHA: "head-sha"},
 		MergeBase: "base-sha",
-		Commits: []GateGitCommit{
+		Commits: []gate.GateGitCommit{
 			{SHA: "head-sha", Subject: "add gate"},
 		},
-		Files: []GateGitChangedFile{
+		Files: []gate.GateGitChangedFile{
 			{Status: "M", Path: "internal/core/gate.go"},
 		},
-	}, GateValidationResult{
-		Command:  DefaultGateValidationCommand,
+	}, gate.GateValidationResult{
+		Command:  gate.DefaultGateValidationCommand,
 		ExitCode: 1,
 		Output:   "validation failed",
-	}, GateEvidenceClassification{
-		AgentManagedWork: []GateAgentManagedWork{
+	}, gate.GateEvidenceClassification{
+		AgentManagedWork: []gate.GateAgentManagedWork{
 			{
 				Path:        "internal/core/gate.go",
 				Status:      "M",
@@ -137,7 +139,7 @@ func gateReportMarkdownFixture(createdAt time.Time, artifacts GateReportArtifact
 				ReportPath:  ".chr/default/runtime/runs/CHR-1/exec-1/execution-report.md",
 			},
 		},
-		ManualOrExternalChanges: []GateManualOrExternalChange{
+		ManualOrExternalChanges: []gate.GateManualOrExternalChange{
 			{Path: "README.md", Status: "M"},
 		},
 	}, artifacts)
@@ -152,11 +154,11 @@ func TestGateReportWriterRejectsDirectoryTarget(t *testing.T) {
 		t.Fatalf("create report directory target: %v", err)
 	}
 
-	report := GateReport{
-		Artifacts: GateReportArtifacts{JSONPath: path},
+	report := gate.GateReport{
+		Artifacts: gate.GateReportArtifacts{JSONPath: path},
 	}
 
-	_, err = NewGateReportWriter().WriteJSON(context.Background(), report)
+	_, err = gate.NewGateReportWriter().WriteJSON(context.Background(), report)
 	if err == nil {
 		t.Fatal("WriteJSON returned nil error")
 	}
@@ -167,15 +169,15 @@ func TestGateReportWriterRejectsDirectoryTarget(t *testing.T) {
 }
 
 func TestNewFailedGateReportRecordsRefsAndFailures(t *testing.T) {
-	report := NewFailedGateReport(
+	report := gate.NewFailedGateReport(
 		time.Date(2026, 6, 1, 12, 30, 45, 0, time.UTC),
 		" main ",
 		" dev ",
-		GateReportArtifacts{},
+		gate.GateReportArtifacts{},
 		[]string{"resolve base ref"},
 	)
 
-	if report.Status != GateReportStatusFailed {
+	if report.Status != gate.GateReportStatusFailed {
 		t.Fatalf("Status = %q, want failed", report.Status)
 	}
 
@@ -188,6 +190,6 @@ func TestNewFailedGateReportRecordsRefsAndFailures(t *testing.T) {
 	}
 }
 
-func newGateTestArtifacts(projectDir string, createdAt time.Time) (GateReportArtifacts, error) {
-	return GateReportArtifacts{JSONPath: filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-"+createdAt.UTC().Format("2006-01-02-15-04-05z"), "evidence", "gate-report.json"), MarkdownPath: filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-"+createdAt.UTC().Format("2006-01-02-15-04-05z"), "artifact.md")}, nil
+func newGateTestArtifacts(projectDir string, createdAt time.Time) (gate.GateReportArtifacts, error) {
+	return gate.GateReportArtifacts{JSONPath: filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-"+createdAt.UTC().Format("2006-01-02-15-04-05z"), "evidence", "gate-report.json"), MarkdownPath: filepath.Join(projectDir, "ops", "default", "report", "00001-dev-main-gate-"+createdAt.UTC().Format("2006-01-02-15-04-05z"), "artifact.md")}, nil
 }

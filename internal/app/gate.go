@@ -1,5 +1,7 @@
 package app
 
+import "forge.adrianpk.com/chr/internal/core/gate"
+
 import (
 	"context"
 	"fmt"
@@ -133,7 +135,7 @@ func (factory commandFactory) runGateWoodpeckerInit(ctx context.Context, cmd *cl
 		return err
 	}
 
-	result, err := core.InitGateWoodpecker(core.GateWoodpeckerInitRequest{
+	result, err := gate.InitGateWoodpecker(gate.GateWoodpeckerInitRequest{
 		ProjectDir: projectContext.ProjectDir,
 		DryRun:     cmd.Bool("dry-run"),
 		Write:      cmd.Bool("write"),
@@ -145,7 +147,7 @@ func (factory commandFactory) runGateWoodpeckerInit(ctx context.Context, cmd *cl
 	return printGateWoodpeckerInitResult(factory.io.Stdout, result)
 }
 
-func printGateWoodpeckerInitResult(stdout io.Writer, result core.GateWoodpeckerInitResult) error {
+func printGateWoodpeckerInitResult(stdout io.Writer, result gate.GateWoodpeckerInitResult) error {
 	_, err := fmt.Fprintf(stdout, "woodpecker: init\nconfig: %s\naction: %s\nfeedback: %s\nwrote: %t\n\n%s",
 		result.ConfigPath,
 		result.Action,
@@ -165,12 +167,12 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return err
 	}
 
-	config, err := core.LoadGateConfig(core.UserPath(projectDir, "config", "gates.yml"))
+	config, err := gate.LoadGateConfig(core.UserPath(projectDir, "config", "gates.yml"))
 	if err != nil {
 		return err
 	}
 
-	evidence, err := core.NewGateGitEvidenceService().Collect(ctx, core.GateGitEvidenceRequest{
+	evidence, err := gate.NewGateGitEvidenceService().Collect(ctx, gate.GateGitEvidenceRequest{
 		ProjectDir: projectDir,
 		BaseRef:    baseRef,
 		HeadRef:    headRef,
@@ -179,7 +181,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return writeGateFailedEvidenceReport(ctx, gateReportSource{CreatedAt: createdAt, Artifacts: artifacts}, baseRef, headRef, err)
 	}
 
-	validation, err := core.NewGateValidationRunner().Run(ctx, core.GateValidationRequest{
+	validation, err := gate.NewGateValidationRunner().Run(ctx, gate.GateValidationRequest{
 		ProjectDir: projectDir,
 		Command:    config.DevMain.ValidationCommand,
 	})
@@ -187,7 +189,7 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 		return writeGateFailedValidationRunReport(ctx, gateReportSource{CreatedAt: createdAt, Artifacts: artifacts}, evidence, validation, err)
 	}
 
-	classification, err := core.NewGateEvidenceClassifier(core.NewReportLister().ListGateExecutionReports).Classify(ctx, core.GateEvidenceClassificationRequest{
+	classification, err := gate.NewGateEvidenceClassifier(core.NewReportLister().ListGateExecutionReports).Classify(ctx, gate.GateEvidenceClassificationRequest{
 		ProjectDir:    projectDir,
 		Files:         evidence.Files,
 		HighRiskPaths: config.DevMain.HighRiskPaths,
@@ -219,27 +221,27 @@ func runGateDevMainForProject(ctx context.Context, stdout io.Writer, projectDir,
 	return nil
 }
 
-func buildGateDevMainReport(source gateReportSource, evidence core.GateGitEvidence, validation core.GateValidationResult, classification core.GateEvidenceClassification, config core.GateDevMainConfig) core.GateReport {
+func buildGateDevMainReport(source gateReportSource, evidence gate.GateGitEvidence, validation gate.GateValidationResult, classification gate.GateEvidenceClassification, config gate.GateDevMainConfig) gate.GateReport {
 	reportClassification := classification
 	if !config.ManualChanges.List {
 		reportClassification.ManualOrExternalChanges = nil
 	}
 
-	report := core.NewGateReport(source.CreatedAt, evidence, validation, reportClassification, source.Artifacts)
+	report := gate.NewGateReport(source.CreatedAt, evidence, validation, reportClassification, source.Artifacts)
 	report.Failures = gateDevMainFailures(validation, classification, config)
 
 	report.Warnings = gateDevMainWarnings(classification, config)
 	if len(report.Failures) > 0 {
-		report.Status = core.GateReportStatusFailed
+		report.Status = gate.GateReportStatusFailed
 	}
 
 	return report
 }
 
 func gateDevMainFailures(
-	validation core.GateValidationResult,
-	classification core.GateEvidenceClassification,
-	config core.GateDevMainConfig,
+	validation gate.GateValidationResult,
+	classification gate.GateEvidenceClassification,
+	config gate.GateDevMainConfig,
 ) []string {
 	failures := []string{}
 	if !validation.Passed {
@@ -254,8 +256,8 @@ func gateDevMainFailures(
 }
 
 func gateDevMainWarnings(
-	classification core.GateEvidenceClassification,
-	config core.GateDevMainConfig,
+	classification gate.GateEvidenceClassification,
+	config gate.GateDevMainConfig,
 ) []string {
 	warnings := []string{}
 	if config.Traceability.WarnOnManualChanges && len(classification.ManualOrExternalChanges) > 0 {
@@ -270,14 +272,14 @@ func gateDevMainWarnings(
 }
 
 func shouldFailGateMissingAgentEvidence(
-	config core.GateDevMainConfig,
-	classification core.GateEvidenceClassification,
+	config gate.GateDevMainConfig,
+	classification gate.GateEvidenceClassification,
 ) bool {
 	return config.Traceability.FailOnMissingAgentEvidence && len(classification.MissingAgentEvidence) > 0
 }
 
 func writeGateFailedEvidenceReport(ctx context.Context, source gateReportSource, baseRef, headRef string, cause error) error {
-	report := core.NewFailedGateReport(source.CreatedAt, baseRef, headRef, source.Artifacts, []string{cause.Error()})
+	report := gate.NewFailedGateReport(source.CreatedAt, baseRef, headRef, source.Artifacts, []string{cause.Error()})
 
 	err := writeGateReports(ctx, report)
 	if err != nil {
@@ -287,8 +289,8 @@ func writeGateFailedEvidenceReport(ctx context.Context, source gateReportSource,
 	return cause
 }
 
-func writeGateFailedValidationRunReport(ctx context.Context, source gateReportSource, evidence core.GateGitEvidence, validation core.GateValidationResult, cause error) error {
-	report := core.NewGateReport(source.CreatedAt, evidence, validation, core.GateEvidenceClassification{}, source.Artifacts)
+func writeGateFailedValidationRunReport(ctx context.Context, source gateReportSource, evidence gate.GateGitEvidence, validation gate.GateValidationResult, cause error) error {
+	report := gate.NewGateReport(source.CreatedAt, evidence, validation, gate.GateEvidenceClassification{}, source.Artifacts)
 	report.Failures = []string{cause.Error()}
 
 	err := writeGateReports(ctx, report)
@@ -299,8 +301,8 @@ func writeGateFailedValidationRunReport(ctx context.Context, source gateReportSo
 	return cause
 }
 
-func writeGateReports(ctx context.Context, report core.GateReport) error {
-	writer := core.NewGateReportWriter()
+func writeGateReports(ctx context.Context, report gate.GateReport) error {
+	writer := gate.NewGateReportWriter()
 
 	jsonPath, err := writer.WriteJSON(ctx, report)
 	if err != nil {
@@ -319,7 +321,7 @@ func writeGateReports(ctx context.Context, report core.GateReport) error {
 	return refreshGateReportArtifactMetadata(markdownPath)
 }
 
-func printGateDevMainReport(stdout io.Writer, report core.GateReport) error {
+func printGateDevMainReport(stdout io.Writer, report gate.GateReport) error {
 	lines := []string{
 		"gate: dev-main",
 		fmt.Sprintf("status: %s", report.Status),
@@ -367,5 +369,5 @@ func printGateDevMainReport(stdout io.Writer, report core.GateReport) error {
 
 type gateReportSource struct {
 	CreatedAt time.Time
-	Artifacts core.GateReportArtifacts
+	Artifacts gate.GateReportArtifacts
 }
