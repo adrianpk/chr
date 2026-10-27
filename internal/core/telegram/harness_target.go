@@ -41,7 +41,9 @@ func (op conversationTransaction) selectedHarnessProject() (projectcore.Project,
 		return projectcore.Project{}, err
 	}
 
-	selected, _, err := op.peerSelection()
+	selection, err := op.peerSelection()
+	selected := selection.ProjectID
+
 	if err != nil {
 		return projectcore.Project{}, err
 	}

@@ -40,15 +40,15 @@ type OperationRequest struct {
 const operationColumns = `r.id,r.operation_ordinal,r.operator_id,r.project_id,r.project_binding_digest,r.namespace,COALESCE(r.conversation_id,''),COALESCE(r.expected_conversation_revision,0),r.operation_id,r.arguments,r.argument_digest,COALESCE(r.prepared_input,''),r.domain_guard,r.state,COALESCE(r.domain_receipt_ref,''),COALESCE(r.result,'')`
 
 // Operation reads an exact retained source binding, without resolving a new target.
-func (s *ReceiverStore) Operation(ctx context.Context, update ReceivedUpdate, ordinal int) (OperationRequest, bool, error) {
+func (s *ReceiverStore) Operation(ctx context.Context, update ReceivedUpdate, ordinal int) (OperationLookup, error) {
 	request, err := scanOperation(s.db.QueryRowContext(ctx, `SELECT `+operationColumns+` FROM telegram_requests r JOIN telegram_updates u ON u.bot_id=r.bot_id AND u.update_id=r.update_id WHERE r.bot_id=? AND r.update_id=? AND r.operation_ordinal=? AND u.payload_digest=? AND u.chat_id=? AND u.topic_id=? AND u.user_id=?`, update.Peer.BotID, update.UpdateID, ordinal, update.Digest, update.Peer.ChatID, update.Peer.TopicID, update.Peer.UserID))
 	if errors.Is(err, sql.ErrNoRows) {
-		return request, false, nil
+		return OperationLookup{Request: request, Found: false}, nil
 	}
 
 	request.Source = update
 
-	return request, err == nil, err
+	return OperationLookup{Request: request, Found: err == nil}, err
 }
 
 func scanOperation(row interface{ Scan(...any) error }) (OperationRequest, error) {
@@ -94,7 +94,9 @@ func (s *ReceiverStore) ReserveOperation(ctx context.Context, request OperationR
 		return request, err
 	}
 
-	retained, found, err := s.Operation(ctx, request.Source, request.Ordinal)
+	operationLookup, err := s.Operation(ctx, request.Source, request.Ordinal)
+	retained, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return request, err
 	}
@@ -174,7 +176,9 @@ func (s *ReceiverStore) ReservePreparedOperation(ctx context.Context, request Op
 		return request, err
 	}
 
-	retained, found, err := s.Operation(ctx, request.Source, request.Ordinal)
+	operationLookup2, err := s.Operation(ctx, request.Source, request.Ordinal)
+	retained, found := operationLookup2.Request, operationLookup2.Found
+
 	if err != nil {
 		return request, err
 	}

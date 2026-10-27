@@ -20,7 +20,9 @@ func telegramHarnessOffer(t *testing.T, f *telegramConversationAppFixture, text 
 		t.Fatal(err)
 	}
 
-	request, found, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found {
 		t.Fatal("selection request was not retained", err)
 	}

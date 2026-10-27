@@ -21,13 +21,13 @@ func TestTelegramControlReference(t *testing.T) {
 		{name: "user", peer: PeerIdentity{BotID: peer.BotID, ChatID: peer.ChatID, UserID: 2}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if _, found, err := f.store.ConversationReference(t.Context(), test.peer, c.ID); err != nil || found {
-				t.Fatal("foreign peer resolved a control conversation", found, err)
+			if conversationLookup, err := f.store.ConversationReference(t.Context(), test.peer, c.ID); err != nil || conversationLookup.Found {
+				t.Fatal("foreign peer resolved a control conversation", conversationLookup.Found, err)
 			}
 		})
 	}
 
-	if current, found, err := f.store.ConversationReference(t.Context(), peer, c.ID); err != nil || !found || current.Revision != c.Revision {
-		t.Fatal("exact reference changed the conversation", current, found, err)
+	if conversationLookup2, err := f.store.ConversationReference(t.Context(), peer, c.ID); err != nil || !conversationLookup2.Found || conversationLookup2.Conversation.Revision != c.Revision {
+		t.Fatal("exact reference changed the conversation", conversationLookup2.Conversation, conversationLookup2.Found, err)
 	}
 }

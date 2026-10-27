@@ -47,25 +47,25 @@ func validActionAnswer(answer ActionAnswer) bool {
 
 // ResolveActionAnswer gives replies, explicit answers and callbacks one binding.
 // An invalidated action reply is still recognized so it cannot become capture text.
-func (s *ReceiverStore) ResolveActionAnswer(ctx context.Context, update ReceivedUpdate) (ActionAnswer, bool, error) {
+func (s *ReceiverStore) ResolveActionAnswer(ctx context.Context, update ReceivedUpdate) (ActionAnswerResolution, error) {
 	text := strings.TrimSpace(update.Text)
 	if update.Kind == "callback_query" && strings.HasPrefix(text, "tga:") {
 		parts := strings.Split(text, ":")
 		if len(parts) != 3 {
-			return ActionAnswer{}, true, ErrActionUnavailable
+			return ActionAnswerResolution{Answer: ActionAnswer{}, Recognized: true}, ErrActionUnavailable
 		}
 
 		return checkActionAnswer(ActionAnswer{Token: parts[1], Choice: parts[2]})
 	}
 
 	if update.Kind != "message" {
-		return ActionAnswer{}, false, nil
+		return ActionAnswerResolution{Answer: ActionAnswer{}, Recognized: false}, nil
 	}
 
 	words := strings.Fields(text)
 	if len(words) > 0 && words[0] == ActionAnswerCommand {
 		if len(words) != 3 {
-			return ActionAnswer{}, true, ErrActionUnavailable
+			return ActionAnswerResolution{Answer: ActionAnswer{}, Recognized: true}, ErrActionUnavailable
 		}
 
 		return checkActionAnswer(ActionAnswer{Token: words[1], Choice: words[2]})
@@ -74,18 +74,18 @@ func (s *ReceiverStore) ResolveActionAnswer(ctx context.Context, update Received
 	return s.replyActionAnswer(ctx, update, text)
 }
 
-func checkActionAnswer(answer ActionAnswer) (ActionAnswer, bool, error) {
+func checkActionAnswer(answer ActionAnswer) (ActionAnswerResolution, error) {
 	if !validActionAnswer(answer) {
-		return answer, true, ErrActionUnavailable
+		return ActionAnswerResolution{Answer: answer, Recognized: true}, ErrActionUnavailable
 	}
 
-	return answer, true, nil
+	return ActionAnswerResolution{Answer: answer, Recognized: true}, nil
 }
 
-func (s *ReceiverStore) replyActionAnswer(ctx context.Context, update ReceivedUpdate, text string) (ActionAnswer, bool, error) {
+func (s *ReceiverStore) replyActionAnswer(ctx context.Context, update ReceivedUpdate, text string) (ActionAnswerResolution, error) {
 	var answer ActionAnswer
 	if update.ReplyToMessageID <= 0 {
-		return answer, false, nil
+		return ActionAnswerResolution{Answer: answer, Recognized: false}, nil
 	}
 
 	var invalidated sql.NullString
@@ -98,13 +98,13 @@ func (s *ReceiverStore) replyActionAnswer(ctx context.Context, update ReceivedUp
 	}
 
 	if err != nil {
-		return answer, true, err
+		return ActionAnswerResolution{Answer: answer, Recognized: true}, err
 	}
 
 	answer.Choice = text
 	if invalidated.Valid {
 		if err := s.replyControlReceipt(ctx, answer.Token, p); err != nil {
-			return answer, true, err
+			return ActionAnswerResolution{Answer: answer, Recognized: true}, err
 		}
 	}
 

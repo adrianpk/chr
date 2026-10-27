@@ -43,7 +43,9 @@ func (s *ReceiverStore) FinishAction(ctx context.Context, claim ActionClaim, res
 			return err
 		}
 
-		source, pending, err := actionResponseSource(ctx, tx, retained, result)
+		sourceResolution, err := actionResponseSource(ctx, tx, retained, result)
+
+		source, pending := sourceResolution.Update, sourceResolution.Pending
 		if err != nil || !pending {
 			return err
 		}
@@ -171,21 +173,21 @@ func finishActionResponse(ctx context.Context, tx *sql.Tx, retained ActionClaim,
 	return nil
 }
 
-func actionResponseSource(ctx context.Context, tx *sql.Tx, claim ActionClaim, result ActionResult) (ReceivedUpdate, bool, error) {
+func actionResponseSource(ctx context.Context, tx *sql.Tx, claim ActionClaim, result ActionResult) (responseSource, error) {
 	original := claim.Answer.Source
 
 	pending, err := readResponsePending(ctx, tx, original)
 	if err != nil || pending {
-		return original, pending, err
+		return responseSource{Update: original, Pending: pending}, err
 	}
 
 	if !confirmedControlReceipt(claim, result) || claim.ResponseSource.Peer != original.Peer || claim.ResponseSource.UpdateID == 0 || claim.Action.State == "consumed" {
-		return original, false, nil
+		return responseSource{Update: original, Pending: false}, nil
 	}
 
 	pending, err = readResponsePending(ctx, tx, claim.ResponseSource)
 
-	return claim.ResponseSource, pending, err
+	return responseSource{Update: claim.ResponseSource, Pending: pending}, err
 }
 
 func confirmedControlReceipt(claim ActionClaim, result ActionResult) bool {

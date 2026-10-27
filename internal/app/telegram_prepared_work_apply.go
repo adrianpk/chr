@@ -35,7 +35,9 @@ func (r telegramReceiver) continuePreparedWork(ctx context.Context, request tele
 		return r.finishAuthoringFailure(ctx, request, current, err)
 	}
 
-	retained, found, err := r.store.Operation(ctx, request.Source, request.Ordinal)
+	operationLookup, err := r.store.Operation(ctx, request.Source, request.Ordinal)
+	retained, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return err
 	}

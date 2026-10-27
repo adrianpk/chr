@@ -23,19 +23,19 @@ type GuidedAssociation struct {
 
 // ReserveGuidedConversation retains only routing to a canonical session.
 // It does not acknowledge the update, create authoring state or grant dispatch.
-func (s *ReceiverStore) ReserveGuidedConversation(ctx context.Context, input ConversationInput, now time.Time) (conversation Conversation, target OperationTarget, err error) {
+func (s *ReceiverStore) ReserveGuidedConversation(ctx context.Context, input ConversationInput, now time.Time) (ConversationBinding, error) {
 	return s.reserveGuidedAssociation(ctx, input, "", now)
 }
 
 // BindGuidedConversation associates an existing guided run by its verified
 // scope. It creates no progression intent and cannot adopt a manual session.
-func (s *ReceiverStore) BindGuidedConversation(ctx context.Context, input ConversationInput, association GuidedAssociation, now time.Time) (Conversation, OperationTarget, error) {
+func (s *ReceiverStore) BindGuidedConversation(ctx context.Context, input ConversationInput, association GuidedAssociation, now time.Time) (ConversationBinding, error) {
 	if input.Project != association.ProjectID || input.Namespace != association.Namespace {
-		return Conversation{}, OperationTarget{}, workflowstate.ErrConflict
+		return ConversationBinding{Conversation: Conversation{}, Target: OperationTarget{}}, workflowstate.ErrConflict
 	}
 
 	if err := authoringstate.ValidateSessionID(association.SessionID); err != nil {
-		return Conversation{}, OperationTarget{}, err
+		return ConversationBinding{Conversation: Conversation{}, Target: OperationTarget{}}, err
 	}
 
 	input.Text = association.Topic
@@ -43,9 +43,15 @@ func (s *ReceiverStore) BindGuidedConversation(ctx context.Context, input Conver
 	return s.reserveGuidedAssociation(ctx, input, association.SessionID, now)
 }
 
-func (s *ReceiverStore) reserveGuidedAssociation(ctx context.Context, input ConversationInput, runID string, now time.Time) (conversation Conversation, target OperationTarget, err error) {
+func (s *ReceiverStore) reserveGuidedAssociation(ctx context.Context, input ConversationInput, runID string, now time.Time) (ConversationBinding, error) {
+	var (
+		conversation Conversation
+		target       OperationTarget
+		err          error
+	)
+
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
-		return conversation, target, workflowstate.ErrConflict
+		return ConversationBinding{Conversation: conversation, Target: target}, workflowstate.ErrConflict
 	}
 
 	input.Intent, input.Action = "develop", ConversationStart
@@ -75,7 +81,7 @@ func (s *ReceiverStore) reserveGuidedAssociation(ctx context.Context, input Conv
 		return err
 	})
 
-	return conversation, target, err
+	return ConversationBinding{Conversation: conversation, Target: target}, err
 }
 
 func (op conversationTransaction) reserveGuidedConversation(runID string) (Conversation, error) {
@@ -95,7 +101,9 @@ func (op conversationTransaction) reserveGuidedConversation(runID string) (Conve
 		return c, err
 	}
 
-	_, created, err := op.start()
+	conversationResult, err := op.start()
+	created := conversationResult.Conversation
+
 	if err != nil {
 		return c, err
 	}
@@ -113,15 +121,22 @@ func (op conversationTransaction) reserveGuidedConversation(runID string) (Conve
 	}
 
 	op.input.Conversation, op.input.Update.ReplyToMessageID = created.ID, 0
-	_, _, err = op.focus()
+	_, _Error := op.focus()
+	err = _Error
 
 	return *created, err
 }
 
 // ResolveGuidedTarget uses existing exact reply/focus routing and guards.
-func (s *ReceiverStore) ResolveGuidedTarget(ctx context.Context, input ConversationInput) (conversation Conversation, target OperationTarget, err error) {
+func (s *ReceiverStore) ResolveGuidedTarget(ctx context.Context, input ConversationInput) (ConversationBinding, error) {
+	var (
+		conversation Conversation
+		target       OperationTarget
+		err          error
+	)
+
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
-		return conversation, target, workflowstate.ErrConflict
+		return ConversationBinding{Conversation: conversation, Target: target}, workflowstate.ErrConflict
 	}
 
 	input.Action = ConversationCapture
@@ -142,7 +157,7 @@ func (s *ReceiverStore) ResolveGuidedTarget(ctx context.Context, input Conversat
 		}
 
 		if input.Conversation != "" {
-			if _, _, err := op.focus(); err != nil {
+			if _, err := op.focus(); err != nil {
 				return err
 			}
 		}
@@ -153,5 +168,5 @@ func (s *ReceiverStore) ResolveGuidedTarget(ctx context.Context, input Conversat
 		return err
 	})
 
-	return conversation, target, err
+	return ConversationBinding{Conversation: conversation, Target: target}, err
 }

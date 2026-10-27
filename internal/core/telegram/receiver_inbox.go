@@ -99,7 +99,9 @@ func retainUpdate(ctx context.Context, tx *sql.Tx, botID, epoch int64, update Re
 		state = update.Kind
 	}
 
-	lane, control, err := inputLane(ctx, tx, update)
+	lane2, err := inputLane(ctx, tx, update)
+	lane, control := lane2.Lane, lane2.Determined
+
 	if err != nil {
 		return err
 	}

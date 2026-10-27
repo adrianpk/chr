@@ -481,3 +481,15 @@ identity columns, cross-table rollback, receiver HTTP/actions/documents, lost-ac
 restart and actual app/native integration regressions pass after relocation.
 Naming cleanup and all assigned signature dispositions remain pending; no final
 slice validation or PR readiness is claimed by this task checkpoint.
+
+
+Receiver tuple results now carry explicit records for answer recognition,
+conversation/target binding, optional retained operations/conversations, routing
+replies, multipart body/type, provider-call reservations, lanes and work pages.
+The prior data and flag assignments still occur before each original error
+branch. Named callback outputs still update their outer variables; work-page
+iteration retains a named error so deferred rows.Close failures remain visible.
+No read miss becomes an error and no read grants authority. Original retained
+HTTP/SQLite/recovery/control/domain-app and frozen identity regressions pass;
+37 exact migration allowances disappear without increasing the ceiling. App
+result tuples and long operation inputs remain assigned to this active slice.

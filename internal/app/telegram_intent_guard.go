@@ -134,7 +134,8 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input tel
 
 		work.Config, work.Projects = input.Config, input.Projects
 		work.ContextDigest = input.ContextDigest
-		_, target, err := r.store.ResolveAuthoringTarget(ctx, work)
+		bindingResult, err := r.store.ResolveAuthoringTarget(ctx, work)
+		target := bindingResult.Target
 
 		return target, true, err
 	}
@@ -160,7 +161,8 @@ func (r telegramReceiver) intentPreparationTarget(ctx context.Context, input tel
 
 		authoring.Input.Config, authoring.Input.Projects = input.Config, input.Projects
 		authoring.Input.ContextDigest = input.ContextDigest
-		_, target, err := r.store.ResolveAuthoringTarget(ctx, authoring.Input)
+		bindingResult2, err := r.store.ResolveAuthoringTarget(ctx, authoring.Input)
+		target := bindingResult2.Target
 
 		return target, true, err
 	}

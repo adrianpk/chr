@@ -103,7 +103,9 @@ func checkTelegramDocumentReceipt(t *testing.T, store *ReceiverStore) {
 		}
 	}
 
-	retained, found, err := store.Operation(t.Context(), request.Source, 0)
+	operationLookup, err := store.Operation(t.Context(), request.Source, 0)
+
+	retained, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || retained.State != "confirmed" || retained.ReceiptRef != "receipts/original.json" {
 		t.Fatal("document failure lost the original effect receipt", retained, err)
 	}

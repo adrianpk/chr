@@ -41,7 +41,9 @@ func (s *ReceiverStore) ResolveOperationModel(ctx context.Context, env StateDire
 
 	defer func() { err = errors.Join(err, lock.Close()) }()
 
-	result, ready, err := s.reserveOperationModel(ctx, request, now)
+	reservation, err := s.reserveOperationModel(ctx, request, now)
+
+	result, ready := reservation.Model, reservation.Call
 	if err != nil || !ready {
 		return result, err
 	}
@@ -73,7 +75,7 @@ func (s *ReceiverStore) ResolveOperationModel(ctx context.Context, env StateDire
 	return result, err
 }
 
-func (s *ReceiverStore) reserveOperationModel(ctx context.Context, request OperationRequest, now time.Time) (OperationModel, bool, error) {
+func (s *ReceiverStore) reserveOperationModel(ctx context.Context, request OperationRequest, now time.Time) (operationModelReservation, error) {
 	var result OperationModel
 
 	ready := false
@@ -112,7 +114,7 @@ func (s *ReceiverStore) reserveOperationModel(ctx context.Context, request Opera
 		return err
 	})
 
-	return result, ready, err
+	return operationModelReservation{Model: result, Call: ready}, err
 }
 
 func (s *ReceiverStore) finishOperationModel(ctx context.Context, request OperationRequest, model OperationModel) error {

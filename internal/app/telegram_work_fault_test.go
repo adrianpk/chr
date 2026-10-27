@@ -67,7 +67,9 @@ func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, 
 func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, before core.WorkflowInvocation) {
 	t.Helper()
 
-	request, found, err := f.receiver.store.Operation(t.Context(), update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), update, 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || request.State != "confirmed" || request.ReceiptRef != "workflow:"+before.ID {
 		t.Fatal("original answer was not confirmed", request, err)
 	}

@@ -12,7 +12,9 @@ import (
 )
 
 func (r telegramReceiver) respondControl(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	retained, found, err := r.store.Operation(ctx, update, 0)
+	operationLookup, err := r.store.Operation(ctx, update, 0)
+	retained, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return true, err
 	}
@@ -50,7 +52,9 @@ func (r telegramReceiver) controlCancelConversation(ctx context.Context, command
 		return false, nil
 	}
 
-	c, found, err := r.store.ConversationReference(ctx, command.Input.Update.Peer, command.Invocation)
+	conversationLookup, err := r.store.ConversationReference(ctx, command.Input.Update.Peer, command.Invocation)
+
+	c, found := conversationLookup.Conversation, conversationLookup.Found
 	if err != nil || !found {
 		return false, err
 	}
@@ -104,7 +108,9 @@ func (r telegramReceiver) dispatchControl(ctx context.Context, user telegramcore
 func (r telegramReceiver) controlInvocation(ctx context.Context, command telegramControlCommand, target telegramcore.OperationTarget) (string, error) {
 	id := command.Invocation
 	if target.ConversationID != "" {
-		c, found, err := r.store.ConversationReference(ctx, command.Input.Update.Peer, target.ConversationID)
+		conversationLookup2, err := r.store.ConversationReference(ctx, command.Input.Update.Peer, target.ConversationID)
+
+		c, found := conversationLookup2.Conversation, conversationLookup2.Found
 		if err != nil || !found || id != "" && c.InvocationID != "" && id != c.InvocationID {
 			return "", workflowstate.ErrConflict
 		}

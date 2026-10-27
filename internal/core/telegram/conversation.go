@@ -113,7 +113,9 @@ func (s *ReceiverStore) ApplyConversation(ctx context.Context, input Conversatio
 			return err
 		}
 
-		text, conversation, err := operation.apply()
+		conversationResult, err := operation.apply()
+		text, conversation := conversationResult.Text, conversationResult.Conversation
+
 		if err != nil {
 			return err
 		}
@@ -153,7 +155,7 @@ func (op conversationTransaction) ensurePeer() error {
 	return nil
 }
 
-func (op conversationTransaction) apply() (string, *Conversation, error) {
+func (op conversationTransaction) apply() (conversationReply, error) {
 	switch op.input.Action {
 	case ConversationSelect:
 		return op.selectProject()
@@ -243,7 +245,9 @@ func (op conversationTransaction) resolveProject(bound *Conversation) (projectco
 		return exactProject(op.allowedProjects(), bound.ProjectID)
 	}
 
-	selected, _, err := op.peerSelection()
+	selection, err := op.peerSelection()
+	selected := selection.ProjectID
+
 	if err != nil {
 		return projectcore.Project{}, err
 	}
@@ -270,64 +274,64 @@ func (op conversationTransaction) defaultProject() (projectcore.Project, error) 
 	return projectcore.Project{}, ErrProjectSelectionAmbiguous
 }
 
-func (op conversationTransaction) peerSelection() (string, string, error) {
+func (op conversationTransaction) peerSelection() (peerSelection, error) {
 	p := op.input.Update.Peer
 
 	var selected, focused string
 
 	err := op.tx.QueryRowContext(op.ctx, `SELECT COALESCE(selected_project_id,''),COALESCE(focused_conversation_id,'') FROM telegram_peers WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, p.BotID, p.ChatID, p.TopicID, p.UserID).Scan(&selected, &focused)
 
-	return selected, focused, err
+	return peerSelection{ProjectID: selected, RootDigest: focused}, err
 }
 
-func (op conversationTransaction) selectProject() (string, *Conversation, error) {
+func (op conversationTransaction) selectProject() (conversationReply, error) {
 	bound, err := op.explicitTarget()
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	project, err := op.resolveProject(bound)
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	if op.input.Project == "" {
-		return "Selected project: " + project.Name, nil, nil
+		return conversationReply{Text: "Selected project: " + project.Name, Conversation: nil}, nil
 	}
 
 	p := op.input.Update.Peer
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET selected_project_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, project.ID, database.FormatTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
 
-	return "Selected project: " + project.Name, nil, err
+	return conversationReply{Text: "Selected project: " + project.Name, Conversation: nil}, err
 }
 
-func (op conversationTransaction) start() (string, *Conversation, error) {
+func (op conversationTransaction) start() (conversationReply, error) {
 	bound, err := op.explicitTarget()
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	project, err := op.resolveProject(bound)
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	binding, err := projectBinding(project)
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	if _, err := projectcore.ResolveDirectory(project.Path); err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	namespace, err := opsnamespace.Resolve(op.input.Namespace, nil)
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	if err := op.checkAllocation(); err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	return op.insertConversation(project, binding, namespace)
@@ -350,9 +354,9 @@ func (op conversationTransaction) checkAllocation() error {
 	return nil
 }
 
-func (op conversationTransaction) insertConversation(project projectcore.Project, binding, namespace string) (string, *Conversation, error) {
+func (op conversationTransaction) insertConversation(project projectcore.Project, binding, namespace string) (conversationReply, error) {
 	if !slices.Contains([]string{"explain", "prepare", "develop"}, op.input.Intent) || len(op.input.Text) > 512 || strings.TrimSpace(op.input.Text) == "" {
-		return "", nil, conversationDiagnosticError("Start with a nonempty topic of at most 512 UTF-8 bytes. This conversation was not created.")
+		return conversationReply{Text: "", Conversation: nil}, conversationDiagnosticError("Start with a nonempty topic of at most 512 UTF-8 bytes. This conversation was not created.")
 	}
 
 	c := Conversation{ID: conversationID(op.input.Update), Peer: op.input.Update.Peer, ProjectID: project.ID, ProjectBindingDigest: binding, Namespace: namespace, Intent: op.input.Intent, Phase: "collecting", Topic: op.input.Text, Revision: 1}
@@ -362,7 +366,7 @@ func (op conversationTransaction) insertConversation(project projectcore.Project
 	text := "Your request for " + conversationLabel(c.Topic) + " in " + conversationLabel(project.Name) + " is retained."
 	text += "\n\nYou can add more details, or send /done " + c.ID + " to finish collecting them."
 
-	return text, &c, err
+	return conversationReply{Text: text, Conversation: &c}, err
 }
 
 func conversationID(update ReceivedUpdate) string {

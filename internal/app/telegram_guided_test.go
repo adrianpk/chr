@@ -247,7 +247,9 @@ func TestGuidedUseCaseTelegramButtons(t *testing.T) {
 		t.Fatal("duplicate callback repeated the owner", duplicate.Text)
 	}
 
-	retained, found, err := f.receiver.store.Operation(t.Context(), request.Source, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), request.Source, 0)
+
+	retained, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || retained.State != "confirmed" {
 		t.Fatal("action receipt missing", err)
 	}

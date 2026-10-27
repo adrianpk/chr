@@ -67,7 +67,9 @@ func (op conversationTransaction) sourceActionConversation(intent, topic string)
 
 	op.input.Intent, op.input.Text = intent, topic
 
-	_, c, err = op.start()
+	conversationResult, conversationResultError := op.start()
+
+	c, err = conversationResult.Conversation, conversationResultError
 	if err != nil {
 		return nil, err
 	}

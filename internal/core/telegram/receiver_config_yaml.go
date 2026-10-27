@@ -63,7 +63,9 @@ func (p *configParser) line(line string) error {
 }
 
 func (p *configParser) field(line string) error {
-	key, value, err := p.fieldHeader(line)
+	field2, err := p.fieldHeader(line)
+	key, value := field2.Key, field2.Value
+
 	if err != nil {
 		return err
 	}
@@ -98,17 +100,17 @@ func userListHeader(value string) error {
 	return nil
 }
 
-func (p *configParser) fieldHeader(line string) (string, string, error) {
+func (p *configParser) fieldHeader(line string) (yamlField, error) {
 	key, value, ok := strings.Cut(line, ":")
 	if !ok || p.seen[key] {
-		return "", "", errors.New("duplicate or malformed field")
+		return yamlField{Key: "", Value: ""}, errors.New("duplicate or malformed field")
 	}
 
 	p.seen[key] = true
 	p.projects = false
 	p.userList = key == "allowed_users"
 
-	return key, strings.TrimSpace(value), nil
+	return yamlField{Key: key, Value: strings.TrimSpace(value)}, nil
 }
 
 func (p *configParser) userLine(indent int, line string) error {

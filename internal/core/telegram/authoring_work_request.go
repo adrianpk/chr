@@ -36,29 +36,29 @@ func (s *ReceiverStore) IsInitialAuthoringWork(ctx context.Context, request Oper
 
 // LatestAuthoringWork reads the retained preview/receipt for an exact
 // currently authorized conversation. It does not grant or refresh a prior scope.
-func (s *ReceiverStore) LatestAuthoringWork(ctx context.Context, input ConversationInput, target OperationTarget) (OperationRequest, bool, error) {
+func (s *ReceiverStore) LatestAuthoringWork(ctx context.Context, input ConversationInput, target OperationTarget) (OperationLookup, error) {
 	if target.ConversationID == "" {
-		return OperationRequest{}, false, workflowstate.ErrConflict
+		return OperationLookup{Request: OperationRequest{}, Found: false}, workflowstate.ErrConflict
 	}
 
 	if err := s.ValidateOperationTarget(ctx, input, target); err != nil {
-		return OperationRequest{}, false, err
+		return OperationLookup{Request: OperationRequest{}, Found: false}, err
 	}
 
 	var id string
 
 	err := s.db.QueryRowContext(ctx, `SELECT id FROM telegram_requests WHERE conversation_id=? AND operation_id='authoring.work' ORDER BY rowid DESC LIMIT 1`, target.ConversationID).Scan(&id)
 	if errors.Is(err, sql.ErrNoRows) {
-		return OperationRequest{}, false, nil
+		return OperationLookup{Request: OperationRequest{}, Found: false}, nil
 	}
 
 	if err != nil {
-		return OperationRequest{}, false, err
+		return OperationLookup{Request: OperationRequest{}, Found: false}, err
 	}
 
 	request, err := readOperationID(ctx, s.db, id)
 
-	return request, err == nil, err
+	return OperationLookup{Request: request, Found: err == nil}, err
 }
 
 func projectAuthoringWorkPhase(ctx context.Context, tx *sql.Tx, request OperationRequest, phase, now string) error {

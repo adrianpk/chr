@@ -34,18 +34,20 @@ func controlLane(action string) ProcessingLane {
 	}
 }
 
-func inputLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (ProcessingLane, bool, error) {
+func inputLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (laneResolution, error) {
 	if update.Kind != "message" && update.Kind != "callback_query" {
-		return ProcessingOrdinary, false, nil
+		return laneResolution{Lane: ProcessingOrdinary, Determined: false}, nil
 	}
 
 	if lane, control := ExplicitControlLane(update); control {
-		return lane, true, nil
+		return laneResolution{Lane: lane, Determined: true}, nil
 	}
 
-	token, answer, err := inputActionToken(ctx, tx, update)
+	tokenResolution, err := inputActionToken(ctx, tx, update)
+	token, answer := tokenResolution.Token, tokenResolution.Found
+
 	if err != nil {
-		return ProcessingOrdinary, false, err
+		return laneResolution{Lane: ProcessingOrdinary, Determined: false}, err
 	}
 
 	if !answer {
@@ -84,23 +86,23 @@ func ExplicitControlLane(update ReceivedUpdate) (ProcessingLane, bool) {
 	}
 }
 
-func actionInputLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, token string) (ProcessingLane, bool, error) {
+func actionInputLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate, token string) (laneResolution, error) {
 	var operation, arguments string
 
 	p := update.Peer
 
 	err := tx.QueryRowContext(ctx, `SELECT r.operation_id,r.arguments FROM telegram_actions a JOIN telegram_requests r ON r.id=a.request_id WHERE a.token=? AND a.bot_id=? AND a.chat_id=? AND a.topic_id=? AND a.user_id=?`, token, p.BotID, p.ChatID, p.TopicID, p.UserID).Scan(&operation, &arguments)
 	if errors.Is(err, sql.ErrNoRows) {
-		return ProcessingDecision, true, nil
+		return laneResolution{Lane: ProcessingDecision, Determined: true}, nil
 	}
 
 	if err != nil || operation != "work.control" && operation != "guided.step" {
-		return ProcessingOrdinary, false, err
+		return laneResolution{Lane: ProcessingOrdinary, Determined: false}, err
 	}
 
 	lane, err := ActionChoiceProcessingLane(OperationRequest{OperationID: operation, Arguments: json.RawMessage(arguments)}, inputActionChoice(update))
 
-	return lane, true, err
+	return laneResolution{Lane: lane, Determined: true}, err
 }
 
 // ActionProcessingLane derives execution class from the immutable
@@ -120,43 +122,43 @@ func ActionProcessingLane(request OperationRequest) (ProcessingLane, error) {
 	return controlLane(args.Action), nil
 }
 
-func unboundReplyLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (ProcessingLane, bool, error) {
+func unboundReplyLane(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (laneResolution, error) {
 	if update.ReplyToMessageID <= 0 {
-		return ProcessingOrdinary, false, nil
+		return laneResolution{Lane: ProcessingOrdinary, Determined: false}, nil
 	}
 
 	state, err := resolveReplyBinding(ctx, tx, update)
 	if state == replyKnown {
-		return ProcessingOrdinary, false, err
+		return laneResolution{Lane: ProcessingOrdinary, Determined: false}, err
 	}
 
 	// Unknown replies only wait or produce diagnostics. They cannot execute a
 	// model and receive no reserved intake allowance before their binding exists.
-	return ProcessingDecision, false, err
+	return laneResolution{Lane: ProcessingDecision, Determined: false}, err
 }
 
-func inputActionToken(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (string, bool, error) {
+func inputActionToken(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (actionTokenResolution, error) {
 	text := strings.TrimSpace(update.Text)
 	if update.Kind == "callback_query" && strings.HasPrefix(text, "tga:") {
 		parts := strings.Split(text, ":")
 		if len(parts) == 3 {
-			return parts[1], true, nil
+			return actionTokenResolution{Token: parts[1], Found: true}, nil
 		}
 
-		return "", true, nil
+		return actionTokenResolution{Token: "", Found: true}, nil
 	}
 
 	words := strings.Fields(text)
 	if len(words) > 0 && words[0] == ActionAnswerCommand {
 		if len(words) == 3 {
-			return words[1], true, nil
+			return actionTokenResolution{Token: words[1], Found: true}, nil
 		}
 
-		return "", true, nil
+		return actionTokenResolution{Token: "", Found: true}, nil
 	}
 
 	if update.ReplyToMessageID <= 0 {
-		return "", false, nil
+		return actionTokenResolution{Token: "", Found: false}, nil
 	}
 
 	var token string
@@ -165,10 +167,10 @@ func inputActionToken(ctx context.Context, tx *sql.Tx, update ReceivedUpdate) (s
 
 	err := tx.QueryRowContext(ctx, `SELECT action_token FROM telegram_replies WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=? AND message_id=? AND purpose='action'`, p.BotID, p.ChatID, p.TopicID, p.UserID, update.ReplyToMessageID).Scan(&token)
 	if errors.Is(err, sql.ErrNoRows) {
-		return "", false, nil
+		return actionTokenResolution{Token: "", Found: false}, nil
 	}
 
-	return token, err == nil, err
+	return actionTokenResolution{Token: token, Found: err == nil}, err
 }
 
 // PendingApplicationInputs returns a bounded lane without overtaking an earlier

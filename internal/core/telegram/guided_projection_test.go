@@ -38,7 +38,9 @@ func TestGuidedUseCaseTelegramProjection(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	guarded, _, err := f.store.ConversationReference(t.Context(), ref.Conversation.Peer, ref.Conversation.ID)
+	conversationLookup, err := f.store.ConversationReference(t.Context(), ref.Conversation.Peer, ref.Conversation.ID)
+
+	guarded := conversationLookup.Conversation
 	if err != nil || guarded.Revision != ref.Conversation.Revision {
 		t.Fatal("projection overtook an unacknowledged owner", err)
 	}
@@ -66,7 +68,9 @@ func guidedTelegramProjectionFixture(t *testing.T) (*telegramConversationFixture
 		t.Fatal(err)
 	}
 
-	c, target, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
+	bindingResult, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
+	c, target := bindingResult.Conversation, bindingResult.Target
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +107,9 @@ func assertGuidedTelegramCoalesced(t *testing.T, f *telegramConversationFixture,
 		t.Fatal(err)
 	}
 
-	after, _, err := f.store.ConversationReference(t.Context(), before.Peer, before.ID)
+	conversationLookup2, err := f.store.ConversationReference(t.Context(), before.Peer, before.ID)
+
+	after := conversationLookup2.Conversation
 	if err != nil || after.Revision != before.Revision || !strings.Contains(after.QuestionBinding, "second view") {
 		t.Fatal("unchanged projection replaced its prompt", err)
 	}

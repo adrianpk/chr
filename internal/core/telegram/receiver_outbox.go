@@ -246,7 +246,8 @@ func (s *ReceiverStore) deliverySent(ctx context.Context, id string, messageID i
 
 // DeliveryFailed retains uncertainty or blocks a permanent/exhausted failure.
 func (s *ReceiverStore) DeliveryFailed(ctx context.Context, delivery ReceiverDelivery, failure error, now time.Time) error {
-	code, permanent, delay := failureState(failure, delivery.Attempts+1)
+	policy := failureState(failure, delivery.Attempts+1)
+	code, permanent, delay := policy.Code, policy.Permanent, policy.Delay
 	state := "pending"
 
 	var apiErr *APIError

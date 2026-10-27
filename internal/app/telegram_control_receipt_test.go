@@ -74,7 +74,9 @@ func telegramControlRecoverAck(t *testing.T, f *telegramConversationAppFixture, 
 func checkTelegramControlRecoveredReceipt(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, id string) {
 	t.Helper()
 
-	request, found, err := f.receiver.store.Operation(t.Context(), update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), update, 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || request.State != "confirmed" || !strings.HasPrefix(request.ReceiptRef, "run/operation-receipts/") {
 		t.Fatal("original control receipt was not recovered", request, err)
 	}

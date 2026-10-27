@@ -22,7 +22,9 @@ type telegramParsedCommand struct {
 }
 
 func (r telegramReceiver) respondCommand(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate, route telegramCommandRoute) (bool, error) {
-	retained, found, err := r.store.Operation(ctx, update, 0)
+	operationLookup, err := r.store.Operation(ctx, update, 0)
+	retained, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return true, err
 	}

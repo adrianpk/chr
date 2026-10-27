@@ -56,7 +56,9 @@ func TestGuidedUseCaseTelegramUploadRecovery(t *testing.T) {
 
 	after := readGuidedTelegramSession(t, operations, f.sessions(t)[0])
 
-	request, found, err := f.receiver.store.Operation(t.Context(), update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), update, 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || request.State != "confirmed" || after.Revision != before.Revision {
 		t.Fatal("transport recovery replayed or lost the canonical operation", err)
 	}

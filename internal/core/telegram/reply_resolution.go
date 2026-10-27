@@ -40,15 +40,15 @@ func resolveReplyBinding(ctx context.Context, reader conversationReader, update 
 	return replyUnknown, err
 }
 
-func (s *ReceiverStore) unboundReply(ctx context.Context, update ReceivedUpdate) (ActionAnswer, bool, error) {
+func (s *ReceiverStore) unboundReply(ctx context.Context, update ReceivedUpdate) (ActionAnswerResolution, error) {
 	state, err := resolveReplyBinding(ctx, s.db, update)
 	if err != nil || state == replyKnown {
-		return ActionAnswer{}, false, err
+		return ActionAnswerResolution{Answer: ActionAnswer{}, Recognized: false}, err
 	}
 
 	if state == replyWaiting {
-		return ActionAnswer{}, true, ErrReplyPending
+		return ActionAnswerResolution{Answer: ActionAnswer{}, Recognized: true}, ErrReplyPending
 	}
 
-	return ActionAnswer{}, true, ErrActionUnavailable
+	return ActionAnswerResolution{Answer: ActionAnswer{}, Recognized: true}, ErrActionUnavailable
 }

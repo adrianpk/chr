@@ -11,7 +11,9 @@ import (
 )
 
 func (r telegramReceiver) respondPreparedWork(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	retained, found, err := r.store.Operation(ctx, update, 0)
+	operationLookup, err := r.store.Operation(ctx, update, 0)
+	retained, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return true, err
 	}
@@ -45,7 +47,9 @@ func (r telegramReceiver) dispatchPreparedWork(ctx context.Context, user telegra
 		return r.recordDiagnostic(ctx, input.Update, input.Config, "Shared authoring is unavailable. Retained context is unchanged.")
 	}
 
-	c, target, err := r.store.ResolveAuthoringTarget(ctx, input)
+	bindingResult, err := r.store.ResolveAuthoringTarget(ctx, input)
+	c, target := bindingResult.Conversation, bindingResult.Target
+
 	if err != nil {
 		return r.recordDiagnostic(ctx, input.Update, input.Config, telegramAuthoringFailure(err))
 	}
@@ -100,7 +104,9 @@ func (r telegramReceiver) preparedWorkInput(ctx context.Context, operations tele
 }
 
 func (r telegramReceiver) reusePreparedWork(ctx context.Context, input telegramcore.ConversationInput, target telegramcore.OperationTarget, owner AuthoringWorkRequest) (bool, error) {
-	previous, found, err := r.store.LatestAuthoringWork(ctx, input, target)
+	operationLookup2, err := r.store.LatestAuthoringWork(ctx, input, target)
+	previous, found := operationLookup2.Request, operationLookup2.Found
+
 	if err != nil {
 		return true, err
 	}

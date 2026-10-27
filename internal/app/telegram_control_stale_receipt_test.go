@@ -86,7 +86,9 @@ func checkTelegramStaleReceipt(t *testing.T, fixture telegramStaleControlFixture
 func checkTelegramStaleReceiptResult(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, accepted bool) {
 	t.Helper()
 
-	request, found, err := f.receiver.store.Operation(t.Context(), update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), update, 0)
+	request, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -155,7 +155,9 @@ func TestTelegramPresentationDocumentAdvancedConversation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request, found, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || request.State != "confirmed" || request.ReceiptRef == "" {
 		t.Fatal("advanced conversation lost original receipt", request, err)
 	}

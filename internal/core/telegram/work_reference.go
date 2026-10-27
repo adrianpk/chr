@@ -31,7 +31,9 @@ func (s *ReceiverStore) WorkReferences(ctx context.Context, botID int64, after s
 		return nil, err
 	}
 
-	result, ids, err := scanWorkReferences(rows)
+	page, err := scanWorkReferences(rows)
+	result, ids := page.References, page.IDs
+
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +48,12 @@ func (s *ReceiverStore) WorkReferences(ctx context.Context, botID int64, after s
 	return result, nil
 }
 
-func scanWorkReferences(rows *sql.Rows) (result []WorkReference, ids []string, err error) {
+func scanWorkReferences(rows *sql.Rows) (page workReferencePage, err error) {
+	var (
+		result []WorkReference
+		ids    []string
+	)
+
 	defer func() { err = errors.Join(err, rows.Close()) }()
 
 	for rows.Next() {
@@ -56,13 +63,13 @@ func scanWorkReferences(rows *sql.Rows) (result []WorkReference, ids []string, e
 		)
 
 		if err := rows.Scan(&id, &ref.Invocation.ID, &ref.Invocation.Revision, &ref.ConversationRevision); err != nil {
-			return nil, nil, err
+			return workReferencePage{References: nil, IDs: nil}, err
 		}
 
 		result, ids = append(result, ref), append(ids, id)
 	}
 
-	return result, ids, rows.Err()
+	return workReferencePage{References: result, IDs: ids}, rows.Err()
 }
 
 // ValidateWorkReference checks that the same confirmed admission still

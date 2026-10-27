@@ -48,7 +48,9 @@ func telegramAuthoringFinishFixture(t *testing.T) (*telegramConversationFixture,
 		t.Fatal(err)
 	}
 
-	_, target, err := f.store.ResolveAuthoringTarget(t.Context(), input)
+	bindingResult, err := f.store.ResolveAuthoringTarget(t.Context(), input)
+	target := bindingResult.Target
+
 	if err != nil {
 		t.Fatal(err)
 	}

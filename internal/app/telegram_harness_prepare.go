@@ -19,7 +19,9 @@ type telegramHarnessPrepared struct {
 }
 
 func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations telegramHarnessService, user telegramcore.AllowedUser, input telegramcore.ConversationInput, target telegramcore.OperationTarget, choices telegramHarnessChoices) error {
-	request, found, err := r.store.Operation(ctx, input.Update, 0)
+	operationLookup, err := r.store.Operation(ctx, input.Update, 0)
+	request, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return err
 	}

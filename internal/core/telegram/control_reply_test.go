@@ -35,7 +35,9 @@ func TestTelegramControlReplyBinding(t *testing.T) {
 
 			checkTelegramControlInputLane(t, f.store, input, tt.lane, tt.control)
 
-			answer, recognized, err := f.store.ResolveActionAnswer(t.Context(), input)
+			answerResolution, err := f.store.ResolveActionAnswer(t.Context(), input)
+
+			answer, recognized := answerResolution.Answer, answerResolution.Recognized
 			if err != nil || !recognized || answer.Token != action.Token || answer.Choice != tt.action {
 				t.Fatal("definite prompt acknowledgement did not release the exact answer", answer, err)
 			}
@@ -71,14 +73,18 @@ func telegramPendingActionDelivery(t *testing.T, store *ReceiverStore, token str
 func checkTelegramEarlyReply(t *testing.T, store *ReceiverStore, update ReceivedUpdate) {
 	t.Helper()
 
-	_, recognized, err := store.ResolveActionAnswer(t.Context(), update)
+	answerResolution2, err := store.ResolveActionAnswer(t.Context(), update)
+
+	recognized := answerResolution2.Recognized
 	if !recognized || !errors.Is(err, ErrReplyPending) {
 		t.Fatal("early reply escaped its pending prompt", recognized, err)
 	}
 
 	update.Peer.UserID++
 
-	_, recognized, err = store.ResolveActionAnswer(t.Context(), update)
+	answerResolution3, answerResolution3Error := store.ResolveActionAnswer(t.Context(), update)
+
+	recognized, err = answerResolution3.Recognized, answerResolution3Error
 	if !recognized || !errors.Is(err, ErrActionUnavailable) {
 		t.Fatal("another peer borrowed the sender's prompt", recognized, err)
 	}
@@ -105,7 +111,9 @@ func TestTelegramControlReplyExhaustion(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			_, recognized, err := f.store.ResolveActionAnswer(t.Context(), update)
+			answerResolution4, err := f.store.ResolveActionAnswer(t.Context(), update)
+
+			recognized := answerResolution4.Recognized
 			if !recognized || !errors.Is(err, test.failure) {
 				t.Fatal("send deadline lost its reply boundary", recognized, err)
 			}

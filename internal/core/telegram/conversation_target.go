@@ -123,7 +123,9 @@ func (op conversationTransaction) target() (*Conversation, error) {
 		return c, err
 	}
 
-	_, focused, err := op.peerSelection()
+	selection, err := op.peerSelection()
+	focused := selection.RootDigest
+
 	if err != nil {
 		return nil, err
 	}
@@ -181,43 +183,45 @@ func (op conversationTransaction) validateTarget(c *Conversation) error {
 	return nil
 }
 
-func (op conversationTransaction) focus() (string, *Conversation, error) {
+func (op conversationTransaction) focus() (conversationReply, error) {
 	c, err := op.explicitTarget()
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	if c == nil {
-		return "", nil, conversationDiagnosticError("Use /focus <conversation> with an exact session ID.")
+		return conversationReply{Text: "", Conversation: nil}, conversationDiagnosticError("Use /focus <conversation> with an exact session ID.")
 	}
 
 	if err := op.validateTarget(c); err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	if !captureEligible(*c) {
-		return "", nil, conversationDiagnosticError("This conversation is " + conversationState(c.Phase) + ". Use /sessions to choose a conversation that can collect details.")
+		return conversationReply{Text: "", Conversation: nil}, conversationDiagnosticError("This conversation is " + conversationState(c.Phase) + ". Use /sessions to choose a conversation that can collect details.")
 	}
 
 	p := op.input.Update.Peer
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_peers SET focused_conversation_id=?,revision=revision+1,updated_at=? WHERE bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, c.ID, database.FormatTime(op.now), p.BotID, p.ChatID, p.TopicID, p.UserID)
 
-	return "Your next details will go to " + conversationLabel(c.Topic) + " in " + op.projectLabel(c.ProjectID) + ".", c, err
+	return conversationReply{Text: "Your next details will go to " + conversationLabel(c.Topic) + " in " + op.projectLabel(c.ProjectID) + ".", Conversation: c}, err
 }
 
-func (op conversationTransaction) list() (string, *Conversation, error) {
+func (op conversationTransaction) list() (conversationReply, error) {
 	sessions, err := readConversations(op.ctx, op.tx, op.input.Update.Peer)
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	if len(sessions) == 0 {
-		return "No retained sessions. Use /prepare <topic> or /develop <topic>.", nil, nil
+		return conversationReply{Text: "No retained sessions. Use /prepare <topic> or /develop <topic>.", Conversation: nil}, nil
 	}
 
-	_, focus, err := op.peerSelection()
+	selection2, err := op.peerSelection()
+	focus := selection2.RootDigest
+
 	if err != nil {
-		return "", nil, err
+		return conversationReply{Text: "", Conversation: nil}, err
 	}
 
 	var text strings.Builder
@@ -234,7 +238,7 @@ func (op conversationTransaction) list() (string, *Conversation, error) {
 		text.WriteString(row)
 	}
 
-	return text.String(), nil, nil
+	return conversationReply{Text: text.String(), Conversation: nil}, nil
 }
 
 func (op conversationTransaction) targetEligible(c Conversation) bool {

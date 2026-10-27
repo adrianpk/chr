@@ -10,9 +10,15 @@ import (
 
 // ResolveAuthoringTarget observes an eligible session and the exact
 // frozen target together, without acknowledging its source or invoking an owner.
-func (s *ReceiverStore) ResolveAuthoringTarget(ctx context.Context, input ConversationInput) (conversation Conversation, target OperationTarget, err error) {
+func (s *ReceiverStore) ResolveAuthoringTarget(ctx context.Context, input ConversationInput) (ConversationBinding, error) {
+	var (
+		conversation Conversation
+		target       OperationTarget
+		err          error
+	)
+
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
-		return conversation, target, workflowstate.ErrConflict
+		return ConversationBinding{Conversation: conversation, Target: target}, workflowstate.ErrConflict
 	}
 
 	input.Action = ConversationAuthor
@@ -37,7 +43,7 @@ func (s *ReceiverStore) ResolveAuthoringTarget(ctx context.Context, input Conver
 		return err
 	})
 
-	return conversation, target, err
+	return ConversationBinding{Conversation: conversation, Target: target}, err
 }
 
 // ReadConversationBinding observes a retained request's exact peer/root

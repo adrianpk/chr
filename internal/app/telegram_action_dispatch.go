@@ -9,7 +9,9 @@ import (
 )
 
 func (r telegramReceiver) respondAction(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	answer, recognized, err := r.store.ResolveActionAnswer(ctx, update)
+	answerResolution, err := r.store.ResolveActionAnswer(ctx, update)
+
+	answer, recognized := answerResolution.Answer, answerResolution.Recognized
 	if !recognized {
 		return false, r.checkCaptureReplyLane(update)
 	}

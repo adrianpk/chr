@@ -59,7 +59,9 @@ func telegramAuthoringExplainExhaust(t *testing.T, f *telegramConversationAppFix
 		t.Fatal(updates, err)
 	}
 
-	request, found, err := f.receiver.store.Operation(t.Context(), updates[0], 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), updates[0], 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found {
 		t.Fatal(request, err)
 	}

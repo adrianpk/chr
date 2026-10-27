@@ -206,7 +206,8 @@ func (s *ReceiverStore) PollFailed(ctx context.Context, botID int64, failure err
 		return err
 	}
 
-	code, permanent, delay := failureState(failure, state.RetryAttempt)
+	policy := failureState(failure, state.RetryAttempt)
+	code, permanent, delay := policy.Code, policy.Permanent, policy.Delay
 
 	health := "degraded"
 	if permanent {
@@ -219,13 +220,13 @@ func (s *ReceiverStore) PollFailed(ctx context.Context, botID int64, failure err
 	return err
 }
 
-func failureState(failure error, attempt int) (string, bool, time.Duration) {
+func failureState(failure error, attempt int) failurePolicy {
 	delay := time.Second << min(4, max(0, attempt-1))
 
 	var apiErr *APIError
 	if errors.As(failure, &apiErr) {
-		return apiErr.Code, apiErr.Permanent, max(delay, apiErr.RetryAfter)
+		return failurePolicy{Code: apiErr.Code, Permanent: apiErr.Permanent, Delay: max(delay, apiErr.RetryAfter)}
 	}
 
-	return "local_failure", true, delay
+	return failurePolicy{Code: "local_failure", Permanent: true, Delay: delay}
 }

@@ -43,7 +43,9 @@ func qualityReceiverStore(t *testing.T, db *sql.DB) *telegramcore.ReceiverStore 
 func qualityReadConversation(t *testing.T, db *sql.DB, want telegramcore.Conversation) telegramcore.Conversation {
 	t.Helper()
 
-	got, found, err := qualityReceiverStore(t, db).ConversationReference(t.Context(), want.Peer, want.ID)
+	conversationLookup, err := qualityReceiverStore(t, db).ConversationReference(t.Context(), want.Peer, want.ID)
+
+	got, found := conversationLookup.Conversation, conversationLookup.Found
 	if err != nil || !found {
 		t.Fatal("frozen conversation unavailable", found, err)
 	}

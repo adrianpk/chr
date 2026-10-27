@@ -71,7 +71,9 @@ func (s *ReceiverStore) readGuidedReference(ctx context.Context, pair [2]string)
 		return GuidedReference{}, err
 	}
 
-	c, found, err := s.ConversationReference(ctx, request.Source.Peer, pair[0])
+	conversationLookup, err := s.ConversationReference(ctx, request.Source.Peer, pair[0])
+
+	c, found := conversationLookup.Conversation, conversationLookup.Found
 	if err != nil || !found || request.Target.ConversationID != c.ID {
 		return GuidedReference{}, errors.Join(workflowstate.ErrConflict, err)
 	}

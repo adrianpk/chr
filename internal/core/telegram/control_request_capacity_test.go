@@ -101,8 +101,8 @@ func checkTelegramOrdinaryRequestFull(t *testing.T, f *telegramConversationFixtu
 		t.Fatal("ordinary requests consumed the control allowance", err)
 	}
 
-	if _, found, err := f.store.Operation(t.Context(), input.Update, 0); err != nil || found {
-		t.Fatal("rejected reservation retained an accepted request", found, err)
+	if operationLookup, err := f.store.Operation(t.Context(), input.Update, 0); err != nil || operationLookup.Found {
+		t.Fatal("rejected reservation retained an accepted request", operationLookup.Found, err)
 	}
 }
 

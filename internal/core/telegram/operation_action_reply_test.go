@@ -46,7 +46,9 @@ func TestTelegramOperationActionReplies(t *testing.T) {
 	input := telegramOperationActionInput(t, f, "confirm")
 	input.Update.ReplyToMessageID = messageID
 
-	reply, recognized, err := f.store.ResolveActionAnswer(t.Context(), input.Update)
+	answerResolution, err := f.store.ResolveActionAnswer(t.Context(), input.Update)
+
+	reply, recognized := answerResolution.Answer, answerResolution.Recognized
 	if err != nil || !recognized || reply.Token != action.Token || reply.Choice != "confirm" {
 		t.Fatal("action reply unavailable", reply, recognized, err)
 	}
@@ -88,7 +90,9 @@ func checkTelegramOperationCallbackAnswer(t *testing.T, f *telegramConversationF
 
 	input.Update.Kind, input.Update.Text = "callback_query", callback
 
-	answer, recognized, err := f.store.ResolveActionAnswer(t.Context(), input.Update)
+	answerResolution2, err := f.store.ResolveActionAnswer(t.Context(), input.Update)
+
+	answer, recognized := answerResolution2.Answer, answerResolution2.Recognized
 	if err != nil || !recognized || answer != reply {
 		t.Fatal("callback and reply diverged", answer, err)
 	}

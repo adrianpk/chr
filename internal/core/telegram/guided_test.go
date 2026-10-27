@@ -23,12 +23,16 @@ func TestGuidedUseCaseTelegramBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	first, target, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
+	bindingResult, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
+	first, target := bindingResult.Conversation, bindingResult.Target
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	second, again, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
+	bindingResult2, err := f.store.ReserveGuidedConversation(t.Context(), input, time.Now())
+
+	second, again := bindingResult2.Conversation, bindingResult2.Target
 	if err != nil || first.ID != second.ID || target != again || authoringEligible(first) {
 		t.Fatal("routing replay replaced a binding or adopted manual authoring", err)
 	}
@@ -53,7 +57,7 @@ func assertGuidedTelegramPeer(t *testing.T, f *telegramConversationFixture, inpu
 	foreign.Config.AllowedUsers = append(foreign.Config.AllowedUsers, AllowedUser{TelegramUserID: foreign.Update.Peer.UserID, OperatorID: "other", ProjectIDs: []string{"alpha"}})
 
 	foreign.Conversation = c.ID
-	if _, _, err := f.store.ResolveGuidedTarget(t.Context(), foreign); err == nil {
+	if _, err := f.store.ResolveGuidedTarget(t.Context(), foreign); err == nil {
 		t.Fatal("foreign peer resolved a guided conversation")
 	}
 
@@ -61,7 +65,7 @@ func assertGuidedTelegramPeer(t *testing.T, f *telegramConversationFixture, inpu
 	moved.Projects = append([]projectcore.Project(nil), input.Projects...)
 
 	moved.Projects[0].Path = t.TempDir()
-	if _, _, err := f.store.ReserveGuidedConversation(t.Context(), moved, time.Now()); err == nil {
+	if _, err := f.store.ReserveGuidedConversation(t.Context(), moved, time.Now()); err == nil {
 		t.Fatal("replay accepted a replaced registered root")
 	}
 }

@@ -73,7 +73,9 @@ func TestGuidedUseCaseTelegramOvertakenAck(t *testing.T) {
 		t.Fatal("acknowledgement replay replaced canonical state or the newer display")
 	}
 
-	request, found, err := f.receiver.store.Operation(t.Context(), update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), update, 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || request.State != "confirmed" {
 		t.Fatal("original effect lacks its receiver receipt", err)
 	}
@@ -115,7 +117,9 @@ func TestGuidedUseCaseTelegramOvertakenButton(t *testing.T) {
 
 	after := readGuidedTelegramSession(t, operations, f.sessions(t)[0])
 
-	retained, found, err := f.receiver.store.Operation(t.Context(), request.Source, 0)
+	operationLookup2, err := f.receiver.store.Operation(t.Context(), request.Source, 0)
+
+	retained, found := operationLookup2.Request, operationLookup2.Found
 	if err != nil || !found || retained.State != "confirmed" || after.Revision != before.Revision || f.sessions(t)[0] != current {
 		t.Fatal("button replay lost its receipt or replaced newer state", err)
 	}

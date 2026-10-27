@@ -20,7 +20,9 @@ func (s *ReceiverStore) ProjectGuided(ctx context.Context, ref GuidedReference, 
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
-		current, ready, err := guidedProjectionReady(ctx, tx, ref, progress)
+		projection, err := guidedProjectionReady(ctx, tx, ref, progress)
+
+		current, ready := projection.Conversation, projection.Ready
 		if err != nil || !ready {
 			return err
 		}
@@ -58,27 +60,27 @@ func (s *ReceiverStore) ProjectGuided(ctx context.Context, ref GuidedReference, 
 	})
 }
 
-func guidedProjectionReady(ctx context.Context, tx *sql.Tx, ref GuidedReference, progress GuidedProgress) (Conversation, bool, error) {
+func guidedProjectionReady(ctx context.Context, tx *sql.Tx, ref GuidedReference, progress GuidedProgress) (guidedProjection, error) {
 	p := ref.Conversation.Peer
 
 	c, err := scanConversation(tx.QueryRowContext(ctx, `SELECT `+conversationColumns+` FROM telegram_conversations WHERE id=? AND bot_id=? AND chat_id=? AND topic_id=? AND user_id=?`, ref.Conversation.ID, p.BotID, p.ChatID, p.TopicID, p.UserID))
 	if err != nil {
-		return c, false, err
+		return guidedProjection{Conversation: c, Ready: false}, err
 	}
 
 	if c.Revision != ref.Conversation.Revision || c.GuidedRunID != ref.Conversation.GuidedRunID {
-		return c, false, nil
+		return guidedProjection{Conversation: c, Ready: false}, nil
 	}
 
 	if sameGuidedView(c.QuestionBinding, progress.Binding) {
-		return c, false, nil
+		return guidedProjection{Conversation: c, Ready: false}, nil
 	}
 
 	var active int
 
 	err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM telegram_requests WHERE conversation_id=? AND operation_id IN ('guided.continue','guided.step') AND state IN ('ready','applying')`, c.ID).Scan(&active)
 
-	return c, active == 0, err
+	return guidedProjection{Conversation: c, Ready: active == 0}, err
 }
 
 func sameGuidedView(before, after string) bool {

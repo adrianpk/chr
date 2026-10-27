@@ -35,7 +35,9 @@ func (s *ReceiverStore) ResolveInterpretation(ctx context.Context, env StateDire
 	}
 	defer func() { err = errors.Join(err, lock.Close()) }()
 
-	result, ready, err := s.reserveInterpretation(ctx, update, now)
+	reservation, err := s.reserveInterpretation(ctx, update, now)
+
+	result, ready := reservation.Interpretation, reservation.Call
 	if err != nil || !ready {
 		return result, err
 	}
@@ -84,7 +86,7 @@ func interpretationCallError(ctx context.Context, decision json.RawMessage, call
 	return callErr
 }
 
-func (s *ReceiverStore) reserveInterpretation(ctx context.Context, update ReceivedUpdate, now time.Time) (Interpretation, bool, error) {
+func (s *ReceiverStore) reserveInterpretation(ctx context.Context, update ReceivedUpdate, now time.Time) (interpretationReservation, error) {
 	var result Interpretation
 
 	ready := false
@@ -121,7 +123,7 @@ func (s *ReceiverStore) reserveInterpretation(ctx context.Context, update Receiv
 		return err
 	})
 
-	return result, ready, err
+	return interpretationReservation{Interpretation: result, Call: ready}, err
 }
 
 func interpretationFailure(err error) string {

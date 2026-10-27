@@ -41,7 +41,9 @@ func (s *ReceiverStore) ReserveHarnessOperation(ctx context.Context, input Conve
 		return request, err
 	}
 
-	retained, found, err := s.Operation(ctx, request.Source, 0)
+	operationLookup, err := s.Operation(ctx, request.Source, 0)
+	retained, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return request, err
 	}

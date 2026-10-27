@@ -29,7 +29,9 @@ func restoreBotLanes(ctx context.Context, tx *sql.Tx, botID int64) error {
 
 func restoreUpdateLanes(ctx context.Context, tx *sql.Tx, updates []ReceivedUpdate) error {
 	for _, update := range updates {
-		lane, control, err := inputLane(ctx, tx, update)
+		lane2, err := inputLane(ctx, tx, update)
+		lane, control := lane2.Lane, lane2.Determined
+
 		if err != nil {
 			return err
 		}

@@ -18,7 +18,9 @@ type telegramAuthoringArguments struct {
 }
 
 func (r telegramReceiver) reserveAuthoring(ctx context.Context, operations telegramAuthoringService, user telegramcore.AllowedUser, command telegramAuthoringCommand) (telegramcore.OperationRequest, error) {
-	c, target, err := r.store.ResolveAuthoringTarget(ctx, command.Input)
+	bindingResult, err := r.store.ResolveAuthoringTarget(ctx, command.Input)
+	c, target := bindingResult.Conversation, bindingResult.Target
+
 	if err != nil {
 		return telegramcore.OperationRequest{}, err
 	}

@@ -31,7 +31,9 @@ func (a ReceiverAPI) SendDocument(ctx context.Context, token string, peer PeerId
 		return acknowledgement, err
 	}
 
-	body, contentType, err := documentMultipart(peer, document, caption, entities, keyboard)
+	multipart2, err := documentMultipart(peer, document, caption, entities, keyboard)
+	body, contentType := multipart2.Payload, multipart2.ContentType
+
 	if err != nil {
 		return acknowledgement, err
 	}
@@ -61,11 +63,11 @@ func decodeDocumentAcknowledgement(data []byte) (tgmessage.Acknowledgement, erro
 	return tgmessage.Acknowledgement{MessageID: message.MessageID, FileID: message.Document.FileID}, nil
 }
 
-func documentMultipart(peer PeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) ([]byte, string, error) {
+func documentMultipart(peer PeerIdentity, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) (multipartBody, error) {
 	return documentMultipartDestination(strconv.FormatInt(peer.ChatID, 10), peer.TopicID, document, caption, entities, keyboard)
 }
 
-func documentMultipartDestination(destination string, topic int64, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) ([]byte, string, error) {
+func documentMultipartDestination(destination string, topic int64, document tgmessage.Document, caption string, entities []tgmessage.Entity, keyboard *inlineKeyboard) (multipartBody, error) {
 	var body bytes.Buffer
 
 	writer := multipart.NewWriter(&body)
@@ -76,12 +78,12 @@ func documentMultipartDestination(destination string, topic int64, document tgme
 	}
 
 	if err := documentJSONFields(fields, entities, keyboard); err != nil {
-		return nil, "", err
+		return multipartBody{Payload: nil, ContentType: ""}, err
 	}
 
 	for key, value := range fields {
 		if err := writer.WriteField(key, value); err != nil {
-			return nil, "", err
+			return multipartBody{Payload: nil, ContentType: ""}, err
 		}
 	}
 
@@ -91,18 +93,18 @@ func documentMultipartDestination(destination string, topic int64, document tgme
 
 	part, err := writer.CreatePart(header)
 	if err != nil {
-		return nil, "", err
+		return multipartBody{Payload: nil, ContentType: ""}, err
 	}
 
 	if _, err := part.Write(document.Payload); err != nil {
-		return nil, "", err
+		return multipartBody{Payload: nil, ContentType: ""}, err
 	}
 
 	if err := writer.Close(); err != nil {
-		return nil, "", err
+		return multipartBody{Payload: nil, ContentType: ""}, err
 	}
 
-	return body.Bytes(), writer.FormDataContentType(), nil
+	return multipartBody{Payload: body.Bytes(), ContentType: writer.FormDataContentType()}, nil
 }
 
 func documentJSONFields(fields map[string]string, entities []tgmessage.Entity, keyboard *inlineKeyboard) error {

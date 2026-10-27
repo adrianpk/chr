@@ -96,7 +96,9 @@ func telegramRecordFailure(err error) string {
 }
 
 func (r telegramReceiver) mutateRecord(ctx context.Context, operations telegramRecordService, user telegramcore.AllowedUser, command telegramRecordCommand) error {
-	request, found, err := r.store.Operation(ctx, command.Input.Update, 0)
+	operationLookup, err := r.store.Operation(ctx, command.Input.Update, 0)
+	request, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return err
 	}

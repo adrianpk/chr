@@ -57,7 +57,9 @@ func (r telegramReceiver) validateOvertakenGuided(ctx context.Context, request t
 		return err
 	}
 
-	current, found, err := r.store.ConversationReference(ctx, request.Source.Peer, request.Target.ConversationID)
+	conversationLookup, err := r.store.ConversationReference(ctx, request.Source.Peer, request.Target.ConversationID)
+	current, found := conversationLookup.Conversation, conversationLookup.Found
+
 	if err != nil {
 		return err
 	}

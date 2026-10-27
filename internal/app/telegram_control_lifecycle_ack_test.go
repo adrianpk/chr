@@ -94,7 +94,9 @@ func checkTelegramLifecycleAckRecovery(t *testing.T, f *telegramConversationAppF
 		t.Fatal("recovery changed newer native state")
 	}
 
-	request, found, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
+	operationLookup, err := f.receiver.store.Operation(t.Context(), input.Update, 0)
+
+	request, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || request.State != "confirmed" || !strings.HasPrefix(request.ReceiptRef, "run/operation-receipts/") {
 		t.Fatal("original lifecycle receipt unavailable", request, err)
 	}

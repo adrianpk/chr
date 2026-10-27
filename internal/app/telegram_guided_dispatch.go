@@ -22,7 +22,9 @@ func (r telegramReceiver) respondGuidedStart(ctx context.Context, user telegramc
 }
 
 func (r telegramReceiver) respondGuided(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	request, found, err := r.store.Operation(ctx, update, 0)
+	operationLookup, err := r.store.Operation(ctx, update, 0)
+	request, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return true, err
 	}
@@ -103,10 +105,13 @@ func (r telegramReceiver) reserveTelegramGuided(ctx context.Context, operations 
 		target telegramcore.OperationTarget
 		err    error
 	)
+
 	if start {
-		c, target, err = r.store.ReserveGuidedConversation(ctx, input, time.Now())
+		bindingResult, bindingResultError := r.store.ReserveGuidedConversation(ctx, input, time.Now())
+		c, target, err = bindingResult.Conversation, bindingResult.Target, bindingResultError
 	} else {
-		c, target, err = r.store.ResolveGuidedTarget(ctx, input)
+		bindingResult2, bindingResult2Error := r.store.ResolveGuidedTarget(ctx, input)
+		c, target, err = bindingResult2.Conversation, bindingResult2.Target, bindingResult2Error
 	}
 
 	if err != nil {

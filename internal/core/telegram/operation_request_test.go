@@ -45,7 +45,9 @@ func TestTelegramOperationRequestRecovery(t *testing.T) {
 
 	store = openTelegramReceiverTestStore(t, env)
 
-	retained, found, err := store.Operation(t.Context(), request.Source, 0)
+	operationLookup, err := store.Operation(t.Context(), request.Source, 0)
+
+	retained, found := operationLookup.Request, operationLookup.Found
 	if err != nil || !found || retained.ID != request.ID || retained.State != "applying" || string(retained.PreparedInput) != string(input) {
 		t.Fatal("request lost frozen owner input", retained, err)
 	}
@@ -63,7 +65,9 @@ func checkTelegramOperationFinish(t *testing.T, store *ReceiverStore, request Op
 		}
 	}
 
-	retained, _, err := store.Operation(t.Context(), request.Source, 0)
+	operationLookup2, err := store.Operation(t.Context(), request.Source, 0)
+
+	retained := operationLookup2.Request
 	if err != nil || retained.State != "confirmed" || retained.ReceiptRef != "run/receipts/original.json" {
 		t.Fatal("confirmed request changed", retained, err)
 	}
@@ -93,7 +97,7 @@ func TestTelegramOperationRequestConflict(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, _, err := store.Operation(t.Context(), request.Source, 0); err == nil {
+	if _, err := store.Operation(t.Context(), request.Source, 0); err == nil {
 		t.Fatal("corrupt prepared input accepted")
 	}
 }
@@ -121,7 +125,9 @@ func TestTelegramOperationRequestRollback(t *testing.T) {
 		t.Fatal("outbox capacity did not abort acknowledgement")
 	}
 
-	retained, _, err := store.Operation(t.Context(), request.Source, 0)
+	operationLookup4, err := store.Operation(t.Context(), request.Source, 0)
+
+	retained := operationLookup4.Request
 	if err != nil || retained.State != "applying" {
 		t.Fatal("failed acknowledgement changed request", retained, err)
 	}

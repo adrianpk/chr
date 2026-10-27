@@ -45,7 +45,9 @@ func (s Sender) SendPresentation(ctx context.Context, token, destination string,
 }
 
 func (api ReceiverAPI) sendNotificationDocument(ctx context.Context, token, destination string, delivery notifycore.TelegramDelivery, entities []tgmessage.Entity) (tgmessage.Acknowledgement, error) {
-	body, contentType, err := documentMultipartDestination(destination, 0, *delivery.Document, delivery.Presentation.PlainFallback, entities, nil)
+	multipart, err := documentMultipartDestination(destination, 0, *delivery.Document, delivery.Presentation.PlainFallback, entities, nil)
+	body, contentType := multipart.Payload, multipart.ContentType
+
 	if err != nil {
 		return tgmessage.Acknowledgement{}, err
 	}

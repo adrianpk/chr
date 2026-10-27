@@ -100,7 +100,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-708 current non-test files under internal/core, their declared symbols,
+709 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -473,3 +473,17 @@ aliases. This changes identifiers only; strings, JSON tags, SQL, frozen bytes an
 transition predicates are retained. Exact debt identities/signatures follow the
 rename ledger without broadening allowances. Pinned strict lint, policy and the
 focused receiver/legacy-storage/wire/invalid-scope regressions pass.
+
+
+### Receiver result contracts
+
+ActionAnswerResolution names recognition separately from the answer;
+OperationLookup and ConversationLookup preserve missing/found/error distinctions.
+ConversationBinding carries the original conversation and target without gaining
+authority. Private reply, selection, multipart, provider reservation, lane, YAML
+field, failure and work-page values name their actual outputs. Provider Call
+flags preserve the original pre-IO reservation decision and finite attempts.
+Explicit assignments preserve partial results on error and outer callback state.
+The work-page iterator keeps its named error for the existing close-error join.
+All existing early guards, SQL, source acknowledgement, quotas and transactions
+remain. Direct integration consumers destructure the named contracts.

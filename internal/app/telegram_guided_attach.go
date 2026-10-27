@@ -53,7 +53,8 @@ func (r telegramReceiver) attachTelegramGuidedName(ctx context.Context, input te
 	}
 
 	input.Project, input.Namespace = target.ProjectID, target.Namespace
-	conversation, _, err := r.store.BindGuidedConversation(ctx, input, association, time.Now())
+	bindingResult, err := r.store.BindGuidedConversation(ctx, input, association, time.Now())
+	conversation := bindingResult.Conversation
 
 	return conversation.ID, err
 }

@@ -49,7 +49,9 @@ func (op conversationTransaction) intentSnapshot() (IntentSnapshot, error) {
 		err      error
 	)
 
-	snapshot.Selected, snapshot.Focused, err = op.peerSelection()
+	selection, selectionError := op.peerSelection()
+
+	snapshot.Selected, snapshot.Focused, err = selection.ProjectID, selection.RootDigest, selectionError
 	if err != nil {
 		return snapshot, err
 	}

@@ -9,7 +9,9 @@ import (
 )
 
 func (r telegramReceiver) respondAuthoring(ctx context.Context, user telegramcore.AllowedUser, config telegramcore.ReceiverConfig, update telegramcore.ReceivedUpdate) (bool, error) {
-	retained, found, err := r.store.Operation(ctx, update, 0)
+	operationLookup, err := r.store.Operation(ctx, update, 0)
+	retained, found := operationLookup.Request, operationLookup.Found
+
 	if err != nil {
 		return true, err
 	}
@@ -60,7 +62,9 @@ func (r telegramReceiver) dispatchAuthoringConversation(ctx context.Context, use
 	case telegramcore.ConversationDone:
 		command.Action, command.Target = core.AuthoringContinuationGenerate, core.AuthoringArtifactKindDump
 	case telegramcore.ConversationCapture:
-		c, _, err := r.store.ResolveAuthoringTarget(ctx, input)
+		bindingResult, err := r.store.ResolveAuthoringTarget(ctx, input)
+		c := bindingResult.Conversation
+
 		if err != nil {
 			return true, r.recordDiagnostic(ctx, input.Update, input.Config, telegramAuthoringFailure(err))
 		}

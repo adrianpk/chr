@@ -121,7 +121,9 @@ func checkTelegramControlReplyWaiting(t *testing.T, f *telegramConversationAppFi
 		}
 
 		if len(pending) == 1 {
-			_, recognized, err := f.receiver.store.ResolveActionAnswer(t.Context(), pending[0])
+			answerResolution, err := f.receiver.store.ResolveActionAnswer(t.Context(), pending[0])
+
+			recognized := answerResolution.Recognized
 			if !recognized || !errors.Is(err, telegramcore.ErrReplyPending) {
 				t.Fatal("reply escaped pending definite acknowledgement", recognized, err)
 			}
