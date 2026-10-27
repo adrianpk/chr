@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func validateWorkflowNativeSubmission(submission WorkflowSubmission, schema string) error {
@@ -47,7 +48,7 @@ func validateWorkflowLegacySubmissionSchema(submission WorkflowSubmission, schem
 func validWorkflowNativeSubmissionOwner(submission WorkflowSubmission) bool {
 	native := submission.Native
 
-	return native.InvocationID == submission.InvocationID && native.Unit == submission.Unit && native.ClaimGeneration > 0 && native.Mechanism == WorkflowPublicationGitAtomicDualRef && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, submission.Guard.Git) && native.CanonicalPR == submission.Guard.PullRequest.URL && native.CapabilityHash == submission.Guard.Capability.Revision
+	return native.InvocationID == submission.InvocationID && native.Unit == submission.Unit && native.ClaimGeneration > 0 && native.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, submission.Guard.Git) && native.CanonicalPR == submission.Guard.PullRequest.URL && native.CapabilityHash == submission.Guard.Capability.Revision
 }
 
 func validateWorkflowNativeSubmissionRefs(native WorkflowNativeSubmission) error {

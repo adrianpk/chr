@@ -798,3 +798,25 @@ priority/severity/created-at ties, nil handling, Board attention and synopsis bo
 remain unchanged. Ticket imports only the shared workflow/state request values;
 the dependency guard explicitly permits those values and rejects the coordinator.
 No store method, lock, journal or native mutation authority moves in this batch.
+
+
+## Slice 12 configuration prerequisite
+
+The complete parsed project configuration has the workspace/config owner, shared
+directly by native workflow, app and adapters. It keeps Web, notification, evidence,
+runtime and work settings together without copying configuration into workflow/state.
+All 114 moved declaration token sequences match after owner/API qualification,
+insignificant trailing parameter commas and resolving the original rebase constant
+to its literal default. Struct/tag order, raw-image revision, explicit presence,
+versioned defaults, guards and error ordering are unchanged. Config.Explicit is a
+read-only presence query; existing Config.Revision supplies the original hash.
+
+Harness-selection journal/image/receipt operations retain their original single
+workspace configuration lock and recovery semantics. Native WorkflowStore upgrade
+transactions stay at their current receiver. The cross-owner fence fixture creates
+a real receipt-rename failure during the existing preparation callback, verifies
+the retained journal blocks upgrade, then removes its obstruction and replays the
+same request. No production test export or recovery hook is introduced. Dependency
+checks reject config-to-root, config-to-coordinator and parent-to-child cycles.
+The existing Slice 15 upgrade-journal tuple debt is qualified through the same
+configuration value; its result shape, expiry and the ceiling-six ratchet remain.

@@ -15,6 +15,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestWorkflowUpgradeCLI exercises the actual root command, policy observation,
@@ -25,7 +26,7 @@ func TestWorkflowUpgradeCLI(t *testing.T) {
 		t.Fatalf("git init: %v: %s", err, output)
 	}
 
-	prior, err := core.ResolveWorkflowConfiguration(project, "")
+	prior, err := workspaceconfig.ResolveWorkflowConfiguration(project, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,7 +115,7 @@ func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 			operations := newTestService(t, project)
 			writeWorkflowUpgradeExecution(t, operations, tc.status)
 
-			opts := core.WorkflowUpgradeOptions{ExpectedRevision: authoringcore.WorkflowContentHash(nil), StateAuthority: core.WorkStateAuthorityTickets}
+			opts := core.WorkflowUpgradeOptions{ExpectedRevision: authoringcore.WorkflowContentHash(nil), StateAuthority: workspaceconfig.WorkStateAuthorityTickets}
 
 			_, err := operations.UpgradeWorkflowConfiguration(t.Context(), opts)
 			if (err != nil) != tc.blocked {

@@ -803,8 +803,8 @@
     },
     {
       "id": "internal/core/workflow_upgrade_journal.go::WorkflowStore.newWorkflowUpgradeJournal",
-      "signature": "func(data []byte, config WorkspaceConfig, opts WorkflowUpgradeOptions, hash string) (workflowUpgradeJournal, []byte, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
+      "signature": "func(data []byte, config workspaceconfig.Config, opts WorkflowUpgradeOptions, hash string) (workflowUpgradeJournal, []byte, error)",
+      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T12.2 qualifies the unchanged configuration value from workspace/config.Config; the tuple remains assigned to Slice 15."
     },
     {
       "id": "internal/core/workflow_upgrade_journal.go::WorkflowStore.retainedWorkflowUpgrade",

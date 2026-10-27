@@ -5,10 +5,11 @@ import (
 	"strings"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ValidateReviewWorkflowConfig validates the corresponding package boundary value.
-func ValidateReviewWorkflowConfig(config ReviewWorkflowConfig) error {
+func ValidateReviewWorkflowConfig(config workspaceconfig.ReviewWorkflowConfig) error {
 	if !IsValidReviewWorkflowMode(config.Mode) {
 		return fmt.Errorf("invalid review workflow mode: %s", config.Mode)
 	}

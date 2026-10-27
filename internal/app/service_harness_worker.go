@@ -9,11 +9,12 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
-func (s service) prepareWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (core.WorkflowHarnessResolution, error) {
+func (s service) prepareWorkflowHarness(ctx context.Context, config workspaceconfig.Config) (core.WorkflowHarnessResolution, error) {
 	if _, err := config.HarnessSelections(s.projectContext.ProjectID); err != nil {
 		return core.WorkflowHarnessResolution{}, err
 	}

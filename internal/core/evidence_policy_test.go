@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func TestDetectEvidenceGherkinContextUsesAcceptanceFeatureArtifacts(t *testing.T) {
@@ -18,7 +19,7 @@ func TestDetectEvidenceGherkinContextUsesAcceptanceFeatureArtifacts(t *testing.T
 		ticket.ProjectArea = "cli"
 	})
 
-	context, err := DetectEvidenceGherkinContext(projectDir, DefaultEvidenceStrategyConfig(), ticket)
+	context, err := DetectEvidenceGherkinContext(projectDir, workspaceconfig.DefaultEvidenceStrategyConfig(), ticket)
 	if err != nil {
 		t.Fatalf("DetectEvidenceGherkinContext returned error: %v", err)
 	}
@@ -36,8 +37,8 @@ func TestDetectEvidenceGherkinContextHonorsDisabledPolicy(t *testing.T) {
 	projectDir := t.TempDir()
 	writeEvidencePolicyFeature(t, projectDir, ".chr/default/acceptance/checkout.feature")
 
-	config := DefaultEvidenceStrategyConfig()
-	config.GherkinPolicy = EvidenceGherkinPolicyDisabled
+	config := workspaceconfig.DefaultEvidenceStrategyConfig()
+	config.GherkinPolicy = workspaceconfig.EvidenceGherkinPolicyDisabled
 
 	context, err := DetectEvidenceGherkinContext(projectDir, config, testEvidencePolicyTicket(func(ticket *ticketcore.Indexed) {
 		ticket.Type = "feature"
@@ -70,7 +71,7 @@ func TestEvidenceGuidanceForTicketRequiresBehaviorGherkinWhenActive(t *testing.T
 		ticket.UseCase = "checkout"
 	})
 	gherkin := EvidenceGherkinContext{
-		Policy:       EvidenceGherkinPolicyActiveWhenApplicable,
+		Policy:       workspaceconfig.EvidenceGherkinPolicyActiveWhenApplicable,
 		Active:       true,
 		Applies:      true,
 		RequiredPath: ".chr/default/acceptance/checkout.feature",

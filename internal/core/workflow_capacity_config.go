@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 const workflowWorkerSlotLimit = 8
@@ -18,30 +18,8 @@ type workflowCapacityLimits struct {
 	Prepared int
 }
 
-func setWorkCapacityConfigValue(config *WorkConfig, key, value string) bool {
-	var field *int
-
-	switch key {
-	case "max_active_workers":
-		field = &config.MaxActiveWorkers
-	case "ready_queue_capacity":
-		field = &config.ReadyQueueCapacity
-	default:
-		return false
-	}
-
-	parsed, err := strconv.Atoi(value)
-	if err != nil {
-		parsed = -1
-	}
-
-	*field = parsed
-
-	return true
-}
-
 func workflowCapacityConfig(projectDir string) (workflowCapacityLimits, error) {
-	config, err := LoadWorkspaceConfig(projectDir)
+	config, err := workspaceconfig.Load(projectDir)
 	if err != nil {
 		return workflowCapacityLimits{}, err
 	}

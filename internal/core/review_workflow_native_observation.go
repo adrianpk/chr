@@ -7,6 +7,7 @@ import (
 	"time"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowNativePublicationBinding retains the original PR/source and exact
@@ -98,7 +99,7 @@ func validateWorkflowNativeBinding(binding WorkflowNativePublicationBinding) err
 
 func validateWorkflowNativeCapability(capability WorkflowNativeCapability) error {
 	sealed, err := sealWorkflowNativeCapability(capability)
-	if err != nil || sealed.Revision != capability.Revision || !capability.AtomicSourceBase || !capability.ExactResult || len(capability.Unsupported) != 0 || capability.AdapterVersion != workflowNativeAdapterVersion || capability.Mechanism != WorkflowPublicationGitAtomicDualRef {
+	if err != nil || sealed.Revision != capability.Revision || !capability.AtomicSourceBase || !capability.ExactResult || len(capability.Unsupported) != 0 || capability.AdapterVersion != workflowNativeAdapterVersion || capability.Mechanism != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return workflowstate.ErrConflict
 	}
 

@@ -8,14 +8,15 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type agentWorkLoopSelection struct {
 	ExcludedAdopted int
 	Tickets         []ticketcore.Indexed
 	EligibleCount   int
-	ReviewConfig    core.ReviewWorkflowConfig
-	WorkConfig      core.WorkConfig
+	ReviewConfig    workspaceconfig.ReviewWorkflowConfig
+	WorkConfig      workspaceconfig.WorkConfig
 }
 
 func parseProjectTicketsFromDir(ctx context.Context, projectID, projectDir string, indexedAt time.Time) ([]ticketcore.Indexed, error) {
@@ -97,7 +98,7 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 	}, nil
 }
 
-func (s service) applyAgentWorkSelectionPreflight(index ticketcore.Index, tickets []ticketcore.Indexed, workConfig core.WorkConfig) ([]ticketcore.Indexed, error) {
+func (s service) applyAgentWorkSelectionPreflight(index ticketcore.Index, tickets []ticketcore.Indexed, workConfig workspaceconfig.WorkConfig) ([]ticketcore.Indexed, error) {
 	allTickets, err := index.ListProject(s.ctx, s.projectContext.ProjectID)
 	if err != nil {
 		return nil, err
@@ -129,18 +130,18 @@ func (s service) applyAgentWorkSelectionPreflight(index ticketcore.Index, ticket
 	return tickets, nil
 }
 
-func agentWorkLoopWorkspaceConfig(projectDir string) (core.WorkspaceConfig, error) {
-	config, err := core.LoadWorkspaceConfig(projectDir)
+func agentWorkLoopWorkspaceConfig(projectDir string) (workspaceconfig.Config, error) {
+	config, err := workspaceconfig.Load(projectDir)
 	if err != nil {
-		return core.WorkspaceConfig{}, err
+		return workspaceconfig.Config{}, err
 	}
 
-	if err := core.ValidateWorkConfig(config.Work); err != nil {
-		return core.WorkspaceConfig{}, err
+	if err := workspaceconfig.ValidateWorkConfig(config.Work); err != nil {
+		return workspaceconfig.Config{}, err
 	}
 
 	if err := core.ValidateReviewWorkflowConfig(config.Review); err != nil {
-		return core.WorkspaceConfig{}, err
+		return workspaceconfig.Config{}, err
 	}
 
 	return config, nil

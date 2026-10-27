@@ -13,14 +13,14 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
 // One explicit flag must expose the UI without creating or supplying a token.
 func TestWebLANCLI(t *testing.T) {
-	t.Setenv(core.DefaultWebTokenEnv, "")
+	t.Setenv(workspaceconfig.DefaultWebTokenEnv, "")
 
 	projectDir := newTestWorkspace(t)
 
@@ -123,14 +123,14 @@ func TestWebLANProjectConfig(t *testing.T) {
 
 // A configured stronger requirement is honored, and a selected network interface is retained.
 func TestWebLANConfiguredPolicy(t *testing.T) {
-	config := core.DefaultWebConfig()
-	config.RequireToken = core.WebTokenModeAlways
+	config := workspaceconfig.DefaultWebConfig()
+	config.RequireToken = workspaceconfig.WebTokenModeAlways
 
 	if _, err := applyWebLANAccess(config, true, false); err == nil {
 		t.Fatal("LAN flag silently weakened configured token protection")
 	}
 
-	config.RequireToken = core.WebTokenModeAuto
+	config.RequireToken = workspaceconfig.WebTokenModeAuto
 	config.Host = "192.0.2.10"
 
 	resolved, err := applyWebLANAccess(config, true, false)
@@ -142,7 +142,7 @@ func TestWebLANConfiguredPolicy(t *testing.T) {
 func webLANHandler(t *testing.T, provider webui.DataProvider) http.Handler {
 	t.Helper()
 
-	config, err := applyWebLANAccess(core.DefaultWebConfig(), true, false)
+	config, err := applyWebLANAccess(workspaceconfig.DefaultWebConfig(), true, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,7 +157,7 @@ func webLANHandler(t *testing.T, provider webui.DataProvider) http.Handler {
 
 // The browser follows rendered links and fragments with no token, auth header or cookie jar.
 func TestWebLANNavigation(t *testing.T) {
-	t.Setenv(core.DefaultWebTokenEnv, "")
+	t.Setenv(workspaceconfig.DefaultWebTokenEnv, "")
 
 	server := httptest.NewServer(webLANHandler(t, nil))
 	defer server.Close()

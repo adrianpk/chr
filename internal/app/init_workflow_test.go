@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestInitWorkflowCLI exercises actual root-command initialization and the
@@ -27,7 +27,7 @@ func TestInitWorkflowCLI(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			var result core.WorkflowConfiguration
+			var result workspaceconfig.WorkflowConfiguration
 			if err := json.Unmarshal(output.Bytes(), &result); err != nil || result.Version != 1 {
 				t.Fatal("CLI omitted version-one defaults", result, err)
 			}
@@ -38,7 +38,7 @@ func TestInitWorkflowCLI(t *testing.T) {
 	}
 }
 
-func checkInitWorkflowCLIValues(t *testing.T, result core.WorkflowConfiguration) {
+func checkInitWorkflowCLIValues(t *testing.T, result workspaceconfig.WorkflowConfiguration) {
 	t.Helper()
 
 	want := map[string]string{"review.mode": "trusted_auto_merge", "work.state_authority": "tickets", "work.workspace_mode": "worktree", "work.max_active_workers": "1"}
@@ -60,7 +60,7 @@ func checkInitWorkflowCLIValues(t *testing.T, result core.WorkflowConfiguration)
 func checkInitWorkflowRuntime(t *testing.T, project string) {
 	t.Helper()
 
-	before, err := core.ResolveWorkflowConfiguration(project, "")
+	before, err := workspaceconfig.ResolveWorkflowConfiguration(project, "")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func checkInitWorkflowRuntime(t *testing.T, project string) {
 		t.Fatal(err)
 	}
 
-	after, err := core.ResolveWorkflowConfiguration(project, "")
+	after, err := workspaceconfig.ResolveWorkflowConfiguration(project, "")
 	if err != nil || before.Revision != after.Revision || before.Version != after.Version {
 		t.Fatal("runtime bootstrap changed project policy", before, after, err)
 	}

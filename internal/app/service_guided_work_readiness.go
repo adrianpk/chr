@@ -7,9 +7,10 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.WorkspaceConfig) (core.WorkflowHarnessResolution, error) {
+func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config workspaceconfig.Config) (core.WorkflowHarnessResolution, error) {
 	resolved, err := s.prepareWorkflowHarness(ctx, config)
 	if err != nil {
 		return core.WorkflowHarnessResolution{}, &authoringcore.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
@@ -19,7 +20,7 @@ func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config core.W
 }
 
 func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection workflowstate.PreviewRequest) error {
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
@@ -42,7 +43,7 @@ func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection wor
 	return s.checkGuidedPublisher(config, selection.Target.Repository)
 }
 
-func (s service) checkGuidedWorker(ctx context.Context, config core.WorkspaceConfig) error {
+func (s service) checkGuidedWorker(ctx context.Context, config workspaceconfig.Config) error {
 	if s.workflowWorker != nil {
 		return nil
 	}
@@ -55,8 +56,8 @@ func (s service) checkGuidedWorker(ctx context.Context, config core.WorkspaceCon
 	return nil
 }
 
-func (s service) checkGuidedPublisher(config core.WorkspaceConfig, repository string) error {
-	if config.Work.Integration.PublicationProfile != core.WorkflowPublicationGitAtomicDualRef {
+func (s service) checkGuidedPublisher(config workspaceconfig.Config, repository string) error {
+	if config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return nil
 	}
 

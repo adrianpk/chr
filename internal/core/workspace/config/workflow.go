@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"fmt"
@@ -35,7 +35,7 @@ type workflowConfigInteger struct {
 	maximum int
 }
 
-func workflowConfigIntegers(config *WorkspaceConfig) []workflowConfigInteger {
+func workflowConfigIntegers(config *Config) []workflowConfigInteger {
 	work := &config.Work
 
 	return []workflowConfigInteger{
@@ -51,8 +51,9 @@ func workflowConfigIntegers(config *WorkspaceConfig) []workflowConfigInteger {
 	}
 }
 
-func parseWorkflowConfig(data []byte) (WorkspaceConfig, error) {
-	config := defaultWorkspaceConfig()
+// Parse validates one bounded configuration image, preserving versioned defaults and explicit keys.
+func Parse(data []byte) (Config, error) {
+	config := Default()
 
 	values, err := readWorkflowConfigValues(data)
 	if err != nil {
@@ -97,7 +98,7 @@ func parseWorkflowConfig(data []byte) (WorkspaceConfig, error) {
 	return config, validateWorkflowConfigValues(config, values)
 }
 
-func applyWorkflowConfigValues(config *WorkspaceConfig, values map[string]string) error {
+func applyWorkflowConfigValues(config *Config, values map[string]string) error {
 	for _, field := range workflowConfigIntegers(config) {
 		value, present := values[field.key]
 		if !present {
@@ -123,7 +124,7 @@ func applyWorkflowConfigValues(config *WorkspaceConfig, values map[string]string
 	return applyWorkflowTicketSelection(config, values)
 }
 
-func applyWorkflowTicketSelection(config *WorkspaceConfig, values map[string]string) error {
+func applyWorkflowTicketSelection(config *Config, values map[string]string) error {
 	if value, present := values["work.include_later_tickets"]; present {
 		if value != "true" && value != "false" {
 			return fmt.Errorf("work.include_later_tickets must be true or false")
@@ -135,7 +136,7 @@ func applyWorkflowTicketSelection(config *WorkspaceConfig, values map[string]str
 	return nil
 }
 
-func validateWorkflowConfigValues(config WorkspaceConfig, values map[string]string) error {
+func validateWorkflowConfigValues(config Config, values map[string]string) error {
 	choices := []struct {
 		key     string
 		allowed []string
@@ -204,15 +205,16 @@ func ResolveWorkflowConfiguration(projectDir string, restriction workflowstate.R
 		return WorkflowConfiguration{}, fmt.Errorf("an invocation may restrict review to human_review only")
 	}
 
-	config, err := LoadWorkspaceConfig(projectDir)
+	config, err := Load(projectDir)
 	if err != nil {
 		return WorkflowConfiguration{}, err
 	}
 
-	return effectiveWorkflowConfiguration(config, restriction), nil
+	return EffectiveWorkflowConfiguration(config, restriction), nil
 }
 
-func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction workflowstate.ReviewMode) WorkflowConfiguration {
+// EffectiveWorkflowConfiguration reports effective values and their sources without changing policy.
+func EffectiveWorkflowConfiguration(config Config, restriction workflowstate.ReviewMode) WorkflowConfiguration {
 	revision := config.workflowRevision
 	if revision == "" {
 		revision = contenthash.Sum(nil)
@@ -220,7 +222,7 @@ func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction workflow
 
 	result := WorkflowConfiguration{Version: config.Workflow.Version, Revision: revision}
 	for _, field := range workflowConfigIntegers(&config) {
-		result.Values = append(result.Values, workflowConfigurationValue(config, field.key, strconv.Itoa(*field.value)))
+		result.Values = append(result.Values, WorkflowValue(config, field.key, strconv.Itoa(*field.value)))
 	}
 
 	for _, field := range []struct{ key, value string }{
@@ -231,7 +233,7 @@ func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction workflow
 		{"work.integration.publication_profile", config.Work.Integration.PublicationProfile},
 		{"work.include_later_tickets", strconv.FormatBool(config.Work.IncludeLaterTickets)},
 	} {
-		value := workflowConfigurationValue(config, field.key, field.value)
+		value := WorkflowValue(config, field.key, field.value)
 		if field.key == "review.mode" && restriction != "" {
 			value.Value, value.Source = string(restriction), "invocation_restriction"
 		}
@@ -242,7 +244,8 @@ func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction workflow
 	return result
 }
 
-func workflowConfigurationValue(config WorkspaceConfig, key, value string) WorkflowConfigurationValue {
+// WorkflowValue labels one effective field by its original explicit or default source.
+func WorkflowValue(config Config, key, value string) WorkflowConfigurationValue {
 	source := "legacy_default"
 	if config.Workflow.Version == 1 {
 		source = "version_default"

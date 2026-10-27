@@ -59,6 +59,7 @@ var leafImports = map[string]map[string]bool{
 	"internal/core/database":         {},
 	"internal/core/model":            {},
 	"internal/core/authoring/state":  {},
+	"internal/core/workspace/config": {coreImportPath + "configvalue": true, coreImportPath + "contenthash": true, coreImportPath + "execution": true, coreImportPath + "harness": true, coreImportPath + "harness/runtime": true, coreImportPath + "notify": true, coreImportPath + "ops/file": true, coreImportPath + "ticket": true, coreImportPath + "workflow/state": true, coreImportPath + "workspace": true},
 	"internal/core/workspace":        {coreImportPath + "ops/file": true, coreImportPath + "project": true},
 	"internal/core/configvalue":      {},
 	"internal/core/contenthash":      {},

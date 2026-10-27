@@ -15,6 +15,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type telegramNotificationCapture struct {
@@ -101,7 +102,7 @@ func newTelegramNotificationAppInput(t *testing.T) (notifycore.Repository, notif
 	now := time.Now().UTC()
 	record := notifycore.AuditRecord{Channel: "telegram", Event: notifycore.Event{ID: "notice-original", ProjectID: project.ProjectID, Type: notifycore.EventLoopFinished, Severity: notifycore.SeverityInfo, Status: notifycore.StatusPending, Source: notifycore.SourceTicketLoop, References: notifycore.References{LoopRunID: "loop-original"}, Payload: notifycore.Payload{Summary: "Ticket loop finished", Detail: "Processed: 1; blocked: 0; failed: 0.\nWorker-reported summary: " + strings.Repeat("literal `_*` 😀\n", 500)}, CreatedAt: now, UpdatedAt: now}}
 
-	config, err := core.LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatal(err)
 	}

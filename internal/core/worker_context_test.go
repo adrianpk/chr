@@ -13,6 +13,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func TestWorkerContextMaterializerWritesContext(t *testing.T) {
@@ -351,7 +352,7 @@ func TestRenderWorkerContextIncludesDocsOnlyEvidenceStrategy(t *testing.T) {
 
 	opts := testWorkerContextOptions("/tmp/context.md")
 	opts.Evidence = &WorkerEvidenceContext{
-		Config:    DefaultEvidenceStrategyConfig(),
+		Config:    workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: &checklist,
 	}
 
@@ -402,7 +403,7 @@ func TestRenderWorkerContextIncludesBehaviorChangeEvidenceStrategy(t *testing.T)
 
 	opts := testWorkerContextOptions("/tmp/context.md")
 	opts.Evidence = &WorkerEvidenceContext{
-		Config:    DefaultEvidenceStrategyConfig(),
+		Config:    workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: &checklist,
 	}
 

@@ -17,6 +17,7 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Both transports exercise the same real authoring retry and publication owner.
@@ -124,7 +125,7 @@ func TestPiGenerationDump(t *testing.T) {
 func TestPiGenerationProtocolIdentity(t *testing.T) {
 	operations, driver := piGenerationFixture(t, `{}`)
 
-	config, err := core.LoadWorkspaceConfig(operations.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(operations.projectContext.ProjectDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +142,7 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	op, err := core.FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: operations.projectContext.ProjectDir, ID: "unsupported-protocol", Purpose: "conversation"}, func(context.Context, core.WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
+	op, err := core.FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: operations.projectContext.ProjectDir, ID: "unsupported-protocol", Purpose: "conversation"}, func(context.Context, workspaceconfig.Config) (harnesshost.GenerationPreparation, error) {
 		return harnesshost.GenerationPreparation{Binding: prepared.Binding, Launch: prepared.Launch}, nil
 	})
 	if err != nil {

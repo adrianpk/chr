@@ -13,6 +13,7 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type ticketApplyResultPlan struct {
@@ -251,7 +252,7 @@ func writeTicketExecutionReport(ctx context.Context, plan ticketApplyResultPlan)
 }
 
 func addTicketExecutionReportEvidenceOptions(opts *core.ExecutionReportOptions, plan ticketApplyResultPlan) error {
-	config, err := core.LoadWorkspaceConfig(plan.ProjectContext.ProjectDir)
+	config, err := workspaceconfig.Load(plan.ProjectContext.ProjectDir)
 	if err != nil {
 		return fmt.Errorf("load evidence strategy config: %w", err)
 	}

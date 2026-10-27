@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func workflowUpgradeFixture(t *testing.T, body string) (*WorkflowStore, WorkflowUpgradeOptions) {
@@ -24,15 +25,15 @@ func workflowUpgradeFixture(t *testing.T, body string) (*WorkflowStore, Workflow
 		writeWorkspaceConfig(t, store.layout.ProjectDir(), body)
 	}
 
-	prior, err := ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
+	prior, err := workspaceconfig.ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return store, WorkflowUpgradeOptions{ExpectedRevision: prior.Revision, StateAuthority: WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
+	return store, WorkflowUpgradeOptions{ExpectedRevision: prior.Revision, StateAuthority: workspaceconfig.WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
 }
 
-func workflowUpgradeValue(config WorkflowConfiguration, key string) string {
+func workflowUpgradeValue(config workspaceconfig.WorkflowConfiguration, key string) string {
 	for _, value := range config.Values {
 		if value.Key == key {
 			return value.Value
@@ -57,7 +58,7 @@ func TestWorkflowUpgradePolicy(t *testing.T) {
 			store, opts := workflowUpgradeFixture(t, tc.body)
 			opts.ReviewMode = workflowstate.ReviewMode(tc.choice)
 
-			prior, err := ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
+			prior, err := workspaceconfig.ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -94,7 +95,7 @@ func checkWorkflowUpgradeSnapshot(t *testing.T, store *WorkflowStore, opts Workf
 		t.Fatal("upgrade retry changed its result", again, err)
 	}
 
-	current, err := ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
+	current, err := workspaceconfig.ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
 	if err != nil || !reflect.DeepEqual(current, result.Current) {
 		t.Fatal("stored policy differs from upgrade receipt", current, err)
 	}
@@ -105,7 +106,7 @@ func checkWorkflowUpgradeSnapshot(t *testing.T, store *WorkflowStore, opts Workf
 func TestWorkflowUpgradePreserves(t *testing.T) {
 	body := "# Project settings\nnotifications:\n  telegram_chat_id: private-channel\nwork:\n  workspace_mode: project\n  max_worker_attempts: 7\nreview:\n  mode: agentic_review\n  forgejo_token_env: PRIVATE_TOKEN\n"
 	store, opts := workflowUpgradeFixture(t, body)
-	opts.StateAuthority = WorkStateAuthorityTrackerCompat
+	opts.StateAuthority = workspaceconfig.WorkStateAuthorityTrackerCompat
 	history := workflowLegacyTicketFixture(t, store, generationcore.GeneratedWorkflowTask{ID: "old", Title: "History", Outcome: "Done"}, 101)
 
 	result, err := store.UpgradeWorkflowConfiguration(t.Context(), opts)
@@ -140,12 +141,12 @@ func checkWorkflowUpgradeUnrelated(t *testing.T, store *WorkflowStore, result Wo
 func TestWorkflowUpgradeAdoption(t *testing.T) {
 	store, selection := workflowPlanAdoptionFixture(t)
 
-	prior, err := ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
+	prior, err := workspaceconfig.ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	opts := WorkflowUpgradeOptions{ExpectedRevision: prior.Revision, StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
+	opts := WorkflowUpgradeOptions{ExpectedRevision: prior.Revision, StateAuthority: workspaceconfig.WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
 	history := workflowLegacyTicketFixture(t, store, generationcore.GeneratedWorkflowTask{ID: "old", Title: "Historical", Outcome: "Preserved"}, 101)
 
 	result, err := store.UpgradeWorkflowConfiguration(t.Context(), opts)
@@ -195,7 +196,7 @@ func TestWorkflowUpgradeRejects(t *testing.T) {
 func checkWorkflowUpgradeAbsent(t *testing.T, store *WorkflowStore) {
 	t.Helper()
 
-	for _, path := range []string{"config.yml", workflowUpgradePending, "workflow-upgrades"} {
+	for _, path := range []string{"config.yml", workspaceconfig.WorkflowUpgradePending, "workflow-upgrades"} {
 		if _, err := os.Stat(workspacecore.UserPath(store.layout.ProjectDir(), path)); !errors.Is(err, os.ErrNotExist) {
 			t.Fatal("rejected upgrade wrote policy or snapshot", path, err)
 		}
@@ -218,7 +219,7 @@ func TestWorkflowUpgradeAmbiguous(t *testing.T) {
 			store, selection := workflowPlanAdoptionFixture(t)
 			tc.change(t, store, &selection)
 
-			opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
+			opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: workspaceconfig.WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
 			if _, err := store.UpgradeWorkflowConfiguration(t.Context(), opts); err == nil {
 				t.Fatal("ambiguous upgrade accepted")
 			}

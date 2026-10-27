@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"context"
@@ -15,7 +15,7 @@ func TestTelegramHarnessSelectionPreparation(t *testing.T) {
 	request := harnessSelectionTestRequest("unprepared", contenthash.Sum(nil), "alpha")
 	options := harnessSelectionTestOptions(request)
 	cause := errors.New("fixture local preparation rejected")
-	options.Validate = func(context.Context, WorkspaceConfig) error { return cause }
+	options.Validate = func(context.Context, Config) error { return cause }
 
 	if _, err := ChangeHarnessSelections(t.Context(), project, options); !errors.Is(err, ErrHarnessSelectionPreparation) || !errors.Is(err, cause) {
 		t.Fatal("prepublication rejection lost its identity", err)

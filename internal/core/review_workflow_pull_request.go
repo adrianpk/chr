@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type workflowRemotePRJSON struct {
@@ -94,7 +95,7 @@ func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context,
 	return nil, fmt.Errorf("workflow provider PR pagination incomplete")
 }
 
-func (adapter RemoteReviewAdapter) readWorkflowPRPage(ctx context.Context, repository string, reference ReviewProviderReference, config ReviewProviderTargetConfig, endpoint string) ([]workflowRemotePRJSON, error) {
+func (adapter RemoteReviewAdapter) readWorkflowPRPage(ctx context.Context, repository string, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, endpoint string) ([]workflowRemotePRJSON, error) {
 	data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(repository, reference, "GET", endpoint, false)...)
 	if err != nil {
 		return nil, err

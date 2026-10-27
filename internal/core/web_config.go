@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"net"
 	"strings"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ValidateWebConfig validates the local Web UI configuration.
-func ValidateWebConfig(config WebConfig) error {
-	for _, check := range []func(WebConfig) error{
+func ValidateWebConfig(config workspaceconfig.WebConfig) error {
+	for _, check := range []func(workspaceconfig.WebConfig) error{
 		validateWebBindConfig,
 		validateWebTokenConfig,
 		validateWebRefreshConfig,
@@ -22,7 +24,7 @@ func ValidateWebConfig(config WebConfig) error {
 	return nil
 }
 
-func validateWebBindConfig(config WebConfig) error {
+func validateWebBindConfig(config workspaceconfig.WebConfig) error {
 	if strings.TrimSpace(config.Host) == "" {
 		return fmt.Errorf("web host is required")
 	}
@@ -34,21 +36,21 @@ func validateWebBindConfig(config WebConfig) error {
 	return nil
 }
 
-func validateWebTokenConfig(config WebConfig) error {
+func validateWebTokenConfig(config workspaceconfig.WebConfig) error {
 	switch config.RequireToken {
-	case WebTokenModeAuto, WebTokenModeTrue, WebTokenModeFalse, WebTokenModeAlways:
+	case workspaceconfig.WebTokenModeAuto, workspaceconfig.WebTokenModeTrue, workspaceconfig.WebTokenModeFalse, workspaceconfig.WebTokenModeAlways:
 	default:
 		return fmt.Errorf("invalid web require_token mode: %s", config.RequireToken)
 	}
 
-	if config.TokenEnv == "" && (config.RequireToken == WebTokenModeTrue || config.RequireToken == WebTokenModeAlways) {
+	if config.TokenEnv == "" && (config.RequireToken == workspaceconfig.WebTokenModeTrue || config.RequireToken == workspaceconfig.WebTokenModeAlways) {
 		return fmt.Errorf("web token_env is required when token mode requires a token")
 	}
 
 	return nil
 }
 
-func validateWebRefreshConfig(config WebConfig) error {
+func validateWebRefreshConfig(config workspaceconfig.WebConfig) error {
 	if config.RefreshIntervalSeconds <= 0 {
 		return fmt.Errorf("web refresh_interval_seconds must be positive")
 	}
@@ -56,7 +58,7 @@ func validateWebRefreshConfig(config WebConfig) error {
 	return nil
 }
 
-func validateWebAllowedOrigins(config WebConfig) error {
+func validateWebAllowedOrigins(config workspaceconfig.WebConfig) error {
 	for _, origin := range config.AllowedOrigins {
 		if strings.TrimSpace(origin) == "" {
 			return fmt.Errorf("web allowed_origins cannot contain empty values")

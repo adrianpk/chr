@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type telegramHarnessStatus struct {
@@ -19,7 +19,7 @@ type telegramHarnessStatus struct {
 
 type telegramHarnessService interface {
 	InspectTelegramHarnessSelections(context.Context, telegramcore.OperationTarget) (telegramHarnessStatus, error)
-	ChangeTelegramHarnessSelections(context.Context, telegramcore.OperationTarget, core.HarnessSelectionChangeRequest, func(context.Context) error) (harnesscore.SelectionSnapshot, error)
+	ChangeTelegramHarnessSelections(context.Context, telegramcore.OperationTarget, workspaceconfig.HarnessSelectionChangeRequest, func(context.Context) error) (harnesscore.SelectionSnapshot, error)
 }
 
 func (s service) telegramHarnessProject(ctx context.Context, target telegramcore.OperationTarget) (service, error) {
@@ -67,7 +67,7 @@ func (s service) telegramHarnessRetained(ctx context.Context) telegramHarnessRet
 
 // ChangeTelegramHarnessSelections resolves the registry root and delegates the
 // confirmed envelope to the shared atomic configuration owner.
-func (s service) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, change core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
+func (s service) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, change workspaceconfig.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
 	scoped, err := s.telegramHarnessProject(ctx, target)
 	if err != nil {
 		return harnesscore.SelectionSnapshot{}, err

@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func retainedTelegramHarnessChange(request telegramcore.OperationRequest) (telegramHarnessPrepared, error) {
@@ -57,7 +57,7 @@ func telegramHarnessSourceChoices(source telegramcore.ReceivedUpdate) (telegramH
 	return choices, nil
 }
 
-func telegramHarnessPreparedBinding(change core.HarnessSelectionChangeRequest, request telegramcore.OperationRequest, choices telegramHarnessChoices) bool {
+func telegramHarnessPreparedBinding(change workspaceconfig.HarnessSelectionChangeRequest, request telegramcore.OperationRequest, choices telegramHarnessChoices) bool {
 	return request.OperationID == telegramcore.HarnessSelectionOperation && change.Binding == (workflowstate.MutationBinding{RequestID: request.ID, Operator: request.Operator}) && change.ProjectRef == request.Target.ProjectID && len(change.ExpectedRevision) == 64 && sameTelegramHarnessChoice(change.Worker, choices.Worker) && sameTelegramHarnessChoice(change.Generation, choices.Generation)
 }
 
@@ -119,7 +119,7 @@ func (r telegramReceiver) finishHarnessActionFailure(ctx context.Context, claim 
 	text := "The selected profile is no longer locally prepared. Defaults are unchanged; inspect /harness and issue a new change."
 	if errors.Is(failure, workflowstate.ErrConflict) {
 		text = "The project, actor, configuration revision or request binding changed. Inspect /harness before issuing a new change."
-	} else if !errors.Is(failure, core.ErrHarnessSelectionPreparation) && !errors.Is(failure, ErrRecordUnsupported) {
+	} else if !errors.Is(failure, workspaceconfig.ErrHarnessSelectionPreparation) && !errors.Is(failure, ErrRecordUnsupported) {
 		// An uncertain transport/owner failure keeps the original action applying.
 		return failure
 	}

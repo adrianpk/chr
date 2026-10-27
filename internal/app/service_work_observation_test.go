@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // The public service chooses native records even with an unrelated corrupt
@@ -20,7 +21,7 @@ func TestWorkObservationNative(t *testing.T) {
 	before := webPlanFiles(t, provider)
 
 	observed, err := operations.ObserveWork(t.Context(), 0)
-	if err != nil || observed.Authority != core.WorkStateAuthorityTickets || len(observed.Current) != 2 {
+	if err != nil || observed.Authority != workspaceconfig.WorkStateAuthorityTickets || len(observed.Current) != 2 {
 		t.Fatal(observed, err)
 	}
 
@@ -87,7 +88,7 @@ func TestWorkObservationLegacy(t *testing.T) {
 		t.Fatal(observed, err)
 	}
 
-	if observed.Authority != core.WorkStateAuthorityTrackerCompat {
+	if observed.Authority != workspaceconfig.WorkStateAuthorityTrackerCompat {
 		t.Fatal(observed.Authority)
 	}
 }

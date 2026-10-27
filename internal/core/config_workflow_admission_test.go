@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestWorkflowConfigAdmission freezes project limits at real admission and keeps
@@ -177,14 +178,14 @@ func checkWorkflowConfigRetry(t *testing.T, store *WorkflowStore, request Workfl
 func checkWorkflowConfigRestriction(t *testing.T, project string) {
 	t.Helper()
 
-	restricted, err := ResolveWorkflowConfiguration(project, workflowstate.ReviewHuman)
+	restricted, err := workspaceconfig.ResolveWorkflowConfiguration(project, workflowstate.ReviewHuman)
 
 	mode := workflowConfigTestValue(t, restricted, "review.mode")
 	if err != nil || mode.Value != "human_review" || mode.Source != "invocation_restriction" {
 		t.Fatal("human restriction did not take precedence", restricted, err)
 	}
 
-	if _, err := ResolveWorkflowConfiguration(project, workflowstate.ReviewTrustedAutoMerge); err == nil {
+	if _, err := workspaceconfig.ResolveWorkflowConfiguration(project, workflowstate.ReviewTrustedAutoMerge); err == nil {
 		t.Fatal("a restriction enabled automatic policy")
 	}
 }

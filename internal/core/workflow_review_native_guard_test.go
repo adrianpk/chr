@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestNativeReviewInputs invalidates approval for actual candidate, history,
@@ -23,7 +24,7 @@ func TestNativeReviewInputs(t *testing.T) {
 			f.provider.pr.HeadCommit = contenthash.Sum([]byte("moved"))[:40]
 		}},
 		{"profile", func(t *testing.T, f nativePreparationFixture, _ WorkflowIntegrationCandidate) {
-			writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationDisabled)
+			writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationDisabled)
 		}},
 		{"method", func(t *testing.T, f nativePreparationFixture, _ WorkflowIntegrationCandidate) {
 			writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "work", "merge_strategy", "squash")
@@ -87,7 +88,7 @@ func TestNativeReviewPolicyIO(t *testing.T) {
 			before := workflowTestRead(t, store, id)
 			provider := &nativeReviewProviderFixture{f.provider, func(_ *WorkflowNativeCapability) {
 				if change == "profile" {
-					writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationDisabled)
+					writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationDisabled)
 				} else {
 					writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "review", "mode", string(workflowstate.ReviewHuman))
 				}

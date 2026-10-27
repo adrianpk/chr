@@ -5,6 +5,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestNativeProfileConfig keeps publication opt-in independent of version and
@@ -14,10 +15,10 @@ func TestNativeProfileConfig(t *testing.T) {
 		name, body, profile string
 		valid               bool
 	}{
-		{"legacy", "", WorkflowPublicationDisabled, true},
-		{"version_one", "workflow:\n  version: 1\n", WorkflowPublicationDisabled, true},
-		{"explicit", "work:\n  integration:\n    publication_profile: git_atomic_dual_ref\n  merge_strategy: squash\nreview:\n  mode: human_review\n", WorkflowPublicationGitAtomicDualRef, true},
-		{"disabled", "work:\n  integration:\n    publication_profile: disabled\n", WorkflowPublicationDisabled, true},
+		{"legacy", "", workspaceconfig.WorkflowPublicationDisabled, true},
+		{"version_one", "workflow:\n  version: 1\n", workspaceconfig.WorkflowPublicationDisabled, true},
+		{"explicit", "work:\n  integration:\n    publication_profile: git_atomic_dual_ref\n  merge_strategy: squash\nreview:\n  mode: human_review\n", workspaceconfig.WorkflowPublicationGitAtomicDualRef, true},
+		{"disabled", "work:\n  integration:\n    publication_profile: disabled\n", workspaceconfig.WorkflowPublicationDisabled, true},
 		{"unsupported", "work:\n  integration:\n    publication_profile: merge_api\n", "", false},
 		{"duplicate", "work:\n  integration:\n    publication_profile: disabled\n  integration:\n    publication_profile: git_atomic_dual_ref\n", "", false},
 		{"unknown_nested", "work:\n  integration:\n    rewrite_any_source: true\n", "", false},
@@ -25,7 +26,7 @@ func TestNativeProfileConfig(t *testing.T) {
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
-			config, err := parseWorkflowConfig([]byte(test.body))
+			config, err := workspaceconfig.Parse([]byte(test.body))
 			if (err == nil) != test.valid {
 				t.Fatalf("configuration validity: %v", err)
 			}
@@ -46,18 +47,18 @@ func TestNativeProfileConfig(t *testing.T) {
 func TestNativeProfileUpgrade(t *testing.T) {
 	data := []byte("review:\n  mode: human_review\nwork:\n  merge_strategy: squash\n")
 
-	config, err := parseWorkflowConfig(data)
+	config, err := workspaceconfig.Parse(data)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	image, err := workflowUpgradeConfig(data, effectiveWorkflowConfiguration(config, ""), WorkflowUpgradeOptions{StateAuthority: WorkStateAuthorityTickets})
+	image, err := workflowUpgradeConfig(data, workspaceconfig.EffectiveWorkflowConfiguration(config, ""), WorkflowUpgradeOptions{StateAuthority: workspaceconfig.WorkStateAuthorityTickets})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	upgraded, err := parseWorkflowConfig(image)
-	if err != nil || upgraded.Work.Integration.PublicationProfile != WorkflowPublicationDisabled || upgraded.Review.Mode != workflowstate.ReviewHuman || upgraded.Work.MergeStrategy != "squash" {
+	upgraded, err := workspaceconfig.Parse(image)
+	if err != nil || upgraded.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationDisabled || upgraded.Review.Mode != workflowstate.ReviewHuman || upgraded.Work.MergeStrategy != "squash" {
 		t.Fatal("upgrade activated publication or changed existing policy")
 	}
 }
@@ -67,12 +68,12 @@ func TestNativeProfileUpgrade(t *testing.T) {
 func TestNativeLegacySnapshot(t *testing.T) {
 	data := []byte("review:\n  mode: human_review\n")
 
-	config, err := parseWorkflowConfig(data)
+	config, err := workspaceconfig.Parse(data)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	prior := effectiveWorkflowConfiguration(config, "")
+	prior := workspaceconfig.EffectiveWorkflowConfiguration(config, "")
 
 	prior.Values = withoutWorkflowPublicationProfile(prior.Values)
 	if !validWorkflowUpgradeConfiguration(prior) {

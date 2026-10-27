@@ -12,6 +12,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowAdoptionTask selects one observed legacy ticket for one approved task.
@@ -34,7 +35,7 @@ type WorkflowPlanAdoptionOptions struct {
 // AdoptPlanWorkflow explicitly adopts selected active records. Ordinary reads
 // never invoke adoption, and inferred historical status creates no receipt.
 func (s *WorkflowStore) AdoptPlanWorkflow(ctx context.Context, opts WorkflowPlanAdoptionOptions) (result WorkflowMaterializationResult, err error) {
-	if err := requireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
+	if err := workspaceconfig.RequireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
 		return result, err
 	}
 

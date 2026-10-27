@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"context"
@@ -45,7 +45,7 @@ func checkHarnessSelectionChangeReplay(t *testing.T, project string, request Har
 	}
 
 	options := harnessSelectionTestOptions(request)
-	options.Validate = func(context.Context, WorkspaceConfig) error { return errors.New("profile is now unavailable") }
+	options.Validate = func(context.Context, Config) error { return errors.New("profile is now unavailable") }
 
 	replay, err := ChangeHarnessSelections(t.Context(), project, options)
 	if err != nil || replay != result {
@@ -59,7 +59,7 @@ func checkHarnessSelectionChangeReplay(t *testing.T, project string, request Har
 		t.Fatal("request ID exchanged choices", err)
 	}
 
-	config, err := LoadWorkspaceConfig(project)
+	config, err := Load(project)
 	if err != nil || config.Harnesses.Worker != "beta" {
 		t.Fatal("replay rewrote current selections", config.Harnesses, err)
 	}
@@ -72,19 +72,26 @@ func TestHarnessSelectionChangeRejects(t *testing.T) {
 		name   string
 		change func(*HarnessSelectionChangeOptions)
 	}{
-		{"stale unrelated edit", func(o *HarnessSelectionChangeOptions) { o.Request.ExpectedRevision = contenthash.Sum([]byte("older")) }},
+		{"stale unrelated edit", func(o *HarnessSelectionChangeOptions) {
+			o.Request.ExpectedRevision = contenthash.Sum([]byte("older"))
+		}},
 		{"unauthorized", func(o *HarnessSelectionChangeOptions) {
 			o.Authorize = func(context.Context) error { return errors.New("denied") }
 		}},
 		{"missing authority", func(o *HarnessSelectionChangeOptions) { o.Authorize = nil }},
 		{"unprepared", func(o *HarnessSelectionChangeOptions) {
-			o.Validate = func(context.Context, WorkspaceConfig) error { return errors.New("unready") }
+			o.Validate = func(context.Context, Config) error { return errors.New("unready") }
 		}},
 		{"path input", func(o *HarnessSelectionChangeOptions) {
 			o.Request.Worker = harnessSelectionTestChoice("/private/driver")
 		}},
-		{"absent roles", func(o *HarnessSelectionChangeOptions) { o.Request.Worker = nil; o.Request.Generation = nil }},
-		{"unbounded actor", func(o *HarnessSelectionChangeOptions) { o.Request.Binding.Operator = strings.Repeat("a", 129) }},
+		{"absent roles", func(o *HarnessSelectionChangeOptions) {
+			o.Request.Worker = nil
+			o.Request.Generation = nil
+		}},
+		{"unbounded actor", func(o *HarnessSelectionChangeOptions) {
+			o.Request.Binding.Operator = strings.Repeat("a", 129)
+		}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -161,7 +168,7 @@ func TestHarnessSelectionNullProfile(t *testing.T) {
 		t.Fatal("named profile was cleared", result, err)
 	}
 
-	config, err := LoadWorkspaceConfig(project)
+	config, err := Load(project)
 	if err != nil || config.Harnesses.Worker != "null" {
 		t.Fatal("quoted profile did not survive reload", config.Harnesses, err)
 	}
@@ -179,7 +186,7 @@ func harnessSelectionTestRequest(id, revision, profile string) HarnessSelectionC
 }
 
 func harnessSelectionTestOptions(request HarnessSelectionChangeRequest) HarnessSelectionChangeOptions {
-	return HarnessSelectionChangeOptions{Request: request, Authorize: func(context.Context) error { return nil }, Validate: func(context.Context, WorkspaceConfig) error { return nil }}
+	return HarnessSelectionChangeOptions{Request: request, Authorize: func(context.Context) error { return nil }, Validate: func(context.Context, Config) error { return nil }}
 }
 
 func writeHarnessSelectionTestFile(t *testing.T, path, body string) {

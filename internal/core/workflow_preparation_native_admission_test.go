@@ -1,6 +1,10 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
+)
 
 type nativePreparationGuardOnly struct {
 	WorkflowPublicationGuardProvider
@@ -39,7 +43,7 @@ func nativePreparationAdmissionProvider(t *testing.T, fixture nativePreparationF
 
 	switch condition {
 	case "disabled":
-		writeWorkflowTestConfigValue(t, fixture.f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationDisabled)
+		writeWorkflowTestConfigValue(t, fixture.f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationDisabled)
 	case "source only":
 		return fixture.f.provider
 	case "missing observer":

@@ -5,9 +5,9 @@ import (
 	"crypto/rand"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -65,7 +65,7 @@ func (e tuiHarnessSelectionExecutor) SaveHarnessSelections(request tui.HarnessSe
 	ctx, cancel := context.WithTimeout(e.operations.ctx, 10*time.Second)
 	defer cancel()
 
-	_, err = e.operations.ChangeHarnessSelections(ctx, core.HarnessSelectionChangeRequest{
+	_, err = e.operations.ChangeHarnessSelections(ctx, workspaceconfig.HarnessSelectionChangeRequest{
 		Binding:    workflowstate.MutationBinding{RequestID: request.RequestID, Operator: actor.OperatorID},
 		ProjectRef: request.ProjectRef, ExpectedRevision: request.Revision, Worker: request.Worker, Generation: request.Generation,
 	}, localHarnessSelectionAuthority(e.operations.projectContext.ProjectDir, actor.OperatorID))

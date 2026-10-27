@@ -5,10 +5,10 @@ import (
 	"os/exec"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ListRegisteredProjects is a bounded, read-only registry operation for explicit IDs.
@@ -38,7 +38,7 @@ func (s service) InspectProjectReadiness(project projectcore.Project) projectRea
 	_, commandErr := exec.LookPath(command)
 	result.ModelExecutablePresent = commandErr == nil
 
-	config, err := core.LoadWorkspaceConfig(project.Path)
+	config, err := workspaceconfig.Load(project.Path)
 	if err != nil || !project.Enabled {
 		return result
 	}

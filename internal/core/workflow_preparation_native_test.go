@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type nativePreparationFixture struct {
@@ -21,7 +22,7 @@ type nativePreparationProviderFixture struct {
 
 func (p *nativePreparationProviderFixture) WorkflowIntegrationCapability(ctx context.Context, pr WorkflowPullRequestSnapshot, method string) (WorkflowPublicationCapability, error) {
 	capability, err := p.workflowPreparationProviderFixture.WorkflowIntegrationCapability(ctx, pr, method)
-	capability.Mechanism = WorkflowPublicationGitAtomicDualRef
+	capability.Mechanism = workspaceconfig.WorkflowPublicationGitAtomicDualRef
 
 	return capability, err
 }
@@ -36,7 +37,7 @@ func (p *nativePreparationProviderFixture) WorkflowPreparedNativeCapability(_ co
 	}
 
 	capability := WorkflowNativeCapability{
-		WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
+		WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
 		SourceRef:                     "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-preparation/v1",
 		PolicyFingerprint: contenthash.Sum([]byte(p.policyRevision)), ServerCapabilityFingerprint: fingerprint, CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")),
 		ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion,
@@ -56,7 +57,7 @@ func nativePreparationExtentFixture(t *testing.T, method, extent string, gate wo
 	t.Helper()
 
 	f := workflowPreparationExtentFixture(t, method, extent, gate)
-	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationGitAtomicDualRef)
+	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationGitAtomicDualRef)
 
 	entry := nativeRoleAdmit(t, f.store, f.run.ID)
 	entry = nativeRoleTransition(t, f.store, entry, "preparing")

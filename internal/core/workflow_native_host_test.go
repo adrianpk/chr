@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type nativeHostFixture struct {
@@ -23,10 +24,10 @@ func newNativeHostFixture(t *testing.T) nativeHostFixture {
 	f, _ := workflowTicketConfiguredFixture(t, "rebase", "ticket", func(_ *WorkflowStore, _ WorkflowRecord, request *WorkflowStartRequest) {
 		request.Policy.MaxWorkerAttempts, request.Policy.MaxIntegrationAttempts = 1, 1
 	})
-	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationGitAtomicDualRef)
+	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationGitAtomicDualRef)
 
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
-	remote := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+	remote := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 	provider := NewWorkflowNativeReviewAdapter(remote, f.store, f.run.ID, t.TempDir())
 	profile := WorkflowNativePublisherProfile{Repository: f.provider.pr.Repository, TargetRef: "refs/heads/dev", Transport: f.remote, CredentialRef: "fixture-publisher", APIIdentityFingerprint: contenthash.Sum([]byte(`{"id":1,"login":"fixture-publisher"}`)), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", CertifiedMethods: []string{"rebase"}, CertificationRef: "fixture/native-rebase-certificate"}
 	writeNativeHostProfile(t, provider.configDir, profile)

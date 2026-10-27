@@ -8,6 +8,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type ticketEvidenceRequest struct {
@@ -18,7 +19,7 @@ type ticketEvidenceRequest struct {
 }
 
 func ticketEvidenceReadiness(ctx context.Context, request ticketEvidenceRequest) (core.EvidenceReadinessResult, error) {
-	config, err := core.LoadWorkspaceConfig(request.ProjectDir)
+	config, err := workspaceconfig.Load(request.ProjectDir)
 	if err != nil {
 		return core.EvidenceReadinessResult{}, fmt.Errorf("load evidence strategy config: %w", err)
 	}

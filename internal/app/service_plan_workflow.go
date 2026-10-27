@@ -11,6 +11,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // MaterializeWorkflowPlan explicitly opts approved input into ticket-owned
@@ -21,7 +22,7 @@ func (s service) MaterializeWorkflowPlan(ctx context.Context, plan generationcor
 		return core.WorkflowMaterializationResult{}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowMaterializationResult{}, err
 	}

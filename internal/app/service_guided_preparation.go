@@ -13,6 +13,7 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // PrepareGuidedWork generates and materializes exactly the committed approved scope.
@@ -29,7 +30,7 @@ func (s service) prepareGuidedWork(ctx context.Context, session *authoringcore.S
 		return workflowstate.ErrConflict
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}

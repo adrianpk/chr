@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s *WorkflowStore) beginWorkflowSubmission(ctx context.Context, id string, provider WorkflowPublicationProvider, git WorkflowIntegrationGit) (submission WorkflowSubmission, submit bool, err error) {
@@ -217,7 +218,7 @@ func (s *WorkflowStore) checkWorkflowLegacyPublicationGuard(ctx context.Context,
 		return guard, err
 	}
 
-	if guard.Capability.Mechanism == WorkflowPublicationGitAtomicDualRef {
+	if guard.Capability.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return guard, ErrWorkflowObservationRequired
 	}
 

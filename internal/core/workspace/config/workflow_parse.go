@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"bufio"
@@ -171,7 +171,7 @@ func guardWorkflowNativeScalar(raw string, indent int, parsed bool) error {
 }
 
 func knownWorkflowConfigKey(key string) bool {
-	config := WorkspaceConfig{}
+	config := Config{}
 	for _, field := range workflowConfigIntegers(&config) {
 		if key == field.key {
 			return true

@@ -12,10 +12,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func installTelegramNotificationSender(t *testing.T, handler http.HandlerFunc) {
@@ -317,7 +317,7 @@ func TestTelegramPresentationFailureNotificationPreparation(t *testing.T) {
 
 	installTelegramNotificationSender(t, func(http.ResponseWriter, *http.Request) { calls.Add(1) })
 
-	config, err := core.LoadWorkspaceConfig(project.ProjectDir)
+	config, err := workspaceconfig.Load(project.ProjectDir)
 	if err != nil {
 		t.Fatal(err)
 	}

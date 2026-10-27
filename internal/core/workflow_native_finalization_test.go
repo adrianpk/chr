@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestNativeFinalization reuses the physically confirmed native receipt for all
@@ -105,7 +107,7 @@ func checkNativeFanoutMembers(t *testing.T, store *WorkflowStore, run workflowIn
 // fanout without introducing an aggregate set or another implementation call.
 func TestNativeFinalizationTicket(t *testing.T) {
 	f, _ := workflowTicketPreparationFixture(t, "rebase", "ticket")
-	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationGitAtomicDualRef)
+	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationGitAtomicDualRef)
 
 	entry := nativeRoleAdmit(t, f.store, f.run.ID)
 	entry = nativeRoleTransition(t, f.store, entry, "preparing")

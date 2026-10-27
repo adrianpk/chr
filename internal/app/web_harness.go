@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -98,7 +98,7 @@ func (p webViewProvider) writeHarnessSelection(ctx context.Context, operations s
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	_, err = operations.ChangeHarnessSelections(ctx, core.HarnessSelectionChangeRequest{
+	_, err = operations.ChangeHarnessSelections(ctx, workspaceconfig.HarnessSelectionChangeRequest{
 		Binding:    workflowstate.MutationBinding{RequestID: request.Fields["request_id"], Operator: actor.OperatorID},
 		ProjectRef: request.Fields["project_ref"], ExpectedRevision: request.Revision, Worker: worker, Generation: generation,
 	}, localHarnessSelectionAuthority(operations.projectContext.ProjectDir, actor.OperatorID))

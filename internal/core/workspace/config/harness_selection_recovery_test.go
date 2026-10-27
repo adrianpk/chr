@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"context"
@@ -43,7 +43,11 @@ func checkHarnessSelectionRecovery(t *testing.T, stage string) {
 	}
 
 	options := harnessSelectionTestOptions(request)
-	options.Validate = func(_ context.Context, _ WorkspaceConfig) error { t.Fatal("recovery repeated preparation"); return nil }
+	options.Validate = func(_ context.Context, _ Config) error {
+		t.Fatal("recovery repeated preparation")
+
+		return nil
+	}
 
 	result, err := ChangeHarnessSelections(t.Context(), project, options)
 	if err != nil || result != journal.Result || string(readHarnessSelectionTestConfig(t, project)) != string(image) {
@@ -146,40 +150,6 @@ func TestHarnessSelectionReceiptCapacity(t *testing.T) {
 	}
 }
 
-// A retained selection intent prevents an upgrade from changing the same image;
-// replay finishes that intent before the original explicit upgrade can proceed.
-func TestHarnessSelectionUpgradeFence(t *testing.T) {
-	store, options := workflowUpgradeFixture(t, "")
-	request := harnessSelectionTestRequest("before-upgrade", options.ExpectedRevision, "alpha")
-	request.ProjectRef = store.projectID
-
-	journal, _ := retainedHarnessSelectionTestChange(t, request)
-	if err := writeHarnessSelectionJournal(store.layout.ProjectDir(), journal); err != nil {
-		t.Fatal(err)
-	}
-
-	if _, err := store.UpgradeWorkflowConfiguration(t.Context(), options); err == nil {
-		t.Fatal("upgrade overwrote a pending selection intent")
-	}
-
-	accepted, err := ChangeHarnessSelections(t.Context(), store.layout.ProjectDir(), harnessSelectionTestOptions(request))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	options.ExpectedRevision = accepted.Revision
-
-	upgraded, err := store.UpgradeWorkflowConfiguration(t.Context(), options)
-	if err != nil || upgraded.Current.Version != 1 {
-		t.Fatal("upgrade did not resume after selection recovery", err)
-	}
-
-	config, err := LoadWorkspaceConfig(store.layout.ProjectDir())
-	if err != nil || config.Harnesses.Worker != "alpha" || config.HarnessAudit.RequestID != request.Binding.RequestID {
-		t.Fatal("upgrade lost selections or their audit", err)
-	}
-}
-
 func retainedHarnessSelectionTestChange(t *testing.T, request HarnessSelectionChangeRequest) (harnessSelectionJournal, []byte) {
 	t.Helper()
 
@@ -190,7 +160,7 @@ func retainedHarnessSelectionTestChange(t *testing.T, request HarnessSelectionCh
 
 	image := harnessSelectionChangeImage(nil, request, digest, "2026-10-19T12:00:00Z")
 
-	config, err := parseWorkflowConfig(image)
+	config, err := Parse(image)
 	if err != nil {
 		t.Fatal(err)
 	}

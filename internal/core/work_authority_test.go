@@ -2,15 +2,17 @@ package core
 
 import (
 	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestWorkAuthority keeps absence transitional and validates explicit routing.
 func TestWorkAuthority(t *testing.T) {
 	cases := []workAuthorityCase{
-		{"absent", "", WorkStateAuthorityTrackerCompat, true, true},
+		{"absent", "", workspaceconfig.WorkStateAuthorityTrackerCompat, true, true},
 		{"empty", "", "", false, false},
-		{"tickets", "tickets", WorkStateAuthorityTickets, true, true},
-		{"compat", "tracker_compat", WorkStateAuthorityTrackerCompat, true, true},
+		{"tickets", "tickets", workspaceconfig.WorkStateAuthorityTickets, true, true},
+		{"compat", "tracker_compat", workspaceconfig.WorkStateAuthorityTrackerCompat, true, true},
 		{"unknown", "both", "", false, false},
 		{"padded", " tickets ", " tickets ", false, true},
 	}
@@ -21,7 +23,7 @@ func TestWorkAuthority(t *testing.T) {
 
 type workAuthorityCase struct {
 	name, value string
-	want        WorkStateAuthority
+	want        workspaceconfig.WorkStateAuthority
 	valid       bool
 	loadValid   bool
 }
@@ -34,7 +36,7 @@ func checkWorkAuthority(t *testing.T, tc workAuthorityCase) {
 		writeWorkspaceConfig(t, project, "work:\n  state_authority: "+tc.value+"\n")
 	}
 
-	config, err := LoadWorkspaceConfig(project)
+	config, err := workspaceconfig.Load(project)
 	if !tc.loadValid {
 		if err == nil {
 			t.Fatal("invalid authority used a fallback")
@@ -48,10 +50,10 @@ func checkWorkAuthority(t *testing.T, tc workAuthorityCase) {
 	}
 	// The parser trims YAML scalars; direct typed values still reject padding.
 	if tc.name == "padded" {
-		config.Work.StateAuthority = WorkStateAuthority(tc.value)
+		config.Work.StateAuthority = workspaceconfig.WorkStateAuthority(tc.value)
 	}
 
-	if got := WorkAuthority(config.Work); got != tc.want || (ValidateWorkConfig(config.Work) == nil) != tc.valid {
-		t.Fatalf("authority = %q, validation = %v", got, ValidateWorkConfig(config.Work))
+	if got := workspaceconfig.WorkAuthority(config.Work); got != tc.want || (workspaceconfig.ValidateWorkConfig(config.Work) == nil) != tc.valid {
+		t.Fatalf("authority = %q, validation = %v", got, workspaceconfig.ValidateWorkConfig(config.Work))
 	}
 }

@@ -12,6 +12,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func agentWorkLoopEventSink(projectDir string, record executioncore.LoopRunRecord) executioncore.AgentEventSink {
@@ -19,7 +20,7 @@ func agentWorkLoopEventSink(projectDir string, record executioncore.LoopRunRecor
 		return executioncore.NewFileAgentEventSink(executioncore.LoopRunEventStreamPath(record))
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectDir)
+	config, err := workspaceconfig.Load(projectDir)
 	if err != nil {
 		return nil
 	}

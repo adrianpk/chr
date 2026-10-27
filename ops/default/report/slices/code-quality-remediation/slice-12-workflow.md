@@ -18,6 +18,9 @@ Slice 11 is verified integrated through PR #448. Slice 12 implementation is acti
 the complete method/transaction/recovery map is frozen before package relocation.
 Shared cycle/review values and pure value-validation contracts now have the
 existing workflow/state owner with direct native, app and adapter consumers.
+Ticket projections have the existing ticket owner. The complete project
+configuration image and its admission/recovery operations now have the
+workspace/config owner, shared directly by workflow, app and adapters.
 
 ## Implementation Notes
 
@@ -43,8 +46,15 @@ Board values and document projections now have their existing ticket owner with
 direct app, adapter and native read consumers. Forty-two declaration moves retain
 exact tokens after qualification, API naming and cmp.Compare substitution; the
 removed integer comparator has the same standard-library result. These resolve
-another twelve dependencies; 57 direct root couplings remain. No type
+another twelve dependencies. Configuration relocation resolves fifteen more,
+leaving 42 direct root couplings. No type
 bridge or coordinator/transport/persistence authority moved into the value owner.
+The 114 configuration declarations retain exact tokens after qualification/API
+names, insignificant parameter commas and the original rebase default's literal
+value. Raw-image revision, explicit presence, defaults, validation order, locks
+and journal/image/receipt replay are unchanged. Config.Explicit exposes only a
+read-only key-presence query. The existing upgrade-journal tuple debt now names
+workspaceconfig.Config; its shape and Slice 15 ownership are retained.
 All 908 store methods still retain their original root receiver. Full family
 relocation and assigned signature remediation remain open.
 
@@ -77,10 +87,22 @@ The ticket-projection prerequisite also passed:
 
 The move ledger records 42 matching declaration token sequences and the exact
 standard-library replacement. The frozen entry map is unchanged.
+The configuration prerequisite passed:
+
+- `go test ./internal/core/workspace/config -count=1 -timeout=3m`: complete colocated selection preparation, recovery, receipt, bound and capacity tests.
+- `go test ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(LoadWorkspaceConfig|WorkflowConfig|WorkflowUpgrade|NativeProfile|NativeLegacySnapshot|NativePreparedSnapshot|WorkAuthority|HarnessSelection|HarnessGenerationConfigFence|WorkflowReviewPolicy|QualityRecordWire|QualityStorage|Leaf)' -count=1 -timeout=3m`: real filesystem/Git/process, frozen configuration/deadline, upgrade/recovery, wire/storage, app and boundary regressions pass; TUI compiles.
+- `go test ./internal/core -run '^Test(WorkflowConfigDeadline|HarnessSelectionUpgradeFence)$' -count=1 -timeout=3m`: unchanged deadline checks and the real cross-owner receipt-failure/upgrade/replay fixture pass.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace/config ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
+- `make check-go-style`: pass; 9306 production declarations, ceiling six, 162 exact debts and one existing external exception.
+
+All 114 configuration declaration token comparisons pass. Earlier test/lint
+overlap hit the existing one-second deadline fixture; unchanged dev and the same
+candidate selection run after lint passed. Assertions and timeout bounds are
+unchanged. This is focused batch evidence, not final controller validation.
 Final exact-head controller validation has not run.
 
 ## Risks and Follow-ups
 
-Configuration/transport/projection dependencies must have real boundaries before
-relocation. Assigned signatures, stage ports, candidate validation and canonical
+Remaining transport, guided admission, native document and operation-lock
+dependencies must have real boundaries before family relocation. Assigned signatures, stage ports, candidate validation and canonical
 integration remain outstanding.

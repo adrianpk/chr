@@ -10,6 +10,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -100,7 +101,7 @@ func (s service) reviewAgentWorkCycleTicket(ctx context.Context, opts agentWorkP
 	return agentWorkReviewResult{Ticket: cycleTicket, Stop: stop}, nil
 }
 
-func (s service) runAgenticReviewCycle(ctx context.Context, selected ticketcore.Indexed, execution executioncore.Record, application core.ResultApplication, config core.ReviewWorkflowConfig) (ticketcore.Indexed, error) {
+func (s service) runAgenticReviewCycle(ctx context.Context, selected ticketcore.Indexed, execution executioncore.Record, application core.ResultApplication, config workspaceconfig.ReviewWorkflowConfig) (ticketcore.Indexed, error) {
 	reviewedAt := s.now().UTC()
 	reviewProjectDir := agenticReviewProjectDir(s.projectContext, execution)
 

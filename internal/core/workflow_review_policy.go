@@ -9,10 +9,11 @@ import (
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (workflowstate.ReviewPolicy, error) {
-	if err := requireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
+	if err := workspaceconfig.RequireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
 		return workflowstate.ReviewPolicy{}, err
 	}
 
@@ -38,13 +39,13 @@ func (s *WorkflowStore) workflowReviewPolicy(run workflowInvocationFile) (workfl
 }
 
 func parseWorkflowReviewPolicy(data []byte) (workflowstate.ReviewPolicy, error) {
-	config, err := parseWorkflowConfig(data)
+	config, err := workspaceconfig.Parse(data)
 	if err != nil {
 		return workflowstate.ReviewPolicy{}, err
 	}
 
-	value := workflowConfigurationValue(config, "review.mode", string(config.Review.Mode))
-	policy := workflowstate.ReviewPolicy{Mode: config.Review.Mode, Method: config.Work.MergeStrategy, Source: value.Source, Revision: config.workflowRevision}
+	value := workspaceconfig.WorkflowValue(config, "review.mode", string(config.Review.Mode))
+	policy := workflowstate.ReviewPolicy{Mode: config.Review.Mode, Method: config.Work.MergeStrategy, Source: value.Source, Revision: config.Revision()}
 
 	return policy, validateWorkflowReviewPolicy(policy)
 }

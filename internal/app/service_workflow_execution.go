@@ -7,6 +7,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s service) workflowStore() (*core.WorkflowStore, error) {
@@ -139,7 +140,7 @@ func workflowControlRevision(expected []uint64) (uint64, error) {
 }
 
 func (s service) workflowResumePorts(run core.WorkflowInvocation) (core.WorkflowResumePorts, error) {
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowResumePorts{}, err
 	}

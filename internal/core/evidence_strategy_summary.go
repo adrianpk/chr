@@ -1,5 +1,7 @@
 package core
 
+import workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
+
 // EvidenceStrategySummaryStatus describes a ticket evidence checklist summary.
 type EvidenceStrategySummaryStatus string
 
@@ -83,7 +85,7 @@ func evidenceStrategySummaryItems(checklist EvidenceStrategyChecklist) []Evidenc
 
 func evidenceStrategySummaryStatus(checklist EvidenceStrategyChecklist) EvidenceStrategySummaryStatus {
 	readiness := EvaluateEvidenceReadiness(EvidenceReadinessRequest{
-		Config:    DefaultEvidenceStrategyConfig(),
+		Config:    workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: &checklist,
 	})
 	if readiness.Allowed {

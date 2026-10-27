@@ -10,8 +10,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestWorkflowConfigCLI exercises the root parser and shared service using real
@@ -67,7 +67,7 @@ func checkWorkflowConfigCLIOutput(t *testing.T, name string, output []byte) {
 		return
 	}
 
-	var result core.WorkflowConfiguration
+	var result workspaceconfig.WorkflowConfiguration
 	if err := json.Unmarshal(output, &result); err != nil || result.Version != 1 || len(result.Values) != 15 {
 		t.Fatal("JSON configuration is incomplete", result, err)
 	}

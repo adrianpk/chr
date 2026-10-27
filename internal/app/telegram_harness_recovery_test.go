@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 var errTelegramHarnessLostAck = errors.New("owned harness acknowledgement lost")
@@ -20,7 +20,7 @@ type telegramHarnessApplyProbe struct {
 	lose  bool
 }
 
-func (s *telegramHarnessApplyProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
+func (s *telegramHarnessApplyProbe) ChangeTelegramHarnessSelections(ctx context.Context, target telegramcore.OperationTarget, request workspaceconfig.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
 	s.calls++
 
 	result, err := s.service.ChangeTelegramHarnessSelections(ctx, target, request, authorize)

@@ -16,6 +16,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 	"forge.adrianpk.com/chr/internal/webui/ui"
 )
@@ -94,7 +95,7 @@ func (factory commandFactory) runWebServe(ctx context.Context, cmd *cli.Command)
 		return err
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,7 @@ func (factory commandFactory) runWebServe(ctx context.Context, cmd *cli.Command)
 		return err
 	}
 	if resolved.Login != nil {
-		resolved.Web.RequireToken = core.WebTokenModeFalse
+		resolved.Web.RequireToken = workspaceconfig.WebTokenModeFalse
 	}
 
 	if cmd.Bool("dry-run") {
@@ -133,7 +134,7 @@ func (factory commandFactory) runWebServe(ctx context.Context, cmd *cli.Command)
 	return serveWeb(ctx, resolved)
 }
 
-func webConfigFromCommand(cmd *cli.Command, config core.WebConfig) (core.WebConfig, error) {
+func webConfigFromCommand(cmd *cli.Command, config workspaceconfig.WebConfig) (workspaceconfig.WebConfig, error) {
 	if cmd.IsSet("host") {
 		config.Host = cmd.String("host")
 	}
@@ -147,7 +148,7 @@ func webConfigFromCommand(cmd *cli.Command, config core.WebConfig) (core.WebConf
 	}
 
 	if cmd.IsSet("require-token") {
-		config.RequireToken = core.WebTokenMode(cmd.String("require-token"))
+		config.RequireToken = workspaceconfig.WebTokenMode(cmd.String("require-token"))
 	}
 
 	if cmd.IsSet("allow-lan") {
@@ -155,28 +156,28 @@ func webConfigFromCommand(cmd *cli.Command, config core.WebConfig) (core.WebConf
 	}
 
 	if err := core.ValidateWebConfig(config); err != nil {
-		return core.WebConfig{}, err
+		return workspaceconfig.WebConfig{}, err
 	}
 
 	return applyWebLANAccess(config, config.AllowLAN, cmd.IsSet("host"))
 }
 
-func applyWebLANAccess(config core.WebConfig, enabled, explicitHost bool) (core.WebConfig, error) {
+func applyWebLANAccess(config workspaceconfig.WebConfig, enabled, explicitHost bool) (workspaceconfig.WebConfig, error) {
 	config.AllowLAN = enabled
 
 	if !enabled {
 		return config, nil
 	}
 
-	if config.RequireToken == core.WebTokenModeTrue || config.RequireToken == core.WebTokenModeAlways {
-		return core.WebConfig{}, fmt.Errorf("--allow-lan conflicts with required web token protection; explicitly set --require-token=false or disable --allow-lan")
+	if config.RequireToken == workspaceconfig.WebTokenModeTrue || config.RequireToken == workspaceconfig.WebTokenModeAlways {
+		return workspaceconfig.WebConfig{}, fmt.Errorf("--allow-lan conflicts with required web token protection; explicitly set --require-token=false or disable --allow-lan")
 	}
 
 	if !explicitHost && core.WebHostIsLoopback(config.Host) {
 		config.Host = "0.0.0.0"
 	}
 
-	config.RequireToken = core.WebTokenModeFalse
+	config.RequireToken = workspaceconfig.WebTokenModeFalse
 
 	return config, nil
 }
@@ -185,7 +186,7 @@ type resolvedWebServeConfig struct {
 	guidedHost     guidedWorkActivator
 	Login          *webui.LoginCredentials
 	ProjectDir     string
-	Web            core.WebConfig
+	Web            workspaceconfig.WebConfig
 	URL            string
 	Env            core.UserEnvironment
 	ProjectContext commandProjectContext
@@ -225,7 +226,7 @@ func printWebServeDryRun(stdout io.Writer, config resolvedWebServeConfig) error 
 	return err
 }
 
-func printWebExposureWarnings(stdout io.Writer, config core.WebConfig, loginEnabled bool) error {
+func printWebExposureWarnings(stdout io.Writer, config workspaceconfig.WebConfig, loginEnabled bool) error {
 	if core.WebHostIsLoopback(config.Host) {
 		return nil
 	}
@@ -324,7 +325,7 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 
 	accessConfig := config.Web
 	if config.Login != nil {
-		accessConfig.RequireToken = core.WebTokenModeFalse
+		accessConfig.RequireToken = workspaceconfig.WebTokenModeFalse
 	}
 
 	access, err := webAccessPolicy(accessConfig)
@@ -360,7 +361,7 @@ func newWebServeMux(config resolvedWebServeConfig) (http.Handler, error) {
 	})
 }
 
-func webAccessPolicy(config core.WebConfig) (webui.AccessPolicy, error) {
+func webAccessPolicy(config workspaceconfig.WebConfig) (webui.AccessPolicy, error) {
 	policy := webui.AccessPolicy{
 		RequireToken:   webTokenRequired(config),
 		Origin:         webURL(config.Host, config.Port),
@@ -379,13 +380,13 @@ func webAccessPolicy(config core.WebConfig) (webui.AccessPolicy, error) {
 	return policy, nil
 }
 
-func webTokenRequired(config core.WebConfig) bool {
+func webTokenRequired(config workspaceconfig.WebConfig) bool {
 	switch config.RequireToken {
-	case core.WebTokenModeTrue, core.WebTokenModeAlways:
+	case workspaceconfig.WebTokenModeTrue, workspaceconfig.WebTokenModeAlways:
 		return true
-	case core.WebTokenModeFalse:
+	case workspaceconfig.WebTokenModeFalse:
 		return false
-	case core.WebTokenModeAuto:
+	case workspaceconfig.WebTokenModeAuto:
 		return !core.WebHostIsLoopback(config.Host)
 	default:
 		return false

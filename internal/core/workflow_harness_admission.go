@@ -7,6 +7,7 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowHarnessResolution binds the prepared host command to its semantic identity.
@@ -18,7 +19,7 @@ type WorkflowHarnessResolution struct {
 
 // WorkflowHarnessResolver prepares the current explicit choice from the same
 // complete configuration image that owns admission. Retained requests skip it.
-type WorkflowHarnessResolver func(context.Context, WorkspaceConfig) (WorkflowHarnessResolution, error)
+type WorkflowHarnessResolver func(context.Context, workspaceconfig.Config) (WorkflowHarnessResolution, error)
 
 func (s *WorkflowStore) resolveWorkflowHarnessRequest(ctx context.Context, request WorkflowStartRequest) (WorkflowStartRequest, error) {
 	retained, found, err := s.retainedWorkflowHarnessRequest(ctx, request)
@@ -26,7 +27,7 @@ func (s *WorkflowStore) resolveWorkflowHarnessRequest(ctx context.Context, reque
 		return retained, err
 	}
 
-	config, err := LoadWorkspaceConfig(s.layout.ProjectDir())
+	config, err := workspaceconfig.Load(s.layout.ProjectDir())
 	if err != nil {
 		return request, err
 	}
@@ -91,7 +92,7 @@ func sameHarnessBinding(left, right *harnesscore.Binding) bool {
 	return *left == *right
 }
 
-func checkCurrentWorkflowHarness(config WorkspaceConfig, request WorkflowStartRequest) error {
+func checkCurrentWorkflowHarness(config workspaceconfig.Config, request WorkflowStartRequest) error {
 	binding := request.HarnessBinding
 	if binding == nil {
 		if config.Harnesses.Worker != "" {

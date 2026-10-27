@@ -10,9 +10,10 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceConfig, result *WorkObservation) error {
+func (s service) observeLegacyWork(ctx context.Context, config workspaceconfig.Config, result *WorkObservation) error {
 	// The same canonical/legacy document owner used by selection reads avoids a
 	// write-through index refresh during observation.
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
@@ -58,7 +59,7 @@ func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceCon
 	return nil
 }
 
-func (s service) observeLegacyQueue(ctx context.Context, config core.WorkspaceConfig, queue core.LegacyWorkQueue, result *WorkObservation) error {
+func (s service) observeLegacyQueue(ctx context.Context, config workspaceconfig.Config, queue core.LegacyWorkQueue, result *WorkObservation) error {
 	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{ProjectDir: s.projectContext.ProjectDir, Tickets: queue.Eligible, BranchPolicy: config.Work.BranchPolicy, Workspace: config.Work.Workspace, RequireBranchPolicy: true})
 	if err != nil {
 		return err

@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-func applyHarnessSelectionAudit(config *WorkspaceConfig, values map[string]string) error {
+func applyHarnessSelectionAudit(config *Config, values map[string]string) error {
 	audit := &config.HarnessAudit
 	fields := []struct {
 		key    string

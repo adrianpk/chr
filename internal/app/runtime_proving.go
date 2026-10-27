@@ -11,6 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (factory commandFactory) runtimeCommand() *cli.Command {
@@ -186,7 +187,7 @@ func (factory commandFactory) runRuntimeValidate(ctx context.Context, cmd *cli.C
 		return err
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}

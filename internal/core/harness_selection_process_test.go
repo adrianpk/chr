@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Independent processes race against the same complete revision. Exactly one
@@ -39,7 +40,7 @@ func TestHarnessSelectionProcesses(t *testing.T) {
 
 	accepted, conflicts := harnessSelectionProcessResults(t, children)
 
-	config, err := LoadWorkspaceConfig(project)
+	config, err := workspaceconfig.Load(project)
 	if err != nil || accepted != 1 || conflicts != 1 || config.Harnesses.Worker == "" || config.Harnesses.Worker != config.Harnesses.Generation {
 		t.Fatal("cross-process compare-and-swap failed", accepted, conflicts, config.Harnesses, err)
 	}
@@ -116,7 +117,7 @@ func TestHarnessSelectionProcess(t *testing.T) {
 
 	request := harnessSelectionTestRequest(os.Getenv("CHR_HARNESS_TEST_PROFILE"), contenthash.Sum(nil), os.Getenv("CHR_HARNESS_TEST_PROFILE"))
 
-	_, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
+	_, err := workspaceconfig.ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
 	if errors.Is(err, workflowstate.ErrConflict) {
 		t.Log("conflict")
 

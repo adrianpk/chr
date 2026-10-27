@@ -9,6 +9,7 @@ import (
 	"time"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type nativeCanonicalFixture struct {
@@ -54,7 +55,7 @@ func nativeCanonicalSubmissionFixture(t *testing.T, f nativeSubmissionFixture, l
 	}
 
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
-	forge := nativeCapabilityFixture{adapter: NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner), runner: runner, request: WorkflowNativeCapabilityRequest{PullRequest: submission.Guard.PullRequest}}
+	forge := nativeCapabilityFixture{adapter: NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner), runner: runner, request: WorkflowNativeCapabilityRequest{PullRequest: submission.Guard.PullRequest}}
 	forge.prefix = nativePolicyCommand(t, forge, "")
 	setNativePRFixture(t, forge, forge.request.PullRequest)
 

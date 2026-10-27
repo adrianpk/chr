@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -291,7 +291,7 @@ func webHarnessAssertWrite(t *testing.T, handler http.Handler, cookies []*http.C
 func webHarnessSnapshot(t *testing.T, operations service) harnesscore.SelectionSnapshot {
 	t.Helper()
 
-	config, err := core.LoadWorkspaceConfig(operations.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(operations.projectContext.ProjectDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -335,7 +335,7 @@ func TestWebHarnessSelectionProcess(t *testing.T) {
 		t.Skip("owned persistence probe is launched by the save test")
 	}
 
-	config, err := core.LoadWorkspaceConfig(project)
+	config, err := workspaceconfig.Load(project)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,6 +12,7 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -65,7 +66,7 @@ func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) 
 		location.ExecutionDir = s.projectContext.ProjectDir
 	}
 
-	operation, err := core.FreezeHarnessGeneration(ctx, harnesshost.GenerationFreezeInput{Project: root, ID: id, Purpose: purpose, Locations: []harnesshost.GenerationLocation{location}}, func(ctx context.Context, config core.WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
+	operation, err := core.FreezeHarnessGeneration(ctx, harnesshost.GenerationFreezeInput{Project: root, ID: id, Purpose: purpose, Locations: []harnesshost.GenerationLocation{location}}, func(ctx context.Context, config workspaceconfig.Config) (harnesshost.GenerationPreparation, error) {
 		return s.prepareGenerationBinding(ctx, config, purpose)
 	})
 	if err != nil {
@@ -75,7 +76,7 @@ func (s service) bindHarnessGeneration(ctx context.Context, id, purpose string) 
 	return &operation, nil
 }
 
-func (s service) prepareGenerationBinding(ctx context.Context, config core.WorkspaceConfig, purpose string) (harnesshost.GenerationPreparation, error) {
+func (s service) prepareGenerationBinding(ctx context.Context, config workspaceconfig.Config, purpose string) (harnesshost.GenerationPreparation, error) {
 	if model, ok := s.legacyConversationModel(config, purpose); ok {
 		return prepareLegacyAPIGeneration(config, purpose, model)
 	}
@@ -113,7 +114,7 @@ func (s service) prepareGenerationBinding(ctx context.Context, config core.Works
 	return prepareCodexGenerationBinding(selection, resolved.Executable)
 }
 
-func (s service) legacyConversationModel(config core.WorkspaceConfig, purpose string) (string, bool) {
+func (s service) legacyConversationModel(config workspaceconfig.Config, purpose string) (string, bool) {
 	if config.Harnesses.Generation != "" || purpose != "conversation" {
 		return "", false
 	}
@@ -126,7 +127,7 @@ func (s service) legacyConversationModel(config core.WorkspaceConfig, purpose st
 	return provider.API.ResolvedModel(), true
 }
 
-func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model string) (harnesshost.GenerationPreparation, error) {
+func prepareLegacyAPIGeneration(config workspaceconfig.Config, purpose, model string) (harnesshost.GenerationPreparation, error) {
 	selection := harnesscore.Selection{
 		Role: harnesscore.Generation, Action: purpose, Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: model,
 		SelectionRevision: config.Revision(), ProfileRevision: harnesscore.ProfileRevision(harnesscore.Profile{ModelProvider: "openai", Model: model}),

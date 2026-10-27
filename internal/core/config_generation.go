@@ -6,10 +6,11 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // HarnessGenerationResolver prepares one selection from the actual configuration image.
-type HarnessGenerationResolver func(context.Context, WorkspaceConfig) (harnesshost.GenerationPreparation, error)
+type HarnessGenerationResolver func(context.Context, workspaceconfig.Config) (harnesshost.GenerationPreparation, error)
 
 // FreezeHarnessGeneration composes configuration loading and admission with the
 // host's retained operation. Recovery reads the retained image before loading current settings.
@@ -19,7 +20,7 @@ func FreezeHarnessGeneration(ctx context.Context, input harnesshost.GenerationFr
 	}
 
 	prepare := func(ctx context.Context, configDir string) (harnesshost.GenerationPreparation, error) {
-		config, err := LoadWorkspaceConfig(configDir)
+		config, err := workspaceconfig.Load(configDir)
 		if err != nil {
 			return harnesshost.GenerationPreparation{}, err
 		}

@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // nativeMethodProbePolicy admits only the designated synthetic case under its
@@ -64,7 +66,7 @@ func admitNativeMethodProbe(t *testing.T, state string, adapter RemoteReviewAdap
 	t.Helper()
 
 	policy := nativeMethodProbePolicy{nativeLivePolicyReader: nativeLivePolicyReader{state: state, profile: profile, publication: request}, https: strings.HasPrefix(publisher.transport, "https://")}
-	query := WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: request}
+	query := WorkflowNativeCapabilityRequest{Config: workspaceconfig.WorkIntegrationConfig{PublicationProfile: workspaceconfig.WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: request}
 
 	capability, err := adapter.WorkflowNativeIntegrationCapability(t.Context(), query, policy, publisher)
 	if err != nil || !capability.AtomicSourceBase || !capability.ExactResult || len(capability.Unsupported) != 0 {

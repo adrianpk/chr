@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestServiceWorkCompat retains unadopted legacy selection and execution while
@@ -22,7 +22,7 @@ func TestServiceWorkCompat(t *testing.T) {
 	checkServiceWorkCompatPreview(t, operations)
 
 	result, err := operations.StartAgentWorkTicket("PRJ-99")
-	if err != nil || result.Execution == nil || result.Execution.TicketKey != "PRJ-99" || result.Authority != core.WorkStateAuthorityTrackerCompat {
+	if err != nil || result.Execution == nil || result.Execution.TicketKey != "PRJ-99" || result.Authority != workspaceconfig.WorkStateAuthorityTrackerCompat {
 		t.Fatal("legacy work lost its execution route", err)
 	}
 
@@ -42,7 +42,7 @@ func TestServiceWorkCompat(t *testing.T) {
 func TestServiceWorkTicketPreview(t *testing.T) {
 	operations, native, _, provider := serviceWorkNativeFixture(t)
 
-	config, err := core.LoadWorkspaceConfig(operations.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(operations.projectContext.ProjectDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func checkServiceWorkCompatPreview(t *testing.T, operations service) {
 	t.Helper()
 
 	preview, err := operations.PreviewAllReadyAgentWork()
-	if err != nil || preview.Authority != core.WorkStateAuthorityTrackerCompat || preview.EligibleCount != 1 || preview.SelectedQueue[0].Key != "PRJ-99" {
+	if err != nil || preview.Authority != workspaceconfig.WorkStateAuthorityTrackerCompat || preview.EligibleCount != 1 || preview.SelectedQueue[0].Key != "PRJ-99" {
 		t.Fatal("compatibility expanded its legacy scope", preview, err)
 	}
 

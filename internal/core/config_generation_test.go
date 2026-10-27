@@ -10,6 +10,7 @@ import (
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Preparation cannot replace the native configuration fence with its own
@@ -21,7 +22,7 @@ func TestHarnessGenerationConfigFence(t *testing.T) {
 			program := generationBindingProgram(t, project)
 			writeHarnessSelectionTestFile(t, workspacecore.UserPath(project, "config.yml"), "harnesses:\n  generation: alpha\n")
 
-			_, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "configuration-fence", Purpose: "plan_generation"}, func(ctx context.Context, config WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
+			_, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "configuration-fence", Purpose: "plan_generation"}, func(ctx context.Context, config workspaceconfig.Config) (harnesshost.GenerationPreparation, error) {
 				prepared, err := generationBindingResolver(program, "model-alpha")(ctx, config)
 				if err != nil {
 					return prepared, err

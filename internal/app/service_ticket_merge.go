@@ -8,6 +8,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type ticketMergeInput struct {
@@ -38,12 +39,12 @@ func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (cor
 		return core.TicketMergeCommandResult{}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}
 
-	if err := core.ValidateWorkConfig(config.Work); err != nil {
+	if err := workspaceconfig.ValidateWorkConfig(config.Work); err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}
 

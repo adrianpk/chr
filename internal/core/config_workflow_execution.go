@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"slices"
 
-	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type retainedExecutionPolicy struct {
@@ -40,7 +40,7 @@ func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key
 }
 
 func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key string, policy workflowstate.ExecutionPolicy, later *bool) (workflowstate.ExecutionPolicy, error) {
-	config, err := LoadWorkspaceConfig(s.layout.ProjectDir())
+	config, err := workspaceconfig.Load(s.layout.ProjectDir())
 	if err != nil {
 		return policy, err
 	}
@@ -60,7 +60,7 @@ func (s *WorkflowStore) resolveWorkflowExecutionPolicy(ctx context.Context, key 
 // allocating an invocation, refilling a budget or claiming a worker.
 func (s *WorkflowStore) InspectWorkflowExecutionPolicy(ctx context.Context) (policy workflowstate.ExecutionPolicy, err error) {
 	err = s.withWorkflowInspection(ctx, func() error {
-		config, readErr := LoadWorkspaceConfig(s.layout.ProjectDir())
+		config, readErr := workspaceconfig.Load(s.layout.ProjectDir())
 		if readErr != nil {
 			return readErr
 		}
@@ -73,7 +73,7 @@ func (s *WorkflowStore) InspectWorkflowExecutionPolicy(ctx context.Context) (pol
 	return policy, err
 }
 
-func configuredWorkflowExecutionPolicy(config WorkspaceConfig, policy workflowstate.ExecutionPolicy, later *bool) (workflowstate.ExecutionPolicy, error) {
+func configuredWorkflowExecutionPolicy(config workspaceconfig.Config, policy workflowstate.ExecutionPolicy, later *bool) (workflowstate.ExecutionPolicy, error) {
 	var err error
 
 	policy, err = applyWorkflowExecutionLimits(config, policy)
@@ -86,10 +86,7 @@ func configuredWorkflowExecutionPolicy(config WorkspaceConfig, policy workflowst
 		policy.IncludeLaterTickets = *later
 	}
 
-	policy.ConfigRevision = contenthash.Sum(nil)
-	if config.workflowRevision != "" {
-		policy.ConfigRevision = config.workflowRevision
-	}
+	policy.ConfigRevision = config.Revision()
 
 	policy = normalizeWorkflowExecutionPolicy(policy)
 	if !validWorkflowExecutionPolicy(policy) {
@@ -108,7 +105,7 @@ func workflowValidationTimeout(contract, configured int) int {
 }
 
 func (s *WorkflowStore) workflowClosingValidationTimeout(ctx context.Context, id string, contract int) (int, error) {
-	config, err := LoadWorkspaceConfig(s.layout.ProjectDir())
+	config, err := workspaceconfig.Load(s.layout.ProjectDir())
 	if err != nil {
 		return 0, err
 	}
@@ -127,9 +124,9 @@ func (s *WorkflowStore) workflowClosingValidationTimeout(ctx context.Context, id
 	return workflowValidationTimeout(contract, seconds), nil
 }
 
-func applyWorkflowExecutionLimits(config WorkspaceConfig, policy workflowstate.ExecutionPolicy) (workflowstate.ExecutionPolicy, error) {
+func applyWorkflowExecutionLimits(config workspaceconfig.Config, policy workflowstate.ExecutionPolicy) (workflowstate.ExecutionPolicy, error) {
 	integration := config.Work.MaxIntegrationAttempts
-	if config.Workflow.Version == 0 && !config.workflowExplicit["work.max_integration_attempts"] {
+	if config.Workflow.Version == 0 && !config.Explicit("work.max_integration_attempts") {
 		// Legacy zero already means the finite default. Retain that original
 		// request representation rather than changing its durable identity.
 		integration = 0
@@ -149,7 +146,7 @@ func applyWorkflowExecutionLimits(config WorkspaceConfig, policy workflowstate.E
 	for _, field := range fields {
 		if *field.value == 0 {
 			*field.value = field.limit
-		} else if config.workflowExplicit[field.key] && *field.value > field.limit {
+		} else if config.Explicit(field.key) && *field.value > field.limit {
 			return policy, fmt.Errorf("invocation cannot relax explicit %s", field.key)
 		}
 	}

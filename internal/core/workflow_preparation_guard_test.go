@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestWorkflowPreparationGuard revokes source-only and stale combined grants,
@@ -95,7 +96,7 @@ func TestWorkflowPreparationProviderPaths(t *testing.T) {
 		for _, method := range []string{"merge", "rebase", "squash"} {
 			t.Run(url+"/"+method, func(t *testing.T) {
 				runner := newFakeRemoteReviewRunner()
-				adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+				adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 				pr := WorkflowPullRequestSnapshot{URL: url, Repository: "https://example.invalid/owner/repo"}
 
 				capability, err := adapter.WorkflowIntegrationCapability(t.Context(), pr, method)

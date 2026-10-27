@@ -9,9 +9,10 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s service) observeNativeWork(ctx context.Context, config core.WorkspaceConfig, result *WorkObservation) error {
+func (s service) observeNativeWork(ctx context.Context, config workspaceconfig.Config, result *WorkObservation) error {
 	store, err := s.workflowStore()
 	if err != nil {
 		return err

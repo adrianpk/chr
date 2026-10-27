@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReconcileWorkflowMembership preserves the invocation's accepted admission policy.
@@ -25,7 +26,7 @@ func (s service) AmendWorkflowSet(ctx context.Context, request core.WorkflowSetA
 		return core.WorkflowMaterializationResult{}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowMaterializationResult{}, err
 	}

@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -38,7 +38,7 @@ func guidedWebWorkFixture(t *testing.T) (webViewProvider, *guidedWorkHost, *guid
 	t.Cleanup(host.close)
 
 	provider := webViewProvider{env: operations.env, assetsFS: operations.assetsFS, projectContext: operations.projectContext}
-	provider.config.Web = core.DefaultWebConfig()
+	provider.config.Web = workspaceconfig.DefaultWebConfig()
 	provider.config.ProjectDir = operations.projectContext.ProjectDir
 	provider.config.guidedHost = host
 	provider.serviceFactory = func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy }

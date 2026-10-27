@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"encoding/json"
@@ -45,7 +45,8 @@ func readHarnessSelectionConfig(project string) ([]byte, error) {
 	return data, err
 }
 
-func requireNoHarnessSelectionChange(project string) error {
+// RequireNoHarnessSelectionChange fences upgrades until the original selection change is recovered.
+func RequireNoHarnessSelectionChange(project string) error {
 	_, err := readHarnessSelectionFile(project, harnessSelectionPending)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil

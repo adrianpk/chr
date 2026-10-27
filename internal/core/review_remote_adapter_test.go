@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func TestRemoteReviewAdapterReadsForgejoSnapshot(t *testing.T) {
@@ -14,7 +16,7 @@ func TestRemoteReviewAdapterReadsForgejoSnapshot(t *testing.T) {
 	runner.outputs["tea api /repos/example/repo/issues/12/comments"] = []byte(`[{"body":"comment"}]`)
 	runner.outputs["tea api /repos/example/repo/commits/abc123/statuses"] = []byte(`[{"state":"success"}]`)
 
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
 	snapshot, err := adapter.Read(t.Context(), "https://codeberg.org/example/repo/pulls/12")
 	if err != nil {
@@ -46,7 +48,7 @@ func TestRemoteReviewAdapterReadsGitHubSnapshot(t *testing.T) {
 	runner.outputs["gh api repos/example/repo/pulls/34/comments"] = []byte(`[{"body":"review"}]`)
 	runner.outputs["gh pr checks https://github.com/example/repo/pull/34 --json name,state,link,bucket"] = []byte(`[{"name":"test","state":"SUCCESS"}]`)
 
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
 	snapshot, err := adapter.Read(t.Context(), "https://github.com/example/repo/pull/34")
 	if err != nil {
@@ -68,7 +70,7 @@ func TestRemoteReviewAdapterReadsGitHubSnapshot(t *testing.T) {
 
 func TestRemoteReviewAdapterWritesInlineComment(t *testing.T) {
 	runner := newFakeRemoteReviewRunner()
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
 	result, err := adapter.WriteComments(t.Context(), "https://github.com/example/repo/pull/34", []RemoteReviewComment{
 		{Body: "Handle nil input.", Path: "internal/example.go", Line: 42, Blocking: true},
@@ -105,7 +107,7 @@ func TestRemoteReviewAdapterFallsBackToGeneralComment(t *testing.T) {
 	runner := newFakeRemoteReviewRunner()
 	runner.inputErrors["tea api -X POST /repos/example/repo/pulls/12/reviews -d @-"] = errors.New("inline unsupported")
 
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
 	result, err := adapter.WriteComments(t.Context(), "https://codeberg.org/example/repo/pulls/12", []RemoteReviewComment{
 		{Body: "Handle nil input.", Path: "internal/example.go", Line: 42},
@@ -133,7 +135,7 @@ func TestRemoteReviewAdapterFallsBackToGeneralComment(t *testing.T) {
 }
 
 func TestRemoteReviewAdapterRejectsDisabledProvider(t *testing.T) {
-	config := DefaultReviewProviderConfig()
+	config := workspaceconfig.DefaultReviewProviderConfig()
 	config.GitHub.Enabled = false
 
 	adapter := NewRemoteReviewAdapter(config, newFakeRemoteReviewRunner())

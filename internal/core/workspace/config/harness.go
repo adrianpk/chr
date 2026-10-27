@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 )
 
-func applyHarnessSelection(config *WorkspaceConfig, values map[string]string) error {
+func applyHarnessSelection(config *Config, values map[string]string) error {
 	for _, field := range []struct {
 		key    string
 		target *string

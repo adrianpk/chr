@@ -1,6 +1,10 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
+)
 
 // TestNativeParallelDrift admits two independent queues on a physical target.
 // An external writer integrates the first result; only a fresh gate and review
@@ -58,7 +62,7 @@ func nativeDriftParallelLane(t *testing.T, lane workflowParallelPublicationLane)
 	t.Helper()
 
 	f := lane.fixture
-	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationGitAtomicDualRef)
+	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationGitAtomicDualRef)
 
 	entry := nativeRoleAdmit(t, f.store, f.run.ID)
 	entry = nativeRoleTransition(t, f.store, entry, "preparing")

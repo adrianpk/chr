@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"context"
@@ -33,11 +33,11 @@ type HarnessSelectionChangeRequest struct {
 type HarnessSelectionChangeOptions struct {
 	Request   HarnessSelectionChangeRequest
 	Authorize func(context.Context) error
-	Validate  func(context.Context, WorkspaceConfig) error
+	Validate  func(context.Context, Config) error
 }
 
 // HarnessSelections projects one coherent workspace image and its last change.
-func (c WorkspaceConfig) HarnessSelections(project string) (harnesscore.SelectionSnapshot, error) {
+func (c Config) HarnessSelections(project string) (harnesscore.SelectionSnapshot, error) {
 	if c.HarnessAudit.ProjectRef != "" && c.HarnessAudit.ProjectRef != project {
 		return harnesscore.SelectionSnapshot{}, fmt.Errorf("%w: harness selections belong to another project", workflowstate.ErrConflict)
 	}
@@ -69,7 +69,7 @@ func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSe
 			return err
 		}
 
-		if err := requireNoWorkflowUpgrade(project); err != nil {
+		if err := RequireNoWorkflowUpgrade(project); err != nil {
 			return err
 		}
 
@@ -157,7 +157,7 @@ func prepareHarnessSelectionChange(ctx context.Context, project string, opts Har
 		return journal, workflowstate.ErrConflict
 	}
 
-	config, err := parseWorkflowConfig(before)
+	config, err := Parse(before)
 	if err != nil {
 		return journal, err
 	}
@@ -168,7 +168,7 @@ func prepareHarnessSelectionChange(ctx context.Context, project string, opts Har
 
 	after := harnessSelectionChangeImage(before, opts.Request, digest, time.Now().UTC().Format(time.RFC3339Nano))
 
-	candidate, err := parseWorkflowConfig(after)
+	candidate, err := Parse(after)
 	if err != nil {
 		return journal, err
 	}
@@ -202,7 +202,7 @@ func harnessSelectionChangeImage(before []byte, request HarnessSelectionChangeRe
 			value = strconv.Quote(value)
 		}
 
-		after = setWorkflowUpgradeValue(after, "harnesses", field.key, value)
+		after = SetValue(after, "harnesses", field.key, value)
 	}
 
 	for _, field := range []struct{ key, value string }{
@@ -212,7 +212,7 @@ func harnessSelectionChangeImage(before []byte, request HarnessSelectionChangeRe
 		{"request_id", request.Binding.RequestID},
 		{"request_digest", digest},
 	} {
-		after = setWorkflowUpgradeValue(after, "harnesses", field.key, field.value)
+		after = SetValue(after, "harnesses", field.key, field.value)
 	}
 
 	return after

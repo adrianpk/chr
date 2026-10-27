@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name string, value any) workflowstate.EvidenceRef {
@@ -49,7 +50,7 @@ func nativeRecordCandidate(t *testing.T, method string) (*WorkflowStore, Workflo
 	}
 
 	proof, pr := candidate.Input.Git, candidate.Input.Source.PullRequest
-	cap := WorkflowNativeCapability{WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: contenthash.Sum([]byte("policy")), ServerCapabilityFingerprint: contenthash.Sum([]byte("server")), CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
+	cap := WorkflowNativeCapability{WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: contenthash.Sum([]byte("policy")), ServerCapabilityFingerprint: contenthash.Sum([]byte("server")), CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
 
 	cap, err = sealWorkflowNativeCapability(cap)
 	if err != nil {

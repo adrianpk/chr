@@ -5,29 +5,31 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"slices"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowUpgradeOptions explicitly selects a project policy and, optionally,
 // one approved legacy plan. Omitting ReviewMode preserves its effective policy.
 type WorkflowUpgradeOptions struct {
-	ExpectedRevision string                       `json:"expected_revision"`
-	StateAuthority   WorkStateAuthority           `json:"state_authority"`
-	ReviewMode       workflowstate.ReviewMode     `json:"review_mode,omitempty"`
-	Adoption         *WorkflowPlanAdoptionOptions `json:"adoption,omitempty"`
-	CheckQuiescent   func(context.Context) error  `json:"-"`
+	ExpectedRevision string                             `json:"expected_revision"`
+	StateAuthority   workspaceconfig.WorkStateAuthority `json:"state_authority"`
+	ReviewMode       workflowstate.ReviewMode           `json:"review_mode,omitempty"`
+	Adoption         *WorkflowPlanAdoptionOptions       `json:"adoption,omitempty"`
+	CheckQuiescent   func(context.Context) error        `json:"-"`
 }
 
 // WorkflowUpgradeResult retains the policy observed before the version marker.
 // Snapshot is relative to the project, outside the workflow record namespace.
 type WorkflowUpgradeResult struct {
-	Snapshot string                         `json:"snapshot"`
-	Prior    WorkflowConfiguration          `json:"prior"`
-	Current  WorkflowConfiguration          `json:"current"`
-	Adopted  *WorkflowMaterializationResult `json:"adopted,omitempty"`
+	Snapshot string                                `json:"snapshot"`
+	Prior    workspaceconfig.WorkflowConfiguration `json:"prior"`
+	Current  workspaceconfig.WorkflowConfiguration `json:"current"`
+	Adopted  *WorkflowMaterializationResult        `json:"adopted,omitempty"`
 }
 
 // UpgradeWorkflowConfiguration upgrades only the selected, quiescent project.
@@ -51,7 +53,7 @@ func (s *WorkflowStore) UpgradeWorkflowConfiguration(ctx context.Context, opts W
 
 	err = s.withLock(ctx, func() (err error) {
 		return workspacecore.WithConfigLock(ctx, s.layout.ProjectDir(), func() error {
-			if err := requireNoHarnessSelectionChange(s.layout.ProjectDir()); err != nil {
+			if err := workspaceconfig.RequireNoHarnessSelectionChange(s.layout.ProjectDir()); err != nil {
 				return err
 			}
 
@@ -69,7 +71,7 @@ func (s *WorkflowStore) UpgradeWorkflowConfiguration(ctx context.Context, opts W
 }
 
 func validateWorkflowUpgradeOptions(opts WorkflowUpgradeOptions) error {
-	if len(opts.ExpectedRevision) != 64 || !workflowConfigChoice(string(opts.StateAuthority), []string{"tickets", "tracker_compat"}) {
+	if len(opts.ExpectedRevision) != 64 || !slices.Contains([]string{"tickets", "tracker_compat"}, string(opts.StateAuthority)) {
 		return fmt.Errorf("upgrade requires an observed configuration revision and explicit state authority")
 	}
 
@@ -86,7 +88,7 @@ func validateWorkflowUpgradeOptions(opts WorkflowUpgradeOptions) error {
 	}
 
 	if opts.Adoption != nil {
-		if opts.StateAuthority != WorkStateAuthorityTickets || opts.Adoption.CheckQuiescent == nil {
+		if opts.StateAuthority != workspaceconfig.WorkStateAuthorityTickets || opts.Adoption.CheckQuiescent == nil {
 			return fmt.Errorf("selected adoption requires ticket authority and legacy task ownership observation")
 		}
 

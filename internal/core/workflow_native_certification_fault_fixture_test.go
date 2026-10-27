@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type nativeFaultCase struct {
@@ -24,7 +26,7 @@ func newNativeFaultCase(t *testing.T, state string, profile nativeLiveProfile, s
 	request, key := buildNativeLiveMethod(t, profile, "rebase")
 	f := &nativeFaultCase{
 		state: state, profile: profile, request: request,
-		adapter: NewRemoteReviewAdapter(DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{}),
+		adapter: NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{}),
 		evidence: nativeCertificationEvidence{
 			Schema: "chr-native-certification/v1", Method: "rebase", Scenario: scenario,
 			Transport: "https", Server: readNativeCertificationServer(t, profile),
@@ -63,7 +65,7 @@ func (f *nativeFaultCase) checkRefs(t *testing.T, source, target string) {
 func nativeFixtureAPI(t *testing.T, ctx context.Context, profile nativeLiveProfile, method, endpoint string, payload any) []byte {
 	t.Helper()
 
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
 
 	resolvedReview, err := adapter.resolveWorkflowRepository(profile.URL)
 

@@ -11,6 +11,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ArtifactOperationResult is the TUI-facing result for artifact creation
@@ -61,7 +62,7 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 		return CreateTicketResult{}, errors.New("ticket synopsis is required")
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return CreateTicketResult{}, err
 	}

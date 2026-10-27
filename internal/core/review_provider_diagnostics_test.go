@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func TestDetectReviewProviderReference(t *testing.T) {
@@ -103,7 +105,7 @@ func TestRunReviewProviderDiagnosticsReady(t *testing.T) {
 	}
 
 	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
-		Config: DefaultReviewProviderConfig(),
+		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 		Runner: runner,
 	})
@@ -120,7 +122,7 @@ func TestRunReviewProviderDiagnosticsReady(t *testing.T) {
 
 func TestRunReviewProviderDiagnosticsReportsMissingCLI(t *testing.T) {
 	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
-		Config: DefaultReviewProviderConfig(),
+		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://github.com/example/repo/pull/34",
 		Runner: fakeReviewProviderDiagnosticRunner{},
 	})
@@ -138,7 +140,7 @@ func TestRunReviewProviderDiagnosticsReportsMissingToken(t *testing.T) {
 	}
 
 	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
-		Config: DefaultReviewProviderConfig(),
+		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://github.com/example/repo/pull/34",
 		Runner: runner,
 	})
@@ -152,7 +154,7 @@ func TestRunReviewProviderDiagnosticsReportsMissingToken(t *testing.T) {
 
 func TestRunReviewProviderDiagnosticsReportsUnsupportedProvider(t *testing.T) {
 	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
-		Config: DefaultReviewProviderConfig(),
+		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://example.com/example/repo/merge-requests/1",
 		Runner: fakeReviewProviderDiagnosticRunner{},
 	})
@@ -172,7 +174,7 @@ func TestRunReviewProviderDiagnosticsDryRunSkipsReadability(t *testing.T) {
 	}
 
 	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
-		Config: DefaultReviewProviderConfig(),
+		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 		DryRun: true,
 		Runner: runner,

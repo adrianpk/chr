@@ -6,10 +6,11 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s *WorkflowStore) checkWorkflowNativeSourceRevision(ctx context.Context, run *workflowInvocationFile, provider WorkflowPullRequestProvider) error {
-	config, err := LoadWorkspaceConfig(s.layout.ProjectDir())
+	config, err := workspaceconfig.Load(s.layout.ProjectDir())
 	if err != nil || !workflowNativeSourceRevisionRequired(config, *run) {
 		return err
 	}
@@ -39,8 +40,8 @@ func (s *WorkflowStore) checkWorkflowNativeSourceRevision(ctx context.Context, r
 	return nil
 }
 
-func workflowNativeSourceRevisionRequired(config WorkspaceConfig, run workflowInvocationFile) bool {
-	return config.Work.Integration.PublicationProfile == WorkflowPublicationGitAtomicDualRef && run.Integration != nil && run.PullRequest != nil
+func workflowNativeSourceRevisionRequired(config workspaceconfig.Config, run workflowInvocationFile) bool {
+	return config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef && run.Integration != nil && run.PullRequest != nil
 }
 
 func workflowNativeSourceIdentityMatches(binding WorkflowPullRequestBinding, pr WorkflowPullRequestSnapshot) bool {

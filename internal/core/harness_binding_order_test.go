@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Admission and switching share exclusion across their entire configuration
@@ -23,7 +24,7 @@ func TestHarnessBindingSelectionOrder(t *testing.T) {
 
 	entered, release, switching := make(chan struct{}), make(chan struct{}), make(chan struct{})
 	resolver := harnessBindingTestResolver(t, workflowTaskCommand(t, "worker"))
-	request.ResolveHarness = func(ctx context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
+	request.ResolveHarness = func(ctx context.Context, config workspaceconfig.Config) (WorkflowHarnessResolution, error) {
 		close(entered)
 
 		select {
@@ -49,7 +50,7 @@ func TestHarnessBindingSelectionOrder(t *testing.T) {
 	changed := make(chan harnessBindingChangeResult, 1)
 
 	go func() {
-		result, err := ChangeHarnessSelections(ctx, project, options)
+		result, err := workspaceconfig.ChangeHarnessSelections(ctx, project, options)
 		changed <- harnessBindingChangeResult{result, err}
 	}()
 

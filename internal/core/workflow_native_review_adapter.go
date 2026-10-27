@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowNativeReviewAdapter connects existing remote observation to the
@@ -50,7 +51,7 @@ func (adapter *WorkflowNativeReviewAdapter) WorkflowIntegrationCapability(ctx co
 		return WorkflowPublicationCapability{}, err
 	}
 
-	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.data...)), AtomicSourceBase: true, ExactResult: true}, nil
+	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.data...)), AtomicSourceBase: true, ExactResult: true}, nil
 }
 
 // WorkflowPreparedNativeCapability observes the actual receive-pack server for
@@ -73,7 +74,7 @@ func (adapter *WorkflowNativeReviewAdapter) WorkflowPreparedNativeCapability(ctx
 		return WorkflowNativeCapability{}, err
 	}
 
-	config, err := LoadWorkspaceConfig(owner.layout.ProjectDir())
+	config, err := workspaceconfig.Load(owner.layout.ProjectDir())
 	if err != nil {
 		return WorkflowNativeCapability{}, err
 	}
@@ -100,8 +101,8 @@ func (adapter *WorkflowNativeReviewAdapter) PublishWorkflowGit(ctx context.Conte
 		return WorkflowGitPublicationResult{}, workflowstate.ErrConflict
 	}
 
-	config, err := LoadWorkspaceConfig(owner.layout.ProjectDir())
-	if err != nil || config.Work.Integration.PublicationProfile != WorkflowPublicationGitAtomicDualRef {
+	config, err := workspaceconfig.Load(owner.layout.ProjectDir())
+	if err != nil || config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return WorkflowGitPublicationResult{}, ErrWorkflowAtomicGuard
 	}
 

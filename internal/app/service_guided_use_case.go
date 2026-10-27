@@ -11,6 +11,7 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // GuidedUseCaseInspection contains retained state and prospective local readiness.
@@ -114,7 +115,7 @@ func (s service) InspectGuidedUseCase(ctx context.Context, id, namespace string)
 }
 
 func (s service) inspectGuidedReadiness(ctx context.Context, result *GuidedUseCaseInspection) {
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		result.Problems = append(result.Problems, err.Error())
 

@@ -9,6 +9,8 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 const (
@@ -36,7 +38,7 @@ type OSReviewRemoteCommandRunner struct{}
 
 // RemoteReviewAdapter describes a package boundary value.
 type RemoteReviewAdapter struct {
-	config ReviewProviderConfig
+	config workspaceconfig.ReviewProviderConfig
 	runner ReviewRemoteCommandRunner
 }
 
@@ -128,7 +130,7 @@ func (OSReviewRemoteCommandRunner) Input(ctx context.Context, command string, in
 }
 
 // NewRemoteReviewAdapter constructs the corresponding package service or value.
-func NewRemoteReviewAdapter(config ReviewProviderConfig, runner ReviewRemoteCommandRunner) RemoteReviewAdapter {
+func NewRemoteReviewAdapter(config workspaceconfig.ReviewProviderConfig, runner ReviewRemoteCommandRunner) RemoteReviewAdapter {
 	if runner == nil {
 		runner = OSReviewRemoteCommandRunner{}
 	}
@@ -208,7 +210,7 @@ func (a RemoteReviewAdapter) Merge(ctx context.Context, req MergeRequest) (Merge
 
 type reviewProviderEndpoint struct {
 	reference ReviewProviderReference
-	config    ReviewProviderTargetConfig
+	config    workspaceconfig.ReviewProviderTargetConfig
 }
 
 func (adapter RemoteReviewAdapter) resolve(rawURL string) (reviewProviderEndpoint, error) {
@@ -229,7 +231,7 @@ func (adapter RemoteReviewAdapter) resolve(rawURL string) (reviewProviderEndpoin
 	return reviewProviderEndpoint{reference: reference, config: config}, nil
 }
 
-func (adapter RemoteReviewAdapter) readForgejo(ctx context.Context, reference ReviewProviderReference, config ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
+func (adapter RemoteReviewAdapter) readForgejo(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
 	prJSON, err := adapter.runner.Output(ctx, config.CLI, "api", forgejoPullRequestPath(reference))
 	if err != nil {
 		return RemoteReviewSnapshot{}, err
@@ -261,7 +263,7 @@ func (adapter RemoteReviewAdapter) readForgejo(ctx context.Context, reference Re
 	}, nil
 }
 
-func (adapter RemoteReviewAdapter) readGitHub(ctx context.Context, reference ReviewProviderReference, config ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
+func (adapter RemoteReviewAdapter) readGitHub(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
 	prJSON, err := adapter.runner.Output(ctx, config.CLI, "pr", "view", reference.URL, "--json", "number,title,state,baseRefName,headRefName,headRefOid,mergeable,isDraft,reviewDecision")
 	if err != nil {
 		return RemoteReviewSnapshot{}, err
@@ -302,7 +304,7 @@ func (adapter RemoteReviewAdapter) readGitHub(ctx context.Context, reference Rev
 	}, nil
 }
 
-func (adapter RemoteReviewAdapter) readForgejoChecks(ctx context.Context, reference ReviewProviderReference, config ReviewProviderTargetConfig, prJSON []byte) ([]byte, bool) {
+func (adapter RemoteReviewAdapter) readForgejoChecks(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, prJSON []byte) ([]byte, bool) {
 	metadata := remoteReviewPRMetadata{}
 	if err := json.Unmarshal(prJSON, &metadata); err != nil || strings.TrimSpace(metadata.Head.SHA) == "" {
 		return nil, false
@@ -316,7 +318,7 @@ func (adapter RemoteReviewAdapter) readForgejoChecks(ctx context.Context, refere
 	return checks, true
 }
 
-func (adapter RemoteReviewAdapter) writeComment(ctx context.Context, reference ReviewProviderReference, config ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
+func (adapter RemoteReviewAdapter) writeComment(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
 	if isInlineComment(comment) {
 		written, err := adapter.writeInlineComment(ctx, reference, config, comment)
 		if err == nil {
@@ -327,7 +329,7 @@ func (adapter RemoteReviewAdapter) writeComment(ctx context.Context, reference R
 	return adapter.writeGeneralComment(ctx, reference, config, comment)
 }
 
-func (adapter RemoteReviewAdapter) writeInlineComment(ctx context.Context, reference ReviewProviderReference, config ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
+func (adapter RemoteReviewAdapter) writeInlineComment(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
 	payload, err := inlineCommentPayload(reference.Provider, comment)
 	if err != nil {
 		return RemoteReviewWrittenComment{}, err
@@ -346,7 +348,7 @@ func (adapter RemoteReviewAdapter) writeInlineComment(ctx context.Context, refer
 	}, nil
 }
 
-func (adapter RemoteReviewAdapter) writeGeneralComment(ctx context.Context, reference ReviewProviderReference, config ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
+func (adapter RemoteReviewAdapter) writeGeneralComment(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
 	payload, err := json.Marshal(map[string]string{"body": generalCommentBody(comment)})
 	if err != nil {
 		return RemoteReviewWrittenComment{}, fmt.Errorf("encode general comment payload: %w", err)

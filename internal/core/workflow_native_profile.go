@@ -7,21 +7,12 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 const (
-	// WorkflowPublicationDisabled preserves the existing publication policy.
-	WorkflowPublicationDisabled = "disabled"
-	// WorkflowPublicationGitAtomicDualRef explicitly permits the owned source rewrite.
-	WorkflowPublicationGitAtomicDualRef = "git_atomic_dual_ref"
-	workflowNativeAdapterVersion        = "chr-native-publication/v1"
+	workflowNativeAdapterVersion = "chr-native-publication/v1"
 )
-
-// WorkIntegrationConfig selects a publication mechanism independently of review.
-type WorkIntegrationConfig struct {
-	PublicationProfile   string
-	MaxPreparedPerTarget int
-}
 
 // WorkflowNativePolicy contains current host-owned grants and certification.
 // Workers cannot supply it. Ownership names one full ref, never a prefix grant.
@@ -71,7 +62,7 @@ type WorkflowNativeCapability struct {
 
 // WorkflowNativeCapabilityRequest supplies the explicit profile and exact source.
 type WorkflowNativeCapabilityRequest struct {
-	Config      WorkIntegrationConfig
+	Config      workspaceconfig.WorkIntegrationConfig
 	PullRequest WorkflowPullRequestSnapshot
 	Publication WorkflowGitPublication
 }
@@ -83,13 +74,13 @@ func workflowNativePolicyReasons(request WorkflowNativeCapabilityRequest, policy
 		condition string
 		decision  string
 	}{
-		{request.Config.PublicationProfile == WorkflowPublicationGitAtomicDualRef, "profile_disabled", "Explicitly select git_atomic_dual_ref."},
+		{request.Config.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef, "profile_disabled", "Explicitly select git_atomic_dual_ref."},
 		{publication.Repository == publication.SourceRepository && publication.Repository == request.PullRequest.HeadRepository, "fork_source", "Select a source owned in the canonical repository."},
 		{policy.Repository == publication.Repository && policy.SourceRef == publication.SourceRef && policy.TargetRef == publication.TargetRef, "ownership_binding", "Resolve current grants for these exact full refs."},
 		{policy.SourceRewriteAuthorized && publication.SourceRewriteAuthorized && policy.OwnershipRevision != "" && policy.OwnershipRevision == publication.OwnershipRevision, "source_rewrite_unauthorized", "Authorize rewriting the exact owned source ref."},
 		{policy.FastForwardTargetAuthorized, "target_push_unauthorized", "Provide an authorized fast-forward target publication role."},
 		{policy.HostCandidateReview, "native_approval_required", "Select a policy permitting host-bound review of the prepared result."},
-		{workflowConfigChoice(string(policy.ReviewMode), []string{string(workflowstate.ReviewHuman), string(workflowstate.ReviewAgentic), string(workflowstate.ReviewTrustedAutoMerge)}), "review_policy_unknown", "Resolve the current candidate review policy."},
+		{slices.Contains([]string{string(workflowstate.ReviewHuman), string(workflowstate.ReviewAgentic), string(workflowstate.ReviewTrustedAutoMerge)}, string(policy.ReviewMode)), "review_policy_unknown", "Resolve the current candidate review policy."},
 		{validWorkflowNativeFingerprint(policy.CredentialIdentityFingerprint), "credential_identity_unknown", "Resolve the current publisher credential identity without secrets."},
 		{slices.Contains(policy.CertifiedMethods, publication.Git.Method), "method_uncertified", "Certify the configured method for this observation profile."},
 	}

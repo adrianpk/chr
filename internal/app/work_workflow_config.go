@@ -8,8 +8,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (factory commandFactory) workConfigCommand() *cli.Command {
@@ -41,7 +41,7 @@ func (factory commandFactory) workConfigCommand() *cli.Command {
 	}}
 }
 
-func renderWorkWorkflowConfig(stdout io.Writer, result core.WorkflowConfiguration) error {
+func renderWorkWorkflowConfig(stdout io.Writer, result workspaceconfig.WorkflowConfiguration) error {
 	for _, value := range result.Values {
 		if _, err := fmt.Fprintf(stdout, "%s: %s (source: %s)\n", value.Key, value.Value, value.Source); err != nil {
 			return err

@@ -13,6 +13,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s service) prepareNativeRecordCreation(ctx context.Context, store *core.WorkflowStore, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
@@ -50,7 +51,7 @@ func (s service) prepareTicketRecord(request RecordMutationRequest) (core.Workfl
 		return core.WorkflowRecord{}, ErrRecordUnsupported
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowRecord{}, err
 	}

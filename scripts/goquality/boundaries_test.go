@@ -11,7 +11,7 @@ type leafDependencyCase struct {
 }
 
 func leafDependencyCases() []leafDependencyCase {
-	return append(ticketProjectionDependencyCases(), append([]leafDependencyCase{
+	return append(append(ticketProjectionDependencyCases(), configurationDependencyCases()...), append([]leafDependencyCase{
 		{"authoring bounded journals", "internal/core/authoring/owner.go", "package authoring\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
 		{"authoring native coordinator", "internal/core/authoring/guided_preparation.go", "package authoring\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"file authoring cycle", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "authoring\"\n", true},
@@ -119,5 +119,15 @@ func TestLeafDependencies(t *testing.T) {
 				t.Fatalf("missing source evidence: %v", failures)
 			}
 		})
+	}
+}
+
+func configurationDependencyCases() []leafDependencyCase {
+	return []leafDependencyCase{
+		{"configuration execution values", "internal/core/workspace/config/config.go", "package config\nimport _ \"" + coreImportPath + "execution\"\n", false},
+		{"configuration shared workflow values", "internal/core/workspace/config/workflow.go", "package config\nimport _ \"" + coreImportPath + "workflow/state\"\n", false},
+		{"configuration root cycle", "internal/core/workspace/config/workflow.go", "package config\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
+		{"configuration workflow coordinator", "internal/core/workspace/config/workflow.go", "package config\nimport _ \"" + coreImportPath + "workflow\"\n", true},
+		{"workspace configuration cycle", "internal/core/workspace/layout.go", "package workspace\nimport _ \"" + coreImportPath + "workspace/config\"\n", true},
 	}
 }

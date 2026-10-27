@@ -11,6 +11,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkOperationResult is the TUI-facing result for agent work operations.
@@ -22,7 +23,7 @@ type WorkOperationResult struct {
 // AgentWorkResult summarizes runnable agent work for the dashboard.
 type AgentWorkResult struct {
 	Scope         string
-	Authority     core.WorkStateAuthority
+	Authority     workspaceconfig.WorkStateAuthority
 	Excluded      map[string]int
 	Workflow      *core.WorkflowInvocation
 	Message       string
@@ -67,7 +68,7 @@ func (s service) StartAgentWorkTicket(ticketKey string) (AgentWorkResult, error)
 		return AgentWorkResult{}, err
 	}
 
-	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+	if workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTickets {
 		return s.startNativeAgentWork(config, workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: ticketKey}}, 0, "")
 	}
 
@@ -174,7 +175,7 @@ func (s service) StartAgentWorkLoop(ctx context.Context, opts AgentWorkSelection
 		return AgentWorkResult{}, err
 	}
 
-	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+	if workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTickets {
 		return s.startNativeAgentWork(config, nativeAgentWorkSelection(opts), opts.MaxIterations, "")
 	}
 
@@ -197,7 +198,7 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 		return AgentWorkResult{}, err
 	}
 
-	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+	if workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTickets {
 		return s.previewNativeAgentWork(config, opts)
 	}
 
@@ -217,7 +218,7 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 
 	return AgentWorkResult{
 		Message:       fmt.Sprintf("Authority tracker_compat; scope unadopted legacy tickets; %d adopted tickets excluded. Ready queue contains %d eligible tickets.", selection.ExcludedAdopted, selection.EligibleCount),
-		Authority:     core.WorkStateAuthorityTrackerCompat,
+		Authority:     workspaceconfig.WorkStateAuthorityTrackerCompat,
 		Excluded:      map[string]int{"ticket_native": selection.ExcludedAdopted},
 		Tickets:       reloaded.Tickets,
 		SelectedQueue: selection.Tickets,

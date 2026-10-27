@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type nativeClosingFixture struct {
@@ -25,7 +26,7 @@ func newNativeClosingTransportFixture(t *testing.T, method string, gate workflow
 	opts.Plan.Slices = opts.Plan.Slices[:1]
 	opts.Plan.ClosingValidation = gate
 	f := workflowPreparationPlanFixture(t, method, "slice_set", workflowPreparationGate("test -f result.txt"), store, opts)
-	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationGitAtomicDualRef)
+	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationGitAtomicDualRef)
 
 	entry := nativeRoleAdmit(t, store, f.run.ID)
 	entry = nativeRoleTransition(t, store, entry, "preparing")

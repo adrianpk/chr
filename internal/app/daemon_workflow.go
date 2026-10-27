@@ -15,6 +15,7 @@ import (
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 const daemonWorkflowActivationLimit = 16
@@ -41,12 +42,12 @@ func (runner daemonWorkflowRunner) projects(ctx context.Context, projects []daem
 			continue
 		}
 
-		config, err := core.LoadWorkspaceConfig(project.Project.Path)
+		config, err := workspaceconfig.Load(project.Project.Path)
 		if err != nil {
 			return err
 		}
 
-		if core.WorkAuthority(config.Work) != core.WorkStateAuthorityTickets {
+		if workspaceconfig.WorkAuthority(config.Work) != workspaceconfig.WorkStateAuthorityTickets {
 			continue
 		}
 

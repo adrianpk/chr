@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type ticketReviewInput struct {
@@ -34,7 +35,7 @@ func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (c
 		return core.TicketReviewCommandResult{}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.TicketReviewCommandResult{}, err
 	}

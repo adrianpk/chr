@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type nativeLiveEvidence struct {
@@ -38,7 +40,7 @@ func nativeLiveRebase(t *testing.T, state string, profile nativeLiveProfile) {
 	t.Helper()
 
 	request, key := prepareNativeLiveRebase(t, profile)
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
 	pr := createNativeLivePR(t, adapter, profile, request)
 	publisher := NewWorkflowGitPublisher(profile.URL, nativeLiveTransport(t, profile))
 	capability := admitNativeLiveProfile(t, state, adapter, profile, request, pr, publisher)
@@ -84,7 +86,7 @@ func admitNativeLiveProfile(t *testing.T, state string, adapter RemoteReviewAdap
 	t.Helper()
 
 	policy := nativeLivePolicyReader{state: state, profile: profile, publication: request}
-	query := WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: request}
+	query := WorkflowNativeCapabilityRequest{Config: workspaceconfig.WorkIntegrationConfig{PublicationProfile: workspaceconfig.WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: request}
 
 	capability, err := adapter.WorkflowNativeIntegrationCapability(t.Context(), query, policy, publisher)
 	if err != nil || !capability.AtomicSourceBase || !capability.ExactResult || len(capability.Unsupported) != 0 {

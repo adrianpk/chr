@@ -6,6 +6,7 @@ import (
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
@@ -43,7 +44,7 @@ func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 		},
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
-			got, err := IntegrationCyclePolicyFromReviewConfig(ReviewWorkflowConfig{
+			got, err := IntegrationCyclePolicyFromReviewConfig(workspaceconfig.ReviewWorkflowConfig{
 				Mode: testCase.mode,
 			})
 			if err != nil {
@@ -58,7 +59,7 @@ func TestIntegrationCyclePolicyFromReviewConfigMapsModes(t *testing.T) {
 }
 
 func TestIntegrationCyclePolicyFromReviewConfigRejectsInvalidConfig(t *testing.T) {
-	_, err := IntegrationCyclePolicyFromReviewConfig(ReviewWorkflowConfig{
+	_, err := IntegrationCyclePolicyFromReviewConfig(workspaceconfig.ReviewWorkflowConfig{
 		Mode: "unknown",
 	})
 	if err == nil || !strings.Contains(err.Error(), "invalid review workflow mode: unknown") {
@@ -72,7 +73,7 @@ func TestPlanIntegrationCycleBuildsSelectedPendingPlan(t *testing.T) {
 	got, err := PlanIntegrationCycle(IntegrationCyclePlanOptions{
 		ProjectID: "project-1",
 		Ticket:    ticket,
-		ReviewConfig: ReviewWorkflowConfig{
+		ReviewConfig: workspaceconfig.ReviewWorkflowConfig{
 			Mode: workflowstate.ReviewAgentic,
 		},
 	})
@@ -103,7 +104,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 			name: "missing project id",
 			opts: IntegrationCyclePlanOptions{
 				Ticket:       ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}},
-				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
+				ReviewConfig: workspaceconfig.ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
 			},
 			want: "integration cycle project id is required",
 		},
@@ -111,7 +112,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 			name: "missing ticket key",
 			opts: IntegrationCyclePlanOptions{
 				ProjectID:    "project-1",
-				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
+				ReviewConfig: workspaceconfig.ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
 			},
 			want: "integration cycle ticket key is required",
 		},
@@ -120,7 +121,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 			opts: IntegrationCyclePlanOptions{
 				ProjectID:    "project-1",
 				Ticket:       ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}},
-				ReviewConfig: ReviewWorkflowConfig{Mode: "unknown"},
+				ReviewConfig: workspaceconfig.ReviewWorkflowConfig{Mode: "unknown"},
 			},
 			want: "invalid review workflow mode: unknown",
 		},

@@ -7,13 +7,14 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type agentWorkMergeCycleOptions struct {
 	Ticket       ticketcore.Indexed
 	Execution    executioncore.Record
-	WorkConfig   core.WorkConfig
-	ReviewConfig core.ReviewWorkflowConfig
+	WorkConfig   workspaceconfig.WorkConfig
+	ReviewConfig workspaceconfig.ReviewWorkflowConfig
 }
 
 func (s service) runAgentWorkMergeCycle(opts agentWorkMergeCycleOptions) (core.TicketMergeCommandResult, error) {

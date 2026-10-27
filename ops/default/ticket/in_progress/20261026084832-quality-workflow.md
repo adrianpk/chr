@@ -91,3 +91,14 @@ fixtures. Twelve more direct dependencies resolve, leaving 57 root couplings;
 all 908 store methods remain together at their original receiver. Native writes,
 locks and journals retain their authority. Focused ticket, native filesystem/Git,
 wire/storage, app and boundary checks, strict lint and the ceiling-six policy pass.
+
+
+Configuration has one shared workspace/config owner for the complete parsed
+image, raw revision/explicit presence, defaults, upgrade fences and guarded
+harness-selection journal/image/receipt recovery. All 114 moved declarations
+retain exact tokens after qualification/API naming and the original literal
+rebase default. Config.Explicit exposes presence without a mutable-map escape.
+Fifteen more direct dependencies resolve, leaving 42; all 908 store methods and
+native workflow upgrade transactions remain at their original receiver. The
+existing Slice 15 upgrade-journal tuple now qualifies the same Config value;
+no new signature debt or relaxed check is introduced.

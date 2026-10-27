@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestNativeReceiptDelivery starts with actual atomic publication and retained
@@ -76,7 +78,7 @@ func checkNativeReceiptDelivery(t *testing.T, f nativeSubmissionFixture, submiss
 	}
 
 	native, intent := receipt.Receipt.Native, submission.Native
-	expected := [3]string{intent.CandidateHash, submission.ID, WorkflowPublicationGitAtomicDualRef}
+	expected := [3]string{intent.CandidateHash, submission.ID, workspaceconfig.WorkflowPublicationGitAtomicDualRef}
 	actual := [3]string{native.CandidateHash, receipt.Receipt.SubmissionID, native.Mechanism}
 
 	if native.CandidateRef != intent.CandidateRef || native.TransactionProofRef != *intent.TransportResponseRef || expected != actual {

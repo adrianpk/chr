@@ -12,6 +12,7 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowMaterializationOptions supplies approved input and the existing native
@@ -31,7 +32,7 @@ type WorkflowMaterializationResult struct {
 // MaterializePlan creates one set and one ticket per task, with one descriptor
 // per integration unit. All shared images are validated before the first write.
 func (s *WorkflowStore) MaterializePlan(ctx context.Context, opts WorkflowMaterializationOptions) (result WorkflowMaterializationResult, err error) {
-	if err := requireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
+	if err := workspaceconfig.RequireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
 		return result, err
 	}
 

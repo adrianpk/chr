@@ -9,6 +9,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type ticketStartPreflight struct {
@@ -43,7 +44,7 @@ func (s service) prepareTicketStart(ctx context.Context, ticket ticketcore.Index
 }
 
 func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket ticketcore.Indexed, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return ticketStartPreflight{}, err
 	}

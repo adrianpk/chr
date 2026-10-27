@@ -6,10 +6,10 @@ import (
 	"os"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func createTelegramNotification(ctx context.Context, repository notifycore.Repository, record notifycore.AuditRecord, project commandProjectContext, config notifycore.TelegramConfig) (notifycore.TelegramTarget, error) {
@@ -92,7 +92,7 @@ func sendTelegramNotificationWithFallback(ctx context.Context, repository notify
 }
 
 func sendTelegramNotification(ctx context.Context, project commandProjectContext, target notifycore.TelegramTarget, delivery notifycore.TelegramDelivery) (tgmessage.Acknowledgement, error) {
-	config, err := core.LoadWorkspaceConfig(project.ProjectDir)
+	config, err := workspaceconfig.Load(project.ProjectDir)
 	if err != nil {
 		return tgmessage.Acknowledgement{}, notifycore.ErrTelegramTargetUnavailable
 	}
@@ -111,7 +111,7 @@ func dispatchLegacyTelegramNotification(ctx context.Context, repository notifyco
 		return telegramcore.SendResult{}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(project.ProjectDir)
+	config, err := workspaceconfig.Load(project.ProjectDir)
 	if err != nil {
 		return telegramcore.SendResult{}, err
 	}

@@ -13,6 +13,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -53,7 +54,7 @@ type WorkerRepairHandoff struct {
 
 // WorkerEvidenceContext describes ticket evidence strategy input.
 type WorkerEvidenceContext struct {
-	Config         EvidenceStrategyConfig
+	Config         workspaceconfig.EvidenceStrategyConfig
 	Checklist      *EvidenceStrategyChecklist
 	ChecklistError string
 	Policy         EvidencePolicyContext
@@ -461,7 +462,7 @@ func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*Wo
 		return nil, err
 	}
 
-	config, err := LoadWorkspaceConfig(projectDir)
+	config, err := workspaceconfig.Load(projectDir)
 	if err != nil {
 		return nil, fmt.Errorf("load evidence strategy config: %w", err)
 	}

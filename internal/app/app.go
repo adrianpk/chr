@@ -16,6 +16,7 @@ import (
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -382,7 +383,7 @@ func loadTUIObservability(
 		return tui.ObservabilityView{}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(projectContext.ProjectDir)
 	if err != nil {
 		return tui.ObservabilityView{}, err
 	}
@@ -399,8 +400,8 @@ func loadTUIObservability(
 
 	view := tui.NewObservabilityView(projectContext.ProjectDir, tui.ObservabilityRecords{Daemon: daemonState, Executions: executions, Loops: loops, Runtime: runtime, Events: events})
 
-	view.Authority = core.WorkAuthority(config.Work)
-	if view.Authority == core.WorkStateAuthorityTickets {
+	view.Authority = workspaceconfig.WorkAuthority(config.Work)
+	if view.Authority == workspaceconfig.WorkStateAuthorityTickets {
 		view.WorkflowPage, err = loadTUIWorkflowPage(ctx, projectContext)
 	}
 

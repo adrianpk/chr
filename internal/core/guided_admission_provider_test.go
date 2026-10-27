@@ -1,6 +1,10 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
+)
 
 // TestGuidedUseCaseAdmissionProvider checks only local readiness and never probes an invented remote PR.
 func TestGuidedUseCaseAdmissionProvider(t *testing.T) {
@@ -8,7 +12,7 @@ func TestGuidedUseCaseAdmissionProvider(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Setenv("CHR_GUIDED_PROVIDER_TEST_TOKEN", "fixture")
 
-			config := ReviewProviderConfig{Forgejo: ReviewProviderTargetConfig{Enabled: true, CLI: "sh", TokenEnv: "CHR_GUIDED_PROVIDER_TEST_TOKEN"}}
+			config := workspaceconfig.ReviewProviderConfig{Forgejo: workspaceconfig.ReviewProviderTargetConfig{Enabled: true, CLI: "sh", TokenEnv: "CHR_GUIDED_PROVIDER_TEST_TOKEN"}}
 
 			switch name {
 			case "disabled":

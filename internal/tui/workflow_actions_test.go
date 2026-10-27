@@ -8,10 +8,10 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestModelWorkflowBinding freezes service-supplied identity, revision, snapshot
@@ -88,7 +88,7 @@ func TestModelWorkflowStopAvailable(t *testing.T) {
 // TestModelWorkflowSelection keeps legacy selection behavior and routes native
 // ticket and case choices through read-only preview before execution.
 func TestModelWorkflowSelection(t *testing.T) {
-	model := NewModel(Options{Observability: ObservabilityView{Authority: core.WorkStateAuthorityTickets}, Tickets: []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}}, Cases: []authoringcore.CaseMetadata{{Slug: "delivery"}}})
+	model := NewModel(Options{Observability: ObservabilityView{Authority: workspaceconfig.WorkStateAuthorityTickets}, Tickets: []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}}, Cases: []authoringcore.CaseMetadata{{Slug: "delivery"}}})
 	model.selectView(ViewTickets)
 	model.planWorkAction(WorkActionStartTicket)
 

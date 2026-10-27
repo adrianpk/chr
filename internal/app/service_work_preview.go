@@ -3,12 +3,12 @@ package app
 import (
 	"fmt"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
+func (s service) previewNativeAgentWork(config workspaceconfig.Config, opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
 	if err := validateAgentWorkSelectionOptions(opts); err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -20,7 +20,7 @@ func (s service) previewNativeAgentWork(config core.WorkspaceConfig, opts AgentW
 	return s.previewNativeAgentWorkSelection(config, nativeAgentWorkSelection(opts))
 }
 
-func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, selection workflowstate.PreviewRequest) (AgentWorkResult, error) {
+func (s service) previewNativeAgentWorkSelection(config workspaceconfig.Config, selection workflowstate.PreviewRequest) (AgentWorkResult, error) {
 	selection.Limit = workflowstate.PageLimit
 
 	target, err := s.nativeAgentWorkTarget(config)
@@ -54,5 +54,5 @@ func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, se
 		}
 	}
 
-	return AgentWorkResult{Scope: selection.Selector.Extent, Authority: core.WorkStateAuthorityTickets, Excluded: preview.Excluded, EligibleCount: preview.Total, Tickets: tickets, SelectedQueue: queue, Message: fmt.Sprintf("Authority tickets; %s selection contains %d eligible tickets; %d slice-owned tickets excluded.", selection.Selector.Extent, preview.Total, preview.Excluded["slice_owned"])}, err
+	return AgentWorkResult{Scope: selection.Selector.Extent, Authority: workspaceconfig.WorkStateAuthorityTickets, Excluded: preview.Excluded, EligibleCount: preview.Total, Tickets: tickets, SelectedQueue: queue, Message: fmt.Sprintf("Authority tickets; %s selection contains %d eligible tickets; %d slice-owned tickets excluded.", selection.Selector.Extent, preview.Total, preview.Excluded["slice_owned"])}, err
 }

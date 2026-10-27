@@ -6,11 +6,12 @@ import (
 	"time"
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func TestEvaluateEvidenceReadinessAllowsCompleteEvidence(t *testing.T) {
 	result := EvaluateEvidenceReadiness(EvidenceReadinessRequest{
-		Config:    DefaultEvidenceStrategyConfig(),
+		Config:    workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklist(),
 		Execution: testEvidenceReadinessExecution(func(record *executioncore.Record) {
 			record.Status = executioncore.StatusSucceeded
@@ -62,19 +63,19 @@ func evidenceReadinessBlockerCases() []evidenceReadinessBlockerCase {
 }
 
 func missingEvidenceChecklistRequest() EvidenceReadinessRequest {
-	return EvidenceReadinessRequest{Config: DefaultEvidenceStrategyConfig()}
+	return EvidenceReadinessRequest{Config: workspaceconfig.DefaultEvidenceStrategyConfig()}
 }
 
 func malformedEvidenceChecklistRequest() EvidenceReadinessRequest {
 	return EvidenceReadinessRequest{
-		Config:         DefaultEvidenceStrategyConfig(),
+		Config:         workspaceconfig.DefaultEvidenceStrategyConfig(),
 		ChecklistError: "invalid Tests status: maybe",
 	}
 }
 
 func blockedEvidenceChecklistRequest() EvidenceReadinessRequest {
 	return EvidenceReadinessRequest{
-		Config: DefaultEvidenceStrategyConfig(),
+		Config: workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklistWith(func(checklist *EvidenceStrategyChecklist) {
 			item, _ := checklist.Item(EvidenceStrategyChecklistLabelTests)
 			item.Status = "blocked"
@@ -93,7 +94,7 @@ func failedEvidenceRuntimeRequest() EvidenceReadinessRequest {
 
 func failedEvidenceExecutionRequest(reason string) EvidenceReadinessRequest {
 	return EvidenceReadinessRequest{
-		Config:    DefaultEvidenceStrategyConfig(),
+		Config:    workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklist(),
 		Execution: testEvidenceReadinessExecution(func(record *executioncore.Record) {
 			record.Status = executioncore.StatusFailed
@@ -104,7 +105,7 @@ func failedEvidenceExecutionRequest(reason string) EvidenceReadinessRequest {
 
 func missingEvidenceSummaryRequest() EvidenceReadinessRequest {
 	return EvidenceReadinessRequest{
-		Config:    DefaultEvidenceStrategyConfig(),
+		Config:    workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklist(),
 		Result: testEvidenceReadinessResult(func(result *executioncore.Result) {
 			result.EvidenceSummary.Validation = ""
@@ -113,14 +114,14 @@ func missingEvidenceSummaryRequest() EvidenceReadinessRequest {
 }
 
 func TestEvaluateEvidenceReadinessAllowsDisabledOrOptionalStrategy(t *testing.T) {
-	for _, config := range []EvidenceStrategyConfig{
-		testEvidenceReadinessConfig(func(config *EvidenceStrategyConfig) {
+	for _, config := range []workspaceconfig.EvidenceStrategyConfig{
+		testEvidenceReadinessConfig(func(config *workspaceconfig.EvidenceStrategyConfig) {
 			config.Enabled = false
 		}),
-		testEvidenceReadinessConfig(func(config *EvidenceStrategyConfig) {
-			config.TicketChecklist = EvidenceTicketChecklistPolicyOptional
+		testEvidenceReadinessConfig(func(config *workspaceconfig.EvidenceStrategyConfig) {
+			config.TicketChecklist = workspaceconfig.EvidenceTicketChecklistPolicyOptional
 		}),
-		testEvidenceReadinessConfig(func(config *EvidenceStrategyConfig) {
+		testEvidenceReadinessConfig(func(config *workspaceconfig.EvidenceStrategyConfig) {
 			config.StrictReadyForReview = false
 		}),
 	} {
@@ -133,7 +134,7 @@ func TestEvaluateEvidenceReadinessAllowsDisabledOrOptionalStrategy(t *testing.T)
 
 func TestEvaluateEvidenceReadinessRequiresFinalChecklistEvidence(t *testing.T) {
 	result := EvaluateEvidenceReadiness(EvidenceReadinessRequest{
-		Config: DefaultEvidenceStrategyConfig(),
+		Config: workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklistWith(func(checklist *EvidenceStrategyChecklist) {
 			item, _ := checklist.Item(EvidenceStrategyChecklistLabelGherkin)
 			item.Checked = false
@@ -152,7 +153,7 @@ func TestEvaluateEvidenceReadinessRequiresFinalChecklistEvidence(t *testing.T) {
 
 func TestEvaluateEvidenceReadinessRejectsNotApplicableGherkinWhenActiveApplies(t *testing.T) {
 	result := EvaluateEvidenceReadiness(EvidenceReadinessRequest{
-		Config: DefaultEvidenceStrategyConfig(),
+		Config: workspaceconfig.DefaultEvidenceStrategyConfig(),
 		Checklist: testCompleteEvidenceReadinessChecklistWith(func(checklist *EvidenceStrategyChecklist) {
 			item, _ := checklist.Item(EvidenceStrategyChecklistLabelGherkin)
 			item.Checked = true
@@ -161,7 +162,7 @@ func TestEvaluateEvidenceReadinessRejectsNotApplicableGherkinWhenActiveApplies(t
 			checklist.Items[item.Label] = item
 		}),
 		Gherkin: EvidenceGherkinContext{
-			Policy:       EvidenceGherkinPolicyActiveWhenApplicable,
+			Policy:       workspaceconfig.EvidenceGherkinPolicyActiveWhenApplicable,
 			Active:       true,
 			Applies:      true,
 			RequiredPath: ".chr/default/acceptance/checkout.feature",
@@ -220,8 +221,8 @@ func testCompleteEvidenceReadinessChecklistWith(edit func(*EvidenceStrategyCheck
 	return &checklist
 }
 
-func testEvidenceReadinessConfig(edit func(*EvidenceStrategyConfig)) EvidenceStrategyConfig {
-	config := DefaultEvidenceStrategyConfig()
+func testEvidenceReadinessConfig(edit func(*workspaceconfig.EvidenceStrategyConfig)) workspaceconfig.EvidenceStrategyConfig {
+	config := workspaceconfig.DefaultEvidenceStrategyConfig()
 	edit(&config)
 
 	return config

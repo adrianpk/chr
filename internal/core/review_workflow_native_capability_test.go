@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type nativePolicyFixture struct {
@@ -58,10 +59,10 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 
 	pr := WorkflowPullRequestSnapshot{URL: repository + marker + "7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(publication.SourceRef, "refs/heads/"), BaseBranch: "dev", HeadCommit: publication.Git.SourceCommit, BaseCommit: publication.Git.BaseCommit, State: "open"}
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 	policy := WorkflowNativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: contenthash.Sum([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
 	policy.ReviewMode = workflowstate.ReviewHuman
-	result := nativeCapabilityFixture{adapter: adapter, runner: runner, request: WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: publication}, policy: &nativePolicyFixture{policy: policy}, git: &nativeInspectorFixture{WorkflowGitPublicationInspector: NewWorkflowGitPublisher(repository, fixture.remote)}, remote: fixture.remote}
+	result := nativeCapabilityFixture{adapter: adapter, runner: runner, request: WorkflowNativeCapabilityRequest{Config: workspaceconfig.WorkIntegrationConfig{PublicationProfile: workspaceconfig.WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: publication}, policy: &nativePolicyFixture{policy: policy}, git: &nativeInspectorFixture{WorkflowGitPublicationInspector: NewWorkflowGitPublisher(repository, fixture.remote)}, remote: fixture.remote}
 	result.prefix = nativePolicyCommand(t, result, "")
 
 	resolvedReview, err := adapter.resolve(pr.URL)
@@ -161,7 +162,9 @@ func TestNativeCapabilityDenials(t *testing.T) {
 		name   string
 		change func(*nativeCapabilityFixture)
 	}{
-		{"disabled", func(f *nativeCapabilityFixture) { f.request.Config.PublicationProfile = WorkflowPublicationDisabled }},
+		{"disabled", func(f *nativeCapabilityFixture) {
+			f.request.Config.PublicationProfile = workspaceconfig.WorkflowPublicationDisabled
+		}},
 		{"human_source", func(f *nativeCapabilityFixture) { f.policy.policy.SourceRewriteAuthorized = false }},
 		{"ownership_changed", func(f *nativeCapabilityFixture) { f.policy.policy.OwnershipRevision = "changed" }},
 		{"fork_source", func(f *nativeCapabilityFixture) {

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowNativeSubmission extends the common journal with the exact Git intent.
@@ -126,5 +127,5 @@ func (s *WorkflowStore) RetainWorkflowNativeSubmission(ctx context.Context, requ
 func workflowNativeSubmissionIntent(candidate WorkflowIntegrationCandidate, run workflowInvocationFile, entry WorkflowIntegrationEntry) WorkflowNativeSubmission {
 	now := time.Now().UTC()
 
-	return WorkflowNativeSubmission{WorkflowNativeRecordBinding: candidate.Native.WorkflowNativeRecordBinding, CandidateHash: candidate.Native.CandidateHash, CandidateRef: *entry.CandidateRef, ClaimGeneration: entry.ClaimGeneration, Mechanism: WorkflowPublicationGitAtomicDualRef, ReviewGrantRef: workflowstate.EvidenceRef{Path: run.Review.ResultRef, Hash: run.Review.ResultHash}, FastForwardProofRef: candidate.Native.HistoryManifestRef, IntentTime: now, DispatchState: "not_started", ApplicationState: "not_started", ObservationDeadline: now.Add(3 * time.Minute)}
+	return WorkflowNativeSubmission{WorkflowNativeRecordBinding: candidate.Native.WorkflowNativeRecordBinding, CandidateHash: candidate.Native.CandidateHash, CandidateRef: *entry.CandidateRef, ClaimGeneration: entry.ClaimGeneration, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, ReviewGrantRef: workflowstate.EvidenceRef{Path: run.Review.ResultRef, Hash: run.Review.ResultHash}, FastForwardProofRef: candidate.Native.HistoryManifestRef, IntentTime: now, DispatchState: "not_started", ApplicationState: "not_started", ObservationDeadline: now.Add(3 * time.Minute)}
 }

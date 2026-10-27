@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // The forge metadata is controlled; publication uses the production atomic Git
@@ -121,7 +122,7 @@ func (p *workflowAssuranceProvider) ObserveWorkflowNativePublication(ctx context
 	}
 
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
-	forge := nativeCapabilityFixture{adapter: NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner), runner: runner, request: WorkflowNativeCapabilityRequest{PullRequest: pr}}
+	forge := nativeCapabilityFixture{adapter: NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner), runner: runner, request: WorkflowNativeCapabilityRequest{PullRequest: pr}}
 	forge.prefix = nativePolicyCommand(p.t, forge, "")
 	setNativePRFixture(p.t, forge, pr)
 

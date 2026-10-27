@@ -6,9 +6,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Native workflow actions select extents or operate on displayed authorization.
@@ -81,7 +81,7 @@ func (m *Model) planNativeWorkAction(action WorkActionID) bool {
 }
 
 func (m *Model) nativeWorkAlias(action WorkActionID) WorkActionID {
-	if m.observability.Authority != core.WorkStateAuthorityTickets {
+	if m.observability.Authority != workspaceconfig.WorkStateAuthorityTickets {
 		return action
 	}
 

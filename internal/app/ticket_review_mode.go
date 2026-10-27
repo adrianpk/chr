@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (factory commandFactory) ticketReviewModeCommand() *cli.Command {
@@ -81,7 +82,7 @@ func (factory commandFactory) runTicketReviewModeStatus(ctx context.Context, cmd
 		return err
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
@@ -108,7 +109,7 @@ func (factory commandFactory) runTicketReviewModeDiagnostics(ctx context.Context
 		return err
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
@@ -155,7 +156,7 @@ func printTicketReviewModeDiagnostics(stdout io.Writer, projectContext commandPr
 	return printTicketReviewModeStatusLines(stdout, lines)
 }
 
-func printTicketReviewModeStatus(stdout io.Writer, projectContext commandProjectContext, config core.ReviewWorkflowConfig, dryRun bool) error {
+func printTicketReviewModeStatus(stdout io.Writer, projectContext commandProjectContext, config workspaceconfig.ReviewWorkflowConfig, dryRun bool) error {
 	status := "ready"
 
 	err := core.ValidateReviewWorkflowConfig(config)

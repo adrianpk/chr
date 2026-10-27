@@ -13,16 +13,17 @@ import (
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type workflowUpgradeJournal struct {
-	Schema      int                   `json:"schema"`
-	ProjectID   string                `json:"project_id"`
-	Namespace   string                `json:"namespace"`
-	RequestHash string                `json:"request_hash"`
-	Prior       WorkflowConfiguration `json:"prior"`
-	Current     WorkflowConfiguration `json:"current"`
-	Checksum    string                `json:"checksum"`
+	Schema      int                                   `json:"schema"`
+	ProjectID   string                                `json:"project_id"`
+	Namespace   string                                `json:"namespace"`
+	RequestHash string                                `json:"request_hash"`
+	Prior       workspaceconfig.WorkflowConfiguration `json:"prior"`
+	Current     workspaceconfig.WorkflowConfiguration `json:"current"`
+	Checksum    string                                `json:"checksum"`
 }
 
 func (s *WorkflowStore) upgradeWorkflowConfiguration(ctx context.Context, opts WorkflowUpgradeOptions) (WorkflowUpgradeResult, error) {
@@ -83,7 +84,7 @@ func (s *WorkflowStore) prepareWorkflowUpgrade(ctx context.Context, opts Workflo
 		return journal, image, errors.Join(err, imageErr)
 	}
 
-	config, err := parseWorkflowConfig(data)
+	config, err := workspaceconfig.Parse(data)
 	if err != nil {
 		return workflowUpgradeJournal{}, nil, err
 	}
@@ -99,27 +100,27 @@ func (s *WorkflowStore) prepareWorkflowUpgrade(ctx context.Context, opts Workflo
 	return s.newWorkflowUpgradeJournal(data, config, opts, hash)
 }
 
-func (s *WorkflowStore) newWorkflowUpgradeJournal(data []byte, config WorkspaceConfig, opts WorkflowUpgradeOptions, hash string) (workflowUpgradeJournal, []byte, error) {
-	journal := workflowUpgradeJournal{Schema: 1, ProjectID: s.projectID, Namespace: s.layout.Namespace(), RequestHash: hash, Prior: effectiveWorkflowConfiguration(config, "")}
+func (s *WorkflowStore) newWorkflowUpgradeJournal(data []byte, config workspaceconfig.Config, opts WorkflowUpgradeOptions, hash string) (workflowUpgradeJournal, []byte, error) {
+	journal := workflowUpgradeJournal{Schema: 1, ProjectID: s.projectID, Namespace: s.layout.Namespace(), RequestHash: hash, Prior: workspaceconfig.EffectiveWorkflowConfiguration(config, "")}
 
 	image, err := workflowUpgradeConfig(data, journal.Prior, opts)
 	if err != nil {
 		return journal, nil, err
 	}
 
-	current, err := parseWorkflowConfig(image)
+	current, err := workspaceconfig.Parse(image)
 	if err != nil {
 		return journal, nil, err
 	}
 
-	journal.Current = effectiveWorkflowConfiguration(current, "")
+	journal.Current = workspaceconfig.EffectiveWorkflowConfiguration(current, "")
 
 	journal.Checksum, err = workflowUpgradeJournalHash(journal)
 	if err != nil {
 		return journal, nil, err
 	}
 
-	return journal, image, s.writeWorkflowUpgradeFile(workflowUpgradePending, journal)
+	return journal, image, s.writeWorkflowUpgradeFile(workspaceconfig.WorkflowUpgradePending, journal)
 }
 
 func (s *WorkflowStore) preflightWorkflowUpgradeAdoption(ctx context.Context, opts WorkflowUpgradeOptions) error {
@@ -166,7 +167,7 @@ func workflowUpgradeJournalImage(journal workflowUpgradeJournal, data []byte, op
 }
 
 func (s *WorkflowStore) retainedWorkflowUpgrade(hash string) (workflowUpgradeJournal, bool, error) {
-	data, err := s.readWorkflowUpgradeFile(workflowUpgradePending)
+	data, err := s.readWorkflowUpgradeFile(workspaceconfig.WorkflowUpgradePending)
 	if errors.Is(err, os.ErrNotExist) {
 		data, err = s.readWorkflowUpgradeFile("workflow-upgrades/" + hash + ".json")
 	}
@@ -212,13 +213,13 @@ func validateWorkflowUpgradePolicyPair(journal workflowUpgradeJournal) error {
 	return nil
 }
 
-func validWorkflowUpgradeConfiguration(config WorkflowConfiguration) bool {
+func validWorkflowUpgradeConfiguration(config workspaceconfig.WorkflowConfiguration) bool {
 	if len(config.Values) < 13 || len(config.Values) > 15 {
 		return false
 	}
 
 	allowed := map[string]bool{}
-	for _, value := range effectiveWorkflowConfiguration(defaultWorkspaceConfig(), "").Values {
+	for _, value := range workspaceconfig.EffectiveWorkflowConfiguration(workspaceconfig.Default(), "").Values {
 		allowed[value.Key] = true
 	}
 
@@ -255,13 +256,13 @@ func workflowUpgradeJournalHash(journal workflowUpgradeJournal) (string, error) 
 	return contenthash.Sum(data), err
 }
 
-func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) error {
-	config, err := parseWorkflowConfig(data)
+func checkWorkflowUpgradePolicy(data []byte, expected workspaceconfig.WorkflowConfiguration) error {
+	config, err := workspaceconfig.Parse(data)
 	if err != nil {
 		return err
 	}
 
-	configuration := effectiveWorkflowConfiguration(config, "")
+	configuration := workspaceconfig.EffectiveWorkflowConfiguration(config, "")
 
 	configuration, err = workflowUpgradeCompatibleConfiguration(config, configuration, expected)
 	if err != nil {
@@ -281,12 +282,12 @@ func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) err
 	return err
 }
 
-func withoutWorkflowPublicationProfile(values []WorkflowConfigurationValue) []WorkflowConfigurationValue {
+func withoutWorkflowPublicationProfile(values []workspaceconfig.WorkflowConfigurationValue) []workspaceconfig.WorkflowConfigurationValue {
 	return withoutWorkflowConfigurationKey(values, "work.integration.publication_profile")
 }
 
-func withoutWorkflowConfigurationKey(values []WorkflowConfigurationValue, key string) []WorkflowConfigurationValue {
-	result := make([]WorkflowConfigurationValue, 0, len(values))
+func withoutWorkflowConfigurationKey(values []workspaceconfig.WorkflowConfigurationValue, key string) []workspaceconfig.WorkflowConfigurationValue {
+	result := make([]workspaceconfig.WorkflowConfigurationValue, 0, len(values))
 	for _, value := range values {
 		if value.Key != key {
 			result = append(result, value)
@@ -296,8 +297,8 @@ func withoutWorkflowConfigurationKey(values []WorkflowConfigurationValue, key st
 	return result
 }
 
-func workflowUpgradeCompatibleConfiguration(config WorkspaceConfig, configuration, expected WorkflowConfiguration) (WorkflowConfiguration, error) {
-	defaults := defaultWorkspaceConfig().Work.Integration
+func workflowUpgradeCompatibleConfiguration(config workspaceconfig.Config, configuration, expected workspaceconfig.WorkflowConfiguration) (workspaceconfig.WorkflowConfiguration, error) {
+	defaults := workspaceconfig.Default().Work.Integration
 
 	optional := []struct {
 		key       string
@@ -307,7 +308,7 @@ func workflowUpgradeCompatibleConfiguration(config WorkspaceConfig, configuratio
 		{"work.integration.max_prepared_per_target", config.Work.Integration.MaxPreparedPerTarget == defaults.MaxPreparedPerTarget},
 	}
 	for _, field := range optional {
-		if slices.ContainsFunc(expected.Values, func(value WorkflowConfigurationValue) bool { return value.Key == field.key }) {
+		if slices.ContainsFunc(expected.Values, func(value workspaceconfig.WorkflowConfigurationValue) bool { return value.Key == field.key }) {
 			continue
 		}
 		// An older immutable snapshot lacks these options. Only their established
@@ -369,7 +370,7 @@ func (s *WorkflowStore) finishWorkflowUpgrade(journal workflowUpgradeJournal, im
 }
 
 func (s *WorkflowStore) removeWorkflowUpgradePending() error {
-	pending, err := workspacecore.ConfigPath(s.layout.ProjectDir(), workflowUpgradePending)
+	pending, err := workspacecore.ConfigPath(s.layout.ProjectDir(), workspaceconfig.WorkflowUpgradePending)
 	if err != nil {
 		return err
 	}
@@ -406,7 +407,7 @@ func (s *WorkflowStore) writeWorkflowUpgradeFile(relative string, value workflow
 	}
 
 	stage := 0
-	if relative != workflowUpgradePending {
+	if relative != workspaceconfig.WorkflowUpgradePending {
 		stage = 1
 	}
 

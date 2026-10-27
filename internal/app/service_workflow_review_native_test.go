@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type serviceNativeReviewFixture struct {
@@ -17,14 +18,14 @@ type serviceNativeReviewFixture struct {
 
 func (p *serviceNativeReviewFixture) WorkflowIntegrationCapability(ctx context.Context, pr core.WorkflowPullRequestSnapshot, method string) (core.WorkflowPublicationCapability, error) {
 	capability, err := p.serviceWorkflowPreparationFixture.WorkflowIntegrationCapability(ctx, pr, method)
-	capability.Mechanism = core.WorkflowPublicationGitAtomicDualRef
+	capability.Mechanism = workspaceconfig.WorkflowPublicationGitAtomicDualRef
 
 	return capability, err
 }
 
 func (p *serviceNativeReviewFixture) WorkflowPreparedNativeCapability(_ context.Context, pr core.WorkflowPullRequestSnapshot, proof core.WorkflowIntegrationProof) (core.WorkflowNativeCapability, error) {
 	capability := core.WorkflowNativeCapability{
-		WorkflowPublicationCapability: core.WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: core.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
+		WorkflowPublicationCapability: core.WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
 		SourceRef:                     "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "service-review/v1",
 		OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit,
 		PolicyFingerprint: serviceNativeReviewHash([]byte(p.policy)), ServerCapabilityFingerprint: serviceNativeReviewHash([]byte("server")), CredentialIdentityFingerprint: serviceNativeReviewHash([]byte("publisher")),

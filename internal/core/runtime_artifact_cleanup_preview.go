@@ -10,6 +10,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // RuntimeArtifactCleanupPreview describes a package boundary value.
@@ -42,7 +43,7 @@ func (s RuntimeArtifactCleanupPreviewService) Preview(
 	projectDir string,
 	projectID string,
 ) (RuntimeArtifactCleanupPreview, error) {
-	config, err := LoadWorkspaceConfig(projectDir)
+	config, err := workspaceconfig.Load(projectDir)
 	if err != nil {
 		return RuntimeArtifactCleanupPreview{}, err
 	}

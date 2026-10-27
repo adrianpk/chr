@@ -8,10 +8,11 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s service) authoringWorkContract(record core.WorkflowRecord, title string, request AuthoringWorkRequest, source authoringcore.ArtifactObservation) (core.WorkflowRecord, error) {
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.WorkflowRecord{}, err
 	}

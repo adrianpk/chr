@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type telegramHarnessPrepared struct {
-	Change    core.HarnessSelectionChangeRequest `json:"change"`
-	Preview   string                             `json:"preview"`
-	ExpiresAt time.Time                          `json:"expires_at"`
+	Change    workspaceconfig.HarnessSelectionChangeRequest `json:"change"`
+	Preview   string                                        `json:"preview"`
+	ExpiresAt time.Time                                     `json:"expires_at"`
 }
 
 func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations telegramHarnessService, change telegramHarnessChange) error {
@@ -79,7 +79,7 @@ func prepareTelegramHarnessChange(status HarnessSelectionStatus, binding workflo
 		return telegramHarnessPrepared{}, err
 	}
 
-	change := core.HarnessSelectionChangeRequest{Binding: binding, ProjectRef: status.Snapshot.ProjectRef, ExpectedRevision: status.Snapshot.Revision, Worker: choices.Worker, Generation: choices.Generation}
+	change := workspaceconfig.HarnessSelectionChangeRequest{Binding: binding, ProjectRef: status.Snapshot.ProjectRef, ExpectedRevision: status.Snapshot.Revision, Worker: choices.Worker, Generation: choices.Generation}
 	preview := fmt.Sprintf("Change harness defaults for %s?\nWorker profile: %s\nGeneration profile: %s\nNew operations only. Running, paused and resumed work keeps its binding. No model call or private setup is performed.", change.ProjectRef, worker, generation)
 
 	return telegramHarnessPrepared{Change: change, Preview: telegramcore.BoundReceiverText(preview), ExpiresAt: time.Now().Add(10 * time.Minute)}, nil

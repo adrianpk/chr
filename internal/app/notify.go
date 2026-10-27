@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 var notifyTelegramSender = telegramcore.NewSender(http.DefaultClient)
@@ -243,7 +244,7 @@ func (factory commandFactory) runNotifyTelegramTest(ctx context.Context, cmd *cl
 func (factory commandFactory) loadNotifyProjectConfig(ctx context.Context, cmd *cli.Command) (notifyProjectConfig, error) {
 	env, err := newUserEnvironmentFromCommand(cmd)
 	if err != nil {
-		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: core.WorkspaceConfig{}}, err
+		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: workspaceconfig.Config{}}, err
 	}
 
 	projectContext, err := newCommandProjectContextResolver(env, factory.deps.assetsFS).Resolve(ctx, commandProjectContextOptions{
@@ -252,18 +253,18 @@ func (factory commandFactory) loadNotifyProjectConfig(ctx context.Context, cmd *
 		AllowCurrentDirectory: true,
 	})
 	if err != nil {
-		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: core.WorkspaceConfig{}}, err
+		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: workspaceconfig.Config{}}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(projectContext.ProjectDir)
 	if err != nil {
-		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: core.WorkspaceConfig{}}, err
+		return notifyProjectConfig{Environment: nil, Project: commandProjectContext{}, Config: workspaceconfig.Config{}}, err
 	}
 
 	return notifyProjectConfig{Environment: env, Project: projectContext, Config: config}, nil
 }
 
-func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, config core.WorkspaceConfig) error {
+func printNotifyStatus(stdout io.Writer, projectContext commandProjectContext, config workspaceconfig.Config) error {
 	telegram := config.Notifications.Telegram
 	telegramStatus := "disabled"
 
@@ -385,5 +386,5 @@ func printNotifyLines(stdout io.Writer, lines []string) error {
 type notifyProjectConfig struct {
 	Environment core.UserEnvironment
 	Project     commandProjectContext
-	Config      core.WorkspaceConfig
+	Config      workspaceconfig.Config
 }

@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowNativeReviewInput binds source rewrite, history and publication
@@ -16,12 +17,12 @@ type WorkflowNativeReviewInput struct {
 }
 
 func (s *WorkflowStore) checkWorkflowSourceReviewProfile() error {
-	config, err := LoadWorkspaceConfig(s.layout.ProjectDir())
+	config, err := workspaceconfig.Load(s.layout.ProjectDir())
 	if err != nil {
 		return err
 	}
 
-	if config.Work.Integration.PublicationProfile == WorkflowPublicationGitAtomicDualRef {
+	if config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return ErrWorkflowAtomicGuard
 	}
 

@@ -6,15 +6,15 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ObservabilityView summarizes execution, loop, and runtime observability.
 type ObservabilityView struct {
-	Authority                core.WorkStateAuthority
+	Authority                workspaceconfig.WorkStateAuthority
 	WorkflowPage             WorkflowPageView
 	DaemonStatus             string
 	DaemonPID                int

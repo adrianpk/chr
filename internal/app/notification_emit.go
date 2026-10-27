@@ -12,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func emitTicketBlockedNotification(
@@ -117,7 +118,7 @@ func emitWorkflowNotification(
 	event notifycore.Event,
 	assetsFS fs.FS,
 ) error {
-	config, err := core.LoadWorkspaceConfig(projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}

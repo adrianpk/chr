@@ -12,10 +12,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (factory commandFactory) workCommand() *cli.Command {
@@ -257,7 +257,7 @@ func (factory commandFactory) workTicketAction(ctx context.Context, cmd *cli.Com
 		return err
 	}
 
-	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+	if workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTickets {
 		return (workWorkflowCLI{stdout: factory.io.Stdout}).extent(ctx, cmd, operations, "ticket")
 	}
 
@@ -741,7 +741,7 @@ func agentWorkAuthorityLines(result AgentWorkResult) []string {
 	}
 
 	scope := "unadopted_legacy"
-	if result.Authority == core.WorkStateAuthorityTickets {
+	if result.Authority == workspaceconfig.WorkStateAuthorityTickets {
 		scope = "loose"
 	}
 

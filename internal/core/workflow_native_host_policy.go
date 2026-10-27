@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReadWorkflowNativePolicy combines a private target certificate with retained
@@ -52,8 +53,8 @@ func (adapter *WorkflowNativeReviewAdapter) nativePublisher(ctx context.Context)
 		return run, owner, WorkflowNativePublisherProfile{}, workflowstate.ErrConflict
 	}
 
-	config, err := LoadWorkspaceConfig(owner.layout.ProjectDir())
-	if err != nil || config.Work.Integration.PublicationProfile != WorkflowPublicationGitAtomicDualRef {
+	config, err := workspaceconfig.Load(owner.layout.ProjectDir())
+	if err != nil || config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return run, owner, WorkflowNativePublisherProfile{}, ErrWorkflowAtomicGuard
 	}
 

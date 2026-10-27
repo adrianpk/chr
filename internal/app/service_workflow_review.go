@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReviewWorkflowSlice uses the shared policy, evidence and supervised role path.
@@ -48,12 +49,12 @@ func (s service) workflowReviewDependencies(id string) (*core.WorkflowStore, cor
 	}
 
 	if remote, ok := provider.(core.RemoteReviewAdapter); ok {
-		config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+		config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		if config.Work.Integration.PublicationProfile == core.WorkflowPublicationGitAtomicDualRef {
+		if config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 			provider = core.NewWorkflowNativeReviewAdapter(remote, store, id, s.env.ConfigDir())
 		}
 	}

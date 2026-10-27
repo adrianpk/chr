@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Omitted fields preserve the historical v1 request digest. Loading and replay
@@ -27,7 +28,7 @@ func TestHarnessBindingLegacy(t *testing.T) {
 
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "harnesses:\n  worker: pi-unavailable\n")
 
-	request.ResolveHarness = func(context.Context, WorkspaceConfig) (WorkflowHarnessResolution, error) {
+	request.ResolveHarness = func(context.Context, workspaceconfig.Config) (WorkflowHarnessResolution, error) {
 		t.Fatal("v1 retry resolved a new profile")
 
 		return WorkflowHarnessResolution{}, nil

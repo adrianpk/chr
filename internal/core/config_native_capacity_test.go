@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestNativePreparedSnapshot accepts existing immutable upgrade records with
@@ -31,12 +32,12 @@ func nativePreparedSnapshot(t *testing.T, keys []string) {
 
 	data := []byte("review:\n  mode: human_review\n")
 
-	config, err := parseWorkflowConfig(data)
+	config, err := workspaceconfig.Parse(data)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	prior := effectiveWorkflowConfiguration(config, "")
+	prior := workspaceconfig.EffectiveWorkflowConfiguration(config, "")
 	for _, key := range keys {
 		prior.Values = withoutWorkflowConfigurationKey(prior.Values, key)
 	}

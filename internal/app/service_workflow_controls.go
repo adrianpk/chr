@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -67,7 +68,7 @@ func (s service) PreviewWorkExtent(ctx context.Context, request workflowstate.Pr
 	return result, err
 }
 
-func (s service) previewWorkTarget(config core.WorkspaceConfig, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
+func (s service) previewWorkTarget(config workspaceconfig.Config, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
 	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
 
 	reader, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetReader)
@@ -78,10 +79,10 @@ func (s service) previewWorkTarget(config core.WorkspaceConfig, identity workflo
 	return reader.ReadWorkflowTarget(s.ctx, core.WorkflowTargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
 }
 
-func (s service) workflowExtentConfig() (core.WorkspaceConfig, error) {
+func (s service) workflowExtentConfig() (workspaceconfig.Config, error) {
 	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
-	if err == nil && core.WorkAuthority(config.Work) != core.WorkStateAuthorityTickets {
-		err = fmt.Errorf("explicit workflow extents require tickets authority; current authority is %s", core.WorkAuthority(config.Work))
+	if err == nil && workspaceconfig.WorkAuthority(config.Work) != workspaceconfig.WorkStateAuthorityTickets {
+		err = fmt.Errorf("explicit workflow extents require tickets authority; current authority is %s", workspaceconfig.WorkAuthority(config.Work))
 	}
 
 	return config, err

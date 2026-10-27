@@ -10,6 +10,8 @@ import (
 	"path"
 	"strconv"
 	"strings"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReviewProvider defines a package boundary type.
@@ -50,7 +52,7 @@ type ReviewProviderReference struct {
 
 // ReviewProviderDiagnosticOptions describes a package boundary value.
 type ReviewProviderDiagnosticOptions struct {
-	Config ReviewProviderConfig
+	Config workspaceconfig.ReviewProviderConfig
 	URL    string
 	DryRun bool
 	Runner ReviewProviderDiagnosticRunner
@@ -174,7 +176,7 @@ func RunReviewProviderDiagnostics(ctx context.Context, opts ReviewProviderDiagno
 	return diagnostic
 }
 
-func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config ReviewProviderTargetConfig, dryRun bool) {
+func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, dryRun bool) {
 	if !diagnostic.checkProviderEnabled(reference, config) {
 		return
 	}
@@ -190,7 +192,7 @@ func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(ctx context.Contex
 	diagnostic.checkProviderPullRequestRead(ctx, runner, reference, config, dryRun)
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(reference ReviewProviderReference, config ReviewProviderTargetConfig) bool {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig) bool {
 	if !config.Enabled {
 		diagnostic.addCheck("provider_enabled", ReviewProviderDiagnosticCheckFail, "provider_disabled", string(reference.Provider))
 
@@ -202,7 +204,7 @@ func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(reference Revie
 	return true
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderCLI(runner ReviewProviderDiagnosticRunner, config ReviewProviderTargetConfig) bool {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderCLI(runner ReviewProviderDiagnosticRunner, config workspaceconfig.ReviewProviderTargetConfig) bool {
 	if strings.TrimSpace(config.CLI) == "" {
 		diagnostic.addCheck("cli_available", ReviewProviderDiagnosticCheckFail, "missing_cli_config", "")
 
@@ -221,7 +223,7 @@ func (diagnostic *ReviewProviderDiagnostic) checkProviderCLI(runner ReviewProvid
 	return true
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderToken(runner ReviewProviderDiagnosticRunner, config ReviewProviderTargetConfig) bool {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderToken(runner ReviewProviderDiagnosticRunner, config workspaceconfig.ReviewProviderTargetConfig) bool {
 	tokenEnv := strings.TrimSpace(config.TokenEnv)
 	if tokenEnv == "" {
 		diagnostic.addCheck("token_available", ReviewProviderDiagnosticCheckSkipped, "token_env_not_configured", "")
@@ -240,7 +242,7 @@ func (diagnostic *ReviewProviderDiagnostic) checkProviderToken(runner ReviewProv
 	return true
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderPullRequestRead(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config ReviewProviderTargetConfig, dryRun bool) {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderPullRequestRead(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, dryRun bool) {
 	if dryRun {
 		diagnostic.addCheck("pr_readable", ReviewProviderDiagnosticCheckSkipped, "dry_run", reference.URL)
 
@@ -265,14 +267,14 @@ func (diagnostic *ReviewProviderDiagnostic) addCheck(name, status, reason, detai
 	})
 }
 
-func reviewProviderTargetConfig(config ReviewProviderConfig, provider ReviewProvider) (ReviewProviderTargetConfig, bool) {
+func reviewProviderTargetConfig(config workspaceconfig.ReviewProviderConfig, provider ReviewProvider) (workspaceconfig.ReviewProviderTargetConfig, bool) {
 	switch provider {
 	case ReviewProviderForgejo:
 		return config.Forgejo, true
 	case ReviewProviderGitHub:
 		return config.GitHub, true
 	default:
-		return ReviewProviderTargetConfig{}, false
+		return workspaceconfig.ReviewProviderTargetConfig{}, false
 	}
 }
 

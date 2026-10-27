@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -115,7 +115,7 @@ func TestWebDashBrowser(t *testing.T) {
 func dashBrowserObservation(state string) WorkObservation {
 	at := time.Date(2026, 10, 18, 12, 0, 0, 0, time.UTC)
 
-	observed := WorkObservation{Authority: core.WorkStateAuthorityTickets, Readiness: executioncore.WorkReadinessReport{Status: executioncore.WorkReadinessStatusReady}, Excluded: map[string]int{}}
+	observed := WorkObservation{Authority: workspaceconfig.WorkStateAuthorityTickets, Readiness: executioncore.WorkReadinessReport{Status: executioncore.WorkReadinessStatusReady}, Excluded: map[string]int{}}
 	if state == "queued" {
 		observed.Eligible = 2
 		observed.Queue = []WorkQueueItem{{Key: "PRJ-1", Title: "Validate API", Scope: "Billing", Readiness: "ready"}, {Key: "PRJ-2", Title: "Apply metadata", Scope: "Accounts", Readiness: "ready"}}

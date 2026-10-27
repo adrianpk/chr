@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // VerifyWorkflowSliceIntegration checks provider and remote Git delivery facts.
@@ -29,7 +30,7 @@ func (s service) VerifyWorkflowSliceIntegration(ctx context.Context, id, method 
 func (s service) workflowIntegrationProvider() (core.WorkflowPullRequestProvider, error) {
 	provider := s.workflowPullRequests
 	if provider == nil {
-		config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+		config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 		if err != nil {
 			return nil, err
 		}

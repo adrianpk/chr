@@ -10,15 +10,15 @@ import (
 	"runtime"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
 type harnessSelectionInput struct {
-	Config    core.WorkspaceConfig
+	Config    workspaceconfig.Config
 	Name      string
 	Role      harnesscore.Role
 	Action    string
@@ -40,7 +40,7 @@ type resolvedHarnessSelection struct {
 // ResolveHarnessSelection observes one coherent persisted role selection.
 // Profile setup is explicit; inspection never installs or authenticates a driver.
 func (s service) ResolveHarnessSelection(ctx context.Context, role harnesscore.Role, action string) (harnesscore.Selection, error) {
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return harnesscore.Selection{}, err
 	}
@@ -50,7 +50,7 @@ func (s service) ResolveHarnessSelection(ctx context.Context, role harnesscore.R
 	return resolved.View, err
 }
 
-func (s service) resolveHarnessSelection(ctx context.Context, config core.WorkspaceConfig, role harnesscore.Role, action string) (resolvedHarnessSelection, error) {
+func (s service) resolveHarnessSelection(ctx context.Context, config workspaceconfig.Config, role harnesscore.Role, action string) (resolvedHarnessSelection, error) {
 	if err := ctx.Err(); err != nil {
 		return resolvedHarnessSelection{}, err
 	}
@@ -244,7 +244,7 @@ func privateHarnessReference(configDir, reference string) bool {
 	return err == nil && info.Mode().IsRegular() && info.Mode().Perm()&0o077 == 0
 }
 
-func legacyHarnessSelection(ctx context.Context, config core.WorkspaceConfig, role harnesscore.Role, action string) (resolvedHarnessSelection, error) {
+func legacyHarnessSelection(ctx context.Context, config workspaceconfig.Config, role harnesscore.Role, action string) (resolvedHarnessSelection, error) {
 	backend, err := legacyHarnessBackend(role, action)
 
 	view := harnesscore.Selection{

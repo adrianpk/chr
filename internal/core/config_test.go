@@ -12,12 +12,13 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 	dir := t.TempDir()
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
@@ -32,20 +33,20 @@ func TestLoadWorkspaceConfigUsesDefaultsWhenMissing(t *testing.T) {
 		t.Fatalf("Notifications = %#v, want %#v", config.Notifications, notifycore.DefaultConfig())
 	}
 
-	if config.Review != DefaultReviewWorkflowConfig() {
-		t.Fatalf("Review = %#v, want %#v", config.Review, DefaultReviewWorkflowConfig())
+	if config.Review != workspaceconfig.DefaultReviewWorkflowConfig() {
+		t.Fatalf("Review = %#v, want %#v", config.Review, workspaceconfig.DefaultReviewWorkflowConfig())
 	}
 
-	if config.Work != DefaultWorkConfig() {
-		t.Fatalf("Work = %#v, want %#v", config.Work, DefaultWorkConfig())
+	if config.Work != workspaceconfig.DefaultWorkConfig() {
+		t.Fatalf("Work = %#v, want %#v", config.Work, workspaceconfig.DefaultWorkConfig())
 	}
 
-	if config.Evidence != DefaultEvidenceConfig() {
-		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, DefaultEvidenceConfig())
+	if config.Evidence != workspaceconfig.DefaultEvidenceConfig() {
+		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, workspaceconfig.DefaultEvidenceConfig())
 	}
 
-	if !reflect.DeepEqual(config.Web, DefaultWebConfig()) {
-		t.Fatalf("Web = %#v, want %#v", config.Web, DefaultWebConfig())
+	if !reflect.DeepEqual(config.Web, workspaceconfig.DefaultWebConfig()) {
+		t.Fatalf("Web = %#v, want %#v", config.Web, workspaceconfig.DefaultWebConfig())
 	}
 
 	if config.Web.AllowLAN {
@@ -67,7 +68,7 @@ runtime:
   validation_command: go test ./...
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
@@ -96,7 +97,7 @@ func TestLoadWorkspaceConfigParsesNotificationConfig(t *testing.T) {
   telegram_chat_id: "123456"
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
@@ -131,15 +132,15 @@ func TestLoadWorkspaceConfigParsesReviewWorkflowConfig(t *testing.T) {
   non_blocking_comment_limit: 2
 `)
 
-			config, err := LoadWorkspaceConfig(dir)
+			config, err := workspaceconfig.Load(dir)
 			if err != nil {
 				t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 			}
 
-			want := ReviewWorkflowConfig{
+			want := workspaceconfig.ReviewWorkflowConfig{
 				Mode:                    test.mode,
 				NonBlockingCommentLimit: 2,
-				Providers:               DefaultReviewProviderConfig(),
+				Providers:               workspaceconfig.DefaultReviewProviderConfig(),
 			}
 			if config.Review != want {
 				t.Fatalf("Review = %#v, want %#v", config.Review, want)
@@ -159,18 +160,18 @@ func TestLoadWorkspaceConfigParsesReviewProviderConfig(t *testing.T) {
   github_token_env: CHR_GITHUB_TOKEN
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := ReviewProviderConfig{
-		Forgejo: ReviewProviderTargetConfig{
+	want := workspaceconfig.ReviewProviderConfig{
+		Forgejo: workspaceconfig.ReviewProviderTargetConfig{
 			Enabled:  true,
 			CLI:      "tea-dev",
 			TokenEnv: "CHR_FORGEJO_TOKEN",
 		},
-		GitHub: ReviewProviderTargetConfig{
+		GitHub: workspaceconfig.ReviewProviderTargetConfig{
 			Enabled:  false,
 			CLI:      "gh-dev",
 			TokenEnv: "CHR_GITHUB_TOKEN",
@@ -197,13 +198,13 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
   worktree_cleanup: manual
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := WorkConfig{
-		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
+	want := workspaceconfig.WorkConfig{
+		Integration:            workspaceconfig.WorkIntegrationConfig{PublicationProfile: workspaceconfig.WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
 		MergeStrategy:          TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
 		CheckpointStepLimit:    workflowstate.PageLimit,
@@ -238,12 +239,12 @@ func TestLoadWorkspaceConfigKeepsWorkWorkspaceDefaultsForMissingKeys(t *testing.
   workspace_mode: worktree
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := DefaultWorkConfig()
+	want := workspaceconfig.DefaultWorkConfig()
 	want.Workspace.Mode = workspacecore.ExecutionWorktree
 
 	if config.Work != want {
@@ -264,17 +265,17 @@ func TestLoadWorkspaceConfigParsesEvidenceStrategyConfig(t *testing.T) {
     execution_report_copy: false
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := EvidenceConfig{
-		Strategy: EvidenceStrategyConfig{
+	want := workspaceconfig.EvidenceConfig{
+		Strategy: workspaceconfig.EvidenceStrategyConfig{
 			Enabled:              false,
-			Mode:                 EvidenceStrategyModeSeparatePass,
-			TicketChecklist:      EvidenceTicketChecklistPolicyOptional,
-			GherkinPolicy:        EvidenceGherkinPolicyManualOnly,
+			Mode:                 workspaceconfig.EvidenceStrategyModeSeparatePass,
+			TicketChecklist:      workspaceconfig.EvidenceTicketChecklistPolicyOptional,
+			GherkinPolicy:        workspaceconfig.EvidenceGherkinPolicyManualOnly,
 			StrictReadyForReview: false,
 			AllowUserEdits:       false,
 			ExecutionReportCopy:  false,
@@ -292,13 +293,13 @@ func TestLoadWorkspaceConfigKeepsEvidenceDefaultsForMissingKeys(t *testing.T) {
     gherkin_policy: disabled
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := DefaultEvidenceConfig()
-	want.Strategy.GherkinPolicy = EvidenceGherkinPolicyDisabled
+	want := workspaceconfig.DefaultEvidenceConfig()
+	want.Strategy.GherkinPolicy = workspaceconfig.EvidenceGherkinPolicyDisabled
 
 	if config.Evidence != want {
 		t.Fatalf("Evidence = %#v, want %#v", config.Evidence, want)
@@ -319,18 +320,18 @@ func TestLoadWorkspaceConfigParsesWebConfig(t *testing.T) {
   refresh_interval_seconds: 5
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := WebConfig{
+	want := workspaceconfig.WebConfig{
 		Enabled:                true,
 		Host:                   "0.0.0.0",
 		Port:                   7444,
 		OpenBrowser:            true,
 		AllowLAN:               true,
-		RequireToken:           WebTokenModeTrue,
+		RequireToken:           workspaceconfig.WebTokenModeTrue,
 		TokenEnv:               "CUSTOM_CHR_WEB_TOKEN",
 		AllowedOrigins:         []string{"https://example.test", "https://ops.example.test"},
 		RefreshIntervalSeconds: 5,
@@ -346,12 +347,12 @@ func TestLoadWorkspaceConfigKeepsWebDefaultsForMissingKeys(t *testing.T) {
   enabled: true
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
 
-	want := DefaultWebConfig()
+	want := workspaceconfig.DefaultWebConfig()
 	want.Enabled = true
 
 	if !reflect.DeepEqual(config.Web, want) {
@@ -360,7 +361,7 @@ func TestLoadWorkspaceConfigKeepsWebDefaultsForMissingKeys(t *testing.T) {
 }
 
 func TestValidateWebConfigAcceptsDefaultConfig(t *testing.T) {
-	err := ValidateWebConfig(DefaultWebConfig())
+	err := ValidateWebConfig(workspaceconfig.DefaultWebConfig())
 	if err != nil {
 		t.Fatalf("ValidateWebConfig returned error: %v", err)
 	}
@@ -369,48 +370,48 @@ func TestValidateWebConfigAcceptsDefaultConfig(t *testing.T) {
 func TestValidateWebConfigRejectsInvalidBindAndTokenConfig(t *testing.T) {
 	assertValidateWebConfigRejects(t, []struct {
 		name    string
-		config  WebConfig
+		config  workspaceconfig.WebConfig
 		wantErr string
 	}{
 		{
 			name: "host",
-			config: WebConfig{
-				Port:                   DefaultWebPort,
-				RequireToken:           WebTokenModeAuto,
-				TokenEnv:               DefaultWebTokenEnv,
-				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+			config: workspaceconfig.WebConfig{
+				Port:                   workspaceconfig.DefaultWebPort,
+				RequireToken:           workspaceconfig.WebTokenModeAuto,
+				TokenEnv:               workspaceconfig.DefaultWebTokenEnv,
+				RefreshIntervalSeconds: workspaceconfig.DefaultWebRefreshIntervalSeconds,
 			},
 			wantErr: "web host is required",
 		},
 		{
 			name: "port",
-			config: WebConfig{
-				Host:                   DefaultWebHost,
+			config: workspaceconfig.WebConfig{
+				Host:                   workspaceconfig.DefaultWebHost,
 				Port:                   0,
-				RequireToken:           WebTokenModeAuto,
-				TokenEnv:               DefaultWebTokenEnv,
-				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+				RequireToken:           workspaceconfig.WebTokenModeAuto,
+				TokenEnv:               workspaceconfig.DefaultWebTokenEnv,
+				RefreshIntervalSeconds: workspaceconfig.DefaultWebRefreshIntervalSeconds,
 			},
 			wantErr: "web port must be between 1 and 65535",
 		},
 		{
 			name: "token mode",
-			config: WebConfig{
-				Host:                   DefaultWebHost,
-				Port:                   DefaultWebPort,
+			config: workspaceconfig.WebConfig{
+				Host:                   workspaceconfig.DefaultWebHost,
+				Port:                   workspaceconfig.DefaultWebPort,
 				RequireToken:           "sometimes",
-				TokenEnv:               DefaultWebTokenEnv,
-				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+				TokenEnv:               workspaceconfig.DefaultWebTokenEnv,
+				RefreshIntervalSeconds: workspaceconfig.DefaultWebRefreshIntervalSeconds,
 			},
 			wantErr: "invalid web require_token mode: sometimes",
 		},
 		{
 			name: "token env",
-			config: WebConfig{
-				Host:                   DefaultWebHost,
-				Port:                   DefaultWebPort,
-				RequireToken:           WebTokenModeTrue,
-				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+			config: workspaceconfig.WebConfig{
+				Host:                   workspaceconfig.DefaultWebHost,
+				Port:                   workspaceconfig.DefaultWebPort,
+				RequireToken:           workspaceconfig.WebTokenModeTrue,
+				RefreshIntervalSeconds: workspaceconfig.DefaultWebRefreshIntervalSeconds,
 			},
 			wantErr: "web token_env is required when token mode requires a token",
 		},
@@ -420,28 +421,28 @@ func TestValidateWebConfigRejectsInvalidBindAndTokenConfig(t *testing.T) {
 func TestValidateWebConfigRejectsInvalidRefreshAndOriginConfig(t *testing.T) {
 	assertValidateWebConfigRejects(t, []struct {
 		name    string
-		config  WebConfig
+		config  workspaceconfig.WebConfig
 		wantErr string
 	}{
 		{
 			name: "refresh",
-			config: WebConfig{
-				Host:         DefaultWebHost,
-				Port:         DefaultWebPort,
-				RequireToken: WebTokenModeAuto,
-				TokenEnv:     DefaultWebTokenEnv,
+			config: workspaceconfig.WebConfig{
+				Host:         workspaceconfig.DefaultWebHost,
+				Port:         workspaceconfig.DefaultWebPort,
+				RequireToken: workspaceconfig.WebTokenModeAuto,
+				TokenEnv:     workspaceconfig.DefaultWebTokenEnv,
 			},
 			wantErr: "web refresh_interval_seconds must be positive",
 		},
 		{
 			name: "origin",
-			config: WebConfig{
-				Host:                   DefaultWebHost,
-				Port:                   DefaultWebPort,
-				RequireToken:           WebTokenModeAuto,
-				TokenEnv:               DefaultWebTokenEnv,
+			config: workspaceconfig.WebConfig{
+				Host:                   workspaceconfig.DefaultWebHost,
+				Port:                   workspaceconfig.DefaultWebPort,
+				RequireToken:           workspaceconfig.WebTokenModeAuto,
+				TokenEnv:               workspaceconfig.DefaultWebTokenEnv,
 				AllowedOrigins:         []string{""},
-				RefreshIntervalSeconds: DefaultWebRefreshIntervalSeconds,
+				RefreshIntervalSeconds: workspaceconfig.DefaultWebRefreshIntervalSeconds,
 			},
 			wantErr: "web allowed_origins cannot contain empty values",
 		},
@@ -450,7 +451,7 @@ func TestValidateWebConfigRejectsInvalidRefreshAndOriginConfig(t *testing.T) {
 
 func assertValidateWebConfigRejects(t *testing.T, tests []struct {
 	name    string
-	config  WebConfig
+	config  workspaceconfig.WebConfig
 	wantErr string
 },
 ) {
@@ -495,17 +496,17 @@ func TestWebHostIsLoopback(t *testing.T) {
 func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
 	tests := []struct {
 		name    string
-		config  ReviewWorkflowConfig
+		config  workspaceconfig.ReviewWorkflowConfig
 		wantErr string
 	}{
 		{
 			name:    "mode",
-			config:  ReviewWorkflowConfig{Mode: "unknown", NonBlockingCommentLimit: 1},
+			config:  workspaceconfig.ReviewWorkflowConfig{Mode: "unknown", NonBlockingCommentLimit: 1},
 			wantErr: "invalid review workflow mode: unknown",
 		},
 		{
 			name:    "limit",
-			config:  ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman, NonBlockingCommentLimit: -1},
+			config:  workspaceconfig.ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman, NonBlockingCommentLimit: -1},
 			wantErr: "review non_blocking_comment_limit cannot be negative",
 		},
 	}
@@ -527,22 +528,22 @@ func TestValidateReviewWorkflowConfigRejectsInvalidConfig(t *testing.T) {
 func TestValidateEvidenceStrategyConfigRejectsInvalidConfig(t *testing.T) {
 	tests := []struct {
 		name    string
-		config  EvidenceStrategyConfig
+		config  workspaceconfig.EvidenceStrategyConfig
 		wantErr string
 	}{
 		{
 			name:    "mode",
-			config:  EvidenceStrategyConfig{Mode: "unknown", TicketChecklist: EvidenceTicketChecklistPolicyRequired, GherkinPolicy: EvidenceGherkinPolicyActiveWhenApplicable},
+			config:  workspaceconfig.EvidenceStrategyConfig{Mode: "unknown", TicketChecklist: workspaceconfig.EvidenceTicketChecklistPolicyRequired, GherkinPolicy: workspaceconfig.EvidenceGherkinPolicyActiveWhenApplicable},
 			wantErr: "invalid evidence strategy mode: unknown",
 		},
 		{
 			name:    "ticket checklist",
-			config:  EvidenceStrategyConfig{Mode: EvidenceStrategyModeInline, TicketChecklist: "unknown", GherkinPolicy: EvidenceGherkinPolicyActiveWhenApplicable},
+			config:  workspaceconfig.EvidenceStrategyConfig{Mode: workspaceconfig.EvidenceStrategyModeInline, TicketChecklist: "unknown", GherkinPolicy: workspaceconfig.EvidenceGherkinPolicyActiveWhenApplicable},
 			wantErr: "invalid evidence ticket_checklist policy: unknown",
 		},
 		{
 			name:    "gherkin policy",
-			config:  EvidenceStrategyConfig{Mode: EvidenceStrategyModeInline, TicketChecklist: EvidenceTicketChecklistPolicyRequired, GherkinPolicy: "unknown"},
+			config:  workspaceconfig.EvidenceStrategyConfig{Mode: workspaceconfig.EvidenceStrategyModeInline, TicketChecklist: workspaceconfig.EvidenceTicketChecklistPolicyRequired, GherkinPolicy: "unknown"},
 			wantErr: "invalid evidence gherkin_policy: unknown",
 		},
 	}
@@ -564,26 +565,26 @@ func TestValidateEvidenceStrategyConfigRejectsInvalidConfig(t *testing.T) {
 func TestValidateWorkConfigRejectsInvalidBranchPolicyConfig(t *testing.T) {
 	tests := []struct {
 		name    string
-		config  WorkConfig
+		config  workspaceconfig.WorkConfig
 		wantErr string
 	}{
 		{
 			name: "mode",
-			config: WorkConfig{
+			config: workspaceconfig.WorkConfig{
 				BranchPolicy: executioncore.WorkBranchPolicy{Mode: "unknown"},
 			},
 			wantErr: "invalid work branch policy mode: unknown",
 		},
 		{
 			name: "integration branch",
-			config: WorkConfig{
+			config: workspaceconfig.WorkConfig{
 				BranchPolicy: executioncore.WorkBranchPolicy{Mode: executioncore.WorkBranchPolicyModeIntegrationBranch},
 			},
 			wantErr: "work integration_branch is required",
 		},
 		{
 			name: "remote",
-			config: WorkConfig{
+			config: workspaceconfig.WorkConfig{
 				BranchPolicy: executioncore.WorkBranchPolicy{
 					Mode:                  executioncore.WorkBranchPolicyModeIntegrationBranch,
 					IntegrationBranch:     "dev",
@@ -602,7 +603,7 @@ func TestValidateWorkConfigRejectsInvalidBranchPolicyConfig(t *testing.T) {
 }
 
 func TestValidateWorkConfigRejectsInvalidWorkspaceMode(t *testing.T) {
-	config := WorkConfig{
+	config := workspaceconfig.WorkConfig{
 		BranchPolicy: executioncore.DefaultWorkBranchPolicy(),
 		Workspace:    workspacecore.ExecutionConfig{Mode: "unknown"},
 	}
@@ -659,17 +660,17 @@ func TestValidateWorkConfigRejectsInvalidWorktreeConfig(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			config := WorkConfig{BranchPolicy: executioncore.DefaultWorkBranchPolicy(), Workspace: test.config}
+			config := workspaceconfig.WorkConfig{BranchPolicy: executioncore.DefaultWorkBranchPolicy(), Workspace: test.config}
 
 			assertValidateWorkConfigError(t, config, test.wantErr)
 		})
 	}
 }
 
-func assertValidateWorkConfigError(t *testing.T, config WorkConfig, wantErr string) {
+func assertValidateWorkConfigError(t *testing.T, config workspaceconfig.WorkConfig, wantErr string) {
 	t.Helper()
 
-	err := ValidateWorkConfig(config)
+	err := workspaceconfig.ValidateWorkConfig(config)
 	if err == nil {
 		t.Fatal("ValidateWorkConfig returned nil error")
 	}
@@ -686,7 +687,7 @@ func TestLoadWorkspaceConfigKeepsNotificationsDisabledByDefault(t *testing.T) {
   telegram_chat_id: "123456"
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
@@ -702,7 +703,7 @@ func TestLoadWorkspaceConfigKeepsRuntimeDefaultsForMissingKeys(t *testing.T) {
   image: custom-agent:latest
 `)
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}
@@ -720,7 +721,7 @@ func TestLoadWorkspaceConfigSupportsLegacyTopLevelTicketKeyPrefix(t *testing.T) 
 	dir := t.TempDir()
 	writeWorkspaceConfig(t, dir, "key_prefix: LEGACY\n")
 
-	config, err := LoadWorkspaceConfig(dir)
+	config, err := workspaceconfig.Load(dir)
 	if err != nil {
 		t.Fatalf("LoadWorkspaceConfig returned error: %v", err)
 	}

@@ -17,6 +17,7 @@ import (
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestWorkflowUpgradeRecovery checks each durable policy boundary. Ordinary
@@ -54,7 +55,7 @@ func TestWorkflowUpgradeRecovery(t *testing.T) {
 func checkWorkflowUpgradePending(t *testing.T, store *WorkflowStore, opts WorkflowUpgradeOptions) {
 	t.Helper()
 
-	if _, err := LoadWorkspaceConfig(store.layout.ProjectDir()); err == nil {
+	if _, err := workspaceconfig.Load(store.layout.ProjectDir()); err == nil {
 		t.Fatal("partial upgrade exposed policy")
 	}
 
@@ -88,7 +89,7 @@ func checkWorkflowUpgradePendingDomain(t *testing.T, store *WorkflowStore) {
 // before enabling policy, preserving identities and excluding a foreign retry.
 func TestWorkflowUpgradeAdoptionRecovery(t *testing.T) {
 	store, selection := workflowPlanAdoptionFixture(t)
-	opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
+	opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: workspaceconfig.WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
 	writes := 0
 
 	store.afterReplace = func(int) error {
@@ -119,7 +120,7 @@ func TestWorkflowUpgradeAdoptionRecovery(t *testing.T) {
 // TestWorkflowUpgradeEdited rejects manual config and journal changes while
 // preserving both images for reconciliation rather than overwriting them.
 func TestWorkflowUpgradeEdited(t *testing.T) {
-	for _, target := range []string{"config.yml", workflowUpgradePending} {
+	for _, target := range []string{"config.yml", workspaceconfig.WorkflowUpgradePending} {
 		t.Run(target, func(t *testing.T) {
 			store, opts := workflowUpgradeFixture(t, "")
 
@@ -202,12 +203,12 @@ func TestWorkflowUpgradeNative(t *testing.T) {
 	store, _, request := workflowExecutionFixture(t, []string{"true"}, 30)
 	workflowTestStart(t, store, request)
 
-	prior, err := ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
+	prior, err := workspaceconfig.ResolveWorkflowConfiguration(store.layout.ProjectDir(), "")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	opts := WorkflowUpgradeOptions{ExpectedRevision: prior.Revision, StateAuthority: WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
+	opts := WorkflowUpgradeOptions{ExpectedRevision: prior.Revision, StateAuthority: workspaceconfig.WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
 	if _, err := store.UpgradeWorkflowConfiguration(t.Context(), opts); err == nil || !strings.Contains(err.Error(), "unfinished workflow") {
 		t.Fatal("retained native ownership ignored", err)
 	}
@@ -289,7 +290,7 @@ func TestWorkflowUpgradeProcess(t *testing.T) {
 	}
 
 	store := NewWorkflowStore(layout, "project-1")
-	opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
+	opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: workspaceconfig.WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
 
 	store.afterReplace = func(stage int) error {
 		if stage == 2 {
@@ -319,7 +320,7 @@ func TestWorkflowUpgradeRestart(t *testing.T) {
 		t.Fatalf("owned upgrade crash = %v: %s", err, output)
 	}
 
-	data, err := store.readWorkflowUpgradeFile(workflowUpgradePending)
+	data, err := store.readWorkflowUpgradeFile(workspaceconfig.WorkflowUpgradePending)
 	if err != nil {
 		t.Fatal(err)
 	}

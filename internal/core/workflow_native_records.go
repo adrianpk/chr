@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 const (
@@ -169,7 +170,7 @@ func WorkflowNativeCandidateHash(candidate WorkflowIntegrationCandidate) (string
 func validateWorkflowCandidateSchema(candidate WorkflowIntegrationCandidate) error {
 	switch candidate.Schema {
 	case "chr-integration-candidate/v1":
-		if candidate.Native != nil || candidate.Input.Capability.Mechanism == WorkflowPublicationGitAtomicDualRef {
+		if candidate.Native != nil || candidate.Input.Capability.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 			return workflowstate.ErrConflict
 		}
 
@@ -283,7 +284,7 @@ func workflowNativeCandidateSourceMatches(candidate WorkflowIntegrationCandidate
 
 func workflowNativeReceiptOwnerMatches(receipt WorkflowReceipt) bool {
 	native := receipt.Native
-	if native.Mechanism != "" && native.Mechanism != WorkflowPublicationGitAtomicDualRef {
+	if native.Mechanism != "" && native.Mechanism != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return false
 	}
 

@@ -10,11 +10,12 @@ import (
 
 	acceptancecore "forge.adrianpk.com/chr/internal/core/authoring/acceptance"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // EvidenceGherkinContext describes project and ticket-level Gherkin policy.
 type EvidenceGherkinContext struct {
-	Policy       EvidenceGherkinPolicy
+	Policy       workspaceconfig.EvidenceGherkinPolicy
 	Active       bool
 	Applies      bool
 	FeaturePaths []string
@@ -50,7 +51,7 @@ type EvidencePolicyContext struct {
 }
 
 // DetectEvidencePolicyContext builds worker-facing evidence policy context.
-func DetectEvidencePolicyContext(projectDir string, config EvidenceStrategyConfig, ticket ticketcore.Indexed) (EvidencePolicyContext, error) {
+func DetectEvidencePolicyContext(projectDir string, config workspaceconfig.EvidenceStrategyConfig, ticket ticketcore.Indexed) (EvidencePolicyContext, error) {
 	gherkin, err := DetectEvidenceGherkinContext(projectDir, config, ticket)
 	if err != nil {
 		return EvidencePolicyContext{}, err
@@ -63,14 +64,14 @@ func DetectEvidencePolicyContext(projectDir string, config EvidenceStrategyConfi
 }
 
 // DetectEvidenceGherkinContext detects whether Gherkin is active and applicable.
-func DetectEvidenceGherkinContext(projectDir string, config EvidenceStrategyConfig, ticket ticketcore.Indexed) (EvidenceGherkinContext, error) {
+func DetectEvidenceGherkinContext(projectDir string, config workspaceconfig.EvidenceStrategyConfig, ticket ticketcore.Indexed) (EvidenceGherkinContext, error) {
 	featurePaths, err := acceptanceFeaturePaths(projectDir)
 	if err != nil {
 		return EvidenceGherkinContext{}, err
 	}
 
 	applies := TicketNeedsGherkin(ticket)
-	active := config.GherkinPolicy == EvidenceGherkinPolicyActiveWhenApplicable && len(featurePaths) > 0
+	active := config.GherkinPolicy == workspaceconfig.EvidenceGherkinPolicyActiveWhenApplicable && len(featurePaths) > 0
 
 	context := EvidenceGherkinContext{
 		Policy:       config.GherkinPolicy,
@@ -169,11 +170,11 @@ func acceptanceFeaturePaths(projectDir string) ([]string, error) {
 	return entries, nil
 }
 
-func evidenceGherkinReason(config EvidenceStrategyConfig, featurePaths []string, applies bool) string {
+func evidenceGherkinReason(config workspaceconfig.EvidenceStrategyConfig, featurePaths []string, applies bool) string {
 	switch {
-	case config.GherkinPolicy == EvidenceGherkinPolicyDisabled:
+	case config.GherkinPolicy == workspaceconfig.EvidenceGherkinPolicyDisabled:
 		return "gherkin_policy=disabled"
-	case config.GherkinPolicy == EvidenceGherkinPolicyManualOnly:
+	case config.GherkinPolicy == workspaceconfig.EvidenceGherkinPolicyManualOnly:
 		return "gherkin_policy=manual_only"
 	case len(featurePaths) == 0:
 		return "no acceptance feature artifacts found"
@@ -326,9 +327,9 @@ func evidenceTestGuidance(kind string) string {
 
 func evidenceGherkinGuidance(gherkin EvidenceGherkinContext) string {
 	switch {
-	case gherkin.Policy == EvidenceGherkinPolicyDisabled:
+	case gherkin.Policy == workspaceconfig.EvidenceGherkinPolicyDisabled:
 		return "disabled"
-	case gherkin.Policy == EvidenceGherkinPolicyManualOnly:
+	case gherkin.Policy == workspaceconfig.EvidenceGherkinPolicyManualOnly:
 		return "manual_only"
 	case gherkin.Active && gherkin.Applies:
 		return "required"

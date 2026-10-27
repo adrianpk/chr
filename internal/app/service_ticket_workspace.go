@@ -11,6 +11,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type ticketStartWorktreePreparer interface {
@@ -23,7 +24,7 @@ var newTicketStartWorktreePreparer = func() ticketStartWorktreePreparer {
 	return service
 }
 
-func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProjectContext, ticket ticketcore.Indexed, config core.WorkspaceConfig, opts ticketStartPreflightOptions) (ticketStartWorkspace, error) {
+func prepareTicketStartWorkspace(ctx context.Context, projectContext commandProjectContext, ticket ticketcore.Indexed, config workspaceconfig.Config, opts ticketStartPreflightOptions) (ticketStartWorkspace, error) {
 	workspace := ticketStartWorkspace{
 		Ticket:     ticket,
 		TicketPath: ticket.Path,

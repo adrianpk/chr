@@ -4,6 +4,7 @@ import (
 	"context"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s *WorkflowStore) workflowNativeContinuationProfile(ctx context.Context, id string) (native bool, err error) {
@@ -13,8 +14,8 @@ func (s *WorkflowStore) workflowNativeContinuationProfile(ctx context.Context, i
 			return err
 		}
 
-		config, err := LoadWorkspaceConfig(owner.layout.ProjectDir())
-		native = run.Integration != nil || config.Work.Integration.PublicationProfile == WorkflowPublicationGitAtomicDualRef
+		config, err := workspaceconfig.Load(owner.layout.ProjectDir())
+		native = run.Integration != nil || config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef
 
 		return err
 	})

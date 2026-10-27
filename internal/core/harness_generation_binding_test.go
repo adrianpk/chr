@@ -13,6 +13,7 @@ import (
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -77,7 +78,7 @@ func generationBindingProgram(t *testing.T, project string) string {
 }
 
 func generationBindingResolver(program, model string) HarnessGenerationResolver {
-	return func(_ context.Context, config WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
+	return func(_ context.Context, config workspaceconfig.Config) (harnesshost.GenerationPreparation, error) {
 		executable, err := harnesshost.FreezeExecutable([]string{program})
 		if err != nil {
 			return harnesshost.GenerationPreparation{}, err

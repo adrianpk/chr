@@ -12,6 +12,7 @@ import (
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -28,7 +29,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	finished := make(chan generationBindingAdmissionResult, 1)
 
 	go func() {
-		operation, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "ordered-operation", Purpose: "plan_generation"}, func(ctx context.Context, c WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
+		operation, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "ordered-operation", Purpose: "plan_generation"}, func(ctx context.Context, c workspaceconfig.Config) (harnesshost.GenerationPreparation, error) {
 			close(entered)
 			<-release
 
@@ -48,7 +49,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	go func() {
 		request := harnessSelectionTestRequest("ordered-switch", contenthash.Sum([]byte(original)), "beta")
 
-		_, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
+		_, err := workspaceconfig.ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
 		changed <- err
 	}()
 
@@ -79,7 +80,7 @@ type generationBindingAdmissionResult struct {
 func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 	project := t.TempDir()
 
-	operation, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "api-operation", Purpose: "quiz_next_question"}, func(_ context.Context, c WorkspaceConfig) (harnesshost.GenerationPreparation, error) {
+	operation, err := FreezeHarnessGeneration(t.Context(), harnesshost.GenerationFreezeInput{Project: project, ID: "api-operation", Purpose: "quiz_next_question"}, func(_ context.Context, c workspaceconfig.Config) (harnesshost.GenerationPreparation, error) {
 		binding, err := harnesscore.SealGenerationBinding(harnesscore.GenerationBinding{
 			Selection: harnesscore.Selection{
 				Role: harnesscore.Generation, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",

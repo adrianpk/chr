@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (factory commandFactory) workUpgradeCommand() *cli.Command {
@@ -45,7 +46,7 @@ func (factory commandFactory) workUpgradeAction(ctx context.Context, cmd *cli.Co
 		return err
 	}
 
-	opts := core.WorkflowUpgradeOptions{ExpectedRevision: cmd.String("config-revision"), StateAuthority: core.WorkStateAuthority(cmd.String("state-authority")), ReviewMode: workflowstate.ReviewMode(cmd.String("review-mode")), Adoption: adoption}
+	opts := core.WorkflowUpgradeOptions{ExpectedRevision: cmd.String("config-revision"), StateAuthority: workspaceconfig.WorkStateAuthority(cmd.String("state-authority")), ReviewMode: workflowstate.ReviewMode(cmd.String("review-mode")), Adoption: adoption}
 
 	result, err := operations.UpgradeWorkflowConfiguration(ctx, opts)
 	if err != nil {

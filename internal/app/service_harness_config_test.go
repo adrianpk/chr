@@ -8,11 +8,11 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // The shared operation enforces current local authority and exposes one fresh
@@ -28,7 +28,7 @@ func TestHarnessSelectionServiceChange(t *testing.T) {
 	}
 
 	choice := "writing"
-	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "select-both", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Worker: &choice, Generation: &choice}
+	request := workspaceconfig.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "select-both", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Worker: &choice, Generation: &choice}
 	authority := localHarnessSelectionAuthority(project, request.Binding.Operator)
 
 	accepted, err := operations.ChangeHarnessSelections(t.Context(), request, authority)
@@ -61,7 +61,7 @@ func checkHarnessSelectionServiceStatus(t *testing.T, second service, accepted h
 	}
 }
 
-func checkHarnessSelectionServiceReplay(t *testing.T, second service, request core.HarnessSelectionChangeRequest, authority func(context.Context) error, accepted harnesscore.SelectionSnapshot) {
+func checkHarnessSelectionServiceReplay(t *testing.T, second service, request workspaceconfig.HarnessSelectionChangeRequest, authority func(context.Context) error, accepted harnesscore.SelectionSnapshot) {
 	t.Helper()
 
 	replay, err := second.ChangeHarnessSelections(t.Context(), request, authority)
@@ -95,7 +95,7 @@ func checkHarnessSelectionServiceRejection(t *testing.T, name string) {
 		t.Fatal(err)
 	}
 
-	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "invalid", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Generation: &name}
+	request := workspaceconfig.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "invalid", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: initial.Snapshot.Revision, Generation: &name}
 	authority := localHarnessSelectionAuthority(project, "operator")
 
 	if name == "foreign-project" {
@@ -112,7 +112,7 @@ func checkHarnessSelectionServiceRejection(t *testing.T, name string) {
 		t.Fatal("invalid selection accepted")
 	}
 
-	config, err := core.LoadWorkspaceConfig(project)
+	config, err := workspaceconfig.Load(project)
 	if err != nil || config.Revision() != initial.Snapshot.Revision {
 		t.Fatal("invalid request changed configuration", config.Harnesses, err)
 	}
@@ -154,7 +154,7 @@ func checkHarnessSelectionStatusInvalid(t *testing.T, mode string) {
 func TestHarnessSelectionAuthorityRechecked(t *testing.T) {
 	operations, _, _, _ := harnessSelectionFixture(t)
 	count := 0
-	request := core.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "revoked", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: authoringcore.WorkflowContentHash(nil), Worker: harnessChoiceTestPointer("writing")}
+	request := workspaceconfig.HarnessSelectionChangeRequest{Binding: workflowstate.MutationBinding{RequestID: "revoked", Operator: "operator"}, ProjectRef: "fixture", ExpectedRevision: authoringcore.WorkflowContentHash(nil), Worker: harnessChoiceTestPointer("writing")}
 
 	_, err := operations.ChangeHarnessSelections(t.Context(), request, func(_ context.Context) error {
 		count++
@@ -168,7 +168,7 @@ func TestHarnessSelectionAuthorityRechecked(t *testing.T) {
 		t.Fatal("authorization was not rechecked", count, err)
 	}
 
-	config, err := core.LoadWorkspaceConfig(operations.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(operations.projectContext.ProjectDir)
 	if err != nil || config.Harnesses.Worker != "" {
 		t.Fatal("revoked request changed configuration", err)
 	}

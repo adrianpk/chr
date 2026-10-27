@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Actual authoring admission, provider failure and a rebuilt service retain the
@@ -107,12 +107,12 @@ func switchGenerationFixture(t *testing.T, operations service, profile string) {
 }
 
 func changeGenerationFixture(ctx context.Context, operations service, profile string) error {
-	config, err := core.LoadWorkspaceConfig(operations.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(operations.projectContext.ProjectDir)
 	if err != nil {
 		return err
 	}
 
-	request := core.HarnessSelectionChangeRequest{
+	request := workspaceconfig.HarnessSelectionChangeRequest{
 		Binding:    workflowstate.MutationBinding{RequestID: "switch-" + profile, Operator: "maintainer"},
 		ProjectRef: operations.projectContext.ProjectID, ExpectedRevision: config.Revision(), Generation: &profile,
 	}

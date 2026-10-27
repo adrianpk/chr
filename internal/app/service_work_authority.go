@@ -9,6 +9,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -18,7 +19,7 @@ func nativeAgentWorkSelection(opts AgentWorkSelectionOptions) workflowstate.Prev
 
 func legacyAgentWorkResult(result AgentWorkResult) AgentWorkResult {
 	result.Scope = "unadopted_legacy"
-	result.Authority = core.WorkStateAuthorityTrackerCompat
+	result.Authority = workspaceconfig.WorkStateAuthorityTrackerCompat
 	result.Message = fmt.Sprintf("Authority tracker_compat; scope unadopted legacy tickets; %d adopted tickets excluded. %s", result.Excluded["ticket_native"], result.Message)
 
 	return result
@@ -33,7 +34,7 @@ func (s service) checkLegacyAgentWorkKey(key string) error {
 	return store.CheckLegacyWorkKey(s.ctx, key)
 }
 
-func (s service) nativeAgentWorkTarget(config core.WorkspaceConfig) (workflowstate.PreviewTarget, error) {
+func (s service) nativeAgentWorkTarget(config workspaceconfig.Config) (workflowstate.PreviewTarget, error) {
 	if config.Work.BranchPolicy.Mode != executioncore.WorkBranchPolicyModeIntegrationBranch {
 		return workflowstate.PreviewTarget{}, fmt.Errorf("ticket authority requires an explicit integration branch")
 	}
@@ -43,7 +44,7 @@ func (s service) nativeAgentWorkTarget(config core.WorkspaceConfig) (workflowsta
 	return workflowstate.PreviewTarget{Repository: repository}, err
 }
 
-func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
+func (s service) observeNativeAgentWorkTarget(config workspaceconfig.Config, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
 	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
 
 	observer, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetGit)
@@ -54,7 +55,7 @@ func (s service) observeNativeAgentWorkTarget(config core.WorkspaceConfig, ident
 	return observer.ObserveWorkflowTarget(s.ctx, core.WorkflowTargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
 }
 
-func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection workflowstate.PreviewRequest, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (core.WorkflowStartResult, error) {
+func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection workflowstate.PreviewRequest, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (core.WorkflowStartResult, error) {
 	target, err := s.nativeAgentWorkTarget(config)
 	if err != nil {
 		return core.WorkflowStartResult{}, err
@@ -114,7 +115,7 @@ func retainedNativeAgentWorkRequest(request core.WorkflowStartRequest, previous 
 	return request, nil
 }
 
-func (s service) startNativeAgentWork(config core.WorkspaceConfig, selection workflowstate.PreviewRequest, limit int, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (AgentWorkResult, error) {
+func (s service) startNativeAgentWork(config workspaceconfig.Config, selection workflowstate.PreviewRequest, limit int, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (AgentWorkResult, error) {
 	if limit < 0 || limit > workflowstate.PageLimit {
 		return AgentWorkResult{}, fmt.Errorf("ticket authority max-iterations must contain 0..128 checkpoint steps")
 	}
@@ -154,5 +155,5 @@ func (s service) nativeAgentWorkResult(run core.WorkflowInvocation) (AgentWorkRe
 
 	tickets, err := store.WorkflowTickets(s.ctx)
 
-	return AgentWorkResult{Scope: run.Selection.Selector.Extent, Authority: core.WorkStateAuthorityTickets, Workflow: &run, Excluded: run.Excluded, Tickets: tickets, EligibleCount: len(run.Members), Message: fmt.Sprintf("Authority tickets; workflow %s is %s; confirmed %d of %d admitted tickets; %d slice-owned tickets excluded.", run.ID, run.Status, run.ConfirmedCursor, len(run.Members), run.Excluded["slice_owned"])}, err
+	return AgentWorkResult{Scope: run.Selection.Selector.Extent, Authority: workspaceconfig.WorkStateAuthorityTickets, Workflow: &run, Excluded: run.Excluded, Tickets: tickets, EligibleCount: len(run.Members), Message: fmt.Sprintf("Authority tickets; workflow %s is %s; confirmed %d of %d admitted tickets; %d slice-owned tickets excluded.", run.ID, run.Status, run.ConfirmedCursor, len(run.Members), run.Excluded["slice_owned"])}, err
 }

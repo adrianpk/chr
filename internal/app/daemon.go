@@ -15,6 +15,7 @@ import (
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (factory commandFactory) daemonCommand() *cli.Command {
@@ -315,14 +316,14 @@ func refreshDaemonProjects(
 			ProjectID:  project.Project.ID,
 		}
 
-		config, err := core.LoadWorkspaceConfig(project.Project.Path)
+		config, err := workspaceconfig.Load(project.Project.Path)
 		if err != nil {
 			return err
 		}
 
 		result.ProjectsReady++
 
-		if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets {
+		if workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTickets {
 			continue
 		}
 

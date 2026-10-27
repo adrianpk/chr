@@ -5,6 +5,7 @@ import (
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // IntegrationCyclePhase defines the current or final phase of one integration cycle.
@@ -38,7 +39,7 @@ type IntegrationCyclePlan struct {
 type IntegrationCyclePlanOptions struct {
 	ProjectID    string
 	Ticket       ticketcore.Indexed
-	ReviewConfig ReviewWorkflowConfig
+	ReviewConfig workspaceconfig.ReviewWorkflowConfig
 }
 
 const (
@@ -147,7 +148,7 @@ func (b IntegrationCycleBlocker) Valid() bool {
 }
 
 // IntegrationCyclePolicyFromReviewConfig maps review workflow config to cycle behavior.
-func IntegrationCyclePolicyFromReviewConfig(config ReviewWorkflowConfig) (IntegrationCyclePolicy, error) {
+func IntegrationCyclePolicyFromReviewConfig(config workspaceconfig.ReviewWorkflowConfig) (IntegrationCyclePolicy, error) {
 	if err := ValidateReviewWorkflowConfig(config); err != nil {
 		return IntegrationCyclePolicy{}, err
 	}

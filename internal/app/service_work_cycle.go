@@ -7,6 +7,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type agentWorkIntegrationCycleState struct {
@@ -22,7 +23,7 @@ type agentWorkPostDevelopmentOptions struct {
 	Execution    executioncore.Record
 	Application  core.ResultApplication
 	Selection    agentWorkLoopSelection
-	ReviewConfig core.ReviewWorkflowConfig
+	ReviewConfig workspaceconfig.ReviewWorkflowConfig
 	LoopSink     executioncore.AgentEventSink
 }
 

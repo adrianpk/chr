@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (s *WorkflowStore) guardWorkflowPreparationWork(ctx context.Context, run workflowInvocationFile) error {
@@ -38,7 +39,7 @@ func (s *WorkflowStore) guardWorkflowPreparationWork(ctx context.Context, run wo
 }
 
 func (s *WorkflowStore) reprepareWorkflowNativeInputs(ctx context.Context, run *workflowInvocationFile, source WorkflowReviewInput, capability WorkflowPublicationCapability, provider WorkflowPublicationGuardProvider) error {
-	if capability.Mechanism != WorkflowPublicationGitAtomicDualRef || run.Preparation == nil {
+	if capability.Mechanism != workspaceconfig.WorkflowPublicationGitAtomicDualRef || run.Preparation == nil {
 		return nil
 	}
 

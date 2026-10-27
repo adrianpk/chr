@@ -7,6 +7,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReadTicketBoard uses the selected authority without rebuilding the legacy index.
@@ -26,7 +27,7 @@ func (s service) readTicketBoardPage(offset int, caseSlug string) (ticketcore.Bo
 }
 
 func (s service) ticketDocumentOptions() (core.TicketBoardReadOptions, error) {
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.TicketBoardReadOptions{}, err
 	}
@@ -38,7 +39,7 @@ func (s service) ticketDocumentOptions() (core.TicketBoardReadOptions, error) {
 
 	return core.TicketBoardReadOptions{
 		Layout: layout, ProjectID: s.projectContext.ProjectID,
-		NativeWorkflow: core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets,
+		NativeWorkflow: workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTickets,
 	}, nil
 }
 
@@ -108,7 +109,7 @@ func (s service) CreateBoardTicket(request core.TicketEditRequest) (core.TicketD
 		return core.TicketDocument{}, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return core.TicketDocument{}, err
 	}

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -26,7 +26,7 @@ func TestWebLoginBrowser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	h, err := newWebServeMux(resolvedWebServeConfig{ProjectDir: t.TempDir(), Web: core.DefaultWebConfig(), Login: &credentials})
+	h, err := newWebServeMux(resolvedWebServeConfig{ProjectDir: t.TempDir(), Web: workspaceconfig.DefaultWebConfig(), Login: &credentials})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type workflowPRCommandFixture struct {
@@ -65,7 +66,7 @@ func TestWorkflowPRAdapter(t *testing.T) {
 			}
 
 			runner.outputs[tc.prefix+"/branches/chr%2Fworkflow%2Fbranch"] = []byte(`{"commit":{"` + commitField + `":"` + strings.Repeat("a", 40) + `"}}`)
-			checkWorkflowPRAdapter(t, NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner), runner, tc.repository, tc.input)
+			checkWorkflowPRAdapter(t, NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner), runner, tc.repository, tc.input)
 		})
 	}
 }
@@ -155,7 +156,7 @@ func TestWorkflowPRAdapterBounds(t *testing.T) {
 		runner.outputs[fmt.Sprintf("tea api -X GET https://forge.example/api/v1/repos/test/repo/pulls?state=all&limit=50&per_page=50&page=%d", page)] = []byte(`[{"head":{"ref":"unrelated"}}]`)
 	}
 
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 	if _, err := adapter.FindWorkflowPullRequests(t.Context(), WorkflowPullRequestQuery{Repository: "https://forge.example/test/repo", HeadBranch: "chr/workflow/branch", BaseBranch: "dev"}); err == nil {
 		t.Fatal("incomplete short-page pagination licensed replacement PR creation")
 	}

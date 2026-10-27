@@ -11,6 +11,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Explanations use their canonical context and reject malformed selected-provider prose.
@@ -122,7 +123,7 @@ func piGenerationReviewCase(t *testing.T, valid bool) {
 		Artifacts: executioncore.Artifacts{ArtifactID: "00001-review", RunDir: filepath.Join(worktree, "ops", "default", "run", "00001-review"), ResultPath: "result.json"},
 	}
 
-	result, err := operations.runAgenticReviewCycle(t.Context(), indexed, execution, core.ResultApplication{TicketPath: path}, core.ReviewWorkflowConfig{})
+	result, err := operations.runAgenticReviewCycle(t.Context(), indexed, execution, core.ResultApplication{TicketPath: path}, workspaceconfig.ReviewWorkflowConfig{})
 	if (err == nil) != valid || valid && result.Status != ticketcore.StatusReadyForDev {
 		t.Fatal("unexpected Pi review validation", err)
 	}

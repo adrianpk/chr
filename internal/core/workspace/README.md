@@ -26,3 +26,8 @@ policy. DefaultExecutionConfig, FillExecutionDefaults and ValidateExecutionConfi
 retain the original zero value, field defaults, fixed worktree root and error
 contracts. Runtime planning and native worktree execution consume these values;
 this owner does not choose tickets or acquire workflow capacity.
+
+The [configuration child](config/README.md) owns parsed project settings, defaults,
+raw-image revisions, explicit-key metadata and recoverable harness-selection
+changes. It consumes these path and locking operations; the parent has no import
+of the child or the workflow coordinator.

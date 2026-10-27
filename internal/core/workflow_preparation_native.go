@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowNativePreparationProvider observes trusted policy and transport for
@@ -45,13 +46,13 @@ func (s *WorkflowStore) checkWorkflowNativePreparationAdmission(run workflowInvo
 }
 
 func workflowNativePreparationProfile(project string, capability WorkflowPublicationCapability) (bool, error) {
-	config, err := LoadWorkspaceConfig(project)
+	config, err := workspaceconfig.Load(project)
 	if err != nil {
 		return false, err
 	}
 
-	native := capability.Mechanism == WorkflowPublicationGitAtomicDualRef
-	if native != (config.Work.Integration.PublicationProfile == WorkflowPublicationGitAtomicDualRef) {
+	native := capability.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef
+	if native != (config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef) {
 		return native, ErrWorkflowAtomicGuard
 	}
 
@@ -79,7 +80,7 @@ func workflowNativePreparationEntryReady(run workflowInvocationFile, entry Workf
 }
 
 func (s *WorkflowStore) bindWorkflowNativePreparation(ctx context.Context, run workflowInvocationFile, input *WorkflowPreparationInput, provider WorkflowPublicationGuardProvider) error {
-	if input.Capability.Mechanism != WorkflowPublicationGitAtomicDualRef {
+	if input.Capability.Mechanism != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return nil
 	}
 

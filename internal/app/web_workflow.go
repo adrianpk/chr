@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -22,9 +23,9 @@ type webWorkflowBinding struct {
 }
 
 func (p webViewProvider) workflowEnabled() bool {
-	config, err := core.LoadWorkspaceConfig(p.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(p.projectContext.ProjectDir)
 
-	return err == nil && core.WorkAuthority(config.Work) == core.WorkStateAuthorityTickets
+	return err == nil && workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTickets
 }
 
 // WorkflowView reads the same native preview and status operations as the CLI.

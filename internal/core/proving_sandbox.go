@@ -14,6 +14,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -171,7 +172,7 @@ func PlanProvingSandboxRunForObjective(projectDir string, objective ProvingObjec
 }
 
 func planProvingRuntime(projectDir string, objective ProvingObjective, mounts []harness.RuntimeMount) (ProvingSandboxRunResult, error) {
-	config, err := LoadWorkspaceConfig(projectDir)
+	config, err := workspaceconfig.Load(projectDir)
 	if err != nil {
 		return ProvingSandboxRunResult{}, err
 	}

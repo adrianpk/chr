@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 type serviceWorkEntryProvider struct {
@@ -228,7 +229,7 @@ func checkServiceWorkNativePreview(t *testing.T, operations service) {
 	t.Helper()
 
 	preview, err := operations.PreviewAllReadyAgentWork()
-	if err != nil || preview.Authority != core.WorkStateAuthorityTickets || preview.EligibleCount != 1 || preview.Excluded["slice_owned"] != 6 || len(preview.SelectedQueue) != 1 || preview.SelectedQueue[0].Key != "PRJ-90" {
+	if err != nil || preview.Authority != workspaceconfig.WorkStateAuthorityTickets || preview.EligibleCount != 1 || preview.Excluded["slice_owned"] != 6 || len(preview.SelectedQueue) != 1 || preview.SelectedQueue[0].Key != "PRJ-90" {
 		t.Fatal("native preview broadened scope", preview, err)
 	}
 }

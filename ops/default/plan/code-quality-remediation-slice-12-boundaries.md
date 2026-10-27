@@ -53,8 +53,9 @@ owner. Shared immutable values belong in an existing cohesive value owner.
 Configuration/transport behavior must cross a real consumer-owned operation
 boundary. The current resolution fields record ten review/cycle value dependencies
 owned directly by workflow/state, eleven ticket projection dependencies owned by
-core/ticket and one integer comparator supplied by the standard library. There
-are 57 direct root couplings before family relocation. A temporary compile-time bridge, if necessary, must be recorded with
+core/ticket and one integer comparator supplied by the standard library. The shared parsed configuration and its admission/recovery operations now have
+the workspace/config owner, resolving another fifteen dependencies. There are
+42 direct root couplings before family relocation. A temporary compile-time bridge, if necessary, must be recorded with
 its explicit approved removal owner by Slice 15.
 
 The [signature entry map](code-quality-remediation-slice-12-signatures.csv)

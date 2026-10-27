@@ -6,9 +6,9 @@ import (
 	"slices"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkQueueItem is a display observation, never an executable scheduler input.
@@ -34,7 +34,7 @@ type WorkEvent struct {
 // WorkObservation is the adapter-neutral snapshot for live work inspection.
 type WorkObservation struct {
 	Warnings                        []string
-	Authority                       core.WorkStateAuthority
+	Authority                       workspaceconfig.WorkStateAuthority
 	Readiness                       executioncore.WorkReadinessReport
 	Queue                           []WorkQueueItem
 	QueueTotal, Eligible, QueueNext int
@@ -54,16 +54,16 @@ func (s service) ObserveWork(ctx context.Context, offset int) (result WorkObserv
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return result, err
 	}
 
-	if err = core.ValidateWorkConfig(config.Work); err != nil {
+	if err = workspaceconfig.ValidateWorkConfig(config.Work); err != nil {
 		return result, err
 	}
 
-	result.Authority = core.WorkAuthority(config.Work)
+	result.Authority = workspaceconfig.WorkAuthority(config.Work)
 	result.ObservedAt = s.utcNow()
 
 	result.Readiness, err = executioncore.CheckWorkReadiness(ctx, executioncore.WorkReadinessOptions{ProjectDir: s.projectContext.ProjectDir, Policy: config.Work.BranchPolicy, Workspace: config.Work.Workspace})
@@ -71,7 +71,7 @@ func (s service) ObserveWork(ctx context.Context, offset int) (result WorkObserv
 		return result, err
 	}
 
-	if result.Authority == core.WorkStateAuthorityTickets {
+	if result.Authority == workspaceconfig.WorkStateAuthorityTickets {
 		err = s.observeNativeWork(ctx, config, &result)
 	} else {
 		err = s.observeLegacyWork(ctx, config, &result)

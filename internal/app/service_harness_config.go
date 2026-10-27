@@ -5,10 +5,10 @@ import (
 	"errors"
 	"sort"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // HarnessProfileStatus offers only named choices and local readiness evidence.
@@ -40,7 +40,7 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 		return result, err
 	}
 
-	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
+	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return result, err
 	}
@@ -79,7 +79,7 @@ func (s service) InspectHarnessSelections(ctx context.Context, action string) (H
 	return result, nil
 }
 
-func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, profiles map[string]harnesscore.Profile, configDir string) []HarnessProfileStatus {
+func harnessProfileChoices(ctx context.Context, config workspaceconfig.Config, profiles map[string]harnesscore.Profile, configDir string) []HarnessProfileStatus {
 	choices := make([]HarnessProfileStatus, 0, len(profiles))
 	for _, profile := range profiles {
 		worker := prepareHarnessSelection(ctx, harnessSelectionInput{Config: config, Role: harnesscore.Worker, ConfigDir: configDir}, profile)
@@ -94,20 +94,20 @@ func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, pro
 
 // ChangeHarnessSelections is the shared authorized configuration mutation. The
 // trusted adapter checks its current actor/project authority even on receipt replay.
-func (s service) ChangeHarnessSelections(ctx context.Context, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
+func (s service) ChangeHarnessSelections(ctx context.Context, request workspaceconfig.HarnessSelectionChangeRequest, authorize func(context.Context) error) (harnesscore.SelectionSnapshot, error) {
 	if request.ProjectRef != s.projectContext.ProjectID {
 		return harnesscore.SelectionSnapshot{}, workflowstate.ErrConflict
 	}
 
-	return core.ChangeHarnessSelections(ctx, s.projectContext.ProjectDir, core.HarnessSelectionChangeOptions{
+	return workspaceconfig.ChangeHarnessSelections(ctx, s.projectContext.ProjectDir, workspaceconfig.HarnessSelectionChangeOptions{
 		Request: request, Authorize: authorize,
-		Validate: func(ctx context.Context, config core.WorkspaceConfig) error {
+		Validate: func(ctx context.Context, config workspaceconfig.Config) error {
 			return s.validateHarnessSelectionChange(ctx, config, request)
 		},
 	})
 }
 
-func (s service) validateHarnessSelectionChange(ctx context.Context, config core.WorkspaceConfig, request core.HarnessSelectionChangeRequest) error {
+func (s service) validateHarnessSelectionChange(ctx context.Context, config workspaceconfig.Config, request workspaceconfig.HarnessSelectionChangeRequest) error {
 	for _, field := range []struct {
 		role   harnesscore.Role
 		change *string

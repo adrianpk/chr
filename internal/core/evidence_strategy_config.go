@@ -3,15 +3,17 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ValidateEvidenceConfig validates the corresponding package boundary value.
-func ValidateEvidenceConfig(config EvidenceConfig) error {
+func ValidateEvidenceConfig(config workspaceconfig.EvidenceConfig) error {
 	return ValidateEvidenceStrategyConfig(config.Strategy)
 }
 
 // ValidateEvidenceStrategyConfig validates the corresponding package boundary value.
-func ValidateEvidenceStrategyConfig(config EvidenceStrategyConfig) error {
+func ValidateEvidenceStrategyConfig(config workspaceconfig.EvidenceStrategyConfig) error {
 	if !IsValidEvidenceStrategyMode(config.Mode) {
 		return fmt.Errorf("invalid evidence strategy mode: %s", config.Mode)
 	}
@@ -28,10 +30,10 @@ func ValidateEvidenceStrategyConfig(config EvidenceStrategyConfig) error {
 }
 
 // IsValidEvidenceStrategyMode executes the corresponding package operation.
-func IsValidEvidenceStrategyMode(mode EvidenceStrategyMode) bool {
-	switch EvidenceStrategyMode(strings.TrimSpace(string(mode))) {
-	case EvidenceStrategyModeInline,
-		EvidenceStrategyModeSeparatePass:
+func IsValidEvidenceStrategyMode(mode workspaceconfig.EvidenceStrategyMode) bool {
+	switch workspaceconfig.EvidenceStrategyMode(strings.TrimSpace(string(mode))) {
+	case workspaceconfig.EvidenceStrategyModeInline,
+		workspaceconfig.EvidenceStrategyModeSeparatePass:
 		return true
 	default:
 		return false
@@ -39,10 +41,10 @@ func IsValidEvidenceStrategyMode(mode EvidenceStrategyMode) bool {
 }
 
 // IsValidEvidenceTicketChecklistPolicy executes the corresponding package operation.
-func IsValidEvidenceTicketChecklistPolicy(policy EvidenceTicketChecklistPolicy) bool {
-	switch EvidenceTicketChecklistPolicy(strings.TrimSpace(string(policy))) {
-	case EvidenceTicketChecklistPolicyRequired,
-		EvidenceTicketChecklistPolicyOptional:
+func IsValidEvidenceTicketChecklistPolicy(policy workspaceconfig.EvidenceTicketChecklistPolicy) bool {
+	switch workspaceconfig.EvidenceTicketChecklistPolicy(strings.TrimSpace(string(policy))) {
+	case workspaceconfig.EvidenceTicketChecklistPolicyRequired,
+		workspaceconfig.EvidenceTicketChecklistPolicyOptional:
 		return true
 	default:
 		return false
@@ -50,11 +52,11 @@ func IsValidEvidenceTicketChecklistPolicy(policy EvidenceTicketChecklistPolicy) 
 }
 
 // IsValidEvidenceGherkinPolicy executes the corresponding package operation.
-func IsValidEvidenceGherkinPolicy(policy EvidenceGherkinPolicy) bool {
-	switch EvidenceGherkinPolicy(strings.TrimSpace(string(policy))) {
-	case EvidenceGherkinPolicyActiveWhenApplicable,
-		EvidenceGherkinPolicyDisabled,
-		EvidenceGherkinPolicyManualOnly:
+func IsValidEvidenceGherkinPolicy(policy workspaceconfig.EvidenceGherkinPolicy) bool {
+	switch workspaceconfig.EvidenceGherkinPolicy(strings.TrimSpace(string(policy))) {
+	case workspaceconfig.EvidenceGherkinPolicyActiveWhenApplicable,
+		workspaceconfig.EvidenceGherkinPolicyDisabled,
+		workspaceconfig.EvidenceGherkinPolicyManualOnly:
 		return true
 	default:
 		return false

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // Preserve the complete configuration revision while parsing strict role fields.
@@ -21,7 +22,7 @@ func TestHarnessSelectionConfiguration(t *testing.T) {
 		{"bad indentation", "harnesses:\n generation: writing\n", "", "", true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			config, err := parseWorkflowConfig([]byte(test.body))
+			config, err := workspaceconfig.Parse([]byte(test.body))
 			if (err != nil) != test.invalid {
 				t.Fatalf("configuration error = %v", err)
 			}

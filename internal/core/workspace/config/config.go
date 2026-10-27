@@ -1,4 +1,4 @@
-package core
+package config
 
 import (
 	"bufio"
@@ -19,8 +19,8 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// WorkspaceConfig describes a package boundary value.
-type WorkspaceConfig struct {
+// Config is one parsed project configuration image with explicit-key metadata and its raw revision.
+type Config struct {
 	Harnesses       harnesscore.SelectionConfig
 	HarnessAudit    harnesscore.SelectionAudit
 	Workflow        WorkflowConfig
@@ -208,7 +208,7 @@ func DefaultReviewProviderConfig() ReviewProviderConfig {
 func DefaultWorkConfig() WorkConfig {
 	return WorkConfig{
 		Integration:            WorkIntegrationConfig{PublicationProfile: WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
-		MergeStrategy:          TicketMergeStrategyRebase,
+		MergeStrategy:          "rebase",
 		WorkerTimeoutSeconds:   3600,
 		CheckpointStepLimit:    workflowstate.PageLimit,
 		MaxWorkerAttempts:      3,
@@ -240,9 +240,9 @@ func DefaultEvidenceStrategyConfig() EvidenceStrategyConfig {
 	}
 }
 
-// LoadWorkspaceConfig loads the corresponding package data.
-func defaultWorkspaceConfig() WorkspaceConfig {
-	return WorkspaceConfig{
+// Default returns the legacy defaults without reading or activating a project.
+func Default() Config {
+	return Config{
 		TicketKeyPrefix: ticketcore.DefaultKeyPrefix,
 		Runtime:         harnessruntime.DefaultConfig(),
 		Notifications:   notifycore.DefaultConfig(),
@@ -253,13 +253,13 @@ func defaultWorkspaceConfig() WorkspaceConfig {
 	}
 }
 
-// LoadWorkspaceConfig resolves explicit values over versioned defaults.
-func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
-	if err := requireNoWorkflowUpgrade(projectDir); err != nil {
-		return WorkspaceConfig{}, err
+// Load resolves explicit values over versioned defaults.
+func Load(projectDir string) (Config, error) {
+	if err := RequireNoWorkflowUpgrade(projectDir); err != nil {
+		return Config{}, err
 	}
 
-	config := defaultWorkspaceConfig()
+	config := Default()
 	path := workspacecore.UserPath(projectDir, "config.yml")
 
 	file, err := os.Open(path)
@@ -268,7 +268,7 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 	}
 
 	if err != nil {
-		return WorkspaceConfig{}, fmt.Errorf("open workspace config: %w", err)
+		return Config{}, fmt.Errorf("open workspace config: %w", err)
 	}
 
 	defer func() {
@@ -278,19 +278,19 @@ func LoadWorkspaceConfig(projectDir string) (WorkspaceConfig, error) {
 
 	err = readWorkspaceConfig(file, &config)
 	if err != nil {
-		return WorkspaceConfig{}, err
+		return Config{}, err
 	}
 
 	return config, nil
 }
 
-func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
+func readWorkspaceConfig(file *os.File, config *Config) error {
 	data, err := io.ReadAll(io.LimitReader(file, workflowstate.FileLimit+1))
 	if err != nil {
 		return fmt.Errorf("read workspace config: %w", err)
 	}
 
-	resolved, err := parseWorkflowConfig(data)
+	resolved, err := Parse(data)
 	if err != nil {
 		return err
 	}
@@ -300,7 +300,7 @@ func readWorkspaceConfig(file *os.File, config *WorkspaceConfig) error {
 	return nil
 }
 
-func applyWorkspaceConfig(data []byte, config *WorkspaceConfig) error {
+func applyWorkspaceConfig(data []byte, config *Config) error {
 	scanner := bufio.NewScanner(strings.NewReader(string(data)))
 	section := ""
 
@@ -323,7 +323,7 @@ func applyWorkspaceConfig(data []byte, config *WorkspaceConfig) error {
 	return nil
 }
 
-func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value string) {
+func applyWorkspaceConfigValue(config *Config, section, key, value string) {
 	if setWorkspaceConfigRootValue(config, section, key, value) {
 		return
 	}
@@ -344,7 +344,7 @@ func applyWorkspaceConfigValue(config *WorkspaceConfig, section, key, value stri
 	}
 }
 
-func setWorkspaceConfigRootValue(config *WorkspaceConfig, section, key, value string) bool {
+func setWorkspaceConfigRootValue(config *Config, section, key, value string) bool {
 	if section != "" && section != "tickets" {
 		return false
 	}

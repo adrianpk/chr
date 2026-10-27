@@ -14,6 +14,7 @@ import (
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -34,7 +35,7 @@ func TestHarnessBindingPending(t *testing.T) {
 
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "harnesses:\n  worker: unavailable\n  generation: other\n")
 
-	request.ResolveHarness = func(context.Context, WorkspaceConfig) (WorkflowHarnessResolution, error) {
+	request.ResolveHarness = func(context.Context, workspaceconfig.Config) (WorkflowHarnessResolution, error) {
 		t.Fatal("retained request resolved live configuration")
 
 		return WorkflowHarnessResolution{}, nil
@@ -65,7 +66,7 @@ func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessR
 		t.Fatal(err)
 	}
 
-	return func(_ context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
+	return func(_ context.Context, config workspaceconfig.Config) (WorkflowHarnessResolution, error) {
 		binding, err := harnesscore.SealBinding(harnesscore.Binding{SchemaVersion: 1, Role: harnesscore.Worker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable.Reference, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
 
 		return WorkflowHarnessResolution{Binding: &binding, Command: slices.Clone(executable.Command)}, err
@@ -242,7 +243,7 @@ func checkHarnessBindingBudget(t *testing.T, identity string) {
 
 	request.Policy.AgentTokenBudget = 100
 	resolver := harnessBindingTestResolver(t, workflowTaskCommand(t, "worker"))
-	request.ResolveHarness = func(ctx context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
+	request.ResolveHarness = func(ctx context.Context, config workspaceconfig.Config) (WorkflowHarnessResolution, error) {
 		resolved, err := resolver(ctx, config)
 		if err != nil {
 			return WorkflowHarnessResolution{}, err

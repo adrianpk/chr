@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // WorkflowNativeIntegrationCapability rechecks current host grants, actual
@@ -21,7 +22,7 @@ func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx conte
 	defer cancel()
 
 	capability := newWorkflowNativeCapability(request)
-	if request.Config.PublicationProfile != WorkflowPublicationGitAtomicDualRef {
+	if request.Config.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		capability.Unsupported = []WorkflowNativeUnsupported{{"profile_disabled", "Explicitly select git_atomic_dual_ref."}}
 
 		return sealWorkflowNativeCapability(capability)
@@ -63,7 +64,7 @@ func sameWorkflowNativeSourcePR(current, retained WorkflowPullRequestSnapshot) b
 
 func newWorkflowNativeCapability(request WorkflowNativeCapabilityRequest) WorkflowNativeCapability {
 	return WorkflowNativeCapability{
-		WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: request.Publication.Repository, PullRequestURL: request.PullRequest.URL, Method: request.Publication.Git.Method, Mechanism: WorkflowPublicationGitAtomicDualRef},
+		WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: request.Publication.Repository, PullRequestURL: request.PullRequest.URL, Method: request.Publication.Git.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef},
 		SourceRef:                     request.Publication.SourceRef, TargetRef: request.Publication.TargetRef, AdapterVersion: workflowNativeAdapterVersion,
 		OriginalSourceCommit: request.Publication.Git.SourceCommit, ExpectedBaseCommit: request.Publication.Git.BaseCommit, PreparedResultCommit: request.Publication.Git.ResultCommit,
 	}

@@ -1,16 +1,16 @@
 package app
 
-import core "forge.adrianpk.com/chr/internal/core"
+import workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 
-func workSelectionWorkConfig(projectDir string) (core.WorkConfig, error) {
-	config, err := core.LoadWorkspaceConfig(projectDir)
+func workSelectionWorkConfig(projectDir string) (workspaceconfig.WorkConfig, error) {
+	config, err := workspaceconfig.Load(projectDir)
 	if err != nil {
-		return core.WorkConfig{}, err
+		return workspaceconfig.WorkConfig{}, err
 	}
 
-	err = core.ValidateWorkConfig(config.Work)
+	err = workspaceconfig.ValidateWorkConfig(config.Work)
 	if err != nil {
-		return core.WorkConfig{}, err
+		return workspaceconfig.WorkConfig{}, err
 	}
 
 	return config.Work, nil

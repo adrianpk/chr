@@ -6,8 +6,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *cli.Command) (bool, error) {
@@ -23,7 +23,7 @@ func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *
 		return false, err
 	}
 
-	if core.WorkAuthority(config.Work) == core.WorkStateAuthorityTrackerCompat {
+	if workspaceconfig.WorkAuthority(config.Work) == workspaceconfig.WorkStateAuthorityTrackerCompat {
 		if err := operations.checkLegacyAgentWorkKey(cmd.Args().First()); err != nil {
 			return false, err
 		}
@@ -43,7 +43,7 @@ func (factory commandFactory) runTicketStartAuthority(ctx context.Context, cmd *
 	return true, printAgentWorkTicket(factory.io.Stdout, result)
 }
 
-func printNativeTicketStartPreview(operations service, config core.WorkspaceConfig, key string, stdout io.Writer) error {
+func printNativeTicketStartPreview(operations service, config workspaceconfig.Config, key string, stdout io.Writer) error {
 	result, err := operations.previewNativeAgentWorkSelection(config, workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: key}})
 	if err != nil {
 		return err

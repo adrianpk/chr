@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestNativePolicyDenials proves anonymous permission denial and incompatible
@@ -80,7 +82,7 @@ func nativeReviewDenial(t *testing.T, state string, profile nativeLiveProfile) {
 	f.evidence.Policy = nativeFixtureAPI(t, t.Context(), profile, method, endpoint, payload)
 	nativeFixtureNote(t, t.Context(), "Created an exact owned native-integration QA target policy requiring native review; retained protection for "+profile.URL+" branch "+branch+".")
 
-	query := WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: f.evidence.Native.Binding.PullRequest, Publication: f.request}
+	query := WorkflowNativeCapabilityRequest{Config: workspaceconfig.WorkIntegrationConfig{PublicationProfile: workspaceconfig.WorkflowPublicationGitAtomicDualRef}, PullRequest: f.evidence.Native.Binding.PullRequest, Publication: f.request}
 	policy := nativeMethodProbePolicy{nativeLivePolicyReader: nativeLivePolicyReader{state: state, profile: profile, publication: f.request}, https: true}
 	capability, err := f.adapter.WorkflowNativeIntegrationCapability(t.Context(), query, policy, f.publisher)
 

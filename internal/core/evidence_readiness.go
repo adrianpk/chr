@@ -6,11 +6,12 @@ import (
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // EvidenceReadinessRequest describes inputs for ready-for-review evidence checks.
 type EvidenceReadinessRequest struct {
-	Config         EvidenceStrategyConfig
+	Config         workspaceconfig.EvidenceStrategyConfig
 	Checklist      *EvidenceStrategyChecklist
 	ChecklistError string
 	Execution      *executioncore.Record
@@ -65,10 +66,10 @@ func (r EvidenceReadinessResult) BlockerReason() string {
 	return "evidence readiness failed: " + strings.Join(reasons, "; ")
 }
 
-func evidenceGateDisabled(config EvidenceStrategyConfig) bool {
+func evidenceGateDisabled(config workspaceconfig.EvidenceStrategyConfig) bool {
 	return !config.Enabled ||
 		!config.StrictReadyForReview ||
-		config.TicketChecklist == EvidenceTicketChecklistPolicyOptional
+		config.TicketChecklist == workspaceconfig.EvidenceTicketChecklistPolicyOptional
 }
 
 func evidenceReadinessDiagnostics(request EvidenceReadinessRequest) []EvidenceReadinessDiagnostic {

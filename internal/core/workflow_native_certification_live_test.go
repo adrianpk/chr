@@ -9,6 +9,7 @@ import (
 	"time"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestNativeForgejoMethods certifies exact merge, rebase and squash publication
@@ -67,7 +68,7 @@ func nativeMethodCase(t *testing.T, state string, profile nativeLiveProfile, ser
 
 	pushNativeLiveInitialRefs(t, profile, request)
 
-	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
+	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
 	pr := createNativeLivePR(t, adapter, profile, request)
 
 	evidence.Native.Binding = WorkflowNativePublicationBinding{

@@ -10,6 +10,7 @@ import (
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // TestInitWorkflowProfiles checks the shipped templates and their missing-field
@@ -76,14 +77,14 @@ func workflowProfileInitializer(t *testing.T) Workspace {
 func checkInitializedWorkflow(t *testing.T, project string) {
 	t.Helper()
 
-	config, err := LoadWorkspaceConfig(project)
-	if err != nil || config.Work.MaxActiveWorkers != 1 || config.Work.Integration.PublicationProfile != WorkflowPublicationDisabled {
+	config, err := workspaceconfig.Load(project)
+	if err != nil || config.Work.MaxActiveWorkers != 1 || config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationDisabled {
 		t.Fatal("initialized workflow differs from approved defaults", config, err)
 	}
 
-	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, WorkStateAuthorityTickets, workspacecore.ExecutionWorktree})
+	checkWorkflowConfigDefaultValues(t, project, workflowConfigDefaultCase{"initialized", "", "version_default", 1, workflowstate.ReviewTrustedAutoMerge, workspaceconfig.WorkStateAuthorityTickets, workspacecore.ExecutionWorktree})
 
-	effective, err := ResolveWorkflowConfiguration(project, "")
+	effective, err := workspaceconfig.ResolveWorkflowConfiguration(project, "")
 	if err != nil || len(effective.Values) != 15 {
 		t.Fatal("initialized configuration is incomplete", effective, err)
 	}
@@ -132,7 +133,7 @@ func checkExistingWorkflowInitialization(t *testing.T, body string) {
 		writeWorkspaceConfig(t, project, body)
 	}
 
-	before, beforeErr := ResolveWorkflowConfiguration(project, "")
+	before, beforeErr := workspaceconfig.ResolveWorkflowConfiguration(project, "")
 	workspace := workflowProfileInitializer(t)
 
 	for _, profile := range []string{"standard", "minimal", "personal"} {
@@ -141,7 +142,7 @@ func checkExistingWorkflowInitialization(t *testing.T, body string) {
 		}
 	}
 
-	after, afterErr := ResolveWorkflowConfiguration(project, "")
+	after, afterErr := workspaceconfig.ResolveWorkflowConfiguration(project, "")
 	if (beforeErr == nil) != (afterErr == nil) || !reflect.DeepEqual(before, after) {
 		t.Fatal("reinitialization changed effective policy", before, after, beforeErr, afterErr)
 	}

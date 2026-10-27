@@ -9,6 +9,7 @@ import (
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 const (
@@ -23,7 +24,7 @@ const (
 // TicketReviewCommandOptions describes a package boundary value.
 type TicketReviewCommandOptions struct {
 	Ticket     ticketcore.Indexed
-	Config     WorkspaceConfig
+	Config     workspaceconfig.Config
 	Result     ticketcore.ReviewResult
 	Findings   []string
 	Adapter    RemoteReviewAdapter

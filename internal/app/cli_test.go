@@ -36,6 +36,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -221,9 +222,9 @@ func TestWebServeDryRunRejectsInvalidConfig(t *testing.T) {
 }
 
 func TestWebServeAutoTokenPolicyRequiresTokenForNonLoopback(t *testing.T) {
-	t.Setenv(core.DefaultWebTokenEnv, "secret-token")
+	t.Setenv(workspaceconfig.DefaultWebTokenEnv, "secret-token")
 
-	webConfig := core.DefaultWebConfig()
+	webConfig := workspaceconfig.DefaultWebConfig()
 	webConfig.Host = "0.0.0.0"
 
 	handler, err := newWebServeMux(resolvedWebServeConfig{
@@ -253,9 +254,9 @@ func TestWebServeAutoTokenPolicyRequiresTokenForNonLoopback(t *testing.T) {
 }
 
 func TestWebServeTokenPolicyRejectsMissingRequiredToken(t *testing.T) {
-	t.Setenv(core.DefaultWebTokenEnv, "")
+	t.Setenv(workspaceconfig.DefaultWebTokenEnv, "")
 
-	webConfig := core.DefaultWebConfig()
+	webConfig := workspaceconfig.DefaultWebConfig()
 	webConfig.Host = "0.0.0.0"
 
 	_, err := newWebServeMux(resolvedWebServeConfig{
@@ -279,7 +280,7 @@ func TestWebServeHealthz(t *testing.T) {
 	handler, err := newWebServeMux(resolvedWebServeConfig{
 		ProjectDir: t.TempDir(),
 		URL:        "http://127.0.0.1:7331",
-		Web:        core.DefaultWebConfig(),
+		Web:        workspaceconfig.DefaultWebConfig(),
 	})
 	if err != nil {
 		t.Fatalf("newWebServeMux returned error: %v", err)
@@ -302,7 +303,7 @@ func TestWebServeShell(t *testing.T) {
 	handler, err := newWebServeMux(resolvedWebServeConfig{
 		ProjectDir: projectDir,
 		URL:        "http://127.0.0.1:7331",
-		Web:        core.DefaultWebConfig(),
+		Web:        workspaceconfig.DefaultWebConfig(),
 	})
 	if err != nil {
 		t.Fatalf("newWebServeMux returned error: %v", err)
@@ -327,7 +328,7 @@ func TestWebServeAssets(t *testing.T) {
 	handler, err := newWebServeMux(resolvedWebServeConfig{
 		ProjectDir: t.TempDir(),
 		URL:        "http://127.0.0.1:7331",
-		Web:        core.DefaultWebConfig(),
+		Web:        workspaceconfig.DefaultWebConfig(),
 	})
 	if err != nil {
 		t.Fatalf("newWebServeMux returned error: %v", err)
@@ -368,7 +369,7 @@ func TestWebServeBoardUsesProjectTickets(t *testing.T) {
 	handler, err := newWebServeMux(resolvedWebServeConfig{
 		ProjectDir:     projectDir,
 		URL:            "http://127.0.0.1:7331",
-		Web:            core.DefaultWebConfig(),
+		Web:            workspaceconfig.DefaultWebConfig(),
 		Env:            env,
 		ProjectContext: projectContext,
 		AssetsFS:       testAssetsFS(),
@@ -991,7 +992,7 @@ func newWebServeBoardTestProvider(projectDir string, env core.UserEnvironment, p
 		config: resolvedWebServeConfig{
 			ProjectDir: projectDir,
 			URL:        "http://127.0.0.1:7331",
-			Web:        core.DefaultWebConfig(),
+			Web:        workspaceconfig.DefaultWebConfig(),
 		},
 	}
 	provider.serviceFactory = func(ctx context.Context) service {
