@@ -8,45 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowControlIntegrationGuard is the displayed integration image. Private
-// claim credentials are derived by the native owner after these fields match.
-type WorkflowControlIntegrationGuard struct {
-	EntryID        string
-	EntryRevision  uint64
-	BudgetRevision uint64
-	CandidateHash  string
-}
-
-// WorkflowControlMutationRequest binds one attributable control to its
-// displayed invocation and any required candidate, budget or question images.
-type WorkflowControlMutationRequest struct {
-	Guided           *GuidedWorkflowControlProof `json:"guided,omitempty"`
-	Binding          workflowstate.MutationBinding
-	Integration      *WorkflowControlIntegrationGuard
-	Grant            *WorkflowIntegrationGrant
-	Answer           *WorkflowIntegrationAnswer
-	Action           string
-	ID               string
-	ExpectedRevision uint64
-	ReviewHash       string
-	DecisionRevision uint64
-	DecisionHash     string
-	StepLimit        int `json:",omitempty"`
-}
-
-// WorkflowControlResult is the original confirmed mutation receipt. Its revision
-// describes acceptance; callers observe current workflow state separately.
-type WorkflowControlResult struct {
-	RequestID      string `json:"request_id"`
-	Action         string `json:"action"`
-	InvocationID   string `json:"invocation_id"`
-	ArgumentDigest string `json:"argument_digest"`
-	ReceiptRef     string `json:"receipt_ref"`
-	PriorRevision  uint64 `json:"prior_revision"`
-	Revision       uint64 `json:"revision"`
-}
-
-func freezeWorkflowControlMutation(request WorkflowControlMutationRequest) (WorkflowControlMutationRequest, string, error) {
+func freezeWorkflowControlMutation(request workflowstate.WorkflowControlMutationRequest) (workflowstate.WorkflowControlMutationRequest, string, error) {
 	if err := validateGuidedControlProof(request); err != nil {
 		return request, "", err
 	}
@@ -64,7 +26,7 @@ func freezeWorkflowControlMutation(request WorkflowControlMutationRequest) (Work
 		return request, "", workflowstate.ErrConflict
 	}
 
-	var frozen WorkflowControlMutationRequest
+	var frozen workflowstate.WorkflowControlMutationRequest
 	if err := json.Unmarshal(data, &frozen); err != nil {
 		return frozen, "", err
 	}
@@ -76,7 +38,7 @@ func freezeWorkflowControlMutation(request WorkflowControlMutationRequest) (Work
 	return frozen, contenthash.Sum(data), nil
 }
 
-func validateWorkflowControlPayload(request WorkflowControlMutationRequest) error {
+func validateWorkflowControlPayload(request workflowstate.WorkflowControlMutationRequest) error {
 	if request.StepLimit != 0 && request.Action != "continue" {
 		return workflowstate.ErrConflict
 	}

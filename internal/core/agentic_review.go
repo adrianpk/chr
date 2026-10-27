@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -41,18 +42,11 @@ type AgenticReviewContext struct {
 
 // AgenticReviewResult describes the structured agentic review decision.
 type AgenticReviewResult struct {
-	Decision          IntegrationReviewDecision `json:"decision"`
-	Summary           string                    `json:"summary"`
-	BlockingFindings  []AgenticReviewFinding    `json:"blocking_findings,omitempty"`
-	NonBlockingNotes  []AgenticReviewFinding    `json:"non_blocking_notes,omitempty"`
-	ReviewedArtifacts []string                  `json:"reviewed_artifacts,omitempty"`
-}
-
-// AgenticReviewFinding describes one blocking or non-blocking review note.
-type AgenticReviewFinding struct {
-	Category string `json:"category"`
-	Title    string `json:"title"`
-	Detail   string `json:"detail"`
+	Decision          IntegrationReviewDecision            `json:"decision"`
+	Summary           string                               `json:"summary"`
+	BlockingFindings  []workflowstate.AgenticReviewFinding `json:"blocking_findings,omitempty"`
+	NonBlockingNotes  []workflowstate.AgenticReviewFinding `json:"non_blocking_notes,omitempty"`
+	ReviewedArtifacts []string                             `json:"reviewed_artifacts,omitempty"`
 }
 
 // AgenticReviewArtifact describes files produced by one local review.
@@ -402,8 +396,8 @@ func WriteAgenticReviewSummary(artifact AgenticReviewArtifact) error {
 	return nil
 }
 
-func agenticReviewFindings(result AgenticReviewResult) []AgenticReviewFinding {
-	findings := make([]AgenticReviewFinding, 0, len(result.BlockingFindings)+len(result.NonBlockingNotes))
+func agenticReviewFindings(result AgenticReviewResult) []workflowstate.AgenticReviewFinding {
+	findings := make([]workflowstate.AgenticReviewFinding, 0, len(result.BlockingFindings)+len(result.NonBlockingNotes))
 	findings = append(findings, result.BlockingFindings...)
 	findings = append(findings, result.NonBlockingNotes...)
 
@@ -474,7 +468,7 @@ func agenticReviewBlockingFindingBodies(result AgenticReviewResult) []string {
 	return findings
 }
 
-func validateAgenticReviewFinding(finding AgenticReviewFinding) error {
+func validateAgenticReviewFinding(finding workflowstate.AgenticReviewFinding) error {
 	if !validAgenticReviewFindingCategory(finding.Category) {
 		return fmt.Errorf("invalid agentic review finding category: %s", finding.Category)
 	}
@@ -505,7 +499,7 @@ func validAgenticReviewFindingCategory(category string) bool {
 	}
 }
 
-func writeAgenticReviewFindings(output *strings.Builder, findings []AgenticReviewFinding) {
+func writeAgenticReviewFindings(output *strings.Builder, findings []workflowstate.AgenticReviewFinding) {
 	if len(findings) == 0 {
 		output.WriteString("- none\n")
 

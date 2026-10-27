@@ -41,7 +41,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 		t.Fatal("unbound continuation retried preparation")
 	}
 
-	request := WorkflowControlMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "native-preparation-retry", Operator: "operator"}, Action: "continue", ID: f.run.ID, ExpectedRevision: blocked.Revision, StepLimit: 1}
+	request := workflowstate.WorkflowControlMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "native-preparation-retry", Operator: "operator"}, Action: "continue", ID: f.run.ID, ExpectedRevision: blocked.Revision, StepLimit: 1}
 
 	control := WorkflowLifecycleControlPorts{Execution: ports}
 	if _, err := f.store.ControlWorkflowLifecycle(t.Context(), request, control, nil); err != nil {
@@ -56,7 +56,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 	checkNativeHostRetryReplay(t, host, request, control, after)
 }
 
-func checkNativeHostRetryReplay(t *testing.T, host nativeHostFixture, request WorkflowControlMutationRequest, control WorkflowLifecycleControlPorts, after WorkflowInvocation) {
+func checkNativeHostRetryReplay(t *testing.T, host nativeHostFixture, request workflowstate.WorkflowControlMutationRequest, control WorkflowLifecycleControlPorts, after WorkflowInvocation) {
 	t.Helper()
 
 	if _, err := host.f.store.ControlWorkflowLifecycle(t.Context(), request, control, nil); err != nil {

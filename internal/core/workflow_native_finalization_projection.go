@@ -94,7 +94,7 @@ func (s *WorkflowStore) workflowNativeDeliveryProof(run workflowInvocationFile, 
 		return WorkflowSliceDeliveryProof{}, err
 	}
 
-	return WorkflowSliceDeliveryProof{Schema: "chr-slice-delivery-proof/v1", InvocationID: run.ID, Unit: receipt.Unit, CandidateID: receipt.CandidateID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, SubmissionID: receipt.SubmissionID, PullRequest: observation.PullRequest, Git: *observation.Git, ConfirmedAt: receipt.ConfirmedAt, NativeReceiptRef: &WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}}, nil
+	return WorkflowSliceDeliveryProof{Schema: "chr-slice-delivery-proof/v1", InvocationID: run.ID, Unit: receipt.Unit, CandidateID: receipt.CandidateID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, SubmissionID: receipt.SubmissionID, PullRequest: observation.PullRequest, Git: *observation.Git, ConfirmedAt: receipt.ConfirmedAt, NativeReceiptRef: &workflowstate.WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}}, nil
 }
 
 func workflowNativeDeliveryReceiptMatches(run workflowInvocationFile, record WorkflowRecord) bool {
@@ -132,7 +132,7 @@ func (s *WorkflowStore) checkWorkflowNativeDeliveryProof(run workflowInvocationF
 	return nil
 }
 
-func (s *WorkflowStore) readWorkflowNativeDeliveryRecord(run workflowInvocationFile, ref WorkflowEvidenceRef) (WorkflowRecord, error) {
+func (s *WorkflowStore) readWorkflowNativeDeliveryRecord(run workflowInvocationFile, ref workflowstate.WorkflowEvidenceRef) (WorkflowRecord, error) {
 	if err := validateWorkflowEvidenceRef(run.ID, ref); err != nil {
 		return WorkflowRecord{}, err
 	}

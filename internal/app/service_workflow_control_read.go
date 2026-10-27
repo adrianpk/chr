@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -30,8 +29,8 @@ func (s service) ReadWorkControlReceipt(ctx context.Context, request WorkflowCon
 	return status, true, err
 }
 
-func workflowNativeControlRequest(request WorkflowControlRequest) core.WorkflowControlMutationRequest {
-	native := core.WorkflowControlMutationRequest{Binding: *request.RequestBinding, Integration: request.Integration, Grant: request.BudgetGrant, Answer: request.DecisionAnswer, Action: request.Action, ID: request.ID, ExpectedRevision: request.ExpectedRevision, ReviewHash: request.BindingHash, DecisionRevision: request.DecisionRevision, DecisionHash: request.DecisionHash}
+func workflowNativeControlRequest(request WorkflowControlRequest) workflowstate.WorkflowControlMutationRequest {
+	native := workflowstate.WorkflowControlMutationRequest{Binding: *request.RequestBinding, Integration: request.Integration, Grant: request.BudgetGrant, Answer: request.DecisionAnswer, Action: request.Action, ID: request.ID, ExpectedRevision: request.ExpectedRevision, ReviewHash: request.BindingHash, DecisionRevision: request.DecisionRevision, DecisionHash: request.DecisionHash}
 	if request.Action == "continue" {
 		native.StepLimit = request.StepLimit
 	}

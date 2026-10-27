@@ -9,9 +9,10 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name string, value any) WorkflowEvidenceRef {
+func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name string, value any) workflowstate.WorkflowEvidenceRef {
 	t.Helper()
 
 	data, err := json.Marshal(value)
@@ -19,7 +20,7 @@ func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name str
 		t.Fatal(err)
 	}
 
-	ref := WorkflowEvidenceRef{Path: "run/" + id + "/evidence/native-" + name + ".json", Hash: contenthash.Sum(data)}
+	ref := workflowstate.WorkflowEvidenceRef{Path: "run/" + id + "/evidence/native-" + name + ".json", Hash: contenthash.Sum(data)}
 
 	path, err := store.safePath(ref.Path)
 	if err != nil {
@@ -77,7 +78,7 @@ func nativeRecordCandidate(t *testing.T, method string) (*WorkflowStore, Workflo
 	b.HistoryManifestRef = retainNativeRecordEvidence(t, f.store, b.InvocationID, "history", WorkflowNativeHistoryManifest{Schema: "chr-native-history/v1", Git: proof})
 	b.PreparationRef = retainNativeRecordEvidence(t, f.store, b.InvocationID, "preparation", candidate.Input)
 	b.CapabilityRef = retainNativeRecordEvidence(t, f.store, b.InvocationID, "capability", cap)
-	b.ValidationRefs = []WorkflowEvidenceRef{retainNativeRecordEvidence(t, f.store, b.InvocationID, "validation", candidate.Validation)}
+	b.ValidationRefs = []workflowstate.WorkflowEvidenceRef{retainNativeRecordEvidence(t, f.store, b.InvocationID, "validation", candidate.Validation)}
 	candidate.Native = &WorkflowNativeCandidate{WorkflowNativeRecordBinding: b}
 
 	candidate.Native.CandidateHash, err = WorkflowNativeCandidateHash(candidate)
@@ -234,7 +235,7 @@ func TestNativeRecordVersions(t *testing.T) {
 			b := &c.Native.WorkflowNativeRecordBinding
 			result := c.Validation
 			result.Schema = "chr-integration-validation/v2"
-			b.ValidationRefs = []WorkflowEvidenceRef{retainNativeRecordEvidence(t, store, b.InvocationID, "unsupported-validation", result)}
+			b.ValidationRefs = []workflowstate.WorkflowEvidenceRef{retainNativeRecordEvidence(t, store, b.InvocationID, "unsupported-validation", result)}
 		}},
 	}
 	for _, tc := range cases {

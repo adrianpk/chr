@@ -170,7 +170,7 @@ func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run
 	}
 
 	file := workflowstate.FileChange{Path: path, Before: before, After: append(data, '\n')}
-	run.IntegrationBudget = &WorkflowIntegrationBudgetBinding{Revision: budget.Revision, Ref: WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(file.After)}}
+	run.IntegrationBudget = &WorkflowIntegrationBudgetBinding{Revision: budget.Revision, Ref: workflowstate.WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(file.After)}}
 
 	return file, nil
 }

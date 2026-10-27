@@ -3,41 +3,22 @@ package core
 import (
 	"context"
 	"encoding/json"
-	"time"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowIntegrationAnswer is an explicit, attributable response. Resolve
-// records an interpretation; defer keeps the question waiting. Neither grants
-// publication, different scope, additional calls or a replacement gate.
-type WorkflowIntegrationAnswer struct {
-	ID             string                `json:"id"`
-	DecisionID     string                `json:"decision_id"`
-	Choice         string                `json:"choice"`
-	Action         string                `json:"action"`
-	Actor          string                `json:"actor"`
-	Authority      string                `json:"authority"`
-	Reason         string                `json:"reason"`
-	PriorRevision  uint64                `json:"prior_revision"`
-	QuestionHash   string                `json:"question_hash"`
-	RecordedAt     time.Time             `json:"recorded_at"`
-	OriginalCommit string                `json:"original_commit,omitempty"`
-	IntegrationFix *AgenticReviewFinding `json:"integration_fix,omitempty"`
-}
-
 // WorkflowIntegrationDecisions is an immutable revision under the existing
 // queue entry. Its original merger input owns source/base, scope and questions.
 type WorkflowIntegrationDecisions struct {
-	SchemaVersion     int                         `json:"schema_version"`
-	ID                string                      `json:"id"`
-	Revision          uint64                      `json:"revision"`
-	CandidateRevision uint64                      `json:"candidate_revision"`
-	State             string                      `json:"state"`
-	Input             WorkflowMergerInput         `json:"input"`
-	Requests          []WorkflowMergerDecision    `json:"requests"`
-	Answers           []WorkflowIntegrationAnswer `json:"answers"`
-	Previous          *WorkflowEvidenceRef        `json:"previous,omitempty"`
+	SchemaVersion     int                                       `json:"schema_version"`
+	ID                string                                    `json:"id"`
+	Revision          uint64                                    `json:"revision"`
+	CandidateRevision uint64                                    `json:"candidate_revision"`
+	State             string                                    `json:"state"`
+	Input             WorkflowMergerInput                       `json:"input"`
+	Requests          []WorkflowMergerDecision                  `json:"requests"`
+	Answers           []workflowstate.WorkflowIntegrationAnswer `json:"answers"`
+	Previous          *workflowstate.WorkflowEvidenceRef        `json:"previous,omitempty"`
 }
 
 // WorkflowIntegrationDecisionRequest records bounded ambiguity at a fresh
@@ -55,7 +36,7 @@ type WorkflowIntegrationAnswerRequest struct {
 	WorkflowIntegrationBudgetGuard
 	DecisionRevision uint64
 	DecisionHash     string
-	Answer           WorkflowIntegrationAnswer
+	Answer           workflowstate.WorkflowIntegrationAnswer
 }
 
 // ReadWorkflowIntegrationDecisions returns the current sealed question record.

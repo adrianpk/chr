@@ -30,7 +30,7 @@ func nativeMergerExecution(t *testing.T, id string) (workflowPreparationFixture,
 	input.ValidationContractRef = retainNativeRecordEvidence(t, f.store, run.ID, "execution-gate", workflowPreparationGate("test -f result.txt"))
 	source := retainNativeRecordEvidence(t, f.store, run.ID, "execution-intent", map[string]string{"intent": "Preserve source behavior"})
 	target := retainNativeRecordEvidence(t, f.store, run.ID, "execution-target", map[string]string{"intent": "Preserve target validation"})
-	input.IntentRefs, input.TargetChangeRefs = []WorkflowEvidenceRef{source}, []WorkflowEvidenceRef{target}
+	input.IntentRefs, input.TargetChangeRefs = []workflowstate.WorkflowEvidenceRef{source}, []workflowstate.WorkflowEvidenceRef{target}
 	input.Requirements = []WorkflowMergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
 	input.Conflicts = []WorkflowMergerConflict{{ID: "conflict-1", Path: "result.txt", Kind: "text", Evidence: diagnostic, RequirementIDs: []string{"source-api", "target-validation"}}}
 
@@ -117,7 +117,7 @@ func checkNativeMergerRetained(t *testing.T, f workflowPreparationFixture, resul
 	checkNativeMergerFrozenHarness(t, f.store, attempt, result.HarnessRef)
 }
 
-func checkNativeMergerFrozenHarness(t *testing.T, store *WorkflowStore, attempt WorkflowAttempt, reference WorkflowEvidenceRef) {
+func checkNativeMergerFrozenHarness(t *testing.T, store *WorkflowStore, attempt WorkflowAttempt, reference workflowstate.WorkflowEvidenceRef) {
 	t.Helper()
 
 	data, err := os.ReadFile(filepath.Join(store.layout.Root(), attempt.InputRef))
@@ -297,7 +297,7 @@ func nativeMergerChildDescendant(id string) {
 	}
 }
 
-func nativeMergerConflictFixture(t *testing.T) (workflowPreparationFixture, WorkflowEvidenceRef) {
+func nativeMergerConflictFixture(t *testing.T) (workflowPreparationFixture, workflowstate.WorkflowEvidenceRef) {
 	t.Helper()
 
 	f := newWorkflowPreparationFixture(t, "merge", workflowPreparationGate("test -f result.txt"))

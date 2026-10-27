@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -244,7 +245,7 @@ func TestApplyAgenticReviewResultNeedsChangesMovesTicketToReadyForDev(t *testing
 		Artifact: agenticReviewArtifactForTest(AgenticReviewResult{
 			Decision: IntegrationReviewDecisionNeedsChanges,
 			Summary:  "Needs repair.",
-			BlockingFindings: []AgenticReviewFinding{{
+			BlockingFindings: []workflowstate.AgenticReviewFinding{{
 				Category: AgenticReviewFindingCorrectness,
 				Title:    "Broken behavior",
 				Detail:   "The main flow fails.",

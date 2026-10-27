@@ -55,17 +55,17 @@ type WorkflowPreparedIntegrationGit interface {
 
 // WorkflowSliceDeliveryProof retains verified external delivery before finalization.
 type WorkflowSliceDeliveryProof struct {
-	Schema           string                      `json:"schema"`
-	InvocationID     string                      `json:"invocation_id"`
-	Unit             workflowstate.Ref           `json:"unit"`
-	CandidateID      string                      `json:"candidate_id"`
-	CandidateRef     string                      `json:"candidate_ref"`
-	CandidateHash    string                      `json:"candidate_hash"`
-	SubmissionID     string                      `json:"submission_id"`
-	PullRequest      WorkflowPullRequestSnapshot `json:"pull_request"`
-	Git              WorkflowIntegrationProof    `json:"git"`
-	ConfirmedAt      time.Time                   `json:"confirmed_at"`
-	NativeReceiptRef *WorkflowEvidenceRef        `json:"native_receipt_ref,omitempty"`
+	Schema           string                             `json:"schema"`
+	InvocationID     string                             `json:"invocation_id"`
+	Unit             workflowstate.Ref                  `json:"unit"`
+	CandidateID      string                             `json:"candidate_id"`
+	CandidateRef     string                             `json:"candidate_ref"`
+	CandidateHash    string                             `json:"candidate_hash"`
+	SubmissionID     string                             `json:"submission_id"`
+	PullRequest      WorkflowPullRequestSnapshot        `json:"pull_request"`
+	Git              WorkflowIntegrationProof           `json:"git"`
+	ConfirmedAt      time.Time                          `json:"confirmed_at"`
+	NativeReceiptRef *workflowstate.WorkflowEvidenceRef `json:"native_receipt_ref,omitempty"`
 }
 
 // VerifyWorkflowSliceIntegration observes external integration without publishing

@@ -80,7 +80,7 @@ func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Con
 
 // PrepareWorkflowMergerIntegrationFix creates an explicitly attributed host fix
 // on a verified private result. Its finding is retained in method provenance.
-func (git OSWorkflowPreparationGit) PrepareWorkflowMergerIntegrationFix(ctx context.Context, state WorkflowMergerRepairState, tree string, finding AgenticReviewFinding) (WorkflowMergerRepairState, error) {
+func (git OSWorkflowPreparationGit) PrepareWorkflowMergerIntegrationFix(ctx context.Context, state WorkflowMergerRepairState, tree string, finding workflowstate.AgenticReviewFinding) (WorkflowMergerRepairState, error) {
 	if state.Result == nil || state.SchemaVersion != 1 || state.Query.Repository != git.transport.repository {
 		return state, workflowstate.ErrConflict
 	}

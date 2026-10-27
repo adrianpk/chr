@@ -7,6 +7,8 @@ import (
 	"os"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) transitionWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationTransition) (WorkflowIntegrationEntry, error) {
@@ -316,7 +318,7 @@ func bindWorkflowIntegrationPublication(entry *WorkflowIntegrationEntry, run wor
 	}
 
 	if entry.State == "finalizing" || entry.State == "integrated" {
-		entry.ReceiptRef = &WorkflowEvidenceRef{Path: run.DeliveryRef, Hash: run.DeliveryHash}
+		entry.ReceiptRef = &workflowstate.WorkflowEvidenceRef{Path: run.DeliveryRef, Hash: run.DeliveryHash}
 	}
 }
 

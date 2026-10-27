@@ -35,7 +35,7 @@ func validateWorkflowDecisionRecord(record WorkflowIntegrationDecisions) error {
 	return nil
 }
 
-func validateWorkflowDecisionAnswer(record WorkflowIntegrationDecisions, answer WorkflowIntegrationAnswer) error {
+func validateWorkflowDecisionAnswer(record WorkflowIntegrationDecisions, answer workflowstate.WorkflowIntegrationAnswer) error {
 	index := slices.IndexFunc(record.Requests, func(d WorkflowMergerDecision) bool { return d.ID == answer.DecisionID })
 	if index < 0 || !validWorkflowDecisionAnswerActor(answer) {
 		return workflowstate.ErrConflict
@@ -53,7 +53,7 @@ func validateWorkflowDecisionAnswer(record WorkflowIntegrationDecisions, answer 
 	return validateWorkflowDecisionPayload(answer)
 }
 
-func validateWorkflowDecisionPayload(answer WorkflowIntegrationAnswer) error {
+func validateWorkflowDecisionPayload(answer workflowstate.WorkflowIntegrationAnswer) error {
 	if answer.DecisionID != "replay-owner" || answer.Action != "resolve" {
 		if answer.OriginalCommit != "" || answer.IntegrationFix != nil {
 			return workflowstate.ErrConflict
@@ -65,7 +65,7 @@ func validateWorkflowDecisionPayload(answer WorkflowIntegrationAnswer) error {
 	return validateWorkflowReplayPayload(answer)
 }
 
-func validateWorkflowReplayPayload(answer WorkflowIntegrationAnswer) error {
+func validateWorkflowReplayPayload(answer workflowstate.WorkflowIntegrationAnswer) error {
 	switch answer.Choice {
 	case "Identify the original source step":
 		if !workflowCommitID(answer.OriginalCommit) || answer.IntegrationFix != nil {
@@ -103,15 +103,15 @@ func validateWorkflowDecisionHistory(record WorkflowIntegrationDecisions) error 
 	return nil
 }
 
-func validWorkflowDecisionAnswerSeal(record WorkflowIntegrationDecisions, answer WorkflowIntegrationAnswer) bool {
+func validWorkflowDecisionAnswerSeal(record WorkflowIntegrationDecisions, answer workflowstate.WorkflowIntegrationAnswer) bool {
 	return answer.PriorRevision > 0 && answer.PriorRevision < record.Revision && validWorkflowNativeFingerprint(answer.QuestionHash) && !answer.RecordedAt.IsZero()
 }
 
-func validWorkflowDecisionAnswerActor(answer WorkflowIntegrationAnswer) bool {
+func validWorkflowDecisionAnswerActor(answer workflowstate.WorkflowIntegrationAnswer) bool {
 	return workflowstate.ValidRequestKey(answer.ID) && workflowstate.ValidRequestKey(answer.Actor) && validWorkflowMergerText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
 }
 
-func validWorkflowDecisionInterpretation(question WorkflowMergerDecision, answer WorkflowIntegrationAnswer) bool {
+func validWorkflowDecisionInterpretation(question WorkflowMergerDecision, answer workflowstate.WorkflowIntegrationAnswer) bool {
 	if answer.Action != "resolve" {
 		return true
 	}
@@ -123,6 +123,6 @@ func validWorkflowDecisionInterpretation(question WorkflowMergerDecision, answer
 	return !strings.HasPrefix(question.ID, "intent-") || answer.Choice == "Provide a compatible requirement interpretation"
 }
 
-func validWorkflowDecisionFix(finding *AgenticReviewFinding) bool {
+func validWorkflowDecisionFix(finding *workflowstate.AgenticReviewFinding) bool {
 	return finding != nil && validateAgenticReviewFinding(*finding) == nil && finding.Category != AgenticReviewFindingCosmetic
 }

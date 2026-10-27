@@ -5,18 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"time"
-)
 
-// WorkflowClosingEvidence binds one set-owned attempt to its exact file image.
-type WorkflowClosingEvidence struct {
-	Ref  string `json:"ref"`
-	Hash string `json:"hash"`
-}
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // WorkflowClosingBinding retains bounded attempt history across explicit reopening.
 // Each set invocation keeps its own retry budget and immutable evidence.
 type WorkflowClosingBinding struct {
-	Attempts []WorkflowClosingEvidence `json:"attempts"`
+	Attempts []workflowstate.WorkflowClosingEvidence `json:"attempts"`
 }
 
 // WorkflowSetClosureRequest requires the observed set and canonical target branch.
@@ -90,19 +86,19 @@ type workflowClosingClaim struct {
 }
 
 type workflowClosingAttempt struct {
-	Schema       string                  `json:"schema"`
-	SetID        string                  `json:"set_id"`
-	Generation   int                     `json:"generation"`
-	CapacitySlot int                     `json:"capacity_slot,omitempty"`
-	BudgetID     string                  `json:"budget_id"`
-	OwnerRoot    string                  `json:"owner_root"`
-	InvocationID string                  `json:"invocation_id,omitempty"`
-	Owner        WorkflowProcessIdentity `json:"owner"`
-	TokenHash    string                  `json:"token_hash"`
-	LeaseUntil   time.Time               `json:"lease_until"`
-	Input        WorkflowClosingEvidence `json:"input"`
-	Result       WorkflowClosingEvidence `json:"result"`
-	Processes    []WorkflowProcess       `json:"processes"`
-	Outcome      string                  `json:"outcome"`
-	FinishedAt   time.Time               `json:"finished_at,omitempty"`
+	Schema       string                                `json:"schema"`
+	SetID        string                                `json:"set_id"`
+	Generation   int                                   `json:"generation"`
+	CapacitySlot int                                   `json:"capacity_slot,omitempty"`
+	BudgetID     string                                `json:"budget_id"`
+	OwnerRoot    string                                `json:"owner_root"`
+	InvocationID string                                `json:"invocation_id,omitempty"`
+	Owner        WorkflowProcessIdentity               `json:"owner"`
+	TokenHash    string                                `json:"token_hash"`
+	LeaseUntil   time.Time                             `json:"lease_until"`
+	Input        workflowstate.WorkflowClosingEvidence `json:"input"`
+	Result       workflowstate.WorkflowClosingEvidence `json:"result"`
+	Processes    []WorkflowProcess                     `json:"processes"`
+	Outcome      string                                `json:"outcome"`
+	FinishedAt   time.Time                             `json:"finished_at,omitempty"`
 }

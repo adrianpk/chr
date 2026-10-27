@@ -5,7 +5,6 @@ import (
 	"maps"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -26,7 +25,7 @@ func TestServiceIntegrationGrant(t *testing.T) {
 	}
 
 	request := serviceIntegrationControl(status, "grant")
-	request.BudgetGrant = &core.WorkflowIntegrationGrant{ID: "more-submissions", Kind: "submission", Amount: 1, Actor: "operator", Reason: "Authorize one additional bounded submission"}
+	request.BudgetGrant = &workflowstate.WorkflowIntegrationGrant{ID: "more-submissions", Kind: "submission", Amount: 1, Actor: "operator", Reason: "Authorize one additional bounded submission"}
 	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
 
 	cases := []struct {

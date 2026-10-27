@@ -12,8 +12,8 @@ import (
 type GuidedResultReference struct {
 	InvocationID string
 	Revision     uint64
-	Receipts     []WorkflowEvidenceRef
-	Closures     []WorkflowClosingEvidence
+	Receipts     []workflowstate.WorkflowEvidenceRef
+	Closures     []workflowstate.WorkflowClosingEvidence
 }
 
 // ReadGuidedResult verifies the exact native binding and its original evidence.

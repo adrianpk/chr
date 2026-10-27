@@ -20,20 +20,20 @@ func TestNativeDecisionReplay(t *testing.T) {
 
 	cases := []struct {
 		name    string
-		answer  WorkflowIntegrationAnswer
+		answer  workflowstate.WorkflowIntegrationAnswer
 		outcome string
 		denied  bool
 	}{
-		{"owner", WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.SourceCommit}, "replay_step", false},
-		{"foreign owner", WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.BaseCommit}, "", true},
-		{"fix", WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", IntegrationFix: &AgenticReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain compatible output", Detail: "Combined validation requires an explicit compatible integration repair"}}, "integration_fix", false},
-		{"defer", WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "defer"}, "needs_decision", false},
+		{"owner", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.SourceCommit}, "replay_step", false},
+		{"foreign owner", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", OriginalCommit: state.Query.BaseCommit}, "", true},
+		{"fix", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "resolve", IntegrationFix: &workflowstate.AgenticReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain compatible output", Detail: "Combined validation requires an explicit compatible integration repair"}}, "integration_fix", false},
+		{"defer", workflowstate.WorkflowIntegrationAnswer{DecisionID: "replay-owner", Action: "defer"}, "needs_decision", false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			input := original
 			input.OperatorDecisionRef = &input.SourceManifestRef
-			input.OperatorAnswers = []WorkflowIntegrationAnswer{tc.answer}
+			input.OperatorAnswers = []workflowstate.WorkflowIntegrationAnswer{tc.answer}
 
 			input, err := SealWorkflowMergerInput(input, now)
 			if err != nil {

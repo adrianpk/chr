@@ -185,7 +185,7 @@ func nativeReplayFix(t *testing.T, proof WorkflowIntegrationProof, lane Workflow
 
 	tree := workflowIntegrationCommand(t, lane.Worktree, "write-tree")
 	reader := workflowIntegrationReader{dir: lane.Worktree}
-	finding := AgenticReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain integration output", Detail: "The combined validation requires this repair output."}
+	finding := workflowstate.AgenticReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain integration output", Detail: "The combined validation requires this repair output."}
 
 	fixed, err := reader.prepareRebaseFix(t.Context(), proof, tree, finding)
 	if err != nil {

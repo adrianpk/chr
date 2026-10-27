@@ -88,13 +88,13 @@ func validateWorkflowIntegrationGrants(b WorkflowIntegrationBudget) error {
 	return validateWorkflowIntegrationTokenGrants(b)
 }
 
-func validWorkflowIntegrationGrant(grant WorkflowIntegrationGrant, revision uint64) bool {
+func validWorkflowIntegrationGrant(grant workflowstate.WorkflowIntegrationGrant, revision uint64) bool {
 	return workflowstate.ValidRequestKey(grant.ID) && grant.Amount > 0 && grant.PriorRevision < revision && grant.PriorRevision > 0 && !grant.RecordedAt.IsZero() && workflowstate.ValidRequestKey(grant.Actor) && workflowstate.ValidRequestKey(grant.Reason)
 }
 
 func validateWorkflowIntegrationTokenGrants(b WorkflowIntegrationBudget) error {
 	if b.AdmissionTokenLimit == nil {
-		if b.TokenLimit != nil || slices.ContainsFunc(b.Grants, func(g WorkflowIntegrationGrant) bool { return g.Kind == "tokens" }) {
+		if b.TokenLimit != nil || slices.ContainsFunc(b.Grants, func(g workflowstate.WorkflowIntegrationGrant) bool { return g.Kind == "tokens" }) {
 			return workflowstate.ErrConflict
 		}
 

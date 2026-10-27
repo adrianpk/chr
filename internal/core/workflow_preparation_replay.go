@@ -83,7 +83,7 @@ func validWorkflowPreparationObject(tree string, parents []string, author Workfl
 	return true
 }
 
-func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, proof WorkflowIntegrationProof, tree string, finding AgenticReviewFinding) (WorkflowIntegrationProof, error) {
+func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, proof WorkflowIntegrationProof, tree string, finding workflowstate.AgenticReviewFinding) (WorkflowIntegrationProof, error) {
 	if !validWorkflowRebaseFixInput(proof, finding) {
 		return proof, workflowstate.ErrConflict
 	}
@@ -139,6 +139,6 @@ func (reader workflowIntegrationReader) requireRebaseFixSigner(proof WorkflowInt
 	return nil
 }
 
-func validWorkflowRebaseFixInput(proof WorkflowIntegrationProof, finding AgenticReviewFinding) bool {
+func validWorkflowRebaseFixInput(proof WorkflowIntegrationProof, finding workflowstate.AgenticReviewFinding) bool {
 	return proof.Method == "rebase" && proof.Provenance != nil && validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof) == nil && validateAgenticReviewFinding(finding) == nil && finding.Category != AgenticReviewFindingCosmetic
 }

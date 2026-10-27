@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -300,7 +301,7 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 	runner := installFakeAgenticReviewRunner(t, core.AgenticReviewResult{
 		Decision: core.IntegrationReviewDecisionPass,
 		Summary:  "Implementation is correct and validation evidence is sufficient.",
-		NonBlockingNotes: []core.AgenticReviewFinding{{
+		NonBlockingNotes: []workflowstate.AgenticReviewFinding{{
 			Category: core.AgenticReviewFindingCosmetic,
 			Title:    "Optional wording cleanup",
 			Detail:   "One help sentence could be clearer, but behavior is correct.",
@@ -1013,7 +1014,7 @@ func agenticReviewNeedsChangesResult(title string) core.AgenticReviewResult {
 	return core.AgenticReviewResult{
 		Decision: core.IntegrationReviewDecisionNeedsChanges,
 		Summary:  "The implementation is missing a required behavior.",
-		BlockingFindings: []core.AgenticReviewFinding{{
+		BlockingFindings: []workflowstate.AgenticReviewFinding{{
 			Category: core.AgenticReviewFindingCorrectness,
 			Title:    title,
 			Detail:   "The ticket requires invalid input recovery, but the implementation accepts bad moves.",

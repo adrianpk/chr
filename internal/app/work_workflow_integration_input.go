@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Transport fields contain displayed fences and explicit operator input only.
@@ -75,8 +75,8 @@ func workflowIntegrationRevision(value string, allowZero bool) (uint64, error) {
 	return revision, nil
 }
 
-func workflowIntegrationGrantFields(fields map[string]string) (core.WorkflowIntegrationGrant, error) {
-	grant := core.WorkflowIntegrationGrant{ID: fields["record_id"], Kind: fields["kind"], Actor: fields["actor"], Reason: fields["reason"]}
+func workflowIntegrationGrantFields(fields map[string]string) (workflowstate.WorkflowIntegrationGrant, error) {
+	grant := workflowstate.WorkflowIntegrationGrant{ID: fields["record_id"], Kind: fields["kind"], Actor: fields["actor"], Reason: fields["reason"]}
 	if !validWorkflowControlIdentity(grant.ID) || !validWorkflowControlIdentity(grant.Actor) || !validWorkflowControlIdentity(grant.Reason) {
 		return grant, fmt.Errorf("grant requires an explicit record identity, actor and reason within 128 bytes")
 	}
@@ -111,8 +111,8 @@ func workflowIntegrationAnswerFields(request WorkflowControlRequest, fields map[
 	return request, nil
 }
 
-func workflowIntegrationAnswerPayload(fields map[string]string) (core.WorkflowIntegrationAnswer, error) {
-	answer := core.WorkflowIntegrationAnswer{ID: fields["record_id"], DecisionID: fields["decision_id"], Choice: fields["choice"], Action: fields["answer_action"], Actor: fields["actor"], Authority: fields["authority"], Reason: fields["reason"], OriginalCommit: fields["original_commit"]}
+func workflowIntegrationAnswerPayload(fields map[string]string) (workflowstate.WorkflowIntegrationAnswer, error) {
+	answer := workflowstate.WorkflowIntegrationAnswer{ID: fields["record_id"], DecisionID: fields["decision_id"], Choice: fields["choice"], Action: fields["answer_action"], Actor: fields["actor"], Authority: fields["authority"], Reason: fields["reason"], OriginalCommit: fields["original_commit"]}
 	for _, value := range []string{answer.ID, answer.DecisionID, answer.Actor, answer.Authority} {
 		if !validWorkflowControlIdentity(value) {
 			return answer, fmt.Errorf("answer requires the displayed question, actor and authority")
@@ -124,13 +124,13 @@ func workflowIntegrationAnswerPayload(fields map[string]string) (core.WorkflowIn
 	}
 
 	if fields["fix_category"] != "" || fields["fix_title"] != "" || fields["fix_detail"] != "" {
-		answer.IntegrationFix = &core.AgenticReviewFinding{Category: fields["fix_category"], Title: fields["fix_title"], Detail: fields["fix_detail"]}
+		answer.IntegrationFix = &workflowstate.AgenticReviewFinding{Category: fields["fix_category"], Title: fields["fix_title"], Detail: fields["fix_detail"]}
 	}
 
 	return answer, nil
 }
 
-func workflowIntegrationAnswerBounds(fields map[string]string, answer core.WorkflowIntegrationAnswer) error {
+func workflowIntegrationAnswerBounds(fields map[string]string, answer workflowstate.WorkflowIntegrationAnswer) error {
 	for _, value := range []string{answer.Choice, answer.Reason, fields["fix_category"], fields["fix_title"], fields["fix_detail"]} {
 		if len(value) > 8192 || strings.ContainsRune(value, '\x00') {
 			return fmt.Errorf("decision answer bounds exceeded")

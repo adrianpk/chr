@@ -177,7 +177,7 @@ func workflowIntegrationLimitValue(limits WorkflowIntegrationLimits, kind string
 // The budget owner supplies the prior revision and recording timestamp.
 type WorkflowIntegrationGrantRequest struct {
 	WorkflowIntegrationBudgetGuard
-	Grant WorkflowIntegrationGrant
+	Grant workflowstate.WorkflowIntegrationGrant
 }
 
 // GrantWorkflowIntegration extends a ceiling without changing consumed history.
@@ -233,7 +233,7 @@ func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workfl
 	return budget, s.commitWorkflowControlBudget(ctx, &run, &budget, control)
 }
 
-func applyWorkflowIntegrationGrant(budget *WorkflowIntegrationBudget, grant WorkflowIntegrationGrant) error {
+func applyWorkflowIntegrationGrant(budget *WorkflowIntegrationBudget, grant workflowstate.WorkflowIntegrationGrant) error {
 	if grant.Kind != "tokens" {
 		return addWorkflowIntegrationLimit(&budget.LimitsSnapshot, grant.Kind, grant.Amount)
 	}
@@ -319,7 +319,7 @@ func workflowAgentUnrecordedCalls(run workflowInvocationFile, budget WorkflowInt
 	return count
 }
 
-func workflowIntegrationGrantRetry(budget WorkflowIntegrationBudget, grant WorkflowIntegrationGrant) (bool, error) {
+func workflowIntegrationGrantRetry(budget WorkflowIntegrationBudget, grant workflowstate.WorkflowIntegrationGrant) (bool, error) {
 	for _, old := range budget.Grants {
 		if old.ID != grant.ID {
 			continue

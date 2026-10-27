@@ -51,7 +51,7 @@ func nativeDecisionAnswer(t *testing.T, store *WorkflowStore, id string, record 
 
 	question := record.Requests[0]
 
-	return WorkflowIntegrationAnswerRequest{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, id), DecisionRevision: record.Revision, DecisionHash: entry.DecisionRef.Hash, Answer: WorkflowIntegrationAnswer{ID: "answer-1", DecisionID: question.ID, Choice: question.Options[0], Action: "resolve", Actor: "operator", Authority: question.Authority, Reason: "Preserve both intents through the explicit compatible interpretation"}}
+	return WorkflowIntegrationAnswerRequest{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, id), DecisionRevision: record.Revision, DecisionHash: entry.DecisionRef.Hash, Answer: workflowstate.WorkflowIntegrationAnswer{ID: "answer-1", DecisionID: question.ID, Choice: question.Options[0], Action: "resolve", Actor: "operator", Authority: question.Authority, Reason: "Preserve both intents through the explicit compatible interpretation"}}
 }
 
 // TestNativeDecisionWait persists questions across restart and forbids a generic
@@ -155,7 +155,7 @@ func TestNativeDecisionGuards(t *testing.T) {
 		change func(*WorkflowIntegrationAnswerRequest, *workflowPreparationFixture)
 	}{
 		{"empty answer", func(r *WorkflowIntegrationAnswerRequest, _ *workflowPreparationFixture) {
-			r.Answer = WorkflowIntegrationAnswer{}
+			r.Answer = workflowstate.WorkflowIntegrationAnswer{}
 		}},
 		{"revision", func(r *WorkflowIntegrationAnswerRequest, _ *workflowPreparationFixture) { r.DecisionRevision++ }},
 		{"hash", func(r *WorkflowIntegrationAnswerRequest, _ *workflowPreparationFixture) {

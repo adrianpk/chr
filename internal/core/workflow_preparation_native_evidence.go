@@ -73,9 +73,9 @@ func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, 
 		commits = append(commits, source.Commit)
 	}
 
-	b.ValidationRefs = make([]WorkflowEvidenceRef, 1)
+	b.ValidationRefs = make([]workflowstate.WorkflowEvidenceRef, 1)
 	values := []struct {
-		ref   *WorkflowEvidenceRef
+		ref   *workflowstate.WorkflowEvidenceRef
 		value any
 	}{
 		{&b.SourceManifestRef, WorkflowNativeSourceManifest{"chr-native-source/v1", b.SourceRepository, b.SourceRef, b.OriginalSource, commits}},
@@ -100,14 +100,14 @@ func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, 
 	return files, nil
 }
 
-func workflowNativePreparationEvidenceFile(id string, value any) (workflowstate.FileChange, WorkflowEvidenceRef, error) {
+func workflowNativePreparationEvidenceFile(id string, value any) (workflowstate.FileChange, workflowstate.WorkflowEvidenceRef, error) {
 	data, err := json.Marshal(value)
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowstate.FileChange{}, WorkflowEvidenceRef{}, workflowstate.ErrConflict
+		return workflowstate.FileChange{}, workflowstate.WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 
 	hash := contenthash.Sum(data)
-	ref := WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", "evidence", hash+".json")), Hash: hash}
+	ref := workflowstate.WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", "evidence", hash+".json")), Hash: hash}
 
 	return workflowstate.FileChange{Path: ref.Path, After: data}, ref, nil
 }
@@ -122,7 +122,7 @@ func (s *WorkflowStore) workflowNativePreparedEntryChange(run *workflowInvocatio
 		return workflowstate.FileChange{}, err
 	}
 
-	request := WorkflowIntegrationTransition{EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: "reviewing", CandidateRef: &WorkflowEvidenceRef{Path: run.Preparation.ResultRef, Hash: run.Preparation.ResultHash}}
+	request := WorkflowIntegrationTransition{EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: "reviewing", CandidateRef: &workflowstate.WorkflowEvidenceRef{Path: run.Preparation.ResultRef, Hash: run.Preparation.ResultHash}}
 	if entry.CandidateRef != nil {
 		request.CandidateHash = entry.CandidateRef.Hash
 	}
@@ -138,7 +138,7 @@ func (s *WorkflowStore) workflowNativePreparedEntryChange(run *workflowInvocatio
 		return file, err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
 
 	return file, nil
 }

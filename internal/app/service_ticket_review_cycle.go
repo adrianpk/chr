@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -211,7 +212,7 @@ func parseAgenticReviewTicket(ctx context.Context, projectID, projectDir, ticket
 	})
 }
 
-func writeAgenticReviewNonBlockingComments(ctx context.Context, ticketPath string, notes []core.AgenticReviewFinding, limit int, createdAt time.Time) error {
+func writeAgenticReviewNonBlockingComments(ctx context.Context, ticketPath string, notes []workflowstate.AgenticReviewFinding, limit int, createdAt time.Time) error {
 	for index, note := range limitedAgenticReviewNotes(notes, limit) {
 		err := core.NewTicketCommenter().AddComment(ctx, core.AddTicketCommentOptions{
 			Path:      ticketPath,
@@ -227,7 +228,7 @@ func writeAgenticReviewNonBlockingComments(ctx context.Context, ticketPath strin
 	return nil
 }
 
-func limitedAgenticReviewNotes(notes []core.AgenticReviewFinding, limit int) []core.AgenticReviewFinding {
+func limitedAgenticReviewNotes(notes []workflowstate.AgenticReviewFinding, limit int) []workflowstate.AgenticReviewFinding {
 	if limit <= 0 || len(notes) == 0 {
 		return nil
 	}
@@ -239,7 +240,7 @@ func limitedAgenticReviewNotes(notes []core.AgenticReviewFinding, limit int) []c
 	return notes[:limit]
 }
 
-func renderAgenticReviewNonBlockingComment(note core.AgenticReviewFinding) string {
+func renderAgenticReviewNonBlockingComment(note workflowstate.AgenticReviewFinding) string {
 	return fmt.Sprintf("Agentic review note (%s): %s\n\n%s", note.Category, note.Title, note.Detail)
 }
 

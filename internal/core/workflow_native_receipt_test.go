@@ -45,7 +45,7 @@ func nativeRecordReceipt(t *testing.T, store *WorkflowStore, candidate WorkflowI
 	native := &WorkflowNativeReceipt{WorkflowNativeRecordBinding: b, CandidateHash: candidate.Native.CandidateHash, ActualMergeResult: b.PreparedResult}
 	native.CandidateRef = retainNativeRecordEvidence(t, store, b.InvocationID, "candidate", candidate)
 	native.TransactionProofRef = retainNativeRecordEvidence(t, store, b.InvocationID, "transaction", transaction)
-	native.ObservationRefs = []WorkflowEvidenceRef{retainNativeRecordEvidence(t, store, b.InvocationID, "observation", observation)}
+	native.ObservationRefs = []workflowstate.WorkflowEvidenceRef{retainNativeRecordEvidence(t, store, b.InvocationID, "observation", observation)}
 	r := workflowTestTask("native-delivery")
 	r.Kind, r.Task, r.Path = "receipt", nil, "run/"+b.InvocationID+"/evidence/native-delivery.json"
 	r.Receipt = &WorkflowReceipt{Schema: workflowNativeReceiptSchema, Native: native, Unit: b.Unit, CandidateID: candidate.Input.Source.CandidateID, SubmissionID: "native-submission", Provider: "forgejo", Repository: b.SourceRepository, PullRequest: b.CanonicalPR, Method: b.Method, SourceCommit: b.OriginalSource, BaseCommit: b.ValidatedBase, PreparedTree: b.PreparedTree, HistoryProof: proof.HistoryHash, ResultCommit: b.PreparedResult, VerifiedTree: proof.VerifiedTree, ObservedTarget: proof.ObservedTarget, VerificationRef: native.ObservationRefs[0].Path, ValidationRefs: []string{native.CandidateRef.Path}, ConfirmedAt: candidate.Validation.FinishedAt}
@@ -118,7 +118,7 @@ func testNativeReceiptPending(t *testing.T, store *WorkflowStore, record Workflo
 	ref = retainNativeRecordEvidence(t, store, record.Receipt.Native.InvocationID, "pending", observation)
 	receipt := *record.Receipt
 	native := *receipt.Native
-	native.ObservationRefs, receipt.Native = []WorkflowEvidenceRef{ref}, &native
+	native.ObservationRefs, receipt.Native = []workflowstate.WorkflowEvidenceRef{ref}, &native
 
 	record.Receipt, record.Path = &receipt, "run/"+native.InvocationID+"/evidence/pending-delivery.json"
 	if _, err := store.CreateReceipt(t.Context(), record); err == nil {

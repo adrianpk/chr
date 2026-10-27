@@ -32,7 +32,7 @@ type WorkflowMergerCheckpointRecord struct {
 
 // RetainWorkflowMergerCheckpoint accepts only a host-prepared, independently
 // verified private checkpoint. It creates neither an agent call nor approval.
-func (s *WorkflowStore) RetainWorkflowMergerCheckpoint(ctx context.Context, guard WorkflowIntegrationBudgetGuard, state WorkflowMergerRepairState, git WorkflowMergerRepairGit) (ref WorkflowEvidenceRef, err error) {
+func (s *WorkflowStore) RetainWorkflowMergerCheckpoint(ctx context.Context, guard WorkflowIntegrationBudgetGuard, state WorkflowMergerRepairState, git WorkflowMergerRepairGit) (ref workflowstate.WorkflowEvidenceRef, err error) {
 	if git == nil {
 		return ref, workflowstate.ErrConflict
 	}
@@ -133,14 +133,14 @@ func workflowMergerCheckpointMatches(record WorkflowMergerCheckpointRecord, inpu
 	return [4]string{q.SourceCommit, q.BaseCommit, q.Method, q.TargetBranch} == [4]string{input.Source, input.Base, input.Method, strings.TrimPrefix(input.TargetRef, "refs/heads/")} && q.Lane.Unit == input.Unit
 }
 
-func (s *WorkflowStore) persistWorkflowMergerCheckpoint(record WorkflowMergerCheckpointRecord) (WorkflowEvidenceRef, error) {
+func (s *WorkflowStore) persistWorkflowMergerCheckpoint(record WorkflowMergerCheckpointRecord) (workflowstate.WorkflowEvidenceRef, error) {
 	data, err := json.MarshalIndent(record, "", "  ")
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return WorkflowEvidenceRef{}, workflowstate.ErrConflict
+		return workflowstate.WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 
 	data = append(data, '\n')
-	ref := WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", record.InvocationID, "extension", "chr", "merger", "checkpoints", contenthash.Sum(data)+".json")), Hash: contenthash.Sum(data)}
+	ref := workflowstate.WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", record.InvocationID, "extension", "chr", "merger", "checkpoints", contenthash.Sum(data)+".json")), Hash: contenthash.Sum(data)}
 
 	return ref, s.commitFiles([]workflowstate.FileChange{{Path: ref.Path, After: data}})
 }

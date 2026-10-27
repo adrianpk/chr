@@ -60,7 +60,7 @@ func workflowMergerRepairSourceMatches(source WorkflowReviewInput, proof Workflo
 	return source.PullRequest.HeadCommit == proof.SourceCommit && source.TargetCommit == proof.BaseCommit && source.Policy.Method == proof.Method && source.PullRequest.Repository == proof.Repository && source.PullRequest.BaseBranch == proof.TargetBranch
 }
 
-func (s *WorkflowStore) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git WorkflowPreparationGit, query WorkflowPreparationQuery) (WorkflowIntegrationProof, []WorkflowEvidenceRef, error) {
+func (s *WorkflowStore) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git WorkflowPreparationGit, query WorkflowPreparationQuery) (WorkflowIntegrationProof, []workflowstate.WorkflowEvidenceRef, error) {
 	state, refs, err := s.acceptedWorkflowCandidateRepair(run)
 	if err != nil {
 		return WorkflowIntegrationProof{}, nil, err

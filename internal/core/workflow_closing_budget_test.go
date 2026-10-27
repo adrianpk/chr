@@ -112,7 +112,7 @@ func workflowClosingBudgetImages(t *testing.T, set *WorkflowRecord, state workfl
 
 		data = append(data, '\n')
 		ref := workflowClosingFile(set.ID, generation, "state.json")
-		set.Set.Closing.Attempts = append(set.Set.Closing.Attempts, WorkflowClosingEvidence{Ref: ref, Hash: contenthash.Sum(data)})
+		set.Set.Closing.Attempts = append(set.Set.Closing.Attempts, workflowstate.WorkflowClosingEvidence{Ref: ref, Hash: contenthash.Sum(data)})
 		files = append(files, workflowstate.FileChange{Path: ref, After: data}, workflowstate.FileChange{Path: state.Input.Ref, After: input})
 	}
 

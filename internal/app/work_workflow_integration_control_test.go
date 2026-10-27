@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -54,7 +53,7 @@ func TestWorkflowIntegrationGrant(t *testing.T) {
 		}},
 		{"manual service", func(t *testing.T, s service, shown WorkflowWorkStatus) (WorkflowWorkStatus, error) {
 			request := serviceIntegrationControl(shown, "grant")
-			request.BudgetGrant = &core.WorkflowIntegrationGrant{ID: "manual-extension", Kind: "submission", Amount: 1, Actor: "operator", Reason: "Authorize one additional bounded submission"}
+			request.BudgetGrant = &workflowstate.WorkflowIntegrationGrant{ID: "manual-extension", Kind: "submission", Amount: 1, Actor: "operator", Reason: "Authorize one additional bounded submission"}
 
 			return s.ControlWorkExtent(t.Context(), request)
 		}},

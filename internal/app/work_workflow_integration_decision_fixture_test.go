@@ -93,8 +93,8 @@ func serviceIntegrationDecisionInput(t *testing.T, operations service, run core.
 	input.ValidationContractRef = serviceIntegrationDecisionEvidence(t, operations, run.ID, "validation", gate)
 	source := serviceIntegrationDecisionEvidence(t, operations, run.ID, "source-intent", map[string]string{"intent": "Preserve the original source behavior"})
 	target := serviceIntegrationDecisionEvidence(t, operations, run.ID, "target-intent", map[string]string{"intent": "Preserve the target validation requirements"})
-	finding := serviceIntegrationDecisionEvidence(t, operations, run.ID, "finding", core.AgenticReviewFinding{Category: core.AgenticReviewFindingCorrectness, Title: "Reconcile declared requirements", Detail: "The source and target intent require an explicit compatible interpretation"})
-	input.IntentRefs, input.TargetChangeRefs, input.FindingRefs = []core.WorkflowEvidenceRef{source}, []core.WorkflowEvidenceRef{target}, []core.WorkflowEvidenceRef{finding}
+	finding := serviceIntegrationDecisionEvidence(t, operations, run.ID, "finding", workflowstate.AgenticReviewFinding{Category: core.AgenticReviewFindingCorrectness, Title: "Reconcile declared requirements", Detail: "The source and target intent require an explicit compatible interpretation"})
+	input.IntentRefs, input.TargetChangeRefs, input.FindingRefs = []workflowstate.WorkflowEvidenceRef{source}, []workflowstate.WorkflowEvidenceRef{target}, []workflowstate.WorkflowEvidenceRef{finding}
 	input.Requirements = []core.WorkflowMergerRequirement{{ID: "source-api", Origin: "source", Evidence: source, ConflictsWith: []string{"target-validation"}}, {ID: "target-validation", Origin: "target", Evidence: target}}
 
 	sealed, err := core.SealWorkflowMergerInput(input, now)
@@ -105,7 +105,7 @@ func serviceIntegrationDecisionInput(t *testing.T, operations service, run core.
 	return sealed
 }
 
-func serviceIntegrationDecisionEvidence(t *testing.T, operations service, id, name string, value any) core.WorkflowEvidenceRef {
+func serviceIntegrationDecisionEvidence(t *testing.T, operations service, id, name string, value any) workflowstate.WorkflowEvidenceRef {
 	t.Helper()
 
 	data, err := json.Marshal(value)
@@ -118,7 +118,7 @@ func serviceIntegrationDecisionEvidence(t *testing.T, operations service, id, na
 		t.Fatal(err)
 	}
 
-	ref := core.WorkflowEvidenceRef{Path: "run/" + id + "/evidence/surface-" + name + ".json", Hash: fmt.Sprintf("%x", sha256.Sum256(data))}
+	ref := workflowstate.WorkflowEvidenceRef{Path: "run/" + id + "/evidence/surface-" + name + ".json", Hash: fmt.Sprintf("%x", sha256.Sum256(data))}
 	path := filepath.Join(layout.Root(), ref.Path)
 
 	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {

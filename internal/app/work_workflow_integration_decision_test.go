@@ -15,7 +15,6 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -25,7 +24,7 @@ func workflowIntegrationAnswerRequest(shown WorkflowWorkStatus, action string) W
 	question := decision.Requests[0]
 	request := serviceIntegrationControl(shown, "answer_decision")
 	request.DecisionRevision, request.DecisionHash = decision.Revision, decision.Hash
-	request.DecisionAnswer = &core.WorkflowIntegrationAnswer{ID: "surface-answer", DecisionID: question.ID, Choice: question.Options[0], Action: action, Actor: "operator", Authority: question.Authority, Reason: "Preserve both requirements through the compatible interpretation"}
+	request.DecisionAnswer = &workflowstate.WorkflowIntegrationAnswer{ID: "surface-answer", DecisionID: question.ID, Choice: question.Options[0], Action: action, Actor: "operator", Authority: question.Authority, Reason: "Preserve both requirements through the compatible interpretation"}
 
 	return request
 }

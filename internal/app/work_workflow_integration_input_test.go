@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowIntegrationPayload preserves explicit replay ownership and finding
@@ -17,10 +17,10 @@ func TestWorkflowIntegrationPayload(t *testing.T) {
 		name, choice string
 		payload      map[string]string
 		original     string
-		fix          *core.AgenticReviewFinding
+		fix          *workflowstate.AgenticReviewFinding
 	}{
 		{"source step", "Identify the original source step", map[string]string{"original_commit": strings.Repeat("c", 40)}, strings.Repeat("c", 40), nil},
-		{"integration fix", "Declare an integration fix with an actionable finding", map[string]string{"fix_category": "correctness", "fix_title": "Preserve declared behavior", "fix_detail": "Retain both source and target requirements"}, "", &core.AgenticReviewFinding{Category: "correctness", Title: "Preserve declared behavior", Detail: "Retain both source and target requirements"}},
+		{"integration fix", "Declare an integration fix with an actionable finding", map[string]string{"fix_category": "correctness", "fix_title": "Preserve declared behavior", "fix_detail": "Retain both source and target requirements"}, "", &workflowstate.AgenticReviewFinding{Category: "correctness", Title: "Preserve declared behavior", Detail: "Retain both source and target requirements"}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			input := maps.Clone(fields)
@@ -49,7 +49,7 @@ func checkWorkflowIntegrationPayloadFence(t *testing.T, request WorkflowControlR
 	}
 }
 
-func checkWorkflowIntegrationFinding(t *testing.T, actual, expected *core.AgenticReviewFinding) {
+func checkWorkflowIntegrationFinding(t *testing.T, actual, expected *workflowstate.AgenticReviewFinding) {
 	t.Helper()
 
 	if expected == nil {

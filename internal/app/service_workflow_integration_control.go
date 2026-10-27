@@ -9,7 +9,7 @@ import (
 
 // WorkflowIntegrationControlGuard contains displayed revisions and candidate
 // identity. The service derives the private claim fence from retained ownership.
-type WorkflowIntegrationControlGuard = core.WorkflowControlIntegrationGuard
+type WorkflowIntegrationControlGuard = workflowstate.WorkflowControlIntegrationGuard
 
 func (s service) executeWorkflowIntegrationControl(ctx context.Context, request WorkflowControlRequest) error {
 	guard, err := s.workflowIntegrationControlGuard(ctx, request)

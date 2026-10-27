@@ -33,7 +33,7 @@ func (s *WorkflowStore) finishWorkflowClosing(ctx context.Context, claim *workfl
 
 	data = append(data, '\n')
 	claim.state.Outcome, claim.state.FinishedAt = receipt.Outcome, receipt.ConfirmedAt
-	claim.state.Result = WorkflowClosingEvidence{Ref: workflowClosingFile(claim.set.ID, claim.state.Generation, "result.json"), Hash: contenthash.Sum(data)}
+	claim.state.Result = workflowstate.WorkflowClosingEvidence{Ref: workflowClosingFile(claim.set.ID, claim.state.Generation, "result.json"), Hash: contenthash.Sum(data)}
 
 	claim.set.Set.Status = "blocked"
 	if receipt.Outcome == "completed" {

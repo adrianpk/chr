@@ -2,7 +2,7 @@ package core
 
 import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 
-func (s *WorkflowStore) workflowNativeReceiptApplication(submission WorkflowSubmission) (*WorkflowEvidenceRef, error) {
+func (s *WorkflowStore) workflowNativeReceiptApplication(submission WorkflowSubmission) (*workflowstate.WorkflowEvidenceRef, error) {
 	native := submission.Native
 	for _, ref := range native.GitObservationRefs {
 		var observation WorkflowNativeGitObservation

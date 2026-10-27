@@ -38,7 +38,7 @@ func nativeMergerAcceptanceFixture(t *testing.T, id, method string) (workflowPre
 	if method == "rebase" {
 		checkpoint := nativeMergerReplayCheckpoint(t, state)
 		payload := *checkpoint
-		payload.Evidence = WorkflowEvidenceRef{}
+		payload.Evidence = workflowstate.WorkflowEvidenceRef{}
 		checkpoint.Evidence = retainNativeRecordEvidence(t, f.store, f.run.ID, "host-checkpoint", payload)
 		request.Input.HistoryCheckpoint = checkpoint
 	}

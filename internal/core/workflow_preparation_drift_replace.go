@@ -34,7 +34,7 @@ func (s *WorkflowStore) replaceWorkflowNativePreparation(ctx context.Context, ru
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: next.ID, Unit: next.Unit, Revision: next.Revision, EntryRef: WorkflowEvidenceRef{Path: queueFile.Path, Hash: contenthash.Sum(queueFile.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: next.ID, Unit: next.Unit, Revision: next.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: queueFile.Path, Hash: contenthash.Sum(queueFile.After)}})
 	staleWorkflowNativePreparation(run)
 	projectWorkflowIntegrationPhase(run, next)
 

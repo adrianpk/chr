@@ -143,7 +143,7 @@ func (s *WorkflowStore) workflowAgentSettlement(ctx context.Context, reservation
 
 	path := "run/" + input.InvocationID + "/evidence/agent-usage-" + input.AttemptID + ".json"
 	reservation.State, reservation.ReportedInput, reservation.ReportedOutput = "settled", proof.Input, proof.Output
-	reservation.SettlementProof = &WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(data)}
+	reservation.SettlementProof = &workflowstate.WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(data)}
 
 	return workflowstate.FileChange{Path: path, After: data}, validateWorkflowIntegrationReservation(*reservation)
 }

@@ -83,7 +83,7 @@ func nativeMergerTreeRepair(t *testing.T, state WorkflowMergerRepairState, path,
 func nativeMergerReplayCheckpoint(t *testing.T, state WorkflowMergerRepairState) *WorkflowMergerCheckpoint {
 	t.Helper()
 
-	checkpoint := &WorkflowMergerCheckpoint{ReplayIndex: state.ReplayIndex, OriginalCommit: state.CurrentSource, PreparedParent: state.PreparedParent, Evidence: WorkflowEvidenceRef{}}
+	checkpoint := &WorkflowMergerCheckpoint{ReplayIndex: state.ReplayIndex, OriginalCommit: state.CurrentSource, PreparedParent: state.PreparedParent, Evidence: workflowstate.WorkflowEvidenceRef{}}
 	_, template, _ := nativeMergerInput(t)
 	checkpoint.Evidence = template.IntentRefs[0]
 

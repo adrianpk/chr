@@ -114,7 +114,7 @@ func workflowLegacyReceiptMatchesProof(receipt WorkflowReceipt, proof WorkflowSl
 
 func workflowNativeReceiptMatchesProof(record WorkflowRecord, proof WorkflowSliceDeliveryProof) bool {
 	receipt := record.Receipt
-	if receipt.Native == nil || *proof.NativeReceiptRef != (WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}) || receipt.Unit != proof.Unit || receipt.CandidateID != proof.CandidateID || receipt.SubmissionID != proof.SubmissionID {
+	if receipt.Native == nil || *proof.NativeReceiptRef != (workflowstate.WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}) || receipt.Unit != proof.Unit || receipt.CandidateID != proof.CandidateID || receipt.SubmissionID != proof.SubmissionID {
 		return false
 	}
 

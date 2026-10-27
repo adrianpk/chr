@@ -91,7 +91,7 @@ func (s *WorkflowStore) freezeWorkflowNativeSourceRevision(ctx context.Context, 
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.WorkflowEvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
 
 	return errors.Join(workflowstate.ErrConflict, s.commitWorkflowPullRequestFiles(run, []workflowstate.FileChange{queue}, file))
 }

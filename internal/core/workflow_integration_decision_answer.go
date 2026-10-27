@@ -93,7 +93,7 @@ func workflowDecisionsResolved(record WorkflowIntegrationDecisions) bool {
 	return len(record.Requests) > 0 && !slices.ContainsFunc(record.Requests, func(d WorkflowMergerDecision) bool { return !workflowDecisionResolved(record.Answers, d.ID) })
 }
 
-func workflowDecisionResolved(answers []WorkflowIntegrationAnswer, id string) bool {
+func workflowDecisionResolved(answers []workflowstate.WorkflowIntegrationAnswer, id string) bool {
 	for i := len(answers) - 1; i >= 0; i-- {
 		if answers[i].DecisionID == id {
 			return answers[i].Action == "resolve"
@@ -122,7 +122,7 @@ func workflowDecisionAnswerRetry(record WorkflowIntegrationDecisions, request Wo
 	return false, nil
 }
 
-func (s *WorkflowStore) checkWorkflowFreshAnswer(run workflowInvocationFile, entry WorkflowIntegrationEntry, budget WorkflowIntegrationBudget, record WorkflowIntegrationDecisions, request WorkflowIntegrationAnswerRequest, answer WorkflowIntegrationAnswer) error {
+func (s *WorkflowStore) checkWorkflowFreshAnswer(run workflowInvocationFile, entry WorkflowIntegrationEntry, budget WorkflowIntegrationBudget, record WorkflowIntegrationDecisions, request WorkflowIntegrationAnswerRequest, answer workflowstate.WorkflowIntegrationAnswer) error {
 	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.WorkflowIntegrationBudgetGuard); err != nil {
 		return err
 	}

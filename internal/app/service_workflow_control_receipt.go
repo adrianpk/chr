@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) executeWorkflowControlResult(ctx context.Context, request WorkflowControlRequest) (*core.WorkflowControlResult, error) {
+func (s service) executeWorkflowControlResult(ctx context.Context, request WorkflowControlRequest) (*workflowstate.WorkflowControlResult, error) {
 	if request.RequestBinding == nil {
 		if request.AuthorizationCheck != nil && workflowDecisionControlAction(request.Action) {
 			return nil, workflowstate.ErrConflict

@@ -60,7 +60,7 @@ func (s *WorkflowStore) confirmWorkflowNativeReceipt(ctx context.Context, run wo
 	}
 
 	facts := *last.Native
-	facts.ReceiptRef = &WorkflowEvidenceRef{Path: receipt.Path, Hash: receipt.SourceHash}
+	facts.ReceiptRef = &workflowstate.WorkflowEvidenceRef{Path: receipt.Path, Hash: receipt.SourceHash}
 	update := WorkflowNativeSubmissionUpdate{WorkflowIntegrationBudgetGuard: guard, SubmissionID: last.ID, JournalHash: journal.sourceHash, Facts: facts}
 
 	_, err = s.retainWorkflowNativeSubmission(ctx, run, update)
@@ -94,12 +94,12 @@ func (s *WorkflowStore) retainWorkflowNativeReceipt(ctx context.Context, run wor
 	return s.writeRecord(ctx, record, 0)
 }
 
-func (s *WorkflowStore) workflowNativeReceiptObservation(submission WorkflowSubmission) (WorkflowNativePublicationObservation, WorkflowEvidenceRef, error) {
+func (s *WorkflowStore) workflowNativeReceiptObservation(submission WorkflowSubmission) (WorkflowNativePublicationObservation, workflowstate.WorkflowEvidenceRef, error) {
 	var observation WorkflowNativePublicationObservation
 
 	native := submission.Native
 	if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil || len(native.ObservationRefs) == 0 {
-		return observation, WorkflowEvidenceRef{}, ErrWorkflowObservationRequired
+		return observation, workflowstate.WorkflowEvidenceRef{}, ErrWorkflowObservationRequired
 	}
 
 	ref := native.ObservationRefs[len(native.ObservationRefs)-1]
@@ -122,14 +122,14 @@ func workflowNativeReceiptPath(run workflowInvocationFile, submission WorkflowSu
 	return filepath.ToSlash(filepath.Join("run", run.ID, "evidence", workflowNativeReceiptID(run, submission)+".json"))
 }
 
-func (s *WorkflowStore) workflowNativeReceipt(run workflowInvocationFile, submission WorkflowSubmission, observation WorkflowNativePublicationObservation, ref WorkflowEvidenceRef) (WorkflowRecord, error) {
+func (s *WorkflowStore) workflowNativeReceipt(run workflowInvocationFile, submission WorkflowSubmission, observation WorkflowNativePublicationObservation, ref workflowstate.WorkflowEvidenceRef) (WorkflowRecord, error) {
 	reference, err := DetectReviewProviderReference(submission.Native.CanonicalPR)
 	if err != nil {
 		return WorkflowRecord{}, err
 	}
 
 	native, git := submission.Native, *observation.Git
-	facts := &WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding, CandidateHash: native.CandidateHash, Mechanism: native.Mechanism, CandidateRef: native.CandidateRef, TransactionProofRef: *native.TransportResponseRef, ObservationRefs: []WorkflowEvidenceRef{ref}, ActualMergeResult: observation.PullRequest.ResultCommit}
+	facts := &WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding, CandidateHash: native.CandidateHash, Mechanism: native.Mechanism, CandidateRef: native.CandidateRef, TransactionProofRef: *native.TransportResponseRef, ObservationRefs: []workflowstate.WorkflowEvidenceRef{ref}, ActualMergeResult: observation.PullRequest.ResultCommit}
 	facts.ObservationContract = observation.ObservationContract
 
 	facts.GitApplicationRef, err = s.workflowNativeReceiptApplication(submission)
@@ -155,7 +155,7 @@ func (s *WorkflowStore) checkWorkflowNativeRetainedReceipt(run workflowInvocatio
 		return workflowstate.ErrConflict
 	}
 
-	if submission.Native.ReceiptRef != nil && *submission.Native.ReceiptRef != (WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}) {
+	if submission.Native.ReceiptRef != nil && *submission.Native.ReceiptRef != (workflowstate.WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}) {
 		return workflowstate.ErrConflict
 	}
 

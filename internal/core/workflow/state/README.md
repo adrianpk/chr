@@ -14,3 +14,9 @@ core/contenthash and the standard library. Root callers use this owner directly.
 FileChange owns the existing path, before hash and replacement bytes shared by
 authoring and workflow journals. It keeps the original JSON keys and field order;
 there is no IO, path permission, transaction or replay decision in this value.
+
+Control requests/results, attributable integration grants/answers, review finding
+values, guided control proof and hashed evidence references are shared retained
+values used by authoring and native workflow consumers. Their original field
+order and JSON tags remain intact. This owner adds no authority validation,
+coordinator, store, IO or policy; each native owner retains those decisions.

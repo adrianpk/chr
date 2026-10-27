@@ -3,6 +3,8 @@ package core
 import (
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeGrantEarly extends an exhausted invocation before queue admission
@@ -23,7 +25,7 @@ func TestNativeGrantEarly(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	grant := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeOperatorBudgetGuard(t, store, run.Invocation.ID), Grant: WorkflowIntegrationGrant{ID: "token-extension", Kind: "tokens", Amount: 50, Actor: "operator", Reason: "Authorize one bounded retry after unknown usage"}}
+	grant := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: nativeOperatorBudgetGuard(t, store, run.Invocation.ID), Grant: workflowstate.WorkflowIntegrationGrant{ID: "token-extension", Kind: "tokens", Amount: 50, Actor: "operator", Reason: "Authorize one bounded retry after unknown usage"}}
 
 	budget, err := store.GrantWorkflowIntegration(t.Context(), grant)
 	if err != nil || budget.TokenLimit == nil || *budget.TokenLimit != 150 || budget.TokensReserved != 100 || *budget.AdmissionTokenLimit != 100 {
@@ -98,7 +100,7 @@ func TestNativeGrantUnmetered(t *testing.T) {
 	}
 
 	retained := workflowTestRead(t, store, run.Invocation.ID)
-	grant := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: WorkflowIntegrationBudgetGuard{InvocationID: retained.ID, InvocationRevision: retained.Revision}, Grant: WorkflowIntegrationGrant{ID: "worker-extension", Kind: "executor", Amount: 1, Actor: "operator", Reason: "Authorize one bounded worker retry"}}
+	grant := WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: WorkflowIntegrationBudgetGuard{InvocationID: retained.ID, InvocationRevision: retained.Revision}, Grant: workflowstate.WorkflowIntegrationGrant{ID: "worker-extension", Kind: "executor", Amount: 1, Actor: "operator", Reason: "Authorize one bounded worker retry"}}
 
 	budget, err := store.GrantWorkflowIntegration(t.Context(), grant)
 	if err != nil || budget.TokenLimit != nil || budget.Usage.WorkerCount != 1 || budget.AdmissionLimits.Worker != 1 || budget.LimitsSnapshot.Worker != 2 {

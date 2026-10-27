@@ -1,17 +1,21 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // ReadWorkflowControlReceipt recovers the native journal and reads a completed
 // request. Missing receipts never reserve a binding or authorize a new effect.
-func (s *WorkflowStore) ReadWorkflowControlReceipt(ctx context.Context, request WorkflowControlMutationRequest) (WorkflowControlResult, bool, error) {
+func (s *WorkflowStore) ReadWorkflowControlReceipt(ctx context.Context, request workflowstate.WorkflowControlMutationRequest) (workflowstate.WorkflowControlResult, bool, error) {
 	request, digest, err := freezeWorkflowControlMutation(request)
 	if err != nil {
-		return WorkflowControlResult{}, false, err
+		return workflowstate.WorkflowControlResult{}, false, err
 	}
 
 	var (
-		result WorkflowControlResult
+		result workflowstate.WorkflowControlResult
 		found  bool
 	)
 

@@ -19,8 +19,8 @@ type WorkflowIntegrationReplay struct {
 // WorkflowIntegrationFix attributes a separate prepared commit to an actionable
 // finding. Candidate validation and review bind the entire resulting sequence.
 type WorkflowIntegrationFix struct {
-	Commit  string               `json:"commit"`
-	Finding AgenticReviewFinding `json:"finding"`
+	Commit  string                             `json:"commit"`
+	Finding workflowstate.AgenticReviewFinding `json:"finding"`
 }
 
 func (reader workflowIntegrationReader) integrationProvenance(ctx context.Context, proof WorkflowIntegrationProof) (*WorkflowIntegrationProvenance, error) {

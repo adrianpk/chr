@@ -17,7 +17,7 @@ func validateWorkflowCandidateRepairBinding(run workflowInvocationFile) error {
 		return workflowstate.ErrConflict
 	}
 
-	for _, ref := range []WorkflowEvidenceRef{b.RecordRef, b.FindingRef} {
+	for _, ref := range []workflowstate.WorkflowEvidenceRef{b.RecordRef, b.FindingRef} {
 		if validateWorkflowEvidenceRef(run.ID, ref) != nil {
 			return workflowstate.ErrConflict
 		}

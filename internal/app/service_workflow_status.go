@@ -45,8 +45,8 @@ type WorkflowWorkStatus struct {
 
 // WorkflowWorkBindings groups the retained bindings fields without changing their wire order.
 type WorkflowWorkBindings struct {
-	HarnessBinding *core.HarnessBinding        `json:"harness_binding,omitempty"`
-	ControlReceipt *core.WorkflowControlResult `json:"control_receipt,omitempty"`
+	HarnessBinding *core.HarnessBinding                 `json:"harness_binding,omitempty"`
+	ControlReceipt *workflowstate.WorkflowControlResult `json:"control_receipt,omitempty"`
 }
 
 // WorkflowWorkLifecycle groups the retained lifecycle fields without changing their wire order.

@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *core.WorkflowStore, request WorkflowControlRequest) (*core.WorkflowControlResult, error) {
+func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *core.WorkflowStore, request WorkflowControlRequest) (*workflowstate.WorkflowControlResult, error) {
 	ports, err := s.workflowLifecycleControlPorts(ctx, store, request)
 	if err != nil {
 		return nil, err

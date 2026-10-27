@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeReceiptApplication refuses missing or substituted application proof
@@ -74,7 +75,7 @@ func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission Wor
 	return record
 }
 
-func nativeReceiptAlteredApplication(t *testing.T, store *WorkflowStore, submission WorkflowSubmission, ref WorkflowEvidenceRef, change func(*WorkflowNativeGitObservation)) WorkflowEvidenceRef {
+func nativeReceiptAlteredApplication(t *testing.T, store *WorkflowStore, submission WorkflowSubmission, ref workflowstate.WorkflowEvidenceRef, change func(*WorkflowNativeGitObservation)) workflowstate.WorkflowEvidenceRef {
 	t.Helper()
 
 	var observation WorkflowNativeGitObservation
