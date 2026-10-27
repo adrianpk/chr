@@ -59,15 +59,15 @@ func TestHarnessBindingPending(t *testing.T) {
 func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessResolver {
 	t.Helper()
 
-	executable, frozen, err := FreezeHarnessExecutable(command)
+	executable, err := FreezeHarnessExecutable(command)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	return func(_ context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
-		binding, err := harnesscore.SealBinding(harnesscore.Binding{SchemaVersion: 1, Role: harnesscore.Worker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
+		binding, err := harnesscore.SealBinding(harnesscore.Binding{SchemaVersion: 1, Role: harnesscore.Worker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable.Reference, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
 
-		return WorkflowHarnessResolution{Binding: &binding, Command: slices.Clone(frozen)}, err
+		return WorkflowHarnessResolution{Binding: &binding, Command: slices.Clone(executable.Command)}, err
 	}
 }
 

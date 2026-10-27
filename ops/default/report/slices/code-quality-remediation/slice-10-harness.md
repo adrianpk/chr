@@ -34,6 +34,11 @@ The real malformed-input test now verifies cancellation on every error branch.
 The process exchange groups its two owned spools and retains explicit context,
 cancellation and protocol handler arguments.
 
+Executable freezing now returns one host-only value pairing its retained public
+reference with its private resolved command. Binding fields and serialized
+executable/argv hashes are unchanged; the new value is never serialized into a
+retained binding. Every native and application consumer uses its explicit fields.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 current root
@@ -68,9 +73,9 @@ Focused implementation checks passed:
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`
 
-The signature disposition ledger records ten fixed occurrences and six cohesive
-five-input contracts. Twenty-two assigned occurrences remain pending. Ten exact
-debt allowances are removed: 227 remain, with ceiling seven and one external
+The signature disposition ledger records eleven fixed occurrences and six cohesive
+five-input contracts. Twenty-one assigned occurrences remain pending. Eleven exact
+debt allowances are removed: 226 remain, with ceiling seven and one external
 exception unchanged. No migration debt or broader allowance is introduced.
 
 Focused runtime/resource and concurrency checks passed:
@@ -82,6 +87,16 @@ Focused runtime/resource and concurrency checks passed:
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`: zero issues.
 
+Executable preparation checks passed:
+
+- `go test ./internal/core ./internal/app -run '^Test(HarnessBinding|HarnessGenerationBinding|HarnessGenerationIdentity|HarnessGenerationCommand|ServiceHarness|PiWorkerPreparation|QualityRecordWire)' -count=1 -timeout=3m`
+
+- `make check-go-style`: 9303 declarations, ceiling seven, 226 exact debts, one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`: zero issues.
+
 ## Risks and Follow-ups
 
 T10.1-T10.6 remain in progress or pending; PR readiness is not established.
+Remaining work includes configuration/selection and generation admission owners,
+21 signature dispositions, host lifecycle/flag review and final exact-head
+controller validation. No Slice 10 PR has been opened.

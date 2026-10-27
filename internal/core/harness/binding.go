@@ -38,3 +38,10 @@ const (
 	Worker     Role = "worker"
 	Generation Role = "generation"
 )
+
+// Executable pairs a frozen private launch command with its retained public
+// identity. It is host preparation data, never part of the serialized Binding.
+type Executable struct {
+	Reference ExecutableRef
+	Command   []string
+}

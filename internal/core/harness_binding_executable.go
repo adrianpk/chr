@@ -21,24 +21,24 @@ const harnessExecutableLimit = 512 << 20
 
 // FreezeHarnessExecutable resolves a host-selected program once and binds its
 // regular executable file and argv. It never launches the executable.
-func FreezeHarnessExecutable(command []string) (harnesscore.ExecutableRef, []string, error) {
+func FreezeHarnessExecutable(command []string) (harnesscore.Executable, error) {
 	if err := workflowstate.ValidateCommand(command); err != nil {
-		return harnesscore.ExecutableRef{}, nil, err
+		return harnesscore.Executable{}, err
 	}
 
 	program, err := exec.LookPath(command[0])
 	if err != nil {
-		return harnesscore.ExecutableRef{}, nil, errors.New("selected harness executable is unavailable")
+		return harnesscore.Executable{}, errors.New("selected harness executable is unavailable")
 	}
 
 	program, err = filepath.Abs(program)
 	if err != nil {
-		return harnesscore.ExecutableRef{}, nil, err
+		return harnesscore.Executable{}, err
 	}
 
 	program, err = filepath.EvalSymlinks(program)
 	if err != nil {
-		return harnesscore.ExecutableRef{}, nil, errors.New("selected harness executable cannot be resolved")
+		return harnesscore.Executable{}, errors.New("selected harness executable cannot be resolved")
 	}
 
 	retained := slices.Clone(command)
@@ -46,12 +46,12 @@ func FreezeHarnessExecutable(command []string) (harnesscore.ExecutableRef, []str
 
 	hash, err := harnessExecutableHash(program)
 	if err != nil {
-		return harnesscore.ExecutableRef{}, nil, err
+		return harnesscore.Executable{}, err
 	}
 
 	data, err := json.Marshal(retained)
 
-	return harnesscore.ExecutableRef{Hash: hash, CommandHash: contenthash.Sum(data)}, retained, err
+	return harnesscore.Executable{Reference: harnesscore.ExecutableRef{Hash: hash, CommandHash: contenthash.Sum(data)}, Command: retained}, err
 }
 
 func harnessExecutableHash(program string) (string, error) {

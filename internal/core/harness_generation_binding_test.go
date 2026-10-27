@@ -76,7 +76,7 @@ func generationBindingProgram(t *testing.T, project string) string {
 
 func generationBindingResolver(program, model string) HarnessGenerationResolver {
 	return func(_ context.Context, config WorkspaceConfig) (HarnessGenerationBinding, HarnessGenerationLaunch, error) {
-		executable, command, err := FreezeHarnessExecutable([]string{program})
+		executable, err := FreezeHarnessExecutable([]string{program})
 		if err != nil {
 			return HarnessGenerationBinding{}, HarnessGenerationLaunch{}, err
 		}
@@ -88,9 +88,9 @@ func generationBindingResolver(program, model string) HarnessGenerationResolver 
 			Capabilities: harness.Capabilities{Generation: true},
 			Readiness:    HarnessReadiness{Supported: true, Executable: "available", Credentials: "cli_managed", Runtime: "native"},
 		}
-		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{Selection: selection, ExecutableRef: executable, ProtocolRevision: "fixture-generation/v1"})
+		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{Selection: selection, ExecutableRef: executable.Reference, ProtocolRevision: "fixture-generation/v1"})
 
-		return binding, HarnessGenerationLaunch{Program: command[0]}, err
+		return binding, HarnessGenerationLaunch{Program: executable.Command[0]}, err
 	}
 }
 

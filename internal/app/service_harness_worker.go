@@ -31,12 +31,12 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		return core.WorkflowHarnessResolution{}, err
 	}
 
-	executable, command, err := core.FreezeHarnessExecutable(worker)
+	executable, err := core.FreezeHarnessExecutable(worker)
 	if err != nil {
 		return core.WorkflowHarnessResolution{}, err
 	}
 
-	if s.workflowWorker != nil && !slices.Equal(s.workflowWorker, command) {
+	if s.workflowWorker != nil && !slices.Equal(s.workflowWorker, executable.Command) {
 		return core.WorkflowHarnessResolution{}, workflowstate.ErrConflict
 	}
 
@@ -44,10 +44,10 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		SchemaVersion: 1, Role: harnesscore.Worker, Harness: resolved.View.Harness, Source: resolved.View.Source,
 		SelectionRevision: resolved.View.SelectionRevision, Profile: resolved.View.Profile, ProfileRevision: resolved.View.ProfileRevision,
 		ModelProvider: harnessWorkerProvider(resolved.View.ModelProvider), Model: resolved.View.Model, Thinking: resolved.View.Thinking,
-		ExecutableRef: executable, RuntimeRef: runtimeRef, ProtocolRevision: protocol, Capabilities: resolved.View.Capabilities,
+		ExecutableRef: executable.Reference, RuntimeRef: runtimeRef, ProtocolRevision: protocol, Capabilities: resolved.View.Capabilities,
 	})
 
-	return core.WorkflowHarnessResolution{Binding: &binding, Command: command}, err
+	return core.WorkflowHarnessResolution{Binding: &binding, Command: executable.Command}, err
 }
 
 func harnessWorkerProvider(provider string) string {

@@ -132,11 +132,6 @@
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/harness_binding_executable.go::FreezeHarnessExecutable",
-      "signature": "func(command []string) (harnesscore.ExecutableRef, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/harness_generation_context.go::HarnessGenerationSelection",
       "signature": "func(ctx context.Context) (string, HarnessGenerationBinding, bool)",
       "reason": "Existing production debt; assigned to Slice 10 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

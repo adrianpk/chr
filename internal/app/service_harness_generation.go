@@ -124,7 +124,7 @@ func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model stri
 }
 
 func prepareCodexGenerationBinding(selection core.HarnessSelection, program string) (core.HarnessGenerationBinding, core.HarnessGenerationLaunch, error) {
-	executable, command, err := core.FreezeHarnessExecutable([]string{program})
+	executable, err := core.FreezeHarnessExecutable([]string{program})
 	if err != nil {
 		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
 	}
@@ -133,9 +133,9 @@ func prepareCodexGenerationBinding(selection core.HarnessSelection, program stri
 		selection.ModelProvider = "cli_default"
 	}
 
-	binding, err := core.SealHarnessGenerationBinding(core.HarnessGenerationBinding{Selection: selection, ExecutableRef: executable, ProtocolRevision: "codex-exec-generation/v1"})
+	binding, err := core.SealHarnessGenerationBinding(core.HarnessGenerationBinding{Selection: selection, ExecutableRef: executable.Reference, ProtocolRevision: "codex-exec-generation/v1"})
 
-	return binding, core.HarnessGenerationLaunch{Program: command[0]}, err
+	return binding, core.HarnessGenerationLaunch{Program: executable.Command[0]}, err
 }
 
 func (s service) generationAdapters(ctx context.Context) (service, error) {
@@ -226,14 +226,14 @@ func preparePiGenerationBinding(selection core.HarnessSelection, resolved resolv
 		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
 	}
 
-	executable, command, err := core.FreezeHarnessExecutable([]string{resolved.Executable})
+	executable, err := core.FreezeHarnessExecutable([]string{resolved.Executable})
 	if err != nil {
 		return core.HarnessGenerationBinding{}, core.HarnessGenerationLaunch{}, err
 	}
 
-	binding, err := core.SealHarnessGenerationBinding(core.HarnessGenerationBinding{Selection: selection, ExecutableRef: executable, ProtocolRevision: pi.ProtocolRevision})
+	binding, err := core.SealHarnessGenerationBinding(core.HarnessGenerationBinding{Selection: selection, ExecutableRef: executable.Reference, ProtocolRevision: pi.ProtocolRevision})
 
-	return binding, core.HarnessGenerationLaunch{Program: command[0], Resources: resources}, err
+	return binding, core.HarnessGenerationLaunch{Program: executable.Command[0], Resources: resources}, err
 }
 
 func (s service) singlePassPlan(ctx context.Context) bool {

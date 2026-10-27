@@ -25,7 +25,7 @@ func TestHarnessBindingLargeExecutable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, _, err := FreezeHarnessExecutable([]string{path}); err != nil {
+	if _, err := FreezeHarnessExecutable([]string{path}); err != nil {
 		t.Fatal("supported CLI footprint was rejected", err)
 	}
 }
@@ -36,14 +36,14 @@ func TestHarnessBindingExecutableFiles(t *testing.T) {
 	for _, kind := range []string{"regular", "symlink", "fifo", "directory", "oversize"} {
 		t.Run(kind, func(t *testing.T) {
 			path := harnessBindingExecutableFixture(t, kind)
-			reference, command, err := FreezeHarnessExecutable([]string{path})
+			executable, err := FreezeHarnessExecutable([]string{path})
 
 			valid := kind == "regular" || kind == "symlink"
 			if (err == nil) != valid {
 				t.Fatal("executable type admission disagreed", err)
 			}
 
-			if valid && (!harnesscore.SelectionDigest(reference.Hash) || !filepath.IsAbs(command[0]) || len(command) != 1) {
+			if valid && (!harnesscore.SelectionDigest(executable.Reference.Hash) || !filepath.IsAbs(executable.Command[0]) || len(executable.Command) != 1) {
 				t.Fatal("executable identity was not retained")
 			}
 		})
