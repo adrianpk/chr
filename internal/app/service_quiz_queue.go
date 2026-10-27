@@ -18,7 +18,7 @@ func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcor
 	}
 
 	if len(state.Candidates) > 0 {
-		state = activateQuizCandidate(state, state.Candidates[0], s.utcNow())
+		state = quizcore.ActivateCandidate(state, state.Candidates[0], s.utcNow())
 		state.Candidates = state.Candidates[1:]
 
 		return state, nil
@@ -51,7 +51,7 @@ func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcor
 		return state, err
 	}
 
-	state = activateQuizQuestion(state, response.Question, response.CreatedAt.UTC())
+	state = quizcore.ActivateQuestion(state, response.Question, response.CreatedAt.UTC())
 	state.Candidates = response.Candidates
 
 	return state, nil
@@ -88,7 +88,7 @@ func (s service) activateNextFastQuestion(state quizcore.RuntimeState) quizcore.
 	state.FastQueue = state.FastQueue[1:]
 	state.FastConsumed = append(state.FastConsumed, candidate.ID)
 
-	return activateQuizCandidate(state, candidate, s.utcNow())
+	return quizcore.ActivateCandidate(state, candidate, s.utcNow())
 }
 
 func (s service) generateFastQuizBatch(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {

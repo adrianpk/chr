@@ -40,9 +40,9 @@ func (s service) prepareGuidedQuizDone(observed core.QuizObservation) (core.Quiz
 	var entry *quizcore.Entry
 
 	if state.ActiveQuestion != nil {
-		skipped := quizEntryFromState(state, quizcore.EntryStatusSkipped, "", s.utcNow())
+		skipped := quizcore.EntryFromState(state, quizcore.EntryStatusSkipped, "", s.utcNow())
 		skipped.ID = fmt.Sprintf("%s-entry-%03d", state.SessionID, state.QuestionsAsked)
-		state = updateQuizStateAfterEntry(state, skipped)
+		state = quizcore.StateAfterEntry(state, skipped)
 		entry = &skipped
 	}
 

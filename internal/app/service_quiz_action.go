@@ -116,9 +116,9 @@ func (s service) prepareQuizOutcome(request core.QuizActionRequest, observed cor
 		answer = ""
 	}
 
-	entry := quizEntryFromState(state, status, answer, s.utcNow())
+	entry := quizcore.EntryFromState(state, status, answer, s.utcNow())
 	entry.ID = fmt.Sprintf("%s-entry-%03d", state.SessionID, state.QuestionsAsked)
-	state = updateQuizStateAfterEntry(state, entry)
+	state = quizcore.StateAfterEntry(state, entry)
 	state = s.continueQuiz(state, append(append([]quizcore.Entry(nil), observed.Entries...), entry))
 
 	message := "Quiz answer recorded."

@@ -233,9 +233,14 @@ path writes a report file and returns an accepted status.
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
 	}
 
-	request, err := operations.newQuizModelRequest(state)
+	entries, err := operations.quizRepository().LoadRawCaptureEntries(operations.ctx, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
-		t.Fatalf("newQuizModelRequest returned error: %v", err)
+		t.Fatal(err)
+	}
+
+	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	if err != nil {
+		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}
 
 	readiness := request.Payload.AcceptanceReadiness
@@ -288,9 +293,14 @@ This is a documentation-only architecture cleanup for a package boundary.
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
 	}
 
-	request, err := operations.newQuizModelRequest(state)
+	entries, err := operations.quizRepository().LoadRawCaptureEntries(operations.ctx, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
-		t.Fatalf("newQuizModelRequest returned error: %v", err)
+		t.Fatal(err)
+	}
+
+	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	if err != nil {
+		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}
 
 	readiness := request.Payload.AcceptanceReadiness
@@ -325,9 +335,14 @@ The project has an existing file and should write an output report.
 		t.Fatalf("newQuizRuntimeState returned error: %v", err)
 	}
 
-	request, err := operations.newQuizModelRequest(state)
+	entries, err := operations.quizRepository().LoadRawCaptureEntries(operations.ctx, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
-		t.Fatalf("newQuizModelRequest returned error: %v", err)
+		t.Fatal(err)
+	}
+
+	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	if err != nil {
+		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}
 
 	readiness := request.Payload.AcceptanceReadiness
@@ -374,9 +389,14 @@ success path accepts the request and writes a visible status response.
 	state.QuestionsAsked = 1
 	state.AnswersRecorded = 1
 
-	request, err := operations.newQuizModelRequest(state)
+	entries, err := operations.quizRepository().LoadRawCaptureEntries(operations.ctx, quizcore.Scope{ProjectID: state.ProjectID, CaseSlug: state.CaseSlug})
 	if err != nil {
-		t.Fatalf("newQuizModelRequest returned error: %v", err)
+		t.Fatal(err)
+	}
+
+	request, err := operations.newQuizModelRequestWithEntries(state, entries)
+	if err != nil {
+		t.Fatalf("newQuizModelRequestWithEntries returned error: %v", err)
 	}
 
 	readiness := request.Payload.AcceptanceReadiness
