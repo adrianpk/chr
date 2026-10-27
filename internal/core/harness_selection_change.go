@@ -110,7 +110,7 @@ func ChangeHarnessSelections(ctx context.Context, project string, opts HarnessSe
 }
 
 func harnessSelectionRequestDigest(r HarnessSelectionChangeRequest) (string, error) {
-	if r.Binding.Validate() != nil || !IsValidOperatorID(r.Binding.Operator) {
+	if r.Binding.Validate() != nil || !workspacecore.IsValidOperatorID(r.Binding.Operator) {
 		return "", errors.New("harness selection requires an authorized actor and preparation")
 	}
 

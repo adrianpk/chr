@@ -103,6 +103,13 @@ The original binding, protocol checks, fallback behavior and finite budgets rema
 A real Pi peer regression cancels one caller and then dispatches the same admitted
 operation from a fresh caller; capacity peers retain independent cancellation.
 
+Shared operator/userspace resolution now lives in workspace, and bounded model
+traces live in harness/trace. This prerequisite removes the root dependency from
+host trace recording. Existing configuration, redaction, payload retention,
+rotation, path validation and environment contracts are unchanged; 49 declarations
+and tests match their pre-move source after qualification. The root quiz integration
+observes the retained llm.ndjson filename without a test-only exported constant.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -245,6 +252,12 @@ Generation caller context checks passed:
 - `make check-go-style`: 9304 declarations, ceiling seven, 207 exact debts, one external exception.
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/app`: zero issues.
+
+Workspace and trace owner move checks passed:
+
+- `go test ./internal/core/workspace ./internal/core/harness/trace ./internal/core ./internal/app ./scripts/goquality -run '^Test(ResolveProjectUserspace|EnsureProjectUserspace|IsValidOperatorID|LoadLLMTrace|WriteLLMTrace|RecordLLMTrace|HarnessGeneration|QualityRecordWire|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9304 declarations, ceiling seven, 207 exact debts, one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace ./internal/core/harness/trace ./internal/core ./internal/app ./scripts/goquality`: zero issues.
 
 ## Risks and Follow-ups
 

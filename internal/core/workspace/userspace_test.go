@@ -1,12 +1,10 @@
-package core
+package workspace
 
 import (
 	"context"
 	"os"
 	"path/filepath"
 	"testing"
-
-	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestResolveProjectUserspaceUsesActiveOperatorEnvironment(t *testing.T) {
@@ -30,7 +28,7 @@ func TestResolveProjectUserspaceUsesActiveOperatorEnvironment(t *testing.T) {
 		t.Fatalf("OperatorID = %q, want adrian", userspace.OperatorID)
 	}
 
-	if userspace.Path != filepath.Join(dir, workspacecore.DirectoryName, workspacecore.UserDirectoryName) {
+	if userspace.Path != filepath.Join(dir, DirectoryName, UserDirectoryName) {
 		t.Fatalf("Path = %q, want .chr/default", userspace.Path)
 	}
 

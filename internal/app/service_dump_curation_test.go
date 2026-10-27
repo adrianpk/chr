@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	harnesstrace "forge.adrianpk.com/chr/internal/core/harness/trace"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
@@ -53,9 +53,9 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 	projectDir := t.TempDir()
 	writeServiceWorkspaceQueryFixture(t, projectDir)
 
-	t.Setenv(core.LLMTraceEnabledEnv, "1")
-	t.Setenv(core.LLMTracePayloadsEnv, "1")
-	t.Setenv(core.ActiveOperatorIDEnv, "test-user")
+	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
+	t.Setenv(harnesstrace.LLMTracePayloadsEnv, "1")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "test-user")
 
 	server := newDumpCurationTraceTestServer(t)
 	defer server.Close()

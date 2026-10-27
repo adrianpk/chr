@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -56,7 +57,7 @@ func (e tuiHarnessSelectionExecutor) retainedHarnessBindings(ctx context.Context
 }
 
 func (e tuiHarnessSelectionExecutor) SaveHarnessSelections(request tui.HarnessSelectionRequest) (tui.HarnessSelectionView, error) {
-	actor, err := core.ResolveProjectUserspace(core.ResolveProjectUserspaceOptions{ProjectDir: e.operations.projectContext.ProjectDir})
+	actor, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: e.operations.projectContext.ProjectDir})
 	if err != nil {
 		return tui.HarnessSelectionView{}, err
 	}

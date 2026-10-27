@@ -8,7 +8,6 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -67,7 +66,7 @@ func TestHarnessSelectionCLIRejects(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			project, root := harnessSelectionCLIFixture(t)
-			t.Setenv(core.ActiveOperatorIDEnv, tc.actor)
+			t.Setenv(workspacecore.ActiveOperatorIDEnv, tc.actor)
 
 			initial := harnessSelectionCLIStatus(t, project, root)
 			args := []string{"harness", "select", "--dir", project, "--dev-root", root, "--config-revision", initial.Snapshot.Revision, "--request-id", "cli-reject"}
@@ -90,7 +89,7 @@ func harnessSelectionCLIFixture(t *testing.T) (string, string) {
 
 	_, project, configDir, _ := harnessSelectionFixture(t)
 	root := t.TempDir()
-	t.Setenv(core.ActiveOperatorIDEnv, "operator")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "operator")
 	t.Setenv("CHR_SPEC_GENERATION_BACKEND", "openai")
 
 	profiles, err := os.ReadFile(filepath.Join(configDir, "harnesses.yml"))

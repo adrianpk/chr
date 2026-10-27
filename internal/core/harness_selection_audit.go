@@ -6,6 +6,7 @@ import (
 
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func applyHarnessSelectionAudit(config *WorkspaceConfig, values map[string]string) error {
@@ -37,7 +38,7 @@ func applyHarnessSelectionAudit(config *WorkspaceConfig, values map[string]strin
 }
 
 func validateHarnessSelectionAudit(audit HarnessSelectionAudit) error {
-	if (workflowstate.MutationBinding{RequestID: audit.ProjectRef, Operator: audit.ChangedBy}).Validate() != nil || !IsValidOperatorID(audit.ChangedBy) {
+	if (workflowstate.MutationBinding{RequestID: audit.ProjectRef, Operator: audit.ChangedBy}).Validate() != nil || !workspacecore.IsValidOperatorID(audit.ChangedBy) {
 		return errors.New("invalid harness selection project or actor")
 	}
 

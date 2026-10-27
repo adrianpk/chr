@@ -1,4 +1,4 @@
-package core
+package trace
 
 import (
 	"context"
@@ -42,8 +42,8 @@ func TestLoadLLMTraceConfigEnabledResolvesUserspaceLogPath(t *testing.T) {
 	config, err := LoadLLMTraceConfig(LoadLLMTraceConfigOptions{
 		ProjectDir: dir,
 		LookupEnv: traceTestLookupEnv(map[string]string{
-			ActiveOperatorIDEnv: "adrian",
-			LLMTraceEnabledEnv:  "1",
+			workspacecore.ActiveOperatorIDEnv: "adrian",
+			LLMTraceEnabledEnv:                "1",
 		}),
 	})
 	if err != nil {
@@ -66,12 +66,12 @@ func TestLoadLLMTraceConfigReadsEnvironmentOverrides(t *testing.T) {
 	config, err := LoadLLMTraceConfig(LoadLLMTraceConfigOptions{
 		ProjectDir: dir,
 		LookupEnv: traceTestLookupEnv(map[string]string{
-			ActiveOperatorIDEnv:     "adrian",
-			LLMTraceEnabledEnv:      "true",
-			LLMTracePayloadsEnv:     "yes",
-			LLMTraceMaxBytesEnv:     "2048",
-			LLMTraceKeepFilesEnv:    "3",
-			"UNRELATED_ENVIRONMENT": "ignored",
+			workspacecore.ActiveOperatorIDEnv: "adrian",
+			LLMTraceEnabledEnv:                "true",
+			LLMTracePayloadsEnv:               "yes",
+			LLMTraceMaxBytesEnv:               "2048",
+			LLMTraceKeepFilesEnv:              "3",
+			"UNRELATED_ENVIRONMENT":           "ignored",
 		}),
 	})
 	if err != nil {
@@ -248,8 +248,8 @@ func traceTestConfig(t *testing.T, dir string, enabled bool) LLMTraceConfig {
 	config, err := LoadLLMTraceConfig(LoadLLMTraceConfigOptions{
 		ProjectDir: dir,
 		LookupEnv: traceTestLookupEnv(map[string]string{
-			ActiveOperatorIDEnv: "adrian",
-			LLMTraceEnabledEnv:  enabledValue,
+			workspacecore.ActiveOperatorIDEnv: "adrian",
+			LLMTraceEnabledEnv:                enabledValue,
 		}),
 		Environ: func() []string { return nil },
 		Now: func() time.Time {

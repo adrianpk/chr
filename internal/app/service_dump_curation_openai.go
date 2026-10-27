@@ -17,6 +17,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesstrace "forge.adrianpk.com/chr/internal/core/harness/trace"
 )
 
 const (
@@ -441,7 +442,7 @@ func (p openAIDumpCurationProvider) recordRequest(
 	ctx context.Context,
 	trace dumpCurationOpenAITrace,
 ) {
-	core.RecordLLMTraceEvent(ctx, core.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, map[string]any{
+	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, map[string]any{
 		"event":                 "llm_request",
 		"llm_call_id":           trace.CallID,
 		"request_id":            trace.RequestID,
@@ -481,7 +482,7 @@ func (p openAIDumpCurationProvider) recordResponse(
 		event["error"] = responseErr.Error()
 	}
 
-	core.RecordLLMTraceEvent(ctx, core.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, event)
+	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: p.ProjectDir}, event)
 }
 
 func dumpCurationInstructions() string {

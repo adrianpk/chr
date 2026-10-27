@@ -12,6 +12,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (factory commandFactory) harnessCommand() *cli.Command {
@@ -76,7 +77,7 @@ func (factory commandFactory) harnessChangeCommand(clearChoice bool) *cli.Comman
 			return err
 		}
 
-		userspace, err := core.ResolveProjectUserspace(core.ResolveProjectUserspaceOptions{ProjectDir: project.ProjectDir})
+		userspace, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: project.ProjectDir})
 		if err != nil {
 			return err
 		}

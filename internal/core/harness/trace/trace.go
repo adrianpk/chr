@@ -1,4 +1,5 @@
-package core
+// Package trace owns bounded host model traces, payload policy and secret redaction.
+package trace
 
 import (
 	"context"
@@ -10,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
@@ -76,7 +79,7 @@ func LoadLLMTraceConfig(opts LoadLLMTraceConfigOptions) (LLMTraceConfig, error) 
 		return config, nil
 	}
 
-	userspace, err := ResolveProjectUserspace(ResolveProjectUserspaceOptions{
+	userspace, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{
 		ProjectDir: opts.ProjectDir,
 		LookupEnv:  lookupEnv,
 	})

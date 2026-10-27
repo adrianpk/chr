@@ -9,6 +9,8 @@ import (
 	"time"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	harnesstrace "forge.adrianpk.com/chr/internal/core/harness/trace"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -165,8 +167,8 @@ func TestValidateAuthoringQuizGenerationResultRejectsGenericUnsafeOutput(t *test
 
 func TestHarnessAuthoringQuizQuestionProviderRecordsTraceEvents(t *testing.T) {
 	projectDir := t.TempDir()
-	t.Setenv(ActiveOperatorIDEnv, "adrian")
-	t.Setenv(LLMTraceEnabledEnv, "1")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
+	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
 
 	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
 cat >/dev/null
@@ -190,9 +192,9 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 
 func TestHarnessAuthoringQuizQuestionProviderRecordsTracePayloadsWhenEnabled(t *testing.T) {
 	projectDir := t.TempDir()
-	t.Setenv(ActiveOperatorIDEnv, "adrian")
-	t.Setenv(LLMTraceEnabledEnv, "1")
-	t.Setenv(LLMTracePayloadsEnv, "1")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
+	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
+	t.Setenv(harnesstrace.LLMTracePayloadsEnv, "1")
 
 	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
 cat >/dev/null
@@ -217,8 +219,8 @@ printf '%s\n' '{"questions":[{"id":"Q1","question":"Which workflow should this s
 
 func TestHarnessAuthoringQuizQuestionProviderRecordsParseFailureTrace(t *testing.T) {
 	projectDir := t.TempDir()
-	t.Setenv(ActiveOperatorIDEnv, "adrian")
-	t.Setenv(LLMTraceEnabledEnv, "1")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "adrian")
+	t.Setenv(harnesstrace.LLMTraceEnabledEnv, "1")
 
 	program := writeAuthoringQuizProviderScript(t, projectDir, `#!/bin/sh
 cat >/dev/null

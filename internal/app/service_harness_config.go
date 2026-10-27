@@ -8,6 +8,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // HarnessProfileStatus offers only named choices and local readiness evidence.
@@ -134,7 +135,7 @@ func localHarnessSelectionAuthority(project, actor string) func(context.Context)
 			return err
 		}
 
-		userspace, err := core.ResolveProjectUserspace(core.ResolveProjectUserspaceOptions{ProjectDir: project})
+		userspace, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: project})
 		if err != nil {
 			return err
 		}

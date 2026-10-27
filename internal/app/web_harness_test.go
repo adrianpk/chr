@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -91,7 +92,7 @@ func claimWebHarnessInvocation(t *testing.T, operations service, request core.Wo
 
 func prepareWebHarnessProfiles(t *testing.T, operations service) string {
 	t.Helper()
-	t.Setenv(core.ActiveOperatorIDEnv, "test-operator")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "test-operator")
 
 	directory := operations.env.ConfigDir()
 	program, marker := filepath.Join(directory, "driver"), filepath.Join(directory, "spawned")

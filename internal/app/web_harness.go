@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -89,7 +90,7 @@ func (p webViewProvider) writeHarnessSelection(ctx context.Context, operations s
 		return webValidationWrite(errors.New("choose a change for at least one role"))
 	}
 
-	actor, err := core.ResolveProjectUserspace(core.ResolveProjectUserspaceOptions{ProjectDir: operations.projectContext.ProjectDir})
+	actor, err := workspacecore.ResolveProjectUserspace(workspacecore.ResolveProjectUserspaceOptions{ProjectDir: operations.projectContext.ProjectDir})
 	if err != nil {
 		return webBlockedWrite("The active local operator is unavailable.")
 	}

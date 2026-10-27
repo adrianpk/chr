@@ -1,4 +1,5 @@
-package core
+// Package workspace owns workspace operator resolution and contained configuration files.
+package workspace
 
 import (
 	"context"
@@ -8,7 +9,6 @@ import (
 	"unicode"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
-	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ActiveOperatorIDEnv defines a package boundary constant.
@@ -54,12 +54,12 @@ func ResolveProjectUserspace(opts ResolveProjectUserspaceOptions) (ProjectUsersp
 		return ProjectUserspace{}, fmt.Errorf("invalid operator id: %s", operatorID)
 	}
 
-	relativeDir := workspacecore.UserRelativePath()
+	relativeDir := UserRelativePath()
 
 	return ProjectUserspace{
 		ProjectDir:  projectDir,
 		OperatorID:  operatorID,
-		Path:        workspacecore.UserPath(projectDir),
+		Path:        UserPath(projectDir),
 		RelativeDir: relativeDir,
 	}, nil
 }

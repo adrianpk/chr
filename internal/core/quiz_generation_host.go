@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 
+	harnesstrace "forge.adrianpk.com/chr/internal/core/harness/trace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -26,5 +27,5 @@ func (QuizGenerationHost) ValidateOutput(ctx context.Context, request harness.Ag
 
 // Trace uses the existing configured redaction and payload policy.
 func (QuizGenerationHost) Trace(ctx context.Context, projectDir string, event map[string]any) {
-	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: projectDir}, event)
+	harnesstrace.RecordLLMTraceEvent(ctx, harnesstrace.LoadLLMTraceConfigOptions{ProjectDir: projectDir}, event)
 }

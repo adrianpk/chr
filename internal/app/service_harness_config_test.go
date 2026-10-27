@@ -18,7 +18,7 @@ import (
 // snapshot to an independently constructed service without restarting either.
 func TestHarnessSelectionServiceChange(t *testing.T) {
 	operations, project, configDir, command := harnessSelectionFixture(t)
-	t.Setenv(core.ActiveOperatorIDEnv, "operator")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "operator")
 	t.Setenv("CHR_SPEC_GENERATION_BACKEND", "openai")
 
 	initial, err := operations.InspectHarnessSelections(t.Context(), "spec_generation")
@@ -68,7 +68,7 @@ func checkHarnessSelectionServiceReplay(t *testing.T, second service, request co
 		t.Fatal("retry did not retain the response", replay, err)
 	}
 
-	t.Setenv(core.ActiveOperatorIDEnv, "different-operator")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "different-operator")
 
 	if _, err := second.ChangeHarnessSelections(t.Context(), request, authority); err == nil {
 		t.Fatal("revoked actor replayed an accepted change")
@@ -87,7 +87,7 @@ func checkHarnessSelectionServiceRejection(t *testing.T, name string) {
 	t.Helper()
 
 	operations, project, _, _ := harnessSelectionFixture(t)
-	t.Setenv(core.ActiveOperatorIDEnv, "operator")
+	t.Setenv(workspacecore.ActiveOperatorIDEnv, "operator")
 
 	initial, err := operations.InspectHarnessSelections(t.Context(), "spec_generation")
 	if err != nil {

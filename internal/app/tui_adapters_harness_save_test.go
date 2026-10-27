@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -126,7 +127,7 @@ func TestTUIHarnessSelectionRejected(t *testing.T) {
 		{"missing actor", view.Snapshot.ProjectRef, "beta", ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			t.Setenv(core.ActiveOperatorIDEnv, test.actor)
+			t.Setenv(workspacecore.ActiveOperatorIDEnv, test.actor)
 
 			_, err := executor.SaveHarnessSelections(tui.HarnessSelectionRequest{ProjectRef: test.project, Revision: view.Snapshot.Revision, RequestID: "rejected-" + strings.ReplaceAll(test.name, " ", "-"), Worker: &test.profile})
 			if err == nil || webHarnessSnapshot(t, operations) != before {
