@@ -15,3 +15,6 @@ workflow coordinator, provider IO or model client dependency in this owner.
 Public callers use Artifact, Paths, RoundNotes, Layout and Check. Write returns a
 WriteResult that retains checks on static rejection with no published path, zero
 outcomes on the original error branches, and paths/checks after confirmed write.
+
+Artifact paths/writes live in artifact.go, clarification note and answer handling
+in round.go, and the cohesive static Gherkin parser/checks in check.go.

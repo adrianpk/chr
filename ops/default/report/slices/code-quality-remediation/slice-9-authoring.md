@@ -25,11 +25,17 @@ Namespace precedence, canonical paths, ID allocation, metadata and private-file
 exclusion retain their original behavior. Workflow keeps allocator reclamation,
 owner proofs, guarded release and durable transaction ownership.
 
-This is the initial T9.1 prerequisite. The complete session/repository move, six duplicate
+T9.1 is active. The complete session/repository move, six duplicate
 comparisons, generation sharing, signature conversions and guided ports remain
 in progress or pending. No Slice 9 completion or PR readiness is claimed.
 
 ## Implementation Notes
+
+Acceptance implementation is split into artifact.go for paths/writes, round.go
+for clarification note rendering/answer retention and check.go for the static
+Gherkin parser. These are separate existing responsibilities; the parser remains
+cohesive. Mechanical relocation, contract changes and this file split are
+separate commits. The first assigned result disposition is recorded.
 
 The initial declaration scan of 101 assigned root authoring files identifies 78
 shared names outside the source set. Resolve each at its genuine shared owner or
@@ -95,7 +101,8 @@ seven and the same one external-interface exception.
 - `internal/core/ops/` owns layout, paths, shared envelopes and allocation primitives.
 - `internal/core/project/paths.go` and `files.go` own the existing shared project primitives.
 - `internal/core/ops/file/` and `internal/core/workflow/state/file_change.go` own shared IO and image contracts.
-- [Move evidence](../../../plan/code-quality-remediation-slice-9-moves.csv).
+- [Move evidence](../../../plan/code-quality-remediation-slice-9-moves.csv) and
+  [recorded dispositions](../../../plan/code-quality-remediation-slice-9-dispositions.csv).
 - [Signature reassociations](../../../plan/code-quality-remediation-slice-9-signatures.csv).
 - [Current owners](../../../plan/code-quality-remediation-core-owners.csv) and
   [dependency ledger](../../../plan/code-quality-remediation-boundaries.md).
@@ -139,6 +146,11 @@ seven and the same one external-interface exception.
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/authoring/acceptance ./internal/core/quiz ./internal/core ./internal/app ./scripts/goquality`
   — passed with zero issues after package naming and the named write outcome.
+
+The post-split acceptance/model/app selection, exact style/README checks and
+pinned strict lint passed again for the new file layout. The parser has 357
+lines, round notes 223 and artifact writing 142; these counts describe cohesive
+owners rather than an imposed file-size cap.
 
 The first compile identified shared allocator calls and a legacy layout literal;
 those consumers now use the owned ops contracts. The first style scan identified

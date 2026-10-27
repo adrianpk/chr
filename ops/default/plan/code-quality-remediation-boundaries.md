@@ -109,7 +109,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-766 current non-test files under internal/core, their declared symbols,
+768 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -671,3 +671,14 @@ owners. Private parser state stays local; root facades are removed by direct
 consumer qualification. The unchanged scope-path rule moves to quiz.ScopeID.
 The original feature tuple and public names are recorded at this mechanical
 checkpoint; their separate package contract step follows before PR readiness.
+
+### Acceptance contracts and cohesive file responsibilities
+
+The separate contract step gives acceptance its package-qualified Artifact,
+Paths, RoundNotes, Check and Write API. WriteResult preserves static-rejection
+findings without a path, zero results at the original other failure branches,
+and paths/checks after success. Real rejection tests also prove no ops envelope
+is created. One tuple debt is removed; the temporary count is 300. Artifact path
+and write ownership, feature-round note/answer retention and static parser checks
+are split into artifact.go, round.go and check.go without a parser framework or
+new rule. The original code/hash ledger follows every relocated declaration.
