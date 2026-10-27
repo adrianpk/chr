@@ -558,3 +558,31 @@ action/delivery/document reads after updates, including different source/content
 hashes and conversation revisions. Swapping positive topic/user IDs makes the
 column-name assertions fail; the original mapper was restored. Focused storage,
 wire, HTTP, recovery lifecycle and lost-ack tests plus pinned lint pass.
+
+## Slice 8 quiz and provider compatibility
+
+The quiz-domain runtime/action/model and generated artifact values moved without
+renaming serialized fields, changing tags, reordering stored fields or changing
+state spellings. Observation's unexported filesystem images were never part of
+JSON; those images remain private beside the original recoverable authoring
+journal. Domain snapshots retain Exists, State, Entries and Revision.
+
+Named receipt lookup retains Result on failure and Found separately from error.
+Schema, checksum, digest, operation-ID checks and revision restoration are the
+original rules. The journal still writes runtime, raw/curated images, metadata
+and acknowledgement in one guarded recovery operation. Existing action recovery,
+binding, torn-observation and exact-entry round-trip tests pass.
+
+The provider-neutral schema keeps the original name, description and schema map.
+The OpenAI wrapper alone retains Type, Name, Description, Strict, Schema in their
+original encoded order, with Store=false and Strict=true. Existing request-body
+fixtures pass. Provider provenance is explicit in response decoding; harness and
+API identities remain their actual selected providers.
+
+Host delegates existing generation identity/admission, output validation and
+trace policy. Bound output and raw HTTP output/accounting remain separate named
+fields. Quiz/structured body limits, deadlines, finite clarification/Fast bounds
+and the 90-second journal transition context are unchanged. Real HTTP checks
+verify authorization and absence of the configured key from provider and opted-in
+trace payloads. The original close-error policy remains justified after checked
+bounded reads; it does not trigger another acknowledged request.

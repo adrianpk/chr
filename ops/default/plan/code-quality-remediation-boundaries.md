@@ -7,7 +7,7 @@ Plan: [Approved delivery](code-quality-remediation.md).
 ## Observed production graph
 
 `go list -f '{{.ImportPath}}: {{join .Imports " "}}' ./internal/... ./cmd/...`
-confirms these module-local edges at the Slice 8 model/service extraction checkpoint. Standard-library and external dependencies
+confirms these module-local edges at the Slice 8 implementation checkpoint. Standard-library and external dependencies
 are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
@@ -572,3 +572,24 @@ has the original readiness tests over persisted entries.
 
 `core/ops/slug.Normalize` is the original Unicode letter/digit/separator rule used
 by artifact names and model tags. It has no repository access or model policy.
+
+## Slice 8 completed boundaries
+
+`quiz.ActionBinding`, ActionRequest, Observation, Transition and ActionResult are
+retained quiz-domain values. Observation exposes only the original read-only
+snapshot. Private filesystem images remain in the authoring journal; its
+transaction, digest, receipt and recovery ownership do not move with the values.
+The two retained five-input operations are the cohesive file-context insertion
+and journal commit described in the eight-row disposition ledger.
+
+`quiz/model.OutputSchema` is a provider-neutral named schema. ResponseFromOutput
+receives actual provider provenance. `quiz/openai.Adapter` owns strict Responses
+wire fields, credentials and HTTP request/response behavior. Host retains original
+request identity, generation admission, semantic output validation and configured
+redacted traces. Structured transport keeps its original distinct body bound and
+caller-owned capacity. Import checks prohibit a reverse domain/provider edge.
+
+`authoring/state.ValidOperationIdentity` retains the existing 256-byte generation
+identity rule; it is distinct from the session-ID contract. The journal keeps the
+original 90-second bounded transition context. No context is stored in domain or
+provider values. State spellings, schema compatibility and finite limits remain.
