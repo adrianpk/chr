@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowTrackerFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationResult, WorkflowTrackerStatus) {
@@ -40,7 +42,7 @@ func TestWorkflowTrackerExport(t *testing.T) {
 	}
 
 	status, err := store.InspectWorkflowTracker(t.Context(), hierarchy.Set.ID)
-	if err != nil || status.Status != "current" || status.OutputHash != workflowHash(before) {
+	if err != nil || status.Status != "current" || status.OutputHash != contenthash.Sum(before) {
 		t.Fatal("status omitted exact output", status, err)
 	}
 
@@ -85,15 +87,15 @@ func checkWorkflowTrackerEdited(t *testing.T, existing bool) {
 	path := filepath.Join(store.layout.Root(), projection.Path)
 	workflowTrackerWrite(t, path, edited)
 
-	for _, hash := range []string{"", workflowHash([]byte("old image"))} {
+	for _, hash := range []string{"", contenthash.Sum([]byte("old image"))} {
 		stale, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: hash})
 		if !errors.Is(err, ErrWorkflowProjectionStale) || stale.Status != "stale" || string(workflowTrackerRead(t, path)) != string(edited) {
 			t.Fatal("edited view was overwritten", stale, err)
 		}
 	}
 
-	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: workflowHash(edited)})
-	if err != nil || repaired.Status != "current" || repaired.ObservedHash == workflowHash(edited) {
+	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: contenthash.Sum(edited)})
+	if err != nil || repaired.Status != "current" || repaired.ObservedHash == contenthash.Sum(edited) {
 		t.Fatal("explicit replacement failed", repaired, err)
 	}
 }
@@ -146,7 +148,7 @@ func TestWorkflowTrackerReceipt(t *testing.T) {
 	count := 0
 
 	for _, source := range projection.Sources {
-		if source.Path == receipt.Path && source.Hash == workflowHash(workflowTrackerRead(t, filepath.Join(fixture.store.layout.Root(), receipt.Path))) {
+		if source.Path == receipt.Path && source.Hash == contenthash.Sum(workflowTrackerRead(t, filepath.Join(fixture.store.layout.Root(), receipt.Path))) {
 			count++
 		}
 	}
@@ -199,7 +201,7 @@ func checkWorkflowTrackerProgress(t *testing.T, store *WorkflowStore, hierarchy 
 		t.Fatal("tracker error rolled back or integrated task progress", err)
 	}
 
-	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: workflowHash(edited)})
+	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: contenthash.Sum(edited)})
 	if err != nil || repaired.Status != "current" || workflowTestRead(t, store, id).Revision != before.Revision {
 		t.Fatal("repair changed execution instead of its view", repaired, err)
 	}

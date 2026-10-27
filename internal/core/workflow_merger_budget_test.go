@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeMergerUnmetered preserves finite attempts and runtime without
@@ -77,13 +79,13 @@ func TestNativeMergerSettlement(t *testing.T) {
 // or a changed capability from refunding a whole-call reservation.
 func TestNativeMergerMeterGuards(t *testing.T) {
 	_, input, _ := nativeMergerInput(t)
-	revision := workflowHash([]byte("meter/v1"))
+	revision := contenthash.Sum([]byte("meter/v1"))
 	input.TokenAllowance = &WorkflowTokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: revision, Deadline: input.Deadline}
 	certificate := WorkflowMergerHarnessCertificate{ReportsWholeCall: true, CapabilityRevision: revision}
 
 	cases := map[string]WorkflowMergerUsage{
 		"partial":        {Input: 20, Output: 10, WholeCall: false, CapabilityRevision: revision},
-		"revision":       {Input: 20, Output: 10, WholeCall: true, CapabilityRevision: workflowHash([]byte("meter/v2"))},
+		"revision":       {Input: 20, Output: 10, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("meter/v2"))},
 		"input ceiling":  {Input: 61, Output: 10, WholeCall: true, CapabilityRevision: revision},
 		"output ceiling": {Input: 10, Output: 41, WholeCall: true, CapabilityRevision: revision},
 	}

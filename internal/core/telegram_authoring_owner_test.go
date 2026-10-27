@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramAuthoringOwnerRequest() AuthoringContinuationRequest {
@@ -69,7 +71,7 @@ func TestTelegramAuthoringOwnerQuestions(t *testing.T) {
 	}
 
 	answer.Binding.RequestID = "stale-answer"
-	if _, err := repo.ContinueAuthoring(t.Context(), answer, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := repo.ContinueAuthoring(t.Context(), answer, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale answer err=%v", err)
 	}
 }
@@ -164,7 +166,7 @@ func TestTelegramAuthoringOwnerDivergence(t *testing.T) {
 	}
 
 	reopened := NewAuthoringSessionRepository(root)
-	if _, err := reopened.GetSession(t.Context(), result.Session.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := reopened.GetSession(t.Context(), result.Session.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("divergent recovery err=%v", err)
 	}
 
@@ -220,7 +222,7 @@ func checkTelegramAuthoringOwnerFault(t *testing.T, fault int) {
 	}
 
 	request.Capture = "Another payload"
-	if _, err := reopened.ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := reopened.ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed request err=%v", err)
 	}
 }
@@ -314,7 +316,7 @@ func TestTelegramAuthoringOwnerBudget(t *testing.T) {
 	}
 
 	request.Capture = "changed input"
-	if _, err := repo.ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := repo.ContinueAuthoring(t.Context(), request, generate); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed failed request err=%v", err)
 	}
 }
@@ -364,7 +366,7 @@ func TestTelegramAuthoringOwnerPhysicalBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := repo.ObserveContinuation(t.Context(), result.Session.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := repo.ObserveContinuation(t.Context(), result.Session.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("mismatched physical binding err=%v", err)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -83,7 +84,7 @@ func webTicketMutationBinding(requestID string) core.WorkflowMutationBinding {
 }
 
 func webTicketFailure(err error) webui.WriteActionResponse {
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		response := webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "Write action rejected stale data.", BlockedReason: "The ticket changed after it was loaded. Reload before saving."}
 		response.ReloadURL, response.DiscardURL = "/board", "/board"
 

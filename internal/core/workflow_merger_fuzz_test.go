@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // FuzzNativeMergerJSON exercises untrusted structured output within the file
@@ -15,7 +17,7 @@ func FuzzNativeMergerJSON(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, data []byte) {
 		var result WorkflowMergerResult
-		if err := decodeWorkflowMergerResult(data, &result); err != nil && !errors.Is(err, ErrWorkflowConflict) {
+		if err := decodeWorkflowMergerResult(data, &result); err != nil && !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("untrusted decoder escaped its error contract", err)
 		}
 	})

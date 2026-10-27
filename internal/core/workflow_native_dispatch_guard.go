@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) checkWorkflowNativeDispatchGuard(ctx context.Context, run workflowInvocationFile, submission WorkflowSubmission, provider WorkflowPublicationGuardProvider) (WorkflowPublicationGuard, error) {
 	if err := s.checkWorkflowNativeDispatchOwner(run, submission); err != nil {
@@ -30,7 +34,7 @@ func (s *WorkflowStore) checkWorkflowNativeDispatchGuard(ctx context.Context, ru
 
 	hash, err := workflowReviewInputHash(input)
 	if err != nil || hash != run.Review.InputHash {
-		return WorkflowPublicationGuard{}, ErrWorkflowConflict
+		return WorkflowPublicationGuard{}, workflowstate.ErrConflict
 	}
 
 	capability, err := observeWorkflowPreparedCapability(ctx, provider, candidate.Input)
@@ -43,7 +47,7 @@ func (s *WorkflowStore) checkWorkflowNativeDispatchGuard(ctx context.Context, ru
 
 func (s *WorkflowStore) checkWorkflowNativeDispatchOwner(run workflowInvocationFile, submission WorkflowSubmission) error {
 	if run.Integration == nil || submission.Native == nil || run.Review == nil || run.Review.State != "authorized" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -52,7 +56,7 @@ func (s *WorkflowStore) checkWorkflowNativeDispatchOwner(run workflowInvocationF
 	}
 
 	if entry.State != "publishing" || entry.StopIntent != "" || !workflowNativeSubmissionEntryMatches(submission, entry) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if _, _, err := s.readWorkflowReview(run); err != nil {

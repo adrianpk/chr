@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPublicationLateResponse finalizes verified external delivery while
@@ -55,7 +57,7 @@ func TestWorkflowPublicationDuringIO(t *testing.T) {
 	}}
 
 	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
-	if !errors.Is(err, ErrWorkflowConflict) || progress.Receipt != nil || progress.Invocation.DeliveryProofRef != "" {
+	if !errors.Is(err, workflowstate.ErrConflict) || progress.Receipt != nil || progress.Invocation.DeliveryProofRef != "" {
 		t.Fatal("target changed during IO but stale delivery proof was accepted", err)
 	}
 

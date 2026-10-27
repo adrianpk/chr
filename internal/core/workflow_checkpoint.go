@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // WorkflowAttemptCheckpoint preserves a stopped attempt without validation proof.
@@ -37,7 +39,7 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 
 	data = append(data, '\n')
 	ref := workflowAttemptFile(run.ID, attempt.ID, "checkpoint.json")
-	attempt.CheckpointRef, attempt.CheckpointHash = ref, workflowHash(data)
+	attempt.CheckpointRef, attempt.CheckpointHash = ref, contenthash.Sum(data)
 	attempt.Outcome, attempt.FinishedAt = reason, now
 	record.Task.AttemptID = ""
 

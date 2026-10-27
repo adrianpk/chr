@@ -139,7 +139,7 @@ func NewReport(createdAt time.Time, evidence GitEvidence, validation ValidationR
 }
 
 // NewFailedReport constructs the corresponding package service or value.
-func NewFailedReport(createdAt time.Time, baseRef string, headRef string, artifacts ReportArtifacts, failures []string) Report {
+func NewFailedReport(createdAt time.Time, baseRef, headRef string, artifacts ReportArtifacts, failures []string) Report {
 	return Report{
 		CreatedAt: createdAt.UTC(),
 		Status:    ReportStatusFailed,

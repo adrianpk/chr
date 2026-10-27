@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"slices"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowSubmissionBinding(run workflowInvocationFile) error {
@@ -13,7 +16,7 @@ func validateWorkflowSubmissionBinding(run workflowInvocationFile) error {
 	}
 
 	if run.Lane == nil || b.Unit != run.Lane.Unit || b.JournalKey != workflowSubmissionJournalKey(run) || !validWorkflowSubmissionProjection(*b) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -29,17 +32,17 @@ func validWorkflowSubmissionState(state string) bool {
 
 func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error {
 	if !validWorkflowSubmissionJournalHeader(journal) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	run := workflowInvocationFile{OwnerRoot: journal.OwnerRoot, WorkflowInvocation: WorkflowInvocation{WorkflowIdentity: WorkflowIdentity{ID: journal.InvocationID, Namespace: journal.Namespace}, WorkflowInvocationExecution: WorkflowInvocationExecution{Lane: &WorkflowLane{Unit: journal.Unit}}}}
 	if journal.Key != workflowSubmissionJournalKey(run) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, submission := range journal.Attempts {
 		if submission.Attempt != i+1 || submission.InvocationID != journal.InvocationID || submission.Unit != journal.Unit {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if i < len(journal.Attempts)-1 && submission.State != "unpublished" {
@@ -55,18 +58,18 @@ func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error 
 }
 
 func validWorkflowSubmissionJournalHeader(journal workflowSubmissionJournal) bool {
-	return slices.Contains([]string{"chr-integration-journal/v1", "chr-integration-journal/v2"}, journal.Schema) && filepath.IsAbs(journal.OwnerRoot) && IsValidOpsNamespace(journal.Namespace) && journal.InvocationID != "" && journal.Unit.ID != "" && len(journal.Attempts) >= 1 && len(journal.Attempts) <= 10
+	return slices.Contains([]string{"chr-integration-journal/v1", "chr-integration-journal/v2"}, journal.Schema) && filepath.IsAbs(journal.OwnerRoot) && opsnamespace.Valid(journal.Namespace) && journal.InvocationID != "" && journal.Unit.ID != "" && len(journal.Attempts) >= 1 && len(journal.Attempts) <= 10
 }
 
 func validateWorkflowSubmission(submission WorkflowSubmission, journal workflowSubmissionJournal) error {
 	guard := submission.Guard
 	if !validWorkflowSubmissionIdentity(submission, journal) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	target, err := workflowSubmissionTargetKey(guard.PullRequest)
 	if err != nil || target != journal.TargetKey || !validWorkflowLane(submission.PreparedLane) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowSubmissionGuard(guard); err != nil {
@@ -74,7 +77,7 @@ func validateWorkflowSubmission(submission WorkflowSubmission, journal workflowS
 	}
 
 	if !slices.Contains([]string{"", "accepted", "unaccepted", "error_unknown"}, submission.Response) || submission.ResponseCommit != "" && !workflowCommitID(submission.ResponseCommit) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowNativeSubmission(submission, journal.Schema); err != nil {
@@ -90,7 +93,7 @@ func validWorkflowSubmissionIdentity(submission WorkflowSubmission, journal work
 
 func validateWorkflowSubmissionGuard(guard WorkflowPublicationGuard) error {
 	if guard.PreparationRef == "" || len(guard.PreparationHash) != 64 || len(guard.ReviewHash) != 64 || guard.PullRequest.HeadCommit != guard.Git.SourceCommit || guard.PullRequest.BaseCommit != guard.Git.BaseCommit || guard.PullRequest.BaseBranch != guard.Git.TargetBranch {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowReviewPolicy(guard.Policy); err != nil {
@@ -111,21 +114,21 @@ func validateWorkflowSubmissionGuard(guard WorkflowPublicationGuard) error {
 func validateWorkflowSubmissionProof(submission WorkflowSubmission) error {
 	if submission.State != "confirmed" {
 		if submission.Proof != nil || submission.ObservedPR != nil || submission.ExternalDelivery {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return validateWorkflowUnpublishedProof(submission)
 	}
 
 	if !validWorkflowConfirmedSubmissionHeader(submission) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	proof := *submission.Proof
 
 	external := proof.ResultCommit != submission.Guard.Git.ResultCommit || proof.BaseCommit != submission.Guard.Git.BaseCommit || proof.HistoryHash != submission.Guard.Git.HistoryHash
 	if external != submission.ExternalDelivery || submission.ObservedPR.ResultCommit != proof.ResultCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	query := submission.Guard.Git.WorkflowIntegrationQuery
@@ -141,10 +144,10 @@ func validWorkflowConfirmedSubmissionHeader(submission WorkflowSubmission) bool 
 func validateWorkflowUnpublishedProof(submission WorkflowSubmission) error {
 	if submission.State == "unpublished" {
 		if submission.Unpublished == nil || submission.Unpublished.SubmissionID != submission.ID || !submission.Unpublished.Unpublished {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	} else if submission.Unpublished != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

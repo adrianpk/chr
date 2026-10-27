@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // FinishGuidedUseCaseDump seals meaningful capture without dispatching later stages.
@@ -45,7 +48,7 @@ func (r *fileAuthoringSessionRepository) finishGuidedUseCaseDump(ctx context.Con
 
 func (r *fileAuthoringSessionRepository) completeGuidedCapture(ctx context.Context, session AuthoringSession, command GuidedUseCaseCommand, operation GuidedUseCaseOperation) (AuthoringSession, error) {
 	if command.Action != "finish" || session.Guided.Stage != "dump" {
-		return session, ErrWorkflowConflict
+		return session, workflowstate.ErrConflict
 	}
 
 	if session.Guided.PendingOperation == nil && command.Content != "" {
@@ -101,7 +104,7 @@ func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, ses
 
 	pending := session.Guided.PendingCheckpoint
 	if pending.OperationID != operation.ID || pending.Ref != guidedCheckpointRef(session.ID, operation.Digest) {
-		return *pending, ErrWorkflowConflict
+		return *pending, workflowstate.ErrConflict
 	}
 
 	checkpoint, err := r.commitGuidedCheckpoint(ctx, *pending, operation.Digest)
@@ -117,7 +120,7 @@ func (r *fileAuthoringSessionRepository) sealGuidedDump(ctx context.Context, ses
 }
 
 func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, session AuthoringSession, operation GuidedUseCaseOperation) (GuidedStageCheckpoint, error) {
-	request := DumpMutationRequest{OperationID: "guided-" + workflowHash([]byte(session.ID+"-dump")), Action: "capture", Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug, Title: session.Guided.CaseName, Content: session.Guided.Capture, ExpectedRevision: session.Guided.CaseHash}
+	request := DumpMutationRequest{OperationID: "guided-" + contenthash.Sum([]byte(session.ID+"-dump")), Action: "capture", Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug, Title: session.Guided.CaseName, Content: session.Guided.Capture, ExpectedRevision: session.Guided.CaseHash}
 
 	result, err := MutateDump(ctx, r.projectDir, request, nil)
 	if err != nil {
@@ -130,7 +133,7 @@ func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, 
 	}
 
 	if artifact.Artifact.SourceHash != result.SourceHash || artifact.Artifact.MetadataHash != result.MetadataHash {
-		return GuidedStageCheckpoint{}, ErrWorkflowConflict
+		return GuidedStageCheckpoint{}, workflowstate.ErrConflict
 	}
 
 	fields, err := projectDumpBodyFields([]byte(artifact.Content))
@@ -159,7 +162,7 @@ func (r *fileAuthoringSessionRepository) prepareGuidedDump(ctx context.Context, 
 func guardGuidedCaseImage(checkpoint GuidedStageCheckpoint, path, hash string) error {
 	for _, image := range checkpoint.Artifacts {
 		if image.Path == path && image.Hash != hash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

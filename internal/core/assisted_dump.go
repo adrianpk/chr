@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrAssistedCurationMissing permits an initial curation before dump synthesis.
@@ -57,7 +60,7 @@ func normalizeAssistedDumpOperation(opts AssistedArtifactSynthesisOptions) (assi
 
 	r, ok := opts.Repository.(*fileAuthoringSessionRepository)
 	if !ok {
-		return operation, ErrWorkflowConflict
+		return operation, workflowstate.ErrConflict
 	}
 
 	root, err := filepath.Abs(opts.ProjectDir)
@@ -67,7 +70,7 @@ func normalizeAssistedDumpOperation(opts AssistedArtifactSynthesisOptions) (assi
 
 	repositoryRoot, err := filepath.Abs(r.projectDir)
 	if err != nil || root != repositoryRoot {
-		return operation, ErrWorkflowConflict
+		return operation, workflowstate.ErrConflict
 	}
 
 	opts.ProjectDir = root
@@ -108,7 +111,7 @@ func assistedDumpDigest(opts AssistedArtifactSynthesisOptions) (string, error) {
 		return "", errors.New("assisted dump input exceeds its bound")
 	}
 
-	return workflowHash(encoded), nil
+	return contenthash.Sum(encoded), nil
 }
 
 func (r *fileAuthoringSessionRepository) prepareAssistedDump(ctx context.Context, operation assistedDumpOperation) (AssistedArtifactSynthesisResult, []workflowFileChange, error) {

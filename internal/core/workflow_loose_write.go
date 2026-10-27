@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Only a revision-guarded write can advance an inactive loose member's expected
@@ -66,7 +68,7 @@ func (s *WorkflowStore) workflowLooseWriteMember(run *workflowInvocationFile, ol
 		}
 
 		if !workflowMemberImageMatches(old, *member, run.WorkflowIdentity) {
-			return false, ErrWorkflowConflict
+			return false, workflowstate.ErrConflict
 		}
 
 		member.ExpectedRevision, member.ExpectedSourceHash = next.Revision, next.SourceHash

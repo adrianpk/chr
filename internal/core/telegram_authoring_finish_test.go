@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestTelegramAuthoringAtomicFinish rolls back conversation/outbox changes when
@@ -56,7 +58,7 @@ func telegramAuthoringFinishFixture(t *testing.T) (*telegramConversationFixture,
 		t.Fatal("prepared request was not retained", request, err)
 	}
 
-	progress := TelegramAuthoringProgress{SessionRef: ".chr/authoring/sessions/example/session.md", Question: &TelegramConversationQuestion{SessionRef: ".chr/authoring/sessions/example/session.md", QuestionID: "question-1", TurnID: "turn-1", Revision: 1, ContentDigest: workflowHash([]byte("real prompt"))}}
+	progress := TelegramAuthoringProgress{SessionRef: ".chr/authoring/sessions/example/session.md", Question: &TelegramConversationQuestion{SessionRef: ".chr/authoring/sessions/example/session.md", QuestionID: "question-1", TurnID: "turn-1", Revision: 1, ContentDigest: contenthash.Sum([]byte("real prompt"))}}
 
 	return f, c, request, progress
 }

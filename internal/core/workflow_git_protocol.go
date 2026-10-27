@@ -6,6 +6,8 @@ import (
 	"io"
 	"strconv"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const (
@@ -151,7 +153,7 @@ func (advertisement workflowAdvertisement) check(request WorkflowGitPublication)
 	}
 
 	if source != request.Git.SourceCommit || target != request.Git.BaseCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

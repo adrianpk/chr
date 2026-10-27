@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowRepositoryDirectory(ctx context.Context, projectDir string) (string, error) {
@@ -185,8 +188,8 @@ func guardedAgentOperationRelease(lock *AgentOperationLock) error {
 			return err
 		}
 
-		if workflowHash(data) != lock.guard {
-			return fmt.Errorf("%w: operation lock owner changed", ErrWorkflowConflict)
+		if contenthash.Sum(data) != lock.guard {
+			return fmt.Errorf("%w: operation lock owner changed", workflowstate.ErrConflict)
 		}
 	}
 

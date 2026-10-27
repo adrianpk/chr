@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestWorkflowCoordinatorClone rejects copied authority before an invocation
@@ -127,7 +129,7 @@ func changeWorkflowCoordinatorTarget(t *testing.T, store *WorkflowStore, foreign
 	path := filepath.Join(store.layout.ProjectDir(), "ops", "other", workflowCoordinatorPath)
 
 	if foreign {
-		marker := workflowCoordinator{Schema: "chr-coordinator/v1", ID: workflowHash([]byte("foreign"))}
+		marker := workflowCoordinator{Schema: "chr-coordinator/v1", ID: contenthash.Sum([]byte("foreign"))}
 
 		data, err := json.Marshal(marker)
 		if err != nil {

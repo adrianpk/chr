@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedService, target core.TelegramOperationTarget, input telegramGuidedInput) (telegramGuidedInput, error) {
@@ -19,7 +20,7 @@ func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedSe
 		}
 
 		if !ready {
-			return input, core.ErrWorkflowConflict
+			return input, workflowstate.ErrConflict
 		}
 
 		input.Command = command
@@ -35,7 +36,7 @@ func prepareTelegramGuidedInput(ctx context.Context, operations telegramGuidedSe
 
 		input.Choices = guidedControlChoices(observed)
 		if len(input.Choices) == 0 {
-			return input, core.ErrWorkflowConflict
+			return input, workflowstate.ErrConflict
 		}
 	}
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func (s *WorkflowStore) commitWorkflowClosingStart(ctx context.Context, claim *workflowClosingClaim) error {
@@ -29,7 +31,7 @@ func (s *WorkflowStore) commitWorkflowClosingState(ctx context.Context, claim *w
 
 	data = append(data, '\n')
 	stateFile := workflowFileChange{Path: workflowClosingFile(claim.set.ID, claim.state.Generation, "state.json"), Before: binding.Hash, After: data}
-	*binding = WorkflowClosingEvidence{Ref: stateFile.Path, Hash: workflowHash(data)}
+	*binding = WorkflowClosingEvidence{Ref: stateFile.Path, Hash: contenthash.Sum(data)}
 	claim.set.Revision++
 	claim.set.UpdatedAt = time.Now().UTC()
 
@@ -51,7 +53,7 @@ func (s *WorkflowStore) commitWorkflowClosingState(ctx context.Context, claim *w
 }
 
 func (s *WorkflowStore) checkWorkflowClosingClaim(ctx context.Context, claim *workflowClosingClaim, lease bool) error {
-	if claim.state.OwnerRoot != s.layout.Root() || claim.state.TokenHash != workflowHash([]byte(claim.worker.Token)) || claim.state.Outcome != "running" {
+	if claim.state.OwnerRoot != s.layout.Root() || claim.state.TokenHash != contenthash.Sum([]byte(claim.worker.Token)) || claim.state.Outcome != "running" {
 		return ErrWorkflowOwned
 	}
 
@@ -73,7 +75,7 @@ func (s *WorkflowStore) checkWorkflowClosingCredential(claim *workflowClosingCla
 	}
 
 	state, err := s.readWorkflowClosingAttempt(claim.set, claim.state.Generation-1)
-	if err != nil || state.TokenHash != workflowHash([]byte(claim.worker.Token)) || state.Outcome != "running" {
+	if err != nil || state.TokenHash != contenthash.Sum([]byte(claim.worker.Token)) || state.Outcome != "running" {
 		return errorsOrConflict(err)
 	}
 

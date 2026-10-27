@@ -5,6 +5,8 @@ import (
 	"errors"
 	"path/filepath"
 	"reflect"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedWorkflowControlProof binds a native control to retained guided authority.
@@ -19,7 +21,7 @@ func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run Work
 
 	absolute, err := filepath.Abs(s.layout.ProjectDir())
 	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	r := &fileAuthoringSessionRepository{projectDir: absolute}
@@ -39,15 +41,15 @@ func (s *WorkflowStore) checkGuidedWorkflowControl(ctx context.Context, run Work
 func guardGuidedNativeControl(session AuthoringSession, run WorkflowInvocation, request WorkflowControlMutationRequest) error {
 	state := session.Guided
 	if state.Work == nil || state.Work.Invocation == nil || state.Work.Materialization == nil || state.Control == nil || state.Control.PendingOperation == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !guidedNativeControlAuthority(session, run, request) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !reflect.DeepEqual(state.Control.NativeRequest, &request) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -56,7 +58,7 @@ func guardGuidedNativeControl(session AuthoringSession, run WorkflowInvocation, 
 // ReadGuidedInvocation checks the exact native reference without claiming work.
 func ReadGuidedInvocation(ctx context.Context, root string, session AuthoringSession) (WorkflowInvocation, error) {
 	if session.Guided == nil {
-		return WorkflowInvocation{}, ErrWorkflowConflict
+		return WorkflowInvocation{}, workflowstate.ErrConflict
 	}
 
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
@@ -66,7 +68,7 @@ func ReadGuidedInvocation(ctx context.Context, root string, session AuthoringSes
 
 	work := session.Guided.Work
 	if work == nil || work.Invocation == nil || work.Materialization == nil {
-		return WorkflowInvocation{}, ErrWorkflowConflict
+		return WorkflowInvocation{}, workflowstate.ErrConflict
 	}
 
 	run, err := NewWorkflowStore(layout, session.ProjectID).ReadWorkflow(ctx, work.Invocation.ID)
@@ -75,7 +77,7 @@ func ReadGuidedInvocation(ctx context.Context, root string, session AuthoringSes
 	}
 
 	if !guidedNativeReferenceMatches(run, session) {
-		return run, ErrWorkflowConflict
+		return run, workflowstate.ErrConflict
 	}
 
 	return run, nil

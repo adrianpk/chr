@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowLooseFailure keeps each failed attempt and its finite budget.
@@ -109,7 +111,7 @@ func TestWorkflowLooseBounded(t *testing.T) {
 	}
 
 	request.Policy.IncludeLaterTickets = true
-	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("same key changed its admission policy", err)
 	}
 }

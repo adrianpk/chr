@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // HarnessProfileStatus offers only named choices and local readiness evidence.
@@ -93,7 +94,7 @@ func harnessProfileChoices(ctx context.Context, config core.WorkspaceConfig, pro
 // trusted adapter checks its current actor/project authority even on receipt replay.
 func (s service) ChangeHarnessSelections(ctx context.Context, request core.HarnessSelectionChangeRequest, authorize func(context.Context) error) (core.HarnessSelectionSnapshot, error) {
 	if request.ProjectRef != s.projectContext.ProjectID {
-		return core.HarnessSelectionSnapshot{}, core.ErrWorkflowConflict
+		return core.HarnessSelectionSnapshot{}, workflowstate.ErrConflict
 	}
 
 	return core.ChangeHarnessSelections(ctx, s.projectContext.ProjectDir, core.HarnessSelectionChangeOptions{

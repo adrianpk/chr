@@ -4,12 +4,15 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramAuthoringScope(t *testing.T) AuthoringWorkScope {
 	t.Helper()
 
-	digest := workflowHash([]byte("canonical source"))
+	digest := contenthash.Sum([]byte("canonical source"))
 
 	scope, err := SealAuthoringWorkScope(AuthoringWorkScope{Binding: WorkflowMutationBinding{RequestID: "description", Operator: "maintainer"}, Intent: AuthoringIntentDevelop, Instruction: "Develop the bounded retry fix.", ProjectID: "example", Namespace: "team", SessionID: "session", SessionRef: ".chr/authoring/sessions/session/session.md", SessionRevision: 3, SourceHash: digest, DescriptionRef: "ops/team/spec/00000-source/artifact.md", DescriptionHash: digest, ContractHash: digest, RecordHash: digest})
 	if err != nil {
@@ -42,10 +45,10 @@ func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 			s.Instruction += " Also redesign scheduling."
 		}},
 		{"source", func(s *AuthoringWorkScope, _ *AuthoringWorkAuthorization) {
-			s.SourceHash = workflowHash([]byte("changed"))
+			s.SourceHash = contenthash.Sum([]byte("changed"))
 		}},
 		{"scope", func(_ *AuthoringWorkScope, a *AuthoringWorkAuthorization) {
-			a.ScopeHash = workflowHash([]byte("changed"))
+			a.ScopeHash = contenthash.Sum([]byte("changed"))
 		}},
 		{"operator", func(_ *AuthoringWorkScope, a *AuthoringWorkAuthorization) { a.Binding.Operator = "other" }},
 		{"prepare", func(s *AuthoringWorkScope, _ *AuthoringWorkAuthorization) { s.Intent = AuthoringIntentPrepare }},
@@ -63,14 +66,14 @@ func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 	}
 
 	changed := scope
-	changed.SourceHash = workflowHash([]byte("new requirements"))
+	changed.SourceHash = contenthash.Sum([]byte("new requirements"))
 
 	changed, err = SealAuthoringWorkScope(changed)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ValidateAuthoringWorkAuthorization(changed, &authority); !errors.Is(err, ErrWorkflowConflict) {
+	if err := ValidateAuthoringWorkAuthorization(changed, &authority); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("old decision accepted a refreshed scope: %v", err)
 	}
 

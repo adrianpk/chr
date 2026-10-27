@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowBoundPreview freezes the displayed native selection for confirmation.
@@ -189,7 +190,7 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 		}
 
 		if !s.workflowConfirmationRecordMatches(record, member) {
-			return nil, core.ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		size += len(record.Body) + len(record.Domain["execution_contract"])

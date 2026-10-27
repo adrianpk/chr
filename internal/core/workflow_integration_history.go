@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof *WorkflowIntegrationProof) error {
@@ -63,13 +66,13 @@ func (reader workflowIntegrationReader) verifyBase(ctx context.Context, proof Wo
 
 func validateWorkflowIntegrationHistory(proof WorkflowIntegrationProof) error {
 	if proof.Method != "rebase" && len(proof.History) != 1 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	previous := proof.BaseCommit
 	for _, entry := range proof.History {
 		if entry.Parent != previous || !validWorkflowIntegrationCommit(entry) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		previous = entry.Commit
@@ -77,7 +80,7 @@ func validateWorkflowIntegrationHistory(proof WorkflowIntegrationProof) error {
 
 	last := proof.History[len(proof.History)-1]
 	if last.Source != proof.SourceCommit || !workflowIntegrationHistoryTipMatches(proof, last) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowIntegrationProvenance(proof)
@@ -158,24 +161,24 @@ func workflowIntegrationHistoryHash(proof WorkflowIntegrationProof) (string, err
 		Provenance                 *WorkflowIntegrationProvenance `json:",omitempty"`
 	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History, proof.Provenance})
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func validateWorkflowIntegrationProof(query WorkflowIntegrationQuery, proof WorkflowIntegrationProof) error {
 	query.SourceDirectory = ""
 	if proof.WorkflowIntegrationQuery != query || !slices.Contains([]string{"merge", "rebase", "squash"}, proof.Method) || proof.PreparedTree != proof.VerifiedTree || len(proof.History) == 0 || len(proof.History) > WorkflowRecordLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, id := range []string{proof.BaseCommit, proof.PreparedTree, proof.VerifiedTree, proof.ObservedTarget} {
 		if !workflowCommitID(id) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
 	hash, err := workflowIntegrationHistoryHash(proof)
 	if err != nil || hash != proof.HistoryHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowIntegrationHistory(proof)

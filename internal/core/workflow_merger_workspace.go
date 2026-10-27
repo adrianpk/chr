@@ -6,10 +6,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowMergerWorkspaceID(input WorkflowMergerInput) string {
-	return workflowHash([]byte(input.InvocationID + "\x00" + input.EntryID + "\x00" + input.ID))
+	return contenthash.Sum([]byte(input.InvocationID + "\x00" + input.EntryID + "\x00" + input.ID))
 }
 
 func (s *WorkflowStore) workflowMergerWorkspace(ctx context.Context, input WorkflowMergerInput, seed string) (WorkflowLane, string, error) {
@@ -24,12 +27,12 @@ func (s *WorkflowStore) workflowMergerWorkspace(ctx context.Context, input Workf
 	}
 
 	if resolved, err := filepath.EvalSymlinks(parent); err != nil || resolved != parent {
-		return WorkflowLane{}, "", ErrWorkflowConflict
+		return WorkflowLane{}, "", workflowstate.ErrConflict
 	}
 
 	root := filepath.Join(parent, workflowMergerWorkspaceID(input))
 	if err := os.Mkdir(root, 0o700); err != nil {
-		return WorkflowLane{}, "", errors.Join(ErrWorkflowConflict, err)
+		return WorkflowLane{}, "", errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	// A private repository has no credential helpers, remotes, hooks or shared

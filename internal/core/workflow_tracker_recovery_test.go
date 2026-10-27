@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowTrackerRestart repairs every interrupted export boundary without
@@ -182,7 +184,7 @@ func TestWorkflowTrackerConcurrentEdit(t *testing.T) {
 	}
 
 	_, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: projection.OutputHash})
-	if !errors.Is(err, ErrWorkflowConflict) || string(workflowTrackerRead(t, path)) != string(edited) {
+	if !errors.Is(err, workflowstate.ErrConflict) || string(workflowTrackerRead(t, path)) != string(edited) {
 		t.Fatal("concurrent edit was replaced", err)
 	}
 }

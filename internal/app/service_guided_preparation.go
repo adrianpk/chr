@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PrepareGuidedWork generates and materializes exactly the committed approved scope.
@@ -33,7 +34,7 @@ func (s service) PrepareGuidedWork(ctx context.Context, command core.GuidedUseCa
 
 func (s service) prepareGuidedWork(ctx context.Context, session *core.AuthoringSession) error {
 	if session.Guided.SpecApproval == nil {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
@@ -83,7 +84,7 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *core.AuthoringS
 	}
 
 	if _, err := os.Stat(paths.Path); !errors.Is(err, os.ErrNotExist) {
-		return errors.Join(core.ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	revision, err := core.PlanTargetRevision(ctx, s.projectContext.ProjectDir, scope)

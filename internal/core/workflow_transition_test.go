@@ -12,6 +12,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowProcess is the owned subprocess used for lock and crash boundaries.
@@ -135,7 +137,7 @@ func workflowTestConflict(t *testing.T, s *WorkflowStore, r WorkflowRecord) {
 		t.Fatal(err)
 	}
 
-	if _, err := s.Snapshot(context.Background()); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := s.Snapshot(context.Background()); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("incompatible image did not block: %v", err)
 	}
 
@@ -249,7 +251,7 @@ func TestWorkflowCompetingWriters(t *testing.T) {
 	for err := range results {
 		if err == nil {
 			accepted++
-		} else if !errors.Is(err, ErrWorkflowConflict) {
+		} else if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal(err)
 		}
 	}

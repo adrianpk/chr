@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMergerEvidence checks real retained files and containment, including
@@ -131,7 +133,7 @@ func TestNativeMergerCancellation(t *testing.T) {
 	}
 
 	// Deadline expiry is an input error, independent of an otherwise live host.
-	if err := store.CheckWorkflowMergerEvidence(t.Context(), input, input.Deadline); !errors.Is(err, ErrWorkflowConflict) {
+	if err := store.CheckWorkflowMergerEvidence(t.Context(), input, input.Deadline); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("expired evidence check passed", err)
 	}
 }

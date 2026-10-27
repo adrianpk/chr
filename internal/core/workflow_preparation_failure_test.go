@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPreparationGateFailure rejects failed, mutating and truncated
@@ -149,7 +151,7 @@ func TestWorkflowPreparationApproval(t *testing.T) {
 		t.Fatalf("combined approval wait: %+v, %v", fresh, err)
 	}
 
-	if _, err := f.store.ApproveWorkflowSlice(t.Context(), f.run.ID, old.InputHash, f.provider); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ApproveWorkflowSlice(t.Context(), f.run.ID, old.InputHash, f.provider); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("source-only approval was reused")
 	}
 

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // A successful Fast batch survives switches and process reconstruction. Deep
@@ -225,7 +226,7 @@ func checkQuizAnswerReplay(t *testing.T, restarted service, provider *quizContin
 	}
 
 	request.Answer = "Changed input"
-	if _, err := restarted.AnswerQuiz(request); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := restarted.AnswerQuiz(request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed retry accepted", err)
 	}
 }
@@ -245,7 +246,7 @@ func checkQuizSkipReplay(t *testing.T, operations service, state core.QuizRuntim
 	}
 
 	request.Binding.OperationID = "stale-skip"
-	if _, err := operations.SkipQuiz(request); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.SkipQuiz(request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale skip consumed a new question", err)
 	}
 

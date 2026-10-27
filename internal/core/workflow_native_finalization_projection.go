@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"math"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowNativeReceiptProjection(run *workflowInvocationFile, entry WorkflowIntegrationEntry, last WorkflowSubmission) (workflowNativeProjection, error) {
@@ -40,7 +43,7 @@ func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile
 
 	ref := last.Native.ReceiptRef
 	if ref == nil {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	record, err := s.readRecord(ref.Path)
@@ -59,7 +62,7 @@ func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile
 	}
 
 	data = append(data, '\n')
-	run.DeliveryProofRef, run.DeliveryProofHash = workflowDeliveryProofPath(*run), workflowHash(data)
+	run.DeliveryProofRef, run.DeliveryProofHash = workflowDeliveryProofPath(*run), contenthash.Sum(data)
 	run.DeliveryRef, run.DeliveryHash = record.Path, record.SourceHash
 	entry.ReceiptRef = ref
 
@@ -72,14 +75,14 @@ func (s *WorkflowStore) projectWorkflowNativeReceipt(run *workflowInvocationFile
 
 func (s *WorkflowStore) workflowNativeDeliveryProof(run workflowInvocationFile, record WorkflowRecord) (WorkflowSliceDeliveryProof, error) {
 	if record.Receipt == nil || record.Receipt.Native == nil || !workflowNativeDeliveryReceiptMatches(run, record) {
-		return WorkflowSliceDeliveryProof{}, ErrWorkflowConflict
+		return WorkflowSliceDeliveryProof{}, workflowstate.ErrConflict
 	}
 
 	receipt := record.Receipt
 
 	refs := receipt.Native.ObservationRefs
 	if len(refs) == 0 {
-		return WorkflowSliceDeliveryProof{}, ErrWorkflowConflict
+		return WorkflowSliceDeliveryProof{}, workflowstate.ErrConflict
 	}
 
 	var observation WorkflowNativePublicationObservation
@@ -140,7 +143,7 @@ func (s *WorkflowStore) readWorkflowNativeDeliveryRecord(run workflowInvocationF
 	}
 
 	if record.Receipt == nil || record.Receipt.Native == nil {
-		return record, ErrWorkflowConflict
+		return record, workflowstate.ErrConflict
 	}
 
 	return record, s.checkWorkflowNativeReceipt(record)
@@ -153,7 +156,7 @@ func (s *WorkflowStore) checkWorkflowNativeDeliverySource(run workflowInvocation
 	}
 
 	if candidate.Input.Source.CandidateRef != run.CandidateRef || candidate.Input.Source.CandidateHash != run.CandidateHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

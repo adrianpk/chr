@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type workflowSetAmendmentReceipt struct {
@@ -42,7 +44,7 @@ func (s *WorkflowStore) finishWorkflowAmendment(ctx context.Context, builder *wo
 
 	data = append(data, '\n')
 	builder.result.ReceiptRef = builder.root + "/amendment.json"
-	set.Set.Amendments = append(set.Set.Amendments, WorkflowAmendmentRef{Revision: set.Revision + 1, Ref: builder.result.ReceiptRef, Hash: workflowHash(data)})
+	set.Set.Amendments = append(set.Set.Amendments, WorkflowAmendmentRef{Revision: set.Revision + 1, Ref: builder.result.ReceiptRef, Hash: contenthash.Sum(data)})
 	set.Set.PlanRef, set.Set.PlanHash = builder.root+"/plan.md", request.Plan.PlanHash
 	set.Set.ClosingValidation = request.Plan.ClosingValidation
 

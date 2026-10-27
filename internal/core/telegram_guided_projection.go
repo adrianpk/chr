@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // ProjectTelegramGuided retains a changed human view and its next reply binding.
@@ -120,7 +122,7 @@ func bindTelegramGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request T
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET text=?,presentation=?,presentation_hash=? WHERE id=?`, presentation.PlainFallback, string(payload), workflowHash(payload), id)
+	_, err = tx.ExecContext(ctx, `UPDATE telegram_outbox SET text=?,presentation=?,presentation_hash=? WHERE id=?`, presentation.PlainFallback, string(payload), contenthash.Sum(payload), id)
 
 	return err
 }

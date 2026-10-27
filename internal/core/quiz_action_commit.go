@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ApplyAction compares the original binding and publishes all quiz images and
@@ -61,7 +63,7 @@ func (r *fileQuizArtifactRepository) ApplyAction(ctx context.Context, request Qu
 func compareQuizBinding(before QuizObservation, request QuizActionRequest) error {
 	binding := request.Binding
 	if binding.ExpectedRevision != before.Revision || binding.SessionID != before.State.SessionID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	questionID := ""
@@ -70,7 +72,7 @@ func compareQuizBinding(before QuizObservation, request QuizActionRequest) error
 	}
 
 	if binding.QuestionID != questionID || (!before.Exists && request.Action != "start") {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

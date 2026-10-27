@@ -4,13 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ResolveTelegramAuthoringTarget observes an eligible session and the exact
 // frozen target together, without acknowledging its source or invoking an owner.
 func (s *TelegramReceiverStore) ResolveTelegramAuthoringTarget(ctx context.Context, input TelegramConversationInput) (conversation TelegramConversation, target TelegramOperationTarget, err error) {
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
-		return conversation, target, ErrWorkflowConflict
+		return conversation, target, workflowstate.ErrConflict
 	}
 
 	input.Action = TelegramConversationAuthor
@@ -26,7 +28,7 @@ func (s *TelegramReceiverStore) ResolveTelegramAuthoringTarget(ctx context.Conte
 		}
 
 		if !telegramAuthoringEligible(*selected) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		target, err = op.operationTarget(selected)
@@ -42,7 +44,7 @@ func (s *TelegramReceiverStore) ResolveTelegramAuthoringTarget(ctx context.Conte
 // binding even after the conversation advances. It grants no new write revision.
 func (s *TelegramReceiverStore) ReadTelegramConversationBinding(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget) (TelegramConversation, error) {
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
-		return TelegramConversation{}, ErrWorkflowConflict
+		return TelegramConversation{}, workflowstate.ErrConflict
 	}
 
 	p := input.Update.Peer

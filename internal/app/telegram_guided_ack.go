@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const telegramGuidedOvertakenAck = "Your original request is confirmed. The conversation has advanced; its current step is retained. Send Show current step to read the latest prompt."
@@ -62,7 +63,7 @@ func (r telegramReceiver) validateOvertakenGuided(ctx context.Context, request c
 	}
 
 	if !found || current.Revision <= request.Target.ConversationRevision {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

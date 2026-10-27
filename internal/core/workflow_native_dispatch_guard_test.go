@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeDispatchGuard refuses stale generations, policy changes and stop
@@ -64,7 +66,7 @@ func TestNativeDispatchPolicy(t *testing.T) {
 	guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
 
 	submission, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
-	if !errors.Is(err, ErrWorkflowConflict) || submission.ID == "" || publisher.calls.Load() != 0 {
+	if !errors.Is(err, workflowstate.ErrConflict) || submission.ID == "" || publisher.calls.Load() != 0 {
 		t.Fatal("policy race reached publication", err)
 	}
 

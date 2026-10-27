@@ -10,6 +10,9 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeEntryFixture(t *testing.T) (*WorkflowStore, WorkflowIntegrationAdmission) {
@@ -172,7 +175,7 @@ func TestNativeEntryAdmission(t *testing.T) {
 			changed := admission
 			tc.change(&changed)
 
-			if _, err := store.AdmitWorkflowIntegration(t.Context(), changed); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.AdmitWorkflowIntegration(t.Context(), changed); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("incompatible admission accepted", err)
 			}
 		})
@@ -205,14 +208,14 @@ func TestNativeEntryFences(t *testing.T) {
 		{"invocation", func(r *WorkflowIntegrationTransition) { r.InvocationRevision-- }},
 		{"entry", func(r *WorkflowIntegrationTransition) { r.EntryRevision-- }},
 		{"generation", func(r *WorkflowIntegrationTransition) { r.ClaimGeneration-- }},
-		{"candidate", func(r *WorkflowIntegrationTransition) { r.CandidateHash = workflowHash([]byte("stale")) }},
+		{"candidate", func(r *WorkflowIntegrationTransition) { r.CandidateHash = contenthash.Sum([]byte("stale")) }},
 		{"phase", func(r *WorkflowIntegrationTransition) { r.State = "integrated" }},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			changed := request
 			tc.change(&changed)
 
-			if _, err := store.TransitionWorkflowIntegration(t.Context(), changed); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.TransitionWorkflowIntegration(t.Context(), changed); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale callback accepted", err)
 			}
 		})
@@ -299,7 +302,7 @@ func checkNativeEntrySequence(t *testing.T, limit string, first, next WorkflowIn
 			t.Fatal("overflow accepted another entry", err)
 		}
 	case "sequence":
-		if !errors.Is(err, ErrWorkflowConflict) {
+		if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("sequence overflow wrapped allocation", err)
 		}
 	}
@@ -336,7 +339,7 @@ func TestNativeEntryBlocker(t *testing.T) {
 	}
 
 	wrong := nativeEntryTransition(t, store, entry, "preparing")
-	if _, err := store.TransitionWorkflowIntegration(t.Context(), wrong); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.TransitionWorkflowIntegration(t.Context(), wrong); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("blocked entry resumed outside its reason", err)
 	}
 
@@ -362,7 +365,7 @@ func TestNativeEntryPause(t *testing.T) {
 	}
 
 	request = nativeEntryTransition(t, store, entry, "queued")
-	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stopped entry resumed implicitly", err)
 	}
 
@@ -376,7 +379,7 @@ func TestNativeEntryPause(t *testing.T) {
 	request = nativeEntryTransition(t, store, entry, "preparing")
 
 	request.ClearStopIntent = true
-	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("non-quiescent transition cleared stop intent", err)
 	}
 }

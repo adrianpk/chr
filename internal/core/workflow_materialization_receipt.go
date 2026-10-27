@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowMaterializationSchema = "chr-materialization/v1"
@@ -29,7 +32,7 @@ type workflowMaterializationReceipt struct {
 func workflowMaterializationHash(plan GeneratedWorkflowPlan) (string, error) {
 	data, err := json.Marshal(orderedWorkflowPlan(plan))
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func materializationReceiptFile(plan GeneratedWorkflowPlan, result WorkflowMaterializationResult) (workflowFileChange, error) {
@@ -102,8 +105,8 @@ func (s *WorkflowStore) readMaterializationReceipt(set WorkflowRecord, plan Gene
 		return WorkflowMaterializationResult{}, err
 	}
 
-	if string(set.Metadata["materialization_receipt_hash"]) != fmt.Sprintf("%q", workflowHash(data)) {
-		return WorkflowMaterializationResult{}, ErrWorkflowConflict
+	if string(set.Metadata["materialization_receipt_hash"]) != fmt.Sprintf("%q", contenthash.Sum(data)) {
+		return WorkflowMaterializationResult{}, workflowstate.ErrConflict
 	}
 
 	var receipt workflowMaterializationReceipt
@@ -117,7 +120,7 @@ func (s *WorkflowStore) readMaterializationReceipt(set WorkflowRecord, plan Gene
 	}
 
 	if !matchingMaterializationReceipt(receipt, set, plan, hash) {
-		return WorkflowMaterializationResult{}, ErrWorkflowConflict
+		return WorkflowMaterializationResult{}, workflowstate.ErrConflict
 	}
 
 	tasks, err := s.readMaterializationBindings(set, receipt)
@@ -147,7 +150,7 @@ func (s *WorkflowStore) readMaterializationBindings(set WorkflowRecord, receipt 
 		}
 
 		if seen[binding.Path] || !matchingMaterializationTask(record, set.ID, binding) {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		seen[binding.Path] = true
@@ -166,13 +169,13 @@ func matchingMaterializationTask(record WorkflowRecord, setID string, binding wo
 
 func (s *WorkflowStore) checkMaterializationSlices(set WorkflowRecord, receipt workflowMaterializationReceipt, snapshot WorkflowSnapshot) error {
 	if len(receipt.Slices) != len(set.Set.Slices) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, slice := range receipt.Slices {
 		current := set.Set.Slices[i]
 		if current.ID != slice.ID || current.Order != slice.Order || current.ContractHash != slice.ContractHash || current.TaskInputHash != WorkflowTaskInputHash(snapshot.Records, slice.ID) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		path, err := s.safePath(current.ContractRef)
@@ -185,8 +188,8 @@ func (s *WorkflowStore) checkMaterializationSlices(set WorkflowRecord, receipt w
 			return err
 		}
 
-		if workflowHash(data) != slice.ContractHash {
-			return ErrWorkflowConflict
+		if contenthash.Sum(data) != slice.ContractHash {
+			return workflowstate.ErrConflict
 		}
 	}
 

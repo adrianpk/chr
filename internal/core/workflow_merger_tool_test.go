@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMergerTools checks actual filesystem aliases, not just path strings.
@@ -40,7 +42,7 @@ func nativeMergerDeniedTools(t *testing.T, tools *workflowMergerTools) {
 	for _, path := range []string{"../external.go", "/etc/passwd", "src/../Makefile", ".git/config", ".chr/receipt.json", "ops/default/ticket/ready/scope.md", "src/validation.go", "src/alias.go", "src/hard.go"} {
 		t.Run(path, func(t *testing.T) {
 			for _, operation := range []string{"read", "write", "delete"} {
-				if _, err := tools.apply(t.Context(), workflowMergerToolRequest{Operation: operation, Path: path}); !errors.Is(err, ErrWorkflowConflict) {
+				if _, err := tools.apply(t.Context(), workflowMergerToolRequest{Operation: operation, Path: path}); !errors.Is(err, workflowstate.ErrConflict) {
 					t.Fatal("escaped model tool permission", operation, err)
 				}
 			}

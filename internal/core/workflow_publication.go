@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowPublicationPorts supplies trusted canonical IO and the separate role.
@@ -225,7 +227,7 @@ func (s *WorkflowStore) readWorkflowPublicationCheckpoint(ctx context.Context, r
 	}
 
 	if reason := workflowPullRequestMismatch(*run.PullRequest, []WorkflowPullRequestSnapshot{pr}); reason != "" {
-		return journal, pr, fmt.Errorf("%w: %s", ErrWorkflowConflict, reason)
+		return journal, pr, fmt.Errorf("%w: %s", workflowstate.ErrConflict, reason)
 	}
 
 	return journal, pr, nil

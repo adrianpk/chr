@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) observeWorkflowAmendment(ctx context.Context, request WorkflowSetAmendmentRequest) (WorkflowRecord, []workflowInvocationFile, error) {
@@ -13,7 +15,7 @@ func (s *WorkflowStore) observeWorkflowAmendment(ctx context.Context, request Wo
 	}
 
 	if !s.workflowAmendmentImageMatches(set, request) {
-		return set, nil, ErrWorkflowConflict
+		return set, nil, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowAmendmentPlan(set, request); err != nil {
@@ -49,11 +51,11 @@ func (s *WorkflowStore) checkWorkflowAmendmentPlan(set WorkflowRecord, request W
 
 	plan := request.Plan
 	if set.Set.PlanHash == plan.PlanHash || set.Set.UseCase != plan.UseCase || set.Set.UseCaseOrder != plan.UseCaseOrder {
-		return fmt.Errorf("%w: changed plan must preserve set association and order", ErrWorkflowConflict)
+		return fmt.Errorf("%w: changed plan must preserve set association and order", workflowstate.ErrConflict)
 	}
 
 	if string(set.Metadata["materialization_id"]) != fmt.Sprintf("%q", plan.MaterializationID) {
-		return fmt.Errorf("%w: amendment changed materialization identity", ErrWorkflowConflict)
+		return fmt.Errorf("%w: amendment changed materialization identity", workflowstate.ErrConflict)
 	}
 
 	if request.Reopen != (set.Set.Status == "completed") {

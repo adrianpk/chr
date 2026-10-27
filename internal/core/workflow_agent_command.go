@@ -7,6 +7,9 @@ import (
 	"io"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowRunAgentCommand(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string) (WorkflowCommandResult, error) {
@@ -40,7 +43,7 @@ func workflowRunAgentCommand(ctx context.Context, claim *WorkflowClaim, prepared
 func (s *WorkflowStore) checkWorkflowAgentInput(ctx context.Context, input WorkflowTaskInput) error {
 	call := input.AgentCall
 	if call == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	certificate, err := s.checkWorkflowAgentHarness(ctx, input.InvocationID, call.Role, WorkflowAgentHarness{Command: input.Worker, Certificate: call.HarnessRef})
@@ -103,7 +106,7 @@ func (s *WorkflowStore) settleWorkflowAgentCall(ctx context.Context, claim *Work
 
 		reservation, err := workflowAgentReservation(&budget, prepared.input)
 		if err != nil || reservation.State != "launched" {
-			return errors.Join(ErrWorkflowConflict, err)
+			return errors.Join(workflowstate.ErrConflict, err)
 		}
 
 		proofFile, err := claim.store.workflowAgentSettlement(ctx, reservation, prepared.input, response, executionErr)
@@ -140,7 +143,7 @@ func (s *WorkflowStore) workflowAgentSettlement(ctx context.Context, reservation
 
 	path := "run/" + input.InvocationID + "/evidence/agent-usage-" + input.AttemptID + ".json"
 	reservation.State, reservation.ReportedInput, reservation.ReportedOutput = "settled", proof.Input, proof.Output
-	reservation.SettlementProof = &WorkflowEvidenceRef{Path: path, Hash: workflowHash(data)}
+	reservation.SettlementProof = &WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(data)}
 
 	return workflowFileChange{Path: path, After: data}, validateWorkflowIntegrationReservation(*reservation)
 }

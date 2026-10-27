@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func readWorkflowEnvelope(path string) (WorkflowRecord, error) {
@@ -32,7 +34,7 @@ func readWorkflowEnvelope(path string) (WorkflowRecord, error) {
 		return WorkflowRecord{}, err
 	}
 
-	r.SourceHash = workflowHash(data)
+	r.SourceHash = contenthash.Sum(data)
 
 	return r, nil
 }
@@ -71,7 +73,7 @@ func (s *WorkflowStore) readRecord(relative string) (WorkflowRecord, error) {
 			return WorkflowRecord{}, err
 		}
 
-		r.SourceHash += ":" + workflowHash(r.Body)
+		r.SourceHash += ":" + contenthash.Sum(r.Body)
 	}
 
 	r.Path = relative

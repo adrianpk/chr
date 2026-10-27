@@ -1,6 +1,9 @@
 package core
 
-import "forge.adrianpk.com/chr/internal/harness"
+import (
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	"forge.adrianpk.com/chr/internal/harness"
+)
 
 // HarnessReadiness describes local preparation separately from remote authentication.
 type HarnessReadiness struct {
@@ -38,7 +41,7 @@ type HarnessSelection struct {
 // Revision identifies the complete persisted configuration image.
 func (c WorkspaceConfig) Revision() string {
 	if c.workflowRevision == "" {
-		return workflowHash(nil)
+		return contenthash.Sum(nil)
 	}
 
 	return c.workflowRevision

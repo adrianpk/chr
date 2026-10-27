@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramAuthoringExplainRootBinding rejects a registry rebind between
@@ -32,7 +33,7 @@ func TestTelegramAuthoringExplainRootBinding(t *testing.T) {
 	operations := telegramOperationConcreteService(t, f.receiver)
 
 	_, err = operations.PrepareTelegramExplanation(t.Context(), target, AuthoringExplanationRequest{ID: "bound-root", Question: "Describe retries."})
-	if !errors.Is(err, core.ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed registry root was entered", err)
 	}
 }

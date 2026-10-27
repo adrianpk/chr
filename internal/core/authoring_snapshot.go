@@ -6,6 +6,10 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ObserveContinuation reads a consistent bounded session after journal recovery.
@@ -58,7 +62,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringSnapshot(id string, images
 		return snapshot, errors.New("authoring transcript capacity exceeded")
 	}
 
-	snapshot.SessionHash, snapshot.TranscriptHash = workflowHash(session), workflowHash(transcript)
+	snapshot.SessionHash, snapshot.TranscriptHash = contenthash.Sum(session), contenthash.Sum(transcript)
 	if err := r.readAuthoringArtifacts(&snapshot, images); err != nil {
 		return snapshot, err
 	}
@@ -97,7 +101,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *Author
 		}
 
 		if !validAuthoringArtifactRef(snapshot.Session.Namespace, ref) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		body, err := r.readAuthoringImage(filepath.FromSlash(ref.Path), images)
@@ -115,7 +119,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringArtifacts(snapshot *Author
 			return errors.New("authoring canonical context exceeds 1 MiB")
 		}
 
-		snapshot.Artifacts = append(snapshot.Artifacts, AuthoringArtifactObservation{Ref: ref, SourceHash: workflowHash(body), MetadataHash: workflowHash(metadata), Body: string(body)})
+		snapshot.Artifacts = append(snapshot.Artifacts, AuthoringArtifactObservation{Ref: ref, SourceHash: contenthash.Sum(body), MetadataHash: contenthash.Sum(metadata), Body: string(body)})
 	}
 
 	return validateAuthoringArtifactContext(*snapshot)
@@ -145,7 +149,7 @@ func authoringSnapshotDigest(snapshot AuthoringSnapshot) (string, error) {
 
 	encoded, err := json.Marshal(guards)
 
-	return workflowHash(encoded), err
+	return contenthash.Sum(encoded), err
 }
 
 func authoringCurrentQuestion(snapshot AuthoringSnapshot) (*AuthoringQuestionBinding, error) {
@@ -159,7 +163,7 @@ func authoringCurrentQuestion(snapshot AuthoringSnapshot) (*AuthoringQuestionBin
 				return nil, err
 			}
 
-			question = &AuthoringQuestionBinding{SessionID: snapshot.Session.ID, TurnID: event.TurnID, QuestionID: event.Question.ID, Revision: event.Revision, ContentDigest: workflowHash(encoded)}
+			question = &AuthoringQuestionBinding{SessionID: snapshot.Session.ID, TurnID: event.TurnID, QuestionID: event.Question.ID, Revision: event.Revision, ContentDigest: contenthash.Sum(encoded)}
 		case AssistedTranscriptEventAnswer:
 			if question != nil && question.QuestionID == event.Answer.QuestionID {
 				question = nil
@@ -181,15 +185,15 @@ func (r *fileAuthoringSessionRepository) guardAuthoringSnapshot(request Authorin
 	}
 
 	if snapshot.Session.ProjectID != request.ProjectID || snapshot.Session.Namespace != request.Namespace {
-		return snapshot, ErrWorkflowConflict
+		return snapshot, workflowstate.ErrConflict
 	}
 
 	if request.Action == "create" || snapshot.Session.Status != AuthoringSessionStatusActive {
-		return snapshot, ErrWorkflowConflict
+		return snapshot, workflowstate.ErrConflict
 	}
 
 	if snapshot.Session.Revision != request.ExpectedRevision || snapshot.SourceHash != request.ExpectedSourceHash {
-		return snapshot, ErrWorkflowConflict
+		return snapshot, workflowstate.ErrConflict
 	}
 
 	return snapshot, nil
@@ -201,8 +205,8 @@ func parseManagedAuthoringSession(content []byte, id string) (AuthoringSession, 
 		return session, err
 	}
 
-	if session.ID != id || session.Revision < 1 || !IsValidOpsNamespace(session.Namespace) || len(session.Inputs) == 0 {
-		return session, ErrWorkflowConflict
+	if session.ID != id || session.Revision < 1 || !opsnamespace.Valid(session.Namespace) || len(session.Inputs) == 0 {
+		return session, workflowstate.ErrConflict
 	}
 
 	return session, nil

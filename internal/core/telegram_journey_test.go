@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramJourneyAdmissionFixture(t *testing.T) (*WorkflowStore, WorkflowRecord, WorkflowStartRequest) {
@@ -61,7 +63,7 @@ func TestTelegramJourneyAdmission(t *testing.T) {
 	check := func(context.Context) error {
 		t.Error("replay repeated admission authority")
 
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	again, err := restarted.StartWorkflowGuarded(t.Context(), request, check)
@@ -97,7 +99,7 @@ func TestTelegramJourneyAdmissionGuards(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, err := store.StartWorkflowGuarded(t.Context(), request, check); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.StartWorkflowGuarded(t.Context(), request, check); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed decision accepted", err)
 			}
 
@@ -132,7 +134,7 @@ func telegramJourneyChangeAdmission(t *testing.T, store *WorkflowStore, record W
 	case "policy":
 		request.Admission.Policy.Revision = strings.Repeat("f", 64)
 	case "authority":
-		return func(context.Context) error { return ErrWorkflowConflict }
+		return func(context.Context) error { return workflowstate.ErrConflict }
 	case "contract":
 		request.Admission.ReadyTicket.ContractHash = strings.Repeat("f", 64)
 	case "validation":

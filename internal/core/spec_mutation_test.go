@@ -10,6 +10,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Manual creates allocate distinct documents in the same scope and honor direct
@@ -41,7 +44,7 @@ func TestSpecMutationCreate(t *testing.T) {
 	}
 
 	request.Body = "Changed arguments"
-	if _, err := MutateSpec(t.Context(), project, request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateSpec(t.Context(), project, request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed retry accepted", err)
 	}
 }
@@ -71,7 +74,7 @@ func TestSpecMutationSave(t *testing.T) {
 	}
 
 	request.OperationID = "stale-save"
-	if _, err := MutateSpec(t.Context(), project, request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateSpec(t.Context(), project, request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal(err)
 	}
 }
@@ -131,7 +134,7 @@ func TestSpecMutationConcurrent(t *testing.T) {
 	for err := range results {
 		if err == nil {
 			committed++
-		} else if errors.Is(err, ErrWorkflowConflict) {
+		} else if errors.Is(err, workflowstate.ErrConflict) {
 			conflicted++
 		} else {
 			t.Fatal(err)
@@ -162,7 +165,7 @@ func checkSpecMutationRecovery(t *testing.T, stop int) {
 		t.Fatal(err)
 	}
 
-	digest := workflowHash(append([]byte(project+"\x00spec-write\x00"), encoded...))
+	digest := contenthash.Sum(append([]byte(project+"\x00spec-write\x00"), encoded...))
 	r := &fileAuthoringSessionRepository{projectDir: project, afterMutationReplace: func(index int) error {
 		if index == stop {
 			return errors.New("interrupted")
@@ -178,7 +181,7 @@ func checkSpecMutationRecovery(t *testing.T, stop int) {
 		t.Fatal("fault not reached")
 	}
 
-	if _, err := ReadSpecDocument(t.Context(), project, partial.Reference); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ReadSpecDocument(t.Context(), project, partial.Reference); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal(err)
 	}
 
@@ -305,7 +308,7 @@ func TestSpecMetadataRevision(t *testing.T) {
 	request := specTestRequest("stale-metadata")
 
 	request.Action, request.Namespace, request.Reference, request.ExpectedRevision = "save", "", result.Reference, before.Revision
-	if _, err := MutateSpec(t.Context(), project, request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateSpec(t.Context(), project, request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal(err)
 	}
 

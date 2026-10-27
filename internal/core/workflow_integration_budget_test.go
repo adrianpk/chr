@@ -8,6 +8,9 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeBudgetFixture(t *testing.T, limit *int64) (*WorkflowStore, WorkflowIntegrationEntry) {
@@ -43,7 +46,7 @@ func nativeBudgetGuard(t *testing.T, store *WorkflowStore, id string) WorkflowIn
 }
 
 func nativeBudgetReservation(entry WorkflowIntegrationEntry, id, role string, input, output int64) WorkflowIntegrationReservation {
-	return WorkflowIntegrationReservation{ID: id, Kind: "agent_call", Role: role, EntryID: entry.ID, Unit: entry.Unit, ClaimGeneration: entry.ClaimGeneration, AttemptID: id, State: "reserved", Allowance: WorkflowTokenAllowance{Maximum: input + output, Input: input, Output: output, CapabilityRevision: workflowHash([]byte("whole-call-meter/v1")), WholeCall: true, Deadline: time.Now().UTC().Add(time.Hour)}}
+	return WorkflowIntegrationReservation{ID: id, Kind: "agent_call", Role: role, EntryID: entry.ID, Unit: entry.Unit, ClaimGeneration: entry.ClaimGeneration, AttemptID: id, State: "reserved", Allowance: WorkflowTokenAllowance{Maximum: input + output, Input: input, Output: output, CapabilityRevision: contenthash.Sum([]byte("whole-call-meter/v1")), WholeCall: true, Deadline: time.Now().UTC().Add(time.Hour)}}
 }
 
 // TestNativeBudgetRace prevents concurrent roles from oversubscribing one ceiling
@@ -106,7 +109,7 @@ func TestNativeBudgetUnknown(t *testing.T) {
 	request.WorkflowIntegrationBudgetGuard = nativeBudgetGuard(t, restarted, entry.InvocationID)
 
 	request.State = "released_before_launch"
-	if _, err := restarted.SettleWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := restarted.SettleWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unknown call refunded", err)
 	}
 
@@ -164,7 +167,7 @@ func TestNativeBudgetBounds(t *testing.T) {
 		{"overflow", func(r *WorkflowIntegrationReservation) { r.Allowance.Input = math.MaxInt64; r.Allowance.Output = 1 }},
 		{"capability", func(r *WorkflowIntegrationReservation) { r.Allowance.CapabilityRevision = "unsupported" }},
 		{"deadline", func(r *WorkflowIntegrationReservation) { r.Allowance.Deadline = time.Now().Add(-time.Hour) }},
-		{"foreign", func(r *WorkflowIntegrationReservation) { r.EntryID = workflowHash([]byte("foreign")) }},
+		{"foreign", func(r *WorkflowIntegrationReservation) { r.EntryID = contenthash.Sum([]byte("foreign")) }},
 	}
 	store, entry := nativeBudgetFixture(t, nil)
 
@@ -197,7 +200,7 @@ func successfulNativeBudgetReservation(t *testing.T, results []error) int {
 			}
 
 			success = i
-		} else if !errors.Is(err, ErrWorkflowConflict) {
+		} else if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal(err)
 		}
 	}
@@ -215,7 +218,7 @@ func nativeBudgetSettlementRetry(t *testing.T, restarted *WorkflowStore, entry W
 	request.Input = 40
 
 	request.WorkflowIntegrationBudgetGuard = nativeBudgetGuard(t, restarted, entry.InvocationID)
-	if _, err := restarted.SettleWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := restarted.SettleWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("settled usage rewritten", err)
 	}
 }

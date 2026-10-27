@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeOutcomePublisherFixture struct {
@@ -175,7 +177,7 @@ func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *n
 
 	if retained.State == "unpublished" {
 		guard := nativeBudgetGuard(t, f.store, retained.InvocationID)
-		if _, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher); !errors.Is(err, ErrWorkflowConflict) || publisher.calls.Load() != 1 {
+		if _, _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher); !errors.Is(err, workflowstate.ErrConflict) || publisher.calls.Load() != 1 {
 			t.Fatal("sealed rejection reused stale authorization", err)
 		}
 	} else {

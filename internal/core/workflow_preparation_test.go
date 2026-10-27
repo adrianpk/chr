@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type workflowPreparationProviderFixture struct {
@@ -14,7 +16,7 @@ type workflowPreparationProviderFixture struct {
 }
 
 func (p *workflowPreparationProviderFixture) WorkflowIntegrationCapability(_ context.Context, pr WorkflowPullRequestSnapshot, method string) (WorkflowPublicationCapability, error) {
-	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: workflowHash([]byte(p.revision)), AtomicSourceBase: p.guarded, ExactResult: p.guarded}, nil
+	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: contenthash.Sum([]byte(p.revision)), AtomicSourceBase: p.guarded, ExactResult: p.guarded}, nil
 }
 
 type workflowPreparationFixture struct {

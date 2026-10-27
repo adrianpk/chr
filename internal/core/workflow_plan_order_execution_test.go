@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // Worker input contains the current canonical order document. Missing required
@@ -50,7 +52,7 @@ func TestWorkflowPlanOrderRepair(t *testing.T) {
 		t.Fatal("edited retained map overwritten", err)
 	}
 
-	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: workflowHash(edited)})
+	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: contenthash.Sum(edited)})
 	if err != nil || !repaired.GeneratedAt.Equal(status.GeneratedAt) {
 		t.Fatal(repaired, err)
 	}

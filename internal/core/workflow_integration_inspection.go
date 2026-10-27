@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationRoleObservation identifies a live role without a lease,
@@ -144,7 +146,7 @@ func workflowIntegrationObservedSubmission(journals []workflowSubmissionJournal,
 		}
 	}
 
-	return nil, ErrWorkflowConflict
+	return nil, workflowstate.ErrConflict
 }
 
 func workflowIntegrationObservedRoles(run workflowInvocationFile, capacity WorkflowIntegrationCapacity) ([]WorkflowIntegrationRoleObservation, error) {

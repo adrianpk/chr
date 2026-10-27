@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) reserveWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationReserve) (WorkflowIntegrationBudget, error) {
@@ -37,7 +39,7 @@ func (s *WorkflowStore) reserveWorkflowIntegration(ctx context.Context, run work
 
 func checkWorkflowIntegrationReservationRetry(old, next WorkflowIntegrationReservation) error {
 	if !sameWorkflowIntegrationReservation(old, next) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -58,7 +60,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationReservationAdmission(ctx context
 
 	r := request.Reservation
 	if !workflowIntegrationReservationMatches(r, entry) || len(budget.Reservations) >= WorkflowRecordLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowIntegrationReservation(r); err != nil {
@@ -84,7 +86,7 @@ func checkWorkflowIntegrationCallDeadline(policy WorkflowExecutionPolicy, budget
 
 	now := time.Now().UTC()
 	if !deadline.After(now) || deadline.After(now.Add(time.Duration(policy.WorkerTimeoutSeconds)*time.Second)) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -114,7 +116,7 @@ func chargeWorkflowIntegrationCounter(budget *WorkflowIntegrationBudget, r Workf
 
 	index := slices.IndexFunc(budget.UnitCounters, func(c WorkflowIntegrationCounter) bool { return c.Unit == r.Unit })
 	if index < 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	counter := &budget.UnitCounters[index]
@@ -215,7 +217,7 @@ func (s *WorkflowStore) grantWorkflowIntegration(ctx context.Context, run workfl
 
 	grant.PriorRevision, grant.RecordedAt = budget.Revision, time.Now().UTC()
 	if !validWorkflowIntegrationGrant(grant, budget.Revision+1) || len(budget.Grants) >= WorkflowPageLimit {
-		return budget, ErrWorkflowConflict
+		return budget, workflowstate.ErrConflict
 	}
 
 	if err := applyWorkflowIntegrationGrant(&budget, grant); err != nil {
@@ -237,7 +239,7 @@ func applyWorkflowIntegrationGrant(budget *WorkflowIntegrationBudget, grant Work
 	}
 
 	if budget.TokenLimit == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	limit, err := workflowTokenSum(*budget.TokenLimit, grant.Amount)
@@ -256,7 +258,7 @@ func checkWorkflowIntegrationRoleBudget(run workflowInvocationFile, budget Workf
 	}
 
 	if workflowAgentAttemptReserved(budget, reservation) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	consumed, limit := workflowIntegrationRoleUsage(budget, reservation.Role)
@@ -325,7 +327,7 @@ func workflowIntegrationGrantRetry(budget WorkflowIntegrationBudget, grant Workf
 
 		grant.PriorRevision, grant.RecordedAt = old.PriorRevision, old.RecordedAt
 		if !reflect.DeepEqual(old, grant) {
-			return false, ErrWorkflowConflict
+			return false, workflowstate.ErrConflict
 		}
 
 		return true, nil

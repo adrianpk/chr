@@ -5,6 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramIntentSnapshot binds interpretation to one peer's observed context.
@@ -21,7 +24,7 @@ type TelegramIntentSnapshot struct {
 // digest can guard target resolution after a provider call without holding a TX.
 func (s *TelegramReceiverStore) TelegramIntentContext(ctx context.Context, input TelegramConversationInput) (snapshot TelegramIntentSnapshot, err error) {
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
-		return snapshot, ErrWorkflowConflict
+		return snapshot, workflowstate.ErrConflict
 	}
 
 	err = s.transaction(ctx, func(tx *sql.Tx) error {
@@ -73,7 +76,7 @@ func (op telegramConversationTransaction) intentSnapshot() (TelegramIntentSnapsh
 		return snapshot, err
 	}
 
-	snapshot.Digest = workflowHash(encoded)
+	snapshot.Digest = contenthash.Sum(encoded)
 
 	return snapshot, nil
 }
@@ -83,7 +86,7 @@ func (op telegramConversationTransaction) intentSnapshot() (TelegramIntentSnapsh
 func (s *TelegramReceiverStore) ResolveTelegramConversationTarget(ctx context.Context, input TelegramConversationInput) (TelegramOperationTarget, error) {
 	var target TelegramOperationTarget
 	if _, ok := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !ok {
-		return target, ErrWorkflowConflict
+		return target, workflowstate.ErrConflict
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {

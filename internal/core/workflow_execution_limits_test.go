@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowTaskGateOrder stops an ordered shared-deadline gate at its first failure.
@@ -101,7 +103,7 @@ func TestWorkflowTaskReuseEdits(t *testing.T) {
 			request.Selection.Selector = workflowClaimSelector(hierarchy, "slice")
 
 			next := workflowTestStart(t, store, request)
-			if _, err := store.ClaimWorkflow(t.Context(), next.Invocation.ID); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.ClaimWorkflow(t.Context(), next.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed retained input accepted: %v", err)
 			}
 		})
@@ -116,7 +118,7 @@ func TestWorkflowTaskRecordEdit(t *testing.T) {
 	path := filepath.Join(store.layout.Root(), filepath.Dir(hierarchy.Tasks[0].Path), "artifact.md")
 
 	worker := []string{"sh", "-c", "printf 'Changed instructions\\n' >> \"$1\"", "worker", path}
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("external input overwritten: %v", err)
 	}
 

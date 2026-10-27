@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
@@ -43,7 +44,7 @@ func telegramPreparedWorkResultText(result AuthoringWorkResult) string {
 
 func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.TelegramOperationRequest, result AuthoringWorkResult, config core.TelegramReceiverConfig) error {
 	if result.Scope.Binding != (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) || result.Result.ReceiptRef == "" {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	facts, err := telegramPreparedWorkFacts(result)
@@ -55,7 +56,7 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request core.T
 	request.Message = telegramOutcomeMessage("26", text)
 
 	err = r.store.FinishTelegramAuthoring(ctx, request, core.TelegramAuthoringProgress{SessionRef: result.Scope.SessionRef}, result.Result.ReceiptRef, facts, text, config.Digest(), time.Now())
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		request.Message = telegramOutcomeMessage("26", "Ticket preparation is confirmed; the advanced conversation is unchanged.\n"+text)
 
 		return r.store.FinishTelegramOperation(ctx, request, "confirmed", result.Result.ReceiptRef, facts, "Canonical work preparation is confirmed; the advanced conversation is unchanged.\n"+text, config.Digest(), time.Now())

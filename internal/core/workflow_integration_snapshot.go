@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) readWorkflowIntegrationSnapshot(ctx context.Context) (workflowIntegrationSnapshot, error) {
@@ -81,7 +84,7 @@ func workflowIntegrationSnapshotHash(snapshot workflowIntegrationSnapshot) (stri
 		Views  []WorkflowIntegrationView
 	}{images, snapshot.Views})
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func (s *WorkflowStore) appendWorkflowIntegrationViews(ctx context.Context, snapshot *workflowIntegrationSnapshot, run workflowInvocationFile, entries []WorkflowIntegrationEntry) error {
@@ -143,7 +146,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationFiles(run workflowInvocationFile
 			return nil
 		}
 
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err != nil || len(files) > WorkflowRecordLimit+1 {
@@ -169,7 +172,7 @@ func checkWorkflowIntegrationDirectoryFiles(run workflowInvocationFile, files []
 }
 
 func (s *WorkflowStore) workflowIntegrationJournals(ctx context.Context) ([]workflowSubmissionJournal, error) {
-	path, err := workflowSubmissionPath(ctx, s.layout.ProjectDir(), workflowHash([]byte("integration-query")))
+	path, err := workflowSubmissionPath(ctx, s.layout.ProjectDir(), contenthash.Sum([]byte("integration-query")))
 	if err != nil {
 		return nil, err
 	}
@@ -191,7 +194,7 @@ func (s *WorkflowStore) workflowIntegrationJournals(ctx context.Context) ([]work
 		}
 
 		if !file.Type().IsRegular() {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		journal, err := readWorkflowSubmissionFile(filepath.Join(filepath.Dir(path), file.Name()))

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type nativeHostFixture struct {
@@ -26,7 +28,7 @@ func newNativeHostFixture(t *testing.T) nativeHostFixture {
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
 	remote := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
 	provider := NewWorkflowNativeReviewAdapter(remote, f.store, f.run.ID, t.TempDir())
-	profile := WorkflowNativePublisherProfile{Repository: f.provider.pr.Repository, TargetRef: "refs/heads/dev", Transport: f.remote, CredentialRef: "fixture-publisher", APIIdentityFingerprint: workflowHash([]byte(`{"id":1,"login":"fixture-publisher"}`)), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", CertifiedMethods: []string{"rebase"}, CertificationRef: "fixture/native-rebase-certificate"}
+	profile := WorkflowNativePublisherProfile{Repository: f.provider.pr.Repository, TargetRef: "refs/heads/dev", Transport: f.remote, CredentialRef: "fixture-publisher", APIIdentityFingerprint: contenthash.Sum([]byte(`{"id":1,"login":"fixture-publisher"}`)), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", CertifiedMethods: []string{"rebase"}, CertificationRef: "fixture/native-rebase-certificate"}
 	writeNativeHostProfile(t, provider.configDir, profile)
 
 	forge := nativeCapabilityFixture{adapter: remote, runner: runner, request: WorkflowNativeCapabilityRequest{PullRequest: f.provider.pr}}
@@ -217,7 +219,7 @@ func TestNativeHostDenials(t *testing.T) {
 	}
 
 	changed := host.profile
-	changed.APIIdentityFingerprint = workflowHash([]byte("different-api-identity"))
+	changed.APIIdentityFingerprint = contenthash.Sum([]byte("different-api-identity"))
 	writeNativeHostProfile(t, host.provider.configDir, changed)
 
 	if _, err := host.provider.WorkflowIntegrationCapability(t.Context(), host.f.provider.pr, "rebase"); err == nil {

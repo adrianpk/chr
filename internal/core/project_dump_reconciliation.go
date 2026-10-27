@@ -9,6 +9,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ProjectDumpReconciliationPreview binds a deterministic composition to all
@@ -147,7 +149,7 @@ func (r *fileAuthoringSessionRepository) applyProjectDumpReconciliation(ctx cont
 	}
 
 	if observed.Revision != request.ExpectedRevision {
-		return ProjectDumpMutationResult{}, ErrWorkflowConflict
+		return ProjectDumpMutationResult{}, workflowstate.ErrConflict
 	}
 
 	preview, err := r.projectDumpReconciliationPreview(observed)
@@ -156,7 +158,7 @@ func (r *fileAuthoringSessionRepository) applyProjectDumpReconciliation(ctx cont
 	}
 
 	if preview.Destination != request.Destination {
-		return ProjectDumpMutationResult{}, ErrWorkflowConflict
+		return ProjectDumpMutationResult{}, workflowstate.ErrConflict
 	}
 
 	changes, result, err := r.projectDumpReconciliationChanges(observed, preview, request.OperationID)

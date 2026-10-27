@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func assistedDumpTestOptions(t *testing.T, root, id string) AssistedArtifactSynthesisOptions {
@@ -179,7 +181,7 @@ func checkAssistedDumpGuard(t *testing.T, name string) {
 		opts.CuratedSummary.ModelSummary = "Changed input."
 	}
 
-	if _, err := SynthesizeAssistedArtifact(t.Context(), opts); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := SynthesizeAssistedArtifact(t.Context(), opts); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed or reserved input accepted", name, err)
 	}
 }
@@ -198,7 +200,7 @@ func TestAssistedDumpDivergence(t *testing.T) {
 	writeTestFile(t, opts.SourceRef.Path, "Independent source.")
 
 	opts.Repository = NewAuthoringSessionRepository(root)
-	if _, err := opts.Repository.GetSession(t.Context(), opts.Session.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := opts.Repository.GetSession(t.Context(), opts.Session.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("divergent source did not block recovery", err)
 	}
 
@@ -243,7 +245,7 @@ func TestAssistedDumpRoot(t *testing.T) {
 	other.OperationID = opts.OperationID
 	writeTestFile(t, filepath.Join(other.ProjectDir, path), string(receipt))
 
-	if _, err := SynthesizeAssistedArtifact(t.Context(), other); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := SynthesizeAssistedArtifact(t.Context(), other); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("receipt crossed project roots", err)
 	}
 }

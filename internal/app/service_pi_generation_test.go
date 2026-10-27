@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Both transports exercise the same real authoring retry and publication owner.
@@ -142,7 +143,7 @@ func TestPiGenerationProtocolIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, _, err := operations.bindGeneration(core.WithHarnessGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, core.ErrWorkflowConflict) {
+	if _, _, err := operations.bindGeneration(core.WithHarnessGeneration(t.Context(), op), "ignored", "conversation"); err == nil || errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unsupported Pi protocol did not reach its dispatch fence", err)
 	}
 

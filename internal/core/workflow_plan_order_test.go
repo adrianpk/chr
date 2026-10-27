@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Required generated input is validated before reserving any native key. Caller
@@ -129,7 +131,7 @@ func checkWorkflowPlanOrderRecovery(t *testing.T, stage int) {
 		t.Fatal("binding did not interrupt")
 	}
 
-	if _, err := PlanTargetRevision(t.Context(), store.layout.ProjectDir(), QuizScope{ProjectID: store.projectID}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := PlanTargetRevision(t.Context(), store.layout.ProjectDir(), QuizScope{ProjectID: store.projectID}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("pending binding was readable", err)
 	}
 

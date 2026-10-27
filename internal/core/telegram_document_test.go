@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // Direct body excerpts omit source metadata while the complete bytes stay intact.
@@ -36,7 +38,7 @@ func TestTelegramPresentationDocumentExcerpt(t *testing.T) {
 func telegramTestDocumentResponse() TelegramDocumentResponse {
 	payload := []byte("---\nstatus: draft\n---\n# Original\n```literal```\n")
 
-	return TelegramDocumentResponse{Message: TelegramMessageBlocks{InitialText: "Draft ready", ContentKind: "markdown", Content: TelegramDocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: TelegramDocument{ProjectID: "example-project", Namespace: "default", ProjectBindingDigest: strings.Repeat("a", 64), SourceRef: "ops/default/spec/example.md", SourceHash: workflowHash(payload), Filename: "example.md", MediaType: "text/markdown", Payload: payload}}
+	return TelegramDocumentResponse{Message: TelegramMessageBlocks{InitialText: "Draft ready", ContentKind: "markdown", Content: TelegramDocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: TelegramDocument{ProjectID: "example-project", Namespace: "default", ProjectBindingDigest: strings.Repeat("a", 64), SourceRef: "ops/default/spec/example.md", SourceHash: contenthash.Sum(payload), Filename: "example.md", MediaType: "text/markdown", Payload: payload}}
 }
 
 // Atomic source acknowledgement freezes exact bytes, destination and caption;
@@ -66,7 +68,7 @@ func TestTelegramPresentationDocumentSnapshot(t *testing.T) {
 
 	changed.Document.Payload = changeTelegramDocumentSource(t, source)
 
-	changed.Document.SourceHash = workflowHash(changed.Document.Payload)
+	changed.Document.SourceHash = contenthash.Sum(changed.Document.Payload)
 	if err := store.QueueDocumentResponse(t.Context(), update, changed, telegramReceiverTestConfig().Digest(), now); err != nil {
 		t.Fatal(err)
 	}

@@ -10,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // New successful generations retain separate revision pairs even when every
@@ -155,7 +158,7 @@ func TestPlanOrderArchiveRecovery(t *testing.T) {
 
 	checkPlanOrderArchive(t, project, plan)
 
-	if workflowHash(readTestPlanImage(t, project, first.TrackerRef)) != first.TrackerHash {
+	if contenthash.Sum(readTestPlanImage(t, project, first.TrackerRef)) != first.TrackerHash {
 		t.Fatal("regeneration altered historical pair")
 	}
 }
@@ -192,7 +195,7 @@ func checkPlanOrderRecovery(t *testing.T, after int) {
 		t.Fatal("publication did not interrupt")
 	}
 
-	if _, err := ObservePlanRevision(t.Context(), project, plan.Scope); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ObservePlanRevision(t.Context(), project, plan.Scope); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("pending pair was readable", err)
 	}
 

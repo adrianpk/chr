@@ -10,6 +10,9 @@ import (
 	"os"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrWorkflowOwned identifies overlap with retained task or hierarchy ownership.
@@ -224,7 +227,7 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 
 	attempt := WorkflowAttempt{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Purpose: claim.purpose, OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key, claim.purpose), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
 	run.Attempts = append(run.Attempts, attempt)
-	run.Owners[claim.AttemptID] = workflowHash([]byte(claim.Token))
+	run.Owners[claim.AttemptID] = contenthash.Sum([]byte(claim.Token))
 	run.Status = "running"
 
 	record.Task.AttemptID, record.Task.ClaimGeneration = claim.AttemptID, claim.Generation
@@ -284,9 +287,9 @@ func (s *WorkflowStore) workflowClaimRecordChanges(run *workflowInvocationFile, 
 }
 
 func workflowClaimRecordHash(record WorkflowRecord, files []workflowFileChange) string {
-	hash := workflowHash(files[0].After)
+	hash := contenthash.Sum(files[0].After)
 	if len(files) > 1 {
-		hash += ":" + workflowHash(record.Body)
+		hash += ":" + contenthash.Sum(record.Body)
 	}
 
 	return hash
@@ -334,7 +337,7 @@ func (s *WorkflowStore) checkWorkflowCredential(ctx context.Context, claim *Work
 	}
 
 	if record.Task.AttemptID != claim.AttemptID || record.Task.ClaimGeneration != claim.Generation {
-		return run, record, ErrWorkflowConflict
+		return run, record, workflowstate.ErrConflict
 	}
 
 	return run, record, nil
@@ -368,7 +371,7 @@ func (s *WorkflowStore) CheckpointWorkflow(ctx context.Context, claim *WorkflowC
 }
 
 func workflowAttemptCredentialMatches(run workflowInvocationFile, claim *WorkflowClaim, attempt WorkflowAttempt) bool {
-	return run.Status == "running" && attempt.Outcome == "running" && attempt.Purpose == claim.purpose && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == workflowHash([]byte(claim.Token))
+	return run.Status == "running" && attempt.Outcome == "running" && attempt.Purpose == claim.purpose && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == contenthash.Sum([]byte(claim.Token))
 }
 
 func workflowReplacedAttempt(run workflowInvocationFile, key, purpose string) string {
@@ -388,7 +391,7 @@ func (s *WorkflowStore) readWorkflowAttemptTask(run workflowInvocationFile, atte
 	}
 
 	if cursor < 0 || cursor >= len(run.Members) || run.Members[cursor].Admission.Key != attempt.TaskKey {
-		return WorkflowRecord{}, ErrWorkflowConflict
+		return WorkflowRecord{}, workflowstate.ErrConflict
 	}
 
 	return s.readRecord(run.Members[cursor].Admission.Path)

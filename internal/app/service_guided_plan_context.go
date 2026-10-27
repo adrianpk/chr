@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) guidedPlanSources(session core.AuthoringSession) (core.PlanSourceObservation, core.QuizRuntimeState, error) {
@@ -100,7 +101,7 @@ func (s service) guidedContractsRequest(session core.AuthoringSession, input cor
 
 	body := core.RenderGeneratedPlan(session.Guided.PendingOperation.PreparedPlan.Plan)
 	if core.WorkflowContentHash([]byte(body)) != input.PlanHash {
-		return request, core.ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	request.ContextSections = append(request.ContextSections, core.QuizModelContextSection{Name: "planned_workflow", Layer: "plan", Authority: input.PlanRef, Content: string(encoded)}, core.QuizModelContextSection{Name: "implementation_plan", Layer: "plan", Authority: input.PlanRef, Content: body})

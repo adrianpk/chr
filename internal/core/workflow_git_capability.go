@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // WorkflowGitPublicationAdvertisement is a read-only observation of the actual
@@ -75,7 +77,7 @@ func workflowGitCapabilityFingerprint(capabilities map[string]bool) (string, err
 		return "", err
 	}
 
-	return workflowHash(data), nil
+	return contenthash.Sum(data), nil
 }
 
 func finishWorkflowGitInspection(session workflowReceivePack) error {

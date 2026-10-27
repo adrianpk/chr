@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Caller intent, rather than transient model output, identifies an operation.
@@ -41,7 +43,7 @@ func TestPlanPublicationRetry(t *testing.T) {
 	changed := *plan.Operation
 
 	changed.Replace = true
-	if _, _, err := LookupPlanPublication(t.Context(), project, changed); !errors.Is(err, ErrWorkflowConflict) {
+	if _, _, err := LookupPlanPublication(t.Context(), project, changed); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("operation ID accepted changed intent", err)
 	}
 }

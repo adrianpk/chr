@@ -7,6 +7,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativePolicyQuery(t *testing.T, f workflowGitFixture) WorkflowPreparationQuery {
@@ -144,7 +147,7 @@ func TestNativeSigningBlocked(t *testing.T) {
 
 			switch name {
 			case "profile":
-				q.SigningProfile = workflowHash([]byte("other policy"))
+				q.SigningProfile = contenthash.Sum([]byte("other policy"))
 				git = git.WithSSHCommitSigning(signing)
 			case "key":
 				signing.KeyFile = filepath.Join(t.TempDir(), "absent")
@@ -252,7 +255,7 @@ func TestNativeCollisionBudget(t *testing.T) {
 
 func nativeCollisionBuild(name string, calls int) (string, error) {
 	if name == "failure" {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if name == "retry" && calls == 4 {

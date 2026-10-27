@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ResolveTelegramWorkTarget creates a source-stable conversation when /work has
@@ -22,7 +24,7 @@ func (s *TelegramReceiverStore) ResolveTelegramControlTarget(ctx context.Context
 func (s *TelegramReceiverStore) resolveTelegramActionTarget(ctx context.Context, input TelegramConversationInput, intent, topic string, now time.Time) (TelegramOperationTarget, error) {
 	var target TelegramOperationTarget
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
-		return target, ErrWorkflowConflict
+		return target, workflowstate.ErrConflict
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {

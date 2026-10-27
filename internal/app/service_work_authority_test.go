@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type serviceWorkEntryProvider struct {
@@ -20,7 +21,7 @@ type serviceWorkEntryProvider struct {
 
 func (p *serviceWorkEntryProvider) ReadWorkflowBranch(ctx context.Context, repository, branch string) (string, error) {
 	if repository != p.repository {
-		return "", core.ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	output, err := exec.CommandContext(ctx, "git", "--git-dir", p.remote, "rev-parse", "refs/heads/"+branch).Output()
@@ -47,7 +48,7 @@ func (p *serviceWorkEntryProvider) CreateWorkflowPullRequest(ctx context.Context
 
 func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (core.WorkflowPullRequestSnapshot, error) {
 	if url != p.pr.URL {
-		return core.WorkflowPullRequestSnapshot{}, core.ErrWorkflowConflict
+		return core.WorkflowPullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	head, err := p.ReadWorkflowBranch(ctx, p.repository, p.pr.HeadBranch)

@@ -8,6 +8,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // OSWorkflowPreparationGit prepares commits in an owned disposable object store
@@ -74,7 +76,7 @@ func (git OSWorkflowPreparationGit) validateQuery(query WorkflowPreparationQuery
 	}
 
 	if !validWorkflowLane(query.Lane) || query.Lane.BaseCommit != query.BaseCommit || !slices.Contains([]string{"merge", "rebase", "squash"}, query.Method) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if _, err := os.Lstat(query.Lane.Worktree); !errors.Is(err, os.ErrNotExist) {
@@ -99,16 +101,16 @@ func (git OSWorkflowPreparationGit) fetchPreparation(ctx context.Context, reader
 
 	base, err := reader.output(ctx, "rev-parse", "refs/heads/target^{commit}")
 	if err != nil || base != query.BaseCommit {
-		return fmt.Errorf("%w: canonical base moved during preparation", ErrWorkflowConflict)
+		return fmt.Errorf("%w: canonical base moved during preparation", workflowstate.ErrConflict)
 	}
 
 	tree, err := reader.tree(ctx, query.SourceCommit)
 	if err != nil || tree != query.SourceTree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", query.OriginCommit, query.SourceCommit); err != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -140,7 +142,7 @@ func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, 
 
 	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
 	if err != nil || proof.BaseCommit != query.BaseCommit {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	return proof, validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof)
@@ -188,7 +190,7 @@ func (reader workflowIntegrationReader) prepareRebase(ctx context.Context, proof
 
 	resultTree, err := reader.tree(ctx, base)
 	if err != nil || baseTree == resultTree {
-		return "", fmt.Errorf("%w: empty integration unit requires operator resolution", ErrWorkflowConflict)
+		return "", fmt.Errorf("%w: empty integration unit requires operator resolution", workflowstate.ErrConflict)
 	}
 
 	return base, nil

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // OSWorkflowIntegrationGit fetches into an owned disposable bare repository.
@@ -210,7 +212,7 @@ func (reader workflowIntegrationReader) verifyRetained(ctx context.Context, quer
 	}
 
 	if !workflowRetainedProofMatches(proof, expected) {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	return proof, validateWorkflowIntegrationProof(query, proof)
@@ -225,7 +227,7 @@ func (reader workflowIntegrationReader) parents(ctx context.Context, commit stri
 
 	fields := strings.Fields(line)
 	if err != nil || len(fields) == 0 || fields[0] != commit {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	return fields[1:], nil
@@ -258,11 +260,11 @@ func (reader workflowIntegrationReader) observeIntegrationTarget(ctx context.Con
 
 	tree, err := reader.tree(ctx, proof.SourceCommit)
 	if err != nil || tree != proof.SourceTree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.SourceCommit); err != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

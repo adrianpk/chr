@@ -4,6 +4,8 @@ import (
 	"errors"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeReceiptUncertainty retains explicit reconciliation when fetch fails
@@ -72,7 +74,7 @@ func TestNativeReceiptRecovery(t *testing.T) {
 
 	fixture.f.store = f.store
 
-	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), guard, fixture.forge.adapter, fixture.git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), guard, fixture.forge.adapter, fixture.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("recovered owner did not fence its old callback", err)
 	}
 
@@ -167,7 +169,7 @@ func TestNativeReceiptTargetEvidence(t *testing.T) {
 			update := nativeSubmissionUpdate(t, f, submission)
 
 			update.Facts.ObservationRefs = append(update.Facts.ObservationRefs, ref)
-			if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("invalid target observation changed publication", err)
 			}
 

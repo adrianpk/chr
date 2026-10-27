@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramOperationMutationRequest() WorkflowMutationRequest {
@@ -95,7 +97,7 @@ func TestTelegramOperationOwnerConflict(t *testing.T) {
 	}
 
 	reopened := NewWorkflowStore(owner.layout, owner.projectID)
-	if _, err := reopened.ApplyRecordMutation(t.Context(), telegramOperationMutationRequest()); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := reopened.ApplyRecordMutation(t.Context(), telegramOperationMutationRequest()); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("divergent journal accepted", err)
 	}
 
@@ -131,7 +133,7 @@ func TestTelegramOperationOwnerArguments(t *testing.T) {
 
 			test.change(&request)
 
-			if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed payload reused identity", err)
 			}
 		})
@@ -229,7 +231,7 @@ func TestTelegramOperationOwnerTamper(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed receipt trusted", err)
 	}
 }
@@ -245,7 +247,7 @@ func TestTelegramOperationOwnerFailedArguments(t *testing.T) {
 	}
 
 	request.Title = "A different request"
-	if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("failed attempt allowed changed arguments", err)
 	}
 
@@ -268,7 +270,7 @@ func TestTelegramOperationOwnerScope(t *testing.T) {
 				request.Record.Namespace = "foreign"
 			}
 
-			if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := owner.ApplyRecordMutation(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("foreign scope was retargeted", err)
 			}
 

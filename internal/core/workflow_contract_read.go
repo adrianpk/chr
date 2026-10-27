@@ -3,6 +3,9 @@ package core
 import (
 	"context"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReadContract observes one bounded canonical input under repository exclusion.
@@ -29,8 +32,8 @@ func (s *WorkflowStore) readContractImage(reference, expectedHash string) ([]byt
 		return nil, err
 	}
 
-	if workflowHash(data) != expectedHash {
-		return nil, fmt.Errorf("%w: contract image changed", ErrWorkflowConflict)
+	if contenthash.Sum(data) != expectedHash {
+		return nil, fmt.Errorf("%w: contract image changed", workflowstate.ErrConflict)
 	}
 
 	return data, nil
@@ -71,7 +74,7 @@ func (s *WorkflowStore) guardMutationSlices(record WorkflowRecord, snapshot Work
 
 		members := workflowMutationSetMembers(snapshot, record.ID)
 		if slice.TaskInputHash != WorkflowTaskInputHash(members, slice.ID) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

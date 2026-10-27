@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func (s *WorkflowStore) workflowTrackerImage(snapshot WorkflowSnapshot, setID string) (WorkflowTrackerStatus, []byte, error) {
@@ -30,7 +32,7 @@ func (s *WorkflowStore) workflowTrackerImage(snapshot WorkflowSnapshot, setID st
 		return result, nil, err
 	}
 
-	result.SourceHash = workflowHash(data)
+	result.SourceHash = contenthash.Sum(data)
 
 	output := renderWorkflowTracker(result, set, tasks)
 	if len(output) > WorkflowFileLimit {
@@ -99,7 +101,7 @@ func (s *WorkflowStore) workflowTrackerReceiptSources(result *WorkflowTrackerSta
 			return err
 		}
 
-		result.Sources = append(result.Sources, WorkflowTrackerSource{Path: ref, Hash: workflowHash(data)})
+		result.Sources = append(result.Sources, WorkflowTrackerSource{Path: ref, Hash: contenthash.Sum(data)})
 	}
 
 	return nil

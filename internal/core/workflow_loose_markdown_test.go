@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowLooseMarkdown advances a guarded native ticket image without
@@ -44,7 +47,7 @@ func TestWorkflowLooseMarkdown(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReconcileWorkflowMembership(t.Context(), run.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReconcileWorkflowMembership(t.Context(), run.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("native description edit became a scheduling change", err)
 	}
 }
@@ -79,7 +82,7 @@ func workflowLooseMarkdown(t *testing.T, store *WorkflowStore) WorkflowRecord {
 		t.Fatal(err)
 	}
 
-	observed, err := store.Adopt(t.Context(), record.Path, *record.Task, workflowHash(data))
+	observed, err := store.Adopt(t.Context(), record.Path, *record.Task, contenthash.Sum(data))
 	if err != nil {
 		t.Fatal(err)
 	}

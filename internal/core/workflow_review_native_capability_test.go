@@ -1,6 +1,10 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+)
 
 // TestNativeReviewCapabilities re-observes ownership, exact refs and all trusted
 // capability fingerprints at approval, grant, review and publication entrypoints.
@@ -10,10 +14,12 @@ func TestNativeReviewCapabilities(t *testing.T) {
 		name   string
 		change func(*WorkflowNativeCapability)
 	}{
-		{"policy", func(c *WorkflowNativeCapability) { c.PolicyFingerprint = workflowHash([]byte("changed")) }},
+		{"policy", func(c *WorkflowNativeCapability) { c.PolicyFingerprint = contenthash.Sum([]byte("changed")) }},
 		{"ownership", func(c *WorkflowNativeCapability) { c.OwnershipRevision = "changed/v2" }},
-		{"server", func(c *WorkflowNativeCapability) { c.ServerCapabilityFingerprint = workflowHash([]byte("changed")) }},
-		{"publisher", func(c *WorkflowNativeCapability) { c.CredentialIdentityFingerprint = workflowHash([]byte("changed")) }},
+		{"server", func(c *WorkflowNativeCapability) { c.ServerCapabilityFingerprint = contenthash.Sum([]byte("changed")) }},
+		{"publisher", func(c *WorkflowNativeCapability) {
+			c.CredentialIdentityFingerprint = contenthash.Sum([]byte("changed"))
+		}},
 		{"observation", func(c *WorkflowNativeCapability) { c.ObservationContract = "github_same_pr_git_merge/v1" }},
 		{"adapter", func(c *WorkflowNativeCapability) { c.AdapterVersion = "unsupported/v2" }},
 		{"source ref", func(c *WorkflowNativeCapability) { c.SourceRef += "-changed" }},
@@ -21,7 +27,7 @@ func TestNativeReviewCapabilities(t *testing.T) {
 		{"base", func(c *WorkflowNativeCapability) { c.ExpectedBaseCommit = c.OriginalSourceCommit }},
 		{"result", func(c *WorkflowNativeCapability) { c.PreparedResultCommit = c.OriginalSourceCommit }},
 		{"signing", func(c *WorkflowNativeCapability) {
-			c.RequiredSignatures, c.SigningProfile = true, workflowHash([]byte("signer"))
+			c.RequiredSignatures, c.SigningProfile = true, contenthash.Sum([]byte("signer"))
 		}},
 		{"atomic", func(c *WorkflowNativeCapability) { c.AtomicSourceBase = false }},
 	}

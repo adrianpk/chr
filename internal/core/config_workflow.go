@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"strconv"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // WorkflowConfig selects prospective defaults without reinterpreting legacy data.
@@ -83,7 +85,7 @@ func parseWorkflowConfig(data []byte) (WorkspaceConfig, error) {
 		return config, err
 	}
 
-	config.workflowRevision = workflowHash(data)
+	config.workflowRevision = contenthash.Sum(data)
 	config.workflowExplicit = make(map[string]bool, len(values))
 
 	for key := range values {
@@ -211,7 +213,7 @@ func ResolveWorkflowConfiguration(projectDir string, restriction ReviewWorkflowM
 func effectiveWorkflowConfiguration(config WorkspaceConfig, restriction ReviewWorkflowMode) WorkflowConfiguration {
 	revision := config.workflowRevision
 	if revision == "" {
-		revision = workflowHash(nil)
+		revision = contenthash.Sum(nil)
 	}
 
 	result := WorkflowConfiguration{Version: config.Workflow.Version, Revision: revision}

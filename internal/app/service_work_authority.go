@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -97,7 +98,7 @@ func (s service) nativeAgentWorkStart(config core.WorkspaceConfig, selection cor
 
 func retainedNativeAgentWorkRequest(request core.WorkflowStartRequest, previous core.WorkflowInvocation) (core.WorkflowStartRequest, error) {
 	if request.ReviewRestriction != "" && request.ReviewRestriction != previous.ReviewRestriction {
-		return request, fmt.Errorf("%w: retained invocation has a different review restriction", core.ErrWorkflowConflict)
+		return request, fmt.Errorf("%w: retained invocation has a different review restriction", workflowstate.ErrConflict)
 	}
 
 	request.RequestKey, request.Selection = previous.RequestKey, previous.Selection

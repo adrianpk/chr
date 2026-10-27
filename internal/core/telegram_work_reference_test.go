@@ -6,6 +6,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramWorkReferenceFixture(t *testing.T, f *telegramConversationFixture, id string) TelegramWorkReference {
@@ -71,7 +73,7 @@ func TestTelegramWorkReferences(t *testing.T) {
 
 	checkTelegramWorkObservation(t, f, first[0])
 
-	if _, err := f.store.TelegramWorkReferences(t.Context(), 12345, "", 17); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.TelegramWorkReferences(t.Context(), 12345, "", 17); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unbounded reference page admitted", err)
 	}
 
@@ -96,7 +98,7 @@ func checkTelegramWorkObservation(t *testing.T, f *telegramConversationFixture, 
 	}
 
 	ref.Invocation.ID = "another-invocation"
-	if err := f.store.ValidateTelegramWorkReference(t.Context(), ref); !errors.Is(err, ErrWorkflowConflict) {
+	if err := f.store.ValidateTelegramWorkReference(t.Context(), ref); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("rebound invocation accepted", err)
 	}
 
@@ -124,10 +126,10 @@ func TestTelegramWorkContinuationGuard(t *testing.T) {
 	store, _, request := workflowClaimFixture(t)
 	run := workflowTestStart(t, store, request).Invocation
 	calls := 0
-	check := func(context.Context) error { calls++; return ErrWorkflowConflict }
+	check := func(context.Context) error { calls++; return workflowstate.ErrConflict }
 
 	_, err := store.ContinueWorkflow(t.Context(), run.ID, WorkflowContinuationRequest{ExpectedRevision: run.Revision, StepLimit: 1, AuthorizationCheck: check}, WorkflowContinuationPorts{})
-	if !errors.Is(err, ErrWorkflowConflict) || calls != 1 {
+	if !errors.Is(err, workflowstate.ErrConflict) || calls != 1 {
 		t.Fatal("continuation authority was not checked", calls, err)
 	}
 

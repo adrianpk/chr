@@ -3,6 +3,9 @@ package core
 import (
 	"context"
 	"errors"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) checkWorkflowNativeSourceRevision(ctx context.Context, run *workflowInvocationFile, provider WorkflowPullRequestProvider) error {
@@ -17,7 +20,7 @@ func (s *WorkflowStore) checkWorkflowNativeSourceRevision(ctx context.Context, r
 	}
 
 	if !workflowNativeSourceIdentityMatches(*run.PullRequest, pr) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if pr.HeadRepository != run.PullRequest.Request.Repository {
@@ -88,9 +91,9 @@ func (s *WorkflowStore) freezeWorkflowNativeSourceRevision(ctx context.Context, 
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: queue.Path, Hash: workflowHash(queue.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
 
-	return errors.Join(ErrWorkflowConflict, s.commitWorkflowPullRequestFiles(run, []workflowFileChange{queue}, file))
+	return errors.Join(workflowstate.ErrConflict, s.commitWorkflowPullRequestFiles(run, []workflowFileChange{queue}, file))
 }
 
 func (s *WorkflowStore) resumeWorkflowNativeSourceDecision(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry) (WorkflowIntegrationEntry, error) {

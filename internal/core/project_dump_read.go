@@ -9,6 +9,10 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const projectDumpInventoryBytes = 8 * WorkflowFileLimit
@@ -30,7 +34,7 @@ func (r *fileAuthoringSessionRepository) checkProjectDumpInspection(ctx context.
 	}
 
 	if _, err := os.Lstat(pending); !errors.Is(err, os.ErrNotExist) {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	return nil
@@ -57,7 +61,7 @@ func (r *fileAuthoringSessionRepository) projectDumpArtifacts(ctx context.Contex
 			continue
 		}
 
-		if !IsValidOpsNamespace(entry.Name()) {
+		if !opsnamespace.Valid(entry.Name()) {
 			return nil, fmt.Errorf("%w: invalid ops namespace", ErrProjectDumpReconciliation)
 		}
 
@@ -187,7 +191,7 @@ func projectDumpObservation(project ProjectMetadata, artifacts []ProjectDumpArti
 		}
 	}
 
-	observed.Revision = workflowHash([]byte(strings.Join(images, "\x00")))
+	observed.Revision = contenthash.Sum([]byte(strings.Join(images, "\x00")))
 	setProjectDumpDestination(&observed)
 
 	return observed
@@ -220,5 +224,5 @@ func projectDumpMetadataImage(project ProjectMetadata) string {
 		return project.SourceHash
 	}
 
-	return workflowHash([]byte(RenderProjectMetadata(project)))
+	return contenthash.Sum([]byte(RenderProjectMetadata(project)))
 }

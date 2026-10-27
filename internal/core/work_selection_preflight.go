@@ -11,6 +11,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 const (
@@ -145,7 +147,7 @@ func acquireAgentOperationFile(lockPath, operation, owner string, createdAt time
 		return nil, err
 	}
 
-	return &AgentOperationLock{path: lockPath, guard: workflowHash(data)}, nil
+	return &AgentOperationLock{path: lockPath, guard: contenthash.Sum(data)}, nil
 }
 
 func normalizeAgentOperationLockOptions(opts AgentOperationLockOptions) (string, string, time.Time, error) {

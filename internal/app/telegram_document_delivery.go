@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramDeliveryEntities(delivery core.TelegramReceiverDelivery, text string) []core.TelegramTextEntity {
@@ -48,7 +49,7 @@ func (r telegramReceiver) sendDocumentDelivery(ctx context.Context, delivery cor
 func (r telegramReceiver) validateDocumentDestination(document core.TelegramDocument, delivery core.TelegramReceiverDelivery) error {
 	config, err := r.currentConfig()
 	if err != nil || config.Digest() != delivery.ConfigDigest {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	chatType := "supergroup"
@@ -58,7 +59,7 @@ func (r telegramReceiver) validateDocumentDestination(document core.TelegramDocu
 
 	user, allowed := config.AuthorizedUser(delivery.Peer.ChatID, delivery.Peer.TopicID, delivery.Peer.UserID, chatType)
 	if !allowed || !slices.Contains(user.ProjectIDs, document.ProjectID) {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
@@ -72,5 +73,5 @@ func (r telegramReceiver) validateDocumentDestination(document core.TelegramDocu
 		}
 	}
 
-	return core.ErrWorkflowConflict
+	return workflowstate.ErrConflict
 }

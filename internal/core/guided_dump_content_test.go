@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedDumpContent seals the final form body once, including after replay.
@@ -29,7 +31,7 @@ func TestGuidedDumpContent(t *testing.T) {
 	}
 
 	command.Content = "A changed request"
-	if _, err := FinishGuidedUseCaseDump(t.Context(), root, command); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := FinishGuidedUseCaseDump(t.Context(), root, command); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed replay replaced the agreed input", err)
 	}
 }

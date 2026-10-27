@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) prepareNativeRecordCreation(ctx context.Context, store *core.WorkflowStore, binding core.WorkflowMutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
@@ -139,7 +140,7 @@ func (s service) caseMutationTarget(ctx context.Context, request RecordMutationR
 	}
 
 	if !validRecordIdentity(request.Identity) || request.ExpectedHash == "" {
-		return core.CaseMetadata{}, core.ErrWorkflowConflict
+		return core.CaseMetadata{}, workflowstate.ErrConflict
 	}
 
 	metadata, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).ReadBounded(ctx, request.Identity)
@@ -148,7 +149,7 @@ func (s service) caseMutationTarget(ctx context.Context, request RecordMutationR
 	}
 
 	if metadata.SourceHash != request.ExpectedHash {
-		return metadata, core.ErrWorkflowConflict
+		return metadata, workflowstate.ErrConflict
 	}
 
 	return metadata, nil

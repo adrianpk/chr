@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Context, proof WorkflowIntegrationProof, original, parent, source string) (string, error) {
@@ -35,7 +37,7 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 	}
 
 	if len(baseline.conflicts) != 0 && !repaired {
-		return "", fmt.Errorf("%w: conflicting tree requires declared host repair", ErrWorkflowConflict)
+		return "", fmt.Errorf("%w: conflicting tree requires declared host repair", workflowstate.ErrConflict)
 	}
 
 	return tree, nil
@@ -57,7 +59,7 @@ func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Conte
 
 	for _, path := range conflicts {
 		if !slices.Contains(paths, path) {
-			return fmt.Errorf("%w: conflicting path has no resolution change", ErrWorkflowConflict)
+			return fmt.Errorf("%w: conflicting path has no resolution change", workflowstate.ErrConflict)
 		}
 	}
 
@@ -76,7 +78,7 @@ func (reader workflowIntegrationReader) verifyMergerConflictKinds(ctx context.Co
 	for _, path := range paths {
 		index := slices.IndexFunc(repair.Input.Conflicts, func(c WorkflowMergerConflict) bool { return c.Path == path })
 		if index < 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		for _, object := range []string{repair.OriginalParent, repair.PreparedParent, repair.Source} {
@@ -86,7 +88,7 @@ func (reader workflowIntegrationReader) verifyMergerConflictKinds(ctx context.Co
 			}
 
 			if kind != "text" && repair.Input.Conflicts[index].Kind != kind {
-				return fmt.Errorf("%w: conflict type was misrepresented", ErrWorkflowConflict)
+				return fmt.Errorf("%w: conflict type was misrepresented", workflowstate.ErrConflict)
 			}
 		}
 	}

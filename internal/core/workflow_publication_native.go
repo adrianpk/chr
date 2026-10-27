@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) workflowNativeContinuationProfile(ctx context.Context, id string) (native bool, err error) {
 	err = s.withLock(ctx, func() error {
@@ -51,7 +55,7 @@ func (s *WorkflowStore) advanceWorkflowNativeIntegration(ctx context.Context, id
 
 func (s *WorkflowStore) admitWorkflowNativeContinuation(ctx context.Context, run WorkflowInvocation) error {
 	if run.Lane == nil || run.PullRequest == nil || run.PullRequest.State != "bound" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	_, err := s.AdmitWorkflowIntegration(ctx, WorkflowIntegrationAdmission{InvocationID: run.ID, ExpectedRevision: run.Revision, Unit: run.Lane.Unit, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/" + run.PullRequest.Request.BaseBranch})
@@ -67,7 +71,7 @@ func (s *WorkflowStore) workflowNativeContinuationOwner(ctx context.Context, id 
 		}
 
 		if run.Integration == nil || run.IntegrationBudget == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		entry, err = owner.readWorkflowIntegrationEntry(run, *run.Integration)

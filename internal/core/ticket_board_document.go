@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
@@ -17,7 +19,7 @@ func readBoardDocument(projectDir, path string) (IndexedTicket, error) {
 		return IndexedTicket{}, err
 	}
 
-	ticket := IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Path: path, RelativePath: filepath.ToSlash(relative), Key: filepath.ToSlash(relative)}, IndexedTicketSummary: IndexedTicketSummary{Title: filepath.Base(path)}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: workflowHash(data)}}
+	ticket := IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Path: path, RelativePath: filepath.ToSlash(relative), Key: filepath.ToSlash(relative)}, IndexedTicketSummary: IndexedTicketSummary{Title: filepath.Base(path)}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: contenthash.Sum(data)}}
 
 	front, err := parseTicketFrontmatter(string(data))
 	if err != nil {

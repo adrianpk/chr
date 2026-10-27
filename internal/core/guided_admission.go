@@ -5,6 +5,8 @@ import (
 	"errors"
 	"path/filepath"
 	"reflect"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedWorkAdmissionPolicy binds existing progression intent to native admission.
@@ -47,7 +49,7 @@ func RetainGuidedHostBlocker(ctx context.Context, root string, scope GuidedUseCa
 
 		state := session.Guided
 		if state.Work == nil || state.Work.Invocation == nil || state.Work.Invocation.ID != invocation {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if state.Status == "paused" || state.Status == "cancelled" || state.Status == "completed" {
@@ -64,7 +66,7 @@ func RetainGuidedHostBlocker(ctx context.Context, root string, scope GuidedUseCa
 // GuidedPreparationCheckpoint returns the sealed canonical preparation input.
 func GuidedPreparationCheckpoint(session AuthoringSession) (GuidedStageCheckpoint, error) {
 	if session.Guided == nil {
-		return GuidedStageCheckpoint{}, ErrWorkflowConflict
+		return GuidedStageCheckpoint{}, workflowstate.ErrConflict
 	}
 
 	return guidedStageCheckpoint(session, "preparation")
@@ -73,13 +75,13 @@ func GuidedPreparationCheckpoint(session AuthoringSession) (GuidedStageCheckpoin
 // ValidateGuidedWorkPreview rejects omissions, additions and replaced initial contracts.
 func ValidateGuidedWorkPreview(reference GuidedMaterializationReference, preview WorkflowPreview) error {
 	if preview.Selector != (WorkflowSelector{Extent: "slice_set", Identity: reference.SetID}) || preview.Total != len(reference.Members) || len(preview.Members) != preview.Total || preview.Total == 0 || preview.Total > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, expected := range reference.Members {
 		member := preview.Members[i]
 		if !guidedInitialMemberMatches(member, expected, reference.SetID) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -97,7 +99,7 @@ func (s *WorkflowStore) checkGuidedWorkflowAdmission(ctx context.Context, reques
 
 	absolute, err := filepath.Abs(s.layout.ProjectDir())
 	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	proof := request.Admission.Guided
@@ -156,7 +158,7 @@ func guardGuidedAdmissionProof(session AuthoringSession, project, namespace stri
 	}
 
 	if retained.RequestKey != request.RequestKey || !reflect.DeepEqual(selection, request.Selection) || !reflect.DeepEqual(retained.Admission, request.Admission) || request.Policy.IncludeLaterTickets {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -170,7 +172,7 @@ func guardGuidedAdmissionCheckpoint(session AuthoringSession, expected string) e
 
 	digest, err := GuidedCheckpointDigest(checkpoint)
 	if err != nil || digest != expected {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	return nil
@@ -179,7 +181,7 @@ func guardGuidedAdmissionCheckpoint(session AuthoringSession, expected string) e
 func guardGuidedAdmissionState(session AuthoringSession, project, namespace string) error {
 	state := session.Guided
 	if state == nil || !validGuidedIntent(session) || session.ProjectID != project || session.Namespace != namespace || state.Stage != "preparation" || state.Work == nil || state.Work.Materialization == nil || state.Work.Admission == nil || state.PendingOperation == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -188,7 +190,7 @@ func guardGuidedAdmissionState(session AuthoringSession, project, namespace stri
 func guardGuidedAdmissionIntent(session AuthoringSession, proof GuidedWorkflowAdmission) error {
 	state := session.Guided
 	if proof.Policy != GuidedWorkAdmissionPolicy || proof.Actor != state.Actor || proof.RunID != session.ID || state.PendingOperation.Action != "admit" || proof.OperationDigest != state.PendingOperation.Digest || proof.MaterializationID != state.Work.Materialization.ID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // QueuePresentationResponse freezes one bounded message and acknowledges its
@@ -38,7 +40,7 @@ func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramR
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(payload), workflowHash(payload), update.Peer.BotID, fmt.Sprintf("update:%d", update.UpdateID))
+	_, err = tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(payload), contenthash.Sum(payload), update.Peer.BotID, fmt.Sprintf("update:%d", update.UpdateID))
 	if err != nil {
 		return err
 	}
@@ -76,7 +78,7 @@ func decodeTelegramPresentation(payload string, delivery *TelegramReceiverDelive
 }
 
 func decodeTelegramPresentationHash(payload, hash string, delivery *TelegramReceiverDelivery) error {
-	if hash != "" && workflowHash([]byte(payload)) != hash {
+	if hash != "" && contenthash.Sum([]byte(payload)) != hash {
 		return errors.New("retained telegram presentation hash mismatch")
 	}
 

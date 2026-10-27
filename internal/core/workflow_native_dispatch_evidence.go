@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) retainWorkflowNativeSend(ctx context.Context, submission WorkflowSubmission, request WorkflowGitPublication, advertisement WorkflowGitPublicationAdvertisement) error {
@@ -20,7 +23,7 @@ func (s *WorkflowStore) retainWorkflowNativeSend(ctx context.Context, submission
 		}
 
 		if advertisement.Fingerprint != capability.ServerCapabilityFingerprint || advertisement.SourceCommit != native.OriginalSource || advertisement.TargetCommit != native.ValidatedBase {
-			return fmt.Errorf("%w: actual advertisement changed", ErrWorkflowConflict)
+			return fmt.Errorf("%w: actual advertisement changed", workflowstate.ErrConflict)
 		}
 
 		manifest := workflowNativeCommandManifest(submission)
@@ -58,7 +61,7 @@ func (s *WorkflowStore) completeWorkflowNativeDispatch(ctx context.Context, subm
 
 	return s.updateWorkflowNativeDispatch(ctx, submission, func(owner *WorkflowStore, native *WorkflowNativeSubmission) error {
 		if !validWorkflowNativeResponse(*native, result) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := owner.retainWorkflowNativeDispatchResponse(submission, native, result); err != nil {
@@ -86,7 +89,7 @@ func (s *WorkflowStore) retainWorkflowNativeDispatchResponse(submission Workflow
 
 	if native.TransportResponseRef != nil && *native.TransportResponseRef != ref {
 		if len(native.TransportResponseHistory) >= WorkflowPageLimit {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		native.TransportResponseHistory = append(native.TransportResponseHistory, *native.TransportResponseRef)
@@ -100,10 +103,10 @@ func (s *WorkflowStore) retainWorkflowNativeDispatchResponse(submission Workflow
 func (s *WorkflowStore) writeWorkflowNativeDispatchEvidence(submission WorkflowSubmission, value any) (WorkflowEvidenceRef, error) {
 	data, err := json.Marshal(value)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return WorkflowEvidenceRef{}, ErrWorkflowConflict
+		return WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 
-	hash := workflowHash(data)
+	hash := contenthash.Sum(data)
 	ref := WorkflowEvidenceRef{Path: "run/" + submission.InvocationID + "/evidence/publication/" + submission.ID + "/" + hash + ".json", Hash: hash}
 
 	path, err := s.safePath(ref.Path)
@@ -155,17 +158,17 @@ func (s *WorkflowStore) readWorkflowOwnedDispatch(ctx context.Context, run workf
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if !workflowNativeDispatchIntentMatches(last, expected) {
-		return journal, WorkflowIntegrationEntry{}, fmt.Errorf("%w: dispatch intent changed", ErrWorkflowConflict)
+		return journal, WorkflowIntegrationEntry{}, fmt.Errorf("%w: dispatch intent changed", workflowstate.ErrConflict)
 	}
 
 	identity, err := workflowProcessIdentity(os.Getpid())
 	if err != nil || identity != *last.Native.DispatchIdentity || last.Native.DispatchState != "dispatching" {
-		return journal, WorkflowIntegrationEntry{}, fmt.Errorf("%w: dispatch owner changed", ErrWorkflowConflict)
+		return journal, WorkflowIntegrationEntry{}, fmt.Errorf("%w: dispatch owner changed", workflowstate.ErrConflict)
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
 	if err == nil && !workflowNativeSubmissionEntryMatches(last, entry) {
-		return journal, entry, fmt.Errorf("%w: dispatch generation or candidate changed", ErrWorkflowConflict)
+		return journal, entry, fmt.Errorf("%w: dispatch generation or candidate changed", workflowstate.ErrConflict)
 	}
 
 	return journal, entry, err

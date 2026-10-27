@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowCapacityBounds rejects malformed configuration instead of falling
@@ -118,7 +120,7 @@ func TestWorkflowCapacityAliases(t *testing.T) {
 	}
 
 	linked := NewWorkflowStore(layout, "alias")
-	if _, _, err := linked.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, ErrWorkflowConflict) {
+	if _, _, err := linked.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("alias accepted conflicting capacity", err)
 	}
 

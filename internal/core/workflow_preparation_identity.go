@@ -6,6 +6,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowPreparationCollisionLimit = 3
@@ -36,7 +39,7 @@ func (git OSWorkflowPreparationGit) preparationReader(dir string, query Workflow
 	if !query.RequiredSignatures {
 		reader.signing = nil
 		if query.SigningProfile != "" {
-			return reader, ErrWorkflowConflict
+			return reader, workflowstate.ErrConflict
 		}
 
 		return reader, nil
@@ -66,12 +69,12 @@ func (reader workflowIntegrationReader) prepareDistinctResult(ctx context.Contex
 
 func workflowDistinctPreparation(source string, preparation *WorkflowIntegrationPreparation, build func() (string, error)) (string, error) {
 	if preparation == nil || !validWorkflowCommitDate(preparation.InitialCommitterDate) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	seconds, err := strconv.ParseInt(strings.Fields(preparation.InitialCommitterDate)[0], 10, 64)
 	if err != nil || seconds > 1<<63-1-workflowPreparationCollisionLimit {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	for retry := 0; retry <= workflowPreparationCollisionLimit; retry++ {
@@ -88,7 +91,7 @@ func workflowDistinctPreparation(source string, preparation *WorkflowIntegration
 		}
 	}
 
-	return "", fmt.Errorf("%w: prepared source identity collision budget exhausted", ErrWorkflowConflict)
+	return "", fmt.Errorf("%w: prepared source identity collision budget exhausted", workflowstate.ErrConflict)
 }
 
 func workflowPreparationIdentity(proof WorkflowIntegrationProof, p WorkflowIntegrationPreparation) string {
@@ -97,7 +100,7 @@ func workflowPreparationIdentity(proof WorkflowIntegrationProof, p WorkflowInteg
 		profile = p.Signing.Hash
 	}
 
-	return workflowHash([]byte(fmt.Sprintf("chr-preparation/v1:%s:%s:%s:%s:%s:%s:%s:%d:%s", proof.Repository, proof.Method, proof.SourceCommit, proof.BaseCommit, proof.ResultCommit, p.InitialCommitterDate, p.CommitterDate, p.NoOpCollisions, profile)))
+	return contenthash.Sum([]byte(fmt.Sprintf("chr-preparation/v1:%s:%s:%s:%s:%s:%s:%s:%d:%s", proof.Repository, proof.Method, proof.SourceCommit, proof.BaseCommit, proof.ResultCommit, p.InitialCommitterDate, p.CommitterDate, p.NoOpCollisions, profile)))
 }
 
 func validWorkflowPreparationMetadata(proof WorkflowIntegrationProof, p WorkflowIntegrationPreparation) bool {
@@ -129,7 +132,7 @@ func (reader workflowIntegrationReader) addPreparationMetadata(ctx context.Conte
 
 	for i, entry := range provenance.Prepared {
 		if !workflowPreparationCommitterMatches(entry, p, i < len(provenance.Prepared)-len(provenance.IntegrationFixes)) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if p.RequiredSignatures {
@@ -162,7 +165,7 @@ func checkWorkflowPreparationSigning(proof WorkflowIntegrationProof, required bo
 	}
 
 	if p == nil || !p.RequiredSignatures || p.Signing == nil || p.Signing.Hash != profile {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

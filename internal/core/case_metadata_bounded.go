@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // LoadBounded observes at most the owner's fixed case-record ceiling.
@@ -64,7 +66,7 @@ func (s CaseMetadataService) loadBoundedCase(path string) (CaseMetadata, error) 
 		return metadata, err
 	}
 
-	metadata.SourcePath, metadata.SourceHash, metadata.Exists = path, contentHash(data), true
+	metadata.SourcePath, metadata.SourceHash, metadata.Exists = path, contenthash.Sum(data), true
 	if metadata.Slug == "" {
 		metadata.Slug = caseSlugFromPath(path)
 	}

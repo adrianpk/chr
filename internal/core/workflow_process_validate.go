@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowAttemptProcesses(invocationID string, attempt WorkflowAttempt) error {
@@ -17,7 +19,7 @@ func validateWorkflowAttemptProcesses(invocationID string, attempt WorkflowAttem
 
 	for index, process := range attempt.Processes {
 		if process.CapacitySlot != attempt.CapacitySlot {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := validateWorkflowProcess(invocationID, attempt.ID, index, process); err != nil {
@@ -34,7 +36,7 @@ func validateWorkflowAttemptProcesses(invocationID string, attempt WorkflowAttem
 
 func validateWorkflowAttemptOwner(attempt WorkflowAttempt) error {
 	if attempt.CapacitySlot < 0 || attempt.CapacitySlot > workflowWorkerSlotLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if attempt.OwnerProcess != nil && !validWorkflowProcessIdentity(*attempt.OwnerProcess) {

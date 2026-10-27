@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name string, value any) WorkflowEvidenceRef {
@@ -16,7 +18,7 @@ func retainNativeRecordEvidence(t *testing.T, store *WorkflowStore, id, name str
 		t.Fatal(err)
 	}
 
-	ref := WorkflowEvidenceRef{Path: "run/" + id + "/evidence/native-" + name + ".json", Hash: workflowHash(data)}
+	ref := WorkflowEvidenceRef{Path: "run/" + id + "/evidence/native-" + name + ".json", Hash: contenthash.Sum(data)}
 
 	path, err := store.safePath(ref.Path)
 	if err != nil {
@@ -45,7 +47,7 @@ func nativeRecordCandidate(t *testing.T, method string) (*WorkflowStore, Workflo
 	}
 
 	proof, pr := candidate.Input.Git, candidate.Input.Source.PullRequest
-	cap := WorkflowNativeCapability{WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: workflowHash([]byte("policy")), ServerCapabilityFingerprint: workflowHash([]byte("server")), CredentialIdentityFingerprint: workflowHash([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
+	cap := WorkflowNativeCapability{WorkflowPublicationCapability: WorkflowPublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: contenthash.Sum([]byte("policy")), ServerCapabilityFingerprint: contenthash.Sum([]byte("server")), CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
 
 	cap, err = sealWorkflowNativeCapability(cap)
 	if err != nil {

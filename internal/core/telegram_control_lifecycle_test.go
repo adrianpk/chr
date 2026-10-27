@@ -5,6 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramLifecycleJournalFixture(t *testing.T, kind string) (*WorkflowStore, WorkflowControlMutationRequest) {
@@ -101,7 +103,7 @@ func checkTelegramLifecycleJournal(t *testing.T, kind string) {
 	before := workflowTestRead(t, reopened, request.ID)
 	checkTelegramLifecycleRecovery(t, kind, before)
 
-	second, err := reopened.ControlWorkflowLifecycle(t.Context(), request, WorkflowLifecycleControlPorts{}, func(context.Context) error { return ErrWorkflowConflict })
+	second, err := reopened.ControlWorkflowLifecycle(t.Context(), request, WorkflowLifecycleControlPorts{}, func(context.Context) error { return workflowstate.ErrConflict })
 	if err != nil || second != first || !reflect.DeepEqual(before, workflowTestRead(t, reopened, request.ID)) {
 		t.Fatal("original receipt replay mutated current authority", second, err)
 	}
@@ -124,11 +126,11 @@ func checkTelegramLifecycleActor(t *testing.T, reopened *WorkflowStore, request 
 	t.Helper()
 
 	request.Binding.Operator = "another-operator"
-	if _, found, err := reopened.ReadWorkflowControlReceipt(t.Context(), request); found || !errors.Is(err, ErrWorkflowConflict) {
+	if _, found, err := reopened.ReadWorkflowControlReceipt(t.Context(), request); found || !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("receipt read accepted another actor", found, err)
 	}
 
-	if _, err := reopened.ControlWorkflowLifecycle(t.Context(), request, WorkflowLifecycleControlPorts{}, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := reopened.ControlWorkflowLifecycle(t.Context(), request, WorkflowLifecycleControlPorts{}, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("receipt was rebound to another actor", err)
 	}
 }
@@ -183,12 +185,12 @@ func TestTelegramControlLifecycleFence(t *testing.T) {
 			check := func(context.Context) error {
 				calls++
 				if calls == 2 {
-					return ErrWorkflowConflict
+					return workflowstate.ErrConflict
 				}
 
 				return nil
 			}
-			if result, err := store.ControlWorkflowLifecycle(t.Context(), request, WorkflowLifecycleControlPorts{}, check); !errors.Is(err, ErrWorkflowConflict) || result.RequestID != "" {
+			if result, err := store.ControlWorkflowLifecycle(t.Context(), request, WorkflowLifecycleControlPorts{}, check); !errors.Is(err, workflowstate.ErrConflict) || result.RequestID != "" {
 				t.Fatal("late authority loss was accepted", result, err)
 			}
 

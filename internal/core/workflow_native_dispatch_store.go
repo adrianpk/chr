@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"os"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) retainWorkflowNativeDispatch(ctx context.Context, run workflowInvocationFile, submission WorkflowSubmission) (WorkflowSubmission, error) {
@@ -36,7 +38,7 @@ func (s *WorkflowStore) retainWorkflowNativeDispatch(ctx context.Context, run wo
 
 func (s *WorkflowStore) workflowNativeDispatchEntry(run workflowInvocationFile, submission WorkflowSubmission) (WorkflowIntegrationEntry, error) {
 	if run.Integration == nil || run.IntegrationBudget == nil {
-		return WorkflowIntegrationEntry{}, ErrWorkflowConflict
+		return WorkflowIntegrationEntry{}, workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -45,7 +47,7 @@ func (s *WorkflowStore) workflowNativeDispatchEntry(run workflowInvocationFile, 
 	}
 
 	if !workflowNativeSubmissionEntryMatches(submission, entry) || entry.State != "publishing" {
-		return entry, ErrWorkflowConflict
+		return entry, workflowstate.ErrConflict
 	}
 
 	return entry, nil

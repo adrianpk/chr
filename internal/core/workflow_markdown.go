@@ -9,6 +9,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func splitWorkflowMarkdown(data []byte) (string, []byte, error) {
@@ -74,7 +77,7 @@ func (s *WorkflowStore) readMarkdown(relative, path string) (WorkflowRecord, err
 		return WorkflowRecord{}, ErrNotWorkflow
 	}
 
-	r := WorkflowRecord{Kind: "ticket", Path: relative, Body: body, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: workflowHash(data)}
+	r := WorkflowRecord{Kind: "ticket", Path: relative, Body: body, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: contenthash.Sum(data)}
 
 	encoded, err := json.Marshal(fields)
 	if err != nil {
@@ -188,8 +191,8 @@ func (s *WorkflowStore) prepareAdoption(relative string, task WorkflowTask, obse
 		return WorkflowRecord{}, err
 	}
 
-	if workflowHash(data) != observedHash {
-		return WorkflowRecord{}, ErrWorkflowConflict
+	if contenthash.Sum(data) != observedHash {
+		return WorkflowRecord{}, workflowstate.ErrConflict
 	}
 
 	front, body, err := splitWorkflowMarkdown(data)

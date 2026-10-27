@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PlanView is the TUI-facing projection of a generated plan document.
@@ -218,7 +219,7 @@ func (s service) preparePlanGeneration(ctx context.Context, scope core.QuizScope
 	}
 
 	if expected != "" && expected != target {
-		return sources, state, target, core.ErrWorkflowConflict
+		return sources, state, target, workflowstate.ErrConflict
 	}
 
 	sources, err = s.observePlanContext(ctx, scope)
@@ -254,7 +255,7 @@ func (s service) publishObservedPlan(ctx context.Context, plan core.GeneratedPla
 		}
 
 		if current.Hash != sources.Hash {
-			return fmt.Errorf("plan sources changed; reload context and generate again: %w", core.ErrWorkflowConflict)
+			return fmt.Errorf("plan sources changed; reload context and generate again: %w", workflowstate.ErrConflict)
 		}
 
 		paths, readErr = core.WriteGeneratedPlan(ctx, s.projectContext.ProjectDir, plan)

@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const (
@@ -69,12 +72,12 @@ type WorkflowNativeReceipt struct {
 
 func validateWorkflowEvidenceRef(id string, ref WorkflowEvidenceRef) error {
 	if !validWorkflowRequestKey(id) || filepath.Base(id) != id || strings.ContainsAny(ref.Path, "\\\x00") || !filepath.IsLocal(ref.Path) || filepath.ToSlash(filepath.Clean(ref.Path)) != ref.Path || !validWorkflowNativeFingerprint(ref.Hash) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	root := "run/" + id + "/"
 	if !strings.HasPrefix(ref.Path, root+"evidence/") && !strings.HasPrefix(ref.Path, root+"extension/chr/") {
-		return fmt.Errorf("%w: evidence belongs to another invocation", ErrWorkflowConflict)
+		return fmt.Errorf("%w: evidence belongs to another invocation", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -89,11 +92,11 @@ func (b WorkflowNativeRecordBinding) evidenceRefs() []WorkflowEvidenceRef {
 
 func validateWorkflowNativeRecordBinding(b WorkflowNativeRecordBinding) error {
 	if !validWorkflowNativeRecordOwner(b) {
-		return fmt.Errorf("%w: unsupported native record version or owner", ErrWorkflowConflict)
+		return fmt.Errorf("%w: unsupported native record version or owner", workflowstate.ErrConflict)
 	}
 
 	if b.PublishedSource != b.PreparedResult || b.PreparedResult == b.OriginalSource || b.PreparedResult == b.ValidatedBase {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowNativeRecordObjects(b); err != nil {
@@ -101,7 +104,7 @@ func validateWorkflowNativeRecordBinding(b WorkflowNativeRecordBinding) error {
 	}
 
 	if len(b.ValidationRefs) == 0 || len(b.evidenceRefs()) > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, ref := range b.evidenceRefs() {
@@ -118,18 +121,18 @@ func validateWorkflowNativeRecordObjects(b WorkflowNativeRecordBinding) error {
 	if b.ObjectFormat == "sha256" {
 		size = 64
 	} else if b.ObjectFormat != "sha1" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, object := range []string{b.OriginalSource, b.ValidatedBase, b.PreparedResult, b.PreparedTree} {
 		if !workflowCommitID(object) || len(object) != size {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
 	for _, hash := range []string{b.ContractHash, b.PolicyHash, b.CapabilityHash} {
 		if !validWorkflowNativeFingerprint(hash) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -139,7 +142,7 @@ func validateWorkflowNativeRecordObjects(b WorkflowNativeRecordBinding) error {
 func validateWorkflowNativeRecordRepository(b WorkflowNativeRecordBinding) error {
 	reference, err := DetectReviewProviderReference(b.CanonicalPR)
 	if err != nil || "https://"+reference.Host+"/"+reference.Owner+"/"+reference.Repo != b.SourceRepository {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	request := WorkflowGitPublication{SourceRef: b.SourceRef, TargetRef: b.TargetRef, Git: WorkflowIntegrationProof{WorkflowIntegrationQuery: WorkflowIntegrationQuery{SourceCommit: b.OriginalSource, ResultCommit: b.PreparedResult}, BaseCommit: b.ValidatedBase}}
@@ -148,7 +151,7 @@ func validateWorkflowNativeRecordRepository(b WorkflowNativeRecordBinding) error
 	}
 
 	if b.Method != "merge" && b.Method != "rebase" && b.Method != "squash" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -157,7 +160,7 @@ func validateWorkflowNativeRecordRepository(b WorkflowNativeRecordBinding) error
 // WorkflowNativeCandidateHash seals every candidate input, including extensions.
 func WorkflowNativeCandidateHash(candidate WorkflowIntegrationCandidate) (string, error) {
 	if candidate.Schema != workflowNativeCandidateSchema || candidate.Native == nil {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	native := *candidate.Native
@@ -166,32 +169,32 @@ func WorkflowNativeCandidateHash(candidate WorkflowIntegrationCandidate) (string
 
 	data, err := json.Marshal(candidate)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func validateWorkflowCandidateSchema(candidate WorkflowIntegrationCandidate) error {
 	switch candidate.Schema {
 	case "chr-integration-candidate/v1":
 		if candidate.Native != nil || candidate.Input.Capability.Mechanism == WorkflowPublicationGitAtomicDualRef {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
 	case workflowNativeCandidateSchema:
 		return validateWorkflowNativeCandidate(candidate)
 	default:
-		return fmt.Errorf("%w: unsupported integration candidate schema", ErrWorkflowConflict)
+		return fmt.Errorf("%w: unsupported integration candidate schema", workflowstate.ErrConflict)
 	}
 }
 
 func validateWorkflowNativeCandidate(candidate WorkflowIntegrationCandidate) error {
 	native := candidate.Native
 	if native == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validWorkflowNativeCandidateHeader(candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowNativeRecordBinding(native.WorkflowNativeRecordBinding); err != nil {
@@ -199,16 +202,16 @@ func validateWorkflowNativeCandidate(candidate WorkflowIntegrationCandidate) err
 	}
 
 	if !workflowNativeCandidateOwnerMatches(candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !workflowNativeCandidateSourceMatches(candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	hash, err := WorkflowNativeCandidateHash(candidate)
 	if err != nil || hash != native.CandidateHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -240,12 +243,12 @@ func validateWorkflowNativeReceiptSchema(receipt WorkflowReceipt) error {
 	}
 
 	if !workflowNativeReceiptOwnerMatches(receipt) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	git := WorkflowIntegrationProof{WorkflowIntegrationQuery: WorkflowIntegrationQuery{Repository: receipt.Repository, Method: receipt.Method, SourceCommit: receipt.SourceCommit, ResultCommit: receipt.ResultCommit, TargetBranch: strings.TrimPrefix(native.TargetRef, "refs/heads/")}, BaseCommit: receipt.BaseCommit, PreparedTree: receipt.PreparedTree}
 	if !workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, git) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	refs := append([]WorkflowEvidenceRef{native.CandidateRef, native.TransactionProofRef}, native.ObservationRefs...)

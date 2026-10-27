@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // ListSpecDocuments enumerates actual canonical documents across namespaces,
@@ -24,7 +26,7 @@ func ListSpecDocuments(ctx context.Context, projectDir string) ([]SpecDocument, 
 
 	count, size := len(namespaces), 0
 	for _, namespace := range namespaces {
-		if !namespace.IsDir() || !IsValidOpsNamespace(namespace.Name()) {
+		if !namespace.IsDir() || !opsnamespace.Valid(namespace.Name()) {
 			continue
 		}
 

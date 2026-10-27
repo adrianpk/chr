@@ -3,6 +3,9 @@ package core
 import (
 	"bytes"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowContinuation(run workflowInvocationFile) error {
@@ -12,11 +15,11 @@ func validateWorkflowContinuation(run workflowInvocationFile) error {
 	}
 
 	if checkpoint.Schema != "chr-continuation-checkpoint/v1" || checkpoint.InvocationID != run.ID || checkpoint.RequestHash != run.RequestHash || checkpoint.RecordedAt.IsZero() {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validWorkflowContinuationPosition(*checkpoint, run) || !validWorkflowContinuationEvidence(*checkpoint) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -58,13 +61,13 @@ func (s *WorkflowStore) checkWorkflowContinuationCheckpoint(run workflowInvocati
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != checkpoint.EvidenceHash {
-		return ErrWorkflowConflict
+	if err != nil || contenthash.Sum(data) != checkpoint.EvidenceHash {
+		return workflowstate.ErrConflict
 	}
 
 	expected, err := encodeWorkflowContinuationCheckpoint(*checkpoint)
 	if err != nil || !bytes.Equal(data, expected) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if checkpoint.ParentRef != "" {

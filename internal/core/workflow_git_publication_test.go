@@ -4,6 +4,8 @@ import (
 	"errors"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowGitFixture struct {
@@ -104,7 +106,7 @@ func TestWorkflowGitAdvertisement(t *testing.T) {
 		t.Run(change, func(t *testing.T) {
 			fixture := newWorkflowGitFixture(t, "merge")
 			source, target := fixture.request.Git.SourceCommit, fixture.request.Git.BaseCommit
-			expected := ErrWorkflowConflict
+			expected := workflowstate.ErrConflict
 
 			switch change {
 			case "source":

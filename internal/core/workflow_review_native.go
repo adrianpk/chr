@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowNativeReviewInput binds source rewrite, history and publication
@@ -51,7 +53,7 @@ func (s *WorkflowStore) bindWorkflowNativeReviewCapability(ctx context.Context, 
 	}
 
 	if !workflowNativeJSONEqual(capability, candidate.Input.Native.Capability) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	input.Native = &WorkflowNativeReviewInput{Candidate: *candidate.Native, ClaimGeneration: candidate.Input.Native.ClaimGeneration, Capability: capability}
@@ -72,7 +74,7 @@ func (s *WorkflowStore) checkWorkflowNativeReviewFence(run workflowInvocationFil
 	}
 
 	if run.Integration == nil || run.Integration.EntryID != input.Native.Candidate.EntryID || run.Preparation == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -81,7 +83,7 @@ func (s *WorkflowStore) checkWorkflowNativeReviewFence(run workflowInvocationFil
 	}
 
 	if !workflowNativeReviewEntryMatches(run, entry, input) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -100,7 +102,7 @@ func validateWorkflowNativeReviewInput(input WorkflowReviewInput) error {
 
 	binding := native.Candidate.WorkflowNativeRecordBinding
 	if native.ClaimGeneration == 0 || !validWorkflowNativeFingerprint(native.Candidate.CandidateHash) || input.PreparedGit == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowNativeRecordBinding(binding); err != nil {
@@ -108,11 +110,11 @@ func validateWorkflowNativeReviewInput(input WorkflowReviewInput) error {
 	}
 
 	if !workflowNativeReviewOwnerMatches(input) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if binding.CapabilityHash != native.Capability.Revision || binding.PolicyHash != native.Capability.PolicyFingerprint {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	preparation := WorkflowPreparationInput{Source: workflowPreparationSource(input), Git: *input.PreparedGit}

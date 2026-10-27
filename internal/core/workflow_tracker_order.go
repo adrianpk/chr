@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validWorkflowTrackerSchema(schema string) bool {
@@ -58,7 +61,7 @@ func (s *WorkflowStore) workflowOrderTrackerImage(snapshot WorkflowSnapshot, set
 		return result, nil, err
 	}
 
-	result.SourceHash = workflowHash(encoded)
+	result.SourceHash = contenthash.Sum(encoded)
 	result.Sources = []WorkflowTrackerSource{{ID: set.ID, Path: set.Path, Hash: result.SourceHash}, {Path: set.Set.PlanRevision.BodyRef, Hash: set.Set.PlanRevision.BodyHash}}
 
 	return result, output, nil
@@ -80,7 +83,7 @@ func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []Workfl
 	}
 
 	if document.MaterializationID == "" {
-		return document, ErrWorkflowConflict
+		return document, workflowstate.ErrConflict
 	}
 
 	document.SetID = set.ID
@@ -91,7 +94,7 @@ func (s *WorkflowStore) workflowOrderDocument(set WorkflowRecord, tasks []Workfl
 
 func (s *WorkflowStore) validateWorkflowOrderSource(document PlanOrderDocument, binding PlanRevisionBinding) error {
 	if document.Schema != "chr-tracker/v2" || document.ProjectID != s.projectID || document.Namespace != s.layout.Namespace() || document.PlanRef != binding.Reference || document.PlanRevision != binding.Revision || document.PlanBodyHash != binding.BodyHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return ValidatePlannedOrder(document.Slices)
@@ -114,7 +117,7 @@ func workflowNativeOrder(set WorkflowRecord, tasks []WorkflowRecord) ([]PlanOrde
 
 		index, ok := indexes[record.Task.SliceID]
 		if !ok {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		slices[index].Tasks = append(slices[index].Tasks, task)
@@ -165,7 +168,7 @@ func (s *WorkflowStore) workflowPlannedOrder(binding PlanRevisionBinding) (PlanO
 		return PlanOrderDocument{}, err
 	}
 
-	if workflowHash(body) != binding.BodyHash {
+	if contenthash.Sum(body) != binding.BodyHash {
 		return PlanOrderDocument{}, ErrWorkflowProjectionStale
 	}
 
@@ -174,7 +177,7 @@ func (s *WorkflowStore) workflowPlannedOrder(binding PlanRevisionBinding) (PlanO
 		return PlanOrderDocument{}, err
 	}
 
-	if workflowHash(planned) != binding.PlannedOrderHash {
+	if contenthash.Sum(planned) != binding.PlannedOrderHash {
 		return PlanOrderDocument{}, ErrWorkflowProjectionStale
 	}
 
@@ -197,16 +200,16 @@ func validateWorkflowPlanRevision(namespace string, set WorkflowSet) error {
 
 	binding := *set.PlanRevision
 	if !validPlanBindingPaths(namespace, binding) || binding.BodyHash != set.PlanHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, hash := range []string{binding.OrderHash, binding.TrackerHash, binding.PlannedOrderHash, binding.PlannedTrackerHash} {
 		if len(hash) != 64 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if _, err := hex.DecodeString(hash); err != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

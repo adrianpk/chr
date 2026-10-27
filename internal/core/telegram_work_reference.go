@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramWorkReference points to a confirmed admission and its current local
@@ -22,7 +23,7 @@ type TelegramWorkReference struct {
 // admitting or claiming work. The caller cycles an empty page back to the start.
 func (s *TelegramReceiverStore) TelegramWorkReferences(ctx context.Context, botID int64, after string, limit int) (result []TelegramWorkReference, err error) {
 	if botID <= 0 || len(after) > 128 || limit < 1 || limit > 16 {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	rows, err := s.db.QueryContext(ctx, `SELECT r.id,c.invocation_id,COALESCE(c.last_observed_revision,0),c.revision FROM telegram_conversations c JOIN telegram_requests r ON r.id=c.authorization_ref WHERE c.bot_id=? AND c.id>? AND c.phase IN ('executing','waiting') AND r.operation_id='work.admit' AND r.state='confirmed' AND r.conversation_id=c.id AND r.domain_receipt_ref='workflow:'||c.invocation_id ORDER BY c.id LIMIT ?`, botID, after, limit)
@@ -77,7 +78,7 @@ func (s *TelegramReceiverStore) ValidateTelegramWorkReference(ctx context.Contex
 	}
 
 	if count != 1 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -87,7 +88,7 @@ func (s *TelegramReceiverStore) ValidateTelegramWorkReference(ctx context.Contex
 // It does not change phase, authorization, native checkpoints or the original result.
 func (s *TelegramReceiverStore) ObserveTelegramWork(ctx context.Context, ref TelegramWorkReference, revision uint64, now time.Time) error {
 	if revision == 0 || revision > math.MaxInt64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {

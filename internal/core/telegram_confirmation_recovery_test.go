@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
@@ -71,7 +72,7 @@ func changeTelegramConfirmationVersion(t *testing.T, f *telegramConversationFixt
 	}
 	// Recompute both retained hashes so this checks version refusal rather than
 	// accidentally stopping at the ordinary byte-integrity check.
-	hash := workflowHash(data)
+	hash := contenthash.Sum(data)
 	execTelegramRecoverySQL(t, f.store, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE action_token=?", string(data), hash, action.Token)
 	execTelegramRecoverySQL(t, f.store, "UPDATE telegram_actions SET presentation_hash=?,guard_digest=? WHERE token=?", hash, telegramActionPresentationDigest(request, hash), action.Token)
 }

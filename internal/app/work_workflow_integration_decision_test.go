@@ -16,6 +16,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -91,7 +92,7 @@ func TestWorkflowIntegrationAnswer(t *testing.T) {
 			checkWorkflowIntegrationAnswer(t, before, after, "resolved", err)
 
 			images := workflowCLIImage(t, operations.projectContext.ProjectDir)
-			if _, err := tc.submit(t, operations, before); !errors.Is(err, core.ErrWorkflowConflict) || !maps.Equal(images, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
+			if _, err := tc.submit(t, operations, before); !errors.Is(err, workflowstate.ErrConflict) || !maps.Equal(images, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
 				t.Fatal("stale displayed answer changed authority", err)
 			}
 		})

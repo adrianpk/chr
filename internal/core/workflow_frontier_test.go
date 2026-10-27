@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowFrontierProvider struct {
@@ -15,7 +17,7 @@ type workflowFrontierProvider struct {
 
 func (p workflowFrontierProvider) ReadWorkflowBranch(ctx context.Context, repository, branch string) (string, error) {
 	if repository != p.pr.Repository {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	output, err := outputWorktreeGit(ctx, p.remote, "rev-parse", "--verify", "refs/heads/"+branch+"^{commit}")

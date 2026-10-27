@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramAuthoringProgress projects confirmed owner references into a session.
@@ -25,7 +27,7 @@ func (s *TelegramReceiverStore) FinishTelegramAuthoring(ctx context.Context, req
 	}
 
 	if !validTelegramOperationFinish("confirmed", receipt, facts) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
@@ -63,7 +65,7 @@ func updateTelegramAuthoringConversation(ctx context.Context, tx *sql.Tx, reques
 	}
 
 	if !telegramAuthoringEligible(c) {
-		return c, ErrWorkflowConflict
+		return c, workflowstate.ErrConflict
 	}
 
 	c.Phase, c.QuestionBinding = "prepared", ""
@@ -99,7 +101,7 @@ func validateTelegramAuthoringProgress(progress TelegramAuthoringProgress) error
 		}
 
 		if progress.Question.SessionRef != progress.SessionRef {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -109,11 +111,11 @@ func validateTelegramAuthoringProgress(progress TelegramAuthoringProgress) error
 func validateTelegramAuthoringSessionRef(ref string) error {
 	parts := strings.Split(ref, "/")
 	if len(parts) != 5 || !filepath.IsLocal(ref) || filepath.Clean(ref) != ref {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if parts[0] != DirectoryName || parts[1] != "authoring" || parts[2] != "sessions" || parts[4] != "session.md" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateAuthoringSessionID(parts[3]); err != nil {

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowClosingProvider struct {
@@ -17,7 +19,7 @@ type workflowClosingProvider struct {
 func (p workflowClosingProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (WorkflowPullRequestSnapshot, error) {
 	pr, found := p.prs[url]
 	if !found {
-		return WorkflowPullRequestSnapshot{}, ErrWorkflowConflict
+		return WorkflowPullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	target, err := p.ReadWorkflowBranch(ctx, pr.Repository, pr.BaseBranch)

@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowAgentBudgetCreation(ctx context.Context, run *workflowInvocationFile) (workflowFileChange, error) {
@@ -58,7 +60,7 @@ func (s *WorkflowStore) reserveWorkflowAgentInput(ctx context.Context, run *work
 	}
 
 	if len(budget.Reservations) >= WorkflowRecordLimit {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	budget.Reservations = append(budget.Reservations, r)
@@ -111,14 +113,14 @@ func (s *WorkflowStore) checkWorkflowUnmeteredAgent(run workflowInvocationFile) 
 func workflowAgentReservation(budget *WorkflowIntegrationBudget, input WorkflowTaskInput) (*WorkflowIntegrationReservation, error) {
 	call := input.AgentCall
 	if call == nil {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	index := slices.IndexFunc(budget.Reservations, func(r WorkflowIntegrationReservation) bool {
 		return r.ID == call.ReservationID && r.AttemptID == input.AttemptID && r.ClaimGeneration == input.Generation && r.Role == call.Role && r.Unit == input.Lane.Unit && r.Allowance == call.Allowance
 	})
 	if index < 0 {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	return &budget.Reservations[index], nil
@@ -167,7 +169,7 @@ func (s *WorkflowStore) workflowAgentCreationFiles(ctx context.Context, envelope
 
 func (s *WorkflowStore) checkWorkflowAgentReservationEvidence(run workflowInvocationFile, r WorkflowIntegrationReservation) error {
 	if !workflowAgentReservationOwned(run, r) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var input WorkflowTaskInput
@@ -186,7 +188,7 @@ func (s *WorkflowStore) checkWorkflowAgentReservationEvidence(run workflowInvoca
 	}
 
 	if certificate.CapabilityRevision != r.Allowance.CapabilityRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return checkWorkflowAgentCertificate(certificate, r.Role, input.Worker)

@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowClosingTargetHook struct {
@@ -45,7 +48,7 @@ func TestWorkflowClosingChanges(t *testing.T) {
 			workflowClosingContract(t, fixture, gate)
 
 			result, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), fixture.run.ID, "dev", ports)
-			if !errors.Is(err, ErrWorkflowConflict) || result.Outcome != "closing_validation_failed" || result.Set.Set.ClosureRef != "" {
+			if !errors.Is(err, workflowstate.ErrConflict) || result.Outcome != "closing_validation_failed" || result.Set.Set.ClosureRef != "" {
 				t.Fatal("changed closing input or target established completion", err)
 			}
 
@@ -103,7 +106,7 @@ func TestWorkflowClosingReopen(t *testing.T) {
 	request.Reopen = true
 	request.Plan.PlanRef = "plan/reopening.md"
 
-	request.Plan.PlanHash = workflowHash([]byte("approved reopening\n"))
+	request.Plan.PlanHash = contenthash.Sum([]byte("approved reopening\n"))
 	if err := os.WriteFile(filepath.Join(fixture.store.layout.Root(), request.Plan.PlanRef), []byte("approved reopening\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}

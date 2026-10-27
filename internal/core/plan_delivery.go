@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // QuizModelStrategyPlanDelivery completes native ticket contracts for a retained
@@ -20,7 +23,7 @@ func ScopePlanDeliveryOrder(slices []PlanOrderSlice, operation PlanPublicationOp
 	}
 
 	identity := operation.ID + "\x00" + operation.Scope.ProjectID + "\x00" + operation.Scope.CaseSlug + "\x00" + operation.ExpectedRevision
-	prefix := "p" + workflowHash([]byte(identity))[:16] + "-"
+	prefix := "p" + contenthash.Sum([]byte(identity))[:16] + "-"
 	result := orderedPlanSlices(slices)
 
 	for i := range result {
@@ -64,7 +67,7 @@ func ObservePlanWorkflow(ctx context.Context, projectDir string, scope QuizScope
 	}
 
 	if !samePlannedWorkflowBinding(planned, binding) || !validPlanBindingPaths(layout.Namespace(), planned) {
-		return GeneratedWorkflowPlan{}, ErrWorkflowConflict
+		return GeneratedWorkflowPlan{}, workflowstate.ErrConflict
 	}
 
 	return r.plannedWorkflowInput(ctx, layout, planned)
@@ -87,7 +90,7 @@ func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Contex
 		return GeneratedWorkflowPlan{}, err
 	}
 
-	if workflowHash(data) != binding.PlannedOrderHash {
+	if contenthash.Sum(data) != binding.PlannedOrderHash {
 		return GeneratedWorkflowPlan{}, ErrWorkflowProjectionStale
 	}
 

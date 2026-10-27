@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramRecordService interface {
@@ -28,7 +29,7 @@ func (s service) telegramProjectService(ctx context.Context, target core.Telegra
 		}
 	}
 
-	return s, fmt.Errorf("%w: registered project is unavailable", core.ErrWorkflowConflict)
+	return s, fmt.Errorf("%w: registered project is unavailable", workflowstate.ErrConflict)
 }
 
 // ReadTelegramRecords resolves the frozen project through the shared registry.
@@ -54,7 +55,7 @@ func (s service) PrepareTelegramRecord(ctx context.Context, target core.Telegram
 // ApplyTelegramRecord applies only serialized input matching the frozen target.
 func (s service) ApplyTelegramRecord(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedRecordMutation) (RecordMutationResult, error) {
 	if prepared.ProjectID != target.ProjectID || prepared.Namespace != target.Namespace {
-		return RecordMutationResult{}, core.ErrWorkflowConflict
+		return RecordMutationResult{}, workflowstate.ErrConflict
 	}
 
 	scoped, err := s.telegramProjectService(ctx, target)

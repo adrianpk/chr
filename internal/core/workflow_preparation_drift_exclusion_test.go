@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeDriftExclusionGit struct {
@@ -40,7 +43,7 @@ func TestNativeDriftExclusion(t *testing.T) {
 	nativeDriftSealDispatch(t, submit, submission, f.f.base)
 
 	store = NewWorkflowStore(store.layout, store.projectID)
-	git := nativeDriftExclusionGit{f.f.git, store, workflowHash([]byte("independent queue")), workflowHash([]byte(candidate.Native.SourceRepository + "\n" + candidate.Native.TargetRef))}
+	git := nativeDriftExclusionGit{f.f.git, store, contenthash.Sum([]byte("independent queue")), contenthash.Sum([]byte(candidate.Native.SourceRepository + "\n" + candidate.Native.TargetRef))}
 
 	fresh, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, git)
 	if err != nil || fresh.Input.Git.BaseCommit != f.f.base {
@@ -96,7 +99,7 @@ func TestNativeSealedSourceDrift(t *testing.T) {
 	nativeDriftSealInputs(t, submit, submission, f.provider.pr.HeadCommit, f.f.base)
 
 	provider := nativeDriftProviderFixture{f.provider, f.f.remote}
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("sealed source drift did not require a scope decision", err)
 	}
 

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReserveTelegramNotification permits one original dispatch and at most one
@@ -58,7 +59,7 @@ func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx conte
 		}
 
 		if count != 1 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if uncertain {

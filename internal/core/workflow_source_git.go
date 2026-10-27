@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PublishWorkflowSource creates or updates only a validated owned source ref.
@@ -37,7 +39,7 @@ func (git OSWorkflowIntegrationGit) validateWorkflowSource(query WorkflowSourceQ
 	}
 
 	if !strings.HasPrefix(branch, "chr/workflow/") || !workflowCommitID(query.Commit) || !workflowCommitID(query.Tree) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -45,7 +47,7 @@ func (git OSWorkflowIntegrationGit) validateWorkflowSource(query WorkflowSourceQ
 
 func (reader workflowIntegrationReader) pushWorkflowSource(ctx context.Context, transport string, query WorkflowSourceQuery, ref, previous string) error {
 	if previous != "" && previous != query.PreviousCommit {
-		return fmt.Errorf("%w: canonical source branch changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: canonical source branch changed", workflowstate.ErrConflict)
 	}
 
 	if _, err := reader.output(ctx, "push", "--quiet", "--force-with-lease="+ref+":"+previous, "--", transport, query.Commit+":"+ref); err != nil {
@@ -68,7 +70,7 @@ func (reader workflowIntegrationReader) workflowSourceHead(ctx context.Context, 
 
 	fields := strings.Fields(output)
 	if len(fields) != 2 || !workflowCommitID(fields[0]) || fields[1] != ref {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	return fields[0], nil

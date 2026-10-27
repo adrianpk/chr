@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowGitPublicationHook(t *testing.T, fixture workflowGitFixture, mode string) string {
@@ -91,7 +93,7 @@ func checkWorkflowGitApplied(t *testing.T, fixture workflowGitFixture, result Wo
 func checkWorkflowGitRejected(t *testing.T, fixture workflowGitFixture, mode string, result WorkflowGitPublicationResult, err error) {
 	t.Helper()
 
-	if !errors.Is(err, ErrWorkflowConflict) || result.State != "rejected" || !result.CommandsSent || result.PublishedSourceCommit != "" {
+	if !errors.Is(err, workflowstate.ErrConflict) || result.State != "rejected" || !result.CommandsSent || result.PublishedSourceCommit != "" {
 		t.Fatalf("atomic rejection lost: %+v, %v", result, err)
 	}
 

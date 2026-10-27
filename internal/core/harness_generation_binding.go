@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // HarnessGenerationBinding retains a non-secret selection for one operation.
@@ -24,7 +26,7 @@ func SealHarnessGenerationBinding(binding HarnessGenerationBinding) (HarnessGene
 		return binding, err
 	}
 
-	binding.BindingHash = workflowHash(data)
+	binding.BindingHash = contenthash.Sum(data)
 
 	return binding, ValidateHarnessGenerationBinding(binding)
 }
@@ -47,7 +49,7 @@ func ValidateHarnessGenerationBinding(binding HarnessGenerationBinding) error {
 	sealed.BindingHash = ""
 
 	data, err := json.Marshal(sealed)
-	if err != nil || workflowHash(data) != binding.BindingHash {
+	if err != nil || contenthash.Sum(data) != binding.BindingHash {
 		return errors.New("generation binding evidence changed")
 	}
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
@@ -123,7 +124,7 @@ func finishTelegramActionResult(ctx context.Context, tx *sql.Tx, retained Telegr
 	}
 
 	if result.ConversationPhase != "" && result.State != "confirmed" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := projectTelegramAuthoringWorkPhase(ctx, tx, retained.Request, result.ConversationPhase, database.FormatTime(now)); err != nil {

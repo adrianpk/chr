@@ -8,6 +8,8 @@ import (
 	"slices"
 	"syscall"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowRoleReservation exposes live owners without their claim credentials.
@@ -253,7 +255,7 @@ func observeWorkflowIntegrationProcesses(common string) ([]WorkflowProcess, erro
 
 	for _, file := range files {
 		if !file.Type().IsRegular() {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		process, alive, err := observeWorkflowCapacityProcess(filepath.Join(dir, file.Name()))
@@ -291,7 +293,7 @@ func (s *WorkflowStore) QueryWorkflowIntegrationSetClosure(ctx context.Context, 
 		}
 
 		if set.Set == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		status, readErr = s.workflowIntegrationClosureStatus(ctx, snapshot, set)
@@ -349,7 +351,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationSetReceipts(ctx context.Context,
 
 	for _, descriptor := range set.Set.Slices {
 		if descriptor.Phase != "integrated" || descriptor.DeliveryRef == "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		receipt, err := s.readRecord(descriptor.DeliveryRef)

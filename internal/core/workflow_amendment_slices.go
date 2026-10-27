@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func checkWorkflowAmendmentAddition(builder workflowAmendmentBuild, slice GeneratedWorkflowSlice, input GeneratedWorkflowTask) error {
 	for _, descriptor := range builder.old.Set.Slices {
 		if descriptor.Phase != "pending" && slice.Order <= descriptor.Order {
-			return fmt.Errorf("%w: new work precedes an execution or integration frontier", ErrWorkflowConflict)
+			return fmt.Errorf("%w: new work precedes an execution or integration frontier", workflowstate.ErrConflict)
 		}
 
 		if descriptor.ID != slice.ID {
@@ -18,7 +20,7 @@ func checkWorkflowAmendmentAddition(builder workflowAmendmentBuild, slice Genera
 
 		for _, task := range builder.tasks {
 			if task.Task.SliceID == slice.ID && (task.Task.Phase != "pending" || input.Order <= task.Task.Order) {
-				return fmt.Errorf("%w: an existing slice accepts only later unstarted tasks", ErrWorkflowConflict)
+				return fmt.Errorf("%w: an existing slice accepts only later unstarted tasks", workflowstate.ErrConflict)
 			}
 		}
 	}
@@ -47,7 +49,7 @@ func (s *WorkflowStore) buildWorkflowAmendmentSlices(builder *workflowAmendmentB
 	}
 
 	if seen != len(old) {
-		return fmt.Errorf("%w: amendment removed an existing slice", ErrWorkflowConflict)
+		return fmt.Errorf("%w: amendment removed an existing slice", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -72,7 +74,7 @@ func buildWorkflowAmendedSlice(builder *workflowAmendmentBuild, old map[string]W
 
 func workflowAmendedSlice(previous, descriptor WorkflowSlice) (WorkflowSlice, error) {
 	if previous.Order != descriptor.Order || previous.ContractHash != descriptor.ContractHash || !reflect.DeepEqual(previous.DependsOn, descriptor.DependsOn) {
-		return descriptor, fmt.Errorf("%w: amendment changed an existing slice contract or order", ErrWorkflowConflict)
+		return descriptor, fmt.Errorf("%w: amendment changed an existing slice contract or order", workflowstate.ErrConflict)
 	}
 
 	previous.TaskInputHash = descriptor.TaskInputHash

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeQueueMigration adds only a missing ledger under its observed
@@ -17,15 +19,15 @@ func TestNativeQueueMigration(t *testing.T) {
 	run := nativeQueueRemoveBudget(t, store, entry.InvocationID)
 
 	before := nativeQueueImages(t, store.layout.Root())
-	if _, err := store.QueryWorkflowIntegrationQueue(t.Context(), WorkflowIntegrationQueueQuery{Limit: 10}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.QueryWorkflowIntegrationQueue(t.Context(), WorkflowIntegrationQueueQuery{Limit: 10}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("read manufactured ledger", err)
 	}
 
-	if _, err := store.AdmitWorkflowIntegration(t.Context(), admission); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.AdmitWorkflowIntegration(t.Context(), admission); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("retry manufactured ledger", err)
 	}
 
-	if _, err := store.MigrateWorkflowIntegration(t.Context(), admission); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.MigrateWorkflowIntegration(t.Context(), admission); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale migration changed owner", err)
 	}
 
@@ -63,7 +65,7 @@ func TestNativeQueueMigrationBytes(t *testing.T) {
 			}
 
 			before := nativeQueueImages(t, store.layout.Root())
-			if _, err := store.MigrateWorkflowIntegration(t.Context(), admission); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.MigrateWorkflowIntegration(t.Context(), admission); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("unbound source became runnable", err)
 			}
 
@@ -160,7 +162,7 @@ func nativeQueueInterruptedIntent(t *testing.T, f nativeSubmissionFixture, first
 		t.Fatal("common intent lost exclusion", err)
 	}
 
-	if _, err := f.store.QueryWorkflowIntegrationQueue(t.Context(), WorkflowIntegrationQueueQuery{Limit: 10}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.QueryWorkflowIntegrationQueue(t.Context(), WorkflowIntegrationQueueQuery{Limit: 10}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale projection looked runnable", err)
 	}
 }

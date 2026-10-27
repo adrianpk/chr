@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeDriftProviderFixture struct {
@@ -25,7 +27,7 @@ func (p nativeDriftProviderFixture) ReadWorkflowPullRequest(ctx context.Context,
 
 func (p nativeDriftProviderFixture) ReadWorkflowBranch(ctx context.Context, repository, branch string) (string, error) {
 	if repository != p.pr.Repository {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	output, err := outputWorktreeGit(ctx, p.remote, "rev-parse", "refs/heads/"+branch)
@@ -64,7 +66,7 @@ func nativeSourceDrift(t *testing.T, name, path string) {
 	nativeDriftMoveSource(t, &f, name, path)
 
 	provider := nativeDriftProviderFixture{f.provider, f.f.remote}
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed source did not require a scope decision", err)
 	}
 

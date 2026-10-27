@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramPreparedWorkService interface {
@@ -21,7 +22,7 @@ func (s service) PrepareTelegramAuthoringWork(ctx context.Context, target core.T
 
 	prepared, err := scoped.PrepareAuthoringWork(ctx, request)
 	if err == nil && (prepared.Scope.ProjectID != target.ProjectID || prepared.Scope.Namespace != target.Namespace) {
-		return PreparedAuthoringWork{}, core.ErrWorkflowConflict
+		return PreparedAuthoringWork{}, workflowstate.ErrConflict
 	}
 
 	return prepared, err
@@ -30,7 +31,7 @@ func (s service) PrepareTelegramAuthoringWork(ctx context.Context, target core.T
 // ApplyTelegramAuthoringWork uses the shared guarded owner and cannot admit work.
 func (s service) ApplyTelegramAuthoringWork(ctx context.Context, target core.TelegramOperationTarget, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	if prepared.Scope.ProjectID != target.ProjectID || prepared.Scope.Namespace != target.Namespace {
-		return AuthoringWorkResult{}, core.ErrWorkflowConflict
+		return AuthoringWorkResult{}, workflowstate.ErrConflict
 	}
 
 	scoped, err := s.telegramBoundProjectService(ctx, target)

@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationBinding pins an invocation to one guarded queue image.
@@ -76,7 +79,7 @@ type WorkflowIntegrationTransition struct {
 }
 
 func workflowIntegrationEntryID(run workflowInvocationFile, unit WorkflowRef) string {
-	return workflowHash([]byte(run.ProjectID + "\x00" + run.Namespace + "\x00" + run.ID + "\x00" + unit.Kind + "\x00" + unit.ID))
+	return contenthash.Sum([]byte(run.ProjectID + "\x00" + run.Namespace + "\x00" + run.ID + "\x00" + unit.Kind + "\x00" + unit.ID))
 }
 
 func workflowIntegrationEntryPath(invocationID, entryID string) string {
@@ -102,7 +105,7 @@ func workflowIntegrationScopeHash(run workflowInvocationFile, unit WorkflowRef) 
 		Members     []WorkflowPreviewMember
 	}{run.RequestHash, unit, members})
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func newWorkflowIntegrationEntry(run workflowInvocationFile, request WorkflowIntegrationAdmission, coordinator workflowCoordinator, sequence uint64) (WorkflowIntegrationEntry, error) {
@@ -176,5 +179,5 @@ func workflowIntegrationTerminal(state string) bool {
 }
 
 func workflowIntegrationConflict(reason string) error {
-	return fmt.Errorf("%w: integration entry %s", ErrWorkflowConflict, reason)
+	return fmt.Errorf("%w: integration entry %s", workflowstate.ErrConflict, reason)
 }

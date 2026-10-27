@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowIntegrationCLIArguments(status WorkflowWorkStatus) []string {
@@ -73,7 +74,7 @@ func TestWorkflowIntegrationGrant(t *testing.T) {
 			images := workflowCLIImage(t, operations.projectContext.ProjectDir)
 
 			stale, err := tc.submit(t, operations, before)
-			if !errors.Is(err, core.ErrWorkflowConflict) || stale.Revision != after.Revision || !maps.Equal(images, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
+			if !errors.Is(err, workflowstate.ErrConflict) || stale.Revision != after.Revision || !maps.Equal(images, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
 				t.Fatal("stale operator action changed authority or hid current status", err)
 			}
 		})
@@ -113,7 +114,7 @@ func TestWorkflowIntegrationApproval(t *testing.T) {
 	checkServiceIntegrationApproval(t, status, after, err)
 
 	images = workflowCLIImage(t, operations.projectContext.ProjectDir)
-	if _, err := workflowCLIInjectedControl(t, operations, "approve", args...); !errors.Is(err, core.ErrWorkflowConflict) || !maps.Equal(images, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
+	if _, err := workflowCLIInjectedControl(t, operations, "approve", args...); !errors.Is(err, workflowstate.ErrConflict) || !maps.Equal(images, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
 		t.Fatal("native CLI approval reused a stale displayed revision", err)
 	}
 }

@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeAgentAdmission refuses unmetered execution before any worker birth
@@ -51,7 +53,7 @@ func TestNativeAgentCeiling(t *testing.T) {
 		t.Fatal("rejected grant mutated consumption", err)
 	}
 
-	if _, err := store.StartWorkflow(t.Context(), WorkflowStartRequest{RequestKey: request.RequestKey, Selection: request.Selection, Policy: WorkflowExecutionPolicy{AgentTokenBudget: 91}}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), WorkflowStartRequest{RequestKey: request.RequestKey, Selection: request.Selection, Policy: WorkflowExecutionPolicy{AgentTokenBudget: 91}}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("entry retry replaced admission ceiling", err)
 	}
 }

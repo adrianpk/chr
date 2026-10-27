@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) reuseWorkflowValidatedTasks(ctx context.Context, run *workflowInvocationFile) error {
@@ -51,7 +54,7 @@ func (s *WorkflowStore) reuseWorkflowTask(ctx context.Context, run *workflowInvo
 
 	lane, err := s.retainedWorkflowLane(ctx, *run, record)
 	if err != nil || lane == nil {
-		return fmt.Errorf("%w: validated task has no retained lane", ErrWorkflowConflict)
+		return fmt.Errorf("%w: validated task has no retained lane", workflowstate.ErrConflict)
 	}
 
 	if err := s.checkWorkflowReusableTask(ctx, *run, record, *lane); err != nil {
@@ -114,7 +117,7 @@ func (s *WorkflowStore) checkWorkflowReusableTaskPrepared(ctx context.Context, r
 		}
 	}
 
-	return fmt.Errorf("%w: reusable task lacks unchanged host evidence", ErrWorkflowConflict)
+	return fmt.Errorf("%w: reusable task lacks unchanged host evidence", workflowstate.ErrConflict)
 }
 
 func workflowAttemptValidatesTask(attempt WorkflowAttempt, record WorkflowRecord) bool {
@@ -133,7 +136,7 @@ func (s *WorkflowStore) workflowRetainedResultMatches(ctx context.Context, run w
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != attempt.ResultHash {
+	if err != nil || contenthash.Sum(data) != attempt.ResultHash {
 		return false
 	}
 
@@ -152,7 +155,7 @@ func (s *WorkflowStore) workflowRetainedInputMatches(attempt WorkflowAttempt, re
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != attempt.InputHash {
+	if err != nil || contenthash.Sum(data) != attempt.InputHash {
 		return false
 	}
 

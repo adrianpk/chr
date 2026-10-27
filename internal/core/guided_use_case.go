@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // GuidedUseCaseState extends a canonical authoring session without adopting manual sessions.
@@ -162,7 +165,7 @@ func guidedOperation(command GuidedUseCaseCommand) (GuidedUseCaseOperation, erro
 
 	encoded, err := json.Marshal(command)
 
-	return GuidedUseCaseOperation{ID: command.OperationID, Action: command.Action, NativeRevision: command.NativeRevision, QuestionID: command.QuestionID, InputDigest: command.InputDigest, ExpectedRevision: command.ExpectedRevision, Digest: workflowHash(encoded), Content: command.Content}, err
+	return GuidedUseCaseOperation{ID: command.OperationID, Action: command.Action, NativeRevision: command.NativeRevision, QuestionID: command.QuestionID, InputDigest: command.InputDigest, ExpectedRevision: command.ExpectedRevision, Digest: contenthash.Sum(encoded), Content: command.Content}, err
 }
 
 func renderGuidedState(output *bytes.Buffer, state *GuidedUseCaseState) error {
@@ -183,7 +186,7 @@ func renderGuidedState(output *bytes.Buffer, state *GuidedUseCaseState) error {
 func validGuidedIntent(session AuthoringSession) bool {
 	state := session.Guided
 
-	return state.SchemaVersion == 1 && session.Revision > 0 && IsValidOpsNamespace(session.Namespace) && strings.TrimSpace(state.Actor) != "" && len(state.Actor) <= 128 && state.ProgressionIntent
+	return state.SchemaVersion == 1 && session.Revision > 0 && opsnamespace.Valid(session.Namespace) && strings.TrimSpace(state.Actor) != "" && len(state.Actor) <= 128 && state.ProgressionIntent
 }
 
 func boundedGuidedState(state *GuidedUseCaseState) bool {

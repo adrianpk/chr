@@ -4,6 +4,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeDecisionRetry makes question creation idempotent and rejects reuse
@@ -18,7 +20,7 @@ func TestNativeDecisionRetry(t *testing.T) {
 	}
 
 	create.Decisions[0].Issue = "A different question"
-	if _, err := f.store.RecordWorkflowIntegrationDecisions(t.Context(), create, f.provider); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.RecordWorkflowIntegrationDecisions(t.Context(), create, f.provider); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("question identifier was reused", err)
 	}
 }
@@ -115,7 +117,7 @@ func nativeDecisionBatchAnswers(t *testing.T, f workflowPreparationFixture, reco
 	}
 
 	answer.Answer.ID, answer.Answer.DecisionID = "answer-2", questions[1].ID
-	if _, err := f.store.AnswerWorkflowIntegrationDecision(t.Context(), answer, f.provider); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.AnswerWorkflowIntegrationDecision(t.Context(), answer, f.provider); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("old display approved unanswered question", err)
 	}
 
@@ -161,7 +163,7 @@ func TestNativeDecisionPhases(t *testing.T) {
 		t.Fatal("resolved decision blocked normal review", err)
 	}
 
-	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("answer skipped exact candidate validation", err)
 	}
 }

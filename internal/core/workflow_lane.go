@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTaskUnit(record WorkflowRecord) WorkflowRef {
@@ -37,7 +40,7 @@ func (s *WorkflowStore) retainedWorkflowLane(ctx context.Context, run workflowIn
 		}
 
 		if previous.Selection.Target.Repository != run.ExecutionSelection().Target.Repository {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		if latest == nil || previous.UpdatedAt.After(latest.UpdatedAt) {
@@ -75,7 +78,7 @@ func (s *WorkflowStore) workflowLaneSelection(ctx context.Context, run workflowI
 
 func (s *WorkflowStore) newWorkflowLane(run workflowInvocationFile, record WorkflowRecord) WorkflowLane {
 	unit := workflowTaskUnit(record)
-	id := workflowHash([]byte(run.Namespace + "\x00" + unit.Kind + "\x00" + unit.ID))[:24]
+	id := contenthash.Sum([]byte(run.Namespace + "\x00" + unit.Kind + "\x00" + unit.ID))[:24]
 
 	return WorkflowLane{Unit: unit, Branch: "refs/heads/chr/workflow/" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "workflow-"+id), BaseCommit: run.ExecutionSelection().Target.Commit, HeadCommit: run.ExecutionSelection().Target.Commit}
 }
@@ -91,7 +94,7 @@ func (s *WorkflowStore) ensureWorkflowLane(ctx context.Context, lane WorkflowLan
 
 	if !exists {
 		if lane.HeadCommit != lane.BaseCommit {
-			return fmt.Errorf("%w: retained lane branch is missing", ErrWorkflowConflict)
+			return fmt.Errorf("%w: retained lane branch is missing", workflowstate.ErrConflict)
 		}
 
 		if err := git.CreateBranch(ctx, s.layout.ProjectDir(), branch, lane.BaseCommit); err != nil {
@@ -124,7 +127,7 @@ func (s *WorkflowStore) ensureWorkflowLane(ctx context.Context, lane WorkflowLan
 func (s *WorkflowStore) observeWorkflowLane(ctx context.Context, lane WorkflowLane) (string, error) {
 	commit, tree, err := s.workflowLaneCandidate(ctx, lane)
 	if err == nil && commit != lane.HeadCommit {
-		err = fmt.Errorf("%w: retained lane moved without a checkpoint", ErrWorkflowConflict)
+		err = fmt.Errorf("%w: retained lane moved without a checkpoint", workflowstate.ErrConflict)
 	}
 
 	return tree, err
@@ -144,7 +147,7 @@ func (s *WorkflowStore) workflowLaneCandidate(ctx context.Context, lane Workflow
 
 	commit, err := (OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{commit}")
 	if err != nil || !reader.isAncestor(ctx, lane.HeadCommit, commit) {
-		return "", "", fmt.Errorf("%w: lane history does not descend from its accepted head", ErrWorkflowConflict)
+		return "", "", fmt.Errorf("%w: lane history does not descend from its accepted head", workflowstate.ErrConflict)
 	}
 
 	if err := s.checkWorkflowCoordinatorTarget(ctx, WorkflowPreviewTarget{Commit: commit}); err != nil {
@@ -161,12 +164,12 @@ func errorsOrConflict(err error) error {
 		return err
 	}
 
-	return ErrWorkflowConflict
+	return workflowstate.ErrConflict
 }
 
 func (s *WorkflowStore) checkWorkflowLaneRegistration(ctx context.Context, lane WorkflowLane) error {
 	if !validWorkflowLane(lane) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	common, err := workflowRepositoryDirectory(ctx, s.layout.ProjectDir())
@@ -176,7 +179,7 @@ func (s *WorkflowStore) checkWorkflowLaneRegistration(ctx context.Context, lane 
 
 	actual, err := workflowRepositoryDirectory(ctx, lane.Worktree)
 	if err != nil || actual != common {
-		return fmt.Errorf("%w: lane belongs to a different coordinator", ErrWorkflowConflict)
+		return fmt.Errorf("%w: lane belongs to a different coordinator", workflowstate.ErrConflict)
 	}
 
 	entries, err := (OSWorktreeGit{}).WorktreeList(ctx, s.layout.ProjectDir())
@@ -190,7 +193,7 @@ func (s *WorkflowStore) checkWorkflowLaneRegistration(ctx context.Context, lane 
 		}
 	}
 
-	return fmt.Errorf("%w: lane branch or worktree registration changed", ErrWorkflowConflict)
+	return fmt.Errorf("%w: lane branch or worktree registration changed", workflowstate.ErrConflict)
 }
 
 func validWorkflowLane(lane WorkflowLane) bool {

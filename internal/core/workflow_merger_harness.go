@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowMergerBrokerProtocol = "chr-merger-broker/v1"
@@ -81,12 +83,12 @@ func (s *WorkflowStore) checkWorkflowMergerHarness(ctx context.Context, input Wo
 
 func checkWorkflowMergerExecutable(command []string, hash string) error {
 	if !validWorkflowMergerCommand(command) || !filepath.IsAbs(command[0]) || !validWorkflowNativeFingerprint(hash) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	path, err := filepath.EvalSymlinks(command[0])
 	if err != nil || path != command[0] {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	file, err := os.Open(path)
@@ -101,7 +103,7 @@ func checkWorkflowMergerExecutable(command []string, hash string) error {
 
 	actual, err := workflowMergerFileHash(file)
 	if err != nil || actual != hash {
-		return fmt.Errorf("%w: certified merger driver changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: certified merger driver changed", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -110,7 +112,7 @@ func checkWorkflowMergerExecutable(command []string, hash string) error {
 func encodeWorkflowMergerAttempt(attempt WorkflowMergerAttempt) ([]byte, error) {
 	data, err := json.MarshalIndent(attempt, "", "  ")
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	return append(data, '\n'), nil
@@ -118,7 +120,7 @@ func encodeWorkflowMergerAttempt(attempt WorkflowMergerAttempt) ([]byte, error) 
 
 func checkWorkflowMergerCertificate(certificate WorkflowMergerHarnessCertificate, command []string) error {
 	if certificate.SchemaVersion != 1 || certificate.Protocol != workflowMergerBrokerProtocol || !certificate.BuiltinToolsDisabled || !slices.Equal(certificate.Command, command) || !validWorkflowNativeFingerprint(certificate.CapabilityRevision) {
-		return fmt.Errorf("%w: certified broker-only merger driver required", ErrWorkflowConflict)
+		return fmt.Errorf("%w: certified broker-only merger driver required", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -135,7 +137,7 @@ func checkWorkflowMergerTokenCapability(input WorkflowMergerInput, certificate W
 func checkWorkflowMergerExecutableMode(file *os.File) error {
 	info, err := file.Stat()
 	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o111 == 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

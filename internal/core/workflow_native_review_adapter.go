@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowNativeReviewAdapter connects existing remote observation to the
@@ -39,7 +42,7 @@ func (adapter *WorkflowNativeReviewAdapter) WorkflowIntegrationCapability(ctx co
 
 	identity, err := adapter.readWorkflowNativeIdentity(ctx, pr)
 	if err != nil || identity != policy.APIIdentityFingerprint {
-		return WorkflowPublicationCapability{}, fmt.Errorf("%w: publisher identity changed", ErrWorkflowConflict)
+		return WorkflowPublicationCapability{}, fmt.Errorf("%w: publisher identity changed", workflowstate.ErrConflict)
 	}
 
 	host, err := json.Marshal(policy)
@@ -47,7 +50,7 @@ func (adapter *WorkflowNativeReviewAdapter) WorkflowIntegrationCapability(ctx co
 		return WorkflowPublicationCapability{}, err
 	}
 
-	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, Revision: workflowHash(append(host, data...)), AtomicSourceBase: true, ExactResult: true}, nil
+	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, data...)), AtomicSourceBase: true, ExactResult: true}, nil
 }
 
 // WorkflowPreparedNativeCapability observes the actual receive-pack server for
@@ -76,7 +79,7 @@ func (adapter *WorkflowNativeReviewAdapter) WorkflowPreparedNativeCapability(ctx
 	}
 
 	if proof.SourceCommit != run.PullRequest.SourceCommit {
-		return WorkflowNativeCapability{}, ErrWorkflowConflict
+		return WorkflowNativeCapability{}, workflowstate.ErrConflict
 	}
 
 	query := WorkflowNativeCapabilityRequest{Config: config.Work.Integration, PullRequest: pr, Publication: request}
@@ -94,7 +97,7 @@ func (adapter *WorkflowNativeReviewAdapter) PublishWorkflowGit(ctx context.Conte
 
 	ownership, err := workflowNativeOwnershipRevision(run, profile)
 	if err != nil || request.OwnershipRevision != ownership || request.SourceRef != run.Lane.Branch || request.TargetRef != profile.TargetRef || request.Git.SourceCommit != run.PullRequest.SourceCommit {
-		return WorkflowGitPublicationResult{}, ErrWorkflowConflict
+		return WorkflowGitPublicationResult{}, workflowstate.ErrConflict
 	}
 
 	config, err := LoadWorkspaceConfig(owner.layout.ProjectDir())

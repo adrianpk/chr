@@ -3,12 +3,14 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) checkWorkflowNativeSubmissionEvidence(ctx context.Context, submission WorkflowSubmission) error {
 	native := submission.Native
 	if native == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var candidate WorkflowIntegrationCandidate
@@ -17,7 +19,7 @@ func (s *WorkflowStore) checkWorkflowNativeSubmissionEvidence(ctx context.Contex
 	}
 
 	if !workflowNativeSubmissionCandidateMatches(submission, candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowNativeCandidate(candidate); err != nil {
@@ -44,7 +46,7 @@ func (s *WorkflowStore) checkWorkflowNativeSubmissionReview(submission WorkflowS
 	}
 
 	if review.Decision.BindingHash != submission.Guard.ReviewHash || review.Decision.Result.Decision != IntegrationReviewDecisionPass {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -102,7 +104,7 @@ func (s *WorkflowStore) checkWorkflowNativeAdvertisement(submission WorkflowSubm
 	}
 
 	if advertisement.SourceCommit != native.OriginalSource || advertisement.TargetCommit != native.ValidatedBase || advertisement.Fingerprint != capability.ServerCapabilityFingerprint {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -121,7 +123,7 @@ func (s *WorkflowStore) checkWorkflowNativeCommands(submission WorkflowSubmissio
 
 	expected := workflowNativeCommandManifest(submission)
 	if manifest != expected {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -142,7 +144,7 @@ func (s *WorkflowStore) checkWorkflowNativeResponse(submission WorkflowSubmissio
 		}
 
 		if !validWorkflowNativeResponse(*native, response) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := s.checkWorkflowNativeTransactionRevision(WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding}, response); err != nil {
@@ -182,7 +184,7 @@ func (s *WorkflowStore) checkWorkflowNativeJournalObservations(submission Workfl
 		}
 
 		if !workflowNativeJournalObservationMatches(*native, observation) || !s.workflowNativeCanonicalObservationValid(submission, observation) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if observation.Git == nil {
@@ -190,7 +192,7 @@ func (s *WorkflowStore) checkWorkflowNativeJournalObservations(submission Workfl
 		}
 
 		if !workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, *observation.Git) || observation.Git.HistoryHash != submission.Guard.Git.HistoryHash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := validateWorkflowIntegrationProof(observation.Git.WorkflowIntegrationQuery, *observation.Git); err != nil {
@@ -217,7 +219,7 @@ func workflowNativeJournalObservationMatches(native WorkflowNativeSubmission, ob
 func (s *WorkflowStore) checkWorkflowNativeAppliedEvidence(submission WorkflowSubmission) error {
 	native := submission.Native
 	if native.TransportResponseRef == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var result WorkflowGitPublicationResult
@@ -228,7 +230,7 @@ func (s *WorkflowStore) checkWorkflowNativeAppliedEvidence(submission WorkflowSu
 	receipt := WorkflowNativeReceipt{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding}
 	if !validWorkflowNativeReceiptTransaction(receipt, result) {
 		if result.State != "unknown" || !result.CommandsSent || !s.workflowNativeGitApplied(submission) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -238,7 +240,7 @@ func (s *WorkflowStore) checkWorkflowNativeAppliedEvidence(submission WorkflowSu
 func (s *WorkflowStore) checkWorkflowNativeNonApplication(_ context.Context, submission WorkflowSubmission) error {
 	native := submission.Native
 	if native.NonApplicationRef == nil || native.DispatchState != "quiescent" || native.DispatchIdentity == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	alive, err := workflowProcessAlive(*native.DispatchIdentity)
@@ -260,7 +262,7 @@ func (s *WorkflowStore) checkWorkflowNativeNonApplication(_ context.Context, sub
 	}
 
 	if !validWorkflowNativeNonApplication(submission, proof) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -292,7 +294,7 @@ func (s *WorkflowStore) applyWorkflowNativeSubmissionEvidence(ctx context.Contex
 
 	if native.ReceiptRef != nil {
 		if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return s.confirmWorkflowNativeSubmission(ctx, submission)
@@ -314,7 +316,7 @@ func (s *WorkflowStore) confirmWorkflowNativeSubmission(_ context.Context, submi
 	}
 
 	if !workflowNativeSubmissionReceiptMatches(*submission, record) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowNativeReceipt(record); err != nil {
@@ -325,7 +327,7 @@ func (s *WorkflowStore) confirmWorkflowNativeSubmission(_ context.Context, submi
 
 	ref := record.Receipt.Native.ObservationRefs[len(record.Receipt.Native.ObservationRefs)-1]
 	if !slices.Contains(native.ObservationRefs, ref) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &observation); err != nil {

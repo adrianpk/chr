@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io"
 	"os"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedHostPage is a bounded inventory for a managed host, across namespaces.
@@ -18,7 +20,7 @@ type GuidedHostPage struct {
 // a page. Only the managed lifecycle calls this mutating recovery operation.
 func RecoverGuidedHostPage(ctx context.Context, root, project string, offset, limit int) (page GuidedHostPage, err error) {
 	if offset < 0 || offset > WorkflowRecordLimit || limit < 1 || limit > WorkflowPageLimit {
-		return page, ErrWorkflowConflict
+		return page, workflowstate.ErrConflict
 	}
 
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {

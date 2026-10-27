@@ -1,6 +1,10 @@
 package core
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+)
 
 func workflowMergerTokenSettlement(reservation *WorkflowIntegrationReservation, result WorkflowMergerAttempt) (workflowFileChange, error) {
 	usage := result.TrustedUsage
@@ -21,7 +25,7 @@ func workflowMergerTokenSettlement(reservation *WorkflowIntegrationReservation, 
 
 	path := "run/" + result.Input.InvocationID + "/evidence/merger-usage-" + reservation.AttemptID + ".json"
 	reservation.State, reservation.ReportedInput, reservation.ReportedOutput = "settled", usage.Input, usage.Output
-	reservation.SettlementProof = &WorkflowEvidenceRef{Path: path, Hash: workflowHash(data)}
+	reservation.SettlementProof = &WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(data)}
 
 	return workflowFileChange{Path: path, After: data}, validateWorkflowIntegrationReservation(*reservation)
 }

@@ -5,6 +5,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type quizActionReceipt struct {
@@ -29,7 +32,7 @@ func (r *fileAuthoringSessionRepository) quizActionDigest(request QuizActionRequ
 		return "", err
 	}
 
-	return workflowHash(append([]byte(root+"\x00quiz\x00"+paths.RawRelativePath+"\x00"), encoded...)), nil
+	return contenthash.Sum(append([]byte(root+"\x00quiz\x00"+paths.RawRelativePath+"\x00"), encoded...)), nil
 }
 
 func quizReceiptChange(digest string, result QuizActionResult) (workflowFileChange, error) {
@@ -40,7 +43,7 @@ func quizReceiptChange(digest string, result QuizActionResult) (workflowFileChan
 		return workflowFileChange{}, err
 	}
 
-	receipt.Checksum = workflowHash(encoded)
+	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
 	return workflowFileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
@@ -70,8 +73,8 @@ func (r *fileAuthoringSessionRepository) quizReceipt(operationID, digest string)
 		return receipt.Result, false, err
 	}
 
-	if receipt.Schema != "chr-quiz-action/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || workflowHash(encoded) != checksum {
-		return receipt.Result, false, ErrWorkflowConflict
+	if receipt.Schema != "chr-quiz-action/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || contenthash.Sum(encoded) != checksum {
+		return receipt.Result, false, workflowstate.ErrConflict
 	}
 
 	receipt.Result.State.Revision = receipt.Revision

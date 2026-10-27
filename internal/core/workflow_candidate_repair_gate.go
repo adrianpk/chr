@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) resumeWorkflowCandidateRepairGate(ctx context.Context, run *workflowInvocationFile, source WorkflowReviewInput) error {
 	if run.Integration == nil {
@@ -70,12 +74,12 @@ func (s *WorkflowStore) prepareWorkflowCandidateRepairGit(ctx context.Context, r
 
 	repaired, ok := git.(WorkflowRepairedPreparationGit)
 	if !ok {
-		return WorkflowIntegrationProof{}, nil, ErrWorkflowConflict
+		return WorkflowIntegrationProof{}, nil, workflowstate.ErrConflict
 	}
 
 	proof, err := repaired.PrepareWorkflowRepairedIntegration(ctx, query, *state)
 	if err == nil && !workflowNativeJSONEqual(proof, *state.Result) {
-		err = ErrWorkflowConflict
+		err = workflowstate.ErrConflict
 	}
 
 	return proof, refs, err

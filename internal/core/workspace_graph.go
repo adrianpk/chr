@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // WorkspaceNodeKind defines a package boundary type.
@@ -150,7 +152,7 @@ func (b WorkspaceGraphBuilder) loadProject(ctx context.Context, graph *Workspace
 		Title:        metadata.Name,
 		Name:         metadata.Name,
 		Description:  metadata.Description,
-		SourceHash:   contentHash(content),
+		SourceHash:   contenthash.Sum(content),
 		ModifiedAt:   info.ModTime().UTC(),
 		Size:         info.Size(),
 	}
@@ -188,7 +190,7 @@ func (b WorkspaceGraphBuilder) loadCases(ctx context.Context, graph *WorkspaceGr
 			Title:        metadata.Name,
 			Name:         metadata.Name,
 			Description:  metadata.Description,
-			SourceHash:   contentHash(content),
+			SourceHash:   contenthash.Sum(content),
 			ModifiedAt:   info.ModTime().UTC(),
 			Size:         info.Size(),
 		})
@@ -328,7 +330,7 @@ func (b WorkspaceGraphBuilder) documentNode(path string) (WorkspaceNode, error) 
 			unquoteMetadataString(fields["curated_path"]),
 		),
 		CaseSlug:   documentCaseSlug(fields),
-		SourceHash: contentHash(content),
+		SourceHash: contenthash.Sum(content),
 		ModifiedAt: info.ModTime().UTC(),
 		Size:       info.Size(),
 	}, nil
@@ -350,7 +352,7 @@ func (b WorkspaceGraphBuilder) ticketNode(path string, info os.FileInfo, content
 		Title:        firstNonEmpty(unquoteMetadataString(metadata["title"]), filepath.Base(path)),
 		Status:       unquoteMetadataString(metadata["status"]),
 		CaseSlug:     unquoteMetadataString(metadata["use_case"]),
-		SourceHash:   contentHash(content),
+		SourceHash:   contenthash.Sum(content),
 		ModifiedAt:   info.ModTime().UTC(),
 		Size:         info.Size(),
 	}, nil

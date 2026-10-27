@@ -4,13 +4,15 @@ import (
 	"context"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ControlWorkflowDecision replays a completed request before checking mutable
 // revisions. New effects and their receipt share the existing native journal.
 func (s *WorkflowStore) ControlWorkflowDecision(ctx context.Context, request WorkflowControlMutationRequest, provider WorkflowPullRequestProvider, check WorkflowAdmissionCheck) (result WorkflowControlResult, err error) {
 	if !slices.Contains([]string{"approve", "grant", "answer_decision"}, request.Action) {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	request, digest, err := freezeWorkflowControlMutation(request)
@@ -76,17 +78,17 @@ func (s *WorkflowStore) applyWorkflowDecisionControl(ctx context.Context, run wo
 
 		return err
 	default:
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 }
 
 func validateWorkflowControlGrant(request WorkflowControlMutationRequest) error {
 	if request.Integration == nil || request.Grant == nil || request.Answer != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.Grant.ID != request.Binding.RequestID || request.Grant.Actor != request.Binding.Operator {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -94,11 +96,11 @@ func validateWorkflowControlGrant(request WorkflowControlMutationRequest) error 
 
 func validateWorkflowControlAnswer(request WorkflowControlMutationRequest) error {
 	if request.Integration == nil || request.Answer == nil || request.Grant != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.Answer.ID != request.Binding.RequestID || request.Answer.Actor != request.Binding.Operator {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

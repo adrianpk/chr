@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMergerCheckpointGuards rejects altered checkpoint images and actual
@@ -46,7 +48,7 @@ func TestNativeMergerCheckpointBinding(t *testing.T) {
 	}
 
 	request.Input = input
-	if _, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale checkpoint binding accepted", err)
 	}
 }

@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) retainWorkflowSubmissionResponse(ctx context.Context, id, submissionID string, response WorkflowSubmissionResponse, submitErr error) (submission WorkflowSubmission, err error) {
@@ -64,7 +66,7 @@ func (s *WorkflowStore) finishWorkflowSubmissionObservation(ctx context.Context,
 
 		submission = journal.Attempts[len(journal.Attempts)-1]
 		if submission.ID != observed.ID {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if readErr := owner.retainWorkflowSubmissionObservation(ctx, &journal, observed); readErr != nil {

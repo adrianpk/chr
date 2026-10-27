@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"errors"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrGuidedControlRejected marks a native rejection whose missing receipt was
@@ -40,7 +42,7 @@ func boundedGuidedControls(control *GuidedControlState) bool {
 func ApplyGuidedUseCaseControl(ctx context.Context, root string, command GuidedUseCaseCommand, apply GuidedUseCaseStep) (session AuthoringSession, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil || apply == nil {
-		return session, errors.Join(ErrWorkflowConflict, err)
+		return session, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	r := &fileAuthoringSessionRepository{projectDir: root}

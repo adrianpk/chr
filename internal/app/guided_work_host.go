@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const guidedHostActivationLimit = 16
@@ -82,7 +83,7 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 }
 
 func guidedHostFailure(err error) bool {
-	return err != nil && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) && !errors.Is(err, core.ErrWorkflowConflict) && !errors.Is(err, core.ErrGuidedUseCaseStopped) && !errors.Is(err, core.ErrWorkflowStop)
+	return err != nil && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, core.ErrGuidedUseCaseStopped) && !errors.Is(err, core.ErrWorkflowStop)
 }
 
 func (host *guidedWorkHost) release(key string) {
@@ -102,7 +103,7 @@ func (host *guidedWorkHost) run(operations service, id string) error {
 
 		run, err := operations.ReadWorkflow(host.ctx, id)
 		if err != nil || run.Admission == nil || run.Admission.Guided == nil {
-			return errors.Join(err, core.ErrWorkflowConflict)
+			return errors.Join(err, workflowstate.ErrConflict)
 		}
 
 		check := func(ctx context.Context) error { return operations.checkGuidedActivation(ctx, run) }

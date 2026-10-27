@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // Receiver and notification admissions contend for the same final 2 MiB on
@@ -24,10 +26,10 @@ func TestTelegramPresentationFailureSharedQuota(t *testing.T) {
 
 	input := telegramNotificationTestInput(t)
 	input.Document.Payload = bytes.Repeat([]byte("n"), telegramDocumentLimit)
-	input.Document.SourceHash = workflowHash(input.Document.Payload)
+	input.Document.SourceHash = contenthash.Sum(input.Document.Payload)
 	response := telegramTestDocumentResponse()
 	response.Document.Payload = bytes.Repeat([]byte("r"), telegramDocumentLimit)
-	response.Document.SourceHash = workflowHash(response.Document.Payload)
+	response.Document.SourceHash = contenthash.Sum(response.Document.Payload)
 
 	ready, results := make(chan struct{}), make(chan error, 2)
 	go func() { <-ready; results <- repository.CreateTelegramNotification(t.Context(), input) }()
@@ -124,7 +126,7 @@ func TestTelegramPresentationNotificationRetention(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	checkTelegramNotificationRetention(t, repository, workflowHash(input.Document.Payload))
+	checkTelegramNotificationRetention(t, repository, contenthash.Sum(input.Document.Payload))
 }
 
 func finishTelegramNotificationRetention(t *testing.T, repository NotificationEventRepository, input TelegramNotificationInput, index int, old, now time.Time) {

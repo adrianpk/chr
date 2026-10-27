@@ -2,6 +2,8 @@ package core
 
 import (
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeProfileConfig keeps publication opt-in independent of version and
@@ -81,7 +83,7 @@ func TestNativeLegacySnapshot(t *testing.T) {
 	}
 
 	enabled := []byte("review:\n  mode: human_review\nwork:\n  integration:\n    publication_profile: git_atomic_dual_ref\n")
-	prior.Revision = workflowHash(enabled)
+	prior.Revision = contenthash.Sum(enabled)
 
 	if err := checkWorkflowUpgradePolicy(enabled, prior); err == nil {
 		t.Fatal("legacy snapshot silently admitted enabled publication")

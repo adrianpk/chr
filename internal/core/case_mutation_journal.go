@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type caseMutationJournal struct {
@@ -22,7 +25,7 @@ func (s CaseMetadataService) commitCaseMutation(request CaseMutationRequest, dig
 	}
 
 	content := []byte(RenderCaseMetadata(metadata))
-	metadata.SourceHash, metadata.Exists = contentHash(content), true
+	metadata.SourceHash, metadata.Exists = contenthash.Sum(content), true
 	result := CaseMutationResult{Metadata: metadata, ReceiptRef: caseMutationReceiptRef(request.Binding.RequestID), ArgumentDigest: digest}
 	receipt := caseMutationReceipt{Schema: "chr-case-mutation/v1", Request: request, Result: result}
 
@@ -31,7 +34,7 @@ func (s CaseMetadataService) commitCaseMutation(request CaseMutationRequest, dig
 		return result, err
 	}
 
-	receipt.Checksum = workflowHash(encoded)
+	receipt.Checksum = contenthash.Sum(encoded)
 
 	encoded, err = json.Marshal(receipt)
 	if err != nil {
@@ -73,7 +76,7 @@ func (s CaseMetadataService) writeCaseMutationJournal(journal caseMutationJourna
 		return err
 	}
 
-	journal.Checksum = workflowHash(encoded)
+	journal.Checksum = contenthash.Sum(encoded)
 
 	encoded, err = json.Marshal(journal)
 	if err != nil {
@@ -142,7 +145,7 @@ func (s CaseMetadataService) checkCaseJournal(journal caseMutationJournal) error
 		return err
 	}
 
-	if journal.Schema != "chr-case-journal/v1" || len(journal.Changes) != 2 || checksum != workflowHash(data) {
+	if journal.Schema != "chr-case-journal/v1" || len(journal.Changes) != 2 || checksum != contenthash.Sum(data) {
 		return errors.New("invalid case mutation journal")
 	}
 
@@ -174,12 +177,12 @@ func (s CaseMetadataService) caseJournalImage(change workflowFileChange) (bool, 
 		return false, err
 	}
 
-	if workflowHash(data) == workflowHash(change.After) {
+	if contenthash.Sum(data) == contenthash.Sum(change.After) {
 		return true, nil
 	}
 
-	if workflowHash(data) != change.Before {
-		return false, fmt.Errorf("%w: case image diverged", ErrWorkflowConflict)
+	if contenthash.Sum(data) != change.Before {
+		return false, fmt.Errorf("%w: case image diverged", workflowstate.ErrConflict)
 	}
 
 	return false, nil
@@ -221,12 +224,12 @@ func validateCaseMutationReceipt(receipt caseMutationReceipt, request CaseMutati
 		return err
 	}
 
-	if receipt.Schema != "chr-case-mutation/v1" || checksum != workflowHash(data) || receipt.Result.ArgumentDigest != digest {
-		return fmt.Errorf("%w: case receipt changed", ErrWorkflowConflict)
+	if receipt.Schema != "chr-case-mutation/v1" || checksum != contenthash.Sum(data) || receipt.Result.ArgumentDigest != digest {
+		return fmt.Errorf("%w: case receipt changed", workflowstate.ErrConflict)
 	}
 
 	if receipt.Request.ProjectID != request.ProjectID || receipt.Request.Namespace != request.Namespace || receipt.Request.Binding != request.Binding || receipt.Result.ReceiptRef != caseMutationReceiptRef(request.Binding.RequestID) {
-		return fmt.Errorf("%w: case receipt scope changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: case receipt scope changed", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -240,7 +243,7 @@ func (s CaseMetadataService) confirmCaseMutation(journal caseMutationJournal) er
 		}
 
 		if !applied {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -259,11 +262,11 @@ func (s CaseMetadataService) guardNewCaseMutation(metadata CaseMetadata) error {
 	}
 
 	if err != nil {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
-	if !metadata.Exists || contentHash(data) != metadata.SourceHash || metadata.Slug != caseSlugFromPath(path) {
-		return ErrWorkflowConflict
+	if !metadata.Exists || contenthash.Sum(data) != metadata.SourceHash || metadata.Slug != caseSlugFromPath(path) {
+		return workflowstate.ErrConflict
 	}
 
 	return nil

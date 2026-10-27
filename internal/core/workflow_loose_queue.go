@@ -5,6 +5,8 @@ import (
 	"maps"
 	"reflect"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowLooseQueue retains admission order independently of live pending order.
@@ -32,13 +34,13 @@ func validateWorkflowLooseQueue(run workflowInvocationFile) error {
 	}
 
 	if !validWorkflowLooseQueueBounds(run) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	keys := map[string]bool{}
 	for _, key := range queue.Admitted {
 		if key == "" || keys[key] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		keys[key] = true
@@ -46,7 +48,7 @@ func validateWorkflowLooseQueue(run workflowInvocationFile) error {
 
 	for _, member := range run.Members {
 		if !keys[member.Admission.Key] || member.Admission.SetID != "" || member.Admission.SliceID != "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -62,7 +64,7 @@ func validWorkflowLooseQueueBounds(run workflowInvocationFile) bool {
 func validateWorkflowLooseExclusions(queue *WorkflowLooseQueue, keys map[string]bool) error {
 	for key, reason := range queue.Excluded {
 		if !keys[key] || !slices.Contains([]string{"status_mismatch", "filter_mismatch", "below_minimum", "integrated"}, reason) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

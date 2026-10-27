@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowOrderFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationResult, WorkflowTrackerStatus) {
@@ -102,7 +105,7 @@ func TestWorkflowOrderStructure(t *testing.T) {
 		t.Fatal("structural title missing from map", source, err)
 	}
 
-	if _, err := store.Write(t.Context(), changed, changed.Revision); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.Write(t.Context(), changed, changed.Revision); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unapproved structural write accepted", err)
 	}
 
@@ -124,7 +127,7 @@ func TestWorkflowOrderEdited(t *testing.T) {
 		t.Fatal("edited output replaced", err)
 	}
 
-	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: workflowHash(edited)})
+	repaired, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: contenthash.Sum(edited)})
 	if err != nil || !repaired.GeneratedAt.Equal(first.GeneratedAt) {
 		t.Fatal("repair lost structural generation time", repaired, err)
 	}

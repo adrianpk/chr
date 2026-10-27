@@ -11,7 +11,9 @@ import (
 	"slices"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramAction binds one prompt to immutable prepared input and an exact peer.
@@ -80,7 +82,7 @@ func readTelegramAction(ctx context.Context, reader telegramConversationReader, 
 }
 
 func telegramActionGuard(request TelegramOperationRequest) string {
-	return workflowHash([]byte(request.ArgumentDigest + ":" + workflowHash(request.PreparedInput)))
+	return contenthash.Sum([]byte(request.ArgumentDigest + ":" + contenthash.Sum(request.PreparedInput)))
 }
 
 func validateTelegramActionOffer(offer TelegramActionOffer, now time.Time) error {
@@ -124,11 +126,11 @@ func readTelegramOperationID(ctx context.Context, reader telegramConversationRea
 func validateTelegramActionTarget(op telegramConversationTransaction, request TelegramOperationRequest) error {
 	user, ok := op.input.Config.AuthorizedUser(op.input.Update.Peer.ChatID, op.input.Update.Peer.TopicID, op.input.Update.Peer.UserID, op.input.Update.ChatType)
 	if !ok || user.OperatorID != request.Operator || request.Source.Peer != op.input.Update.Peer {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.Target.ConversationID == "" || request.Target.ConversationRevision <= 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	conversation, err := op.conversation(request.Target.ConversationID)
@@ -141,20 +143,20 @@ func validateTelegramActionTarget(op telegramConversationTransaction, request Te
 	}
 
 	if slices.Contains([]string{"completed", "canceled", "failed"}, conversation.Phase) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return op.validateTarget(conversation)
 }
 
 func telegramActionUnavailable(err error) bool {
-	return errors.Is(err, sql.ErrNoRows) || errors.Is(err, ErrWorkflowConflict) || errors.Is(err, ErrTelegramActionUnavailable)
+	return errors.Is(err, sql.ErrNoRows) || errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrTelegramActionUnavailable)
 }
 
 func telegramActionTargetConflict(err error) bool {
 	var diagnostic telegramConversationDiagnostic
 
-	return errors.Is(err, ErrWorkflowConflict) || errors.As(err, &diagnostic)
+	return errors.Is(err, workflowstate.ErrConflict) || errors.As(err, &diagnostic)
 }
 
 func telegramActionOfferHasView(offer TelegramActionOffer) bool {

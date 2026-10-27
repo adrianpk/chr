@@ -5,6 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowLooseBlockedFixture(t *testing.T) workflowIntegrationFixture {
@@ -40,7 +42,7 @@ func workflowLooseDependency(t *testing.T, store *WorkflowStore, key, dependency
 	}
 
 	record.Task.DependsOn, record.Domain["execution_contract"] = contract.DependsOn, data
-	record.Task.ContractHash = workflowHash(append([]byte("\x00\x00"), data...))
+	record.Task.ContractHash = contenthash.Sum(append([]byte("\x00\x00"), data...))
 	workflowTestWrite(t, store, record)
 }
 

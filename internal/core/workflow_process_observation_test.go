@@ -4,6 +4,8 @@ import (
 	"os"
 	"syscall"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowProcessObservation covers the kernel's two process-exit errors,
@@ -17,7 +19,7 @@ func TestWorkflowProcessObservation(t *testing.T) {
 		{"removed entry", os.ErrNotExist, true},
 		{"exit during read", &os.PathError{Op: "read", Path: "/proc/123/stat", Err: syscall.ESRCH}, true},
 		{"unreadable entry", os.ErrPermission, false},
-		{"invalid entry", ErrWorkflowConflict, false},
+		{"invalid entry", workflowstate.ErrConflict, false},
 		{"observed entry", nil, false},
 	}
 	for _, test := range cases {

@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Apply re-observes source membership, body, metadata and project identity inside
@@ -36,7 +38,7 @@ func TestProjectDumpReconcileStale(t *testing.T) {
 			}
 
 			before := projectDumpTestImage(t, project)
-			if _, err := ReconcileProjectDump(t.Context(), project, request); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := ReconcileProjectDump(t.Context(), project, request); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale confirmation accepted", err)
 			}
 
@@ -128,7 +130,7 @@ func TestProjectDumpReconcileDivergence(t *testing.T) {
 	path := filepath.Join(project, filepath.FromSlash(preview.Destination))
 	writeTestFile(t, path, "Independent edit.\n")
 
-	if _, err := ReconcileProjectDump(t.Context(), project, request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ReconcileProjectDump(t.Context(), project, request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("divergent recovery accepted", err)
 	}
 

@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+)
 
 func (s *WorkflowStore) replaceWorkflowNativePreparation(ctx context.Context, run *workflowInvocationFile, entry WorkflowIntegrationEntry, previous WorkflowPreparationInput, source WorkflowReviewInput) error {
 	next, err := s.workflowNativeReplacementEntry(ctx, *run, entry)
@@ -29,7 +33,7 @@ func (s *WorkflowStore) replaceWorkflowNativePreparation(ctx context.Context, ru
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: next.ID, Unit: next.Unit, Revision: next.Revision, EntryRef: WorkflowEvidenceRef{Path: queueFile.Path, Hash: workflowHash(queueFile.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: next.ID, Unit: next.Unit, Revision: next.Revision, EntryRef: WorkflowEvidenceRef{Path: queueFile.Path, Hash: contenthash.Sum(queueFile.After)}})
 	staleWorkflowNativePreparation(run)
 	projectWorkflowIntegrationPhase(run, next)
 
@@ -80,7 +84,7 @@ func workflowNativeReplacementTransition(entry WorkflowIntegrationEntry, state s
 }
 
 func reserveWorkflowNativeDrift(budget *WorkflowIntegrationBudget, entry WorkflowIntegrationEntry, base string) error {
-	id := workflowHash([]byte(entry.ID + ":drift:" + base))
+	id := contenthash.Sum([]byte(entry.ID + ":drift:" + base))
 
 	reservation := WorkflowIntegrationReservation{ID: id, Kind: "drift", EntryID: entry.ID, Unit: entry.Unit, ClaimGeneration: entry.ClaimGeneration, AttemptID: id, BaseCommit: base, State: "reserved"}
 	if workflowIntegrationBaseCharged(budget.Reservations, reservation) {

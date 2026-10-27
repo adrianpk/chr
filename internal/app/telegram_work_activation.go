@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramWorkCompletion struct {
@@ -43,7 +44,7 @@ func (r telegramReceiver) resumeWorkReference(ctx context.Context, ref core.Tele
 	}
 
 	if admission.Invocation.ID != ref.Invocation.ID || admission.RequestKey == "" || admission.Selector != preview.Request.Selector {
-		return RetainedWorkProgress{}, core.ErrWorkflowConflict
+		return RetainedWorkProgress{}, workflowstate.ErrConflict
 	}
 
 	check := func(ctx context.Context) error { return r.validateWorkReference(ctx, ref) }
@@ -82,7 +83,7 @@ func (r telegramReceiver) completeWorkActivation(ctx context.Context, result tel
 
 	ref := result.Reference
 	if status.ID != ref.Invocation.ID || status.ProjectID != ref.Request.Target.ProjectID || status.Namespace != ref.Request.Target.Namespace {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return r.projectWorkProgress(ctx, ref, status)
@@ -94,7 +95,7 @@ func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref core.Tele
 			return ctx.Err()
 		}
 
-		if errors.Is(err, core.ErrWorkflowConflict) {
+		if errors.Is(err, workflowstate.ErrConflict) {
 			return nil
 		}
 
@@ -120,7 +121,7 @@ func telegramWorkActivationCode(err error) string {
 		return "current_owner"
 	case errors.Is(err, core.ErrWorkflowCapacity):
 		return "waiting_capacity"
-	case errors.Is(err, core.ErrWorkflowConflict):
+	case errors.Is(err, workflowstate.ErrConflict):
 		return "binding_changed"
 	default:
 		return "native_work_unavailable"

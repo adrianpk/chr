@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowSliceRepairPurpose = "slice_repair"
@@ -22,7 +24,7 @@ func (s *WorkflowStore) RepairWorkflowSlice(ctx context.Context, id, taskKey str
 		restoreWorkflowCapacityWait(&run)
 
 		if run.CandidateRepair != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if !workflowSliceRepairReady(run.WorkflowInvocation) || run.StopIntent != "" {

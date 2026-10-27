@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowUpgradeFixture(t *testing.T, body string) (*WorkflowStore, WorkflowUpgradeOptions) {
@@ -125,7 +127,7 @@ func checkWorkflowUpgradeUnrelated(t *testing.T, store *WorkflowStore, result Wo
 	}
 
 	historical, err := os.ReadFile(filepath.Join(store.layout.Root(), history.Path))
-	if err != nil || workflowHash(historical) != history.SourceHash {
+	if err != nil || contenthash.Sum(historical) != history.SourceHash {
 		t.Fatal("unselected history changed", err)
 	}
 }
@@ -152,7 +154,7 @@ func TestWorkflowUpgradeAdoption(t *testing.T) {
 	checkWorkflowUpgradeSnapshot(t, store, opts, result)
 
 	data, err := os.ReadFile(filepath.Join(store.layout.Root(), history.Path))
-	if err != nil || workflowHash(data) != history.SourceHash {
+	if err != nil || contenthash.Sum(data) != history.SourceHash {
 		t.Fatal("upgrade converted unselected history", err)
 	}
 }
@@ -213,7 +215,7 @@ func TestWorkflowUpgradeAmbiguous(t *testing.T) {
 			store, selection := workflowPlanAdoptionFixture(t)
 			tc.change(t, store, &selection)
 
-			opts := WorkflowUpgradeOptions{ExpectedRevision: workflowHash(nil), StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
+			opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
 			if _, err := store.UpgradeWorkflowConfiguration(t.Context(), opts); err == nil {
 				t.Fatal("ambiguous upgrade accepted")
 			}

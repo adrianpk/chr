@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"syscall"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Broker messages are the entire model tool surface. Only scoped file operations
@@ -39,18 +41,18 @@ func (tools *workflowMergerTools) apply(ctx context.Context, request workflowMer
 	}
 
 	if request.Result != nil || request.Usage != nil {
-		return workflowMergerToolResponse{}, ErrWorkflowConflict
+		return workflowMergerToolResponse{}, workflowstate.ErrConflict
 	}
 
 	if request.Operation == "check" {
 		// Executing repaired code without a separate command sandbox would bypass
 		// the broker's path and credential boundary. Host gates run after diff
 		// acceptance; a proposal never grants an unrestricted validation process.
-		return workflowMergerToolResponse{}, fmt.Errorf("%w: local validation process is not granted", ErrWorkflowConflict)
+		return workflowMergerToolResponse{}, fmt.Errorf("%w: local validation process is not granted", workflowstate.ErrConflict)
 	}
 
 	if request.Check != nil || !workflowMergerPathAllowed(tools.input, request.Path) {
-		return workflowMergerToolResponse{}, ErrWorkflowConflict
+		return workflowMergerToolResponse{}, workflowstate.ErrConflict
 	}
 
 	if err := tools.checkPath(request.Path); err != nil {
@@ -64,7 +66,7 @@ func (tools *workflowMergerTools) file(request workflowMergerToolRequest) (workf
 	switch request.Operation {
 	case "read":
 		if request.Content != "" {
-			return workflowMergerToolResponse{}, ErrWorkflowConflict
+			return workflowMergerToolResponse{}, workflowstate.ErrConflict
 		}
 
 		return tools.read(request.Path)
@@ -72,12 +74,12 @@ func (tools *workflowMergerTools) file(request workflowMergerToolRequest) (workf
 		return workflowMergerToolResponse{}, tools.write(request.Path, request.Content)
 	case "delete":
 		if request.Content != "" {
-			return workflowMergerToolResponse{}, ErrWorkflowConflict
+			return workflowMergerToolResponse{}, workflowstate.ErrConflict
 		}
 
 		return workflowMergerToolResponse{}, tools.root.Remove(request.Path)
 	default:
-		return workflowMergerToolResponse{}, fmt.Errorf("%w: merger tool is not permitted", ErrWorkflowConflict)
+		return workflowMergerToolResponse{}, fmt.Errorf("%w: merger tool is not permitted", workflowstate.ErrConflict)
 	}
 }
 
@@ -94,7 +96,7 @@ func (tools *workflowMergerTools) checkPath(path string) error {
 		}
 
 		if info.Mode()&os.ModeSymlink != 0 || i < len(parts)-1 && !info.IsDir() || i == len(parts)-1 && !workflowMergerRegularFile(info) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

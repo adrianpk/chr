@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestTelegramControlReceiptMissing proves a receipt probe cannot reserve or
@@ -19,7 +21,7 @@ func TestTelegramControlReceiptMissing(t *testing.T) {
 		t.Fatal("receipt probe changed an unaccepted request", result, found, err)
 	}
 
-	path, err := store.safePath(filepath.Join("run", "operation-bindings", workflowHash([]byte(request.Binding.RequestID))+".json"))
+	path, err := store.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))
 	if err != nil {
 		t.Fatal(err)
 	}

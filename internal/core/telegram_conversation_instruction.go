@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramConversationInstruction reads the original retained source. A nonempty
@@ -20,7 +22,7 @@ type TelegramConversationInstruction struct {
 func (s *TelegramReceiverStore) ReadTelegramConversationInstruction(ctx context.Context, input TelegramConversationInput) (TelegramConversationInstruction, error) {
 	var result TelegramConversationInstruction
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed || input.Conversation == "" {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	peer := input.Update.Peer

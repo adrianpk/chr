@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"math"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowGrantBudget(ctx context.Context, run workflowInvocationFile, guard WorkflowIntegrationBudgetGuard) (WorkflowIntegrationEntry, WorkflowIntegrationBudget, error) {
@@ -12,7 +14,7 @@ func (s *WorkflowStore) workflowGrantBudget(ctx context.Context, run workflowInv
 
 	var entry WorkflowIntegrationEntry
 	if guard.EntryID != "" || guard.EntryRevision != 0 || guard.ClaimGeneration != 0 {
-		return entry, WorkflowIntegrationBudget{}, ErrWorkflowConflict
+		return entry, WorkflowIntegrationBudget{}, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowIntegrationRetainedRecords(ctx, run); err != nil {
@@ -41,7 +43,7 @@ func guardWorkflowGrant(run workflowInvocationFile, entry WorkflowIntegrationEnt
 	}
 
 	if guard.InvocationID != run.ID || guard.InvocationRevision != run.Revision || guard.BudgetRevision != revision || run.Revision == math.MaxUint64 || budget.Revision == math.MaxUint64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -49,7 +51,7 @@ func guardWorkflowGrant(run workflowInvocationFile, entry WorkflowIntegrationEnt
 
 func (s *WorkflowStore) workflowGrantBudgetAdmission(ctx context.Context, run workflowInvocationFile, guard WorkflowIntegrationBudgetGuard) (WorkflowIntegrationBudget, error) {
 	if guard.BudgetRevision != 0 || run.Policy.AgentTokenBudget != 0 {
-		return WorkflowIntegrationBudget{}, ErrWorkflowConflict
+		return WorkflowIntegrationBudget{}, workflowstate.ErrConflict
 	}
 
 	limits := workflowIntegrationAdmissionLimits(run.Policy)
@@ -91,7 +93,7 @@ func (s *WorkflowStore) workflowGrantedLimit(run workflowInvocationFile, role st
 	case "executor":
 		return limits.Worker, nil
 	default:
-		return 0, ErrWorkflowConflict
+		return 0, workflowstate.ErrConflict
 	}
 }
 

@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validWorkflowMergerPath(path string) bool {
@@ -12,13 +14,13 @@ func validWorkflowMergerPath(path string) bool {
 
 func validateWorkflowMergerPaths(paths []string) error {
 	if len(paths) > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{}
 	for _, path := range paths {
 		if !validWorkflowMergerPath(path) || seen[path] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[path] = true
@@ -54,7 +56,7 @@ func workflowMergerPathAllowed(input WorkflowMergerInput, path string) bool {
 
 func validateWorkflowMergerScope(input WorkflowMergerInput) error {
 	if len(input.AllowedPaths) == 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowMergerPaths(input.AllowedPaths); err != nil {
@@ -67,7 +69,7 @@ func validateWorkflowMergerScope(input WorkflowMergerInput) error {
 
 	for _, path := range input.AllowedPaths {
 		if workflowMergerControlPath(path) || workflowMergerPathWithin(path, input.ProtectedPaths) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -76,12 +78,12 @@ func validateWorkflowMergerScope(input WorkflowMergerInput) error {
 
 func validateWorkflowMergerCommands(commands [][]string) error {
 	if len(commands) == 0 || len(commands) > 16 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, command := range commands {
 		if !validWorkflowMergerCommand(command) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

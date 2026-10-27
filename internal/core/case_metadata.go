@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // CaseMetadataSchemaVersion defines a package boundary constant.
@@ -93,7 +95,7 @@ func (s CaseMetadataService) LoadPath(path string) (CaseMetadata, error) {
 	}
 
 	metadata.SourcePath = path
-	metadata.SourceHash = contentHash(content)
+	metadata.SourceHash = contenthash.Sum(content)
 	metadata.Exists = true
 
 	if strings.TrimSpace(metadata.Slug) == "" {
@@ -151,7 +153,7 @@ func (s CaseMetadataService) save(metadata CaseMetadata) (CaseMetadata, error) {
 	}
 
 	metadata.SourcePath = path
-	metadata.SourceHash = contentHash([]byte(content))
+	metadata.SourceHash = contenthash.Sum([]byte(content))
 	metadata.Exists = true
 
 	return metadata, nil
@@ -183,7 +185,7 @@ func validateCaseMetadataWriteHash(path string, metadata CaseMetadata) error {
 		return fmt.Errorf("read current case metadata before write: %w", err)
 	}
 
-	currentHash := contentHash(current)
+	currentHash := contenthash.Sum(current)
 	if currentHash != metadata.SourceHash {
 		return fmt.Errorf("case metadata file changed outside chr: refresh before saving")
 	}

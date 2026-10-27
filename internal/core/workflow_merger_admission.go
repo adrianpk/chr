@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowMergerAdmission(ctx context.Context, run workflowInvocationFile, request WorkflowMergerRequest, harness WorkflowMergerHarness, provider WorkflowPullRequestProvider) (WorkflowIntegrationEntry, WorkflowIntegrationBudget, string, error) {
@@ -68,7 +70,7 @@ func (s *WorkflowStore) checkWorkflowMergerAdmissionInputs(ctx context.Context, 
 
 func checkWorkflowMergerEntry(run workflowInvocationFile, entry WorkflowIntegrationEntry, input WorkflowMergerInput) error {
 	if run.Lane == nil || input.WorkerTimeoutSeconds != run.Policy.WorkerTimeoutSeconds {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	hash := run.CandidateHash
@@ -83,7 +85,7 @@ func checkWorkflowMergerEntry(run workflowInvocationFile, entry WorkflowIntegrat
 		ClaimGeneration: entry.ClaimGeneration, Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef,
 	}
 	if input.InvocationID != run.ID || current != workflowMergerFence(input) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -92,7 +94,7 @@ func checkWorkflowMergerEntry(run workflowInvocationFile, entry WorkflowIntegrat
 func (s *WorkflowStore) workflowMergerSeed(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, input WorkflowMergerInput) (string, error) {
 	policy, err := s.workflowReviewPolicy(run)
 	if err != nil || policy.Method != input.Method {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if run.CandidateRepair != nil {
@@ -109,7 +111,7 @@ func (s *WorkflowStore) workflowMergerSeed(ctx context.Context, run workflowInvo
 	}
 
 	if candidate.Input.Git.SourceCommit != input.Source || candidate.Input.Git.BaseCommit != input.Base || candidate.Input.Git.Method != input.Method {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowPreparationGit(ctx, candidate); err != nil {
@@ -122,7 +124,7 @@ func (s *WorkflowStore) workflowMergerSeed(ctx context.Context, run workflowInvo
 func freezeWorkflowMergerRequest(request WorkflowMergerRequest) (WorkflowMergerRequest, error) {
 	data, err := json.Marshal(request)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return WorkflowMergerRequest{}, fmt.Errorf("%w: merger admission exceeds bounds", ErrWorkflowConflict)
+		return WorkflowMergerRequest{}, fmt.Errorf("%w: merger admission exceeds bounds", workflowstate.ErrConflict)
 	}
 
 	var frozen WorkflowMergerRequest

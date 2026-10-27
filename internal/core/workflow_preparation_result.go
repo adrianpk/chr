@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"errors"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) commitWorkflowPreparationInput(ctx context.Context, run *workflowInvocationFile, record WorkflowRecord, observation workflowSliceObservation, input WorkflowPreparationInput, lane WorkflowLane) (workflowPreparedTask, error) {
@@ -40,7 +42,7 @@ func checkWorkflowPreparedProof(query WorkflowPreparationQuery, proof WorkflowIn
 
 	expected.ResultCommit, expected.SourceDirectory = proof.ResultCommit, ""
 	if proof.BaseCommit != query.BaseCommit || proof.ObservedTarget != query.BaseCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := checkWorkflowPreparationSigning(proof, query.RequiredSignatures, query.SigningProfile); err != nil {
@@ -73,7 +75,7 @@ func (s *WorkflowStore) checkWorkflowPreparationSource(ctx context.Context, run 
 	}
 
 	if capability != input.Capability {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

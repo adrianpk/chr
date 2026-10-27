@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) regenerateWorkflowMerger(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, reader workflowIntegrationReader, state WorkflowMergerRepairState, repair WorkflowIntegrationTreeRepair) ([]WorkflowMergerRegenerationEvidence, error) {
@@ -18,7 +20,7 @@ func (s *WorkflowStore) regenerateWorkflowMerger(ctx context.Context, claim *Wor
 		}
 
 		if len(evidence) >= 8 {
-			return evidence, ErrWorkflowConflict
+			return evidence, workflowstate.ErrConflict
 		}
 
 		observation, err := s.runWorkflowMergerRegeneration(ctx, claim, prepared, provider, reader, state, conflict, tree)
@@ -75,7 +77,7 @@ func (s *WorkflowStore) runWorkflowMergerRegeneration(ctx context.Context, claim
 
 	after, err := workflowMergerSnapshot(ctx, reader, state)
 	if err != nil || after != evidence.OutputTree {
-		return evidence, ErrWorkflowConflict
+		return evidence, workflowstate.ErrConflict
 	}
 
 	return evidence, nil
@@ -87,7 +89,7 @@ func (s *WorkflowStore) runWorkflowMergerProcedure(ctx context.Context, claim *W
 	}
 
 	if !validWorkflowMergerCommand(command) || time.Now().After(prepared.leaseUntil) {
-		return WorkflowCommandResult{}, ErrWorkflowConflict
+		return WorkflowCommandResult{}, workflowstate.ErrConflict
 	}
 
 	result, err := workflowRunCommand(ctx, claim, prepared, command)
@@ -96,7 +98,7 @@ func (s *WorkflowStore) runWorkflowMergerProcedure(ctx context.Context, claim *W
 	}
 
 	if result.ExitCode != 0 || result.Truncated {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	return result, s.guardWorkflowMergerAcceptance(ctx, claim, prepared, provider)
@@ -105,7 +107,7 @@ func (s *WorkflowStore) runWorkflowMergerProcedure(ctx context.Context, claim *W
 func checkWorkflowMergerLocalConfig(directory string, expected []byte) error {
 	actual, err := os.ReadFile(filepath.Join(directory, ".git", "config"))
 	if err != nil || !bytes.Equal(expected, actual) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

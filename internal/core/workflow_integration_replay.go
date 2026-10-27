@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationReplay records retained intent, including empty replays.
@@ -112,7 +114,7 @@ func (reader workflowIntegrationReader) appendRebaseFixAttributions(ctx context.
 
 func validateWorkflowRebaseProvenance(proof WorkflowIntegrationProof, p WorkflowIntegrationProvenance) error {
 	if len(proof.History) != len(p.Source) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	original, prepared := proof.OriginCommit, proof.BaseCommit
@@ -121,7 +123,7 @@ func validateWorkflowRebaseProvenance(proof WorkflowIntegrationProof, p Workflow
 	for i, source := range p.Source {
 		entry := p.Prepared[i]
 		if !validWorkflowReplayMapping(proof.History[i], p.Replays[i], source, entry, original, prepared) || seen[entry.Commit] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[entry.Commit] = true
@@ -131,7 +133,7 @@ func validateWorkflowRebaseProvenance(proof WorkflowIntegrationProof, p Workflow
 	for i, fix := range p.IntegrationFixes {
 		entry := p.Prepared[len(p.Source)+i]
 		if !validWorkflowIntegrationFix(fix, entry, prepared) || seen[entry.Commit] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[entry.Commit] = true
@@ -140,7 +142,7 @@ func validateWorkflowRebaseProvenance(proof WorkflowIntegrationProof, p Workflow
 
 	last := p.Prepared[len(p.Prepared)-1]
 	if last.Commit != proof.ResultCommit || last.Tree != proof.PreparedTree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -15,14 +16,14 @@ func telegramNotificationTestInput(t *testing.T) TelegramNotificationInput {
 	record := testNotificationAuditRecord(time.Now().UTC())
 	record.Channel = "telegram"
 
-	target, err := ResolveTelegramNotificationTarget(projectcore.Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, DefaultOpsNamespace, "@example_channel", workflowHash([]byte("configured sender")))
+	target, err := ResolveTelegramNotificationTarget(projectcore.Project{ID: record.Event.ProjectID, Path: t.TempDir(), Enabled: true}, DefaultOpsNamespace, "@example_channel", contenthash.Sum([]byte("configured sender")))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	payload := []byte("# Complete worker-reported details\n\nLiteral `*_` 😀\n")
 
-	return TelegramNotificationInput{Record: record, Target: target, Message: TelegramMessageBlocks{Family: "47", InitialText: "Ticket blocked in Example project", ContentKind: "markdown", Content: TelegramDocumentExcerpt(payload), SecondaryText: "Complete original export attached. Integration requires its canonical receipt."}, Document: &TelegramDocument{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notification.md", SourceHash: workflowHash(payload), Filename: "notification.md", MediaType: "text/markdown", Payload: payload}}
+	return TelegramNotificationInput{Record: record, Target: target, Message: TelegramMessageBlocks{Family: "47", InitialText: "Ticket blocked in Example project", ContentKind: "markdown", Content: TelegramDocumentExcerpt(payload), SecondaryText: "Complete original export attached. Integration requires its canonical receipt."}, Document: &TelegramDocument{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notification.md", SourceHash: contenthash.Sum(payload), Filename: "notification.md", MediaType: "text/markdown", Payload: payload}}
 }
 
 // A real database freezes the event's presentation and bytes together. Updating
@@ -44,7 +45,7 @@ func TestTelegramPresentationNotificationSnapshot(t *testing.T) {
 	}
 
 	delivery := telegramNotificationRetained(t, repository, input.Record.Event.ID, input.Target)
-	if delivery.Document == nil || !bytes.Equal(delivery.Document.Payload, original) || delivery.Presentation.DocumentHash != workflowHash(original) {
+	if delivery.Document == nil || !bytes.Equal(delivery.Document.Payload, original) || delivery.Presentation.DocumentHash != contenthash.Sum(original) {
 		t.Fatal("notification replaced its original image", delivery)
 	}
 
@@ -79,11 +80,11 @@ func checkTelegramNotificationTargets(t *testing.T, repository NotificationEvent
 		case "project":
 			target.ProjectID = "other-project"
 		case "root":
-			target.ProjectBindingDigest = workflowHash([]byte("other root"))
+			target.ProjectBindingDigest = contenthash.Sum([]byte("other root"))
 		case "namespace":
 			target.Namespace = "other"
 		case "configuration":
-			target.ConfigDigest = workflowHash([]byte("other sender"))
+			target.ConfigDigest = contenthash.Sum([]byte("other sender"))
 		}
 
 		if _, _, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, target); err == nil {

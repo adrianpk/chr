@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) registerWorkflowProcess(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string, pid int) (registered WorkflowProcess, index int, err error) {
@@ -59,12 +62,12 @@ func (s *WorkflowStore) finishWorkflowProcess(ctx context.Context, claim *Workfl
 
 		attempt := &run.Attempts[len(run.Attempts)-1]
 		if index >= len(attempt.Processes) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		process := &attempt.Processes[index]
 		if !workflowProcessBindingMatches(*process, expected) {
-			return errors.Join(ErrWorkflowConflict, ErrWorkflowOwned)
+			return errors.Join(workflowstate.ErrConflict, ErrWorkflowOwned)
 		}
 
 		alive, err := workflowProcessGroupAlive(*process)
@@ -96,7 +99,7 @@ func (s *WorkflowStore) hashWorkflowProcessOutput(process *WorkflowProcess) erro
 		return err
 	}
 
-	process.StdoutHash, process.StderrHash = workflowHash(stdout), workflowHash(stderr)
+	process.StdoutHash, process.StderrHash = contenthash.Sum(stdout), contenthash.Sum(stderr)
 
 	return nil
 }

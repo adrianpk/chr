@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowContinuationCheckpoint binds a bounded call to frozen request identity.
@@ -39,7 +42,7 @@ func (s *WorkflowStore) retainWorkflowContinuation(ctx context.Context, observed
 		}
 
 		if run.Revision != observed.Revision || run.RequestHash != observed.RequestHash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if readErr = owner.checkWorkflowInputs(ctx, run); readErr != nil {
@@ -80,7 +83,7 @@ func (s *WorkflowStore) commitWorkflowContinuation(run *workflowInvocationFile, 
 	}
 
 	checkpoint.EvidenceRef = workflowContinuationCheckpointPath(run.ID, checkpoint.Sequence)
-	checkpoint.EvidenceHash = workflowHash(data)
+	checkpoint.EvidenceHash = contenthash.Sum(data)
 	run.Continuation = &checkpoint
 
 	return s.commitWorkflowPullRequestFiles(run, extra, workflowFileChange{Path: checkpoint.EvidenceRef, After: data})

@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowSelector names an exact extent. Only loose work omits Identity.
@@ -99,7 +102,7 @@ func (s *WorkflowStore) Preview(ctx context.Context, request WorkflowPreviewRequ
 	})
 
 	if err == nil && request.SnapshotHash != "" && request.SnapshotHash != preview.SnapshotHash {
-		return WorkflowPreview{}, fmt.Errorf("%w: restart workflow preview pagination", ErrWorkflowConflict)
+		return WorkflowPreview{}, fmt.Errorf("%w: restart workflow preview pagination", workflowstate.ErrConflict)
 	}
 
 	return preview, err
@@ -151,7 +154,7 @@ func (selection workflowSelection) preview(request WorkflowPreviewRequest) (Work
 		return WorkflowPreview{}, err
 	}
 
-	preview.SnapshotHash = workflowHash([]byte(selection.hash() + requestHash))
+	preview.SnapshotHash = contenthash.Sum([]byte(selection.hash() + requestHash))
 
 	members := []WorkflowPreviewMember{}
 
@@ -285,7 +288,7 @@ func workflowPreviewRequestHash(request WorkflowPreviewRequest) (string, error) 
 		return "", err
 	}
 
-	return workflowHash(encoded), nil
+	return contenthash.Sum(encoded), nil
 }
 
 func validateWorkflowPreviewContext(request WorkflowPreviewRequest) error {

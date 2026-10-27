@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func nativeRecordReceipt(t *testing.T, store *WorkflowStore, candidate WorkflowIntegrationCandidate) WorkflowRecord {
@@ -67,7 +69,7 @@ func TestNativeReceiptProof(t *testing.T) {
 		{"observation", func(r *WorkflowReceipt) { r.Native.ObservationRefs = nil }},
 		{"merge", func(r *WorkflowReceipt) { r.Native.ActualMergeResult = r.SourceCommit }},
 		{"candidate", func(r *WorkflowReceipt) { r.CandidateID = "another-candidate" }},
-		{"profile", func(r *WorkflowReceipt) { r.Native.CapabilityHash = workflowHash([]byte("another-profile")) }},
+		{"profile", func(r *WorkflowReceipt) { r.Native.CapabilityHash = contenthash.Sum([]byte("another-profile")) }},
 		{"mechanism", func(r *WorkflowReceipt) { r.Native.Mechanism = "another-mechanism" }},
 	}
 	for _, tc := range cases {

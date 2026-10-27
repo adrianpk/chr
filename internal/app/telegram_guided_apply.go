@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
@@ -42,7 +43,7 @@ func (r telegramReceiver) continueTelegramGuided(ctx context.Context, request co
 	operations = r.boundTelegramGuidedService(operations, request, owner.Command.RunID)
 
 	session, err := applyTelegramGuided(ctx, operations, request.Target, owner)
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishGuidedFailure(ctx, request, current, err)
 	}
 
@@ -68,7 +69,7 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core
 	request.Message = telegramOutcomeMessage("43", text)
 
 	request.Delivery, err = r.guidedDocument(ctx, request, observed, kind)
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishGuidedFailure(ctx, request, current, telegramGuidedRoutingFailure("That original has not been sealed for this run. Send Show current step to continue; saved inputs are unchanged."))
 	}
 
@@ -77,7 +78,7 @@ func (r telegramReceiver) finishTelegramGuided(ctx context.Context, request core
 	}
 
 	err = r.store.FinishTelegramGuided(ctx, request, progress, facts, text, current.Digest(), time.Now())
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishOvertakenGuided(ctx, request, progress, facts, current)
 	}
 
@@ -134,11 +135,11 @@ func telegramRetainedGuidedInput(request core.TelegramOperationRequest) (telegra
 	}
 
 	if !telegramGuidedOwnerMatches(owner, request, args) {
-		return owner, core.ErrWorkflowConflict
+		return owner, workflowstate.ErrConflict
 	}
 
 	if !telegramGuidedSourceMatches(owner, request) {
-		return owner, core.ErrWorkflowConflict
+		return owner, workflowstate.ErrConflict
 	}
 
 	return owner, nil

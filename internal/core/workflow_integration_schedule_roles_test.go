@@ -5,6 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func nativeRolePeer(t *testing.T, store *WorkflowStore, namespace, key, target string) (*WorkflowStore, WorkflowIntegrationEntry) {
@@ -24,7 +26,7 @@ func nativeRolePeer(t *testing.T, store *WorkflowStore, namespace, key, target s
 		t.Fatal(err)
 	}
 
-	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: TicketStatusReadyForDev, Phase: "pending", ContractHash: workflowHash(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: TicketStatusReadyForDev, Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	record, err = peer.Create(t.Context(), "Independent task", record)
 	if err != nil {

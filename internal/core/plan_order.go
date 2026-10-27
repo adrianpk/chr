@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // PlanOrderTask describes stable intended order; ticket references are assigned
@@ -125,7 +127,7 @@ func planOrderBytes(document PlanOrderDocument) ([]byte, []byte, error) {
 	}
 
 	var output bytes.Buffer
-	fmt.Fprintf(&output, "---\nworkflow_projection: chr-tracker/v2\nstate_authority: tickets\nplan_ref: %s\nplan_revision: %d\nplan_body_hash: %s\nsource_hash: %s\n---\n\n# Workflow tracker\n\n", yamlString(document.PlanRef), document.PlanRevision, document.PlanBodyHash, workflowHash(encoded))
+	fmt.Fprintf(&output, "---\nworkflow_projection: chr-tracker/v2\nstate_authority: tickets\nplan_ref: %s\nplan_revision: %d\nplan_body_hash: %s\nsource_hash: %s\n---\n\n# Workflow tracker\n\n", yamlString(document.PlanRef), document.PlanRevision, document.PlanBodyHash, contenthash.Sum(encoded))
 
 	if document.SetID == "" {
 		output.WriteString("Planned order. Tickets are unbound; this map cannot authorize execution.\n\n")

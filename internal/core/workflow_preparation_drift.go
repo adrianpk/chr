@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) guardWorkflowPreparationWork(ctx context.Context, run workflowInvocationFile) error {
@@ -51,7 +53,7 @@ func (s *WorkflowStore) reprepareWorkflowNativeInputs(ctx context.Context, run *
 	}
 
 	if previous.Native.ClaimGeneration != entry.ClaimGeneration {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	changed, err := workflowNativePreparationChanged(ctx, *run, previous, source, provider)

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/fs"
 	"path/filepath"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowTrackerSnapshot(ctx context.Context, setID, schema string) (WorkflowSnapshot, error) {
@@ -51,7 +53,7 @@ func (s *WorkflowStore) readWorkflowOrderSet(setID string) (WorkflowRecord, erro
 	}
 
 	if set.ID != setID || set.Set == nil || set.ProjectID != s.projectID || set.Namespace != s.layout.Namespace() {
-		return set, ErrWorkflowConflict
+		return set, workflowstate.ErrConflict
 	}
 
 	return set, nil
@@ -101,7 +103,7 @@ func (s *WorkflowStore) appendWorkflowOrderTask(snapshot *WorkflowSnapshot, path
 	}
 
 	if record.ProjectID != s.projectID || record.Namespace != s.layout.Namespace() {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if len(snapshot.Records) >= WorkflowRecordLimit {

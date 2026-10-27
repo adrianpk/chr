@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -168,7 +169,7 @@ func webWorkflowResponse(status WorkflowWorkStatus, err error) webui.WriteAction
 	}
 
 	result.Status, result.Summary, result.Validation = webui.WriteStatusValidation, "Workflow action failed.", []string{err.Error()}
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		result.Status = webui.WriteStatusStale
 	}
 

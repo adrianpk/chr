@@ -5,6 +5,8 @@ import (
 	"errors"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowOrderAmendment(t *testing.T, store *WorkflowStore, set WorkflowRecord) WorkflowSetAmendmentRequest {
@@ -83,7 +85,7 @@ func TestWorkflowPlanOrderWriteGuard(t *testing.T) {
 	task := hierarchy.Tasks[0]
 
 	task.Task.Order = 99
-	if _, err := store.Write(t.Context(), task, task.Revision); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.Write(t.Context(), task, task.Revision); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("task order bypassed amendment", err)
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeForgejoMethods certifies exact merge, rebase and squash publication
@@ -120,7 +122,7 @@ func installNativeContention(t *testing.T, profile nativeLiveProfile, request *W
 func checkNativeContention(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, request WorkflowGitPublication, advanced string, result WorkflowGitPublicationResult, err error, evidence *nativeCertificationEvidence) {
 	t.Helper()
 
-	if !errors.Is(err, ErrWorkflowConflict) || !result.CommandsSent || result.State != "rejected" {
+	if !errors.Is(err, workflowstate.ErrConflict) || !result.CommandsSent || result.State != "rejected" {
 		t.Fatalf("atomic contention outcome: %s, %v", result.State, err)
 	}
 

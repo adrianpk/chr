@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // CreateTicketDocument allocates through the existing canonical envelope owner.
@@ -82,7 +84,7 @@ func createNativeTicketDocument(ctx context.Context, opts TicketBoardReadOptions
 
 	record := WorkflowRecord{Kind: "ticket", Body: []byte(content), Task: &WorkflowTask{
 		Schema: WorkflowSchema, Key: key, Status: unquoteMetadataString(front.Metadata["status"]), Phase: "pending",
-		UseCase: request.Fields["use_case"], ContractHash: workflowHash([]byte(key + "\x00" + content)),
+		UseCase: request.Fields["use_case"], ContractHash: contenthash.Sum([]byte(key + "\x00" + content)),
 	}}
 
 	_, err = NewWorkflowStore(opts.Layout, opts.ProjectID).ApplyRecordMutation(ctx, WorkflowMutationRequest{Binding: request.Binding, Title: request.Fields["title"], Record: record})

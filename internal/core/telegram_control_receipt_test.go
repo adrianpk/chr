@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramControlJournalFixture(t *testing.T, action string) (*WorkflowStore, WorkflowControlMutationRequest, WorkflowPullRequestProvider) {
@@ -96,7 +98,7 @@ func checkTelegramControlJournal(t *testing.T, action string) {
 	}
 
 	request.ExpectedRevision++
-	if _, err := restarted.ControlWorkflowDecision(t.Context(), request, provider, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := restarted.ControlWorkflowDecision(t.Context(), request, provider, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed receipt payload accepted", err)
 	}
 }

@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeClosingFanout refuses even a standalone set gate before every
@@ -187,7 +189,7 @@ func nativeClosingPreservedFiles(t *testing.T, f nativeClosingFixture) map[strin
 	files := map[string]string{}
 
 	for _, path := range paths {
-		files[path] = workflowHash(workflowReadTestBytes(t, store, path))
+		files[path] = contenthash.Sum(workflowReadTestBytes(t, store, path))
 	}
 
 	return files

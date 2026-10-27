@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramHarnessPrepared struct {
@@ -30,7 +31,7 @@ func (r telegramReceiver) prepareHarnessChange(ctx context.Context, operations t
 	}
 
 	if request.OperationID != core.TelegramHarnessSelectionOperation {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.State != "ready" {
@@ -126,14 +127,14 @@ func (r telegramReceiver) offerHarnessChange(ctx context.Context, request core.T
 	}
 
 	if !prepared.ExpiresAt.After(time.Now()) {
-		return r.finishHarnessPreparationFailure(ctx, request, input.Config, core.ErrWorkflowConflict)
+		return r.finishHarnessPreparationFailure(ctx, request, input.Config, workflowstate.ErrConflict)
 	}
 
 	return r.offerConfirmationDocument(ctx, request, core.TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm", "cancel"}, ExpiresAt: prepared.ExpiresAt}, "39", prepared.Preview, "Only new operations use these defaults. Admitted work keeps its original binding.")
 }
 
 func (r telegramReceiver) finishHarnessPreparationFailure(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig, failure error) error {
-	if !errors.Is(failure, core.ErrWorkflowConflict) {
+	if !errors.Is(failure, workflowstate.ErrConflict) {
 		return failure
 	}
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramControlArguments struct {
@@ -89,11 +90,11 @@ func telegramRetainedControl(request core.TelegramOperationRequest) (telegramCon
 
 	expected, err := telegramControlRequest(request, arguments, preview.Status)
 	if err != nil || !reflect.DeepEqual(control, expected) {
-		return preview, core.ErrWorkflowConflict
+		return preview, workflowstate.ErrConflict
 	}
 
 	if !telegramControlStatusMatches(preview.Status, control.ID, request.Target) {
-		return preview, core.ErrWorkflowConflict
+		return preview, workflowstate.ErrConflict
 	}
 
 	return preview, nil

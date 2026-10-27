@@ -1,11 +1,11 @@
 package tui
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 import (
 	"errors"
 
 	tea "github.com/charmbracelet/bubbletea"
-
-	"forge.adrianpk.com/chr/internal/core"
 )
 
 // HarnessSelectionRequest carries exact choices; the application resolves the
@@ -57,7 +57,7 @@ func (m *Model) completeHarnessSave(msg harnessSelectionSavedMsg) {
 	state.Busy, state.Saving, state.Scroll = false, false, 0
 	if msg.Err != nil {
 		state.Message = "Could not confirm save. Choices retained; check readiness, retry unchanged or reload."
-		if errors.Is(msg.Err, core.ErrWorkflowConflict) {
+		if errors.Is(msg.Err, workflowstate.ErrConflict) {
 			state.Message = "Defaults or request identity changed. Choices retained; r reloads before saving."
 		}
 

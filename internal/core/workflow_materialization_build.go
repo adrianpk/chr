@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func orderedWorkflowPlan(plan GeneratedWorkflowPlan) GeneratedWorkflowPlan {
@@ -112,7 +114,7 @@ func (s *WorkflowStore) materializationTask(input GeneratedWorkflowTask, slice G
 		return record, err
 	}
 
-	record.Task.ContractHash = workflowHash(append([]byte(set.ID+"\x00"+slice.ID+"\x00"), contract...))
+	record.Task.ContractHash = contenthash.Sum(append([]byte(set.ID+"\x00"+slice.ID+"\x00"), contract...))
 	record.Domain = map[string]json.RawMessage{"plan_task_id": json.RawMessage(fmt.Sprintf("%q", input.ID)), "execution_contract": contract}
 	body, err := NewTicketRenderer().RenderTicket(Ticket{Key: key, Title: input.Title, Synopsis: input.Outcome, Status: TicketStatusReadyForDev, Priority: input.Priority, Severity: input.Severity, Type: input.Type, Tags: input.Tags, UseCase: set.Set.UseCase, ProjectArea: "plan", SourceKind: "plan_tracking", SourceRef: set.Set.PlanRef, Slice: slice.Label, Body: input.Body, CreatedAt: now, UpdatedAt: now})
 	record.Body = []byte(body)
@@ -142,7 +144,7 @@ func materializationSlice(input GeneratedWorkflowSlice, set WorkflowRecord, task
 		return WorkflowSlice{}, err
 	}
 
-	return WorkflowSlice{ID: input.ID, Order: input.Order, Title: input.Title, ContractRef: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", "slice-"+input.ID+".json")), ContractHash: workflowHash(contract), TaskInputHash: WorkflowTaskInputHash(tasks, input.ID), DependsOn: resolveMaterializationRefs(input.DependsOn, keys), Phase: "pending"}, nil
+	return WorkflowSlice{ID: input.ID, Order: input.Order, Title: input.Title, ContractRef: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", "slice-"+input.ID+".json")), ContractHash: contenthash.Sum(contract), TaskInputHash: WorkflowTaskInputHash(tasks, input.ID), DependsOn: resolveMaterializationRefs(input.DependsOn, keys), Phase: "pending"}, nil
 }
 
 // WorkflowTaskInputHash detects membership or contract changes in a slice.
@@ -162,5 +164,5 @@ func WorkflowTaskInputHash(records []WorkflowRecord, sliceID string) string {
 		values = append(values, fmt.Sprintf("%d:%q:%q", task.Order, task.Key, task.ContractHash))
 	}
 
-	return workflowHash([]byte(strings.Join(values, "\n")))
+	return contenthash.Sum([]byte(strings.Join(values, "\n")))
 }

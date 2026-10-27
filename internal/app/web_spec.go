@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -64,7 +65,7 @@ func (p webViewProvider) writeSpecAction(operations service, request webui.Write
 		err = fmt.Errorf("unsupported spec editor action")
 	}
 
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "This spec changed. Your edits are retained; reload before saving.", ReloadURL: "/specs/detail?id=" + url.QueryEscape(request.ID)}, nil
 	}
 

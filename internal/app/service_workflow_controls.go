@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -59,7 +60,7 @@ func (s service) PreviewWorkExtent(ctx context.Context, request core.WorkflowPre
 	if err == nil {
 		result.ExecutionPolicy, err = store.InspectWorkflowExecutionPolicy(ctx)
 		if err == nil && result.Policy.Revision != result.ExecutionPolicy.ConfigRevision {
-			err = core.ErrWorkflowConflict
+			err = workflowstate.ErrConflict
 		}
 	}
 
@@ -129,7 +130,7 @@ func (s service) continueWorkExtent(ctx context.Context, id string, steps int, c
 	request.AuthorizationCheck = check
 
 	if len(expected) > 1 || len(expected) == 1 && expected[0] == 0 {
-		return core.WorkflowContinuationProgress{}, core.ErrWorkflowConflict
+		return core.WorkflowContinuationProgress{}, workflowstate.ErrConflict
 	}
 
 	if len(expected) == 1 {

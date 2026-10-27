@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowWorkerSlotLimit = 8
@@ -83,7 +85,7 @@ func checkWorkflowCapacityRoots(worktrees []WorktreeGitEntry, lanes map[string]b
 		}
 
 		if observed != limits {
-			return fmt.Errorf("%w: linked worktrees resolve conflicting repository capacity", ErrWorkflowConflict)
+			return fmt.Errorf("%w: linked worktrees resolve conflicting repository capacity", workflowstate.ErrConflict)
 		}
 	}
 

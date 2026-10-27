@@ -6,6 +6,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ResolveTelegramHarnessTarget observes the explicitly selected registered
@@ -33,7 +34,7 @@ func (s *TelegramReceiverStore) ResolveTelegramHarnessTarget(ctx context.Context
 func (op telegramConversationTransaction) selectedHarnessProject() (projectcore.Project, error) {
 	_, allowed := op.input.Config.AuthorizedUser(op.input.Update.Peer.ChatID, op.input.Update.Peer.TopicID, op.input.Update.Peer.UserID, op.input.Update.ChatType)
 	if !allowed || op.input.Project != "" || op.input.Conversation != "" || op.input.Namespace != "" || op.input.Update.ReplyToMessageID != 0 {
-		return projectcore.Project{}, ErrWorkflowConflict
+		return projectcore.Project{}, workflowstate.ErrConflict
 	}
 
 	if err := op.ensurePeer(); err != nil {
@@ -46,7 +47,7 @@ func (op telegramConversationTransaction) selectedHarnessProject() (projectcore.
 	}
 
 	if selected == "" {
-		return projectcore.Project{}, ErrWorkflowConflict
+		return projectcore.Project{}, workflowstate.ErrConflict
 	}
 
 	return exactTelegramProject(op.allowedProjects(), selected)

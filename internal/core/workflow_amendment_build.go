@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowAmendmentBuild struct {
@@ -69,7 +71,7 @@ func (s *WorkflowStore) workflowAmendmentBuilder(ctx context.Context, set Workfl
 
 		id := ""
 		if err := json.Unmarshal(task.Domain["plan_task_id"], &id); err != nil || id == "" {
-			return builder, fmt.Errorf("%w: task has no stable plan identity", ErrWorkflowConflict)
+			return builder, fmt.Errorf("%w: task has no stable plan identity", workflowstate.ErrConflict)
 		}
 
 		builder.tasks[id], builder.keys[id] = task, task.Task.Key
@@ -95,7 +97,7 @@ func (s *WorkflowStore) buildWorkflowAmendmentTasks(ctx context.Context, builder
 	}
 
 	if len(seen) != len(builder.keys) {
-		return fmt.Errorf("%w: amendment removed an existing task", ErrWorkflowConflict)
+		return fmt.Errorf("%w: amendment removed an existing task", workflowstate.ErrConflict)
 	}
 
 	for i := range builder.result.Tasks {
@@ -126,7 +128,7 @@ func checkWorkflowAmendedTask(task WorkflowRecord, input GeneratedWorkflowTask, 
 	old, oldErr := json.Marshal(previous)
 
 	if err != nil || oldErr != nil || task.Task.SliceID != slice.ID || task.Task.Order != input.Order || string(data) != string(old) {
-		return fmt.Errorf("%w: amendment reordered, reassociated or rewrote retained task %s", ErrWorkflowConflict, task.Task.Key)
+		return fmt.Errorf("%w: amendment reordered, reassociated or rewrote retained task %s", workflowstate.ErrConflict, task.Task.Key)
 	}
 
 	return nil

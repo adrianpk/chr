@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"slices"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowLooseQueueFixture(t *testing.T, includeLater bool) workflowIntegrationFixture {
@@ -53,7 +55,7 @@ func workflowLooseCreate(t *testing.T, store *WorkflowStore, original WorkflowRe
 		t.Fatal(err)
 	}
 
-	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: TicketStatusReadyForDev, Phase: "pending", DependsOn: dependencies, ContractHash: workflowHash(append([]byte("\x00\x00"), data...))}, Body: workflowLooseBody(key, priority), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: TicketStatusReadyForDev, Phase: "pending", DependsOn: dependencies, ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: workflowLooseBody(key, priority), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	created, err := store.Create(t.Context(), key, record)
 	if err != nil {

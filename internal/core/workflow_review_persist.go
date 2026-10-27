@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowReviewEvidence struct {
@@ -32,7 +35,7 @@ func (s *WorkflowStore) persistWorkflowReviewInput(run *workflowInvocationFile, 
 
 	run.ReviewCount++
 	ref := workflowReviewPath(run.ID, run.ReviewCount, "input.json")
-	run.Review = &WorkflowReviewBinding{Round: run.ReviewCount, Unit: input.Unit, State: "pending", InputRef: ref, InputHash: workflowHash(data)}
+	run.Review = &WorkflowReviewBinding{Round: run.ReviewCount, Unit: input.Unit, State: "pending", InputRef: ref, InputHash: contenthash.Sum(data)}
 	run.Status, run.Outcome, run.Blocker = "waiting_review", "slice_review_pending", nil
 
 	files, err := s.workflowReviewDomainChanges(run, observation, false)
@@ -63,7 +66,7 @@ func (s *WorkflowStore) persistWorkflowReviewDecision(run *workflowInvocationFil
 	data = append(data, '\n')
 	run.Review.DecisionCount++
 	ref := workflowReviewPath(run.ID, run.Review.Round, fmt.Sprintf("decision-%d.json", run.Review.DecisionCount))
-	run.Review.ResultRef, run.Review.ResultHash, run.Review.State = ref, workflowHash(data), state
+	run.Review.ResultRef, run.Review.ResultHash, run.Review.State = ref, contenthash.Sum(data), state
 	run.Review.RepairTaskKey = decision.RepairTaskKey
 
 	run.Status, run.Outcome, run.Blocker = "waiting_review", "slice_review_"+state, nil
@@ -97,7 +100,7 @@ func workflowReviewAttemptResult(run *workflowInvocationFile, data []byte) []wor
 	}
 
 	attempt.ResultRef = workflowAttemptFile(run.ID, attempt.ID, "result.json")
-	attempt.ResultHash = workflowHash(data)
+	attempt.ResultHash = contenthash.Sum(data)
 
 	return []workflowFileChange{{Path: attempt.ResultRef, After: data}}
 }
@@ -147,7 +150,7 @@ func (s *WorkflowStore) workflowReviewDomainChanges(run *workflowInvocationFile,
 func (s *WorkflowStore) readWorkflowReview(run workflowInvocationFile) (WorkflowReviewInput, WorkflowReviewDecision, error) {
 	var input WorkflowReviewInput
 	if run.Review == nil {
-		return input, WorkflowReviewDecision{}, ErrWorkflowConflict
+		return input, WorkflowReviewDecision{}, workflowstate.ErrConflict
 	}
 
 	data, err := s.readWorkflowReviewImage(run.Review.InputRef, run.Review.InputHash)
@@ -160,7 +163,7 @@ func (s *WorkflowStore) readWorkflowReview(run workflowInvocationFile) (Workflow
 	}
 
 	if input.Schema != "chr-workflow-review-input/v1" || input.InvocationID != run.ID || input.Unit != run.Review.Unit || !workflowCommitID(input.TargetCommit) {
-		return input, WorkflowReviewDecision{}, ErrWorkflowConflict
+		return input, WorkflowReviewDecision{}, workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowReviewPolicy(input.Policy); err != nil {
@@ -183,8 +186,8 @@ func (s *WorkflowStore) readWorkflowReviewImage(ref, hash string) ([]byte, error
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != hash {
-		return nil, ErrWorkflowConflict
+	if err != nil || contenthash.Sum(data) != hash {
+		return nil, workflowstate.ErrConflict
 	}
 
 	return data, nil

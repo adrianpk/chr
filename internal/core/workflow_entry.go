@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // FindWorkflowEntry attaches a compatibility entrypoint to equivalent unfinished
@@ -80,7 +82,7 @@ func (s *WorkflowStore) matchWorkflowEntry(runs []workflowInvocationFile, reques
 
 		if run.RequestHash == hash {
 			if found {
-				return result, found, fmt.Errorf("%w: ambiguous unfinished entrypoint", ErrWorkflowConflict)
+				return result, found, fmt.Errorf("%w: ambiguous unfinished entrypoint", workflowstate.ErrConflict)
 			}
 
 			result, found = run.WorkflowInvocation, true

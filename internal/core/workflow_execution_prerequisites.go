@@ -3,6 +3,9 @@ package core
 import (
 	"context"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowPrerequisiteImages(ctx context.Context, run workflowInvocationFile, record WorkflowRecord) ([]WorkflowInputImage, map[string]string, error) {
@@ -68,14 +71,14 @@ func (s *WorkflowStore) checkWorkflowPreparedInput(prepared workflowPreparedTask
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != prepared.inputHash {
-		return fmt.Errorf("%w: frozen worker input changed", ErrWorkflowConflict)
+	if err != nil || contenthash.Sum(data) != prepared.inputHash {
+		return fmt.Errorf("%w: frozen worker input changed", workflowstate.ErrConflict)
 	}
 
 	for _, image := range prepared.input.Prerequisites {
 		record, err := s.readRecord(image.Path)
 		if err != nil || record.Revision != image.Revision || record.SourceHash != image.SourceHash {
-			return fmt.Errorf("%w: frozen prerequisite changed", ErrWorkflowConflict)
+			return fmt.Errorf("%w: frozen prerequisite changed", workflowstate.ErrConflict)
 		}
 	}
 
@@ -90,8 +93,8 @@ func (s *WorkflowStore) checkWorkflowPrerequisiteEvidence(hashes map[string]stri
 		}
 
 		data, err := readWorkflowFile(path)
-		if err != nil || workflowHash(data) != hash {
-			return fmt.Errorf("%w: frozen prerequisite evidence changed", ErrWorkflowConflict)
+		if err != nil || contenthash.Sum(data) != hash {
+			return fmt.Errorf("%w: frozen prerequisite evidence changed", workflowstate.ErrConflict)
 		}
 	}
 

@@ -3,13 +3,16 @@ package core
 import (
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Dump observations include every alias image and the resolved canonical body.
 // This keeps an old session reference usable without dropping its edit guard.
 func (r *fileAuthoringSessionRepository) readAuthoringDumpObservations(snapshot *AuthoringSnapshot, ref AuthoringArtifactRef, images map[string][]byte) (ProjectDumpArtifact, error) {
 	if err := ValidateProjectDumpReference(ref.Path); err != nil || ref.Path == "" || strings.Split(ref.Path, "/")[3] != ref.ID {
-		return ProjectDumpArtifact{}, ErrWorkflowConflict
+		return ProjectDumpArtifact{}, workflowstate.ErrConflict
 	}
 
 	resolved, err := resolveProjectDumpAlias(ref.Path, func(reference string) (ProjectDumpArtifact, error) {
@@ -21,7 +24,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpObservations(snapshot 
 
 	if resolved.Raw || resolved.CaseSlug != "" {
 		if !validAuthoringArtifactRef(snapshot.Session.Namespace, ref) {
-			return resolved, ErrWorkflowConflict
+			return resolved, workflowstate.ErrConflict
 		}
 
 		return resolved, nil
@@ -78,7 +81,7 @@ func (r *fileAuthoringSessionRepository) authoringDumpProject(images map[string]
 	reference := filepath.Join(DirectoryName, UserDirectoryName, "project.md")
 	if content, found := images[reference]; found {
 		project, err := ParseProjectMetadata(string(content))
-		project.Exists, project.SourceHash = true, workflowHash(content)
+		project.Exists, project.SourceHash = true, contenthash.Sum(content)
 
 		return project, err
 	}
@@ -96,11 +99,11 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpBytes(reference string
 
 func guardAuthoringDumpReference(namespace string, ref AuthoringArtifactRef, resolved ProjectDumpArtifact, project ProjectMetadata) error {
 	if project.ProjectDumpRef != "" && project.ProjectDumpRef != resolved.Reference {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validAuthoringArtifactRef(namespace, ref) && project.ProjectDumpRef != resolved.Reference {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

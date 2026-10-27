@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PlanDeliveryResult completes authoring with tickets and their internal order
@@ -115,7 +116,7 @@ func (s service) planDeliveryInput(ctx context.Context, request PlanGenerateRequ
 	retained := filepath.ToSlash(filepath.Join(layout.RelativeRoot(), input.PlanRef))
 
 	if generated.Plan.RelativePath != canonical && generated.Plan.RelativePath != retained {
-		return input, layout, core.ErrWorkflowConflict
+		return input, layout, workflowstate.ErrConflict
 	}
 
 	if generated.Existing {
@@ -136,7 +137,7 @@ func (s service) checkDeliveryTarget(ctx context.Context, scope core.QuizScope, 
 	}
 
 	if expected != "" && expected != current {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

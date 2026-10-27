@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) respondWork(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
@@ -120,7 +121,7 @@ func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request core.T
 		return r.unavailableConfirmationDocument(ctx, request, input.Config)
 	}
 
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishWorkFailure(ctx, request, "blocked", err, input.Config)
 	}
 

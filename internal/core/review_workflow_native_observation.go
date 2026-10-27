@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowNativePublicationBinding retains the original PR/source and exact
@@ -73,7 +75,7 @@ func validateWorkflowNativeBinding(binding WorkflowNativePublicationBinding) err
 	}
 
 	if binding.GitApplication != nil && !workflowNativeApplicationAttributed(binding) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	capability, proof := binding.Capability, binding.Git
@@ -81,14 +83,14 @@ func validateWorkflowNativeBinding(binding WorkflowNativePublicationBinding) err
 
 	actual := [6]string{proof.Repository, binding.PullRequest.URL, proof.Method, proof.SourceCommit, proof.BaseCommit, proof.ResultCommit}
 	if expected != actual {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	request := WorkflowGitPublication{Repository: capability.Repository, SourceRepository: binding.PullRequest.HeadRepository, Directory: binding.SourceDirectory, SourceRef: capability.SourceRef, TargetRef: capability.TargetRef, SourceRewriteAuthorized: true, OwnershipRevision: capability.OwnershipRevision, Git: proof}
 
 	revision, err := WorkflowGitPublicationRevision(request)
 	if err != nil || revision != binding.Publication.CandidateRevision || !workflowNativeSourceBinding(WorkflowNativeCapabilityRequest{PullRequest: binding.PullRequest, Publication: request}) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -97,7 +99,7 @@ func validateWorkflowNativeBinding(binding WorkflowNativePublicationBinding) err
 func validateWorkflowNativeCapability(capability WorkflowNativeCapability) error {
 	sealed, err := sealWorkflowNativeCapability(capability)
 	if err != nil || sealed.Revision != capability.Revision || !capability.AtomicSourceBase || !capability.ExactResult || len(capability.Unsupported) != 0 || capability.AdapterVersion != workflowNativeAdapterVersion || capability.Mechanism != WorkflowPublicationGitAtomicDualRef {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -106,18 +108,18 @@ func validateWorkflowNativeCapability(capability WorkflowNativeCapability) error
 func validateWorkflowNativeResult(binding WorkflowNativePublicationBinding) error {
 	proof, publication := binding.Git, binding.Publication
 	if !publication.CommandsSent || (publication.State != "applied" && publication.State != "unknown") {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	expected := [5]string{"chr-git-publication-result/v1", proof.SourceCommit, proof.ResultCommit, proof.SourceCommit, proof.BaseCommit}
 
 	actual := [5]string{publication.Schema, publication.OriginalSourceCommit, publication.ResultCommit, publication.AdvertisedSourceCommit, publication.AdvertisedTargetCommit}
 	if expected != actual {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if publication.State == "applied" && publication.PublishedSourceCommit != proof.ResultCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -259,7 +261,7 @@ func verifyWorkflowNativeTarget(ctx context.Context, binding WorkflowNativePubli
 
 	actual := [4]string{proof.BaseCommit, proof.VerifiedTree, proof.PreparedTree, proof.HistoryHash}
 	if expected != actual {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	return proof, nil
@@ -295,7 +297,7 @@ func observeWorkflowPreparedGit(ctx context.Context, git WorkflowIntegrationGit,
 	}
 
 	if expected.Provenance != nil {
-		return WorkflowIntegrationProof{}, ErrWorkflowConflict
+		return WorkflowIntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	return git.VerifyWorkflowIntegration(ctx, query)

@@ -6,6 +6,8 @@ import (
 	"errors"
 	"os"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestWorkflowSubmissionCorruption rejects deleted, unknown, symlinked and
@@ -36,7 +38,7 @@ func testWorkflowSubmissionCorruption(t *testing.T, changed string) {
 	alias := workflowSubmissionAlias(t, f)
 
 	err = alias.withLock(t.Context(), func() error {
-		return alias.guardWorkflowSubmissionTarget(t.Context(), workflowHash([]byte("another-unit")), journal.TargetKey)
+		return alias.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another-unit")), journal.TargetKey)
 	})
 	if err == nil {
 		t.Fatal("journal corruption released exclusion through an alias")

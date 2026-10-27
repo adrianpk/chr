@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // WorkflowAdmissionCheck revalidates volatile caller authority before admission
 // or a guarded retained activation. Original admission replay bypasses the check.
@@ -23,11 +27,11 @@ func validateWorkflowAdmissionGuard(guard *WorkflowAdmissionGuard, selection Wor
 	}
 
 	if !validWorkflowNativeFingerprint(guard.SnapshotHash) || selection.SnapshotHash != "" && selection.SnapshotHash != guard.SnapshotHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if guard.Selected != nil && (!validWorkflowRequestKey(guard.Selected.Key) || guard.Selected.Revision == 0) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowTicketAdmission(guard, selection); err != nil {
@@ -39,7 +43,7 @@ func validateWorkflowAdmissionGuard(guard *WorkflowAdmissionGuard, selection Wor
 
 func validateWorkflowAdmissionPolicy(guard *WorkflowAdmissionGuard) error {
 	if !validWorkflowExecutionPolicy(guard.ExecutionPolicy) || guard.ExecutionPolicy.ConfigRevision != guard.Policy.Revision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowReviewPolicy(guard.Policy)
@@ -57,7 +61,7 @@ func (s *WorkflowStore) checkWorkflowAdmissionGuard(ctx context.Context, request
 		}
 
 		if policy != request.Admission.Policy || request.Policy != request.Admission.ExecutionPolicy {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		request.Selected = request.Admission.Selected

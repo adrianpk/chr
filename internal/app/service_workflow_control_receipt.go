@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) executeWorkflowControlResult(ctx context.Context, request WorkflowControlRequest) (*core.WorkflowControlResult, error) {
 	if request.RequestBinding == nil {
 		if request.AuthorizationCheck != nil && workflowDecisionControlAction(request.Action) {
-			return nil, core.ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		return nil, s.executeWorkflowControl(ctx, request)

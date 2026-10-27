@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func nativeAgentHarness(t *testing.T, store *WorkflowStore, id, mode string) WorkflowAgentHarness {
@@ -24,7 +26,7 @@ func nativeAgentHarness(t *testing.T, store *WorkflowStore, id, mode string) Wor
 		t.Fatal(err)
 	}
 
-	certificate := WorkflowAgentHarnessCertificate{SchemaVersion: 1, Protocol: workflowAgentCallProtocol, Command: command, ExecutableHash: workflowHash(data), CapabilityRevision: workflowHash([]byte("fixture-whole-call/v1")), Roles: []string{"executor", "reviewer", "closing"}, Accounting: workflowTokenAccounting, EnforcesWholeCall: true, ReportsWholeCall: true}
+	certificate := WorkflowAgentHarnessCertificate{SchemaVersion: 1, Protocol: workflowAgentCallProtocol, Command: command, ExecutableHash: contenthash.Sum(data), CapabilityRevision: contenthash.Sum([]byte("fixture-whole-call/v1")), Roles: []string{"executor", "reviewer", "closing"}, Accounting: workflowTokenAccounting, EnforcesWholeCall: true, ReportsWholeCall: true}
 	ref := retainNativeRecordEvidence(t, store, id, "agent-harness-"+mode, certificate)
 
 	return WorkflowAgentHarness{Command: command, Certificate: ref, InputTokens: 60, OutputTokens: 40}

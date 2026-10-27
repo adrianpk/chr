@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) validateRecordAuthority(ctx context.Context, request core.TelegramOperationRequest) error {
@@ -21,7 +22,7 @@ func (r telegramReceiver) validateRecordTargetAuthority(ctx context.Context, req
 
 	user, allowed := config.AuthorizedUser(request.Source.Peer.ChatID, request.Source.Peer.TopicID, request.Source.Peer.UserID, request.Source.ChatType)
 	if !allowed || user.OperatorID != request.Operator {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
@@ -73,7 +74,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 	}
 
 	if !telegramPreparedRecordBinding(prepared, request) {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := r.store.BeginTelegramOperation(ctx, request, time.Now()); err != nil {
@@ -81,7 +82,7 @@ func (r telegramReceiver) applyRecord(ctx context.Context, operations telegramRe
 	}
 
 	result, err := operations.ApplyTelegramRecord(ctx, request.Target, prepared)
-	if errors.Is(err, core.ErrWorkflowConflict) || errors.Is(err, ErrRecordUnsupported) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) {
 		return r.finishRecordFailure(ctx, request, "blocked", err, config)
 	}
 

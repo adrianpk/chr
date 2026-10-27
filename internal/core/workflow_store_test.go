@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTestStore(t *testing.T) *WorkflowStore {
@@ -60,7 +63,7 @@ func TestWorkflowRoundTrip(t *testing.T) {
 		t.Fatal("round trip lost revision, creation time or unknown fields")
 	}
 
-	if _, err := s.Write(ctx, old, old.Revision); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := s.Write(ctx, old, old.Revision); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale writer: %v", err)
 	}
 
@@ -82,7 +85,7 @@ func testWorkflowManualEdit(t *testing.T, s *WorkflowStore, written WorkflowReco
 		t.Fatal(err)
 	}
 
-	if _, err := s.Write(ctx, written, written.Revision); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := s.Write(ctx, written, written.Revision); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("manual edit with unchanged revision: %v", err)
 	}
 }
@@ -109,7 +112,7 @@ func TestWorkflowAdoption(t *testing.T) {
 
 	task := workflowTestTask("CHR-1").Task
 
-	r, err := s.Adopt(ctx, relative, *task, workflowHash([]byte(content)))
+	r, err := s.Adopt(ctx, relative, *task, contenthash.Sum([]byte(content)))
 	if err != nil {
 		t.Fatal(err)
 	}

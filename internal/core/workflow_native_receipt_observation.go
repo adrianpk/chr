@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) observeWorkflowNativeReceipt(ctx context.Context, receipt WorkflowRecord, provider WorkflowPullRequestProvider, git WorkflowIntegrationGit) (WorkflowNativePublicationObservation, error) {
 	observer, ok := provider.(WorkflowNativePublicationObserver)
@@ -19,7 +23,7 @@ func (s *WorkflowStore) observeWorkflowNativeReceipt(ctx context.Context, receip
 func (s *WorkflowStore) workflowNativeReceiptBinding(receipt WorkflowRecord) (WorkflowNativePublicationBinding, error) {
 	var binding WorkflowNativePublicationBinding
 	if receipt.Receipt == nil || receipt.Receipt.Native == nil {
-		return binding, ErrWorkflowConflict
+		return binding, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowNativeReceipt(receipt); err != nil {
@@ -79,7 +83,7 @@ func (s *WorkflowStore) retainWorkflowNativeReceiptObservation(ctx context.Conte
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.State != "confirmed" || !workflowNativeSubmissionEntryMatches(last, entry) {
-		return run, ErrWorkflowConflict
+		return run, workflowstate.ErrConflict
 	}
 
 	guard := WorkflowIntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, BudgetRevision: run.IntegrationBudget.Revision}

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -81,7 +82,7 @@ func webCasePlanScope(ctx context.Context, operations service, request webui.Wri
 
 func webPlanWriteFailure(err error, slug string) webui.WriteActionResponse {
 	response := webValidationWrite(err)
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		response.Status = webui.WriteStatusStale
 		response.Summary = "The plan or its context changed. Reload this case before generating again."
 		response.ReloadURL = "/cases/detail?id=" + url.QueryEscape(slug)
@@ -162,7 +163,7 @@ func (p webViewProvider) writePlanDelivery(ctx context.Context, operations servi
 	result, err := operations.GeneratePlanDelivery(ctx, PlanGenerateRequest{Scope: scope, ExpectedRevision: request.Revision, OperationID: request.Fields["request_id"]})
 	if err != nil {
 		response := webValidationWrite(err)
-		if errors.Is(err, core.ErrWorkflowConflict) {
+		if errors.Is(err, workflowstate.ErrConflict) {
 			response.Status = webui.WriteStatusStale
 		}
 

@@ -10,6 +10,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) prepareLegacyWorkflowPlan(opts WorkflowPlanAdoptionOptions) (WorkflowRecord, error) {
@@ -32,7 +35,7 @@ func (s *WorkflowStore) prepareLegacyWorkflowPlan(opts WorkflowPlanAdoptionOptio
 	}
 
 	if _, adopted := record.Metadata["workflow"]; adopted {
-		return record, ErrWorkflowConflict
+		return record, workflowstate.ErrConflict
 	}
 
 	body, err := s.readApprovedPlan(opts.Plan)
@@ -40,9 +43,9 @@ func (s *WorkflowStore) prepareLegacyWorkflowPlan(opts WorkflowPlanAdoptionOptio
 		return record, err
 	}
 
-	record.SourceHash += ":" + workflowHash(body)
+	record.SourceHash += ":" + contenthash.Sum(body)
 	if record.SourceHash != opts.SourceHash {
-		return record, ErrWorkflowConflict
+		return record, workflowstate.ErrConflict
 	}
 
 	record.ProjectID, record.Path, record.Body = s.projectID, opts.PlanPath, body

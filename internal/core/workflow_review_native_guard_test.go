@@ -3,6 +3,8 @@ package core
 import (
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeReviewInputs invalidates approval for actual candidate, history,
@@ -13,11 +15,11 @@ func TestNativeReviewInputs(t *testing.T) {
 		change func(*testing.T, nativePreparationFixture, WorkflowIntegrationCandidate)
 	}{
 		{"target", func(_ *testing.T, f nativePreparationFixture, _ WorkflowIntegrationCandidate) {
-			f.provider.pr.BaseCommit = workflowHash([]byte("moved"))[:40]
+			f.provider.pr.BaseCommit = contenthash.Sum([]byte("moved"))[:40]
 			f.provider.target = f.provider.pr.BaseCommit
 		}},
 		{"source", func(_ *testing.T, f nativePreparationFixture, _ WorkflowIntegrationCandidate) {
-			f.provider.pr.HeadCommit = workflowHash([]byte("moved"))[:40]
+			f.provider.pr.HeadCommit = contenthash.Sum([]byte("moved"))[:40]
 		}},
 		{"profile", func(t *testing.T, f nativePreparationFixture, _ WorkflowIntegrationCandidate) {
 			writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "work", "integration.publication_profile", WorkflowPublicationDisabled)

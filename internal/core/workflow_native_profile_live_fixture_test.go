@@ -9,6 +9,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type nativeLiveProfile struct {
@@ -172,6 +174,6 @@ func (reader nativeLivePolicyReader) policy(profile nativeLiveProfile, method st
 		FastForwardTargetAuthorized:   profile.Policy.TargetPublication == "Explicitly authorized fast-forward Git publication",
 		HostCandidateReview:           profile.Policy.Review == "CHR-managed validation and review of the prepared candidate" && !profile.Policy.NativeApproval && !profile.Policy.NativeProtection && !profile.Policy.Signing,
 		ReviewMode:                    ReviewWorkflowModeHumanReview,
-		CredentialIdentityFingerprint: workflowHash([]byte(identity)), ObservationContract: profile.Certification.Contract, CertifiedMethods: profile.Certification.Methods,
+		CredentialIdentityFingerprint: contenthash.Sum([]byte(identity)), ObservationContract: profile.Certification.Contract, CertifiedMethods: profile.Certification.Methods,
 	}, nil
 }

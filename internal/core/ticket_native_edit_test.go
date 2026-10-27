@@ -6,6 +6,8 @@ import (
 	"maps"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Native edits retain unknown envelope fields and reject unproven lifecycle moves.
@@ -40,7 +42,7 @@ func TestTicketNativeEditing(t *testing.T) {
 
 	checkNativeTicketRejected(t, opts, saved, TicketEditRequest{Fields: map[string]string{"status": TicketStatusDone}, Binding: ticketEditorBinding("native-done")})
 
-	if _, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{Key: created.Task.Key, Revision: original.Revision, Body: &body, Binding: ticketEditorBinding("native-stale")}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{Key: created.Task.Key, Revision: original.Revision, Body: &body, Binding: ticketEditorBinding("native-stale")}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("native stale edit was accepted", err)
 	}
 }

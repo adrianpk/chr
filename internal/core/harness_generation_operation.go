@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -70,7 +71,7 @@ func FreezeHarnessGeneration(ctx context.Context, project, id, purpose string, r
 
 	if retained, ok := ctx.Value(harnessGenerationContextKey{}).(HarnessGenerationOperation); ok {
 		if retained.project != root {
-			return operation, ErrWorkflowConflict
+			return operation, workflowstate.ErrConflict
 		}
 
 		return retained, validateGenerationOperation(retained)
@@ -140,7 +141,7 @@ func prepareHarnessGenerationOperation(ctx context.Context, project, id, purpose
 	}
 
 	if binding.Selection.SelectionRevision != config.Revision() || binding.Selection.Profile != config.Harnesses.Generation || binding.Selection.Action != purpose {
-		return operation, ErrWorkflowConflict
+		return operation, workflowstate.ErrConflict
 	}
 
 	if err := checkGenerationExecutable(operation); err != nil {
@@ -189,7 +190,7 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 	}
 
 	if operation.Binding.Selection.Action != operation.Purpose {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !filepath.IsAbs(operation.configDir) || !filepath.IsAbs(operation.executionDir) || len(operation.ProjectRef) > 256 {
@@ -198,7 +199,7 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 
 	if operation.Binding.Selection.Backend == "openai" {
 		if operation.program != "" || operation.resources != (harness.GenerationResources{}) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil

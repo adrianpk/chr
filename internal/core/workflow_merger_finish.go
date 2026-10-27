@@ -5,6 +5,9 @@ import (
 	"errors"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) finishWorkflowMerger(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, attempt *WorkflowMergerAttempt, executionErr error) error {
@@ -58,7 +61,7 @@ func (s *WorkflowStore) persistWorkflowMergerFinish(ctx context.Context, run *wo
 		return r.ID == result.Input.BudgetReservationID && r.AttemptID == claim.AttemptID
 	})
 	if index < 0 || !slices.Contains([]string{"reserved", "launched"}, budget.Reservations[index].State) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 	// Dispatch uncertainty and unmetered calls retain their charge. Whole-call
 	// observations remain available to the existing budget settlement owner.
@@ -98,7 +101,7 @@ func (s *WorkflowStore) persistWorkflowMergerFinish(ctx context.Context, run *wo
 func workflowMergerFinishedRun(run *workflowInvocationFile, claim *WorkflowClaim, result WorkflowMergerAttempt, data []byte) workflowFileChange {
 	current := &run.Attempts[len(run.Attempts)-1]
 	current.Outcome, current.FinishedAt = "checkpointed", time.Now().UTC()
-	current.ResultRef, current.ResultHash = workflowAttemptFile(run.ID, claim.AttemptID, "result.json"), workflowHash(data)
+	current.ResultRef, current.ResultHash = workflowAttemptFile(run.ID, claim.AttemptID, "result.json"), contenthash.Sum(data)
 
 	run.Status, run.Outcome = "waiting_integration", "merger_proposal_pending"
 	if result.Acceptance != nil && result.Acceptance.Outcome == "accepted_pending_validation" {
@@ -140,7 +143,7 @@ func boundWorkflowMergerAttempt(attempt *WorkflowMergerAttempt) error {
 
 	attempt.Harness.Stdout, attempt.Harness.Stderr, attempt.Harness.Truncated = "", "", true
 
-	return ErrWorkflowConflict
+	return workflowstate.ErrConflict
 }
 
 func appendWorkflowMergerSettlement(files []workflowFileChange, settlement workflowFileChange) []workflowFileChange {

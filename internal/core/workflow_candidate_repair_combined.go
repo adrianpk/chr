@@ -3,13 +3,15 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // BeginWorkflowMergerCombinedRepair freezes a clean merge/squash baseline for
 // semantic repair. Rebase repair must name its original replay step instead.
 func (git OSWorkflowPreparationGit) BeginWorkflowMergerCombinedRepair(ctx context.Context, query WorkflowPreparationQuery, proof WorkflowIntegrationProof) (WorkflowMergerRepairState, error) {
 	if !validWorkflowCombinedRepairQuery(git, query, proof) {
-		return WorkflowMergerRepairState{}, ErrWorkflowConflict
+		return WorkflowMergerRepairState{}, workflowstate.ErrConflict
 	}
 
 	reader, err := git.newMergerRepairReader(ctx, query)

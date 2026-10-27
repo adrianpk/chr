@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileAuthoringSessionRepository) CreateSession(ctx context.Context, session AuthoringSession) (paths AuthoringSessionPaths, err error) {
@@ -27,12 +29,12 @@ func (r *fileAuthoringSessionRepository) UpdateSession(ctx context.Context, sess
 		}
 
 		if current.Guided != nil || session.Guided != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if current.Revision > 0 {
 			if session.Revision != current.Revision || session.Namespace != current.Namespace {
-				return ErrWorkflowConflict
+				return workflowstate.ErrConflict
 			}
 
 			session.Revision++
@@ -86,7 +88,7 @@ func (r *fileAuthoringSessionRepository) AppendTranscriptEvents(ctx context.Cont
 		}
 
 		if session.Guided != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := r.appendTranscriptEvents(ctx, id, events); err != nil {

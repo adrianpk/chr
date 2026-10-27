@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowPlanAdoptionFixture(t *testing.T) (*WorkflowStore, WorkflowPlanAdoptionOptions) {
@@ -31,14 +33,14 @@ func workflowPlanAdoptionFixture(t *testing.T) (*WorkflowStore, WorkflowPlanAdop
 		t.Fatal(err)
 	}
 
-	plan.PlanHash = workflowHash(body)
+	plan.PlanHash = contenthash.Sum(body)
 
 	metadata, err := os.ReadFile(filepath.Join(artifact.Dir, "metadata.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	opts := WorkflowPlanAdoptionOptions{Plan: plan, PlanPath: "plan/" + artifact.ID + "/metadata.json", SourceHash: workflowHash(metadata) + ":" + plan.PlanHash, CheckQuiescent: func(context.Context, []string) error { return nil }}
+	opts := WorkflowPlanAdoptionOptions{Plan: plan, PlanPath: "plan/" + artifact.ID + "/metadata.json", SourceHash: contenthash.Sum(metadata) + ":" + plan.PlanHash, CheckQuiescent: func(context.Context, []string) error { return nil }}
 	for i := range opts.Plan.Slices {
 		for j := range opts.Plan.Slices[i].Tasks {
 			task := &opts.Plan.Slices[i].Tasks[j]
@@ -85,7 +87,7 @@ func workflowLegacyTicketFixture(t *testing.T, store *WorkflowStore, task Genera
 		t.Fatal(err)
 	}
 
-	return WorkflowAdoptionTask{TaskID: task.ID, Path: path, SourceHash: workflowHash([]byte(text))}
+	return WorkflowAdoptionTask{TaskID: task.ID, Path: path, SourceHash: contenthash.Sum([]byte(text))}
 }
 
 // TestWorkflowPlanAdoption preserves original identity, creation times, native
@@ -201,7 +203,7 @@ func markLegacyWorkflowAttempt(t *testing.T, store *WorkflowStore, opts *Workflo
 		t.Fatal(err)
 	}
 
-	opts.Tasks[0].SourceHash = workflowHash(data)
+	opts.Tasks[0].SourceHash = contenthash.Sum(data)
 }
 
 // TestWorkflowPlanAdoptionOwned blocks an actual held legacy operation lock and
@@ -326,5 +328,5 @@ func markLegacyWorkflowUseCase(t *testing.T, store *WorkflowStore, opts *Workflo
 		t.Fatal(err)
 	}
 
-	opts.Tasks[0].SourceHash = workflowHash(data)
+	opts.Tasks[0].SourceHash = contenthash.Sum(data)
 }

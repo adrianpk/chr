@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // workflowPlanFixture represents two integration units with three task contracts
@@ -11,7 +13,7 @@ import (
 func workflowPlanFixture() GeneratedWorkflowPlan {
 	gate := WorkflowValidation{Required: true, Commands: [][]string{{"go", "test", "./..."}}, TimeoutSeconds: 60}
 
-	plan := GeneratedWorkflowPlan{MaterializationID: "generation-a", Title: "Delivery", PlanRef: "plan/approved.md", PlanHash: workflowHash([]byte("approved\n")), ClosingValidation: gate}
+	plan := GeneratedWorkflowPlan{MaterializationID: "generation-a", Title: "Delivery", PlanRef: "plan/approved.md", PlanHash: contenthash.Sum([]byte("approved\n")), ClosingValidation: gate}
 	for i := 1; i <= 2; i++ {
 		slice := GeneratedWorkflowSlice{ID: fmt.Sprintf("slice-%d", i), Label: fmt.Sprintf("Slice %d", i), Order: i, Title: "Integration", Contract: "Deliver one reviewed integration unit", Validation: gate}
 		for j := 1; j <= 3; j++ {

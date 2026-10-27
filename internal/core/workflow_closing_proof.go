@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) observeWorkflowClosingTarget(ctx context.Context, request WorkflowSetClosureRequest, ports WorkflowFrontierPorts) (WorkflowPreviewTarget, error) {
@@ -15,7 +18,7 @@ func (s *WorkflowStore) observeWorkflowClosingTarget(ctx context.Context, reques
 	}
 
 	if target.Repository != request.Repository || !workflowCommitID(target.Commit) {
-		return target, ErrWorkflowConflict
+		return target, workflowstate.ErrConflict
 	}
 
 	actual, err := ports.Provider.ReadWorkflowBranch(ctx, request.Repository, request.Branch)
@@ -28,7 +31,7 @@ func (s *WorkflowStore) observeWorkflowClosingTarget(ctx context.Context, reques
 
 func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input WorkflowClosingInput, descriptor WorkflowSlice, ports WorkflowFrontierPorts) (WorkflowClosingSlice, error) {
 	if descriptor.Phase != "integrated" || descriptor.DeliveryRef == "" {
-		return WorkflowClosingSlice{}, fmt.Errorf("%w: all actual slices must integrate", ErrWorkflowConflict)
+		return WorkflowClosingSlice{}, fmt.Errorf("%w: all actual slices must integrate", workflowstate.ErrConflict)
 	}
 
 	receipt, err := s.readRecord(descriptor.DeliveryRef)
@@ -62,7 +65,7 @@ func (s *WorkflowStore) workflowClosingSliceProof(ctx context.Context, input Wor
 
 func (s *WorkflowStore) workflowClosingDeliveryProof(ctx context.Context, receipt WorkflowRecord) (WorkflowSliceDeliveryProof, string, error) {
 	if receipt.Receipt == nil || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() {
-		return WorkflowSliceDeliveryProof{}, "", ErrWorkflowConflict
+		return WorkflowSliceDeliveryProof{}, "", workflowstate.ErrConflict
 	}
 
 	if receipt.Receipt.Native != nil {
@@ -80,10 +83,10 @@ func (s *WorkflowStore) workflowClosingDeliveryProof(ctx context.Context, receip
 	}
 
 	if proof.Schema != "chr-slice-delivery-proof/v1" || !workflowReceiptMatchesProof(receipt, proof, receipt.Receipt.VerificationRef) {
-		return proof, "", ErrWorkflowConflict
+		return proof, "", workflowstate.ErrConflict
 	}
 
-	return proof, workflowHash(data), nil
+	return proof, contenthash.Sum(data), nil
 }
 
 func (s *WorkflowStore) observeWorkflowClosingSlice(ctx context.Context, input WorkflowClosingInput, receipt WorkflowRecord, retained WorkflowSliceDeliveryProof, ports WorkflowFrontierPorts) (WorkflowIntegrationProof, error) {
@@ -101,14 +104,14 @@ func (s *WorkflowStore) observeWorkflowClosingLegacySlice(ctx context.Context, i
 	}
 
 	if !workflowClosingPRMatches(input, receipt, retained, pr) {
-		return WorkflowIntegrationProof{}, ErrWorkflowConflict
+		return WorkflowIntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	query := retained.Git.WorkflowIntegrationQuery
 
 	query.SourceDirectory = s.layout.ProjectDir()
 	if query.Repository != input.Target.Repository || query.TargetBranch != input.Branch {
-		return WorkflowIntegrationProof{}, ErrWorkflowConflict
+		return WorkflowIntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	proof, err := ports.Observer.VerifyWorkflowIntegration(ctx, query)
@@ -121,7 +124,7 @@ func (s *WorkflowStore) observeWorkflowClosingLegacySlice(ctx context.Context, i
 	}
 
 	if proof.ObservedTarget != input.Target.Commit || proof.HistoryHash != receipt.Receipt.HistoryProof || proof.VerifiedTree != receipt.Receipt.VerifiedTree {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	return proof, nil
@@ -134,7 +137,7 @@ func (s *WorkflowStore) workflowClosingSliceMembers(ctx context.Context, descrip
 	}
 
 	if descriptor.TaskInputHash != WorkflowTaskInputHash(snapshot.Records, descriptor.ID) || receipt.Receipt.Unit != (WorkflowRef{Kind: "slice", ID: descriptor.ID}) || descriptor.PullRequest != receipt.Receipt.PullRequest {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	count := 0
@@ -147,7 +150,7 @@ func (s *WorkflowStore) workflowClosingSliceMembers(ctx context.Context, descrip
 		count++
 
 		if !workflowFinalizedTaskMatches(record, "refs/heads/"+proof.PullRequest.HeadBranch, receipt) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

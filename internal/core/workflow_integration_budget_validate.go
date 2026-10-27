@@ -5,6 +5,8 @@ import (
 	"math"
 	"reflect"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTokenSum(a, b int64) (int64, error) {
@@ -41,12 +43,12 @@ func validWorkflowIntegrationBudgetHeader(b WorkflowIntegrationBudget) bool {
 
 func validateWorkflowIntegrationTokens(b WorkflowIntegrationBudget) error {
 	if b.TokenLimit != nil && *b.TokenLimit <= 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	settled, reserved, err := workflowIntegrationTokenTotals(b.Reservations)
 	if err != nil || settled != b.TokensSettled || reserved != b.TokensReserved {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	total, err := workflowTokenSum(settled, reserved)
@@ -60,13 +62,13 @@ func validateWorkflowIntegrationTokens(b WorkflowIntegrationBudget) error {
 func validateWorkflowIntegrationGrants(b WorkflowIntegrationBudget) error {
 	limits := b.AdmissionLimits
 	if !validWorkflowIntegrationLimits(limits) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	ids := map[string]bool{}
 	for _, grant := range b.Grants {
 		if !validWorkflowIntegrationGrant(grant, b.Revision) || ids[grant.ID] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		ids[grant.ID] = true
@@ -80,7 +82,7 @@ func validateWorkflowIntegrationGrants(b WorkflowIntegrationBudget) error {
 	}
 
 	if limits != b.LimitsSnapshot {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowIntegrationTokenGrants(b)
@@ -93,7 +95,7 @@ func validWorkflowIntegrationGrant(grant WorkflowIntegrationGrant, revision uint
 func validateWorkflowIntegrationTokenGrants(b WorkflowIntegrationBudget) error {
 	if b.AdmissionTokenLimit == nil {
 		if b.TokenLimit != nil || slices.ContainsFunc(b.Grants, func(g WorkflowIntegrationGrant) bool { return g.Kind == "tokens" }) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -101,7 +103,7 @@ func validateWorkflowIntegrationTokenGrants(b WorkflowIntegrationBudget) error {
 
 	limit := *b.AdmissionTokenLimit
 	if limit <= 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, grant := range b.Grants {
@@ -118,7 +120,7 @@ func validateWorkflowIntegrationTokenGrants(b WorkflowIntegrationBudget) error {
 	}
 
 	if b.TokenLimit == nil || *b.TokenLimit != limit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -141,7 +143,7 @@ func addWorkflowIntegrationLimit(limits *WorkflowIntegrationLimits, kind string,
 	case "submission":
 		counter = &limits.Submission
 	default:
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	next, err := workflowTokenSum(*counter, amount)
@@ -158,7 +160,7 @@ func workflowIntegrationTokenTotals(reservations []WorkflowIntegrationReservatio
 	ids := map[string]bool{}
 	for _, r := range reservations {
 		if ids[r.ID] {
-			return 0, 0, ErrWorkflowConflict
+			return 0, 0, workflowstate.ErrConflict
 		}
 
 		ids[r.ID] = true
@@ -170,7 +172,7 @@ func workflowIntegrationTokenTotals(reservations []WorkflowIntegrationReservatio
 		case "settled":
 			usage, sumErr := workflowTokenSum(r.ReportedInput, r.ReportedOutput)
 			if sumErr != nil || usage > r.Allowance.Maximum {
-				return 0, 0, ErrWorkflowConflict
+				return 0, 0, workflowstate.ErrConflict
 			}
 
 			settled, err = workflowTokenSum(settled, usage)
@@ -188,7 +190,7 @@ func workflowIntegrationTokenTotals(reservations []WorkflowIntegrationReservatio
 
 func validateWorkflowIntegrationReservation(r WorkflowIntegrationReservation) error {
 	if !validWorkflowIntegrationReservationOwner(r) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if r.Kind != "agent_call" {
@@ -196,19 +198,19 @@ func validateWorkflowIntegrationReservation(r WorkflowIntegrationReservation) er
 	}
 
 	if !validWorkflowIntegrationCallAllowance(r) || !slices.Contains([]string{"executor", "merger", "reviewer", "closing"}, r.Role) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if r.State == "settled" {
 		if r.SettlementProof == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
 	}
 
 	if r.ReportedInput != 0 || r.ReportedOutput != 0 || r.SettlementProof != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -234,15 +236,15 @@ func validWorkflowIntegrationCallAllowance(r WorkflowIntegrationReservation) boo
 
 func validateWorkflowIntegrationAction(r WorkflowIntegrationReservation) error {
 	if !slices.Contains([]string{"drift", "submission"}, r.Kind) || r.Role != "" || r.State != "reserved" || r.Allowance != (WorkflowTokenAllowance{}) || !r.RuntimeDeadline.IsZero() {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if r.SettlementProof != nil || r.ReportedInput != 0 || r.ReportedOutput != 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validWorkflowIntegrationActionBase(r) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -260,7 +262,7 @@ func validateWorkflowIntegrationCounters(b WorkflowIntegrationBudget) error {
 	units := map[WorkflowRef]bool{}
 	for _, counter := range b.UnitCounters {
 		if !validWorkflowIntegrationCounterUnit(counter.Unit) || units[counter.Unit] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		units[counter.Unit] = true
@@ -269,13 +271,13 @@ func validateWorkflowIntegrationCounters(b WorkflowIntegrationBudget) error {
 		}
 
 		if counter.Merger < 0 || counter.Drift < 0 || counter.Submission < 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
 	for _, reservation := range b.Reservations {
 		if !units[reservation.Unit] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -309,7 +311,7 @@ func checkWorkflowIntegrationUsage(before, now WorkflowIntegrationUsage) error {
 	for _, old := range before.ReviewRepairs {
 		index := slices.IndexFunc(now.ReviewRepairs, func(current WorkflowReviewRepairBudget) bool { return current.Unit == old.Unit })
 		if index < 0 || now.ReviewRepairs[index].Consumed < old.Consumed {
-			return fmt.Errorf("%w: existing review repair consumption decreased", ErrWorkflowConflict)
+			return fmt.Errorf("%w: existing review repair consumption decreased", workflowstate.ErrConflict)
 		}
 	}
 
@@ -329,7 +331,7 @@ func workflowUsageIncludes(now, before []string) bool {
 func checkWorkflowIntegrationCounterReservations(counter WorkflowIntegrationCounter, reservations []WorkflowIntegrationReservation) error {
 	expected := WorkflowIntegrationCounter{Unit: counter.Unit, ExistingSubmissions: counter.ExistingSubmissions, Submission: counter.ExistingSubmissions}
 	if counter.ExistingSubmissions < 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, reservation := range reservations {
@@ -350,7 +352,7 @@ func checkWorkflowIntegrationCounterReservations(counter WorkflowIntegrationCoun
 	}
 
 	if counter != expected {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -362,12 +364,12 @@ func validWorkflowIntegrationLimits(limits WorkflowIntegrationLimits) bool {
 
 func validateWorkflowIntegrationUsage(usage WorkflowIntegrationUsage) error {
 	if usage.WorkerCount < 0 || usage.ReviewCount < 0 || usage.PreparationCount < 0 || len(usage.Attempts) > WorkflowRecordLimit || len(usage.ClosingAttempts) > WorkflowRecordLimit || len(usage.ReviewRepairs) > WorkflowRecordLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, repair := range usage.ReviewRepairs {
 		if repair.Consumed < 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

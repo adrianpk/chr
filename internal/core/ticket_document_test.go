@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Editing the full description preserves unknown metadata, discussion and identity.
@@ -30,7 +32,7 @@ func TestTicketDocumentRoundTrip(t *testing.T) {
 			checkTicketEditorSaved(t, original, saved, body, fields)
 
 			before := ticketEditorBytes(t, saved.Ticket.Path)
-			if _, err := UpdateTicketDocument(t.Context(), opts, request); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := UpdateTicketDocument(t.Context(), opts, request); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale editor overwrote newer content", err)
 			}
 
@@ -154,7 +156,7 @@ func TestTicketDocumentConcurrent(t *testing.T) {
 		err := <-results
 		if err == nil {
 			success++
-		} else if errors.Is(err, ErrWorkflowConflict) {
+		} else if errors.Is(err, workflowstate.ErrConflict) {
 			conflict++
 		} else {
 			t.Fatal(err)

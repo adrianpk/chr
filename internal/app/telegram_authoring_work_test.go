@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramAuthoringWorkFixture(t *testing.T) (service, core.AuthoringContinuationResult) {
@@ -197,7 +198,7 @@ func TestTelegramAuthoringWorkGuards(t *testing.T) {
 
 			tt.change(t, operations, &prepared)
 
-			if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, core.ErrWorkflowConflict) {
+			if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed prepared work accepted", err)
 			}
 
@@ -231,7 +232,7 @@ func TestTelegramAuthoringWorkFailedBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), prepared); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale source accepted", err)
 	}
 
@@ -247,7 +248,7 @@ func TestTelegramAuthoringWorkFailedBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), fresh); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.ApplyPreparedAuthoringWork(t.Context(), fresh); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("failed request exchanged its arguments", err)
 	}
 

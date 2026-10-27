@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) beginWorkflowNativeSubmission(ctx context.Context, run workflowInvocationFile, fence WorkflowIntegrationBudgetGuard, provider WorkflowPublicationGuardProvider) (WorkflowSubmission, bool, error) {
@@ -29,7 +31,7 @@ func (s *WorkflowStore) beginWorkflowNativeSubmission(ctx context.Context, run w
 	}
 
 	if !workflowNativeSubmissionReady(run, entry, journal) {
-		return WorkflowSubmission{}, false, ErrWorkflowConflict
+		return WorkflowSubmission{}, false, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowIntegrationAuthorization(run, entry); err != nil {
@@ -126,7 +128,7 @@ type workflowNativeProjection struct {
 
 func (s *WorkflowStore) prepareWorkflowNativeProjection(run *workflowInvocationFile, journal workflowSubmissionJournal) (workflowNativeProjection, error) {
 	if run.Integration == nil {
-		return workflowNativeProjection{}, ErrWorkflowConflict
+		return workflowNativeProjection{}, workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
@@ -136,7 +138,7 @@ func (s *WorkflowStore) prepareWorkflowNativeProjection(run *workflowInvocationF
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if !workflowNativeSubmissionEntryMatches(last, entry) {
-		return workflowNativeProjection{}, ErrWorkflowConflict
+		return workflowNativeProjection{}, workflowstate.ErrConflict
 	}
 
 	binding := workflowSubmissionProjection(journal)
@@ -225,7 +227,7 @@ func (s *WorkflowStore) retainWorkflowNativeSubmission(ctx context.Context, run 
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if !workflowNativeSubmissionCallbackMatches(last, entry, request) {
-		return last, ErrWorkflowConflict
+		return last, workflowstate.ErrConflict
 	}
 
 	if workflowNativeJSONEqual(*last.Native, request.Facts) {
@@ -261,7 +263,7 @@ func workflowNativeDispatchStopped(native WorkflowNativeSubmission, run workflow
 
 func checkWorkflowNativeSubmissionCallback(run workflowInvocationFile, entry WorkflowIntegrationEntry, budget WorkflowIntegrationBudget, last WorkflowSubmission, hash string, request WorkflowNativeSubmissionUpdate) error {
 	if hash != request.JournalHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.WorkflowIntegrationBudgetGuard); err != nil {

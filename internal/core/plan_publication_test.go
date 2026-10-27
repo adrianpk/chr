@@ -9,6 +9,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Two publishers bind the same observed absence; the process-safe owner admits
@@ -42,7 +44,7 @@ func TestPlanPublicationConcurrent(t *testing.T) {
 	for err := range results {
 		if err == nil {
 			writes++
-		} else if errors.Is(err, ErrWorkflowConflict) {
+		} else if errors.Is(err, workflowstate.ErrConflict) {
 			conflicts++
 		} else {
 			t.Fatal(err)
@@ -78,7 +80,7 @@ func TestPlanPublicationRecovery(t *testing.T) {
 		t.Fatal("publication interruption was ignored")
 	}
 
-	if _, err := PlanTargetRevision(t.Context(), project, plan.Scope); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := PlanTargetRevision(t.Context(), project, plan.Scope); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("pending publication was readable", err)
 	}
 
@@ -88,7 +90,7 @@ func TestPlanPublicationRecovery(t *testing.T) {
 
 	checkRecoveredPlanPublication(t, project, paths, plan)
 
-	if _, err := WriteGeneratedPlan(t.Context(), project, plan); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := WriteGeneratedPlan(t.Context(), project, plan); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("old target binding was accepted after recovery", err)
 	}
 }

@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationProvenance supplements the original history proof without
@@ -42,7 +45,7 @@ func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, 
 		return nil, err
 	}
 
-	p := &WorkflowIntegrationProvenance{Schema: "chr-integration-provenance/v1", ObjectFormat: format, AttributionPolicy: "host_author_with_original_source_manifest", CombinedDiffHash: workflowHash([]byte(diff)), Source: source, Prepared: []WorkflowIntegrationAttribution{prepared}}
+	p := &WorkflowIntegrationProvenance{Schema: "chr-integration-provenance/v1", ObjectFormat: format, AttributionPolicy: "host_author_with_original_source_manifest", CombinedDiffHash: contenthash.Sum([]byte(diff)), Source: source, Prepared: []WorkflowIntegrationAttribution{prepared}}
 	if proof.Provenance != nil {
 		p.Repairs = slices.Clone(proof.Provenance.Repairs)
 	}
@@ -61,7 +64,7 @@ func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Con
 	}
 
 	if !workflowNativeJSONEqual(actual, proof.Provenance) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -74,7 +77,7 @@ func validateWorkflowIntegrationProvenance(proof WorkflowIntegrationProof) error
 	}
 
 	if !validWorkflowProvenanceHeader(proof, *p) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowProvenanceCommits(proof, *p); err != nil {
@@ -82,7 +85,7 @@ func validateWorkflowIntegrationProvenance(proof WorkflowIntegrationProof) error
 	}
 
 	if p.Preparation != nil && !validWorkflowPreparationMetadata(proof, *p.Preparation) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowTreeRepairs(proof); err != nil {
@@ -95,7 +98,7 @@ func validateWorkflowIntegrationProvenance(proof WorkflowIntegrationProof) error
 
 	data, err := json.Marshal(p)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -141,7 +144,7 @@ func validWorkflowAttributedSources(proof WorkflowIntegrationProof, sources []Wo
 
 func validateWorkflowProvenanceCommits(proof WorkflowIntegrationProof, p WorkflowIntegrationProvenance) error {
 	if !validWorkflowAttributedSources(proof, p.Source) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if proof.Method == "rebase" {
@@ -156,7 +159,7 @@ func validateWorkflowProvenanceCommits(proof WorkflowIntegrationProof, p Workflo
 	}
 
 	if !validWorkflowIntegrationAttribution(result) || result.Commit != proof.ResultCommit || result.Tree != proof.PreparedTree || !slices.Equal(result.Parents, parents) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

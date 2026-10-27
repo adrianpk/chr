@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"errors"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflowInvocationFile, receipt WorkflowRecord, candidate WorkflowSliceCandidate, ports WorkflowFrontierPorts) (WorkflowPreviewTarget, WorkflowIntegrationProof, error) {
@@ -19,7 +21,7 @@ func (s *WorkflowStore) observeWorkflowFrontier(ctx context.Context, run workflo
 	}
 
 	if target.Repository != run.Selection.Target.Repository || !workflowCommitID(target.Commit) {
-		return target, WorkflowIntegrationProof{}, ErrWorkflowConflict
+		return target, WorkflowIntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	proof, err := s.workflowFrontierReceiptProof(ctx, run, receipt, candidate, target, ports)
@@ -61,7 +63,7 @@ func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFil
 	}
 
 	if workflowPullRequestMismatch(*run.PullRequest, []WorkflowPullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != receipt.Receipt.ResultCommit || pr.BaseCommit != target.Commit {
-		return WorkflowIntegrationProof{}, ErrWorkflowConflict
+		return WorkflowIntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	integration := workflowIntegrationQuery(run, candidate, pr, receipt.Receipt.Method)
@@ -76,7 +78,7 @@ func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFil
 	}
 
 	if !workflowFrontierReceiptProofMatches(proof, receipt, target) {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	return proof, nil

@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowJournalPath = "lock/workflow-transition.json"
@@ -91,7 +94,7 @@ func (s *WorkflowStore) commitAllocatedFiles(changes []workflowFileChange, guard
 		return err
 	}
 
-	journal := workflowJournal{Schema: WorkflowSchema, ID: workflowHash(append([]byte(guard), data...)), Changes: changes, AllocationGuard: guard}
+	journal := workflowJournal{Schema: WorkflowSchema, ID: contenthash.Sum(append([]byte(guard), data...)), Changes: changes, AllocationGuard: guard}
 
 	encoded, err := json.Marshal(journal)
 	if err != nil {
@@ -153,7 +156,7 @@ func (s *WorkflowStore) checkJournalImages(journal workflowJournal) error {
 		return err
 	}
 
-	if journal.Schema != WorkflowSchema || workflowHash(append([]byte(journal.AllocationGuard), data...)) != journal.ID || len(journal.Changes) == 0 {
+	if journal.Schema != WorkflowSchema || contenthash.Sum(append([]byte(journal.AllocationGuard), data...)) != journal.ID || len(journal.Changes) == 0 {
 		return fmt.Errorf("invalid workflow transition journal")
 	}
 
@@ -187,13 +190,13 @@ func (s *WorkflowStore) journalImage(change workflowFileChange) (bool, error) {
 		return false, err
 	}
 
-	hash := workflowHash(data)
-	if hash == workflowHash(change.After) {
+	hash := contenthash.Sum(data)
+	if hash == contenthash.Sum(change.After) {
 		return true, nil
 	}
 
 	if hash != change.Before {
-		return false, fmt.Errorf("%w: %s", ErrWorkflowConflict, change.Path)
+		return false, fmt.Errorf("%w: %s", workflowstate.ErrConflict, change.Path)
 	}
 
 	return false, nil
@@ -247,7 +250,7 @@ func (s *WorkflowStore) confirmJournalImages(journal workflowJournal) error {
 		}
 
 		if !applied {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

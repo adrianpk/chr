@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, target WorkflowPreviewTarget, proof WorkflowIntegrationProof) error {
@@ -15,7 +17,7 @@ func (s *WorkflowStore) commitWorkflowFrontier(run *workflowInvocationFile, targ
 	}
 
 	delivery.EvidenceRef = workflowFrontierEvidencePath(run.ID, delivery.Cursor)
-	delivery.EvidenceHash = workflowHash(data)
+	delivery.EvidenceHash = contenthash.Sum(data)
 	run.Deliveries = append(run.Deliveries, delivery)
 	run.ExecutionTarget = &target
 	run.ConfirmedCursor = run.Cursor

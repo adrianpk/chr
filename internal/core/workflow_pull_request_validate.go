@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
@@ -18,7 +20,7 @@ func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
 
 	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil || repository != binding.Request.Repository || !validWorkflowPullRequestContent(WorkflowSlicePullRequestRequest{BaseBranch: binding.Request.BaseBranch, Title: binding.Request.Title, Body: binding.Request.Body}) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowPullRequestState(*binding); err != nil {
@@ -26,7 +28,7 @@ func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
 	}
 
 	if !validWorkflowPullRequestCandidate(run, *binding) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowPullRequestObservationRef(run.ID, *binding)
@@ -42,11 +44,11 @@ func validWorkflowPullRequestIdentity(run workflowInvocationFile, binding Workfl
 
 func validateWorkflowPullRequestState(binding WorkflowPullRequestBinding) error {
 	if !slices.Contains([]string{"prepared", "creating", "awaiting_observation", "bound", "blocked"}, binding.State) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if binding.State == "bound" && binding.URL == "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if binding.URL == "" {
@@ -55,7 +57,7 @@ func validateWorkflowPullRequestState(binding WorkflowPullRequestBinding) error 
 
 	repository, err := workflowPullRequestRepository(binding.URL)
 	if err != nil || repository != binding.Request.Repository {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -89,7 +91,7 @@ func validateWorkflowPullRequestObservationRef(id string, binding WorkflowPullRe
 
 	scoped := workflowUnitPullRequestObservationPath(id, binding.ID, binding.ObservationCount)
 	if binding.ObservationCount < 1 || binding.ObservationCount > WorkflowPageLimit || !slices.Contains([]string{legacy, scoped}, binding.ObservationRef) || len(binding.ObservationHash) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

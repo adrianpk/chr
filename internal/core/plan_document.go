@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // PlanDocument is one concrete plan body, independent of latest-in-scope
@@ -84,7 +86,7 @@ func planDocumentOrigin(metadata map[string]any) (string, error) {
 	}
 
 	namespace, ok := metadata["namespace"].(string)
-	if !ok || !IsValidOpsNamespace(namespace) {
+	if !ok || !opsnamespace.Valid(namespace) {
 		return "", errors.New("invalid plan namespace")
 	}
 
@@ -97,7 +99,7 @@ func validatePlanDocumentReference(reference string) error {
 	}
 
 	parts := strings.Split(reference, "/")
-	if len(parts) != 5 || parts[0] != OpsDirectoryName || !IsValidOpsNamespace(parts[1]) || parts[2] != "plan" || !opsArtifactIDPattern.MatchString(parts[3]) || parts[4] != OpsArtifactBodyFile() {
+	if len(parts) != 5 || parts[0] != OpsDirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "plan" || !opsArtifactIDPattern.MatchString(parts[3]) || parts[4] != OpsArtifactBodyFile() {
 		return errors.New("plan reference must identify a canonical plan artifact")
 	}
 

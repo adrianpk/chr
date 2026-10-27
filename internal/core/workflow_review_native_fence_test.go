@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeReviewFence changes queue ownership or native policy while a real
@@ -47,7 +49,7 @@ func nativeReviewFence(t *testing.T, change string) {
 		t.Fatal(err)
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowConflict) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale review succeeded or lost its owner", err)
 	}
 

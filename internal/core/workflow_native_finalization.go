@@ -6,6 +6,8 @@ import (
 	"math"
 	"os"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) finalizeWorkflowNativeUnit(ctx context.Context, run workflowInvocationFile) (bool, WorkflowRecord, error) {
@@ -51,7 +53,7 @@ func (s *WorkflowStore) finalizeWorkflowNativeReceipt(ctx context.Context, run *
 	}
 
 	if entry.State != "finalizing" {
-		return WorkflowRecord{}, ErrWorkflowConflict
+		return WorkflowRecord{}, workflowstate.ErrConflict
 	}
 
 	receipt, err := s.readWorkflowFinalizationReceipt(ctx, *run)

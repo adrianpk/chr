@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -45,14 +46,14 @@ func SealHarnessBinding(binding HarnessBinding) (HarnessBinding, error) {
 		return binding, err
 	}
 
-	binding.CapabilitiesRef = workflowHash(capabilities)
+	binding.CapabilitiesRef = contenthash.Sum(capabilities)
 
 	data, err := json.Marshal(binding)
 	if err != nil {
 		return binding, err
 	}
 
-	binding.BindingHash = workflowHash(data)
+	binding.BindingHash = contenthash.Sum(data)
 
 	return binding, ValidateHarnessBinding(binding)
 }
@@ -80,7 +81,7 @@ func ValidateHarnessBinding(binding HarnessBinding) error {
 		return err
 	}
 
-	if workflowHash(capabilities) != binding.CapabilitiesRef || workflowHash(data) != binding.BindingHash {
+	if contenthash.Sum(capabilities) != binding.CapabilitiesRef || contenthash.Sum(data) != binding.BindingHash {
 		return errors.New("harness binding evidence changed")
 	}
 

@@ -1,6 +1,10 @@
 package core
 
-import "slices"
+import (
+	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func workflowBoundTaskWorker(run workflowInvocationFile, worker []string, mode string) ([]string, error) {
 	if run.HarnessBinding == nil {
@@ -12,7 +16,7 @@ func workflowBoundTaskWorker(run workflowInvocationFile, worker []string, mode s
 	}
 
 	if len(worker) != 0 && !slices.Equal(worker, run.HarnessCommand) {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	if err := checkHarnessExecutable(run.HarnessBinding, run.HarnessCommand); err != nil {
@@ -26,14 +30,14 @@ func validateWorkflowTaskHarnessSchema(input WorkflowTaskInput) error {
 	switch input.Schema {
 	case "chr-task-input/v1":
 		if input.HarnessBinding != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	case "chr-task-input/v2":
 		if input.HarnessBinding == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	default:
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if input.HarnessBinding == nil {
@@ -55,14 +59,14 @@ func checkWorkflowTaskHarness(run workflowInvocationFile, input WorkflowTaskInpu
 	attempt := run.Attempts[len(run.Attempts)-1]
 	if attempt.Purpose != "" {
 		if input.HarnessBinding != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
 	}
 
 	if !sameHarnessBinding(run.HarnessBinding, input.HarnessBinding) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

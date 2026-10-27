@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Invalid capture inputs, unresolved general ownership and missing/stale edit
@@ -175,7 +177,7 @@ func TestDumpMutationProjectBinding(t *testing.T) {
 	}
 
 	request := DumpMutationRequest{OperationID: "foreign", Action: "save", Reference: reference, ExpectedRevision: foreign.Revision, Content: "Unbound replacement."}
-	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("foreign document revision accepted", err)
 	}
 }
@@ -199,7 +201,7 @@ func TestDumpMutationCaseRevision(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale case capture accepted", err)
 	}
 }

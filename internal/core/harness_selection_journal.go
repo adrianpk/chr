@@ -7,6 +7,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const (
@@ -62,7 +65,7 @@ func readHarnessSelectionFile(project, relative string) ([]byte, error) {
 }
 
 func harnessSelectionReceiptPath(id string) string {
-	return filepath.Join("harness-selection-receipts", workflowHash([]byte(id))+".json")
+	return filepath.Join("harness-selection-receipts", contenthash.Sum([]byte(id))+".json")
 }
 
 func writeHarnessSelectionJournal(project string, journal harnessSelectionJournal) error {
@@ -94,7 +97,7 @@ func harnessSelectionJournalHash(journal harnessSelectionJournal) (string, error
 	journal.Checksum = ""
 	data, err := json.Marshal(journal)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func decodeHarnessSelectionJournal(data []byte) (harnessSelectionJournal, error) {
@@ -164,7 +167,7 @@ func readHarnessSelectionReceipt(project string, request HarnessSelectionChangeR
 	}
 
 	if journal.Result.RequestDigest != digest {
-		return HarnessSelectionSnapshot{}, false, ErrWorkflowConflict
+		return HarnessSelectionSnapshot{}, false, workflowstate.ErrConflict
 	}
 
 	return journal.Result, true, nil
@@ -186,11 +189,11 @@ func recoverHarnessSelectionChange(project string, request HarnessSelectionChang
 	}
 
 	if journal.Request.ProjectRef != request.ProjectRef {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if journal.Request.Binding.RequestID == request.Binding.RequestID && journal.Result.RequestDigest != digest {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return finishHarnessSelectionChange(project, journal)
@@ -202,9 +205,9 @@ func finishHarnessSelectionChange(project string, journal harnessSelectionJourna
 		return err
 	}
 
-	observed := workflowHash(current)
+	observed := contenthash.Sum(current)
 	if observed != journal.Before && observed != journal.Result.Revision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if observed == journal.Before {
@@ -218,8 +221,8 @@ func finishHarnessSelectionChange(project string, journal harnessSelectionJourna
 
 func publishRetainedHarnessSelectionImage(project string, current []byte, journal harnessSelectionJournal) error {
 	image := harnessSelectionChangeImage(current, journal.Request, journal.Result.RequestDigest, journal.Result.ChangedAt)
-	if workflowHash(image) != journal.Result.Revision {
-		return ErrWorkflowConflict
+	if contenthash.Sum(image) != journal.Result.Revision {
+		return workflowstate.ErrConflict
 	}
 
 	path, err := workflowUpgradePath(project, "config.yml")
@@ -255,7 +258,7 @@ func retainHarnessSelectionReceipt(project string, journal harnessSelectionJourn
 
 	if found {
 		if retained != journal.Result {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil

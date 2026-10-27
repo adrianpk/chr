@@ -5,6 +5,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Durable group observations retain the occupied slot if both the host and
@@ -23,7 +25,7 @@ func workflowOccupiedProcessSlots(common string) (map[int]bool, error) {
 	}
 
 	if len(entries) > WorkflowRecordLimit {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	for _, entry := range entries {
@@ -73,7 +75,7 @@ func observeWorkflowCapacityProcess(path string) (WorkflowProcess, bool, error) 
 	}
 
 	if name != filepath.Base(path) || !validWorkflowCapacityProcess(process) {
-		return process, false, ErrWorkflowConflict
+		return process, false, workflowstate.ErrConflict
 	}
 
 	alive, err := workflowProcessGroupAlive(process)

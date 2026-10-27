@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeCandidateRegenerateGit struct{ OSWorkflowPreparationGit }
@@ -23,7 +25,7 @@ func TestNativeCandidateSubstitution(t *testing.T) {
 	}
 
 	git := nativeCandidateRegenerateGit{f.f.git}
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("host gate substituted another P for accepted repair", err)
 	}
 

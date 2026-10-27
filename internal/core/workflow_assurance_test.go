@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowAssuranceOrdered composes six real worker processes, two automatic
@@ -72,7 +75,7 @@ func checkWorkflowAssuranceBudgets(t *testing.T, store *WorkflowStore, id string
 			changed := run
 			tc.mutate(&changed)
 
-			if !errors.Is(validateWorkflowInvocation(changed), ErrWorkflowConflict) {
+			if !errors.Is(validateWorkflowInvocation(changed), workflowstate.ErrConflict) {
 				t.Fatal("unbound cumulative round accepted")
 			}
 		})
@@ -158,7 +161,7 @@ func checkWorkflowAssuranceClosure(t *testing.T, store *WorkflowStore, hierarchy
 	}
 
 	before := workflowTestRead(t, store, run.ID)
-	_, err = store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: workflowHash(workflowTrackerRead(t, path))})
+	_, err = store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: contenthash.Sum(workflowTrackerRead(t, path))})
 
 	if err != nil || workflowTestRead(t, store, run.ID).Revision != before.Revision {
 		t.Fatal("projection repair ran work or replaced closure", err)

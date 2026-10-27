@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeReceiptDescendant observes actual target advancement after native
@@ -129,7 +131,7 @@ func nativeReceiptPreservedFiles(t *testing.T, fixture nativeCanonicalFixture, r
 			t.Fatal(err)
 		}
 
-		files[path] = workflowHash(data)
+		files[path] = contenthash.Sum(data)
 	}
 
 	return files

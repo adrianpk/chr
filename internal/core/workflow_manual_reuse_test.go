@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowManualReuse requires the retained prerequisite records, evidence
@@ -32,7 +34,7 @@ func TestWorkflowManualReuse(t *testing.T) {
 
 			changeWorkflowManualReuseImage(t, store, task, image)
 
-			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed retained %s accepted: %v", image, err)
 			}
 

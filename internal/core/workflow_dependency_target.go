@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowDependencyTarget binds a resumed independent cursor to canonical
@@ -55,7 +58,7 @@ func (s *WorkflowStore) resumeWorkflowDependencyTarget(ctx context.Context, run 
 	}
 
 	proof.EvidenceRef = workflowDependencyTargetPath(run.ID, len(run.DependencyTargets)+1)
-	proof.EvidenceHash = workflowHash(data)
+	proof.EvidenceHash = contenthash.Sum(data)
 	next.DependencyTargets = append(slices.Clone(run.DependencyTargets), proof)
 	next.Blocker = nil
 	*run = next
@@ -98,7 +101,7 @@ func (s *WorkflowStore) observeWorkflowDependencyTarget(ctx context.Context, run
 
 	reader := workflowProofReader{store: s}
 	if !reader.isAncestor(ctx, run.ExecutionSelection().Target.Commit, target.Commit) {
-		return target, ErrWorkflowConflict
+		return target, workflowstate.ErrConflict
 	}
 
 	return target, s.checkWorkflowTarget(ctx, target)
@@ -119,7 +122,7 @@ func (s *WorkflowStore) workflowDependencyTargetReceipts(ctx context.Context, ru
 
 	refs := dependencies.refs[WorkflowRef{Kind: "ticket", ID: key}]
 	if len(refs) == 0 || len(refs) > WorkflowPageLimit {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	reader := workflowProofReader{store: s, selection: selection, request: run.ExecutionSelection()}
@@ -136,7 +139,7 @@ func (s *WorkflowStore) workflowDependencyTargetReceipts(ctx context.Context, ru
 	for _, ref := range refs {
 		path := reader.deliveryRef(ref)
 		if reader.integrationProofReason(ctx, ref) != "" || len(images[path]) != 64 {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		receipts[path] = images[path]

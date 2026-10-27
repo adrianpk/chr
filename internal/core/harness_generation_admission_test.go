@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"testing"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -41,7 +42,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	changed := make(chan error, 1)
 
 	go func() {
-		request := harnessSelectionTestRequest("ordered-switch", workflowHash([]byte(original)), "beta")
+		request := harnessSelectionTestRequest("ordered-switch", contenthash.Sum([]byte(original)), "beta")
 
 		_, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
 		changed <- err
@@ -50,7 +51,7 @@ func TestHarnessGenerationBindingSelectionOrder(t *testing.T) {
 	close(release)
 
 	admission := <-finished
-	if admission.err != nil || admission.operation.Binding.Selection.SelectionRevision != workflowHash([]byte(original)) {
+	if admission.err != nil || admission.operation.Binding.Selection.SelectionRevision != contenthash.Sum([]byte(original)) {
 		t.Fatal("admission observed a mixed configuration image", admission.err)
 	}
 
@@ -78,7 +79,7 @@ func TestHarnessGenerationBindingDirectAPI(t *testing.T) {
 		binding, err := SealHarnessGenerationBinding(HarnessGenerationBinding{
 			Selection: HarnessSelection{
 				Role: HarnessGeneration, Action: "quiz_next_question", Backend: "openai", Source: "legacy", ModelProvider: "openai", Model: "fixture-api-model",
-				SelectionRevision: c.Revision(), ProfileRevision: workflowHash([]byte("fixture-api-profile")),
+				SelectionRevision: c.Revision(), ProfileRevision: contenthash.Sum([]byte("fixture-api-profile")),
 				Readiness: HarnessReadiness{Supported: true, Executable: "not_required", Credentials: "api_managed", Runtime: "not_required"},
 			}, ProtocolRevision: "responses/v1",
 		})
@@ -144,7 +145,7 @@ func TestHarnessGenerationBindingInputIdentity(t *testing.T) {
 	}
 
 	record := generationBindingReadMetadata(t, request)
-	if record.InputRef != "sha256:"+workflowHash([]byte(request.Prompt)) || record.Selection != operation.Binding {
+	if record.InputRef != "sha256:"+contenthash.Sum([]byte(request.Prompt)) || record.Selection != operation.Binding {
 		t.Fatal("retry lost current input or original selection", record)
 	}
 }

@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowResultReceipt is validated delivery evidence from the native owner.
@@ -107,7 +110,7 @@ func (s *WorkflowStore) workflowResultReceipt(run workflowInvocationFile) (Workf
 
 	record, err := s.readRecord(run.DeliveryRef)
 	if err != nil || !workflowSliceReceiptHeaderMatches(record, run) || !workflowReceiptMatchesProof(record, proof, run.DeliveryProofRef) {
-		return WorkflowResultReceipt{}, errors.Join(ErrWorkflowConflict, err)
+		return WorkflowResultReceipt{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	return WorkflowResultReceipt{Reference: WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}, Receipt: *record.Receipt, Proof: proof}, nil
@@ -115,8 +118,8 @@ func (s *WorkflowStore) workflowResultReceipt(run workflowInvocationFile) (Workf
 
 func (s *WorkflowStore) workflowResultClosure(closure WorkflowInvocationClosure) (WorkflowResultClosure, error) {
 	data, err := s.workflowClosingRead(closure.Receipt.Ref)
-	if err != nil || workflowHash(data) != closure.Receipt.Hash {
-		return WorkflowResultClosure{}, errors.Join(ErrWorkflowConflict, err)
+	if err != nil || contenthash.Sum(data) != closure.Receipt.Hash {
+		return WorkflowResultClosure{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	var receipt WorkflowClosingReceipt

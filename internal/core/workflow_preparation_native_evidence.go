@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) sealWorkflowNativePreparation(run workflowInvocationFile, candidate *WorkflowIntegrationCandidate) error {
@@ -62,7 +65,7 @@ func workflowNativePreparationRecord(candidate WorkflowIntegrationCandidate) Wor
 func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, b *WorkflowNativeRecordBinding) ([]workflowFileChange, error) {
 	proof := candidate.Input.Git
 	if proof.Provenance == nil || len(proof.Provenance.Source) == 0 {
-		return nil, fmt.Errorf("%w: native validation requires the original source manifest", ErrWorkflowConflict)
+		return nil, fmt.Errorf("%w: native validation requires the original source manifest", workflowstate.ErrConflict)
 	}
 
 	commits := make([]string, 0, len(proof.Provenance.Source))
@@ -100,10 +103,10 @@ func workflowNativePreparationEvidence(candidate *WorkflowIntegrationCandidate, 
 func workflowNativePreparationEvidenceFile(id string, value any) (workflowFileChange, WorkflowEvidenceRef, error) {
 	data, err := json.Marshal(value)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return workflowFileChange{}, WorkflowEvidenceRef{}, ErrWorkflowConflict
+		return workflowFileChange{}, WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 
-	hash := workflowHash(data)
+	hash := contenthash.Sum(data)
 	ref := WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", "evidence", hash+".json")), Hash: hash}
 
 	return workflowFileChange{Path: ref.Path, After: data}, ref, nil
@@ -135,7 +138,7 @@ func (s *WorkflowStore) workflowNativePreparedEntryChange(run *workflowInvocatio
 		return file, err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: workflowHash(file.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
 
 	return file, nil
 }

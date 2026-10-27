@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramGuidedProjectService interface {
@@ -51,7 +52,7 @@ func (h *telegramGuidedHost) pump(ctx context.Context) error {
 	for _, ref := range refs {
 		h.after = ref.Conversation.ID
 		if err := h.recoverReference(ctx, ref); err != nil && ctx.Err() == nil {
-			if !errors.Is(err, core.ErrWorkflowConflict) {
+			if !errors.Is(err, workflowstate.ErrConflict) {
 				slog.WarnContext(ctx, "Guided Telegram association needs recovery", "code", "guided_association_blocked")
 			}
 		}

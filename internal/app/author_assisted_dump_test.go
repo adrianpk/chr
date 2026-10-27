@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Finalization reuses its prepared source and confirmed result after later dump
@@ -34,7 +35,7 @@ func TestAuthorAssistedDumpRetry(t *testing.T) {
 	changed := append([]string(nil), args...)
 	changed[8] = "Changed requirements."
 
-	if err := run(t.Context(), changed, &bytes.Buffer{}, &bytes.Buffer{}); !errors.Is(err, core.ErrWorkflowConflict) {
+	if err := run(t.Context(), changed, &bytes.Buffer{}, &bytes.Buffer{}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed finalization arguments accepted", err)
 	}
 }

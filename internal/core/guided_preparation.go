@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedPreparedPlan retains validated generation before revision-bound publication.
@@ -71,7 +73,7 @@ func PublishGuidedPlan(ctx context.Context, root string, scope GuidedUseCaseScop
 
 		result, found, err = LookupPlanPublication(ctx, root, *plan.Operation)
 		if err == nil && !found {
-			err = ErrWorkflowConflict
+			err = workflowstate.ErrConflict
 		}
 
 		return err
@@ -101,7 +103,7 @@ func guidedPublicationPlan(session AuthoringSession) (GeneratedPlan, error) {
 
 	digest, err := GuidedCheckpointDigest(checkpoint)
 	if err != nil || digest != prepared.InputDigest {
-		return plan, errors.Join(ErrWorkflowConflict, err)
+		return plan, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	plan.Operation, plan.CreateOnly, plan.RequireOrderMap = &operation, true, true
@@ -118,13 +120,13 @@ func guidedPublicationPlan(session AuthoringSession) (GeneratedPlan, error) {
 // GuidedMaterializationBinding retains owner identities without copying native task state.
 func GuidedMaterializationBinding(result WorkflowMaterializationResult, input GeneratedWorkflowPlan) (GuidedMaterializationReference, error) {
 	if result.Set.Set == nil || result.Set.Set.PlanRevision == nil || result.Set.Set.UseCase != input.UseCase || len(result.Tasks) == 0 || len(result.Tasks) > WorkflowPageLimit {
-		return GuidedMaterializationReference{}, ErrWorkflowConflict
+		return GuidedMaterializationReference{}, workflowstate.ErrConflict
 	}
 
 	ref := GuidedMaterializationReference{ID: input.MaterializationID, ReceiptRef: result.ReceiptRef, SetID: result.Set.ID, SetPath: result.Set.Path, PlanRevision: *result.Set.Set.PlanRevision}
 	for _, task := range result.Tasks {
 		if task.Task == nil || task.Task.SetID != ref.SetID {
-			return ref, ErrWorkflowConflict
+			return ref, workflowstate.ErrConflict
 		}
 
 		ref.Members = append(ref.Members, GuidedWorkMember{Key: task.Task.Key, Path: task.Path, ContractHash: task.Task.ContractHash, SourceHash: task.SourceHash, Revision: task.Revision})
@@ -136,7 +138,7 @@ func GuidedMaterializationBinding(result WorkflowMaterializationResult, input Ge
 // SealGuidedPreparation freezes the initial plan, bound tracker and native contracts.
 func SealGuidedPreparation(ctx context.Context, root string, session *AuthoringSession) error {
 	if session.Guided.Work == nil || session.Guided.Work.Materialization == nil || session.Guided.PendingOperation == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	source, err := guidedStageCheckpoint(*session, "specification")
@@ -164,7 +166,7 @@ func SealGuidedPreparation(ctx context.Context, root string, session *AuthoringS
 func guidedPreparationPaths(session AuthoringSession) ([]string, error) {
 	work := session.Guided.Work
 	if work.Publication == nil {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	materialized := work.Materialization
@@ -172,7 +174,7 @@ func guidedPreparationPaths(session AuthoringSession) ([]string, error) {
 
 	root := filepath.ToSlash(filepath.Join(OpsDirectoryName, session.Namespace))
 	if validatePlanDocumentReference(work.Publication.Reference) != nil || !strings.HasPrefix(work.Publication.Reference, root+"/") {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	references := []string{work.Publication.Reference[len(root)+1:], filepath.Join(filepath.Dir(work.Publication.Reference[len(root)+1:]), "metadata.json"), binding.BodyRef, binding.OrderRef, binding.TrackerRef, binding.CurrentTrackerRef, filepath.Join(filepath.Dir(binding.CurrentTrackerRef), "metadata.json"), materialized.ReceiptRef, materialized.SetPath, filepath.Join(filepath.Dir(materialized.SetPath), "artifact.md")}
@@ -229,14 +231,14 @@ func ValidateGuidedContracts(input, generated GeneratedWorkflowPlan) error {
 	}
 
 	if !reflect.DeepEqual(plannedWorkflowOrder(input), plannedWorkflowOrder(generated)) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	expected := input
 
 	expected.Slices, expected.ClosingValidation = generated.Slices, generated.ClosingValidation
 	if !reflect.DeepEqual(expected, generated) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	encoded, err := json.Marshal(generated)
@@ -254,7 +256,7 @@ func guardGuidedPlanScope(session AuthoringSession) error {
 
 	scope := QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: state.CaseSlug}
 	if prepared.Plan.Scope != scope || operation.Scope != scope || operation.ExpectedRevision != prepared.TargetRevision || operation.Replace || !operation.TicketDelivery {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -320,7 +322,7 @@ func guardGuidedContractDependencies(plan GeneratedWorkflowPlan) error {
 func guardGuidedDependencies(refs []WorkflowRef, allowed map[WorkflowRef]bool) error {
 	for _, ref := range refs {
 		if !allowed[ref] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -329,11 +331,11 @@ func guardGuidedDependencies(refs []WorkflowRef, allowed map[WorkflowRef]bool) e
 
 func guardGuidedPreparationState(state *GuidedUseCaseState) error {
 	if state == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if state.Stage != "preparation" || state.SpecApproval == nil || state.Work == nil || state.PendingOperation == nil || state.PendingOperation.PreparedPlan == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

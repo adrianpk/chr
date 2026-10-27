@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowMergerAcceptance records host observations, never a validation or
@@ -25,7 +27,7 @@ type WorkflowMergerAcceptance struct {
 // port. It retains accepted/rejected evidence without granting publication.
 func (s *WorkflowStore) ExecuteWorkflowMergerRepair(ctx context.Context, request WorkflowMergerRequest, harness WorkflowMergerHarness, provider WorkflowPullRequestProvider, git WorkflowMergerRepairGit) (WorkflowMergerAttempt, error) {
 	if request.Input.RepairCheckpointRef == nil || git == nil {
-		return WorkflowMergerAttempt{}, ErrWorkflowConflict
+		return WorkflowMergerAttempt{}, workflowstate.ErrConflict
 	}
 
 	frozen, err := freezeWorkflowMergerRequest(request)

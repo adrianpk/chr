@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"sort"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowAdoptionTask selects one observed legacy ticket for one approved task.
@@ -123,7 +126,7 @@ func workflowAdoptionHash(opts WorkflowPlanAdoptionOptions) (string, error) {
 		Tasks      []WorkflowAdoptionTask
 	}{opts.PlanPath, opts.SourceHash, selected})
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func (s *WorkflowStore) preparePlanAdoption(ctx context.Context, opts WorkflowPlanAdoptionOptions) (WorkflowMaterializationResult, error) {
@@ -166,7 +169,7 @@ func (s *WorkflowStore) planAdoptionFiles(result WorkflowMaterializationResult, 
 		return nil, err
 	}
 
-	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", workflowHash(receipt.After)))
+	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", contenthash.Sum(receipt.After)))
 	files := []workflowFileChange{}
 
 	for _, record := range append([]WorkflowRecord{result.Set}, result.Tasks...) {
@@ -181,7 +184,7 @@ func (s *WorkflowStore) planAdoptionFiles(result WorkflowMaterializationResult, 
 		}
 
 		if observed != record.SourceHash {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		files = append(files, encoded...)
@@ -208,7 +211,7 @@ func (s *WorkflowStore) resumePlanAdoption(snapshot WorkflowSnapshot, opts Workf
 	}
 
 	if string(result.Set.Metadata["adoption_hash"]) != fmt.Sprintf("%q", hash) {
-		return result, true, ErrWorkflowConflict
+		return result, true, workflowstate.ErrConflict
 	}
 
 	return result, true, nil

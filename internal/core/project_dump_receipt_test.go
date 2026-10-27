@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // An existing empty receipt directory has capacity; its normal end-of-directory
@@ -93,7 +95,7 @@ func TestProjectDumpReconcileBinding(t *testing.T) {
 			request = prepareProjectDumpReceiptBinding(t, project, request, kind)
 
 			_, err = ReconcileProjectDump(t.Context(), project, request)
-			if err == nil || kind != "corrupt receipt" && !errors.Is(err, ErrWorkflowConflict) {
+			if err == nil || kind != "corrupt receipt" && !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("conflicting operation identity was reused", err)
 			}
 		})

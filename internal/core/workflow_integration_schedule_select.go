@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, q WorkflowIntegrationQueueQuery) ([]WorkflowIntegrationSelection, map[string]int, error) {
@@ -102,7 +104,7 @@ func workflowIntegrationScheduleRun(runs []workflowInvocationFile, entry Workflo
 		}
 	}
 
-	return workflowInvocationFile{}, ErrWorkflowConflict
+	return workflowInvocationFile{}, workflowstate.ErrConflict
 }
 
 func workflowIntegrationScheduleExclusion(run workflowInvocationFile, entry WorkflowIntegrationEntry) string {
@@ -154,7 +156,7 @@ func (s *WorkflowStore) workflowIntegrationScheduledTask(ctx context.Context, ru
 	}
 
 	if len(preview.Members) != 1 {
-		return WorkflowPreviewMember{}, fmt.Errorf("%w: admitted task is no longer selectable", ErrWorkflowConflict)
+		return WorkflowPreviewMember{}, fmt.Errorf("%w: admitted task is no longer selectable", workflowstate.ErrConflict)
 	}
 
 	return preview.Members[0], validateWorkflowClaimContract(selection.records[request.Selector.Identity])

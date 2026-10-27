@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestGuidedUseCaseSpecAuthority binds default approval to the intended run and policy.
@@ -106,8 +108,8 @@ func guidedSpecSealFixture(t *testing.T) (string, AuthoringSession) {
 	}
 
 	session.Guided.Stage = "specification"
-	session.Guided.SpecApproval = &GuidedSpecApprovalReference{Reference: result.Reference, Revision: result.Revision, GuidedSpecApproval: GuidedSpecApproval{ContentHash: workflowHash([]byte("Exact approved content"))}}
-	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-spec", Action: "spec", Digest: workflowHash([]byte("seal-spec"))}
+	session.Guided.SpecApproval = &GuidedSpecApprovalReference{Reference: result.Reference, Revision: result.Revision, GuidedSpecApproval: GuidedSpecApproval{ContentHash: contenthash.Sum([]byte("Exact approved content"))}}
+	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-spec", Action: "spec", Digest: contenthash.Sum([]byte("seal-spec"))}
 
 	return root, session
 }

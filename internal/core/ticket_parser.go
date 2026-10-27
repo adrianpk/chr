@@ -2,14 +2,14 @@ package core
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TicketParser defines a package boundary interface.
@@ -239,7 +239,7 @@ func indexedTicketFromMetadata(
 		}, IndexedTicketProjection: IndexedTicketProjection{
 			FileMTime:   info.ModTime().UTC(),
 			FileSize:    info.Size(),
-			ContentHash: contentHash(content),
+			ContentHash: contenthash.Sum(content),
 			IndexedAt:   opts.IndexedAt.UTC(),
 		},
 	}
@@ -360,12 +360,6 @@ func optionalTicketInt(value string) (int, error) {
 	}
 
 	return parsed, nil
-}
-
-func contentHash(content []byte) string {
-	sum := sha256.Sum256(content)
-
-	return hex.EncodeToString(sum[:])
 }
 
 func indexedTicketSummaryFromMetadata(metadata map[string]string) IndexedTicketSummary {

@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseRecoveryInventory pages all namespaces without adopting
@@ -21,7 +23,7 @@ func TestGuidedUseCaseRecoveryInventory(t *testing.T) {
 	}
 
 	for _, bounds := range [][2]int{{-1, 1}, {WorkflowRecordLimit + 1, 1}, {0, 0}, {0, WorkflowPageLimit + 1}} {
-		if _, err := RecoverGuidedHostPage(t.Context(), root, original.ProjectID, bounds[0], bounds[1]); !errors.Is(err, ErrWorkflowConflict) {
+		if _, err := RecoverGuidedHostPage(t.Context(), root, original.ProjectID, bounds[0], bounds[1]); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("inventory accepted invalid bounds", bounds, err)
 		}
 	}

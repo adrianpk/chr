@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // StartGuidedUseCase creates or replays one explicitly authorized guided session.
@@ -34,7 +37,7 @@ func (r *fileAuthoringSessionRepository) startGuidedUseCase(ctx context.Context,
 		}
 
 		if current.Guided.Actor != request.Actor || current.Guided.ProgressionIntent != request.ProgressionIntent {
-			return current, ErrWorkflowConflict
+			return current, workflowstate.ErrConflict
 		}
 
 		return current, nil
@@ -77,7 +80,7 @@ func ReadGuidedUseCase(ctx context.Context, root string, scope GuidedUseCaseScop
 
 func guardGuidedScope(session AuthoringSession, scope GuidedUseCaseScope) error {
 	if session.Guided == nil || session.ProjectID != scope.ProjectID || session.Namespace != scope.Namespace || session.ID != scope.RunID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -99,7 +102,7 @@ func (r *fileAuthoringSessionRepository) guidedFileChange(path string, content [
 		return change, err
 	}
 
-	change.Before = workflowHash(before)
+	change.Before = contenthash.Sum(before)
 
 	return change, nil
 }
@@ -190,11 +193,11 @@ func guardGuidedCommand(session AuthoringSession, command GuidedUseCaseCommand, 
 	}
 
 	if guidedControlOwnsID(session.Guided.Control, operation.ID) {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	if guidedIdeaOwnsID(session.Guided, operation.ID) {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	if pending := session.Guided.PendingOperation; pending != nil {
@@ -202,7 +205,7 @@ func guardGuidedCommand(session AuthoringSession, command GuidedUseCaseCommand, 
 	}
 
 	if session.Revision != command.ExpectedRevision || len(session.Guided.CompletedOperations) >= 256 {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	return false, nil
@@ -210,7 +213,7 @@ func guardGuidedCommand(session AuthoringSession, command GuidedUseCaseCommand, 
 
 func guidedDigestConflict(retained, received GuidedUseCaseOperation) error {
 	if retained.ID != received.ID || retained.Digest != received.Digest {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -220,7 +223,7 @@ func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, s
 	switch command.Action {
 	case "name":
 		if session.Guided.Stage != "name" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := r.nameGuidedUseCase(ctx, session, operation); err != nil {
@@ -228,7 +231,7 @@ func (r *fileAuthoringSessionRepository) applyGuidedInput(ctx context.Context, s
 		}
 	case "append":
 		if session.Guided.Stage != "dump" || session.Guided.PendingOperation != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if command.Content == "" {
@@ -270,7 +273,7 @@ func (r *fileAuthoringSessionRepository) nameGuidedUseCase(ctx context.Context, 
 	owner := NewCaseMetadataService(r.projectDir)
 
 	result, err := owner.SaveBound(ctx, CaseMutationRequest{
-		Binding:   WorkflowMutationBinding{RequestID: "guided-" + workflowHash([]byte(session.ID+"-name")), Operator: session.Guided.Actor},
+		Binding:   WorkflowMutationBinding{RequestID: "guided-" + contenthash.Sum([]byte(session.ID+"-name")), Operator: session.Guided.Actor},
 		ProjectID: session.ProjectID, Namespace: session.Namespace, Metadata: metadata,
 	})
 	if err != nil {

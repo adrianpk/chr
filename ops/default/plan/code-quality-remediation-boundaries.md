@@ -216,3 +216,16 @@ into the identity package would split that existing transactional owner. All
 baseline signature rows assigned to Slice 6 remain assigned here and must be
 resolved by T6.5. project_userspace remains shared workspace/operator configuration
 at the core root. No helper implementation is copied to make the graph compile.
+
+### Shared notification value dependencies
+
+core/contenthash owns the existing SHA-256/hex content digest used by source and
+retained records. The two identical root digest implementations now use that one
+owner. core/ops/namespace owns the existing namespace spelling rule; layout and
+transport still own selection and authorization. core/workflow/state owns the
+single existing ErrConflict identity shared by conditional durable writes. It
+contains no store or coordinator behavior. These dependencies let notification
+storage preserve its errors and hashes without importing the root package.
+
+Focused original record-byte, old SQLite, notification snapshot/quota/retention,
+operational layout and workflow-mutation checks pass after these ownership changes.

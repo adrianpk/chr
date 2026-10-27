@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvocationFile, selection workflowSelection, later []WorkflowPreviewMember) error {
@@ -84,12 +86,12 @@ func mergeWorkflowLaterMembers(run workflowInvocationFile, selection workflowSel
 		index, exists := known[member.Key]
 		if exists {
 			if index != nextOld || i < run.Cursor && index != i {
-				return nil, fmt.Errorf("%w: frozen work reordered", ErrWorkflowConflict)
+				return nil, fmt.Errorf("%w: frozen work reordered", workflowstate.ErrConflict)
 			}
 
 			nextOld++
 		} else if i < run.Cursor {
-			return nil, fmt.Errorf("%w: later work precedes confirmed or validated progress", ErrWorkflowConflict)
+			return nil, fmt.Errorf("%w: later work precedes confirmed or validated progress", workflowstate.ErrConflict)
 		}
 	}
 

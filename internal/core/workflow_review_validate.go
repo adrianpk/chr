@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowReviewBinding(run workflowInvocationFile) error {
@@ -20,7 +22,7 @@ func validateWorkflowReviewBinding(run workflowInvocationFile) error {
 	if run.Review == nil {
 		_, retained := workflowRetainedRoleCounts(run)
 		if run.ReviewCount != retained {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -33,7 +35,7 @@ func validateWorkflowReviewBudgets(budgets []WorkflowReviewRepairBudget) error {
 	seen := map[WorkflowRef]bool{}
 	for _, budget := range budgets {
 		if !slices.Contains([]string{"slice", "ticket"}, budget.Unit.Kind) || budget.Unit.ID == "" || seen[budget.Unit] || budget.Consumed < 1 || budget.Consumed > workflowReviewRepairLimit {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[budget.Unit] = true
@@ -45,11 +47,11 @@ func validateWorkflowReviewBudgets(budgets []WorkflowReviewRepairBudget) error {
 func validateWorkflowCurrentReviewBinding(run workflowInvocationFile) error {
 	binding := run.Review
 	if run.Lane == nil || binding.Unit != run.Lane.Unit || binding.Round < 1 || binding.Round != run.ReviewCount || binding.InputRef != workflowReviewPath(run.ID, binding.Round, "input.json") || len(binding.InputHash) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !slices.Contains([]string{"pending", "running", "waiting_approval", "authorized", "needs_repair", "insufficient_evidence", "human_required", "stale", "repair_limit_exceeded"}, binding.State) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowReviewDecisionRefs(run.ID, *binding)
@@ -58,14 +60,14 @@ func validateWorkflowCurrentReviewBinding(run workflowInvocationFile) error {
 func validateWorkflowReviewDecisionRefs(id string, binding WorkflowReviewBinding) error {
 	if binding.DecisionCount == 0 {
 		if !slices.Contains([]string{"pending", "running", "waiting_approval", "stale"}, binding.State) || binding.ResultRef != "" || binding.ResultHash != "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
 	}
 
 	if binding.DecisionCount < 1 || binding.DecisionCount > 2 || len(binding.ResultHash) != 64 || binding.ResultRef != workflowReviewPath(id, binding.Round, fmt.Sprintf("decision-%d.json", binding.DecisionCount)) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -74,7 +76,7 @@ func validateWorkflowReviewDecisionRefs(id string, binding WorkflowReviewBinding
 func parseWorkflowReviewDecision(stdout string, input *WorkflowReviewInput) (WorkflowReviewDecision, error) {
 	var decision WorkflowReviewDecision
 	if input == nil {
-		return decision, ErrWorkflowConflict
+		return decision, workflowstate.ErrConflict
 	}
 
 	decoder := json.NewDecoder(bytes.NewBufferString(stdout))
@@ -94,7 +96,7 @@ func parseWorkflowReviewDecision(stdout string, input *WorkflowReviewInput) (Wor
 func validateWorkflowReviewDecision(decision WorkflowReviewDecision, input WorkflowReviewInput) error {
 	hash, err := workflowReviewInputHash(input)
 	if err != nil || hash != decision.BindingHash {
-		return fmt.Errorf("%w: review decision names another candidate", ErrWorkflowConflict)
+		return fmt.Errorf("%w: review decision names another candidate", workflowstate.ErrConflict)
 	}
 
 	if err := ValidateAgenticReviewResult(decision.Result); err != nil {
@@ -149,15 +151,15 @@ func (s *WorkflowStore) readWorkflowReviewDecisions(run workflowInvocationFile, 
 	}
 
 	if ref != "" || hash != "" {
-		return newest, ErrWorkflowConflict
+		return newest, workflowstate.ErrConflict
 	}
 
 	if run.Review.State == "authorized" && newest.Result.Decision != IntegrationReviewDecisionPass {
-		return newest, ErrWorkflowConflict
+		return newest, workflowstate.ErrConflict
 	}
 
 	if newest.RepairTaskKey != run.Review.RepairTaskKey {
-		return newest, ErrWorkflowConflict
+		return newest, workflowstate.ErrConflict
 	}
 
 	return newest, nil
@@ -166,7 +168,7 @@ func (s *WorkflowStore) readWorkflowReviewDecisions(run workflowInvocationFile, 
 func (s *WorkflowStore) readWorkflowReviewEvidence(run workflowInvocationFile, input WorkflowReviewInput, count int, ref, hash string) (workflowReviewEvidence, error) {
 	var evidence workflowReviewEvidence
 	if ref != workflowReviewPath(run.ID, run.Review.Round, fmt.Sprintf("decision-%d.json", count)) {
-		return evidence, ErrWorkflowConflict
+		return evidence, workflowstate.ErrConflict
 	}
 
 	data, err := s.readWorkflowReviewImage(ref, hash)
@@ -196,7 +198,7 @@ func (s *WorkflowStore) readWorkflowReviewEvidence(run workflowInvocationFile, i
 func validateWorkflowReviewOrigin(mode ReviewWorkflowMode, count int, evidence workflowReviewEvidence) error {
 	if count == 2 {
 		if mode != ReviewWorkflowModeAgenticReview || evidence.Origin != "human" || evidence.Decision.Result.Decision != IntegrationReviewDecisionPass {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -212,11 +214,11 @@ func validateWorkflowReviewOrigin(mode ReviewWorkflowMode, count int, evidence w
 	}
 
 	if evidence.Origin != expected {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if expected != "agentic" && evidence.Decision.Result.Decision != IntegrationReviewDecisionPass {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -224,11 +226,11 @@ func validateWorkflowReviewOrigin(mode ReviewWorkflowMode, count int, evidence w
 
 func validateWorkflowReviewEvidenceHeader(run workflowInvocationFile, count int, evidence workflowReviewEvidence) error {
 	if evidence.Schema != "chr-workflow-review/v1" || evidence.RecordedAt.IsZero() {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if run.Review.DecisionCount == 2 && count == 1 && evidence.Decision.Result.Decision != IntegrationReviewDecisionHumanRequired {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

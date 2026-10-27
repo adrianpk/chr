@@ -6,6 +6,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // A completed native message stays inspectable after capture is closed, without
@@ -133,7 +134,7 @@ func telegramWorkStatusFixture(t *testing.T) (*telegramConversationFixture, Tele
 	input := telegramOperationActionInput(t, f, "Show the work status.")
 	input.Update.ReplyToMessageID = 77777
 
-	if _, err := f.store.ResolveTelegramWorkStatusTarget(t.Context(), input, now); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ResolveTelegramWorkStatusTarget(t.Context(), input, now); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("undelivered work message identified an execution", err)
 	}
 

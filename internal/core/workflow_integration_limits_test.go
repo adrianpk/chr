@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeLimitFixture(t *testing.T, policy WorkflowExecutionPolicy) (*WorkflowStore, WorkflowIntegrationEntry) {
@@ -48,7 +50,7 @@ func TestNativeLimitPolicy(t *testing.T) {
 			}
 
 			run.Policy.MaxMergerAttempts = int(tc.wantMerger + 1)
-			if _, err := store.readWorkflowIntegrationBudget(run); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.readWorkflowIntegrationBudget(run); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed execution policy replaced frozen budget authority", err)
 			}
 		})
@@ -139,7 +141,7 @@ func TestNativeDeadlineRetry(t *testing.T) {
 	}
 
 	request.Reservation.RuntimeDeadline = request.Reservation.RuntimeDeadline.Add(time.Second)
-	if _, err := store.ReserveWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReserveWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("same call acquired a later deadline", err)
 	}
 
@@ -180,7 +182,7 @@ func TestNativeBudgetDeadline(t *testing.T) {
 			}
 
 			request := WorkflowIntegrationReserve{WorkflowIntegrationBudgetGuard: nativeBudgetGuard(t, store, entry.InvocationID), Reservation: r}
-			if _, err := store.ReserveWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.ReserveWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("call extended the retained worker timeout", err)
 			}
 

@@ -8,6 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Plan/map publication and approved binding share authoring exclusion before
@@ -27,7 +30,7 @@ func (r *fileAuthoringSessionRepository) checkPlanWorkflowPending(reference stri
 	}
 
 	if _, err := os.Lstat(path); !errors.Is(err, os.ErrNotExist) {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	return nil
@@ -49,7 +52,7 @@ func (s *WorkflowStore) validateApprovedOrder(plan GeneratedWorkflowPlan, setID 
 	}
 
 	if current != binding {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.validateApprovalOrderImages(binding, setID)
@@ -57,7 +60,7 @@ func (s *WorkflowStore) validateApprovedOrder(plan GeneratedWorkflowPlan, setID 
 
 func (s *WorkflowStore) validatePlannedApproval(plan GeneratedWorkflowPlan, binding PlanRevisionBinding) error {
 	if !validPlanBindingPaths(s.layout.Namespace(), binding) || plan.PlanRef != binding.BodyRef || plan.PlanHash != binding.BodyHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.validateOrderScope(binding, plan.UseCase); err != nil {
@@ -70,7 +73,7 @@ func (s *WorkflowStore) validatePlannedApproval(plan GeneratedWorkflowPlan, bind
 	}
 
 	if !reflect.DeepEqual(orderedPlanSlices(planned.Slices), orderedPlanSlices(plannedWorkflowOrder(plan))) {
-		return fmt.Errorf("%w: approved hierarchy differs from retained planned order", ErrWorkflowConflict)
+		return fmt.Errorf("%w: approved hierarchy differs from retained planned order", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -87,7 +90,7 @@ func (s *WorkflowStore) validateApprovalOrderImages(binding PlanRevisionBinding,
 		return err
 	}
 
-	if workflowHash(order) != binding.OrderHash || workflowHash(tracker) != binding.TrackerHash {
+	if contenthash.Sum(order) != binding.OrderHash || contenthash.Sum(tracker) != binding.TrackerHash {
 		return ErrWorkflowProjectionStale
 	}
 
@@ -97,7 +100,7 @@ func (s *WorkflowStore) validateApprovalOrderImages(binding PlanRevisionBinding,
 	}
 
 	if document.SetID != "" && document.SetID != setID {
-		return fmt.Errorf("%w: revision is already bound to another set", ErrWorkflowConflict)
+		return fmt.Errorf("%w: revision is already bound to another set", workflowstate.ErrConflict)
 	}
 
 	return s.checkCurrentOrderOutput(binding)
@@ -106,7 +109,7 @@ func (s *WorkflowStore) validateApprovalOrderImages(binding PlanRevisionBinding,
 func (s *WorkflowStore) requirePlanRevisionBinding(reference string) error {
 	full := filepath.ToSlash(filepath.Join(s.layout.RelativeRoot(), reference))
 	if validPlanRevisionJournalPath(full) {
-		return fmt.Errorf("%w: generated plan requires its explicit revision binding", ErrWorkflowConflict)
+		return fmt.Errorf("%w: generated plan requires its explicit revision binding", workflowstate.ErrConflict)
 	}
 
 	metadata, err := s.readWorkflowTrackerFile(filepath.ToSlash(filepath.Join(filepath.Dir(reference), "metadata.json")))
@@ -124,7 +127,7 @@ func (s *WorkflowStore) requirePlanRevisionBinding(reference string) error {
 	}
 
 	if fields["plan_binding"] != nil {
-		return fmt.Errorf("%w: generated plan requires its explicit revision binding", ErrWorkflowConflict)
+		return fmt.Errorf("%w: generated plan requires its explicit revision binding", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -174,7 +177,7 @@ func (s *WorkflowStore) validateOrderScope(binding PlanRevisionBinding, useCase 
 	}
 
 	if fields["project_id"] != s.projectID || fields["case_slug"] != useCase {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	plannedTracker, err := s.readWorkflowTrackerFile(filepath.ToSlash(filepath.Join(filepath.Dir(binding.TrackerRef), "planned-tracker.md")))
@@ -182,7 +185,7 @@ func (s *WorkflowStore) validateOrderScope(binding PlanRevisionBinding, useCase 
 		return err
 	}
 
-	if workflowHash(plannedTracker) != binding.PlannedTrackerHash {
+	if contenthash.Sum(plannedTracker) != binding.PlannedTrackerHash {
 		return ErrWorkflowProjectionStale
 	}
 

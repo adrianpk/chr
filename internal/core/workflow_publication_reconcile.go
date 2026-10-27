@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // workflowRetainDeliveryStatus records a fact without clearing execution stops.
@@ -38,7 +40,7 @@ func checkWorkflowVerifiedPR(ctx context.Context, run workflowInvocationFile, pr
 	}
 
 	if workflowPullRequestMismatch(*run.PullRequest, []WorkflowPullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != proof.ResultCommit || pr.BaseCommit != proof.ObservedTarget {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -55,7 +57,7 @@ func (s *WorkflowStore) reconcileWorkflowPublishedSubmission(ctx context.Context
 		// A permanent unpublished seal remains history after a repaired candidate.
 		// This delivery must not be attributed to that older guarded command.
 		if last.State != "unpublished" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return s.projectWorkflowSubmission(run, journal)
@@ -76,12 +78,12 @@ func (s *WorkflowStore) reconcileWorkflowPublishedSubmission(ctx context.Context
 func (s *WorkflowStore) retainWorkflowSubmissionObservation(ctx context.Context, journal *workflowSubmissionJournal, observed WorkflowSubmission) error {
 	last := &journal.Attempts[len(journal.Attempts)-1]
 	if last.ID != observed.ID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if last.State == "confirmed" {
 		if observed.State != "confirmed" || last.Proof.HistoryHash != observed.Proof.HistoryHash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -178,7 +180,7 @@ func checkWorkflowSupersededTarget(ctx context.Context, run workflowInvocationFi
 	}
 
 	if !workflowCommitID(target) || target != pr.BaseCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

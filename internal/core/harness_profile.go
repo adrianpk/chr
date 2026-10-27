@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/configvalue"
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 const harnessProfilesLimit = 65_536
@@ -94,7 +95,7 @@ func HarnessProfileRevision(p HarnessProfile) string {
 		data = append(data, value...)
 	}
 
-	return workflowHash(data)
+	return contenthash.Sum(data)
 }
 
 func validateHarnessProfile(p HarnessProfile) error {

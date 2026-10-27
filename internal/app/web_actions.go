@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -422,7 +423,7 @@ func webDumpOperation(kind string, result DumpOperationResult) webui.OperationSt
 }
 
 func webDumpWriteFailure(err error, reference string) webui.WriteActionResponse {
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		reload := "/dumps"
 		if reference != "" {
 			reload += "/detail?id=" + url.QueryEscape(reference)

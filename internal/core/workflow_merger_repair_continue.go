@@ -4,6 +4,8 @@ import (
 	"context"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ContinueWorkflowMergerRepair consumes a host-accepted repair and resumes its
@@ -19,7 +21,7 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 
 	proof := workflowMergerRepairProof(state)
 	if len(state.Repairs) >= WorkflowPageLimit || validateWorkflowTreeRepair(proof, repair) != nil {
-		return state, ErrWorkflowConflict
+		return state, workflowstate.ErrConflict
 	}
 
 	if err := reader.verifyMergerTreeRepair(ctx, repair, state.OriginalParent, state.PreparedParent, state.CurrentSource, state.Tree, state.Conflicts); err != nil {
@@ -54,12 +56,12 @@ func checkWorkflowRepairPredecessors(state WorkflowMergerRepairState, input Work
 
 	checkpoint := input.HistoryCheckpoint
 	if checkpoint == nil || checkpoint.ReplayIndex != state.ReplayIndex || len(checkpoint.Predecessors) != len(state.History) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, entry := range state.History {
 		if checkpoint.Predecessors[i].Source != entry.Source || checkpoint.Predecessors[i].Commit != entry.Commit {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

@@ -3,11 +3,13 @@ package core
 import (
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowDecisionRecord(record WorkflowIntegrationDecisions) error {
 	if !validWorkflowDecisionHeader(record) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowMergerDecisions(record.Requests, record.Input); err != nil {
@@ -19,7 +21,7 @@ func validateWorkflowDecisionRecord(record WorkflowIntegrationDecisions) error {
 	}
 
 	if (record.State == "resolved") != workflowDecisionsResolved(record) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowDecisionHistory(record); err != nil {
@@ -36,16 +38,16 @@ func validateWorkflowDecisionRecord(record WorkflowIntegrationDecisions) error {
 func validateWorkflowDecisionAnswer(record WorkflowIntegrationDecisions, answer WorkflowIntegrationAnswer) error {
 	index := slices.IndexFunc(record.Requests, func(d WorkflowMergerDecision) bool { return d.ID == answer.DecisionID })
 	if index < 0 || !validWorkflowDecisionAnswerActor(answer) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	question := record.Requests[index]
 	if answer.Authority != question.Authority || !slices.Contains(question.Options, answer.Choice) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validWorkflowDecisionInterpretation(question, answer) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowDecisionPayload(answer)
@@ -54,7 +56,7 @@ func validateWorkflowDecisionAnswer(record WorkflowIntegrationDecisions, answer 
 func validateWorkflowDecisionPayload(answer WorkflowIntegrationAnswer) error {
 	if answer.DecisionID != "replay-owner" || answer.Action != "resolve" {
 		if answer.OriginalCommit != "" || answer.IntegrationFix != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -67,14 +69,14 @@ func validateWorkflowReplayPayload(answer WorkflowIntegrationAnswer) error {
 	switch answer.Choice {
 	case "Identify the original source step":
 		if !workflowCommitID(answer.OriginalCommit) || answer.IntegrationFix != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	case "Declare an integration fix with an actionable finding":
 		if answer.OriginalCommit != "" || !validWorkflowDecisionFix(answer.IntegrationFix) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	default:
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -88,7 +90,7 @@ func validateWorkflowDecisionHistory(record WorkflowIntegrationDecisions) error 
 	seen := map[string]bool{}
 	for _, answer := range record.Answers {
 		if seen[answer.ID] || !validWorkflowDecisionAnswerSeal(record, answer) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := validateWorkflowDecisionAnswer(record, answer); err != nil {

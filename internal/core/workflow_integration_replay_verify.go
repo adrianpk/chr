@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowIntegrationHistoryTipMatches(proof WorkflowIntegrationProof, last WorkflowIntegrationCommit) bool {
@@ -24,7 +26,7 @@ func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof
 	base := proof.ResultCommit
 	if p := proof.Provenance; p != nil {
 		if !validWorkflowProvenanceHeader(proof, *p) || len(p.Source) != count {
-			return nil, "", ErrWorkflowConflict
+			return nil, "", workflowstate.ErrConflict
 		}
 
 		base = p.Prepared[count-1].Commit
@@ -54,7 +56,7 @@ func (reader workflowIntegrationReader) verifyRebaseProvenance(ctx context.Conte
 	for _, fix := range proof.Provenance.IntegrationFixes {
 		entry, err := reader.commitAttribution(ctx, fix.Commit)
 		if err != nil || !validWorkflowIntegrationFix(fix, entry, parent) || entry.Tree == proof.PreparedTree {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		parent = entry.Commit
@@ -67,7 +69,7 @@ func (reader workflowIntegrationReader) verifyRebaseProvenance(ctx context.Conte
 	}
 
 	if !workflowNativeJSONEqual(actual, proof.Provenance) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

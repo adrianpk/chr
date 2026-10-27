@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var errAuthoringDocumentUnavailable = errors.New("requested original authoring document is unavailable")
@@ -25,7 +26,7 @@ func (s service) authoringDocument(ctx context.Context, sessionID string, kind c
 	}
 
 	if snapshot.Session.ProjectID != s.projectContext.ProjectID {
-		return core.AuthoringArtifactObservation{}, core.ErrWorkflowConflict
+		return core.AuthoringArtifactObservation{}, workflowstate.ErrConflict
 	}
 
 	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
@@ -46,7 +47,7 @@ func (s service) ReadPreparedAuthoringDocument(ctx context.Context, prepared Pre
 	}
 
 	if prepared.ProjectID != s.projectContext.ProjectID || !validAuthoringDocumentKind(prepared.Request.DocumentKind) || len(prepared.Sources) != 1 {
-		return core.AuthoringArtifactObservation{}, core.ErrWorkflowConflict
+		return core.AuthoringArtifactObservation{}, workflowstate.ErrConflict
 	}
 
 	artifact, err := s.authoringDocument(ctx, prepared.Request.SessionID, prepared.Request.DocumentKind)
@@ -56,7 +57,7 @@ func (s service) ReadPreparedAuthoringDocument(ctx context.Context, prepared Pre
 
 	source := prepared.Sources[0]
 	if artifact.Ref.Path != source.Reference || artifact.SourceHash != source.SourceHash {
-		return core.AuthoringArtifactObservation{}, core.ErrWorkflowConflict
+		return core.AuthoringArtifactObservation{}, workflowstate.ErrConflict
 	}
 
 	return artifact, nil

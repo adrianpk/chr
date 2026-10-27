@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // The forge metadata is controlled; publication uses the production atomic Git
@@ -62,7 +64,7 @@ func (p *workflowAssuranceProvider) ReadWorkflowBranch(ctx context.Context, _, b
 func (p *workflowAssuranceProvider) ReadWorkflowPullRequest(ctx context.Context, address string) (WorkflowPullRequestSnapshot, error) {
 	pr, found := p.prs[address]
 	if !found {
-		return pr, ErrWorkflowConflict
+		return pr, workflowstate.ErrConflict
 	}
 
 	var err error

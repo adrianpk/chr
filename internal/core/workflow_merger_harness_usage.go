@@ -1,12 +1,14 @@
 package core
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 func checkWorkflowMergerHarnessUsage(input WorkflowMergerInput, certificate WorkflowMergerHarnessCertificate, usage *WorkflowMergerUsage) error {
 	if usage == nil {
 		return nil
 	}
 
 	if !certificate.ReportsWholeCall || usage.CapabilityRevision != certificate.CapabilityRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowMergerReportedUsage(usage, input.TokenAllowance); err != nil {

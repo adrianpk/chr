@@ -7,6 +7,8 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PrepareRecordMutation freezes validated owner input before durable dispatch.
@@ -52,8 +54,8 @@ func (s service) PrepareRecordMutation(ctx context.Context, namespace string, bi
 
 // ApplyPreparedRecordMutation invokes the actual owner with the retained input.
 func (s service) ApplyPreparedRecordMutation(ctx context.Context, prepared PreparedRecordMutation) (RecordMutationResult, error) {
-	if prepared.ProjectID != s.projectContext.ProjectID || !core.IsValidOpsNamespace(prepared.Namespace) {
-		return RecordMutationResult{}, core.ErrWorkflowConflict
+	if prepared.ProjectID != s.projectContext.ProjectID || !opsnamespace.Valid(prepared.Namespace) {
+		return RecordMutationResult{}, workflowstate.ErrConflict
 	}
 
 	if err := validatePreparedRecordOwner(prepared); err != nil {
@@ -130,7 +132,7 @@ func (s service) nativeMutationTarget(ctx context.Context, store *core.WorkflowS
 
 func guardRecordObservation(record core.WorkflowRecord, request RecordMutationRequest) error {
 	if request.ExpectedRevision == 0 || request.ExpectedHash == "" || record.Revision != request.ExpectedRevision || record.SourceHash != request.ExpectedHash {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -138,7 +140,7 @@ func guardRecordObservation(record core.WorkflowRecord, request RecordMutationRe
 
 func (s service) applyPreparedCaseMutation(ctx context.Context, prepared PreparedRecordMutation) (RecordMutationResult, error) {
 	if prepared.Kind != RecordUseCase || prepared.Case.ProjectID != prepared.ProjectID || prepared.Case.Namespace != prepared.Namespace {
-		return RecordMutationResult{}, core.ErrWorkflowConflict
+		return RecordMutationResult{}, workflowstate.ErrConflict
 	}
 
 	result, err := core.NewCaseMetadataService(s.projectContext.ProjectDir).SaveBound(ctx, *prepared.Case)
@@ -196,7 +198,7 @@ func validatePreparedRecordOwner(prepared PreparedRecordMutation) error {
 
 	if prepared.Case != nil {
 		if prepared.Kind != RecordUseCase {
-			return core.ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -214,5 +216,5 @@ func validatePreparedNativeKind(kind RecordKind, record core.WorkflowRecord) err
 		return nil
 	}
 
-	return core.ErrWorkflowConflict
+	return workflowstate.ErrConflict
 }

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -87,7 +88,7 @@ func assertGuidedTUIStaleScope(t *testing.T, executor tuiGuidedExecutor, operati
 			command.Namespace = "another-namespace"
 		}
 
-		if _, err := executor.ExecuteGuided(tui.GuidedRequest{Action: "input", Command: command}); !errors.Is(err, core.ErrWorkflowConflict) {
+		if _, err := executor.ExecuteGuided(tui.GuidedRequest{Action: "input", Command: command}); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("stale or foreign terminal command was accepted", foreign, err)
 		}
 	}

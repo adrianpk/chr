@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var errTelegramRecordTarget = errors.New("telegram record target is unavailable")
@@ -82,7 +83,7 @@ func (r telegramReceiver) recordDiagnostic(ctx context.Context, update core.Tele
 }
 
 func telegramRecordFailure(err error) string {
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return "Record conflict: the observed revision, source image or lifecycle changed. Read the current record before issuing a new request."
 	}
 

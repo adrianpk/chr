@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterializationResult, plan GeneratedWorkflowPlan) ([]workflowFileChange, error) {
@@ -28,14 +31,14 @@ func (s *WorkflowStore) materializedOrderChanges(result *WorkflowMaterialization
 		return nil, err
 	}
 
-	binding.OrderHash, binding.TrackerHash = workflowHash(order), workflowHash(tracker)
+	binding.OrderHash, binding.TrackerHash = contenthash.Sum(order), contenthash.Sum(tracker)
 
 	changes, err := s.retainedBoundOrderChanges(previous, binding, order, tracker)
 	if err != nil {
 		return nil, err
 	}
 
-	registration := workflowBoundTrackerStatus(s, result.Set, binding, workflowHash(order))
+	registration := workflowBoundTrackerStatus(s, result.Set, binding, contenthash.Sum(order))
 
 	registered, err := s.boundTrackerChanges(registration, tracker)
 	if err != nil {
@@ -64,7 +67,7 @@ func (s *WorkflowStore) retainedBoundOrderChanges(previous, next PlanRevisionBin
 
 	current, err := s.readPlanOrderBinding(previous)
 	if err != nil || current != previous {
-		return nil, errors.Join(ErrWorkflowConflict, err)
+		return nil, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	currentData, err := s.readWorkflowTrackerFile(bindingRef)
@@ -75,7 +78,7 @@ func (s *WorkflowStore) retainedBoundOrderChanges(previous, next PlanRevisionBin
 	images := []struct {
 		ref, expected string
 		body          []byte
-	}{{next.OrderRef, previous.OrderHash, order}, {next.TrackerRef, previous.TrackerHash, tracker}, {bindingRef, workflowHash(currentData), data}}
+	}{{next.OrderRef, previous.OrderHash, order}, {next.TrackerRef, previous.TrackerHash, tracker}, {bindingRef, contenthash.Sum(currentData), data}}
 
 	changes := make([]workflowFileChange, 0, len(images))
 	for _, image := range images {
@@ -151,7 +154,7 @@ func (s *WorkflowStore) observedOrderImage(reference string, body []byte) (workf
 		return change, err
 	}
 
-	change.Before = workflowHash(current)
+	change.Before = contenthash.Sum(current)
 
 	return change, nil
 }
@@ -186,10 +189,10 @@ func (s *WorkflowStore) currentPlanOrderMetadata(binding PlanRevisionBinding) (m
 	same := current.Reference == binding.Reference && current.Revision == binding.Revision && current.BodyHash == binding.BodyHash
 
 	if same && current != binding {
-		return nil, workflowFileChange{}, false, ErrWorkflowConflict
+		return nil, workflowFileChange{}, false, workflowstate.ErrConflict
 	}
 
-	return metadata, workflowFileChange{Path: reference, Before: workflowHash(data)}, same, nil
+	return metadata, workflowFileChange{Path: reference, Before: contenthash.Sum(data)}, same, nil
 }
 
 func (s *WorkflowStore) checkCurrentOrderOutput(binding PlanRevisionBinding) error {
@@ -203,8 +206,8 @@ func (s *WorkflowStore) checkCurrentOrderOutput(binding PlanRevisionBinding) err
 		return err
 	}
 
-	if workflowHash(body) != binding.BodyHash {
-		return ErrWorkflowConflict
+	if contenthash.Sum(body) != binding.BodyHash {
+		return workflowstate.ErrConflict
 	}
 
 	tracker, err := s.readWorkflowTrackerFile(binding.CurrentTrackerRef)
@@ -212,7 +215,7 @@ func (s *WorkflowStore) checkCurrentOrderOutput(binding PlanRevisionBinding) err
 		return err
 	}
 
-	if workflowHash(tracker) != binding.TrackerHash {
+	if contenthash.Sum(tracker) != binding.TrackerHash {
 		return ErrWorkflowProjectionStale
 	}
 
@@ -285,7 +288,7 @@ func (s *WorkflowStore) boundCurrentTrackerChanges(previous, next PlanRevisionBi
 		return nil, err
 	}
 
-	return []workflowFileChange{output, {Path: metadataRef, Before: workflowHash(current), After: encoded}}, nil
+	return []workflowFileChange{output, {Path: metadataRef, Before: contenthash.Sum(current), After: encoded}}, nil
 }
 
 func (s *WorkflowStore) registerBoundProjection(metadata map[string]any, binding PlanRevisionBinding) error {

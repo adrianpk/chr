@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // SpecMutationRequest creates an independent document or saves the exact
@@ -43,7 +47,7 @@ func MutateSpec(ctx context.Context, projectDir string, request SpecMutationRequ
 		return result, err
 	}
 
-	digest := workflowHash(append([]byte(root+"\x00spec-write\x00"), encoded...))
+	digest := contenthash.Sum(append([]byte(root+"\x00spec-write\x00"), encoded...))
 	r := &fileAuthoringSessionRepository{projectDir: root}
 	err = WithAuthoringMutation(ctx, root, func(ctx context.Context) error {
 		var found bool
@@ -101,7 +105,7 @@ func (r *fileAuthoringSessionRepository) commitSpec(ctx context.Context, request
 	}
 
 	result.Reference = document.Reference
-	result.Revision = workflowHash([]byte(strings.Join([]string{r.projectDir, document.Reference, workflowHash(changes[0].After), workflowHash(changes[1].After)}, "\x00")))
+	result.Revision = contenthash.Sum([]byte(strings.Join([]string{r.projectDir, document.Reference, contenthash.Sum(changes[0].After), contenthash.Sum(changes[1].After)}, "\x00")))
 
 	receipt, err := specReceiptChange(digest, result)
 	if err != nil {
@@ -140,7 +144,7 @@ func (r *fileAuthoringSessionRepository) specSaveTarget(ctx context.Context, req
 	}
 
 	if document.Revision != request.ExpectedRevision || document.CaseSlug != request.CaseSlug || document.ProjectID != "" && document.ProjectID != request.ProjectID {
-		return document, ErrWorkflowConflict
+		return document, workflowstate.ErrConflict
 	}
 
 	return document, r.guardGuidedSpecApproval(ctx, request, document)
@@ -156,7 +160,7 @@ func (r *fileAuthoringSessionRepository) newSpecDocument(request SpecMutationReq
 	}
 
 	if _, err := os.Lstat(path); !errors.Is(err, os.ErrNotExist) {
-		return document, errors.Join(ErrWorkflowConflict, err)
+		return document, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: r.projectDir, Namespace: request.Namespace})
@@ -187,7 +191,7 @@ func validateSpecCreate(request SpecMutationRequest) error {
 		return errors.New("guided approval requires its generated draft revision")
 	}
 
-	if !IsValidOpsNamespace(request.Namespace) || request.Reference != "" || request.ExpectedRevision != "" {
+	if !opsnamespace.Valid(request.Namespace) || request.Reference != "" || request.ExpectedRevision != "" {
 		return errors.New("spec creation requires a namespace and new document identity")
 	}
 

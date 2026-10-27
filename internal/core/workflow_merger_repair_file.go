@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (reader workflowIntegrationReader) mergerFileKind(ctx context.Context, tree, path string) (string, error) {
@@ -15,7 +17,7 @@ func (reader workflowIntegrationReader) mergerFileKind(ctx context.Context, tree
 
 	fields := strings.Fields(header)
 	if !ok || name != path || len(fields) != 3 || !workflowCommitID(fields[2]) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if fields[0] == "160000" {

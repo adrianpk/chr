@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type workflowFileChange struct {
@@ -137,7 +139,7 @@ func (s *WorkflowStore) encodeChanges(r WorkflowRecord) ([]workflowFileChange, e
 		}
 
 		if err == nil {
-			changes[i].Before = workflowHash(before)
+			changes[i].Before = contenthash.Sum(before)
 		}
 	}
 

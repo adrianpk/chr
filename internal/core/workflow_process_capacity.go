@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // A durable group ledger complements flock when the supervisor is killed before
@@ -33,7 +35,7 @@ func registerWorkflowProcessCapacity(ctx context.Context, claim *WorkflowClaim, 
 func workflowCapacityProcessName(process WorkflowProcess) (string, error) {
 	data, err := json.Marshal(process.Identity)
 
-	return workflowHash(data) + ".json", err
+	return contenthash.Sum(data) + ".json", err
 }
 
 func guardWorkflowProcessCapacity(common string) error {

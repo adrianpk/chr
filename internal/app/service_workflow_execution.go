@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) workflowStore() (*core.WorkflowStore, error) {
@@ -130,7 +131,7 @@ func workflowControlRevision(expected []uint64) (uint64, error) {
 	}
 
 	if len(expected) != 1 || expected[0] == 0 {
-		return 0, core.ErrWorkflowConflict
+		return 0, workflowstate.ErrConflict
 	}
 
 	return expected[0], nil

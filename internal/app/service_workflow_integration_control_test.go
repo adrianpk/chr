@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func serviceIntegrationControl(status WorkflowWorkStatus, action string) WorkflowControlRequest {
@@ -44,7 +45,7 @@ func TestServiceIntegrationGrant(t *testing.T) {
 			stale.Integration = &guard
 			tc.change(&stale)
 
-			if _, err := operations.ControlWorkExtent(t.Context(), stale); !errors.Is(err, core.ErrWorkflowConflict) {
+			if _, err := operations.ControlWorkExtent(t.Context(), stale); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale native grant accepted", err)
 			}
 
@@ -66,7 +67,7 @@ func checkServiceIntegrationGrant(t *testing.T, operations service, request Work
 	}
 
 	images := workflowCLIImage(t, operations.projectContext.ProjectDir)
-	if _, err := operations.ControlWorkExtent(t.Context(), request); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.ControlWorkExtent(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("old surface revision granted again", err)
 	}
 
@@ -91,7 +92,7 @@ func TestServiceIntegrationApproval(t *testing.T) {
 	checkServiceIntegrationApproval(t, status, after, err)
 
 	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
-	if _, err := operations.ControlWorkExtent(t.Context(), request); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.ControlWorkExtent(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale surface approval accepted", err)
 	}
 

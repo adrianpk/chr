@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) respondPreparedWork(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
@@ -84,7 +85,7 @@ func (r telegramReceiver) preparedWorkInput(ctx context.Context, operations tele
 	}
 
 	if snapshot.Session.Namespace != target.Namespace || snapshot.Session.ProjectID != target.ProjectID || snapshot.Question != nil {
-		return owner, core.ErrWorkflowConflict
+		return owner, workflowstate.ErrConflict
 	}
 
 	input.Conversation = c.ID

@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func (s *WorkflowStore) readWorkflowSelection(ctx context.Context) (workflowSelection, error) {
@@ -105,7 +107,7 @@ func (selection workflowSelection) hash() string {
 
 	sort.Strings(images)
 
-	return workflowHash([]byte(strings.Join(images, "\n")))
+	return contenthash.Sum([]byte(strings.Join(images, "\n")))
 }
 
 func (s *WorkflowStore) appendUnpreparedTicket(selection *workflowSelection, paths map[string]bool, path string) error {
@@ -175,7 +177,7 @@ func workflowUnpreparedTicket(content []byte) (IndexedTicket, error) {
 		return IndexedTicket{}, err
 	}
 
-	return IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: unquoteMetadataString(metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: unquoteMetadataString(metadata["status"]), UseCase: unquoteMetadataString(metadata["use_case"]), Priority: unquoteMetadataString(metadata["priority"]), Severity: unquoteMetadataString(metadata["severity"]), Type: unquoteMetadataString(metadata["type"]), ProjectArea: unquoteMetadataString(metadata["project_area"]), Tags: parseMetadataStringList(metadata["tags"])}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: created}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: workflowHash(content)}}, nil
+	return IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: unquoteMetadataString(metadata["key"])}, IndexedTicketClassification: IndexedTicketClassification{Status: unquoteMetadataString(metadata["status"]), UseCase: unquoteMetadataString(metadata["use_case"]), Priority: unquoteMetadataString(metadata["priority"]), Severity: unquoteMetadataString(metadata["severity"]), Type: unquoteMetadataString(metadata["type"]), ProjectArea: unquoteMetadataString(metadata["project_area"]), Tags: parseMetadataStringList(metadata["tags"])}, IndexedTicketTimes: IndexedTicketTimes{CreatedAt: created}, IndexedTicketProjection: IndexedTicketProjection{ContentHash: contenthash.Sum(content)}}, nil
 }
 
 func (s *WorkflowStore) hashWorkflowEvidence(ctx context.Context, selection *workflowSelection) error {
@@ -220,7 +222,7 @@ func (s *WorkflowStore) workflowEvidenceHash(relative string) (string, error) {
 		return "", err
 	}
 
-	return workflowHash(data), nil
+	return contenthash.Sum(data), nil
 }
 
 func (s *WorkflowStore) appendWorkflowUnprepared(ctx context.Context, selection *workflowSelection, paths map[string]bool, enabled bool) error {

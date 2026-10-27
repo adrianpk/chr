@@ -4,6 +4,8 @@ import (
 	"errors"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseAdmissionMembership refuses replaced, missing, foreign or additional native work.
@@ -17,7 +19,7 @@ func TestGuidedUseCaseAdmissionMembership(t *testing.T) {
 			changeGuidedPreview(&preview, variant)
 
 			err := ValidateGuidedWorkPreview(reference, preview)
-			if variant == "exact" && err != nil || variant != "exact" && !errors.Is(err, ErrWorkflowConflict) {
+			if variant == "exact" && err != nil || variant != "exact" && !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("unexpected membership authority", err)
 			}
 		})
@@ -52,7 +54,7 @@ func TestGuidedUseCaseAdmissionAuthority(t *testing.T) {
 			changeGuidedAdmissionProof(&session, &request, variant)
 
 			err := guardGuidedAdmissionProof(session, "project", "default", request)
-			if variant == "exact" && err != nil || variant != "exact" && !errors.Is(err, ErrWorkflowConflict) {
+			if variant == "exact" && err != nil || variant != "exact" && !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("unexpected progression authority", err)
 			}
 		})

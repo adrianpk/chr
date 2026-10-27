@@ -9,6 +9,9 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowParallelPublicationLane struct {
@@ -23,13 +26,13 @@ type workflowParallelPublicationProvider struct {
 }
 
 func (p *workflowParallelPublicationProvider) observationPath() string {
-	return filepath.Join(p.remote, "pr-"+workflowHash([]byte(p.pr.URL))+".json")
+	return filepath.Join(p.remote, "pr-"+contenthash.Sum([]byte(p.pr.URL))+".json")
 }
 
 func (p *workflowParallelPublicationProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (WorkflowPullRequestSnapshot, error) {
 	pr := p.pr
 	if url != pr.URL {
-		return pr, ErrWorkflowConflict
+		return pr, workflowstate.ErrConflict
 	}
 
 	data, err := os.ReadFile(p.observationPath())

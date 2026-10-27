@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowPullRequestObservation struct {
@@ -48,7 +51,7 @@ func (s *WorkflowStore) workflowPullRequestObservation(run *workflowInvocationFi
 	data = append(data, '\n')
 	binding.ObservationCount++
 	binding.ObservationRef = workflowUnitPullRequestObservationPath(run.ID, binding.ID, binding.ObservationCount)
-	binding.ObservationHash = workflowHash(data)
+	binding.ObservationHash = contenthash.Sum(data)
 
 	return workflowFileChange{Path: binding.ObservationRef, After: data}, nil
 }
@@ -68,8 +71,8 @@ func (s *WorkflowStore) readWorkflowPullRequestObservation(binding WorkflowPullR
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != binding.ObservationHash {
-		return workflowPullRequestObservation{}, ErrWorkflowConflict
+	if err != nil || contenthash.Sum(data) != binding.ObservationHash {
+		return workflowPullRequestObservation{}, workflowstate.ErrConflict
 	}
 
 	var observation workflowPullRequestObservation
@@ -78,7 +81,7 @@ func (s *WorkflowStore) readWorkflowPullRequestObservation(binding WorkflowPullR
 	}
 
 	if observation.Schema != "chr-slice-pr-observation/v1" || observation.BindingID != binding.ID || observation.ObservedAt.IsZero() {
-		return observation, ErrWorkflowConflict
+		return observation, workflowstate.ErrConflict
 	}
 
 	return observation, nil

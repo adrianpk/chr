@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // CheckWorkflowMergerCheckpoint verifies actual Git objects, the replay prefix
@@ -20,7 +22,7 @@ func (git OSWorkflowPreparationGit) CheckWorkflowMergerCheckpoint(ctx context.Co
 
 	head, err := reader.output(ctx, "rev-parse", "HEAD")
 	if err != nil || head != state.PreparedParent {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -28,24 +30,24 @@ func (git OSWorkflowPreparationGit) CheckWorkflowMergerCheckpoint(ctx context.Co
 
 func checkWorkflowMergerPrivateRepository(ctx context.Context, directory string) error {
 	if !filepath.IsAbs(directory) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	resolved, err := filepath.EvalSymlinks(directory)
 	if err != nil || resolved != directory {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	info, err := os.Lstat(filepath.Join(directory, ".git"))
 	if err != nil || !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	reader := workflowIntegrationReader{dir: directory, environment: workflowMergerEnvironment(filepath.Dir(directory))}
 
 	remotes, err := reader.output(ctx, "remote")
 	if err != nil || remotes != "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -55,7 +57,7 @@ func checkWorkflowMergerPrivateRepository(ctx context.Context, directory string)
 // object store. It does not change a branch or publish a temporary commit.
 func (git OSWorkflowPreparationGit) ImportWorkflowMergerTree(ctx context.Context, state WorkflowMergerRepairState, directory, tree string) error {
 	if !workflowCommitID(tree) || directory == state.Query.Lane.Worktree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	reader, err := git.resumeMergerRepairReader(ctx, state)

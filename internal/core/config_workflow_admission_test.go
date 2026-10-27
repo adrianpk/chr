@@ -5,6 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowConfigAdmission freezes project limits at real admission and keeps
@@ -136,7 +139,7 @@ func executeWorkflowConfigDeadline(t *testing.T, extent string, store *WorkflowS
 func checkWorkflowConfigFrozen(t *testing.T, policy WorkflowExecutionPolicy, body string) {
 	t.Helper()
 
-	if policy.WorkerTimeoutSeconds != 60 || policy.ValidationTimeoutSeconds != 10 || policy.CheckpointStepLimit != 2 || policy.MaxWorkerAttempts != 1 || policy.MaxIntegrationAttempts != 2 || policy.IncludeLaterTickets || policy.ConfigRevision != workflowHash([]byte(body)) {
+	if policy.WorkerTimeoutSeconds != 60 || policy.ValidationTimeoutSeconds != 10 || policy.CheckpointStepLimit != 2 || policy.MaxWorkerAttempts != 1 || policy.MaxIntegrationAttempts != 2 || policy.IncludeLaterTickets || policy.ConfigRevision != contenthash.Sum([]byte(body)) {
 		t.Fatal("admission did not freeze resolved restrictions", policy)
 	}
 }
@@ -158,7 +161,7 @@ func checkWorkflowConfigRetry(t *testing.T, store *WorkflowStore, request Workfl
 	request.Policy = policy
 
 	request.RequestKey = "forged-config"
-	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("caller forged a retained configuration snapshot", err)
 	}
 

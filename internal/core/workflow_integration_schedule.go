@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // WorkflowIntegrationScheduleQuery bounds selection from admitted native units.
@@ -107,5 +109,5 @@ func (scheduler *workflowIntegrationScheduler) hash() (string, error) {
 
 	data, err := json.Marshal(images)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }

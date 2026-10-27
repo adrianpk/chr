@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // The continuation builds dump images, never a nested publication. Its existing
@@ -16,7 +18,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Contex
 	}
 
 	if snapshot.dumpRevision != observed.Revision {
-		return AuthoringArtifactRef{}, nil, ErrWorkflowConflict
+		return AuthoringArtifactRef{}, nil, workflowstate.ErrConflict
 	}
 
 	target, err := r.authoringDumpTarget(session, observed)
@@ -45,7 +47,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringDump(ctx context.Contex
 func (r *fileAuthoringSessionRepository) authoringDumpTarget(session AuthoringSession, observed ProjectDumpObservation) (dumpMutationTarget, error) {
 	target := dumpMutationTarget{Project: observed.Project, Destination: observed.Destination}
 	if len(session.Inputs) == 0 || session.Inputs[0].Kind != AuthoringArtifactKindDump || !validAuthoringArtifactRef(session.Namespace, session.Inputs[0]) {
-		return target, ErrWorkflowConflict
+		return target, workflowstate.ErrConflict
 	}
 
 	if target.Destination == "" {
@@ -77,7 +79,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringDumpSnapshot(ctx contex
 	if request.Action == "refine" {
 		output := authoringArtifactObservation(*snapshot, observed.Destination)
 		if output == nil || output.Ref.Role != AuthoringArtifactRoleOutput {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -140,7 +142,7 @@ func authoringDumpPreparation(snapshot AuthoringSnapshot, session AuthoringSessi
 	if observed := authoringArtifactObservation(snapshot, target.RawReference); observed != nil {
 		fields, err := projectDumpBodyFields([]byte(observed.Body))
 		if err != nil || fields["type"] != "dump_raw" {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		raw = observed.Body
@@ -179,7 +181,7 @@ func authoringDumpBinding(binding authoringRequestBinding, snapshot AuthoringSna
 
 	if binding.Request.Action == "refine" {
 		if authoringArtifactObservation(snapshot, target.Destination) == nil {
-			return mutation, ErrWorkflowConflict
+			return mutation, workflowstate.ErrConflict
 		}
 
 		mutation.Request.Action, mutation.Request.Content = "save", body

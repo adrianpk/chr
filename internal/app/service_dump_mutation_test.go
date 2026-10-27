@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -170,7 +171,7 @@ func TestServiceDumpWriteGuards(t *testing.T) {
 	}
 
 	_, err = operations.AppendDump(DumpAppendRequest{OperationID: "stale", ExpectedRevision: created.Revision, RelativePath: created.RelativePath, Content: "Stale append."})
-	if !errors.Is(err, core.ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale append accepted", err)
 	}
 }

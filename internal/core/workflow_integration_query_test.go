@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeQueuePage(t *testing.T, store *WorkflowStore, q WorkflowIntegrationQueueQuery) WorkflowIntegrationQueuePage {
@@ -40,7 +43,7 @@ func nativeQueueImages(t *testing.T, root string) map[string]string {
 				return err
 			}
 
-			images[path] = workflowHash(data)
+			images[path] = contenthash.Sum(data)
 		}
 
 		return nil
@@ -89,7 +92,7 @@ func nativeQueueStalePage(t *testing.T, store *WorkflowStore, first, second Work
 		t.Fatal(err)
 	}
 
-	if _, err := store.QueryWorkflowIntegrationQueue(t.Context(), q); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.QueryWorkflowIntegrationQueue(t.Context(), q); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale pagination returned runnable work", err)
 	}
 
@@ -137,7 +140,7 @@ func TestNativeQueueNoReplay(t *testing.T) {
 	}
 	for _, check := range checks {
 		t.Run(check.name, func(t *testing.T) {
-			if err := check.query(); !errors.Is(err, ErrWorkflowConflict) {
+			if err := check.query(); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("query replayed transition", err)
 			}
 
@@ -211,7 +214,7 @@ func nativeQueueDamage(t *testing.T, store *WorkflowStore, id, damage string) {
 	}
 
 	change := workflowFileChange{Path: run.IntegrationBudget.Ref.Path, Before: run.IntegrationBudget.Ref.Hash, After: data}
-	run.IntegrationBudget.Ref.Hash = workflowHash(data)
+	run.IntegrationBudget.Ref.Hash = contenthash.Sum(data)
 
 	invocation, err := workflowInvocationChange(run)
 	if err != nil {

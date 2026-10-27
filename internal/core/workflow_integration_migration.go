@@ -4,6 +4,8 @@ import (
 	"context"
 	"math"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // MigrateWorkflowIntegration explicitly admits a missing unit, or adds the
@@ -29,7 +31,7 @@ func (s *WorkflowStore) MigrateWorkflowIntegration(ctx context.Context, request 
 			}
 		}
 
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	})
 
 	return entry, integrationRecordError(workflowInvocationPath(request.InvocationID), err)
@@ -37,7 +39,7 @@ func (s *WorkflowStore) MigrateWorkflowIntegration(ctx context.Context, request 
 
 func (s *WorkflowStore) migrateWorkflowIntegration(ctx context.Context, run workflowInvocationFile, runs []workflowInvocationFile, request WorkflowIntegrationAdmission) (WorkflowIntegrationEntry, error) {
 	if run.Revision != request.ExpectedRevision || run.Revision == math.MaxUint64 {
-		return WorkflowIntegrationEntry{}, ErrWorkflowConflict
+		return WorkflowIntegrationEntry{}, workflowstate.ErrConflict
 	}
 
 	if len(run.IntegrationEntries) == 0 {
@@ -53,7 +55,7 @@ func (s *WorkflowStore) migrateWorkflowIntegration(ctx context.Context, run work
 
 func (s *WorkflowStore) migrateWorkflowIntegrationLedger(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationAdmission) (WorkflowIntegrationEntry, error) {
 	if run.Integration == nil || run.Integration.Unit != request.Unit {
-		return WorkflowIntegrationEntry{}, ErrWorkflowConflict
+		return WorkflowIntegrationEntry{}, workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -62,7 +64,7 @@ func (s *WorkflowStore) migrateWorkflowIntegrationLedger(ctx context.Context, ru
 	}
 
 	if entry.TargetRef != request.TargetRef || entry.AdmissionKey != request.AdmissionKey {
-		return entry, ErrWorkflowConflict
+		return entry, workflowstate.ErrConflict
 	}
 
 	if run.IntegrationBudget != nil {

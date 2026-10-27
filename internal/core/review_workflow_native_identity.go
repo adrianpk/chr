@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Context, pr WorkflowPullRequestSnapshot) (string, error) {
@@ -31,5 +33,5 @@ func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Contex
 		return "", err
 	}
 
-	return workflowHash(data), nil
+	return contenthash.Sum(data), nil
 }

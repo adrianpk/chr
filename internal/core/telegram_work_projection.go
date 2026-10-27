@@ -9,7 +9,9 @@ import (
 	"math"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramWorkObservation is a read projection of a canonical native revision.
@@ -26,11 +28,11 @@ type TelegramWorkObservation struct {
 // Original admission results and all native state remain unchanged.
 func (s *TelegramReceiverStore) ProjectTelegramWork(ctx context.Context, ref TelegramWorkReference, observation TelegramWorkObservation, configDigest string, now time.Time) error {
 	if observation.Revision == 0 || observation.Revision > math.MaxInt64 || observation.Text == "" || len(observation.Text) > 16384 || len(configDigest) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validTelegramWorkObservation(observation) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
@@ -84,7 +86,7 @@ func sameTelegramWorkNotice(ctx context.Context, tx *sql.Tx, ref TelegramWorkRef
 			return false, err
 		}
 
-		hash = workflowHash(image)
+		hash = contenthash.Sum(image)
 	}
 
 	return kind == observation.Kind && phase == observation.Phase && text == observation.Text && presentationHash == hash, nil
@@ -141,7 +143,7 @@ func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramW
 		}
 
 		if len(presentation) != 0 {
-			if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(presentation), workflowHash(presentation), ref.Request.Source.Peer.BotID, key); err != nil {
+			if _, err := tx.ExecContext(ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE bot_id=? AND event_key=?", string(presentation), contenthash.Sum(presentation), ref.Request.Source.Peer.BotID, key); err != nil {
 				return err
 			}
 		}
@@ -152,7 +154,7 @@ func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramW
 
 func insertTelegramWorkNotice(ctx context.Context, tx *sql.Tx, ref TelegramWorkReference, kind, key, text, configDigest string, part, parts int, now time.Time) error {
 	peer, target := ref.Request.Source.Peer, ref.Request.Target
-	id := "tgd-" + workflowHash(fmt.Appendf(nil, "%d:%s:%d", peer.BotID, key, part))[:32]
+	id := "tgd-" + contenthash.Sum(fmt.Appendf(nil, "%d:%s:%d", peer.BotID, key, part))[:32]
 	_, err := tx.ExecContext(ctx, `INSERT INTO telegram_outbox(id,bot_id,chat_id,topic_id,user_id,conversation_id,conversation_revision,request_id,event_key,config_digest,kind,text,part_index,part_count,state,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending',?,?)`, id, peer.BotID, peer.ChatID, peer.TopicID, peer.UserID, target.ConversationID, ref.ConversationRevision, ref.Request.ID, key, configDigest, kind, text, part, parts, database.FormatTime(now), database.FormatTime(now))
 
 	return err

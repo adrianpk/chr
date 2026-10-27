@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AdmitGuidedWork binds original progression intent to one exact native invocation.
@@ -39,7 +40,7 @@ func (s service) admitGuidedWork(ctx context.Context, session *core.AuthoringSes
 
 	work := session.Guided.Work
 	if work == nil || work.Materialization == nil {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if work.Admission == nil {

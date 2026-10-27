@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -50,7 +51,7 @@ func TestTUIWorkflowStale(t *testing.T) {
 	id := workflowCLIManualStart(t, operations, hierarchy)
 
 	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
-	if _, err := executor.ExecuteWorkAction(preview.Confirmation.Request); !errors.Is(err, core.ErrWorkflowConflict) && !errors.Is(err, core.ErrWorkflowOwned) {
+	if _, err := executor.ExecuteWorkAction(preview.Confirmation.Request); !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, core.ErrWorkflowOwned) {
 		t.Fatal("stale confirmation started work", err)
 	}
 
@@ -138,7 +139,7 @@ func TestTUIWorkflowApproval(t *testing.T) {
 	provider.pr.HeadCommit = strings.Repeat("d", 40)
 
 	result, err := executor.ExecuteWorkAction(preview.Confirmation.Request)
-	if !errors.Is(err, core.ErrWorkflowConflict) || result.Workflow == nil || result.Workflow.ApprovalHash != review.InputHash {
+	if !errors.Is(err, workflowstate.ErrConflict) || result.Workflow == nil || result.Workflow.ApprovalHash != review.InputHash {
 		t.Fatal("moved PR head accepted or hidden", err)
 	}
 
@@ -173,7 +174,7 @@ func checkTUIWorkflowStaleControl(t *testing.T, operations service, executor tui
 	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
 
 	stale, err := executor.ExecuteWorkAction(request)
-	if !errors.Is(err, core.ErrWorkflowConflict) || stale.Workflow == nil || stale.Workflow.Revision != revision || !maps.Equal(before, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
+	if !errors.Is(err, workflowstate.ErrConflict) || stale.Workflow == nil || stale.Workflow.Revision != revision || !maps.Equal(before, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
 		t.Fatal("stale control hid current status or changed authorization", err)
 	}
 }

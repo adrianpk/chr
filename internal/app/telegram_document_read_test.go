@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Real authoring sources and registry bindings reject missing or changed
@@ -58,7 +59,7 @@ func checkTelegramOriginalDocumentGuard(t *testing.T, change string) {
 	operations := telegramOperationConcreteService(t, f.receiver)
 
 	_, err = operations.ReadPreparedTelegramDocument(t.Context(), request.Target, prepared)
-	if !errors.Is(err, core.ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("read followed a changed document or registry root", err)
 	}
 

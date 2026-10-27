@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPreparationGuard revokes source-only and stale combined grants,
@@ -18,14 +21,14 @@ func TestWorkflowPreparationGuard(t *testing.T) {
 		{"base", func(t *testing.T, f workflowPreparationFixture, _ WorkflowIntegrationCandidate) {
 			t.Helper()
 
-			f.provider.target = workflowHash([]byte("moved"))[:40]
+			f.provider.target = contenthash.Sum([]byte("moved"))[:40]
 			f.provider.pr.BaseCommit = f.provider.target
 		}},
 		{"protection", func(_ *testing.T, f workflowPreparationFixture, _ WorkflowIntegrationCandidate) {
 			f.provider.revision = "guard-v2"
 		}},
 		{"source", func(_ *testing.T, f workflowPreparationFixture, _ WorkflowIntegrationCandidate) {
-			f.provider.pr.HeadCommit = workflowHash([]byte("changed-source"))[:40]
+			f.provider.pr.HeadCommit = contenthash.Sum([]byte("changed-source"))[:40]
 		}},
 		{"lane", func(t *testing.T, _ workflowPreparationFixture, c WorkflowIntegrationCandidate) {
 			t.Helper()
@@ -132,7 +135,7 @@ func TestWorkflowPreparationIO(t *testing.T) {
 	f := newWorkflowPreparationFixture(t, "merge", WorkflowValidation{WaiverReason: "Preparation IO fixture"})
 
 	git := workflowPreparationGitHook{git: f.git, after: func() { f.provider.revision = "changed-after-Git" }}
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale preparation: %v", err)
 	}
 

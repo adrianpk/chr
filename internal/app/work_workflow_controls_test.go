@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowCLIStatus(t *testing.T, project string, args ...string) (WorkflowWorkStatus, error) {
@@ -56,7 +57,7 @@ func TestWorkflowCLIControls(t *testing.T) {
 		t.Fatal("pause did not reach shared lifecycle", paused, err)
 	}
 
-	if _, err := workflowCLIStatus(t, project, "status", "--revision", strconv.FormatUint(status.Revision, 10), "--offset", "1", id); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := workflowCLIStatus(t, project, "status", "--revision", strconv.FormatUint(status.Revision, 10), "--offset", "1", id); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale status pagination accepted", err)
 	}
 

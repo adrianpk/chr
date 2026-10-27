@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // WorkflowSelectionGuard binds admission to the selected native ticket image.
 // It is admission input, not a retained credential or an execution override.
@@ -15,7 +19,7 @@ func checkWorkflowRevision(run WorkflowInvocation, expected []uint64) error {
 	}
 
 	if len(expected) != 1 || expected[0] == 0 || expected[0] != run.Revision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -35,12 +39,12 @@ func (s *WorkflowStore) checkWorkflowSelectionGuard(ctx context.Context, request
 
 	record := selection.records[guard.Key]
 	if guard.Revision == 0 || record.Task == nil || record.Revision != guard.Revision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	ticket := IndexedTicket{IndexedTicketIdentity: IndexedTicketIdentity{Key: guard.Key}, IndexedTicketClassification: IndexedTicketClassification{UseCase: record.Task.UseCase}}
 	if !selection.matches(request.Selection.Selector, ticket, record) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -48,7 +52,7 @@ func (s *WorkflowStore) checkWorkflowSelectionGuard(ctx context.Context, request
 
 func (s *WorkflowStore) acceptWorkflowContinuation(ctx context.Context, id string, expected uint64, checks ...WorkflowAdmissionCheck) (result WorkflowInvocation, err error) {
 	if len(checks) > 1 {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	var check WorkflowAdmissionCheck

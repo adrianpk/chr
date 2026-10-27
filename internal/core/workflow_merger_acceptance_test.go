@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeMergerAcceptanceFixture(t *testing.T, id, method string) (workflowPreparationFixture, WorkflowMergerRequest, WorkflowMergerHarness, WorkflowMergerRepairState) {
@@ -188,7 +190,7 @@ func TestNativeMergerAcceptanceStale(t *testing.T) {
 	git := nativeMergerAcceptanceGit{OSWorkflowPreparationGit: f.git, afterCommit: func() { f.provider.target = strings.Repeat("f", 40) }}
 
 	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, git)
-	if !errors.Is(err, ErrWorkflowConflict) || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "rejected" || attempt.Acceptance.Next == nil {
+	if !errors.Is(err, workflowstate.ErrConflict) || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "rejected" || attempt.Acceptance.Next == nil {
 		t.Fatal("stale result accepted or private evidence lost", err)
 	}
 
@@ -229,7 +231,7 @@ func testNativeMergerAcceptanceReject(t *testing.T, mutate func(*testing.T, work
 	}}
 
 	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, git)
-	if !errors.Is(err, ErrWorkflowConflict) || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "rejected" || attempt.Acceptance.Next != nil {
+	if !errors.Is(err, workflowstate.ErrConflict) || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "rejected" || attempt.Acceptance.Next != nil {
 		t.Fatal("invalid actual edit accepted", attempt.Failure, err)
 	}
 

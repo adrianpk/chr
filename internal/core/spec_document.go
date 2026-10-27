@@ -6,6 +6,10 @@ import (
 	"errors"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // SpecDocument is one concrete spec, with its editable body separated from
@@ -36,7 +40,7 @@ func validateSpecReference(reference string) error {
 	}
 
 	parts := strings.Split(reference, "/")
-	if len(parts) != 5 || parts[0] != OpsDirectoryName || !IsValidOpsNamespace(parts[1]) || parts[2] != "spec" || parts[4] != OpsArtifactBodyFile() {
+	if len(parts) != 5 || parts[0] != OpsDirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "spec" || parts[4] != OpsArtifactBodyFile() {
 		return errors.New("spec reference must identify a canonical spec artifact")
 	}
 
@@ -61,7 +65,7 @@ func ReadSpecDocument(ctx context.Context, projectDir, reference string) (SpecDo
 			return document, err
 		}
 
-		document.images = append(document.images, workflowFileChange{Path: path, Before: workflowHash(data), After: data})
+		document.images = append(document.images, workflowFileChange{Path: path, Before: contenthash.Sum(data), After: data})
 	}
 
 	if err := decodeSpecDocument(&document); err != nil {
@@ -73,7 +77,7 @@ func ReadSpecDocument(ctx context.Context, projectDir, reference string) (SpecDo
 		return document, err
 	}
 
-	document.Revision = workflowHash([]byte(strings.Join([]string{root, reference, document.images[0].Before, document.images[1].Before}, "\x00")))
+	document.Revision = contenthash.Sum([]byte(strings.Join([]string{root, reference, document.images[0].Before, document.images[1].Before}, "\x00")))
 
 	return document, r.checkQuizImages(document.images)
 }
@@ -150,7 +154,7 @@ func decodeSpecMetadata(document *SpecDocument) error {
 	parts := strings.Split(document.Reference, "/")
 	for key, want := range map[string]string{"schema_version": "ops-layout/v1", "namespace": parts[1], "type": "spec", "id": parts[3]} {
 		if document.metadata[key] != want {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

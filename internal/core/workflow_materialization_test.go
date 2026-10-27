@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowMaterializationFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationOptions) {
@@ -72,7 +74,7 @@ func checkMaterializedHierarchy(t *testing.T, store *WorkflowStore, result Workf
 		}
 
 		contract, err := os.ReadFile(filepath.Join(store.layout.Root(), slice.ContractRef))
-		if err != nil || workflowHash(contract) != slice.ContractHash {
+		if err != nil || contenthash.Sum(contract) != slice.ContractHash {
 			t.Fatalf("slice contract = %v", err)
 		}
 	}

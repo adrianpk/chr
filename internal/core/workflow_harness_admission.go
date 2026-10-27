@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowHarnessResolver prepares the current explicit choice from the same
@@ -27,7 +29,7 @@ func (s *WorkflowStore) resolveWorkflowHarnessRequest(ctx context.Context, reque
 		}
 
 		if request.HarnessBinding != nil && !sameHarnessBinding(request.HarnessBinding, binding) {
-			return request, ErrWorkflowConflict
+			return request, workflowstate.ErrConflict
 		}
 
 		request.HarnessBinding, request.HarnessCommand = binding, command
@@ -59,11 +61,11 @@ func (s *WorkflowStore) retainedWorkflowHarnessRequest(ctx context.Context, requ
 
 func retainWorkflowHarnessRequest(request WorkflowStartRequest, run workflowInvocationFile) (WorkflowStartRequest, error) {
 	if request.HarnessBinding != nil && !sameHarnessBinding(request.HarnessBinding, run.HarnessBinding) {
-		return request, ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	if len(request.HarnessCommand) > 0 && !slices.Equal(request.HarnessCommand, run.HarnessCommand) {
-		return request, ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	request.HarnessBinding = cloneHarnessBinding(run.HarnessBinding)
@@ -84,18 +86,18 @@ func checkCurrentWorkflowHarness(config WorkspaceConfig, request WorkflowStartRe
 	binding := request.HarnessBinding
 	if binding == nil {
 		if config.Harnesses.Worker != "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return validateWorkflowHarnessPair(nil, request.HarnessCommand)
 	}
 
 	if binding.SelectionRevision != config.Revision() || binding.Profile != config.Harnesses.Worker {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.Policy.ConfigRevision != binding.SelectionRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowHarnessPair(binding, request.HarnessCommand)
@@ -126,14 +128,14 @@ func validateWorkflowInvocationHarness(run workflowInvocationFile) error {
 	switch run.Schema {
 	case "chr-invocation/v1":
 		if run.HarnessBinding != nil || len(run.HarnessCommand) != 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	case "chr-invocation/v2":
 		if run.HarnessBinding == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	default:
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowHarnessPair(run.HarnessBinding, run.HarnessCommand)

@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"syscall"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type authoringOwnerContextKey struct{}
@@ -111,11 +113,11 @@ func authoringRuntimeRef(suffix string) string {
 }
 
 func authoringRequestRef(id string) string {
-	return authoringRuntimeRef("requests/" + workflowHash([]byte(id)) + ".json")
+	return authoringRuntimeRef("requests/" + contenthash.Sum([]byte(id)) + ".json")
 }
 
 func authoringReceiptRef(id string) string {
-	return authoringRuntimeRef("receipts/" + workflowHash([]byte(id)) + ".json")
+	return authoringRuntimeRef("receipts/" + contenthash.Sum([]byte(id)) + ".json")
 }
 
 func (r *fileAuthoringSessionRepository) authoringSessionPaths(id string) (AuthoringSessionPaths, error) {

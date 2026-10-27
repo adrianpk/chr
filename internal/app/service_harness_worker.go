@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -35,7 +36,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 	}
 
 	if s.workflowWorker != nil && !slices.Equal(s.workflowWorker, command) {
-		return nil, nil, core.ErrWorkflowConflict
+		return nil, nil, workflowstate.ErrConflict
 	}
 
 	binding, err := core.SealHarnessBinding(core.HarnessBinding{

@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowMergerTree struct {
@@ -27,7 +29,7 @@ func (reader workflowIntegrationReader) mergerTree(ctx context.Context, original
 	}
 
 	if stdout.overflow {
-		return workflowMergerTree{}, ErrWorkflowConflict
+		return workflowMergerTree{}, workflowstate.ErrConflict
 	}
 
 	return parseWorkflowMergerTree(stdout.buffer.String(), err != nil)
@@ -36,7 +38,7 @@ func (reader workflowIntegrationReader) mergerTree(ctx context.Context, original
 func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, error) {
 	fields := strings.Split(data, "\x00")
 	if len(fields) < 2 || !workflowCommitID(fields[0]) {
-		return workflowMergerTree{}, ErrWorkflowConflict
+		return workflowMergerTree{}, workflowstate.ErrConflict
 	}
 
 	result := workflowMergerTree{tree: fields[0]}
@@ -50,7 +52,7 @@ func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, 
 		}
 
 		if !validWorkflowMergerPath(path) || len(result.conflicts) >= WorkflowPageLimit {
-			return workflowMergerTree{}, ErrWorkflowConflict
+			return workflowMergerTree{}, workflowstate.ErrConflict
 		}
 
 		result.conflicts = append(result.conflicts, path)
@@ -60,7 +62,7 @@ func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, 
 
 	result.conflicts = slices.Compact(result.conflicts)
 	if len(result.conflicts) == 0 {
-		return workflowMergerTree{}, fmt.Errorf("%w: merge conflict has no bounded file diagnosis", ErrWorkflowConflict)
+		return workflowMergerTree{}, fmt.Errorf("%w: merge conflict has no bounded file diagnosis", workflowstate.ErrConflict)
 	}
 
 	return result, nil

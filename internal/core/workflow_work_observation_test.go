@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Native observation retains shared ordering/readiness and ignores unrelated
@@ -55,7 +57,7 @@ func TestWorkflowWorkPending(t *testing.T) {
 	}
 
 	before := nativeQueueImages(t, store.layout.ProjectDir())
-	if _, err := store.InspectWorkflowWork(t.Context(), WorkflowPreviewTarget{}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.InspectWorkflowWork(t.Context(), WorkflowPreviewTarget{}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal(err)
 	}
 

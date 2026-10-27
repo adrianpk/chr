@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Canonical web identity is independent of host transport aliases and access
@@ -20,7 +22,7 @@ func workflowCanonicalRepository(raw string) (string, error) {
 
 	parts := strings.Split(strings.TrimPrefix(parsed.Path, "/"), "/")
 	if len(parts) != 2 || !validWorkflowRepositoryPart(parts[0]) || !validWorkflowRepositoryPart(parts[1]) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	parsed.Host, err = workflowCanonicalRepositoryHost(parsed)
@@ -34,13 +36,13 @@ func workflowCanonicalRepository(raw string) (string, error) {
 func workflowCanonicalRepositoryHost(parsed *url.URL) (string, error) {
 	host := strings.TrimSuffix(strings.ToLower(parsed.Hostname()), ".")
 	if host == "" || strings.ContainsAny(host, " \\%\x00\r\n\t") || strings.HasSuffix(parsed.Host, ":") {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if strings.Contains(host, ":") {
 		ip, err := netip.ParseAddr(host)
 		if err != nil {
-			return "", ErrWorkflowConflict
+			return "", workflowstate.ErrConflict
 		}
 
 		host = "[" + ip.String() + "]"
@@ -61,7 +63,7 @@ func workflowCanonicalRepositoryPort(raw string) (string, error) {
 
 	port, err := strconv.Atoi(raw)
 	if err != nil || port < 1 || port > 65535 {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if port == 443 {

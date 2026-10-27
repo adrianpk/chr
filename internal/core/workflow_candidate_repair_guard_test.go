@@ -4,6 +4,9 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeCandidateRepairGuard rejects changed host findings and policies
@@ -29,7 +32,7 @@ func nativeCandidateRepairGuard(t *testing.T, change string) {
 		f.provider.policyRevision = "changed-policy"
 		f.provider.mu.Unlock()
 	case "scope":
-		request.Input.ScopeHash = workflowHash([]byte("expanded-scope"))
+		request.Input.ScopeHash = contenthash.Sum([]byte("expanded-scope"))
 	}
 
 	var err error
@@ -39,7 +42,7 @@ func nativeCandidateRepairGuard(t *testing.T, change string) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.f.git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed admission acquired merger authority", err)
 	}
 
@@ -48,7 +51,7 @@ func nativeCandidateRepairGuard(t *testing.T, change string) {
 	}
 
 	key := before.Members[len(before.Members)-1].Admission.Key
-	if _, err := store.RepairWorkflowSlice(t.Context(), id, key); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.RepairWorkflowSlice(t.Context(), id, key); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("native integration failure rewound source tasks", err)
 	}
 

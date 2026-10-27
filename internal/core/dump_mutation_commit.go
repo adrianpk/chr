@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileAuthoringSessionRepository) commitDumpMutation(ctx context.Context, binding dumpMutationBinding) (ProjectDumpMutationResult, error) {
@@ -16,7 +19,7 @@ func (r *fileAuthoringSessionRepository) commitDumpMutation(ctx context.Context,
 	}
 
 	if target.Destination != binding.Destination || target.RawReference != binding.RawReference {
-		return ProjectDumpMutationResult{}, ErrWorkflowConflict
+		return ProjectDumpMutationResult{}, workflowstate.ErrConflict
 	}
 
 	changes, result, err := r.dumpMutationChanges(binding, target)
@@ -62,7 +65,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutatio
 
 	changes := append(history, workflowFileChange{Path: filepath.FromSlash(target.Destination), Before: target.Artifact.SourceHash, After: content},
 		workflowFileChange{Path: filepath.Join(filepath.Dir(target.Destination), "metadata.json"), Before: target.Artifact.MetadataHash, After: updated})
-	result.SourceHash, result.MetadataHash = workflowHash(content), workflowHash(updated)
+	result.SourceHash, result.MetadataHash = contenthash.Sum(content), contenthash.Sum(updated)
 
 	components, err := r.dumpCaptureChanges(binding, target)
 	if err != nil {
@@ -202,7 +205,7 @@ func appendDumpCaptureMetadata(metadata map[string]any, binding dumpMutationBind
 
 	metadata["dump_captures"] = append(captures, map[string]string{
 		"operation_id": binding.Request.OperationID, "raw_ref": binding.RawReference,
-		"input_hash": workflowHash([]byte(binding.Request.Content)), "raw_hash": workflowHash([]byte(binding.Prepared.RawContent)),
+		"input_hash": contenthash.Sum([]byte(binding.Request.Content)), "raw_hash": contenthash.Sum([]byte(binding.Prepared.RawContent)),
 	})
 
 	return nil

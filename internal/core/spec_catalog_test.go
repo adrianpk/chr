@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Catalog reads preserve every actual artifact across namespaces and never
@@ -54,7 +56,7 @@ func TestSpecGenerationRevision(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := WriteGeneratedSpec(t.Context(), project, spec); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := WriteGeneratedSpec(t.Context(), project, spec); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale absence accepted", err)
 	}
 
@@ -64,7 +66,7 @@ func TestSpecGenerationRevision(t *testing.T) {
 	request.Action, request.Namespace, request.Reference, request.ExpectedRevision = "save", "", document.Reference, document.Revision
 	specTestMutate(t, project, request)
 
-	if _, err := WriteGeneratedSpec(t.Context(), project, spec); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := WriteGeneratedSpec(t.Context(), project, spec); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("generation overwrote editor", err)
 	}
 
@@ -136,7 +138,7 @@ func TestSpecGenerationScope(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := WriteGeneratedSpec(t.Context(), project, spec); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := WriteGeneratedSpec(t.Context(), project, spec); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("generated scope changed", err)
 	}
 }

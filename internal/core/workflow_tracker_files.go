@@ -9,6 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var errWorkflowTrackerAbsent = errors.New("tracker is not registered")
@@ -53,7 +56,7 @@ func (s *WorkflowStore) workflowTrackerOutput(setID string) (string, error) {
 		return "", err
 	}
 
-	return workflowHash(data), nil
+	return contenthash.Sum(data), nil
 }
 
 func (s *WorkflowStore) readWorkflowTracker(setID string) (WorkflowTrackerStatus, error) {
@@ -92,7 +95,7 @@ func (s *WorkflowStore) validateWorkflowTracker(result WorkflowTrackerStatus, se
 		return err
 	}
 
-	if !validWorkflowTrackerSchema(result.Schema) || result.SetID != setID || result.ProjectID != s.projectID || result.Namespace != s.layout.Namespace() || result.Path != "tracker/"+setID+".md" || workflowHash(data) != checksum {
+	if !validWorkflowTrackerSchema(result.Schema) || result.SetID != setID || result.ProjectID != s.projectID || result.Namespace != s.layout.Namespace() || result.Path != "tracker/"+setID+".md" || contenthash.Sum(data) != checksum {
 		return fmt.Errorf("%w: invalid or edited tracker metadata", ErrWorkflowProjectionStale)
 	}
 
@@ -153,7 +156,7 @@ func (s *WorkflowStore) writeWorkflowTracker(result WorkflowTrackerStatus, outpu
 }
 
 func (s *WorkflowStore) confirmWorkflowTracker(result WorkflowTrackerStatus, output []byte) (WorkflowTrackerStatus, error) {
-	result.OutputHash, result.PendingHash, result.ObservedHash = workflowHash(output), "", workflowHash(output)
+	result.OutputHash, result.PendingHash, result.ObservedHash = contenthash.Sum(output), "", contenthash.Sum(output)
 	result.Status, result.Reason, result.Detail = "current", "", ""
 
 	if result.Schema != "chr-tracker/v2" || result.GeneratedAt.IsZero() {
@@ -176,7 +179,7 @@ func (s *WorkflowStore) confirmWorkflowTracker(result WorkflowTrackerStatus, out
 func (s *WorkflowStore) checkWorkflowTrackerOutput(setID, expected string) error {
 	observed, err := s.workflowTrackerOutput(setID)
 	if err != nil || observed != expected {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	return nil
@@ -285,7 +288,7 @@ func workflowTrackerMetadataBytes(result WorkflowTrackerStatus) ([]byte, error) 
 		return nil, err
 	}
 
-	result.Checksum = workflowHash(data)
+	result.Checksum = contenthash.Sum(data)
 
 	data, err = json.Marshal(result)
 	if err != nil {

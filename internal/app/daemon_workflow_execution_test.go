@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -314,7 +315,7 @@ func TestDaemonWorkflowRevision(t *testing.T) {
 	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
 
 	progress, err := operations.ResumeRetainedWork(t.Context(), id, status.Revision)
-	if !errors.Is(err, core.ErrWorkflowConflict) || progress.Status.Revision != paused.Revision || progress.Attempted || !maps.Equal(before, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
+	if !errors.Is(err, workflowstate.ErrConflict) || progress.Status.Revision != paused.Revision || progress.Attempted || !maps.Equal(before, workflowCLIImage(t, operations.projectContext.ProjectDir)) {
 		t.Fatal("stale daemon revision changed execution or hid current state", progress, err)
 	}
 }

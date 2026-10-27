@@ -4,6 +4,8 @@ import (
 	"context"
 	"reflect"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) settleWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationSettlement) (WorkflowIntegrationBudget, error) {
@@ -14,7 +16,7 @@ func (s *WorkflowStore) settleWorkflowIntegration(ctx context.Context, run workf
 
 	index := slices.IndexFunc(budget.Reservations, func(r WorkflowIntegrationReservation) bool { return r.ID == request.ReservationID })
 	if index < 0 {
-		return budget, ErrWorkflowConflict
+		return budget, workflowstate.ErrConflict
 	}
 
 	if request.State == "launched" && workflowIntegrationReservationStopped(run, entry) {
@@ -44,7 +46,7 @@ func (s *WorkflowStore) settleWorkflowIntegration(ctx context.Context, run workf
 
 func (s *WorkflowStore) checkWorkflowIntegrationSettlement(id string, old, next WorkflowIntegrationReservation) error {
 	if old.Kind != "agent_call" || !workflowIntegrationSettlementAllowed(old.State, next.State) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if next.State == "settled" {
@@ -71,7 +73,7 @@ func workflowIntegrationSettlementAllowed(old, next string) bool {
 
 func (s *WorkflowStore) checkWorkflowTokenSettlement(id string, reservation WorkflowIntegrationReservation) error {
 	if reservation.SettlementProof == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var proof WorkflowTokenSettlement
@@ -81,12 +83,12 @@ func (s *WorkflowStore) checkWorkflowTokenSettlement(id string, reservation Work
 
 	expected := WorkflowTokenSettlement{SchemaVersion: 1, ReservationID: reservation.ID, AttemptID: reservation.AttemptID, CapabilityRevision: reservation.Allowance.CapabilityRevision, WholeCall: true, Input: reservation.ReportedInput, Output: reservation.ReportedOutput}
 	if proof != expected {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	total, err := workflowTokenSum(proof.Input, proof.Output)
 	if err != nil || total > reservation.Allowance.Maximum || proof.Input > reservation.Allowance.Input || proof.Output > reservation.Allowance.Output {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

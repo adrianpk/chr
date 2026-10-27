@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) finishWorkflowSliceValidation(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, candidate *WorkflowSliceCandidate, interrupted bool) error {
@@ -51,7 +54,7 @@ func (s *WorkflowStore) commitWorkflowSliceCandidate(run workflowInvocationFile,
 	data = append(data, '\n')
 	ref := workflowAttemptFile(run.ID, candidate.ID, "result.json")
 	attempt := &run.Attempts[len(run.Attempts)-1]
-	attempt.ResultRef, attempt.ResultHash, attempt.FinishedAt = ref, workflowHash(data), time.Now().UTC()
+	attempt.ResultRef, attempt.ResultHash, attempt.FinishedAt = ref, contenthash.Sum(data), time.Now().UTC()
 	record.Task.AttemptID = ""
 
 	run.Outcome = candidate.Result.Outcome
@@ -90,12 +93,12 @@ func (s *WorkflowStore) ReadWorkflowSliceCandidate(ctx context.Context, id strin
 func (s *WorkflowStore) readWorkflowSliceCandidate(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation) (WorkflowSliceCandidate, error) {
 	path, err := s.safePath(run.CandidateRef)
 	if err != nil || run.CandidateRef == "" {
-		return WorkflowSliceCandidate{}, ErrWorkflowConflict
+		return WorkflowSliceCandidate{}, workflowstate.ErrConflict
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != run.CandidateHash {
-		return WorkflowSliceCandidate{}, ErrWorkflowConflict
+	if err != nil || contenthash.Sum(data) != run.CandidateHash {
+		return WorkflowSliceCandidate{}, workflowstate.ErrConflict
 	}
 
 	var candidate WorkflowSliceCandidate
@@ -120,11 +123,11 @@ func (s *WorkflowStore) readWorkflowSliceCandidate(ctx context.Context, run work
 
 func checkWorkflowSliceCandidateBinding(run workflowInvocationFile, observation workflowSliceObservation, candidate WorkflowSliceCandidate) error {
 	if !workflowSliceCandidateMatchesRun(run, candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !workflowSliceCandidateMatchesContract(observation, candidate.UnitInput()) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, attempt := range run.Attempts {
@@ -133,7 +136,7 @@ func checkWorkflowSliceCandidateBinding(run workflowInvocationFile, observation 
 		}
 	}
 
-	return ErrWorkflowConflict
+	return workflowstate.ErrConflict
 }
 
 func workflowSliceCandidateMatchesRun(run workflowInvocationFile, candidate WorkflowSliceCandidate) bool {
@@ -151,12 +154,12 @@ func workflowSliceCandidateMatchesAttempt(run workflowInvocationFile, candidate 
 func (s *WorkflowStore) checkWorkflowSliceCandidateProofs(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, candidate WorkflowSliceCandidate) error {
 	result := candidate.Result
 	if !workflowSliceResultMatchesLane(result, *run.Lane) || len(candidate.UnitInput().Tasks) != len(observation.tasks) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	tree, err := s.observeWorkflowLane(ctx, candidate.Lane)
 	if err != nil || tree != result.Tree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowPrerequisiteEvidence(map[string]string{result.InputRef: result.InputHash, candidate.UnitInput().ContractRef: candidate.UnitInput().ContractHash}); err != nil {
@@ -166,7 +169,7 @@ func (s *WorkflowStore) checkWorkflowSliceCandidateProofs(ctx context.Context, r
 	for i, record := range observation.tasks {
 		proof, err := s.workflowSliceTaskProof(ctx, run, record)
 		if err != nil || proof != candidate.UnitInput().Tasks[i] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

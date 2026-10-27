@@ -3,11 +3,13 @@ package core
 import (
 	"context"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func checkWorkflowMergerRemote(ctx context.Context, provider WorkflowPullRequestProvider, input WorkflowMergerInput) error {
 	if provider == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, observed := range []struct{ ref, commit string }{{input.SourceRef, input.Source}, {input.TargetRef, input.Base}} {
@@ -17,7 +19,7 @@ func checkWorkflowMergerRemote(ctx context.Context, provider WorkflowPullRequest
 		}
 
 		if commit != observed.commit {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -67,7 +69,7 @@ func (s *WorkflowStore) checkWorkflowMergerOwned(ctx context.Context, claim *Wor
 	}
 
 	if run.Integration == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)

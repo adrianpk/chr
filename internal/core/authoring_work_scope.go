@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode/utf8"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AuthoringIntent separates a requested explanation, preparation and development.
@@ -54,7 +58,7 @@ func SealAuthoringWorkScope(scope AuthoringWorkScope) (AuthoringWorkScope, error
 	}
 
 	encoded, err := json.Marshal(scope)
-	scope.Hash = workflowHash(encoded)
+	scope.Hash = contenthash.Sum(encoded)
 
 	return scope, err
 }
@@ -67,7 +71,7 @@ func ValidateAuthoringWorkScope(scope AuthoringWorkScope) error {
 	}
 
 	if scope.Schema != expected.Schema || scope.Hash != expected.Hash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -85,7 +89,7 @@ func AuthorizeAuthoringWork(scope AuthoringWorkScope, decision WorkflowMutationB
 	}
 
 	if scope.Intent != AuthoringIntentDevelop || decision.Operator != scope.Binding.Operator || observed != scope.Hash {
-		return AuthoringWorkAuthorization{}, ErrWorkflowConflict
+		return AuthoringWorkAuthorization{}, workflowstate.ErrConflict
 	}
 
 	return AuthoringWorkAuthorization{Binding: decision, ScopeHash: observed}, nil
@@ -100,7 +104,7 @@ func ValidateAuthoringWorkAuthorization(scope AuthoringWorkScope, authority *Aut
 
 	if scope.Intent == AuthoringIntentPrepare {
 		if authority != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -138,7 +142,7 @@ func validateAuthoringWorkScope(scope AuthoringWorkScope) error {
 	for _, digest := range []string{scope.SourceHash, scope.DescriptionHash, scope.ContractHash, scope.RecordHash} {
 		decoded, err := hex.DecodeString(digest)
 		if err != nil || len(decoded) != 32 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -146,7 +150,7 @@ func validateAuthoringWorkScope(scope AuthoringWorkScope) error {
 }
 
 func validateAuthoringWorkBounds(scope AuthoringWorkScope) error {
-	if strings.TrimSpace(scope.Instruction) == "" || len(scope.Instruction) > 8192 || !utf8.ValidString(scope.Instruction) || scope.ProjectID == "" || len(scope.ProjectID) > 128 || !IsValidOpsNamespace(scope.Namespace) || scope.SessionRevision < 1 {
+	if strings.TrimSpace(scope.Instruction) == "" || len(scope.Instruction) > 8192 || !utf8.ValidString(scope.Instruction) || scope.ProjectID == "" || len(scope.ProjectID) > 128 || !opsnamespace.Valid(scope.Namespace) || scope.SessionRevision < 1 {
 		return errors.New("invalid bounded authoring work scope")
 	}
 
@@ -155,11 +159,11 @@ func validateAuthoringWorkBounds(scope AuthoringWorkScope) error {
 
 func validateAuthoringWorkPaths(scope AuthoringWorkScope) error {
 	if scope.SessionRef != filepath.ToSlash(filepath.Join(".chr", "authoring", "sessions", scope.SessionID, "session.md")) || scope.DescriptionRef == "" || len(scope.DescriptionRef) > 1024 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !filepath.IsLocal(scope.DescriptionRef) || filepath.Clean(scope.DescriptionRef) != scope.DescriptionRef || (!validAuthoringArtifactRef(scope.Namespace, AuthoringArtifactRef{Path: scope.DescriptionRef, Kind: AuthoringArtifactKindSpec}) && ValidateProjectDumpReference(scope.DescriptionRef) != nil) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

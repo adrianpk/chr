@@ -3,6 +3,8 @@ package core
 import (
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validWorkflowMergerText(text string) bool {
@@ -11,7 +13,7 @@ func validWorkflowMergerText(text string) bool {
 
 func validateWorkflowMergerResolutions(result WorkflowMergerResult, input WorkflowMergerInput) error {
 	if len(result.ResolutionNotes) > len(input.Conflicts) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{}
@@ -19,7 +21,7 @@ func validateWorkflowMergerResolutions(result WorkflowMergerResult, input Workfl
 	for _, note := range result.ResolutionNotes {
 		index := slices.IndexFunc(input.Conflicts, func(c WorkflowMergerConflict) bool { return c.ID == note.ConflictID })
 		if index < 0 || seen[note.ConflictID] || !validWorkflowMergerText(note.Rationale) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := validateWorkflowMergerResolution(note, input.Conflicts[index], input); err != nil {
@@ -34,7 +36,7 @@ func validateWorkflowMergerResolutions(result WorkflowMergerResult, input Workfl
 
 func validateWorkflowMergerResolution(note WorkflowMergerResolution, conflict WorkflowMergerConflict, input WorkflowMergerInput) error {
 	if note.Path != conflict.Path || !slices.Equal(note.RegenerationCommand, conflict.RegenerationCommand) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowMergerRequirementIDs(note.RequirementIDs, input.Requirements); err != nil {
@@ -43,7 +45,7 @@ func validateWorkflowMergerResolution(note WorkflowMergerResolution, conflict Wo
 
 	for _, requirement := range conflict.RequirementIDs {
 		if !slices.Contains(note.RequirementIDs, requirement) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -52,13 +54,13 @@ func validateWorkflowMergerResolution(note WorkflowMergerResolution, conflict Wo
 
 func validateWorkflowMergerDecisions(decisions []WorkflowMergerDecision, input WorkflowMergerInput) error {
 	if len(decisions) > 16 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{}
 	for _, decision := range decisions {
 		if !validWorkflowRequestKey(decision.ID) || seen[decision.ID] || !validWorkflowMergerText(decision.Issue) || !validWorkflowRequestKey(decision.Authority) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := validateWorkflowMergerRequirementIDs(decision.RequirementIDs, input.Requirements); err != nil {
@@ -66,7 +68,7 @@ func validateWorkflowMergerDecisions(decisions []WorkflowMergerDecision, input W
 		}
 
 		if !validWorkflowMergerOptions(decision.Options) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[decision.ID] = true
@@ -98,11 +100,11 @@ func validateWorkflowMergerOutcome(result WorkflowMergerResult, input WorkflowMe
 		return validateWorkflowMergerResolved(result, input)
 	case "needs_decision":
 		if len(result.DecisionRequests) == 0 || result.Failure != "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	case "failed":
 		if !validWorkflowMergerText(result.Failure) || len(result.DecisionRequests) > 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -111,12 +113,12 @@ func validateWorkflowMergerOutcome(result WorkflowMergerResult, input WorkflowMe
 
 func validateWorkflowMergerResolved(result WorkflowMergerResult, input WorkflowMergerInput) error {
 	if len(result.DecisionRequests) > 0 || result.Failure != "" || len(result.ChangedPaths) == 0 || len(result.ResolutionNotes) != len(input.Conflicts) || len(result.PreservedRequirements) != len(input.Requirements) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	decisions, err := WorkflowMergerRequiredDecisions(input)
 	if err != nil || len(decisions) != 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

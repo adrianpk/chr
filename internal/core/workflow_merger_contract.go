@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) checkWorkflowMergerCommands(ctx context.Context, run workflowInvocationFile, input WorkflowMergerInput) error {
@@ -23,7 +25,7 @@ func (s *WorkflowStore) checkWorkflowMergerCommands(ctx context.Context, run wor
 	}
 
 	if !reflect.DeepEqual(gate.Commands, input.ValidationCommands) || !reflect.DeepEqual(gate, retained) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

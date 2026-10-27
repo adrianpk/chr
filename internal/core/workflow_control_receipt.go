@@ -6,6 +6,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowControlReceipt struct {
@@ -53,7 +56,7 @@ func (commit *workflowControlCommit) files(ctx context.Context, revision uint64)
 		return nil, err
 	}
 
-	receipt.Checksum = workflowHash(data)
+	receipt.Checksum = contenthash.Sum(data)
 	data, err = json.Marshal(receipt)
 
 	return []workflowFileChange{{Path: receipt.Result.ReceiptRef, After: data}}, err
@@ -96,8 +99,8 @@ func (s *WorkflowStore) validateWorkflowControlReceipt(receipt workflowControlRe
 	}
 
 	expected := WorkflowControlResult{RequestID: request.Binding.RequestID, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID), PriorRevision: request.ExpectedRevision, Revision: request.ExpectedRevision + 1}
-	if receipt.Schema != "chr-workflow-control/v1" || receipt.State != "confirmed" || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() || receipt.Operator != request.Binding.Operator || checksum != workflowHash(encoded) || receipt.Result != expected {
-		return ErrWorkflowConflict
+	if receipt.Schema != "chr-workflow-control/v1" || receipt.State != "confirmed" || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() || receipt.Operator != request.Binding.Operator || checksum != contenthash.Sum(encoded) || receipt.Result != expected {
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -106,7 +109,7 @@ func (s *WorkflowStore) validateWorkflowControlReceipt(receipt workflowControlRe
 func (s *WorkflowStore) reserveWorkflowControlBinding(request WorkflowControlMutationRequest, digest string) error {
 	reservation := workflowControlReservation{Schema: "chr-workflow-control-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID)}
 
-	path, err := s.safePath(filepath.Join("run", "operation-bindings", workflowHash([]byte(request.Binding.RequestID))+".json"))
+	path, err := s.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))
 	if err != nil {
 		return err
 	}
@@ -119,7 +122,7 @@ func (s *WorkflowStore) reserveWorkflowControlBinding(request WorkflowControlMut
 		}
 
 		if prior != reservation {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil

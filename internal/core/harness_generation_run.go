@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/process"
 )
@@ -56,11 +57,11 @@ func startHarnessGenerationRun(ctx context.Context, request harness.AgentRunRequ
 	record := &HarnessRunMetadata{
 		Schema: "chr-harness-run/v1", RequestID: request.ID, Purpose: request.Purpose,
 		OperationID: id, Selection: binding, SelectionRevision: binding.Selection.SelectionRevision,
-		InputRef:       "sha256:" + workflowHash([]byte(request.Prompt)),
+		InputRef:       "sha256:" + contenthash.Sum([]byte(request.Prompt)),
 		ProcessOutcome: "started", OutputValidation: "unknown", UsageStatus: "unknown", StartedAt: time.Now().UTC(),
 	}
 	if len(request.OutputSchema) != 0 {
-		record.SchemaRef = "sha256:" + workflowHash(request.OutputSchema)
+		record.SchemaRef = "sha256:" + contenthash.Sum(request.OutputSchema)
 	}
 
 	if err := checkHarnessRunIdentity(request, *record); err != nil {
@@ -142,7 +143,7 @@ func retainNormalizedHarnessOutput(request harness.AgentRunRequest, output []byt
 		return err
 	}
 
-	record.OutputRef, record.OutputHash = name, workflowHash(output)
+	record.OutputRef, record.OutputHash = name, contenthash.Sum(output)
 
 	return nil
 }

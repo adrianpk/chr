@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeGrantGuards rejects nonpositive, overflowing, stale and unbounded
@@ -79,7 +81,7 @@ func TestNativeGrantConcurrent(t *testing.T) {
 	for err := range results {
 		if err == nil {
 			successes++
-		} else if !errors.Is(err, ErrWorkflowConflict) {
+		} else if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal(err)
 		}
 	}

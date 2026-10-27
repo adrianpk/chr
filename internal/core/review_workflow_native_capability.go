@@ -8,6 +8,9 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowNativeIntegrationCapability rechecks current host grants, actual
@@ -34,7 +37,7 @@ func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx conte
 	}
 
 	if !sameWorkflowNativeSourcePR(pr, request.PullRequest) || !workflowNativeSourceBinding(request) {
-		return capability, fmt.Errorf("%w: canonical PR source binding changed", ErrWorkflowConflict)
+		return capability, fmt.Errorf("%w: canonical PR source binding changed", workflowstate.ErrConflict)
 	}
 
 	policy, err := policies.ReadWorkflowNativePolicy(ctx, pr, request.Publication.Git.Method)
@@ -85,7 +88,7 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 		return capability, err
 	}
 
-	capability.PolicyFingerprint = workflowHash(append(hostData, policyData...))
+	capability.PolicyFingerprint = contenthash.Sum(append(hostData, policyData...))
 
 	identity, err := adapter.readWorkflowNativeIdentity(ctx, request.PullRequest)
 	if err != nil {
@@ -93,10 +96,10 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 	}
 
 	if policy.APIIdentityFingerprint != "" && identity != policy.APIIdentityFingerprint {
-		return capability, fmt.Errorf("%w: publisher identity changed", ErrWorkflowConflict)
+		return capability, fmt.Errorf("%w: publisher identity changed", workflowstate.ErrConflict)
 	}
 
-	capability.CredentialIdentityFingerprint = workflowHash([]byte(policy.CredentialIdentityFingerprint + "\x00" + identity))
+	capability.CredentialIdentityFingerprint = contenthash.Sum([]byte(policy.CredentialIdentityFingerprint + "\x00" + identity))
 
 	capability.Unsupported = append(capability.Unsupported, reasons...)
 	if !workflowNativeObservationContractMatches(contract, policy.ObservationContract) {
@@ -123,7 +126,7 @@ func inspectWorkflowNativeCapability(ctx context.Context, request WorkflowNative
 	}
 
 	if advertisement.SourceCommit != request.Publication.Git.SourceCommit || advertisement.TargetCommit != request.Publication.Git.BaseCommit || !validWorkflowNativeFingerprint(advertisement.Fingerprint) {
-		return capability, fmt.Errorf("%w: receive-pack source or target binding changed", ErrWorkflowConflict)
+		return capability, fmt.Errorf("%w: receive-pack source or target binding changed", workflowstate.ErrConflict)
 	}
 
 	capability.ServerCapabilityFingerprint = advertisement.Fingerprint
@@ -141,7 +144,7 @@ func (adapter RemoteReviewAdapter) RecheckWorkflowNativeCapability(ctx context.C
 	}
 
 	if !current.AtomicSourceBase || !current.ExactResult || current.Revision != prior.Revision {
-		return fmt.Errorf("%w: native capability changed (%s)", ErrWorkflowConflict, changedWorkflowNativeCapability(prior, current))
+		return fmt.Errorf("%w: native capability changed (%s)", workflowstate.ErrConflict, changedWorkflowNativeCapability(prior, current))
 	}
 
 	return nil
@@ -192,7 +195,7 @@ func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context,
 
 	var repository workflowNativeRepositoryPolicy
 	if err := json.Unmarshal(responses[0], &repository); err != nil || strings.TrimSuffix(repository.URL, "/") != pr.Repository {
-		return nil, nil, contract, ErrWorkflowConflict
+		return nil, nil, contract, workflowstate.ErrConflict
 	}
 
 	return workflowNativeRemotePolicy(responses, method, contract)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func bindInitialTelegramAuthoringWork(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest) error {
@@ -36,7 +38,7 @@ func (s *TelegramReceiverStore) IsInitialTelegramAuthoringWork(ctx context.Conte
 // currently authorized conversation. It does not grant or refresh a prior scope.
 func (s *TelegramReceiverStore) LatestTelegramAuthoringWork(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget) (TelegramOperationRequest, bool, error) {
 	if target.ConversationID == "" {
-		return TelegramOperationRequest{}, false, ErrWorkflowConflict
+		return TelegramOperationRequest{}, false, workflowstate.ErrConflict
 	}
 
 	if err := s.ValidateTelegramOperationTarget(ctx, input, target); err != nil {
@@ -65,7 +67,7 @@ func projectTelegramAuthoringWorkPhase(ctx context.Context, tx *sql.Tx, request 
 	}
 
 	if request.OperationID != "authoring.work" || (phase != "prepared" && phase != "awaiting_confirmation") {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	_, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET phase=?,updated_at=? WHERE id=? AND revision=? AND project_binding_digest=? AND phase IN ('preparing','prepared','awaiting_confirmation')`, phase, now, request.Target.ConversationID, request.Target.ConversationRevision, request.Target.ProjectBindingDigest)

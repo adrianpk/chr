@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReconcileWorkflowNativeGitSubmission observes the same submission without
@@ -56,7 +58,7 @@ func (s *WorkflowStore) workflowNativeReconciliationInput(ctx context.Context, g
 
 		submission = journal.Attempts[len(journal.Attempts)-1]
 		if !workflowNativeSubmissionEntryMatches(submission, entry) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		var candidate WorkflowIntegrationCandidate
@@ -75,7 +77,7 @@ func (s *WorkflowStore) workflowNativeReconciliationInput(ctx context.Context, g
 
 func observeWorkflowNativeGit(ctx context.Context, submission WorkflowSubmission, request WorkflowGitPublication, inspector WorkflowGitPublicationInspector, git WorkflowPreparedIntegrationGit) (WorkflowNativeGitObservation, error) {
 	advertisement, err := inspector.InspectWorkflowGitPublication(ctx, request)
-	if err != nil && !errors.Is(err, ErrWorkflowConflict) && !errors.Is(err, ErrWorkflowObservationRequired) && !errors.Is(err, ErrWorkflowAtomicGuard) {
+	if err != nil && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowObservationRequired) && !errors.Is(err, ErrWorkflowAtomicGuard) {
 		return WorkflowNativeGitObservation{}, err
 	}
 

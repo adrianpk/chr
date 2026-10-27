@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramAuthoringArguments struct {
@@ -57,7 +58,7 @@ func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations te
 	}
 
 	if snapshot.SessionRef != c.AuthoringSessionRef || snapshot.Session.Namespace != target.Namespace || snapshot.Session.ProjectID != target.ProjectID {
-		return request, core.ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	request.SessionID, request.ExpectedRevision, request.ExpectedSourceHash = id, snapshot.Session.Revision, snapshot.SourceHash
@@ -70,7 +71,7 @@ func (r telegramReceiver) authoringOwnerInput(ctx context.Context, operations te
 
 func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command telegramAuthoringCommand, c core.TelegramConversation, request core.AuthoringContinuationRequest) (core.AuthoringContinuationRequest, error) {
 	if command.Action == core.AuthoringContinuationRefine || command.Action == core.AuthoringContinuationAnswer {
-		return request, core.ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	input := command.Input
@@ -93,7 +94,7 @@ func (r telegramReceiver) initialAuthoringInput(ctx context.Context, command tel
 
 func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, answer, binding string, snapshot core.AuthoringSnapshot) (core.AuthoringContinuationRequest, error) {
 	if snapshot.Question == nil {
-		return request, core.ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	var question core.TelegramConversationQuestion
@@ -103,7 +104,7 @@ func telegramAuthoringAnswerInput(request core.AuthoringContinuationRequest, ans
 
 	expected := telegramAuthoringQuestion(snapshot.SessionRef, snapshot.Question)
 	if question != *expected {
-		return request, core.ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	request.Target = core.AuthoringArtifactKind(snapshot.Session.Target)
@@ -127,11 +128,11 @@ func telegramAuthoringQuestion(ref string, question *core.AuthoringQuestionBindi
 func telegramAuthoringSessionID(ref string) (string, error) {
 	parts := strings.Split(ref, "/")
 	if len(parts) != 5 || !filepath.IsLocal(ref) || filepath.Clean(ref) != ref {
-		return "", core.ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if parts[0] != core.DirectoryName || parts[1] != "authoring" || parts[2] != "sessions" || parts[4] != "session.md" {
-		return "", core.ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	return parts[3], nil

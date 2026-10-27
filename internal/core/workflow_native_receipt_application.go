@@ -1,5 +1,7 @@
 package core
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 func (s *WorkflowStore) workflowNativeReceiptApplication(submission WorkflowSubmission) (*WorkflowEvidenceRef, error) {
 	native := submission.Native
 	for _, ref := range native.GitObservationRefs {
@@ -20,7 +22,7 @@ func (s *WorkflowStore) checkWorkflowNativeReceiptApplication(receipt WorkflowRe
 	native := receipt.Native
 	if native.GitApplicationRef == nil {
 		if !validWorkflowNativeReceiptTransaction(*native, transaction) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -32,7 +34,7 @@ func (s *WorkflowStore) checkWorkflowNativeReceiptApplication(receipt WorkflowRe
 	}
 
 	if observation.SubmissionID != receipt.SubmissionID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var candidate WorkflowIntegrationCandidate
@@ -42,12 +44,12 @@ func (s *WorkflowStore) checkWorkflowNativeReceiptApplication(receipt WorkflowRe
 
 	binding := WorkflowNativePublicationBinding{Git: candidate.Input.Git, Publication: transaction, GitApplication: &observation}
 	if !workflowNativeApplicationAttributed(binding) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	intent := WorkflowNativeSubmission{WorkflowNativeRecordBinding: native.WorkflowNativeRecordBinding}
 	if !validWorkflowNativeResponse(intent, transaction) || transaction.State != "applied" && transaction.State != "unknown" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

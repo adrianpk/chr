@@ -7,6 +7,9 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowClosingMember freezes each actual ticket, including work excluded by
@@ -76,7 +79,7 @@ func (s *WorkflowStore) workflowClosingInput(ctx context.Context, set WorkflowRe
 		return WorkflowClosingInput{}, err
 	}
 
-	input := WorkflowClosingInput{Schema: "chr-set-closing-input/v1", SetID: set.ID, SetRevision: set.Revision, SetSourceHash: set.SourceHash, ProjectID: set.ProjectID, Namespace: set.Namespace, Plan: WorkflowClosingEvidence{Ref: set.Set.PlanRef, Hash: set.Set.PlanHash}, Validation: set.Set.ClosingValidation, ContractHash: workflowHash(contract), Target: target, Branch: request.Branch, EvidenceHashes: map[string]string{set.Set.PlanRef: set.Set.PlanHash}}
+	input := WorkflowClosingInput{Schema: "chr-set-closing-input/v1", SetID: set.ID, SetRevision: set.Revision, SetSourceHash: set.SourceHash, ProjectID: set.ProjectID, Namespace: set.Namespace, Plan: WorkflowClosingEvidence{Ref: set.Set.PlanRef, Hash: set.Set.PlanHash}, Validation: set.Set.ClosingValidation, ContractHash: contenthash.Sum(contract), Target: target, Branch: request.Branch, EvidenceHashes: map[string]string{set.Set.PlanRef: set.Set.PlanHash}}
 	input.ValidationTimeoutSeconds = seconds
 	reader := workflowProofReader{store: s}
 
@@ -119,7 +122,7 @@ func (s *WorkflowStore) workflowClosingMembers(ctx context.Context, id string) (
 		}
 
 		if record.Task.Phase != "integrated" || record.Task.Status != TicketStatusDone || record.Task.AttemptID != "" {
-			return nil, fmt.Errorf("%w: actual member %s requires integration", ErrWorkflowConflict, record.Task.Key)
+			return nil, fmt.Errorf("%w: actual member %s requires integration", workflowstate.ErrConflict, record.Task.Key)
 		}
 
 		members = append(members, WorkflowClosingMember{WorkflowIdentity: record.WorkflowIdentity, Key: record.Task.Key, Path: record.Path, SourceHash: record.SourceHash, SliceID: record.Task.SliceID, Order: record.Task.Order})

@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type retainedExecutionPolicy struct {
@@ -23,14 +26,14 @@ func (s *WorkflowStore) retainedWorkflowExecutionPolicy(ctx context.Context, key
 		}
 
 		if workflowRequestedRetainedPolicy(policy, run.Policy, later) != run.Policy {
-			return retainedExecutionPolicy{Policy: policy}, fmt.Errorf("%w: request key names a different frozen policy", ErrWorkflowConflict)
+			return retainedExecutionPolicy{Policy: policy}, fmt.Errorf("%w: request key names a different frozen policy", workflowstate.ErrConflict)
 		}
 
 		return retainedExecutionPolicy{Policy: run.Policy, Found: true}, nil
 	}
 
 	if policy.ConfigRevision != "" {
-		return retainedExecutionPolicy{Policy: policy}, fmt.Errorf("%w: a frozen policy must match its retained request", ErrWorkflowConflict)
+		return retainedExecutionPolicy{Policy: policy}, fmt.Errorf("%w: a frozen policy must match its retained request", workflowstate.ErrConflict)
 	}
 
 	return retainedExecutionPolicy{Policy: policy}, nil
@@ -83,7 +86,7 @@ func configuredWorkflowExecutionPolicy(config WorkspaceConfig, policy WorkflowEx
 		policy.IncludeLaterTickets = *later
 	}
 
-	policy.ConfigRevision = workflowHash(nil)
+	policy.ConfigRevision = contenthash.Sum(nil)
 	if config.workflowRevision != "" {
 		policy.ConfigRevision = config.workflowRevision
 	}

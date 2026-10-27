@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func observeWorkflowSubmission(ctx context.Context, submission WorkflowSubmission, provider WorkflowPublicationProvider, git WorkflowIntegrationGit) (WorkflowSubmission, error) {
@@ -16,7 +18,7 @@ func observeWorkflowSubmission(ctx context.Context, submission WorkflowSubmissio
 	}
 
 	if !workflowSubmissionPRMatches(submission, pr) {
-		return submission, ErrWorkflowConflict
+		return submission, workflowstate.ErrConflict
 	}
 
 	if pr.Merged {
@@ -74,7 +76,7 @@ func checkWorkflowUnpublishedObservation(ctx context.Context, submission Workflo
 	}
 
 	if !workflowCommitID(target) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -116,7 +118,7 @@ func checkWorkflowSubmittedObservation(ctx context.Context, submission WorkflowS
 	}
 
 	if !workflowSubmissionPRMatches(submission, pr) || !pr.Merged || pr.ResultCommit != submission.Proof.ResultCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	target, err := provider.ReadWorkflowBranch(ctx, pr.Repository, pr.BaseBranch)
@@ -125,7 +127,7 @@ func checkWorkflowSubmittedObservation(ctx context.Context, submission WorkflowS
 	}
 
 	if target != submission.Proof.ObservedTarget {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

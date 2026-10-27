@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeReceiptApplication refuses missing or substituted application proof
@@ -20,7 +22,9 @@ func TestNativeReceiptApplication(t *testing.T) {
 	}{
 		{"missing", nil},
 		{"submission", func(o *WorkflowNativeGitObservation) { o.SubmissionID = "another-submission" }},
-		{"revision", func(o *WorkflowNativeGitObservation) { o.CandidateRevision = workflowHash([]byte("another-revision")) }},
+		{"revision", func(o *WorkflowNativeGitObservation) {
+			o.CandidateRevision = contenthash.Sum([]byte("another-revision"))
+		}},
 		{"source", func(o *WorkflowNativeGitObservation) { o.SourceCommit = submission.Native.OriginalSource }},
 		{"history", func(o *WorkflowNativeGitObservation) { o.Git = nil }},
 	}

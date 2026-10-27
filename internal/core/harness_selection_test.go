@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // Preserve the complete configuration revision while parsing strict role fields.
@@ -28,7 +30,7 @@ func TestHarnessSelectionConfiguration(t *testing.T) {
 				t.Fatalf("configuration error = %v", err)
 			}
 
-			if !test.invalid && (config.Harnesses.Worker != test.worker || config.Harnesses.Generation != test.generation || config.Revision() != workflowHash([]byte(test.body))) {
+			if !test.invalid && (config.Harnesses.Worker != test.worker || config.Harnesses.Generation != test.generation || config.Revision() != contenthash.Sum([]byte(test.body))) {
 				t.Fatalf("configuration = %#v", config.Harnesses)
 			}
 		})

@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type planTargetObservation struct {
@@ -50,7 +53,7 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 	}
 
 	if (target.images[0].After == nil) != (target.images[1].After == nil) {
-		return target, ErrWorkflowConflict
+		return target, workflowstate.ErrConflict
 	}
 
 	if target.images[1].After != nil {
@@ -68,7 +71,7 @@ func observePlanTarget(ctx context.Context, projectDir, reference string) (planT
 		return target, err
 	}
 
-	target.revision = workflowHash([]byte(strings.Join([]string{root, reference, target.images[0].Before, target.images[1].Before}, "\x00")))
+	target.revision = contenthash.Sum([]byte(strings.Join([]string{root, reference, target.images[0].Before, target.images[1].Before}, "\x00")))
 
 	return target, r.checkQuizImages(target.images)
 }
@@ -176,7 +179,7 @@ func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, 
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 	for _, reference := range []string{archive.RelativePath, filepath.Join(filepath.Dir(archive.RelativePath), "metadata.json")} {
 		if _, err := r.authoringRead(reference); !errors.Is(err, os.ErrNotExist) {
-			return nil, errors.Join(ErrWorkflowConflict, err)
+			return nil, errors.Join(workflowstate.ErrConflict, err)
 		}
 	}
 
@@ -209,7 +212,7 @@ func generatedPlanArchiveChanges(projectDir string, current GeneratedPlanPaths, 
 func validatePlanTargetMetadata(metadata map[string]any, reference string) error {
 	parts := strings.Split(reference, "/")
 	if metadata["schema_version"] != "ops-layout/v1" || metadata["type"] != "plan" || metadata["namespace"] != parts[1] || metadata["id"] != parts[3] {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -232,7 +235,7 @@ func validatePlanTargetScope(target planTargetObservation, scope QuizScope) erro
 	}
 
 	if declared != scope.CaseSlug || fields["project_id"] != "" && fields["project_id"] != scope.ProjectID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -240,7 +243,7 @@ func validatePlanTargetScope(target planTargetObservation, scope QuizScope) erro
 
 func validatePlanPublicationTarget(target planTargetObservation, plan GeneratedPlan) error {
 	if plan.CreateOnly && target.metadata != nil || plan.ExpectedRevision != "" && target.revision != plan.ExpectedRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if target.metadata != nil {

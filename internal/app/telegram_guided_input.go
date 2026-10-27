@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramGuidedBinding struct {
@@ -78,7 +79,7 @@ func telegramGuidedTextAction(binding telegramGuidedBinding, text string) (strin
 	}
 
 	if strings.HasPrefix(normalized, "/") {
-		return "", "", core.ErrWorkflowConflict
+		return "", "", workflowstate.ErrConflict
 	}
 
 	return telegramGuidedStageAction(binding, text)
@@ -100,7 +101,7 @@ func telegramGuidedStageAction(binding telegramGuidedBinding, text string) (stri
 		}
 	}
 
-	return "", "", core.ErrWorkflowConflict
+	return "", "", workflowstate.ErrConflict
 }
 
 func telegramGuidedProgress(observed GuidedUseCaseInspection) (core.TelegramGuidedProgress, error) {

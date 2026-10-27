@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"sync"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeSubmissionApplied retains actual two-ref Git proof while the original
@@ -129,7 +131,7 @@ func nativeSubmissionPendingExcluded(t *testing.T, f nativeSubmissionFixture, su
 		t.Fatal("forge lag permitted another publication", err)
 	}
 
-	if err := f.store.guardWorkflowSubmissionTarget(t.Context(), workflowHash([]byte("another publication")), workflowHash([]byte(f.candidate.Native.SourceRepository+"\n"+f.candidate.Native.TargetRef))); !errors.Is(err, ErrWorkflowOwned) {
+	if err := f.store.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another publication")), contenthash.Sum([]byte(f.candidate.Native.SourceRepository+"\n"+f.candidate.Native.TargetRef))); !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatal("applied Git released target exclusion", err)
 	}
 }

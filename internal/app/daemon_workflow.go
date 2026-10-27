@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const daemonWorkflowActivationLimit = 16
@@ -152,7 +153,7 @@ func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry proje
 func daemonWorkflowWait(progress RetainedWorkProgress, failure error) bool {
 	stopped := progress.Status.StopIntent != "" && (progress.Status.Status == "paused" || progress.Status.Status == "cancelled")
 
-	return errors.Is(failure, core.ErrWorkflowOwned) || errors.Is(failure, core.ErrWorkflowCapacity) || errors.Is(failure, core.ErrWorkflowConflict) || stopped
+	return errors.Is(failure, core.ErrWorkflowOwned) || errors.Is(failure, core.ErrWorkflowCapacity) || errors.Is(failure, workflowstate.ErrConflict) || stopped
 }
 
 func (runner daemonWorkflowRunner) progress(project string, progress RetainedWorkProgress, failure error) error {

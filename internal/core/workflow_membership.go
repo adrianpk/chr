@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReconcileWorkflowMembership reports later ready work under the frozen selector.
@@ -51,7 +53,7 @@ func (s *WorkflowStore) reconcileWorkflowMembership(ctx context.Context, run wor
 	}
 
 	if selection.setOrderRule(run.Selection.Selector) != run.SetOrderRule {
-		return run, fmt.Errorf("%w: frozen set ordering rule changed", ErrWorkflowConflict)
+		return run, fmt.Errorf("%w: frozen set ordering rule changed", workflowstate.ErrConflict)
 	}
 
 	return s.retainWorkflowLaterMembers(ctx, run, selection)

@@ -12,6 +12,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowCommandOutputLimit = 16 << 10
@@ -110,7 +112,7 @@ func workflowCommandGroupStopped(pid int) bool {
 func runWorkflowSupervisedProcess(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *workflowCommandOutput) (WorkflowCommandResult, error) {
 	ownership, registered, registerErr := claim.store.registerWorkflowProcess(ctx, claim, prepared, command, process.Process.Pid)
 	if registerErr == nil && registered != index {
-		registerErr = ErrWorkflowConflict
+		registerErr = workflowstate.ErrConflict
 	}
 
 	if registerErr == nil {

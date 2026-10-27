@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 const workspaceSemanticDigestCacheSchemaVersion = 1
@@ -257,7 +259,7 @@ func (DeterministicWorkspaceSemanticDigestGenerator) GenerateWorkspaceSemanticDi
 		request.PromptHash,
 	}
 
-	return contentHash([]byte(strings.Join(parts, "\x00"))), nil
+	return contenthash.Sum([]byte(strings.Join(parts, "\x00"))), nil
 }
 
 // Generate generates the requested artifact.

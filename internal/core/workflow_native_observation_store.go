@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowNativeObservationBinding(ctx context.Context, submission WorkflowSubmission, request WorkflowGitPublication) (binding WorkflowNativePublicationBinding, err error) {
@@ -131,7 +133,7 @@ func (s *WorkflowStore) checkWorkflowNativeCanonicalCallback(ctx context.Context
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if !workflowNativeSubmissionCallbackMatches(last, entry, update) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return checkWorkflowNativeSubmissionCallback(run, entry, budget, last, journal.sourceHash, update)

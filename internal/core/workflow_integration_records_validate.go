@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) checkWorkflowIntegrationRetainedRecords(ctx context.Context, run workflowInvocationFile) error {
@@ -63,7 +65,7 @@ func checkWorkflowIntegrationBudgetOwnership(run workflowInvocationFile, budget 
 	for _, reservation := range budget.Reservations {
 		if reservation.AttemptInput != nil {
 			if !workflowAgentReservationOwned(run, reservation) {
-				return ErrWorkflowConflict
+				return workflowstate.ErrConflict
 			}
 
 			continue
@@ -207,7 +209,7 @@ func checkWorkflowIntegrationProjections(snapshot workflowIntegrationSnapshot) e
 
 		index := slices.IndexFunc(snapshot.Journals, func(j workflowSubmissionJournal) bool { return j.Key == binding.JournalKey })
 		if index < 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		journal := snapshot.Journals[index]
@@ -230,7 +232,7 @@ func checkWorkflowIntegrationNativeProjections(snapshot workflowIntegrationSnaps
 
 		index := slices.IndexFunc(snapshot.Views, func(v WorkflowIntegrationView) bool { return v.Entry.ID == last.Native.EntryID })
 		if index < 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		binding := snapshot.Views[index].Entry.SubmissionRef
@@ -261,7 +263,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationEntryReceipt(run workflowInvocat
 	}
 
 	if !workflowIntegrationEntryReceiptMatches(run, entry, record) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowNativeReceipt(record); err != nil {

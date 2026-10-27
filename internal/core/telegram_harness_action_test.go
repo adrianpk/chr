@@ -6,6 +6,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // A reservation failure rolls back its source-owned auxiliary conversation;
@@ -44,7 +46,7 @@ func TestTelegramHarnessSelectionReservation(t *testing.T) {
 // published image or receipt, unlike an uncertain failure after publication.
 func TestTelegramHarnessSelectionPreparation(t *testing.T) {
 	project := t.TempDir()
-	request := harnessSelectionTestRequest("unprepared", workflowHash(nil), "alpha")
+	request := harnessSelectionTestRequest("unprepared", contenthash.Sum(nil), "alpha")
 	options := harnessSelectionTestOptions(request)
 	cause := errors.New("fixture local preparation rejected")
 	options.Validate = func(context.Context, WorkspaceConfig) error { return cause }

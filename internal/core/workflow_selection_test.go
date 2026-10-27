@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowSelectionFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationResult) {
@@ -83,7 +85,7 @@ func TestWorkflowSelectionPages(t *testing.T) {
 	task.Task.Status = TicketStatusBacklog
 	workflowTestWrite(t, store, task)
 
-	if _, err := store.Preview(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.Preview(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale page accepted: %v", err)
 	}
 
@@ -147,7 +149,7 @@ func TestWorkflowSelectionPendingJournal(t *testing.T) {
 	}
 
 	request := WorkflowPreviewRequest{Selector: WorkflowSelector{Extent: "ticket", Identity: "PRJ-1"}, Limit: 1}
-	if _, err := store.Preview(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.Preview(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("pending journal preview = %v", err)
 	}
 

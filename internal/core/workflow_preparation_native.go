@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowNativePreparationProvider observes trusted policy and transport for
@@ -36,7 +38,7 @@ func (s *WorkflowStore) checkWorkflowNativePreparationAdmission(run workflowInvo
 	}
 
 	if !workflowNativePreparationOwnerMatches(entry, source) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return workflowNativePreparationEntryReady(run, entry)
@@ -63,7 +65,7 @@ func workflowNativePreparationOwnerMatches(entry WorkflowIntegrationEntry, sourc
 func workflowNativePreparationEntryReady(run workflowInvocationFile, entry WorkflowIntegrationEntry) error {
 	if run.Preparation != nil && run.Preparation.State == "validated" {
 		if !slices.Contains([]string{"reviewing", "waiting_review", "ready_to_publish"}, entry.State) || !workflowNativePreparedEntryMatches(run, entry) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -108,7 +110,7 @@ func validateWorkflowPreparedNativeCapability(input WorkflowPreparationInput, ca
 	}
 
 	if !validWorkflowNativeCapabilityRecord(capability) || !validWorkflowNativeFingerprint(capability.PolicyFingerprint) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	pr, proof := input.Source.PullRequest, input.Git
@@ -116,7 +118,7 @@ func validateWorkflowPreparedNativeCapability(input WorkflowPreparationInput, ca
 	actual := [5]string{capability.SourceRef, capability.TargetRef, capability.OriginalSourceCommit, capability.ExpectedBaseCommit, capability.PreparedResultCommit}
 
 	if expected != actual || proof.ResultCommit == proof.SourceCommit || proof.ResultCommit == proof.BaseCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowPublicationCapability(input.Source, capability.WorkflowPublicationCapability)
@@ -147,7 +149,7 @@ func observeWorkflowPreparedNativeCapability(ctx context.Context, provider Workf
 	}
 
 	if head != input.Git.SourceCommit {
-		return WorkflowNativeCapability{}, ErrWorkflowConflict
+		return WorkflowNativeCapability{}, workflowstate.ErrConflict
 	}
 
 	capability, err := provider.WorkflowPreparedNativeCapability(ctx, input.Source.PullRequest, input.Git)
@@ -169,7 +171,7 @@ func (s *WorkflowStore) cachedWorkflowPreparationCapability(ctx context.Context,
 	}
 
 	if run.Integration == nil || run.Integration.EntryID != native.Entry.EntryID {
-		return preliminary, ErrWorkflowConflict
+		return preliminary, workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -178,7 +180,7 @@ func (s *WorkflowStore) cachedWorkflowPreparationCapability(ctx context.Context,
 	}
 
 	if entry.ClaimGeneration != native.ClaimGeneration || !workflowNativePreparedEntryMatches(run, entry) {
-		return preliminary, ErrWorkflowConflict
+		return preliminary, workflowstate.ErrConflict
 	}
 
 	return observeWorkflowPreparedCapability(ctx, provider, candidate.Input)
@@ -190,7 +192,7 @@ func (s *WorkflowStore) checkWorkflowNativePreparationFence(run workflowInvocati
 	}
 
 	if run.Integration == nil || *run.Integration != native.Entry {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -199,7 +201,7 @@ func (s *WorkflowStore) checkWorkflowNativePreparationFence(run workflowInvocati
 	}
 
 	if entry.State != "validating" || entry.ClaimGeneration != native.ClaimGeneration || entry.StopIntent != "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

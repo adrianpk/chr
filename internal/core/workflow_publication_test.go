@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowPublicationPorts(f workflowPreparationFixture, p WorkflowPullRequestProvider) WorkflowPublicationPorts {
@@ -85,7 +87,7 @@ func TestWorkflowPublicationMovedBase(t *testing.T) {
 func assertWorkflowPublicationMoved(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, progress WorkflowIntegrationProgress, moved, oldHash string) {
 	t.Helper()
 
-	if _, err := f.store.ApproveWorkflowSlice(t.Context(), f.run.ID, oldHash, p); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ApproveWorkflowSlice(t.Context(), f.run.ID, oldHash, p); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("old manual approval survived target movement", err)
 	}
 

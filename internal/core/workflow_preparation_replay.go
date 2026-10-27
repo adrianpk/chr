@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (reader workflowIntegrationReader) replayCommit(ctx context.Context, tree, parent, source string) (string, error) {
@@ -37,7 +39,7 @@ func (reader workflowIntegrationReader) preparationCommitterDate() string {
 
 func (reader workflowIntegrationReader) preparationObject(ctx context.Context, tree string, parents []string, author WorkflowIntegrationIdentity, encoding, message string) (string, error) {
 	if !validWorkflowPreparationObject(tree, parents, author, encoding) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	// Write exact message bytes: commit-tree normalizes terminal newlines. Old
@@ -59,7 +61,7 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, t
 	}
 
 	if len(data) >= WorkflowFileLimit {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	id, err := reader.rawInput(ctx, data, "hash-object", "-t", "commit", "-w", "--stdin")
@@ -83,7 +85,7 @@ func validWorkflowPreparationObject(tree string, parents []string, author Workfl
 
 func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, proof WorkflowIntegrationProof, tree string, finding AgenticReviewFinding) (WorkflowIntegrationProof, error) {
 	if !validWorkflowRebaseFixInput(proof, finding) {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	if err := reader.requireRebaseFixSigner(proof); err != nil {
@@ -95,7 +97,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 	}
 
 	if tree == proof.PreparedTree || len(proof.Provenance.Prepared) >= WorkflowRecordLimit {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	author := WorkflowIntegrationIdentity{Name: "Workflow Host", Email: "workflow@example.invalid", Date: fmt.Sprintf("%d +0000", time.Now().Unix())}

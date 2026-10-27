@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func nativeReplayFixture(t *testing.T) workflowGitFixture {
@@ -132,7 +134,7 @@ func TestNativeReplayGuard(t *testing.T) {
 		edit func(*WorkflowIntegrationProvenance)
 	}{
 		{"author", func(p *WorkflowIntegrationProvenance) { p.Source[0].Author.Name = "Forged Author" }},
-		{"message", func(p *WorkflowIntegrationProvenance) { p.Prepared[0].MessageHash = workflowHash([]byte("forged")) }},
+		{"message", func(p *WorkflowIntegrationProvenance) { p.Prepared[0].MessageHash = contenthash.Sum([]byte("forged")) }},
 		{"date", func(p *WorkflowIntegrationProvenance) { p.Prepared[0].Author.Date = "978307200 +0000" }},
 		{"empty", func(p *WorkflowIntegrationProvenance) { p.Replays[0].EmptyDecision = "source_empty" }},
 		{"order", func(p *WorkflowIntegrationProvenance) { p.Replays[0], p.Replays[1] = p.Replays[1], p.Replays[0] }},

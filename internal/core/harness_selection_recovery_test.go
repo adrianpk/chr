@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Recovery covers each durable boundary: retained intent, renamed config, and
@@ -21,7 +24,7 @@ func checkHarnessSelectionRecovery(t *testing.T, stage string) {
 	t.Helper()
 
 	project := t.TempDir()
-	request := harnessSelectionTestRequest("interrupted", workflowHash(nil), "alpha")
+	request := harnessSelectionTestRequest("interrupted", contenthash.Sum(nil), "alpha")
 
 	journal, image := retainedHarnessSelectionTestChange(t, request)
 	if err := writeHarnessSelectionJournal(project, journal); err != nil {
@@ -55,7 +58,7 @@ func checkHarnessSelectionRecovery(t *testing.T, stage string) {
 // its publication; the original authorized payload remains recoverable.
 func TestHarnessSelectionRecoveryIdentity(t *testing.T) {
 	project := t.TempDir()
-	request := harnessSelectionTestRequest("interrupted", workflowHash(nil), "alpha")
+	request := harnessSelectionTestRequest("interrupted", contenthash.Sum(nil), "alpha")
 
 	journal, _ := retainedHarnessSelectionTestChange(t, request)
 	if err := writeHarnessSelectionJournal(project, journal); err != nil {
@@ -65,7 +68,7 @@ func TestHarnessSelectionRecoveryIdentity(t *testing.T) {
 	changed := request
 
 	changed.Generation = harnessSelectionTestChoice("beta")
-	if _, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(changed)); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(changed)); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("interrupted identity changed payload", err)
 	}
 
@@ -85,7 +88,7 @@ func TestHarnessSelectionRecoveryConflict(t *testing.T) {
 	for _, change := range []string{"foreign edit", "corrupt checksum"} {
 		t.Run(change, func(t *testing.T) {
 			project := t.TempDir()
-			request := harnessSelectionTestRequest("interrupted", workflowHash(nil), "alpha")
+			request := harnessSelectionTestRequest("interrupted", contenthash.Sum(nil), "alpha")
 
 			journal, _ := retainedHarnessSelectionTestChange(t, request)
 			if err := writeHarnessSelectionJournal(project, journal); err != nil {
@@ -115,7 +118,7 @@ func TestHarnessSelectionRecoveryConflict(t *testing.T) {
 // configuration while already accepted request IDs remain replayable.
 func TestHarnessSelectionReceiptCapacity(t *testing.T) {
 	project := t.TempDir()
-	request := harnessSelectionTestRequest("first", workflowHash(nil), "alpha")
+	request := harnessSelectionTestRequest("first", contenthash.Sum(nil), "alpha")
 
 	result, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
 	if err != nil {
@@ -132,7 +135,7 @@ func TestHarnessSelectionReceiptCapacity(t *testing.T) {
 		t.Fatal("receipt capacity was exceeded")
 	}
 
-	if workflowHash(readHarnessSelectionTestConfig(t, project)) != result.Revision {
+	if contenthash.Sum(readHarnessSelectionTestConfig(t, project)) != result.Revision {
 		t.Fatal("capacity rejection changed configuration")
 	}
 

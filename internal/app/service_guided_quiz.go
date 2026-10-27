@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type guidedGenerationContext struct{ session core.AuthoringSession }
@@ -36,7 +37,7 @@ func (s service) ConductGuidedQuiz(ctx context.Context, command core.GuidedUseCa
 
 func (s service) conductGuidedQuiz(ctx context.Context, session *core.AuthoringSession) error {
 	if session.Guided.Stage != "quiz" {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	checkpoint, err := guidedDumpCheckpoint(*session)
@@ -114,7 +115,7 @@ func (s service) prepareGuidedQuizAction(ctx context.Context, session core.Autho
 
 		action = "start"
 	} else if session.Guided.Quiz.SessionID != observed.State.SessionID || session.Guided.Quiz.Revision != observed.Revision || session.Guided.Quiz.InputDigest != digest {
-		return core.QuizActionRequest{}, core.ErrWorkflowConflict
+		return core.QuizActionRequest{}, workflowstate.ErrConflict
 	}
 
 	binding := core.QuizActionBinding{SessionID: observed.State.SessionID, ExpectedRevision: observed.Revision, OperationID: "guided-" + operation.Digest}

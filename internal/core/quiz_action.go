@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // QuizActionBinding guards a retained question and makes retries idempotent.
@@ -118,11 +120,11 @@ func prepareQuizTransition(before QuizObservation, next QuizTransition, request 
 	state.Revision = ""
 
 	if state.ProjectID != request.Scope.ProjectID || state.CaseSlug != request.Scope.CaseSlug {
-		return next, ErrWorkflowConflict
+		return next, workflowstate.ErrConflict
 	}
 
 	if request.Action != "start" && state.SessionID != before.State.SessionID {
-		return next, ErrWorkflowConflict
+		return next, workflowstate.ErrConflict
 	}
 
 	if err := validateRetainedQuizState(*state); err != nil {

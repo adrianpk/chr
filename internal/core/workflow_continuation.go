@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowContinuationRequest supplies host actions for the retained extent.
@@ -51,7 +53,7 @@ func (s *WorkflowStore) ContinueWorkflow(ctx context.Context, id string, request
 			return WorkflowContinuationProgress{Invocation: run}, err
 		}
 	} else if request.AuthorizationCheck != nil {
-		return WorkflowContinuationProgress{Invocation: run}, ErrWorkflowConflict
+		return WorkflowContinuationProgress{Invocation: run}, workflowstate.ErrConflict
 	}
 
 	steps, reason, err := s.continueWorkflowSteps(ctx, id, request, ports, limit)

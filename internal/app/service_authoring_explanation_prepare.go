@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PreparedAuthoringExplanation freezes the question and canonical context before
@@ -50,7 +51,7 @@ func (s service) ExplainPreparedAuthoring(ctx context.Context, prepared Prepared
 	}
 
 	if prepared.ProjectID != s.projectContext.ProjectID {
-		return result, core.ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	if prepared.Request.DocumentKind != "" {

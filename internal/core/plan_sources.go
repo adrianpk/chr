@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PlanSourceInput binds one selected source to its exact retained image.
@@ -42,7 +45,7 @@ func ObservePlanSources(ctx context.Context, projectDir string, scope QuizScope)
 
 	second, err := observePlanSources(ctx, projectDir, scope)
 	if err == nil && second.Hash != first.Hash {
-		err = ErrWorkflowConflict
+		err = workflowstate.ErrConflict
 	}
 
 	return first, err
@@ -91,7 +94,7 @@ func observePlanSources(ctx context.Context, projectDir string, scope QuizScope)
 		return observed, errors.New("plan source context exceeds 96 KiB; narrow the selected context")
 	}
 
-	observed.Hash = workflowHash(encoded)
+	observed.Hash = contenthash.Sum(encoded)
 
 	return observed, errors.Join(err, r.checkProjectDumpInspection(ctx))
 }
@@ -116,12 +119,12 @@ func (r *fileAuthoringSessionRepository) appendPlanMetadata(ctx context.Context,
 			return err
 		}
 
-		if input.Kind == "project_document" && observed.Project.Exists && workflowHash(data) != observed.Project.SourceHash {
-			return ErrWorkflowConflict
+		if input.Kind == "project_document" && observed.Project.Exists && contenthash.Sum(data) != observed.Project.SourceHash {
+			return workflowstate.ErrConflict
 		}
 
 		input.Reference = filepath.ToSlash(input.Reference)
-		input.Revision, input.Content = workflowHash(data), string(data)
+		input.Revision, input.Content = contenthash.Sum(data), string(data)
 		observed.Inputs = append(observed.Inputs, input)
 	}
 

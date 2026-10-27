@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // CreateTelegramNotification admits the event, immutable view and complete
@@ -30,9 +32,9 @@ func (r *sqliteNotificationEventRepository) CreateTelegramNotification(ctx conte
 		view := RenderTelegramMessage(input.Message)
 		if input.Document != nil {
 			view = RenderTelegramDocument(input.Message)
-			view.DocumentID = "tgndoc-" + workflowHash([]byte(input.Record.Event.ID))[:32]
+			view.DocumentID = "tgndoc-" + contenthash.Sum([]byte(input.Record.Event.ID))[:32]
 
-			view.DocumentHash = workflowHash(input.Document.Payload)
+			view.DocumentHash = contenthash.Sum(input.Document.Payload)
 			if err := retainTelegramNotificationDocument(ctx, tx, input, view.DocumentID); err != nil {
 				return err
 			}
@@ -43,7 +45,7 @@ func (r *sqliteNotificationEventRepository) CreateTelegramNotification(ctx conte
 			return err
 		}
 
-		_, err = tx.ExecContext(ctx, `UPDATE notification_events SET telegram_presentation=?,telegram_presentation_hash=?,telegram_document_id=NULLIF(?,''),telegram_destination=?,telegram_config_digest=?,telegram_namespace=?,telegram_project_binding_digest=? WHERE id=?`, string(payload), workflowHash(payload), view.DocumentID, input.Target.Destination, input.Target.ConfigDigest, input.Target.Namespace, input.Target.ProjectBindingDigest, input.Record.Event.ID)
+		_, err = tx.ExecContext(ctx, `UPDATE notification_events SET telegram_presentation=?,telegram_presentation_hash=?,telegram_document_id=NULLIF(?,''),telegram_destination=?,telegram_config_digest=?,telegram_namespace=?,telegram_project_binding_digest=? WHERE id=?`, string(payload), contenthash.Sum(payload), view.DocumentID, input.Target.Destination, input.Target.ConfigDigest, input.Target.Namespace, input.Target.ProjectBindingDigest, input.Record.Event.ID)
 
 		return err
 	})
@@ -75,7 +77,7 @@ func validateTelegramNotificationTarget(input TelegramNotificationInput) error {
 		return ErrTelegramNotificationTargetUnavailable
 	}
 
-	if !validTelegramDigest(target.ConfigDigest) || !validTelegramDigest(target.ProjectBindingDigest) || !IsValidOpsNamespace(target.Namespace) || strings.TrimSpace(target.Destination) == "" || len(target.Destination) > 512 {
+	if !validTelegramDigest(target.ConfigDigest) || !validTelegramDigest(target.ProjectBindingDigest) || !opsnamespace.Valid(target.Namespace) || strings.TrimSpace(target.Destination) == "" || len(target.Destination) > 512 {
 		return ErrTelegramNotificationTargetUnavailable
 	}
 

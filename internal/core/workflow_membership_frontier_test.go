@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowMembershipFrontier admits a later slice only after finalized
@@ -96,7 +98,7 @@ func checkWorkflowMembershipLaterSet(t *testing.T, before, current WorkflowInvoc
 	t.Helper()
 
 	if retroactive {
-		if !errors.Is(failure, ErrWorkflowConflict) || current.Revision != before.Revision {
+		if !errors.Is(failure, workflowstate.ErrConflict) || current.Revision != before.Revision {
 			t.Fatal("retroactive use-case work crossed confirmed progress", failure)
 		}
 
@@ -177,7 +179,7 @@ func TestWorkflowMembershipExternalOrder(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReconcileWorkflowMembership(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReconcileWorkflowMembership(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("external reorder was silently reconciled", err)
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) prepareWorkflowReview(ctx context.Context, id string, provider WorkflowPullRequestProvider, reviewer []string, harness *WorkflowAgentHarness) (claim *WorkflowClaim, prepared workflowPreparedTask, binding WorkflowReviewBinding, err error) {
@@ -112,7 +114,7 @@ func (s *WorkflowStore) prepareWorkflowReviewPolicy(ctx context.Context, run *wo
 
 		return s.claimWorkflowReview(ctx, run, observation, input, reviewer, harness)
 	default:
-		return nil, workflowPreparedTask{}, ErrWorkflowConflict
+		return nil, workflowPreparedTask{}, workflowstate.ErrConflict
 	}
 }
 

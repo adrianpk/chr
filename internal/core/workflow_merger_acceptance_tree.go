@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowMergerSnapshot(ctx context.Context, reader workflowIntegrationReader, state WorkflowMergerRepairState) (string, error) {
@@ -15,7 +17,7 @@ func workflowMergerSnapshot(ctx context.Context, reader workflowIntegrationReade
 
 	head, err := reader.output(ctx, "rev-parse", "HEAD")
 	if err != nil || head != state.PreparedParent {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if err := checkWorkflowMergerSnapshotFiles(reader.dir); err != nil {
@@ -47,7 +49,7 @@ func checkWorkflowMergerSnapshotFiles(directory string) error {
 
 		count++
 		if count > WorkflowRecordLimit {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if entry.IsDir() {
@@ -60,7 +62,7 @@ func checkWorkflowMergerSnapshotFiles(directory string) error {
 		}
 
 		if !workflowMergerRegularFile(info) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -86,12 +88,12 @@ func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Con
 	slices.Sort(declared)
 
 	if exact && !slices.Equal(paths, declared) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, path := range paths {
 		if !slices.Contains(declared, path) || !workflowMergerPathAllowed(input, path) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -110,7 +112,7 @@ func (reader workflowIntegrationReader) checkMergerChangedKinds(ctx context.Cont
 				return c.Path == path && c.Kind == kind && workflowMergerProcedureRequired(c)
 			})
 			if kind != "text" && !declared {
-				return ErrWorkflowConflict
+				return workflowstate.ErrConflict
 			}
 		}
 	}
@@ -139,7 +141,7 @@ func (reader workflowIntegrationReader) checkMergerSideSelection(ctx context.Con
 func (reader workflowIntegrationReader) checkMergerConflictSides(ctx context.Context, state WorkflowMergerRepairState, tree, path string) error {
 	resolved, err := reader.mergerPathObject(ctx, tree, path)
 	if err != nil || resolved == "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	content, err := reader.rawOutput(ctx, "show", tree+":"+path)
@@ -148,7 +150,7 @@ func (reader workflowIntegrationReader) checkMergerConflictSides(ctx context.Con
 	}
 
 	if strings.Contains(content, "<<<<<<<") && strings.Contains(content, ">>>>>>>") {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, side := range []string{state.PreparedParent, state.CurrentSource} {
@@ -171,7 +173,7 @@ func (reader workflowIntegrationReader) checkMergerCopiedSide(ctx context.Contex
 	}
 
 	if object == resolved {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	other, err := reader.rawOutput(ctx, "show", side+":"+path)
@@ -180,7 +182,7 @@ func (reader workflowIntegrationReader) checkMergerCopiedSide(ctx context.Contex
 	}
 
 	if strings.TrimSpace(content) == strings.TrimSpace(other) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

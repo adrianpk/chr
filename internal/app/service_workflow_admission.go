@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowBoundAdmission supplies a durable request key and the displayed policy.
@@ -19,7 +20,7 @@ type WorkflowBoundAdmission struct {
 
 func (s service) admitBoundWorkExtent(ctx context.Context, selection core.WorkflowPreviewRequest, selected *core.WorkflowSelectionGuard, steps int, bindings []WorkflowBoundAdmission) (AgentWorkResult, error) {
 	if len(bindings) != 1 || steps != 0 || len(selection.SnapshotHash) != 64 || selection.Offset != 0 {
-		return AgentWorkResult{}, core.ErrWorkflowConflict
+		return AgentWorkResult{}, workflowstate.ErrConflict
 	}
 
 	// Retained requests must reach the owner before re-reading mutable records,
@@ -62,7 +63,7 @@ func (s service) boundAdmissionCheck(selection core.WorkflowPreviewRequest, chec
 		}
 
 		if observed != selection.Target {
-			return core.ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if check != nil {

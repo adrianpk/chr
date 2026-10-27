@@ -10,6 +10,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) withLock(ctx context.Context, action func() error) (err error) {
@@ -85,7 +87,7 @@ func (s *WorkflowStore) requireNoWorkflowTransition() error {
 	}
 
 	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("%w: reconcile pending transition before preview", ErrWorkflowConflict)
+		return fmt.Errorf("%w: reconcile pending transition before preview", workflowstate.ErrConflict)
 	} else if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}

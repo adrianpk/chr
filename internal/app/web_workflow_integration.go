@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -65,7 +66,7 @@ func webWorkflowIntegrationControl(ctx context.Context, operations service, requ
 		}
 
 		if status.Integration != nil {
-			return request, fmt.Errorf("%w: native approval requires displayed integration guards", core.ErrWorkflowConflict)
+			return request, fmt.Errorf("%w: native approval requires displayed integration guards", workflowstate.ErrConflict)
 		}
 	}
 

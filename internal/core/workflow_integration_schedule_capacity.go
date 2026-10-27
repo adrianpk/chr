@@ -4,13 +4,15 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // All callers hold the common repository lock. A purpose selects scheduling
 // policy, never a separate worker pool or credentials.
 func (s *WorkflowStore) guardWorkflowIntegrationRole(ctx context.Context, run workflowInvocationFile, purpose string) error {
 	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowIntegrationValidationPurpose, workflowSliceReviewPurpose, workflowSliceRepairPurpose, workflowMergerPurpose, "closing", "set_amendment"}, purpose) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.guardWorkflowIntegrationRoleOwner(run); err != nil {
@@ -78,7 +80,7 @@ func (s *WorkflowStore) workflowIntegrationPreparationTarget(run workflowInvocat
 	}
 
 	if run.PullRequest == nil {
-		return "", "", ErrWorkflowConflict
+		return "", "", workflowstate.ErrConflict
 	}
 
 	repository, err := workflowCanonicalRepository(run.PullRequest.Request.Repository)

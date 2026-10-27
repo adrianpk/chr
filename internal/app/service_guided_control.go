@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ControlGuidedUseCase preserves interrupted stages and delegates native work
@@ -85,7 +86,7 @@ func (s service) applyGuidedNativeControl(ctx context.Context, store *core.Workf
 	}
 
 	result, err = store.ControlWorkflowLifecycle(ctx, request, ports, nil)
-	if !errors.Is(err, core.ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		return result, err
 	}
 	// A failed write can still have an accepted journal entry. Only a verified

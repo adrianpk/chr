@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 	"unicode/utf8"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowMergerFileHash(reader io.Reader) (string, error) {
@@ -30,7 +32,7 @@ func (tools *workflowMergerTools) read(path string) (workflowMergerToolResponse,
 	}
 
 	if len(data) > WorkflowFileLimit || !utf8.Valid(data) {
-		return workflowMergerToolResponse{}, ErrWorkflowConflict
+		return workflowMergerToolResponse{}, workflowstate.ErrConflict
 	}
 
 	return workflowMergerToolResponse{Content: string(data)}, nil
@@ -38,7 +40,7 @@ func (tools *workflowMergerTools) read(path string) (workflowMergerToolResponse,
 
 func (tools *workflowMergerTools) write(path, content string) (err error) {
 	if len(content) > WorkflowFileLimit || !utf8.ValidString(content) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	file, err := tools.root.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)

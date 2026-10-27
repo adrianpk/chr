@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowContinuationFixture(t *testing.T) (*WorkflowStore, WorkflowStartRequest, WorkflowInvocation) {
@@ -96,7 +98,7 @@ func TestWorkflowContinuationBounds(t *testing.T) {
 	}
 
 	request.Selection.Selector = WorkflowSelector{Extent: "use_case", Identity: "broader"}
-	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("retry key broadened the original extent", err)
 	}
 

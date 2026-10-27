@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ObserveAuthoring returns canonical current question and artifact observations.
@@ -20,7 +21,7 @@ func (s service) ObserveAuthoring(ctx context.Context, id string) (core.Authorin
 // supplies the exact observed image and an opaque immutable request binding.
 func (s service) ContinueAuthoring(ctx context.Context, request core.AuthoringContinuationRequest) (core.AuthoringContinuationResult, error) {
 	if request.ProjectID != s.projectContext.ProjectID {
-		return core.AuthoringContinuationResult{}, core.ErrWorkflowConflict
+		return core.AuthoringContinuationResult{}, workflowstate.ErrConflict
 	}
 
 	return core.NewAuthoringSessionRepository(s.projectContext.ProjectDir).ContinueAuthoring(ctx, request, s.generateAuthoringDraft)
@@ -30,7 +31,7 @@ func (s service) ContinueAuthoring(ctx context.Context, request core.AuthoringCo
 // writer after generation. The guard is never serialized or supplied by a model.
 func (s service) ContinueAuthoringGuarded(ctx context.Context, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
 	if request.ProjectID != s.projectContext.ProjectID {
-		return core.AuthoringContinuationResult{}, core.ErrWorkflowConflict
+		return core.AuthoringContinuationResult{}, workflowstate.ErrConflict
 	}
 
 	return core.NewAuthoringSessionRepository(s.projectContext.ProjectDir).ContinueAuthoring(ctx, request, s.generateAuthoringDraft, guard)

@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // UnitInput returns the actual ticket or slice integration contract. Independent
@@ -37,7 +40,7 @@ func workflowUnitContractHash(observation workflowSliceObservation) string {
 
 func (s *WorkflowStore) readWorkflowTicketMembership(run workflowInvocationFile) (workflowSliceObservation, error) {
 	if run.Cursor > len(run.Members) || !workflowMemberOwnsUnit(run.Members[run.Cursor-1], run.Lane.Unit) {
-		return workflowSliceObservation{}, ErrWorkflowConflict
+		return workflowSliceObservation{}, workflowstate.ErrConflict
 	}
 
 	record, err := s.readRecord(run.Members[run.Cursor-1].Admission.Path)
@@ -46,7 +49,7 @@ func (s *WorkflowStore) readWorkflowTicketMembership(run workflowInvocationFile)
 	}
 
 	if record.Task == nil || !slices.Contains([]string{"validated", "waiting_slice", "integrated"}, record.Task.Phase) {
-		return workflowSliceObservation{}, ErrWorkflowConflict
+		return workflowSliceObservation{}, workflowstate.ErrConflict
 	}
 
 	return workflowSliceObservation{tasks: []WorkflowRecord{record}}, nil
@@ -111,7 +114,7 @@ func (s *WorkflowStore) workflowTicketCandidate(ctx context.Context, run workflo
 }
 
 func workflowTicketCandidateID(id string, proof WorkflowSliceTaskProof) string {
-	return workflowHash([]byte(id + "\x00" + proof.EvidenceHash + "\x00" + proof.InputHash))
+	return contenthash.Sum([]byte(id + "\x00" + proof.EvidenceHash + "\x00" + proof.InputHash))
 }
 
 func workflowTicketCandidatePath(id, candidateID string) string {
@@ -135,7 +138,7 @@ func (s *WorkflowStore) commitWorkflowTicketCandidate(run *workflowInvocationFil
 	}
 
 	data = append(data, '\n')
-	run.CandidateRef, run.CandidateHash = workflowTicketCandidatePath(run.ID, candidate.ID), workflowHash(data)
+	run.CandidateRef, run.CandidateHash = workflowTicketCandidatePath(run.ID, candidate.ID), contenthash.Sum(data)
 	run.Outcome = "ticket_candidate_ready"
 
 	return s.commitWorkflowPullRequestFiles(run, nil, workflowFileChange{Path: run.CandidateRef, After: data})
@@ -143,12 +146,12 @@ func (s *WorkflowStore) commitWorkflowTicketCandidate(run *workflowInvocationFil
 
 func (s *WorkflowStore) checkWorkflowTicketCandidate(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, candidate WorkflowSliceCandidate) error {
 	if !workflowTicketCandidateMatchesRun(run, observation, candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	proof, err := s.workflowSliceTaskProof(ctx, run, observation.tasks[0])
 	if err != nil || proof != candidate.Ticket.Tasks[0] || candidate.ID != workflowTicketCandidateID(run.ID, proof) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	data, err := s.readWorkflowReviewImage(proof.EvidenceRef, proof.EvidenceHash)
@@ -172,7 +175,7 @@ func checkWorkflowTicketResult(run workflowInvocationFile, proof WorkflowSliceTa
 
 	actual, err := json.Marshal(candidate)
 	if err != nil || string(actual) != string(expected) || !result.Successful || result.Commit != run.Lane.HeadCommit || result.InputRef != proof.InputRef || result.InputHash != proof.InputHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

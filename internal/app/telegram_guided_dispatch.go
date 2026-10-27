@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // An explicit new-project instruction can answer the project-choice diagnostic,
@@ -180,12 +181,12 @@ func (r telegramReceiver) validateGuidedRunBinding(ctx context.Context, request 
 	}
 
 	if c.GuidedRunID != id {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	bound, err := telegramAuthoringSessionID(c.AuthoringSessionRef)
 	if err != nil || bound != id {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

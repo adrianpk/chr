@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 const (
@@ -17,15 +18,12 @@ const (
 	OpsUserEnv = "OPS_USER"
 )
 
-var (
-	opsNamespacePattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
-	opsArtifactTypes    = map[string]struct{}{
-		"dump": {}, "quiz": {}, "spec": {}, "plan": {}, "tracker": {},
-		"ticket": {}, "run": {}, "report": {}, "explanation": {}, "map": {},
-	}
-)
+var opsArtifactTypes = map[string]struct{}{
+	"dump": {}, "quiz": {}, "spec": {}, "plan": {}, "tracker": {},
+	"ticket": {}, "run": {}, "report": {}, "explanation": {}, "map": {},
+}
 
-// OpsLayout is the project-local layout shared with KAL, Codex, and Pi.
+// OpsLayout describes the project-local operational layout.
 type OpsLayout struct {
 	projectDir string
 	namespace  string
@@ -59,16 +57,11 @@ func ResolveOpsLayout(opts ResolveOpsLayoutOptions) (OpsLayout, error) {
 		namespace = DefaultOpsNamespace
 	}
 
-	if !IsValidOpsNamespace(namespace) {
+	if !opsnamespace.Valid(namespace) {
 		return OpsLayout{}, fmt.Errorf("invalid ops namespace: %s", namespace)
 	}
 
 	return OpsLayout{projectDir: projectDir, namespace: namespace}, nil
-}
-
-// IsValidOpsNamespace reports whether value is a shared namespace name.
-func IsValidOpsNamespace(value string) bool {
-	return opsNamespacePattern.MatchString(strings.TrimSpace(value))
 }
 
 // ProjectDir returns the absolute project directory.

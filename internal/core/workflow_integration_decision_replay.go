@@ -1,6 +1,10 @@
 package core
 
-import "slices"
+import (
+	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) checkWorkflowDecisionReplayAnswer(record WorkflowIntegrationDecisions, answer WorkflowIntegrationAnswer) error {
 	if answer.OriginalCommit == "" {
@@ -13,7 +17,7 @@ func (s *WorkflowStore) checkWorkflowDecisionReplayAnswer(record WorkflowIntegra
 	}
 
 	if !slices.Contains(manifest.Commits, answer.OriginalCommit) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -36,7 +40,7 @@ func workflowMergerAnsweredPlan(plan WorkflowMergerRepairPlan, input WorkflowMer
 
 		if answer.OriginalCommit != "" {
 			if !slices.Contains(owners, answer.OriginalCommit) {
-				return plan, false, ErrWorkflowConflict
+				return plan, false, workflowstate.ErrConflict
 			}
 
 			plan.Outcome, plan.OriginalCommit = "replay_step", answer.OriginalCommit
@@ -45,7 +49,7 @@ func workflowMergerAnsweredPlan(plan WorkflowMergerRepairPlan, input WorkflowMer
 		}
 
 		if answer.IntegrationFix == nil || validateAgenticReviewFinding(*answer.IntegrationFix) != nil || answer.IntegrationFix.Category == AgenticReviewFindingCosmetic {
-			return plan, false, ErrWorkflowConflict
+			return plan, false, workflowstate.ErrConflict
 		}
 
 		finding := *answer.IntegrationFix

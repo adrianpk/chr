@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func retainedTelegramHarnessChange(request core.TelegramOperationRequest) (telegramHarnessPrepared, error) {
@@ -18,7 +19,7 @@ func retainedTelegramHarnessChange(request core.TelegramOperationRequest) (teleg
 
 	choices, err := telegramHarnessSourceChoices(request.Source)
 	if err != nil {
-		return prepared, core.ErrWorkflowConflict
+		return prepared, workflowstate.ErrConflict
 	}
 
 	arguments, err := json.Marshal(choices)
@@ -37,7 +38,7 @@ func retainedTelegramHarnessChange(request core.TelegramOperationRequest) (teleg
 	}
 
 	if string(arguments) != string(retainedArguments) || !telegramHarnessPreparedBinding(prepared.Change, request, choices) {
-		return prepared, core.ErrWorkflowConflict
+		return prepared, workflowstate.ErrConflict
 	}
 
 	return prepared, nil
@@ -46,7 +47,7 @@ func retainedTelegramHarnessChange(request core.TelegramOperationRequest) (teleg
 func telegramHarnessSourceChoices(source core.TelegramReceivedUpdate) (telegramHarnessChoices, error) {
 	choices, recognized, err := parseTelegramHarness(source)
 	if err != nil || !recognized || (choices.Worker == nil && choices.Generation == nil) {
-		return choices, core.ErrWorkflowConflict
+		return choices, workflowstate.ErrConflict
 	}
 
 	return choices, nil
@@ -76,7 +77,7 @@ func (r telegramReceiver) applyHarnessAction(ctx context.Context, claim core.Tel
 
 	prepared, err := retainedTelegramHarnessChange(claim.Request)
 	if err != nil {
-		return r.finishHarnessActionFailure(ctx, claim, config, core.ErrWorkflowConflict)
+		return r.finishHarnessActionFailure(ctx, claim, config, workflowstate.ErrConflict)
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -98,7 +99,7 @@ func (r telegramReceiver) applyHarnessAction(ctx context.Context, claim core.Tel
 func (r telegramReceiver) harnessPublishAuthority(claim core.TelegramActionClaim) func(context.Context) error {
 	return func(ctx context.Context) error {
 		if !claim.Action.ExpiresAt.After(time.Now()) {
-			return core.ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		input, err := r.harnessAuthorityInput(claim.Request)
@@ -112,7 +113,7 @@ func (r telegramReceiver) harnessPublishAuthority(claim core.TelegramActionClaim
 
 func (r telegramReceiver) finishHarnessActionFailure(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig, failure error) error {
 	text := "The selected profile is no longer locally prepared. Defaults are unchanged; inspect /harness and issue a new change."
-	if errors.Is(failure, core.ErrWorkflowConflict) {
+	if errors.Is(failure, workflowstate.ErrConflict) {
 		text = "The project, actor, configuration revision or request binding changed. Inspect /harness before issuing a new change."
 	} else if !errors.Is(failure, core.ErrHarnessSelectionPreparation) && !errors.Is(failure, ErrRecordUnsupported) {
 		// An uncertain transport/owner failure keeps the original action applying.

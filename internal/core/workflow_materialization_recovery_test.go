@@ -11,6 +11,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowMaterializationProcess exits its owned process after a selected
@@ -124,7 +126,7 @@ func TestWorkflowMaterializationConflict(t *testing.T) {
 		}
 
 		opts.Plan.Slices[0].Tasks[0].Scope = "Changed scope"
-		if _, err := store.MaterializePlan(t.Context(), opts); !errors.Is(err, ErrWorkflowConflict) {
+		if _, err := store.MaterializePlan(t.Context(), opts); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatalf("changed request: %v", err)
 		}
 	})
@@ -141,7 +143,7 @@ func TestWorkflowMaterializationConflict(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if _, err := store.MaterializePlan(t.Context(), opts); !errors.Is(err, ErrWorkflowConflict) {
+		if _, err := store.MaterializePlan(t.Context(), opts); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatalf("manual edit overwritten: %v", err)
 		}
 	})

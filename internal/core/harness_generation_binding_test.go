@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -81,7 +82,7 @@ func generationBindingResolver(program, model string) HarnessGenerationResolver 
 		selection := HarnessSelection{
 			Role: HarnessGeneration, Action: "plan_generation", Source: "project", Profile: config.Harnesses.Generation,
 			Harness: "codex", Backend: "codex", ModelProvider: "cli_default", Model: model,
-			SelectionRevision: config.Revision(), ProfileRevision: workflowHash([]byte("fixture-profile-" + model)),
+			SelectionRevision: config.Revision(), ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + model)),
 			Capabilities: harness.Capabilities{Generation: true},
 			Readiness:    HarnessReadiness{Supported: true, Executable: "available", Credentials: "cli_managed", Runtime: "native"},
 		}
@@ -140,7 +141,7 @@ func replaceGenerationBindingRecord(t *testing.T, operation HarnessGenerationOpe
 		t.Fatal(err)
 	}
 
-	record.Checksum = workflowHash(encoded)
+	record.Checksum = contenthash.Sum(encoded)
 	if err := writeHarnessGenerationFile(path, record); err != nil {
 		t.Fatal(err)
 	}
@@ -281,7 +282,7 @@ func checkGenerationMetadataCompleted(t *testing.T, record HarnessRunMetadata, o
 func checkGenerationMetadataOutput(t *testing.T, record HarnessRunMetadata, operation HarnessGenerationOperation, output []byte) {
 	t.Helper()
 
-	if record.OutputRef != "output.json" || record.OutputHash != workflowHash(output) || record.SelectionRevision != operation.Binding.Selection.SelectionRevision {
+	if record.OutputRef != "output.json" || record.OutputHash != contenthash.Sum(output) || record.SelectionRevision != operation.Binding.Selection.SelectionRevision {
 		t.Fatal("normalized artifact identity was not retained", record)
 	}
 }

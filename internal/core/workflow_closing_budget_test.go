@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestWorkflowClosingBudget retains exhaustion across restart and rejects before
@@ -109,7 +111,7 @@ func workflowClosingBudgetImages(t *testing.T, set *WorkflowRecord, state workfl
 
 		data = append(data, '\n')
 		ref := workflowClosingFile(set.ID, generation, "state.json")
-		set.Set.Closing.Attempts = append(set.Set.Closing.Attempts, WorkflowClosingEvidence{Ref: ref, Hash: workflowHash(data)})
+		set.Set.Closing.Attempts = append(set.Set.Closing.Attempts, WorkflowClosingEvidence{Ref: ref, Hash: contenthash.Sum(data)})
 		files = append(files, workflowFileChange{Path: ref, After: data}, workflowFileChange{Path: state.Input.Ref, After: input})
 	}
 

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowInvocationClosure retains a confirmed set and its refreshed execution
@@ -38,7 +40,7 @@ func (s *WorkflowStore) workflowClosingRunReady(ctx context.Context, run workflo
 	}
 
 	if run.Cursor < len(run.Members) && run.Members[run.Cursor].Admission.SetID == setID {
-		return fmt.Errorf("%w: selected set work remains", ErrWorkflowConflict)
+		return fmt.Errorf("%w: selected set work remains", workflowstate.ErrConflict)
 	}
 
 	for _, attempt := range run.Attempts {
@@ -109,7 +111,7 @@ func workflowClosingProjectionFence(run workflowInvocationFile, claim *workflowC
 
 	image := run.SetImages[len(run.Closures)]
 	if image.Path != previous.Path || image.Revision != previous.Revision || image.SourceHash != previous.SourceHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if run.ClosingSet != "" && run.ClosingSet != claim.set.ID {
@@ -167,7 +169,7 @@ func (s *WorkflowStore) CloseWorkflowInvocationSet(ctx context.Context, id, bran
 	if len(run.Deliveries) > 0 {
 		retained := run.Deliveries[len(run.Deliveries)-1].PullRequest.Request.BaseBranch
 		if branch != "" && branch != retained {
-			return WorkflowSetClosureResult{}, ErrWorkflowConflict
+			return WorkflowSetClosureResult{}, workflowstate.ErrConflict
 		}
 
 		branch = retained

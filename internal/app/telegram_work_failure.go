@@ -7,10 +7,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramWorkFailure(failure error) string {
-	if errors.Is(failure, core.ErrWorkflowConflict) {
+	if errors.Is(failure, workflowstate.ErrConflict) {
 		return "Work conflict: the displayed selection, policy, target or authority changed. Read current native work before requesting a new preview."
 	}
 

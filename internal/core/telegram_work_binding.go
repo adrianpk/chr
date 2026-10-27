@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramInvocationBinding references canonical native work without credentials.
@@ -18,7 +20,7 @@ type TelegramInvocationBinding struct {
 // Current peer/operator/project authority must be checked separately by the host.
 func (s *TelegramReceiverStore) ValidateTelegramWorkConversation(ctx context.Context, request TelegramOperationRequest) error {
 	if request.OperationID != "work.admit" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.Target.ConversationID == "" {
@@ -35,7 +37,7 @@ func (s *TelegramReceiverStore) ValidateTelegramWorkConversation(ctx context.Con
 	}
 
 	if count != 1 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -56,11 +58,11 @@ func projectTelegramWorkBinding(ctx context.Context, tx *sql.Tx, request Telegra
 func projectTelegramAdmissionBinding(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, result TelegramActionResult, now string) error {
 	bound := result.Invocation
 	if result.InvocationPhase != "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.OperationID != "work.admit" || result.State != "confirmed" || !validWorkflowRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 || result.ReceiptRef != "workflow:"+bound.ID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.Target.ConversationID == "" {
@@ -86,7 +88,7 @@ func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request Tele
 	bound := result.Invocation
 
 	if target.ConversationID == "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	changed, err := tx.ExecContext(ctx, `UPDATE telegram_conversations SET invocation_id=?,last_observed_revision=MAX(COALESCE(last_observed_revision,0),?),authorization_ref=COALESCE(NULLIF(authorization_ref,''),?),phase=?,updated_at=? WHERE id=? AND revision=? AND project_id=? AND namespace=? AND project_binding_digest=? AND (invocation_id IS NULL OR invocation_id=?) AND COALESCE(last_observed_revision,0)<=?`, bound.ID, bound.Revision, request.ID, result.InvocationPhase, now, target.ConversationID, target.ConversationRevision, target.ProjectID, target.Namespace, target.ProjectBindingDigest, bound.ID, bound.Revision)
@@ -106,15 +108,15 @@ func projectTelegramControlBinding(ctx context.Context, tx *sql.Tx, request Tele
 func validateTelegramControlBinding(request TelegramOperationRequest, result TelegramActionResult) error {
 	bound := result.Invocation
 	if result.State != "confirmed" || !validWorkflowRequestKey(bound.ID) || bound.Revision == 0 || bound.Revision > math.MaxInt64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !slices.Contains([]string{"executing", "waiting", "completed", "canceled"}, result.InvocationPhase) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if result.ReceiptRef != workflowMutationReceiptPath(request.ID) && result.ReceiptRef != fmt.Sprintf("workflow:%s:revision:%d", bound.ID, bound.Revision) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

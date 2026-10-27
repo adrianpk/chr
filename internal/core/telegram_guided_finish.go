@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramGuidedProgress contains only verified display and owner references.
@@ -55,7 +57,7 @@ func updateTelegramGuidedBinding(ctx context.Context, tx *sql.Tx, request Telegr
 	}
 
 	if c.GuidedRunID == "" || c.AuthoringSessionRef != progress.SessionRef {
-		return c, ErrWorkflowConflict
+		return c, workflowstate.ErrConflict
 	}
 
 	c.Phase, c.QuestionBinding = progress.Phase, progress.Binding
@@ -72,15 +74,15 @@ func updateTelegramGuidedBinding(ctx context.Context, tx *sql.Tx, request Telegr
 
 func validateTelegramGuidedProgress(progress TelegramGuidedProgress, facts json.RawMessage) error {
 	if validateTelegramAuthoringSessionRef(progress.SessionRef) != nil || len(progress.Topic) > 512 || len(progress.Binding) > 4096 || !json.Valid([]byte(progress.Binding)) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if progress.Phase != "collecting" && progress.Phase != "completed" && progress.Phase != "canceled" && progress.Phase != "failed" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validTelegramOperationFinish("confirmed", progress.SessionRef, facts) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -92,7 +94,7 @@ func projectTelegramGuidedAction(ctx context.Context, tx *sql.Tx, retained Teleg
 	}
 
 	if result.State != "confirmed" || retained.Request.OperationID != "guided.step" {
-		return retained, ErrWorkflowConflict
+		return retained, workflowstate.ErrConflict
 	}
 
 	if err := validateTelegramGuidedProgress(*result.Guided, result.Facts); err != nil {

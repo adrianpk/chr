@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowReviewInputs(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider) (workflowSliceObservation, WorkflowReviewInput, error) {
@@ -78,7 +81,7 @@ func observeWorkflowReviewPR(ctx context.Context, run workflowInvocationFile, pr
 	}
 
 	if reason := workflowPullRequestMismatch(*run.PullRequest, []WorkflowPullRequestSnapshot{pr}); reason != "" || pr.Merged {
-		return pr, "", fmt.Errorf("%w: canonical PR is changed or requires delivery observation", ErrWorkflowConflict)
+		return pr, "", fmt.Errorf("%w: canonical PR is changed or requires delivery observation", workflowstate.ErrConflict)
 	}
 
 	target, err := provider.ReadWorkflowBranch(ctx, pr.Repository, pr.BaseBranch)
@@ -87,7 +90,7 @@ func observeWorkflowReviewPR(ctx context.Context, run workflowInvocationFile, pr
 	}
 
 	if !workflowCommitID(target) || target != pr.BaseCommit {
-		return pr, target, fmt.Errorf("%w: canonical target differs from review observation", ErrWorkflowConflict)
+		return pr, target, fmt.Errorf("%w: canonical target differs from review observation", workflowstate.ErrConflict)
 	}
 
 	return pr, target, nil
@@ -100,7 +103,7 @@ func (s *WorkflowStore) checkWorkflowReviewAfterIO(ctx context.Context, run work
 
 	current, err := s.workflowReviewPolicy(run)
 	if err != nil || current != policy {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -118,7 +121,7 @@ func workflowReviewInputBytes(input WorkflowReviewInput) ([]byte, error) {
 func workflowReviewInputHash(input WorkflowReviewInput) (string, error) {
 	data, err := workflowReviewInputBytes(input)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func (s *WorkflowStore) checkWorkflowReviewGrant(ctx context.Context, run workflowInvocationFile, provider WorkflowPullRequestProvider) (WorkflowReviewInput, error) {
@@ -137,7 +140,7 @@ func (s *WorkflowStore) checkWorkflowReviewGrant(ctx context.Context, run workfl
 
 	hash, err := workflowReviewInputHash(input)
 	if err != nil || hash != run.Review.InputHash {
-		return input, fmt.Errorf("%w: review grant inputs changed", ErrWorkflowConflict)
+		return input, fmt.Errorf("%w: review grant inputs changed", workflowstate.ErrConflict)
 	}
 
 	return input, nil
@@ -145,7 +148,7 @@ func (s *WorkflowStore) checkWorkflowReviewGrant(ctx context.Context, run workfl
 
 func (s *WorkflowStore) approveWorkflowSlice(ctx context.Context, run workflowInvocationFile, bindingHash string, provider WorkflowPullRequestProvider, control *workflowControlCommit) (WorkflowReviewBinding, error) {
 	if run.Review == nil || bindingHash != run.Review.InputHash || !slices.Contains([]string{"waiting_approval", "human_required", "authorized"}, run.Review.State) {
-		return WorkflowReviewBinding{}, fmt.Errorf("%w: approval does not name the current human decision", ErrWorkflowConflict)
+		return WorkflowReviewBinding{}, fmt.Errorf("%w: approval does not name the current human decision", workflowstate.ErrConflict)
 	}
 
 	if _, _, err := s.readWorkflowReview(run); err != nil {
@@ -159,7 +162,7 @@ func (s *WorkflowStore) approveWorkflowSlice(ctx context.Context, run workflowIn
 
 	hash, err := workflowReviewInputHash(input)
 	if err != nil || hash != bindingHash {
-		return *run.Review, fmt.Errorf("%w: approval inputs changed", ErrWorkflowConflict)
+		return *run.Review, fmt.Errorf("%w: approval inputs changed", workflowstate.ErrConflict)
 	}
 
 	if run.Review.State == "authorized" {

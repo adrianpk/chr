@@ -9,7 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIndex is implemented by the existing SQLite ticket index.
@@ -198,7 +200,7 @@ func workflowSnapshotHash(snapshot WorkflowSnapshot) string {
 
 	sort.Strings(images)
 
-	return workflowHash([]byte(strings.Join(images, "\n")))
+	return contenthash.Sum([]byte(strings.Join(images, "\n")))
 }
 
 // QueryWorkflow rejects stale SQL or pagination snapshots before returning work.
@@ -221,7 +223,7 @@ func (i *sqliteTicketIndex) QueryWorkflow(ctx context.Context, store *WorkflowSt
 		}
 
 		if indexedHash != hash || (q.SnapshotHash != "" && q.SnapshotHash != hash) {
-			return fmt.Errorf("%w: rebuild workflow index or restart pagination", ErrWorkflowConflict)
+			return fmt.Errorf("%w: rebuild workflow index or restart pagination", workflowstate.ErrConflict)
 		}
 
 		page, err = i.queryWorkflowPage(ctx, store, snapshot, q)

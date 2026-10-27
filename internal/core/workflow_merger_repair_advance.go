@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (reader workflowIntegrationReader) advanceMergerRepair(ctx context.Context, state *WorkflowMergerRepairState) error {
@@ -77,7 +79,7 @@ func (reader workflowIntegrationReader) finishMergerRepair(ctx context.Context, 
 	}
 
 	if state.Tree == baseTree || state.PreparedParent == state.Query.SourceCommit {
-		return fmt.Errorf("%w: empty result or source identity collision requires operator resolution", ErrWorkflowConflict)
+		return fmt.Errorf("%w: empty result or source identity collision requires operator resolution", workflowstate.ErrConflict)
 	}
 
 	proof := workflowMergerRepairProof(*state)

@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowAmendmentRecovery interrupts the approval, ticket, set and run
@@ -51,7 +53,7 @@ func checkWorkflowAmendmentRestart(t *testing.T, store *WorkflowStore, id string
 		t.Fatal("restart lost frozen scope or accepted set image", err)
 	}
 
-	if _, err := store.AmendWorkflowSet(t.Context(), amend); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.AmendWorkflowSet(t.Context(), amend); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale amendment allocated another transition", err)
 	}
 }
@@ -75,7 +77,7 @@ func TestWorkflowAmendmentEvidence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReconcileWorkflowMembership(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReconcileWorkflowMembership(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed approved amendment became executable", err)
 	}
 }

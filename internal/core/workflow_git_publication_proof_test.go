@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowGitCandidate rejects changed or forged proof before publication,
@@ -85,7 +87,7 @@ func TestWorkflowGitFastForward(t *testing.T) {
 	sealWorkflowGitFixture(t, &fixture.request)
 
 	result, err := NewWorkflowGitPublisher(fixture.request.Repository, fixture.remote).PublishWorkflowGit(t.Context(), fixture.request)
-	if !errors.Is(err, ErrWorkflowConflict) || result.CommandsSent {
+	if !errors.Is(err, workflowstate.ErrConflict) || result.CommandsSent {
 		t.Fatalf("non-fast-forward target published: %+v, %v", result, err)
 	}
 

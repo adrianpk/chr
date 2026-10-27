@@ -10,6 +10,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TicketBoardReadOptions selects authority and one bounded page of the Board.
@@ -251,7 +253,7 @@ func ticketBoardPage(projectID string, tickets []IndexedTicket, offset, limit in
 		images = append(images, ticket.Key+"\x00"+ticket.ContentHash)
 	}
 
-	board.Revision = workflowHash([]byte(strings.Join(images, "\n")))
+	board.Revision = contenthash.Sum([]byte(strings.Join(images, "\n")))
 
 	board.Offset, board.LoadedCount, board.NextOffset = offset, end-start, -1
 	if end < len(tickets) {

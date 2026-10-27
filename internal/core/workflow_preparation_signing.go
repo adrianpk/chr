@@ -9,6 +9,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowSSHCommitSigning is trusted host configuration. Only the public key
@@ -46,14 +49,14 @@ func (git OSWorkflowPreparationGit) WithSSHCommitSigning(signing WorkflowSSHComm
 
 func workflowSSHSigningProfile(signing *WorkflowSSHCommitSigning) (WorkflowCommitSigningProfile, error) {
 	if signing == nil || !filepath.IsAbs(signing.KeyFile) {
-		return WorkflowCommitSigningProfile{}, ErrWorkflowConflict
+		return WorkflowCommitSigningProfile{}, workflowstate.ErrConflict
 	}
 
 	p := WorkflowCommitSigningProfile{PublicKey: strings.TrimSpace(signing.PublicKey), Principal: signing.Principal}
 
-	p.Hash = workflowHash([]byte("chr-ssh-commit-signing/v1:" + p.Principal + ":" + p.PublicKey))
+	p.Hash = contenthash.Sum([]byte("chr-ssh-commit-signing/v1:" + p.Principal + ":" + p.PublicKey))
 	if !validWorkflowSigningProfile(p) {
-		return p, ErrWorkflowConflict
+		return p, workflowstate.ErrConflict
 	}
 
 	return p, nil
@@ -64,7 +67,7 @@ func validWorkflowSigningProfile(p WorkflowCommitSigningProfile) bool {
 		return false
 	}
 
-	return p.Hash == workflowHash([]byte("chr-ssh-commit-signing/v1:"+p.Principal+":"+p.PublicKey))
+	return p.Hash == contenthash.Sum([]byte("chr-ssh-commit-signing/v1:"+p.Principal+":"+p.PublicKey))
 }
 
 func validWorkflowSigningPrincipal(principal string) bool {
@@ -128,7 +131,7 @@ func (reader workflowIntegrationReader) signPreparationObject(ctx context.Contex
 	}
 
 	if reader.preparation != nil && (!reader.preparation.RequiredSignatures || reader.preparation.Signing == nil || reader.preparation.Signing.Hash != profile.Hash) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	signature, err := workflowCommitSSHCommand(ctx, data, "-Y", "sign", "-n", "git", "-f", reader.signing.KeyFile)
@@ -138,7 +141,7 @@ func (reader workflowIntegrationReader) signPreparationObject(ctx context.Contex
 
 	header, message, ok := strings.Cut(data, "\n\n")
 	if !ok || !strings.HasPrefix(signature, "-----BEGIN SSH SIGNATURE-----\n") {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	signature = strings.TrimSuffix(signature, "\n")
@@ -148,7 +151,7 @@ func (reader workflowIntegrationReader) signPreparationObject(ctx context.Contex
 
 func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.Context, commit string, profile *WorkflowCommitSigningProfile) (WorkflowIntegrationSignature, error) {
 	if profile == nil || !validWorkflowSigningProfile(*profile) {
-		return WorkflowIntegrationSignature{}, ErrWorkflowConflict
+		return WorkflowIntegrationSignature{}, workflowstate.ErrConflict
 	}
 
 	data, err := reader.rawOutput(ctx, "cat-file", "commit", commit)
@@ -165,13 +168,13 @@ func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.C
 		return WorkflowIntegrationSignature{}, err
 	}
 
-	return WorkflowIntegrationSignature{Commit: commit, SignatureHash: workflowHash([]byte(signature))}, nil
+	return WorkflowIntegrationSignature{Commit: commit, SignatureHash: contenthash.Sum([]byte(signature))}, nil
 }
 
 func workflowPreparationSignaturePayload(data string) (string, string, error) {
 	header, message, ok := strings.Cut(data, "\n\n")
 	if !ok {
-		return "", "", ErrWorkflowConflict
+		return "", "", workflowstate.ErrConflict
 	}
 
 	var unsigned, signature []string
@@ -181,7 +184,7 @@ func workflowPreparationSignaturePayload(data string) (string, string, error) {
 	for _, line := range strings.Split(header, "\n") {
 		switch {
 		case strings.HasPrefix(line, "gpgsig ") && len(signature) != 0:
-			return "", "", ErrWorkflowConflict
+			return "", "", workflowstate.ErrConflict
 		case strings.HasPrefix(line, "gpgsig "):
 			inside = true
 
@@ -235,7 +238,7 @@ func workflowCommitSSHCommand(ctx context.Context, input string, args ...string)
 	}
 
 	if stdout.overflow {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	return stdout.buffer.String(), nil

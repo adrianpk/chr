@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) workflowClosingNativeDeliveryProof(ctx context.Context, receipt WorkflowRecord) (WorkflowSliceDeliveryProof, string, error) {
 	native := receipt.Receipt.Native
@@ -31,7 +35,7 @@ func (s *WorkflowStore) workflowClosingNativeDeliveryProof(ctx context.Context, 
 
 	refs := native.ObservationRefs
 	if len(refs) == 0 || refs[len(refs)-1].Path != receipt.Receipt.VerificationRef {
-		return proof, "", ErrWorkflowConflict
+		return proof, "", workflowstate.ErrConflict
 	}
 
 	return proof, refs[len(refs)-1].Hash, nil
@@ -50,13 +54,13 @@ func (s *WorkflowStore) workflowClosingNativeEntry(run workflowInvocationFile, r
 
 		ref := WorkflowEvidenceRef{Path: receipt.Path, Hash: receipt.SourceHash}
 		if run.OwnerRoot != s.layout.Root() || entry.State != "integrated" || entry.Blocker != nil || entry.ReceiptRef == nil || *entry.ReceiptRef != ref {
-			return entry, ErrWorkflowConflict
+			return entry, workflowstate.ErrConflict
 		}
 
 		return entry, nil
 	}
 
-	return WorkflowIntegrationEntry{}, ErrWorkflowConflict
+	return WorkflowIntegrationEntry{}, workflowstate.ErrConflict
 }
 
 func workflowClosingNativeView(run workflowInvocationFile, receipt WorkflowRecord) (workflowInvocationFile, error) {
@@ -70,7 +74,7 @@ func workflowClosingNativeView(run workflowInvocationFile, receipt WorkflowRecor
 		}
 	}
 
-	return run, ErrWorkflowConflict
+	return run, workflowstate.ErrConflict
 }
 
 func (s *WorkflowStore) checkWorkflowClosingNativeSubmission(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, receipt WorkflowRecord) error {
@@ -91,7 +95,7 @@ func (s *WorkflowStore) checkWorkflowClosingNativeSubmission(ctx context.Context
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if !workflowClosingNativeJournalMatches(journal, run, *binding, receipt) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if last.ID != receipt.Receipt.SubmissionID || last.State != "confirmed" || !workflowNativeSubmissionEntryMatches(last, entry) {
@@ -120,7 +124,7 @@ func (s *WorkflowStore) observeWorkflowClosingNativeSlice(ctx context.Context, i
 
 	proof := *observation.Git
 	if proof.Repository != input.Target.Repository || proof.TargetBranch != input.Branch || !workflowFrontierReceiptProofMatches(proof, receipt, input.Target) {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	return proof, nil
@@ -134,7 +138,7 @@ func (s *WorkflowStore) checkWorkflowClosingNativeCanonical(ctx context.Context,
 		}
 
 		if receipt.Receipt == nil || receipt.SourceHash != slice.Receipt.Hash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if receipt.Receipt.Native == nil {

@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowTicketFixture(t *testing.T, extent string, gate WorkflowValidation) (*WorkflowStore, WorkflowRecord, WorkflowStartRequest) {
@@ -21,7 +23,7 @@ func workflowTicketFixture(t *testing.T, extent string, gate WorkflowValidation)
 		t.Fatal(err)
 	}
 
-	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: "PRJ-90", Status: TicketStatusReadyForDev, Phase: "pending", ContractHash: workflowHash(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: "PRJ-90", Status: TicketStatusReadyForDev, Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	record, err = store.Create(t.Context(), "Independent task", record)
 	if err != nil {

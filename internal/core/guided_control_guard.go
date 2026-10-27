@@ -1,10 +1,12 @@
 package core
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 func guardGuidedControl(session AuthoringSession, operation GuidedUseCaseOperation) (bool, error) {
 	state := session.Guided
 
 	if !guidedControlAction(operation.Action) {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	if state.Control != nil {
@@ -28,7 +30,7 @@ func guardGuidedControl(session AuthoringSession, operation GuidedUseCaseOperati
 
 func replayGuidedControl(receipt GuidedControlReceipt, operation GuidedUseCaseOperation) (bool, error) {
 	if receipt.Rejected {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	return true, guidedDigestConflict(receipt.GuidedUseCaseOperation, operation)
@@ -59,7 +61,7 @@ func guidedControlOwnsID(control *GuidedControlState, id string) bool {
 func guardFreshGuidedControl(session AuthoringSession, operation GuidedUseCaseOperation) error {
 	state := session.Guided
 	if session.Revision != operation.ExpectedRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := guardGuidedControlStatus(state, operation.Action); err != nil {
@@ -75,16 +77,16 @@ func guardFreshGuidedControl(session AuthoringSession, operation GuidedUseCaseOp
 
 func guardGuidedControlIdentity(state *GuidedUseCaseState, id string) error {
 	if guidedIdeaOwnsID(state, id) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if state.PendingOperation != nil && state.PendingOperation.ID == id {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, completed := range state.CompletedOperations {
 		if completed.ID == id {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -94,7 +96,7 @@ func guardGuidedControlIdentity(state *GuidedUseCaseState, id string) error {
 func guardGuidedControlNativeRevision(work *GuidedWorkState, revision uint64) error {
 	hasNative := work != nil && work.Invocation != nil
 	if hasNative != (revision != 0) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -102,15 +104,15 @@ func guardGuidedControlNativeRevision(work *GuidedWorkState, revision uint64) er
 
 func guardGuidedControlStatus(state *GuidedUseCaseState, action string) error {
 	if state.Status == "cancelled" || state.Status == "completed" || state.Status == "failed" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if state.Control != nil && len(state.Control.CompletedOperations) >= 128 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if action == "resume" && (state.Control == nil || state.Control.StopIntent != "pause") {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

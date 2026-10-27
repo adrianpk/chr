@@ -11,6 +11,9 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowMutationBinding identifies a caller-neutral, immutable mutation payload.
@@ -118,7 +121,7 @@ func (s *WorkflowStore) normalizeMutation(request WorkflowMutationRequest) (Work
 		return request, "", errors.New("record mutation arguments exceed 64 KiB")
 	}
 
-	return request, workflowHash(data), nil
+	return request, contenthash.Sum(data), nil
 }
 
 func validateWorkflowMutationBinding(binding WorkflowMutationBinding) error {
@@ -130,7 +133,7 @@ func validateWorkflowMutationBinding(binding WorkflowMutationBinding) error {
 }
 
 func workflowMutationReceiptPath(requestID string) string {
-	return filepath.ToSlash(filepath.Join("run", "operation-receipts", workflowHash([]byte(requestID))+".json"))
+	return filepath.ToSlash(filepath.Join("run", "operation-receipts", contenthash.Sum([]byte(requestID))+".json"))
 }
 
 func (s *WorkflowStore) readMutationReceipt(request WorkflowMutationRequest, digest string) (WorkflowMutationResult, bool, error) {
@@ -169,8 +172,8 @@ func (s *WorkflowStore) validateMutationReceipt(receipt workflowMutationReceipt,
 		return err
 	}
 
-	if receipt.Schema != "chr-record-mutation/v1" || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() || checksum != workflowHash(encoded) {
-		return fmt.Errorf("%w: invalid record mutation receipt", ErrWorkflowConflict)
+	if receipt.Schema != "chr-record-mutation/v1" || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() || checksum != contenthash.Sum(encoded) {
+		return fmt.Errorf("%w: invalid record mutation receipt", workflowstate.ErrConflict)
 	}
 
 	return validateWorkflowMutationResult(receipt, request, digest)
@@ -179,11 +182,11 @@ func (s *WorkflowStore) validateMutationReceipt(receipt workflowMutationReceipt,
 func validateWorkflowMutationResult(receipt workflowMutationReceipt, request WorkflowMutationRequest, digest string) error {
 	result := receipt.Result
 	if receipt.State != "confirmed" || receipt.Operation != workflowMutationOperation(request) || receipt.ExpectedRevision != request.ExpectedRevision || receipt.BeforeSourceHash != request.Record.SourceHash {
-		return fmt.Errorf("%w: mutation receipt guard changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: mutation receipt guard changed", workflowstate.ErrConflict)
 	}
 
 	if result.RequestID != request.Binding.RequestID || result.ArgumentDigest != digest || receipt.Operator != request.Binding.Operator || result.ReceiptRef != workflowMutationReceiptPath(request.Binding.RequestID) {
-		return fmt.Errorf("%w: mutation request payload changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: mutation request payload changed", workflowstate.ErrConflict)
 	}
 
 	return result.Record.Validate()
@@ -197,7 +200,7 @@ func (s *WorkflowStore) mutationReceiptChange(request WorkflowMutationRequest, r
 		return workflowFileChange{}, err
 	}
 
-	receipt.Checksum = workflowHash(data)
+	receipt.Checksum = contenthash.Sum(data)
 	data, err = json.Marshal(receipt)
 
 	return workflowFileChange{Path: result.ReceiptRef, After: data}, err
@@ -342,7 +345,7 @@ func guardMutationCreation(files []workflowFileChange, expected uint64) error {
 
 	for _, file := range files {
 		if file.Before != "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -386,11 +389,11 @@ func (s *WorkflowStore) prepareMutationRecord(request WorkflowMutationRequest) (
 
 func (s *WorkflowStore) validateMutationScope(record WorkflowRecord) error {
 	if record.ProjectID != "" && record.ProjectID != s.projectID {
-		return fmt.Errorf("%w: foreign mutation project", ErrWorkflowConflict)
+		return fmt.Errorf("%w: foreign mutation project", workflowstate.ErrConflict)
 	}
 
 	if record.Namespace != "" && record.Namespace != s.layout.Namespace() {
-		return fmt.Errorf("%w: foreign mutation namespace", ErrWorkflowConflict)
+		return fmt.Errorf("%w: foreign mutation namespace", workflowstate.ErrConflict)
 	}
 
 	return nil

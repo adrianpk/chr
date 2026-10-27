@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) checkWorkflowAmendmentEvidence(set WorkflowRecord, binding WorkflowAmendmentRef) error {
@@ -17,8 +20,8 @@ func (s *WorkflowStore) checkWorkflowAmendmentEvidence(set WorkflowRecord, bindi
 		return err
 	}
 
-	if workflowHash(data) != binding.Hash {
-		return ErrWorkflowConflict
+	if contenthash.Sum(data) != binding.Hash {
+		return workflowstate.ErrConflict
 	}
 
 	var receipt workflowSetAmendmentReceipt
@@ -28,7 +31,7 @@ func (s *WorkflowStore) checkWorkflowAmendmentEvidence(set WorkflowRecord, bindi
 
 	root := filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", fmt.Sprintf("amendment-%04d", binding.Revision)))
 	if !workflowAmendmentReceiptMatches(set, binding, receipt, root) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	hashes := map[string]string{root + "/plan.md": receipt.Plan.PlanHash}

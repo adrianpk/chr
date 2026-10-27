@@ -9,6 +9,9 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func guidedGitReader(root string) workflowIntegrationReader {
@@ -36,7 +39,7 @@ func guidedRepositoryIdentity(ctx context.Context, reader workflowIntegrationRea
 		return "", err
 	}
 
-	return "git-common:" + workflowHash([]byte(common)), nil
+	return "git-common:" + contenthash.Sum([]byte(common)), nil
 }
 
 func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Context, id string, operation GuidedUseCaseOperation, stage string, paths []string) (GuidedStageCheckpoint, error) {
@@ -71,7 +74,7 @@ func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Con
 			return checkpoint, errors.New("guided checkpoint exceeds 8 MiB")
 		}
 
-		checkpoint.Artifacts = append(checkpoint.Artifacts, GuidedCommittedArtifact{Path: path, Hash: workflowHash(content)})
+		checkpoint.Artifacts = append(checkpoint.Artifacts, GuidedCommittedArtifact{Path: path, Hash: contenthash.Sum(content)})
 	}
 
 	return checkpoint, nil
@@ -79,7 +82,7 @@ func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Con
 
 func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Context, checkpoint GuidedStageCheckpoint, digest string) (result GuidedStageCheckpoint, err error) {
 	if !validGuidedCheckpointRef(checkpoint.Ref, digest) {
-		return checkpoint, ErrWorkflowConflict
+		return checkpoint, workflowstate.ErrConflict
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
@@ -144,8 +147,8 @@ func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Contex
 			return "", err
 		}
 
-		if workflowHash(content) != artifact.Hash {
-			return "", ErrWorkflowConflict
+		if contenthash.Sum(content) != artifact.Hash {
+			return "", workflowstate.ErrConflict
 		}
 
 		blob, err := reader.rawInput(ctx, string(content), "hash-object", "-w", "--stdin")
@@ -189,7 +192,7 @@ func ReadGuidedCommittedArtifact(ctx context.Context, root string, checkpoint Gu
 	}
 
 	if identity != checkpoint.Repository {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	for _, artifact := range checkpoint.Artifacts {
@@ -202,7 +205,7 @@ func ReadGuidedCommittedArtifact(ctx context.Context, root string, checkpoint Gu
 			return nil, fmt.Errorf("guided committed input unavailable: %w", err)
 		}
 
-		if workflowHash([]byte(content)) != artifact.Hash {
+		if contenthash.Sum([]byte(content)) != artifact.Hash {
 			return nil, errors.New("guided committed input hash mismatch")
 		}
 
@@ -219,7 +222,7 @@ func validGuidedCheckpointRef(ref, digest string) bool {
 }
 
 func guidedCheckpointRef(id, digest string) string {
-	return "refs/chr/guided/" + workflowHash([]byte(id)) + "/" + digest
+	return "refs/chr/guided/" + contenthash.Sum([]byte(id)) + "/" + digest
 }
 
 // CheckGuidedCheckpointReadiness observes local Git prerequisites without mutations.

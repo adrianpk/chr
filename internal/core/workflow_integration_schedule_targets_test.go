@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeProcessTargets shares target journals between admitted work and
@@ -115,13 +117,13 @@ func checkNativeUnknownQueries(t *testing.T, store *WorkflowStore, peer, other W
 		t.Fatal("unknown native target escaped its alias barrier")
 	}
 
-	key := workflowHash([]byte(peer.Repository + "\n" + peer.TargetRef))
-	if err := store.guardWorkflowSubmissionTarget(t.Context(), workflowHash([]byte("other intent")), key); !errors.Is(err, ErrWorkflowOwned) {
+	key := contenthash.Sum([]byte(peer.Repository + "\n" + peer.TargetRef))
+	if err := store.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("other intent")), key); !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatal("uncertain native target admitted another publication", err)
 	}
 
-	otherKey := workflowHash([]byte(other.Repository + "\n" + other.TargetRef))
-	if err := store.guardWorkflowSubmissionTarget(t.Context(), workflowHash([]byte("other intent")), otherKey); err != nil {
+	otherKey := contenthash.Sum([]byte(other.Repository + "\n" + other.TargetRef))
+	if err := store.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("other intent")), otherKey); err != nil {
 		t.Fatal("uncertain native publication blocked another target", err)
 	}
 

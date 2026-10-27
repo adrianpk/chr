@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type dumpMutationTarget struct {
@@ -38,7 +41,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationTarget(ctx context.Context,
 	}
 
 	if request.ExpectedRevision != "" && request.ExpectedRevision != observed.Revision {
-		return dumpMutationTarget{}, ErrWorkflowConflict
+		return dumpMutationTarget{}, workflowstate.ErrConflict
 	}
 
 	if observed.Destination == "" {
@@ -51,7 +54,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationTarget(ctx context.Context,
 	target := dumpMutationTarget{Project: observed.Project, Artifact: observed.Candidates[0], Destination: observed.Destination}
 	parts := strings.Split(target.Destination, "/")
 
-	target.RawReference = strings.Join([]string{OpsDirectoryName, parts[1], "dump", "00000-" + workflowHash([]byte(request.OperationID)) + "-raw", OpsArtifactBodyFile()}, "/")
+	target.RawReference = strings.Join([]string{OpsDirectoryName, parts[1], "dump", "00000-" + contenthash.Sum([]byte(request.OperationID)) + "-raw", OpsArtifactBodyFile()}, "/")
 	if err := r.requireNewDumpEnvelope(target.RawReference); err != nil {
 		return target, err
 	}
@@ -66,7 +69,7 @@ func (r *fileAuthoringSessionRepository) dumpEditTarget(ctx context.Context, req
 	}
 
 	if observed.Revision != request.ExpectedRevision || observed.Artifact.Raw {
-		return dumpMutationTarget{}, ErrWorkflowConflict
+		return dumpMutationTarget{}, workflowstate.ErrConflict
 	}
 
 	target := dumpMutationTarget{Artifact: observed.Artifact, Destination: observed.Artifact.Reference}
@@ -95,7 +98,7 @@ func (r *fileAuthoringSessionRepository) validateDumpCase(ctx context.Context, s
 	}
 
 	if metadata.Slug != slug || expectedHash != "" && metadata.SourceHash != expectedHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowControlCAS proves two stale control submissions cannot both mutate
@@ -43,7 +45,7 @@ func testWorkflowControlCAS(t *testing.T, action string) {
 		err := <-results
 		if err == nil {
 			accepted++
-		} else if errors.Is(err, ErrWorkflowConflict) {
+		} else if errors.Is(err, workflowstate.ErrConflict) {
 			conflicted++
 		} else {
 			t.Fatal(err)
@@ -76,7 +78,7 @@ func testWorkflowGuardedAdmission(t *testing.T, name string) {
 		request.Selected.Revision = 0
 	}
 
-	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale selected ticket was admitted", err)
 	}
 

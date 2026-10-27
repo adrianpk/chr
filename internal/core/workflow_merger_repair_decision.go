@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowMergerRequiredDecisions identifies incompatible intent and unsupported
@@ -16,12 +19,12 @@ func WorkflowMergerRequiredDecisions(input WorkflowMergerInput) ([]WorkflowMerge
 	decisions := workflowMergerIntentDecisions(input)
 	for _, conflict := range input.Conflicts {
 		if workflowMergerProcedureRequired(conflict) && !workflowMergerProcedureDeclared(input, conflict) {
-			decisions = append(decisions, WorkflowMergerDecision{ID: "procedure-" + workflowHash([]byte(conflict.ID))[:16], Issue: fmt.Sprintf("%s conflict at %s has no declared deterministic regeneration and validation procedure.", conflict.Kind, conflict.Path), RequirementIDs: slices.Clone(conflict.RequirementIDs), Options: []string{"Declare a repository-owned resolution and validation procedure", "Leave this conflict unresolved"}, Authority: "maintainer"})
+			decisions = append(decisions, WorkflowMergerDecision{ID: "procedure-" + contenthash.Sum([]byte(conflict.ID))[:16], Issue: fmt.Sprintf("%s conflict at %s has no declared deterministic regeneration and validation procedure.", conflict.Kind, conflict.Path), RequirementIDs: slices.Clone(conflict.RequirementIDs), Options: []string{"Declare a repository-owned resolution and validation procedure", "Leave this conflict unresolved"}, Authority: "maintainer"})
 		}
 	}
 
 	if len(decisions) > 16 {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	decisions = slices.DeleteFunc(decisions, func(d WorkflowMergerDecision) bool {
@@ -47,7 +50,7 @@ func workflowMergerIntentDecisions(input WorkflowMergerInput) []WorkflowMergerDe
 			}
 
 			seen[key] = true
-			decisions = append(decisions, WorkflowMergerDecision{ID: "intent-" + workflowHash([]byte(key))[:16], Issue: fmt.Sprintf("Requirements %s and %s declare incompatible intent; preserving both requires a product or ownership decision.", pair[0], pair[1]), RequirementIDs: pair, Options: []string{"Provide a compatible requirement interpretation", "Approve a scoped requirement change"}, Authority: "maintainer"})
+			decisions = append(decisions, WorkflowMergerDecision{ID: "intent-" + contenthash.Sum([]byte(key))[:16], Issue: fmt.Sprintf("Requirements %s and %s declare incompatible intent; preserving both requires a product or ownership decision.", pair[0], pair[1]), RequirementIDs: pair, Options: []string{"Provide a compatible requirement interpretation", "Approve a scoped requirement change"}, Authority: "maintainer"})
 		}
 	}
 
@@ -69,7 +72,7 @@ func validateWorkflowMergerIntentConflicts(requirements []WorkflowMergerRequirem
 		}
 
 		if slices.Contains(requirement.ConflictsWith, requirement.ID) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := validateWorkflowMergerRequirementIDs(requirement.ConflictsWith, requirements); err != nil {

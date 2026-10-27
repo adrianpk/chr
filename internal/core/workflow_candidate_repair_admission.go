@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowCandidateRepairBinding(run workflowInvocationFile) error {
@@ -12,12 +14,12 @@ func validateWorkflowCandidateRepairBinding(run workflowInvocationFile) error {
 	}
 
 	if !slices.Contains([]string{"slice", "ticket"}, b.Unit.Kind) || b.Unit.ID == "" || !validWorkflowNativeFingerprint(b.EntryID) || b.ClaimGeneration == 0 || !validWorkflowNativeFingerprint(b.CandidateHash) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, ref := range []WorkflowEvidenceRef{b.RecordRef, b.FindingRef} {
 		if validateWorkflowEvidenceRef(run.ID, ref) != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -31,7 +33,7 @@ func (s *WorkflowStore) checkWorkflowCandidateRepairAdmission(ctx context.Contex
 	}
 
 	if !workflowCandidateRepairFenceMatches(*b, run, entry, input) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	repair, err := s.readWorkflowCandidateRepair(run)
@@ -40,12 +42,12 @@ func (s *WorkflowStore) checkWorkflowCandidateRepairAdmission(ctx context.Contex
 	}
 
 	if input.Reason != repair.Reason || !workflowMergerRepairIdentity(input, repair.Candidate.Input.Git) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, ref := range repair.FindingRefs {
 		if !slices.Contains(input.FindingRefs, ref) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

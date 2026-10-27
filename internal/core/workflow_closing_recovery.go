@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReconcileWorkflowClosing records interruption only after the previous owner
@@ -19,7 +22,7 @@ func (s *WorkflowStore) ReconcileWorkflowClosing(ctx context.Context, setPath st
 		}
 
 		if set.Set == nil || set.Set.Closing == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		result, readErr = s.reconcileWorkflowClosing(ctx, set, nil)
@@ -89,7 +92,7 @@ func workflowClosingAttemptID(set WorkflowRecord, generation int) string {
 
 func (s *WorkflowStore) workflowRecoveredClosingClaim(set WorkflowRecord, state workflowClosingAttempt) (*workflowClosingClaim, error) {
 	data, err := s.workflowClosingRead(state.Input.Ref)
-	if err != nil || workflowHash(data) != state.Input.Hash {
+	if err != nil || contenthash.Sum(data) != state.Input.Hash {
 		return nil, errorsOrConflict(err)
 	}
 

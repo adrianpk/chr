@@ -3,6 +3,8 @@ package core
 import (
 	"encoding/json"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestWorkflowTaskIndependent keeps validation distinct from required integration.
@@ -48,7 +50,7 @@ func workflowIndependentTask(t *testing.T, grouped WorkflowRecord) WorkflowRecor
 
 	task := *grouped.Task
 	task.Key, task.SetID, task.SliceID, task.UseCase, task.Order = "PRJ-90", "", "", "", 0
-	task.ContractHash = workflowHash(append([]byte("\x00\x00"), data...))
+	task.ContractHash = contenthash.Sum(append([]byte("\x00\x00"), data...))
 
 	return WorkflowRecord{Kind: "ticket", Task: &task, Body: grouped.Body, Domain: map[string]json.RawMessage{"execution_contract": data}}
 }

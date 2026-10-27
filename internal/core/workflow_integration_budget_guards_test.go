@@ -6,6 +6,8 @@ import (
 	"math"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeBudgetGrants extends only an explicit positive ceiling, preserves
@@ -74,7 +76,7 @@ func TestNativeBudgetDrift(t *testing.T) {
 	request.WorkflowIntegrationBudgetGuard = nativeBudgetGuard(t, store, entry.InvocationID)
 
 	request.Reservation.ID = "another-id"
-	if _, err := store.ReserveWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReserveWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("same base gained another budget", err)
 	}
 

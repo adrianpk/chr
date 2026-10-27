@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) respondExplanation(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
@@ -171,7 +172,7 @@ func telegramRetainedExplanation(request core.TelegramOperationRequest) (Prepare
 	}
 
 	if prepared.ProjectID != request.Target.ProjectID || prepared.Request.ID != request.ID || arguments.PayloadHash != recordDigest(request.PreparedInput) {
-		return prepared, core.ErrWorkflowConflict
+		return prepared, workflowstate.ErrConflict
 	}
 
 	return prepared, nil

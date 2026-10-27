@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func nativeObservationFixture(t *testing.T, fixture nativeCapabilityFixture) WorkflowNativePublicationBinding {
@@ -131,7 +133,7 @@ func checkNativeLaterAttribution(t *testing.T, fixture nativeCapabilityFixture, 
 		t.Fatal("retained actual application lost attribution after source advanced", err)
 	}
 
-	prior.HistoryHash = workflowHash([]byte("different history"))
+	prior.HistoryHash = contenthash.Sum([]byte("different history"))
 
 	if _, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git); err == nil {
 		t.Fatal("foreign history attributed a later source")

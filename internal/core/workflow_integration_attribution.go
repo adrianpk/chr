@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationIdentity preserves an object's identity and Git date.
@@ -39,10 +42,10 @@ func (reader workflowIntegrationReader) commitAttribution(ctx context.Context, c
 func workflowCommitAttribution(commit, data string) (WorkflowIntegrationAttribution, error) {
 	header, message, ok := strings.Cut(data, "\n\n")
 	if !ok {
-		return WorkflowIntegrationAttribution{}, ErrWorkflowConflict
+		return WorkflowIntegrationAttribution{}, workflowstate.ErrConflict
 	}
 
-	result := WorkflowIntegrationAttribution{Commit: commit, Parents: []string{}, MessageHash: workflowHash([]byte(message))}
+	result := WorkflowIntegrationAttribution{Commit: commit, Parents: []string{}, MessageHash: contenthash.Sum([]byte(message))}
 
 	for _, line := range strings.Split(header, "\n") {
 		key, value, _ := strings.Cut(line, " ")
@@ -68,7 +71,7 @@ func workflowCommitAttribution(commit, data string) (WorkflowIntegrationAttribut
 	}
 
 	if !validWorkflowIntegrationAttribution(result) {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	return result, nil
@@ -77,14 +80,14 @@ func workflowCommitAttribution(commit, data string) (WorkflowIntegrationAttribut
 func workflowIntegrationIdentity(value string) (WorkflowIntegrationIdentity, error) {
 	nameEnd := strings.LastIndex(value, " <")
 	if nameEnd < 1 {
-		return WorkflowIntegrationIdentity{}, ErrWorkflowConflict
+		return WorkflowIntegrationIdentity{}, workflowstate.ErrConflict
 	}
 
 	email, date, ok := strings.Cut(value[nameEnd+2:], "> ")
 
 	identity := WorkflowIntegrationIdentity{Name: value[:nameEnd], Email: email, Date: date}
 	if !ok || !validWorkflowCommitIdentity(identity) {
-		return identity, ErrWorkflowConflict
+		return identity, workflowstate.ErrConflict
 	}
 
 	return identity, nil

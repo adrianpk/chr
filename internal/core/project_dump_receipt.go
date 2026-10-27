@@ -5,6 +5,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type projectDumpMutationReceipt struct {
@@ -20,7 +23,7 @@ func projectDumpReconciliationDigest(projectDir string, request ProjectDumpRecon
 		return "", err
 	}
 
-	return workflowHash(append([]byte(projectDir+"\x00reconcile\x00"), encoded...)), nil
+	return contenthash.Sum(append([]byte(projectDir+"\x00reconcile\x00"), encoded...)), nil
 }
 
 func projectDumpReceiptChange(digest string, result ProjectDumpMutationResult) (workflowFileChange, error) {
@@ -31,7 +34,7 @@ func projectDumpReceiptChange(digest string, result ProjectDumpMutationResult) (
 		return workflowFileChange{}, err
 	}
 
-	receipt.Checksum = workflowHash(encoded)
+	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
 	return workflowFileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
@@ -61,8 +64,8 @@ func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest 
 		return receipt.Result, false, err
 	}
 
-	if receipt.Schema != "chr-project-dump-receipt/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || workflowHash(encoded) != checksum {
-		return receipt.Result, false, ErrWorkflowConflict
+	if receipt.Schema != "chr-project-dump-receipt/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || contenthash.Sum(encoded) != checksum {
+		return receipt.Result, false, workflowstate.ErrConflict
 	}
 
 	return receipt.Result, true, nil
@@ -71,7 +74,7 @@ func (r *fileAuthoringSessionRepository) projectDumpReceipt(operationID, digest 
 func (r *fileAuthoringSessionRepository) projectDumpOperationAvailable(operationID string) error {
 	_, err := r.readAuthoringDocument(filepath.ToSlash(authoringRequestRef(operationID)))
 	if err == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !errors.Is(err, os.ErrNotExist) {

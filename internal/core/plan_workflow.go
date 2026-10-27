@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // GeneratedWorkflowPlan is explicit approved materialization input. Its request
@@ -171,4 +173,4 @@ func validateWorkflowPlanTask(task GeneratedWorkflowTask) error {
 }
 
 // WorkflowContentHash binds an approved source image without deriving identity.
-func WorkflowContentHash(data []byte) string { return workflowHash(data) }
+func WorkflowContentHash(data []byte) string { return contenthash.Sum(data) }

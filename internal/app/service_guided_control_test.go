@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func guidedNativeControl(t *testing.T, operations service, session core.AuthoringSession, id, action string) core.GuidedUseCaseCommand {
@@ -232,7 +233,7 @@ func rejectStaleGuidedControl(t *testing.T, operations service, started core.Aut
 	stale.NativeRevision++
 
 	rejected, err := operations.ControlGuidedUseCase(t.Context(), stale)
-	if !errors.Is(err, core.ErrWorkflowConflict) || rejected.Guided.Control.StopIntent != "" || rejected.Guided.Control.PendingOperation != nil {
+	if !errors.Is(err, workflowstate.ErrConflict) || rejected.Guided.Control.StopIntent != "" || rejected.Guided.Control.PendingOperation != nil {
 		t.Fatal("stale control retained a stop or blocked fresh controls", err)
 	}
 

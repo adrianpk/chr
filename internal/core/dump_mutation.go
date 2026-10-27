@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // DumpMutationRequest binds a capture, append or full-body save to one operation.
@@ -63,7 +66,7 @@ func ReadDumpDocument(ctx context.Context, projectDir, reference string) (DumpDo
 }
 
 func dumpDocumentRevision(root string, artifact ProjectDumpArtifact) string {
-	return workflowHash([]byte(strings.Join([]string{root, artifact.Reference, artifact.SourceHash, artifact.MetadataHash}, "\x00")))
+	return contenthash.Sum([]byte(strings.Join([]string{root, artifact.Reference, artifact.SourceHash, artifact.MetadataHash}, "\x00")))
 }
 
 // MutateDump publishes content, history, metadata and receipt through the shared
@@ -163,7 +166,7 @@ func validateDumpCapture(request DumpMutationRequest) error {
 		return nil
 	}
 
-	if !IsValidOpsNamespace(request.Namespace) || len(request.Namespace) > 128 || len(request.CaseSlug) > 128 {
+	if !opsnamespace.Valid(request.Namespace) || len(request.Namespace) > 128 || len(request.CaseSlug) > 128 {
 		return errors.New("case capture requires an existing case and namespace")
 	}
 
@@ -176,5 +179,5 @@ func dumpMutationDigest(root string, request DumpMutationRequest) (string, error
 		return "", err
 	}
 
-	return workflowHash(append([]byte(root+"\x00dump-write\x00"), encoded...)), nil
+	return contenthash.Sum(append([]byte(root+"\x00dump-write\x00"), encoded...)), nil
 }

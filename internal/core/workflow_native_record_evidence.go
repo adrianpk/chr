@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowNativeSourceManifest retains the ordered original source identities.
@@ -51,7 +54,7 @@ func (s *WorkflowStore) checkWorkflowNativeCandidate(candidate WorkflowIntegrati
 	}
 
 	if !workflowNativeJSONEqual(input, candidate.Input) || !slices.Equal(b.MergerAttemptRefs, candidate.Input.MergerAttemptRefs) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var capability WorkflowNativeCapability
@@ -60,7 +63,7 @@ func (s *WorkflowStore) checkWorkflowNativeCandidate(candidate WorkflowIntegrati
 	}
 
 	if capability.WorkflowPublicationCapability != candidate.Input.Capability {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.checkWorkflowNativeCandidateHistory(candidate, b)
@@ -73,7 +76,7 @@ func (s *WorkflowStore) checkWorkflowNativeCandidateHistory(candidate WorkflowIn
 	}
 
 	if !workflowNativeJSONEqual(history.Git, candidate.Input.Git) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -96,7 +99,7 @@ func (s *WorkflowStore) checkWorkflowNativeRecordEvidence(b WorkflowNativeRecord
 	}
 
 	if history.Schema != "chr-native-history/v1" || !workflowNativeRecordGitMatches(b, history.Git) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowIntegrationProof(history.Git.WorkflowIntegrationQuery, history.Git); err != nil {
@@ -117,11 +120,11 @@ func (s *WorkflowStore) checkWorkflowNativeSourceManifest(b WorkflowNativeRecord
 	}
 
 	if !validWorkflowNativeSourceHeader(b, source) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if source.Commits[len(source.Commits)-1] != b.OriginalSource {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowNativeSourceCommits(b, source.Commits, git)
@@ -138,14 +141,14 @@ func (s *WorkflowStore) checkWorkflowNativeCapabilityEvidence(b WorkflowNativeRe
 	}
 
 	if !validWorkflowNativeCapabilityRecord(capability) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	expected := [10]string{b.SourceRepository, b.CanonicalPR, b.SourceRef, b.TargetRef, b.Method, b.OriginalSource, b.ValidatedBase, b.PreparedResult, b.CapabilityHash, b.PolicyHash}
 
 	actual := [10]string{capability.Repository, capability.PullRequestURL, capability.SourceRef, capability.TargetRef, capability.Method, capability.OriginalSourceCommit, capability.ExpectedBaseCommit, capability.PreparedResultCommit, capability.Revision, capability.PolicyFingerprint}
 	if expected != actual {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.checkWorkflowNativeValidationEvidence(b)
@@ -159,7 +162,7 @@ func (s *WorkflowStore) checkWorkflowNativeValidationEvidence(b WorkflowNativeRe
 		}
 
 		if result.Schema != "chr-integration-validation/v1" || !result.Successful || result.Outcome != "integration_validated" || result.Commit != b.PreparedResult || result.Tree != b.PreparedTree || result.FinishedAt.IsZero() {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := s.checkWorkflowNativeValidationInput(b, result); err != nil {
@@ -177,7 +180,7 @@ func (s *WorkflowStore) checkWorkflowNativeValidationInput(b WorkflowNativeRecor
 	}
 
 	if input.Preparation == nil || input.AttemptID != result.AttemptID || input.Generation != result.Generation || input.ContractHash != b.ContractHash || !workflowNativeRecordGitMatches(b, input.Preparation.Git) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var preparation WorkflowPreparationInput
@@ -186,7 +189,7 @@ func (s *WorkflowStore) checkWorkflowNativeValidationInput(b WorkflowNativeRecor
 	}
 
 	if !workflowNativeJSONEqual(input.Preparation, preparation) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowPreparationGate(input, result)
@@ -200,7 +203,7 @@ func (s *WorkflowStore) checkWorkflowNativeReceipt(record WorkflowRecord) error 
 
 	native := receipt.Native
 	if !strings.HasPrefix(record.Path, "run/"+native.InvocationID+"/evidence/") || record.Revision != 1 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var candidate WorkflowIntegrationCandidate
@@ -213,7 +216,7 @@ func (s *WorkflowStore) checkWorkflowNativeReceipt(record WorkflowRecord) error 
 	}
 
 	if !workflowNativeReceiptCandidateMatches(*receipt, candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.checkWorkflowNativeReceiptObservations(*receipt)
@@ -242,7 +245,7 @@ func (s *WorkflowStore) checkWorkflowNativeReceiptObservations(receipt WorkflowR
 		}
 
 		if i == len(native.ObservationRefs)-1 && observation.State != "merged" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if observation.State == "merged" {
@@ -270,7 +273,7 @@ func (s *WorkflowStore) checkWorkflowNativeTransactionRevision(native WorkflowNa
 	}
 
 	if native.ObservationContract != "" && native.ObservationContract != capability.ObservationContract {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var history WorkflowNativeHistoryManifest
@@ -282,7 +285,7 @@ func (s *WorkflowStore) checkWorkflowNativeTransactionRevision(native WorkflowNa
 
 	revision, err := WorkflowGitPublicationRevision(request)
 	if err != nil || revision != transaction.CandidateRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -291,16 +294,16 @@ func (s *WorkflowStore) checkWorkflowNativeTransactionRevision(native WorkflowNa
 func validateWorkflowNativeReceiptObservation(receipt WorkflowReceipt, observation WorkflowNativePublicationObservation) error {
 	native := receipt.Native
 	if !workflowNativeObservationTargetValid(observation) || !validWorkflowNativeReceiptObservationHeader(receipt, observation) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	git := *observation.Git
 	if native.ActualMergeResult != receipt.ResultCommit && (native.ObservationContract != observation.ObservationContract || !workflowNativeSourceResultObserved(observation)) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !workflowNativeRecordGitMatches(native.WorkflowNativeRecordBinding, git) || !workflowReceiptGitMatches(receipt, git) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowIntegrationProof(git.WorkflowIntegrationQuery, git)
@@ -310,7 +313,7 @@ func workflowNativeJSONEqual(a, b any) bool {
 	first, firstErr := json.Marshal(a)
 	second, secondErr := json.Marshal(b)
 
-	return firstErr == nil && secondErr == nil && workflowHash(first) == workflowHash(second)
+	return firstErr == nil && secondErr == nil && contenthash.Sum(first) == contenthash.Sum(second)
 }
 
 func validWorkflowNativeSourceHeader(b WorkflowNativeRecordBinding, source WorkflowNativeSourceManifest) bool {
@@ -334,7 +337,7 @@ func validateWorkflowNativeSourceCommits(b WorkflowNativeRecordBinding, commits 
 	seen := map[string]bool{}
 	for _, commit := range commits {
 		if !workflowCommitID(commit) || len(commit) != len(b.OriginalSource) || seen[commit] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[commit] = true
@@ -351,7 +354,7 @@ func validateWorkflowNativeSourceMapping(b WorkflowNativeRecordBinding, commits 
 		}
 
 		if !slices.Equal(commits, originals) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -365,7 +368,7 @@ func validateWorkflowNativeSourceMapping(b WorkflowNativeRecordBinding, commits 
 	}
 
 	if !slices.Equal(commits, originals) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

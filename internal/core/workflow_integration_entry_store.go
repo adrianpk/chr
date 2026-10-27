@@ -7,6 +7,9 @@ import (
 	"math"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) readWorkflowIntegrationEntry(run workflowInvocationFile, binding WorkflowIntegrationBinding) (WorkflowIntegrationEntry, error) {
@@ -228,7 +231,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationEntryFiles(run *workflowInvocat
 		return err
 	}
 
-	binding := WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: workflowHash(file.After)}}
+	binding := WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}}
 	updateWorkflowIntegrationBinding(run, binding)
 
 	run.Revision++
@@ -258,7 +261,7 @@ func updateWorkflowIntegrationBinding(run *workflowInvocationFile, binding Workf
 
 func (s *WorkflowStore) commitWorkflowIntegrationAdmission(ctx context.Context, run *workflowInvocationFile, entry WorkflowIntegrationEntry, budget *WorkflowIntegrationBudget) error {
 	if run.Revision == math.MaxUint64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	budgetFile, err := s.workflowIntegrationBudgetChange(ctx, run, budget)
@@ -271,7 +274,7 @@ func (s *WorkflowStore) commitWorkflowIntegrationAdmission(ctx context.Context, 
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: workflowHash(file.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
 
 	run.Revision++
 	run.UpdatedAt = time.Now().UTC()

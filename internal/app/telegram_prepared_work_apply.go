@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) continuePreparedWork(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
@@ -38,7 +39,7 @@ func (r telegramReceiver) continuePreparedWork(ctx context.Context, request core
 	}
 
 	if !found {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	request = retained
@@ -63,7 +64,7 @@ func (r telegramReceiver) applyPreparedWork(ctx context.Context, operations tele
 
 		return err
 	})
-	if errors.Is(err, core.ErrWorkflowConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, core.ErrAuthoringAuthorityRequired) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) || errors.Is(err, core.ErrAuthoringAuthorityRequired) {
 		return r.finishAuthoringFailure(ctx, request, config, err)
 	}
 
@@ -89,7 +90,7 @@ func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, 
 	}
 
 	if !initial {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	input, err := r.preparedWorkAuthorityInput(request)
@@ -103,7 +104,7 @@ func (r telegramReceiver) validateInitialPreparedWorkGrant(ctx context.Context, 
 	}
 
 	if instruction.DevelopmentRef == "" || prepared.Authorization.Binding != (core.WorkflowMutationBinding{RequestID: instruction.DevelopmentRef, Operator: request.Operator}) {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

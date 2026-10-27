@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramControlDecisionGuards rejects each independently stale displayed
@@ -53,7 +54,7 @@ func TestTelegramControlDecisionGuards(t *testing.T) {
 	request.AuthorizationCheck = func(context.Context) error {
 		checks++
 		if checks == 2 {
-			return core.ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -91,7 +92,7 @@ func telegramControlRejected(t *testing.T, operations service, request WorkflowC
 	t.Helper()
 
 	after, err := operations.ControlWorkExtent(t.Context(), request)
-	if !errors.Is(err, core.ErrWorkflowConflict) || after.Revision != revision || after.ControlReceipt != nil {
+	if !errors.Is(err, workflowstate.ErrConflict) || after.Revision != revision || after.ControlReceipt != nil {
 		t.Fatal("stale or unauthorized decision changed native state", after, err)
 	}
 }

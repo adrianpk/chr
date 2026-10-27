@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowPRProviderFixture struct {
@@ -296,7 +298,7 @@ func TestWorkflowSlicePRBlock(t *testing.T) {
 func assertWorkflowPRBlocked(t *testing.T, store *WorkflowStore, id string, provider *workflowPRProviderFixture) {
 	t.Helper()
 
-	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), id, workflowPRContent(), provider); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), id, workflowPRContent(), provider); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("mismatched canonical PR accepted")
 	}
 
@@ -306,7 +308,7 @@ func assertWorkflowPRBlocked(t *testing.T, store *WorkflowStore, id string, prov
 	}
 
 	reads := provider.reads
-	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), id, workflowPRContent(), provider); !errors.Is(err, ErrWorkflowConflict) || provider.creates > 1 || provider.reads != reads {
+	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), id, workflowPRContent(), provider); !errors.Is(err, workflowstate.ErrConflict) || provider.creates > 1 || provider.reads != reads {
 		t.Fatal("ordinary retry bypassed explicit reconciliation")
 	}
 }
@@ -395,7 +397,7 @@ func TestWorkflowSlicePRSource(t *testing.T) {
 	source := provider.pr.HeadCommit
 
 	provider.pr.HeadCommit = run.Selection.Target.Commit
-	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), run.ID, workflowPRContent(), provider); !errors.Is(err, ErrWorkflowConflict) || provider.creates != 0 {
+	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), run.ID, workflowPRContent(), provider); !errors.Is(err, workflowstate.ErrConflict) || provider.creates != 0 {
 		t.Fatal("remote source mismatch created a PR")
 	}
 
@@ -405,7 +407,7 @@ func TestWorkflowSlicePRSource(t *testing.T) {
 	changed := workflowPRContent()
 
 	changed.BaseBranch = "main"
-	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), run.ID, changed, provider); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.EnsureWorkflowSlicePullRequest(t.Context(), run.ID, changed, provider); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("target branch binding changed")
 	}
 

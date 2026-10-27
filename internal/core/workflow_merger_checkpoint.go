@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowMergerRepairGit is a trusted host port. Model tools cannot invoke it.
@@ -31,7 +34,7 @@ type WorkflowMergerCheckpointRecord struct {
 // verified private checkpoint. It creates neither an agent call nor approval.
 func (s *WorkflowStore) RetainWorkflowMergerCheckpoint(ctx context.Context, guard WorkflowIntegrationBudgetGuard, state WorkflowMergerRepairState, git WorkflowMergerRepairGit) (ref WorkflowEvidenceRef, err error) {
 	if git == nil {
-		return ref, ErrWorkflowConflict
+		return ref, workflowstate.ErrConflict
 	}
 
 	state, err = freezeWorkflowMergerCheckpoint(state)
@@ -86,7 +89,7 @@ func workflowMergerCandidateHash(run workflowInvocationFile, entry WorkflowInteg
 func (s *WorkflowStore) readWorkflowMergerCheckpoint(input WorkflowMergerInput) (WorkflowMergerRepairState, error) {
 	var record WorkflowMergerCheckpointRecord
 	if input.RepairCheckpointRef == nil {
-		return record.State, ErrWorkflowConflict
+		return record.State, workflowstate.ErrConflict
 	}
 
 	if err := s.readWorkflowNativeEvidence(input.InvocationID, *input.RepairCheckpointRef, &record); err != nil {
@@ -94,7 +97,7 @@ func (s *WorkflowStore) readWorkflowMergerCheckpoint(input WorkflowMergerInput) 
 	}
 
 	if !workflowMergerCheckpointMatches(record, input) {
-		return record.State, ErrWorkflowConflict
+		return record.State, workflowstate.ErrConflict
 	}
 
 	return record.State, checkWorkflowRepairPredecessors(record.State, input)
@@ -103,7 +106,7 @@ func (s *WorkflowStore) readWorkflowMergerCheckpoint(input WorkflowMergerInput) 
 func (s *WorkflowStore) checkWorkflowMergerCheckpointOwner(run workflowInvocationFile, entry WorkflowIntegrationEntry, state WorkflowMergerRepairState) error {
 	policy, err := s.workflowReviewPolicy(run)
 	if err != nil || run.Lane == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	q := state.Query
@@ -111,7 +114,7 @@ func (s *WorkflowStore) checkWorkflowMergerCheckpointOwner(run workflowInvocatio
 
 	actual := [5]string{q.Repository, q.TargetBranch, q.SourceCommit, q.OriginCommit, q.Method}
 	if actual != expected || q.Lane.Unit != entry.Unit || q.Lane.Worktree == run.Lane.Worktree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -133,11 +136,11 @@ func workflowMergerCheckpointMatches(record WorkflowMergerCheckpointRecord, inpu
 func (s *WorkflowStore) persistWorkflowMergerCheckpoint(record WorkflowMergerCheckpointRecord) (WorkflowEvidenceRef, error) {
 	data, err := json.MarshalIndent(record, "", "  ")
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return WorkflowEvidenceRef{}, ErrWorkflowConflict
+		return WorkflowEvidenceRef{}, workflowstate.ErrConflict
 	}
 
 	data = append(data, '\n')
-	ref := WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", record.InvocationID, "extension", "chr", "merger", "checkpoints", workflowHash(data)+".json")), Hash: workflowHash(data)}
+	ref := WorkflowEvidenceRef{Path: filepath.ToSlash(filepath.Join("run", record.InvocationID, "extension", "chr", "merger", "checkpoints", contenthash.Sum(data)+".json")), Hash: contenthash.Sum(data)}
 
 	return ref, s.commitFiles([]workflowFileChange{{Path: ref.Path, After: data}})
 }
@@ -145,7 +148,7 @@ func (s *WorkflowStore) persistWorkflowMergerCheckpoint(record WorkflowMergerChe
 func freezeWorkflowMergerCheckpoint(state WorkflowMergerRepairState) (WorkflowMergerRepairState, error) {
 	data, err := json.Marshal(state)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return WorkflowMergerRepairState{}, ErrWorkflowConflict
+		return WorkflowMergerRepairState{}, workflowstate.ErrConflict
 	}
 
 	var frozen WorkflowMergerRepairState

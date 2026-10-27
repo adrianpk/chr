@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowSliceObservation struct {
@@ -74,7 +77,7 @@ func (s *WorkflowStore) readWorkflowAggregateMembership(ctx context.Context, run
 
 	observation.set = selection.sets[observation.tasks[0].Task.SetID]
 	if observation.descriptor.TaskInputHash != WorkflowTaskInputHash(observation.tasks, observation.descriptor.ID) {
-		return observation, fmt.Errorf("%w: aggregate membership changed", ErrWorkflowConflict)
+		return observation, fmt.Errorf("%w: aggregate membership changed", workflowstate.ErrConflict)
 	}
 
 	return observation, nil
@@ -83,13 +86,13 @@ func (s *WorkflowStore) readWorkflowAggregateMembership(ctx context.Context, run
 func checkWorkflowSliceMembership(run workflowInvocationFile, observation workflowSliceObservation) error {
 	start := run.Cursor - len(observation.tasks)
 	if len(observation.tasks) == 0 || start < 0 || run.Cursor > len(run.Members) {
-		return fmt.Errorf("%w: incomplete aggregate slice", ErrWorkflowConflict)
+		return fmt.Errorf("%w: incomplete aggregate slice", workflowstate.ErrConflict)
 	}
 
 	for i, record := range observation.tasks {
 		member := run.Members[start+i].Admission
 		if member.Key != record.Task.Key || member.SliceID != run.Lane.Unit.ID || !slices.Contains([]string{"validated", "waiting_slice"}, record.Task.Phase) {
-			return fmt.Errorf("%w: aggregate requires every ordered task", ErrWorkflowConflict)
+			return fmt.Errorf("%w: aggregate requires every ordered task", workflowstate.ErrConflict)
 		}
 	}
 
@@ -144,8 +147,8 @@ func (s *WorkflowStore) readWorkflowSliceContract(descriptor WorkflowSlice) (wor
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != descriptor.ContractHash {
-		return workflowSliceContract{}, fmt.Errorf("%w: aggregate contract image changed", ErrWorkflowConflict)
+	if err != nil || contenthash.Sum(data) != descriptor.ContractHash {
+		return workflowSliceContract{}, fmt.Errorf("%w: aggregate contract image changed", workflowstate.ErrConflict)
 	}
 
 	var contract workflowSliceContract
@@ -174,5 +177,5 @@ func (s *WorkflowStore) workflowSliceTaskProof(ctx context.Context, run workflow
 		}
 	}
 
-	return WorkflowSliceTaskProof{}, ErrWorkflowConflict
+	return WorkflowSliceTaskProof{}, workflowstate.ErrConflict
 }

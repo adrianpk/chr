@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // Registration is journaled with the first explicit native authoring operation.
@@ -89,7 +91,7 @@ func (s *WorkflowStore) checkWorkflowCoordinatorTarget(ctx context.Context, targ
 func workflowCoordinatorTargetPath(path string) bool {
 	parts := strings.Split(filepath.ToSlash(path), "/")
 
-	return len(parts) == 3 && parts[0] == OpsDirectoryName && IsValidOpsNamespace(parts[1]) && parts[2] == workflowCoordinatorPath
+	return len(parts) == 3 && parts[0] == OpsDirectoryName && opsnamespace.Valid(parts[1]) && parts[2] == workflowCoordinatorPath
 }
 
 func (s *WorkflowStore) checkWorkflowFrontierOwnership(ctx context.Context, run workflowInvocationFile) error {

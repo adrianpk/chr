@@ -5,6 +5,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type nativeSubmissionFixture struct {
@@ -152,7 +154,7 @@ func nativeSubmissionCandidateExcluded(t *testing.T, f nativeSubmissionFixture) 
 
 	request := nativeEntryTransition(t, f.store, entry, "blocked")
 	changed := *entry.CandidateRef
-	changed.Hash = workflowHash([]byte("another candidate"))
+	changed.Hash = contenthash.Sum([]byte("another candidate"))
 	request.CandidateRef = &changed
 
 	request.Blocker = &WorkflowIntegrationBlocker{Reason: "pending", RequiredAction: "observe original dispatch", ResumeState: "observing"}

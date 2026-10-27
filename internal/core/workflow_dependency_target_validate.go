@@ -5,17 +5,20 @@ import (
 	"context"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowDependencyTargets(run workflowInvocationFile) error {
 	if len(run.DependencyTargets) > WorkflowPageLimit || len(run.DependencyTargets) > 0 && run.ExecutionTarget == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	previousCursor := 0
 	for i, proof := range run.DependencyTargets {
 		if !validWorkflowDependencyTarget(run, proof, i) || proof.Cursor < previousCursor || proof.Previous != workflowDependencyPreviousTarget(run, i) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		previousCursor = proof.Cursor
@@ -94,13 +97,13 @@ func (s *WorkflowStore) checkWorkflowDependencyTargets(ctx context.Context, run 
 		}
 
 		data, err := readWorkflowFile(path)
-		if err != nil || workflowHash(data) != proof.EvidenceHash {
-			return ErrWorkflowConflict
+		if err != nil || contenthash.Sum(data) != proof.EvidenceHash {
+			return workflowstate.ErrConflict
 		}
 
 		expected, err := encodeWorkflowDependencyTarget(proof)
 		if err != nil || !bytes.Equal(data, expected) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := s.checkWorkflowPrerequisiteEvidence(proof.Receipts); err != nil {
@@ -109,7 +112,7 @@ func (s *WorkflowStore) checkWorkflowDependencyTargets(ctx context.Context, run 
 
 		reader := workflowProofReader{store: s}
 		if !reader.isAncestor(ctx, proof.Previous.Commit, proof.Target.Commit) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

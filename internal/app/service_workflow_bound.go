@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowRetainedReference names original admission, independently of an adapter.
@@ -23,7 +24,7 @@ func (s service) ResumeBoundWork(ctx context.Context, reference WorkflowRetained
 
 	expected := &core.WorkflowAdmissionGuard{SnapshotHash: preview.Request.SnapshotHash, Selected: preview.Selected, Policy: preview.View.Policy, ExecutionPolicy: preview.View.ExecutionPolicy, ReadyTicket: preview.ReadyTicket}
 	if run.RequestKey != reference.RequestKey || run.ProjectID != s.projectContext.ProjectID || run.Selection.Selector != preview.Request.Selector || run.Selection.Target != preview.Request.Target || !reflect.DeepEqual(run.Admission, expected) {
-		return RetainedWorkProgress{}, core.ErrWorkflowConflict
+		return RetainedWorkProgress{}, workflowstate.ErrConflict
 	}
 
 	return s.ResumeRetainedWorkGuarded(ctx, run.ID, run.Revision, check)

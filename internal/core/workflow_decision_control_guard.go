@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run workflowInvocationFile, request WorkflowControlMutationRequest) (WorkflowIntegrationBudgetGuard, error) {
 	if err := checkWorkflowRevision(run.WorkflowInvocation, []uint64{request.ExpectedRevision}); err != nil {
@@ -13,7 +17,7 @@ func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run wo
 
 	if request.Integration == nil {
 		if run.Integration != nil {
-			return WorkflowIntegrationBudgetGuard{}, ErrWorkflowConflict
+			return WorkflowIntegrationBudgetGuard{}, workflowstate.ErrConflict
 		}
 
 		return WorkflowIntegrationBudgetGuard{}, nil
@@ -29,12 +33,12 @@ func (s *WorkflowStore) workflowDecisionControlGuard(ctx context.Context, run wo
 
 func workflowDisplayedIntegrationGuard(run workflowInvocationFile, observed *WorkflowIntegrationInspection, shown WorkflowControlIntegrationGuard) (WorkflowIntegrationBudgetGuard, error) {
 	if observed == nil || observed.Entry == nil {
-		return WorkflowIntegrationBudgetGuard{}, ErrWorkflowConflict
+		return WorkflowIntegrationBudgetGuard{}, workflowstate.ErrConflict
 	}
 
 	entry := observed.Entry
 	if shown.EntryID != entry.ID || shown.EntryRevision != entry.Revision || shown.BudgetRevision != observed.Budget.Revision || shown.CandidateHash != WorkflowIntegrationDisplayedCandidate(observed) {
-		return WorkflowIntegrationBudgetGuard{}, ErrWorkflowConflict
+		return WorkflowIntegrationBudgetGuard{}, workflowstate.ErrConflict
 	}
 
 	return WorkflowIntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, BudgetRevision: observed.Budget.Revision, ClaimGeneration: entry.ClaimGeneration}, nil
@@ -69,7 +73,7 @@ func checkWorkflowControlReview(run workflowInvocationFile, expected string) err
 	}
 
 	if expected != reviewHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

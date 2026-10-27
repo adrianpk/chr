@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowRemotePRJSON struct {
@@ -52,7 +54,7 @@ func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context,
 	}
 
 	if !validWorkflowPRBranch(query.HeadBranch) || !validWorkflowPRBranch(query.BaseBranch) {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	found := []WorkflowPullRequestSnapshot{}
@@ -161,7 +163,7 @@ func (adapter RemoteReviewAdapter) CreateWorkflowPullRequest(ctx context.Context
 	}
 
 	if !validWorkflowPRBranch(request.HeadBranch) || !validWorkflowPullRequestContent(WorkflowSlicePullRequestRequest{BaseBranch: request.BaseBranch, Title: request.Title, Body: request.Body}) {
-		return WorkflowPullRequestSnapshot{}, ErrWorkflowConflict
+		return WorkflowPullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	payload, err := json.Marshal(map[string]string{"head": request.HeadBranch, "base": request.BaseBranch, "title": request.Title, "body": request.Body})
@@ -185,7 +187,7 @@ func (adapter RemoteReviewAdapter) ReadWorkflowBranch(ctx context.Context, repos
 	}
 
 	if !validWorkflowPRBranch(branch) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	endpoint := workflowRemoteRepositoryPath(reference) + "/branches/" + url.PathEscape(branch)
@@ -200,7 +202,7 @@ func (adapter RemoteReviewAdapter) ReadWorkflowBranch(ctx context.Context, repos
 
 func decodeWorkflowRemoteBranch(data []byte) (string, error) {
 	if len(data) > WorkflowFileLimit {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	var branch struct {
@@ -218,11 +220,11 @@ func decodeWorkflowRemoteBranch(data []byte) (string, error) {
 	}
 
 	if branch.Commit.ID != "" && branch.Commit.ID != branch.Commit.SHA {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	if !workflowCommitID(branch.Commit.SHA) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	return branch.Commit.SHA, nil
@@ -230,7 +232,7 @@ func decodeWorkflowRemoteBranch(data []byte) (string, error) {
 
 func decodeWorkflowRemotePR(data []byte) (WorkflowPullRequestSnapshot, error) {
 	if len(data) > WorkflowFileLimit {
-		return WorkflowPullRequestSnapshot{}, ErrWorkflowConflict
+		return WorkflowPullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	var pr workflowRemotePRJSON

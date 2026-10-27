@@ -3,13 +3,16 @@ package core
 import (
 	"encoding/json"
 	"maps"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PrepareIndependentWorkflowTask seals an executable description without making
 // a backlog ticket ready or admitting it, and leaves the input record unchanged.
 func PrepareIndependentWorkflowTask(record WorkflowRecord, contract GeneratedWorkflowTask) (WorkflowRecord, error) {
 	if !workflowIndependentBacklog(record) || len(contract.DependsOn) != 0 {
-		return WorkflowRecord{}, ErrWorkflowConflict
+		return WorkflowRecord{}, workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowPlanTask(contract); err != nil {
@@ -22,7 +25,7 @@ func PrepareIndependentWorkflowTask(record WorkflowRecord, contract GeneratedWor
 	}
 
 	task := *record.Task
-	task.ContractHash = workflowHash(append([]byte("\x00\x00"), encoded...))
+	task.ContractHash = contenthash.Sum(append([]byte("\x00\x00"), encoded...))
 
 	record.Task, record.Domain = &task, maps.Clone(record.Domain)
 	if record.Domain == nil {

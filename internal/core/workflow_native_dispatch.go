@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PublishWorkflowNativeSubmission journals the host dispatch before invoking the
@@ -77,7 +79,7 @@ func (s *WorkflowStore) authorizeWorkflowNativeDispatch(ctx context.Context, sub
 	}
 
 	if !workflowNativeJSONEqual(guard, submission.Guard) {
-		return submission, WorkflowGitPublication{}, ErrWorkflowConflict
+		return submission, WorkflowGitPublication{}, workflowstate.ErrConflict
 	}
 
 	candidate, err := s.readWorkflowPreparation(run)
@@ -97,7 +99,7 @@ func (s *WorkflowStore) authorizeWorkflowNativeDispatch(ctx context.Context, sub
 
 func (s *WorkflowStore) workflowNativeDispatchRequest(candidate WorkflowIntegrationCandidate) (WorkflowGitPublication, error) {
 	if candidate.Native == nil {
-		return WorkflowGitPublication{}, ErrWorkflowConflict
+		return WorkflowGitPublication{}, workflowstate.ErrConflict
 	}
 
 	binding := candidate.Native.WorkflowNativeRecordBinding

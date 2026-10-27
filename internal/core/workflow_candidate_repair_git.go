@@ -3,18 +3,20 @@ package core
 import (
 	"context"
 	"path/filepath"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PrepareWorkflowRepairedIntegration independently verifies retained method
 // history and imports exactly the host-accepted P into a fresh gate checkout.
 func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx context.Context, query WorkflowPreparationQuery, state WorkflowMergerRepairState) (WorkflowIntegrationProof, error) {
 	if !validWorkflowRepairedPreparationQuery(git, query, state) {
-		return WorkflowIntegrationProof{}, ErrWorkflowConflict
+		return WorkflowIntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	proof := *state.Result
 	if state.Query.SourceCommit != query.SourceCommit || state.Query.OriginCommit != query.OriginCommit || state.Query.SourceTree != query.SourceTree || checkWorkflowPreparedProof(query, proof) != nil {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	if err := checkWorkflowMergerPrivateRepository(ctx, state.Query.Lane.Worktree); err != nil {

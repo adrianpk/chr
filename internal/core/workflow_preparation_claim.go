@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) prepareWorkflowIntegrationValidation(ctx context.Context, id string, provider WorkflowPublicationGuardProvider, git WorkflowPreparationGit) (claim *WorkflowClaim, prepared workflowPreparedTask, input WorkflowPreparationInput, round int, cached *WorkflowIntegrationCandidate, err error) {
@@ -106,7 +109,7 @@ func (s *WorkflowStore) cachedWorkflowPreparation(ctx context.Context, run workf
 
 	if !workflowPreparationInputsCurrent(run, candidate, hash, capability) {
 		if candidate.Input.Native != nil {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		return nil, nil
@@ -256,7 +259,7 @@ func (s *WorkflowStore) beginWorkflowPreparation(run *workflowInvocationFile, so
 		run.Review.State = "stale"
 	}
 
-	id := workflowHash([]byte(fmt.Sprintf("%s:%d", run.ID, run.PreparationCount)))[:24]
+	id := contenthash.Sum([]byte(fmt.Sprintf("%s:%d", run.ID, run.PreparationCount)))[:24]
 	lane := WorkflowLane{Unit: source.Unit, Branch: "refs/heads/chr/workflow/integration-" + id, Worktree: filepath.Join(s.layout.WorktreeRoot(), "integration-"+id), BaseCommit: source.TargetCommit, HeadCommit: source.TargetCommit}
 
 	return lane, nil

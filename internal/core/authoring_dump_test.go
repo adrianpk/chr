@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Independent bound sessions and ordinary captures share the same identity and
@@ -123,7 +125,7 @@ func TestAuthoringDumpRefine(t *testing.T) {
 		t.Fatal("stale continuation invoked its provider")
 
 		return AuthoringDraft{}, nil
-	}); !errors.Is(err, ErrWorkflowConflict) {
+	}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale shared body accepted", err)
 	}
 
@@ -261,7 +263,7 @@ func TestAuthoringDumpProviderGuard(t *testing.T) {
 
 		return telegramAuthoringOwnerDraft(ctx, snapshot, request)
 	})
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed preparation source accepted", err)
 	}
 
@@ -403,7 +405,7 @@ func TestAuthoringDumpMissingOutput(t *testing.T) {
 
 		return AuthoringDraft{}, nil
 	})
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("refinement created a new output", err)
 	}
 }

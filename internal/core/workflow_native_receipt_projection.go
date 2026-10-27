@@ -1,11 +1,15 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) projectWorkflowNativeReceiptObservation(run *workflowInvocationFile, entry *WorkflowIntegrationEntry, submission WorkflowSubmission) error {
 	refs := submission.Native.ObservationRefs
 	if len(refs) == 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var observation WorkflowNativePublicationObservation
@@ -98,7 +102,7 @@ func (s *WorkflowStore) repairWorkflowNativeReceiptOwner(ctx context.Context, ru
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.State != "confirmed" || !workflowNativeSubmissionEntryMatches(last, entry) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, last); err != nil {
@@ -110,5 +114,5 @@ func (s *WorkflowStore) repairWorkflowNativeReceiptOwner(ctx context.Context, ru
 	}
 
 	// The caller must obtain the repaired owner revision before starting new IO.
-	return ErrWorkflowConflict
+	return workflowstate.ErrConflict
 }

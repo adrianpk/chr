@@ -3,6 +3,9 @@ package core
 import (
 	"context"
 	"encoding/json"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) reuseWorkflowManualResult(ctx context.Context, claim *WorkflowClaim, candidate WorkflowManualCandidate) (result WorkflowTaskResult, found bool, err error) {
@@ -66,7 +69,7 @@ func (s *WorkflowStore) checkWorkflowManualProof(ctx context.Context, run workfl
 
 	reader := workflowProofReader{store: s, request: request}
 	if !workflowAttemptValidatesTask(attempt, record) || !s.workflowRetainedInputMatches(attempt, record) || !reader.validTaskProof(ctx, record, result.WorkflowTaskValidation) {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	return result, nil
@@ -88,14 +91,14 @@ func (s *WorkflowStore) checkWorkflowManualRetainedImage(ctx context.Context, at
 	}
 
 	if commit != candidate.Commit || tree != candidate.Tree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
 }
 
 func workflowManualResultOwnerMatches(run workflowInvocationFile, attempt WorkflowAttempt, claim *WorkflowClaim) bool {
-	return run.OwnerRoot == claim.store.layout.Root() && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == workflowHash([]byte(claim.Token))
+	return run.OwnerRoot == claim.store.layout.Root() && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == contenthash.Sum([]byte(claim.Token))
 }
 
 func workflowAttemptTaskPath(run workflowInvocationFile, attempt WorkflowAttempt) string {
@@ -119,8 +122,8 @@ func (s *WorkflowStore) readWorkflowManualResult(attempt WorkflowAttempt, candid
 		return WorkflowTaskResult{}, err
 	}
 
-	if workflowHash(data) != attempt.ResultHash {
-		return WorkflowTaskResult{}, ErrWorkflowConflict
+	if contenthash.Sum(data) != attempt.ResultHash {
+		return WorkflowTaskResult{}, workflowstate.ErrConflict
 	}
 
 	var result WorkflowTaskResult
@@ -129,7 +132,7 @@ func (s *WorkflowStore) readWorkflowManualResult(attempt WorkflowAttempt, candid
 	}
 
 	if !workflowManualResultMatches(result, attempt, candidate) {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	return result, nil

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func guidedIdeasFixture(t *testing.T) (string, AuthoringSession, GuidedUseCaseCommand) {
@@ -72,7 +74,7 @@ func assertGuidedIdeaGuards(t *testing.T, root string, command GuidedUseCaseComm
 			changed.Content = " "
 		}
 
-		if _, err := RetainGuidedIdea(t.Context(), root, changed); !errors.Is(err, ErrWorkflowConflict) {
+		if _, err := RetainGuidedIdea(t.Context(), root, changed); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("invalid idea accepted", variant, err)
 		}
 	}
@@ -137,7 +139,7 @@ func TestGuidedUseCaseIdeasControl(t *testing.T) {
 	idea.ExpectedRevision = stopped.Revision
 
 	idea.OperationID = pause.OperationID
-	if _, err := RetainGuidedIdea(t.Context(), root, idea); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := RetainGuidedIdea(t.Context(), root, idea); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("idea reused an existing control identity", err)
 	}
 

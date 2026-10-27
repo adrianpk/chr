@@ -9,12 +9,14 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func workflowApprovedAmendment(t *testing.T, store *WorkflowStore, set WorkflowRecord) WorkflowSetAmendmentRequest {
 	t.Helper()
 
-	plan := GeneratedWorkflowPlan{Title: "Approved changed delivery", PlanRef: "plan/approved-change.md", PlanHash: workflowHash([]byte("approved amendment\n")), UseCase: set.Set.UseCase, UseCaseOrder: set.Set.UseCaseOrder, ClosingValidation: set.Set.ClosingValidation}
+	plan := GeneratedWorkflowPlan{Title: "Approved changed delivery", PlanRef: "plan/approved-change.md", PlanHash: contenthash.Sum([]byte("approved amendment\n")), UseCase: set.Set.UseCase, UseCaseOrder: set.Set.UseCaseOrder, ClosingValidation: set.Set.ClosingValidation}
 	if err := json.Unmarshal(set.Metadata["materialization_id"], &plan.MaterializationID); err != nil {
 		t.Fatal(err)
 	}
@@ -192,7 +194,7 @@ func TestWorkflowAmendmentRejects(t *testing.T) {
 	}{
 		{"stale revision", func(r *WorkflowSetAmendmentRequest) { r.ExpectedRevision++ }},
 		{"stale image", func(r *WorkflowSetAmendmentRequest) { r.ExpectedSourceHash = "changed" }},
-		{"unchanged plan", func(r *WorkflowSetAmendmentRequest) { r.Plan.PlanHash = workflowHash([]byte("approved\n")) }},
+		{"unchanged plan", func(r *WorkflowSetAmendmentRequest) { r.Plan.PlanHash = contenthash.Sum([]byte("approved\n")) }},
 		{"task contract", func(r *WorkflowSetAmendmentRequest) { r.Plan.Slices[0].Tasks[0].Body = "changed" }},
 		{"task order", func(r *WorkflowSetAmendmentRequest) { r.Plan.Slices[0].Tasks[0].Order = 9 }},
 		{"slice order", func(r *WorkflowSetAmendmentRequest) { r.Plan.Slices[0].Order = 9 }},

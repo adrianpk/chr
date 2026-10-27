@@ -4,6 +4,8 @@ import (
 	"context"
 	"path/filepath"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) observeWorkflowMergerRepair(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, state WorkflowMergerRepairState, attempt *WorkflowMergerAttempt) (WorkflowIntegrationTreeRepair, error) {
@@ -65,7 +67,7 @@ func (reader workflowIntegrationReader) checkMergerGeneratedEdits(ctx context.Co
 
 		after, err := reader.mergerPathObject(ctx, proposal, conflict.Path)
 		if err != nil || before != after {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

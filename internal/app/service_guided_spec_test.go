@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseSpecApproval uses committed clarification and records exact default approval.
@@ -130,7 +131,7 @@ func TestGuidedUseCaseSpecChanged(t *testing.T) {
 	operations.afterGuidedSpec = nil
 
 	blocked, err := operations.GenerateGuidedSpec(t.Context(), command)
-	if !errors.Is(err, core.ErrWorkflowConflict) || blocked.Guided.SpecApproval != nil || len(model.requests) != 3 {
+	if !errors.Is(err, workflowstate.ErrConflict) || blocked.Guided.SpecApproval != nil || len(model.requests) != 3 {
 		t.Fatalf("later content approved or generation repeated: %v", err)
 	}
 
@@ -192,7 +193,7 @@ func TestGuidedUseCaseSpecStage(t *testing.T) {
 	operations, session, model := guidedQuizFixture(t, "default")
 
 	rejected, err := operations.GenerateGuidedSpec(t.Context(), guidedQuizCommand(session, "premature-spec", "spec", ""))
-	if !errors.Is(err, core.ErrWorkflowConflict) || rejected.Revision != session.Revision || rejected.Guided.PendingOperation != nil || len(model.requests) != 0 {
+	if !errors.Is(err, workflowstate.ErrConflict) || rejected.Revision != session.Revision || rejected.Guided.PendingOperation != nil || len(model.requests) != 0 {
 		t.Fatal("out-of-order command poisoned the current stage")
 	}
 }

@@ -6,6 +6,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func specDocumentChanges(document SpecDocument, request SpecMutationRequest) ([]workflowFileChange, error) {
@@ -64,7 +67,7 @@ func specReceiptChange(digest string, result SpecMutationResult) (workflowFileCh
 		return workflowFileChange{}, err
 	}
 
-	receipt.Checksum = workflowHash(encoded)
+	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
 	return workflowFileChange{Path: authoringReceiptRef(result.OperationID), After: encoded}, err
@@ -94,8 +97,8 @@ func (r *fileAuthoringSessionRepository) specReceipt(operationID, digest string)
 		return receipt.Result, false, err
 	}
 
-	if receipt.Schema != "chr-spec-receipt/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || workflowHash(encoded) != checksum {
-		return receipt.Result, false, ErrWorkflowConflict
+	if receipt.Schema != "chr-spec-receipt/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || contenthash.Sum(encoded) != checksum {
+		return receipt.Result, false, workflowstate.ErrConflict
 	}
 
 	return receipt.Result, true, nil

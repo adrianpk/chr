@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeDecisionReplay carries a typed replay owner or explicit actionable
@@ -40,7 +42,7 @@ func TestNativeDecisionReplay(t *testing.T) {
 
 			plan, err := PlanWorkflowMergerRepair(t.Context(), state.Query.Lane.Worktree, input, *state.Result, nil)
 			if tc.denied {
-				if !errors.Is(err, ErrWorkflowConflict) {
+				if !errors.Is(err, workflowstate.ErrConflict) {
 					t.Fatal("unowned source step was accepted", err)
 				}
 

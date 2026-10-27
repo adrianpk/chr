@@ -7,10 +7,13 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) workflowIntegrationLegacySubmissions(ctx context.Context, run workflowInvocationFile) ([]WorkflowIntegrationCounter, error) {
-	key := workflowHash([]byte("budget-journal-scan"))
+	key := contenthash.Sum([]byte("budget-journal-scan"))
 
 	path, err := workflowSubmissionPath(ctx, s.layout.ProjectDir(), key)
 	if err != nil {
@@ -27,7 +30,7 @@ func (s *WorkflowStore) workflowIntegrationLegacySubmissions(ctx context.Context
 	}
 
 	if len(entries) > WorkflowRecordLimit {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	return readWorkflowIntegrationLegacyCounters(filepath.Dir(path), entries, run)
@@ -42,7 +45,7 @@ func readWorkflowIntegrationLegacyCounters(dir string, entries []os.DirEntry, ru
 		}
 
 		if !entry.Type().IsRegular() {
-			return nil, ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		journal, err := readWorkflowSubmissionFile(filepath.Join(dir, entry.Name()))
@@ -76,7 +79,7 @@ func appendWorkflowIntegrationLegacyCounter(counters *[]WorkflowIntegrationCount
 	}
 
 	if slices.ContainsFunc(*counters, func(c WorkflowIntegrationCounter) bool { return c.Unit == journal.Unit }) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	*counters = append(*counters, WorkflowIntegrationCounter{Unit: journal.Unit, Submission: consumed, ExistingSubmissions: consumed})
@@ -98,7 +101,7 @@ func checkWorkflowIntegrationLegacySubmissions(budget WorkflowIntegrationBudget,
 		}
 
 		if !slices.ContainsFunc(counters, func(c WorkflowIntegrationCounter) bool { return c.Unit == retained.Unit }) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

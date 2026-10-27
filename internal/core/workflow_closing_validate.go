@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowClosingBinding(set WorkflowSet) error {
@@ -17,7 +19,7 @@ func validateWorkflowClosingBinding(set WorkflowSet) error {
 
 	for _, binding := range set.Closing.Attempts {
 		if !filepath.IsLocal(binding.Ref) || len(binding.Hash) != 64 || filepath.Base(binding.Ref) != "state.json" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -26,7 +28,7 @@ func validateWorkflowClosingBinding(set WorkflowSet) error {
 
 func validateWorkflowClosingAttempt(set WorkflowRecord, index int, state workflowClosingAttempt) error {
 	if !workflowClosingAttemptIdentity(set, index, state) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowClosingOutcome(state, index < len(set.Set.Closing.Attempts)-1); err != nil {
@@ -34,11 +36,11 @@ func validateWorkflowClosingAttempt(set WorkflowRecord, index int, state workflo
 	}
 
 	if state.Input.Ref != workflowClosingFile(set.ID, index+1, "input.json") || len(state.Input.Hash) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if state.Result.Ref != "" && (state.Result.Ref != workflowClosingFile(set.ID, index+1, "result.json") || len(state.Result.Hash) != 64) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, process := range state.Processes {
@@ -61,27 +63,27 @@ func validWorkflowClosingOwner(state workflowClosingAttempt) bool {
 func validateWorkflowClosingOutcome(state workflowClosingAttempt, historical bool) error {
 	if state.Outcome == "running" {
 		if !workflowClosingRunningOutcome(state, historical) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
 	}
 
 	if state.FinishedAt.IsZero() {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	switch state.Outcome {
 	case "completed", "closing_validation_failed":
 		if state.Result.Ref == "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	case "interrupted":
 		if state.Result.Ref != "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	default:
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -89,20 +91,20 @@ func validateWorkflowClosingOutcome(state workflowClosingAttempt, historical boo
 
 func validateWorkflowClosingProcess(id string, state workflowClosingAttempt, i int, process WorkflowProcess) error {
 	if !validWorkflowClosingProcess(state, process) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	base := workflowClosingFile(id, state.Generation, fmt.Sprintf("command-%d", i+1))
 	if process.StdoutRef != base+".stdout" || process.StderrRef != base+".stderr" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if process.State == "stopped" {
 		if len(process.StdoutHash) != 64 || len(process.StderrHash) != 64 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	} else if state.Outcome != "running" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

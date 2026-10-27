@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
@@ -20,7 +21,7 @@ func seedTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore, count
 
 	_, err := store.db.ExecContext(t.Context(), `WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM n WHERE x<?)
  INSERT INTO telegram_document_snapshots(id,owner_kind,owner_id,bot_id,chat_id,topic_id,user_id,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at)
- SELECT 'quota-'||x,'receiver','quota-owner-'||x,12345,100001,0,100001,?,'example-project','default',?,'exports/quota.md',?,?,'quota.md','text/markdown',2097152,zeroblob(2097152),? FROM n`, count, telegramReceiverTestConfig().Digest(), strings.Repeat("a", 64), workflowHash(zero), workflowHash(zero), database.FormatTime(time.Now()))
+ SELECT 'quota-'||x,'receiver','quota-owner-'||x,12345,100001,0,100001,?,'example-project','default',?,'exports/quota.md',?,?,'quota.md','text/markdown',2097152,zeroblob(2097152),? FROM n`, count, telegramReceiverTestConfig().Digest(), strings.Repeat("a", 64), contenthash.Sum(zero), contenthash.Sum(zero), database.FormatTime(time.Now()))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +42,7 @@ func TestTelegramPresentationDocumentQuota(t *testing.T) {
 
 	response := telegramTestDocumentResponse()
 	response.Document.Payload = bytes.Repeat([]byte("q"), telegramDocumentLimit)
-	response.Document.SourceHash = workflowHash(response.Document.Payload)
+	response.Document.SourceHash = contenthash.Sum(response.Document.Payload)
 	response.Message.Content = TelegramDocumentExcerpt(response.Document.Payload)
 	ready, results := make(chan struct{}), make(chan error, 2)
 

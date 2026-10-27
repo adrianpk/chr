@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeReceiptMerged(t *testing.T, fixture nativeCanonicalFixture) WorkflowSubmission {
@@ -66,7 +68,7 @@ func TestNativeReceiptFences(t *testing.T) {
 			stale := guard
 			test.change(&stale)
 
-			if _, err := f.store.ConfirmWorkflowNativeReceipt(t.Context(), stale); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := f.store.ConfirmWorkflowNativeReceipt(t.Context(), stale); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale receipt callback accepted", err)
 			}
 

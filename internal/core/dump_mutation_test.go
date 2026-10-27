@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // First and concurrent later captures share one destination even when the
@@ -92,7 +94,7 @@ func TestDumpMutationSave(t *testing.T) {
 	checkDumpMutationSaveHistory(t, project, before)
 
 	request.OperationID = "stale-save"
-	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale body save accepted", err)
 	}
 }
@@ -183,7 +185,7 @@ func TestDumpMutationAppend(t *testing.T) {
 	}
 
 	request.Content = "Changed append payload."
-	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("append operation identity was reused", err)
 	}
 }

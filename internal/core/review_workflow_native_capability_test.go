@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 type nativePolicyFixture struct {
@@ -56,7 +58,7 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 	pr := WorkflowPullRequestSnapshot{URL: repository + marker + "7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(publication.SourceRef, "refs/heads/"), BaseBranch: "dev", HeadCommit: publication.Git.SourceCommit, BaseCommit: publication.Git.BaseCommit, State: "open"}
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
 	adapter := NewRemoteReviewAdapter(DefaultReviewProviderConfig(), runner)
-	policy := WorkflowNativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: workflowHash([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
+	policy := WorkflowNativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: contenthash.Sum([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
 	policy.ReviewMode = ReviewWorkflowModeHumanReview
 	result := nativeCapabilityFixture{adapter: adapter, runner: runner, request: WorkflowNativeCapabilityRequest{Config: WorkIntegrationConfig{PublicationProfile: WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: publication}, policy: &nativePolicyFixture{policy: policy}, git: &nativeInspectorFixture{WorkflowGitPublicationInspector: NewWorkflowGitPublisher(repository, fixture.remote)}, remote: fixture.remote}
 	result.prefix = nativePolicyCommand(t, result, "")
@@ -129,7 +131,7 @@ func TestNativeCapability(t *testing.T) {
 				t.Fatal("unmerged speculative result invalidated unchanged S/B/P", err)
 			}
 
-			fixture.policy.policy.CredentialIdentityFingerprint = workflowHash([]byte("changed-role"))
+			fixture.policy.policy.CredentialIdentityFingerprint = contenthash.Sum([]byte("changed-role"))
 			if err := fixture.adapter.RecheckWorkflowNativeCapability(t.Context(), fixture.request, capability, fixture.policy, fixture.git); err == nil {
 				t.Fatal("changed credential identity reused old authorization")
 			}

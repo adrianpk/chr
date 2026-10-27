@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, result *WorkflowTaskResult, interrupted bool) error {
@@ -40,7 +43,7 @@ func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowC
 		}
 
 		data = append(data, '\n')
-		run.Attempts[len(run.Attempts)-1].ResultHash = workflowHash(data)
+		run.Attempts[len(run.Attempts)-1].ResultHash = contenthash.Sum(data)
 
 		if err := claim.store.commitWorkflowClaim(run, record, workflowFileChange{Path: ref, After: data}); err != nil {
 			return err
@@ -53,7 +56,7 @@ func (s *WorkflowStore) finishWorkflowTask(ctx context.Context, claim *WorkflowC
 func (s *WorkflowStore) checkWorkflowTaskCandidate(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask, result *WorkflowTaskResult) error {
 	commit, tree, err := s.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if result.Successful && (err != nil || commit != result.Commit || tree != result.Tree) {
-		return fmt.Errorf("%w: validated candidate changed before journaling", ErrWorkflowConflict)
+		return fmt.Errorf("%w: validated candidate changed before journaling", workflowstate.ErrConflict)
 	}
 
 	if err == nil {

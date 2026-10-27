@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramAuthoringRespondRecovery journals a real answer and its requested
@@ -62,7 +64,7 @@ func telegramAuthoringCheckRespondReplay(t *testing.T, reopened AuthoringSession
 	replay, err := reopened.ContinueAuthoring(t.Context(), respond, generate, func(context.Context) error {
 		guardCalls++
 
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	})
 	if err != nil || replay.SourceHash != confirmed.SourceHash || *providerCalls != 1 || guardCalls != 0 {
 		t.Fatal("receipt reconciliation repeated a new effect", replay, providerCalls, guardCalls, err)
@@ -85,9 +87,9 @@ func TestTelegramAuthoringCommitGuard(t *testing.T) {
 			t.Error("authority was not checked after generation")
 		}
 
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	})
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("revoked authority committed", err)
 	}
 
@@ -97,7 +99,7 @@ func TestTelegramAuthoringCommitGuard(t *testing.T) {
 	}
 
 	request.Capture = "Changed payload"
-	if _, err := repo.ContinueAuthoring(t.Context(), request, telegramAuthoringOwnerDraft); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := repo.ContinueAuthoring(t.Context(), request, telegramAuthoringOwnerDraft); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("failed request changed arguments", err)
 	}
 }

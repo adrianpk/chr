@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramOperationCaseRequest() CaseMutationRequest {
@@ -38,7 +40,7 @@ func TestTelegramOperationCaseReplay(t *testing.T) {
 	}
 
 	request.Metadata.Name = "A different request"
-	if _, err := reopened.SaveBound(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := reopened.SaveBound(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed case arguments accepted", err)
 	}
 
@@ -94,11 +96,11 @@ func TestTelegramOperationCaseConflict(t *testing.T) {
 	}
 
 	reopened := NewCaseMetadataService(owner.projectDir)
-	if _, err := reopened.SaveBound(t.Context(), telegramOperationCaseRequest()); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := reopened.SaveBound(t.Context(), telegramOperationCaseRequest()); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("divergent case accepted", err)
 	}
 
-	if _, err := reopened.Save(CaseMetadata{Name: "Another case"}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := reopened.Save(CaseMetadata{Name: "Another case"}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("ordinary save bypassed pending journal", err)
 	}
 
@@ -128,7 +130,7 @@ func TestTelegramOperationCaseGuards(t *testing.T) {
 	}
 
 	update.Binding.RequestID = "stale"
-	if _, err := owner.SaveBound(t.Context(), update); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := owner.SaveBound(t.Context(), update); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale image accepted", err)
 	}
 
@@ -146,7 +148,7 @@ func TestTelegramOperationCaseGuards(t *testing.T) {
 	}
 
 	invalid.Metadata.Name = "Different"
-	if _, err := owner.SaveBound(t.Context(), invalid); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := owner.SaveBound(t.Context(), invalid); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("failed request arguments replaced", err)
 	}
 }

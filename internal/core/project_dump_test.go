@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Observation is read-only; adoption retains the sole general identity and every
@@ -146,7 +148,7 @@ func checkProjectDumpConflict(t *testing.T, name string) {
 func checkProjectDumpPending(t *testing.T, project string, err error) {
 	t.Helper()
 
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("read recovered or ignored pending mutation", err)
 	}
 
@@ -196,7 +198,7 @@ func TestProjectDumpStale(t *testing.T) {
 			changeProjectDumpSource(t, project, reference, change)
 
 			_, err = NewProjectMetadataService(project).AdoptProjectDump(t.Context(), observed.Revision)
-			if !errors.Is(err, ErrWorkflowConflict) {
+			if !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale adoption accepted", change, err)
 			}
 		})

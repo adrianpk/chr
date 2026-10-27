@@ -4,20 +4,22 @@ import (
 	"context"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // BeginWorkflowMergerSemanticRepair rewinds an existing verified rebase to the
 // owning original step. The unchanged prefix stays exact and the suffix replays.
 func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx context.Context, query WorkflowPreparationQuery, proof WorkflowIntegrationProof, original string) (WorkflowMergerRepairState, error) {
 	if git.validateQuery(query) != nil || !validWorkflowMergerSemanticProof(query, proof) {
-		return WorkflowMergerRepairState{}, ErrWorkflowConflict
+		return WorkflowMergerRepairState{}, workflowstate.ErrConflict
 	}
 
 	expected := query.WorkflowIntegrationQuery
 
 	expected.SourceDirectory, expected.ResultCommit = "", proof.ResultCommit
 	if validateWorkflowIntegrationProof(expected, proof) != nil || proof.BaseCommit != query.BaseCommit {
-		return WorkflowMergerRepairState{}, ErrWorkflowConflict
+		return WorkflowMergerRepairState{}, workflowstate.ErrConflict
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
@@ -33,7 +35,7 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx contex
 	}
 
 	if !validWorkflowRepairPreparation(*proof.Provenance.Preparation, *reader.preparation) {
-		return WorkflowMergerRepairState{}, ErrWorkflowConflict
+		return WorkflowMergerRepairState{}, workflowstate.ErrConflict
 	}
 
 	reader.preparation = proof.Provenance.Preparation
@@ -51,7 +53,7 @@ func validWorkflowMergerSemanticProof(query WorkflowPreparationQuery, proof Work
 func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Context, query WorkflowPreparationQuery, proof WorkflowIntegrationProof, original string) (WorkflowMergerRepairState, error) {
 	index := slices.IndexFunc(proof.History, func(entry WorkflowIntegrationCommit) bool { return entry.Source == original })
 	if index < 0 {
-		return WorkflowMergerRepairState{}, ErrWorkflowConflict
+		return WorkflowMergerRepairState{}, workflowstate.ErrConflict
 	}
 
 	parent := query.OriginCommit
@@ -80,7 +82,7 @@ func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Con
 // on a verified private result. Its finding is retained in method provenance.
 func (git OSWorkflowPreparationGit) PrepareWorkflowMergerIntegrationFix(ctx context.Context, state WorkflowMergerRepairState, tree string, finding AgenticReviewFinding) (WorkflowMergerRepairState, error) {
 	if state.Result == nil || state.SchemaVersion != 1 || state.Query.Repository != git.transport.repository {
-		return state, ErrWorkflowConflict
+		return state, workflowstate.ErrConflict
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)

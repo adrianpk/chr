@@ -7,6 +7,9 @@ import (
 	"math"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) readWorkflowIntegrationBudget(run workflowInvocationFile) (WorkflowIntegrationBudget, error) {
@@ -14,7 +17,7 @@ func (s *WorkflowStore) readWorkflowIntegrationBudget(run workflowInvocationFile
 
 	binding := run.IntegrationBudget
 	if binding == nil || binding.Ref.Path != workflowIntegrationBudgetPath(run.ID) {
-		return budget, ErrWorkflowConflict
+		return budget, workflowstate.ErrConflict
 	}
 
 	data, err := s.readWorkflowReviewImage(binding.Ref.Path, binding.Ref.Hash)
@@ -27,7 +30,7 @@ func (s *WorkflowStore) readWorkflowIntegrationBudget(run workflowInvocationFile
 	}
 
 	if budget.InvocationID != run.ID || budget.Revision != binding.Revision {
-		return budget, ErrWorkflowConflict
+		return budget, workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowIntegrationBudget(budget); err != nil {
@@ -82,7 +85,7 @@ func (s *WorkflowStore) workflowIntegrationClosingUsage(snapshot WorkflowSnapsho
 func (s *WorkflowStore) workflowIntegrationBudgetAdmission(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, tokenLimit *int64) (WorkflowIntegrationBudget, error) {
 	if run.Policy.AgentTokenBudget > 0 {
 		if tokenLimit != nil && *tokenLimit != run.Policy.AgentTokenBudget {
-			return WorkflowIntegrationBudget{}, ErrWorkflowConflict
+			return WorkflowIntegrationBudget{}, workflowstate.ErrConflict
 		}
 
 		limit := run.Policy.AgentTokenBudget
@@ -120,7 +123,7 @@ func (s *WorkflowStore) extendWorkflowIntegrationBudget(run workflowInvocationFi
 	}
 
 	if tokenLimit != nil && (budget.AdmissionTokenLimit == nil || *budget.AdmissionTokenLimit != *tokenLimit) {
-		return budget, ErrWorkflowConflict
+		return budget, workflowstate.ErrConflict
 	}
 
 	if !slices.ContainsFunc(budget.UnitCounters, func(c WorkflowIntegrationCounter) bool { return c.Unit == entry.Unit }) {
@@ -132,7 +135,7 @@ func (s *WorkflowStore) extendWorkflowIntegrationBudget(run workflowInvocationFi
 
 func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run *workflowInvocationFile, budget *WorkflowIntegrationBudget) (workflowFileChange, error) {
 	if budget.Revision == math.MaxUint64 {
-		return workflowFileChange{}, ErrWorkflowConflict
+		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 
 	usage, err := s.workflowIntegrationUsage(ctx, *run)
@@ -158,7 +161,7 @@ func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run
 
 	data, err := json.MarshalIndent(budget, "", "  ")
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return workflowFileChange{}, ErrWorkflowConflict
+		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 
 	path, before := workflowIntegrationBudgetPath(run.ID), ""
@@ -167,7 +170,7 @@ func (s *WorkflowStore) workflowIntegrationBudgetChange(ctx context.Context, run
 	}
 
 	file := workflowFileChange{Path: path, Before: before, After: append(data, '\n')}
-	run.IntegrationBudget = &WorkflowIntegrationBudgetBinding{Revision: budget.Revision, Ref: WorkflowEvidenceRef{Path: path, Hash: workflowHash(file.After)}}
+	run.IntegrationBudget = &WorkflowIntegrationBudgetBinding{Revision: budget.Revision, Ref: WorkflowEvidenceRef{Path: path, Hash: contenthash.Sum(file.After)}}
 
 	return file, nil
 }
@@ -195,7 +198,7 @@ func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, ru
 	}
 
 	if run.Integration == nil || run.Integration.EntryID != guard.EntryID {
-		return WorkflowIntegrationEntry{}, WorkflowIntegrationBudget{}, ErrWorkflowConflict
+		return WorkflowIntegrationEntry{}, WorkflowIntegrationBudget{}, workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -229,7 +232,7 @@ func (s *WorkflowStore) currentWorkflowIntegrationBudget(ctx context.Context, ru
 
 func (s *WorkflowStore) checkWorkflowIntegrationBudgetEvidence(run workflowInvocationFile, budget WorkflowIntegrationBudget) error {
 	if run.Policy.AgentTokenBudget > 0 && (budget.AdmissionTokenLimit == nil || *budget.AdmissionTokenLimit != run.Policy.AgentTokenBudget) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if budget.AdmissionLimits != workflowIntegrationAdmissionLimits(run.Policy) {
@@ -247,7 +250,7 @@ func (s *WorkflowStore) checkWorkflowIntegrationBudgetEvidence(run workflowInvoc
 
 func (s *WorkflowStore) checkWorkflowBudgetReservationEvidence(run workflowInvocationFile, reservation WorkflowIntegrationReservation) error {
 	if reservation.EntryID != workflowIntegrationEntryID(run, reservation.Unit) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if reservation.AttemptInput != nil {

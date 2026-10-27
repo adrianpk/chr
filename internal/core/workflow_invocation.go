@@ -9,6 +9,9 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowExecutionPolicy freezes finite execution limits at admission.
@@ -326,7 +329,7 @@ func workflowStartHash(request WorkflowStartRequest) (string, error) {
 	request.Selection.SnapshotHash = ""
 	data, err := json.Marshal(request)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func (s *WorkflowStore) startWorkflow(ctx context.Context, request WorkflowStartRequest, check WorkflowAdmissionCheck) (WorkflowStartResult, error) {
@@ -404,7 +407,7 @@ func (s *WorkflowStore) freezeWorkflowSelection(ctx context.Context, request Wor
 		}
 
 		if request.SnapshotHash != "" && request.SnapshotHash != page.SnapshotHash {
-			return all, ErrWorkflowConflict
+			return all, workflowstate.ErrConflict
 		}
 
 		if request.Offset == 0 {
@@ -429,7 +432,7 @@ func (s *WorkflowStore) findWorkflowInvocation(runs []workflowInvocationFile, ke
 
 		matchedKey := slices.Contains(run.RequestKeys, key)
 		if matchedKey && run.RequestHash != hash {
-			return run, false, fmt.Errorf("%w: request key names different frozen input", ErrWorkflowConflict)
+			return run, false, fmt.Errorf("%w: request key names different frozen input", workflowstate.ErrConflict)
 		}
 
 		if matchedKey || run.RequestHash == hash && !workflowInvocationTerminal(run.Status) {

@@ -6,6 +6,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PlanPublicationOperation binds retries to caller-owned intent, independently
@@ -62,7 +65,7 @@ func (r *fileAuthoringSessionRepository) planOperationDigest(operation PlanPubli
 
 	encoded, err := json.Marshal(operation)
 
-	return workflowHash(append([]byte(root+"\x00plan\x00"+paths.RelativePath+"\x00"), encoded...)), err
+	return contenthash.Sum(append([]byte(root+"\x00plan\x00"+paths.RelativePath+"\x00"), encoded...)), err
 }
 
 func (r *fileAuthoringSessionRepository) planReceipt(operation PlanPublicationOperation) (PlanPublicationResult, bool, error) {
@@ -104,11 +107,11 @@ func (r *fileAuthoringSessionRepository) completedPlanOperation(plan GeneratedPl
 
 	operation := *plan.Operation
 	if operation.Scope != plan.Scope || operation.Replace == plan.CreateOnly || operation.TrackerReplaceHash != plan.TrackerReplaceHash {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	if operation.ExpectedRevision != "" && operation.ExpectedRevision != plan.ExpectedRevision {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	_, found, err := r.planReceipt(operation)
@@ -149,7 +152,7 @@ func (r *fileAuthoringSessionRepository) planPublicationReceiptChange(paths Gene
 		return nil, err
 	}
 
-	receipt.Checksum = workflowHash(encoded)
+	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
 	return []workflowFileChange{{Path: authoringReceiptRef(plan.Operation.ID), After: encoded}}, err
@@ -164,8 +167,8 @@ func validatePlanPublicationReceipt(receipt planPublicationReceipt, operationID,
 		return err
 	}
 
-	if receipt.Schema != "chr-plan-publication/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || checksum != workflowHash(encoded) {
-		return ErrWorkflowConflict
+	if receipt.Schema != "chr-plan-publication/v1" || receipt.Digest != digest || receipt.Result.OperationID != operationID || checksum != contenthash.Sum(encoded) {
+		return workflowstate.ErrConflict
 	}
 
 	return nil

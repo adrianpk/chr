@@ -7,6 +7,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeMergerInput(t *testing.T) (*WorkflowStore, WorkflowMergerInput, time.Time) {
@@ -17,13 +20,13 @@ func nativeMergerInput(t *testing.T) (*WorkflowStore, WorkflowMergerInput, time.
 	input := WorkflowMergerInput{
 		WorkflowMergerIdentity: WorkflowMergerIdentity{
 			ProtocolVersion: 1, ID: "merger-attempt-1", InvocationID: "native-run-1",
-			EntryID: workflowHash([]byte("entry")), Unit: WorkflowRef{Kind: "slice", ID: "slice-1"},
-			CandidateRevision: 2, CandidateHash: workflowHash([]byte("candidate")), ClaimGeneration: 3,
-			ScopeHash: workflowHash([]byte("scope")), Reason: "preparation_conflict",
+			EntryID: contenthash.Sum([]byte("entry")), Unit: WorkflowRef{Kind: "slice", ID: "slice-1"},
+			CandidateRevision: 2, CandidateHash: contenthash.Sum([]byte("candidate")), ClaimGeneration: 3,
+			ScopeHash: contenthash.Sum([]byte("scope")), Reason: "preparation_conflict",
 		}, WorkflowMergerGit: WorkflowMergerGit{
 			Repository: "https://forge.example.test/testing/native", SourceRef: "refs/heads/chr/work/source", TargetRef: "refs/heads/dev",
 			Source: strings.Repeat("1", 40), Base: strings.Repeat("2", 40), Method: "merge",
-			OwnedWorkspaceID: workflowHash([]byte("owned-checkout")),
+			OwnedWorkspaceID: contenthash.Sum([]byte("owned-checkout")),
 		}, WorkflowMergerScope: WorkflowMergerScope{AllowedPaths: []string{"src", "docs"}, ProtectedPaths: []string{"src/validation.go", "Makefile"}}, WorkflowMergerValidation: WorkflowMergerValidation{ValidationCommands: [][]string{{"go", "test", "./..."}}}, WorkflowMergerLimits: WorkflowMergerLimits{
 			CapacityReservationID: "worker-slot-1", BudgetReservationID: "merger-call-1",
 			RemainingAttempts: 3, WorkerTimeoutSeconds: 120, AdmittedAt: now, Deadline: now.Add(time.Minute),
@@ -119,7 +122,7 @@ func TestNativeMergerMalformed(t *testing.T) {
 
 	for name, data := range cases {
 		t.Run(name, func(t *testing.T) {
-			if _, err := ParseWorkflowMergerResult([]byte(data), input, workflowMergerFence(input), now); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := ParseWorkflowMergerResult([]byte(data), input, workflowMergerFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("malformed or authority-bearing proposal was accepted", err)
 			}
 		})
@@ -131,12 +134,12 @@ func TestNativeMergerMalformed(t *testing.T) {
 func TestNativeMergerFence(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
 	cases := map[string]func(*WorkflowMergerFence){
-		"entry":      func(f *WorkflowMergerFence) { f.EntryID = workflowHash([]byte("other")) },
-		"candidate":  func(f *WorkflowMergerFence) { f.CandidateHash = workflowHash([]byte("new candidate")) },
+		"entry":      func(f *WorkflowMergerFence) { f.EntryID = contenthash.Sum([]byte("other")) },
+		"candidate":  func(f *WorkflowMergerFence) { f.CandidateHash = contenthash.Sum([]byte("new candidate")) },
 		"revision":   func(f *WorkflowMergerFence) { f.CandidateRevision++ },
 		"generation": func(f *WorkflowMergerFence) { f.ClaimGeneration++ },
-		"scope":      func(f *WorkflowMergerFence) { f.ScopeHash = workflowHash([]byte("expanded scope")) },
-		"workspace":  func(f *WorkflowMergerFence) { f.OwnedWorkspaceID = workflowHash([]byte("user checkout")) },
+		"scope":      func(f *WorkflowMergerFence) { f.ScopeHash = contenthash.Sum([]byte("expanded scope")) },
+		"workspace":  func(f *WorkflowMergerFence) { f.OwnedWorkspaceID = contenthash.Sum([]byte("user checkout")) },
 		"source":     func(f *WorkflowMergerFence) { f.Source = strings.Repeat("3", 40) },
 		"base":       func(f *WorkflowMergerFence) { f.Base = strings.Repeat("4", 40) },
 		"method":     func(f *WorkflowMergerFence) { f.Method = "squash" },
@@ -151,13 +154,13 @@ func TestNativeMergerFence(t *testing.T) {
 			current := workflowMergerFence(input)
 			mutate(&current)
 
-			if _, err := ParseWorkflowMergerResult(data, input, current, now); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := ParseWorkflowMergerResult(data, input, current, now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale proposal passed the host fence", err)
 			}
 		})
 	}
 
-	if _, err := ParseWorkflowMergerResult(data, input, workflowMergerFence(input), input.Deadline); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ParseWorkflowMergerResult(data, input, workflowMergerFence(input), input.Deadline); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("elapsed deadline was treated as continuing authority", err)
 	}
 }
@@ -166,7 +169,7 @@ func TestNativeMergerFence(t *testing.T) {
 // unsupported output-only metering or a report larger than the granted call.
 func TestNativeMergerUsage(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
-	input.TokenAllowance = &WorkflowTokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: workflowHash([]byte("harness")), Deadline: input.Deadline}
+	input.TokenAllowance = &WorkflowTokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("harness")), Deadline: input.Deadline}
 
 	input, err := SealWorkflowMergerInput(input, now)
 	if err != nil {
@@ -184,7 +187,7 @@ func TestNativeMergerUsage(t *testing.T) {
 		{"negative", &WorkflowMergerUsage{Input: -1, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
 		{"overflow", &WorkflowMergerUsage{Input: math.MaxInt64, Output: 1, WholeCall: true, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
 		{"output only", &WorkflowMergerUsage{Output: 20, CapabilityRevision: input.TokenAllowance.CapabilityRevision}, false},
-		{"other harness", &WorkflowMergerUsage{Input: 20, WholeCall: true, CapabilityRevision: workflowHash([]byte("other"))}, false},
+		{"other harness", &WorkflowMergerUsage{Input: 20, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("other"))}, false},
 	}
 
 	for _, test := range cases {

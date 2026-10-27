@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) nextWorkflowInvocationNumber(ctx context.Context) (int, error) {
@@ -108,7 +111,7 @@ func (s *WorkflowStore) checkWorkflowInputsPrepared(ctx context.Context, run wor
 		}
 
 		if !workflowMemberImageMatches(record, input, run.WorkflowIdentity) {
-			return fmt.Errorf("%w: frozen task image changed", ErrWorkflowConflict)
+			return fmt.Errorf("%w: frozen task image changed", workflowstate.ErrConflict)
 		}
 	}
 
@@ -131,7 +134,7 @@ func (s *WorkflowStore) checkWorkflowSetImages(run workflowInvocationFile) error
 		}
 
 		if record.Set == nil || record.Revision != image.Revision || record.SourceHash != image.SourceHash || record.ProjectID != run.ProjectID || record.Namespace != run.Namespace {
-			return fmt.Errorf("%w: frozen set image changed", ErrWorkflowConflict)
+			return fmt.Errorf("%w: frozen set image changed", workflowstate.ErrConflict)
 		}
 
 		if err := s.checkWorkflowSetAmendmentEvidence(record); err != nil {
@@ -157,9 +160,9 @@ func validateWorkflowClaimContract(record WorkflowRecord) error {
 		return err
 	}
 
-	hash := workflowHash(append([]byte(record.Task.SetID+"\x00"+record.Task.SliceID+"\x00"), encoded...))
+	hash := contenthash.Sum(append([]byte(record.Task.SetID+"\x00"+record.Task.SliceID+"\x00"), encoded...))
 	if hash != record.Task.ContractHash {
-		return fmt.Errorf("%w: execution contract image differs", ErrWorkflowConflict)
+		return fmt.Errorf("%w: execution contract image differs", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -179,12 +182,12 @@ func (s *WorkflowStore) checkWorkflowTarget(ctx context.Context, target Workflow
 func guardWorkflowClaimImages(record WorkflowRecord, files []workflowFileChange) error {
 	observed := strings.Split(record.SourceHash, ":")
 	if len(files) != len(observed) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, file := range files {
 		if file.Before != observed[i] {
-			return fmt.Errorf("%w: claimed task image changed before journaling", ErrWorkflowConflict)
+			return fmt.Errorf("%w: claimed task image changed before journaling", workflowstate.ErrConflict)
 		}
 	}
 

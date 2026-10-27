@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeTargetAliases binds actual admission, selection, worker capacity and
@@ -82,12 +84,12 @@ func TestNativeTargetBarrier(t *testing.T) {
 	pr.Repository = "https://FORGE.EXAMPLE:443/test/repo.git/"
 
 	key, err := workflowSubmissionTargetKey(pr)
-	if err != nil || key != workflowHash([]byte(peer.Repository+"\n"+peer.TargetRef)) {
+	if err != nil || key != contenthash.Sum([]byte(peer.Repository+"\n"+peer.TargetRef)) {
 		t.Fatal("publication and queue aliases have different target keys", err)
 	}
 
 	before := nativeQueueImages(t, f.store.layout.Root())
-	if err := linked.guardWorkflowSubmissionTarget(t.Context(), workflowHash([]byte("another intent")), key); !errors.Is(err, ErrWorkflowOwned) {
+	if err := linked.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another intent")), key); !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatal("alias bypassed the actual publication barrier", err)
 	}
 
@@ -207,7 +209,7 @@ func nativeCoordinatorImage(t *testing.T, common, mode string) []byte {
 			t.Fatal(err)
 		}
 
-		registration.Owner = workflowHash([]byte("another machine and common directory"))
+		registration.Owner = contenthash.Sum([]byte("another machine and common directory"))
 
 		data, err = json.Marshal(registration)
 		if err != nil {

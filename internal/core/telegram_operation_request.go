@@ -10,7 +10,10 @@ import (
 	"fmt"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramOperationRequest retains one complete transport binding before dispatch.
@@ -56,7 +59,7 @@ func scanTelegramOperation(row interface{ Scan(...any) error }) (TelegramOperati
 	err := row.Scan(&request.ID, &request.Ordinal, &request.Operator, &request.Target.ProjectID, &request.Target.ProjectBindingDigest, &request.Target.Namespace, &request.Target.ConversationID, &request.Target.ConversationRevision, &request.OperationID, &arguments, &request.ArgumentDigest, &prepared, &guard, &request.State, &request.ReceiptRef, &result)
 
 	request.Arguments, request.PreparedInput, request.Result = json.RawMessage(arguments), json.RawMessage(prepared), json.RawMessage(result)
-	if err == nil && prepared != "" && workflowHash([]byte(prepared)) != guard {
+	if err == nil && prepared != "" && contenthash.Sum([]byte(prepared)) != guard {
 		return request, errTelegramReceiverConflict
 	}
 
@@ -160,7 +163,7 @@ func (s *TelegramReceiverStore) ReservePreparedTelegramOperation(ctx context.Con
 	}
 
 	if len(input) == 0 || len(input) > 1048576 || !json.Valid(input) {
-		return request, ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	err = s.transaction(ctx, func(tx *sql.Tx) error {
@@ -176,7 +179,7 @@ func (s *TelegramReceiverStore) ReservePreparedTelegramOperation(ctx context.Con
 	}
 
 	if !found || retained.ArgumentDigest != request.ArgumentDigest || string(retained.PreparedInput) != string(input) {
-		return request, ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	return retained, nil
@@ -185,14 +188,14 @@ func (s *TelegramReceiverStore) ReservePreparedTelegramOperation(ctx context.Con
 func reservePreparedTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, input json.RawMessage, now time.Time) error {
 	pending, err := telegramReadResponsePending(ctx, tx, request.Source)
 	if err != nil || !pending {
-		return errors.Join(err, ErrWorkflowConflict)
+		return errors.Join(err, workflowstate.ErrConflict)
 	}
 
 	if err := insertTelegramOperation(ctx, tx, request, now); err != nil {
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `UPDATE telegram_requests SET prepared_input=?,domain_guard=?,state='ready',updated_at=? WHERE id=? AND argument_digest=? AND state='prepared' AND prepared_input IS NULL`, string(input), workflowHash(input), database.FormatTime(now), request.ID, request.ArgumentDigest)
+	_, err = tx.ExecContext(ctx, `UPDATE telegram_requests SET prepared_input=?,domain_guard=?,state='ready',updated_at=? WHERE id=? AND argument_digest=? AND state='prepared' AND prepared_input IS NULL`, string(input), contenthash.Sum(input), database.FormatTime(now), request.ID, request.ArgumentDigest)
 	if err != nil {
 		return err
 	}
@@ -205,7 +208,7 @@ func validTelegramOperationEnvelope(request TelegramOperationRequest) bool {
 		return false
 	}
 
-	return IsValidOpsNamespace(request.Target.Namespace) && request.Target.ProjectID != "" && len(request.Target.ProjectBindingDigest) == 64
+	return opsnamespace.Valid(request.Target.Namespace) && request.Target.ProjectID != "" && len(request.Target.ProjectBindingDigest) == 64
 }
 
 func insertTelegramOperation(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, now time.Time) error {

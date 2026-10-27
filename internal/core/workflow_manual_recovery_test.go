@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func replaceWorkflowManualStatus(t *testing.T, data []byte) []byte {
@@ -91,7 +93,7 @@ func TestWorkflowManualPrerequisite(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("prerequisite edit accepted: %v", err)
 	}
 }

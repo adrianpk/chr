@@ -5,6 +5,9 @@ import (
 	"errors"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileAuthoringSessionRepository) guardGuidedSpecApproval(ctx context.Context, request SpecMutationRequest, document SpecDocument) error {
@@ -32,11 +35,11 @@ func (r *fileAuthoringSessionRepository) guardGuidedSpecApproval(ctx context.Con
 func guardGuidedApprovalDocument(request SpecMutationRequest, document SpecDocument) error {
 	approval := request.GuidedApproval
 	if request.Status != "approved" || request.Body != document.Body || request.Title != document.Title {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
-	if approval.GeneratedRevision != document.Revision || approval.ContentHash != workflowHash([]byte(document.Body)) {
-		return ErrWorkflowConflict
+	if approval.GeneratedRevision != document.Revision || approval.ContentHash != contenthash.Sum([]byte(document.Body)) {
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -47,7 +50,7 @@ func guardGuidedApprovalSource(session AuthoringSession, request SpecMutationReq
 
 	draft := session.Guided.SpecDraft
 	if draft == nil || draft.Reference != document.Reference || draft.Revision != document.Revision || draft.ContentHash != approval.ContentHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	checkpoint, err := guidedStageCheckpoint(session, "quiz")
@@ -61,7 +64,7 @@ func guardGuidedApprovalSource(session AuthoringSession, request SpecMutationReq
 	}
 
 	if digest != approval.InputDigest {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -70,7 +73,7 @@ func guardGuidedApprovalSource(session AuthoringSession, request SpecMutationReq
 func guardGuidedApprovalRun(session AuthoringSession, request SpecMutationRequest) error {
 	approval := request.GuidedApproval
 	if approval == nil || validateSpecReference(request.Reference) != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	scope := GuidedUseCaseScope{RunID: approval.RunID, ProjectID: request.ProjectID, Namespace: strings.Split(request.Reference, "/")[1]}
@@ -80,7 +83,7 @@ func guardGuidedApprovalRun(session AuthoringSession, request SpecMutationReques
 
 	state := session.Guided
 	if state.Stage != "specification" || !state.ProgressionIntent || state.Actor != approval.Actor || approval.Policy != GuidedSpecApprovalPolicy {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return guardGuidedPreparedSpec(state.PendingOperation, request)
@@ -90,12 +93,12 @@ func guardGuidedPreparedSpec(operation *GuidedUseCaseOperation, request SpecMuta
 	approval := request.GuidedApproval
 
 	if operation == nil || operation.Action != "spec" || operation.PreparedSpec == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	prepared := operation.PreparedSpec
 	if prepared.Title != request.Title || prepared.Body != request.Body || prepared.InputDigest != approval.InputDigest {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -115,7 +118,7 @@ func guidedStageCheckpoint(session AuthoringSession, stage string) (GuidedStageC
 func SealGuidedSpec(ctx context.Context, root string, session *AuthoringSession) error {
 	approval := session.Guided.SpecApproval
 	if approval == nil || session.Guided.PendingOperation == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	source, err := guidedStageCheckpoint(*session, "quiz")
@@ -129,8 +132,8 @@ func SealGuidedSpec(ctx context.Context, root string, session *AuthoringSession)
 			return err
 		}
 
-		if document.Revision != approval.Revision || document.Status != "approved" || workflowHash([]byte(document.Body)) != approval.ContentHash {
-			return ErrWorkflowConflict
+		if document.Revision != approval.Revision || document.Status != "approved" || contenthash.Sum([]byte(document.Body)) != approval.ContentHash {
+			return workflowstate.ErrConflict
 		}
 	}
 

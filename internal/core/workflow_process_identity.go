@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowProcessIdentity binds a PID to one Linux boot and process birth.
@@ -57,12 +59,12 @@ func workflowReadProcStat(pid int) (workflowProcStat, error) {
 
 	tail := strings.LastIndex(string(data), ") ")
 	if tail < 0 {
-		return workflowProcStat{}, ErrWorkflowConflict
+		return workflowProcStat{}, workflowstate.ErrConflict
 	}
 
 	fields := strings.Fields(string(data)[tail+2:])
 	if len(fields) < 20 {
-		return workflowProcStat{}, ErrWorkflowConflict
+		return workflowProcStat{}, workflowstate.ErrConflict
 	}
 
 	group, err := strconv.Atoi(fields[2])

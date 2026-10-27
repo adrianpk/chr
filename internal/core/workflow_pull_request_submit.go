@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) ensureWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, provider WorkflowPullRequestProvider) (WorkflowPullRequestSnapshot, error) {
@@ -43,7 +45,7 @@ func (s *WorkflowStore) createWorkflowPullRequest(ctx context.Context, run *work
 	}
 
 	if commit != binding.SourceCommit {
-		return WorkflowPullRequestSnapshot{}, fmt.Errorf("%w: canonical source branch differs from validated candidate", ErrWorkflowConflict)
+		return WorkflowPullRequestSnapshot{}, fmt.Errorf("%w: canonical source branch differs from validated candidate", workflowstate.ErrConflict)
 	}
 
 	if _, err := s.readWorkflowSliceCandidate(ctx, *run, observation); err != nil {
@@ -128,7 +130,7 @@ func (s *WorkflowStore) blockWorkflowPullRequest(run *workflowInvocationFile, sn
 		return err
 	}
 
-	return fmt.Errorf("%w: %s requires explicit reconciliation", ErrWorkflowConflict, reason)
+	return fmt.Errorf("%w: %s requires explicit reconciliation", workflowstate.ErrConflict, reason)
 }
 
 func workflowPullRequestMismatch(binding WorkflowPullRequestBinding, snapshots []WorkflowPullRequestSnapshot) string {
@@ -183,7 +185,7 @@ func workflowPullRequestRepository(raw string) (string, error) {
 
 	pos := len(raw) - len(marker) - len(fmt.Sprint(reference.Number))
 	if pos < 0 || raw[pos:] != marker+fmt.Sprint(reference.Number) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	return workflowCanonicalRepository(raw[:pos])

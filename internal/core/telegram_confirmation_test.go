@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func telegramConfirmationFixture(t *testing.T) (*telegramConversationFixture, TelegramActionOffer, TelegramAction) {
@@ -14,7 +16,7 @@ func telegramConfirmationFixture(t *testing.T) (*telegramConversationFixture, Te
 		payload := []byte("# Complete scope\n\nOne exact record and its validation.\n")
 		offer.Delivery = &TelegramDocumentResponse{
 			Message:  TelegramMessageBlocks{Family: "29", InitialText: "Create this ticket?", Content: "One exact record."},
-			Document: TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/confirmation.md", SourceHash: workflowHash(payload), Filename: "confirmation.md", MediaType: "text/markdown", Payload: payload},
+			Document: TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/confirmation.md", SourceHash: contenthash.Sum(payload), Filename: "confirmation.md", MediaType: "text/markdown", Payload: payload},
 		}
 	})
 }
@@ -160,7 +162,7 @@ func reopenTelegramConfirmation(t *testing.T, f *telegramConversationFixture, of
 func rejectedTelegramConfirmationDocument(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, kind string) TelegramDocument {
 	t.Helper()
 
-	document := TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/scope.md", SourceHash: workflowHash([]byte("scope")), Filename: "scope.md", MediaType: "text/markdown", Payload: []byte("scope")}
+	document := TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/scope.md", SourceHash: contenthash.Sum([]byte("scope")), Filename: "scope.md", MediaType: "text/markdown", Payload: []byte("scope")}
 
 	switch kind {
 	case "oversized":

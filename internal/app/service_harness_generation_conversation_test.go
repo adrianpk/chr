@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // The host retains an intent's binding outside the selected project's mutable
@@ -44,7 +45,7 @@ func generationBindingConversationCase(t *testing.T, fixture func(*testing.T, st
 	checkGenerationFixtureModels(t, second, map[string]string{"intent-independent": "other-model"})
 
 	input.Projects = input.Projects[1:]
-	if _, err := restarted.ResolveConversationIntent(t.Context(), "source", input); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := restarted.ResolveConversationIntent(t.Context(), "source", input); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("retained generation bypassed current allowed projects", err)
 	}
 }

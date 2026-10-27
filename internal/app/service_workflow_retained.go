@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // RetainedWorkProgress reports one guarded activation of existing authorization.
@@ -27,7 +28,7 @@ func (s service) ResumeRetainedWorkGuarded(ctx context.Context, id string, revis
 	s.ctx = ctx
 
 	if !validWorkflowControlIdentity(id) || revision == 0 {
-		return result, core.ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	defer func() {
@@ -148,7 +149,7 @@ func (s service) recoverRetainedWork(ctx context.Context, status WorkflowWorkSta
 	}
 
 	if run.Revision != status.Revision {
-		return run, core.ErrWorkflowConflict
+		return run, workflowstate.ErrConflict
 	}
 
 	if run.Status == "running" {

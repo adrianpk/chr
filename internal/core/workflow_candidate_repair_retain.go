@@ -1,10 +1,15 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) retainWorkflowCandidateRepair(ctx context.Context, run *workflowInvocationFile, candidate WorkflowIntegrationCandidate, reason string, refs []WorkflowEvidenceRef) error {
 	if run.Integration == nil || candidate.Input.Native == nil || len(refs) == 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
@@ -13,7 +18,7 @@ func (s *WorkflowStore) retainWorkflowCandidateRepair(ctx context.Context, run *
 	}
 
 	if !workflowCandidateRepairOwnerMatches(*run, entry, candidate) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	request := WorkflowIntegrationTransition{EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, CandidateHash: workflowMergerCandidateHash(*run, entry), State: "merging"}
@@ -45,7 +50,7 @@ func (s *WorkflowStore) retainWorkflowCandidateRepair(ctx context.Context, run *
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: queue.Path, Hash: workflowHash(queue.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: queue.Path, Hash: contenthash.Sum(queue.After)}})
 
 	return s.commitWorkflowPullRequestFiles(run, []workflowFileChange{queue}, file)
 }

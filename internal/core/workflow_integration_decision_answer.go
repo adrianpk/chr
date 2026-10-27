@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) answerWorkflowDecision(ctx context.Context, run workflowInvocationFile, request WorkflowIntegrationAnswerRequest, provider WorkflowPullRequestProvider, control *workflowControlCommit) (WorkflowIntegrationDecisions, error) {
@@ -78,7 +80,7 @@ func (s *WorkflowStore) checkWorkflowDecisionCurrent(ctx context.Context, run wo
 
 func checkWorkflowDecisionFence(run workflowInvocationFile, entry WorkflowIntegrationEntry, record WorkflowIntegrationDecisions) error {
 	if run.Lane == nil || entry.StateRevision != record.CandidateRevision || entry.ClaimGeneration != record.Input.ClaimGeneration {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	input := record.Input
@@ -111,7 +113,7 @@ func workflowDecisionAnswerRetry(record WorkflowIntegrationDecisions, request Wo
 
 		answer.PriorRevision, answer.QuestionHash, answer.RecordedAt = old.PriorRevision, old.QuestionHash, old.RecordedAt
 		if !reflect.DeepEqual(answer, old) || request.DecisionRevision != old.PriorRevision || request.DecisionHash != old.QuestionHash {
-			return false, ErrWorkflowConflict
+			return false, workflowstate.ErrConflict
 		}
 
 		return true, nil
@@ -126,7 +128,7 @@ func (s *WorkflowStore) checkWorkflowFreshAnswer(run workflowInvocationFile, ent
 	}
 
 	if request.DecisionRevision != record.Revision || request.DecisionHash != entry.DecisionRef.Hash || entry.State != "blocked" || record.State != "waiting" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowDecisionAnswer(record, answer); err != nil {

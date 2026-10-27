@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Preview orders valid creation timestamps before uncertain evidence, then
@@ -45,7 +47,7 @@ func TestProjectDumpReconcile(t *testing.T) {
 	}
 
 	request.Destination = sources[0]
-	if _, err := ReconcileProjectDump(t.Context(), project, request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ReconcileProjectDump(t.Context(), project, request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("operation identity accepted another target", err)
 	}
 }
@@ -219,7 +221,7 @@ func checkProjectDumpReconciliationFault(t *testing.T, fault int) {
 		t.Fatal("fault not exercised", fault)
 	}
 
-	if _, err := ObserveProjectDump(t.Context(), project); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ObserveProjectDump(t.Context(), project); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("read bypassed pending recovery", err)
 	}
 
@@ -263,7 +265,7 @@ func TestProjectDumpReconcileConcurrent(t *testing.T) {
 	for err := range results {
 		if err == nil {
 			winners++
-		} else if !errors.Is(err, ErrWorkflowConflict) {
+		} else if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal(err)
 		}
 	}

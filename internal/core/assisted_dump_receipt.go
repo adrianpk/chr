@@ -5,6 +5,9 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type assistedDumpMutationReceipt struct {
@@ -22,7 +25,7 @@ func assistedDumpReceiptChange(digest string, result AssistedArtifactSynthesisRe
 		return workflowFileChange{}, err
 	}
 
-	receipt.Checksum = workflowHash(encoded)
+	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
 	return workflowFileChange{Path: authoringReceiptRef(receipt.Mutation.OperationID), After: encoded}, err
@@ -68,12 +71,12 @@ func validateAssistedDumpReceipt(receipt assistedDumpMutationReceipt, operationI
 		return err
 	}
 
-	if receipt.Schema != "chr-assisted-dump-receipt/v1" || receipt.Digest != digest || receipt.Mutation.OperationID != operationID || workflowHash(encoded) != checksum {
-		return ErrWorkflowConflict
+	if receipt.Schema != "chr-assisted-dump-receipt/v1" || receipt.Digest != digest || receipt.Mutation.OperationID != operationID || contenthash.Sum(encoded) != checksum {
+		return workflowstate.ErrConflict
 	}
 
 	if receipt.Reference.Path == "" || receipt.Reference.Path != receipt.Mutation.Destination {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return ValidateProjectDumpReference(receipt.Reference.Path)
@@ -92,8 +95,8 @@ func (r *fileAuthoringSessionRepository) assistedDumpReceiptContent(mutation Pro
 		return nil, err
 	}
 
-	if workflowHash(body) != mutation.SourceHash || workflowHash(metadata) != mutation.MetadataHash {
-		return nil, ErrWorkflowConflict
+	if contenthash.Sum(body) != mutation.SourceHash || contenthash.Sum(metadata) != mutation.MetadataHash {
+		return nil, workflowstate.ErrConflict
 	}
 
 	return body, nil

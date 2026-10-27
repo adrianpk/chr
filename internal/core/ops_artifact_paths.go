@@ -3,6 +3,8 @@ package core
 import (
 	"path/filepath"
 	"strings"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 const opsArtifactBodyFile = "artifact.md"
@@ -31,7 +33,7 @@ func IsOpsArtifactBodyPath(projectDir, path string) bool {
 		return false
 	}
 
-	if !IsValidOpsNamespace(parts[1]) {
+	if !opsnamespace.Valid(parts[1]) {
 		return false
 	}
 

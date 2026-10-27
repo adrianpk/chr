@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowMergerPurpose = "merger"
@@ -57,9 +60,9 @@ func (s *WorkflowStore) QueryWorkflowIntegrationRoles(ctx context.Context, q Wor
 			return readErr
 		}
 
-		hash := workflowHash(data)
+		hash := contenthash.Sum(data)
 		if q.SnapshotHash != "" && q.SnapshotHash != hash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		items = slices.DeleteFunc(items, func(item WorkflowIntegrationRoleSelection) bool {
@@ -207,7 +210,7 @@ func workflowIntegrationRoleRank(role string) int {
 }
 
 func workflowIntegrationTargetBlocked(snapshot workflowIntegrationSnapshot, entry WorkflowIntegrationEntry) bool {
-	target := workflowHash([]byte(entry.Repository + "\n" + entry.TargetRef))
+	target := contenthash.Sum([]byte(entry.Repository + "\n" + entry.TargetRef))
 
 	return slices.ContainsFunc(snapshot.Journals, func(j workflowSubmissionJournal) bool {
 		return j.TargetKey == target && j.Attempts[len(j.Attempts)-1].State == "awaiting_observation"

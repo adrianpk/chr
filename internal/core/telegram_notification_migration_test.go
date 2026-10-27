@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
@@ -110,7 +111,7 @@ func TestTelegramPresentationFailureNotificationInput(t *testing.T) {
 			i.Document.Payload = []byte(strings.Repeat("x", telegramDocumentLimit+1))
 		}},
 		{"wrong root", func(i *TelegramNotificationInput) {
-			i.Document.ProjectBindingDigest = workflowHash([]byte("other root"))
+			i.Document.ProjectBindingDigest = contenthash.Sum([]byte("other root"))
 		}},
 	} {
 		t.Run(item.name, func(t *testing.T) {

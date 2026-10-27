@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"unicode/utf8"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowMergerCall struct {
@@ -32,7 +34,7 @@ func (s *WorkflowStore) workflowMergerCall(input WorkflowMergerInput) (workflowM
 
 		total += len(data)
 		if total >= WorkflowFileLimit || !utf8.Valid(data) {
-			return call, ErrWorkflowConflict
+			return call, workflowstate.ErrConflict
 		}
 
 		call.Evidence[ref.Path] = string(data)
@@ -51,7 +53,7 @@ func serveWorkflowMergerBroker(ctx context.Context, tools *workflowMergerTools, 
 	for scanner.Scan() {
 		total, messages = total+len(scanner.Bytes()), messages+1
 		if total > 8*WorkflowFileLimit || messages > WorkflowPageLimit || proposal != nil {
-			return nil, nil, ErrWorkflowConflict
+			return nil, nil, workflowstate.ErrConflict
 		}
 
 		request, decodeErr := decodeWorkflowMergerTool(scanner.Bytes())
@@ -91,7 +93,7 @@ func decodeWorkflowMergerTool(data []byte) (workflowMergerToolRequest, error) {
 
 	err := decoder.Decode(&request)
 	if err != nil {
-		err = fmt.Errorf("%w: invalid merger tool message", ErrWorkflowConflict)
+		err = fmt.Errorf("%w: invalid merger tool message", workflowstate.ErrConflict)
 	}
 
 	return request, err
@@ -99,7 +101,7 @@ func decodeWorkflowMergerTool(data []byte) (workflowMergerToolRequest, error) {
 
 func workflowMergerTerminal(request workflowMergerToolRequest) (json.RawMessage, *WorkflowMergerUsage, error) {
 	if request.Path != "" || request.Content != "" || request.Check != nil || len(request.Result) == 0 {
-		return nil, nil, ErrWorkflowConflict
+		return nil, nil, workflowstate.ErrConflict
 	}
 
 	return request.Result, request.Usage, nil
@@ -107,7 +109,7 @@ func workflowMergerTerminal(request workflowMergerToolRequest) (json.RawMessage,
 
 func workflowMergerBrokerComplete(scanner *bufio.Scanner, proposal json.RawMessage, ctx context.Context) error {
 	if scanner.Err() != nil || proposal == nil || ctx.Err() != nil {
-		return fmt.Errorf("%w: merger driver did not finish a bounded proposal", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger driver did not finish a bounded proposal", workflowstate.ErrConflict)
 	}
 
 	return nil

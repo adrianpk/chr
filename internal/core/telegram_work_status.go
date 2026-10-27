@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func readTelegramWorkMessageConversation(ctx context.Context, reader telegramConversationReader, peer TelegramPeerIdentity, messageID int64) (string, error) {
@@ -41,7 +43,7 @@ func (s *TelegramReceiverStore) ResolveTelegramWorkStatusTarget(ctx context.Cont
 	var target TelegramOperationTarget
 
 	if _, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType); !allowed {
-		return target, ErrWorkflowConflict
+		return target, workflowstate.ErrConflict
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
@@ -56,7 +58,7 @@ func (s *TelegramReceiverStore) ResolveTelegramWorkStatusTarget(ctx context.Cont
 		}
 
 		if id == "" || input.Conversation != "" && input.Conversation != id {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		conversation, err := op.conversation(id)
@@ -98,7 +100,7 @@ func (s *TelegramReceiverStore) QueueTelegramWorkStatus(ctx context.Context, inp
 		}
 
 		if current != target || invocation == "" || conversation.InvocationID != invocation {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := queueTelegramPresentation(ctx, tx, input.Update, message, input.Config.Digest(), now); err != nil {

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GenerateGuidedSpec generates, saves and approves only the current run's specification.
@@ -35,7 +36,7 @@ func (s service) GenerateGuidedSpec(ctx context.Context, command core.GuidedUseC
 
 func (s service) generateGuidedSpec(ctx context.Context, session *core.AuthoringSession) error {
 	if session.Guided.Stage != "specification" {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	operation := session.Guided.PendingOperation

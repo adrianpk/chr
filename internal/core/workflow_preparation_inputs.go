@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func observeWorkflowPublicationCapability(ctx context.Context, provider WorkflowPublicationGuardProvider, source WorkflowReviewInput) (WorkflowPublicationCapability, error) {
@@ -17,7 +19,7 @@ func observeWorkflowPublicationCapability(ctx context.Context, provider Workflow
 	}
 
 	if head != source.PullRequest.HeadCommit {
-		return WorkflowPublicationCapability{}, ErrWorkflowConflict
+		return WorkflowPublicationCapability{}, workflowstate.ErrConflict
 	}
 
 	capability, err := provider.WorkflowIntegrationCapability(ctx, source.PullRequest, source.Policy.Method)
@@ -30,7 +32,7 @@ func observeWorkflowPublicationCapability(ctx context.Context, provider Workflow
 
 func validateWorkflowPublicationCapability(source WorkflowReviewInput, capability WorkflowPublicationCapability) error {
 	if capability.Repository != source.PullRequest.Repository || capability.PullRequestURL != source.PullRequest.URL || capability.Method != source.Policy.Method || capability.Mechanism == "" || len(capability.Mechanism) > 128 || len(capability.Revision) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !capability.AtomicSourceBase || !capability.ExactResult {
@@ -71,7 +73,7 @@ func (s *WorkflowStore) checkWorkflowPublicationGuard(ctx context.Context, run w
 	}
 
 	if capability != candidate.Input.Capability || review.PreparationRef != run.Preparation.ResultRef || review.PreparationHash != run.Preparation.ResultHash {
-		return WorkflowPublicationGuard{}, ErrWorkflowConflict
+		return WorkflowPublicationGuard{}, workflowstate.ErrConflict
 	}
 
 	return WorkflowPublicationGuard{PullRequest: review.PullRequest, Capability: capability, Git: candidate.Input.Git, PreparationRef: run.Preparation.ResultRef, PreparationHash: run.Preparation.ResultHash, ReviewHash: run.Review.InputHash, Policy: review.Policy}, nil
@@ -96,7 +98,7 @@ func (s *WorkflowStore) currentWorkflowPreparation(ctx context.Context, run work
 
 	hash, err := workflowReviewInputHash(source)
 	if err != nil || hash != run.Preparation.SourceHash {
-		return candidate, fmt.Errorf("%w: prepared source, base or current policy changed", ErrWorkflowConflict)
+		return candidate, fmt.Errorf("%w: prepared source, base or current policy changed", workflowstate.ErrConflict)
 	}
 
 	if err := s.checkWorkflowPreparationGit(ctx, candidate); err != nil {
@@ -117,11 +119,11 @@ func (s *WorkflowStore) checkWorkflowPreparationGit(ctx context.Context, candida
 	}
 
 	if err != nil {
-		return fmt.Errorf("%w: prepared lane changed: %w", ErrWorkflowConflict, err)
+		return fmt.Errorf("%w: prepared lane changed: %w", workflowstate.ErrConflict, err)
 	}
 
 	if commit != proof.ResultCommit || tree != proof.PreparedTree {
-		return fmt.Errorf("%w: prepared lane commit or tree changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: prepared lane commit or tree changed", workflowstate.ErrConflict)
 	}
 
 	reader := workflowIntegrationReader{dir: candidate.Lane.Worktree}
@@ -133,7 +135,7 @@ func (s *WorkflowStore) checkWorkflowPreparationGit(ctx context.Context, candida
 
 	observed.HistoryHash, err = workflowIntegrationHistoryHash(observed)
 	if err != nil || observed.BaseCommit != proof.BaseCommit || observed.HistoryHash != proof.HistoryHash || observed.VerifiedTree != proof.PreparedTree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -145,20 +147,20 @@ func validateWorkflowPreparationBinding(run workflowInvocationFile) error {
 	}
 
 	if run.PreparationCount < 0 || run.PreparationCount > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if run.Preparation == nil {
 		retained, _ := workflowRetainedRoleCounts(run)
 		if run.PreparationCount != retained {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
 	}
 
 	if !validWorkflowPreparationHeader(run) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowPreparationRefs(run.ID, *run.Preparation)
@@ -173,14 +175,14 @@ func validWorkflowPreparationHeader(run workflowInvocationFile) bool {
 func validateWorkflowPreparationRefs(id string, b WorkflowPreparationBinding) error {
 	if b.ResultRef == "" {
 		if b.State == "validated" || b.ResultHash != "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
 	}
 
 	if b.ResultRef != workflowPreparationPath(id, b.Round) || len(b.ResultHash) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

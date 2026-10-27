@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // BeginWorkflowMergerRepair prepares an owned private checkpoint. Conflicts are
@@ -39,7 +41,7 @@ func (git OSWorkflowPreparationGit) newMergerRepairReader(ctx context.Context, q
 
 	parent := filepath.Dir(reader.dir)
 	if resolved, err := filepath.EvalSymlinks(parent); err != nil || resolved != parent {
-		return reader, ErrWorkflowConflict
+		return reader, workflowstate.ErrConflict
 	}
 
 	if err := os.Mkdir(reader.dir, 0o700); err != nil {
@@ -71,12 +73,12 @@ func (git OSWorkflowPreparationGit) importMergerRepairObjects(ctx context.Contex
 
 	base, err := reader.output(ctx, "rev-parse", "refs/heads/target^{commit}")
 	if err != nil || base != query.BaseCommit {
-		return fmt.Errorf("%w: canonical base moved during repair preparation", ErrWorkflowConflict)
+		return fmt.Errorf("%w: canonical base moved during repair preparation", workflowstate.ErrConflict)
 	}
 
 	tree, err := reader.tree(ctx, query.SourceCommit)
 	if err != nil || tree != query.SourceTree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	proof := workflowMergerRepairProof(WorkflowMergerRepairState{Query: query})

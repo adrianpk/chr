@@ -8,10 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-)
 
-// ErrWorkflowConflict requires fresh observation or explicit reconciliation.
-var ErrWorkflowConflict = errors.New("workflow revision or image conflict")
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // ErrNotWorkflow excludes unadopted documents from executable state.
 var ErrNotWorkflow = errors.New("document is not an adopted workflow record")
@@ -202,7 +201,7 @@ func (s *WorkflowStore) guardWrite(r *WorkflowRecord, expected uint64) error {
 	}
 
 	if conflictingWorkflowImage(old, *r, expected) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.guardBoundWorkflowTaskOrder(old, *r); err != nil {
@@ -245,7 +244,7 @@ func guardWorkflowDomain(old, next WorkflowRecord) error {
 
 func guardWorkflowTaskChange(oldTask, nextTask *WorkflowTask) error {
 	if oldTask.Key != nextTask.Key || oldTask.ClaimGeneration != nextTask.ClaimGeneration || oldTask.AttemptID != nextTask.AttemptID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	changed := oldTask.SetID != nextTask.SetID || oldTask.SliceID != nextTask.SliceID || oldTask.Order != nextTask.Order

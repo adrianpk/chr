@@ -7,6 +7,9 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) beginWorkflowSubmission(ctx context.Context, id string, provider WorkflowPublicationProvider, git WorkflowIntegrationGit) (submission WorkflowSubmission, submit bool, err error) {
@@ -66,7 +69,7 @@ func (s *WorkflowStore) loadWorkflowSubmissionJournal(ctx context.Context, run w
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if errors.Is(err, os.ErrNotExist) {
 		if run.Submission != nil && run.Lane != nil && run.Submission.Unit == run.Lane.Unit {
-			return journal, ErrWorkflowConflict
+			return journal, workflowstate.ErrConflict
 		}
 
 		return workflowSubmissionJournal{}, nil
@@ -172,7 +175,7 @@ func (s *WorkflowStore) persistWorkflowSubmissionIntent(ctx context.Context, run
 }
 
 func workflowSubmissionID(key string, number int, preparationHash string) string {
-	return "chr-submission-" + workflowHash([]byte(key+":"+strconv.Itoa(number)+":"+preparationHash))
+	return "chr-submission-" + contenthash.Sum([]byte(key+":"+strconv.Itoa(number)+":"+preparationHash))
 }
 
 func (s *WorkflowStore) projectWorkflowSubmission(run *workflowInvocationFile, journal workflowSubmissionJournal) error {

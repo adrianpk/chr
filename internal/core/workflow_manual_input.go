@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) loadWorkflowManualTask(ctx context.Context, claim *WorkflowClaim, execute bool) (prepared workflowPreparedTask, err error) {
@@ -56,7 +59,7 @@ func (s *WorkflowStore) loadWorkflowManualInput(run workflowInvocationFile, reco
 func (s *WorkflowStore) readWorkflowManualInput(attempt WorkflowAttempt) (workflowPreparedTask, error) {
 	path, err := s.safePath(attempt.InputRef)
 	if err != nil || attempt.InputRef == "" {
-		return workflowPreparedTask{}, ErrWorkflowConflict
+		return workflowPreparedTask{}, workflowstate.ErrConflict
 	}
 
 	data, err := readWorkflowFile(path)
@@ -64,8 +67,8 @@ func (s *WorkflowStore) readWorkflowManualInput(attempt WorkflowAttempt) (workfl
 		return workflowPreparedTask{}, err
 	}
 
-	if workflowHash(data) != attempt.InputHash {
-		return workflowPreparedTask{}, ErrWorkflowConflict
+	if contenthash.Sum(data) != attempt.InputHash {
+		return workflowPreparedTask{}, workflowstate.ErrConflict
 	}
 
 	var input WorkflowTaskInput
@@ -94,7 +97,7 @@ func validateWorkflowManualCandidate(candidate WorkflowManualCandidate) error {
 
 func (s *WorkflowStore) checkWorkflowManualCandidate(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, candidate WorkflowManualCandidate) error {
 	if candidate.InputHash != prepared.inputHash || candidate.Branch != prepared.input.Lane.Branch {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	commit, tree, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
@@ -103,7 +106,7 @@ func (s *WorkflowStore) checkWorkflowManualCandidate(ctx context.Context, claim 
 	}
 
 	if commit != candidate.Commit || tree != candidate.Tree {
-		return fmt.Errorf("%w: reported manual candidate differs from actual Git image", ErrWorkflowConflict)
+		return fmt.Errorf("%w: reported manual candidate differs from actual Git image", workflowstate.ErrConflict)
 	}
 
 	return s.checkWorkflowValidationImage(ctx, claim, prepared, WorkflowTaskResult{WorkflowTaskValidation: WorkflowTaskValidation{Commit: commit, Tree: tree}})

@@ -8,6 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReadWorkflow observes a retained invocation; its private token hashes stay private.
@@ -50,7 +54,7 @@ func (s *WorkflowStore) readWorkflowInvocation(id string) (workflowInvocationFil
 		return run, fmt.Errorf("foreign workflow invocation scope")
 	}
 
-	run.sourceHash = workflowHash(data)
+	run.sourceHash = contenthash.Sum(data)
 
 	return run, validateWorkflowInvocation(run)
 }
@@ -168,7 +172,7 @@ func (s *WorkflowStore) appendObservedWorkflowInvocation(runs *[]workflowInvocat
 
 	outside := !owners[run.OwnerRoot]
 	if outside && !workflowInvocationTerminal(run.Status) {
-		return fmt.Errorf("%w: invocation owner is outside this repository coordinator", ErrWorkflowConflict)
+		return fmt.Errorf("%w: invocation owner is outside this repository coordinator", workflowstate.ErrConflict)
 	}
 	// A Git copy cannot claim work. Terminal copies retain retry identity as history.
 	if run.OwnerRoot == s.layout.Root() || outside {
@@ -223,7 +227,7 @@ func (s *WorkflowStore) workflowWorktreeLayouts(projectDir string) ([]OpsLayout,
 	names := []string{s.layout.Namespace(), DefaultOpsNamespace}
 
 	for _, entry := range entries {
-		if entry.IsDir() && IsValidOpsNamespace(entry.Name()) {
+		if entry.IsDir() && opsnamespace.Valid(entry.Name()) {
 			names = append(names, entry.Name())
 		}
 	}

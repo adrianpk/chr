@@ -11,6 +11,8 @@ import (
 	"strings"
 	"syscall"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestWorkflowUpgradeRecovery checks each durable policy boundary. Ordinary
@@ -82,7 +84,7 @@ func checkWorkflowUpgradePendingDomain(t *testing.T, store *WorkflowStore) {
 // before enabling policy, preserving identities and excluding a foreign retry.
 func TestWorkflowUpgradeAdoptionRecovery(t *testing.T) {
 	store, selection := workflowPlanAdoptionFixture(t)
-	opts := WorkflowUpgradeOptions{ExpectedRevision: workflowHash(nil), StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
+	opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: WorkStateAuthorityTickets, Adoption: &selection, CheckQuiescent: func(context.Context) error { return nil }}
 	writes := 0
 
 	store.afterReplace = func(int) error {
@@ -222,7 +224,7 @@ func TestWorkflowUpgradePath(t *testing.T) {
 			image := workflowUpgradeInvalidImage(kind)
 			writeWorkflowUpgradeInvalid(t, kind, path, image)
 
-			opts.ExpectedRevision = workflowHash(image)
+			opts.ExpectedRevision = contenthash.Sum(image)
 			if _, err := store.UpgradeWorkflowConfiguration(t.Context(), opts); err == nil {
 				t.Fatal("unsafe policy path accepted")
 			}
@@ -283,7 +285,7 @@ func TestWorkflowUpgradeProcess(t *testing.T) {
 	}
 
 	store := NewWorkflowStore(layout, "project-1")
-	opts := WorkflowUpgradeOptions{ExpectedRevision: workflowHash(nil), StateAuthority: WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
+	opts := WorkflowUpgradeOptions{ExpectedRevision: contenthash.Sum(nil), StateAuthority: WorkStateAuthorityTickets, CheckQuiescent: func(context.Context) error { return nil }}
 
 	store.afterReplace = func(stage int) error {
 		if stage == 2 {

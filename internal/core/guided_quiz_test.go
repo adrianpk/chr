@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseQuizSufficiency requires an answered, owner-confirmed complete quiz.
@@ -61,7 +64,7 @@ func TestGuidedUseCaseQuizLegacy(t *testing.T) {
 // TestGuidedUseCaseQuizOwner prevents progression writes outside the existing mutation claim.
 func TestGuidedUseCaseQuizOwner(t *testing.T) {
 	root, session := guidedCaptureFixture(t)
-	if err := RetainGuidedUseCaseProgress(t.Context(), root, &session); err == nil || errors.Is(err, ErrWorkflowConflict) {
+	if err := RetainGuidedUseCaseProgress(t.Context(), root, &session); err == nil || errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("unexpected owner boundary: %v", err)
 	}
 }
@@ -78,7 +81,7 @@ func TestGuidedUseCaseQuizCheckpoint(t *testing.T) {
 	scope := QuizScope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}
 	paths, result := completedGuidedQuizFixture(t, root, scope)
 	session.Guided.Quiz = &GuidedQuizState{SessionID: result.State.SessionID, Revision: result.State.Revision}
-	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-quiz", Action: "answer", Digest: workflowHash([]byte("seal-quiz"))}
+	session.Guided.PendingOperation = &GuidedUseCaseOperation{ID: "seal-quiz", Action: "answer", Digest: contenthash.Sum([]byte("seal-quiz"))}
 	r := &fileAuthoringSessionRepository{projectDir: root}
 
 	var original string

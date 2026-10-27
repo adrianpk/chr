@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationAnswer is an explicit, attributable response. Resolve
@@ -66,7 +68,7 @@ func (s *WorkflowStore) ReadWorkflowIntegrationDecisions(ctx context.Context, id
 		}
 
 		if run.Integration == nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		entry, readErr := owner.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -112,7 +114,7 @@ func (s *WorkflowStore) RecordWorkflowIntegrationDecisions(ctx context.Context, 
 func (s *WorkflowStore) AnswerWorkflowIntegrationDecision(ctx context.Context, request WorkflowIntegrationAnswerRequest, provider WorkflowPullRequestProvider) (result WorkflowIntegrationDecisions, err error) {
 	data, err := json.Marshal(request)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	var frozen WorkflowIntegrationAnswerRequest
@@ -137,7 +139,7 @@ func (s *WorkflowStore) AnswerWorkflowIntegrationDecision(ctx context.Context, r
 func freezeWorkflowDecisionRequest(request WorkflowIntegrationDecisionRequest) (WorkflowIntegrationDecisionRequest, error) {
 	data, err := json.Marshal(request)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return WorkflowIntegrationDecisionRequest{}, ErrWorkflowConflict
+		return WorkflowIntegrationDecisionRequest{}, workflowstate.ErrConflict
 	}
 
 	var frozen WorkflowIntegrationDecisionRequest

@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowCandidateRepairBinding retains actionable combined-result evidence.
@@ -71,7 +73,7 @@ func (s *WorkflowStore) repairWorkflowReviewedSlice(ctx context.Context, id, key
 
 func (s *WorkflowStore) repairWorkflowNativeReview(ctx context.Context, run workflowInvocationFile, key string, provider WorkflowPullRequestProvider) error {
 	if run.Review.State != "needs_repair" || run.Review.RepairTaskKey != key {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if run.CandidateRepair != nil && workflowCandidateRepairFindingMatches(*run.CandidateRepair, run.Review) {
@@ -104,7 +106,7 @@ func (s *WorkflowStore) readWorkflowCandidateRepair(run workflowInvocationFile) 
 
 	b := run.CandidateRepair
 	if b == nil || run.Integration == nil || run.Lane == nil || b.EntryID != run.Integration.EntryID || b.Unit != run.Lane.Unit {
-		return repair, ErrWorkflowConflict
+		return repair, workflowstate.ErrConflict
 	}
 
 	if err := s.readWorkflowNativeEvidence(run.ID, b.RecordRef, &repair); err != nil {
@@ -112,7 +114,7 @@ func (s *WorkflowStore) readWorkflowCandidateRepair(run workflowInvocationFile) 
 	}
 
 	if !validWorkflowCandidateRepairRecord(run, repair) {
-		return repair, ErrWorkflowConflict
+		return repair, workflowstate.ErrConflict
 	}
 
 	for _, ref := range repair.FindingRefs {

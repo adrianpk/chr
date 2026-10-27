@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func guidedProgressKey(operations service, scope core.GuidedUseCaseScope) string {
@@ -149,7 +150,7 @@ func (host *guidedWorkHost) activateRetained(operations service, session core.Au
 
 func (operations service) checkGuidedActivation(ctx context.Context, run core.WorkflowInvocation) error {
 	if run.Admission == nil || run.Admission.Guided == nil {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	scope := core.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
@@ -160,7 +161,7 @@ func (operations service) checkGuidedActivation(ctx context.Context, run core.Wo
 	}
 
 	if !guidedInvocationMatches(run, session) {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !core.GuidedDispatchAllowed(session) {

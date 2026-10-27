@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Lost acknowledgements at every replacement recover body, components, pointer
@@ -73,7 +75,7 @@ func checkDumpMutationFault(t *testing.T, action string, fault int) {
 		t.Fatal("fault not exercised")
 	}
 
-	if _, err := ObserveProjectDump(t.Context(), project); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ObserveProjectDump(t.Context(), project); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("partial capture was readable", err)
 	}
 
@@ -116,7 +118,7 @@ func TestDumpMutationPreparedRetry(t *testing.T) {
 	changed := request
 
 	changed.Content = "Changed payload."
-	if _, err := MutateDump(t.Context(), project, changed, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateDump(t.Context(), project, changed, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("reserved operation accepted changed payload", err)
 	}
 
@@ -170,7 +172,7 @@ func TestDumpMutationPointerConflict(t *testing.T) {
 	path := ProjectMetadataPath(project)
 	writeTestFile(t, path, "Independent project metadata.\n")
 
-	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateDump(t.Context(), project, request, nil); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("recovery replaced divergent project metadata", err)
 	}
 

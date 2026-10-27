@@ -1,5 +1,7 @@
 package core
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 func telegramGuidedActionRecovering(claim *TelegramActionClaim) bool {
 	return claim.Request.OperationID == "guided.step" && claim.Action.State == "applying" && claim.Request.State == "applying"
 }
@@ -28,7 +30,7 @@ func claimTelegramGuidedRecovery(op telegramConversationTransaction, claim *Tele
 	}
 
 	if current.GuidedRunID == "" || current.Revision < claim.Request.Target.ConversationRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateTelegramGuidedRecoveryTarget(op, current, claim.Request); err != nil {
@@ -44,7 +46,7 @@ func claimTelegramGuidedRecovery(op telegramConversationTransaction, claim *Tele
 
 func validateTelegramGuidedRecoveryTarget(op telegramConversationTransaction, current TelegramConversation, request TelegramOperationRequest) error {
 	if request.Source.Peer != op.input.Update.Peer {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	target := request.Target

@@ -10,6 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrWorkflowAuthority prevents legacy execution of an adopted task or projection.
@@ -113,7 +116,7 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 		}
 
 		if !bytes.Equal(current, observed) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return atomicWorkflowFile(path, replacement)
@@ -132,7 +135,7 @@ func writeLegacyTicketFile(ctx context.Context, path string, observed, replaceme
 	}
 
 	parts := strings.Split(filepath.ToSlash(relative), "/")
-	if len(parts) > 2 && parts[0] == OpsDirectoryName && IsValidOpsNamespace(parts[1]) {
+	if len(parts) > 2 && parts[0] == OpsDirectoryName && opsnamespace.Valid(parts[1]) {
 		layout.namespace = parts[1]
 	}
 

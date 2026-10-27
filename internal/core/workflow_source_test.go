@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSource pushes one retained validated source, retries idempotently
@@ -25,7 +27,7 @@ func TestWorkflowSource(t *testing.T) {
 	target := checkWorkflowSourceTarget(t, store, candidate, remote, request.Selection.Target.Commit)
 	workflowSelectionGit(t, store, "push", "--force", remote, target+":"+candidate.Lane.Branch)
 
-	if err := store.PublishWorkflowSource(t.Context(), run.ID, publisher); !errors.Is(err, ErrWorkflowConflict) {
+	if err := store.PublishWorkflowSource(t.Context(), run.ID, publisher); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("source collision overwritten", err)
 	}
 
@@ -81,7 +83,7 @@ func TestWorkflowSourceCorruption(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.PublishWorkflowSource(t.Context(), run.ID, NewWorkflowIntegrationGit(request.Selection.Target.Repository, filepath.Join(t.TempDir(), "absent.git"))); !errors.Is(err, ErrWorkflowConflict) {
+	if err := store.PublishWorkflowSource(t.Context(), run.ID, NewWorkflowIntegrationGit(request.Selection.Target.Repository, filepath.Join(t.TempDir(), "absent.git"))); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("source IO preceded evidence guard", err)
 	}
 }

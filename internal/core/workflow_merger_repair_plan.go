@@ -4,6 +4,8 @@ import (
 	"context"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PlanWorkflowMergerRepair selects a source-owned semantic repair or requests
@@ -11,7 +13,7 @@ import (
 func PlanWorkflowMergerRepair(ctx context.Context, directory string, input WorkflowMergerInput, proof WorkflowIntegrationProof, fix *AgenticReviewFinding) (WorkflowMergerRepairPlan, error) {
 	plan := WorkflowMergerRepairPlan{InputHash: input.InputHash}
 	if validateWorkflowMergerInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof) != nil || !workflowMergerRepairIdentity(input, proof) {
-		return plan, ErrWorkflowConflict
+		return plan, workflowstate.ErrConflict
 	}
 
 	decisions, err := WorkflowMergerRequiredDecisions(input)
@@ -108,7 +110,7 @@ func workflowMergerSemanticPlan(plan WorkflowMergerRepairPlan, input WorkflowMer
 
 	if fix != nil {
 		if validateAgenticReviewFinding(*fix) != nil || fix.Category == AgenticReviewFindingCosmetic {
-			return plan, ErrWorkflowConflict
+			return plan, workflowstate.ErrConflict
 		}
 
 		finding := *fix

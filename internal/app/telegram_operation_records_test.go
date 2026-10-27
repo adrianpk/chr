@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramOperationTestService(t *testing.T) service {
@@ -83,7 +84,7 @@ func TestTelegramOperationTicketRecords(t *testing.T) {
 	}
 
 	_, err = operations.PrepareRecordMutation(t.Context(), "default", core.WorkflowMutationBinding{RequestID: "stale", Operator: "maintainer"}, RecordMutationRequest{Kind: RecordTicket, Action: "update", Identity: first.Record.Identity, ExpectedRevision: first.Record.Revision, ExpectedHash: first.Record.SourceHash, Title: telegramRecordText("stale")})
-	if !errors.Is(err, core.ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale ticket observation accepted", err)
 	}
 }
@@ -181,7 +182,7 @@ func TestTelegramOperationRecordGuards(t *testing.T) {
 
 	writeServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, "ops", "default", "plan", "contract.json"), "changed")
 
-	if _, err := operations.ApplyPreparedRecordMutation(t.Context(), prepared); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.ApplyPreparedRecordMutation(t.Context(), prepared); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed contract accepted", err)
 	}
 }

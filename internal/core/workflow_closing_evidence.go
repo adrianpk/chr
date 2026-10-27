@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowClosingFile(id string, generation int, name string) string {
@@ -53,7 +56,7 @@ func (s *WorkflowStore) checkWorkflowClosingInputs(ctx context.Context, claim *w
 	}
 
 	if set.Revision != claim.set.Revision || set.SourceHash != claim.set.SourceHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowClosingMembers(ctx, claim, set); err != nil {
@@ -66,7 +69,7 @@ func (s *WorkflowStore) checkWorkflowClosingInputs(ctx context.Context, claim *w
 	}
 
 	data, err := s.workflowClosingRead(claim.state.Input.Ref)
-	if err != nil || workflowHash(data) != claim.state.Input.Hash {
+	if err != nil || contenthash.Sum(data) != claim.state.Input.Hash {
 		return errorsOrConflict(err)
 	}
 
@@ -80,7 +83,7 @@ func (s *WorkflowStore) checkWorkflowClosingMembers(ctx context.Context, claim *
 	}
 
 	if !reflect.DeepEqual(members, claim.input.Members) {
-		return fmt.Errorf("%w: actual closing members changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: actual closing members changed", workflowstate.ErrConflict)
 	}
 
 	return s.checkWorkflowIntegrationSetReceipts(ctx, set)
@@ -90,7 +93,7 @@ func (s *WorkflowStore) readWorkflowClosingAttempt(set WorkflowRecord, index int
 	binding := set.Set.Closing.Attempts[index]
 
 	data, err := s.workflowClosingRead(binding.Ref)
-	if err != nil || workflowHash(data) != binding.Hash {
+	if err != nil || contenthash.Sum(data) != binding.Hash {
 		return workflowClosingAttempt{}, errorsOrConflict(err)
 	}
 
@@ -104,7 +107,7 @@ func (s *WorkflowStore) readWorkflowClosingAttempt(set WorkflowRecord, index int
 
 func (s *WorkflowStore) readWorkflowClosedSet(set WorkflowRecord) (WorkflowSetClosureResult, error) {
 	if set.Set.Closing == nil || len(set.Set.Closing.Attempts) == 0 {
-		return WorkflowSetClosureResult{}, ErrWorkflowConflict
+		return WorkflowSetClosureResult{}, workflowstate.ErrConflict
 	}
 
 	state, err := s.readWorkflowClosingAttempt(set, len(set.Set.Closing.Attempts)-1)
@@ -122,7 +125,7 @@ func (s *WorkflowStore) readWorkflowClosedSet(set WorkflowRecord) (WorkflowSetCl
 
 func (s *WorkflowStore) readWorkflowClosingReceipt(state workflowClosingAttempt) (WorkflowClosingReceipt, error) {
 	data, err := s.workflowClosingRead(state.Result.Ref)
-	if err != nil || workflowHash(data) != state.Result.Hash {
+	if err != nil || contenthash.Sum(data) != state.Result.Hash {
 		return WorkflowClosingReceipt{}, errorsOrConflict(err)
 	}
 
@@ -132,7 +135,7 @@ func (s *WorkflowStore) readWorkflowClosingReceipt(state workflowClosingAttempt)
 	}
 
 	if receipt.Schema != "chr-set-closure/v1" || receipt.SetID != state.SetID || receipt.Outcome != state.Outcome || receipt.Input != state.Input || receipt.ConfirmedAt != state.FinishedAt {
-		return receipt, ErrWorkflowConflict
+		return receipt, workflowstate.ErrConflict
 	}
 
 	return receipt, nil
@@ -162,7 +165,7 @@ func (s *WorkflowStore) checkWorkflowClosingResult(state workflowClosingAttempt)
 
 	retained.Schema = input.Schema
 	if input.Schema != "chr-set-closing-input/v1" || !reflect.DeepEqual(retained, input) || receipt.Waiver != input.Validation.WaiverReason {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowClosingResults(input.Validation, receipt)
@@ -170,12 +173,12 @@ func (s *WorkflowStore) checkWorkflowClosingResult(state workflowClosingAttempt)
 
 func validateWorkflowClosingResults(gate WorkflowValidation, receipt WorkflowClosingReceipt) error {
 	if len(receipt.Validation) > len(gate.Commands) || receipt.Outcome == "completed" && len(receipt.Validation) != len(gate.Commands) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, result := range receipt.Validation {
 		if !reflect.DeepEqual(result.Command, gate.Commands[i]) || receipt.Outcome == "completed" && result.ExitCode != 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

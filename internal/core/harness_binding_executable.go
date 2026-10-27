@@ -11,6 +11,9 @@ import (
 	"path/filepath"
 	"slices"
 	"syscall"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const harnessExecutableLimit = 512 << 20
@@ -47,7 +50,7 @@ func FreezeHarnessExecutable(command []string) (HarnessExecutableRef, []string, 
 
 	data, err := json.Marshal(retained)
 
-	return HarnessExecutableRef{Hash: hash, CommandHash: workflowHash(data)}, retained, err
+	return HarnessExecutableRef{Hash: hash, CommandHash: contenthash.Sum(data)}, retained, err
 }
 
 func harnessExecutableHash(program string) (string, error) {
@@ -88,12 +91,12 @@ func checkHarnessCommandImage(binding HarnessBinding, command []string) error {
 	}
 
 	if !filepath.IsAbs(command[0]) || filepath.Clean(command[0]) != command[0] {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	data, err := json.Marshal(command)
-	if err != nil || workflowHash(data) != binding.ExecutableRef.CommandHash {
-		return ErrWorkflowConflict
+	if err != nil || contenthash.Sum(data) != binding.ExecutableRef.CommandHash {
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -110,7 +113,7 @@ func checkHarnessExecutable(binding *HarnessBinding, command []string) error {
 
 	resolved, err := filepath.EvalSymlinks(command[0])
 	if err != nil || resolved != command[0] {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	hash, err := harnessExecutableHash(resolved)

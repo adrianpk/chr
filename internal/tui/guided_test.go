@@ -1,5 +1,7 @@
 package tui
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 import (
 	"errors"
 	"strings"
@@ -34,7 +36,7 @@ func TestGuidedUseCaseTUIStaleInput(t *testing.T) {
 	m.guidedExecutor = guidedTestExecutor(func(request GuidedRequest) (GuidedView, error) {
 		submitted = request
 
-		return GuidedView{}, core.ErrWorkflowConflict
+		return GuidedView{}, workflowstate.ErrConflict
 	})
 
 	updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("e")})

@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) newWorkflowControlCommit(request WorkflowControlMutationRequest, digest string, check WorkflowAdmissionCheck) *workflowControlCommit {
@@ -39,7 +41,7 @@ func (s *WorkflowStore) workflowClosingControlFiles(ctx context.Context, claim *
 	}
 
 	if claim.state.InvocationID != control.receipt.Result.InvocationID {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	run, err := s.readWorkflowInvocation(claim.state.InvocationID)

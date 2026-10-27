@@ -7,6 +7,9 @@ import (
 	"io/fs"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ConfirmWorkflowNativeReceipt seals delivery from retained host evidence for
@@ -44,7 +47,7 @@ func (s *WorkflowStore) confirmWorkflowNativeReceipt(ctx context.Context, run wo
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.Native == nil || !workflowNativeSubmissionEntryMatches(last, entry) {
-		return WorkflowRecord{}, ErrWorkflowConflict
+		return WorkflowRecord{}, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, last); err != nil {
@@ -112,7 +115,7 @@ func (s *WorkflowStore) workflowNativeReceiptObservation(submission WorkflowSubm
 }
 
 func workflowNativeReceiptID(run workflowInvocationFile, submission WorkflowSubmission) string {
-	return "delivery-" + workflowHash([]byte(run.ID+"\x00"+submission.CandidateID+"\x00"+submission.ID))
+	return "delivery-" + contenthash.Sum([]byte(run.ID+"\x00"+submission.CandidateID+"\x00"+submission.ID))
 }
 
 func workflowNativeReceiptPath(run workflowInvocationFile, submission WorkflowSubmission) string {
@@ -149,11 +152,11 @@ func (s *WorkflowStore) workflowNativeReceipt(run workflowInvocationFile, submis
 
 func (s *WorkflowStore) checkWorkflowNativeRetainedReceipt(run workflowInvocationFile, submission WorkflowSubmission, record WorkflowRecord) error {
 	if record.ID != workflowNativeReceiptID(run, submission) || record.ProjectID != run.ProjectID || record.Namespace != run.Namespace || !workflowNativeSubmissionReceiptMatches(submission, record) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if submission.Native.ReceiptRef != nil && *submission.Native.ReceiptRef != (WorkflowEvidenceRef{Path: record.Path, Hash: record.SourceHash}) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.checkWorkflowNativeReceipt(record)

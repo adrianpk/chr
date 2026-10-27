@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReconcileWorkflow fences an expired or dead owner after proving its group dead
@@ -64,7 +67,7 @@ func (s *WorkflowStore) reconcileWorkflowInvocation(ctx context.Context, run wor
 
 func workflowRecoverableOwner(attempt WorkflowAttempt) error {
 	if attempt.OwnerProcess == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	alive, err := workflowProcessAlive(*attempt.OwnerProcess)
@@ -153,7 +156,7 @@ func (s *WorkflowStore) recoverWorkflowAttempt(ctx context.Context, run workflow
 	}
 
 	if record.Task.AttemptID != attempt.ID || record.Task.ClaimGeneration != attempt.Generation {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	files, err := control.files(ctx, run.Revision+1)
@@ -184,8 +187,8 @@ func recoveredWorkflowLock(path, invocationID string, attempt WorkflowAttempt) (
 	}
 
 	if lock.AttemptID != attempt.ID || lock.Process == nil || attempt.OwnerProcess == nil || *lock.Process != *attempt.OwnerProcess {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
-	return &AgentOperationLock{path: path, guard: workflowHash(data)}, nil
+	return &AgentOperationLock{path: path, guard: contenthash.Sum(data)}, nil
 }

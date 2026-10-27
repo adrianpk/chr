@@ -1,6 +1,10 @@
 package core
 
-import "testing"
+import (
+	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+)
 
 // TestNativePreparedSnapshot accepts existing immutable upgrade records with
 // either prior option set. Omitted fields cannot conceal a changed policy.
@@ -47,7 +51,7 @@ func nativePreparedSnapshot(t *testing.T, keys []string) {
 
 	changed := []byte("review:\n  mode: human_review\nwork:\n  integration:\n    max_prepared_per_target: 3\n")
 
-	prior.Revision = workflowHash(changed)
+	prior.Revision = contenthash.Sum(changed)
 	if err := checkWorkflowUpgradePolicy(changed, prior); err == nil {
 		t.Fatal("snapshot accepted a changed or omitted preparation limit")
 	}

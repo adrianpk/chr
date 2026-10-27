@@ -7,6 +7,8 @@ import (
 	"io"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowMergerFence is the host's current immutable acceptance identity.
@@ -38,7 +40,7 @@ func ParseWorkflowMergerResult(data []byte, input WorkflowMergerInput, current W
 	}
 
 	if workflowMergerFence(input) != current {
-		return result, fmt.Errorf("%w: merger generation or candidate is stale", ErrWorkflowConflict)
+		return result, fmt.Errorf("%w: merger generation or candidate is stale", workflowstate.ErrConflict)
 	}
 
 	if err := decodeWorkflowMergerResult(data, &result); err != nil {
@@ -54,7 +56,7 @@ func ParseWorkflowMergerResult(data []byte, input WorkflowMergerInput, current W
 
 func decodeWorkflowMergerResult(data []byte, result *WorkflowMergerResult) error {
 	if len(data) == 0 || len(data) > WorkflowFileLimit {
-		return fmt.Errorf("%w: merger result exceeds file bound", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger result exceeds file bound", workflowstate.ErrConflict)
 	}
 
 	if err := checkWorkflowMergerJSON(data); err != nil {
@@ -65,11 +67,11 @@ func decodeWorkflowMergerResult(data []byte, result *WorkflowMergerResult) error
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(result); err != nil {
-		return fmt.Errorf("%w: invalid merger result: %w", ErrWorkflowConflict, err)
+		return fmt.Errorf("%w: invalid merger result: %w", workflowstate.ErrConflict, err)
 	}
 
 	if err := decoder.Decode(&struct{}{}); err != io.EOF {
-		return fmt.Errorf("%w: merger result contains trailing output", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger result contains trailing output", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -77,7 +79,7 @@ func decodeWorkflowMergerResult(data []byte, result *WorkflowMergerResult) error
 
 func validateWorkflowMergerResult(result WorkflowMergerResult, input WorkflowMergerInput) error {
 	if result.ProtocolVersion != input.ProtocolVersion || result.InputHash != input.InputHash || !slices.Contains([]string{"resolved", "needs_decision", "failed"}, result.Outcome) {
-		return fmt.Errorf("%w: merger result version or input is stale", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger result version or input is stale", workflowstate.ErrConflict)
 	}
 
 	if err := validateWorkflowMergerPaths(result.ChangedPaths); err != nil {
@@ -86,7 +88,7 @@ func validateWorkflowMergerResult(result WorkflowMergerResult, input WorkflowMer
 
 	for _, path := range result.ChangedPaths {
 		if !workflowMergerPathAllowed(input, path) {
-			return fmt.Errorf("%w: merger result escapes approved scope", ErrWorkflowConflict)
+			return fmt.Errorf("%w: merger result escapes approved scope", workflowstate.ErrConflict)
 		}
 	}
 
@@ -103,7 +105,7 @@ func validateWorkflowMergerResult(result WorkflowMergerResult, input WorkflowMer
 
 func validateWorkflowMergerResultEvidence(result WorkflowMergerResult, input WorkflowMergerInput) error {
 	if len(result.LocalCheckRefs) > 16 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, ref := range result.LocalCheckRefs {
@@ -128,11 +130,11 @@ func validateWorkflowMergerReportedUsage(usage *WorkflowMergerUsage, allowance *
 
 	total, err := workflowTokenSum(usage.Input, usage.Output)
 	if err != nil || !usage.WholeCall || !validWorkflowNativeFingerprint(usage.CapabilityRevision) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if allowance != nil && (usage.CapabilityRevision != allowance.CapabilityRevision || total > allowance.Maximum) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

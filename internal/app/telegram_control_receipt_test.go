@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramControlLostAck struct {
@@ -19,7 +20,7 @@ type telegramControlLostAck struct {
 func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, target core.TelegramOperationTarget, binding core.WorkflowMutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
 	status, err := s.service.ApplyTelegramControl(ctx, target, binding, request, check)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
-		return status, errors.Join(errTelegramLostRecordAck, core.ErrWorkflowConflict)
+		return status, errors.Join(errTelegramLostRecordAck, workflowstate.ErrConflict)
 	}
 
 	return status, err

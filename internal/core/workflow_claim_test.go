@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowClaimFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationResult, WorkflowStartRequest) {
@@ -181,7 +183,7 @@ func TestWorkflowClaimEdits(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, ErrWorkflowConflict) {
+	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("manual image overwritten by owner: %v", err)
 	}
 }
@@ -214,7 +216,7 @@ func TestWorkflowClaimFrozenInputs(t *testing.T) {
 			run := workflowTestStart(t, store, request)
 			tc.change(t, store, hierarchy)
 
-			if _, err := store.ClaimWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.ClaimWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed frozen input accepted: %v", err)
 			}
 		})
@@ -232,7 +234,7 @@ func TestWorkflowClaimPrerequisite(t *testing.T) {
 	}
 
 	request.Selection.Target.Commit = strings.Repeat("a", 40)
-	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed target reused request key: %v", err)
 	}
 }
@@ -262,7 +264,7 @@ func TestWorkflowClaimJournalGuard(t *testing.T) {
 
 		return store.commitWorkflowClaim(run, record)
 	})
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed pre-journal image accepted: %v", err)
 	}
 

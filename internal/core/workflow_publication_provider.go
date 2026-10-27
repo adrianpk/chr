@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // WorkflowIntegrationCapability reports the existing provider merge APIs'
@@ -25,7 +27,7 @@ func (adapter RemoteReviewAdapter) WorkflowIntegrationCapability(ctx context.Con
 
 	mechanism := string(reference.Provider) + "_merge_api_source_guard_only"
 
-	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: mechanism, Revision: workflowHash([]byte(mechanism + ":v1"))}, nil
+	return WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: mechanism, Revision: contenthash.Sum([]byte(mechanism + ":v1"))}, nil
 }
 
 // SubmitWorkflowIntegration refuses the current source-only merge APIs. It does

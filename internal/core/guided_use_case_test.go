@@ -10,6 +10,8 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseCaptureStart preserves identity and rejects changed start scope.
@@ -44,7 +46,7 @@ func TestGuidedUseCaseCaptureStart(t *testing.T) {
 	variants["intent"] = changed
 	for name, changed := range variants {
 		t.Run(name, func(t *testing.T) {
-			if _, err := StartGuidedUseCase(t.Context(), root, changed); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := StartGuidedUseCase(t.Context(), root, changed); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed start accepted: %v", err)
 			}
 		})
@@ -61,7 +63,7 @@ func TestGuidedUseCaseCaptureManual(t *testing.T) {
 	}
 
 	scope := GuidedUseCaseScope{RunID: first.ID, ProjectID: first.ProjectID, Namespace: first.Namespace}
-	if _, err := StartGuidedUseCase(t.Context(), root, GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := StartGuidedUseCase(t.Context(), root, GuidedUseCaseStart{GuidedUseCaseScope: scope, Actor: "operator", ProgressionIntent: true}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("adopted manual session: %v", err)
 	}
 
@@ -91,7 +93,7 @@ func TestGuidedUseCaseCaptureWrites(t *testing.T) {
 	}
 
 	command.Content = "Replacement"
-	if _, err := MutateGuidedUseCase(t.Context(), root, command); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := MutateGuidedUseCase(t.Context(), root, command); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed replay accepted: %v", err)
 	}
 }
@@ -124,7 +126,7 @@ func assertGuidedConcurrentWrites(t *testing.T, root string, command GuidedUseCa
 	for err := range results {
 		if err == nil {
 			successes++
-		} else if errors.Is(err, ErrWorkflowConflict) {
+		} else if errors.Is(err, workflowstate.ErrConflict) {
 			conflicts++
 		} else {
 			t.Fatal(err)

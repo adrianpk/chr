@@ -6,6 +6,7 @@ import (
 	"maps"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowStatusRequest bounds a retained invocation's member page.
@@ -129,7 +130,7 @@ func (s service) WorkflowStatus(ctx context.Context, id string, request Workflow
 	}
 
 	if request.ExpectedRevision != 0 && request.ExpectedRevision != inspection.Invocation.Revision {
-		return WorkflowWorkStatus{}, fmt.Errorf("%w: restart status pagination", core.ErrWorkflowConflict)
+		return WorkflowWorkStatus{}, fmt.Errorf("%w: restart status pagination", workflowstate.ErrConflict)
 	}
 
 	return workflowWorkStatus(inspection, request), nil

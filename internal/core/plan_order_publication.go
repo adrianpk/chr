@@ -9,6 +9,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target planTargetObservation, metadata map[string]any, plan GeneratedPlan, body []byte) ([]workflowFileChange, error) {
@@ -34,7 +38,7 @@ func preparePlanOrderChanges(projectDir string, paths GeneratedPlanPaths, target
 		return nil, err
 	}
 
-	binding.OrderHash, binding.TrackerHash = workflowHash(encoded), workflowHash(tracker)
+	binding.OrderHash, binding.TrackerHash = contenthash.Sum(encoded), contenthash.Sum(tracker)
 	binding.PlannedOrderHash, binding.PlannedTrackerHash = binding.OrderHash, binding.TrackerHash
 	r := &fileAuthoringSessionRepository{projectDir: projectDir}
 
@@ -72,7 +76,7 @@ func newPlanRevision(paths GeneratedPlanPaths, metadata map[string]any, plan Gen
 
 	parts := strings.Split(paths.RelativePath, "/")
 	reference := strings.Join(parts[2:], "/")
-	hash := workflowHash(body)
+	hash := contenthash.Sum(body)
 	retained := filepath.ToSlash(filepath.Join(filepath.Dir(reference), "files", "plan-revisions", fmt.Sprintf("%d-%s", revision, hash)))
 	binding := PlanRevisionBinding{Reference: reference, Revision: revision, BodyHash: hash, BodyRef: retained + "/plan.md", OrderRef: retained + "/order.json", TrackerRef: retained + "/tracker.md", CurrentTrackerRef: "tracker/00000-" + paths.ScopeID + "-tracking/artifact.md"}
 	document := PlanOrderDocument{Schema: "chr-tracker/v2", ProjectID: plan.Scope.ProjectID, Namespace: parts[1], PlanRef: reference, PlanRevision: revision, PlanBodyHash: hash, SourceObservationHash: plan.SourceObservationHash, SourceInputs: plan.SourceInputs, Slices: orderedPlanSlices(plan.Order)}
@@ -102,7 +106,7 @@ func (r *fileAuthoringSessionRepository) planRetainedImages(namespace string, bi
 	for i, reference := range refs {
 		path := filepath.ToSlash(filepath.Join(root, reference))
 		if _, err := r.authoringRead(path); !errors.Is(err, os.ErrNotExist) {
-			return nil, errors.Join(ErrWorkflowConflict, err)
+			return nil, errors.Join(workflowstate.ErrConflict, err)
 		}
 
 		changes = append(changes, workflowFileChange{Path: path, After: images[i]})
@@ -130,7 +134,7 @@ func (r *fileAuthoringSessionRepository) planCurrentTrackerChanges(namespace str
 	}
 
 	if (images[0].After == nil) != (images[1].After == nil) {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	if err := checkPreviousPlanTracker(target, images[0], plan.TrackerReplaceHash); err != nil {
@@ -198,7 +202,7 @@ func validPlanRevisionJournalPath(reference string) bool {
 func validPlanTrackerJournalPath(reference string) bool {
 	parts := strings.Split(filepath.ToSlash(reference), "/")
 
-	return len(parts) == 5 && parts[0] == "ops" && IsValidOpsNamespace(parts[1]) && parts[2] == "tracker" && opsArtifactIDPattern.MatchString(parts[3]) && (parts[4] == "artifact.md" || parts[4] == "metadata.json")
+	return len(parts) == 5 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "tracker" && opsArtifactIDPattern.MatchString(parts[3]) && (parts[4] == "artifact.md" || parts[4] == "metadata.json")
 }
 
 func appendPlanRevisionManifest(paths GeneratedPlanPaths, metadata map[string]any, changes []workflowFileChange) error {
@@ -245,7 +249,7 @@ func planCurrentTrackerMetadata(layout OpsLayout, reference string, plan Generat
 }
 
 func validPlanRevisionDirectory(parts []string) bool {
-	return len(parts) == 8 && parts[0] == "ops" && IsValidOpsNamespace(parts[1]) && parts[2] == "plan" && opsArtifactIDPattern.MatchString(parts[3]) && parts[4] == "files" && parts[5] == "plan-revisions"
+	return len(parts) == 8 && parts[0] == "ops" && opsnamespace.Valid(parts[1]) && parts[2] == "plan" && opsArtifactIDPattern.MatchString(parts[3]) && parts[4] == "files" && parts[5] == "plan-revisions"
 }
 
 func validPlanRevisionKey(value string) bool {
@@ -278,14 +282,14 @@ func planManifestFiles(value any) ([]any, error) {
 
 		return result, nil
 	default:
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 }
 
 func validatePlanTrackerMetadata(metadata map[string]any, reference string) error {
 	parts := strings.Split(reference, "/")
 	if metadata["schema_version"] != "ops-layout/v1" || metadata["type"] != "tracker" || metadata["namespace"] != parts[1] || metadata["id"] != parts[3] {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

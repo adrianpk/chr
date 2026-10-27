@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeSchedulePage(t *testing.T, store *WorkflowStore, q WorkflowIntegrationScheduleQuery) WorkflowIntegrationSchedulePage {
@@ -125,7 +127,7 @@ func checkNativeScheduleWait(t *testing.T, store, peer *WorkflowStore, entry Wor
 		t.Fatal("direct claim bypassed native pause or blocker", err)
 	}
 
-	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), WorkflowIntegrationScheduleQuery{Limit: 10, SnapshotHash: stale.SnapshotHash}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), WorkflowIntegrationScheduleQuery{Limit: 10, SnapshotHash: stale.SnapshotHash}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale selection acquired an owner", err)
 	}
 
@@ -185,7 +187,7 @@ func checkNativeScheduleReceiptBarrier(t *testing.T, store *WorkflowStore, hiera
 	}
 
 	next := WorkflowIntegrationAdmission{InvocationID: id, ExpectedRevision: before.Revision, Unit: WorkflowRef{Kind: "slice", ID: hierarchy.Set.Set.Slices[1].ID}, AdmissionKey: before.RequestKey, TargetRef: "refs/heads/dev"}
-	if _, err := store.AdmitWorkflowIntegration(t.Context(), next); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.AdmitWorkflowIntegration(t.Context(), next); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("future slice became an admitted unit", err)
 	}
 
@@ -236,7 +238,7 @@ func TestNativeScheduleNoReplay(t *testing.T) {
 	}
 
 	before := nativeQueueImages(t, peer.layout.Root())
-	if _, err := store.QueryWorkflowIntegrationSchedule(t.Context(), WorkflowIntegrationScheduleQuery{Limit: 10}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.QueryWorkflowIntegrationSchedule(t.Context(), WorkflowIntegrationScheduleQuery{Limit: 10}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("selection ignored an interrupted peer", err)
 	}
 
@@ -264,11 +266,11 @@ func TestNativeScheduleInputs(t *testing.T) {
 	before := nativeQueueImages(t, store.layout.Root())
 
 	_, err = store.QueryWorkflowIntegrationSchedule(t.Context(), WorkflowIntegrationScheduleQuery{Limit: 10})
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed admitted input became selectable", err)
 	}
 
-	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), WorkflowIntegrationScheduleQuery{Limit: 10}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), WorkflowIntegrationScheduleQuery{Limit: 10}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("scheduler claimed stale task input", err)
 	}
 

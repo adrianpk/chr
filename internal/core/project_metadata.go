@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // ProjectMetadataSchemaVersion defines a package boundary constant.
@@ -64,7 +66,7 @@ func (s ProjectMetadataService) Load() (ProjectMetadata, error) {
 	}
 
 	metadata.SourcePath = path
-	metadata.SourceHash = contentHash(content)
+	metadata.SourceHash = contenthash.Sum(content)
 	metadata.Exists = true
 
 	return metadata, nil
@@ -128,7 +130,7 @@ func (s ProjectMetadataService) save(metadata ProjectMetadata, bindDump bool) (P
 	}
 
 	metadata.SourcePath = path
-	metadata.SourceHash = contentHash([]byte(content))
+	metadata.SourceHash = contenthash.Sum([]byte(content))
 	metadata.Exists = true
 
 	return metadata, nil

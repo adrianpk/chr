@@ -9,6 +9,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowPublicationDirectory = "chr-workflow-publications"
@@ -26,21 +29,21 @@ type workflowSubmissionJournal struct {
 }
 
 func workflowSubmissionJournalKey(run workflowInvocationFile) string {
-	return workflowHash([]byte(run.OwnerRoot + "\n" + run.Namespace + "\n" + run.ID + "\n" + run.Lane.Unit.Kind + "\n" + run.Lane.Unit.ID))
+	return contenthash.Sum([]byte(run.OwnerRoot + "\n" + run.Namespace + "\n" + run.ID + "\n" + run.Lane.Unit.Kind + "\n" + run.Lane.Unit.ID))
 }
 
 func workflowSubmissionTargetKey(pr WorkflowPullRequestSnapshot) (string, error) {
 	repository, err := workflowCanonicalRepository(pr.Repository)
 	if err != nil || !validWorkflowPRBranch(pr.BaseBranch) {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
-	return workflowHash([]byte(repository + "\nrefs/heads/" + pr.BaseBranch)), nil
+	return contenthash.Sum([]byte(repository + "\nrefs/heads/" + pr.BaseBranch)), nil
 }
 
 func workflowSubmissionPath(ctx context.Context, projectDir, key string) (string, error) {
 	if _, err := hex.DecodeString(key); err != nil || len(key) != 64 {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	common, err := workflowRepositoryDirectory(ctx, projectDir)
@@ -75,9 +78,9 @@ func readWorkflowSubmissionFile(path string) (journal workflowSubmissionJournal,
 		return journal, err
 	}
 
-	journal.sourceHash = workflowHash(data)
+	journal.sourceHash = contenthash.Sum(data)
 	if filepath.Base(path) != journal.Key+".json" {
-		return journal, ErrWorkflowConflict
+		return journal, workflowstate.ErrConflict
 	}
 
 	return journal, validateWorkflowSubmissionJournal(journal)
@@ -95,7 +98,7 @@ func (s *WorkflowStore) readWorkflowSubmissionJournal(ctx context.Context, run w
 
 	journal, err := readWorkflowSubmissionFile(path)
 	if err == nil && (journal.OwnerRoot != run.OwnerRoot || journal.Namespace != run.Namespace || journal.InvocationID != run.ID || journal.Unit != run.Lane.Unit) {
-		err = ErrWorkflowConflict
+		err = workflowstate.ErrConflict
 	}
 
 	return journal, err
@@ -125,7 +128,7 @@ func (s *WorkflowStore) writeWorkflowSubmissionJournal(ctx context.Context, jour
 		return err
 	}
 
-	journal.sourceHash = workflowHash(encoded)
+	journal.sourceHash = contenthash.Sum(encoded)
 
 	if s.afterReplace != nil {
 		return s.afterReplace(-1)
@@ -144,8 +147,8 @@ func checkWorkflowSubmissionImage(path, expected string) error {
 		return err
 	}
 
-	if workflowHash(data) != expected {
-		return ErrWorkflowConflict
+	if contenthash.Sum(data) != expected {
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -204,11 +207,11 @@ func (s *WorkflowStore) checkWorkflowSubmissionProjection(ctx context.Context, r
 
 	journal, err := readWorkflowSubmissionFile(path)
 	if err != nil {
-		return fmt.Errorf("%w: projected submission journal is absent or invalid: %w", ErrWorkflowConflict, err)
+		return fmt.Errorf("%w: projected submission journal is absent or invalid: %w", workflowstate.ErrConflict, err)
 	}
 
 	if journal.InvocationID != run.ID || journal.Unit != run.Submission.Unit || journal.OwnerRoot != run.OwnerRoot || journal.TargetKey != run.Submission.TargetKey {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
@@ -226,7 +229,7 @@ func checkWorkflowSubmissionTargets(dir string, entries []os.DirEntry, key, targ
 		}
 
 		if !entry.Type().IsRegular() {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		journal, err := readWorkflowSubmissionFile(filepath.Join(dir, entry.Name()))

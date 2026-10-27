@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (git OSWorkflowPreparationGit) resumeMergerRepairReader(ctx context.Context, state WorkflowMergerRepairState) (workflowIntegrationReader, error) {
@@ -12,7 +14,7 @@ func (git OSWorkflowPreparationGit) resumeMergerRepairReader(ctx context.Context
 
 	query.SourceDirectory, query.ResultCommit = query.Lane.Worktree, query.BaseCommit
 	if !validWorkflowMergerRepairStateIdentity(state) || git.transport.validateQuery(query.WorkflowIntegrationQuery) != nil {
-		return workflowIntegrationReader{}, ErrWorkflowConflict
+		return workflowIntegrationReader{}, workflowstate.ErrConflict
 	}
 
 	reader, err := git.preparationReader(query.Lane.Worktree, query)
@@ -57,7 +59,7 @@ func (reader workflowIntegrationReader) verifyMergerRepairPrefix(ctx context.Con
 	proof := workflowMergerRepairProof(state)
 	for i, entry := range state.History {
 		if entry.Source != sources[i] || entry.Parent != parent {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		tree, err := reader.expectedIntegrationTree(ctx, proof, original, parent, entry.Source)
@@ -69,7 +71,7 @@ func (reader workflowIntegrationReader) verifyMergerRepairPrefix(ctx context.Con
 	}
 
 	if !workflowMergerRepairEndMatches(state, original, parent) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

@@ -4,12 +4,13 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramControlRequest(request core.TelegramOperationRequest, args telegramControlArguments, status WorkflowWorkStatus) (WorkflowControlRequest, error) {
 	control := WorkflowControlRequest{Action: args.Action, ID: args.ID, ExpectedRevision: status.Revision, StepLimit: 1}
 	if status.Revision == 0 || !validTelegramControlAction(args.Action) {
-		return control, core.ErrWorkflowConflict
+		return control, workflowstate.ErrConflict
 	}
 
 	if err := validateTelegramControlParameters(args.Action, args.Parameters); err != nil {
@@ -31,14 +32,14 @@ func telegramBoundDecisionControlRequest(request core.TelegramOperationRequest, 
 
 	if control.Action == "approve" {
 		if control.BindingHash == "" || !slices.Contains([]string{"waiting_approval", "human_required"}, status.ReviewState) {
-			return control, core.ErrWorkflowConflict
+			return control, workflowstate.ErrConflict
 		}
 
 		return control, nil
 	}
 
 	if control.Integration == nil {
-		return control, core.ErrWorkflowConflict
+		return control, workflowstate.ErrConflict
 	}
 
 	p := parameters
@@ -53,7 +54,7 @@ func telegramBoundDecisionControlRequest(request core.TelegramOperationRequest, 
 
 func telegramDecisionAnswerRequest(request core.TelegramOperationRequest, control WorkflowControlRequest, p telegramControlParameters, decision *WorkflowIntegrationDecisionStatus) (WorkflowControlRequest, error) {
 	if decision == nil || decision.State != "waiting" {
-		return control, core.ErrWorkflowConflict
+		return control, workflowstate.ErrConflict
 	}
 
 	for _, question := range decision.Requests {
@@ -62,7 +63,7 @@ func telegramDecisionAnswerRequest(request core.TelegramOperationRequest, contro
 		}
 
 		if p.Option > len(question.Options) {
-			return control, core.ErrWorkflowConflict
+			return control, workflowstate.ErrConflict
 		}
 
 		control.DecisionRevision, control.DecisionHash = decision.Revision, decision.Hash
@@ -71,5 +72,5 @@ func telegramDecisionAnswerRequest(request core.TelegramOperationRequest, contro
 		return control, nil
 	}
 
-	return control, core.ErrWorkflowConflict
+	return control, workflowstate.ErrConflict
 }

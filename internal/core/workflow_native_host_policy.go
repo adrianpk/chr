@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReadWorkflowNativePolicy combines a private target certificate with retained
@@ -21,7 +24,7 @@ func (adapter *WorkflowNativeReviewAdapter) ReadWorkflowNativePolicy(ctx context
 
 	policy, err := owner.workflowReviewPolicy(run)
 	if err != nil || policy.Method != method {
-		return WorkflowNativePolicy{}, ErrWorkflowConflict
+		return WorkflowNativePolicy{}, workflowstate.ErrConflict
 	}
 
 	ownership, err := workflowNativeOwnershipRevision(run, profile)
@@ -34,7 +37,7 @@ func (adapter *WorkflowNativeReviewAdapter) ReadWorkflowNativePolicy(ctx context
 		return WorkflowNativePolicy{}, err
 	}
 
-	return WorkflowNativePolicy{Repository: profile.Repository, SourceRef: run.Lane.Branch, TargetRef: profile.TargetRef, OwnershipRevision: ownership, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, ReviewMode: policy.Mode, CredentialIdentityFingerprint: workflowHash(image), APIIdentityFingerprint: profile.APIIdentityFingerprint, ObservationContract: profile.ObservationContract, CertifiedMethods: profile.CertifiedMethods}, nil
+	return WorkflowNativePolicy{Repository: profile.Repository, SourceRef: run.Lane.Branch, TargetRef: profile.TargetRef, OwnershipRevision: ownership, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, ReviewMode: policy.Mode, CredentialIdentityFingerprint: contenthash.Sum(image), APIIdentityFingerprint: profile.APIIdentityFingerprint, ObservationContract: profile.ObservationContract, CertifiedMethods: profile.CertifiedMethods}, nil
 }
 
 func (adapter *WorkflowNativeReviewAdapter) nativePublisher(ctx context.Context) (workflowInvocationFile, *WorkflowStore, WorkflowNativePublisherProfile, error) {
@@ -46,7 +49,7 @@ func (adapter *WorkflowNativeReviewAdapter) nativePublisher(ctx context.Context)
 	}
 
 	if !workflowNativePublicationOwner(run) {
-		return run, owner, WorkflowNativePublisherProfile{}, ErrWorkflowConflict
+		return run, owner, WorkflowNativePublisherProfile{}, workflowstate.ErrConflict
 	}
 
 	config, err := LoadWorkspaceConfig(owner.layout.ProjectDir())
@@ -80,5 +83,5 @@ func workflowNativeOwnershipRevision(run workflowInvocationFile, profile Workflo
 		Publisher                                                              WorkflowNativePublisherProfile
 	}{run.ProjectID, run.Namespace, run.ID, run.OwnerRoot, run.RequestKey, run.PullRequest.ID, run.CandidateHash, *run.Lane, profile})
 
-	return workflowHash(image), err
+	return contenthash.Sum(image), err
 }

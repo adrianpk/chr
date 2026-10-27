@@ -4,6 +4,8 @@ import (
 	"errors"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSliceChanged refuses candidate reuse after proof, contract or Git
@@ -46,7 +48,7 @@ func TestWorkflowSliceChanged(t *testing.T) {
 
 			tc.mutate(t, store, retained, candidate)
 
-			if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed aggregate image reused: %v", err)
 			}
 
@@ -67,14 +69,14 @@ func TestWorkflowSliceGateMutation(t *testing.T) {
 			run := workflowTestStart(t, store, request)
 
 			candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker"))
-			if !errors.Is(err, ErrWorkflowConflict) || candidate.Result.Successful {
+			if !errors.Is(err, workflowstate.ErrConflict) || candidate.Result.Successful {
 				t.Fatalf("mutable aggregate candidate accepted: %v", err)
 			}
 
 			retained := workflowTestValidatedSlice(t, store, hierarchy, run.Invocation.ID)
 			checkWorkflowAggregateFailure(t, retained)
 
-			if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed lane reran the aggregate gate")
 			}
 		})
@@ -190,7 +192,7 @@ func TestWorkflowSlicePartial(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker")); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker")); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("partial slice formed an aggregate candidate: %v", err)
 	}
 

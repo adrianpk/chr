@@ -6,6 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func normalizeAssistedDumpSource(opts *AssistedArtifactSynthesisOptions) error {
@@ -17,7 +20,7 @@ func normalizeAssistedDumpSource(opts *AssistedArtifactSynthesisOptions) error {
 	}
 
 	if path != expected || opts.SourceRef.ID != "curated-summary-"+opts.Session.ID || opts.SourceRef.Kind != AuthoringArtifactKindDraft || opts.SourceRef.Role != AuthoringArtifactRoleOutput {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	relative, err := filepath.Rel(opts.ProjectDir, path)
@@ -43,17 +46,17 @@ func (r *fileAuthoringSessionRepository) assistedDumpSourceImage(opts AssistedAr
 
 	generated, err := time.Parse(time.RFC3339, fields["generated_at"])
 	if err != nil {
-		return workflowFileChange{}, ErrWorkflowConflict
+		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 
 	summary := opts.CuratedSummary
 
 	summary.GeneratedAt = generated
 	if fields["session_id"] != summary.SessionID || string(content) != RenderAssistedCuratedAnswerSummary(summary) {
-		return workflowFileChange{}, ErrWorkflowConflict
+		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 
-	return workflowFileChange{Path: filepath.FromSlash(opts.SourceRef.Path), Before: workflowHash(content), After: content}, nil
+	return workflowFileChange{Path: filepath.FromSlash(opts.SourceRef.Path), Before: contenthash.Sum(content), After: content}, nil
 }
 
 func (r *fileAuthoringSessionRepository) assistedDumpSessionImage(session AuthoringSession) (workflowFileChange, error) {
@@ -83,8 +86,8 @@ func (r *fileAuthoringSessionRepository) assistedDumpSessionImage(session Author
 	}
 
 	if !bytes.Equal(content, []byte(full)) && !bytes.Equal(content, []byte(local)) {
-		return workflowFileChange{}, ErrWorkflowConflict
+		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 
-	return workflowFileChange{Path: relative.SessionPath, Before: workflowHash(content)}, nil
+	return workflowFileChange{Path: relative.SessionPath, Before: contenthash.Sum(content)}, nil
 }

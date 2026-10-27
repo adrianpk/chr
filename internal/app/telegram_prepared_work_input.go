@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations telegramPreparedWorkService, request core.TelegramOperationRequest) (PreparedAuthoringWork, error) {
@@ -19,7 +20,7 @@ func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations te
 	}
 
 	if owner.Binding != (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) {
-		return PreparedAuthoringWork{}, core.ErrWorkflowConflict
+		return PreparedAuthoringWork{}, workflowstate.ErrConflict
 	}
 
 	prepared, err := operations.PrepareTelegramAuthoringWork(ctx, request.Target, owner)
@@ -82,7 +83,7 @@ func (r telegramReceiver) preparedWorkAuthorityInput(request core.TelegramOperat
 
 	user, allowed := config.AuthorizedUser(request.Source.Peer.ChatID, request.Source.Peer.TopicID, request.Source.Peer.UserID, request.Source.ChatType)
 	if !allowed || user.OperatorID != request.Operator {
-		return core.TelegramConversationInput{}, core.ErrWorkflowConflict
+		return core.TelegramConversationInput{}, workflowstate.ErrConflict
 	}
 
 	projects, err := r.operations.ListRegisteredProjects(user.ProjectIDs)
@@ -107,7 +108,7 @@ func telegramRetainedPreparedWork(request core.TelegramOperationRequest) (Prepar
 	}
 
 	if scope.Binding != (core.WorkflowMutationBinding{RequestID: request.ID, Operator: request.Operator}) || scope.ProjectID != request.Target.ProjectID || scope.Namespace != request.Target.Namespace || telegramWorkScopeRequest(scope) != owner {
-		return prepared, core.ErrWorkflowConflict
+		return prepared, workflowstate.ErrConflict
 	}
 
 	return prepared, nil

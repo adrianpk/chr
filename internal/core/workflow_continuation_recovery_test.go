@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowContinuationRecovery interrupts both checkpoint replacements and
@@ -51,7 +53,7 @@ func TestWorkflowContinuationCorruption(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ContinueWorkflow(t.Context(), run.ID, WorkflowContinuationRequest{Worker: workflowPRWorker(), StepLimit: 1}, WorkflowContinuationPorts{}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ContinueWorkflow(t.Context(), run.ID, WorkflowContinuationRequest{Worker: workflowPRWorker(), StepLimit: 1}, WorkflowContinuationPorts{}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("corrupt continuation admitted more work", err)
 	}
 

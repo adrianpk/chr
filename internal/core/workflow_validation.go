@@ -6,6 +6,8 @@ import (
 	"math"
 	"slices"
 	"strings"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // Validate rejects partial or inconsistent workflow records before persistence.
@@ -34,7 +36,7 @@ func (r WorkflowRecord) Validate() error {
 }
 
 func (r WorkflowRecord) validateIdentity() error {
-	if r.ID == "" || r.ProjectID == "" || !IsValidOpsNamespace(r.Namespace) || r.Revision == 0 {
+	if r.ID == "" || r.ProjectID == "" || !opsnamespace.Valid(r.Namespace) || r.Revision == 0 {
 		return fmt.Errorf("workflow identity, scope and positive revision are required")
 	}
 

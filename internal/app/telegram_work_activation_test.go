@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversationAppFixture, service, core.TelegramWorkReference) {
@@ -205,7 +206,7 @@ func TestTelegramWorkActivationAuthority(t *testing.T) {
 			f.receiver.operations = telegramWorkFinalAuthority{service: operations, change: func() { telegramWorkChangeActor(t, f, change) }}
 
 			result := f.receiver.activateWork(t.Context(), ref)
-			if !errors.Is(result.Failure, core.ErrWorkflowConflict) || result.Progress.Steps != 0 {
+			if !errors.Is(result.Failure, workflowstate.ErrConflict) || result.Progress.Steps != 0 {
 				t.Fatal("changed final authority accepted", result.Progress, result.Failure)
 			}
 

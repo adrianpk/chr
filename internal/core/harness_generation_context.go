@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -40,12 +42,12 @@ func HarnessGenerationRequestID(ctx context.Context, id string) string {
 		return id
 	}
 
-	prefix := "generation-" + workflowHash([]byte(operation.ID))[:16] + "-"
+	prefix := "generation-" + contenthash.Sum([]byte(operation.ID))[:16] + "-"
 	if strings.HasPrefix(id, prefix) && len(id) == len(prefix)+64 {
 		return id
 	}
 
-	return prefix + workflowHash([]byte(id))
+	return prefix + contenthash.Sum([]byte(id))
 }
 
 func prepareBoundGenerationRequest(ctx context.Context, request harness.AgentRunRequest) (harness.AgentRunRequest, error) {
@@ -93,12 +95,12 @@ func applyGenerationRequestSelection(operation HarnessGenerationOperation, reque
 	selection := operation.Binding.Selection
 	for _, field := range []struct{ actual, expected string }{{request.Program, operation.program}, {request.Model, model}, {request.ModelProvider, selection.ModelProvider}, {request.Thinking, selection.Thinking}} {
 		if field.actual != "" && field.actual != field.expected {
-			return request, ErrWorkflowConflict
+			return request, workflowstate.ErrConflict
 		}
 	}
 
 	if request.Resources != (harness.GenerationResources{}) && request.Resources != operation.resources {
-		return request, ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	request.Program, request.Model, request.FrozenSelection = operation.program, model, true

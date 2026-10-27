@@ -7,20 +7,22 @@ import (
 	"io"
 	"strings"
 	"unicode/utf8"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func checkWorkflowMergerJSON(data []byte) error {
 	if !utf8.Valid(data) {
-		return fmt.Errorf("%w: merger JSON is not UTF-8", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger JSON is not UTF-8", workflowstate.ErrConflict)
 	}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	if err := workflowMergerJSONValue(decoder, 0); err != nil {
-		return fmt.Errorf("%w: malformed merger JSON: %w", ErrWorkflowConflict, err)
+		return fmt.Errorf("%w: malformed merger JSON: %w", workflowstate.ErrConflict, err)
 	}
 
 	if _, err := decoder.Token(); err != io.EOF {
-		return fmt.Errorf("%w: merger result contains trailing output", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger result contains trailing output", workflowstate.ErrConflict)
 	}
 
 	return nil

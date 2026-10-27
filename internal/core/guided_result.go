@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"reflect"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedResultReference retains only native completion references, not new receipts.
@@ -16,7 +18,7 @@ type GuidedResultReference struct {
 // ReadGuidedResult verifies the exact native binding and its original evidence.
 func ReadGuidedResult(ctx context.Context, root string, session AuthoringSession) (WorkflowResultInspection, error) {
 	if session.Guided == nil || session.Guided.Work == nil || session.Guided.Work.Invocation == nil {
-		return WorkflowResultInspection{}, ErrWorkflowConflict
+		return WorkflowResultInspection{}, workflowstate.ErrConflict
 	}
 
 	layout, err := ResolveOpsLayout(ResolveOpsLayoutOptions{ProjectDir: root, Namespace: session.Namespace})
@@ -39,15 +41,15 @@ func ReadGuidedResult(ctx context.Context, root string, session AuthoringSession
 func guardGuidedResultBinding(session AuthoringSession, run WorkflowInvocation) error {
 	work := session.Guided.Work
 	if work.Materialization == nil || work.Admission == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !guidedNativeReferenceMatches(run, session) || !reflect.DeepEqual(run.Admission, work.Admission.Admission) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if run.Selection.Selector.Extent != "slice_set" || run.Selection.Selector.Identity != work.Materialization.SetID || len(run.Members) != len(work.Materialization.Members) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return guardGuidedResultMembers(work, run)
@@ -57,7 +59,7 @@ func guardGuidedResultMembers(work *GuidedWorkState, run WorkflowInvocation) err
 	for i, member := range run.Members {
 		frozen := work.Materialization.Members[i]
 		if member.Admission.Key != frozen.Key || member.Admission.ContractHash != frozen.ContractHash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

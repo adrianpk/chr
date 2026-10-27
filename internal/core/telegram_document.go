@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"unicode/utf8"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // TelegramDocument contains a complete authorized source image or an explicitly
@@ -57,7 +59,7 @@ func validateTelegramDocument(document TelegramDocument) error {
 }
 
 func validateTelegramDocumentTarget(document TelegramDocument) error {
-	if document.ProjectID == "" || !IsValidOpsNamespace(document.Namespace) {
+	if document.ProjectID == "" || !opsnamespace.Valid(document.Namespace) {
 		return ErrTelegramDocumentUnavailable
 	}
 

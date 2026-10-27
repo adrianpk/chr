@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowTargetQuery identifies the host checkout receiving canonical objects.
@@ -91,7 +93,7 @@ func (reader workflowIntegrationReader) remoteTarget(ctx context.Context, transp
 
 	fields := strings.Fields(output)
 	if len(fields) != 2 || !workflowCommitID(fields[0]) || fields[1] != "refs/heads/"+branch {
-		return "", ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	return fields[0], nil

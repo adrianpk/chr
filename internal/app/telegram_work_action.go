@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
@@ -29,7 +30,7 @@ func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim core.Tel
 	binding := WorkflowBoundAdmission{RequestKey: claim.Request.ID, Policy: preview.View.Policy, ExecutionPolicy: preview.View.ExecutionPolicy, Check: r.workAdmissionCheck(claim)}
 
 	result, err := operations.StartTelegramWork(ctx, claim.Request.Target, preview, binding)
-	if errors.Is(err, core.ErrWorkflowConflict) || errors.Is(err, core.ErrWorkflowOwned) || errors.Is(err, core.ErrWorkflowCapacity) || errors.Is(err, ErrRecordUnsupported) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, core.ErrWorkflowOwned) || errors.Is(err, core.ErrWorkflowCapacity) || errors.Is(err, ErrRecordUnsupported) {
 		return r.finishWorkActionFailure(ctx, claim, err, config)
 	}
 
@@ -43,7 +44,7 @@ func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim core.Tel
 func (r telegramReceiver) workAdmissionCheck(claim core.TelegramActionClaim) core.WorkflowAdmissionCheck {
 	return func(ctx context.Context) error {
 		if !claim.Action.ExpiresAt.After(time.Now()) {
-			return core.ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return r.validateWorkAdmissionAuthority(ctx, claim.Request)
@@ -62,7 +63,7 @@ func telegramRetainedWorkPreview(request core.TelegramOperationRequest) (Workflo
 	}
 
 	if preview.Request.Selector != selector || preview.Request.SnapshotHash != preview.View.Preview.SnapshotHash || preview.Request.Target != preview.View.Target {
-		return preview, core.ErrWorkflowConflict
+		return preview, workflowstate.ErrConflict
 	}
 
 	return preview, nil
@@ -106,7 +107,7 @@ type telegramWorkAdmissionResult struct {
 
 func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim core.TelegramActionClaim, result AgentWorkResult, config core.TelegramReceiverConfig) error {
 	if result.Workflow == nil || result.Workflow.ID == "" {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	run := result.Workflow

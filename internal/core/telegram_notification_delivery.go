@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // SendPresentation shares the receiver's bounded HTTP boundary and multipart
@@ -134,7 +136,7 @@ func validateTelegramNotificationDelivery(delivery TelegramNotificationDelivery)
 	}
 
 	check := TelegramReceiverDelivery{Text: p.PlainFallback, DocumentID: p.DocumentID}
-	if err := decodeTelegramPresentationHash(string(payload), workflowHash(payload), &check); err != nil {
+	if err := decodeTelegramPresentationHash(string(payload), contenthash.Sum(payload), &check); err != nil {
 		return err
 	}
 
@@ -150,7 +152,7 @@ func validateTelegramNotificationAttachment(p TelegramPresentation, document *Te
 		return nil
 	}
 
-	if p.TemplateRevision != "document-v1" || p.DocumentID == "" || p.DocumentHash != workflowHash(document.Payload) {
+	if p.TemplateRevision != "document-v1" || p.DocumentID == "" || p.DocumentHash != contenthash.Sum(document.Payload) {
 		return ErrTelegramDocumentUnavailable
 	}
 

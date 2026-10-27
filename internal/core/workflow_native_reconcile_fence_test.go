@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeGitInspectorFixture struct {
@@ -48,7 +50,7 @@ func TestNativeGitFence(t *testing.T) {
 			t.Fatal(err)
 		}
 	}}
-	if _, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), guard, inspector, git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), guard, inspector, git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale observation changed the common journal", err)
 	}
 

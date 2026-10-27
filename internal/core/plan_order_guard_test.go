@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // Invalid generated identities cannot create a plan, map or ticket. Stable IDs
@@ -66,12 +68,12 @@ func TestPlanOrderEditedOutput(t *testing.T) {
 		t.Fatal("overwrote edited output", err)
 	}
 
-	plan.TrackerReplaceHash = workflowHash([]byte("another observation"))
+	plan.TrackerReplaceHash = contenthash.Sum([]byte("another observation"))
 	if _, err := WriteGeneratedPlan(t.Context(), project, plan); !errors.Is(err, ErrWorkflowProjectionStale) {
 		t.Fatal("accepted wrong observation", err)
 	}
 
-	plan.TrackerReplaceHash = workflowHash(edited)
+	plan.TrackerReplaceHash = contenthash.Sum(edited)
 	if _, err := WriteGeneratedPlan(t.Context(), project, plan); err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +82,7 @@ func TestPlanOrderEditedOutput(t *testing.T) {
 		t.Fatal("failed attempts advanced revision", second)
 	}
 
-	if workflowHash(readTestPlanImage(t, project, first.TrackerRef)) != first.TrackerHash {
+	if contenthash.Sum(readTestPlanImage(t, project, first.TrackerRef)) != first.TrackerHash {
 		t.Fatal("replacement altered retained map")
 	}
 }
@@ -113,7 +115,7 @@ func TestPlanOrderMissingCompanion(t *testing.T) {
 // Extending the v2 authoring journal permits only the bounded retained revision
 // files and existing tracker envelopes. It does not widen the v1 path contract.
 func TestPlanOrderJournalPaths(t *testing.T) {
-	root := "ops/default/plan/00000-chosen-plan/files/plan-revisions/1-" + workflowHash([]byte("body")) + "/"
+	root := "ops/default/plan/00000-chosen-plan/files/plan-revisions/1-" + contenthash.Sum([]byte("body")) + "/"
 
 	cases := []struct {
 		name, path string
@@ -123,8 +125,8 @@ func TestPlanOrderJournalPaths(t *testing.T) {
 		{"retained body", root + "plan.md", true},
 		{"tracker envelope", "ops/default/tracker/00000-chosen-tracking/metadata.json", true},
 		{"other retained file", root + "state.json", false},
-		{"zero revision", "ops/default/plan/00000-chosen-plan/files/plan-revisions/0-" + workflowHash([]byte("body")) + "/plan.md", false},
-		{"unbounded revision", "ops/default/plan/00000-chosen-plan/files/plan-revisions/4097-" + workflowHash([]byte("body")) + "/plan.md", false},
+		{"zero revision", "ops/default/plan/00000-chosen-plan/files/plan-revisions/0-" + contenthash.Sum([]byte("body")) + "/plan.md", false},
+		{"unbounded revision", "ops/default/plan/00000-chosen-plan/files/plan-revisions/4097-" + contenthash.Sum([]byte("body")) + "/plan.md", false},
 		{"invalid hash", "ops/default/plan/00000-chosen-plan/files/plan-revisions/1-invalid/plan.md", false},
 		{"nested tracker", "ops/default/tracker/00000-chosen-tracking/files/run.json", false},
 	}

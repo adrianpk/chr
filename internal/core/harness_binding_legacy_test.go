@@ -8,6 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Omitted fields preserve the historical v1 request digest. Loading and replay
@@ -59,7 +62,7 @@ func checkHarnessBindingLegacyHash(t *testing.T, run WorkflowInvocation) {
 	}{Admission: run.Admission, Selection: run.Selection, Policy: run.Policy, ReviewRestriction: run.ReviewRestriction}
 
 	data, err := json.Marshal(legacy)
-	if err != nil || workflowHash(data) != run.RequestHash {
+	if err != nil || contenthash.Sum(data) != run.RequestHash {
 		t.Fatal("v1 request hash changed", err)
 	}
 }
@@ -70,7 +73,7 @@ func TestHarnessBindingEntry(t *testing.T) {
 	store, _, request := workflowExecutionFixture(t, workflowTaskCommand(t, "gate"), 30)
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "harnesses:\n  worker: alpha\n")
 
-	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("explicit profile silently used legacy execution", err)
 	}
 

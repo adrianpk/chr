@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramGuidedReference is a transport association, never execution authority.
@@ -16,7 +18,7 @@ type TelegramGuidedReference struct {
 // transport receipt. Canonical authoring and native files retain all work state.
 func (s *TelegramReceiverStore) TelegramGuidedReferences(ctx context.Context, botID int64, after string, limit int) ([]TelegramGuidedReference, error) {
 	if botID <= 0 || len(after) > 128 || limit < 1 || limit > 16 {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	rows, err := s.db.QueryContext(ctx, `SELECT c.id,(SELECT r.id FROM telegram_requests r WHERE r.conversation_id=c.id AND r.operation_id IN ('guided.continue','guided.step') AND r.state='confirmed' ORDER BY r.rowid DESC LIMIT 1) FROM telegram_conversations c WHERE c.bot_id=? AND c.id>? AND c.guided_run_id IS NOT NULL AND EXISTS(SELECT 1 FROM telegram_requests seen WHERE seen.conversation_id=c.id AND seen.operation_id IN ('guided.continue','guided.step') AND seen.state='confirmed') ORDER BY c.id LIMIT ?`, botID, after, limit)
@@ -71,7 +73,7 @@ func (s *TelegramReceiverStore) readTelegramGuidedReference(ctx context.Context,
 
 	c, found, err := s.TelegramConversationReference(ctx, request.Source.Peer, pair[0])
 	if err != nil || !found || request.Target.ConversationID != c.ID {
-		return TelegramGuidedReference{}, errors.Join(ErrWorkflowConflict, err)
+		return TelegramGuidedReference{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	request.Target.ConversationRevision = c.Revision

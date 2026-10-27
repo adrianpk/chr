@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Observe reads current images without allocating artifacts or recovering a
@@ -68,7 +71,7 @@ func (r *fileAuthoringSessionRepository) quizImage(reference string) (workflowFi
 		return image, nil
 	}
 
-	image.After, image.Before = data, workflowHash(data)
+	image.After, image.Before = data, contenthash.Sum(data)
 
 	return image, err
 }
@@ -81,7 +84,7 @@ func (r *fileAuthoringSessionRepository) checkQuizRead() error {
 
 	_, err = os.Lstat(path)
 	if err == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if errors.Is(err, os.ErrNotExist) {
@@ -99,7 +102,7 @@ func (r *fileAuthoringSessionRepository) checkQuizImages(images []workflowFileCh
 		}
 
 		if current.Before != image.Before {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -114,10 +117,10 @@ func (r *fileAuthoringSessionRepository) quizRevision(scope QuizScope, images []
 
 	hashes := []string{root, scope.ProjectID, scope.CaseSlug}
 	for _, image := range images {
-		hashes = append(hashes, image.Path, workflowHash(image.After))
+		hashes = append(hashes, image.Path, contenthash.Sum(image.After))
 	}
 
-	return workflowHash([]byte(strings.Join(hashes, "\x00"))), nil
+	return contenthash.Sum([]byte(strings.Join(hashes, "\x00"))), nil
 }
 
 func decodeQuizObservation(observed *QuizObservation, scope QuizScope, paths QuizArtifactPaths) error {
@@ -141,7 +144,7 @@ func decodeQuizObservation(observed *QuizObservation, scope QuizScope, paths Qui
 	}
 
 	if !quizStateMatchesScope(*state, scope, paths) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	observed.Exists = true

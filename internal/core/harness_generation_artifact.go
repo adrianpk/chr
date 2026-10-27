@@ -9,11 +9,12 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
 func harnessGenerationOperationPath(project, id string) (string, error) {
-	return workflowUpgradePath(project, filepath.Join("tmp", "agent-runs", "operations", workflowHash([]byte(id))+".json"))
+	return workflowUpgradePath(project, filepath.Join("tmp", "agent-runs", "operations", contenthash.Sum([]byte(id))+".json"))
 }
 
 func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerationOperation, error) {
@@ -37,7 +38,7 @@ func readHarnessGenerationOperation(project, id, purpose string) (HarnessGenerat
 	record.Checksum = ""
 
 	encoded, err := json.Marshal(record)
-	if err != nil || workflowHash(encoded) != checksum || record.Schema != "chr-harness-operation/v1" || record.Operation.ID != id || record.Operation.Purpose != purpose {
+	if err != nil || contenthash.Sum(encoded) != checksum || record.Schema != "chr-harness-operation/v1" || record.Operation.ID != id || record.Operation.Purpose != purpose {
 		return record.Operation, errors.New("invalid retained generation operation")
 	}
 
@@ -71,7 +72,7 @@ func writeHarnessGenerationOperation(operation HarnessGenerationOperation) error
 		return err
 	}
 
-	record.Checksum = workflowHash(encoded)
+	record.Checksum = contenthash.Sum(encoded)
 
 	return writeHarnessGenerationFile(path, record)
 }

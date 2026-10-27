@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func (r *fileAuthoringSessionRepository) readProjectDumpArtifact(reference string) (ProjectDumpArtifact, int, error) {
@@ -97,7 +99,7 @@ func projectDumpArtifact(reference string, body, encoded []byte, fields, metadat
 	}
 
 	artifact := ProjectDumpArtifact{
-		Reference: reference, Title: metadata["title"], SourceHash: workflowHash(body), MetadataHash: workflowHash(encoded), CaseSlug: scope,
+		Reference: reference, Title: metadata["title"], SourceHash: contenthash.Sum(body), MetadataHash: contenthash.Sum(encoded), CaseSlug: scope,
 		Raw: fields["type"] == "dump_raw" || fields["status"] == "raw" && fields["curated"] != "", CuratedReference: fields["curated"],
 		CanonicalReference: metadata["canonical_ref"],
 		Status:             fields["status"], DocumentType: fields["type"],

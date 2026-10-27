@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Retrying after each publication boundary recovers the entire mutation and
@@ -63,7 +65,7 @@ func TestQuizActionBindings(t *testing.T) {
 		switch {
 		case err == nil:
 			accepted++
-		case errors.Is(err, ErrWorkflowConflict):
+		case errors.Is(err, workflowstate.ErrConflict):
 			stale++
 		default:
 			t.Fatal(err)
@@ -89,7 +91,7 @@ func checkQuizActionReplay(t *testing.T, repo *fileQuizArtifactRepository, reque
 		request.Binding.OperationID = fmt.Sprintf("answer-%d", index)
 
 		result, err := repo.ApplyAction(t.Context(), request, answerQuizActionFixture)
-		if errors.Is(err, ErrWorkflowConflict) {
+		if errors.Is(err, workflowstate.ErrConflict) {
 			continue
 		}
 
@@ -98,7 +100,7 @@ func checkQuizActionReplay(t *testing.T, repo *fileQuizArtifactRepository, reque
 		}
 
 		request.Answer = "changed"
-		if _, err := repo.ApplyAction(t.Context(), request, answerQuizActionFixture); !errors.Is(err, ErrWorkflowConflict) {
+		if _, err := repo.ApplyAction(t.Context(), request, answerQuizActionFixture); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("operation identity accepted changed arguments", err)
 		}
 
@@ -248,7 +250,7 @@ func checkQuizActionRecovery(t *testing.T, index int) {
 		t.Fatal("fault was not reached")
 	}
 
-	if _, err := repo.Observe(t.Context(), request.Scope); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := repo.Observe(t.Context(), request.Scope); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("read exposed a pending journal", err)
 	}
 

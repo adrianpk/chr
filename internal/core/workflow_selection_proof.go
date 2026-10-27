@@ -7,6 +7,9 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowPreviewTarget binds proof to an observed immutable canonical target.
@@ -105,8 +108,8 @@ func (reader *workflowProofReader) readEvidence(relative string) ([]byte, error)
 	}
 
 	data, err := readWorkflowFile(path)
-	if err == nil && workflowHash(data) != reader.selection.evidenceHashes[relative] {
-		return nil, ErrWorkflowConflict
+	if err == nil && contenthash.Sum(data) != reader.selection.evidenceHashes[relative] {
+		return nil, workflowstate.ErrConflict
 	}
 
 	return data, err

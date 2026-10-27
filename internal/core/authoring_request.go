@@ -8,6 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringContinuationRequest, string, error) {
@@ -16,14 +20,14 @@ func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringC
 	}
 
 	if request.Action == "create" && request.SessionID == "" {
-		request.SessionID = "author-" + workflowHash([]byte(request.Binding.RequestID))[:24]
+		request.SessionID = "author-" + contenthash.Sum([]byte(request.Binding.RequestID))[:24]
 	}
 
 	if err := validateAuthoringSessionID(request.SessionID); err != nil {
 		return request, "", err
 	}
 
-	if request.ProjectID == "" || !IsValidOpsNamespace(request.Namespace) {
+	if request.ProjectID == "" || !opsnamespace.Valid(request.Namespace) {
 		return request, "", errors.New("authoring requires project and namespace")
 	}
 
@@ -36,7 +40,7 @@ func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringC
 		return request, "", errors.New("authoring request exceeds 512 KiB")
 	}
 
-	return request, workflowHash(encoded), nil
+	return request, contenthash.Sum(encoded), nil
 }
 
 func validateAuthoringRequest(request AuthoringContinuationRequest) error {
@@ -53,7 +57,7 @@ func validateAuthoringRequest(request AuthoringContinuationRequest) error {
 	}
 
 	if !validAuthoringObservation(request) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateAuthoringActionArguments(request)
@@ -63,11 +67,11 @@ func validateAuthoringActionArguments(request AuthoringContinuationRequest) erro
 	switch request.Action {
 	case "ask", "generate", "refine":
 		if request.Question != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	case "answer", "respond":
 		if request.Question == nil || strings.TrimSpace(request.Instructions) == "" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	default:
 		return errors.New("unsupported authoring action")
@@ -181,8 +185,8 @@ func readExistingAuthoringBinding(data []byte, digest string) (authoringRequestB
 		return binding, err
 	}
 
-	if binding.Attempts < 0 || binding.Attempts > 5 || binding.Schema != "chr-authoring-request/v1" || binding.Digest != digest || workflowHash(payload) != digest {
-		return binding, ErrWorkflowConflict
+	if binding.Attempts < 0 || binding.Attempts > 5 || binding.Schema != "chr-authoring-request/v1" || binding.Digest != digest || contenthash.Sum(payload) != digest {
+		return binding, workflowstate.ErrConflict
 	}
 
 	return binding, nil
@@ -197,12 +201,12 @@ func validateAuthoringReceipt(receipt authoringMutationReceipt, request Authorin
 		return err
 	}
 
-	if receipt.Schema != "chr-authoring-receipt/v1" || receipt.Digest != digest || receipt.Result.ArgumentDigest != digest || checksum != workflowHash(encoded) {
-		return ErrWorkflowConflict
+	if receipt.Schema != "chr-authoring-receipt/v1" || receipt.Digest != digest || receipt.Result.ArgumentDigest != digest || checksum != contenthash.Sum(encoded) {
+		return workflowstate.ErrConflict
 	}
 
 	if receipt.Result.RequestID != request.Binding.RequestID || receipt.Result.Session.ID != request.SessionID || receipt.Result.ReceiptRef != filepath.ToSlash(authoringReceiptRef(request.Binding.RequestID)) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -219,7 +223,7 @@ func validAuthoringContinuationKind(kind AuthoringArtifactKind) bool {
 
 func validateAuthoringCreation(request AuthoringContinuationRequest) error {
 	if request.Topic == "" || request.Capture == "" || request.ExpectedRevision != 0 || request.ExpectedSourceHash != "" || request.Question != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

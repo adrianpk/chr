@@ -13,6 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowCLIManualHarness = `set -eu
@@ -112,7 +113,7 @@ func checkWorkflowCLIManualFailure(t *testing.T, operations service, id string) 
 	if err != nil {
 		// A changed lane with an unaccepted hash stays fenced. Its failed handoff
 		// must release the host's capacity descriptors even while that conflict remains.
-		if !errors.Is(err, core.ErrWorkflowConflict) {
+		if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("manual failure leaked capacity", err)
 		}
 
@@ -164,7 +165,7 @@ func TestWorkflowCLIAdmission(t *testing.T) {
 	workflowCLIAdvanceTarget(t, project, provider.remote)
 
 	request.SnapshotHash = preview.Preview.SnapshotHash
-	if _, err := operations.StartWorkExtent(t.Context(), request, 1); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.StartWorkExtent(t.Context(), request, 1); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale preview admitted execution", err)
 	}
 

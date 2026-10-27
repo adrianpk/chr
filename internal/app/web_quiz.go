@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -140,7 +141,7 @@ func (p webViewProvider) writeQuizAction(operations service, request webui.Write
 }
 
 func webQuizWriteFailure(id string, err error) webui.WriteActionResponse {
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "This question changed. Your draft is retained; reload the current question.", ReloadURL: quizFocusURL(id)}
 	}
 
@@ -159,7 +160,7 @@ func webQuizActionScope(operations service, request webui.WriteActionRequest) (c
 	}
 
 	if paths.CuratedRelativePath != request.ID {
-		return scope, core.ErrWorkflowConflict
+		return scope, workflowstate.ErrConflict
 	}
 
 	if request.Action != "quiz.start" {

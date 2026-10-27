@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeEntryCandidate binds a real prepared Git result to its admission;
@@ -41,7 +44,7 @@ func TestNativeEntryCandidate(t *testing.T) {
 	wrong := retainNativeRecordEvidence(t, store, run.ID, "foreign-entry-candidate", candidate)
 
 	request.CandidateRef = &wrong
-	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("foreign entry candidate accepted", err)
 	}
 
@@ -56,7 +59,7 @@ func TestNativeEntryCandidate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.TransitionWorkflowIntegration(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed candidate bytes accepted", err)
 	}
 
@@ -158,7 +161,7 @@ func nativeEntryUnsupported(t *testing.T, store *WorkflowStore, path string) {
 
 	// Reseal the owner pointer so version dispatch, rather than a stale hash,
 	// is the reason this retained future record blocks mutation.
-	run.Integration.EntryRef.Hash = workflowHash(data)
+	run.Integration.EntryRef.Hash = contenthash.Sum(data)
 	run.IntegrationEntries[0] = *run.Integration
 
 	change, err := workflowInvocationChange(run)
@@ -166,7 +169,7 @@ func nativeEntryUnsupported(t *testing.T, store *WorkflowStore, path string) {
 		t.Fatal(err)
 	}
 
-	if err := store.commitFiles([]workflowFileChange{{Path: run.Integration.EntryRef.Path, Before: workflowHash(mustReadNativeEntry(t, path)), After: data}, change}); err != nil {
+	if err := store.commitFiles([]workflowFileChange{{Path: run.Integration.EntryRef.Path, Before: contenthash.Sum(mustReadNativeEntry(t, path)), After: data}, change}); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -211,7 +214,7 @@ func TestNativeEntryUnknown(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), transition); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), transition); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("missing journal was interpreted as no publication", err)
 	}
 

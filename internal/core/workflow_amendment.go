@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowAmendmentRef binds an immutable approved amendment to its owning set.
@@ -63,7 +65,7 @@ func (s *WorkflowStore) amendWorkflowSet(ctx context.Context, request WorkflowSe
 	}
 
 	if set.Set.PlanRevision != nil && request.Plan.PlanRevision == nil {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	if err := s.validateApprovedOrder(request.Plan, set.ID); err != nil {

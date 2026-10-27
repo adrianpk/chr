@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativePreparationFence changes the durable queue owner or current policy
@@ -45,7 +47,7 @@ func nativePreparationFence(t *testing.T, change string) {
 		t.Fatal(err)
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowConflict) && !errors.Is(err, ErrWorkflowOwned) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatal("stale gate succeeded", err)
 	}
 

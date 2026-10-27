@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"reflect"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func guardWorkflowSetChange(old, next WorkflowSet) error {
@@ -31,12 +33,12 @@ func guardBoundWorkflowSetOrder(old, next WorkflowSet) error {
 	}
 
 	if !reflect.DeepEqual(old.PlanRevision, next.PlanRevision) || old.PlanRef != next.PlanRef || old.PlanHash != next.PlanHash {
-		return fmt.Errorf("%w: plan revision requires approved amendment", ErrWorkflowConflict)
+		return fmt.Errorf("%w: plan revision requires approved amendment", workflowstate.ErrConflict)
 	}
 
 	before, after := boundWorkflowSliceOrder(old), boundWorkflowSliceOrder(next)
 	if !reflect.DeepEqual(before, after) {
-		return fmt.Errorf("%w: ordered hierarchy requires approved amendment", ErrWorkflowConflict)
+		return fmt.Errorf("%w: ordered hierarchy requires approved amendment", workflowstate.ErrConflict)
 	}
 
 	return nil

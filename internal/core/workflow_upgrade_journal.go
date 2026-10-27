@@ -8,6 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowUpgradeJournal struct {
@@ -59,7 +62,7 @@ func workflowUpgradeRequestHash(opts WorkflowUpgradeOptions) (string, error) {
 		return "", fmt.Errorf("workflow upgrade request exceeds 1 MiB")
 	}
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func (s *WorkflowStore) prepareWorkflowUpgrade(ctx context.Context, opts WorkflowUpgradeOptions, hash string) (workflowUpgradeJournal, []byte, error) {
@@ -83,7 +86,7 @@ func (s *WorkflowStore) prepareWorkflowUpgrade(ctx context.Context, opts Workflo
 		return workflowUpgradeJournal{}, nil, err
 	}
 
-	if config.Workflow.Version != 0 || workflowHash(data) != opts.ExpectedRevision {
+	if config.Workflow.Version != 0 || contenthash.Sum(data) != opts.ExpectedRevision {
 		return workflowUpgradeJournal{}, nil, fmt.Errorf("workflow upgrade requires the unchanged legacy configuration")
 	}
 
@@ -139,7 +142,7 @@ func (s *WorkflowStore) preflightWorkflowUpgradeAdoption(ctx context.Context, op
 }
 
 func workflowUpgradeJournalImage(journal workflowUpgradeJournal, data []byte, opts WorkflowUpgradeOptions) ([]byte, error) {
-	observed := workflowHash(data)
+	observed := contenthash.Sum(data)
 	if observed == journal.Current.Revision {
 		return data, checkWorkflowUpgradePolicy(data, journal.Current)
 	}
@@ -153,8 +156,8 @@ func workflowUpgradeJournalImage(journal workflowUpgradeJournal, data []byte, op
 	}
 
 	image, err := workflowUpgradeConfig(data, journal.Prior, opts)
-	if err == nil && workflowHash(image) != journal.Current.Revision {
-		return nil, ErrWorkflowConflict
+	if err == nil && contenthash.Sum(image) != journal.Current.Revision {
+		return nil, workflowstate.ErrConflict
 	}
 
 	return image, err
@@ -247,7 +250,7 @@ func workflowUpgradeJournalHash(journal workflowUpgradeJournal) (string, error) 
 	journal.Checksum = ""
 	data, err := json.Marshal(journal)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) error {
@@ -269,8 +272,8 @@ func checkWorkflowUpgradePolicy(data []byte, expected WorkflowConfiguration) err
 	}
 
 	image, err := json.Marshal(expected)
-	if err == nil && workflowHash(actual) != workflowHash(image) {
-		return ErrWorkflowConflict
+	if err == nil && contenthash.Sum(actual) != contenthash.Sum(image) {
+		return workflowstate.ErrConflict
 	}
 
 	return err
@@ -308,7 +311,7 @@ func workflowUpgradeCompatibleConfiguration(config WorkspaceConfig, configuratio
 		// An older immutable snapshot lacks these options. Only their established
 		// defaults may be projected away; omission cannot authorize another policy.
 		if !field.unchanged {
-			return configuration, ErrWorkflowConflict
+			return configuration, workflowstate.ErrConflict
 		}
 
 		configuration.Values = withoutWorkflowConfigurationKey(configuration.Values, field.key)
@@ -330,8 +333,8 @@ func (s *WorkflowStore) writeWorkflowUpgradeSnapshot(journal workflowUpgradeJour
 	}
 
 	image, err := json.Marshal(journal)
-	if err == nil && workflowHash(image) != workflowHash(data) {
-		return ErrWorkflowConflict
+	if err == nil && contenthash.Sum(image) != contenthash.Sum(data) {
+		return workflowstate.ErrConflict
 	}
 
 	return err
@@ -348,8 +351,8 @@ func (s *WorkflowStore) finishWorkflowUpgrade(journal workflowUpgradeJournal, im
 		return err
 	}
 
-	if workflowHash(current) != journal.Prior.Revision && workflowHash(current) != journal.Current.Revision {
-		return ErrWorkflowConflict
+	if contenthash.Sum(current) != journal.Prior.Revision && contenthash.Sum(current) != journal.Current.Revision {
+		return workflowstate.ErrConflict
 	}
 
 	if err := atomicWorkflowFile(path, image); err != nil {

@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"syscall"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 const workflowCoordinatorPath = "coordinator.json"
@@ -45,7 +47,7 @@ func workflowCoordinatorOwner(common string) (string, error) {
 	// host cannot obtain authority by copying its registration file.
 	image := fmt.Appendf(machine, "\x00%d\x00%d", stat.Dev, stat.Ino)
 
-	return workflowHash(image), nil
+	return contenthash.Sum(image), nil
 }
 
 func (s *WorkflowStore) workflowLocalCoordinator(ctx context.Context, register bool) (workflowCoordinator, error) {

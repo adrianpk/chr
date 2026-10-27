@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestWorkflowSubmissionAtomicGuard changes a canonical source or target after
@@ -100,7 +102,7 @@ func testWorkflowSubmissionExclusion(t *testing.T, intent string) {
 			return err
 		}
 
-		return alias.guardWorkflowSubmissionTarget(t.Context(), workflowHash([]byte("another-unit")), key)
+		return alias.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another-unit")), key)
 	}); err != nil {
 		t.Fatal("sealed unpublished result retained exclusion", err)
 	}
@@ -129,7 +131,7 @@ func assertWorkflowSubmissionExcluded(t *testing.T, alias *WorkflowStore, submis
 			return err
 		}
 
-		return alias.guardWorkflowSubmissionTarget(t.Context(), workflowHash([]byte("another-unit")), key)
+		return alias.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another-unit")), key)
 	})
 	if !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatalf("linked worktree or namespace bypassed target exclusion: %v", err)

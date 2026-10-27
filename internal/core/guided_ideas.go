@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedIdeaReference locates a separately retained request pending later review.
@@ -27,7 +30,7 @@ type GuidedLaterIdea struct {
 func RetainGuidedIdea(ctx context.Context, root string, command GuidedUseCaseCommand) (session AuthoringSession, err error) {
 	operation, err := guidedOperation(command)
 	if err != nil || command.Action != "idea" || strings.TrimSpace(command.Content) == "" || len(command.Content) > 8192 {
-		return session, errors.Join(ErrWorkflowConflict, err)
+		return session, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	r := &fileAuthoringSessionRepository{projectDir: root}
@@ -56,7 +59,7 @@ func guardGuidedIdea(session AuthoringSession, operation GuidedUseCaseOperation)
 	for _, idea := range session.Guided.LaterIdeas {
 		if idea.ID == operation.ID {
 			if idea.Digest != operation.Digest {
-				return false, ErrWorkflowConflict
+				return false, workflowstate.ErrConflict
 			}
 
 			return true, nil
@@ -64,11 +67,11 @@ func guardGuidedIdea(session AuthoringSession, operation GuidedUseCaseOperation)
 	}
 
 	if session.Revision != operation.ExpectedRevision || len(session.Guided.LaterIdeas) >= 64 || len(session.Guided.Checkpoints) == 0 {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	if guidedControlOwnsID(session.Guided.Control, operation.ID) {
-		return false, ErrWorkflowConflict
+		return false, workflowstate.ErrConflict
 	}
 
 	return false, guardGuidedControlIdentity(session.Guided, operation.ID)
@@ -93,7 +96,7 @@ func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *AuthoringSess
 		return err
 	}
 
-	idea.Hash = workflowHash(encoded)
+	idea.Hash = contenthash.Sum(encoded)
 
 	path, err := r.authoringPath(idea.Path)
 	if err != nil {
@@ -115,7 +118,7 @@ func (r *fileAuthoringSessionRepository) retainGuidedIdea(session *AuthoringSess
 // ReadGuidedIdeas verifies original separately retained entries without recovery.
 func ReadGuidedIdeas(ctx context.Context, root string, session AuthoringSession) ([]GuidedLaterIdea, error) {
 	if session.Guided == nil {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	r := &fileAuthoringSessionRepository{projectDir: root}
@@ -139,12 +142,12 @@ func ReadGuidedIdeas(ctx context.Context, root string, session AuthoringSession)
 
 func (r *fileAuthoringSessionRepository) readGuidedIdea(id string, ref GuidedIdeaReference) (GuidedLaterIdea, error) {
 	if ref.Path != authoringRuntimeRef(filepath.Join("sessions", id, "later-ideas", ref.ID+".json")) {
-		return GuidedLaterIdea{}, ErrWorkflowConflict
+		return GuidedLaterIdea{}, workflowstate.ErrConflict
 	}
 
 	data, err := r.authoringRead(ref.Path)
-	if err != nil || workflowHash(data) != ref.Hash {
-		return GuidedLaterIdea{}, errors.Join(ErrWorkflowConflict, err)
+	if err != nil || contenthash.Sum(data) != ref.Hash {
+		return GuidedLaterIdea{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	var idea GuidedLaterIdea
@@ -156,7 +159,7 @@ func (r *fileAuthoringSessionRepository) readGuidedIdea(id string, ref GuidedIde
 
 	expected.Hash = ""
 	if idea.GuidedIdeaReference != expected || idea.State != "pending_review" || strings.TrimSpace(idea.Content) == "" {
-		return idea, ErrWorkflowConflict
+		return idea, workflowstate.ErrConflict
 	}
 
 	idea.Hash = ref.Hash

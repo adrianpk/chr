@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func queueTelegramActionView(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token, legacy string) error {
@@ -50,7 +52,7 @@ func sealTelegramActionPresentation(op telegramConversationTransaction, request 
 		return err
 	}
 
-	hash := workflowHash(payload)
+	hash := contenthash.Sum(payload)
 	if _, err := op.tx.ExecContext(op.ctx, "UPDATE telegram_outbox SET presentation=?,presentation_hash=? WHERE action_token=?", string(payload), hash, token); err != nil {
 		return err
 	}
@@ -61,7 +63,7 @@ func sealTelegramActionPresentation(op telegramConversationTransaction, request 
 }
 
 func telegramActionPresentationDigest(request TelegramOperationRequest, hash string) string {
-	return workflowHash([]byte("telegram-action/v1:" + telegramActionGuard(request) + ":" + hash))
+	return contenthash.Sum([]byte("telegram-action/v1:" + telegramActionGuard(request) + ":" + hash))
 }
 
 func telegramActionDigestMatches(action TelegramAction, request TelegramOperationRequest) bool {
@@ -123,7 +125,7 @@ func validateTelegramActionDocument(ctx context.Context, reader telegramConversa
 		return err
 	}
 
-	if validateTelegramDocument(document) != nil || document.ProjectID != request.Target.ProjectID || document.Namespace != request.Target.Namespace || document.ProjectBindingDigest != request.Target.ProjectBindingDigest || hash != delivery.Presentation.DocumentHash || workflowHash(document.Payload) != hash {
+	if validateTelegramDocument(document) != nil || document.ProjectID != request.Target.ProjectID || document.Namespace != request.Target.Namespace || document.ProjectBindingDigest != request.Target.ProjectBindingDigest || hash != delivery.Presentation.DocumentHash || contenthash.Sum(document.Payload) != hash {
 		return ErrTelegramActionUnavailable
 	}
 

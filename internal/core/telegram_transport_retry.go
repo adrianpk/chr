@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramTransportRetry names one exhausted transport cycle. It cannot reset
@@ -31,7 +32,7 @@ func RetryLocalTelegramTransport(ctx context.Context, env UserEnvironment, asset
 
 	botID, err := TelegramBoundBotID(env)
 	if err != nil || botID != request.BotID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	store, err := NewTelegramReceiverStore(ctx, env, assets)
@@ -57,7 +58,7 @@ func (s *TelegramReceiverStore) RetryTelegramTransport(ctx context.Context, requ
 
 func (s *TelegramReceiverStore) retryTelegramTransport(ctx context.Context, request TelegramTransportRetry, now time.Time) error {
 	if request.BotID <= 0 || request.Poll == (request.DeliveryID != "") || len(request.DeliveryID) > 128 || strings.TrimSpace(request.Actor) != request.Actor {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowMutationBinding(WorkflowMutationBinding{RequestID: "telegram-transport-retry", Operator: request.Actor}); err != nil {

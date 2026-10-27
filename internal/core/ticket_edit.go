@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TicketEditRequest patches supported fields against one observed source image.
@@ -31,7 +34,7 @@ func UpdateTicketDocument(ctx context.Context, opts TicketBoardReadOptions, requ
 	}
 
 	if document.Revision != request.Revision {
-		return document, ErrWorkflowConflict
+		return document, workflowstate.ErrConflict
 	}
 
 	if document.ReadOnlyReason != "" {
@@ -43,7 +46,7 @@ func UpdateTicketDocument(ctx context.Context, opts TicketBoardReadOptions, requ
 		return document, err
 	}
 
-	committedRevision := workflowHash([]byte(content))
+	committedRevision := contenthash.Sum([]byte(content))
 	if document.native != nil {
 		committedRevision, err = writeNativeTicketEdit(ctx, opts, document, request, content)
 	} else {
@@ -255,7 +258,7 @@ func prepareNativeTicketEdit(document TicketDocument, request TicketEditRequest,
 	}
 
 	if request.Body != nil && document.ReadOnly["body"] == "" {
-		record.Task.ContractHash = workflowHash([]byte(record.Task.Key + "\x00" + record.Task.UseCase + "\x00" + *request.Body))
+		record.Task.ContractHash = contenthash.Sum([]byte(record.Task.Key + "\x00" + record.Task.UseCase + "\x00" + *request.Body))
 	}
 
 	return record, nil

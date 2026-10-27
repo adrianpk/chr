@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // ListPlanDocuments enumerates concrete canonical plans across namespaces,
@@ -22,7 +24,7 @@ func ListPlanDocuments(ctx context.Context, projectDir string) ([]PlanDocument, 
 
 	count, size := len(namespaces), 0
 	for _, namespace := range namespaces {
-		if !namespace.IsDir() || !IsValidOpsNamespace(namespace.Name()) {
+		if !namespace.IsDir() || !opsnamespace.Valid(namespace.Name()) {
 			continue
 		}
 

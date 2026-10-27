@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReadWorkControlReceipt observes an accepted control without constructing
 // execution ports or permitting a fresh mutation through an expired prompt.
 func (s service) ReadWorkControlReceipt(ctx context.Context, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error) {
 	if request.RequestBinding == nil {
-		return WorkflowWorkStatus{}, false, core.ErrWorkflowConflict
+		return WorkflowWorkStatus{}, false, workflowstate.ErrConflict
 	}
 
 	store, err := s.workflowStore()

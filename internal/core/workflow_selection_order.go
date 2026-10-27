@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (selection workflowSelection) orderMembers(members []WorkflowPreviewMember, selector WorkflowSelector) (string, error) {
@@ -72,7 +74,7 @@ func (selection workflowSelection) validateMemberInputs(members []WorkflowPrevie
 
 		descriptor := selection.slices[member.SliceID]
 		if descriptor.TaskInputHash != WorkflowTaskInputHash(selection.snapshot.Records, member.SliceID) {
-			return fmt.Errorf("%w: slice %s membership fingerprint changed", ErrWorkflowConflict, member.SliceID)
+			return fmt.Errorf("%w: slice %s membership fingerprint changed", workflowstate.ErrConflict, member.SliceID)
 		}
 
 		checked[member.SliceID] = true

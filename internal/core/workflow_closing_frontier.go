@@ -2,24 +2,27 @@ package core
 
 import (
 	"encoding/json"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowInvocationClosures(run workflowInvocationFile) error {
 	if len(run.Closures) > len(run.SetImages) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	cursor := 0
 	for i, closure := range run.Closures {
 		if !validWorkflowInvocationClosure(run, i, cursor, closure) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		cursor = closure.Cursor
 	}
 
 	if run.ClosingSet != "" && (run.ClosingSet != workflowNextClosingSet(run.WorkflowInvocation) || run.Status != "running") {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -28,7 +31,7 @@ func validateWorkflowInvocationClosures(run workflowInvocationFile) error {
 func (s *WorkflowStore) checkWorkflowInvocationClosureEvidence(run workflowInvocationFile) error {
 	for _, closure := range run.Closures {
 		data, err := s.workflowClosingRead(closure.Receipt.Ref)
-		if err != nil || workflowHash(data) != closure.Receipt.Hash {
+		if err != nil || contenthash.Sum(data) != closure.Receipt.Hash {
 			return errorsOrConflict(err)
 		}
 
@@ -38,7 +41,7 @@ func (s *WorkflowStore) checkWorkflowInvocationClosureEvidence(run workflowInvoc
 		}
 
 		if receipt.Schema != "chr-set-closure/v1" || receipt.SetID != closure.SetID || receipt.Target != closure.Target || receipt.Outcome != "completed" {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

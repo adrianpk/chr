@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeQueueIndex proves index deletion/corruption is recoverable without
@@ -46,7 +48,7 @@ func nativeQueueStaleIndex(t *testing.T, index *sqliteTicketIndex, store *Workfl
 		t.Fatal(err)
 	}
 
-	if _, err := index.QueryWorkflowIntegrationQueue(t.Context(), store, q); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := index.QueryWorkflowIntegrationQueue(t.Context(), store, q); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale projection returned work", err)
 	}
 
@@ -68,7 +70,7 @@ func nativeQueueRepairCache(t *testing.T, index *sqliteTicketIndex, store *Workf
 			t.Fatal(err)
 		}
 
-		if _, err := index.QueryWorkflowIntegrationQueue(t.Context(), store, q); !errors.Is(err, ErrWorkflowConflict) {
+		if _, err := index.QueryWorkflowIntegrationQueue(t.Context(), store, q); !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("invalid projection returned work", err)
 		}
 

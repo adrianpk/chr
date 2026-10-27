@@ -10,6 +10,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTestIndex(t *testing.T, path string) WorkflowIndex {
@@ -112,7 +113,7 @@ func TestWorkflowIndex(t *testing.T) {
 	first.Task.Status = TicketStatusBacklog
 	workflowTestWrite(t, store, first)
 
-	if _, err := index.QueryWorkflow(context.Background(), store, q); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := index.QueryWorkflow(context.Background(), store, q); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale index returned work: %v", err)
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) respondControl(ctx context.Context, user core.TelegramAllowedUser, config core.TelegramReceiverConfig, update core.TelegramReceivedUpdate) (bool, error) {
@@ -104,7 +105,7 @@ func (r telegramReceiver) controlInvocation(ctx context.Context, command telegra
 	if target.ConversationID != "" {
 		c, found, err := r.store.TelegramConversationReference(ctx, command.Input.Update.Peer, target.ConversationID)
 		if err != nil || !found || id != "" && c.InvocationID != "" && id != c.InvocationID {
-			return "", core.ErrWorkflowConflict
+			return "", workflowstate.ErrConflict
 		}
 
 		if c.InvocationID != "" {
@@ -113,7 +114,7 @@ func (r telegramReceiver) controlInvocation(ctx context.Context, command telegra
 	}
 
 	if !validWorkflowControlIdentity(id) {
-		return "", core.ErrWorkflowConflict
+		return "", workflowstate.ErrConflict
 	}
 
 	return id, nil
@@ -134,7 +135,7 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 	}
 
 	if status.ID != id || status.ProjectID != target.ProjectID || status.Namespace != target.Namespace {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if status.Integration != nil && status.Integration.Decision != nil && len(status.Integration.Decision.Requests) > 0 {

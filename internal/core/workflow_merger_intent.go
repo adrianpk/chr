@@ -1,6 +1,10 @@
 package core
 
-import "slices"
+import (
+	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func validateWorkflowMergerRequirements(requirements []WorkflowMergerRequirement) error {
 	seen := map[string]bool{}
@@ -8,7 +12,7 @@ func validateWorkflowMergerRequirements(requirements []WorkflowMergerRequirement
 
 	for _, requirement := range requirements {
 		if !validWorkflowRequestKey(requirement.ID) || seen[requirement.ID] || !slices.Contains([]string{"source", "target"}, requirement.Origin) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[requirement.ID] = true
@@ -17,7 +21,7 @@ func validateWorkflowMergerRequirements(requirements []WorkflowMergerRequirement
 	}
 
 	if !source || !target {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowMergerIntentConflicts(requirements)
@@ -25,13 +29,13 @@ func validateWorkflowMergerRequirements(requirements []WorkflowMergerRequirement
 
 func validateWorkflowMergerRequirementIDs(ids []string, requirements []WorkflowMergerRequirement) error {
 	if len(ids) == 0 || len(ids) > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{}
 	for _, id := range ids {
 		if seen[id] || !slices.ContainsFunc(requirements, func(r WorkflowMergerRequirement) bool { return r.ID == id }) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[id] = true
@@ -44,7 +48,7 @@ func validateWorkflowMergerConflicts(input WorkflowMergerInput) error {
 	seen := map[string]bool{}
 	for _, conflict := range input.Conflicts {
 		if !validWorkflowRequestKey(conflict.ID) || seen[conflict.ID] || !workflowMergerPathAllowed(input, conflict.Path) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if err := validateWorkflowMergerRequirementIDs(conflict.RequirementIDs, input.Requirements); err != nil {
@@ -52,7 +56,7 @@ func validateWorkflowMergerConflicts(input WorkflowMergerInput) error {
 		}
 
 		if !validWorkflowMergerConflictProcedure(conflict) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[conflict.ID] = true
@@ -72,17 +76,17 @@ func validateWorkflowMergerCheckpoint(input WorkflowMergerInput) error {
 	}
 
 	if !validWorkflowMergerCheckpointPosition(input, *checkpoint) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !validWorkflowMergerCheckpointObjects(input, *checkpoint) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{checkpoint.OriginalCommit: true}
 	for _, replay := range checkpoint.Predecessors {
 		if !validWorkflowMergerPredecessor(replay, len(input.Source)) || seen[replay.Source] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[replay.Source] = true
@@ -94,7 +98,7 @@ func validateWorkflowMergerCheckpoint(input WorkflowMergerInput) error {
 	}
 
 	if parent != checkpoint.PreparedParent {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

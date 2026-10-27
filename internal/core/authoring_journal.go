@@ -6,6 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type authoringMutationJournal struct {
@@ -26,7 +30,7 @@ func (r *fileAuthoringSessionRepository) writeAuthoringJournalVersion(schema str
 		return err
 	}
 
-	journal.Checksum = workflowHash(encoded)
+	journal.Checksum = contenthash.Sum(encoded)
 
 	encoded, err = json.Marshal(journal)
 	if err != nil {
@@ -93,7 +97,7 @@ func (r *fileAuthoringSessionRepository) checkAuthoringJournal(journal authoring
 		return err
 	}
 
-	if !validAuthoringJournalBounds(journal, len(encoded)+len(checksum)) || checksum != workflowHash(encoded) {
+	if !validAuthoringJournalBounds(journal, len(encoded)+len(checksum)) || checksum != contenthash.Sum(encoded) {
 		return errors.New("invalid authoring journal")
 	}
 
@@ -123,12 +127,12 @@ func (r *fileAuthoringSessionRepository) authoringJournalImage(change workflowFi
 		return false, err
 	}
 
-	if workflowHash(data) == workflowHash(change.After) {
+	if contenthash.Sum(data) == contenthash.Sum(change.After) {
 		return true, nil
 	}
 
-	if workflowHash(data) != change.Before {
-		return false, ErrWorkflowConflict
+	if contenthash.Sum(data) != change.Before {
+		return false, workflowstate.ErrConflict
 	}
 
 	return false, nil
@@ -191,7 +195,7 @@ func (r *fileAuthoringSessionRepository) replayAuthoringJournal(journal authorin
 	for _, change := range journal.Changes {
 		applied, err := r.authoringJournalImage(change)
 		if err != nil || !applied {
-			return errors.Join(ErrWorkflowConflict, err)
+			return errors.Join(workflowstate.ErrConflict, err)
 		}
 	}
 
@@ -216,7 +220,7 @@ func (r *fileAuthoringSessionRepository) checkAuthoringJournalImages(journal aut
 
 func validAuthoringOpsJournalPath(path string) bool {
 	parts := strings.Split(path, "/")
-	if len(parts) != 5 || parts[0] != OpsDirectoryName || !IsValidOpsNamespace(parts[1]) {
+	if len(parts) != 5 || parts[0] != OpsDirectoryName || !opsnamespace.Valid(parts[1]) {
 		return false
 	}
 

@@ -5,6 +5,9 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeDecisionFixture(t *testing.T) (workflowPreparationFixture, WorkflowMergerRequest, WorkflowIntegrationDecisions) {
@@ -139,7 +142,7 @@ func nativeDecisionResolvedInput(t *testing.T, f workflowPreparationFixture, inp
 		t.Fatal(err)
 	}
 
-	if err := f.store.CheckWorkflowMergerEvidence(t.Context(), input, time.Now().UTC()); !errors.Is(err, ErrWorkflowConflict) {
+	if err := f.store.CheckWorkflowMergerEvidence(t.Context(), input, time.Now().UTC()); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("model text replaced operator authority", err)
 	}
 }
@@ -156,17 +159,17 @@ func TestNativeDecisionGuards(t *testing.T) {
 		}},
 		{"revision", func(r *WorkflowIntegrationAnswerRequest, _ *workflowPreparationFixture) { r.DecisionRevision++ }},
 		{"hash", func(r *WorkflowIntegrationAnswerRequest, _ *workflowPreparationFixture) {
-			r.DecisionHash = workflowHash([]byte("other"))
+			r.DecisionHash = contenthash.Sum([]byte("other"))
 		}},
 		{"authority", func(r *WorkflowIntegrationAnswerRequest, _ *workflowPreparationFixture) { r.Answer.Authority = "agent" }},
 		{"source", func(_ *WorkflowIntegrationAnswerRequest, f *workflowPreparationFixture) {
-			f.provider.pr.HeadCommit = workflowHash([]byte("changed-source"))[:40]
+			f.provider.pr.HeadCommit = contenthash.Sum([]byte("changed-source"))[:40]
 		}},
 		{"scope choice", func(r *WorkflowIntegrationAnswerRequest, _ *workflowPreparationFixture) {
 			r.Answer.Choice = "Approve a scoped requirement change"
 		}},
 		{"base", func(_ *WorkflowIntegrationAnswerRequest, f *workflowPreparationFixture) {
-			f.provider.target = workflowHash([]byte("changed"))[:40]
+			f.provider.target = contenthash.Sum([]byte("changed"))[:40]
 		}},
 	}
 	for _, tc := range cases {
@@ -175,7 +178,7 @@ func TestNativeDecisionGuards(t *testing.T) {
 			answer := nativeDecisionAnswer(t, f.store, f.run.ID, record)
 			tc.change(&answer, &f)
 
-			if _, err := f.store.AnswerWorkflowIntegrationDecision(t.Context(), answer, f.provider); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := f.store.AnswerWorkflowIntegrationDecision(t.Context(), answer, f.provider); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("invalid answer accepted", err)
 			}
 
@@ -232,7 +235,7 @@ func TestNativeDecisionContext(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := f.store.CheckWorkflowMergerEvidence(t.Context(), input, time.Now().UTC()); !errors.Is(err, ErrWorkflowConflict) {
+			if err := f.store.CheckWorkflowMergerEvidence(t.Context(), input, time.Now().UTC()); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed context reused answer", err)
 			}
 		})

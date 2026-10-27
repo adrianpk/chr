@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"fmt"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowQuerySQL(q WorkflowQuery) (string, error) {
@@ -80,5 +82,5 @@ func appendWorkflowQueryResult(page *WorkflowPage, snapshot WorkflowSnapshot, ki
 		}
 	}
 
-	return fmt.Errorf("%w: indexed workflow reference is absent", ErrWorkflowConflict)
+	return fmt.Errorf("%w: indexed workflow reference is absent", workflowstate.ErrConflict)
 }

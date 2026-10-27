@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowTicketAdmission binds the explicit transition of one independent
@@ -22,7 +24,7 @@ func validateWorkflowTicketAdmission(guard *WorkflowAdmissionGuard, selection Wo
 	}
 
 	if guard.Selected == nil || ticket.Key != guard.Selected.Key || ticket.Revision != guard.Selected.Revision || !validWorkflowNativeFingerprint(ticket.ContractHash) || selection.Selector.Extent != "ticket" || selection.Selector.Identity != ticket.Key {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowGate(ticket.Validation)
@@ -38,7 +40,7 @@ func (s *WorkflowStore) PreviewWorkflowTicketAdmission(ctx context.Context, memb
 		}
 
 		if record.Task == nil || record.ProjectID != s.projectID || record.Namespace != s.layout.Namespace() || record.Task.Key != member.Key || record.Revision != member.Revision || record.SourceHash != member.SourceHash || record.Task.ContractHash != member.ContractHash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if !workflowIndependentBacklog(record) {
@@ -72,7 +74,7 @@ func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile
 	}
 
 	if len(run.Members) != 1 {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	member := run.Members[0]
@@ -83,7 +85,7 @@ func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile
 	}
 
 	if !workflowIndependentBacklog(record) || !workflowMemberImageMatches(record, member, run.WorkflowIdentity) {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	observed, err := workflowTicketAdmission(record)
@@ -92,7 +94,7 @@ func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile
 	}
 
 	if !reflect.DeepEqual(observed, run.Admission.ReadyTicket) {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	record.Task.Status = TicketStatusReadyForDev

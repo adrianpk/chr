@@ -9,6 +9,8 @@ import (
 	"slices"
 	"testing"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -61,7 +63,7 @@ func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessR
 	}
 
 	return func(_ context.Context, config WorkspaceConfig) (*HarnessBinding, []string, error) {
-		binding, err := SealHarnessBinding(HarnessBinding{SchemaVersion: 1, Role: HarnessWorker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: workflowHash([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
+		binding, err := SealHarnessBinding(HarnessBinding{SchemaVersion: 1, Role: HarnessWorker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
 
 		return &binding, slices.Clone(frozen), err
 	}
@@ -99,7 +101,7 @@ func checkHarnessBindingInputs(t *testing.T, store *WorkflowStore, run WorkflowI
 
 	for _, attempt := range run.Attempts {
 		data, err := readWorkflowFile(filepath.Join(store.layout.Root(), attempt.InputRef))
-		if err != nil || workflowHash(data) != attempt.InputHash {
+		if err != nil || contenthash.Sum(data) != attempt.InputHash {
 			t.Fatal("worker input digest changed", err)
 		}
 
@@ -157,7 +159,7 @@ func checkHarnessBindingCommandOverride(t *testing.T, store *WorkflowStore, id s
 	t.Helper()
 
 	claim := workflowTestClaim(t, store, id)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, []string{"sh", "-c", "exit 0"}); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, []string{"sh", "-c", "exit 0"}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("caller replaced the bound command", err)
 	}
 }
@@ -182,7 +184,7 @@ func TestHarnessBindingRejects(t *testing.T) {
 
 			switch change {
 			case "hash":
-				run.HarnessBinding.BindingHash = workflowHash([]byte("changed"))
+				run.HarnessBinding.BindingHash = contenthash.Sum([]byte("changed"))
 			case "model":
 				run.HarnessBinding.Model = "different-model"
 			case "schema":
@@ -216,7 +218,7 @@ func checkHarnessBindingReplayModel(t *testing.T, store *WorkflowStore, request 
 	}
 
 	changed.HarnessBinding = &sealed
-	if _, err := store.StartWorkflow(t.Context(), changed); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), changed); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("replay exchanged its binding", err)
 	}
 }
@@ -245,7 +247,7 @@ func checkHarnessBindingBudget(t *testing.T, identity string) {
 
 		binding.Harness = identity
 		if identity == "pi" {
-			binding.RuntimeRef = "sha256:" + workflowHash([]byte("pi-runtime"))
+			binding.RuntimeRef = "sha256:" + contenthash.Sum([]byte("pi-runtime"))
 		}
 
 		sealed, err := SealHarnessBinding(*binding)

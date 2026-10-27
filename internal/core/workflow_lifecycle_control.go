@@ -4,6 +4,8 @@ import (
 	"context"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowLifecycleControlPorts supplies existing native resume and continuation
@@ -106,7 +108,7 @@ func (s *WorkflowStore) applyWorkflowLifecycleControl(ctx context.Context, run w
 	case "continue":
 		return s.acceptWorkflowControlContinuation(ctx, &run, request.StepLimit, commit)
 	default:
-		return 0, ErrWorkflowConflict
+		return 0, workflowstate.ErrConflict
 	}
 }
 
@@ -134,11 +136,11 @@ func (s *WorkflowStore) acceptWorkflowControlContinuation(ctx context.Context, r
 
 func validateWorkflowLifecyclePayload(request WorkflowControlMutationRequest) error {
 	if request.Integration != nil || request.Grant != nil || request.Answer != nil || request.ReviewHash != "" || request.DecisionRevision != 0 || request.DecisionHash != "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.StepLimit < 0 || request.StepLimit > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

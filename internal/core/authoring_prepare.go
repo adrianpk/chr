@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileAuthoringSessionRepository) prepareAuthoringContinuation(ctx context.Context, binding authoringRequestBinding, snapshot AuthoringSnapshot, draft AuthoringDraft) ([]workflowFileChange, error) {
@@ -100,8 +103,8 @@ func (r *fileAuthoringSessionRepository) authoringTranscriptImage(binding author
 			return nil, err
 		}
 
-		if workflowHash(content) != snapshot.TranscriptHash {
-			return nil, ErrWorkflowConflict
+		if contenthash.Sum(content) != snapshot.TranscriptHash {
+			return nil, workflowstate.ErrConflict
 		}
 
 		text = string(content)

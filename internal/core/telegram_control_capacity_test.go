@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func fillTelegramOrdinaryIntake(t *testing.T, store *TelegramReceiverStore) {
@@ -226,7 +228,7 @@ func TestTelegramControlContextGuard(t *testing.T) {
 
 	f.apply(t, TelegramConversationStart, func(i *TelegramConversationInput) { i.Project = "beta" })
 
-	if _, err := f.store.ResolveTelegramConversationTarget(t.Context(), input); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ResolveTelegramConversationTarget(t.Context(), input); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("model result followed changed context", err)
 	}
 }

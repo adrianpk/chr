@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
@@ -83,7 +84,7 @@ func TestGuidedUseCaseTelegramMigration(t *testing.T) {
 
 	now := database.FormatTime(time.Now())
 	execTelegramRecoverySQL(t, old, `INSERT INTO telegram_peers(bot_id,chat_id,topic_id,user_id,updated_at) VALUES(12345,100001,0,100001,?)`, now)
-	execTelegramRecoverySQL(t, old, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,capture,revision,created_at,updated_at) VALUES('manual',12345,100001,0,100001,'alpha',?,'default','develop','collecting','Manual topic','Original context',7,?,?)`, workflowHash([]byte("root")), now, now)
+	execTelegramRecoverySQL(t, old, `INSERT INTO telegram_conversations(id,bot_id,chat_id,topic_id,user_id,project_id,project_binding_digest,namespace,intent,phase,topic,capture,revision,created_at,updated_at) VALUES('manual',12345,100001,0,100001,'alpha',?,'default','develop','collecting','Manual topic','Original context',7,?,?)`, contenthash.Sum([]byte("root")), now, now)
 
 	if err := old.Close(); err != nil {
 		t.Fatal(err)

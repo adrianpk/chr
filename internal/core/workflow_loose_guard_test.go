@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowLooseChangedInput rejects unguarded rank edits and changed execution
@@ -19,7 +21,7 @@ func TestWorkflowLooseChangedInput(t *testing.T) {
 			before := workflowTestRead(t, f.store, f.run.ID)
 			changeWorkflowLooseInput(t, f.store, record, change)
 
-			if _, err := f.store.ReconcileWorkflowMembership(t.Context(), before.ID); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := f.store.ReconcileWorkflowMembership(t.Context(), before.ID); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed frozen execution was silently accepted", err)
 			}
 
@@ -79,7 +81,7 @@ func TestWorkflowLooseRetainedProof(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.ClaimWorkflow(t.Context(), run.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ClaimWorkflow(t.Context(), run.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("altered delivery admitted a successor", err)
 	}
 }

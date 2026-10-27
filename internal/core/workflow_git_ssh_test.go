@@ -13,6 +13,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowSSHCommand(t *testing.T, name string, args ...string) string {
@@ -174,7 +176,7 @@ func TestWorkflowGitSSH(t *testing.T) {
 func checkWorkflowGitStale(t *testing.T, result WorkflowGitPublicationResult, err error) {
 	t.Helper()
 
-	if !errors.Is(err, ErrWorkflowConflict) || result.CommandsSent {
+	if !errors.Is(err, workflowstate.ErrConflict) || result.CommandsSent {
 		t.Fatalf("stale publication: %+v, %v", result, err)
 	}
 }

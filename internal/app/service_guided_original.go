@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ReadGuidedUseCaseOriginal returns a complete committed image without reading
@@ -33,7 +34,7 @@ func (s service) ReadGuidedUseCaseOriginal(ctx context.Context, id, namespace, k
 		}
 	}
 
-	return GuidedUseCaseArtifact{}, core.ErrWorkflowConflict
+	return GuidedUseCaseArtifact{}, workflowstate.ErrConflict
 }
 
 func guidedOriginalMatches(session core.AuthoringSession, stage, path, kind string) bool {

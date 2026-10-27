@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateGuidedControlProof(request WorkflowControlMutationRequest) error {
@@ -14,7 +16,7 @@ func validateGuidedControlProof(request WorkflowControlMutationRequest) error {
 	}
 
 	if !guidedControlAction(request.Action) || validateAuthoringSessionID(proof.RunID) != nil || !validWorkflowNativeFingerprint(proof.OperationDigest) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -25,12 +27,12 @@ func validateGuidedControlProof(request WorkflowControlMutationRequest) error {
 func BindGuidedControlInvocation(ctx context.Context, root string, session *AuthoringSession) error {
 	absolute, err := filepath.Abs(root)
 	if err != nil || !holdsAuthoringOwner(ctx, absolute) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	state := session.Guided
 	if state == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !guidedControlNeedsInvocation(state) {
@@ -38,7 +40,7 @@ func BindGuidedControlInvocation(ctx context.Context, root string, session *Auth
 	}
 
 	if state.Control == nil || state.Control.PendingOperation == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	lookup, err := findGuidedControlInvocation(ctx, root, *session)
@@ -74,7 +76,7 @@ func (s *WorkflowStore) lookupGuidedAdmission(ctx context.Context, session Autho
 			}
 
 			if run.ProjectID != session.ProjectID || !reflect.DeepEqual(run.Admission, request.Admission) {
-				return ErrWorkflowConflict
+				return workflowstate.ErrConflict
 			}
 
 			result = guidedAdmissionLookup{Invocation: run.WorkflowInvocation, Found: true}

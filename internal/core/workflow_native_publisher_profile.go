@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowNativePublisherProfile is host configuration for one canonical target.
@@ -97,16 +99,16 @@ func selectWorkflowNativePublisher(profiles []WorkflowNativePublisherProfile, re
 func validateWorkflowNativePublisher(profile WorkflowNativePublisherProfile) error {
 	canonical, err := workflowCanonicalRepository(profile.Repository)
 	if err != nil || canonical != profile.Repository || !validWorkflowNativeFingerprint(profile.APIIdentityFingerprint) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !strings.HasPrefix(profile.TargetRef, "refs/heads/") || !validWorkflowPRBranch(strings.TrimPrefix(profile.TargetRef, "refs/heads/")) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, value := range []string{profile.Transport, profile.CredentialRef, profile.CertificationRef} {
 		if value == "" || len(value) > 1024 || strings.ContainsAny(value, "\x00\r\n") {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -115,13 +117,13 @@ func validateWorkflowNativePublisher(profile WorkflowNativePublisherProfile) err
 
 func validateWorkflowNativePublisherMethods(profile WorkflowNativePublisherProfile) error {
 	if !slices.Contains([]string{"forgejo_same_pr_git_auto_merge/v1", "github_same_pr_git_merge/v1", workflowNativeSourceResultContract}, profile.ObservationContract) || len(profile.CertifiedMethods) == 0 || len(profile.CertifiedMethods) > 3 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{}
 	for _, method := range profile.CertifiedMethods {
 		if !slices.Contains([]string{"merge", "rebase", "squash"}, method) || seen[method] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[method] = true

@@ -2,6 +2,9 @@ package core
 
 import (
 	"context"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) commitWorkflowSliceFinalization(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, receipt WorkflowRecord) error {
@@ -19,7 +22,7 @@ func (s *WorkflowStore) commitWorkflowSliceFinalization(ctx context.Context, run
 		return err
 	}
 
-	run.DeliveryRef, run.DeliveryHash = receipt.Path, workflowHash(files[0].After)
+	run.DeliveryRef, run.DeliveryHash = receipt.Path, contenthash.Sum(files[0].After)
 	snapshot.Records = append(snapshot.Records, receipt)
 
 	changes, err := s.workflowFinalizationTaskImages(run, &snapshot, observation.tasks, receipt)
@@ -114,7 +117,7 @@ func (s *WorkflowStore) checkWorkflowFinalizationImages(ctx context.Context, run
 
 		record, err := s.readRecord(member.Admission.Path)
 		if err != nil || !workflowFinalizedTaskMatches(record, run.Lane.Branch, receipt) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -129,7 +132,7 @@ func (s *WorkflowStore) checkWorkflowFinalizationImages(ctx context.Context, run
 
 	unit := selection.slices[receipt.Receipt.Unit.ID]
 	if unit.Phase != "integrated" || unit.DeliveryRef != receipt.Path || unit.PullRequest != receipt.Receipt.PullRequest {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

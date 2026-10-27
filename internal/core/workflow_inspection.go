@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowInspection observes retained authorization and current task records.
@@ -89,7 +91,7 @@ func (s *WorkflowStore) InspectWorkflowPage(ctx context.Context, offset, limit i
 
 	next = -1
 	if offset < 0 || offset > WorkflowRecordLimit || limit < 1 || limit > WorkflowPageLimit {
-		return nil, next, ErrWorkflowConflict
+		return nil, next, workflowstate.ErrConflict
 	}
 
 	err = s.withWorkflowInspection(ctx, func() error {

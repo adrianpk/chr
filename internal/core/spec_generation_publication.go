@@ -8,6 +8,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // SpecTargetRevision binds generation to either the current document or its
@@ -29,7 +32,7 @@ func observeSpecTarget(ctx context.Context, projectDir, reference string) (SpecD
 	document = SpecDocument{Reference: reference}
 	for _, path := range []string{reference, filepath.Join(filepath.Dir(reference), "metadata.json")} {
 		if _, err := r.authoringRead(path); !errors.Is(err, os.ErrNotExist) {
-			return document, errors.Join(ErrWorkflowConflict, err)
+			return document, errors.Join(workflowstate.ErrConflict, err)
 		}
 
 		document.images = append(document.images, workflowFileChange{Path: path})
@@ -40,7 +43,7 @@ func observeSpecTarget(ctx context.Context, projectDir, reference string) (SpecD
 		return document, err
 	}
 
-	document.Revision = workflowHash([]byte(strings.Join([]string{root, reference, "", ""}, "\x00")))
+	document.Revision = contenthash.Sum([]byte(strings.Join([]string{root, reference, "", ""}, "\x00")))
 
 	return document, r.checkProjectDumpInspection(ctx)
 }
@@ -136,7 +139,7 @@ func prepareGeneratedSpecDocument(projectDir string, paths GeneratedSpecPaths, d
 
 func validateSpecGenerationTarget(document SpecDocument, spec GeneratedSpec) error {
 	if spec.ExpectedRevision != "" && document.Revision != spec.ExpectedRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if document.metadata == nil {
@@ -144,11 +147,11 @@ func validateSpecGenerationTarget(document SpecDocument, spec GeneratedSpec) err
 	}
 
 	if document.CaseSlug != spec.Scope.CaseSlug {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if document.ProjectID != "" && document.ProjectID != spec.Scope.ProjectID {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

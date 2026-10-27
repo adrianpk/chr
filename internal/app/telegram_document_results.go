@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 var telegramDocumentNamePattern = regexp.MustCompile(`[^a-z0-9]+`)
@@ -59,7 +60,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request core.Te
 	}
 
 	if snapshot.SourceHash != result.SourceHash {
-		return nil, core.ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	return telegramPrimaryAuthoringDocument(request.Target, result, snapshot, owner.Target)
@@ -85,7 +86,7 @@ func telegramPrimaryAuthoringDocument(target core.TelegramOperationTarget, resul
 		return &core.TelegramDocumentResponse{Message: core.TelegramMessageBlocks{Family: "21", InitialText: headline, ContentKind: "markdown", Content: core.TelegramDocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: telegramDocumentForTarget(target, artifact.Ref.Path, artifact.SourceHash, telegramDocumentName(string(kind), result.Session.Topic), "text/markdown", payload)}, nil
 	}
 
-	return nil, core.ErrWorkflowConflict
+	return nil, workflowstate.ErrConflict
 }
 
 func telegramExplanationDocument(target core.TelegramOperationTarget, requestID string, result AuthoringExplanation, source []byte) core.TelegramDocumentResponse {

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // ErrWorkflowProjectionStale preserves domain progress when a derived export fails.
@@ -184,7 +186,7 @@ func (s *WorkflowStore) prepareWorkflowTrackerImage(snapshot WorkflowSnapshot, s
 		return result, nil, previous, err
 	}
 
-	result.OutputHash, result.PendingHash = previous.OutputHash, workflowHash(output)
+	result.OutputHash, result.PendingHash = previous.OutputHash, contenthash.Sum(output)
 
 	result.GeneratedAt = previous.GeneratedAt
 	if result.Schema == "chr-tracker/v2" && result.SourceHash != previous.SourceHash {

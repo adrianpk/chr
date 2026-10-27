@@ -4,6 +4,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeInspectionRole observes a real owned slot without granting another
@@ -67,11 +69,11 @@ func TestNativeDecisionInspection(t *testing.T) {
 	store := NewWorkflowStore(f.store.layout, f.store.projectID)
 
 	before := nativeQueueImages(t, store.layout.Root())
-	if _, err := store.ReadWorkflowIntegrationDecisions(t.Context(), f.run.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReadWorkflowIntegrationDecisions(t.Context(), f.run.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("decision view replayed the interrupted answer", err)
 	}
 
-	if _, err := store.InspectWorkflow(t.Context(), f.run.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.InspectWorkflow(t.Context(), f.run.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("status replayed the interrupted answer", err)
 	}
 

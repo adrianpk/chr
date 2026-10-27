@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowIntegrationEntry(entry WorkflowIntegrationEntry) error {
@@ -35,7 +38,7 @@ func validWorkflowIntegrationEntryHeader(entry WorkflowIntegrationEntry) bool {
 }
 
 func validWorkflowIntegrationIdentity(entry WorkflowIntegrationEntry) bool {
-	return entry.SchemaVersion == 1 && validWorkflowNativeFingerprint(entry.ID) && validWorkflowRequestKey(entry.InvocationID) && entry.ProjectID != "" && IsValidOpsNamespace(entry.Namespace) && validWorkflowNativeFingerprint(entry.CoordinatorID) && validWorkflowNativeFingerprint(entry.FrozenScopeHash) && validWorkflowRequestKey(entry.AdmissionKey)
+	return entry.SchemaVersion == 1 && validWorkflowNativeFingerprint(entry.ID) && validWorkflowRequestKey(entry.InvocationID) && entry.ProjectID != "" && opsnamespace.Valid(entry.Namespace) && validWorkflowNativeFingerprint(entry.CoordinatorID) && validWorkflowNativeFingerprint(entry.FrozenScopeHash) && validWorkflowRequestKey(entry.AdmissionKey)
 }
 
 func validWorkflowIntegrationRevisions(entry WorkflowIntegrationEntry) bool {
@@ -147,7 +150,7 @@ func workflowIntegrationNextState(entry WorkflowIntegrationEntry, next string) e
 	}
 
 	if !slices.Contains(allowed, next) {
-		return fmt.Errorf("%w: integration phase %s cannot advance to %s", ErrWorkflowConflict, entry.State, next)
+		return fmt.Errorf("%w: integration phase %s cannot advance to %s", workflowstate.ErrConflict, entry.State, next)
 	}
 
 	return nil
@@ -200,7 +203,7 @@ func validateWorkflowIntegrationBudgetBinding(run workflowInvocationFile) error 
 	}
 
 	if b.Revision == 0 || b.Ref.Path != workflowIntegrationBudgetPath(run.ID) || !validWorkflowNativeFingerprint(b.Ref.Hash) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

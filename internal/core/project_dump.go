@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrProjectDumpReconciliation leaves existing material unchanged until an
@@ -59,7 +62,7 @@ func ValidateProjectDumpReference(reference string) error {
 }
 
 func validProjectDumpEnvelope(parts []string) bool {
-	return parts[0] == OpsDirectoryName && parts[2] == "dump" && parts[4] == OpsArtifactBodyFile() && IsValidOpsNamespace(parts[1]) && strings.TrimSpace(parts[1]) == parts[1]
+	return parts[0] == OpsDirectoryName && parts[2] == "dump" && parts[4] == OpsArtifactBodyFile() && opsnamespace.Valid(parts[1]) && strings.TrimSpace(parts[1]) == parts[1]
 }
 
 // ObserveProjectDump inspects canonical documents without creating metadata,
@@ -122,7 +125,7 @@ func (r *fileAuthoringSessionRepository) observeProjectDump(ctx context.Context,
 	}
 
 	if projectDumpMetadataImage(current) != projectDumpMetadataImage(project) {
-		return observed, ErrWorkflowConflict
+		return observed, workflowstate.ErrConflict
 	}
 
 	return observed, nil
@@ -145,7 +148,7 @@ func (s ProjectMetadataService) AdoptProjectDump(ctx context.Context, expectedRe
 		}
 
 		if observed.Revision != expectedRevision {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		if observed.ReconciliationReason != "" || observed.Destination == "" {

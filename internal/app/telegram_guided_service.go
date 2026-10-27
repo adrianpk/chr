@@ -5,6 +5,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramGuidedService interface {
@@ -50,7 +51,7 @@ func (s service) InspectTelegramGuided(ctx context.Context, target core.Telegram
 func (s service) ApplyTelegramGuided(ctx context.Context, target core.TelegramOperationTarget, input telegramGuidedInput) (core.AuthoringSession, error) {
 	command := input.Command
 	if command.ProjectID != target.ProjectID || command.Namespace != target.Namespace || command.RunID == "" {
-		return core.AuthoringSession{}, core.ErrWorkflowConflict
+		return core.AuthoringSession{}, workflowstate.ErrConflict
 	}
 
 	scoped, err := s.telegramGuidedProject(ctx, target)

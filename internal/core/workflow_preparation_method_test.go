@@ -3,6 +3,8 @@ package core
 import (
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // TestNativeMethodObjects rejects actual prepared objects with false combined
@@ -62,7 +64,7 @@ func TestNativeMethodMetadata(t *testing.T) {
 		{"source_tree", func(p *WorkflowIntegrationProof) { p.SourceTree = p.PreparedTree }},
 		{"date", nativeAlteredPreparationDate},
 		{"signature", func(p *WorkflowIntegrationProof) {
-			p.Provenance.Preparation.Signatures[0].SignatureHash = workflowHash([]byte("forged signature"))
+			p.Provenance.Preparation.Signatures[0].SignatureHash = contenthash.Sum([]byte("forged signature"))
 		}},
 	}
 

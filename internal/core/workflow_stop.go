@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrWorkflowStop reports a durable pause or cancellation request.
@@ -52,7 +54,7 @@ func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string, ports ...
 	defer cancel()
 
 	if len(ports) > 1 {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	err = s.withLock(ctx, func() error {

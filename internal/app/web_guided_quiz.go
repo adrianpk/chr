@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -29,14 +30,14 @@ func (p webViewProvider) writeGuidedQuizAction(operations service, request webui
 	}
 
 	if observed.Session == nil || observed.Quiz == nil {
-		return webQuizWriteFailure(request.ID, core.ErrWorkflowConflict), nil
+		return webQuizWriteFailure(request.ID, workflowstate.ErrConflict), nil
 	}
 
 	view := webui.GuidedUseCaseView{}
 	projectGuidedWebQuiz(&view, observed)
 
 	if request.ID != view.QuizID || request.Fields["session_id"] != observed.Quiz.State.SessionID || request.Revision != observed.Quiz.Revision || request.Fields["case_slug"] != observed.Session.Guided.CaseSlug {
-		return webGuidedQuizFailure(observed, core.ErrWorkflowConflict), nil
+		return webGuidedQuizFailure(observed, workflowstate.ErrConflict), nil
 	}
 
 	command, err := guidedQuizWebCommand(request)
@@ -75,7 +76,7 @@ func guidedQuizWebCommand(request webui.WriteActionRequest) (core.GuidedUseCaseC
 	case "quiz.cancel":
 		command.Action = "cancel"
 	default:
-		return command, core.ErrWorkflowConflict
+		return command, workflowstate.ErrConflict
 	}
 
 	var err error

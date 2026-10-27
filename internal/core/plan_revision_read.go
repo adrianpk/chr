@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ObservePlanRevision reads the current retained order binding without repairing
@@ -57,14 +60,14 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope QuizSco
 	}
 
 	if result.Reference != paths.RelativePath {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	namespace := strings.Split(result.Reference, "/")[1]
 
 	binding := result.Binding
 	if !validPlanBindingPaths(namespace, binding) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	root := filepath.Join(OpsDirectoryName, namespace)
@@ -75,7 +78,7 @@ func (r *fileAuthoringSessionRepository) validatePlanReceiptResult(scope QuizSco
 
 func (r *fileAuthoringSessionRepository) validatePlanRevisionImages(namespace string, binding PlanRevisionBinding) error {
 	if !validPlanBindingPaths(namespace, binding) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	root := filepath.Join(OpsDirectoryName, namespace)
@@ -91,7 +94,7 @@ func (r *fileAuthoringSessionRepository) checkPlanImages(root string, images map
 			return fmt.Errorf("plan companion unavailable: %w", err)
 		}
 
-		if hash == "" || workflowHash(data) != hash {
+		if hash == "" || contenthash.Sum(data) != hash {
 			return ErrWorkflowProjectionStale
 		}
 	}

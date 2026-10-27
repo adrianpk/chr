@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) offerGuidedControls(ctx context.Context, request core.TelegramOperationRequest, config core.TelegramReceiverConfig) error {
@@ -17,7 +18,7 @@ func (r telegramReceiver) offerGuidedControls(ctx context.Context, request core.
 	}
 
 	if !input.Offer || request.OperationID != "guided.step" || strings.ToLower(strings.TrimSpace(request.Source.Text)) != "show controls" {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	current, err := r.validateAuthoringAuthority(ctx, request, false)
@@ -47,7 +48,7 @@ func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim core.Tele
 	}
 
 	input, current, err := r.prepareGuidedAction(ctx, claim)
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishGuidedActionFailure(ctx, claim, config, err)
 	}
 
@@ -60,7 +61,7 @@ func (r telegramReceiver) applyGuidedAction(ctx context.Context, claim core.Tele
 	operations = r.boundTelegramGuidedService(operations, claim.Request, input.Command.RunID)
 
 	session, err := applyTelegramGuided(ctx, operations, claim.Request.Target, input)
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishGuidedActionFailure(ctx, claim, current, err)
 	}
 
@@ -92,7 +93,7 @@ func (r telegramReceiver) finishGuidedAction(ctx context.Context, claim core.Tel
 	result := core.TelegramActionResult{State: "confirmed", Delivery: delivery, Guided: &progress, ReceiptRef: progress.SessionRef, Facts: facts, Text: text, Message: telegramOutcomeMessage("43", text), ConfigDigest: config.Digest()}
 
 	err = r.store.FinishTelegramAction(ctx, claim, result, time.Now())
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishOvertakenGuidedAction(ctx, claim, result)
 	}
 
@@ -119,7 +120,7 @@ func (r telegramReceiver) prepareGuidedAction(ctx context.Context, claim core.Te
 	}
 
 	if !input.Offer || !slices.Contains(input.Choices, claim.Choice) || input.Command.Action != "" {
-		return input, current, core.ErrWorkflowConflict
+		return input, current, workflowstate.ErrConflict
 	}
 
 	if err := r.validateGuidedRunBinding(ctx, claim.Request, current, input.Command.RunID); err != nil {

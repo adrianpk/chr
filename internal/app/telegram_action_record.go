@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) applyRecordAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
@@ -17,7 +18,7 @@ func (r telegramReceiver) applyRecordAction(ctx context.Context, claim core.Tele
 	}
 
 	prepared, err := r.prepareRecordAction(ctx, claim)
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return r.finishRecordActionFailure(ctx, claim, err, config)
 	}
 
@@ -29,7 +30,7 @@ func (r telegramReceiver) applyRecordAction(ctx context.Context, claim core.Tele
 	defer cancel()
 
 	result, err := operations.ApplyTelegramRecord(applyContext, claim.Request.Target, prepared)
-	if errors.Is(err, core.ErrWorkflowConflict) || errors.Is(err, ErrRecordUnsupported) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, ErrRecordUnsupported) {
 		return r.finishRecordActionFailure(ctx, claim, err, config)
 	}
 
@@ -63,7 +64,7 @@ func (r telegramReceiver) finishRecordActionFailure(ctx context.Context, claim c
 
 func (r telegramReceiver) prepareRecordAction(ctx context.Context, claim core.TelegramActionClaim) (PreparedRecordMutation, error) {
 	if !claim.Action.ExpiresAt.After(time.Now()) {
-		return PreparedRecordMutation{}, core.ErrWorkflowConflict
+		return PreparedRecordMutation{}, workflowstate.ErrConflict
 	}
 
 	if err := r.validateRecordAuthority(ctx, claim.Request); err != nil {
@@ -76,7 +77,7 @@ func (r telegramReceiver) prepareRecordAction(ctx context.Context, claim core.Te
 	}
 
 	if !telegramPreparedRecordBinding(prepared, claim.Request) {
-		return PreparedRecordMutation{}, core.ErrWorkflowConflict
+		return PreparedRecordMutation{}, workflowstate.ErrConflict
 	}
 
 	if err := r.store.BeginTelegramOperation(ctx, claim.Request, time.Now()); err != nil {

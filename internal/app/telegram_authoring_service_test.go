@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramAuthoringServiceFixture(t *testing.T, reply func(authoringModelInput) string) (service, *atomic.Int64) {
@@ -219,7 +220,7 @@ func TestTelegramAuthoringServiceObservedEdit(t *testing.T) {
 	retained := readServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, path))
 
 	request := telegramAuthoringServiceNext(before, "stale", "generate", core.AuthoringArtifactKindSpec)
-	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.ContinueAuthoring(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale image err=%v", err)
 	}
 

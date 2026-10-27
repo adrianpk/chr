@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationIndex extends the existing SQLite projection. Its rows are
@@ -66,7 +68,7 @@ func (i *sqliteTicketIndex) replaceWorkflowIntegrationIndex(ctx context.Context,
 func workflowIntegrationViewHash(view WorkflowIntegrationView) (string, error) {
 	data, err := json.Marshal(view)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func indexWorkflowIntegrationView(ctx context.Context, tx *sql.Tx, view WorkflowIntegrationView) error {
@@ -122,7 +124,7 @@ func (i *sqliteTicketIndex) checkWorkflowIntegrationIndex(ctx context.Context, p
 	}
 
 	if hash != snapshot.Hash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	rows, err := i.db.QueryContext(ctx, "SELECT entry_id, image_hash FROM workflow_integration_entries WHERE project_id = ? AND coordinator_id = ? ORDER BY queue_sequence, entry_id", projectID, coordinatorID)
@@ -144,7 +146,7 @@ func checkWorkflowIntegrationIndexRows(rows *sql.Rows, views []WorkflowIntegrati
 		}
 
 		if count >= len(views) || id != views[count].Entry.ID {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		expected, err := workflowIntegrationViewHash(views[count])
@@ -156,7 +158,7 @@ func checkWorkflowIntegrationIndexRows(rows *sql.Rows, views []WorkflowIntegrati
 	}
 
 	if count != len(views) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return rows.Err()

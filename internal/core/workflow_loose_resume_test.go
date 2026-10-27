@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowLooseResumeTarget rejects provider disagreement and rewritten
@@ -42,7 +44,7 @@ func testWorkflowLooseResumeTarget(t *testing.T, reason string) {
 	}
 
 	ports := WorkflowResumePorts{Provider: provider, Target: f.git, TargetBranch: "dev"}
-	if _, err := f.store.ResumeWorkflow(t.Context(), before.ID, ports); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ResumeWorkflow(t.Context(), before.ID, ports); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unaccepted canonical target cleared a prerequisite stop", err)
 	}
 
@@ -194,7 +196,7 @@ func testWorkflowLooseResumeCorruption(t *testing.T, evidence string) {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.ClaimWorkflow(t.Context(), run.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ClaimWorkflow(t.Context(), run.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("corrupted resume evidence admitted another worker", err)
 	}
 

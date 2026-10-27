@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseQuizCommitted binds clarification to retained bytes and seals sufficient answers.
@@ -228,7 +229,7 @@ func TestGuidedUseCaseQuizConcurrent(t *testing.T) {
 	for err := range results {
 		if err == nil {
 			successes++
-		} else if !errors.Is(err, core.ErrWorkflowConflict) {
+		} else if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal(err)
 		}
 	}

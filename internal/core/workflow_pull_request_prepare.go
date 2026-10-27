@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) prepareWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, request WorkflowSlicePullRequestRequest) (workflowSliceObservation, error) {
@@ -35,7 +38,7 @@ func (s *WorkflowStore) checkWorkflowPullRequestReady(run workflowInvocationFile
 	}
 
 	if run.PullRequest != nil && run.PullRequest.State == "blocked" {
-		return fmt.Errorf("%w: %s requires explicit reconciliation", ErrWorkflowConflict, run.PullRequest.Reason)
+		return fmt.Errorf("%w: %s requires explicit reconciliation", workflowstate.ErrConflict, run.PullRequest.Reason)
 	}
 
 	if run.PullRequest != nil && run.PullRequest.ObservationRef != "" {
@@ -55,7 +58,7 @@ func prepareWorkflowPullRequestBinding(run *workflowInvocationFile, observation 
 
 	prRequest := WorkflowPullRequestRequest{WorkflowPullRequestQuery: WorkflowPullRequestQuery{Repository: repository, HeadBranch: strings.TrimPrefix(run.Lane.Branch, "refs/heads/"), BaseBranch: request.BaseBranch}, Title: request.Title, Body: request.Body}
 	if !validWorkflowPRBranch(prRequest.HeadBranch) || prRequest.HeadBranch == prRequest.BaseBranch {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := initializeWorkflowPullRequestBinding(run, observation.descriptor, prRequest); err != nil {
@@ -64,11 +67,11 @@ func prepareWorkflowPullRequestBinding(run *workflowInvocationFile, observation 
 
 	binding := run.PullRequest
 	if observation.descriptor.PullRequest != "" && observation.descriptor.PullRequest != binding.URL {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if !workflowPullRequestCandidateMayAdvance(*binding, candidate.ID) {
-		return fmt.Errorf("%w: uncertain creation still owns its candidate", ErrWorkflowConflict)
+		return fmt.Errorf("%w: uncertain creation still owns its candidate", workflowstate.ErrConflict)
 	}
 
 	binding.CandidateID, binding.CandidateRef, binding.CandidateHash = candidate.ID, run.CandidateRef, run.CandidateHash
@@ -84,14 +87,14 @@ func workflowPullRequestCandidateMayAdvance(binding WorkflowPullRequestBinding, 
 func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descriptor WorkflowSlice, request WorkflowPullRequestRequest) error {
 	if run.PullRequest != nil {
 		if run.PullRequest.Request != request || run.PullRequest.Unit != run.Lane.Unit || run.PullRequest.TargetCommit != run.ExecutionSelection().Target.Commit {
-			return fmt.Errorf("%w: retained PR request changed", ErrWorkflowConflict)
+			return fmt.Errorf("%w: retained PR request changed", workflowstate.ErrConflict)
 		}
 
 		return nil
 	}
 
 	if descriptor.Branch != "" && descriptor.Branch != run.Lane.Branch {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	run.PullRequest = &WorkflowPullRequestBinding{Schema: "chr-slice-pr/v1", ID: workflowPullRequestBindingID(*run, request.Repository), Unit: run.Lane.Unit, Request: request, TargetCommit: run.ExecutionSelection().Target.Commit, State: "prepared", URL: descriptor.PullRequest}
@@ -103,5 +106,5 @@ func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descripto
 }
 
 func workflowPullRequestBindingID(run workflowInvocationFile, repository string) string {
-	return workflowHash([]byte(run.ProjectID + "\x00" + run.Namespace + "\x00" + run.Lane.Unit.ID + "\x00" + repository))
+	return contenthash.Sum([]byte(run.ProjectID + "\x00" + run.Namespace + "\x00" + run.Lane.Unit.ID + "\x00" + repository))
 }

@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const dumpMutationBindingLimit = 8 * WorkflowFileLimit
@@ -31,7 +34,7 @@ func (r *fileAuthoringSessionRepository) prepareDumpMutation(ctx context.Context
 	}
 
 	if found && (binding.Destination != target.Destination || binding.RawReference != target.RawReference) {
-		return binding, ErrWorkflowConflict
+		return binding, workflowstate.ErrConflict
 	}
 
 	if !found {
@@ -81,8 +84,8 @@ func (r *fileAuthoringSessionRepository) validateDumpMutationBinding(binding dum
 		return err
 	}
 
-	if binding.Schema != "chr-project-dump-request/v1" || digest != binding.Digest || digest != actualDigest || checksum != workflowHash(encoded) || binding.Attempts < 0 || binding.Attempts > 5 {
-		return ErrWorkflowConflict
+	if binding.Schema != "chr-project-dump-request/v1" || digest != binding.Digest || digest != actualDigest || checksum != contenthash.Sum(encoded) || binding.Attempts < 0 || binding.Attempts > 5 {
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -108,7 +111,7 @@ func (r *fileAuthoringSessionRepository) saveDumpMutationBinding(binding dumpMut
 		return err
 	}
 
-	binding.Checksum = workflowHash(encoded)
+	binding.Checksum = contenthash.Sum(encoded)
 
 	encoded, err = json.Marshal(binding)
 	if err != nil {

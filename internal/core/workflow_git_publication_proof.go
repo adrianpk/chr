@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowGitPublicationRevision binds the original source, base, exact result,
@@ -15,7 +18,7 @@ func WorkflowGitPublicationRevision(request WorkflowGitPublication) (string, err
 		Git                                                                           WorkflowIntegrationProof
 	}{"chr-git-publication/v1", request.Repository, request.SourceRepository, request.SourceRef, request.TargetRef, request.OwnershipRevision, request.SourceRewriteAuthorized, request.Git})
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, request WorkflowGitPublication) error {
@@ -25,7 +28,7 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 
 	proof := request.Git
 	if proof.Repository != request.Repository || request.TargetRef != "refs/heads/"+proof.TargetBranch {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof); err != nil {
@@ -33,18 +36,18 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 	}
 
 	if !validWorkflowPublicationProofObjects(proof) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	reader := workflowIntegrationReader{dir: request.Directory}
 
 	tree, err := reader.tree(ctx, proof.SourceCommit)
 	if err != nil || tree != proof.SourceTree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.SourceCommit); err != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return reader.verifyPublicationHistory(ctx, proof)
@@ -63,16 +66,16 @@ func validWorkflowPublicationProofObjects(proof WorkflowIntegrationProof) bool {
 func validateWorkflowPublicationOwnership(request WorkflowGitPublication) error {
 	source, err := workflowCanonicalRepository(request.SourceRepository)
 	if err != nil || source != request.Repository || !request.SourceRewriteAuthorized {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if request.OwnershipRevision == "" || len(request.OwnershipRevision) > 256 || strings.ContainsAny(request.OwnershipRevision, "\x00\r\n") {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	revision, err := WorkflowGitPublicationRevision(request)
 	if err != nil || revision != request.CandidateRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -88,7 +91,7 @@ func (reader workflowIntegrationReader) verifyPublicationHistory(ctx context.Con
 
 	hash, err := workflowIntegrationHistoryHash(actual)
 	if err != nil || hash != proof.HistoryHash || actual.BaseCommit != proof.BaseCommit || actual.VerifiedTree != proof.VerifiedTree {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

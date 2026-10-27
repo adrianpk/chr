@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramOperationModel retains a provider result independently of semantic
@@ -77,14 +79,14 @@ func (s *TelegramReceiverStore) reserveTelegramOperationModel(ctx context.Contex
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
 		pending, err := telegramReadResponsePending(ctx, tx, request.Source)
 		if err != nil || !pending {
-			return errors.Join(err, ErrWorkflowConflict)
+			return errors.Join(err, workflowstate.ErrConflict)
 		}
 
 		var retry, response string
 
 		u := request.Source
 
-		err = tx.QueryRowContext(ctx, `SELECT r.model_attempt,COALESCE(r.model_retry_at,''),r.model_error_code,COALESCE(r.model_result,'') FROM telegram_requests r JOIN telegram_updates u ON u.bot_id=r.bot_id AND u.update_id=r.update_id WHERE r.id=? AND r.argument_digest=? AND r.operator_id=? AND r.prepared_input=? AND r.domain_guard=? AND r.state='applying' AND u.payload_digest=? AND u.chat_id=? AND u.topic_id=? AND u.user_id=? AND u.payload=? AND u.update_kind=?`, request.ID, request.ArgumentDigest, request.Operator, string(request.PreparedInput), workflowHash(request.PreparedInput), u.Digest, u.Peer.ChatID, u.Peer.TopicID, u.Peer.UserID, u.Text, u.Kind).Scan(&result.Attempts, &retry, &result.ErrorCode, &response)
+		err = tx.QueryRowContext(ctx, `SELECT r.model_attempt,COALESCE(r.model_retry_at,''),r.model_error_code,COALESCE(r.model_result,'') FROM telegram_requests r JOIN telegram_updates u ON u.bot_id=r.bot_id AND u.update_id=r.update_id WHERE r.id=? AND r.argument_digest=? AND r.operator_id=? AND r.prepared_input=? AND r.domain_guard=? AND r.state='applying' AND u.payload_digest=? AND u.chat_id=? AND u.topic_id=? AND u.user_id=? AND u.payload=? AND u.update_kind=?`, request.ID, request.ArgumentDigest, request.Operator, string(request.PreparedInput), contenthash.Sum(request.PreparedInput), u.Digest, u.Peer.ChatID, u.Peer.TopicID, u.Peer.UserID, u.Text, u.Kind).Scan(&result.Attempts, &retry, &result.ErrorCode, &response)
 		if err != nil {
 			return err
 		}
@@ -134,12 +136,12 @@ func (s *TelegramReceiverStore) finishTelegramOperationModel(ctx context.Context
 
 func validateTelegramOperationModel(request TelegramOperationRequest, invoke func(context.Context) (json.RawMessage, error)) error {
 	if invoke == nil || request.ID != TelegramOperationID(request.Source, request.Ordinal) || len(request.PreparedInput) == 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	normalized, err := normalizeTelegramOperation(request)
 	if err != nil || normalized.ArgumentDigest != request.ArgumentDigest {
-		return errors.Join(err, ErrWorkflowConflict)
+		return errors.Join(err, workflowstate.ErrConflict)
 	}
 
 	return nil

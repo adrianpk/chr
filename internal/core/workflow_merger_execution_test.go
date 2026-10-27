@@ -9,6 +9,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeMergerExecution(t *testing.T, id string) (workflowPreparationFixture, WorkflowMergerRequest, WorkflowMergerHarness) {
@@ -67,7 +70,7 @@ func nativeMergerTestHarness(t *testing.T, store *WorkflowStore, id string) Work
 	}
 
 	command := []string{executable, "-test.run=^TestNativeMergerChild$"}
-	certificate := WorkflowMergerHarnessCertificate{SchemaVersion: 1, Protocol: workflowMergerBrokerProtocol, Command: command, ExecutableHash: hash, CapabilityRevision: workflowHash([]byte("fixture-broker/v1")), BuiltinToolsDisabled: true}
+	certificate := WorkflowMergerHarnessCertificate{SchemaVersion: 1, Protocol: workflowMergerBrokerProtocol, Command: command, ExecutableHash: hash, CapabilityRevision: contenthash.Sum([]byte("fixture-broker/v1")), BuiltinToolsDisabled: true}
 
 	return WorkflowMergerHarness{Command: command, Certificate: retainNativeRecordEvidence(t, store, id, "execution-harness", certificate)}
 }
@@ -127,7 +130,7 @@ func checkNativeMergerFrozenHarness(t *testing.T, store *WorkflowStore, attempt 
 		t.Fatal(err)
 	}
 
-	if workflowHash(data) != attempt.InputHash || input.MergerHarnessRef == nil || *input.MergerHarnessRef != reference {
+	if contenthash.Sum(data) != attempt.InputHash || input.MergerHarnessRef == nil || *input.MergerHarnessRef != reference {
 		t.Fatal("driver certificate was not frozen before launch")
 	}
 }
@@ -171,12 +174,12 @@ func TestNativeMergerAdmission(t *testing.T) {
 
 	cases := map[string]func(*WorkflowMergerRequest, *WorkflowMergerHarness){
 		"candidate": func(r *WorkflowMergerRequest, _ *WorkflowMergerHarness) {
-			r.Input.CandidateHash = workflowHash([]byte("stale"))
+			r.Input.CandidateHash = contenthash.Sum([]byte("stale"))
 		},
 		"source": func(r *WorkflowMergerRequest, _ *WorkflowMergerHarness) { r.Input.Source = strings.Repeat("f", 40) },
 		"base":   func(r *WorkflowMergerRequest, _ *WorkflowMergerHarness) { r.Input.Base = strings.Repeat("f", 40) },
 		"scope": func(r *WorkflowMergerRequest, _ *WorkflowMergerHarness) {
-			r.Input.ScopeHash = workflowHash([]byte("new-scope"))
+			r.Input.ScopeHash = contenthash.Sum([]byte("new-scope"))
 		},
 		"generation": func(r *WorkflowMergerRequest, _ *WorkflowMergerHarness) { r.Input.ClaimGeneration++ },
 		"method":     func(r *WorkflowMergerRequest, _ *WorkflowMergerHarness) { r.Input.Method = "squash" },
@@ -202,7 +205,7 @@ func TestNativeMergerAdmission(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, err := f.store.ExecuteWorkflowMerger(t.Context(), request, driver, f.provider); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := f.store.ExecuteWorkflowMerger(t.Context(), request, driver, f.provider); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("invalid admission dispatched", err)
 			}
 		})

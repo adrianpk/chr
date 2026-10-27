@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowTaskRetry retains the failed attempt and reuses its lane on repair.
@@ -126,7 +128,7 @@ func TestWorkflowTaskPrerequisiteEdit(t *testing.T) {
 	path := filepath.Join(store.layout.Root(), filepath.Dir(hierarchy.Tasks[0].Path), "artifact.md")
 
 	worker := []string{"sh", "-c", "printf 'Changed prerequisite\\n' >> \"$1\"", "worker", path}
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed prerequisite accepted: %v", err)
 	}
 

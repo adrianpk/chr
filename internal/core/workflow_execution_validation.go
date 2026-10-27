@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) validateWorkflowTask(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, result *WorkflowTaskResult) error {
@@ -57,7 +59,7 @@ func (s *WorkflowStore) checkWorkflowValidationImage(ctx context.Context, claim 
 	}
 
 	if commit != result.Commit || tree != result.Tree {
-		return fmt.Errorf("%w: validation changed its immutable Git candidate", ErrWorkflowConflict)
+		return fmt.Errorf("%w: validation changed its immutable Git candidate", workflowstate.ErrConflict)
 	}
 
 	return nil

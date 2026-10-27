@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramControlAuthorization checks authority at the native effect boundary
@@ -33,11 +34,11 @@ func checkTelegramControlAuthorization(t *testing.T, action string) {
 	request := WorkflowControlRequest{Action: action, ID: before.ID, ExpectedRevision: before.Revision, StepLimit: 1, AuthorizationCheck: func(context.Context) error {
 		checks++
 
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}}
 
 	status, err := operations.ControlWorkExtent(t.Context(), request)
-	if !errors.Is(err, core.ErrWorkflowConflict) || checks != 1 || status.Revision != before.Revision {
+	if !errors.Is(err, workflowstate.ErrConflict) || checks != 1 || status.Revision != before.Revision {
 		t.Fatal("native control did not enforce the final authority check", status, checks, err)
 	}
 

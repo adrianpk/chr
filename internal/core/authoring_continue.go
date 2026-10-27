@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ContinueAuthoring binds arguments before provider preparation and journals the
@@ -90,7 +93,7 @@ func guardAuthoringContinuation(snapshot AuthoringSnapshot, request AuthoringCon
 	}
 
 	if snapshot.Question != nil && request.Action != "ask" {
-		return fmt.Errorf("%w: answer or replace the pending question", ErrWorkflowConflict)
+		return fmt.Errorf("%w: answer or replace the pending question", workflowstate.ErrConflict)
 	}
 
 	if len(snapshot.Events) >= 64 || len(snapshot.Session.Provenance) >= 64 {
@@ -219,7 +222,7 @@ func authoringReceiptChange(binding authoringRequestBinding, result AuthoringCon
 		return workflowFileChange{}, err
 	}
 
-	receipt.Checksum = workflowHash(encoded)
+	receipt.Checksum = contenthash.Sum(encoded)
 	encoded, err = json.Marshal(receipt)
 
 	return workflowFileChange{Path: authoringReceiptRef(binding.Request.Binding.RequestID), After: encoded}, err
@@ -265,7 +268,7 @@ func (r *fileAuthoringSessionRepository) prepareAuthoringSnapshot(ctx context.Co
 
 func guardAuthoringAnswer(snapshot AuthoringSnapshot, request AuthoringContinuationRequest) error {
 	if request.Target != AuthoringArtifactKind(snapshot.Session.Target) || snapshot.Question == nil || *snapshot.Question != *request.Question || snapshot.Question.Revision != snapshot.Session.Revision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

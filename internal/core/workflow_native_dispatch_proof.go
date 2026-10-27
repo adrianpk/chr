@@ -1,6 +1,10 @@
 package core
 
-import "slices"
+import (
+	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *WorkflowStore) checkWorkflowNativeDispatchCompletion(submission WorkflowSubmission) error {
 	native := submission.Native
@@ -14,7 +18,7 @@ func (s *WorkflowStore) checkWorkflowNativeDispatchCompletion(submission Workflo
 	}
 
 	if !workflowNativeCompletionMatches(submission, completion) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	refs := slices.Clone(native.TransportResponseHistory)
@@ -23,7 +27,7 @@ func (s *WorkflowStore) checkWorkflowNativeDispatchCompletion(submission Workflo
 	}
 
 	if !slices.Contains(refs, completion.ResponseRef) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var result WorkflowGitPublicationResult
@@ -32,7 +36,7 @@ func (s *WorkflowStore) checkWorkflowNativeDispatchCompletion(submission Workflo
 	}
 
 	if completion.CandidateRevision != result.CandidateRevision {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -68,12 +72,12 @@ func (s *WorkflowStore) checkWorkflowNativeGitObservations(submission WorkflowSu
 
 func validateWorkflowNativeGitObservation(submission WorkflowSubmission, observation WorkflowNativeGitObservation) error {
 	if !validWorkflowNativeGitObservationHeader(submission, observation) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	proof := observation.Git
 	if (proof != nil) != (observation.Condition == "result_verified") || !slices.Contains([]string{"result_verified", "result_unverified"}, observation.Condition) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if proof == nil {
@@ -81,7 +85,7 @@ func validateWorkflowNativeGitObservation(submission WorkflowSubmission, observa
 	}
 
 	if !workflowNativeRecordGitMatches(submission.Native.WorkflowNativeRecordBinding, *proof) || proof.HistoryHash != submission.Guard.Git.HistoryHash || proof.ObservedTarget != observation.TargetCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, *proof)
@@ -106,7 +110,7 @@ func (s *WorkflowStore) workflowNativeGitApplied(submission WorkflowSubmission) 
 func (s *WorkflowStore) checkWorkflowNativeDefiniteNonApplication(submission WorkflowSubmission, proof WorkflowNativeNonApplicationProof) error {
 	native := submission.Native
 	if !validWorkflowNativeNonApplicationHeader(submission, proof) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var result WorkflowGitPublicationResult
@@ -126,7 +130,7 @@ func (s *WorkflowStore) checkWorkflowNativeDefiniteNonApplication(submission Wor
 	}
 
 	if !workflowNativeNonApplicationObservation(*native, proof, observation) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

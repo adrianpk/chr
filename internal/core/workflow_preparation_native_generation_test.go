@@ -3,6 +3,8 @@ package core
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativePreparationGeneration keeps exact S/B/P unchanged while a new queue
@@ -33,7 +35,7 @@ func TestNativePreparationGeneration(t *testing.T) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	if _, err := restarted.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := restarted.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("prior queue generation reused combined evidence", err)
 	}
 

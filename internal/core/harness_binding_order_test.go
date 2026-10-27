@@ -5,6 +5,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 // Admission and switching share exclusion across their entire configuration
@@ -39,7 +41,7 @@ func TestHarnessBindingSelectionOrder(t *testing.T) {
 
 	waitHarnessBindingSignal(t, ctx, entered)
 
-	options := harnessSelectionTestOptions(harnessSelectionTestRequest("switch-after-admission", workflowHash([]byte(before)), "beta"))
+	options := harnessSelectionTestOptions(harnessSelectionTestRequest("switch-after-admission", contenthash.Sum([]byte(before)), "beta"))
 	options.Request.ProjectRef = store.projectID
 	once := sync.Once{}
 	options.Authorize = func(context.Context) error { once.Do(func() { close(switching) }); return nil }
@@ -71,7 +73,7 @@ func checkHarnessBindingAdmissionImage(t *testing.T, run WorkflowInvocation, bef
 	t.Helper()
 
 	binding := run.HarnessBinding
-	if binding == nil || binding.Profile != "alpha" || binding.SelectionRevision != workflowHash([]byte(before)) || run.Policy.ConfigRevision != binding.SelectionRevision {
+	if binding == nil || binding.Profile != "alpha" || binding.SelectionRevision != contenthash.Sum([]byte(before)) || run.Policy.ConfigRevision != binding.SelectionRevision {
 		t.Fatal("admission combined different configuration images")
 	}
 }

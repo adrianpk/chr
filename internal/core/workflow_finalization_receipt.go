@@ -6,10 +6,13 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowSliceReceiptID(run workflowInvocationFile) string {
-	return "delivery-" + workflowHash([]byte(run.ID+"\x00"+run.PullRequest.CandidateID+"\x00"+workflowDeliverySubmissionID(run)))
+	return "delivery-" + contenthash.Sum([]byte(run.ID+"\x00"+run.PullRequest.CandidateID+"\x00"+workflowDeliverySubmissionID(run)))
 }
 
 func workflowSliceReceiptPath(run workflowInvocationFile) string {
@@ -22,7 +25,7 @@ func validateWorkflowFinalizationRef(run workflowInvocationFile) error {
 	}
 
 	if run.PullRequest == nil || run.DeliveryProofRef == "" || run.DeliveryRef != workflowSliceReceiptPath(run) || len(run.DeliveryHash) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -58,7 +61,7 @@ func (s *WorkflowStore) readWorkflowSliceReceipt(ctx context.Context, run workfl
 
 func (s *WorkflowStore) readWorkflowFinalizationReceipt(ctx context.Context, run workflowInvocationFile) (WorkflowRecord, error) {
 	if err := validateWorkflowFinalizationRef(run); err != nil || run.DeliveryRef == "" {
-		return WorkflowRecord{}, ErrWorkflowConflict
+		return WorkflowRecord{}, workflowstate.ErrConflict
 	}
 
 	if run.Submission != nil {
@@ -74,7 +77,7 @@ func (s *WorkflowStore) readWorkflowFinalizationReceipt(ctx context.Context, run
 
 	record, err := s.readRecord(run.DeliveryRef)
 	if err != nil || !workflowSliceReceiptHeaderMatches(record, run) || !workflowReceiptMatchesProof(record, proof, run.DeliveryProofRef) {
-		return record, ErrWorkflowConflict
+		return record, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {

@@ -3,6 +3,7 @@ package core
 import (
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 )
 
@@ -45,7 +46,7 @@ func (row telegramDocumentSnapshotRow) values() []any {
 		document.ProjectBindingDigest,
 		document.SourceRef,
 		document.SourceHash,
-		workflowHash(document.Payload),
+		contenthash.Sum(document.Payload),
 		document.Filename,
 		document.MediaType,
 		len(document.Payload),
@@ -73,7 +74,7 @@ func (row telegramNotificationDocumentRow) values() []any {
 		d.ProjectBindingDigest,
 		d.SourceRef,
 		d.SourceHash,
-		workflowHash(d.Payload),
+		contenthash.Sum(d.Payload),
 		d.Filename,
 		d.MediaType,
 		len(d.Payload),

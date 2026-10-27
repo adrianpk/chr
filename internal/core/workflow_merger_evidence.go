@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (input WorkflowMergerInput) evidenceRefs() []WorkflowEvidenceRef {
@@ -39,7 +41,7 @@ func (input WorkflowMergerInput) evidenceRefs() []WorkflowEvidenceRef {
 func validateWorkflowMergerReferences(input WorkflowMergerInput) error {
 	refs := input.evidenceRefs()
 	if len(input.IntentRefs) == 0 || len(input.TargetChangeRefs) == 0 || len(refs) > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]string{}
@@ -50,7 +52,7 @@ func validateWorkflowMergerReferences(input WorkflowMergerInput) error {
 		}
 
 		if hash, present := seen[ref.Path]; present && hash != ref.Hash {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[ref.Path] = ref.Hash
@@ -72,7 +74,7 @@ func (s *WorkflowStore) CheckWorkflowMergerEvidence(ctx context.Context, input W
 		}
 
 		if _, err := s.readWorkflowReviewImage(ref.Path, ref.Hash); err != nil {
-			return fmt.Errorf("%w: merger evidence changed or escaped containment", ErrWorkflowConflict)
+			return fmt.Errorf("%w: merger evidence changed or escaped containment", workflowstate.ErrConflict)
 		}
 	}
 
@@ -93,20 +95,20 @@ func (s *WorkflowStore) checkWorkflowMergerManifest(input WorkflowMergerInput) e
 
 	actual := [4]string{manifest.Schema, manifest.Repository, manifest.SourceRef, manifest.OriginalSource}
 	if actual != expected || len(manifest.Commits) == 0 || len(manifest.Commits) > WorkflowRecordLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{}
 	for _, commit := range manifest.Commits {
 		if !workflowCommitID(commit) || len(commit) != len(input.Source) || seen[commit] {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		seen[commit] = true
 	}
 
 	if manifest.Commits[len(manifest.Commits)-1] != input.Source {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.checkWorkflowMergerCheckpointEvidence(input, manifest)
@@ -119,12 +121,12 @@ func (s *WorkflowStore) checkWorkflowMergerCheckpointEvidence(input WorkflowMerg
 	}
 
 	if checkpoint.ReplayIndex >= len(manifest.Commits) || manifest.Commits[checkpoint.ReplayIndex] != checkpoint.OriginalCommit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i, replay := range checkpoint.Predecessors {
 		if manifest.Commits[i] != replay.Source {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -144,7 +146,7 @@ func (s *WorkflowStore) checkWorkflowMergerCheckpointEvidence(input WorkflowMerg
 
 	expected.Evidence, retained.Evidence = WorkflowEvidenceRef{}, WorkflowEvidenceRef{}
 	if !workflowNativeJSONEqual(expected, retained) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

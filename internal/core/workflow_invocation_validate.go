@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowInvocation(run workflowInvocationFile) error {
@@ -22,7 +24,7 @@ func validateWorkflowInvocation(run workflowInvocationFile) error {
 
 	hash, err := workflowStartHash(request)
 	if err != nil || hash != run.RequestHash {
-		return fmt.Errorf("%w: invocation request image changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: invocation request image changed", workflowstate.ErrConflict)
 	}
 
 	if !validWorkflowInvocationBounds(run) {
@@ -298,11 +300,11 @@ func validateWorkflowAttemptState(attempt WorkflowAttempt) error {
 	}
 
 	if attempt.Outcome == "reviewed" && attempt.Purpose != workflowSliceReviewPurpose {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if attempt.Outcome == "prepared" && attempt.Purpose != workflowIntegrationValidationPurpose {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || !slices.Contains([]string{"running", "checkpointed", "validated", "failed", "paused", "cancelled", "interrupted", "recovered", "reviewed", "prepared"}, attempt.Outcome) {

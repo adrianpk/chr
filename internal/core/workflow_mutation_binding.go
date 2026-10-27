@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowMutationReservation struct {
@@ -26,7 +29,7 @@ type workflowMutationReservation struct {
 func (s *WorkflowStore) reserveMutationBinding(request WorkflowMutationRequest, digest string) error {
 	reservation := workflowMutationReservation{Schema: "chr-record-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Operation: workflowMutationOperation(request), ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ObservedSourceHash: request.Record.SourceHash, ReceiptRef: workflowMutationReceiptPath(request.Binding.RequestID)}
 
-	path, err := s.safePath(filepath.Join("run", "operation-bindings", workflowHash([]byte(request.Binding.RequestID))+".json"))
+	path, err := s.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))
 	if err != nil {
 		return err
 	}
@@ -59,7 +62,7 @@ func checkWorkflowMutationReservation(data []byte, expected workflowMutationRese
 	}
 	// Every field is scalar; exact comparison also rejects a newer schema or state.
 	if retained != expected {
-		return fmt.Errorf("%w: mutation identity is bound to another payload", ErrWorkflowConflict)
+		return fmt.Errorf("%w: mutation identity is bound to another payload", workflowstate.ErrConflict)
 	}
 
 	return nil

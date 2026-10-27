@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 const (
@@ -196,7 +198,7 @@ func ValidateQuizRuntimeState(state QuizRuntimeState) error {
 
 // ValidateQuizScope validates the corresponding package boundary value.
 func ValidateQuizScope(scope QuizScope) error {
-	if scope.Namespace != "" && !IsValidOpsNamespace(scope.Namespace) {
+	if scope.Namespace != "" && !opsnamespace.Valid(scope.Namespace) {
 		return fmt.Errorf("invalid quiz namespace")
 	}
 

@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowOrderMapInput supplies declared order only. Live task inputs and
@@ -51,7 +54,7 @@ func (s *WorkflowStore) requiredWorkflowOrderMap(ctx context.Context, record Wor
 
 func (s *WorkflowStore) checkRequiredOrderImages(source WorkflowTrackerStatus, output []byte) error {
 	binding := source.PlanRevision
-	if binding == nil || binding.OrderHash != source.SourceHash || binding.TrackerHash != workflowHash(output) {
+	if binding == nil || binding.OrderHash != source.SourceHash || binding.TrackerHash != contenthash.Sum(output) {
 		return ErrWorkflowProjectionStale
 	}
 
@@ -63,8 +66,8 @@ func (s *WorkflowStore) checkRequiredOrderImages(source WorkflowTrackerStatus, o
 	images := map[string]string{source.Path: binding.TrackerHash, binding.TrackerRef: binding.TrackerHash, binding.OrderRef: binding.OrderHash}
 	for reference, hash := range images {
 		data, err := s.readWorkflowTrackerFile(reference)
-		if err != nil || workflowHash(data) != hash {
-			return fmt.Errorf("%w: %s observed hash %s: %w", ErrWorkflowProjectionStale, reference, workflowHash(data), err)
+		if err != nil || contenthash.Sum(data) != hash {
+			return fmt.Errorf("%w: %s observed hash %s: %w", ErrWorkflowProjectionStale, reference, contenthash.Sum(data), err)
 		}
 	}
 
@@ -85,7 +88,7 @@ func (s *WorkflowStore) repairRequiredOrderImages(snapshot WorkflowSnapshot, sou
 			return err
 		}
 
-		if change.Before != workflowHash(change.After) {
+		if change.Before != contenthash.Sum(change.After) {
 			changes = append(changes, change)
 		}
 	}
@@ -128,7 +131,7 @@ func (s *WorkflowStore) retainedOrderRegistration(setID string) (WorkflowTracker
 	}
 
 	if !matchingOrderRegistration(status, *set.Set.PlanRevision) {
-		return status, false, ErrWorkflowConflict
+		return status, false, workflowstate.ErrConflict
 	}
 
 	return status, true, nil
@@ -140,7 +143,7 @@ func (s *WorkflowStore) guardBoundWorkflowTaskOrder(old, next WorkflowRecord) er
 	}
 
 	if next.Task == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	set, err := s.readWorkflowOrderSet(old.Task.SetID)
@@ -153,7 +156,7 @@ func (s *WorkflowStore) guardBoundWorkflowTaskOrder(old, next WorkflowRecord) er
 	}
 
 	if workflowTaskOrderChanged(old, next) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -165,7 +168,7 @@ func (s *WorkflowStore) checkRequiredOrderStatus(source WorkflowTrackerStatus, o
 		return errors.Join(ErrWorkflowProjectionStale, err)
 	}
 
-	if status.Schema != "chr-tracker/v2" || status.SourceHash != source.SourceHash || status.OutputHash != workflowHash(output) {
+	if status.Schema != "chr-tracker/v2" || status.SourceHash != source.SourceHash || status.OutputHash != contenthash.Sum(output) {
 		return ErrWorkflowProjectionStale
 	}
 
@@ -183,7 +186,7 @@ type workflowOrderRepairImage struct {
 
 func (s *WorkflowStore) requiredOrderRepairImages(snapshot WorkflowSnapshot, source WorkflowTrackerStatus, output []byte) ([]workflowOrderRepairImage, error) {
 	binding := source.PlanRevision
-	if binding == nil || binding.OrderHash != source.SourceHash || binding.TrackerHash != workflowHash(output) {
+	if binding == nil || binding.OrderHash != source.SourceHash || binding.TrackerHash != contenthash.Sum(output) {
 		return nil, ErrWorkflowProjectionStale
 	}
 
@@ -207,7 +210,7 @@ func (s *WorkflowStore) requiredOrderRepairImages(snapshot WorkflowSnapshot, sou
 		return nil, err
 	}
 
-	images := []workflowOrderRepairImage{{binding.OrderRef, binding.OrderHash, order}, {binding.TrackerRef, binding.TrackerHash, output}, {filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "binding.json")), workflowHash(encoded), encoded}}
+	images := []workflowOrderRepairImage{{binding.OrderRef, binding.OrderHash, order}, {binding.TrackerRef, binding.TrackerHash, output}, {filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "binding.json")), contenthash.Sum(encoded), encoded}}
 
 	return images, nil
 }

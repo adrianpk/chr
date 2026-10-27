@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"slices"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) runWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, directory string, command []string) (result WorkflowCommandResult, err error) {
@@ -86,7 +88,7 @@ func (s *WorkflowStore) registerWorkflowClosingProcess(ctx context.Context, clai
 		}
 
 		if len(claim.state.Processes) >= 16 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		registered = WorkflowProcess{CapacitySlot: workflowWorkerSlotNumber(claim.worker.reservation.Name()), Identity: identity, GroupID: pid, Command: slices.Clone(command), State: "running", StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
@@ -110,7 +112,7 @@ func (s *WorkflowStore) finishWorkflowClosingProcess(ctx context.Context, claim 
 
 		process := &claim.state.Processes[len(claim.state.Processes)-1]
 		if !workflowProcessBindingMatches(*process, expected) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		alive, err := workflowProcessGroupAlive(*process)

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -17,7 +18,7 @@ func (e tuiGuidedExecutor) ExecuteGuided(request tui.GuidedRequest) (tui.GuidedV
 	defer cancel()
 
 	if request.Command.ProjectID != e.operations.projectContext.ProjectID {
-		return tui.GuidedView{}, core.ErrWorkflowConflict
+		return tui.GuidedView{}, workflowstate.ErrConflict
 	}
 
 	if err := e.apply(ctx, request); err != nil {
@@ -32,7 +33,7 @@ func (e tuiGuidedExecutor) ExecuteGuided(request tui.GuidedRequest) (tui.GuidedV
 	view := tuiGuidedView(observed)
 	if request.Action == "document" && request.Document == "results" {
 		if observed.Session == nil {
-			return view, core.ErrWorkflowConflict
+			return view, workflowstate.ErrConflict
 		}
 
 		payload, err := json.MarshalIndent(guidedResultSnapshot(observed), "", "  ")
@@ -64,7 +65,7 @@ func (e tuiGuidedExecutor) apply(ctx context.Context, request tui.GuidedRequest)
 	case "input":
 		_, err = e.operations.ChangeGuidedUseCase(ctx, request.Command)
 	default:
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	var prerequisite *core.GuidedPrerequisiteError

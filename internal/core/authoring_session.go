@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"time"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 // AuthoringSessionStatus defines a package boundary type.
@@ -364,7 +366,7 @@ func validateManagedAuthoringRevision(session AuthoringSession) error {
 		return err
 	}
 
-	if session.Revision < 0 || (session.Revision > 0 && !IsValidOpsNamespace(session.Namespace)) {
+	if session.Revision < 0 || (session.Revision > 0 && !opsnamespace.Valid(session.Namespace)) {
 		return fmt.Errorf("invalid managed authoring revision or namespace")
 	}
 

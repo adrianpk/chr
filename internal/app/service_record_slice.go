@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s service) prepareSliceRecordMutation(ctx context.Context, store *core.WorkflowStore, binding core.WorkflowMutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
@@ -52,7 +53,7 @@ func prepareSliceDescriptor(parent *core.WorkflowRecord, request RecordMutationR
 
 	for _, existing := range parent.Set.Slices {
 		if existing.ID == descriptor.ID {
-			return core.ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 

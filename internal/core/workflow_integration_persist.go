@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowDeliveryProofPath(run workflowInvocationFile) string {
@@ -16,7 +19,7 @@ func validateWorkflowDeliveryRef(run workflowInvocationFile) error {
 	}
 
 	if run.PullRequest == nil || run.DeliveryProofRef != workflowDeliveryProofPath(run) || len(run.DeliveryProofHash) != 64 || run.CandidateRef != run.PullRequest.CandidateRef || run.CandidateHash != run.PullRequest.CandidateHash {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -30,7 +33,7 @@ func (s *WorkflowStore) persistWorkflowDeliveryProof(run *workflowInvocationFile
 		}
 
 		if previous.Git.HistoryHash != proof.Git.HistoryHash || previous.Git.ResultCommit != proof.Git.ResultCommit || previous.Git.TargetBranch != proof.Git.TargetBranch {
-			return proof, ErrWorkflowConflict
+			return proof, workflowstate.ErrConflict
 		}
 
 		workflowRetainDeliveryStatus(run, "slice_delivery_verified", false)
@@ -44,7 +47,7 @@ func (s *WorkflowStore) persistWorkflowDeliveryProof(run *workflowInvocationFile
 	}
 
 	data = append(data, '\n')
-	run.DeliveryProofRef, run.DeliveryProofHash = workflowDeliveryProofPath(*run), workflowHash(data)
+	run.DeliveryProofRef, run.DeliveryProofHash = workflowDeliveryProofPath(*run), contenthash.Sum(data)
 	workflowRetainDeliveryStatus(run, "slice_delivery_verified", false)
 
 	change := workflowFileChange{Path: run.DeliveryProofRef, After: data}
@@ -55,7 +58,7 @@ func (s *WorkflowStore) persistWorkflowDeliveryProof(run *workflowInvocationFile
 func (s *WorkflowStore) readWorkflowDeliveryProof(run workflowInvocationFile) (WorkflowSliceDeliveryProof, error) {
 	var proof WorkflowSliceDeliveryProof
 	if run.DeliveryProofRef == "" || validateWorkflowDeliveryRef(run) != nil {
-		return proof, ErrWorkflowConflict
+		return proof, workflowstate.ErrConflict
 	}
 
 	path, err := s.safePath(run.DeliveryProofRef)
@@ -64,8 +67,8 @@ func (s *WorkflowStore) readWorkflowDeliveryProof(run workflowInvocationFile) (W
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != run.DeliveryProofHash {
-		return proof, ErrWorkflowConflict
+	if err != nil || contenthash.Sum(data) != run.DeliveryProofHash {
+		return proof, workflowstate.ErrConflict
 	}
 
 	if err := json.Unmarshal(data, &proof); err != nil {
@@ -81,7 +84,7 @@ func (s *WorkflowStore) readWorkflowDeliveryProof(run workflowInvocationFile) (W
 
 func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof WorkflowSliceDeliveryProof) error {
 	if !workflowDeliveryProofMatchesRun(run, proof) || !proof.PullRequest.Merged || workflowPullRequestMismatch(*run.PullRequest, []WorkflowPullRequestSnapshot{proof.PullRequest}) != "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	query := WorkflowIntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: proof.Git.Method, SourceCommit: run.PullRequest.SourceCommit, SourceTree: run.PullRequest.SourceTree, OriginCommit: run.ExecutionSelection().Target.Commit, ResultCommit: proof.PullRequest.ResultCommit}

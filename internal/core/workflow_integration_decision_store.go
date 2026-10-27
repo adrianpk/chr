@@ -6,12 +6,15 @@ import (
 	"reflect"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) readWorkflowDecisionRecord(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry) (WorkflowIntegrationDecisions, error) {
 	var record WorkflowIntegrationDecisions
 	if entry.DecisionRef == nil {
-		return record, ErrWorkflowConflict
+		return record, workflowstate.ErrConflict
 	}
 
 	if err := s.readWorkflowNativeEvidence(run.ID, *entry.DecisionRef, &record); err != nil {
@@ -23,7 +26,7 @@ func (s *WorkflowStore) readWorkflowDecisionRecord(ctx context.Context, run work
 	}
 
 	if record.Input.InvocationID != run.ID || record.Input.EntryID != entry.ID || record.Input.Unit != entry.Unit {
-		return record, ErrWorkflowConflict
+		return record, workflowstate.ErrConflict
 	}
 
 	if err := s.CheckWorkflowMergerEvidence(ctx, record.Input, record.Input.AdmittedAt); err != nil {
@@ -73,7 +76,7 @@ func (s *WorkflowStore) recordWorkflowDecisions(ctx context.Context, run workflo
 
 func (s *WorkflowStore) checkWorkflowDecisionAdmission(ctx context.Context, run workflowInvocationFile, entry WorkflowIntegrationEntry, request WorkflowIntegrationDecisionRequest, provider WorkflowPullRequestProvider) error {
 	if !workflowMergerRunnable(run, entry) || !validWorkflowRequestKey(request.ID) || len(request.Decisions) == 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {
@@ -102,10 +105,10 @@ func workflowDecisionFile(entry *WorkflowIntegrationEntry, record WorkflowIntegr
 
 	data, err := json.Marshal(record)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return workflowFileChange{}, ErrWorkflowConflict
+		return workflowFileChange{}, workflowstate.ErrConflict
 	}
 
-	hash := workflowHash(data)
+	hash := contenthash.Sum(data)
 	path := "run/" + record.Input.InvocationID + "/extension/chr/integration/" + entry.ID + "/decisions/" + hash + ".json"
 	entry.DecisionRef = &WorkflowEvidenceRef{Path: path, Hash: hash}
 
@@ -126,7 +129,7 @@ func (s *WorkflowStore) commitWorkflowDecisionRecord(run *workflowInvocationFile
 		return err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: entryFile.Path, Hash: workflowHash(entryFile.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
 	return s.commitWorkflowPullRequestFiles(run, append([]workflowFileChange{entryFile}, extra...), file)
 }
@@ -163,7 +166,7 @@ func (s *WorkflowStore) workflowMergerDecisionFiles(ctx context.Context, run *wo
 		return nil, err
 	}
 
-	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: entryFile.Path, Hash: workflowHash(entryFile.After)}})
+	updateWorkflowIntegrationBinding(run, WorkflowIntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: WorkflowEvidenceRef{Path: entryFile.Path, Hash: contenthash.Sum(entryFile.After)}})
 
 	return []workflowFileChange{file, entryFile}, nil
 }
@@ -174,7 +177,7 @@ func checkWorkflowMergerDecisionBinding(entry WorkflowIntegrationEntry, input Wo
 	}
 
 	if entry.DecisionRef == nil || *entry.DecisionRef != *input.OperatorDecisionRef {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -183,7 +186,7 @@ func checkWorkflowMergerDecisionBinding(entry WorkflowIntegrationEntry, input Wo
 func (s *WorkflowStore) checkWorkflowMergerOperatorEvidence(input WorkflowMergerInput) error {
 	if input.OperatorDecisionRef == nil {
 		if len(input.OperatorAnswers) != 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return nil
@@ -199,7 +202,7 @@ func (s *WorkflowStore) checkWorkflowMergerOperatorEvidence(input WorkflowMerger
 	}
 
 	if record.State != "resolved" || !reflect.DeepEqual(record.Answers, input.OperatorAnswers) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	expected, actual := workflowMergerFence(record.Input), workflowMergerFence(input)
@@ -207,7 +210,7 @@ func (s *WorkflowStore) checkWorkflowMergerOperatorEvidence(input WorkflowMerger
 
 	expected.OwnedWorkspaceID = actual.OwnedWorkspaceID
 	if expected != actual || !workflowDecisionContextEqual(record.Input, input) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -253,7 +256,7 @@ func (s *WorkflowStore) workflowDecisionRequestRetry(ctx context.Context, run wo
 	}
 
 	if !reflect.DeepEqual(prior.Input, request.Input) || !reflect.DeepEqual(prior.Requests, request.Decisions) {
-		return prior, false, ErrWorkflowConflict
+		return prior, false, workflowstate.ErrConflict
 	}
 
 	return prior, true, s.checkWorkflowDecisionCurrent(ctx, run, entry, prior, provider)

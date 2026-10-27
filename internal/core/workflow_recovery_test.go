@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowRecoveryBudget replays an interrupted claim, fences it and consumes
@@ -75,7 +77,7 @@ func TestWorkflowRecoveryForeignLock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReconcileWorkflow(t.Context(), retained.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ReconcileWorkflow(t.Context(), retained.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("foreign lock removed: %v", err)
 	}
 
@@ -167,7 +169,7 @@ func TestWorkflowProcessEdit(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "edit process")); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "edit process")); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed process binding accepted: %v", err)
 	}
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 const (
@@ -114,7 +116,7 @@ func sealWorkflowNativeCapability(capability WorkflowNativeCapability) (Workflow
 		return capability, err
 	}
 
-	capability.Revision = workflowHash(data)
+	capability.Revision = contenthash.Sum(data)
 
 	return capability, nil
 }

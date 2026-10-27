@@ -11,8 +11,10 @@ import (
 	"strings"
 	"time"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramConversationAction enumerates local routing and capture operations.
@@ -142,7 +144,7 @@ func (op telegramConversationTransaction) ensurePeer() error {
 	}
 
 	if snapshot.Digest != op.input.ContextDigest {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -377,5 +379,5 @@ func (op telegramConversationTransaction) developmentInstructionRef(c TelegramCo
 	// creates this opaque source reference; the final scope still needs binding.
 	data := fmt.Appendf(nil, "%s\x00%s\x00%s\x00%s\x00%s", c.ID, user.OperatorID, c.ProjectID, c.Namespace, op.input.Update.Text)
 
-	return "instruction-" + workflowHash(data)
+	return "instruction-" + contenthash.Sum(data)
 }

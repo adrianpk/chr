@@ -8,6 +8,9 @@ import (
 	"path/filepath"
 	"syscall"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowAllocationSchema = "chr-materialization-lock/v1"
@@ -37,7 +40,7 @@ func (s *WorkflowStore) acquireWorkflowAllocation() (string, error) {
 		return "", err
 	}
 
-	return workflowHash(data), nil
+	return contenthash.Sum(data), nil
 }
 
 func (s *WorkflowStore) reclaimWorkflowAllocation(path string) error {
@@ -59,7 +62,7 @@ func (s *WorkflowStore) reclaimWorkflowAllocation(path string) error {
 		return fmt.Errorf("materialization allocator is still owned")
 	}
 
-	return s.releaseWorkflowAllocation(workflowHash(data))
+	return s.releaseWorkflowAllocation(contenthash.Sum(data))
 }
 
 func (s *WorkflowStore) releaseWorkflowAllocation(guard string) error {
@@ -78,8 +81,8 @@ func (s *WorkflowStore) releaseWorkflowAllocation(guard string) error {
 		return err
 	}
 
-	if workflowHash(data) != guard {
-		return fmt.Errorf("%w: allocation lock owner changed", ErrWorkflowConflict)
+	if contenthash.Sum(data) != guard {
+		return fmt.Errorf("%w: allocation lock owner changed", workflowstate.ErrConflict)
 	}
 
 	if err := os.Remove(path); err != nil {

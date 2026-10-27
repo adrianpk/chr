@@ -1,5 +1,7 @@
 package tui
 
+import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+
 import (
 	"errors"
 	"strings"
@@ -17,7 +19,7 @@ func TestTUIHarnessSelectionSave(t *testing.T) {
 	for _, failure := range []struct {
 		name string
 		err  error
-	}{{"stale", core.ErrWorkflowConflict}, {"lost acknowledgement", errors.New("private transport details")}} {
+	}{{"stale", workflowstate.ErrConflict}, {"lost acknowledgement", errors.New("private transport details")}} {
 		t.Run(failure.name, func(t *testing.T) {
 			executor := harnessSaveFixture()
 			executor.saveErr = failure.err

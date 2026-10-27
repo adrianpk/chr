@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"slices"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 const workflowTaskInstructions = `Complete the execution_contract in lane.worktree on the assigned lane.branch.
@@ -153,7 +156,7 @@ func encodeWorkflowTaskInput(run *workflowInvocationFile, input WorkflowTaskInpu
 	ref := workflowAttemptFile(run.ID, input.AttemptID, "input.json")
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	lane := input.Lane
-	attempt.Lane, attempt.InputRef, attempt.InputHash = &lane, ref, workflowHash(data)
+	attempt.Lane, attempt.InputRef, attempt.InputHash = &lane, ref, contenthash.Sum(data)
 
 	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, workflowFileChange{Path: ref, After: data}, nil
 }
@@ -175,7 +178,7 @@ func (s *WorkflowStore) commitWorkflowState(run *workflowInvocationFile, extra .
 		return err
 	}
 
-	run.sourceHash = workflowHash(state.After)
+	run.sourceHash = contenthash.Sum(state.After)
 
 	return nil
 }
@@ -186,7 +189,7 @@ func validateWorkflowInputWorker(mode string, worker []string) error {
 	}
 
 	if mode != "manual" && mode != "automatic" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowCommand(worker)

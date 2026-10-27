@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AuthoringExplanationRequest asks about the project and optional canonical
@@ -88,7 +89,7 @@ func (s service) authoringExplanationSources(ctx context.Context, sessionID stri
 		}
 
 		if snapshot.Session.ProjectID != s.projectContext.ProjectID {
-			return nil, core.ErrWorkflowConflict
+			return nil, workflowstate.ErrConflict
 		}
 
 		for _, artifact := range snapshot.Artifacts {

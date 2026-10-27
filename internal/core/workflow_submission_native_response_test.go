@@ -3,6 +3,9 @@ package core
 import (
 	"errors"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeSubmissionResponses retains the original unknown exchange when
@@ -32,7 +35,7 @@ func TestNativeSubmissionResponses(t *testing.T) {
 	request.Facts.ApplicationState = "git_applied"
 
 	request.Facts.TransportResponseRef = applied.Facts.TransportResponseRef
-	if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("unknown response erased", err)
 	}
 
@@ -73,7 +76,9 @@ func TestNativeSubmissionFences(t *testing.T) {
 	}{
 		{"revision", func(r *WorkflowNativeSubmissionUpdate) { r.InvocationRevision++; r.Facts.ApplicationState = "unknown" }},
 		{"generation", func(r *WorkflowNativeSubmissionUpdate) { r.ClaimGeneration++; r.Facts.ApplicationState = "unknown" }},
-		{"candidate", func(r *WorkflowNativeSubmissionUpdate) { r.Facts.CandidateHash = workflowHash([]byte("replacement")) }},
+		{"candidate", func(r *WorkflowNativeSubmissionUpdate) {
+			r.Facts.CandidateHash = contenthash.Sum([]byte("replacement"))
+		}},
 		{"deadline", func(r *WorkflowNativeSubmissionUpdate) {
 			r.Facts.ObservationDeadline = r.Facts.ObservationDeadline.Add(1)
 		}},
@@ -83,7 +88,7 @@ func TestNativeSubmissionFences(t *testing.T) {
 			changed := request
 			test.change(&changed)
 
-			if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), changed); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), changed); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale or changed intent accepted", err)
 			}
 

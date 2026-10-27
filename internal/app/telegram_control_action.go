@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.TelegramActionClaim, config core.TelegramReceiverConfig) error {
@@ -46,7 +47,7 @@ func (r telegramReceiver) applyControlAction(ctx context.Context, claim core.Tel
 
 	check := func(ctx context.Context) error {
 		if !claim.Action.ExpiresAt.After(time.Now()) {
-			return core.ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		return r.validateRecordAuthority(ctx, claim.Request)
@@ -122,7 +123,7 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim core.Te
 }
 
 func telegramControlExpectedFailure(err error) bool {
-	for _, expected := range []error{core.ErrWorkflowConflict, core.ErrWorkflowOwned, core.ErrWorkflowCapacity, core.ErrWorkflowStop, core.ErrWorkflowIntegrationBudget} {
+	for _, expected := range []error{workflowstate.ErrConflict, core.ErrWorkflowOwned, core.ErrWorkflowCapacity, core.ErrWorkflowStop, core.ErrWorkflowIntegrationBudget} {
 		if errors.Is(err, expected) {
 			return true
 		}

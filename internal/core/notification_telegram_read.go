@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
@@ -17,11 +19,11 @@ func ResolveTelegramNotificationTarget(project projectcore.Project, namespace, d
 		return TelegramNotificationTarget{}, err
 	}
 
-	if !project.Enabled || !IsValidOpsNamespace(namespace) || !validTelegramDigest(digest) {
+	if !project.Enabled || !opsnamespace.Valid(namespace) || !validTelegramDigest(digest) {
 		return TelegramNotificationTarget{}, ErrTelegramDocumentUnavailable
 	}
 
-	return TelegramNotificationTarget{ProjectID: project.ID, Namespace: namespace, ProjectBindingDigest: binding, Destination: destination, ConfigDigest: workflowHash([]byte(digest + "\x00" + binding + "\x00" + namespace))}, nil
+	return TelegramNotificationTarget{ProjectID: project.ID, Namespace: namespace, ProjectBindingDigest: binding, Destination: destination, ConfigDigest: contenthash.Sum([]byte(digest + "\x00" + binding + "\x00" + namespace))}, nil
 }
 
 type telegramNotificationManifest struct {
@@ -134,7 +136,7 @@ func (r *sqliteNotificationEventRepository) readTelegramNotificationDocument(ctx
 		return d, err
 	}
 
-	if d.ProjectID != target.ProjectID || d.Namespace != target.Namespace || d.ProjectBindingDigest != target.ProjectBindingDigest || storedHash != hash || workflowHash(d.Payload) != hash {
+	if d.ProjectID != target.ProjectID || d.Namespace != target.Namespace || d.ProjectBindingDigest != target.ProjectBindingDigest || storedHash != hash || contenthash.Sum(d.Payload) != hash {
 		return TelegramDocument{}, ErrTelegramDocumentUnavailable
 	}
 

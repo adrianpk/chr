@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramWorkAdmissionFixture(t *testing.T) (*WorkflowStore, WorkflowStartRequest, WorkflowMaterializationResult) {
@@ -52,7 +54,11 @@ func TestTelegramWorkAdmissionReplay(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check := func(context.Context) error { t.Error("replay repeated effect checks"); return ErrWorkflowConflict }
+	check := func(context.Context) error {
+		t.Error("replay repeated effect checks")
+
+		return workflowstate.ErrConflict
+	}
 
 	again, err := NewWorkflowStore(store.layout, store.projectID).StartWorkflowGuarded(t.Context(), request, check)
 	if err != nil || !again.Attached || again.Invocation.ID != first.Invocation.ID || len(again.Invocation.Attempts) != 0 || again.Invocation.Admission == nil {
@@ -64,7 +70,7 @@ func TestTelegramWorkAdmissionReplay(t *testing.T) {
 	guard.SnapshotHash = strings.Repeat("f", 64)
 
 	changed.Admission, changed.Selection.SnapshotHash = &guard, guard.SnapshotHash
-	if _, err := store.StartWorkflow(t.Context(), changed); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), changed); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed snapshot reused original key", err)
 	}
 }
@@ -78,7 +84,7 @@ func TestTelegramWorkAdmissionGuards(t *testing.T) {
 
 			check := telegramWorkChangeAdmission(t, store, &request, hierarchy, test)
 
-			if _, err := store.StartWorkflowGuarded(t.Context(), request, check); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.StartWorkflowGuarded(t.Context(), request, check); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed admission accepted", err)
 			}
 
@@ -99,7 +105,7 @@ func telegramWorkChangeAdmission(t *testing.T, store *WorkflowStore, request *Wo
 	case "selected":
 		request.Admission.Selected.Revision++
 	case "authority":
-		return func(context.Context) error { return ErrWorkflowConflict }
+		return func(context.Context) error { return workflowstate.ErrConflict }
 	case "membership":
 		path := filepath.Join(store.layout.Root(), hierarchy.Tasks[1].Path)
 

@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func validateWorkflowFrontier(run workflowInvocationFile) error {
@@ -21,7 +24,7 @@ func validateWorkflowFrontier(run workflowInvocationFile) error {
 	}
 
 	if cursor > run.ConfirmedCursor {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowExecutionTarget(run)
@@ -35,10 +38,10 @@ func validateWorkflowExecutionTarget(run workflowInvocationFile) error {
 	target := workflowRetainedExecutionTarget(run)
 	if run.ExecutionTarget != nil {
 		if target == nil || *run.ExecutionTarget != *target {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	} else if target != nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return validateWorkflowDependencyTargets(run)
@@ -81,12 +84,12 @@ func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery WorkflowU
 	}
 
 	if delivery.Lane.Unit != delivery.Unit || !validWorkflowLane(delivery.Lane) || delivery.PullRequest == nil {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, member := range run.Members[previous:delivery.Cursor] {
 		if !workflowMemberOwnsUnit(member, delivery.Unit) || member.Admission.SetID != delivery.SetID {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -102,11 +105,11 @@ func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery WorkflowU
 
 func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery WorkflowUnitDelivery, previous int) error {
 	if delivery.Schema != "chr-unit-frontier/v1" || delivery.InvocationID != run.ID || !validWorkflowFrontierUnit(run, delivery, previous) || delivery.Cursor <= previous || delivery.Cursor > run.Cursor || delivery.Cursor > len(run.Members) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if delivery.EvidenceRef != workflowFrontierEvidencePath(run.ID, delivery.Cursor) || len(delivery.EvidenceHash) != 64 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -122,7 +125,7 @@ func validWorkflowFrontierUnit(run workflowInvocationFile, delivery WorkflowUnit
 
 func validateWorkflowUnitDeliveryTarget(run workflowInvocationFile, delivery WorkflowUnitDelivery) error {
 	if delivery.Target.Repository != run.Selection.Target.Repository || delivery.NextTarget.Repository != run.Selection.Target.Repository || delivery.NextTarget.Commit != delivery.Proof.ObservedTarget || !workflowCommitID(delivery.Target.Commit) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -188,13 +191,13 @@ func (s *WorkflowStore) checkWorkflowContinuationEvidence(ctx context.Context, r
 		}
 
 		data, err := readWorkflowFile(path)
-		if err != nil || workflowHash(data) != delivery.EvidenceHash {
-			return ErrWorkflowConflict
+		if err != nil || contenthash.Sum(data) != delivery.EvidenceHash {
+			return workflowstate.ErrConflict
 		}
 
 		expected, err := encodeWorkflowUnitDelivery(delivery)
 		if err != nil || !bytes.Equal(data, expected) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		refs := workflowUnitEvidenceHashes(run, delivery)

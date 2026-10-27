@@ -5,6 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowIntegrationRecordError identifies retained data requiring reconciliation.
@@ -19,7 +23,7 @@ func (e *WorkflowIntegrationRecordError) Error() string {
 }
 
 func (e *WorkflowIntegrationRecordError) Unwrap() error {
-	return errors.Join(ErrWorkflowConflict, e.Cause)
+	return errors.Join(workflowstate.ErrConflict, e.Cause)
 }
 
 // WorkflowIntegrationView resolves an entry's sealed ledger and immutable evidence.
@@ -103,22 +107,22 @@ func integrationRecordError(path string, err error) error {
 
 func validateWorkflowIntegrationQueueQuery(q WorkflowIntegrationQueueQuery) error {
 	if !workflowIntegrationQueryBounds(q) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
-	if q.Namespace != "" && !IsValidOpsNamespace(q.Namespace) {
-		return ErrWorkflowConflict
+	if q.Namespace != "" && !opsnamespace.Valid(q.Namespace) {
+		return workflowstate.ErrConflict
 	}
 
 	for _, state := range q.States {
 		if !validWorkflowIntegrationState(state) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
 	if q.Repository != "" {
 		if _, err := workflowCanonicalRepository(q.Repository); err != nil {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -128,7 +132,7 @@ func validateWorkflowIntegrationQueueQuery(q WorkflowIntegrationQueueQuery) erro
 func workflowIntegrationQueuePage(snapshot workflowIntegrationSnapshot, q WorkflowIntegrationQueueQuery) (WorkflowIntegrationQueuePage, error) {
 	page := WorkflowIntegrationQueuePage{SnapshotHash: snapshot.Hash, NextOffset: -1}
 	if q.SnapshotHash != "" && q.SnapshotHash != snapshot.Hash {
-		return page, ErrWorkflowConflict
+		return page, workflowstate.ErrConflict
 	}
 
 	views := []WorkflowIntegrationView{}
@@ -163,7 +167,7 @@ func workflowIntegrationEligible(entry WorkflowIntegrationEntry, journals []work
 		return false
 	}
 
-	target := workflowHash([]byte(entry.Repository + "\n" + entry.TargetRef))
+	target := contenthash.Sum([]byte(entry.Repository + "\n" + entry.TargetRef))
 
 	return !slices.ContainsFunc(journals, func(j workflowSubmissionJournal) bool {
 		return j.TargetKey == target && j.Attempts[len(j.Attempts)-1].State == "awaiting_observation"
@@ -184,7 +188,7 @@ type WorkflowSubmissionQuery struct {
 // QueryWorkflowIntegrationSubmissions includes uncertain and sealed history.
 func (s *WorkflowStore) QueryWorkflowIntegrationSubmissions(ctx context.Context, q WorkflowSubmissionQuery) (result []WorkflowPublicationBarrier, err error) {
 	if q.Limit < 1 || q.Limit > WorkflowPageLimit {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {

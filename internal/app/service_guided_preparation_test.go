@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCasePreparationCommitted materializes only the frozen specification and seals initial contracts.
@@ -127,7 +128,7 @@ func TestGuidedUseCasePreparationExisting(t *testing.T) {
 	}
 
 	_, err = operations.PrepareGuidedWork(t.Context(), guidedQuizCommand(session, "prepare", "prepare", ""))
-	if !errors.Is(err, core.ErrWorkflowConflict) || len(model.base.requests) != 0 {
+	if !errors.Is(err, workflowstate.ErrConflict) || len(model.base.requests) != 0 {
 		t.Fatal("manual plan adopted or replaced", err)
 	}
 
@@ -271,7 +272,7 @@ func TestGuidedUseCasePreparationRepeated(t *testing.T) {
 	}
 
 	rejected, err := operations.PrepareGuidedWork(t.Context(), guidedQuizCommand(prepared, "replacement-prepare", "prepare", ""))
-	if !errors.Is(err, core.ErrWorkflowConflict) || rejected.Revision != prepared.Revision || len(model.base.requests) != 1 || model.calls != 1 {
+	if !errors.Is(err, workflowstate.ErrConflict) || rejected.Revision != prepared.Revision || len(model.base.requests) != 1 || model.calls != 1 {
 		t.Fatal("sealed preparation was dispatched again", err)
 	}
 }

@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ErrHarnessSelectionPreparation identifies a rejected candidate before any
@@ -52,7 +55,7 @@ type HarnessSelectionChangeOptions struct {
 // HarnessSelections projects one coherent workspace image and its last change.
 func (c WorkspaceConfig) HarnessSelections(project string) (HarnessSelectionSnapshot, error) {
 	if c.HarnessAudit.ProjectRef != "" && c.HarnessAudit.ProjectRef != project {
-		return HarnessSelectionSnapshot{}, fmt.Errorf("%w: harness selections belong to another project", ErrWorkflowConflict)
+		return HarnessSelectionSnapshot{}, fmt.Errorf("%w: harness selections belong to another project", workflowstate.ErrConflict)
 	}
 
 	audit := c.HarnessAudit
@@ -120,7 +123,7 @@ func harnessSelectionRequestDigest(r HarnessSelectionChangeRequest) (string, err
 
 	data, err := json.Marshal(r)
 
-	return workflowHash(data), err
+	return contenthash.Sum(data), err
 }
 
 func validateHarnessSelectionChoices(r HarnessSelectionChangeRequest) error {
@@ -172,8 +175,8 @@ func prepareHarnessSelectionChange(ctx context.Context, project string, opts Har
 		return journal, err
 	}
 
-	if workflowHash(before) != opts.Request.ExpectedRevision {
-		return journal, ErrWorkflowConflict
+	if contenthash.Sum(before) != opts.Request.ExpectedRevision {
+		return journal, workflowstate.ErrConflict
 	}
 
 	config, err := parseWorkflowConfig(before)
@@ -197,7 +200,7 @@ func prepareHarnessSelectionChange(ctx context.Context, project string, opts Har
 	}
 
 	result, err := candidate.HarnessSelections(opts.Request.ProjectRef)
-	journal = harnessSelectionJournal{Schema: "chr-harness-selection-change/v1", Request: opts.Request, Result: result, Before: workflowHash(before)}
+	journal = harnessSelectionJournal{Schema: "chr-harness-selection-change/v1", Request: opts.Request, Result: result, Before: contenthash.Sum(before)}
 
 	return journal, err
 }

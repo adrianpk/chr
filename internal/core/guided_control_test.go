@@ -6,6 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseControlCAS accepts one concurrent control, retains its receipt
@@ -72,7 +74,7 @@ func assertGuidedControlRace(t *testing.T, results <-chan error) {
 		switch {
 		case err == nil:
 			successes++
-		case errors.Is(err, ErrWorkflowConflict):
+		case errors.Is(err, workflowstate.ErrConflict):
 			conflicts++
 		default:
 			t.Fatal(err)
@@ -96,7 +98,7 @@ func assertGuidedStoppedInput(t *testing.T, root string, session AuthoringSessio
 
 	resumed, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *AuthoringSession) error { return nil })
 	if session.Guided.Status == "cancelled" {
-		if !errors.Is(err, ErrWorkflowConflict) {
+		if !errors.Is(err, workflowstate.ErrConflict) {
 			t.Fatal("cancelled run resumed", err)
 		}
 
@@ -127,13 +129,13 @@ func testGuidedUncertainControl(t *testing.T, rejected bool) {
 	root, session := guidedCaptureFixture(t)
 	command := GuidedUseCaseCommand{GuidedUseCaseScope: GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, ExpectedRevision: session.Revision, OperationID: "original-stop", Action: "pause"}
 
-	cause := ErrWorkflowConflict
+	cause := workflowstate.ErrConflict
 	if rejected {
 		cause = errors.Join(cause, ErrGuidedControlRejected)
 	}
 
 	retained, err := ApplyGuidedUseCaseControl(t.Context(), root, command, func(context.Context, *AuthoringSession) error { return cause })
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("owner failure was lost", err)
 	}
 

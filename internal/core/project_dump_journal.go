@@ -4,6 +4,8 @@ import (
 	"encoding/hex"
 	"path/filepath"
 	"strings"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 const (
@@ -49,7 +51,7 @@ func validAuthoringJournalVersionPath(schema, reference string) bool {
 
 func validQuizRuntimeJournalPath(reference string) bool {
 	parts := strings.Split(filepath.ToSlash(reference), "/")
-	if len(parts) != 5 || parts[0] != DirectoryName || !IsValidOpsNamespace(parts[1]) || parts[2] != "tmp" || parts[3] != "quiz-runtime" {
+	if len(parts) != 5 || parts[0] != DirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "tmp" || parts[3] != "quiz-runtime" {
 		return false
 	}
 

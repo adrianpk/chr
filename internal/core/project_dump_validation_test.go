@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Pointer shape is validated without consulting a cache or accepting normalized
@@ -228,7 +230,7 @@ func TestProjectDumpBindingScope(t *testing.T) {
 	}
 
 	_, err = NewProjectMetadataService(projects[1]).AdoptProjectDump(t.Context(), observed.Revision)
-	if !errors.Is(err, ErrWorkflowConflict) {
+	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("observation crossed project roots", err)
 	}
 }

@@ -9,6 +9,9 @@ import (
 	"os/exec"
 	"testing"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Independent processes race against the same complete revision. Exactly one
@@ -111,10 +114,10 @@ func TestHarnessSelectionProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := harnessSelectionTestRequest(os.Getenv("CHR_HARNESS_TEST_PROFILE"), workflowHash(nil), os.Getenv("CHR_HARNESS_TEST_PROFILE"))
+	request := harnessSelectionTestRequest(os.Getenv("CHR_HARNESS_TEST_PROFILE"), contenthash.Sum(nil), os.Getenv("CHR_HARNESS_TEST_PROFILE"))
 
 	_, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
-	if errors.Is(err, ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		t.Log("conflict")
 
 		return

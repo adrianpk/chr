@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramHarnessSelectionOperation identifies deterministic configuration selection.
@@ -16,7 +17,7 @@ const TelegramHarnessSelectionOperation = "harnesses.change"
 // conversation and freezes prepared input against the current selected project.
 func (s *TelegramReceiverStore) ReserveTelegramHarnessOperation(ctx context.Context, input TelegramConversationInput, request TelegramOperationRequest, prepared json.RawMessage, now time.Time) (TelegramOperationRequest, error) {
 	if !validTelegramHarnessReservation(input, request, prepared) {
-		return request, ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	err := s.transaction(ctx, func(tx *sql.Tx) error {
@@ -46,7 +47,7 @@ func (s *TelegramReceiverStore) ReserveTelegramHarnessOperation(ctx context.Cont
 	}
 
 	if !found || retained.ArgumentDigest != request.ArgumentDigest || string(retained.PreparedInput) != string(prepared) {
-		return request, ErrWorkflowConflict
+		return request, workflowstate.ErrConflict
 	}
 
 	return retained, nil
@@ -75,7 +76,7 @@ func (op telegramConversationTransaction) harnessConfirmationTarget(expected Tel
 	}
 
 	if current != expected {
-		return TelegramOperationTarget{}, ErrWorkflowConflict
+		return TelegramOperationTarget{}, workflowstate.ErrConflict
 	}
 
 	conversation, err := op.sourceActionConversation("prepare", "Harness defaults")
@@ -84,7 +85,7 @@ func (op telegramConversationTransaction) harnessConfirmationTarget(expected Tel
 	}
 
 	if conversation.ID != telegramConversationID(op.input.Update) {
-		return TelegramOperationTarget{}, ErrWorkflowConflict
+		return TelegramOperationTarget{}, workflowstate.ErrConflict
 	}
 
 	return op.operationTarget(conversation)
@@ -95,7 +96,7 @@ func (op telegramConversationTransaction) harnessConfirmationTarget(expected Tel
 func (s *TelegramReceiverStore) ValidateTelegramHarnessTarget(ctx context.Context, input TelegramConversationInput, request TelegramOperationRequest) error {
 	user, allowed := input.Config.AuthorizedUser(input.Update.Peer.ChatID, input.Update.Peer.TopicID, input.Update.Peer.UserID, input.Update.ChatType)
 	if !allowed || user.OperatorID != request.Operator || request.Source.Peer != input.Update.Peer || request.OperationID != TelegramHarnessSelectionOperation || request.Target.ConversationID != telegramConversationID(request.Source) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return s.transaction(ctx, func(tx *sql.Tx) error {
@@ -107,7 +108,7 @@ func (s *TelegramReceiverStore) ValidateTelegramHarnessTarget(ctx context.Contex
 		}
 
 		if project.ID != request.Target.ProjectID {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 
 		conversation, err := op.conversation(request.Target.ConversationID)
@@ -129,7 +130,7 @@ func finishTelegramHarnessConversation(ctx context.Context, tx *sql.Tx, request 
 	}
 
 	if request.Target.ConversationID != telegramConversationID(request.Source) {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	phase := "failed"

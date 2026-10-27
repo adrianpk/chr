@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowInspectionJournal leaves interrupted transitions byte-identical
@@ -25,11 +27,11 @@ func TestWorkflowInspectionJournal(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.InspectWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.InspectWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("status replayed a pending transition", err)
 	}
 
-	if _, err := store.InspectWorkflowPolicy(t.Context()); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.InspectWorkflowPolicy(t.Context()); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("policy inspection replayed a pending transition", err)
 	}
 
@@ -116,7 +118,7 @@ func TestWorkflowInspectionLinked(t *testing.T) {
 	}
 	for _, check := range checks {
 		t.Run(check.name, func(t *testing.T) {
-			if err := check.read(); !errors.Is(err, ErrWorkflowConflict) {
+			if err := check.read(); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("linked journal was recovered by inspection", err)
 			}
 

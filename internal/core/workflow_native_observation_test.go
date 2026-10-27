@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeCanonicalFixture struct {
@@ -246,7 +248,7 @@ func TestNativeCanonicalFence(t *testing.T) {
 			t.Fatal(err)
 		}
 	}}
-	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale canonical callback changed the journal", err)
 	}
 

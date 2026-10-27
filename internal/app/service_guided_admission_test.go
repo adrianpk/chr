@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type guidedAdmissionModel struct{ planDeliveryTestModel }
@@ -98,7 +99,7 @@ func TestGuidedUseCaseAdmissionExact(t *testing.T) {
 	}
 
 	fresh := guidedQuizCommand(started, "different-admission", "admit", "")
-	if _, err := operations.AdmitGuidedWork(t.Context(), fresh); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.AdmitGuidedWork(t.Context(), fresh); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("new admission replaced the original", err)
 	}
 }

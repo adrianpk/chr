@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TicketDocument is an observed editable document with its canonical write guards.
@@ -79,7 +82,7 @@ func loadTicketDocument(ticket IndexedTicket) (TicketDocument, error) {
 		return TicketDocument{}, err
 	}
 
-	document := TicketDocument{Ticket: ticket, content: content, Revision: workflowHash(content), Fields: map[string]string{}, ReadOnly: map[string]string{}}
+	document := TicketDocument{Ticket: ticket, content: content, Revision: contenthash.Sum(content), Fields: map[string]string{}, ReadOnly: map[string]string{}}
 
 	_, body, splitErr := splitWorkflowMarkdown(content)
 	if splitErr != nil {
@@ -100,7 +103,7 @@ func loadTicketDocument(ticket IndexedTicket) (TicketDocument, error) {
 	}
 
 	if !ticket.NativeWorkflow && observed != ticket.Key {
-		return document, ErrWorkflowConflict
+		return document, workflowstate.ErrConflict
 	}
 
 	return completeTicketDocument(document, body), nil
@@ -164,7 +167,7 @@ func (s *WorkflowStore) nativeTicketDocument(ctx context.Context, document Ticke
 		}
 
 		if !nativeTicketDocumentImage(document, record) {
-			return document, ErrWorkflowConflict
+			return document, workflowstate.ErrConflict
 		}
 
 		document.native, document.Revision, document.Phase = &record, record.SourceHash, record.Task.Phase
@@ -177,12 +180,12 @@ func (s *WorkflowStore) nativeTicketDocument(ctx context.Context, document Ticke
 		return document, nil
 	}
 
-	return document, ErrWorkflowConflict
+	return document, workflowstate.ErrConflict
 }
 
 func nativeTicketDocumentImage(document TicketDocument, record WorkflowRecord) bool {
 	if strings.HasSuffix(record.Path, ".md") {
-		return workflowHash(document.content) == record.SourceHash
+		return contenthash.Sum(document.content) == record.SourceHash
 	}
 
 	return bytes.Equal(document.content, record.Body)

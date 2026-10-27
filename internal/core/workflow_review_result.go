@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) finishWorkflowReview(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, decision WorkflowReviewDecision, executionErr error, interrupted bool) (result WorkflowReviewBinding, err error) {
@@ -65,7 +67,7 @@ func (s *WorkflowStore) acceptWorkflowReview(ctx context.Context, claim *Workflo
 func checkWorkflowReviewInputHash(input WorkflowReviewInput, expected string) error {
 	hash, err := workflowReviewInputHash(input)
 	if err != nil || hash != expected {
-		return fmt.Errorf("%w: review inputs changed during execution", ErrWorkflowConflict)
+		return fmt.Errorf("%w: review inputs changed during execution", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -101,7 +103,7 @@ func consumeWorkflowReviewRepair(run *workflowInvocationFile, taskKey string) er
 	}
 
 	if run.Review.RepairTaskKey != taskKey {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for i := range run.ReviewRepairs {

@@ -7,6 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // A single accepted image preserves unrelated bytes, commits both roles and
@@ -16,7 +19,7 @@ func TestHarnessSelectionChange(t *testing.T) {
 	original := "# retain comment\nunknown_extension:\n  custom: untouched\nwork:\n  max_active_workers: 2\n"
 	writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), original)
 
-	request := harnessSelectionTestRequest("first", workflowHash([]byte(original)), "alpha")
+	request := harnessSelectionTestRequest("first", contenthash.Sum([]byte(original)), "alpha")
 
 	result, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
 	if err != nil || result.Worker != "alpha" || result.Generation != "alpha" || result.ChangedBy != "operator" || result.RequestID != "first" {
@@ -24,7 +27,7 @@ func TestHarnessSelectionChange(t *testing.T) {
 	}
 
 	data := readHarnessSelectionTestConfig(t, project)
-	if !strings.HasPrefix(string(data), original) || result.Revision != workflowHash(data) {
+	if !strings.HasPrefix(string(data), original) || result.Revision != contenthash.Sum(data) {
 		t.Fatal("changed unrelated configuration or reported a partial revision")
 	}
 
@@ -50,7 +53,7 @@ func checkHarnessSelectionChangeReplay(t *testing.T, project string, request Har
 	changed := request
 
 	changed.Generation = harnessSelectionTestChoice("other")
-	if _, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(changed)); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(changed)); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("request ID exchanged choices", err)
 	}
 
@@ -67,7 +70,7 @@ func TestHarnessSelectionChangeRejects(t *testing.T) {
 		name   string
 		change func(*HarnessSelectionChangeOptions)
 	}{
-		{"stale unrelated edit", func(o *HarnessSelectionChangeOptions) { o.Request.ExpectedRevision = workflowHash([]byte("older")) }},
+		{"stale unrelated edit", func(o *HarnessSelectionChangeOptions) { o.Request.ExpectedRevision = contenthash.Sum([]byte("older")) }},
 		{"unauthorized", func(o *HarnessSelectionChangeOptions) {
 			o.Authorize = func(context.Context) error { return errors.New("denied") }
 		}},
@@ -87,7 +90,7 @@ func TestHarnessSelectionChangeRejects(t *testing.T) {
 			original := "unknown: retained\n"
 			writeHarnessSelectionTestFile(t, UserPath(project, "config.yml"), original)
 
-			options := harnessSelectionTestOptions(harnessSelectionTestRequest("reject", workflowHash([]byte(original)), "alpha"))
+			options := harnessSelectionTestOptions(harnessSelectionTestRequest("reject", contenthash.Sum([]byte(original)), "alpha"))
 			tc.change(&options)
 
 			if _, err := ChangeHarnessSelections(t.Context(), project, options); err == nil {
@@ -112,7 +115,7 @@ func TestHarnessSelectionChangeRejects(t *testing.T) {
 func TestHarnessSelectionChangeClear(t *testing.T) {
 	project := t.TempDir()
 
-	first, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(harnessSelectionTestRequest("select", workflowHash(nil), "alpha")))
+	first, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(harnessSelectionTestRequest("select", contenthash.Sum(nil), "alpha")))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +130,7 @@ func TestHarnessSelectionChangeClear(t *testing.T) {
 	request.ProjectRef = "foreign"
 
 	request.ExpectedRevision = result.Revision
-	if _, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request)); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request)); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("foreign project changed selections", err)
 	}
 
@@ -149,7 +152,7 @@ func TestHarnessSelectionChangeClear(t *testing.T) {
 // role, including when the accepted change is reloaded from configuration.
 func TestHarnessSelectionNullProfile(t *testing.T) {
 	project := t.TempDir()
-	request := harnessSelectionTestRequest("named-null", workflowHash(nil), "null")
+	request := harnessSelectionTestRequest("named-null", contenthash.Sum(nil), "null")
 
 	result, err := ChangeHarnessSelections(t.Context(), project, harnessSelectionTestOptions(request))
 	if err != nil || result.Worker != "null" || result.Generation != "null" {

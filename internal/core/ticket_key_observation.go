@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
 func (r *fileTicketRepository) nextKeyNumber(ctx context.Context) (int, error) {
@@ -53,7 +55,7 @@ func ticketKeyRoots(projectDir string) ([]string, error) {
 	}
 
 	for _, entry := range entries {
-		if IsValidOpsNamespace(entry.Name()) {
+		if opsnamespace.Valid(entry.Name()) {
 			roots = append(roots, filepath.Join(projectDir, OpsDirectoryName, entry.Name(), "ticket"))
 		}
 	}

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowClaimExpiry keeps serial capacity after its owner loses result authority.
@@ -70,7 +72,7 @@ func checkWorkflowUnownedStatusWrite(t *testing.T, store *WorkflowStore, path st
 	}
 
 	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "rogue", "running", TicketStatusInProgress
-	if _, err := store.Write(t.Context(), record, record.Revision); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.Write(t.Context(), record, record.Revision); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("generic writer created an unfenced claim: %v", err)
 	}
 }
@@ -97,7 +99,7 @@ func TestWorkflowOperationRelease(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := lock.Release(); !errors.Is(err, ErrWorkflowConflict) {
+	if err := lock.Release(); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale release accepted: %v", err)
 	}
 
@@ -157,7 +159,7 @@ func TestWorkflowInvocationTerminal(t *testing.T) {
 	}
 
 	request.Selection.Selector.Identity = hierarchy.Tasks[1].Task.Key
-	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowConflict) {
+	if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("attached retry key broadened original input: %v", err)
 	}
 }

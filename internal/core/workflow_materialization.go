@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowMaterializationOptions supplies approved input and the existing native
@@ -122,8 +125,8 @@ func (s *WorkflowStore) readApprovedPlan(plan GeneratedWorkflowPlan) ([]byte, er
 		return nil, err
 	}
 
-	if workflowHash(data) != plan.PlanHash {
-		return nil, ErrWorkflowConflict
+	if contenthash.Sum(data) != plan.PlanHash {
+		return nil, workflowstate.ErrConflict
 	}
 
 	return data, nil
@@ -135,7 +138,7 @@ func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResul
 		return nil, err
 	}
 
-	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", workflowHash(receipt.After)))
+	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", contenthash.Sum(receipt.After)))
 	files := []workflowFileChange{}
 
 	for _, record := range append([]WorkflowRecord{result.Set}, result.Tasks...) {
@@ -146,7 +149,7 @@ func (s *WorkflowStore) materializationFiles(result WorkflowMaterializationResul
 
 		for _, change := range encoded {
 			if change.Before != "" {
-				return nil, fmt.Errorf("%w: allocated path already exists", ErrWorkflowConflict)
+				return nil, fmt.Errorf("%w: allocated path already exists", workflowstate.ErrConflict)
 			}
 		}
 

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -99,7 +100,7 @@ func (p webViewProvider) writeHarnessSelection(ctx context.Context, operations s
 		Binding:    core.WorkflowMutationBinding{RequestID: request.Fields["request_id"], Operator: actor.OperatorID},
 		ProjectRef: request.Fields["project_ref"], ExpectedRevision: request.Revision, Worker: worker, Generation: generation,
 	}, localHarnessSelectionAuthority(operations.projectContext.ProjectDir, actor.OperatorID))
-	if errors.Is(err, core.ErrWorkflowConflict) {
+	if errors.Is(err, workflowstate.ErrConflict) {
 		return webui.WriteActionResponse{Status: webui.WriteStatusStale, Summary: "The defaults or request identity changed. Your choices are retained; reload current defaults before saving."}
 	}
 

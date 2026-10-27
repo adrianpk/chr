@@ -8,6 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileAuthoringSessionRepository) projectDumpImages(source ProjectDumpArtifact) ([]byte, []byte, error) {
@@ -21,8 +24,8 @@ func (r *fileAuthoringSessionRepository) projectDumpImages(source ProjectDumpArt
 		return nil, nil, err
 	}
 
-	if workflowHash(body) != source.SourceHash || workflowHash(metadata) != source.MetadataHash {
-		return nil, nil, ErrWorkflowConflict
+	if contenthash.Sum(body) != source.SourceHash || contenthash.Sum(metadata) != source.MetadataHash {
+		return nil, nil, workflowstate.ErrConflict
 	}
 
 	return body, metadata, nil
@@ -63,7 +66,7 @@ func (r *fileAuthoringSessionRepository) composeProjectDumps(sources []ProjectDu
 }
 
 func projectDumpHistoryRef(source ProjectDumpArtifact) string {
-	image := workflowHash([]byte(source.SourceHash + "\x00" + source.MetadataHash))
+	image := contenthash.Sum([]byte(source.SourceHash + "\x00" + source.MetadataHash))
 
 	return filepath.ToSlash(filepath.Join(filepath.Dir(source.Reference), "files", "history", image))
 }
@@ -81,10 +84,10 @@ func (r *fileAuthoringSessionRepository) projectDumpHistoryChange(reference stri
 	}
 
 	if !bytes.Equal(before, content) {
-		return change, ErrWorkflowConflict
+		return change, workflowstate.ErrConflict
 	}
 
-	change.Before = workflowHash(before)
+	change.Before = contenthash.Sum(before)
 
 	return change, nil
 }
@@ -130,7 +133,7 @@ func projectDumpReconciliationProvenance(preview ProjectDumpReconciliationPrevie
 }
 
 func (r *fileAuthoringSessionRepository) projectDumpReconciliationChanges(observed ProjectDumpObservation, preview ProjectDumpReconciliationPreview, operationID string) ([]workflowFileChange, ProjectDumpMutationResult, error) {
-	result := ProjectDumpMutationResult{OperationID: operationID, Destination: preview.Destination, SourceHash: workflowHash([]byte(preview.Content))}
+	result := ProjectDumpMutationResult{OperationID: operationID, Destination: preview.Destination, SourceHash: contenthash.Sum([]byte(preview.Content))}
 
 	changes := []workflowFileChange{{Path: filepath.FromSlash(preview.Destination), Before: preview.Sources[0].SourceHash, After: []byte(preview.Content)}}
 	for _, source := range preview.Sources {
@@ -140,7 +143,7 @@ func (r *fileAuthoringSessionRepository) projectDumpReconciliationChanges(observ
 		}
 
 		if source.Reference == preview.Destination {
-			result.MetadataHash = workflowHash(sourceChanges[2].After)
+			result.MetadataHash = contenthash.Sum(sourceChanges[2].After)
 		}
 
 		changes = append(changes, sourceChanges...)

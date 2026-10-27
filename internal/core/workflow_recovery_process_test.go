@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowRecoveryProcess is a host fixture that can die while its supervised
@@ -337,7 +339,7 @@ func stopWorkflowRecoveryGroup(process WorkflowProcess, release string) error {
 	}
 
 	if !owned {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	err = syscall.Kill(-process.GroupID, syscall.SIGKILL)

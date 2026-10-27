@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowGitPublication supplies immutable object identities and full refs to
@@ -138,7 +140,7 @@ func retainWorkflowPublicationAdvertisement(ctx context.Context, request Workflo
 func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, request WorkflowGitPublication) error {
 	repository, err := workflowCanonicalRepository(git.repository)
 	if err != nil || repository != request.Repository || request.Directory == "" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowPublicationRefs(request); err != nil {
@@ -147,7 +149,7 @@ func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, reque
 
 	reader := workflowIntegrationReader{dir: request.Directory}
 	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", request.Git.BaseCommit, request.Git.ResultCommit); err != nil {
-		return fmt.Errorf("%w: prepared target is not fast-forward", ErrWorkflowConflict)
+		return fmt.Errorf("%w: prepared target is not fast-forward", workflowstate.ErrConflict)
 	}
 
 	return git.validatePublicationProof(ctx, request)
@@ -156,7 +158,7 @@ func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, reque
 func validateWorkflowPublicationRefs(request WorkflowGitPublication) error {
 	for _, ref := range []string{request.SourceRef, request.TargetRef} {
 		if !strings.HasPrefix(ref, "refs/heads/") || !validWorkflowPRBranch(strings.TrimPrefix(ref, "refs/heads/")) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -167,7 +169,7 @@ func validateWorkflowPublicationRefs(request WorkflowGitPublication) error {
 
 	for _, id := range []string{proof.SourceCommit, proof.BaseCommit, proof.ResultCommit} {
 		if !workflowCommitID(id) || len(id) != len(proof.SourceCommit) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -195,7 +197,7 @@ func exchangeWorkflowPublication(session workflowReceivePack, request WorkflowGi
 
 	result.State = state
 	if state == "rejected" {
-		return result, ErrWorkflowConflict
+		return result, workflowstate.ErrConflict
 	}
 
 	result.PublishedSourceCommit = request.Git.ResultCommit

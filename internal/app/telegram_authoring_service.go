@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramAuthoringService interface {
@@ -24,7 +25,7 @@ func (s service) ObserveTelegramAuthoring(ctx context.Context, target core.Teleg
 // ContinueTelegramAuthoring adapts registry routing to the neutral guarded owner.
 func (s service) ContinueTelegramAuthoring(ctx context.Context, target core.TelegramOperationTarget, request core.AuthoringContinuationRequest, guard core.AuthoringCommitGuard) (core.AuthoringContinuationResult, error) {
 	if request.ProjectID != target.ProjectID || request.Namespace != target.Namespace {
-		return core.AuthoringContinuationResult{}, core.ErrWorkflowConflict
+		return core.AuthoringContinuationResult{}, workflowstate.ErrConflict
 	}
 
 	scoped, err := s.telegramProjectService(ctx, target)

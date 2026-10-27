@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) commitWorkflowProcessStart(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask) error {
@@ -34,7 +36,7 @@ func (s *WorkflowStore) commitWorkflowMergerStart(ctx context.Context, run *work
 		return r.ID == input.BudgetReservationID && r.AttemptID == prepared.input.AttemptID && r.EntryID == input.EntryID && r.ClaimGeneration == input.ClaimGeneration
 	})
 	if index < 0 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if prepared.mergerProcedure {
@@ -42,7 +44,7 @@ func (s *WorkflowStore) commitWorkflowMergerStart(ctx context.Context, run *work
 	}
 
 	if budget.Reservations[index].State != "reserved" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	// The birth identity and launch reservation reach disk before the supervisor
@@ -59,12 +61,12 @@ func (s *WorkflowStore) commitWorkflowMergerStart(ctx context.Context, run *work
 
 func (s *WorkflowStore) commitWorkflowMergerProcedureStart(run *workflowInvocationFile, prepared workflowPreparedTask, reservation WorkflowIntegrationReservation) error {
 	if reservation.State != "launched" {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	processes := run.Attempts[len(run.Attempts)-1].Processes
 	if len(processes) < 2 {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	command := processes[len(processes)-1].Command
@@ -73,7 +75,7 @@ func (s *WorkflowStore) commitWorkflowMergerProcedureStart(run *workflowInvocati
 		return workflowMergerProcedureRequired(c) && (slices.Equal(command, c.RegenerationCommand) || slices.Equal(command, c.ValidationCommand))
 	})
 	if !allowed {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 	// Host procedures retain their own birth identity under the same capacity and
 	// finite deadline. They do not dispatch another model call or refill its charge.
@@ -92,7 +94,7 @@ func (s *WorkflowStore) commitWorkflowAgentStart(ctx context.Context, run *workf
 
 	reservation, err := workflowAgentReservation(&budget, prepared.input)
 	if err != nil || reservation.State != "reserved" {
-		return errors.Join(ErrWorkflowConflict, err)
+		return errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	reservation.State = "launched"

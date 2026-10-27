@@ -3,6 +3,8 @@ package core
 import (
 	"context"
 	"encoding/json"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowRepairedPreparationGit attaches a retained host-accepted result to a
@@ -51,7 +53,7 @@ func (s *WorkflowStore) readWorkflowAcceptedRepair(run workflowInvocationFile, e
 	}
 
 	if !validWorkflowAcceptedRepair(run, entry, attempt, result) {
-		return nil, nil, ErrWorkflowConflict
+		return nil, nil, workflowstate.ErrConflict
 	}
 
 	a := result.Acceptance
@@ -65,7 +67,7 @@ func (s *WorkflowStore) workflowCandidateRepairAttemptRefs(run workflowInvocatio
 	refs := []WorkflowEvidenceRef{}
 
 	if proof.Provenance == nil {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	for _, repair := range proof.Provenance.Repairs {
@@ -101,7 +103,7 @@ func (s *WorkflowStore) workflowCandidateRepairAttemptRef(run workflowInvocation
 		}
 	}
 
-	return WorkflowEvidenceRef{}, ErrWorkflowConflict
+	return WorkflowEvidenceRef{}, workflowstate.ErrConflict
 }
 
 func validWorkflowAcceptedRepair(run workflowInvocationFile, entry WorkflowIntegrationEntry, attempt WorkflowAttempt, result WorkflowMergerAttempt) bool {

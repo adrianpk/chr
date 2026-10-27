@@ -1,6 +1,10 @@
 package core
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // ClaimNextWorkflowIntegration claims the earliest eligible admitted task.
 // Selection and the existing task/capacity transaction share the repository lock.
@@ -11,7 +15,7 @@ func (s *WorkflowStore) ClaimNextWorkflowIntegration(ctx context.Context, q Work
 	}
 
 	if q.Offset != 0 {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	q.Limit = 1
@@ -54,7 +58,7 @@ func (s *WorkflowStore) claimWorkflowIntegrationSelection(ctx context.Context, i
 	}
 
 	if run.Revision != item.InvocationRevision || run.Namespace != item.Entry.Namespace {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	return owner.claimWorkflow(ctx, run)

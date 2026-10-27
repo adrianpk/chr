@@ -10,6 +10,10 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // CaseMutationRequest binds a metadata write to its caller and observed image.
@@ -78,7 +82,7 @@ func (s CaseMetadataService) normalizeCaseMutation(request CaseMutationRequest) 
 		return request, "", err
 	}
 
-	if request.ProjectID == "" || !IsValidOpsNamespace(request.Namespace) {
+	if request.ProjectID == "" || !opsnamespace.Valid(request.Namespace) {
 		return request, "", errors.New("case mutation requires its target scope")
 	}
 
@@ -106,7 +110,7 @@ func (s CaseMetadataService) normalizeCaseMutation(request CaseMutationRequest) 
 		return request, "", errors.New("case mutation arguments exceed 64 KiB")
 	}
 
-	return request, workflowHash(data), nil
+	return request, contenthash.Sum(data), nil
 }
 
 func (s CaseMetadataService) withMutationLock(ctx context.Context, action func() error) (err error) {
@@ -163,11 +167,11 @@ func (s CaseMetadataService) caseMutationPath(relative string) (string, error) {
 }
 
 func caseMutationReceiptRef(id string) string {
-	return "case-mutations/receipts/" + workflowHash([]byte(id)) + ".json"
+	return "case-mutations/receipts/" + contenthash.Sum([]byte(id)) + ".json"
 }
 
 func (s CaseMetadataService) reserveCaseMutation(request CaseMutationRequest, digest string) error {
-	path, err := s.caseMutationPath("case-mutations/bindings/" + workflowHash([]byte(request.Binding.RequestID)) + ".json")
+	path, err := s.caseMutationPath("case-mutations/bindings/" + contenthash.Sum([]byte(request.Binding.RequestID)) + ".json")
 	if err != nil {
 		return err
 	}
@@ -183,7 +187,7 @@ func (s CaseMetadataService) reserveCaseMutation(request CaseMutationRequest, di
 	data, err := readWorkflowFile(path)
 	if err == nil {
 		if string(data) != string(encoded) {
-			return fmt.Errorf("%w: case mutation payload changed", ErrWorkflowConflict)
+			return fmt.Errorf("%w: case mutation payload changed", workflowstate.ErrConflict)
 		}
 
 		return nil

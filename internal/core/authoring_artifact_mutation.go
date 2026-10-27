@@ -5,22 +5,25 @@ import (
 	"errors"
 	"path/filepath"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (r *fileAuthoringSessionRepository) authoringArtifactChanges(binding authoringRequestBinding, snapshot AuthoringSnapshot, ref AuthoringArtifactRef, body string) ([]workflowFileChange, error) {
 	if !validAuthoringArtifactRef(binding.Request.Namespace, ref) {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	observation := authoringArtifactObservation(snapshot, ref.Path)
 
 	replacing := binding.Request.Action == "refine" || binding.Request.Action == "ask"
 	if observation != nil && !replacing {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	if observation == nil && binding.Request.Action == "refine" {
-		return nil, ErrWorkflowConflict
+		return nil, workflowstate.ErrConflict
 	}
 
 	metadata, err := r.authoringArtifactMetadata(binding, snapshot, ref, observation)
@@ -85,8 +88,8 @@ func (r *fileAuthoringSessionRepository) observedAuthoringMetadata(ref Authoring
 		return nil, err
 	}
 
-	if workflowHash(encoded) != observed.MetadataHash {
-		return nil, ErrWorkflowConflict
+	if contenthash.Sum(encoded) != observed.MetadataHash {
+		return nil, workflowstate.ErrConflict
 	}
 
 	var metadata map[string]any

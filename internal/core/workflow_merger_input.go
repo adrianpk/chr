@@ -7,6 +7,9 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // SealWorkflowMergerInput validates and hashes a host-assembled immutable input.
@@ -32,10 +35,10 @@ func workflowMergerInputHash(input WorkflowMergerInput) (string, error) {
 
 	data, err := json.Marshal(input)
 	if err != nil || len(data) >= WorkflowFileLimit {
-		return "", fmt.Errorf("%w: merger input exceeds file bound", ErrWorkflowConflict)
+		return "", fmt.Errorf("%w: merger input exceeds file bound", workflowstate.ErrConflict)
 	}
 
-	return workflowHash(data), nil
+	return contenthash.Sum(data), nil
 }
 
 func validateWorkflowMergerInput(input WorkflowMergerInput, now time.Time) error {
@@ -45,7 +48,7 @@ func validateWorkflowMergerInput(input WorkflowMergerInput, now time.Time) error
 
 	hash, err := workflowMergerInputHash(input)
 	if err != nil || !validWorkflowNativeFingerprint(input.InputHash) || hash != input.InputHash {
-		return fmt.Errorf("%w: merger input hash changed", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger input hash changed", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -53,7 +56,7 @@ func validateWorkflowMergerInput(input WorkflowMergerInput, now time.Time) error
 
 func validateWorkflowMergerInputContent(input WorkflowMergerInput, now time.Time) error {
 	if !validWorkflowMergerIdentity(input) || !validWorkflowMergerObjects(input) {
-		return fmt.Errorf("%w: invalid merger identity or objects", ErrWorkflowConflict)
+		return fmt.Errorf("%w: invalid merger identity or objects", workflowstate.ErrConflict)
 	}
 
 	if err := validateWorkflowMergerRepository(input); err != nil {
@@ -78,12 +81,12 @@ func validateWorkflowMergerInputContent(input WorkflowMergerInput, now time.Time
 func validateWorkflowMergerRepository(input WorkflowMergerInput) error {
 	repository, err := workflowCanonicalRepository(input.Repository)
 	if err != nil || repository != input.Repository || input.SourceRef == input.TargetRef {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	for _, ref := range []string{input.SourceRef, input.TargetRef} {
 		if !strings.HasPrefix(ref, "refs/heads/") || !validWorkflowPRBranch(strings.TrimPrefix(ref, "refs/heads/")) {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	}
 
@@ -113,16 +116,16 @@ func validWorkflowMergerObjects(input WorkflowMergerInput) bool {
 
 func validateWorkflowMergerAllowance(input WorkflowMergerInput, now time.Time) error {
 	if !validWorkflowMergerLimits(input) {
-		return fmt.Errorf("%w: merger requires finite attempts and runtime", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger requires finite attempts and runtime", workflowstate.ErrConflict)
 	}
 
 	if !validWorkflowMergerDeadline(input, now) {
-		return fmt.Errorf("%w: merger deadline is stale or exceeds the worker timeout", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger deadline is stale or exceeds the worker timeout", workflowstate.ErrConflict)
 	}
 
 	allowance := input.TokenAllowance
 	if allowance != nil && (!validWorkflowTokenAllowance(*allowance) || allowance.Deadline != input.Deadline) {
-		return fmt.Errorf("%w: merger token allowance is unenforceable", ErrWorkflowConflict)
+		return fmt.Errorf("%w: merger token allowance is unenforceable", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -140,7 +143,7 @@ func validWorkflowMergerDeadline(input WorkflowMergerInput, now time.Time) bool 
 
 func validateWorkflowMergerIntent(input WorkflowMergerInput) error {
 	if len(input.Requirements) == 0 || len(input.Requirements) > WorkflowPageLimit || len(input.Conflicts) > WorkflowPageLimit {
-		return ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	if err := validateWorkflowMergerRequirements(input.Requirements); err != nil {
@@ -162,14 +165,14 @@ func validateWorkflowMergerReason(input WorkflowMergerInput) error {
 	switch input.Reason {
 	case "preparation_conflict":
 		if len(input.Conflicts) == 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	case "combined_gate_regression", "actionable_review_finding":
 		if len(input.FindingRefs) == 0 {
-			return ErrWorkflowConflict
+			return workflowstate.ErrConflict
 		}
 	default:
-		return fmt.Errorf("%w: clean or drift-only preparation cannot launch a merger", ErrWorkflowConflict)
+		return fmt.Errorf("%w: clean or drift-only preparation cannot launch a merger", workflowstate.ErrConflict)
 	}
 
 	return nil

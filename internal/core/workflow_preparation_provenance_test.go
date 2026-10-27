@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"slices"
 	"testing"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
 func nativeCombinedPreparation(t *testing.T, f workflowGitFixture) (WorkflowIntegrationProof, WorkflowLane) {
@@ -98,8 +100,8 @@ func TestNativeCombinedGuard(t *testing.T) {
 	}{
 		{"author", func(p *WorkflowIntegrationProvenance) { p.Source[0].Author.Name = "Forged Author" }},
 		{"date", func(p *WorkflowIntegrationProvenance) { p.Source[0].Author.Date = "1700000000 +0000" }},
-		{"message", func(p *WorkflowIntegrationProvenance) { p.Source[0].MessageHash = workflowHash([]byte("forged")) }},
-		{"diff", func(p *WorkflowIntegrationProvenance) { p.CombinedDiffHash = workflowHash([]byte("forged")) }},
+		{"message", func(p *WorkflowIntegrationProvenance) { p.Source[0].MessageHash = contenthash.Sum([]byte("forged")) }},
+		{"diff", func(p *WorkflowIntegrationProvenance) { p.CombinedDiffHash = contenthash.Sum([]byte("forged")) }},
 		{"committer", func(p *WorkflowIntegrationProvenance) { p.Prepared[0].Committer.Name = "Forged Host" }},
 	}
 	for _, tc := range cases {
@@ -140,7 +142,7 @@ func TestNativeCombinedLegacy(t *testing.T) {
 		Method, Source, Base, Tree string
 		History                    []WorkflowIntegrationCommit
 	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History})
-	if err != nil || workflowHash(data) != proof.HistoryHash || validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof) != nil {
+	if err != nil || contenthash.Sum(data) != proof.HistoryHash || validateWorkflowIntegrationProof(proof.WorkflowIntegrationQuery, proof) != nil {
 		t.Fatal("historical proof hash or read contract changed")
 	}
 }

@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTestManual(t *testing.T, store *WorkflowStore, id string, worker []string) (*WorkflowClaim, WorkflowManualTask) {
@@ -126,7 +128,7 @@ func TestWorkflowManualSnapshot(t *testing.T) {
 			candidate := workflowManualTestCandidate(t, store, task)
 
 			path, changed := changeWorkflowManualImage(t, store, hierarchy, task, image)
-			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, ErrWorkflowConflict) {
+			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed image accepted: %v", err)
 			}
 

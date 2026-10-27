@@ -3,6 +3,9 @@ package core
 import (
 	"context"
 	"encoding/json"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowResultValidation contains the latest host task validation, without
@@ -58,7 +61,7 @@ func (s *WorkflowStore) workflowResultValidation(attempt WorkflowAttempt) (Workf
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != attempt.ResultHash {
+	if err != nil || contenthash.Sum(data) != attempt.ResultHash {
 		return WorkflowResultValidation{}, 0, errorsOrConflict(err)
 	}
 
@@ -68,7 +71,7 @@ func (s *WorkflowStore) workflowResultValidation(attempt WorkflowAttempt) (Workf
 	}
 
 	if !workflowResultMatchesAttempt(evidence, attempt) {
-		return WorkflowResultValidation{}, 0, ErrWorkflowConflict
+		return WorkflowResultValidation{}, 0, workflowstate.ErrConflict
 	}
 
 	for i := range evidence.Validation {
@@ -94,7 +97,7 @@ func (s *WorkflowStore) workflowResultTask(attempt WorkflowAttempt) (WorkflowTas
 	}
 
 	data, err := readWorkflowFile(path)
-	if err != nil || workflowHash(data) != attempt.InputHash {
+	if err != nil || contenthash.Sum(data) != attempt.InputHash {
 		return WorkflowTaskInput{}, 0, errorsOrConflict(err)
 	}
 
@@ -104,7 +107,7 @@ func (s *WorkflowStore) workflowResultTask(attempt WorkflowAttempt) (WorkflowTas
 	}
 
 	if input.AttemptID != attempt.ID || input.Generation != attempt.Generation || input.TaskKey != attempt.TaskKey {
-		return input, 0, ErrWorkflowConflict
+		return input, 0, workflowstate.ErrConflict
 	}
 
 	return input, len(data), nil

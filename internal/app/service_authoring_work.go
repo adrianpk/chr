@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AuthoringWorkRequest proposes a native description from observed authoring
@@ -98,7 +99,7 @@ func (s service) ApplyPreparedAuthoringWork(ctx context.Context, prepared Prepar
 // receipt reconciles first without acquiring fresh authority for a changed scope.
 func (s service) ApplyPreparedAuthoringWorkGuarded(ctx context.Context, prepared PreparedAuthoringWork, guard core.AuthoringCommitGuard) (AuthoringWorkResult, error) {
 	if guard == nil {
-		return AuthoringWorkResult{}, core.ErrWorkflowConflict
+		return AuthoringWorkResult{}, workflowstate.ErrConflict
 	}
 
 	return s.applyPreparedAuthoringWork(ctx, prepared, guard)
@@ -177,7 +178,7 @@ func (s service) guardPreparedAuthoringSource(ctx context.Context, scope core.Au
 	}
 
 	if source.Ref.Path != scope.DescriptionRef || source.SourceHash != scope.DescriptionHash {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -193,7 +194,7 @@ func guardAuthoringWorkSource(snapshot core.AuthoringSnapshot, request Authoring
 	}
 
 	if snapshot.Session.ProjectID != projectID || snapshot.Session.ID != request.SessionID || snapshot.Session.Revision != request.ExpectedRevision || snapshot.SourceHash != request.ExpectedSourceHash || snapshot.Question != nil {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil
@@ -234,7 +235,7 @@ func validatePreparedAuthoringWork(prepared PreparedAuthoringWork, projectID str
 	}
 
 	if recordDigest(image) != prepared.Scope.RecordHash {
-		return fmt.Errorf("%w: prepared description changed", core.ErrWorkflowConflict)
+		return fmt.Errorf("%w: prepared description changed", workflowstate.ErrConflict)
 	}
 
 	return nil
@@ -243,7 +244,7 @@ func validatePreparedAuthoringWork(prepared PreparedAuthoringWork, projectID str
 func guardAuthoringWorkOwner(prepared PreparedAuthoringWork, projectID string) error {
 	scope, mutation := prepared.Scope, prepared.Mutation
 	if scope.ProjectID != projectID || mutation.ProjectID != projectID || mutation.Namespace != scope.Namespace || mutation.Kind != RecordTicket || mutation.Case != nil || mutation.Native == nil {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return guardAuthoringWorkRecord(*mutation.Native, scope)
@@ -251,7 +252,7 @@ func guardAuthoringWorkOwner(prepared PreparedAuthoringWork, projectID string) e
 
 func guardAuthoringWorkRecord(request core.WorkflowMutationRequest, scope core.AuthoringWorkScope) error {
 	if request.Binding != scope.Binding || request.ExpectedRevision != 0 || request.Record.Task == nil || request.Record.Task.ContractHash != scope.ContractHash || request.Record.Task.Phase != "pending" || request.Record.Task.Status != core.TicketStatusBacklog {
-		return core.ErrWorkflowConflict
+		return workflowstate.ErrConflict
 	}
 
 	return nil

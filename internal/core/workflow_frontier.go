@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowUnitDelivery retains a delivered unit before its active bindings move.
@@ -168,7 +170,7 @@ func (s *WorkflowStore) readWorkflowFrontierCandidate(ctx context.Context, run w
 
 	tasks := dependencies.tasks[run.Lane.Unit.ID]
 	if len(tasks) == 0 {
-		return WorkflowSliceCandidate{}, fmt.Errorf("%w: finalized slice has no members", ErrWorkflowConflict)
+		return WorkflowSliceCandidate{}, fmt.Errorf("%w: finalized slice has no members", workflowstate.ErrConflict)
 	}
 
 	observation := workflowSliceObservation{descriptor: selection.slices[run.Lane.Unit.ID], set: selection.sets[tasks[0].Task.SetID], tasks: tasks}

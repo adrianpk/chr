@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowGrant uses the common owner before queue admission and
@@ -36,11 +37,11 @@ func TestServiceWorkflowGrant(t *testing.T) {
 	}
 
 	grant.Grant.ID = "stale-grant"
-	if _, err := operations.GrantWorkflowIntegration(t.Context(), grant); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.GrantWorkflowIntegration(t.Context(), grant); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("service bypassed revision guard", err)
 	}
 
-	if _, err := operations.ReadWorkflowIntegrationDecisions(t.Context(), started.Invocation.ID); !errors.Is(err, core.ErrWorkflowConflict) {
+	if _, err := operations.ReadWorkflowIntegrationDecisions(t.Context(), started.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("service invented an approval", err)
 	}
 }
