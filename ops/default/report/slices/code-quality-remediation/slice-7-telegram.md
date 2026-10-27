@@ -1,11 +1,12 @@
 # Slice 7: Telegram transport, receiver and retained delivery
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-7-quality-telegram`
 PR: `#444`
+Integration: verified Rebase + Fast-forward into dev at `92f91847ffdc374c53b8044e9435b7af6d1cb722`.
 
 ## Purpose
 
@@ -99,7 +100,8 @@ existing owners. Boolean outcomes with different contracts remain distinct.
 Final PR-head validation uses make verify, the non-short Telegram/core/app batch,
 focused retained-state concurrency/recovery race tests, then git diff --check.
 The controller validation ledger and PR Validation own the exact clean HEAD,
-ordered commands, outcomes and logs. Integration remains controller-owned.
+ordered commands, outcomes and logs. All four commands passed on
+`92f91847ffdc374c53b8044e9435b7af6d1cb722`, now verified integrated through PR #444.
 
 ## Risks and Follow-ups
 

@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084827
 title: "Quality slice 7: Telegram transport, receiver and retained delivery"
-status: reviewing
+status: solved
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -13,6 +13,8 @@ commits: [734cafff, 071a0e1d, a11b75fa, 7a845d3f, a055ba79, b77cf0e3, 450b92e4, 
 started_at: 2026-10-27T09:28:39Z
 branch: refactor/slice-7-quality-telegram
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/444
+resolution: fixed
+closed_at: 2026-10-27T11:47:16Z
 reviewed_at: 2026-10-27T11:35:33Z
 ready_at: 2026-10-26T08:57:09Z
 ---
@@ -64,5 +66,6 @@ Telegram owner, all 156 signature dispositions, typed retained rows, D06 intake,
 state/error contracts and justified cleanup. The canonical report owns the
 focused task results and evidence links. The controller ledger owns final
 clean-HEAD validation; PR #444 holds the canonical
-branch and immutable report link; integration remains controller-owned. Other
+branch and immutable report link. PR #444 is verified merged into dev at
+92f91847ffdc374c53b8044e9435b7af6d1cb722 with all four exact-head checks successful. Other
 recorded slices remain pending.
