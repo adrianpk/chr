@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
@@ -31,7 +32,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		return core.WorkflowHarnessResolution{}, err
 	}
 
-	executable, err := core.FreezeHarnessExecutable(selected.Command)
+	executable, err := harnesshost.FreezeHarnessExecutable(selected.Command)
 	if err != nil {
 		return core.WorkflowHarnessResolution{}, err
 	}

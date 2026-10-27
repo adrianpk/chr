@@ -9,11 +9,12 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowRunAgentCommand(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string) (WorkflowCommandResult, error) {
-	if err := checkHarnessExecutable(prepared.input.HarnessBinding, command); err != nil {
+	if err := harnesshost.CheckHarnessExecutable(prepared.input.HarnessBinding, command); err != nil {
 		return WorkflowCommandResult{}, err
 	}
 

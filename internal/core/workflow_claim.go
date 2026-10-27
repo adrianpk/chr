@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -57,7 +58,7 @@ func (s *WorkflowStore) ClaimWorkflow(ctx context.Context, id string) (claim *Wo
 }
 
 func (s *WorkflowStore) claimWorkflow(ctx context.Context, run workflowInvocationFile) (claim *WorkflowClaim, err error) {
-	if err := checkHarnessExecutable(run.HarnessBinding, run.HarnessCommand); err != nil {
+	if err := harnesshost.CheckHarnessExecutable(run.HarnessBinding, run.HarnessCommand); err != nil {
 		return nil, err
 	}
 

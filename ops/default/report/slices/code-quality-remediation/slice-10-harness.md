@@ -87,6 +87,13 @@ integration stays beside its environment, and package fixtures use production
 migration assets against owned in-memory databases. The 68 moved declarations and
 tests retain their source preimages after namespace qualification.
 
+Host executable resolution, streaming fingerprints, retained command-image
+validation and worker executable checks now live under core/harness/host. The
+parent harness owner contains the original pure binding copy. Native and app
+consumers call each owner directly; no root forwarding API remains. The existing
+large, symlink, FIFO, directory and oversized executable tests follow their host
+owner. Native admission still owns its distinct omitted-command request case.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 initial root
@@ -204,6 +211,11 @@ SQL remain unchanged.
 
 - `go test ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(ValidateDaemon|EvaluateDaemon|LoadDaemon|DaemonState|NewDaemon|Daemon|Leaf)' -count=1 -timeout=3m`: all selected checks passed; TUI compiled.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/daemon ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
+
+Executable owner move checks passed:
+
+- `go test ./internal/core/harness/... ./internal/core ./internal/app ./scripts/goquality -run '^Test(HarnessBinding|HarnessGeneration|HarnessSelection|QualityRecordWire|ServiceHarness|Leaf)' -count=1 -timeout=3m`
+- `make check-go-style`: 9303 declarations, ceiling seven, 208 exact debts, one external exception.
 
 ## Risks and Follow-ups
 

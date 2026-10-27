@@ -1,4 +1,5 @@
-package core
+// Package host owns executable admission and host execution policy over retained bindings.
+package host
 
 import (
 	"crypto/sha256"
@@ -44,7 +45,7 @@ func FreezeHarnessExecutable(command []string) (harnesscore.Executable, error) {
 	retained := slices.Clone(command)
 	retained[0] = program
 
-	hash, err := harnessExecutableHash(program)
+	hash, err := HarnessExecutableHash(program)
 	if err != nil {
 		return harnesscore.Executable{}, err
 	}
@@ -54,7 +55,8 @@ func FreezeHarnessExecutable(command []string) (harnesscore.Executable, error) {
 	return harnesscore.Executable{Reference: harnesscore.ExecutableRef{Hash: hash, CommandHash: contenthash.Sum(data)}, Command: retained}, err
 }
 
-func harnessExecutableHash(program string) (string, error) {
+// HarnessExecutableHash fingerprints a bounded regular executable without launching it.
+func HarnessExecutableHash(program string) (string, error) {
 	file, err := openHarnessExecutable(program)
 	if err != nil {
 		return "", errors.New("retained harness executable is unavailable")
@@ -86,7 +88,8 @@ func openHarnessExecutable(program string) (*os.File, error) {
 	return os.OpenFile(program, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
 }
 
-func checkHarnessCommandImage(binding harnesscore.Binding, command []string) error {
+// CheckHarnessCommandImage validates the retained absolute argv image without launching it.
+func CheckHarnessCommandImage(binding harnesscore.Binding, command []string) error {
 	if err := workflowstate.ValidateCommand(command); err != nil {
 		return err
 	}
@@ -103,12 +106,13 @@ func checkHarnessCommandImage(binding harnesscore.Binding, command []string) err
 	return nil
 }
 
-func checkHarnessExecutable(binding *harnesscore.Binding, command []string) error {
+// CheckHarnessExecutable checks admitted command identity and the current executable image.
+func CheckHarnessExecutable(binding *harnesscore.Binding, command []string) error {
 	if binding == nil {
 		return nil
 	}
 
-	if err := validateWorkflowHarnessPair(binding, command); err != nil {
+	if err := ValidateWorkflowHarnessPair(binding, command); err != nil {
 		return err
 	}
 
@@ -117,7 +121,7 @@ func checkHarnessExecutable(binding *harnesscore.Binding, command []string) erro
 		return workflowstate.ErrConflict
 	}
 
-	hash, err := harnessExecutableHash(resolved)
+	hash, err := HarnessExecutableHash(resolved)
 	if err != nil {
 		return err
 	}

@@ -9,6 +9,7 @@ import (
 
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -235,7 +236,7 @@ func validateGenerationOperation(operation HarnessGenerationOperation) error {
 	}
 
 	// The generic command-image check does no worker-role or live-profile IO.
-	return checkHarnessCommandImage(harnesscore.Binding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
+	return harnesshost.CheckHarnessCommandImage(harnesscore.Binding{ExecutableRef: operation.Binding.ExecutableRef}, []string{operation.program})
 }
 
 func validateGenerationResources(resources harness.GenerationResources, backend string) error {
@@ -278,7 +279,7 @@ func checkGenerationExecutable(operation HarnessGenerationOperation) error {
 		return errors.New("retained generation executable cannot be resolved")
 	}
 
-	hash, err := harnessExecutableHash(operation.program)
+	hash, err := harnesshost.HarnessExecutableHash(operation.program)
 	if err != nil {
 		return err
 	}

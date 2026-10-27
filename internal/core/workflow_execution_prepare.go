@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -91,7 +92,7 @@ func (s *WorkflowStore) workflowTaskInput(ctx context.Context, run workflowInvoc
 
 	input := WorkflowTaskInput{Schema: "chr-task-input/v1", InvocationID: run.ID, AttemptID: attempt.ID, Generation: attempt.Generation, TaskKey: record.Task.Key, InputRevision: attempt.InputRevision, SourceHash: record.SourceHash, ContractHash: record.Task.ContractHash, Body: string(record.Body), Target: run.ExecutionSelection().Target, Lane: *run.Lane, Worker: slices.Clone(worker)}
 	if run.HarnessBinding != nil && attempt.Purpose == "" {
-		input.HarnessBinding = cloneHarnessBinding(run.HarnessBinding)
+		input.HarnessBinding = harnesscore.CloneHarnessBinding(run.HarnessBinding)
 		input.Schema = "chr-task-input/v2"
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -98,7 +99,7 @@ func workflowRetainedEntryRequest(request WorkflowStartRequest, run WorkflowInvo
 	}
 
 	if request.HarnessBinding == nil {
-		request.HarnessBinding = cloneHarnessBinding(run.HarnessBinding)
+		request.HarnessBinding = harnesscore.CloneHarnessBinding(run.HarnessBinding)
 	}
 
 	request.Selection.Target = run.Selection.Target

@@ -1,41 +1,14 @@
 package core
 
 import (
-	"errors"
-
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 )
-
-func cloneHarnessBinding(binding *harnesscore.Binding) *harnesscore.Binding {
-	if binding == nil {
-		return nil
-	}
-
-	copy := *binding
-
-	return &copy
-}
-
-func validateWorkflowHarnessPair(binding *harnesscore.Binding, command []string) error {
-	if binding == nil {
-		if len(command) != 0 {
-			return errors.New("unbound workflow cannot retain a harness command")
-		}
-
-		return nil
-	}
-
-	if err := harnesscore.ValidateBinding(*binding); err != nil {
-		return err
-	}
-
-	return checkHarnessCommandImage(*binding, command)
-}
 
 func validateWorkflowRequestedHarness(binding *harnesscore.Binding, command []string) error {
 	if binding != nil && len(command) == 0 {
 		return harnesscore.ValidateBinding(*binding)
 	}
 
-	return validateWorkflowHarnessPair(binding, command)
+	return harnesshost.ValidateWorkflowHarnessPair(binding, command)
 }

@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
@@ -124,7 +125,7 @@ func prepareLegacyAPIGeneration(config core.WorkspaceConfig, purpose, model stri
 }
 
 func prepareCodexGenerationBinding(selection harnesscore.Selection, program string) (core.HarnessGenerationPreparation, error) {
-	executable, err := core.FreezeHarnessExecutable([]string{program})
+	executable, err := harnesshost.FreezeHarnessExecutable([]string{program})
 	if err != nil {
 		return core.HarnessGenerationPreparation{}, err
 	}
@@ -226,7 +227,7 @@ func preparePiGenerationBinding(selection harnesscore.Selection, resolved resolv
 		return core.HarnessGenerationPreparation{}, err
 	}
 
-	executable, err := core.FreezeHarnessExecutable([]string{resolved.Executable})
+	executable, err := harnesshost.FreezeHarnessExecutable([]string{resolved.Executable})
 	if err != nil {
 		return core.HarnessGenerationPreparation{}, err
 	}

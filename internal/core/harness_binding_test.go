@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness"
@@ -59,7 +60,7 @@ func TestHarnessBindingPending(t *testing.T) {
 func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessResolver {
 	t.Helper()
 
-	executable, err := FreezeHarnessExecutable(command)
+	executable, err := harnesshost.FreezeHarnessExecutable(command)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +183,7 @@ func TestHarnessBindingRejects(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			run.HarnessBinding = cloneHarnessBinding(run.HarnessBinding)
+			run.HarnessBinding = harnesscore.CloneHarnessBinding(run.HarnessBinding)
 
 			switch change {
 			case "hash":
