@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
 type telegramModelClaim struct {
@@ -46,5 +48,5 @@ func acquireTelegramModelSlot(env TelegramStateDirectory, botID int64) (*os.File
 		}
 	}
 
-	return nil, ErrStructuredModelCapacity
+	return nil, modelcore.ErrCapacity
 }

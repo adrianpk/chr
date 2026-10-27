@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
 func telegramAuthoringModelRequest() StructuredModelRequest {
@@ -81,7 +83,7 @@ func TestTelegramAuthoringModelCapacity(t *testing.T) {
 		<-entered
 	}
 
-	if _, err := provider.InvokeStructuredModel(t.Context(), telegramAuthoringModelRequest()); !errors.Is(err, ErrStructuredModelCapacity) {
+	if _, err := provider.InvokeStructuredModel(t.Context(), telegramAuthoringModelRequest()); !errors.Is(err, modelcore.ErrCapacity) {
 		t.Errorf("third request err=%v", err)
 	}
 
@@ -97,7 +99,7 @@ func TestTelegramAuthoringModelCapacity(t *testing.T) {
 	shortCtx, shortCancel := context.WithTimeout(t.Context(), time.Nanosecond)
 	defer shortCancel()
 
-	if _, err := provider.InvokeStructuredModel(shortCtx, telegramAuthoringModelRequest()); err == nil || errors.Is(err, ErrStructuredModelCapacity) {
+	if _, err := provider.InvokeStructuredModel(shortCtx, telegramAuthoringModelRequest()); err == nil || errors.Is(err, modelcore.ErrCapacity) {
 		t.Fatalf("released slot err=%v", err)
 	}
 }

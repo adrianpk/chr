@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -41,7 +42,7 @@ max_attempts: 3
 
 func TestPlanProvingSandboxRunRendersDockerCommands(t *testing.T) {
 	projectDir := newTestProvingProject(t)
-	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	objectivePath := filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 
 	result, err := PlanProvingSandboxRun(projectDir, objectivePath, codex.Runner{})
 	if err != nil {
@@ -69,7 +70,7 @@ func TestPlanProvingSandboxRunRendersDockerCommands(t *testing.T) {
 
 func TestRunProvingSandboxDryRunDoesNotExecuteCommands(t *testing.T) {
 	projectDir := newTestProvingProject(t)
-	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	objectivePath := filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 	executor := &recordingHarnessExecutor{}
 
 	result, err := RunProvingSandbox(context.Background(), ProvingSandboxRunOptions{
@@ -94,7 +95,7 @@ func TestRunProvingSandboxDryRunDoesNotExecuteCommands(t *testing.T) {
 
 func TestRenderProvingWorkerContextIncludesObjective(t *testing.T) {
 	projectDir := newTestProvingProject(t)
-	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	objectivePath := filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 
 	result, err := PlanProvingSandboxRun(projectDir, objectivePath, codex.Runner{})
 	if err != nil {
@@ -116,7 +117,7 @@ func TestRenderProvingWorkerContextIncludesObjective(t *testing.T) {
 
 func TestRunProvingValidationCapturesFailure(t *testing.T) {
 	projectDir := newTestProvingProject(t)
-	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	objectivePath := filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 	writeTestFile(t, filepath.Join(projectDir, "Makefile"), `.PHONY: compile lint test verify
 compile:
 	@true
@@ -158,7 +159,7 @@ verify:
 
 func TestRunProvingRalphLoopStopsOnValidationPass(t *testing.T) {
 	projectDir := newTestProvingProject(t)
-	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	objectivePath := filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 	executor := &recordingHarnessExecutor{}
 	validations := 0
 
@@ -212,7 +213,7 @@ func TestRunProvingRalphLoopStopsOnValidationPass(t *testing.T) {
 
 func TestRunProvingRalphLoopFeedsFailureIntoNextAttempt(t *testing.T) {
 	projectDir := newTestProvingProject(t)
-	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	objectivePath := filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 	executor := &recordingHarnessExecutor{}
 	validations := 0
 
@@ -272,7 +273,7 @@ func TestRunProvingRalphLoopFeedsFailureIntoNextAttempt(t *testing.T) {
 
 func TestRunProvingRalphLoopStopsOnRepeatedFailure(t *testing.T) {
 	projectDir := newTestProvingProject(t)
-	objectivePath := filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
+	objectivePath := filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md")
 
 	result, err := RunProvingRalphLoop(context.Background(), ProvingRalphLoopOptions{
 		Worker:        codex.Runner{},
@@ -311,7 +312,7 @@ func newTestProvingProject(t *testing.T) string {
 	t.Helper()
 
 	dir := t.TempDir()
-	writeTestFile(t, filepath.Join(dir, DirectoryName, "config.yml"), `version: 1
+	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, "config.yml"), `version: 1
 workspace_root: .chr
 canonical_assets: markdown
 tickets:
@@ -323,9 +324,9 @@ runtime:
   artifact_dir: ops/default/run
   validation_command: make verify
 `)
-	writeTestFile(t, filepath.Join(dir, DirectoryName, UserDirectoryName, "runtime", "agent", "Dockerfile"), "FROM golang:1.22-bookworm\n")
-	writeTestFile(t, filepath.Join(dir, DirectoryName, UserDirectoryName, "tickets", "TODO-1-fix-task-id-reuse.md"), "# Ticket\n")
-	writeTestFile(t, filepath.Join(dir, DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md"), `---
+	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, UserDirectoryName, "runtime", "agent", "Dockerfile"), "FROM golang:1.22-bookworm\n")
+	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, UserDirectoryName, "tickets", "TODO-1-fix-task-id-reuse.md"), "# Ticket\n")
+	writeTestFile(t, filepath.Join(dir, workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md"), `---
 objective_id: proving-TODO-1
 ticket_key: TODO-1
 kind: bugfix

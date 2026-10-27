@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestServiceRefreshWorkspaceBuildsGraph(t *testing.T) {
@@ -1055,7 +1056,7 @@ func writeServiceWorkspaceQueryFixture(t *testing.T, projectDir string) {
 		Name:        "Blog Publishing",
 		Description: "Publish articles.",
 	}))
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, core.UserDirectoryName, "specs", "blog-spec.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, core.UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "accepted"
 case: "blog"
@@ -1063,7 +1064,7 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, core.UserDirectoryName, "plans", "project-plan.md"), `---
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, core.UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---
@@ -1126,7 +1127,7 @@ func writeServiceWorkspaceFile(t *testing.T, path, content string) {
 }
 
 func canonicalServiceWorkspaceFixturePath(path string) string {
-	marker := filepath.Join(core.DirectoryName, core.UserDirectoryName)
+	marker := filepath.Join(workspacecore.DirectoryName, core.UserDirectoryName)
 
 	parts := strings.Split(filepath.ToSlash(path), filepath.ToSlash(marker)+"/")
 	if len(parts) != 2 {

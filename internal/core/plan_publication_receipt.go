@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -49,7 +50,7 @@ func LookupPlanPublication(ctx context.Context, projectDir string, operation Pla
 }
 
 func (r *fileAuthoringSessionRepository) planOperationDigest(operation PlanPublicationOperation) (string, error) {
-	if err := validateAuthoringSessionID(operation.ID); err != nil {
+	if err := authoringstate.ValidateSessionID(operation.ID); err != nil {
 		return "", err
 	}
 

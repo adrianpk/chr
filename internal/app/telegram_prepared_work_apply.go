@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -43,7 +44,7 @@ func (r telegramReceiver) continuePreparedWork(ctx context.Context, request core
 	}
 
 	request = retained
-	if prepared.Scope.Intent == core.AuthoringIntentDevelop && prepared.Authorization == nil {
+	if prepared.Scope.Intent == authoringstate.IntentDevelop && prepared.Authorization == nil {
 		return r.offerPreparedWorkScope(ctx, request, prepared)
 	}
 

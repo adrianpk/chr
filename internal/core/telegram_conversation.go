@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
@@ -372,7 +373,7 @@ func telegramConversationID(update TelegramReceivedUpdate) string {
 
 func (op telegramConversationTransaction) developmentInstructionRef(c TelegramConversation) string {
 	command := strings.Fields(op.input.Update.Text)
-	if c.Intent != string(AuthoringIntentDevelop) || len(command) < 2 || command[0] != "/develop" {
+	if c.Intent != string(authoringstate.IntentDevelop) || len(command) < 2 || command[0] != "/develop" {
 		return ""
 	}
 

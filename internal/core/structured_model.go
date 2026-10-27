@@ -6,14 +6,9 @@ import (
 	"errors"
 	"time"
 
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	"forge.adrianpk.com/chr/internal/harness"
 )
-
-// ErrStructuredModelCapacity indicates both bounded provider slots are occupied.
-var ErrStructuredModelCapacity = errors.New("structured model capacity exhausted")
-
-// ErrStructuredModelOutput identifies malformed or oversized provider output.
-var ErrStructuredModelOutput = errors.New("invalid or oversized structured model output")
 
 // StructuredModelRequest supplies bounded data and a caller-owned output schema.
 // It cannot select tools, commands, credentials or execution authority.
@@ -67,7 +62,7 @@ func (p *ConfiguredStructuredModel) InvokeStructuredModel(ctx context.Context, r
 	case p.slots <- struct{}{}:
 		defer func() { <-p.slots }()
 	default:
-		return nil, ErrStructuredModelCapacity
+		return nil, modelcore.ErrCapacity
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, request.timeout())
@@ -92,7 +87,7 @@ func (p *ConfiguredStructuredModel) InvokeStructuredModel(ctx context.Context, r
 	}
 
 	if len(output) > 65536 || !json.Valid(output) {
-		return nil, ValidateStructuredModelOutput(ctx, request, ErrStructuredModelOutput)
+		return nil, ValidateStructuredModelOutput(ctx, request, modelcore.ErrOutput)
 	}
 
 	return json.RawMessage(output), nil

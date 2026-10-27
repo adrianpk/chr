@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestInvokeQuizModelValidatesRequestAndResponse(t *testing.T) {
@@ -1535,7 +1537,7 @@ func decodeOpenAIQuizRequestBody(t *testing.T, body []byte) (openAIResponsesRequ
 func readLLMTraceEvents(t *testing.T, projectDir string) []map[string]any {
 	t.Helper()
 
-	path := filepath.Join(projectDir, DirectoryName, UserDirectoryName, "log", "llm", defaultLLMTraceFileName)
+	path := filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "log", "llm", defaultLLMTraceFileName)
 
 	content, err := os.ReadFile(path)
 	if err != nil {

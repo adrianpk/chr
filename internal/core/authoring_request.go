@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -23,7 +24,7 @@ func normalizeAuthoringRequest(request AuthoringContinuationRequest) (AuthoringC
 		request.SessionID = "author-" + contenthash.Sum([]byte(request.Binding.RequestID))[:24]
 	}
 
-	if err := validateAuthoringSessionID(request.SessionID); err != nil {
+	if err := authoringstate.ValidateSessionID(request.SessionID); err != nil {
 		return request, "", err
 	}
 

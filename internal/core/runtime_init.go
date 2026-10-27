@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // RuntimeAssets defines a package boundary interface.
@@ -66,7 +67,7 @@ func (r *runtimeAssets) Init(ctx context.Context, opts RuntimeInitOptions) (Runt
 			continue
 		}
 
-		rel := filepath.Join(DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
+		rel := filepath.Join(workspacecore.DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
 		target := filepath.Join(absProjectDir, rel)
 
 		created, err := createFile(target, file.content, opts.DryRun)

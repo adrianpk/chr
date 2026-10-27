@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -27,7 +28,7 @@ func TestStructuredHarnessOutput(t *testing.T) {
 			provider.Runner = &fakeAgentRunner{Result: harness.AgentRunResult{Output: []byte(test.output)}}
 
 			output, err := provider.InvokeStructuredModel(t.Context(), structuredHarnessRequest(t))
-			if errors.Is(err, ErrStructuredModelOutput) != test.invalid || (!test.invalid && err != nil) {
+			if errors.Is(err, modelcore.ErrOutput) != test.invalid || (!test.invalid && err != nil) {
 				t.Fatalf("output = %q, error = %v", output, err)
 			}
 

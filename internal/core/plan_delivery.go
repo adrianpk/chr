@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -120,7 +121,7 @@ func quizModelPlanDeliveryResponse(request QuizModelRequest, output []byte) (Qui
 	var contracts GeneratedWorkflowPlan
 
 	if len(output) > WorkflowFileLimit {
-		return QuizModelResponse{}, ErrStructuredModelOutput
+		return QuizModelResponse{}, modelcore.ErrOutput
 	}
 
 	if err := decodeAuthoringState(extractJSONObject(output), &contracts); err != nil {

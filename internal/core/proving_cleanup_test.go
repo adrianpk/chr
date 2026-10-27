@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
 
@@ -27,7 +28,7 @@ func TestProvingLogFailure(t *testing.T) {
 		t.Run(item.name, func(t *testing.T) {
 			result, err := RunProvingSandbox(t.Context(), ProvingSandboxRunOptions{
 				Worker: codex.Runner{}, ProjectDir: newTestProvingProject(t),
-				ObjectivePath: filepath.Join(DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md"),
+				ObjectivePath: filepath.Join(workspacecore.DirectoryName, "proving", "objectives", "TODO-1-fix-task-id-reuse.md"),
 				Executor:      closedProvingLogExecutor{err: item.err},
 			})
 			if !errors.Is(err, os.ErrClosed) || item.err != nil && !errors.Is(err, item.err) {

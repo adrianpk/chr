@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Apply re-observes source membership, body, metadata and project identity inside
@@ -154,7 +155,7 @@ func TestProjectDumpJournalPaths(t *testing.T) {
 	}{
 		{authoringReceiptRef("operation"), true, true},
 		{"ops/default/dump/00000-context/artifact.md", true, true},
-		{filepath.Join(DirectoryName, UserDirectoryName, "project.md"), false, true},
+		{filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), false, true},
 		{history, false, true},
 		{"ops/default/spec/00000-context/files/history/" + strings.Repeat("a", 64) + "/artifact.md", false, false},
 		{"README.md", false, false},

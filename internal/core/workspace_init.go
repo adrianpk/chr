@@ -10,11 +10,10 @@ import (
 	"strings"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
-	// DirectoryName defines a package boundary constant.
-	DirectoryName = ".chr"
 	// UserDirectoryName is the default pseudo-user workspace directory name.
 	UserDirectoryName = "default"
 )
@@ -91,7 +90,7 @@ var directories = []string{
 
 // UserRelativePath executes the corresponding package operation.
 func UserRelativePath(elements ...string) string {
-	parts := append([]string{DirectoryName, UserDirectoryName}, elements...)
+	parts := append([]string{workspacecore.DirectoryName, UserDirectoryName}, elements...)
 
 	return filepath.ToSlash(filepath.Join(parts...))
 }
@@ -113,7 +112,7 @@ func (w *workspace) Init(ctx context.Context, opts InitOptions) (InitResult, err
 		return InitResult{}, err
 	}
 
-	result := InitResult{Root: filepath.Join(absProjectDir, DirectoryName)}
+	result := InitResult{Root: filepath.Join(absProjectDir, workspacecore.DirectoryName)}
 
 	_, err = os.Stat(result.Root)
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -152,7 +151,7 @@ func initDirectories(ctx context.Context, projectDir string, dryRun bool, result
 			return err
 		}
 
-		rel := filepath.Join(DirectoryName, filepath.FromSlash(dir))
+		rel := filepath.Join(workspacecore.DirectoryName, filepath.FromSlash(dir))
 		target := filepath.Join(projectDir, rel)
 
 		created, err := ensureDir(target, dryRun)
@@ -185,7 +184,7 @@ func (w *workspace) initWorkspaceFiles(ctx context.Context, input workspaceFileI
 			return err
 		}
 
-		rel := filepath.Join(DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
+		rel := filepath.Join(workspacecore.DirectoryName, UserDirectoryName, filepath.FromSlash(file.path))
 		target := filepath.Join(input.ProjectDir, rel)
 		// Absence is an existing policy choice, not permission to enable version one.
 		if file.path == "config.yml" && !input.NewProject {

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -18,7 +19,7 @@ type AuthoringWorkRequest struct {
 	SessionID          string                        `json:"session_id"`
 	ExpectedRevision   int64                         `json:"expected_revision"`
 	ExpectedSourceHash string                        `json:"expected_source_hash"`
-	Intent             core.AuthoringIntent          `json:"intent"`
+	Intent             authoringstate.Intent         `json:"intent"`
 	Instruction        string                        `json:"instruction"`
 }
 
@@ -185,7 +186,7 @@ func (s service) guardPreparedAuthoringSource(ctx context.Context, scope core.Au
 }
 
 func guardAuthoringWorkSource(snapshot core.AuthoringSnapshot, request AuthoringWorkRequest, projectID string) error {
-	if request.Intent != core.AuthoringIntentPrepare && request.Intent != core.AuthoringIntentDevelop {
+	if request.Intent != authoringstate.IntentPrepare && request.Intent != authoringstate.IntentDevelop {
 		return errors.New("explanation cannot prepare native work")
 	}
 

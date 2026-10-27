@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestReportListerListsProjectReports(t *testing.T) {
@@ -125,7 +126,7 @@ func TestReportListerUsesActiveOpsNamespace(t *testing.T) {
 		"execution-report.md",
 	), "# Execution Report\n\n## Summary\n\n- execution: adrian-exec\n")
 	writeReportListingFile(t, projectDir, filepath.Join(
-		DirectoryName,
+		workspacecore.DirectoryName,
 		UserDirectoryName,
 		"runtime",
 		"runs",

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -129,7 +130,7 @@ func (r *fileAuthoringSessionRepository) reconcileProjectDump(ctx context.Contex
 }
 
 func validateProjectDumpReconciliation(request ProjectDumpReconciliationRequest) error {
-	if err := validateAuthoringSessionID(request.OperationID); err != nil {
+	if err := authoringstate.ValidateSessionID(request.OperationID); err != nil {
 		return fmt.Errorf("dump operation identity: %w", err)
 	}
 

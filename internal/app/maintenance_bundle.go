@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	"forge.adrianpk.com/chr/internal/core/database"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (factory commandFactory) maintenanceBundleCommand() *cli.Command {
@@ -126,7 +127,7 @@ func collectDiagnosticBundleRegistry(ctx context.Context, env core.UserEnvironme
 	diagnostics, err := projectcore.NewDiagnosticsService(
 		registry,
 		projectcore.NewActiveStore(env),
-		core.DirectoryName,
+		workspacecore.DirectoryName,
 	).ListDiagnostics(ctx)
 	if err != nil {
 		return nil, err

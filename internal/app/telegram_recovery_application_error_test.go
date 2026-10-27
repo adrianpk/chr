@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
 // TestTelegramRecoveryApplicationError keeps a real checkpoint failure visible
@@ -23,8 +23,8 @@ func TestTelegramRecoveryApplicationError(t *testing.T) {
 		{"checkpoint", checkpoint, checkpoint},
 		{"joined", errors.Join(context.Canceled, checkpoint), checkpoint},
 		{"wrapped join", fmt.Errorf("application call: %w", errors.Join(context.Canceled, checkpoint)), checkpoint},
-		{"deferred join", errors.Join(context.Canceled, core.ErrStructuredModelCapacity), nil},
-		{"checkpoint and wait", errors.Join(context.Canceled, core.ErrStructuredModelCapacity, checkpoint), checkpoint},
+		{"deferred join", errors.Join(context.Canceled, modelcore.ErrCapacity), nil},
+		{"checkpoint and wait", errors.Join(context.Canceled, modelcore.ErrCapacity, checkpoint), checkpoint},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			host := newTelegramApplicationHost(telegramReceiver{})

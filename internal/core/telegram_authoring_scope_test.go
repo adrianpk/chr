@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -14,7 +15,7 @@ func telegramAuthoringScope(t *testing.T) AuthoringWorkScope {
 
 	digest := contenthash.Sum([]byte("canonical source"))
 
-	scope, err := SealAuthoringWorkScope(AuthoringWorkScope{Binding: workflowstate.MutationBinding{RequestID: "description", Operator: "maintainer"}, Intent: AuthoringIntentDevelop, Instruction: "Develop the bounded retry fix.", ProjectID: "example", Namespace: "team", SessionID: "session", SessionRef: ".chr/authoring/sessions/session/session.md", SessionRevision: 3, SourceHash: digest, DescriptionRef: "ops/team/spec/00000-source/artifact.md", DescriptionHash: digest, ContractHash: digest, RecordHash: digest})
+	scope, err := SealAuthoringWorkScope(AuthoringWorkScope{Binding: workflowstate.MutationBinding{RequestID: "description", Operator: "maintainer"}, Intent: authoringstate.IntentDevelop, Instruction: "Develop the bounded retry fix.", ProjectID: "example", Namespace: "team", SessionID: "session", SessionRef: ".chr/authoring/sessions/session/session.md", SessionRevision: 3, SourceHash: digest, DescriptionRef: "ops/team/spec/00000-source/artifact.md", DescriptionHash: digest, ContractHash: digest, RecordHash: digest})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,8 +52,8 @@ func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 			a.ScopeHash = contenthash.Sum([]byte("changed"))
 		}},
 		{"operator", func(_ *AuthoringWorkScope, a *AuthoringWorkAuthorization) { a.Binding.Operator = "other" }},
-		{"prepare", func(s *AuthoringWorkScope, _ *AuthoringWorkAuthorization) { s.Intent = AuthoringIntentPrepare }},
-		{"explain", func(s *AuthoringWorkScope, _ *AuthoringWorkAuthorization) { s.Intent = AuthoringIntentExplain }},
+		{"prepare", func(s *AuthoringWorkScope, _ *AuthoringWorkAuthorization) { s.Intent = authoringstate.IntentPrepare }},
+		{"explain", func(s *AuthoringWorkScope, _ *AuthoringWorkAuthorization) { s.Intent = authoringstate.IntentExplain }},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -86,7 +87,7 @@ func TestTelegramAuthoringScopeAuthority(t *testing.T) {
 // without treating it as development authority.
 func TestTelegramAuthoringScopePreparation(t *testing.T) {
 	scope := telegramAuthoringScope(t)
-	scope.Intent = AuthoringIntentPrepare
+	scope.Intent = authoringstate.IntentPrepare
 
 	scope, err := SealAuthoringWorkScope(scope)
 	if err != nil || ValidateAuthoringWorkAuthorization(scope, nil) != nil {

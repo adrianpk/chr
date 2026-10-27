@@ -12,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Actual authoring admission, provider failure and a rebuilt service retain the
@@ -166,7 +167,7 @@ func checkGenerationFixtureModels(t *testing.T, project string, expected map[str
 func checkGenerationAuthoringAttempts(t *testing.T, project, id string, attempts int) {
 	t.Helper()
 
-	paths, err := filepath.Glob(filepath.Join(project, core.DirectoryName, "authoring", "requests", "*.json"))
+	paths, err := filepath.Glob(filepath.Join(project, workspacecore.DirectoryName, "authoring", "requests", "*.json"))
 	if err != nil {
 		t.Fatal(err)
 	}

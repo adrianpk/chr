@@ -25,6 +25,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/gate"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -1560,7 +1561,7 @@ func TestInitRejectsFileTarget(t *testing.T) {
 
 func TestMetadataProjectSetSavesProjectMetadata(t *testing.T) {
 	projectDir := t.TempDir()
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, ".keep"), "")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, ".keep"), "")
 
 	var stdout bytes.Buffer
 
@@ -1660,7 +1661,7 @@ func TestDumpNewAndShowUseServiceCommands(t *testing.T) {
 
 func TestMetadataCaseSetCreatesUseCaseMetadata(t *testing.T) {
 	projectDir := t.TempDir()
-	writeServiceWorkspaceFile(t, filepath.Join(projectDir, core.DirectoryName, ".keep"), "")
+	writeServiceWorkspaceFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, ".keep"), "")
 
 	var stdout bytes.Buffer
 
@@ -8613,7 +8614,7 @@ func newGateCLIGitProject(t *testing.T) string {
 	t.Helper()
 
 	projectDir := t.TempDir()
-	writeGateCLIFile(t, projectDir, filepath.Join(core.DirectoryName, ".keep"), "")
+	writeGateCLIFile(t, projectDir, filepath.Join(workspacecore.DirectoryName, ".keep"), "")
 	runGateCLIGit(t, projectDir, "init")
 
 	return projectDir

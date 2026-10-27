@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -54,7 +55,7 @@ func (s *TelegramReceiverStore) ResolveTelegramOperationModel(ctx context.Contex
 	}
 
 	if callErr == nil && (len(response) > 65536 || !json.Valid(response)) {
-		callErr = ErrStructuredModelOutput
+		callErr = modelcore.ErrOutput
 	}
 
 	finishCtx, finishCancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)

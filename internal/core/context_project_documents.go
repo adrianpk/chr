@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 var projectDocumentReferencePattern = regexp.MustCompile(`(?:^|[\s("'])((?:\.prj|docs|\.chr)/(?:[A-Za-z0-9._@=+,:;~/-]+)\.(?:md|markdown|txt|yml|yaml))(?:$|[\s)"',.])`)
@@ -54,7 +56,7 @@ func LoadProjectDocumentContext(opts ProjectDocumentContextOptions) (ProjectDocu
 
 	return ProjectDocumentContext{
 		ProjectDir:        projectDir,
-		WorkspaceDir:      filepath.Join(projectDir, DirectoryName),
+		WorkspaceDir:      filepath.Join(projectDir, workspacecore.DirectoryName),
 		Ticket:            ticket,
 		TicketDocument:    ticketDocument,
 		ReferencedDocs:    referencedDocs,

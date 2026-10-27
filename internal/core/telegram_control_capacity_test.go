@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -198,7 +199,7 @@ func checkTelegramControlModelWait(t *testing.T, f *telegramConversationFixture,
 
 		return json.RawMessage(`{}`), nil
 	})
-	if !errors.Is(err, ErrStructuredModelCapacity) {
+	if !errors.Is(err, modelcore.ErrCapacity) {
 		t.Fatal("third model call bypassed shared capacity", err)
 	}
 

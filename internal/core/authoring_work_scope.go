@@ -8,19 +8,10 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
-)
-
-// AuthoringIntent separates a requested explanation, preparation and development.
-type AuthoringIntent string
-
-// Only an explicit development decision can authorize a prepared scope.
-const (
-	AuthoringIntentExplain AuthoringIntent = "explain"
-	AuthoringIntentPrepare AuthoringIntent = "prepare"
-	AuthoringIntentDevelop AuthoringIntent = "develop"
 )
 
 // AuthoringWorkScope binds a proposed native description to canonical inputs.
@@ -28,7 +19,7 @@ const (
 type AuthoringWorkScope struct {
 	Schema          string                        `json:"schema"`
 	Binding         workflowstate.MutationBinding `json:"binding"`
-	Intent          AuthoringIntent               `json:"intent"`
+	Intent          authoringstate.Intent         `json:"intent"`
 	Instruction     string                        `json:"instruction"`
 	ProjectID       string                        `json:"project_id"`
 	Namespace       string                        `json:"namespace"`
@@ -88,7 +79,7 @@ func AuthorizeAuthoringWork(scope AuthoringWorkScope, decision workflowstate.Mut
 		return AuthoringWorkAuthorization{}, err
 	}
 
-	if scope.Intent != AuthoringIntentDevelop || decision.Operator != scope.Binding.Operator || observed != scope.Hash {
+	if scope.Intent != authoringstate.IntentDevelop || decision.Operator != scope.Binding.Operator || observed != scope.Hash {
 		return AuthoringWorkAuthorization{}, workflowstate.ErrConflict
 	}
 
@@ -102,7 +93,7 @@ func ValidateAuthoringWorkAuthorization(scope AuthoringWorkScope, authority *Aut
 		return err
 	}
 
-	if scope.Intent == AuthoringIntentPrepare {
+	if scope.Intent == authoringstate.IntentPrepare {
 		if authority != nil {
 			return workflowstate.ErrConflict
 		}
@@ -127,7 +118,7 @@ func validateAuthoringWorkScope(scope AuthoringWorkScope) error {
 		return err
 	}
 
-	if scope.Intent != AuthoringIntentPrepare && scope.Intent != AuthoringIntentDevelop {
+	if scope.Intent != authoringstate.IntentPrepare && scope.Intent != authoringstate.IntentDevelop {
 		return errors.New("only preparation or development can describe native work")
 	}
 
@@ -154,7 +145,7 @@ func validateAuthoringWorkBounds(scope AuthoringWorkScope) error {
 		return errors.New("invalid bounded authoring work scope")
 	}
 
-	return validateAuthoringSessionID(scope.SessionID)
+	return authoringstate.ValidateSessionID(scope.SessionID)
 }
 
 func validateAuthoringWorkPaths(scope AuthoringWorkScope) error {

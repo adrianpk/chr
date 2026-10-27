@@ -5,7 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
@@ -42,7 +44,7 @@ func validAuthoringJournalVersionPath(schema, reference string) bool {
 		return false
 	}
 
-	if reference == filepath.Join(DirectoryName, UserDirectoryName, "project.md") {
+	if reference == filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md") {
 		return true
 	}
 
@@ -51,11 +53,11 @@ func validAuthoringJournalVersionPath(schema, reference string) bool {
 
 func validQuizRuntimeJournalPath(reference string) bool {
 	parts := strings.Split(filepath.ToSlash(reference), "/")
-	if len(parts) != 5 || parts[0] != DirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "tmp" || parts[3] != "quiz-runtime" {
+	if len(parts) != 5 || parts[0] != workspacecore.DirectoryName || !opsnamespace.Valid(parts[1]) || parts[2] != "tmp" || parts[3] != "quiz-runtime" {
 		return false
 	}
 
-	return strings.HasSuffix(parts[4], ".json") && validateAuthoringSessionID(strings.TrimSuffix(parts[4], ".json")) == nil
+	return strings.HasSuffix(parts[4], ".json") && authoringstate.ValidateSessionID(strings.TrimSuffix(parts[4], ".json")) == nil
 }
 
 func validProjectDumpHistoryPath(reference string) bool {

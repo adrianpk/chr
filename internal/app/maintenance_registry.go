@@ -8,8 +8,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (factory commandFactory) maintenanceRegistryCommand() *cli.Command {
@@ -82,7 +82,7 @@ func (factory commandFactory) runMaintenanceRegistryStatus(ctx context.Context, 
 	diagnostics, err := projectcore.NewDiagnosticsService(
 		registry,
 		projectcore.NewActiveStore(env),
-		core.DirectoryName,
+		workspacecore.DirectoryName,
 	).ListDiagnostics(ctx)
 	if err != nil {
 		return err

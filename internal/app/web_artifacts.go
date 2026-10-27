@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/tui"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -468,7 +469,7 @@ func caseRelativePath(projectDir string, metadata core.CaseMetadata) string {
 		return filepath.ToSlash(relativePath)
 	}
 
-	return filepath.ToSlash(filepath.Join(core.DirectoryName, core.UserDirectoryName, "cases", metadata.Slug+".md"))
+	return filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, core.UserDirectoryName, "cases", metadata.Slug+".md"))
 }
 
 func firstNonEmptyString(values ...string) string {

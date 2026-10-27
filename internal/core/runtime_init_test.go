@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 	"testing/fstest"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
@@ -19,7 +21,7 @@ func TestRuntimeInitCreatesRuntimeTemplate(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	if result.Root != filepath.Join(dir, DirectoryName, UserDirectoryName, "runtime") {
+	if result.Root != filepath.Join(dir, workspacecore.DirectoryName, UserDirectoryName, "runtime") {
 		t.Fatalf("Root = %q, want runtime root", result.Root)
 	}
 
@@ -102,7 +104,7 @@ func newTestRuntimeAssets() RuntimeAssets {
 func createWorkspaceRoot(t *testing.T, dir string) {
 	t.Helper()
 
-	err := os.Mkdir(filepath.Join(dir, DirectoryName), 0o755)
+	err := os.Mkdir(filepath.Join(dir, workspacecore.DirectoryName), 0o755)
 	if err != nil {
 		t.Fatalf("create workspace root: %v", err)
 	}

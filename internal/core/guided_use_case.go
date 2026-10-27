@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
@@ -155,7 +156,7 @@ func parseGuidedUseCase(value string) (*GuidedUseCaseState, error) {
 }
 
 func guidedOperation(command GuidedUseCaseCommand) (GuidedUseCaseOperation, error) {
-	if err := validateAuthoringSessionID(command.OperationID); err != nil {
+	if err := authoringstate.ValidateSessionID(command.OperationID); err != nil {
 		return GuidedUseCaseOperation{}, err
 	}
 

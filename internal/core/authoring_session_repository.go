@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // AuthoringSessionsDirectory defines a package boundary constant.
@@ -51,7 +53,7 @@ func NewAuthoringSessionRepository(projectDir string) AuthoringSessionRepository
 
 // AuthoringSessionLayout executes the corresponding package operation.
 func AuthoringSessionLayout(projectDir, id string) AuthoringSessionPaths {
-	sessionDir := filepath.Join(projectDir, DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), id)
+	sessionDir := filepath.Join(projectDir, workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), id)
 
 	return AuthoringSessionPaths{
 		SessionDir:     sessionDir,
@@ -167,7 +169,7 @@ func (r *fileAuthoringSessionRepository) getSession(ctx context.Context, id stri
 
 // ListSessions lists the requested data.
 func (r *fileAuthoringSessionRepository) listSessions(ctx context.Context) ([]AuthoringSession, error) {
-	sessionsDir := filepath.Join(r.projectDir, DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory))
+	sessionsDir := filepath.Join(r.projectDir, workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory))
 	sessions := []AuthoringSession{}
 
 	visited := 0

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -80,7 +81,7 @@ func TestOpenAIDumpCurationProviderRecordsTracePayloads(t *testing.T) {
 		t.Fatalf("PolishedBody = %q", result.PolishedBody)
 	}
 
-	tracePath := filepath.Join(projectDir, core.DirectoryName, core.UserDirectoryName, "log", "llm", "llm.ndjson")
+	tracePath := filepath.Join(projectDir, workspacecore.DirectoryName, core.UserDirectoryName, "log", "llm", "llm.ndjson")
 
 	trace, err := os.ReadFile(tracePath)
 	if err != nil {

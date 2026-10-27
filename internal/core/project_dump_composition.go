@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (r *fileAuthoringSessionRepository) projectDumpImages(source ProjectDumpArtifact) (projectDumpFileImages, error) {
@@ -154,7 +155,7 @@ func (r *fileAuthoringSessionRepository) projectDumpReconciliationChanges(observ
 	project := observed.Project
 	project.ProjectDumpRef = preview.Destination
 	changes = append(changes, workflowFileChange{
-		Path: filepath.Join(DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project)),
+		Path: filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project)),
 	})
 
 	return projectDumpChanges{Changes: changes, Result: result}, nil

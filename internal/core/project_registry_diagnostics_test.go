@@ -8,6 +8,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestProjectRegistryDiagnosticsReportsProjectState(t *testing.T) {
@@ -36,7 +37,7 @@ func TestProjectRegistryDiagnosticsReportsProjectState(t *testing.T) {
 	diagnostics, err := projectcore.NewDiagnosticsService(
 		registry,
 		projectcore.NewActiveStore(env),
-		DirectoryName,
+		workspacecore.DirectoryName,
 	).ListDiagnostics(context.Background())
 	if err != nil {
 		t.Fatalf("ListDiagnostics returned error: %v", err)
@@ -93,7 +94,7 @@ func newDiagnosticProjectWorkspace(t *testing.T) string {
 
 	projectDir := t.TempDir()
 
-	err := os.Mkdir(filepath.Join(projectDir, DirectoryName), 0o755)
+	err := os.Mkdir(filepath.Join(projectDir, workspacecore.DirectoryName), 0o755)
 	if err != nil {
 		t.Fatalf("Mkdir returned error: %v", err)
 	}

@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TestInitWorkflowProfiles checks the shipped templates and their missing-field
@@ -36,7 +38,7 @@ func checkWorkflowProfile(t *testing.T, profile string) {
 		t.Fatal("dry run lost planned configuration", result, err)
 	}
 
-	assertNotExists(t, project, DirectoryName)
+	assertNotExists(t, project, workspacecore.DirectoryName)
 
 	options.DryRun = false
 	if _, err := workspace.Init(t.Context(), options); err != nil {

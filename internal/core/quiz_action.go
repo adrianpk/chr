@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -58,7 +59,7 @@ func validateQuizAction(request QuizActionRequest) error {
 		return err
 	}
 
-	if err := validateAuthoringSessionID(request.Binding.OperationID); err != nil {
+	if err := authoringstate.ValidateSessionID(request.Binding.OperationID); err != nil {
 		return err
 	}
 
@@ -96,7 +97,7 @@ func validateRetainedQuizState(state QuizRuntimeState) error {
 	}
 
 	if state.SchemaVersion == 2 {
-		if err := validateAuthoringSessionID(state.SessionID); err != nil {
+		if err := authoringstate.ValidateSessionID(state.SessionID); err != nil {
 			return err
 		}
 	}

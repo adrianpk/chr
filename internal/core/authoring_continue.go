@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -230,7 +231,7 @@ func authoringReceiptChange(binding authoringRequestBinding, result AuthoringCon
 
 func authoringProviderFailure(err error) string {
 	switch {
-	case errors.Is(err, ErrStructuredModelCapacity):
+	case errors.Is(err, modelcore.ErrCapacity):
 		return "provider_capacity"
 	case errors.Is(err, context.DeadlineExceeded):
 		return "provider_timeout"

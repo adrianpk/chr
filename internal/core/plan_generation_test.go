@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestArchiveGeneratedPlanCopiesCanonicalPlanWithArchiveMetadata(t *testing.T) {
@@ -72,7 +74,7 @@ func TestArchiveGeneratedPlanReturnsFalseWhenCanonicalPlanIsMissing(t *testing.T
 		t.Fatal("archived = true, want false")
 	}
 
-	archiveRoot := filepath.Join(projectDir, DirectoryName, PlanDirectory, "archive")
+	archiveRoot := filepath.Join(projectDir, workspacecore.DirectoryName, PlanDirectory, "archive")
 	if _, err := os.Stat(archiveRoot); !os.IsNotExist(err) {
 		t.Fatalf("archive root exists after missing archive: %v", err)
 	}

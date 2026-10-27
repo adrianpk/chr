@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -41,14 +42,14 @@ func telegramAuthoringWorkFixture(t *testing.T) (service, core.AuthoringContinua
 	return operations, created
 }
 
-func telegramAuthoringWorkRequest(result core.AuthoringContinuationResult, intent core.AuthoringIntent) AuthoringWorkRequest {
+func telegramAuthoringWorkRequest(result core.AuthoringContinuationResult, intent authoringstate.Intent) AuthoringWorkRequest {
 	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: "work-description", Operator: "maintainer"}, SessionID: result.Session.ID, ExpectedRevision: result.Session.Revision, ExpectedSourceHash: result.SourceHash, Intent: intent, Instruction: "Retain the retry ceiling and existing defaults."}
 }
 
 // TestTelegramAuthoringWorkPreparation materializes a real native backlog ticket
 // with canonical provenance and retained intent, without admitting an invocation.
 func TestTelegramAuthoringWorkPreparation(t *testing.T) {
-	for _, intent := range []core.AuthoringIntent{core.AuthoringIntentPrepare, core.AuthoringIntentDevelop} {
+	for _, intent := range []authoringstate.Intent{authoringstate.IntentPrepare, authoringstate.IntentDevelop} {
 		t.Run(string(intent), func(t *testing.T) {
 			operations, created := telegramAuthoringWorkFixture(t)
 
@@ -85,7 +86,7 @@ func TestTelegramAuthoringWorkPreparation(t *testing.T) {
 func telegramAuthoringWorkGrant(t *testing.T, operations service, prepared PreparedAuthoringWork) PreparedAuthoringWork {
 	t.Helper()
 
-	if prepared.Scope.Intent != core.AuthoringIntentDevelop {
+	if prepared.Scope.Intent != authoringstate.IntentDevelop {
 		return prepared
 	}
 
@@ -191,7 +192,7 @@ func TestTelegramAuthoringWorkGuards(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			operations, created := telegramAuthoringWorkFixture(t)
 
-			prepared, err := operations.PrepareAuthoringWork(t.Context(), telegramAuthoringWorkRequest(created, core.AuthoringIntentPrepare))
+			prepared, err := operations.PrepareAuthoringWork(t.Context(), telegramAuthoringWorkRequest(created, authoringstate.IntentPrepare))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -212,7 +213,7 @@ func TestTelegramAuthoringWorkGuards(t *testing.T) {
 	}
 
 	operations, created := telegramAuthoringWorkFixture(t)
-	if _, err := operations.PrepareAuthoringWork(t.Context(), telegramAuthoringWorkRequest(created, core.AuthoringIntentExplain)); err == nil {
+	if _, err := operations.PrepareAuthoringWork(t.Context(), telegramAuthoringWorkRequest(created, authoringstate.IntentExplain)); err == nil {
 		t.Fatal("explanation prepared native work")
 	}
 }
@@ -221,7 +222,7 @@ func TestTelegramAuthoringWorkGuards(t *testing.T) {
 // arguments even when a caller observes fresh sources and prepares another key.
 func TestTelegramAuthoringWorkFailedBinding(t *testing.T) {
 	operations, created := telegramAuthoringWorkFixture(t)
-	request := telegramAuthoringWorkRequest(created, core.AuthoringIntentPrepare)
+	request := telegramAuthoringWorkRequest(created, authoringstate.IntentPrepare)
 
 	prepared, err := operations.PrepareAuthoringWork(t.Context(), request)
 	if err != nil {

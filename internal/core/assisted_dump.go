@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -94,7 +95,7 @@ func normalizeAssistedDumpOperation(opts AssistedArtifactSynthesisOptions) (assi
 	repository.projectDir = root
 	operation = assistedDumpOperation{repository: &repository, options: opts, operationID: operationID, digest: digest}
 
-	return operation, validateAuthoringSessionID(operationID)
+	return operation, authoringstate.ValidateSessionID(operationID)
 }
 
 func assistedDumpDigest(opts AssistedArtifactSynthesisOptions) (string, error) {

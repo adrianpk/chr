@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type commandProjectContext struct {
@@ -115,7 +116,7 @@ func resolveRegisteredProjectDirectory(project projectcore.Project) (commandProj
 		return commandProjectContext{}, fmt.Errorf("registered project path is not a directory: %s", project.Path)
 	}
 
-	workspacePath := filepath.Join(project.Path, core.DirectoryName)
+	workspacePath := filepath.Join(project.Path, workspacecore.DirectoryName)
 
 	info, err = os.Stat(workspacePath)
 	if err != nil {

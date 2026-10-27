@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestWorkspaceIndexBuildsLookupsAndEdgesFromGraph(t *testing.T) {
@@ -80,14 +82,14 @@ func TestWorkspaceIndexTracksProjectWideAndUnresolvedCaseDocuments(t *testing.T)
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "valid"), RenderCaseMetadata(CaseMetadata{
 		Name: "Valid",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "plans", "project-plan.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "plans", "project-plan.md"), `---
 title: "Project Plan"
 status: "ready"
 ---
 
 # Project Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "missing-case.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "dumps", "missing-case.md"), `---
 title: "Missing Case Dump"
 case: "missing"
 ---
@@ -121,7 +123,7 @@ func TestWorkspaceIndexExcludesArchivedGeneratedDocuments(t *testing.T) {
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "plans", "blog-plan.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "plans", "blog-plan.md"), `---
 title: "Blog Plan"
 status: "planned"
 case: "blog"
@@ -129,7 +131,7 @@ case: "blog"
 
 # Blog Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "plans", "archive", "blog-plan-20260525.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "plans", "archive", "blog-plan-20260525.md"), `---
 title: "Archived Blog Plan"
 status: "planned"
 case: "blog"
@@ -137,7 +139,7 @@ case: "blog"
 
 # Archived Blog Plan
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Blog Spec"
 status: "draft"
 case: "blog"
@@ -145,7 +147,7 @@ case: "blog"
 
 # Blog Spec
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "specs", "archive", "blog-spec-20260525.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "specs", "archive", "blog-spec-20260525.md"), `---
 title: "Archived Blog Spec"
 status: "draft"
 case: "blog"

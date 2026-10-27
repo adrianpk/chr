@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func (r *fileAuthoringSessionRepository) commitDumpMutation(ctx context.Context, binding dumpMutationBinding) (ProjectDumpMutationResult, error) {
@@ -77,7 +78,7 @@ func (r *fileAuthoringSessionRepository) dumpMutationChanges(binding dumpMutatio
 	if target.Project.Name != "" && target.Project.ProjectDumpRef != target.Destination {
 		project := target.Project
 		project.ProjectDumpRef = target.Destination
-		changes = append(changes, workflowFileChange{Path: filepath.Join(DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project))})
+		changes = append(changes, workflowFileChange{Path: filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md"), Before: project.SourceHash, After: []byte(RenderProjectMetadata(project))})
 	}
 
 	return changes, result, nil

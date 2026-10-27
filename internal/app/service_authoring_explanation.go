@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"forge.adrianpk.com/chr/internal/core"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -73,7 +74,7 @@ func decodeAuthoringExplanation(output json.RawMessage) (string, error) {
 	}
 
 	if strings.TrimSpace(response.Explanation) == "" || len(response.Explanation) > 12000 {
-		return "", core.ErrStructuredModelOutput
+		return "", modelcore.ErrOutput
 	}
 
 	return response.Explanation, nil

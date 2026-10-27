@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
 type telegramApplicationCompletion struct {
@@ -107,7 +108,7 @@ func (h *telegramApplicationHost) complete(result telegramApplicationCompletion)
 }
 
 func telegramApplicationDeferred(err error) bool {
-	for _, expected := range []error{core.ErrStructuredModelCapacity, core.ErrTelegramReplyPending, errTelegramLaneChanged, context.Canceled} {
+	for _, expected := range []error{modelcore.ErrCapacity, core.ErrTelegramReplyPending, errTelegramLaneChanged, context.Canceled} {
 		err = telegramHostFailure(err, expected)
 	}
 

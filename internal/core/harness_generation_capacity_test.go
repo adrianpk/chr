@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -33,7 +34,7 @@ func TestHarnessGenerationBindingCapacityPool(t *testing.T) {
 
 	close(release)
 
-	if !errors.Is(err, ErrStructuredModelCapacity) {
+	if !errors.Is(err, modelcore.ErrCapacity) {
 		t.Fatal("selection created another capacity pool", err)
 	}
 

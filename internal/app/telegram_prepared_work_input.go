@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -46,7 +47,7 @@ func (r telegramReceiver) prepareTelegramWork(ctx context.Context, operations te
 }
 
 func (r telegramReceiver) bindInitialPreparedWorkAuthority(ctx context.Context, request core.TelegramOperationRequest, prepared PreparedAuthoringWork) (PreparedAuthoringWork, error) {
-	if prepared.Scope.Intent != core.AuthoringIntentDevelop {
+	if prepared.Scope.Intent != authoringstate.IntentDevelop {
 		return prepared, nil
 	}
 

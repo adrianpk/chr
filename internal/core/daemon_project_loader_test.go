@@ -8,6 +8,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestLoadDaemonProjectsReturnsEnabledProjectsWithReadyStatus(t *testing.T) {
@@ -112,7 +113,7 @@ func newDaemonLoaderWorkspace(t *testing.T) string {
 
 	projectDir := t.TempDir()
 
-	err := os.Mkdir(filepath.Join(projectDir, DirectoryName), 0o755)
+	err := os.Mkdir(filepath.Join(projectDir, workspacecore.DirectoryName), 0o755)
 	if err != nil {
 		t.Fatalf("create workspace directory: %v", err)
 	}

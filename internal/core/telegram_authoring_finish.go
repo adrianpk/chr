@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TelegramAuthoringProgress projects confirmed owner references into a session.
@@ -114,11 +116,11 @@ func validateTelegramAuthoringSessionRef(ref string) error {
 		return workflowstate.ErrConflict
 	}
 
-	if parts[0] != DirectoryName || parts[1] != "authoring" || parts[2] != "sessions" || parts[4] != "session.md" {
+	if parts[0] != workspacecore.DirectoryName || parts[1] != "authoring" || parts[2] != "sessions" || parts[4] != "session.md" {
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateAuthoringSessionID(parts[3]); err != nil {
+	if err := authoringstate.ValidateSessionID(parts[3]); err != nil {
 		return err
 	}
 

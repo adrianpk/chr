@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
 type telegramIntentService interface {
@@ -65,7 +66,7 @@ func (r telegramReceiver) resolveIntent(ctx context.Context, operations telegram
 		hash := sha256.Sum256(fmt.Appendf(nil, "%d:%d", update.Peer.BotID, update.UpdateID))
 
 		result, err := operations.ResolveConversationIntent(callCtx, "intent-"+hex.EncodeToString(hash[:16]), modelInput)
-		if errors.Is(err, errConversationIntentInvalid) || errors.Is(err, core.ErrStructuredModelOutput) {
+		if errors.Is(err, errConversationIntentInvalid) || errors.Is(err, modelcore.ErrOutput) {
 			result = telegramIntentClarification("Which operation should I use, and for which project or conversation?")
 			err = nil
 		}

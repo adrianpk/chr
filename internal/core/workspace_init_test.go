@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 	"testing/fstest"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestInitCreatesProjectWorkspace(t *testing.T) {
@@ -18,8 +20,8 @@ func TestInitCreatesProjectWorkspace(t *testing.T) {
 		t.Fatalf("Init returned error: %v", err)
 	}
 
-	if result.Root != filepath.Join(dir, DirectoryName) {
-		t.Fatalf("Root = %q, want %q", result.Root, filepath.Join(dir, DirectoryName))
+	if result.Root != filepath.Join(dir, workspacecore.DirectoryName) {
+		t.Fatalf("Root = %q, want %q", result.Root, filepath.Join(dir, workspacecore.DirectoryName))
 	}
 
 	assertDir(t, dir, ".chr/default/tickets/open")
@@ -215,7 +217,7 @@ func TestInitDryRunDoesNotCreateWorkspace(t *testing.T) {
 		t.Fatal("dry run reported no planned creates")
 	}
 
-	_, err = os.Stat(filepath.Join(dir, DirectoryName))
+	_, err = os.Stat(filepath.Join(dir, workspacecore.DirectoryName))
 	if !os.IsNotExist(err) {
 		t.Fatalf("dry run created workspace or returned unexpected stat error: %v", err)
 	}

@@ -12,18 +12,21 @@ are omitted here; tests do not define production ownership.
 
 | Consumer | Existing dependencies |
 | --- | --- |
+| app | core, core/authoring/state, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace, harness, harness/codex, harness/pi, tui, webui, webui/ui |
 | cmd/chr | app |
-| app | core, core/database, core/gate, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, harness, harness/codex, harness/pi, tui, webui, webui/ui |
-| core | core/configvalue, core/contenthash, core/database, core/gate, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, harness, harness/process |
+| core | core/authoring/state, core/configvalue, core/contenthash, core/database, core/gate, core/model, core/notify, core/ops/namespace, core/project, core/telegram/message, core/workflow/state, core/workspace, harness, harness/process |
+| core/authoring/state | none |
 | core/configvalue | none |
 | core/contenthash | none |
 | core/database | none |
 | core/gate | core/configvalue |
+| core/model | none |
 | core/notify | core/contenthash, core/database, core/ops/namespace, core/project, core/telegram/message, core/workflow/state |
 | core/ops/namespace | none |
 | core/project | core/database |
 | core/telegram/message | core/contenthash, core/ops/namespace |
 | core/workflow/state | core/contenthash |
+| core/workspace | none |
 | harness | none |
 | harness/codex | harness, harness/process |
 | harness/pi | harness, harness/process |
@@ -96,7 +99,7 @@ constraints, not permission to rename an ambiguous domain concept.
 ## Root production-file dispositions
 
 [The exact file ledger](code-quality-remediation-core-owners.csv) enumerates all
-704 current non-test files under internal/core, their declared symbols,
+707 current non-test files under internal/core, their declared symbols,
 existing signature owners, final responsibility and migration/retention task.
 It provides a finite per-file handoff, including exact declarations. Multiple owners
 on a workflow file require separating store-owned atomic operations from stage
@@ -406,3 +409,15 @@ verify real callers before retaining, relocating or removing either path.
 The mechanical receiver move and all 156 assigned signature dispositions remain
 pending. The focused task evidence does not substitute for the final clean-head
 make verify and controller-recorded PR validation.
+
+
+### Authoring, model and workspace value prerequisites
+
+core/authoring/state now owns the original session identity validator and authoring
+intent values; no complete session validation, progression or approval moves.
+core/model owns the same two structured-provider failure sentinels. Provider and
+receiver consumers preserve errors.Is identity and original failure spelling;
+slots, attempts and model IO remain with their existing owners. core/workspace
+owns the unchanged .chr directory spelling shared by initialization and retained
+references. No root aliases or copies remain for these values. The production
+import policy bounds all three owners without root/coordinator/adapter imports.

@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type telegramGuidedBinding struct {
@@ -118,7 +119,7 @@ func telegramGuidedProgress(observed GuidedUseCaseInspection) (core.TelegramGuid
 
 	data, err := json.Marshal(binding)
 
-	return core.TelegramGuidedProgress{SessionRef: core.DirectoryName + "/authoring/sessions/" + session.ID + "/session.md", Topic: session.Topic, Binding: string(data), Phase: telegramGuidedTransportPhase(observed)}, err
+	return core.TelegramGuidedProgress{SessionRef: workspacecore.DirectoryName + "/authoring/sessions/" + session.ID + "/session.md", Topic: session.Topic, Binding: string(data), Phase: telegramGuidedTransportPhase(observed)}, err
 }
 
 func telegramGuidedDocumentKind(text string) string {

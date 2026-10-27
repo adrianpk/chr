@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync/atomic"
 	"syscall"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type authoringOwnerContextKey struct{}
@@ -44,7 +45,7 @@ func WithAuthoringMutation(ctx context.Context, projectDir string, action func(c
 
 	r := &fileAuthoringSessionRepository{projectDir: root}
 
-	lockPath, err := r.authoringPath(filepath.Join(DirectoryName, "authoring", "owner.lock"))
+	lockPath, err := r.authoringPath(filepath.Join(workspacecore.DirectoryName, "authoring", "owner.lock"))
 	if err != nil {
 		return err
 	}
@@ -100,16 +101,8 @@ func (r *fileAuthoringSessionRepository) authoringPath(relative string) (string,
 	return path, nil
 }
 
-func validateAuthoringSessionID(id string) error {
-	if !regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`).MatchString(id) {
-		return errors.New("invalid authoring session identity")
-	}
-
-	return nil
-}
-
 func authoringRuntimeRef(suffix string) string {
-	return filepath.Join(DirectoryName, "authoring", suffix)
+	return filepath.Join(workspacecore.DirectoryName, "authoring", suffix)
 }
 
 func authoringRequestRef(id string) string {
@@ -121,7 +114,7 @@ func authoringReceiptRef(id string) string {
 }
 
 func (r *fileAuthoringSessionRepository) authoringSessionPaths(id string) (AuthoringSessionPaths, error) {
-	if err := validateAuthoringSessionID(id); err != nil {
+	if err := authoringstate.ValidateSessionID(id); err != nil {
 		return AuthoringSessionPaths{}, err
 	}
 

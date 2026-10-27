@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -95,7 +96,7 @@ func (r telegramReceiver) preparedWorkInput(ctx context.Context, operations tele
 		return owner, err
 	}
 
-	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: core.TelegramOperationID(input.Update, 0), Operator: operator}, SessionID: id, ExpectedRevision: snapshot.Session.Revision, ExpectedSourceHash: snapshot.SourceHash, Intent: core.AuthoringIntent(c.Intent), Instruction: instruction.Text}, nil
+	return AuthoringWorkRequest{Binding: workflowstate.MutationBinding{RequestID: core.TelegramOperationID(input.Update, 0), Operator: operator}, SessionID: id, ExpectedRevision: snapshot.Session.Revision, ExpectedSourceHash: snapshot.SourceHash, Intent: authoringstate.Intent(c.Intent), Instruction: instruction.Text}, nil
 }
 
 func (r telegramReceiver) reusePreparedWork(ctx context.Context, input core.TelegramConversationInput, target core.TelegramOperationTarget, owner AuthoringWorkRequest) (bool, error) {

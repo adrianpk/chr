@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
 // Two real Pi peers share the original model capacity across live profile changes.
@@ -56,7 +57,7 @@ func TestPiGenerationCapacity(t *testing.T) {
 
 	harnessSelectionWrite(t, filepath.Join(driver, "release"), "finish owned calls")
 
-	if !errors.Is(err, core.ErrStructuredModelCapacity) {
+	if !errors.Is(err, modelcore.ErrCapacity) {
 		t.Error("Pi selection created another capacity pool", err)
 	}
 

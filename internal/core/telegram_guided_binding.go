@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"time"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // ErrTelegramNotGuided lets a transport leave existing manual conversations alone.
@@ -26,7 +28,7 @@ func (s *TelegramReceiverStore) BindTelegramGuidedConversation(ctx context.Conte
 		return TelegramConversation{}, TelegramOperationTarget{}, workflowstate.ErrConflict
 	}
 
-	if err := validateAuthoringSessionID(session.ID); err != nil {
+	if err := authoringstate.ValidateSessionID(session.ID); err != nil {
 		return TelegramConversation{}, TelegramOperationTarget{}, err
 	}
 
@@ -97,7 +99,7 @@ func (op telegramConversationTransaction) reserveGuidedConversation(runID string
 		created.GuidedRunID = created.ID
 	}
 
-	created.AuthoringSessionRef = filepath.ToSlash(filepath.Join(DirectoryName, "authoring", "sessions", created.GuidedRunID, "session.md"))
+	created.AuthoringSessionRef = filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, "authoring", "sessions", created.GuidedRunID, "session.md"))
 
 	_, err = op.tx.ExecContext(op.ctx, `UPDATE telegram_conversations SET authoring_session_ref=?,guided_run_id=? WHERE id=?`, created.AuthoringSessionRef, created.GuidedRunID, created.ID)
 	if err != nil {

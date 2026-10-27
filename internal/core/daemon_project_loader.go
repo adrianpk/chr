@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // DaemonProjectStatus defines a package boundary type.
@@ -89,7 +90,7 @@ func classifyDaemonProjectStatError(project projectcore.Project, err error) Daem
 }
 
 func classifyDaemonProjectWorkspace(project projectcore.Project) DaemonProject {
-	workspacePath := filepath.Join(project.Path, DirectoryName)
+	workspacePath := filepath.Join(project.Path, workspacecore.DirectoryName)
 
 	info, err := os.Stat(workspacePath)
 	if err != nil {

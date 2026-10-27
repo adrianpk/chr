@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 type telegramAuthoringArguments struct {
@@ -131,7 +132,7 @@ func telegramAuthoringSessionID(ref string) (string, error) {
 		return "", workflowstate.ErrConflict
 	}
 
-	if parts[0] != core.DirectoryName || parts[1] != "authoring" || parts[2] != "sessions" || parts[4] != "session.md" {
+	if parts[0] != workspacecore.DirectoryName || parts[1] != "authoring" || parts[2] != "sessions" || parts[4] != "session.md" {
 		return "", workflowstate.ErrConflict
 	}
 

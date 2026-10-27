@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const (
@@ -471,7 +473,7 @@ func scopedQuizArtifactLayout(projectDir string, scope QuizScope) (QuizArtifactP
 		*target.relative = filepath.ToSlash(relative)
 	}
 
-	paths.RuntimeRelativePath = filepath.ToSlash(filepath.Join(DirectoryName, scope.Namespace, QuizRuntimeDirectory, id+".json"))
+	paths.RuntimeRelativePath = filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, scope.Namespace, QuizRuntimeDirectory, id+".json"))
 	paths.RuntimePath = filepath.Join(projectDir, filepath.FromSlash(paths.RuntimeRelativePath))
 
 	return paths, nil

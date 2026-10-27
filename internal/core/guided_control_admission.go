@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"slices"
 
+	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,7 +16,7 @@ func validateGuidedControlProof(request WorkflowControlMutationRequest) error {
 		return nil
 	}
 
-	if !guidedControlAction(request.Action) || validateAuthoringSessionID(proof.RunID) != nil || !validWorkflowNativeFingerprint(proof.OperationDigest) {
+	if !guidedControlAction(request.Action) || authoringstate.ValidateSessionID(proof.RunID) != nil || !validWorkflowNativeFingerprint(proof.OperationDigest) {
 		return workflowstate.ErrConflict
 	}
 

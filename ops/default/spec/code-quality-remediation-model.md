@@ -452,3 +452,12 @@ permitted projects populate the actual parsed command before dispatch. Work and
 explanation preserve their distinct reservation, authority, model, document and
 confirmation paths. Test-only help forwarding and guided result aliases are
 removed while their live renderer/export guards and behavioral tests remain.
+
+
+Authoring Intent keeps the exact explain/prepare/develop values and field types;
+ValidateSessionID keeps the exact identifier predicate and error text. The two
+structured model failure identities are each defined once at the neutral model
+owner and used directly by provider/retained operation consumers. The shared
+workspace DirectoryName stays .chr. These moves change no JSON tags, field order,
+retained references, checksum bytes, provider slots or retry allowance. Frozen
+records, old SQLite images, authoring scope, model and Telegram regressions pass.

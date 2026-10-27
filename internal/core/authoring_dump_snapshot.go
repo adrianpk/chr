@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // Dump observations include every alias image and the resolved canonical body.
@@ -78,7 +79,7 @@ func (r *fileAuthoringSessionRepository) readAuthoringDumpImage(snapshot *Author
 }
 
 func (r *fileAuthoringSessionRepository) authoringDumpProject(images map[string][]byte) (ProjectMetadata, error) {
-	reference := filepath.Join(DirectoryName, UserDirectoryName, "project.md")
+	reference := filepath.Join(workspacecore.DirectoryName, UserDirectoryName, "project.md")
 	if content, found := images[reference]; found {
 		project, err := ParseProjectMetadata(string(content))
 		project.Exists, project.SourceHash = true, contenthash.Sum(content)

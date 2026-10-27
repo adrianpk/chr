@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // AssistedAuthoringContextPackageOptions describes a package boundary value.
@@ -88,7 +90,7 @@ func LoadAssistedAuthoringContextPackage(
 
 	return AssistedAuthoringContextPackage{
 		ProjectDir:        projectDir,
-		WorkspaceDir:      filepath.Join(projectDir, DirectoryName),
+		WorkspaceDir:      filepath.Join(projectDir, workspacecore.DirectoryName),
 		Session:           opts.Session,
 		SessionPaths:      sessionPaths,
 		AgentProtocol:     agentProtocol,

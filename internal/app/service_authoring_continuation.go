@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -104,7 +105,7 @@ func parseAuthoringDraft(snapshot core.AuthoringSnapshot, request core.Authoring
 	}
 
 	if len(response.Body) > 32768 || len(response.Question) > 4096 || len(response.Rationale) > 2048 {
-		return core.AuthoringDraft{}, core.ErrStructuredModelOutput
+		return core.AuthoringDraft{}, modelcore.ErrOutput
 	}
 
 	if response.Question != "" {

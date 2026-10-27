@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	modelcore "forge.adrianpk.com/chr/internal/core/model"
 )
 
 // TelegramInterpretation retains resolution independently of application effects.
@@ -125,7 +126,7 @@ func (s *TelegramReceiverStore) reserveTelegramInterpretation(ctx context.Contex
 
 func telegramInterpretationFailure(err error) string {
 	switch {
-	case errors.Is(err, ErrStructuredModelCapacity):
+	case errors.Is(err, modelcore.ErrCapacity):
 		return "provider_capacity"
 	case errors.Is(err, context.DeadlineExceeded):
 		return "provider_timeout"

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 const projectWidePlanningMaxFiles = 80
@@ -102,7 +103,7 @@ func (s service) projectWidePlanningSections() ([]core.QuizModelContextSection, 
 func (s service) projectWidePlanningBaseline() (projectWidePlanningBaseline, error) {
 	baseline := projectWidePlanningBaseline{
 		ProjectDir:         s.projectContext.ProjectDir,
-		WorkspaceDirExists: pathExists(filepath.Join(s.projectContext.ProjectDir, core.DirectoryName)),
+		WorkspaceDirExists: pathExists(filepath.Join(s.projectContext.ProjectDir, workspacecore.DirectoryName)),
 		MakefileExists:     pathExists(filepath.Join(s.projectContext.ProjectDir, "Makefile")),
 		ReadmeExists:       pathExists(filepath.Join(s.projectContext.ProjectDir, "README.md")),
 	}

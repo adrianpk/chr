@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func projectRegistryFlags() []cli.Flag {
@@ -48,13 +49,13 @@ func newUserEnvironment(devRoot string) (core.UserEnvironment, error) {
 }
 
 func requireWorkspace(projectDir string) error {
-	info, err := os.Stat(filepath.Join(projectDir, core.DirectoryName))
+	info, err := os.Stat(filepath.Join(projectDir, workspacecore.DirectoryName))
 	if err != nil {
 		return fmt.Errorf("inspect project workspace: %w", err)
 	}
 
 	if !info.IsDir() {
-		return fmt.Errorf("project workspace is not a directory: %s", filepath.Join(projectDir, core.DirectoryName))
+		return fmt.Errorf("project workspace is not a directory: %s", filepath.Join(projectDir, workspacecore.DirectoryName))
 	}
 
 	return nil

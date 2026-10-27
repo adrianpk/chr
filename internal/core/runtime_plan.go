@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -77,7 +78,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 
 	executionWorkspaceDir := runtimeExecutionWorkspaceDir(projectDir, workspace.Mode, opts.ExecutionWorkspaceDir)
 
-	workspaceDir := filepath.Join(executionWorkspaceDir, DirectoryName)
+	workspaceDir := filepath.Join(executionWorkspaceDir, workspacecore.DirectoryName)
 	dockerfilePath := resolveProjectPath(projectDir, config.DockerfilePath)
 
 	artifactDir, runArtifactDir, workerContextPath, resultPath, logPath, validationPath, err := runtimeArtifactPaths(projectDir, executionWorkspaceDir, config.ArtifactDir, opts)

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
@@ -244,7 +245,7 @@ func LoadAuthoringQuizContextSections(
 
 	sections = append(sections, authoringQuizOptionalFileSection(projectDir, "agent_protocol", "protocols", "AGENTS.md"))
 	sections = append(sections, authoringQuizWorkspaceGraphSection(ctx, projectDir))
-	sections = append(sections, authoringQuizPathInventorySection(projectDir, "workspace_artifacts", "workspace", DirectoryName))
+	sections = append(sections, authoringQuizPathInventorySection(projectDir, "workspace_artifacts", "workspace", workspacecore.DirectoryName))
 	sections = append(sections, authoringQuizPathInventorySection(projectDir, "docs", "docs", "docs"))
 	sections = append(sections, authoringQuizTreeSection(projectDir))
 	sections = append(sections, authoringQuizGoInventorySection(projectDir))
@@ -567,7 +568,7 @@ func authoringQuizSourceArtifact(session AuthoringSession) AuthoringArtifactRef 
 		ID:          "session:" + session.ID,
 		Kind:        AuthoringArtifactKindSession,
 		Role:        AuthoringArtifactRoleInput,
-		Path:        filepath.ToSlash(filepath.Join(DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), session.ID, "session.md")),
+		Path:        filepath.ToSlash(filepath.Join(workspacecore.DirectoryName, filepath.FromSlash(AuthoringSessionsDirectory), session.ID, "session.md")),
 		Description: "Authoring session metadata.",
 	}
 }

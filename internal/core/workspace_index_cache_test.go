@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 func TestWorkspaceGraphBuilderBuildCachedIndexMissWritesCache(t *testing.T) {
@@ -57,7 +59,7 @@ func TestWorkspaceGraphBuilderBuildCachedIndexPreservesDumpPairMetadata(t *testi
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "blog-notes.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "dumps", "blog-notes.md"), `---
 title: "Blog Notes"
 status: "curated"
 type: "dump"
@@ -67,7 +69,7 @@ case: "blog"
 
 # Blog Notes
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "dumps", "blog-notes-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "dumps", "blog-notes-raw.md"), `---
 title: "Blog Notes Raw Capture"
 status: "raw"
 type: "dump_raw"
@@ -106,7 +108,7 @@ func TestWorkspaceGraphBuilderBuildCachedIndexPreservesQuizPairMetadata(t *testi
 	writeWorkspaceGraphFile(t, CaseMetadataPath(projectDir, "blog"), RenderCaseMetadata(CaseMetadata{
 		Name: "Blog Publishing",
 	}))
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "quizzes", "blog-quiz.md"), `---
 title: "Blog Quiz"
 status: "curated"
 raw_path: "ops/default/quiz/00000-blog-quiz-raw/artifact.md"
@@ -115,7 +117,7 @@ case: "blog"
 
 # Blog Quiz
 `)
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "quizzes", "blog-quiz-raw.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "quizzes", "blog-quiz-raw.md"), `---
 title: "Blog Quiz Raw Capture"
 status: "raw"
 curated_path: "ops/default/quiz/00000-blog-quiz/artifact.md"
@@ -156,7 +158,7 @@ func TestWorkspaceGraphBuilderBuildCachedIndexRewritesStaleCache(t *testing.T) {
 		t.Fatalf("first BuildCachedIndex returned error: %v", err)
 	}
 
-	writeWorkspaceGraphFile(t, filepath.Join(projectDir, DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
+	writeWorkspaceGraphFile(t, filepath.Join(projectDir, workspacecore.DirectoryName, UserDirectoryName, "specs", "blog-spec.md"), `---
 title: "Updated Blog Spec"
 status: "accepted"
 case: "blog"
