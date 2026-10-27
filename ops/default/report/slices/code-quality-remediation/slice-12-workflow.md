@@ -15,7 +15,7 @@ and recovery authority, direct consumers and cohesive stage contracts.
 ## Delivered Behavior
 
 Slice 11 is verified integrated through PR #448. Slice 12 implementation is active;
-workflow method/transaction/recovery mapping precedes package relocation.
+the complete method/transaction/recovery map is frozen before package relocation.
 
 ## Implementation Notes
 
@@ -25,7 +25,13 @@ without transferring persistence, coordination or transport behavior.
 
 ## Contracts Added or Changed
 
-None implemented yet.
+The [authority map](../../../plan/code-quality-remediation-slice-12-boundaries.md)
+records all 908 store methods, 100 concrete IO/authority/recovery entries and 79
+direct root dependencies at the verified predecessor revision. All store methods
+retain one receiver owner; future policy consumers are recorded separately.
+All 71 assigned baseline signature rows map to 68 current declarations; 48 require
+refactoring, 22 are legal cohesion watches and one has a verified prior shared
+owner fix. Relocation and signature changes are not yet implemented.
 
 ## Files of Interest
 
@@ -35,10 +41,13 @@ None implemented yet.
 
 ## Validation
 
-Activation documentation links, ticket lifecycle metadata and whitespace were
-checked. Implementation checks and final controller validation have not run.
+Activation documentation links, ticket lifecycle metadata and whitespace passed.
+The compiler-resolved source graph, complete method/dependency/signature identity
+coverage and exact frozen declaration hashes passed. These are mapping checks;
+runtime implementation and final controller validation have not run.
 
 ## Risks and Follow-ups
 
-The initial store method map must identify transaction/recovery boundaries before
-relocation. Candidate validation and canonical integration remain outstanding.
+Configuration/transport/projection dependencies must have real boundaries before
+relocation. Assigned signatures, stage ports, candidate validation and canonical
+integration remain outstanding.

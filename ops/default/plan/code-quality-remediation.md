@@ -239,6 +239,8 @@ Focused selection: Existing indexed-ticket/readiness/doctor/worktree/evidence re
 
 ### Slice 12: Workflow state, store and coordinator package
 
+Implementation map: [Store methods and authority boundaries](code-quality-remediation-slice-12-boundaries.md).
+
 Findings: R1, R2, R3, R5, R6, R10.
 Ticket: [TKT-20261026084832](../ticket/in_progress/20261026084832-quality-workflow.md).
 

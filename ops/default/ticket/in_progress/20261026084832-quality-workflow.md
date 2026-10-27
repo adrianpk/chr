@@ -61,3 +61,12 @@ All commands above are planned. None ran as implementation validation during thi
 
 Slice 11 PR #448 is verified integrated at `d0d65c114cf8ddffcd0492f7fc0b746a832adc0d`.
 Slice 12 is active; T12.1 method/transaction/recovery mapping precedes relocation.
+
+
+T12.1 freezes all 908 store methods across 234 files with exact identities/hashes,
+100 concrete IO/authority/recovery entries and 79 direct root dependencies. The
+[authority map](../../plan/code-quality-remediation-slice-12-boundaries.md)
+keeps one receiver/transaction owner and records future policy consumers.
+All 71 assigned baseline rows map to 68 current declarations. Compiler-resolved
+mapping and exact coverage/hash checks pass; T12.2 boundary resolution is active.
+No runtime move or final candidate validation is represented as completed.
