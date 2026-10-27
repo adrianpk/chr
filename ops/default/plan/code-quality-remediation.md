@@ -7,7 +7,7 @@ Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 8, Quiz domain and model adapter; in progress after verified integration of PR #444.
+Active slice: Slice 8, Quiz domain and model adapter; reviewing PR #445 after verified integration of PR #444.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -176,7 +176,7 @@ Focused selection: Existing receiver/action/outbox and document multipart fixtur
 ### Slice 8: Quiz domain and model adapter
 
 Findings: R1, R2, R3, R4, R7, R10.
-Ticket: [TKT-20261026084828](../ticket/in_progress/20261026084828-quality-quiz.md).
+Ticket: [TKT-20261026084828](../ticket/reviewing/20261026084828-quality-quiz.md).
 
 1. **T8.1:** Move quiz state, transitions and domain payloads to internal/core/quiz; move OpenAI-specific request/schema/response behavior to internal/core/quiz/openai. Keep provider-specific IO out of the quiz domain.
 2. **T8.2:** Split quiz_openai_model.go by schema, request and response responsibilities; split quiz_model_payload.go and service_quiz.go where cohesion warrants it. Retain the justified schema-literal complexity exception rather than creating artificial fragments.
@@ -411,7 +411,7 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 5 | [TKT-20261026084825](../ticket/solved/20261026084825-quality-views.md) | TUI model ownership and Web view sections | ready; predecessor applies |
 | 6 | [TKT-20261026084826](../ticket/solved/20261026084826-quality-leaves.md) | Gate, notifications and project packages | ready; predecessor applies |
 | 7 | [TKT-20261026084827](../ticket/solved/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | ready; predecessor applies |
-| 8 | [TKT-20261026084828](../ticket/in_progress/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
+| 8 | [TKT-20261026084828](../ticket/reviewing/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
 | 9 | [TKT-20261026084829](../ticket/ready/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | ready; predecessor applies |
 | 10 | [TKT-20261026084830](../ticket/ready/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | ready; predecessor applies |
 | 11 | [TKT-20261026084831](../ticket/ready/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | ready; predecessor applies |

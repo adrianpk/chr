@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 8, Quiz domain and model adapter; in progress after verified integration of PR #444.
+Active slice: Slice 8, Quiz domain and model adapter; reviewing PR #445 after verified integration of PR #444.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -128,7 +128,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | T8.3 | Replace assigned quiz model argument/result tuples with domain inputs and outputs, preserving question identity, answer sufficiency, model errors, token accounting and finite round limits. | implemented | d8782c80998f; ecf4baf844ac; be31a8b01b75 | All eight dispositions: six fixed, two cohesive legal five-input operations; named raw/bound output, trace observation, receipt lookup, metadata and parent/trunk results; 301 debts belong to other slices |
 | T8.4 | Remove service.newQuizModelRequest if its production path is still unused; update tests to the live request path. Preserve Deep/Fast/manual/guided behavior and existing provider selection. | implemented | 4b8b1869f972 | Production-unused newQuizModelRequest removed; four readiness tests use real persisted entries with newQuizModelRequestWithEntries; focused manual, Deep/Fast and guided service checks pass |
 | T8.5 | Keep cancellation explicit and secrets out of payloads/logs. Finish local signature, flag, state and suppression entries and update the dependency ledger and glossary. | implemented | 3e12b10d2219; 0a751d414f31; be31a8b01b75 | Explicit host/cancellation and actual provider identity; fixed OpenAI wire flags; original states, body limits and cleanup semantics; HTTP authorization/trace secrecy and owner policy checks pass |
-| T8.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | in_progress | — | Canonical report and task evidence complete; PR references and exact clean-head controller validation pending |
+| T8.6 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | 300a3c956d8e | Canonical PR #445, immutable report introduction d8782c80998f381db8d26e3c048317758aa1a464; controller ledger and PR Validation own final exact clean-head make verify, focused non-short/race checks and whitespace; integration pending |
 
 ### Slice 9: Authoring, document generation and guided preparation
 
