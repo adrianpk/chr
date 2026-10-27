@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -91,7 +92,7 @@ func TestWorkflowSourceCorruption(t *testing.T) {
 func checkWorkflowSourceTarget(t *testing.T, store *WorkflowStore, candidate WorkflowSliceCandidate, remote, expectedTarget string) string {
 	t.Helper()
 
-	reader := workflowIntegrationReader{dir: store.layout.ProjectDir()}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: store.layout.ProjectDir()}}
 	source, err := reader.workflowSourceHead(t.Context(), remote, candidate.Lane.Branch)
 
 	target, targetErr := reader.remoteTarget(t.Context(), remote, "dev")

@@ -11,6 +11,7 @@ import (
 	"slices"
 	"time"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -24,13 +25,13 @@ func (s *WorkflowStore) runWorkflowClosingCommand(ctx context.Context, claim *wo
 		return result, err
 	}
 
-	defer func() { err = errors.Join(err, stdout.file.Close()) }()
+	defer func() { err = errors.Join(err, stdout.File.Close()) }()
 
 	stderr, err := openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stderr"))
 	if err != nil {
 		return result, err
 	}
-	defer func() { err = errors.Join(err, stderr.file.Close()) }()
+	defer func() { err = errors.Join(err, stderr.File.Close()) }()
 
 	gate, permit, err := os.Pipe()
 	if err != nil {
@@ -53,7 +54,7 @@ func (s *WorkflowStore) runWorkflowClosingCommand(ctx context.Context, claim *wo
 	return s.waitWorkflowClosingCommand(ctx, claim, command, process, permit, stdout, stderr, base)
 }
 
-func (s *WorkflowStore) waitWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *workflowCommandOutput, base string) (WorkflowCommandResult, error) {
+func (s *WorkflowStore) waitWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *opsfile.CommandOutput, base string) (WorkflowCommandResult, error) {
 	registered, err := s.registerWorkflowClosingProcess(ctx, claim, command, process.Process.Pid, base)
 	if err == nil {
 		_, err = fmt.Fprintln(permit, "run")
@@ -61,7 +62,7 @@ func (s *WorkflowStore) waitWorkflowClosingCommand(ctx context.Context, claim *w
 
 	err = errors.Join(err, permit.Close(), process.Wait())
 
-	result := WorkflowCommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.buffer.String(), Stderr: stderr.buffer.String(), Truncated: stdout.truncated || stderr.truncated}
+	result := WorkflowCommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.Buffer.String(), Stderr: stderr.Buffer.String(), Truncated: stdout.Truncated || stderr.Truncated}
 	if process.ProcessState != nil {
 		result.ExitCode = process.ProcessState.ExitCode()
 	}

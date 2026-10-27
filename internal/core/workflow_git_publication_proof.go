@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -39,14 +40,14 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 		return workflowstate.ErrConflict
 	}
 
-	reader := workflowIntegrationReader{dir: request.Directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: request.Directory}}
 
 	tree, err := reader.tree(ctx, proof.SourceCommit)
 	if err != nil || tree != proof.SourceTree {
 		return workflowstate.ErrConflict
 	}
 
-	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.SourceCommit); err != nil {
+	if _, err := reader.Output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.SourceCommit); err != nil {
 		return workflowstate.ErrConflict
 	}
 

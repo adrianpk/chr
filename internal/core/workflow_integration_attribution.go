@@ -31,7 +31,7 @@ type WorkflowIntegrationAttribution struct {
 }
 
 func (reader workflowIntegrationReader) commitAttribution(ctx context.Context, commit string) (WorkflowIntegrationAttribution, error) {
-	data, err := reader.rawOutput(ctx, "cat-file", "commit", commit)
+	data, err := reader.RawOutput(ctx, "cat-file", "commit", commit)
 	if err != nil {
 		return WorkflowIntegrationAttribution{}, err
 	}
@@ -142,7 +142,7 @@ func validWorkflowAttributionObjects(entry WorkflowIntegrationAttribution) bool 
 }
 
 func (reader workflowIntegrationReader) sourceAttributions(ctx context.Context, proof WorkflowIntegrationProof) ([]WorkflowIntegrationAttribution, error) {
-	line, err := reader.output(ctx, "rev-list", "--reverse", "--topo-order", "--max-count="+strconv.Itoa(workflowstate.RecordLimit+1), proof.OriginCommit+".."+proof.SourceCommit)
+	line, err := reader.Output(ctx, "rev-list", "--reverse", "--topo-order", "--max-count="+strconv.Itoa(workflowstate.RecordLimit+1), proof.OriginCommit+".."+proof.SourceCommit)
 
 	commits := strings.Fields(line)
 	if err != nil || len(commits) == 0 || len(commits) > workflowstate.RecordLimit {

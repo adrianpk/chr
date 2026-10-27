@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -126,7 +127,7 @@ func (s *WorkflowStore) checkWorkflowPreparationGit(ctx context.Context, candida
 		return fmt.Errorf("%w: prepared lane commit or tree changed", workflowstate.ErrConflict)
 	}
 
-	reader := workflowIntegrationReader{dir: candidate.Lane.Worktree}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: candidate.Lane.Worktree}}
 
 	observed := WorkflowIntegrationProof{WorkflowIntegrationQuery: proof.WorkflowIntegrationQuery, ObservedTarget: proof.ObservedTarget, Provenance: proof.Provenance}
 	if err := reader.verifyMethod(ctx, &observed); err != nil {

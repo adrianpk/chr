@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // WorkflowEntryRepository resolves only an explicit public canonical identity.
@@ -13,9 +15,9 @@ func WorkflowEntryRepository(ctx context.Context, projectDir, remote string) (st
 		return "", fmt.Errorf("work canonical_remote is required for ticket authority")
 	}
 
-	reader := workflowIntegrationReader{dir: projectDir}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: projectDir}}
 
-	raw, err := reader.output(ctx, "remote", "get-url", "--", remote)
+	raw, err := reader.Output(ctx, "remote", "get-url", "--", remote)
 	if err != nil {
 		return "", fmt.Errorf("read canonical remote identity: %w", err)
 	}

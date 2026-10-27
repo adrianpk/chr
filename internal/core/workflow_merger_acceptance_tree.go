@@ -11,28 +11,28 @@ import (
 )
 
 func workflowMergerSnapshot(ctx context.Context, reader workflowIntegrationReader, state WorkflowMergerRepairState) (string, error) {
-	if err := checkWorkflowMergerPrivateRepository(ctx, reader.dir); err != nil {
+	if err := checkWorkflowMergerPrivateRepository(ctx, reader.Directory); err != nil {
 		return "", err
 	}
 
-	head, err := reader.output(ctx, "rev-parse", "HEAD")
+	head, err := reader.Output(ctx, "rev-parse", "HEAD")
 	if err != nil || head != state.PreparedParent {
 		return "", workflowstate.ErrConflict
 	}
 
-	if err := checkWorkflowMergerSnapshotFiles(reader.dir); err != nil {
+	if err := checkWorkflowMergerSnapshotFiles(reader.Directory); err != nil {
 		return "", err
 	}
 	// Reset the index independently: an untrusted index cannot hide worktree edits.
-	if _, err := reader.output(ctx, "read-tree", "--reset", state.Tree); err != nil {
+	if _, err := reader.Output(ctx, "read-tree", "--reset", state.Tree); err != nil {
 		return "", err
 	}
 
-	if _, err := reader.output(ctx, "add", "--all", "--force", "--", "."); err != nil {
+	if _, err := reader.Output(ctx, "add", "--all", "--force", "--", "."); err != nil {
 		return "", err
 	}
 
-	return reader.output(ctx, "write-tree")
+	return reader.Output(ctx, "write-tree")
 }
 
 func checkWorkflowMergerSnapshotFiles(directory string) error {
@@ -70,7 +70,7 @@ func checkWorkflowMergerSnapshotFiles(directory string) error {
 }
 
 func (reader workflowIntegrationReader) mergerDiffPaths(ctx context.Context, before, after string) ([]string, error) {
-	data, err := reader.rawOutput(ctx, "diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", before, after, "--")
+	data, err := reader.RawOutput(ctx, "diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", before, after, "--")
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (reader workflowIntegrationReader) checkMergerChangedKinds(ctx context.Cont
 }
 
 func (reader workflowIntegrationReader) mergerPathObject(ctx context.Context, tree, path string) (string, error) {
-	return reader.rawOutput(ctx, "ls-tree", "-z", "--full-tree", tree, "--", path)
+	return reader.RawOutput(ctx, "ls-tree", "-z", "--full-tree", tree, "--", path)
 }
 
 func (reader workflowIntegrationReader) checkMergerSideSelection(ctx context.Context, state WorkflowMergerRepairState, input WorkflowMergerInput, tree string) error {
@@ -144,7 +144,7 @@ func (reader workflowIntegrationReader) checkMergerConflictSides(ctx context.Con
 		return workflowstate.ErrConflict
 	}
 
-	content, err := reader.rawOutput(ctx, "show", tree+":"+path)
+	content, err := reader.RawOutput(ctx, "show", tree+":"+path)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func (reader workflowIntegrationReader) checkMergerCopiedSide(ctx context.Contex
 		return workflowstate.ErrConflict
 	}
 
-	other, err := reader.rawOutput(ctx, "show", side+":"+path)
+	other, err := reader.RawOutput(ctx, "show", side+":"+path)
 	if err != nil {
 		return err
 	}

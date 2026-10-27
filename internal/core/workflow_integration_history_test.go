@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestWorkflowIntegrationHistory rejects a correct final tree with invalid
@@ -34,9 +36,9 @@ func TestWorkflowIntegrationHostConfig(t *testing.T) {
 
 	t.Setenv("GIT_CONFIG_GLOBAL", config)
 
-	reader := workflowIntegrationReader{dir: dir}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: dir}}
 
-	value, err := reader.output(t.Context(), "config", "--get", "credential.helper")
+	value, err := reader.Output(t.Context(), "config", "--get", "credential.helper")
 	if err != nil || value != "host-fixture" {
 		t.Fatalf("trusted host credential configuration was discarded: %s: %v", value, err)
 	}

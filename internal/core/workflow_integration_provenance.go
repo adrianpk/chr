@@ -35,12 +35,12 @@ func (reader workflowIntegrationReader) combinedProvenance(ctx context.Context, 
 		return nil, err
 	}
 
-	format, err := reader.output(ctx, "rev-parse", "--show-object-format")
+	format, err := reader.Output(ctx, "rev-parse", "--show-object-format")
 	if err != nil {
 		return nil, err
 	}
 
-	diff, err := reader.rawOutput(ctx, "-c", "core.quotePath=true", "-c", "color.ui=false", "diff", "--binary", "--full-index", "--no-ext-diff", "--no-textconv", "--no-renames", "--diff-algorithm=myers", "--no-indent-heuristic", "--unified=3", "--src-prefix=a/", "--dst-prefix=b/", proof.BaseCommit, proof.ResultCommit, "--")
+	diff, err := reader.RawOutput(ctx, "-c", "core.quotePath=true", "-c", "color.ui=false", "diff", "--binary", "--full-index", "--no-ext-diff", "--no-textconv", "--no-renames", "--diff-algorithm=myers", "--no-indent-heuristic", "--unified=3", "--src-prefix=a/", "--dst-prefix=b/", proof.BaseCommit, proof.ResultCommit, "--")
 	if err != nil {
 		return nil, err
 	}

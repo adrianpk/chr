@@ -8,7 +8,7 @@ import (
 )
 
 func (reader workflowIntegrationReader) mergerFileKind(ctx context.Context, tree, path string) (string, error) {
-	data, err := reader.rawOutput(ctx, "ls-tree", "-z", "--full-tree", tree, "--", path)
+	data, err := reader.RawOutput(ctx, "ls-tree", "-z", "--full-tree", tree, "--", path)
 	if err != nil || data == "" {
 		return "text", err
 	}
@@ -28,7 +28,7 @@ func (reader workflowIntegrationReader) mergerFileKind(ctx context.Context, tree
 		return "binary", nil
 	}
 
-	content, err := reader.rawOutput(ctx, "cat-file", "blob", fields[2])
+	content, err := reader.RawOutput(ctx, "cat-file", "blob", fields[2])
 	if err != nil {
 		return "", err
 	}

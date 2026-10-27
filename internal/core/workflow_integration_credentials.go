@@ -7,15 +7,17 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // Temporary bare stores do not inherit the source repository's local Git
 // configuration. Carry only credential settings in the child environment;
 // helper results and secrets are never written to the temporary Git config.
 func (reader workflowIntegrationReader) withSourceCredentials(ctx context.Context, source string) (workflowIntegrationReader, error) {
-	config := workflowIntegrationReader{dir: source, environment: reader.environment}
+	config := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: source, Environment: reader.Environment}}
 
-	data, err := config.rawOutput(ctx, "config", "--null", "--local", "--get-regexp", `^credential(\..*)?\.(helper|username|usehttppath)$`)
+	data, err := config.RawOutput(ctx, "config", "--null", "--local", "--get-regexp", `^credential(\..*)?\.(helper|username|usehttppath)$`)
 	if err != nil {
 		var exit *exec.ExitError
 		if errors.As(err, &exit) && exit.ExitCode() == 1 {
@@ -29,12 +31,12 @@ func (reader workflowIntegrationReader) withSourceCredentials(ctx context.Contex
 		return reader, fmt.Errorf("integration credential configuration exceeds bounds")
 	}
 
-	environment, err := workflowCredentialEnvironment(reader.process(ctx, "version").Env, data)
+	environment, err := workflowCredentialEnvironment(reader.Process(ctx, "version").Env, data)
 	if err != nil {
 		return reader, err
 	}
 
-	reader.environment = environment
+	reader.Environment = environment
 
 	return reader, nil
 }

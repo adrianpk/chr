@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -26,7 +27,7 @@ type WorkflowIntegrationPreparation struct {
 }
 
 func (git OSWorkflowPreparationGit) preparationReader(dir string, query WorkflowPreparationQuery) (workflowIntegrationReader, error) {
-	reader := workflowIntegrationReader{dir: dir, signing: git.signing}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: dir}, signing: git.signing}
 
 	date := git.committerTime
 	if date.IsZero() {

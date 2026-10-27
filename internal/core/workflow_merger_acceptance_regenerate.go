@@ -43,7 +43,7 @@ func (s *WorkflowStore) regenerateWorkflowMerger(ctx context.Context, claim *Wor
 func (s *WorkflowStore) runWorkflowMergerRegeneration(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, reader workflowIntegrationReader, state WorkflowMergerRepairState, conflict WorkflowMergerConflict, tree string) (WorkflowMergerRegenerationEvidence, error) {
 	evidence := WorkflowMergerRegenerationEvidence{ConflictID: conflict.ID, InputTree: tree}
 
-	config, err := os.ReadFile(filepath.Join(reader.dir, ".git", "config"))
+	config, err := os.ReadFile(filepath.Join(reader.Directory, ".git", "config"))
 	if err != nil {
 		return evidence, err
 	}
@@ -57,7 +57,7 @@ func (s *WorkflowStore) runWorkflowMergerRegeneration(ctx context.Context, claim
 		return evidence, err
 	}
 
-	if err := checkWorkflowMergerLocalConfig(reader.dir, config); err != nil {
+	if err := checkWorkflowMergerLocalConfig(reader.Directory, config); err != nil {
 		return evidence, err
 	}
 
@@ -71,7 +71,7 @@ func (s *WorkflowStore) runWorkflowMergerRegeneration(ctx context.Context, claim
 		return evidence, err
 	}
 
-	if err := checkWorkflowMergerLocalConfig(reader.dir, config); err != nil {
+	if err := checkWorkflowMergerLocalConfig(reader.Directory, config); err != nil {
 		return evidence, err
 	}
 

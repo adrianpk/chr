@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -217,7 +218,7 @@ func TestWorkflowTaskOutputBounds(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	proof := workflowTestExecute(t, store, run.Invocation.ID, "flood")
-	if !proof.Worker.Truncated || len(proof.Worker.Stdout) != workflowCommandOutputLimit {
+	if !proof.Worker.Truncated || len(proof.Worker.Stdout) != opsfile.CommandOutputLimit {
 		t.Fatal("worker output was unbounded or silently discarded")
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -117,7 +118,7 @@ func TestNativeSignedFix(t *testing.T) {
 	tree := workflowIntegrationCommand(t, q.Lane.Worktree, "write-tree")
 	finding := workflowstate.ReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain repaired behavior", Detail: "The prepared candidate requires this declared integration repair."}
 
-	reader := workflowIntegrationReader{dir: q.Lane.Worktree}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: q.Lane.Worktree}}
 	if _, err := reader.prepareRebaseFix(t.Context(), proof, tree, finding); err == nil {
 		t.Fatal("integration repair bypassed the required host signer")
 	}
@@ -179,7 +180,7 @@ func TestNativeSigningBlocked(t *testing.T) {
 func TestNativePreparationCollision(t *testing.T) {
 	f := newWorkflowGitFixture(t, "rebase")
 	q := nativePolicyQuery(t, f)
-	reader := workflowIntegrationReader{dir: f.request.Directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: f.request.Directory}}
 
 	source, err := reader.commitAttribution(t.Context(), q.SourceCommit)
 	if err != nil {
@@ -189,14 +190,14 @@ func TestNativePreparationCollision(t *testing.T) {
 	seconds := int64(1700000000)
 	data := fmt.Sprintf("tree %s\nparent %s\nauthor %s <%s> %s\ncommitter Workflow Host <workflow@example.invalid> %d +0000\n\n", q.SourceTree, q.OriginCommit, source.Author.Name, source.Author.Email, source.Author.Date, seconds)
 
-	raw, err := reader.rawOutput(t.Context(), "cat-file", "commit", q.SourceCommit)
+	raw, err := reader.RawOutput(t.Context(), "cat-file", "commit", q.SourceCommit)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	_, message, _ := strings.Cut(raw, "\n\n")
 
-	id, err := reader.rawInput(t.Context(), data+message, "hash-object", "-t", "commit", "-w", "--stdin")
+	id, err := reader.RawInput(t.Context(), data+message, "hash-object", "-t", "commit", "-w", "--stdin")
 	if err != nil {
 		t.Fatal(err)
 	}

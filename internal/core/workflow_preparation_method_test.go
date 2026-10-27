@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestNativeMethodObjects rejects actual prepared objects with false combined
@@ -24,9 +25,9 @@ func nativeAlteredTree(t *testing.T, directory string, proof WorkflowIntegration
 	t.Helper()
 
 	entry := proof.Provenance.Prepared[0]
-	reader := workflowIntegrationReader{dir: directory, preparation: proof.Provenance.Preparation}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}, preparation: proof.Provenance.Preparation}
 
-	raw, err := reader.rawOutput(t.Context(), "cat-file", "commit", entry.Commit)
+	raw, err := reader.RawOutput(t.Context(), "cat-file", "commit", entry.Commit)
 	if err != nil {
 		t.Fatal(err)
 	}

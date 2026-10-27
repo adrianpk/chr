@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -17,8 +18,8 @@ type workflowMergerTree struct {
 }
 
 func (reader workflowIntegrationReader) mergerTree(ctx context.Context, original, parent, source string) (workflowMergerTree, error) {
-	command := reader.process(ctx, "merge-tree", "--write-tree", "--name-only", "-z", "--merge-base="+original, parent, source)
-	stdout, stderr := &workflowProviderOutput{}, &workflowCommandOutput{}
+	command := reader.Process(ctx, "merge-tree", "--write-tree", "--name-only", "-z", "--merge-base="+original, parent, source)
+	stdout, stderr := &opsfile.ProviderOutput{}, &opsfile.CommandOutput{}
 	command.Stdout, command.Stderr = stdout, stderr
 
 	err := command.Run()
@@ -28,11 +29,11 @@ func (reader workflowIntegrationReader) mergerTree(ctx context.Context, original
 		return workflowMergerTree{}, fmt.Errorf("merger tree preparation: %w", err)
 	}
 
-	if stdout.overflow {
+	if stdout.Overflow {
 		return workflowMergerTree{}, workflowstate.ErrConflict
 	}
 
-	return parseWorkflowMergerTree(stdout.buffer.String(), err != nil)
+	return parseWorkflowMergerTree(stdout.Buffer.String(), err != nil)
 }
 
 func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, error) {
@@ -69,11 +70,11 @@ func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, 
 }
 
 func (reader workflowIntegrationReader) materializeMergerTree(ctx context.Context, parent, tree string) error {
-	if _, err := reader.output(ctx, "checkout", "--quiet", "--detach", parent); err != nil {
+	if _, err := reader.Output(ctx, "checkout", "--quiet", "--detach", parent); err != nil {
 		return err
 	}
 
-	_, err := reader.output(ctx, "read-tree", "--reset", "-u", tree)
+	_, err := reader.Output(ctx, "read-tree", "--reset", "-u", tree)
 
 	return err
 }

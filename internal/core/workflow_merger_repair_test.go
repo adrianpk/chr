@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -87,7 +88,7 @@ func nativeMergerReplayCheckpoint(t *testing.T, state WorkflowMergerRepairState)
 	_, template, _ := nativeMergerInput(t)
 	checkpoint.Evidence = template.IntentRefs[0]
 
-	reader := workflowIntegrationReader{dir: state.Query.Lane.Worktree}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: state.Query.Lane.Worktree}}
 	for _, entry := range state.History {
 		source, err := reader.commitAttribution(t.Context(), entry.Source)
 		if err != nil {

@@ -57,7 +57,7 @@ func workflowIntegrationParentsMatch(proof WorkflowIntegrationProof, parents []s
 }
 
 func (reader workflowIntegrationReader) verifyBase(ctx context.Context, proof WorkflowIntegrationProof) error {
-	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.BaseCommit); err != nil {
+	if _, err := reader.Output(ctx, "merge-base", "--is-ancestor", proof.OriginCommit, proof.BaseCommit); err != nil {
 		return fmt.Errorf("integration base does not contain the frozen target: %w", err)
 	}
 
@@ -133,7 +133,7 @@ func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof 
 }
 
 func (reader workflowIntegrationReader) linearSource(ctx context.Context, proof WorkflowIntegrationProof) ([]string, error) {
-	line, err := reader.output(ctx, "rev-list", "--reverse", "--first-parent", "--max-count=4097", proof.OriginCommit+".."+proof.SourceCommit)
+	line, err := reader.Output(ctx, "rev-list", "--reverse", "--first-parent", "--max-count=4097", proof.OriginCommit+".."+proof.SourceCommit)
 
 	commits := strings.Fields(line)
 	if err != nil || len(commits) == 0 || len(commits) > workflowstate.RecordLimit {

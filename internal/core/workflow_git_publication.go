@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -147,8 +148,8 @@ func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, reque
 		return err
 	}
 
-	reader := workflowIntegrationReader{dir: request.Directory}
-	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", request.Git.BaseCommit, request.Git.ResultCommit); err != nil {
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: request.Directory}}
+	if _, err := reader.Output(ctx, "merge-base", "--is-ancestor", request.Git.BaseCommit, request.Git.ResultCommit); err != nil {
 		return fmt.Errorf("%w: prepared target is not fast-forward", workflowstate.ErrConflict)
 	}
 

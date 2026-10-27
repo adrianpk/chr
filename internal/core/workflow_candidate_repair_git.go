@@ -4,6 +4,7 @@ import (
 	"context"
 	"path/filepath"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -23,7 +24,7 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx conte
 		return proof, err
 	}
 
-	reader := workflowIntegrationReader{dir: state.Query.Lane.Worktree, signing: git.signing, environment: workflowMergerEnvironment(filepath.Dir(state.Query.Lane.Worktree))}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: state.Query.Lane.Worktree, Environment: workflowMergerEnvironment(filepath.Dir(state.Query.Lane.Worktree))}, signing: git.signing}
 	if err := reader.verifyPublicationHistory(ctx, proof); err != nil {
 		return proof, err
 	}
@@ -36,17 +37,17 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx conte
 }
 
 func checkWorkflowRepairedCheckout(ctx context.Context, reader workflowIntegrationReader, proof WorkflowIntegrationProof) error {
-	head, err := reader.output(ctx, "rev-parse", "HEAD")
+	head, err := reader.Output(ctx, "rev-parse", "HEAD")
 	if err != nil || head != proof.ResultCommit {
 		return errorsOrConflict(err)
 	}
 
-	status, err := reader.output(ctx, "status", "--porcelain", "--untracked-files=all")
+	status, err := reader.Output(ctx, "status", "--porcelain", "--untracked-files=all")
 	if err != nil || status != "" {
 		return errorsOrConflict(err)
 	}
 
-	tree, err := reader.output(ctx, "write-tree")
+	tree, err := reader.Output(ctx, "write-tree")
 	if err != nil || tree != proof.PreparedTree {
 		return errorsOrConflict(err)
 	}

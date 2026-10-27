@@ -12,10 +12,11 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func guidedGitReader(root string) workflowIntegrationReader {
+func guidedGitReader(root string) projectcore.GitReader {
 	environment := []string{}
 
 	for _, entry := range os.Environ() {
@@ -26,11 +27,11 @@ func guidedGitReader(root string) workflowIntegrationReader {
 
 	environment = append(environment, "GIT_TERMINAL_PROMPT=0", "GIT_NO_REPLACE_OBJECTS=1")
 
-	return workflowIntegrationReader{dir: root, environment: environment}
+	return projectcore.GitReader{Directory: root, Environment: environment}
 }
 
-func guidedRepositoryIdentity(ctx context.Context, reader workflowIntegrationReader) (string, error) {
-	common, err := reader.output(ctx, "rev-parse", "--path-format=absolute", "--git-common-dir")
+func guidedRepositoryIdentity(ctx context.Context, reader projectcore.GitReader) (string, error) {
+	common, err := reader.Output(ctx, "rev-parse", "--path-format=absolute", "--git-common-dir")
 	if err != nil {
 		return "", err
 	}
@@ -55,7 +56,7 @@ func (r *fileAuthoringSessionRepository) observeGuidedCheckpoint(ctx context.Con
 		return authoringcore.GuidedStageCheckpoint{}, err
 	}
 
-	base, err := reader.output(ctx, "rev-parse", "--verify", "HEAD^{commit}")
+	base, err := reader.Output(ctx, "rev-parse", "--verify", "HEAD^{commit}")
 	if err != nil {
 		return authoringcore.GuidedStageCheckpoint{}, err
 	}
@@ -92,8 +93,8 @@ func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Cont
 	reader := guidedGitReader(r.projectDir)
 	result = checkpoint
 	// show-ref distinguishes a missing ref from an unavailable/corrupt object.
-	if _, err := reader.output(ctx, "show-ref", "--verify", "--quiet", checkpoint.Ref); err == nil {
-		result.Commit, err = reader.output(ctx, "rev-parse", "--verify", checkpoint.Ref+"^{commit}")
+	if _, err := reader.Output(ctx, "show-ref", "--verify", "--quiet", checkpoint.Ref); err == nil {
+		result.Commit, err = reader.Output(ctx, "rev-parse", "--verify", checkpoint.Ref+"^{commit}")
 		if err != nil {
 			return result, err
 		}
@@ -116,29 +117,29 @@ func (r *fileAuthoringSessionRepository) commitGuidedCheckpoint(ctx context.Cont
 		return result, err
 	}
 
-	reader.environment = append(reader.environment, "GIT_INDEX_FILE="+indexPath)
+	reader.Environment = append(reader.Environment, "GIT_INDEX_FILE="+indexPath)
 
 	tree, err := r.guidedCheckpointTree(ctx, reader, checkpoint)
 	if err != nil {
 		return result, err
 	}
 
-	result.Commit, err = reader.rawInput(ctx, "Guided "+checkpoint.Stage+" checkpoint\n\nOperation: "+digest+"\n", "commit-tree", tree, "-p", checkpoint.BaseCommit)
+	result.Commit, err = reader.RawInput(ctx, "Guided "+checkpoint.Stage+" checkpoint\n\nOperation: "+digest+"\n", "commit-tree", tree, "-p", checkpoint.BaseCommit)
 
 	result.Commit = strings.TrimSpace(result.Commit)
 	if err != nil {
 		return result, err
 	}
 
-	if _, err := reader.output(ctx, "update-ref", checkpoint.Ref, result.Commit, ""); err != nil {
+	if _, err := reader.Output(ctx, "update-ref", checkpoint.Ref, result.Commit, ""); err != nil {
 		return result, err
 	}
 
 	return result, validateGuidedCheckpoint(ctx, r.projectDir, result)
 }
 
-func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Context, reader workflowIntegrationReader, checkpoint authoringcore.GuidedStageCheckpoint) (string, error) {
-	if _, err := reader.output(ctx, "read-tree", checkpoint.BaseCommit); err != nil {
+func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Context, reader projectcore.GitReader, checkpoint authoringcore.GuidedStageCheckpoint) (string, error) {
+	if _, err := reader.Output(ctx, "read-tree", checkpoint.BaseCommit); err != nil {
 		return "", err
 	}
 
@@ -152,18 +153,18 @@ func (r *fileAuthoringSessionRepository) guidedCheckpointTree(ctx context.Contex
 			return "", workflowstate.ErrConflict
 		}
 
-		blob, err := reader.rawInput(ctx, string(content), "hash-object", "-w", "--stdin")
+		blob, err := reader.RawInput(ctx, string(content), "hash-object", "-w", "--stdin")
 		if err != nil {
 			return "", err
 		}
 
 		blob = strings.TrimSpace(blob)
-		if _, err := reader.output(ctx, "update-index", "--add", "--cacheinfo", "100644", blob, artifact.Path); err != nil {
+		if _, err := reader.Output(ctx, "update-index", "--add", "--cacheinfo", "100644", blob, artifact.Path); err != nil {
 			return "", err
 		}
 	}
 
-	return reader.output(ctx, "write-tree")
+	return reader.Output(ctx, "write-tree")
 }
 
 func validateGuidedCheckpoint(ctx context.Context, root string, checkpoint authoringcore.GuidedStageCheckpoint) error {
@@ -201,7 +202,7 @@ func ReadGuidedCommittedArtifact(ctx context.Context, root string, checkpoint au
 			continue
 		}
 
-		content, err := reader.rawOutput(ctx, "show", checkpoint.Commit+":"+path)
+		content, err := reader.RawOutput(ctx, "show", checkpoint.Commit+":"+path)
 		if err != nil {
 			return nil, fmt.Errorf("guided committed input unavailable: %w", err)
 		}
@@ -233,7 +234,7 @@ func CheckGuidedCheckpointReadiness(ctx context.Context, root string) error {
 
 	reader := guidedGitReader(root)
 	for _, args := range [][]string{{"rev-parse", "--verify", "HEAD^{commit}"}, {"var", "GIT_AUTHOR_IDENT"}, {"var", "GIT_COMMITTER_IDENT"}} {
-		if _, err := reader.output(ctx, args...); err != nil {
+		if _, err := reader.Output(ctx, args...); err != nil {
 			return errors.New("git checkpoints require a repository with an initial commit and a configured author identity")
 		}
 	}

@@ -7,28 +7,10 @@ import (
 	"os/exec"
 	"time"
 
-	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 type workflowProviderCommandRunner struct{}
-
-type workflowProviderOutput struct {
-	buffer   bytes.Buffer
-	overflow bool
-}
-
-func (output *workflowProviderOutput) Write(data []byte) (int, error) {
-	length := len(data)
-
-	remaining := workflowstate.FileLimit - output.buffer.Len()
-	if length > remaining {
-		data, output.overflow = data[:remaining], true
-	}
-
-	_, err := output.buffer.Write(data)
-
-	return length, err
-}
 
 func (runner workflowProviderCommandRunner) Output(ctx context.Context, command string, args ...string) ([]byte, error) {
 	return runner.Input(ctx, command, nil, args...)
@@ -39,7 +21,7 @@ func (workflowProviderCommandRunner) Input(ctx context.Context, command string, 
 	defer cancel()
 
 	process := exec.CommandContext(ctx, command, args...)
-	stdout, stderr := &workflowProviderOutput{}, &workflowCommandOutput{}
+	stdout, stderr := &opsfile.ProviderOutput{}, &opsfile.CommandOutput{}
 	process.Stdin, process.Stdout, process.Stderr = bytes.NewReader(input), stdout, stderr
 
 	process.WaitDelay = time.Second
@@ -47,11 +29,11 @@ func (workflowProviderCommandRunner) Input(ctx context.Context, command string, 
 		return nil, fmt.Errorf("run workflow provider: %w", err)
 	}
 
-	if stdout.overflow {
+	if stdout.Overflow {
 		return nil, fmt.Errorf("workflow provider response exceeds file bounds")
 	}
 
-	return stdout.buffer.Bytes(), nil
+	return stdout.Buffer.Bytes(), nil
 }
 
 func (adapter RemoteReviewAdapter) workflowProviderRunner() ReviewRemoteCommandRunner {

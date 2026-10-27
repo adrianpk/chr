@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -42,7 +43,7 @@ func newWorkflowGitFixture(t *testing.T, method string) workflowGitFixture {
 	query := WorkflowIntegrationQuery{Repository: "https://forge.example.invalid/team/project", TargetBranch: "dev", Method: method, SourceCommit: source, SourceTree: workflowIntegrationCommand(t, actor, "rev-parse", source+"^{tree}"), OriginCommit: origin, ResultCommit: result}
 	proof := WorkflowIntegrationProof{WorkflowIntegrationQuery: query, BaseCommit: base, ObservedTarget: base}
 
-	reader := workflowIntegrationReader{dir: actor}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: actor}}
 	if err := reader.verifyMethod(t.Context(), &proof); err != nil {
 		t.Fatal(err)
 	}

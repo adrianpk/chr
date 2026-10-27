@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,7 +17,7 @@ func (git OSWorkflowIntegrationGit) PublishWorkflowSource(ctx context.Context, q
 		return err
 	}
 
-	reader := workflowIntegrationReader{dir: query.Directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: query.Directory}}
 
 	tree, err := reader.tree(ctx, query.Commit)
 	if err != nil || tree != query.Tree {
@@ -50,7 +51,7 @@ func (reader workflowIntegrationReader) pushWorkflowSource(ctx context.Context, 
 		return fmt.Errorf("%w: canonical source branch changed", workflowstate.ErrConflict)
 	}
 
-	if _, err := reader.output(ctx, "push", "--quiet", "--force-with-lease="+ref+":"+previous, "--", transport, query.Commit+":"+ref); err != nil {
+	if _, err := reader.Output(ctx, "push", "--quiet", "--force-with-lease="+ref+":"+previous, "--", transport, query.Commit+":"+ref); err != nil {
 		return err
 	}
 
@@ -63,7 +64,7 @@ func (reader workflowIntegrationReader) pushWorkflowSource(ctx context.Context, 
 }
 
 func (reader workflowIntegrationReader) workflowSourceHead(ctx context.Context, transport, ref string) (string, error) {
-	output, err := reader.output(ctx, "ls-remote", "--", transport, ref)
+	output, err := reader.Output(ctx, "ls-remote", "--", transport, ref)
 	if err != nil || output == "" {
 		return "", err
 	}

@@ -105,7 +105,7 @@ func (s *WorkflowStore) hashWorkflowProcessOutput(process *WorkflowProcess) erro
 	return nil
 }
 
-func (s *WorkflowStore) workflowProcessOutput(claim *WorkflowClaim, index int) (stdout, stderr *workflowCommandOutput, err error) {
+func (s *WorkflowStore) workflowProcessOutput(claim *WorkflowClaim, index int) (stdout, stderr *opsfile.CommandOutput, err error) {
 	base := workflowAttemptFile(claim.InvocationID, claim.AttemptID, fmt.Sprintf("command-%d", index+1))
 
 	stdout, err = openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stdout"))
@@ -115,16 +115,16 @@ func (s *WorkflowStore) workflowProcessOutput(claim *WorkflowClaim, index int) (
 
 	stderr, err = openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stderr"))
 	if err != nil {
-		return nil, nil, errors.Join(err, stdout.file.Close())
+		return nil, nil, errors.Join(err, stdout.File.Close())
 	}
 
 	return stdout, stderr, nil
 }
 
-func openWorkflowCommandOutput(path string) (*workflowCommandOutput, error) {
+func openWorkflowCommandOutput(path string) (*opsfile.CommandOutput, error) {
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 
-	return &workflowCommandOutput{file: file}, err
+	return &opsfile.CommandOutput{File: file}, err
 }
 
 func workflowProcessBindingMatches(observed, expected WorkflowProcess) bool {

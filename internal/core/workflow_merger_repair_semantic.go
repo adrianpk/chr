@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -30,7 +31,7 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx contex
 		return WorkflowMergerRepairState{}, err
 	}
 
-	if _, err := reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-write-fetch-head", "--", query.SourceDirectory, proof.ResultCommit); err != nil {
+	if _, err := reader.Output(ctx, "fetch", "--quiet", "--no-tags", "--no-write-fetch-head", "--", query.SourceDirectory, proof.ResultCommit); err != nil {
 		return WorkflowMergerRepairState{}, err
 	}
 
@@ -88,7 +89,7 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowMergerIntegrationFix(ctx cont
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	reader := workflowIntegrationReader{dir: state.Query.Lane.Worktree, signing: git.signing}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: state.Query.Lane.Worktree}, signing: git.signing}
 
 	proof, err := reader.prepareRebaseFix(ctx, *state.Result, tree, finding)
 	if err != nil {

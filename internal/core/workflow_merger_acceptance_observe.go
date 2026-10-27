@@ -5,13 +5,14 @@ import (
 	"path/filepath"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) observeWorkflowMergerRepair(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, provider WorkflowPullRequestProvider, state WorkflowMergerRepairState, attempt *WorkflowMergerAttempt) (WorkflowIntegrationTreeRepair, error) {
 	input, proposal := attempt.Input, *attempt.Proposal
 	repair := WorkflowIntegrationTreeRepair{Input: input, Proposal: proposal, OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}
-	reader := workflowIntegrationReader{dir: prepared.input.Lane.Worktree, environment: workflowMergerEnvironment(filepath.Dir(prepared.input.Lane.Worktree))}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: prepared.input.Lane.Worktree, Environment: workflowMergerEnvironment(filepath.Dir(prepared.input.Lane.Worktree))}}
 
 	tree, err := workflowMergerSnapshot(ctx, reader, state)
 	if err != nil {

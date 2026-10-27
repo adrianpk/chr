@@ -35,7 +35,7 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 	state.History = slices.Clone(state.History)
 	state.Repairs = append(slices.Clone(state.Repairs), repair)
 
-	if _, err := reader.output(ctx, "read-tree", "--reset", "-u", repair.ResolvedTree); err != nil {
+	if _, err := reader.Output(ctx, "read-tree", "--reset", "-u", repair.ResolvedTree); err != nil {
 		return state, err
 	}
 

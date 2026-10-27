@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +21,7 @@ func (git OSWorkflowPreparationGit) CheckWorkflowMergerCheckpoint(ctx context.Co
 		return err
 	}
 
-	head, err := reader.output(ctx, "rev-parse", "HEAD")
+	head, err := reader.Output(ctx, "rev-parse", "HEAD")
 	if err != nil || head != state.PreparedParent {
 		return workflowstate.ErrConflict
 	}
@@ -43,9 +44,9 @@ func checkWorkflowMergerPrivateRepository(ctx context.Context, directory string)
 		return workflowstate.ErrConflict
 	}
 
-	reader := workflowIntegrationReader{dir: directory, environment: workflowMergerEnvironment(filepath.Dir(directory))}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory, Environment: workflowMergerEnvironment(filepath.Dir(directory))}}
 
-	remotes, err := reader.output(ctx, "remote")
+	remotes, err := reader.Output(ctx, "remote")
 	if err != nil || remotes != "" {
 		return workflowstate.ErrConflict
 	}
@@ -65,7 +66,7 @@ func (git OSWorkflowPreparationGit) ImportWorkflowMergerTree(ctx context.Context
 		return err
 	}
 
-	_, err = reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", directory, tree)
+	_, err = reader.Output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", directory, tree)
 
 	return err
 }

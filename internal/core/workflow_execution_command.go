@@ -13,34 +13,9 @@ import (
 	"syscall"
 	"time"
 
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
-
-const workflowCommandOutputLimit = 16 << 10
-
-type workflowCommandOutput struct {
-	buffer    bytes.Buffer
-	truncated bool
-	file      *os.File
-}
-
-func (output *workflowCommandOutput) Write(data []byte) (int, error) {
-	length := len(data)
-
-	remaining := workflowCommandOutputLimit - output.buffer.Len()
-	if length > remaining {
-		data = data[:remaining]
-		output.truncated = true
-	}
-
-	_, err := output.buffer.Write(data)
-	if output.file != nil {
-		_, writeErr := output.file.Write(data)
-		err = errors.Join(err, writeErr, output.file.Sync())
-	}
-
-	return length, err
-}
 
 func workflowRunCommand(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string) (result WorkflowCommandResult, err error) {
 	run, err := claim.store.ReadWorkflow(ctx, claim.InvocationID)
@@ -56,7 +31,7 @@ func workflowRunCommand(ctx context.Context, claim *WorkflowClaim, prepared work
 	}
 
 	defer func() {
-		err = errors.Join(err, stdout.file.Close(), stderr.file.Close())
+		err = errors.Join(err, stdout.File.Close(), stderr.File.Close())
 	}()
 
 	gate, permit, err := os.Pipe()
@@ -109,7 +84,7 @@ func workflowCommandGroupStopped(pid int) bool {
 	return err == nil && !alive
 }
 
-func runWorkflowSupervisedProcess(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *workflowCommandOutput) (WorkflowCommandResult, error) {
+func runWorkflowSupervisedProcess(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) (WorkflowCommandResult, error) {
 	ownership, registered, registerErr := claim.store.registerWorkflowProcess(ctx, claim, prepared, command, process.Process.Pid)
 	if registerErr == nil && registered != index {
 		registerErr = workflowstate.ErrConflict
@@ -122,7 +97,7 @@ func runWorkflowSupervisedProcess(ctx context.Context, claim *WorkflowClaim, pre
 	closeErr := permit.Close()
 	err := errors.Join(registerErr, closeErr, process.Wait())
 
-	result := WorkflowCommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.buffer.String(), Stderr: stderr.buffer.String(), Truncated: stdout.truncated || stderr.truncated}
+	result := WorkflowCommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.Buffer.String(), Stderr: stderr.Buffer.String(), Truncated: stdout.Truncated || stderr.Truncated}
 	if process.ProcessState != nil {
 		result.ExitCode = process.ProcessState.ExitCode()
 	}

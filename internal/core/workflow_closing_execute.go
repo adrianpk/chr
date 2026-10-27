@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -63,9 +64,9 @@ func (s *WorkflowStore) prepareWorkflowClosingCheckout(ctx context.Context, clai
 		return "", err
 	}
 
-	reader := workflowIntegrationReader{dir: worktree}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: worktree}}
 	for _, argv := range [][]string{{"init", "--quiet"}, {"fetch", "--quiet", "--no-tags", "--", s.layout.ProjectDir(), claim.input.Target.Commit}, {"checkout", "--quiet", "--detach", claim.input.Target.Commit}} {
-		if _, err := reader.output(ctx, argv...); err != nil {
+		if _, err := reader.Output(ctx, argv...); err != nil {
 			return "", err
 		}
 	}
@@ -74,15 +75,15 @@ func (s *WorkflowStore) prepareWorkflowClosingCheckout(ctx context.Context, clai
 }
 
 func checkWorkflowClosingCheckout(ctx context.Context, directory string, input WorkflowClosingInput) error {
-	reader := workflowIntegrationReader{dir: directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
 	for expression, expected := range map[string]string{"HEAD^{commit}": input.Target.Commit, "HEAD^{tree}": input.Tree} {
-		actual, err := reader.output(ctx, "rev-parse", "--verify", expression)
+		actual, err := reader.Output(ctx, "rev-parse", "--verify", expression)
 		if err != nil || actual != expected {
 			return errorsOrConflict(err)
 		}
 	}
 
-	status, err := reader.output(ctx, "status", "--porcelain", "--untracked-files=all")
+	status, err := reader.Output(ctx, "status", "--porcelain", "--untracked-files=all")
 	if err != nil || status != "" {
 		return errorsOrConflict(err)
 	}

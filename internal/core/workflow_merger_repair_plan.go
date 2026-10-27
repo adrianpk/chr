@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -27,7 +28,7 @@ func PlanWorkflowMergerRepair(ctx context.Context, directory string, input Workf
 		return plan, nil
 	}
 
-	reader := workflowIntegrationReader{dir: directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
@@ -61,7 +62,7 @@ func (reader workflowIntegrationReader) mergerSemanticOwners(ctx context.Context
 
 	parent := proof.OriginCommit
 	for _, entry := range proof.History {
-		data, err := reader.rawOutput(ctx, "diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", parent, entry.Source, "--")
+		data, err := reader.RawOutput(ctx, "diff", "--name-only", "-z", "--no-renames", "--no-ext-diff", "--no-textconv", parent, entry.Source, "--")
 		if err != nil {
 			return nil, err
 		}

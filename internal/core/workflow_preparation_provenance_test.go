@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -72,7 +73,7 @@ func extendNativeCombinedSource(t *testing.T, f *workflowGitFixture) {
 func checkNativeCombinedObjects(t *testing.T, directory string, proof WorkflowIntegrationProof) {
 	t.Helper()
 
-	reader := workflowIntegrationReader{dir: directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
 	parents, err := reader.parents(t.Context(), proof.ResultCommit)
 
 	expected := []string{proof.BaseCommit}

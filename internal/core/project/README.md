@@ -19,3 +19,9 @@ ContainsPath does not resolve symlinks or replace a caller's authoritative path
 guard. WriteFileAtomically retains the existing adjacent .tmp replacement and
 errors; it does not replace bounded, synced workflow writes or authoring journals.
 Those remain distinct durability contracts owned by their callers.
+
+GitReader owns the existing Git command transport shared by guided checkpoints
+and native workflow Git readers. It retains the same flags, directory/environment
+selection, process-group cancellation, wait delay, output bounds and diagnostics.
+Native integration keeps preparation, credentials, signing and proof policy;
+authoring keeps checkpoint selection, hashes, references and mutation order.

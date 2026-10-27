@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -154,7 +155,7 @@ func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.C
 		return WorkflowIntegrationSignature{}, workflowstate.ErrConflict
 	}
 
-	data, err := reader.rawOutput(ctx, "cat-file", "commit", commit)
+	data, err := reader.RawOutput(ctx, "cat-file", "commit", commit)
 	if err != nil {
 		return WorkflowIntegrationSignature{}, err
 	}
@@ -230,16 +231,16 @@ func verifyWorkflowSSHSignature(ctx context.Context, payload, signature string, 
 func workflowCommitSSHCommand(ctx context.Context, input string, args ...string) (string, error) {
 	command := exec.CommandContext(ctx, "ssh-keygen", args...)
 	command.Stdin = strings.NewReader(input)
-	stdout, stderr := &workflowProviderOutput{}, &workflowCommandOutput{}
+	stdout, stderr := &opsfile.ProviderOutput{}, &opsfile.CommandOutput{}
 
 	command.Stdout, command.Stderr = stdout, stderr
 	if err := command.Run(); err != nil {
 		return "", fmt.Errorf("host commit signature operation failed: %w", err)
 	}
 
-	if stdout.overflow {
+	if stdout.Overflow {
 		return "", workflowstate.ErrConflict
 	}
 
-	return stdout.buffer.String(), nil
+	return stdout.Buffer.String(), nil
 }

@@ -28,7 +28,7 @@ var leafImports = map[string]map[string]bool{
 	"internal/core/authoring/generation": {coreImportPath + "quiz": true, coreImportPath + "workflow/state": true},
 	"internal/core/quiz":                 {coreImportPath + "authoring/state": true, coreImportPath + "ops/namespace": true, coreImportPath + "workflow/state": true},
 	"internal/core/gate":                 {coreImportPath + "configvalue": true},
-	"internal/core/project":              {coreImportPath + "database": true},
+	"internal/core/project":              {coreImportPath + "database": true, coreImportPath + "ops/file": true},
 	"internal/core/notify": {
 		coreImportPath + "database":         true,
 		coreImportPath + "contenthash":      true,

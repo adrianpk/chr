@@ -19,7 +19,7 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerCombinedRepair(ctx contex
 		return WorkflowMergerRepairState{}, err
 	}
 
-	if _, err := reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-write-fetch-head", "--", query.SourceDirectory, proof.ResultCommit); err != nil {
+	if _, err := reader.Output(ctx, "fetch", "--quiet", "--no-tags", "--no-write-fetch-head", "--", query.SourceDirectory, proof.ResultCommit); err != nil {
 		return WorkflowMergerRepairState{}, err
 	}
 

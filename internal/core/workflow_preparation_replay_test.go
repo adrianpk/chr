@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -45,9 +46,9 @@ func nativeOriginalCommit(t *testing.T, directory, tree, parent, author, date, e
 		header += "encoding " + encoding + "\n"
 	}
 
-	reader := workflowIntegrationReader{dir: directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
 
-	id, err := reader.rawInput(t.Context(), header+"\n"+message, "hash-object", "-t", "commit", "-w", "--stdin")
+	id, err := reader.RawInput(t.Context(), header+"\n"+message, "hash-object", "-t", "commit", "-w", "--stdin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,14 +82,14 @@ func TestNativeReplayProof(t *testing.T) {
 func checkNativeReplayMessages(t *testing.T, directory string, proof WorkflowIntegrationProof) {
 	t.Helper()
 
-	reader := workflowIntegrationReader{dir: directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: directory}}
 	for i, source := range proof.Provenance.Source {
-		original, err := reader.rawOutput(t.Context(), "cat-file", "commit", source.Commit)
+		original, err := reader.RawOutput(t.Context(), "cat-file", "commit", source.Commit)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		prepared, err := reader.rawOutput(t.Context(), "cat-file", "commit", proof.Provenance.Prepared[i].Commit)
+		prepared, err := reader.RawOutput(t.Context(), "cat-file", "commit", proof.Provenance.Prepared[i].Commit)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -184,7 +185,7 @@ func nativeReplayFix(t *testing.T, proof WorkflowIntegrationProof, lane Workflow
 	workflowIntegrationCommand(t, lane.Worktree, "add", "repair.txt")
 
 	tree := workflowIntegrationCommand(t, lane.Worktree, "write-tree")
-	reader := workflowIntegrationReader{dir: lane.Worktree}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: lane.Worktree}}
 	finding := workflowstate.ReviewFinding{Category: AgenticReviewFindingCorrectness, Title: "Retain integration output", Detail: "The combined validation requires this repair output."}
 
 	fixed, err := reader.prepareRebaseFix(t.Context(), proof, tree, finding)

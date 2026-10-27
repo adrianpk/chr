@@ -10,7 +10,7 @@ import (
 )
 
 func (reader workflowIntegrationReader) replayCommit(ctx context.Context, tree, parent, source string) (string, error) {
-	data, err := reader.rawOutput(ctx, "cat-file", "commit", source)
+	data, err := reader.RawOutput(ctx, "cat-file", "commit", source)
 	if err != nil {
 		return "", err
 	}
@@ -64,7 +64,7 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, t
 		return "", workflowstate.ErrConflict
 	}
 
-	id, err := reader.rawInput(ctx, data, "hash-object", "-t", "commit", "-w", "--stdin")
+	id, err := reader.RawInput(ctx, data, "hash-object", "-t", "commit", "-w", "--stdin")
 
 	return strings.TrimSpace(id), err
 }

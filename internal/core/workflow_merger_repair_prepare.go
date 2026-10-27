@@ -39,12 +39,12 @@ func (git OSWorkflowPreparationGit) newMergerRepairReader(ctx context.Context, q
 		return reader, err
 	}
 
-	parent := filepath.Dir(reader.dir)
+	parent := filepath.Dir(reader.Directory)
 	if resolved, err := filepath.EvalSymlinks(parent); err != nil || resolved != parent {
 		return reader, workflowstate.ErrConflict
 	}
 
-	if err := os.Mkdir(reader.dir, 0o700); err != nil {
+	if err := os.Mkdir(reader.Directory, 0o700); err != nil {
 		return reader, err
 	}
 
@@ -53,7 +53,7 @@ func (git OSWorkflowPreparationGit) newMergerRepairReader(ctx context.Context, q
 		format = "sha256"
 	}
 
-	if _, err := reader.output(ctx, "init", "--quiet", "--object-format="+format); err != nil {
+	if _, err := reader.Output(ctx, "init", "--quiet", "--object-format="+format); err != nil {
 		return reader, err
 	}
 
@@ -66,12 +66,12 @@ func (git OSWorkflowPreparationGit) newMergerRepairReader(ctx context.Context, q
 
 func (git OSWorkflowPreparationGit) importMergerRepairObjects(ctx context.Context, reader workflowIntegrationReader, query WorkflowPreparationQuery) error {
 	for _, fetch := range [][]string{{query.SourceDirectory, query.SourceCommit}, {git.transport.transport, "refs/heads/" + query.TargetBranch + ":refs/heads/target"}} {
-		if _, err := reader.output(ctx, append([]string{"fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--"}, fetch...)...); err != nil {
+		if _, err := reader.Output(ctx, append([]string{"fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--"}, fetch...)...); err != nil {
 			return err
 		}
 	}
 
-	base, err := reader.output(ctx, "rev-parse", "refs/heads/target^{commit}")
+	base, err := reader.Output(ctx, "rev-parse", "refs/heads/target^{commit}")
 	if err != nil || base != query.BaseCommit {
 		return fmt.Errorf("%w: canonical base moved during repair preparation", workflowstate.ErrConflict)
 	}
@@ -86,7 +86,7 @@ func (git OSWorkflowPreparationGit) importMergerRepairObjects(ctx context.Contex
 		return err
 	}
 
-	_, err = reader.output(ctx, "merge-base", "--is-ancestor", query.OriginCommit, query.SourceCommit)
+	_, err = reader.Output(ctx, "merge-base", "--is-ancestor", query.OriginCommit, query.SourceCommit)
 
 	return err
 }

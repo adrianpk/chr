@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -37,7 +38,7 @@ func (git OSWorkflowIntegrationGit) ReadWorkflowTarget(ctx context.Context, quer
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	reader := workflowIntegrationReader{dir: query.Directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: query.Directory}}
 	commit, err := reader.remoteTarget(ctx, git.transport, query.Branch)
 
 	return workflowstate.PreviewTarget{Repository: query.Repository, Commit: commit}, err
@@ -53,18 +54,18 @@ func (git OSWorkflowIntegrationGit) ObserveWorkflowTarget(ctx context.Context, q
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	reader := workflowIntegrationReader{dir: query.Directory}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: query.Directory}}
 
 	commit, err := reader.remoteTarget(ctx, git.transport, query.Branch)
 	if err != nil {
 		return workflowstate.PreviewTarget{}, err
 	}
 
-	if _, err := reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", git.transport, "refs/heads/"+query.Branch); err != nil {
+	if _, err := reader.Output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", git.transport, "refs/heads/"+query.Branch); err != nil {
 		return workflowstate.PreviewTarget{}, err
 	}
 
-	if _, err := reader.output(ctx, "cat-file", "-e", commit+"^{commit}"); err != nil {
+	if _, err := reader.Output(ctx, "cat-file", "-e", commit+"^{commit}"); err != nil {
 		return workflowstate.PreviewTarget{}, err
 	}
 
@@ -86,7 +87,7 @@ func (git OSWorkflowIntegrationGit) checkWorkflowTargetQuery(query WorkflowTarge
 }
 
 func (reader workflowIntegrationReader) remoteTarget(ctx context.Context, transport, branch string) (string, error) {
-	output, err := reader.output(ctx, "ls-remote", "--exit-code", "--", transport, "refs/heads/"+branch)
+	output, err := reader.Output(ctx, "ls-remote", "--exit-code", "--", transport, "refs/heads/"+branch)
 	if err != nil {
 		return "", err
 	}

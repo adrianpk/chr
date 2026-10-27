@@ -12,6 +12,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 type workflowPublicationBuffer struct {
@@ -33,7 +35,7 @@ func workflowPublicationCommand(ctx context.Context, name string, args ...string
 
 	command.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "GIT_NO_REPLACE_OBJECTS=1")
 	command.WaitDelay = time.Second
-	command.Stderr = &workflowCommandOutput{}
+	command.Stderr = &opsfile.CommandOutput{}
 	command.Cancel = func() error {
 		err := syscall.Kill(-command.Process.Pid, syscall.SIGKILL)
 		if errors.Is(err, syscall.ESRCH) {

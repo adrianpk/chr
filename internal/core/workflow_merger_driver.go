@@ -6,6 +6,8 @@ import (
 	"errors"
 	"io"
 	"os"
+
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 )
 
 type workflowMergerDriverResult struct {
@@ -29,7 +31,7 @@ func runWorkflowMergerDriver(ctx context.Context, claim *WorkflowClaim, prepared
 		return workflowMergerDriverResult{err: err}
 	}
 
-	defer func() { _ = stdout.file.Close(); _ = stderr.file.Close() }() //nolint:errcheck
+	defer func() { _ = stdout.File.Close(); _ = stderr.File.Close() }() //nolint:errcheck
 
 	gate, permit, err := os.Pipe()
 	if err != nil {
@@ -40,7 +42,7 @@ func runWorkflowMergerDriver(ctx context.Context, claim *WorkflowClaim, prepared
 	return executeWorkflowMergerDriver(ctx, claim, prepared, tools, call, gate, permit, index, stdout, stderr)
 }
 
-func executeWorkflowMergerDriver(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall, gate, permit *os.File, index int, stdout, stderr *workflowCommandOutput) workflowMergerDriverResult {
+func executeWorkflowMergerDriver(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall, gate, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) workflowMergerDriverResult {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 

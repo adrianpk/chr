@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -124,7 +125,7 @@ func moveNativeOutcomeRef(t *testing.T, ctx context.Context, f nativeSubmissionF
 		return
 	}
 
-	if _, err := (workflowIntegrationReader{dir: f.candidate.Lane.Worktree}).output(ctx, "--git-dir="+remote, "update-ref", ref, value); err != nil {
+	if _, err := (workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: f.candidate.Lane.Worktree}}).Output(ctx, "--git-dir="+remote, "update-ref", ref, value); err != nil {
 		t.Fatal(err)
 	}
 }

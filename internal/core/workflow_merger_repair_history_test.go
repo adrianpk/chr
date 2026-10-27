@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
 // TestNativeMergerReplaySteps retains each successive real conflict checkpoint
@@ -73,7 +75,7 @@ func TestNativeMergerRepairProof(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	reader := workflowIntegrationReader{dir: query.Lane.Worktree}
+	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: query.Lane.Worktree}}
 	if reader.verifyPublicationHistory(t.Context(), proof) == nil {
 		t.Fatal("recomputed hash hid a nondeterministic repaired tree")
 	}

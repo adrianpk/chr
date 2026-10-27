@@ -12,6 +12,8 @@ type leafDependencyCase struct {
 
 func leafDependencyCases() []leafDependencyCase {
 	return []leafDependencyCase{
+		{"project Git bounded output", "internal/core/project/git.go", "package project\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
+		{"bounded output project cycle", "internal/core/ops/file/output.go", "package file\nimport _ \"" + coreImportPath + "project\"\n", true},
 		{"legacy fields scalar codec", "internal/core/ticket/metadata/parse.go", "package metadata\nimport _ \"" + coreImportPath + "ops/metadata\"\n", false},
 		{"legacy fields authoring cycle", "internal/core/ticket/metadata/parse.go", "package metadata\nimport _ \"" + coreImportPath + "authoring\"\n", true},
 		{"authoring coordinator", "internal/core/authoring/session_value.go", "package authoring\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},

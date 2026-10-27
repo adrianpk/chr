@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -87,19 +88,19 @@ func (git OSWorkflowPreparationGit) validateQuery(query WorkflowPreparationQuery
 }
 
 func (git OSWorkflowPreparationGit) fetchPreparation(ctx context.Context, reader workflowIntegrationReader, query WorkflowPreparationQuery) error {
-	if _, err := reader.output(ctx, "init", "--bare", "--quiet"); err != nil {
+	if _, err := reader.Output(ctx, "init", "--bare", "--quiet"); err != nil {
 		return err
 	}
 
-	if _, err := reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--", query.SourceDirectory, query.SourceCommit); err != nil {
+	if _, err := reader.Output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--", query.SourceDirectory, query.SourceCommit); err != nil {
 		return err
 	}
 
-	if _, err := reader.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--", git.transport.transport, "refs/heads/"+query.TargetBranch+":refs/heads/target"); err != nil {
+	if _, err := reader.Output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--", git.transport.transport, "refs/heads/"+query.TargetBranch+":refs/heads/target"); err != nil {
 		return err
 	}
 
-	base, err := reader.output(ctx, "rev-parse", "refs/heads/target^{commit}")
+	base, err := reader.Output(ctx, "rev-parse", "refs/heads/target^{commit}")
 	if err != nil || base != query.BaseCommit {
 		return fmt.Errorf("%w: canonical base moved during preparation", workflowstate.ErrConflict)
 	}
@@ -109,7 +110,7 @@ func (git OSWorkflowPreparationGit) fetchPreparation(ctx context.Context, reader
 		return workflowstate.ErrConflict
 	}
 
-	if _, err := reader.output(ctx, "merge-base", "--is-ancestor", query.OriginCommit, query.SourceCommit); err != nil {
+	if _, err := reader.Output(ctx, "merge-base", "--is-ancestor", query.OriginCommit, query.SourceCommit); err != nil {
 		return workflowstate.ErrConflict
 	}
 
@@ -203,7 +204,7 @@ func (reader workflowIntegrationReader) preparationCommit(ctx context.Context, t
 }
 
 func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationReader, query WorkflowPreparationQuery, proof WorkflowIntegrationProof) error {
-	source := workflowIntegrationReader{dir: query.SourceDirectory}
+	source := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: query.SourceDirectory}}
 	branch := strings.TrimPrefix(query.Lane.Branch, "refs/heads/")
 	git := OSWorktreeGit{}
 
@@ -212,7 +213,7 @@ func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationRe
 		return errorsOrConflict(err)
 	}
 
-	if _, err := source.output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", reader.dir, proof.ResultCommit); err != nil {
+	if _, err := source.Output(ctx, "fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--", reader.Directory, proof.ResultCommit); err != nil {
 		return err
 	}
 

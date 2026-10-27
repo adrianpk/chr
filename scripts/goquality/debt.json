@@ -443,7 +443,7 @@
     },
     {
       "id": "internal/core/workflow_closing_command.go::WorkflowStore.waitWorkflowClosingCommand",
-      "signature": "func(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *workflowCommandOutput, base string) (WorkflowCommandResult, error)",
+      "signature": "func(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *opsfile.CommandOutput, base string) (WorkflowCommandResult, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -508,7 +508,7 @@
     },
     {
       "id": "internal/core/workflow_execution_command.go::runWorkflowSupervisedProcess",
-      "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *workflowCommandOutput) (WorkflowCommandResult, error)",
+      "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) (WorkflowCommandResult, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -768,7 +768,7 @@
     },
     {
       "id": "internal/core/workflow_merger_driver.go::executeWorkflowMergerDriver",
-      "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall, gate, permit *os.File, index int, stdout, stderr *workflowCommandOutput) workflowMergerDriverResult",
+      "signature": "func(ctx context.Context, claim *WorkflowClaim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall, gate, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) workflowMergerDriverResult",
       "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
@@ -943,7 +943,7 @@
     },
     {
       "id": "internal/core/workflow_process_record.go::WorkflowStore.workflowProcessOutput",
-      "signature": "func(claim *WorkflowClaim, index int) (stdout, stderr *workflowCommandOutput, err error)",
+      "signature": "func(claim *WorkflowClaim, index int) (stdout, stderr *opsfile.CommandOutput, err error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
