@@ -20,6 +20,20 @@ profile-name and selection-digest checks have one owner. Root and app consumers
 call the owner directly. Native command fencing retains its original workflow
 errors and execution checks.
 
+Runtime planning consumes its existing named artifact path set directly; the
+seven-result facade is removed. Canonical layout selection has a named outcome.
+Pi preparation returns distinct credential, call-resource, model-mount, container
+and publication records. Expected absence and publication stability remain
+separate from failure. Output limits, digest guards, credential refresh exclusion,
+cleanup ordering and finite deadlines are unchanged.
+
+The bridge derives and defers its own cancellation before input reading. The
+input watcher receives that exact cancellation handle and returns prompt/error;
+there is no stored operation context or context hidden inside a result record.
+The real malformed-input test now verifies cancellation on every error branch.
+The process exchange groups its two owned spools and retains explicit context,
+cancellation and protocol handler arguments.
+
 ## Implementation Notes
 
 The approved inventory assigns 38 signature occurrences and 30 current root
@@ -53,6 +67,20 @@ Focused implementation checks passed:
 - `make check-go-style`: 9304 declarations, ceiling seven, 237 debts, one external exception.
 
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/harness/... ./internal/core ./internal/app`
+
+The signature disposition ledger records ten fixed occurrences and six cohesive
+five-input contracts. Twenty-two assigned occurrences remain pending. Ten exact
+debt allowances are removed: 227 remain, with ceiling seven and one external
+exception unchanged. No migration debt or broader allowance is introduced.
+
+Focused runtime/resource and concurrency checks passed:
+
+- `go test ./internal/harness/pi ./internal/harness/process ./internal/core ./internal/app -run '^Test(Pi|AgentRunProcess|RuntimePlan|QualityRecordWire)' -count=1 -timeout=3m`
+- `go test ./internal/core ./internal/app ./internal/harness/pi ./internal/harness/codex -run '^Test(PlanRuntime|ValidateRuntime|RuntimeArtifactCleanup|HarnessBinding|QualityRecordWire|PiWorkerInput|PiWorkerPreparation|PiGenerationResources|PiGenerationResourceIdentity|Codex)' -count=1 -timeout=3m`: Codex compiled with no matching tests; runtime paths, resources and bridge preparation exercised directly.
+- `go test -race ./internal/harness/pi ./internal/harness/process -run '^Test(PiWorkerConnection(Bounds)?|PiCredentialRefresh(Failure|Reject|Deadline|Resources|Canceled|Home)?|PiTransportDriver|AgentRunProcess(Streams|Cancellation))$' -count=1 -timeout=3m`
+- `make check-go-style`: 9303 production declarations, 227 debts, unchanged ceiling and external exception.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/harness/... ./internal/core ./internal/app`: zero issues.
 
 ## Risks and Follow-ups
 

@@ -29,12 +29,12 @@ func ResolveWorkerResources(ctx context.Context, configDir, credentialRef, model
 		return WorkerResources{}, errors.New("configure an explicit private Pi worker credential reference")
 	}
 
-	_, oauth, err := workerCredential(resources.CredentialFile, provider)
+	credential, err := workerCredential(resources.CredentialFile, provider)
 	if err != nil {
 		return WorkerResources{}, err
 	}
 
-	if oauth {
+	if credential.oauth {
 		if err := validateRefreshDirectory(ctx, resources.CredentialFile); err != nil {
 			return WorkerResources{}, err
 		}
@@ -55,42 +55,47 @@ func ResolveWorkerResources(ctx context.Context, configDir, credentialRef, model
 		resources.ModelConfigHash = resourceHash(models)
 	}
 
-	return WorkerResources{GenerationResources: resources, OAuth: oauth}, nil
+	return WorkerResources{GenerationResources: resources, OAuth: credential.oauth}, nil
 }
 
-func workerCredential(path, provider string) ([]byte, bool, error) {
+type workerCredentialSelection struct {
+	data  []byte
+	oauth bool
+}
+
+func workerCredential(path, provider string) (workerCredentialSelection, error) {
 	if filepath.Base(path) == refreshLockName {
-		return nil, false, errors.New("pi credential filename is reserved for refresh exclusion")
+		return workerCredentialSelection{}, errors.New("pi credential filename is reserved for refresh exclusion")
 	}
 
 	data, err := readPrivateResource(path)
 	if err != nil {
-		return nil, false, err
+		return workerCredentialSelection{}, err
 	}
 
 	fields, err := workerCredentialFields(data, provider)
 	if err != nil {
-		return nil, false, err
+		return workerCredentialSelection{}, err
 	}
 
 	if fields["type"] == "api_key" {
-		selected, _, err := selectedCredential(path, provider)
+		selected, err := selectedCredential(path, provider)
 
-		return selected, false, err
+		return workerCredentialSelection{data: selected.data}, err
 	}
 
 	info, err := os.Lstat(path)
 	if err != nil || !privateArtifact(info) {
-		return nil, false, errors.New("pi OAuth credential owner requires a private regular file with one link")
+		return workerCredentialSelection{}, errors.New("pi OAuth credential owner requires a private regular file with one link")
 	}
 
 	if err := validateOAuthCredential(fields); err != nil {
-		return nil, false, err
+		return workerCredentialSelection{}, err
 	}
 
 	selected, err := json.Marshal(map[string]any{provider: fields})
 
-	return selected, true, err
+	return workerCredentialSelection{data: selected, oauth: true}, err
 }
 
 func validateOAuthCredential(fields map[string]any) error {
@@ -173,12 +178,12 @@ func WithWorkerCredential(ctx context.Context, source, private, provider string,
 		return err
 	}
 
-	_, oauth, err := workerCredential(source, provider)
+	credential, err := workerCredential(source, provider)
 	if err != nil {
 		return err
 	}
 
-	if oauth {
+	if credential.oauth {
 		lock, err := acquireRefreshLock(ctx, filepath.Join(filepath.Dir(source), refreshLockName))
 		if err != nil {
 			return err
@@ -190,18 +195,18 @@ func WithWorkerCredential(ctx context.Context, source, private, provider string,
 		}
 	}
 
-	original, currentOAuth, err := workerCredential(source, provider)
-	if err != nil || currentOAuth != oauth {
+	original, err := workerCredential(source, provider)
+	if err != nil || original.oauth != credential.oauth {
 		return errors.New("pi credential type changed during call preparation")
 	}
 
-	if err := writeCallArtifact(private, original); err != nil {
+	if err := writeCallArtifact(private, original.data); err != nil {
 		return errors.New("prepare private Pi worker authentication")
 	}
 
 	err = action()
-	if oauth {
-		err = errors.Join(err, publishRefreshedCredential(ctx, source, private, provider, original))
+	if credential.oauth {
+		err = errors.Join(err, publishRefreshedCredential(ctx, source, private, provider, original.data))
 	}
 
 	return err
@@ -251,16 +256,16 @@ func waitCredentialLock(ctx context.Context, file *os.File, mode int) error {
 }
 
 func publishRefreshedCredential(ctx context.Context, source, private, provider string, original []byte) error {
-	updated, oauth, err := workerCredential(private, provider)
-	if err != nil || !oauth {
+	updated, err := workerCredential(private, provider)
+	if err != nil || !updated.oauth {
 		return errors.New("pi refresh produced invalid credentials; retained credentials were preserved")
 	}
 
-	if string(updated) == string(original) {
+	if string(updated.data) == string(original) {
 		return nil
 	}
 
-	return atomicWorkerCredential(ctx, source, provider, original, updated)
+	return atomicWorkerCredential(ctx, source, provider, original, updated.data)
 }
 
 func atomicWorkerCredential(ctx context.Context, path, provider string, original, data []byte) (err error) {
@@ -274,8 +279,8 @@ func atomicWorkerCredential(ctx context.Context, path, provider string, original
 
 	defer func() { err = errors.Join(err, publication.Close()) }()
 
-	current, _, err := workerCredential(path, provider)
-	if err != nil || string(current) != string(original) {
+	current, err := workerCredential(path, provider)
+	if err != nil || string(current.data) != string(original) {
 		return errors.New("pi credential owner changed during refresh; refusing to overwrite it")
 	}
 
@@ -320,51 +325,56 @@ func openCredentialPublication(ctx context.Context, path string, mode int) (*os.
 			return nil, err
 		}
 
-		file, stable, err := openStableCredentialPublication(ctx, path, mode)
+		publication, err := openStableCredentialPublication(ctx, path, mode)
 		if err != nil {
 			return nil, err
 		}
 
-		if stable {
-			return file, nil
+		if publication.stable {
+			return publication.file, nil
 		}
 	}
 }
 
-func openStableCredentialPublication(ctx context.Context, path string, mode int) (*os.File, bool, error) {
+type credentialPublication struct {
+	file   *os.File
+	stable bool
+}
+
+func openStableCredentialPublication(ctx context.Context, path string, mode int) (credentialPublication, error) {
 	file, err := os.OpenFile(path, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
 	if err != nil {
-		return nil, false, errors.New("pi credential publication owner is unavailable")
+		return credentialPublication{}, errors.New("pi credential publication owner is unavailable")
 	}
 
 	info, err := file.Stat()
 	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o077 != 0 {
-		return nil, false, errors.Join(errors.New("pi credential publication requires a private regular file"), file.Close())
+		return credentialPublication{}, errors.Join(errors.New("pi credential publication requires a private regular file"), file.Close())
 	}
 
 	if err := waitCredentialLock(ctx, file, mode); err != nil {
-		return nil, false, errors.Join(err, file.Close())
+		return credentialPublication{}, errors.Join(err, file.Close())
 	}
 
 	current, err := os.Lstat(path)
 	if err != nil {
-		return nil, false, errors.Join(err, file.Close())
+		return credentialPublication{}, errors.Join(err, file.Close())
 	}
 
 	if !os.SameFile(info, current) {
 		closeErr := file.Close()
 		if mode == syscall.LOCK_EX {
-			return nil, false, errors.Join(errors.New("pi credential owner changed during publication"), closeErr)
+			return credentialPublication{}, errors.Join(errors.New("pi credential owner changed during publication"), closeErr)
 		}
 
-		return nil, false, closeErr
+		return credentialPublication{}, closeErr
 	}
 
 	if !privateArtifact(current) {
-		return nil, false, errors.Join(errors.New("pi credential publication owner is not private"), file.Close())
+		return credentialPublication{}, errors.Join(errors.New("pi credential publication owner is not private"), file.Close())
 	}
 
-	return file, true, nil
+	return credentialPublication{file: file, stable: true}, nil
 }
 
 func validateRefreshDirectoryPath(dir string) error {

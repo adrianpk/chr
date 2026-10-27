@@ -28,7 +28,7 @@ func ResolveResources(configDir, credentialRef, modelRef, provider string) (harn
 	}
 
 	resources.CredentialFile = resourcePath(configDir, credentialRef)
-	if _, _, err := selectedCredential(resources.CredentialFile, provider); err != nil {
+	if _, err := selectedCredential(resources.CredentialFile, provider); err != nil {
 		return resources, err
 	}
 
@@ -74,15 +74,20 @@ func readPrivateResource(path string) (data []byte, err error) {
 	return data, nil
 }
 
-func selectedCredential(path, provider string) ([]byte, string, error) {
+type credentialSelection struct {
+	data   []byte
+	secret string
+}
+
+func selectedCredential(path, provider string) (credentialSelection, error) {
 	data, err := readPrivateResource(path)
 	if err != nil {
-		return nil, "", err
+		return credentialSelection{}, err
 	}
 
 	var credentials map[string]json.RawMessage
 	if err := json.Unmarshal(data, &credentials); err != nil {
-		return nil, "", errors.New("pi credentials require a provider mapping")
+		return credentialSelection{}, errors.New("pi credentials require a provider mapping")
 	}
 
 	var credential struct {
@@ -94,16 +99,16 @@ func selectedCredential(path, provider string) ([]byte, string, error) {
 	decoder.DisallowUnknownFields()
 
 	if err := decoder.Decode(&credential); err != nil || credential.Type != "api_key" || credential.Key == "" {
-		return nil, "", fmt.Errorf("selected Pi provider requires a static API-key credential; OAuth needs a refresh owner: %w", ErrCapability)
+		return credentialSelection{}, fmt.Errorf("selected Pi provider requires a static API-key credential; OAuth needs a refresh owner: %w", ErrCapability)
 	}
 
 	if strings.HasPrefix(credential.Key, "!") || strings.ContainsAny(credential.Key, "$\x00\r\n") {
-		return nil, "", fmt.Errorf("dynamic Pi credential commands and environment expansion are unsupported: %w", ErrCapability)
+		return credentialSelection{}, fmt.Errorf("dynamic Pi credential commands and environment expansion are unsupported: %w", ErrCapability)
 	}
 
 	selected, err := json.Marshal(map[string]any{provider: credential})
 
-	return selected, credential.Key, err
+	return credentialSelection{data: selected, secret: credential.Key}, err
 }
 
 func selectedModels(path, provider string) ([]byte, error) {
@@ -224,19 +229,25 @@ func resourceHash(data []byte) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func loadCallResources(resources harness.GenerationResources, provider string) ([]byte, []byte, string, error) {
-	auth, secret, err := selectedCredential(resources.CredentialFile, provider)
+type callResources struct {
+	auth   []byte
+	models []byte
+	secret string
+}
+
+func loadCallResources(resources harness.GenerationResources, provider string) (callResources, error) {
+	auth, err := selectedCredential(resources.CredentialFile, provider)
 	if err != nil {
-		return nil, nil, "", err
+		return callResources{}, err
 	}
 
 	var models []byte
 	if resources.ModelConfigFile != "" {
 		models, err = selectedModels(resources.ModelConfigFile, provider)
 		if err != nil || resourceHash(models) != resources.ModelConfigHash {
-			return nil, nil, "", errors.New("selected Pi model configuration changed or is unavailable; restore its frozen definition")
+			return callResources{}, errors.New("selected Pi model configuration changed or is unavailable; restore its frozen definition")
 		}
 	}
 
-	return auth, models, secret, nil
+	return callResources{auth: auth.data, models: models, secret: auth.secret}, nil
 }

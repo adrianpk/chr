@@ -1,7 +1,6 @@
 package pi
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
@@ -23,11 +22,13 @@ func TestPiWorkerConnection(t *testing.T) {
 
 	go func() { _, _ = fmt.Fprint(writer, "4\ntask") }() //nolint:errcheck // Reader assertions report a broken fixture.
 
-	prompt, ctx, cancel, err := ReadWorkerInput(t.Context(), reader)
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	prompt, err := ReadWorkerInput(ctx, reader, cancel)
 	if err != nil || prompt != "task" || ctx.Err() != nil {
 		t.Fatalf("host input failed: %q, %v", prompt, err)
 	}
-	defer cancel()
 
 	if err := writer.Close(); err != nil {
 		t.Fatal(err)
@@ -54,8 +55,15 @@ func TestPiWorkerConnectionBounds(t *testing.T) {
 		{"short payload", "4\nab", io.ErrUnexpectedEOF},
 	} {
 		t.Run(scenario.name, func(t *testing.T) {
-			if _, err := readWorkerPrompt(bufio.NewReader(strings.NewReader(scenario.data))); !errors.Is(err, scenario.want) {
+			ctx, cancel := context.WithCancel(t.Context())
+			defer cancel()
+
+			if _, err := ReadWorkerInput(ctx, strings.NewReader(scenario.data), cancel); !errors.Is(err, scenario.want) {
 				t.Fatalf("input boundary: %v, want %v", err, scenario.want)
+			}
+
+			if !errors.Is(ctx.Err(), context.Canceled) {
+				t.Fatal("failed input retained its owned runtime context")
 			}
 		})
 	}
@@ -63,8 +71,7 @@ func TestPiWorkerConnectionBounds(t *testing.T) {
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
 
-	_, _, release, err := ReadWorkerInput(ctx, strings.NewReader("4\ntask"))
-	release()
+	_, err := ReadWorkerInput(ctx, strings.NewReader("4\ntask"), cancel)
 
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("canceled host admitted input: %v", err)

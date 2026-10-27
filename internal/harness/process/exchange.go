@@ -31,7 +31,7 @@ func (e Executor) Exchange(ctx context.Context, command harness.AgentCommand, st
 	}
 	defer func() { err = errors.Join(err, diagnostic.remove()) }()
 
-	err = exchangeCommand(ctx, command, out, diagnostic, cancel, handle)
+	err = exchangeCommand(ctx, command, exchangeStreams{stdout: out, stderr: diagnostic}, cancel, handle)
 	// Keep one record of lookahead so sanitization precedes excerpt truncation.
 	stdout, outErr := out.read(harness.MaxDiagnostic + harness.MaxRecord)
 	stderr, diagnosticErr := diagnostic.read(harness.MaxStderr)
@@ -40,10 +40,15 @@ func (e Executor) Exchange(ctx context.Context, command harness.AgentCommand, st
 	return result, errors.Join(err, out.err, diagnostic.err, outErr, diagnosticErr, callerCtx.Err())
 }
 
-func exchangeCommand(ctx context.Context, command harness.AgentCommand, out, diagnostic *spool, cancel context.CancelFunc, handle func(io.Reader, io.WriteCloser, context.CancelFunc) error) (err error) {
+type exchangeStreams struct {
+	stdout *spool
+	stderr *spool
+}
+
+func exchangeCommand(ctx context.Context, command harness.AgentCommand, streams exchangeStreams, cancel context.CancelFunc, handle func(io.Reader, io.WriteCloser, context.CancelFunc) error) (err error) {
 	cmd := ownedCommand(ctx, command, "")
 	cmd.Stdin = nil
-	cmd.Stderr = diagnostic
+	cmd.Stderr = streams.stderr
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -61,7 +66,7 @@ func exchangeCommand(ctx context.Context, command harness.AgentCommand, out, dia
 		return err
 	}
 
-	reader := io.TeeReader(stdout, out)
+	reader := io.TeeReader(stdout, streams.stdout)
 	err = handle(reader, &exchangeInput{WriteCloser: stdin, remaining: harness.MaxInput}, cancel)
 	closeErr := closeExchangePipe(stdin)
 

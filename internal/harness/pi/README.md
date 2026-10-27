@@ -73,3 +73,10 @@ RPC context, and adopted detached tools are stopped and reaped before capacity
 or refreshed credentials are released. Normalized output remains distinct from
 host task validation and publication. Protocol streams stay ephemeral; provider
 failure details are redacted with the current credentials before excerpting.
+
+Private resource preparation returns named credential, model and publication
+records. Selected bytes, redaction secrets, OAuth classification, optional mounts
+and publication stability retain separate meanings. The bridge caller derives
+its operation context and defers cancellation before reading input; the input
+watcher receives only that explicit cancellation handle. Every input failure
+cancels the same operation before reservations or model execution can continue.

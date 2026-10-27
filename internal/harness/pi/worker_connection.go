@@ -70,14 +70,14 @@ func workerHeartbeats(ctx context.Context, done <-chan struct{}, stdin io.Writer
 }
 
 // ReadWorkerInput reads one bounded raw context followed by host heartbeats.
-// Losing the connection cancels the same context that owns Pi and its pipes,
+// The caller derives ctx and owns cancel for Pi, its reservations and pipes.
+// Losing the connection cancels that same operation,
 // including when a host is killed without an opportunity to run cleanup.
-func ReadWorkerInput(ctx context.Context, input io.Reader) (string, context.Context, context.CancelFunc, error) {
-	ctx, cancel := context.WithCancel(ctx)
+func ReadWorkerInput(ctx context.Context, input io.Reader, cancel context.CancelFunc) (string, error) {
 	if err := ctx.Err(); err != nil {
 		cancel()
 
-		return "", ctx, cancel, err
+		return "", err
 	}
 
 	reader := bufio.NewReader(input)
@@ -98,21 +98,21 @@ func ReadWorkerInput(ctx context.Context, input io.Reader) (string, context.Cont
 	case <-ctx.Done():
 		cancel()
 
-		return "", ctx, cancel, ctx.Err()
+		return "", ctx.Err()
 	case <-time.After(workerConnectionTimeout):
 		cancel()
 
-		return "", ctx, cancel, errors.New("pi worker host connection expired during input")
+		return "", errors.New("pi worker host connection expired during input")
 	case prepared := <-ready:
 		if prepared.err != nil {
 			cancel()
 
-			return "", ctx, cancel, prepared.err
+			return "", prepared.err
 		}
 
 		go watchWorkerConnection(ctx, reader, cancel)
 
-		return prepared.prompt, ctx, cancel, nil
+		return prepared.prompt, nil
 	}
 }
 

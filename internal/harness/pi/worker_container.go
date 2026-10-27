@@ -70,13 +70,13 @@ func RunWorkerContainer(ctx context.Context, request WorkerLaunch) (output []byt
 	}
 	defer func() { err = errors.Join(err, os.RemoveAll(private)) }()
 
-	command, name, err := prepareWorkerContainer(ctx, request, private)
+	container, err := prepareWorkerContainer(ctx, request, private)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { err = errors.Join(err, removeWorkerContainer(ctx, command.Program, name)) }()
+	defer func() { err = errors.Join(err, removeWorkerContainer(ctx, container.command.Program, container.name)) }()
 
-	response, err := (process.Executor{Secrets: workerCredentialSecrets(request.Options.CredentialFile)}).Exchange(ctx, command, time.Now(), func(stdout io.Reader, stdin io.WriteCloser, _ context.CancelFunc) error {
+	response, err := (process.Executor{Secrets: workerCredentialSecrets(request.Options.CredentialFile)}).Exchange(ctx, container.command, time.Now(), func(stdout io.Reader, stdin io.WriteCloser, _ context.CancelFunc) error {
 		return exchangeWorkerInput(ctx, stdout, stdin, request.Prompt, &output)
 	})
 	if err != nil {
@@ -102,17 +102,22 @@ func validateWorkerOptions(options WorkerRuntimeOptions) error {
 	return nil
 }
 
-func prepareWorkerContainer(ctx context.Context, request WorkerLaunch, private string) (harness.AgentCommand, string, error) {
+type workerContainer struct {
+	command harness.AgentCommand
+	name    string
+}
+
+func prepareWorkerContainer(ctx context.Context, request WorkerLaunch, private string) (workerContainer, error) {
 	options := request.Options
 
 	resources, err := ResolveWorkerResources(ctx, "", options.CredentialFile, options.ModelFile, options.Provider)
 	if err != nil || resources.ModelConfigHash != options.ModelHash || resources.OAuth != options.OAuth {
-		return harness.AgentCommand{}, "", errors.New("pi worker resources changed or are unavailable; restore the admitted profile resources")
+		return workerContainer{}, errors.New("pi worker resources changed or are unavailable; restore the admitted profile resources")
 	}
 
 	prepared, err := prepareWorkerMounts(request, private)
 	if err != nil {
-		return harness.AgentCommand{}, "", err
+		return workerContainer{}, err
 	}
 
 	name := filepath.Base(private)
@@ -125,7 +130,7 @@ func prepareWorkerContainer(ctx context.Context, request WorkerLaunch, private s
 	for _, mount := range prepared.mounts {
 		argument, err := workerMountArgument(mount)
 		if err != nil {
-			return harness.AgentCommand{}, "", err
+			return workerContainer{}, err
 		}
 
 		args = append(args, "--mount", argument)
@@ -137,7 +142,7 @@ func prepareWorkerContainer(ctx context.Context, request WorkerLaunch, private s
 		args = append(args, "--model-file", "/chr-models.json")
 	}
 
-	return harness.AgentCommand{Program: "docker", Args: args, Dir: request.Directory}, name, nil
+	return workerContainer{command: harness.AgentCommand{Program: "docker", Args: args, Dir: request.Directory}, name: name}, nil
 }
 
 func workerContainerArguments(request WorkerLaunch, name string) []string {
@@ -212,27 +217,32 @@ func removeWorkerContainer(ctx context.Context, program, name string) error {
 	return nil
 }
 
-func workerModelMount(options WorkerRuntimeOptions, private string) (*harness.RuntimeMount, bool, error) {
+type workerModelBinding struct {
+	mount   *harness.RuntimeMount
+	gateway bool
+}
+
+func workerModelMount(options WorkerRuntimeOptions, private string) (workerModelBinding, error) {
 	if options.ModelFile == "" {
-		return nil, false, nil
+		return workerModelBinding{}, nil
 	}
 
 	models, err := selectedModels(options.ModelFile, options.Provider)
 	if err != nil || resourceHash(models) != options.ModelHash {
-		return nil, false, errors.New("pi worker model semantics changed during preparation")
+		return workerModelBinding{}, errors.New("pi worker model semantics changed during preparation")
 	}
 
 	path := filepath.Join(private, "models.json")
 	if err := os.WriteFile(path, models, 0o600); err != nil {
-		return nil, false, err
+		return workerModelBinding{}, err
 	}
 
 	gateway, err := workerModelNetwork(models)
 	if err != nil {
-		return nil, false, err
+		return workerModelBinding{}, err
 	}
 
-	return &harness.RuntimeMount{Source: path, Target: "/chr-models.json", ReadOnly: true}, gateway, nil
+	return workerModelBinding{mount: &harness.RuntimeMount{Source: path, Target: "/chr-models.json", ReadOnly: true}, gateway: gateway}, nil
 }
 
 type workerMountSet struct {
@@ -261,14 +271,14 @@ func prepareWorkerMounts(request WorkerLaunch, private string) (workerMountSet, 
 		mounts = append(mounts, harness.RuntimeMount{Source: options.CredentialFile, Target: authTarget, ReadOnly: true})
 	}
 
-	modelMount, gateway, err := workerModelMount(options, private)
+	model, err := workerModelMount(options, private)
 	if err != nil {
 		return workerMountSet{}, err
 	}
 
-	if modelMount != nil {
-		mounts = append(mounts, *modelMount)
+	if model.mount != nil {
+		mounts = append(mounts, *model.mount)
 	}
 
-	return workerMountSet{mounts: mounts, authTarget: authTarget, gateway: gateway}, nil
+	return workerMountSet{mounts: mounts, authTarget: authTarget, gateway: model.gateway}, nil
 }

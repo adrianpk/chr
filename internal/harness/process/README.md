@@ -16,3 +16,7 @@ An independently owned Linux worker bridge can enable child adoption and reap
 model tools that detached from the original process group. This capability is
 never enabled on a shared application host. Reaping completes before the bridge
 releases its existing runtime capacity reservation.
+
+An exchange keeps its stdout and stderr spools in one owned stream record.
+The context, cancellation handle and protocol handler stay explicit arguments;
+stream lifetime and cleanup remain within Exchange.

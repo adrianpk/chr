@@ -82,7 +82,7 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 	workspaceDir := filepath.Join(executionWorkspaceDir, workspacecore.DirectoryName)
 	dockerfilePath := projectcore.ResolvePath(projectDir, config.DockerfilePath)
 
-	artifactDir, runArtifactDir, workerContextPath, resultPath, logPath, validationPath, err := runtimeArtifactPaths(projectDir, executionWorkspaceDir, config.ArtifactDir, opts)
+	paths, err := runtimeArtifactPaths(projectDir, executionWorkspaceDir, config.ArtifactDir, opts)
 	if err != nil {
 		return RuntimePlan{}, err
 	}
@@ -102,12 +102,12 @@ func PlanRuntime(opts RuntimePlanOptions) (RuntimePlan, error) {
 		Image:                 config.Image,
 		ContainerWorkdir:      config.Workdir,
 		Mounts:                append(runtimeMounts(projectDir, executionWorkspaceDir, workspace.Mode, config.Workdir), opts.ExtraMounts...),
-		ArtifactDir:           artifactDir,
-		RunArtifactDir:        runArtifactDir,
-		WorkerContextPath:     workerContextPath,
-		ResultPath:            resultPath,
-		LogPath:               logPath,
-		ValidationPath:        validationPath,
+		ArtifactDir:           paths.artifactDir,
+		RunArtifactDir:        paths.runArtifactDir,
+		WorkerContextPath:     paths.workerContextPath,
+		ResultPath:            paths.resultPath,
+		LogPath:               paths.logPath,
+		ValidationPath:        paths.validationPath,
 		ValidationCommand:     config.ValidationCommand,
 	}, nil
 }
@@ -177,34 +177,14 @@ type runtimeArtifactPathSet struct {
 	validationPath    string
 }
 
-func runtimeArtifactPaths(
-	projectDir string,
-	executionWorkspaceDir string,
-	configuredArtifactDir string,
-	opts RuntimePlanOptions,
-) (string, string, string, string, string, string, error) {
-	paths, err := runtimeArtifactPathSetFor(projectDir, executionWorkspaceDir, configuredArtifactDir, opts)
-	if err != nil {
-		return "", "", "", "", "", "", err
-	}
-
-	return paths.artifactDir,
-		paths.runArtifactDir,
-		paths.workerContextPath,
-		paths.resultPath,
-		paths.logPath,
-		paths.validationPath,
-		nil
-}
-
-func runtimeArtifactPathSetFor(projectDir, executionWorkspaceDir, configuredArtifactDir string, opts RuntimePlanOptions) (runtimeArtifactPathSet, error) {
-	layout, artifactID, canonical, err := runtimeOpsLayout(projectDir, configuredArtifactDir, opts)
+func runtimeArtifactPaths(projectDir, executionWorkspaceDir, configuredArtifactDir string, opts RuntimePlanOptions) (runtimeArtifactPathSet, error) {
+	selected, err := runtimeOpsLayout(projectDir, configuredArtifactDir, opts)
 	if err != nil {
 		return runtimeArtifactPathSet{}, err
 	}
 
-	if canonical {
-		return canonicalRuntimeArtifactPaths(layout, artifactID, opts)
+	if selected.canonical {
+		return canonicalRuntimeArtifactPaths(selected.layout, selected.artifactID, opts)
 	}
 
 	return privateRuntimeArtifactPaths(executionWorkspaceDir, configuredArtifactDir, opts), nil
@@ -270,26 +250,32 @@ func privateRunArtifactDir(artifactDir string, opts RuntimePlanOptions) string {
 	return artifactDir
 }
 
-func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlanOptions) (opscore.Layout, string, bool, error) {
+type runtimeArtifactLayout struct {
+	layout     opscore.Layout
+	artifactID string
+	canonical  bool
+}
+
+func runtimeOpsLayout(projectDir, configuredArtifactDir string, opts RuntimePlanOptions) (runtimeArtifactLayout, error) {
 	if opts.OpsLayout != nil || opts.ArtifactID != "" {
 		if opts.OpsLayout == nil || strings.TrimSpace(opts.ArtifactID) == "" {
-			return opscore.Layout{}, "", false, fmt.Errorf("canonical ops layout and artifact id are required together")
+			return runtimeArtifactLayout{}, fmt.Errorf("canonical ops layout and artifact id are required together")
 		}
 
-		return *opts.OpsLayout, strings.TrimSpace(opts.ArtifactID), true, nil
+		return runtimeArtifactLayout{layout: *opts.OpsLayout, artifactID: strings.TrimSpace(opts.ArtifactID), canonical: true}, nil
 	}
 
 	artifactDir := filepath.ToSlash(filepath.Clean(filepath.FromSlash(strings.TrimSpace(configuredArtifactDir))))
 	if artifactDir == PrivateRuntimeArtifactDir {
 		layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: projectDir})
 		if err != nil {
-			return opscore.Layout{}, "", false, err
+			return runtimeArtifactLayout{}, err
 		}
 
-		return layout, "", true, nil
+		return runtimeArtifactLayout{layout: layout, canonical: true}, nil
 	}
 
-	return opscore.Layout{}, "", false, nil
+	return runtimeArtifactLayout{}, nil
 }
 
 func runtimeMounts(projectDir, executionWorkspaceDir string, mode WorkWorkspaceMode, workdir string) []harness.RuntimeMount {

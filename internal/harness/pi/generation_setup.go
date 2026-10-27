@@ -10,7 +10,7 @@ import (
 )
 
 func prepareGenerationCall(request harness.AgentRunRequest) (call generationCall, err error) {
-	auth, models, secret, err := loadCallResources(request.Resources, request.ModelProvider)
+	resources, err := loadCallResources(request.Resources, request.ModelProvider)
 	if err != nil {
 		return call, err
 	}
@@ -25,13 +25,13 @@ func prepareGenerationCall(request harness.AgentRunRequest) (call generationCall
 		}
 	}()
 
-	call.result, call.secret = generationResult(request), secret
+	call.result, call.secret = generationResult(request), resources.secret
 
 	if err := writeGenerationInput(call, request); err != nil {
 		return call, err
 	}
 
-	if err := writePrivateCallFiles(call.privateDir, auth, models); err != nil {
+	if err := writePrivateCallFiles(call.privateDir, resources.auth, resources.models); err != nil {
 		return call, err
 	}
 

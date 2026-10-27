@@ -140,11 +140,13 @@ func (factory commandFactory) runPiBridge(ctx context.Context, cmd *cli.Command)
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	prompt, ctx, cancel, err := pi.ReadWorkerInput(ctx, factory.io.Stdin)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	prompt, err := pi.ReadWorkerInput(ctx, factory.io.Stdin, cancel)
 	if err != nil {
 		return err
 	}
-	defer cancel()
 
 	release, err := core.HoldWorkerRuntimeReservation(ctx, core.WorkerRuntimeReservation{Slot: cmd.String("slot"), Guard: cmd.String("guard")})
 	if err != nil {
