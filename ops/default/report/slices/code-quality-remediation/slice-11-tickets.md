@@ -30,10 +30,10 @@ commits with direct consumers and preserved durable/wire contracts.
 The move ledger reconciles 723 declaration/test preimages after explicit contract
 prerequisites, namespace qualification, naming and signature formatting. Durable
 fields, order, text/JSON bytes, timestamps, empty values, legacy aliases and error
-meanings are unchanged. Twenty-eight assigned signatures now use cohesive owner state or
-named outcomes. The partial disposition ledger records 21 fixes, with seven new result contracts awaiting their commit references; remaining
+meanings are unchanged. Thirty-four assigned signatures now use cohesive owner state or
+named outcomes. The partial disposition ledger records 28 fixes, with six new operation/result contracts awaiting their commit references; remaining
 assigned signatures and watches are open. The global policy remains at ceiling
-seven with 180 exact debts and one external exception.
+seven with 174 exact debts and one external exception.
 
 ## Files of Interest
 
@@ -243,6 +243,20 @@ remain at ceiling seven.
 
 - `make check-go-style`: 9307 declarations, ceiling seven, 180 exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui`: zero issues after the result changes.
+
+Legacy observation owns its per-pass stream budget/output and one stream source
+identity, retaining 32-read limits, increments, event filters and context routing.
+Rejected remote records consume existing parse options and retain original ID/time
+defaults and rejection validation. The existing SQL row decodes its own fields
+with unchanged parse/error order. Review planning consumes existing operation
+options and a named state/status transition with unchanged result/guard/write
+semantics, including agentic callers. This closes all five remaining assigned
+high-arity inputs and one result entry: 174 exact debts remain at ceiling seven.
+
+- `go test ./internal/core ./internal/app ./internal/tui -run '^Test(RemoteCommand|TelegramRemoteCommand|TicketReviewCommand|RunTicketReviewCommand|WorkObservation|ObserveWork|QualityStorage|QualityRecordWire|TicketDocument|AgenticReview)' -count=1 -timeout=3m`: passed; TUI compiled with no selected tests.
+
+- `make check-go-style`: 9307 declarations, ceiling seven, 174 exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/app ./internal/tui`: zero issues after the operation input changes.
 
 ## Risks and Follow-ups
 

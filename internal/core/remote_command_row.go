@@ -81,3 +81,29 @@ func insertRemoteCommandRecordSQL() string {
 func selectRemoteCommandRecordSQL() string {
 	return `SELECT ` + remoteCommandColumns + ` FROM remote_command_records`
 }
+
+func (row remoteCommandRow) decoded() (RemoteCommandRecord, error) {
+	record := row.record
+
+	var err error
+
+	record.Status = RemoteCommandRecordStatus(row.status)
+	record.Request.Intent = RemoteCommandIntent(row.intent)
+
+	record.Request.ReceivedAt, err = database.ParseTime(row.receivedAt)
+	if err != nil {
+		return RemoteCommandRecord{}, err
+	}
+
+	record.Request.CreatedAt, err = database.ParseTime(row.createdAt)
+	if err != nil {
+		return RemoteCommandRecord{}, err
+	}
+
+	record.Request.Loop, err = decodeRemoteCommandLoop(row.loop, record.Request.Loop.MaxIterations)
+	if err != nil {
+		return RemoteCommandRecord{}, err
+	}
+
+	return record, nil
+}

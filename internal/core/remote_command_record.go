@@ -43,16 +43,9 @@ func NewAcceptedRemoteCommandRecord(request RemoteCommandRequest) (RemoteCommand
 }
 
 // NewRejectedRemoteCommandRecord constructs the corresponding package service or value.
-func NewRejectedRemoteCommandRecord(
-	request RemoteCommandRequest,
-	rawText string,
-	sender RemoteCommandSender,
-	reason string,
-	receivedAt time.Time,
-	createdAt time.Time,
-) (RemoteCommandRecord, error) {
+func NewRejectedRemoteCommandRecord(request RemoteCommandRequest, opts RemoteCommandParseOptions, reason string) (RemoteCommandRecord, error) {
 	if request.ID == "" {
-		request = rejectedRemoteCommandRequest(rawText, sender, receivedAt, createdAt)
+		request = rejectedRemoteCommandRequest(opts.Text, opts.Sender, opts.ReceivedAt, opts.CreatedAt)
 	}
 
 	record := RemoteCommandRecord{
@@ -154,12 +147,7 @@ func shellQuoteRemoteArgument(value string) string {
 	return "'" + strings.ReplaceAll(value, "'", "'\\''") + "'"
 }
 
-func rejectedRemoteCommandRequest(
-	rawText string,
-	sender RemoteCommandSender,
-	receivedAt time.Time,
-	createdAt time.Time,
-) RemoteCommandRequest {
+func rejectedRemoteCommandRequest(rawText string, sender RemoteCommandSender, receivedAt, createdAt time.Time) RemoteCommandRequest {
 	if receivedAt.IsZero() {
 		receivedAt = time.Unix(0, 0).UTC()
 	}

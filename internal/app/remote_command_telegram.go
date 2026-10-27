@@ -33,11 +33,8 @@ func remoteCommandRecordFromTelegramUpdate(update telegramcore.Update, now time.
 
 	return core.NewRejectedRemoteCommandRecord(
 		core.RemoteCommandRequest{},
-		update.Message.Text,
-		sender,
+		core.RemoteCommandParseOptions{Text: update.Message.Text, Sender: sender, ReceivedAt: receivedAt, CreatedAt: now},
 		err.Error(),
-		receivedAt,
-		now,
 	)
 }
 

@@ -7,16 +7,6 @@
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/app/service_work_observation_legacy.go::service.observeLegacyContext",
-      "signature": "func(ctx context.Context, result *WorkObservation, current *WorkContext, path, executionID, loopID string, streams *int) error",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/app/service_work_observation_legacy.go::service.observeLegacyActivity",
-      "signature": "func(ctx context.Context, result *WorkObservation, current *WorkContext, path, executionID, loopID string, streams *int) error",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/app/service_workflow_control_read.go::service.ReadWorkControlReceipt",
       "signature": "func(ctx context.Context, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -72,16 +62,6 @@
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/remote_command_record.go::NewRejectedRemoteCommandRecord",
-      "signature": "func(request RemoteCommandRequest, rawText string, sender RemoteCommandSender, reason string, receivedAt time.Time, createdAt time.Time) (RemoteCommandRecord, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/remote_command_record_repository.go::finishScannedRemoteCommandRecord",
-      "signature": "func(record RemoteCommandRecord, status string, intent string, receivedAt string, createdAt string, loop remoteCommandLoopColumns) (RemoteCommandRecord, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/review_provider_diagnostics.go::parseReviewProviderURL",
       "signature": "func(rawURL string) (*url.URL, []string, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -104,16 +84,6 @@
     {
       "id": "internal/core/review_workflow_pull_request.go::RemoteReviewAdapter.resolveWorkflowRepository",
       "signature": "func(repository string) (ReviewProviderReference, ReviewProviderTargetConfig, error)",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/ticket_review_command.go::ticketReviewCommandPlan",
-      "signature": "func(ticket ticketcore.Indexed, ref ticketmetadata.ReviewRef, snapshot RemoteReviewSnapshot, result string, findings []string, dryRun bool) TicketReviewCommandResult",
-      "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/ticket_review_command.go::ticketReviewCommandStateAndStatus",
-      "signature": "func(result string) (string, string)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

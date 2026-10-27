@@ -32,11 +32,7 @@ type sqliteRemoteCommandRecordRepository struct {
 }
 
 // NewRemoteCommandRecordRepository constructs the corresponding package service or value.
-func NewRemoteCommandRecordRepository(
-	ctx context.Context,
-	env UserEnvironment,
-	assetsFS fs.FS,
-) (RemoteCommandRecordRepository, error) {
+func NewRemoteCommandRecordRepository(ctx context.Context, env UserEnvironment, assetsFS fs.FS) (RemoteCommandRecordRepository, error) {
 	err := os.MkdirAll(env.DataDir(), 0o755)
 	if err != nil {
 		return nil, fmt.Errorf("create user data directory: %w", err)
@@ -61,11 +57,7 @@ func NewRemoteCommandRecordRepository(
 }
 
 // NewRemoteCommandRecordRepositoryFromDB constructs the corresponding package service or value.
-func NewRemoteCommandRecordRepositoryFromDB(
-	ctx context.Context,
-	db *sql.DB,
-	assetsFS fs.FS,
-) (RemoteCommandRecordRepository, error) {
+func NewRemoteCommandRecordRepositoryFromDB(ctx context.Context, db *sql.DB, assetsFS fs.FS) (RemoteCommandRecordRepository, error) {
 	migrator := database.NewMigrator(assetsFS)
 
 	err := migrator.Migrate(ctx, db)
@@ -77,10 +69,7 @@ func NewRemoteCommandRecordRepositoryFromDB(
 }
 
 // CreateRemoteCommandRecord executes the corresponding package operation.
-func (r *sqliteRemoteCommandRecordRepository) CreateRemoteCommandRecord(
-	ctx context.Context,
-	record RemoteCommandRecord,
-) error {
+func (r *sqliteRemoteCommandRecordRepository) CreateRemoteCommandRecord(ctx context.Context, record RemoteCommandRecord) error {
 	err := ValidateRemoteCommandRecord(record)
 	if err != nil {
 		return err
@@ -95,10 +84,7 @@ func (r *sqliteRemoteCommandRecordRepository) CreateRemoteCommandRecord(
 }
 
 // GetRemoteCommandRecord executes the corresponding package operation.
-func (r *sqliteRemoteCommandRecordRepository) GetRemoteCommandRecord(
-	ctx context.Context,
-	id string,
-) (RemoteCommandRecord, error) {
+func (r *sqliteRemoteCommandRecordRepository) GetRemoteCommandRecord(ctx context.Context, id string) (RemoteCommandRecord, error) {
 	row := r.db.QueryRowContext(ctx, selectRemoteCommandRecordSQL()+" WHERE id = ?", id)
 
 	record, err := scanRemoteCommandRecord(row)
@@ -114,9 +100,7 @@ func (r *sqliteRemoteCommandRecordRepository) GetRemoteCommandRecord(
 }
 
 // ListRemoteCommandRecords lists the requested data.
-func (r *sqliteRemoteCommandRecordRepository) ListRemoteCommandRecords(
-	ctx context.Context,
-) ([]RemoteCommandRecord, error) {
+func (r *sqliteRemoteCommandRecordRepository) ListRemoteCommandRecords(ctx context.Context) ([]RemoteCommandRecord, error) {
 	rows, err := r.db.QueryContext(ctx, selectRemoteCommandRecordSQL()+" ORDER BY created_at")
 	if err != nil {
 		return nil, fmt.Errorf("list remote command records: %w", err)
@@ -166,7 +150,7 @@ func scanRemoteCommandRecord(scanner remoteCommandRecordScanner) (RemoteCommandR
 		return RemoteCommandRecord{}, fmt.Errorf("scan remote command record: %w", err)
 	}
 
-	return finishScannedRemoteCommandRecord(row.record, row.status, row.intent, row.receivedAt, row.createdAt, row.loop)
+	return row.decoded()
 }
 
 type remoteCommandLoopColumns struct {
@@ -179,41 +163,7 @@ type remoteCommandLoopColumns struct {
 	UseCases     string
 }
 
-func finishScannedRemoteCommandRecord(
-	record RemoteCommandRecord,
-	status string,
-	intent string,
-	receivedAt string,
-	createdAt string,
-	loop remoteCommandLoopColumns,
-) (RemoteCommandRecord, error) {
-	var err error
-
-	record.Status = RemoteCommandRecordStatus(status)
-	record.Request.Intent = RemoteCommandIntent(intent)
-
-	record.Request.ReceivedAt, err = database.ParseTime(receivedAt)
-	if err != nil {
-		return RemoteCommandRecord{}, err
-	}
-
-	record.Request.CreatedAt, err = database.ParseTime(createdAt)
-	if err != nil {
-		return RemoteCommandRecord{}, err
-	}
-
-	record.Request.Loop, err = decodeRemoteCommandLoop(loop, record.Request.Loop.MaxIterations)
-	if err != nil {
-		return RemoteCommandRecord{}, err
-	}
-
-	return record, nil
-}
-
-func decodeRemoteCommandLoop(
-	columns remoteCommandLoopColumns,
-	maxIterations int,
-) (RemoteCommandLoopOptions, error) {
+func decodeRemoteCommandLoop(columns remoteCommandLoopColumns, maxIterations int) (RemoteCommandLoopOptions, error) {
 	loop := RemoteCommandLoopOptions{MaxIterations: maxIterations}
 
 	var err error

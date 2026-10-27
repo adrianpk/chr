@@ -78,7 +78,7 @@ func RunTicketReviewCommand(ctx context.Context, opts TicketReviewCommandOptions
 		return TicketReviewCommandResult{}, fmt.Errorf("read remote review evidence: %w", err)
 	}
 
-	plan := ticketReviewCommandPlan(opts.Ticket, ref, snapshot, reviewResult, opts.Findings, opts.DryRun)
+	plan := ticketReviewCommandPlan(opts, ref, snapshot, reviewResult)
 	if opts.DryRun {
 		return plan, nil
 	}
@@ -144,50 +144,42 @@ func ticketReviewCommandPullRequestRef(ticket ticketcore.Indexed) (ticketmetadat
 	return ticketmetadata.ReviewRef{}, fmt.Errorf("ticket review requires a pull_request review ref")
 }
 
-func ticketReviewCommandPlan(
-	ticket ticketcore.Indexed,
-	ref ticketmetadata.ReviewRef,
-	snapshot RemoteReviewSnapshot,
-	result string,
-	findings []string,
-	dryRun bool,
-) TicketReviewCommandResult {
-	state, status := ticketReviewCommandStateAndStatus(result)
+func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata.ReviewRef, snapshot RemoteReviewSnapshot, result string) TicketReviewCommandResult {
+	transition := ticketReviewCommandStateAndStatus(result)
 
 	return TicketReviewCommandResult{
-		TicketKey:        ticket.Key,
+		TicketKey:        opts.Ticket.Key,
 		ReviewRef:        ref,
 		RemoteSnapshot:   snapshot,
-		ReviewState:      state,
+		ReviewState:      transition.state,
 		ReviewResult:     result,
-		Status:           status,
-		BlockingFindings: trimmedTicketReviewFindings(findings),
-		ReviewRound:      ticket.ReviewRound + 1,
-		DryRun:           dryRun,
+		Status:           transition.status,
+		BlockingFindings: trimmedTicketReviewFindings(opts.Findings),
+		ReviewRound:      opts.Ticket.ReviewRound + 1,
+		DryRun:           opts.DryRun,
 	}
 }
 
-func ticketReviewCommandStateAndStatus(result string) (string, string) {
+type ticketReviewTransition struct {
+	state, status string
+}
+
+func ticketReviewCommandStateAndStatus(result string) ticketReviewTransition {
 	switch result {
 	case TicketReviewCommandResultPass:
-		return "pass", ticketcore.StatusReadyForMerge
+		return ticketReviewTransition{state: "pass", status: ticketcore.StatusReadyForMerge}
 	case TicketReviewCommandResultNeedsChanges:
-		return "changes_requested", ticketcore.StatusReadyForDev
+		return ticketReviewTransition{state: "changes_requested", status: ticketcore.StatusReadyForDev}
 	case TicketReviewCommandResultInsufficientEvidence:
-		return "insufficient_evidence", ticketcore.StatusReadyForDev
+		return ticketReviewTransition{state: "insufficient_evidence", status: ticketcore.StatusReadyForDev}
 	case TicketReviewCommandResultNeedsHumanDecision:
-		return "needs_human_decision", ticketcore.StatusReadyForReview
+		return ticketReviewTransition{state: "needs_human_decision", status: ticketcore.StatusReadyForReview}
 	default:
-		return "", ticketcore.StatusReadyForReview
+		return ticketReviewTransition{status: ticketcore.StatusReadyForReview}
 	}
 }
 
-func writeTicketReviewCommandFindings(
-	ctx context.Context,
-	adapter RemoteReviewAdapter,
-	url string,
-	findings []string,
-) ([]RemoteReviewWrittenComment, error) {
+func writeTicketReviewCommandFindings(ctx context.Context, adapter RemoteReviewAdapter, url string, findings []string) ([]RemoteReviewWrittenComment, error) {
 	trimmed := trimmedTicketReviewFindings(findings)
 	if len(trimmed) == 0 {
 		return nil, nil

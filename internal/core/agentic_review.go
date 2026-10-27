@@ -425,15 +425,11 @@ func ticketReviewResultForAgenticDecision(decision IntegrationReviewDecision) st
 }
 
 func ticketReviewStateForResult(result string) string {
-	state, _ := ticketReviewCommandStateAndStatus(result)
-
-	return state
+	return ticketReviewCommandStateAndStatus(result).state
 }
 
 func ticketReviewStatusForResult(result string) string {
-	_, status := ticketReviewCommandStateAndStatus(result)
-
-	return status
+	return ticketReviewCommandStateAndStatus(result).status
 }
 
 func agenticReviewMetadataRef(ticket ticketcore.Indexed, artifact AgenticReviewArtifact) ticketmetadata.ReviewRef {

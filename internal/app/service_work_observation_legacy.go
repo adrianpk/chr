@@ -39,18 +39,18 @@ func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceCon
 		tickets[ticket.Key] = ticket
 	}
 
-	streams := 0
+	observation := legacyWorkObservation{projectID: s.projectContext.ProjectID, result: result}
 
 	for _, execution := range retained.Executions {
 		current := WorkContext{ID: "execution:" + execution.ID, Kind: "execution", TicketKey: execution.TicketKey, Title: tickets[execution.TicketKey].Title, Scope: tickets[execution.TicketKey].UseCase, Status: string(execution.Status), UpdatedAt: execution.UpdatedAt, Message: execution.FailureReason}
-		if err = s.observeLegacyContext(ctx, result, &current, executioncore.RecordEventStreamPath(execution), execution.ID, "", &streams); err != nil {
+		if err = observation.observeContext(ctx, &current, legacyActivitySource{path: executioncore.RecordEventStreamPath(execution), executionID: execution.ID}); err != nil {
 			return err
 		}
 	}
 
 	for _, loop := range retained.Loops {
 		current := WorkContext{ID: "loop:" + loop.ID, Kind: "loop", Status: string(loop.Status), UpdatedAt: loop.UpdatedAt, Message: loop.FailureReason, Eligible: loop.EligibleCount, Processed: loop.ProcessedCount, Blocked: loop.BlockedCount, Failed: loop.FailedCount}
-		if err = s.observeLegacyContext(ctx, result, &current, executioncore.LoopRunEventStreamPath(loop), "", loop.ID, &streams); err != nil {
+		if err = observation.observeContext(ctx, &current, legacyActivitySource{path: executioncore.LoopRunEventStreamPath(loop), loopID: loop.ID}); err != nil {
 			return err
 		}
 	}
@@ -80,8 +80,18 @@ func (s service) observeLegacyQueue(ctx context.Context, config core.WorkspaceCo
 	return nil
 }
 
-func (s service) observeLegacyContext(ctx context.Context, result *WorkObservation, current *WorkContext, path, executionID, loopID string, streams *int) error {
-	if err := s.observeLegacyActivity(ctx, result, current, path, executionID, loopID, streams); err != nil {
+type legacyWorkObservation struct {
+	projectID string
+	result    *WorkObservation
+	streams   int
+}
+
+type legacyActivitySource struct {
+	path, executionID, loopID string
+}
+
+func (observation *legacyWorkObservation) observeContext(ctx context.Context, current *WorkContext, source legacyActivitySource) error {
+	if err := observation.observeActivity(ctx, current, source); err != nil {
 		return err
 	}
 
@@ -90,36 +100,36 @@ func (s service) observeLegacyContext(ctx context.Context, result *WorkObservati
 	}
 
 	if current.Status == "running" || current.Status == "pending" {
-		result.Current = append(result.Current, *current)
+		observation.result.Current = append(observation.result.Current, *current)
 	} else {
-		result.Results = append(result.Results, *current)
+		observation.result.Results = append(observation.result.Results, *current)
 	}
 
 	return nil
 }
 
-func (s service) observeLegacyActivity(ctx context.Context, result *WorkObservation, current *WorkContext, path, executionID, loopID string, streams *int) error {
-	if path == "" || *streams >= 32 {
+func (observation *legacyWorkObservation) observeActivity(ctx context.Context, current *WorkContext, source legacyActivitySource) error {
+	if source.path == "" || observation.streams >= 32 {
 		return nil
 	}
 
-	*streams++
+	observation.streams++
 
-	stream, err := executioncore.ReadRecentAgentEvents(ctx, path)
+	stream, err := executioncore.ReadRecentAgentEvents(ctx, source.path)
 	if err != nil {
 		return err
 	}
 
 	if len(stream.Malformed) > 0 {
-		result.Warnings = append(result.Warnings, "Some retained activity entries are malformed.")
+		observation.result.Warnings = append(observation.result.Warnings, "Some retained activity entries are malformed.")
 	}
 
 	for _, event := range stream.Events {
-		if !legacyWorkEventMatches(event, s.projectContext.ProjectID, executionID, loopID) {
+		if !legacyWorkEventMatches(event, observation.projectID, source.executionID, source.loopID) {
 			continue
 		}
 
-		if err = appendObservedLegacyEvent(result, current, event); err != nil {
+		if err = appendObservedLegacyEvent(observation.result, current, event); err != nil {
 			return err
 		}
 	}
