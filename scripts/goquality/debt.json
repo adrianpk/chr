@@ -207,51 +207,6 @@
       "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/context_agent_protocols.go::normalizeAgentProtocolContextOptions",
-      "signature": "func(opts AgentProtocolContextOptions) (string, string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_agent_protocols.go::loadApplicableAgentFiles",
-      "signature": "func(projectDir, targetDir string) ([]ContextDocument, []ContextSourceInventoryEntry, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_agent_protocols.go::loadChrProtocolFiles",
-      "signature": "func(projectDir string) ([]ContextDocument, []ContextSourceInventoryEntry, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_agent_protocols.go::loadProtocolCandidateFiles",
-      "signature": "func(projectDir string, candidates []string) ([]ContextDocument, []ContextSourceInventoryEntry, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_previous_attempt.go::loadPreviousAttemptValidation",
-      "signature": "func(record ExecutionRecord) (string, ContextSourceInventoryEntry, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_previous_attempt.go::loadPreviousAttemptResult",
-      "signature": "func(record ExecutionRecord) (*ExecutionResult, ContextSourceInventoryEntry, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_project_documents.go::normalizeProjectDocumentContextOptions",
-      "signature": "func(opts ProjectDocumentContextOptions) (string, string, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_project_documents.go::loadContextTicket",
-      "signature": "func(opts ProjectDocumentContextOptions, projectDir string, ticketPath string) (IndexedTicket, ContextDocument, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/context_project_documents.go::loadReferencedProjectDocuments",
-      "signature": "func(projectDir string, content string) ([]ContextDocument, []ContextSourceInventoryEntry, error)",
-      "reason": "Existing production debt; assigned to Slice 9 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/evidence_strategy_checklist.go::evidenceStrategyChecklistBlock",
       "signature": "func(content string) (string, bool, error)",
       "reason": "Existing production debt; assigned to Slice 11 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

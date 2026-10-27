@@ -84,19 +84,25 @@ func DefaultAgentIdentity() AgentIdentity {
 	}
 }
 
+type agentProtocolPaths struct {
+	ProjectDir string
+	TargetPath string
+	TargetDir  string
+}
+
 // LoadAgentProtocolContext loads the corresponding package data.
 func LoadAgentProtocolContext(opts AgentProtocolContextOptions) (AgentProtocolContext, error) {
-	projectDir, targetPath, targetDir, err := normalizeAgentProtocolContextOptions(opts)
+	paths, err := normalizeAgentProtocolContextOptions(opts)
 	if err != nil {
 		return AgentProtocolContext{}, err
 	}
 
-	agentFiles, agentSources, err := loadApplicableAgentFiles(projectDir, targetDir)
+	agent, err := loadApplicableAgentFiles(paths.ProjectDir, paths.TargetDir)
 	if err != nil {
 		return AgentProtocolContext{}, err
 	}
 
-	chrFiles, chrSources, err := loadChrProtocolFiles(projectDir)
+	protocols, err := loadChrProtocolFiles(paths.ProjectDir)
 	if err != nil {
 		return AgentProtocolContext{}, err
 	}
@@ -111,15 +117,15 @@ func LoadAgentProtocolContext(opts AgentProtocolContextOptions) (AgentProtocolCo
 			Included:    true,
 		},
 	}
-	sources = append(sources, agentSources...)
-	sources = append(sources, chrSources...)
+	sources = append(sources, agent.Sources...)
+	sources = append(sources, protocols.Sources...)
 
 	return AgentProtocolContext{
-		ProjectDir:    projectDir,
-		TargetPath:    targetPath,
+		ProjectDir:    paths.ProjectDir,
+		TargetPath:    paths.TargetPath,
 		AgentIdentity: DefaultAgentIdentity(),
-		AgentFiles:    agentFiles,
-		ChrFiles:      chrFiles,
+		AgentFiles:    agent.Documents,
+		ChrFiles:      protocols.Documents,
 		Sources:       sources,
 	}, nil
 }
@@ -157,22 +163,22 @@ func RenderProtocolsContext(ctx AgentProtocolContext) string {
 	return output.String()
 }
 
-func normalizeAgentProtocolContextOptions(opts AgentProtocolContextOptions) (string, string, string, error) {
+func normalizeAgentProtocolContextOptions(opts AgentProtocolContextOptions) (agentProtocolPaths, error) {
 	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
 	if err != nil {
-		return "", "", "", err
+		return agentProtocolPaths{}, err
 	}
 
 	targetPath, err := cleanAbsTargetPath(projectDir, opts.TargetPath)
 	if err != nil {
-		return "", "", "", err
+		return agentProtocolPaths{}, err
 	}
 
 	if !projectcore.ContainsPath(projectDir, targetPath) {
-		return "", "", "", fmt.Errorf("target path is outside project: %s", targetPath)
+		return agentProtocolPaths{}, fmt.Errorf("target path is outside project: %s", targetPath)
 	}
 
-	return projectDir, targetPath, targetDirectory(targetPath), nil
+	return agentProtocolPaths{ProjectDir: projectDir, TargetPath: targetPath, TargetDir: targetDirectory(targetPath)}, nil
 }
 
 func cleanAbsProjectDir(projectDir string) (string, error) {
@@ -214,10 +220,10 @@ func targetDirectory(targetPath string) string {
 	return filepath.Dir(targetPath)
 }
 
-func loadApplicableAgentFiles(projectDir, targetDir string) ([]ContextDocument, []ContextSourceInventoryEntry, error) {
+func loadApplicableAgentFiles(projectDir, targetDir string) (contextDocumentLoad, error) {
 	dirs, err := dirsFromProjectToTarget(projectDir, targetDir)
 	if err != nil {
-		return nil, nil, err
+		return contextDocumentLoad{}, err
 	}
 
 	documents := make([]ContextDocument, 0, len(dirs))
@@ -228,7 +234,7 @@ func loadApplicableAgentFiles(projectDir, targetDir string) ([]ContextDocument, 
 
 		relPath, err := filepath.Rel(projectDir, path)
 		if err != nil {
-			return nil, nil, fmt.Errorf("resolve AGENTS.md relative path: %w", err)
+			return contextDocumentLoad{}, fmt.Errorf("resolve AGENTS.md relative path: %w", err)
 		}
 
 		relPath = filepath.ToSlash(relPath)
@@ -251,7 +257,7 @@ func loadApplicableAgentFiles(projectDir, targetDir string) ([]ContextDocument, 
 				continue
 			}
 
-			return nil, nil, fmt.Errorf("read AGENTS.md: %w", err)
+			return contextDocumentLoad{}, fmt.Errorf("read AGENTS.md: %w", err)
 		}
 
 		documents = append(documents, ContextDocument{
@@ -271,7 +277,7 @@ func loadApplicableAgentFiles(projectDir, targetDir string) ([]ContextDocument, 
 		})
 	}
 
-	return documents, sources, nil
+	return contextDocumentLoad{Documents: documents, Sources: sources}, nil
 }
 
 func dirsFromProjectToTarget(projectDir, targetDir string) ([]string, error) {
@@ -300,10 +306,10 @@ func dirsFromProjectToTarget(projectDir, targetDir string) ([]string, error) {
 	return dirs, nil
 }
 
-func loadChrProtocolFiles(projectDir string) ([]ContextDocument, []ContextSourceInventoryEntry, error) {
+func loadChrProtocolFiles(projectDir string) (contextDocumentLoad, error) {
 	candidates, err := chrProtocolCandidates(projectDir)
 	if err != nil {
-		return nil, nil, err
+		return contextDocumentLoad{}, err
 	}
 
 	return loadProtocolCandidateFiles(projectDir, candidates)
@@ -364,14 +370,14 @@ func directoryExists(path string) bool {
 func loadProtocolCandidateFiles(
 	projectDir string,
 	candidates []string,
-) ([]ContextDocument, []ContextSourceInventoryEntry, error) {
+) (contextDocumentLoad, error) {
 	documents := make([]ContextDocument, 0, len(candidates))
 	sources := make([]ContextSourceInventoryEntry, 0, len(candidates))
 
 	for _, path := range candidates {
 		relPath, err := filepath.Rel(projectDir, path)
 		if err != nil {
-			return nil, nil, fmt.Errorf("resolve .chr relative path: %w", err)
+			return contextDocumentLoad{}, fmt.Errorf("resolve .chr relative path: %w", err)
 		}
 
 		relPath = filepath.ToSlash(relPath)
@@ -394,7 +400,7 @@ func loadProtocolCandidateFiles(
 				continue
 			}
 
-			return nil, nil, fmt.Errorf("read .chr protocol file: %w", err)
+			return contextDocumentLoad{}, fmt.Errorf("read .chr protocol file: %w", err)
 		}
 
 		documents = append(documents, ContextDocument{
@@ -414,7 +420,7 @@ func loadProtocolCandidateFiles(
 		})
 	}
 
-	return documents, sources, nil
+	return contextDocumentLoad{Documents: documents, Sources: sources}, nil
 }
 
 func writeMarkdownField(output *strings.Builder, title, value string) {

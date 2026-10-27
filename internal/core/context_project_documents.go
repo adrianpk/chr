@@ -36,31 +36,46 @@ type ProjectDocumentContext struct {
 	Sources           []ContextSourceInventoryEntry
 }
 
+type projectDocumentPaths struct {
+	ProjectDir string
+	TicketPath string
+}
+
+type contextTicketLoad struct {
+	Ticket   IndexedTicket
+	Document ContextDocument
+}
+
+type contextDocumentLoad struct {
+	Documents []ContextDocument
+	Sources   []ContextSourceInventoryEntry
+}
+
 // LoadProjectDocumentContext loads the corresponding package data.
 func LoadProjectDocumentContext(opts ProjectDocumentContextOptions) (ProjectDocumentContext, error) {
-	projectDir, ticketPath, err := normalizeProjectDocumentContextOptions(opts)
+	paths, err := normalizeProjectDocumentContextOptions(opts)
 	if err != nil {
 		return ProjectDocumentContext{}, err
 	}
 
-	ticket, ticketDocument, err := loadContextTicket(opts, projectDir, ticketPath)
+	ticket, err := loadContextTicket(opts, paths.ProjectDir, paths.TicketPath)
 	if err != nil {
 		return ProjectDocumentContext{}, err
 	}
 
-	referencedDocs, documentSources, err := loadReferencedProjectDocuments(projectDir, ticketDocument.Content)
+	referenced, err := loadReferencedProjectDocuments(paths.ProjectDir, ticket.Document.Content)
 	if err != nil {
 		return ProjectDocumentContext{}, err
 	}
 
-	sources := projectDocumentSources(projectDir, ticketDocument, documentSources)
+	sources := projectDocumentSources(paths.ProjectDir, ticket.Document, referenced.Sources)
 
 	return ProjectDocumentContext{
-		ProjectDir:        projectDir,
-		WorkspaceDir:      filepath.Join(projectDir, workspacecore.DirectoryName),
-		Ticket:            ticket,
-		TicketDocument:    ticketDocument,
-		ReferencedDocs:    referencedDocs,
+		ProjectDir:        paths.ProjectDir,
+		WorkspaceDir:      filepath.Join(paths.ProjectDir, workspacecore.DirectoryName),
+		Ticket:            ticket.Ticket,
+		TicketDocument:    ticket.Document,
+		ReferencedDocs:    referenced.Documents,
 		ValidationCommand: projectValidationCommand(opts.Plan),
 		Sources:           sources,
 	}, nil
@@ -126,15 +141,15 @@ func RenderSourceInventory(sources []ContextSourceInventoryEntry) string {
 	return output.String()
 }
 
-func normalizeProjectDocumentContextOptions(opts ProjectDocumentContextOptions) (string, string, error) {
+func normalizeProjectDocumentContextOptions(opts ProjectDocumentContextOptions) (projectDocumentPaths, error) {
 	projectDir, err := cleanAbsProjectDir(opts.ProjectDir)
 	if err != nil {
-		return "", "", err
+		return projectDocumentPaths{}, err
 	}
 
 	ticketPath := strings.TrimSpace(opts.TicketPath)
 	if ticketPath == "" {
-		return "", "", fmt.Errorf("project document ticket path is required")
+		return projectDocumentPaths{}, fmt.Errorf("project document ticket path is required")
 	}
 
 	if !filepath.IsAbs(ticketPath) {
@@ -143,22 +158,22 @@ func normalizeProjectDocumentContextOptions(opts ProjectDocumentContextOptions) 
 
 	ticketPath, err = filepath.Abs(ticketPath)
 	if err != nil {
-		return "", "", fmt.Errorf("resolve ticket path: %w", err)
+		return projectDocumentPaths{}, fmt.Errorf("resolve ticket path: %w", err)
 	}
 
 	ticketPath = filepath.Clean(ticketPath)
 	if !projectcore.ContainsPath(projectDir, ticketPath) {
-		return "", "", fmt.Errorf("ticket path is outside project: %s", ticketPath)
+		return projectDocumentPaths{}, fmt.Errorf("ticket path is outside project: %s", ticketPath)
 	}
 
-	return projectDir, ticketPath, nil
+	return projectDocumentPaths{ProjectDir: projectDir, TicketPath: ticketPath}, nil
 }
 
 func loadContextTicket(
 	opts ProjectDocumentContextOptions,
 	projectDir string,
 	ticketPath string,
-) (IndexedTicket, ContextDocument, error) {
+) (contextTicketLoad, error) {
 	indexedAt := opts.IndexedAt
 	if indexedAt.IsZero() {
 		indexedAt = time.Now().UTC()
@@ -171,21 +186,21 @@ func loadContextTicket(
 		IndexedAt:  indexedAt,
 	})
 	if err != nil {
-		return IndexedTicket{}, ContextDocument{}, err
+		return contextTicketLoad{}, err
 	}
 
 	document, err := readContextDocument(projectDir, "ticket:"+ticket.RelativePath, ticketPath)
 	if err != nil {
-		return IndexedTicket{}, ContextDocument{}, err
+		return contextTicketLoad{}, err
 	}
 
-	return ticket, document, nil
+	return contextTicketLoad{Ticket: ticket, Document: document}, nil
 }
 
 func loadReferencedProjectDocuments(
 	projectDir string,
 	content string,
-) ([]ContextDocument, []ContextSourceInventoryEntry, error) {
+) (contextDocumentLoad, error) {
 	refs := referencedProjectDocumentPaths(content)
 	documents := make([]ContextDocument, 0, len(refs))
 	sources := make([]ContextSourceInventoryEntry, 0, len(refs))
@@ -202,14 +217,14 @@ func loadReferencedProjectDocuments(
 				continue
 			}
 
-			return nil, nil, err
+			return contextDocumentLoad{}, err
 		}
 
 		documents = append(documents, document)
 		sources = append(sources, includedDocumentSource(id, ref))
 	}
 
-	return documents, sources, nil
+	return contextDocumentLoad{Documents: documents, Sources: sources}, nil
 }
 
 func referencedProjectDocumentPaths(content string) []string {

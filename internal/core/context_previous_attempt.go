@@ -34,6 +34,16 @@ type PreviousAttemptContext struct {
 	Sources                    []ContextSourceInventoryEntry
 }
 
+type previousValidationArtifact struct {
+	Content string
+	Source  ContextSourceInventoryEntry
+}
+
+type previousResultArtifact struct {
+	Result *ExecutionResult
+	Source ContextSourceInventoryEntry
+}
+
 // LoadPreviousAttemptContext loads the corresponding package data.
 func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAttemptContext, error) {
 	err := ValidateExecutionRecord(opts.Execution)
@@ -41,18 +51,18 @@ func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAtt
 		return PreviousAttemptContext{}, err
 	}
 
-	validationContent, validationSource, err := loadPreviousAttemptValidation(opts.Execution)
+	validation, err := loadPreviousAttemptValidation(opts.Execution)
 	if err != nil {
 		return PreviousAttemptContext{}, err
 	}
 
-	result, resultSource, err := loadPreviousAttemptResult(opts.Execution)
+	loaded, err := loadPreviousAttemptResult(opts.Execution)
 	if err != nil {
 		return PreviousAttemptContext{}, err
 	}
 
-	changedFiles := previousAttemptChangedFiles(result)
-	signatures := validationFailureSignatures(validationContent)
+	changedFiles := previousAttemptChangedFiles(loaded.Result)
+	signatures := validationFailureSignatures(validation.Content)
 
 	return PreviousAttemptContext{
 		ExecutionID:                opts.Execution.ID,
@@ -61,14 +71,14 @@ func LoadPreviousAttemptContext(opts PreviousAttemptContextOptions) (PreviousAtt
 		FailureKind:                ExecutionFailureKindFromReason(opts.Execution.FailureReason),
 		FailureReason:              opts.Execution.FailureReason,
 		ValidationCommand:          opts.Execution.Runtime.ValidationCommand,
-		Result:                     result,
+		Result:                     loaded.Result,
 		ChangedFiles:               changedFiles,
 		ValidationPath:             opts.Execution.Artifacts.ValidationPath,
-		ValidationExcerpt:          validationExcerpt(validationContent, previousAttemptValidationLimit(opts.MaxValidationLines)),
+		ValidationExcerpt:          validationExcerpt(validation.Content, previousAttemptValidationLimit(opts.MaxValidationLines)),
 		FailureSignatures:          signatures,
-		RepeatedFailureSignatures:  repeatedValidationFailureSignatures(validationContent),
+		RepeatedFailureSignatures:  repeatedValidationFailureSignatures(validation.Content),
 		PreviousAttemptContextPath: strings.TrimSpace(opts.PreviousAttemptContextPath),
-		Sources:                    []ContextSourceInventoryEntry{validationSource, resultSource},
+		Sources:                    []ContextSourceInventoryEntry{validation.Source, loaded.Source},
 	}, nil
 }
 
@@ -115,7 +125,7 @@ func RenderPreviousAttemptContextLink(path string) string {
 	return output.String()
 }
 
-func loadPreviousAttemptValidation(record ExecutionRecord) (string, ContextSourceInventoryEntry, error) {
+func loadPreviousAttemptValidation(record ExecutionRecord) (previousValidationArtifact, error) {
 	source := ContextSourceInventoryEntry{
 		ID:          "previous-attempt:validation",
 		Kind:        ContextSourceKindPreviousAttempt,
@@ -130,18 +140,18 @@ func loadPreviousAttemptValidation(record ExecutionRecord) (string, ContextSourc
 		if errors.Is(err, os.ErrNotExist) {
 			source.Reason = "file was not found"
 
-			return "", source, nil
+			return previousValidationArtifact{Source: source}, nil
 		}
 
-		return "", source, fmt.Errorf("read previous validation artifact: %w", err)
+		return previousValidationArtifact{Source: source}, fmt.Errorf("read previous validation artifact: %w", err)
 	}
 
 	source.Included = true
 
-	return string(content), source, nil
+	return previousValidationArtifact{Content: string(content), Source: source}, nil
 }
 
-func loadPreviousAttemptResult(record ExecutionRecord) (*ExecutionResult, ContextSourceInventoryEntry, error) {
+func loadPreviousAttemptResult(record ExecutionRecord) (previousResultArtifact, error) {
 	source := ContextSourceInventoryEntry{
 		ID:          "previous-attempt:result",
 		Kind:        ContextSourceKindPreviousAttempt,
@@ -156,15 +166,15 @@ func loadPreviousAttemptResult(record ExecutionRecord) (*ExecutionResult, Contex
 		if errors.Is(err, os.ErrNotExist) {
 			source.Reason = "file was not found"
 
-			return nil, source, nil
+			return previousResultArtifact{Source: source}, nil
 		}
 
-		return nil, source, fmt.Errorf("load previous result artifact: %w", err)
+		return previousResultArtifact{Source: source}, fmt.Errorf("load previous result artifact: %w", err)
 	}
 
 	source.Included = true
 
-	return &result, source, nil
+	return previousResultArtifact{Result: &result, Source: source}, nil
 }
 
 func previousAttemptChangedFiles(result *ExecutionResult) []ExecutionResultChangedFile {
