@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"encoding/json"
@@ -11,6 +9,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -148,7 +147,7 @@ func (s service) checkDeliveryTarget(ctx context.Context, scope quizcore.Scope, 
 }
 
 func (s service) generatePlanTicketContracts(ctx context.Context, input generationcore.GeneratedWorkflowPlan, plan PlanView) (generationcore.GeneratedWorkflowPlan, error) {
-	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(quizmodel.QuizModelActionMaterializePlanTracking))
+	bound, ctx, err := s.bindGeneration(ctx, input.MaterializationID, string(quizmodel.ActionMaterializePlanTracking))
 	if err != nil {
 		return input, err
 	}
@@ -168,10 +167,10 @@ func (s service) generatePlanTicketContracts(ctx context.Context, input generati
 		return input, err
 	}
 
-	request.Strategy = quizmodel.QuizModelStrategyPlanDelivery
-	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{Name: "planned_workflow", Layer: "plan", Authority: input.PlanRef, Content: string(encoded)})
+	request.Strategy = quizmodel.StrategyPlanDelivery
+	request.ContextSections = append(request.ContextSections, quizmodel.ContextSection{Name: "planned_workflow", Layer: "plan", Authority: input.PlanRef, Content: string(encoded)})
 
-	response, err := quizmodel.InvokeQuizModel(ctx, bound.quizModel, request)
+	response, err := quizmodel.Invoke(ctx, bound.quizModel, request)
 	if err != nil {
 		return input, err
 	}

@@ -1,22 +1,22 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 type telegramGuidedWaitingModel struct {
-	base    quizmodel.QuizModelAdapter
+	base    quizmodel.Adapter
 	entered chan struct{}
 	release chan struct{}
 }
 
-func (model telegramGuidedWaitingModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
+func (model telegramGuidedWaitingModel) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
 	select {
 	case model.entered <- struct{}{}:
 	default:
@@ -25,10 +25,10 @@ func (model telegramGuidedWaitingModel) InvokeQuizModel(ctx context.Context, req
 	select {
 	case <-model.release:
 	case <-ctx.Done():
-		return quizmodel.QuizModelResponse{}, ctx.Err()
+		return quizmodel.Response{}, ctx.Err()
 	}
 
-	return model.base.InvokeQuizModel(ctx, request)
+	return model.base.Invoke(ctx, request)
 }
 
 // TestGuidedUseCaseTelegramManaged keeps receiver status responsive during

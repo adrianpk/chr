@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"encoding/json"
@@ -16,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -25,14 +24,14 @@ type planDeliveryTestModel struct {
 	calls int
 }
 
-func (m *planDeliveryTestModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
-	if request.Strategy != quizmodel.QuizModelStrategyPlanDelivery {
-		return m.base.InvokeQuizModel(ctx, request)
+func (m *planDeliveryTestModel) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
+	if request.Strategy != quizmodel.StrategyPlanDelivery {
+		return m.base.Invoke(ctx, request)
 	}
 
 	m.calls++
 	if m.fail {
-		return quizmodel.QuizModelResponse{}, errors.New("provider temporarily unavailable")
+		return quizmodel.Response{}, errors.New("provider temporarily unavailable")
 	}
 
 	var input generationcore.GeneratedWorkflowPlan
@@ -40,7 +39,7 @@ func (m *planDeliveryTestModel) InvokeQuizModel(ctx context.Context, request qui
 	for _, section := range request.ContextSections {
 		if section.Name == "planned_workflow" {
 			if err := json.Unmarshal([]byte(section.Content), &input); err != nil {
-				return quizmodel.QuizModelResponse{}, err
+				return quizmodel.Response{}, err
 			}
 		}
 	}
@@ -58,7 +57,7 @@ func (m *planDeliveryTestModel) InvokeQuizModel(ctx context.Context, request qui
 		}
 	}
 
-	return quizmodel.QuizModelResponse{ID: "delivery-response", RequestID: request.ID, Provider: "fixture", Status: quizmodel.QuizModelResponseReady, PlanTracking: generationcore.GeneratedPlanTracking{Workflow: &input}, CreatedAt: request.CreatedAt}, nil
+	return quizmodel.Response{ID: "delivery-response", RequestID: request.ID, Provider: "fixture", Status: quizmodel.ResponseReady, PlanTracking: generationcore.GeneratedPlanTracking{Workflow: &input}, CreatedAt: request.CreatedAt}, nil
 }
 
 func webPlanDeliveryFixture(t *testing.T) (webViewProvider, *planDeliveryTestModel) {

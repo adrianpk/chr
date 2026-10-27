@@ -1,13 +1,13 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
+
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // TestGuidedUseCaseWebBrowser observes real Chromium form submission, navigation,
@@ -161,7 +161,7 @@ func guidedBrowserSecondQuestion(t *testing.T, operations service) {
 		t.Fatal("missing owned quiz provider")
 	}
 
-	model.quiz.responses = []quizmodel.QuizModelResponse{model.quiz.responses[0], serviceQuizModelResponse("second", "question-2", operations.utcNow()), model.quiz.responses[1]}
+	model.quiz.responses = []quizmodel.Response{model.quiz.responses[0], serviceQuizModelResponse("second", "question-2", operations.utcNow()), model.quiz.responses[1]}
 }
 
 func assertGuidedBrowserName(t *testing.T, browser *webWorkflowBrowser) {

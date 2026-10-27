@@ -1,12 +1,11 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"testing"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -104,7 +103,7 @@ func TestTUIQuizAdapterDispatchesRuntimeQuizActions(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponse("response-2", "question-2", clock()),
 		},
@@ -160,7 +159,7 @@ func TestTUISpecAdapterGeneratesAcceptanceFeature(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status: generationcore.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog

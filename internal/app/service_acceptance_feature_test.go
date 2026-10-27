@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"os"
 	"path/filepath"
@@ -10,6 +8,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
@@ -18,7 +17,7 @@ func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status: generationcore.AcceptanceFeatureStatusGenerated,
 				Body:   validBlogAcceptanceFeatureBody(),
@@ -50,7 +49,7 @@ func TestServiceGenerateAcceptanceFeatureWritesGeneratedFeature(t *testing.T) {
 	}
 
 	request := model.requests[len(model.requests)-1]
-	if request.Action != quizmodel.QuizModelActionGenerateAcceptanceFeature {
+	if request.Action != quizmodel.ActionGenerateAcceptanceFeature {
 		t.Fatalf("Action = %q, want acceptance feature generation", request.Action)
 	}
 
@@ -74,7 +73,7 @@ func TestServiceGenerateAcceptanceFeatureRejectsInvalidGeneratedFeature(t *testi
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status: generationcore.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
@@ -114,7 +113,7 @@ func TestServiceGenerateAcceptanceFeatureReportsNeedsMoreInfo(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 				RejectionReason: "Missing observable failure path.",
@@ -171,7 +170,7 @@ func TestServiceGenerateAcceptanceFeaturePreservesExistingFeatureRoundAnswers(t 
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status:          generationcore.AcceptanceFeatureStatusNeedsMoreInfo,
 				RejectionReason: "Missing observable failure path.",
@@ -239,7 +238,7 @@ func TestServiceGenerateAcceptanceFeatureReportsNotApplicable(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status:          generationcore.AcceptanceFeatureStatusNotApplicable,
 				RejectionReason: "The topic is editorial guidance, not observable behavior.",
@@ -285,7 +284,7 @@ case: "blog"
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizAcceptanceFeatureResponse("response-feature", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status: generationcore.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
@@ -354,7 +353,7 @@ Feature: Blog publishing
 `
 }
 
-func quizModelRequestHasSection(request quizmodel.QuizModelRequest, name string) bool {
+func quizModelRequestHasSection(request quizmodel.Request, name string) bool {
 	for _, section := range request.ContextSections {
 		if section.Name == name {
 			return true

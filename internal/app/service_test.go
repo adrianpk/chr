@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"errors"
@@ -13,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -109,11 +108,11 @@ func TestNewQuizModelAdapterRoutesArtifactGenerationToCodexByDefault(t *testing.
 		t.Fatalf("adapter = %T, want action routing adapter", adapter)
 	}
 
-	for _, action := range []quizmodel.QuizModelAction{
-		quizmodel.QuizModelActionGenerateSpec,
-		quizmodel.QuizModelActionGenerateAcceptanceFeature,
-		quizmodel.QuizModelActionGeneratePlan,
-		quizmodel.QuizModelActionMaterializePlanTracking,
+	for _, action := range []quizmodel.Action{
+		quizmodel.ActionGenerateSpec,
+		quizmodel.ActionGenerateAcceptanceFeature,
+		quizmodel.ActionGeneratePlan,
+		quizmodel.ActionMaterializePlanTracking,
 	} {
 		if _, ok := routing.ActionAdapters[action]; !ok {
 			t.Fatalf("%s action is not routed: %#v", action, routing.ActionAdapters)

@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"net/http"
@@ -15,6 +13,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -203,7 +202,7 @@ func guidedWebFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel) {
 	now := operations.utcNow()
 	completion := serviceQuizModelResponse("complete", "complete", now)
 	completion.Question.Required = false
-	model := &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{serviceQuizModelResponse("first", "question-1", now), completion}}
+	model := &fakeServiceQuizModel{responses: []quizmodel.Response{serviceQuizModelResponse("first", "question-1", now), completion}}
 	operations.quizModel = model
 	provider.serviceFactory = func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy }
 

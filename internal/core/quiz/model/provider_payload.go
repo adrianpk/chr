@@ -1,6 +1,7 @@
 package model
 
-func ProviderPayload(request QuizModelRequest) map[string]any {
+// ProviderPayload projects the shared request context for a generation backend.
+func ProviderPayload(request Request) map[string]any {
 	payload := map[string]any{
 		"project":          request.Payload.Project,
 		"quiz":             request.Payload.Quiz,
@@ -12,21 +13,21 @@ func ProviderPayload(request QuizModelRequest) map[string]any {
 		payload["acceptance_readiness"] = request.Payload.AcceptanceReadiness
 	}
 
-	hasContextAction := request.Action == QuizModelActionNextQuestion ||
-		request.Action == QuizModelActionDraftSpec ||
-		request.Action == QuizModelActionGenerateSpec ||
-		request.Action == QuizModelActionGeneratePlan ||
-		request.Action == QuizModelActionGeneratePlanOutline ||
-		request.Action == QuizModelActionGeneratePlanSliceDetail ||
-		request.Action == QuizModelActionMaterializePlanTracking
+	hasContextAction := request.Action == ActionNextQuestion ||
+		request.Action == ActionDraftSpec ||
+		request.Action == ActionGenerateSpec ||
+		request.Action == ActionGeneratePlan ||
+		request.Action == ActionGeneratePlanOutline ||
+		request.Action == ActionGeneratePlanSliceDetail ||
+		request.Action == ActionMaterializePlanTracking
 	if hasContextAction && len(request.ContextSections) > 0 {
-		payload["context_sections"] = quizModelProviderContextSections(request.ContextSections)
+		payload["context_sections"] = providerContextSections(request.ContextSections)
 	}
 
 	return payload
 }
 
-func quizModelProviderContextSections(sections []QuizModelContextSection) []map[string]any {
+func providerContextSections(sections []ContextSection) []map[string]any {
 	payloads := make([]map[string]any, 0, len(sections))
 
 	for _, section := range sections {

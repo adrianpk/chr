@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"errors"
 	"os"
@@ -11,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // Both configured generation paths publish a complete unbound pair. Retrying
@@ -59,7 +58,7 @@ func TestServicePlanRequiresOrder(t *testing.T) {
 	operations := newPlanTestService(t, project)
 	response := serviceQuizPlanResponse("legacy-output", serviceQuizClock()())
 	response.Plan.Order = nil
-	operations.quizModel = &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{response}}
+	operations.quizModel = &fakeServiceQuizModel{responses: []quizmodel.Response{response}}
 
 	_, err := operations.GeneratePlan(t.Context(), PlanGenerateRequest{Scope: quizcore.Scope{CaseSlug: "blog"}})
 	if err == nil || !strings.Contains(err.Error(), "ordered slices") {

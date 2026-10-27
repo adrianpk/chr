@@ -2,14 +2,12 @@ package core
 
 import (
 	"context"
-
 	"fmt"
 	"path/filepath"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
-
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )

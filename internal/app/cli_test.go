@@ -1,8 +1,6 @@
 //nolint:wsl_v5 // Web adapter tests keep setup and assertions close to the rendered behavior.
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"bytes"
 	"context"
@@ -28,6 +26,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/gate"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -750,7 +749,7 @@ func TestWebServeWriteActionGeneratesSpecWithService(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizDraftSpecResponse("response-spec", clock()),
 		},
 	}
@@ -776,7 +775,7 @@ func TestWebServeWriteActionGeneratesSpecWithService(t *testing.T) {
 		t.Fatalf("result = %#v, want completed spec generation", result)
 	}
 
-	if len(model.requests) != 1 || model.requests[0].Action != quizmodel.QuizModelActionGenerateSpec {
+	if len(model.requests) != 1 || model.requests[0].Action != quizmodel.ActionGenerateSpec {
 		t.Fatalf("model requests = %#v, want generate spec request", model.requests)
 	}
 

@@ -1,10 +1,9 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 func quizGenerationOperationID(request core.QuizActionRequest, state quizcore.RuntimeState) string {
@@ -15,13 +14,13 @@ func quizGenerationOperationID(request core.QuizActionRequest, state quizcore.Ru
 	return "quiz-" + request.Binding.OperationID
 }
 
-func (s service) invokeQuizGeneration(state quizcore.RuntimeState, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
-	bound, _, err := s.bindGeneration(s.ctx, state.GenerationOperationID, string(quizmodel.QuizModelActionNextQuestion))
+func (s service) invokeQuizGeneration(state quizcore.RuntimeState, request quizmodel.Request) (quizmodel.Response, error) {
+	bound, _, err := s.bindGeneration(s.ctx, state.GenerationOperationID, string(quizmodel.ActionNextQuestion))
 	if err != nil {
-		return quizmodel.QuizModelResponse{}, err
+		return quizmodel.Response{}, err
 	}
 
 	request.ID = core.HarnessGenerationRequestID(bound.ctx, request.ID)
 
-	return quizmodel.InvokeQuizModel(bound.ctx, bound.quizModel, request)
+	return quizmodel.Invoke(bound.ctx, bound.quizModel, request)
 }

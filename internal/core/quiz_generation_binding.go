@@ -1,15 +1,14 @@
 package core
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"encoding/json"
 
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/harness"
 )
 
-func (a OpenAIQuizModelAdapter) invokeBoundQuizAPI(ctx context.Context, request quizmodel.QuizModelRequest, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error) {
+func (a OpenAIQuizModelAdapter) invokeBoundQuizAPI(ctx context.Context, request quizmodel.Request, trace openAIQuizTrace) ([]byte, openAIQuizExecutionResult, error) {
 	var result openAIQuizExecutionResult
 
 	schema, err := json.Marshal(quizmodel.OutputFormat(request).Schema)
@@ -29,6 +28,6 @@ func (a OpenAIQuizModelAdapter) invokeBoundQuizAPI(ctx context.Context, request 
 	return output, result, err
 }
 
-func (a OpenAIQuizModelAdapter) quizAPIRunRequest(request quizmodel.QuizModelRequest, trace openAIQuizTrace) harness.AgentRunRequest {
+func (a OpenAIQuizModelAdapter) quizAPIRunRequest(request quizmodel.Request, trace openAIQuizTrace) harness.AgentRunRequest {
 	return harness.AgentRunRequest{ID: request.ID, Purpose: string(request.Action), ProjectDir: a.ProjectDir, Prompt: string(trace.RequestBody), OutputName: "output.json"}
 }

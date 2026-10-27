@@ -2,36 +2,36 @@ package model
 
 import (
 	"fmt"
-
 	"strings"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-func Instructions(request QuizModelRequest) string {
+// Instructions selects the grounded generation rules for an action and mode.
+func Instructions(request Request) string {
 	switch {
-	case request.Action == QuizModelActionMaterializePlanTracking:
-		return quizModelTrackingInstructions(request)
-	case request.Action == QuizModelActionGeneratePlan:
-		return quizModelPlanGenerationInstructions()
-	case request.Action == QuizModelActionGeneratePlanOutline:
-		return quizModelPlanOutlineGenerationInstructions()
-	case request.Action == QuizModelActionGeneratePlanSliceDetail:
-		return quizModelPlanSliceDetailGenerationInstructions()
-	case request.Action == QuizModelActionGenerateSpec:
-		return quizModelSpecGenerationInstructions()
-	case request.Action == QuizModelActionGenerateAcceptanceFeature:
-		return quizModelFeatureGenerationInstructions()
-	case request.Action == QuizModelActionDraftSpec:
-		return quizModelDraftSpecInstructions()
+	case request.Action == ActionMaterializePlanTracking:
+		return trackingInstructions(request)
+	case request.Action == ActionGeneratePlan:
+		return planGenerationInstructions()
+	case request.Action == ActionGeneratePlanOutline:
+		return planOutlineGenerationInstructions()
+	case request.Action == ActionGeneratePlanSliceDetail:
+		return planSliceDetailGenerationInstructions()
+	case request.Action == ActionGenerateSpec:
+		return specGenerationInstructions()
+	case request.Action == ActionGenerateAcceptanceFeature:
+		return featureGenerationInstructions()
+	case request.Action == ActionDraftSpec:
+		return draftSpecInstructions()
 	case request.Mode == quizcore.ModeFast:
-		return quizModelFastQuestionInstructions()
+		return fastQuestionInstructions()
 	default:
-		return quizModelDeepQuestionInstructions()
+		return deepQuestionInstructions()
 	}
 }
 
-func quizModelDeepQuestionInstructions() string {
+func deepQuestionInstructions() string {
 	return strings.TrimSpace(`
 You generate exactly one next question for a project quiz.
 The service has already selected the quiz scope and routing state; do not change the scope.
@@ -55,7 +55,7 @@ Return only the JSON object required by the response schema.
 `)
 }
 
-func quizModelFastQuestionInstructions() string {
+func fastQuestionInstructions() string {
 	return strings.TrimSpace(fmt.Sprintf(`
 You generate the next %d questions for a project quiz fast mode.
 The service has already selected the quiz scope and routing state; do not change the scope.
@@ -75,10 +75,10 @@ Do not mention batch, round, tree, candidate, or strategy choices to the user.
 If the next step needs semantic interpretation that is not explicit in the provided context, return a normal broad question.
 Do not ask for secrets, credentials, tokens, passwords, private keys, or PII.
 Return only the JSON object required by the response schema.
-`, QuizModelFastBatchSize))
+`, FastBatchSize))
 }
 
-func quizModelPlanTrackingInstructions() string {
+func planTrackingInstructions() string {
 	return strings.TrimSpace(`
 You materialize execution tracking artifacts from an existing implementation plan.
 Use the structured request payload and context sections as the sole source of truth.
@@ -102,7 +102,7 @@ Return only the JSON object required by the response schema.
 `)
 }
 
-func quizModelPlanGenerationInstructions() string {
+func planGenerationInstructions() string {
 	return strings.TrimSpace(`
 You generate an implementation plan for the selected project or use case.
 Use the structured request payload and all context sections as the sole source of truth.
@@ -163,7 +163,7 @@ Return only the JSON object required by the response schema.
 `)
 }
 
-func quizModelPlanOutlineGenerationInstructions() string {
+func planOutlineGenerationInstructions() string {
 	return strings.TrimSpace(`
 You generate a structured implementation plan outline for the selected project or use case.
 Use the structured request payload and all context sections as the sole source of truth.
@@ -181,7 +181,7 @@ Return only the JSON object required by the response schema.
 `)
 }
 
-func quizModelPlanSliceDetailGenerationInstructions() string {
+func planSliceDetailGenerationInstructions() string {
 	return strings.TrimSpace(`
 You expand exactly one implementation slice from an authoritative staged plan outline.
 Use the structured request payload, the full plan_outline context section, and the target_slice context section as the sole source of truth.
@@ -197,7 +197,7 @@ Return only the JSON object required by the response schema.
 `)
 }
 
-func quizModelSpecGenerationInstructions() string {
+func specGenerationInstructions() string {
 	return strings.TrimSpace(`
 You generate a formal specification for the selected project or use case.
 Use the structured request payload and all context sections as the sole source of truth.
@@ -217,7 +217,7 @@ Return only the JSON object required by the response schema.
 `)
 }
 
-func quizModelFeatureGenerationInstructions() string {
+func featureGenerationInstructions() string {
 	return strings.TrimSpace(`
 You generate a Gherkin acceptance feature artifact from the selected project or use case context.
 Use the structured request payload and all context sections as the sole source of truth.
@@ -240,7 +240,7 @@ Return only the JSON object required by the response schema.
 `)
 }
 
-func quizModelDraftSpecInstructions() string {
+func draftSpecInstructions() string {
 	return strings.TrimSpace(`
 You generate a draft specification from a completed project dump and quiz.
 Use the structured request payload and all context sections as the sole source of truth.

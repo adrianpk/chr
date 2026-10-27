@@ -1,9 +1,10 @@
 package model
 
-func ValidateParsedResponse(response QuizModelResponse, parseErr error) error {
+// ValidateParsedResponse keeps parsing and semantic failures on the shared response path.
+func ValidateParsedResponse(response Response, parseErr error) error {
 	if parseErr != nil {
 		return parseErr
 	}
 
-	return ValidateQuizModelResponse(response)
+	return ValidateResponse(response)
 }

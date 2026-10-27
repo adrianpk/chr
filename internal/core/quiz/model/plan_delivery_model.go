@@ -68,18 +68,18 @@ func planDeliveryEnum(values ...string) map[string]any {
 	return map[string]any{"type": "string", "enum": values}
 }
 
-func quizModelTrackingInstructions(request QuizModelRequest) string {
-	if request.Strategy == QuizModelStrategyPlanDelivery {
+func trackingInstructions(request Request) string {
+	if request.Strategy == StrategyPlanDelivery {
 		return planDeliveryInstructions
 	}
 
-	return quizModelPlanTrackingInstructions()
+	return planTrackingInstructions()
 }
 
-func quizModelTrackingFormat(request QuizModelRequest) OutputFormatDefinition {
-	if request.Strategy == QuizModelStrategyPlanDelivery {
+func trackingFormat(request Request) OutputFormatDefinition {
+	if request.Strategy == StrategyPlanDelivery {
 		return NewOutputFormat("plan_delivery", "Ticket contracts for the retained plan and declared order.", planDeliveryJSONSchema())
 	}
 
-	return NewOutputFormat("plan_tracking_artifacts", "Plan tracking and ticket payloads derived from an existing implementation plan.", quizModelPlanTrackingJSONSchema())
+	return NewOutputFormat("plan_tracking_artifacts", "Plan tracking and ticket payloads derived from an existing implementation plan.", planTrackingJSONSchema())
 }

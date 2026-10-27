@@ -1,12 +1,11 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // Done asks the same clarification owner whether the saved answers suffice.
@@ -32,7 +31,7 @@ func (s service) prepareGuidedQuizDone(observed core.QuizObservation) (core.Quiz
 		return core.QuizTransition{}, err
 	}
 
-	if response.Status != quizmodel.QuizModelResponseReady || response.Question.Required {
+	if response.Status != quizmodel.ResponseReady || response.Question.Required {
 		state.ContinuationError = "Clarification still needs an answer. Continue the quiz before finishing."
 
 		return core.QuizTransition{State: state, Message: state.ContinuationError}, nil

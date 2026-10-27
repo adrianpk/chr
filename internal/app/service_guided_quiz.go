@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"encoding/json"
@@ -11,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -141,42 +140,42 @@ func guidedDumpCheckpoint(session core.AuthoringSession) (core.GuidedStageCheckp
 	return core.GuidedStageCheckpoint{}, errors.New("guided quiz requires a retained dump checkpoint")
 }
 
-func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.QuizModelRequest, error) {
+func (s service) guidedQuizModelRequest(state quizcore.RuntimeState, entries []quizcore.Entry) (quizmodel.Request, error) {
 	session := s.guidedContext.session
 
 	sections, err := s.guidedCommittedSections(session, "dump")
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, err
+		return quizmodel.Request{}, err
 	}
 
 	history, err := json.Marshal(entries)
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, err
+		return quizmodel.Request{}, err
 	}
 
 	if len(history) > workflowstate.FileLimit {
-		return quizmodel.QuizModelRequest{}, errors.New("guided clarification history exceeds its bound")
+		return quizmodel.Request{}, errors.New("guided clarification history exceeds its bound")
 	}
 
-	sections = append(sections, quizmodel.QuizModelContextSection{Name: "answered clarification", Layer: quizmodel.QuizModelContextLayerQuiz, Authority: "canonical owner", Content: string(history)})
-	payload := s.quizModelPayloadWithEntries(state, quizmodel.QuizModelActionNextQuestion, entries)
-	payload.Project = quizmodel.QuizModelProjectPayload{ID: session.ProjectID, Name: session.Guided.CaseName}
+	sections = append(sections, quizmodel.ContextSection{Name: "answered clarification", Layer: quizmodel.ContextLayerQuiz, Authority: "canonical owner", Content: string(history)})
+	payload := s.quizModelPayloadWithEntries(state, quizmodel.ActionNextQuestion, entries)
+	payload.Project = quizmodel.ProjectPayload{ID: session.ProjectID, Name: session.Guided.CaseName}
 
-	coreSections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
+	coreSections, err := quizmodel.ContextSectionsForPayload(payload)
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, err
+		return quizmodel.Request{}, err
 	}
 
-	return quizmodel.QuizModelRequest{
-		ID: fmt.Sprintf("guided-%s-%d", session.ID, state.QuestionsAsked+1), Action: quizmodel.QuizModelActionNextQuestion, Strategy: quizModelStrategy(state.Mode),
+	return quizmodel.Request{
+		ID: fmt.Sprintf("guided-%s-%d", session.ID, state.QuestionsAsked+1), Action: quizmodel.ActionNextQuestion, Strategy: quizModelStrategy(state.Mode),
 		Scope: quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: state.Mode,
 		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...),
-		OutputContract: quizmodel.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
+		OutputContract: quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}, nil
 }
 
-func (s service) guidedCommittedSections(session core.AuthoringSession, stage string) ([]quizmodel.QuizModelContextSection, error) {
-	sections := []quizmodel.QuizModelContextSection{}
+func (s service) guidedCommittedSections(session core.AuthoringSession, stage string) ([]quizmodel.ContextSection, error) {
+	sections := []quizmodel.ContextSection{}
 
 	for _, checkpoint := range session.Guided.Checkpoints {
 		if checkpoint.Stage != stage {
@@ -190,7 +189,7 @@ func (s service) guidedCommittedSections(session core.AuthoringSession, stage st
 			}
 
 			if strings.HasSuffix(artifact.Path, "/artifact.md") {
-				sections = append(sections, quizmodel.QuizModelContextSection{Layer: quizmodel.QuizModelContextLayerProject, Name: artifact.Path, Content: string(content), Authority: "committed", Metadata: map[string]string{"repository": checkpoint.Repository, "commit": checkpoint.Commit, "path": artifact.Path, "hash": artifact.Hash}})
+				sections = append(sections, quizmodel.ContextSection{Layer: quizmodel.ContextLayerProject, Name: artifact.Path, Content: string(content), Authority: "committed", Metadata: map[string]string{"repository": checkpoint.Repository, "commit": checkpoint.Commit, "path": artifact.Path, "hash": artifact.Hash}})
 			}
 		}
 	}

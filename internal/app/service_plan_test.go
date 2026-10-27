@@ -1,8 +1,6 @@
 //nolint:wsl_v5 // Service tests keep setup and assertions close to the behavior under test.
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"os"
@@ -15,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -82,11 +81,11 @@ The implementation must preserve editorial review.
 		t.Fatalf("model requests = %d, want outline and slice detail requests", len(model.requests))
 	}
 
-	if model.requests[0].Action != quizmodel.QuizModelActionGeneratePlanOutline {
+	if model.requests[0].Action != quizmodel.ActionGeneratePlanOutline {
 		t.Fatalf("first action = %q, want plan outline generation", model.requests[0].Action)
 	}
 
-	if model.requests[1].Action != quizmodel.QuizModelActionGeneratePlanSliceDetail {
+	if model.requests[1].Action != quizmodel.ActionGeneratePlanSliceDetail {
 		t.Fatalf("second action = %q, want plan slice detail generation", model.requests[1].Action)
 	}
 
@@ -122,7 +121,7 @@ The implementation must preserve editorial review.
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizPlanResponse("response-plan", clock()),
 		},
 	}
@@ -145,7 +144,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("model requests = %d, want single plan generation request", len(model.requests))
 	}
 
-	if model.requests[0].Action != quizmodel.QuizModelActionGeneratePlan {
+	if model.requests[0].Action != quizmodel.ActionGeneratePlan {
 		t.Fatalf("action = %q, want plan generation", model.requests[0].Action)
 	}
 
@@ -181,7 +180,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("newPlanOutlineGenerationModelRequest returned error: %v", err)
 	}
 
-	if request.Action != quizmodel.QuizModelActionGeneratePlanOutline {
+	if request.Action != quizmodel.ActionGeneratePlanOutline {
 		t.Fatalf("Action = %q, want plan outline generation", request.Action)
 	}
 
@@ -236,7 +235,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("newPlanGenerationModelRequest returned error: %v", err)
 	}
 
-	if request.Action != quizmodel.QuizModelActionGeneratePlan {
+	if request.Action != quizmodel.ActionGeneratePlan {
 		t.Fatalf("Action = %q, want plan generation", request.Action)
 	}
 
@@ -284,7 +283,7 @@ The implementation must preserve editorial review.
 		t.Fatalf("newPlanSliceDetailGenerationModelRequest returned error: %v", err)
 	}
 
-	if request.Action != quizmodel.QuizModelActionGeneratePlanSliceDetail {
+	if request.Action != quizmodel.ActionGeneratePlanSliceDetail {
 		t.Fatalf("Action = %q, want plan slice detail generation", request.Action)
 	}
 
@@ -416,7 +415,7 @@ func TestServiceGeneratePlanDoesNotWritePlanWhenSliceDetailFails(t *testing.T) {
 	badDetail.SliceDetail.ShortName = "renamed slice"
 
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizPlanOutlineResponse("response-plan-outline", clock()),
 			badDetail,
 		},
@@ -457,7 +456,7 @@ Implement planning foundation.
 
 	now := time.Date(2026, 5, 25, 11, 12, 13, 14, time.UTC)
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizPlanTrackingResponse("response-tracking", now),
 		},
 	}
@@ -503,7 +502,7 @@ Implement planning foundation.
 	)
 	assertMaterializedPlanTrackingTicketContent(t, ticket)
 
-	if len(model.requests) != 1 || model.requests[0].Action != quizmodel.QuizModelActionMaterializePlanTracking {
+	if len(model.requests) != 1 || model.requests[0].Action != quizmodel.ActionMaterializePlanTracking {
 		t.Fatalf("model requests = %#v, want plan tracking materialization", model.requests)
 	}
 }
@@ -521,12 +520,12 @@ case_slug: "blog"
 `)
 
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			{
 				ID:        "response-invalid-tracking",
 				RequestID: "filled-by-fake",
 				Provider:  "fake",
-				Status:    quizmodel.QuizModelResponseReady,
+				Status:    quizmodel.ResponseReady,
 				PlanTracking: generationcore.GeneratedPlanTracking{
 					Title:     "Invalid Tracking",
 					Body:      "Missing generated tickets.",
@@ -1072,15 +1071,12 @@ type deadlineCapturingPlanModel struct {
 	remaining   time.Duration
 }
 
-func (m *deadlineCapturingPlanModel) InvokeQuizModel(
-	ctx context.Context,
-	request quizmodel.QuizModelRequest,
-) (quizmodel.QuizModelResponse, error) {
+func (m *deadlineCapturingPlanModel) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
 	deadline, ok := ctx.Deadline()
 	m.hasDeadline = ok
 	m.remaining = time.Until(deadline)
 
-	if request.Action == quizmodel.QuizModelActionGeneratePlanOutline {
+	if request.Action == quizmodel.ActionGeneratePlanOutline {
 		return serviceQuizPlanOutlineResponse("response-plan-outline", request.CreatedAt), nil
 	}
 
@@ -1102,10 +1098,7 @@ func newBlockingPlanModel() *blockingPlanModel {
 	}
 }
 
-func (m *blockingPlanModel) InvokeQuizModel(
-	_ context.Context,
-	request quizmodel.QuizModelRequest,
-) (quizmodel.QuizModelResponse, error) {
+func (m *blockingPlanModel) Invoke(_ context.Context, request quizmodel.Request) (quizmodel.Response, error) {
 	m.mu.Lock()
 	m.count++
 	m.mu.Unlock()
@@ -1113,7 +1106,7 @@ func (m *blockingPlanModel) InvokeQuizModel(
 	m.once.Do(func() { close(m.started) })
 	<-m.release
 
-	if request.Action == quizmodel.QuizModelActionGeneratePlanOutline {
+	if request.Action == quizmodel.ActionGeneratePlanOutline {
 		return serviceQuizPlanOutlineResponse("response-plan-outline", request.CreatedAt), nil
 	}
 

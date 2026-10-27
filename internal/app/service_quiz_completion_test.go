@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"encoding/json"
 	"fmt"
@@ -9,6 +7,7 @@ import (
 	"testing"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // Discovery retains answers outside the recent-five window, including the
@@ -36,7 +35,7 @@ func TestServiceQuizFullHistory(t *testing.T) {
 			continue
 		}
 
-		var history []quizmodel.QuizModelEntryPayload
+		var history []quizmodel.EntryPayload
 		if err := json.Unmarshal([]byte(section.Content), &history); err != nil {
 			t.Fatal(err)
 		}
@@ -71,7 +70,7 @@ func checkQuizNaturalStop(t *testing.T, name string) {
 		second.Question.Prompt = "  " + strings.ToUpper(first.Question.Prompt) + "  "
 	}
 
-	model.responses = []quizmodel.QuizModelResponse{first, second}
+	model.responses = []quizmodel.Response{first, second}
 
 	started, err := operations.StartQuiz(QuizStartRequest{Mode: quizcore.ModeDeep})
 	if err != nil {
@@ -109,7 +108,7 @@ func checkQuizDuplicateRecovery(t *testing.T, operations service, model *fakeSer
 		t.Fatal("resume would replay the rejected provider output")
 	}
 
-	model.responses = []quizmodel.QuizModelResponse{serviceQuizModelResponse("third", "third", serviceQuizClock()())}
+	model.responses = []quizmodel.Response{serviceQuizModelResponse("third", "third", serviceQuizClock()())}
 
 	resumed, err := operations.ResumeQuiz(QuizResumeRequest{})
 	if err != nil || resumed.State.ActiveQuestion == nil || resumed.State.AnswersRecorded != 1 || resumed.State.ContinuationPending {

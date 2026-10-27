@@ -1,12 +1,11 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"strings"
 	"testing"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // Case discovery inherits project decisions while retaining its own pending
@@ -15,7 +14,7 @@ func TestServiceQuizInheritedHistory(t *testing.T) {
 	operations, model := newRetainedQuizFixture(t)
 	final := serviceQuizModelResponse("final", "final", serviceQuizClock()())
 	final.Question.Required = false
-	model.responses = []quizmodel.QuizModelResponse{serviceQuizModelResponse("first", "first", serviceQuizClock()()), final}
+	model.responses = []quizmodel.Response{serviceQuizModelResponse("first", "first", serviceQuizClock()()), final}
 
 	if _, err := operations.StartQuiz(QuizStartRequest{}); err != nil {
 		t.Fatal(err)

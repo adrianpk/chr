@@ -1,14 +1,15 @@
 package model
 
 import (
+	"testing"
+
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
-	"testing"
 )
 
 func TestQuizModelRoutingStateCarriesTopicConductorSignals(t *testing.T) {
 	request := routingTestRequest()
-	request.Payload.RecentEntries = []QuizModelEntryPayload{
+	request.Payload.RecentEntries = []EntryPayload{
 		quizModelEntryPayloadWithTags("identity"),
 		quizModelEntryPayloadWithTags("identity"),
 		quizModelEntryPayloadWithTags("storage"),
@@ -16,7 +17,7 @@ func TestQuizModelRoutingStateCarriesTopicConductorSignals(t *testing.T) {
 		quizModelEntryPayloadWithTags("identity"),
 	}
 
-	state := quizModelRoutingState(request, QuizModelQuestionPayload{
+	state := routingState(request, QuestionPayload{
 		Question:      "What identifier should appear in public paths?",
 		Tags:          []string{"identity"},
 		FollowUpDepth: 1,
@@ -54,7 +55,7 @@ func TestQuizModelRoutingStateCarriesAcceptanceReadinessPromptIntent(t *testing.
 		Missing:    []generationcore.AcceptanceReadinessSlot{generationcore.AcceptanceReadinessSlotActor},
 	}
 
-	state := quizModelRoutingState(request, QuizModelQuestionPayload{
+	state := routingState(request, QuestionPayload{
 		Question:              "Who starts this workflow?",
 		Tags:                  []string{"actor"},
 		FollowUpDepth:         1,
@@ -80,8 +81,8 @@ func TestQuizModelRoutingStateCarriesAcceptanceReadinessPromptIntent(t *testing.
 	}
 }
 
-func quizModelEntryPayloadWithTags(tags ...string) QuizModelEntryPayload {
-	return QuizModelEntryPayload{
+func quizModelEntryPayloadWithTags(tags ...string) EntryPayload {
+	return EntryPayload{
 		Question: "Question?",
 		Answer:   "Answer.",
 		Status:   string(quizcore.EntryStatusAnswered),
@@ -95,12 +96,12 @@ func TestQuizModelRuntimeDepthForcesTrunkAfterBranchReturn(t *testing.T) {
 	state.Trail = nil
 	state.BranchReturnReason = quizcore.BranchReturnReasonSkipped
 
-	depth := quizModelRuntimeDepth(state, quizcore.MaxFollowUpDepth)
+	depth := runtimeDepth(state, quizcore.MaxFollowUpDepth)
 	if depth != 1 {
 		t.Fatalf("depth = %d, want trunk depth after branch return", depth)
 	}
 }
 
-func routingTestRequest() QuizModelRequest {
-	return QuizModelRequest{Strategy: "deep", Payload: QuizModelPayload{Quiz: QuizModelQuizPayload{EntryCount: 1, Mode: "deep"}}}
+func routingTestRequest() Request {
+	return Request{Strategy: "deep", Payload: Payload{Quiz: QuizPayload{EntryCount: 1, Mode: "deep"}}}
 }

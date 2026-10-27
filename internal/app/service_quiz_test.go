@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"fmt"
@@ -15,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) {
@@ -23,7 +22,7 @@ func TestServiceStartQuizCreatesScopedRuntimeThroughModelBoundary(t *testing.T) 
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 		},
 	}
@@ -83,7 +82,7 @@ func TestServiceAnswerQuizRecordsRawCaptureAndAdvances(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponseWithCandidates("response-1", "question-1", clock(), []quizcore.Candidate{serviceQuizCandidate("question-2", "Which constraint matters next?", clock())}),
 		},
 	}
@@ -139,7 +138,7 @@ func TestServiceAnswerQuizReusesPersistedPromptIntent(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponseWithQuestion("response-1", serviceQuizQuestion(quizcore.Question{
 				ID:        "question-1",
 				Prompt:    "What should the workflow preserve?",
@@ -406,7 +405,7 @@ func TestServiceFastQuizActivatesBufferedCandidatesWithoutRawCapture(t *testing.
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponseWithCandidates(
 				"response-1",
 				"question-1",
@@ -531,7 +530,7 @@ func TestServiceGenerateQuizDraftSpecUsesCuratedNotes(t *testing.T) {
 	})
 
 	draftRequest := model.model.requests[len(model.model.requests)-1]
-	if draftRequest.Action != quizmodel.QuizModelActionDraftSpec {
+	if draftRequest.Action != quizmodel.ActionDraftSpec {
 		t.Fatalf("draft action = %q", draftRequest.Action)
 	}
 
@@ -548,7 +547,7 @@ func answerServiceQuiz(t *testing.T, projectDir string) (serviceQuizFixture, Qui
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponse("response-2", "question-2", clock()),
 			serviceQuizDraftSpecResponse("response-3", clock()),
@@ -600,7 +599,7 @@ func assertServiceQuizContentContains(t *testing.T, content string, values []str
 	}
 }
 
-func assertServiceQuizRedWrightPayload(t *testing.T, request quizmodel.QuizModelRequest) {
+func assertServiceQuizRedWrightPayload(t *testing.T, request quizmodel.Request) {
 	t.Helper()
 
 	if request.Payload.Project.Name != "Quiz Project" {
@@ -622,7 +621,7 @@ func TestServiceQuizTrailRecoversAfterMaxDepthBranch(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(quizcore.Question{
 				ID:        "question-2",
@@ -678,7 +677,7 @@ func TestServiceQuizSkipReturnsToTrunkCoverage(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponseWithQuestion("response-2", serviceQuizQuestion(quizcore.Question{
 				ID:        "question-2",
@@ -765,7 +764,7 @@ func TestServiceQuizLifecycleOperations(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizModelResponse("response-1", "question-1", clock()),
 			serviceQuizModelResponseWithCandidates("response-2", "question-2", clock(), []quizcore.Candidate{serviceQuizCandidate("question-3", "Which constraint matters next?", clock())}),
 		},
@@ -966,42 +965,39 @@ func serviceQuizReadModelRuntimeState(updated time.Time) quizcore.RuntimeState {
 }
 
 type fakeServiceQuizModel struct {
-	requests  []quizmodel.QuizModelRequest
-	responses []quizmodel.QuizModelResponse
+	requests  []quizmodel.Request
+	responses []quizmodel.Response
 }
 
 //nolint:nestif // Test fake keeps action fallback behavior in one place.
-func (m *fakeServiceQuizModel) InvokeQuizModel(
-	_ context.Context,
-	request quizmodel.QuizModelRequest,
-) (quizmodel.QuizModelResponse, error) {
+func (m *fakeServiceQuizModel) Invoke(_ context.Context, request quizmodel.Request) (quizmodel.Response, error) {
 	m.requests = append(m.requests, request)
 
 	if len(m.responses) == 0 {
-		if request.Action == quizmodel.QuizModelActionDraftSpec || request.Action == quizmodel.QuizModelActionGenerateSpec {
+		if request.Action == quizmodel.ActionDraftSpec || request.Action == quizmodel.ActionGenerateSpec {
 			return serviceQuizDraftSpecResponse("response-fallback", request.CreatedAt), nil
 		}
 
-		if request.Action == quizmodel.QuizModelActionGeneratePlanOutline {
+		if request.Action == quizmodel.ActionGeneratePlanOutline {
 			return serviceQuizPlanOutlineResponse("response-fallback-outline", request.CreatedAt), nil
 		}
 
-		if request.Action == quizmodel.QuizModelActionGeneratePlanSliceDetail {
+		if request.Action == quizmodel.ActionGeneratePlanSliceDetail {
 			return serviceQuizPlanSliceDetailResponse("response-fallback-slice-detail", request.CreatedAt), nil
 		}
 
-		if request.Action == quizmodel.QuizModelActionGeneratePlan {
+		if request.Action == quizmodel.ActionGeneratePlan {
 			return serviceQuizPlanResponse("response-fallback-plan", request.CreatedAt), nil
 		}
 
-		if request.Action == quizmodel.QuizModelActionGenerateAcceptanceFeature {
+		if request.Action == quizmodel.ActionGenerateAcceptanceFeature {
 			return serviceQuizAcceptanceFeatureResponse("response-fallback-feature", request.CreatedAt, generationcore.AcceptanceFeatureGeneration{
 				Status:          generationcore.AcceptanceFeatureStatusNotApplicable,
 				RejectionReason: "No acceptance feature context is available.",
 			}), nil
 		}
 
-		if request.Action == quizmodel.QuizModelActionMaterializePlanTracking {
+		if request.Action == quizmodel.ActionMaterializePlanTracking {
 			return serviceQuizPlanTrackingResponse("response-fallback", request.CreatedAt), nil
 		}
 
@@ -1052,12 +1048,12 @@ func serviceQuizModelResponse(
 	responseID string,
 	questionID string,
 	createdAt time.Time,
-) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		Question: quizcore.Question{
 			ID:        questionID,
 			Prompt:    fmt.Sprintf("What should the workflow preserve for %s?", questionID),
@@ -1072,12 +1068,12 @@ func serviceQuizModelResponse(
 	}
 }
 
-func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+func serviceQuizDraftSpecResponse(responseID string, createdAt time.Time) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		DraftSpec: generationcore.QuizDraftSpec{
 			Scope:          quizcore.Scope{ProjectID: "service-project"},
 			Title:          "Quiz Generated Spec",
@@ -1095,38 +1091,38 @@ func serviceQuizDraftSpecResponseWithFeature(
 	responseID string,
 	createdAt time.Time,
 	feature generationcore.AcceptanceFeatureGeneration,
-) quizmodel.QuizModelResponse {
+) quizmodel.Response {
 	response := serviceQuizDraftSpecResponse(responseID, createdAt)
 	response.DraftSpec.Feature = feature
 
 	return response
 }
 
-func serviceQuizAcceptanceFeatureResponse(responseID string, createdAt time.Time, feature generationcore.AcceptanceFeatureGeneration) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+func serviceQuizAcceptanceFeatureResponse(responseID string, createdAt time.Time, feature generationcore.AcceptanceFeatureGeneration) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		Feature:   feature,
 		RawText:   "raw acceptance feature",
 		CreatedAt: createdAt,
 	}
 }
 
-func serviceQuizStagedPlanResponses(createdAt time.Time) []quizmodel.QuizModelResponse {
-	return []quizmodel.QuizModelResponse{
+func serviceQuizStagedPlanResponses(createdAt time.Time) []quizmodel.Response {
+	return []quizmodel.Response{
 		serviceQuizPlanOutlineResponse("response-plan-outline", createdAt),
 		serviceQuizPlanSliceDetailResponse("response-plan-slice-detail", createdAt),
 	}
 }
 
-func serviceQuizPlanResponse(responseID string, createdAt time.Time) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+func serviceQuizPlanResponse(responseID string, createdAt time.Time) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		Plan: generationcore.GeneratedPlan{
 			Scope:     quizcore.Scope{ProjectID: "service-project"},
 			Title:     "Generated Implementation Plan",
@@ -1139,12 +1135,12 @@ func serviceQuizPlanResponse(responseID string, createdAt time.Time) quizmodel.Q
 	}
 }
 
-func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		PlanOutline: generationcore.GeneratedPlanOutline{
 			Scope:              quizcore.Scope{ProjectID: "service-project"},
 			Title:              "Generated Implementation Plan",
@@ -1176,12 +1172,12 @@ func serviceQuizPlanOutlineResponse(responseID string, createdAt time.Time) quiz
 	}
 }
 
-func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		SliceDetail: generationcore.GeneratedPlanSliceDetail{
 			Scope:               quizcore.Scope{ProjectID: "service-project"},
 			SliceID:             "Slice 1",
@@ -1218,12 +1214,12 @@ func serviceQuizPlanSliceDetailResponse(responseID string, createdAt time.Time) 
 	}
 }
 
-func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		PlanTracking: generationcore.GeneratedPlanTracking{
 			Scope:     quizcore.Scope{ProjectID: "service-project"},
 			Title:     "Generated Plan Tracking",
@@ -1248,12 +1244,12 @@ func serviceQuizPlanTrackingResponse(responseID string, createdAt time.Time) qui
 	}
 }
 
-func serviceQuizModelResponseWithQuestion(responseID string, question quizcore.Question) quizmodel.QuizModelResponse {
-	return quizmodel.QuizModelResponse{
+func serviceQuizModelResponseWithQuestion(responseID string, question quizcore.Question) quizmodel.Response {
+	return quizmodel.Response{
 		ID:        responseID,
 		RequestID: "filled-by-fake",
 		Provider:  "fake",
-		Status:    quizmodel.QuizModelResponseReady,
+		Status:    quizmodel.ResponseReady,
 		Question:  question,
 		RawText:   "raw model text",
 		CreatedAt: question.CreatedAt,
@@ -1271,7 +1267,7 @@ func serviceQuizModelResponseWithCandidates(
 	questionID string,
 	createdAt time.Time,
 	candidates []quizcore.Candidate,
-) quizmodel.QuizModelResponse {
+) quizmodel.Response {
 	response := serviceQuizModelResponse(responseID, questionID, createdAt)
 	response.Candidates = candidates
 
@@ -1300,7 +1296,7 @@ func serviceQuizClock() func() time.Time {
 
 func assertQuizModelRequestSections(
 	t *testing.T,
-	request quizmodel.QuizModelRequest,
+	request quizmodel.Request,
 	names []string,
 ) {
 	t.Helper()

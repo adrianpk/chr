@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"encoding/json"
@@ -12,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -102,7 +101,7 @@ func (s service) reserveGuidedPlan(ctx context.Context, session *core.AuthoringS
 }
 
 func (s service) generateGuidedPlan(ctx context.Context, session core.AuthoringSession) (core.GuidedPreparedPlan, error) {
-	bound, ctx, err := s.bindGeneration(ctx, session.Guided.Work.PublicationOperation.ID, string(quizmodel.QuizModelActionGeneratePlan))
+	bound, ctx, err := s.bindGeneration(ctx, session.Guided.Work.PublicationOperation.ID, string(quizmodel.ActionGeneratePlan))
 	if err != nil {
 		return core.GuidedPreparedPlan{}, err
 	}

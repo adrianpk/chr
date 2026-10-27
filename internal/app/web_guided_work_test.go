@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"net/http"
@@ -9,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -17,12 +16,12 @@ type guidedWebWorkModel struct {
 	plan guidedAdmissionModel
 }
 
-func (model *guidedWebWorkModel) InvokeQuizModel(ctx context.Context, request quizmodel.QuizModelRequest) (quizmodel.QuizModelResponse, error) {
-	if request.Action == quizmodel.QuizModelActionGeneratePlan || request.Strategy == quizmodel.QuizModelStrategyPlanDelivery {
-		return model.plan.InvokeQuizModel(ctx, request)
+func (model *guidedWebWorkModel) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
+	if request.Action == quizmodel.ActionGeneratePlan || request.Strategy == quizmodel.StrategyPlanDelivery {
+		return model.plan.Invoke(ctx, request)
 	}
 
-	return model.quiz.InvokeQuizModel(ctx, request)
+	return model.quiz.Invoke(ctx, request)
 }
 
 func guidedWebWorkFixture(t *testing.T) (webViewProvider, *guidedWorkHost, *guidedWebWorkModel) {
@@ -32,7 +31,7 @@ func guidedWebWorkFixture(t *testing.T) (webViewProvider, *guidedWorkHost, *guid
 	now := operations.utcNow()
 	completion := serviceQuizModelResponse("complete", "complete", now)
 	completion.Question.Required = false
-	model := &guidedWebWorkModel{quiz: fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{serviceQuizModelResponse("first", "question-1", now), completion}}}
+	model := &guidedWebWorkModel{quiz: fakeServiceQuizModel{responses: []quizmodel.Response{serviceQuizModelResponse("first", "question-1", now), completion}}}
 	operations.quizModel = model
 	host := newGuidedWorkHost(t.Context())
 	t.Cleanup(host.close)

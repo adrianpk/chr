@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"io/fs"
@@ -10,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -29,7 +28,7 @@ type service struct {
 	projectContext         commandProjectContext
 	dumpEditor             DumpEditorLauncher
 	dumpCurator            DumpCurationProvider
-	quizModel              quizmodel.QuizModelAdapter
+	quizModel              quizmodel.Adapter
 	conversationModel      core.StructuredModelProvider
 	generationBinder       generationOperationBinder
 	generationArtifactsDir string
@@ -73,24 +72,24 @@ func newDumpCurationProvider(projectDir string) DumpCurationProvider {
 	return harnessDumpCurationProvider{ProjectDir: projectDir, Runner: codex.Runner{}}
 }
 
-func newQuizModelAdapter(projectDir string) quizmodel.QuizModelAdapter {
+func newQuizModelAdapter(projectDir string) quizmodel.Adapter {
 	defaultAdapter := core.OpenAIQuizModelAdapter{ProjectDir: projectDir}
-	actionAdapters := map[quizmodel.QuizModelAction]quizmodel.QuizModelAdapter{}
+	actionAdapters := map[quizmodel.Action]quizmodel.Adapter{}
 
 	if codexGenerationBackend("CHR_SPEC_GENERATION_BACKEND") {
-		actionAdapters[quizmodel.QuizModelActionGenerateSpec] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
+		actionAdapters[quizmodel.ActionGenerateSpec] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if codexGenerationBackend("CHR_ACCEPTANCE_FEATURE_GENERATION_BACKEND") {
-		actionAdapters[quizmodel.QuizModelActionGenerateAcceptanceFeature] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
+		actionAdapters[quizmodel.ActionGenerateAcceptanceFeature] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if codexGenerationBackend("CHR_PLAN_GENERATION_BACKEND") {
-		actionAdapters[quizmodel.QuizModelActionGeneratePlan] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
+		actionAdapters[quizmodel.ActionGeneratePlan] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if codexGenerationBackend("CHR_PLAN_TRACKING_GENERATION_BACKEND") {
-		actionAdapters[quizmodel.QuizModelActionMaterializePlanTracking] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
+		actionAdapters[quizmodel.ActionMaterializePlanTracking] = core.HarnessQuizModelAdapter{ProjectDir: projectDir, Runner: codex.Runner{}}
 	}
 
 	if len(actionAdapters) == 0 {

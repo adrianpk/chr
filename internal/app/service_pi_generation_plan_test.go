@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"encoding/json"
 	"os"
@@ -11,12 +9,13 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // Pi performs real readiness and plan calls before the tracking publication owner.
 func TestPiGenerationPlan(t *testing.T) {
 	plan := serviceQuizPlanResponse("fixture", time.Now().UTC()).Plan
-	payload := quizmodel.QuizModelPlanPayload{Title: plan.Title, Body: plan.Body, Status: "planned", Order: plan.Order}
+	payload := quizmodel.PlanPayload{Title: plan.Title, Body: plan.Body, Status: "planned", Order: plan.Order}
 
 	body, err := json.Marshal(payload)
 	if err != nil {
@@ -88,7 +87,7 @@ func writePiTrackingResponse(t *testing.T, driver string) {
 
 	tracking := serviceQuizPlanTrackingResponse("fixture", time.Now().UTC()).PlanTracking
 	ticket := tracking.Tickets[0]
-	payload := quizmodel.QuizModelPlanTrackingPayload{Title: tracking.Title, Body: tracking.Body, Status: "tracking", Tickets: []quizmodel.QuizModelPlanTrackingTicketPayload{{
+	payload := quizmodel.PlanTrackingPayload{Title: tracking.Title, Body: tracking.Body, Status: "tracking", Tickets: []quizmodel.PlanTrackingTicketPayload{{
 		SliceID: ticket.SliceID, Title: ticket.Title, Synopsis: ticket.Synopsis, Summary: ticket.Summary, Body: ticket.Body, Priority: ticket.Priority, Severity: ticket.Severity, Type: ticket.Type, Tags: ticket.Tags, Dependencies: []string{},
 	}}}
 

@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"net/http"
@@ -14,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -123,7 +122,7 @@ func newWebQuizFixture(t *testing.T) (webViewProvider, *fakeServiceQuizModel) {
 		candidates = append(candidates, serviceQuizCandidate("question-"+strconv.Itoa(index+2), prompt, now))
 	}
 
-	model := &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{serviceQuizModelResponseWithCandidates("batch", "question-1", now, candidates)}}
+	model := &fakeServiceQuizModel{responses: []quizmodel.Response{serviceQuizModelResponseWithCandidates("batch", "question-1", now, candidates)}}
 	operations.quizModel, operations.now = model, serviceQuizClock()
 	provider.serviceFactory = func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy }
 

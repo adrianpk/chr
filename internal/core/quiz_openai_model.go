@@ -1,7 +1,5 @@
 package core
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"bytes"
 	"context"
@@ -15,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 const (
@@ -82,25 +82,22 @@ type openAIResponsesError struct {
 	Type    string `json:"type"`
 }
 
-// InvokeQuizModel invokes the configured model adapter.
-func (a OpenAIQuizModelAdapter) InvokeQuizModel(
-	ctx context.Context,
-	request quizmodel.QuizModelRequest,
-) (quizmodel.QuizModelResponse, error) {
+// Invoke invokes the configured model adapter.
+func (a OpenAIQuizModelAdapter) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
 	request.ID = HarnessGenerationRequestID(ctx, request.ID)
 
-	err := quizmodel.ValidateQuizModelRequest(request)
+	err := quizmodel.ValidateRequest(request)
 	if err != nil {
-		return quizmodel.QuizModelResponse{}, err
+		return quizmodel.Response{}, err
 	}
 
 	trace := a.newOpenAIQuizTrace(request)
 
 	output, result, err := a.invokeBoundQuizAPI(ctx, request, trace)
 	if err != nil {
-		a.recordOpenAIQuizResponse(ctx, request, trace, result, "error", err, quizmodel.QuizModelResponse{})
+		a.recordOpenAIQuizResponse(ctx, request, trace, result, "error", err, quizmodel.Response{})
 
-		return quizmodel.QuizModelResponse{}, err
+		return quizmodel.Response{}, err
 	}
 
 	response, err := quizmodel.ResponseFromOutput(request, output)
@@ -108,9 +105,9 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 
 	err = ValidateHarnessGenerationOutput(ctx, a.quizAPIRunRequest(request, trace), err)
 	if err != nil {
-		a.recordOpenAIQuizResponse(ctx, request, trace, result, "parse_error", err, quizmodel.QuizModelResponse{})
+		a.recordOpenAIQuizResponse(ctx, request, trace, result, "parse_error", err, quizmodel.Response{})
 
-		return quizmodel.QuizModelResponse{}, err
+		return quizmodel.Response{}, err
 	}
 
 	a.recordOpenAIQuizResponse(ctx, request, trace, result, "ready", nil, response)
@@ -120,7 +117,7 @@ func (a OpenAIQuizModelAdapter) InvokeQuizModel(
 
 func (a OpenAIQuizModelAdapter) invokeOpenAI(
 	ctx context.Context,
-	request quizmodel.QuizModelRequest,
+	request quizmodel.Request,
 	trace openAIQuizTrace,
 ) ([]byte, openAIQuizExecutionResult, error) {
 	if a.openAIAPIKey() == "" {
@@ -156,7 +153,7 @@ func (a OpenAIQuizModelAdapter) invokeOpenAI(
 	return result.Output, result, err
 }
 
-func (a OpenAIQuizModelAdapter) openAIRequestBody(request quizmodel.QuizModelRequest) ([]byte, error) {
+func (a OpenAIQuizModelAdapter) openAIRequestBody(request quizmodel.Request) ([]byte, error) {
 	content, err := json.Marshal(quizmodel.ProviderPayload(request))
 	if err != nil {
 		return nil, fmt.Errorf("marshal quiz model payload: %w", err)
@@ -185,7 +182,7 @@ func (a OpenAIQuizModelAdapter) openAIRequestBody(request quizmodel.QuizModelReq
 }
 
 func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
-	request quizmodel.QuizModelRequest,
+	request quizmodel.Request,
 	httpRequest *http.Request,
 	startedAt time.Time,
 ) (openAIQuizExecutionResult, error) {
@@ -224,7 +221,7 @@ func (a OpenAIQuizModelAdapter) executeOpenAIRequest(
 	return result, nil
 }
 
-func (a OpenAIQuizModelAdapter) newOpenAIQuizTrace(request quizmodel.QuizModelRequest) openAIQuizTrace {
+func (a OpenAIQuizModelAdapter) newOpenAIQuizTrace(request quizmodel.Request) openAIQuizTrace {
 	body, err := a.openAIRequestBody(request)
 	if err != nil {
 		body = nil
@@ -240,7 +237,7 @@ func (a OpenAIQuizModelAdapter) newOpenAIQuizTrace(request quizmodel.QuizModelRe
 
 func (a OpenAIQuizModelAdapter) recordOpenAIQuizRequest(
 	ctx context.Context,
-	request quizmodel.QuizModelRequest,
+	request quizmodel.Request,
 	trace openAIQuizTrace,
 ) {
 	RecordLLMTraceEvent(ctx, LoadLLMTraceConfigOptions{ProjectDir: a.ProjectDir}, map[string]any{
@@ -248,7 +245,7 @@ func (a OpenAIQuizModelAdapter) recordOpenAIQuizRequest(
 		"llm_call_id":           trace.CallID,
 		"request_id":            request.ID,
 		"action":                string(request.Action),
-		"provider":              quizmodel.QuizModelProviderOpenAI,
+		"provider":              quizmodel.ProviderOpenAI,
 		"model":                 trace.Model,
 		"request_payload_bytes": len(trace.RequestBody),
 		"request_payload":       string(trace.RequestBody),
@@ -257,12 +254,12 @@ func (a OpenAIQuizModelAdapter) recordOpenAIQuizRequest(
 
 func (a OpenAIQuizModelAdapter) recordOpenAIQuizResponse(
 	ctx context.Context,
-	request quizmodel.QuizModelRequest,
+	request quizmodel.Request,
 	trace openAIQuizTrace,
 	result openAIQuizExecutionResult,
 	status string,
 	responseErr error,
-	response quizmodel.QuizModelResponse,
+	response quizmodel.Response,
 ) {
 	event := map[string]any{
 		"event":                  "llm_response",
@@ -270,7 +267,7 @@ func (a OpenAIQuizModelAdapter) recordOpenAIQuizResponse(
 		"request_id":             request.ID,
 		"response_id":            response.ID,
 		"action":                 string(request.Action),
-		"provider":               quizmodel.QuizModelProviderOpenAI,
+		"provider":               quizmodel.ProviderOpenAI,
 		"model":                  trace.Model,
 		"status":                 status,
 		"http_status":            result.StatusCode,
@@ -338,7 +335,7 @@ func (a OpenAIQuizModelAdapter) openAIBaseURL() string {
 	return baseURL
 }
 
-func (a OpenAIQuizModelAdapter) httpClient(request quizmodel.QuizModelRequest) *http.Client {
+func (a OpenAIQuizModelAdapter) httpClient(request quizmodel.Request) *http.Client {
 	if a.Client != nil {
 		return a.Client
 	}
@@ -346,14 +343,14 @@ func (a OpenAIQuizModelAdapter) httpClient(request quizmodel.QuizModelRequest) *
 	return &http.Client{Timeout: openAIQuizModelTimeout(request.Action)}
 }
 
-func openAIQuizModelTimeout(action quizmodel.QuizModelAction) time.Duration {
+func openAIQuizModelTimeout(action quizmodel.Action) time.Duration {
 	switch action {
-	case quizmodel.QuizModelActionGenerateSpec,
-		quizmodel.QuizModelActionGenerateAcceptanceFeature,
-		quizmodel.QuizModelActionGeneratePlan,
-		quizmodel.QuizModelActionGeneratePlanOutline,
-		quizmodel.QuizModelActionGeneratePlanSliceDetail,
-		quizmodel.QuizModelActionMaterializePlanTracking:
+	case quizmodel.ActionGenerateSpec,
+		quizmodel.ActionGenerateAcceptanceFeature,
+		quizmodel.ActionGeneratePlan,
+		quizmodel.ActionGeneratePlanOutline,
+		quizmodel.ActionGeneratePlanSliceDetail,
+		quizmodel.ActionMaterializePlanTracking:
 		return defaultOpenAIGenerationTimeout
 	default:
 		return defaultOpenAIQuizTimeout

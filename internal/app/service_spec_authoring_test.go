@@ -1,13 +1,12 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"strings"
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // Concrete listing preserves independent identities in one scope while the
@@ -29,7 +28,7 @@ func TestSpecDocumentCatalog(t *testing.T) {
 		t.Fatal("manual creation invoked a model")
 	}
 
-	model.responses = []quizmodel.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
+	model.responses = []quizmodel.Response{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
 	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: "named-work"}}); err != nil {
 		t.Fatal(err)
@@ -59,7 +58,7 @@ func checkSpecGenerationScope(t *testing.T, slug string) {
 	operations := provider.service(t.Context())
 	seedSpecGenerationScopes(t, operations)
 
-	model.responses = []quizmodel.QuizModelResponse{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
+	model.responses = []quizmodel.Response{serviceQuizDraftSpecResponse("generated", serviceQuizClock()())}
 
 	if _, err := operations.GenerateSpec(t.Context(), SpecGenerateRequest{Scope: quizcore.Scope{CaseSlug: slug}}); err != nil {
 		t.Fatal(err)

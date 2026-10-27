@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"crypto/sha256"
@@ -13,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -108,7 +107,7 @@ func (s service) guidedSpecEffect(phase string) error {
 }
 
 func (s service) prepareGuidedSpec(ctx context.Context, session core.AuthoringSession) (core.GuidedPreparedSpec, error) {
-	bound, ctx, err := s.bindGeneration(ctx, "guided-spec-"+session.Guided.PendingOperation.Digest, string(quizmodel.QuizModelActionGenerateSpec))
+	bound, ctx, err := s.bindGeneration(ctx, "guided-spec-"+session.Guided.PendingOperation.Digest, string(quizmodel.ActionGenerateSpec))
 	if err != nil {
 		return core.GuidedPreparedSpec{}, err
 	}
@@ -118,43 +117,43 @@ func (s service) prepareGuidedSpec(ctx context.Context, session core.AuthoringSe
 		return core.GuidedPreparedSpec{}, err
 	}
 
-	response, err := quizmodel.InvokeQuizModel(ctx, bound.quizModel, request)
+	response, err := quizmodel.Invoke(ctx, bound.quizModel, request)
 	if err != nil {
 		return core.GuidedPreparedSpec{}, err
 	}
 
-	if response.Status != quizmodel.QuizModelResponseReady || strings.TrimSpace(response.DraftSpec.Body) == "" || len(response.DraftSpec.Body) > 65536 || strings.TrimSpace(response.DraftSpec.Title) == "" || len(response.DraftSpec.Title) > 512 || strings.ContainsAny(response.DraftSpec.Title, "\r\n") {
+	if response.Status != quizmodel.ResponseReady || strings.TrimSpace(response.DraftSpec.Body) == "" || len(response.DraftSpec.Body) > 65536 || strings.TrimSpace(response.DraftSpec.Title) == "" || len(response.DraftSpec.Title) > 512 || strings.ContainsAny(response.DraftSpec.Title, "\r\n") {
 		return core.GuidedPreparedSpec{}, errors.New("guided specification requires valid generated content within 64 KiB")
 	}
 
 	return core.GuidedPreparedSpec{Title: response.DraftSpec.Title, Body: response.DraftSpec.Body, InputDigest: digest, RequestID: request.ID, ResponseID: response.ID}, nil
 }
 
-func (s service) guidedSpecModelRequest(session core.AuthoringSession) (quizmodel.QuizModelRequest, string, error) {
+func (s service) guidedSpecModelRequest(session core.AuthoringSession) (quizmodel.Request, string, error) {
 	sections, state, entries, checkpoint, err := s.guidedSpecInputs(session)
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, "", err
+		return quizmodel.Request{}, "", err
 	}
 
-	payload := s.quizModelPayloadWithEntries(state, quizmodel.QuizModelActionGenerateSpec, entries)
-	payload.Project = quizmodel.QuizModelProjectPayload{ID: session.ProjectID, Name: session.Guided.CaseName}
+	payload := s.quizModelPayloadWithEntries(state, quizmodel.ActionGenerateSpec, entries)
+	payload.Project = quizmodel.ProjectPayload{ID: session.ProjectID, Name: session.Guided.CaseName}
 
-	coreSections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
+	coreSections, err := quizmodel.ContextSectionsForPayload(payload)
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, "", err
+		return quizmodel.Request{}, "", err
 	}
 
 	digest, err := core.GuidedCheckpointDigest(checkpoint)
-	request := quizmodel.QuizModelRequest{
-		ID: core.HarnessGenerationRequestID(s.ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.QuizModelActionGenerateSpec, Strategy: "guided_committed_inputs",
+	request := quizmodel.Request{
+		ID: core.HarnessGenerationRequestID(s.ctx, "guided-"+session.ID+"-spec"), Action: quizmodel.ActionGenerateSpec, Strategy: "guided_committed_inputs",
 		Scope: quizcore.Scope{ProjectID: session.ProjectID, Namespace: session.Namespace, CaseSlug: session.Guided.CaseSlug}, Mode: quizcore.ModeDeep,
-		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...), OutputContract: quizmodel.QuizModelOutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
+		RuntimeState: state, Payload: payload, ContextSections: append(coreSections, sections...), OutputContract: quizmodel.OutputContract{RequiredFields: payload.OutputContract.RequiredFields}, CreatedAt: s.utcNow(),
 	}
 
 	return request, digest, err
 }
 
-func (s service) guidedSpecInputs(session core.AuthoringSession) ([]quizmodel.QuizModelContextSection, quizcore.RuntimeState, []quizcore.Entry, core.GuidedStageCheckpoint, error) {
+func (s service) guidedSpecInputs(session core.AuthoringSession) ([]quizmodel.ContextSection, quizcore.RuntimeState, []quizcore.Entry, core.GuidedStageCheckpoint, error) {
 	var (
 		state   quizcore.RuntimeState
 		entries []quizcore.Entry

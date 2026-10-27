@@ -1,7 +1,5 @@
 package core
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"os"
@@ -12,6 +10,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 func TestAcceptanceFeatureLayoutUsesCanonicalPath(t *testing.T) {
@@ -82,7 +81,7 @@ func TestValidateAcceptanceFeatureGenerationRequiresPromptsForNeedsMoreInfo(t *t
 }
 
 func TestDecodeQuizModelFeaturePayloadKeepsClarificationPrompts(t *testing.T) {
-	payload, err := quizmodel.DecodeQuizModelFeaturePayload([]byte(`{
+	payload, err := quizmodel.DecodeFeaturePayload([]byte(`{
 		"status": "needs_more_info",
 		"rejection_reason": "The failure behavior is missing.",
 		"clarification_prompts": [

@@ -1,7 +1,5 @@
 package core
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"bytes"
 	"context"
@@ -11,6 +9,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 func (p *ConfiguredStructuredModel) invokeOpenAI(ctx context.Context, request StructuredModelRequest) ([]byte, error) {

@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"errors"
@@ -14,6 +12,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // SpecView is the TUI-facing projection of a spec document.
@@ -75,7 +74,7 @@ func (s service) GenerateSpec(ctx context.Context, request SpecGenerateRequest) 
 	var result SpecOperationResult
 
 	err := s.withGenerationRuntime(ctx, "spec", scope, func(ctx context.Context) error {
-		bound, ctx, err := s.bindGeneration(ctx, "spec-"+dumpRequestID(request.OperationID), string(quizmodel.QuizModelActionGenerateSpec))
+		bound, ctx, err := s.bindGeneration(ctx, "spec-"+dumpRequestID(request.OperationID), string(quizmodel.ActionGenerateSpec))
 		if err != nil {
 			return err
 		}
@@ -130,7 +129,7 @@ func (s service) generateSpec(ctx context.Context, scope quizcore.Scope) (SpecOp
 		"context_sections": fmt.Sprintf("%d", len(modelRequest.ContextSections)),
 	})
 
-	response, err := quizmodel.InvokeQuizModel(ctx, s.quizModel, modelRequest)
+	response, err := quizmodel.Invoke(ctx, s.quizModel, modelRequest)
 	if err != nil {
 		s.appendPlanGenerationLog("generate_spec_model_invocation_failed", map[string]string{
 			"case_slug":  scope.CaseSlug,
@@ -305,44 +304,44 @@ func (s service) specGenerationRuntimeState(scope quizcore.Scope) (quizcore.Runt
 	return state, nil
 }
 
-func (s service) newSpecGenerationModelRequest(state quizcore.RuntimeState) (quizmodel.QuizModelRequest, error) {
+func (s service) newSpecGenerationModelRequest(state quizcore.RuntimeState) (quizmodel.Request, error) {
 	scope := quizcore.Scope{
 		ProjectID: state.ProjectID,
 		CaseSlug:  state.CaseSlug,
 	}
 
-	payload, err := s.newQuizModelPayload(scope, state, quizmodel.QuizModelActionGenerateSpec)
+	payload, err := s.newQuizModelPayload(scope, state, quizmodel.ActionGenerateSpec)
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, err
+		return quizmodel.Request{}, err
 	}
 
-	sections, err := quizmodel.QuizModelContextSectionsForPayload(payload)
+	sections, err := quizmodel.ContextSectionsForPayload(payload)
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, err
+		return quizmodel.Request{}, err
 	}
 
 	sections, err = s.appendSpecGenerationContextSections(sections, scope)
 	if err != nil {
-		return quizmodel.QuizModelRequest{}, err
+		return quizmodel.Request{}, err
 	}
 
-	return quizmodel.QuizModelRequest{
+	return quizmodel.Request{
 		ID:              core.HarnessGenerationRequestID(s.ctx, fmt.Sprintf("spec-generation-%s", specScopeID(scope))),
-		Action:          quizmodel.QuizModelActionGenerateSpec,
+		Action:          quizmodel.ActionGenerateSpec,
 		Strategy:        "spec_generation",
 		Scope:           scope,
 		Mode:            state.Mode,
 		RuntimeState:    state,
 		Payload:         payload,
 		ContextSections: sections,
-		OutputContract: quizmodel.QuizModelOutputContract{
+		OutputContract: quizmodel.OutputContract{
 			RequiredFields: payload.OutputContract.RequiredFields,
 		},
 		CreatedAt: s.utcNow(),
 	}, nil
 }
 
-func (s service) appendSpecGenerationContextSections(sections []quizmodel.QuizModelContextSection, scope quizcore.Scope) ([]quizmodel.QuizModelContextSection, error) {
+func (s service) appendSpecGenerationContextSections(sections []quizmodel.ContextSection, scope quizcore.Scope) ([]quizmodel.ContextSection, error) {
 	dumps, err := s.specGenerationSources()
 	if err != nil {
 		return nil, err
@@ -352,10 +351,10 @@ func (s service) appendSpecGenerationContextSections(sections []quizmodel.QuizMo
 }
 
 func (s service) appendGenerationContextSections(
-	sections []quizmodel.QuizModelContextSection,
+	sections []quizmodel.ContextSection,
 	scope quizcore.Scope,
 	nodeIDs func(core.WorkspaceIndex) []string,
-) ([]quizmodel.QuizModelContextSection, error) {
+) ([]quizmodel.ContextSection, error) {
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "agent_protocol", "protocol", "AGENTS.md")
 	sections = appendQuizFileContextSection(sections, s.projectContext.ProjectDir, "project_document", "project", core.ProjectMetadataPath(""))
 
@@ -426,16 +425,16 @@ func sortedGenerationContextNodeIDs(index core.WorkspaceIndex, kinds []core.Work
 }
 
 func appendSpecNodeContextSection(
-	sections []quizmodel.QuizModelContextSection,
+	sections []quizmodel.ContextSection,
 	projectDir string,
 	node core.WorkspaceNode,
-) []quizmodel.QuizModelContextSection {
+) []quizmodel.ContextSection {
 	content, err := os.ReadFile(filepath.Join(projectDir, filepath.FromSlash(node.RelativePath)))
 	if err != nil {
 		return sections
 	}
 
-	return append(sections, quizmodel.QuizModelContextSection{
+	return append(sections, quizmodel.ContextSection{
 		Name:      string(node.Kind),
 		Layer:     string(node.Kind),
 		Authority: node.RelativePath,
@@ -449,7 +448,7 @@ func appendSpecNodeContextSection(
 }
 
 //nolint:wsl_v5 // Straight extraction loop is easier to read without extra helpers.
-func specSourcePaths(sections []quizmodel.QuizModelContextSection) []string {
+func specSourcePaths(sections []quizmodel.ContextSection) []string {
 	paths := []string{}
 	for _, section := range sections {
 		if strings.TrimSpace(section.Authority) == "" {

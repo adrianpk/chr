@@ -1,12 +1,11 @@
 package core
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"encoding/json"
 	"testing"
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 // Native contract generation uses both provider transports' shared decoder and
@@ -29,9 +28,9 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 		t.Fatal(err)
 	}
 
-	request := validCodexQuizModelRequest(quizmodel.QuizModelActionMaterializePlanTracking)
-	request.Strategy = quizmodel.QuizModelStrategyPlanDelivery
-	request.ContextSections = append(request.ContextSections, quizmodel.QuizModelContextSection{Name: "planned_workflow", Content: string(input)})
+	request := validCodexQuizModelRequest(quizmodel.ActionMaterializePlanTracking)
+	request.Strategy = quizmodel.StrategyPlanDelivery
+	request.ContextSections = append(request.ContextSections, quizmodel.ContextSection{Name: "planned_workflow", Content: string(input)})
 
 	if changed {
 		plan.Slices[0].Tasks[0].Title = "Unplanned work"
@@ -51,7 +50,7 @@ func checkPlanDeliveryModel(t *testing.T, changed bool) {
 		return
 	}
 
-	if err != nil || response.PlanTracking.Workflow == nil || quizmodel.ValidateQuizModelResponse(response) != nil {
+	if err != nil || response.PlanTracking.Workflow == nil || quizmodel.ValidateResponse(response) != nil {
 		t.Fatal(response, err)
 	}
 

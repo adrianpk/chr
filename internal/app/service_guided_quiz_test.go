@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"errors"
 	"os"
@@ -12,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -172,7 +171,7 @@ func guidedQuizFixture(t *testing.T, namespace string) (service, core.AuthoringS
 	question := serviceQuizModelResponse("question-response", "question-1", now)
 	completion := serviceQuizModelResponse("completion-response", "complete", now)
 	completion.Question.Required = false
-	model := &fakeServiceQuizModel{responses: []quizmodel.QuizModelResponse{question, completion}}
+	model := &fakeServiceQuizModel{responses: []quizmodel.Response{question, completion}}
 	operations.quizModel = model
 
 	return operations, session, model

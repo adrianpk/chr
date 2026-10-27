@@ -10,54 +10,54 @@ import (
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
-// QuizModelAction defines a package boundary type.
-type QuizModelAction string
+// Action defines a package boundary type.
+type Action string
 
 const (
-	// QuizModelActionNextQuestion defines a package boundary constant.
-	QuizModelActionNextQuestion QuizModelAction = "quiz_next_question"
-	// QuizModelActionDraftSpec defines a package boundary constant.
-	QuizModelActionDraftSpec QuizModelAction = "quiz_to_draft_spec"
-	// QuizModelActionGenerateSpec defines a package boundary constant.
-	QuizModelActionGenerateSpec QuizModelAction = "spec_generation"
-	// QuizModelActionGenerateAcceptanceFeature defines a package boundary constant.
-	QuizModelActionGenerateAcceptanceFeature QuizModelAction = "acceptance_feature_generation"
-	// QuizModelActionGeneratePlan defines a package boundary constant.
-	QuizModelActionGeneratePlan QuizModelAction = "plan_generation"
-	// QuizModelActionGeneratePlanOutline defines a package boundary constant.
-	QuizModelActionGeneratePlanOutline QuizModelAction = "plan_outline_generation"
-	// QuizModelActionGeneratePlanSliceDetail defines a package boundary constant.
-	QuizModelActionGeneratePlanSliceDetail QuizModelAction = "plan_slice_detail_generation"
-	// QuizModelActionMaterializePlanTracking defines a package boundary constant.
-	QuizModelActionMaterializePlanTracking QuizModelAction = "plan_tracking_materialization"
+	// ActionNextQuestion defines a package boundary constant.
+	ActionNextQuestion Action = "quiz_next_question"
+	// ActionDraftSpec defines a package boundary constant.
+	ActionDraftSpec Action = "quiz_to_draft_spec"
+	// ActionGenerateSpec defines a package boundary constant.
+	ActionGenerateSpec Action = "spec_generation"
+	// ActionGenerateAcceptanceFeature defines a package boundary constant.
+	ActionGenerateAcceptanceFeature Action = "acceptance_feature_generation"
+	// ActionGeneratePlan defines a package boundary constant.
+	ActionGeneratePlan Action = "plan_generation"
+	// ActionGeneratePlanOutline defines a package boundary constant.
+	ActionGeneratePlanOutline Action = "plan_outline_generation"
+	// ActionGeneratePlanSliceDetail defines a package boundary constant.
+	ActionGeneratePlanSliceDetail Action = "plan_slice_detail_generation"
+	// ActionMaterializePlanTracking defines a package boundary constant.
+	ActionMaterializePlanTracking Action = "plan_tracking_materialization"
 )
 
-// QuizModelResponseStatus defines a package boundary type.
-type QuizModelResponseStatus string
+// ResponseStatus defines a package boundary type.
+type ResponseStatus string
 
 const (
-	// QuizModelResponseReady defines a package boundary constant.
-	QuizModelResponseReady QuizModelResponseStatus = "ready"
-	// QuizModelResponseBlocked defines a package boundary constant.
-	QuizModelResponseBlocked QuizModelResponseStatus = "blocked"
+	// ResponseReady defines a package boundary constant.
+	ResponseReady ResponseStatus = "ready"
+	// ResponseBlocked defines a package boundary constant.
+	ResponseBlocked ResponseStatus = "blocked"
 )
 
-// QuizModelRequest describes a package boundary value.
-type QuizModelRequest struct {
+// Request describes a package boundary value.
+type Request struct {
 	ID              string
-	Action          QuizModelAction
+	Action          Action
 	Strategy        string
 	Scope           quizcore.Scope
 	Mode            quizcore.Mode
 	RuntimeState    quizcore.RuntimeState
-	Payload         QuizModelPayload
-	ContextSections []QuizModelContextSection
-	OutputContract  QuizModelOutputContract
+	Payload         Payload
+	ContextSections []ContextSection
+	OutputContract  OutputContract
 	CreatedAt       time.Time
 }
 
-// QuizModelContextSection describes a package boundary value.
-type QuizModelContextSection struct {
+// ContextSection describes a package boundary value.
+type ContextSection struct {
 	Name      string
 	Layer     string
 	Authority string
@@ -65,17 +65,17 @@ type QuizModelContextSection struct {
 	Metadata  map[string]string
 }
 
-// QuizModelOutputContract describes a package boundary value.
-type QuizModelOutputContract struct {
+// OutputContract describes a package boundary value.
+type OutputContract struct {
 	RequiredFields []string
 }
 
-// QuizModelResponse describes a package boundary value.
-type QuizModelResponse struct {
+// Response describes a package boundary value.
+type Response struct {
 	ID           string
 	RequestID    string
 	Provider     string
-	Status       QuizModelResponseStatus
+	Status       ResponseStatus
 	Question     quizcore.Question
 	Candidates   []quizcore.Candidate
 	DraftSpec    generationcore.QuizDraftSpec
@@ -88,37 +88,37 @@ type QuizModelResponse struct {
 	CreatedAt    time.Time
 }
 
-// QuizModelAdapter defines a package boundary interface.
-type QuizModelAdapter interface {
-	InvokeQuizModel(ctx context.Context, request QuizModelRequest) (QuizModelResponse, error)
+// Adapter defines a package boundary interface.
+type Adapter interface {
+	Invoke(ctx context.Context, request Request) (Response, error)
 }
 
-// InvokeQuizModel executes the corresponding package operation.
-func InvokeQuizModel(ctx context.Context, adapter QuizModelAdapter, request QuizModelRequest) (QuizModelResponse, error) {
-	err := ValidateQuizModelRequest(request)
+// Invoke executes the corresponding package operation.
+func Invoke(ctx context.Context, adapter Adapter, request Request) (Response, error) {
+	err := ValidateRequest(request)
 	if err != nil {
-		return QuizModelResponse{}, err
+		return Response{}, err
 	}
 
 	if adapter == nil {
-		return QuizModelResponse{}, fmt.Errorf("quiz model adapter is required")
+		return Response{}, fmt.Errorf("quiz model adapter is required")
 	}
 
-	response, err := adapter.InvokeQuizModel(ctx, request)
+	response, err := adapter.Invoke(ctx, request)
 	if err != nil {
-		return QuizModelResponse{}, err
+		return Response{}, err
 	}
 
-	err = ValidateQuizModelResponse(response)
+	err = ValidateResponse(response)
 	if err != nil {
-		return QuizModelResponse{}, err
+		return Response{}, err
 	}
 
 	return response, nil
 }
 
-// ValidateQuizModelRequest validates the corresponding package boundary value.
-func ValidateQuizModelRequest(request QuizModelRequest) error {
+// ValidateRequest validates the corresponding package boundary value.
+func ValidateRequest(request Request) error {
 	if strings.TrimSpace(request.ID) == "" {
 		return fmt.Errorf("quiz model request id is required")
 	}
@@ -145,11 +145,11 @@ func ValidateQuizModelRequest(request QuizModelRequest) error {
 		return err
 	}
 
-	return validateQuizModelRequestPayload(request)
+	return validateRequestPayload(request)
 }
 
-func validateQuizModelRequestPayload(request QuizModelRequest) error {
-	err := ValidateQuizModelPayload(request.Payload)
+func validateRequestPayload(request Request) error {
+	err := ValidatePayload(request.Payload)
 	if err != nil {
 		return err
 	}
@@ -169,8 +169,8 @@ func validateQuizModelRequestPayload(request QuizModelRequest) error {
 	return nil
 }
 
-// ValidateQuizModelResponse validates the corresponding package boundary value.
-func ValidateQuizModelResponse(response QuizModelResponse) error {
+// ValidateResponse validates the corresponding package boundary value.
+func ValidateResponse(response Response) error {
 	if strings.TrimSpace(response.ID) == "" {
 		return fmt.Errorf("quiz model response id is required")
 	}
@@ -187,8 +187,8 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 		return fmt.Errorf("quiz model response status is invalid: %s", response.Status)
 	}
 
-	if response.Status == QuizModelResponseReady {
-		err := validateQuizModelReadyResponse(response)
+	if response.Status == ResponseReady {
+		err := validateReadyResponse(response)
 		if err != nil {
 			return err
 		}
@@ -209,23 +209,23 @@ func ValidateQuizModelResponse(response QuizModelResponse) error {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (a QuizModelAction) Valid() bool {
+func (a Action) Valid() bool {
 	switch a {
-	case QuizModelActionNextQuestion,
-		QuizModelActionDraftSpec,
-		QuizModelActionGenerateSpec,
-		QuizModelActionGenerateAcceptanceFeature,
-		QuizModelActionGeneratePlan,
-		QuizModelActionGeneratePlanOutline,
-		QuizModelActionGeneratePlanSliceDetail,
-		QuizModelActionMaterializePlanTracking:
+	case ActionNextQuestion,
+		ActionDraftSpec,
+		ActionGenerateSpec,
+		ActionGenerateAcceptanceFeature,
+		ActionGeneratePlan,
+		ActionGeneratePlanOutline,
+		ActionGeneratePlanSliceDetail,
+		ActionMaterializePlanTracking:
 		return true
 	default:
 		return false
 	}
 }
 
-func validateQuizModelReadyResponse(response QuizModelResponse) error {
+func validateReadyResponse(response Response) error {
 	if response.DraftSpec.HasContent() {
 		return generationcore.ValidateQuizDraftSpecModelContent(response.DraftSpec)
 	}
@@ -256,9 +256,9 @@ func validateQuizModelReadyResponse(response QuizModelResponse) error {
 }
 
 // Valid reports whether the value is one of the supported constants.
-func (s QuizModelResponseStatus) Valid() bool {
+func (s ResponseStatus) Valid() bool {
 	switch s {
-	case QuizModelResponseReady, QuizModelResponseBlocked:
+	case ResponseReady, ResponseBlocked:
 		return true
 	default:
 		return false

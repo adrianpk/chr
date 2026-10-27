@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"os"
@@ -12,6 +10,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
@@ -21,7 +20,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizDraftSpecResponse("response-spec", clock()),
 		},
 	}
@@ -39,7 +38,7 @@ func TestServiceGenerateSpecUsesUseCaseContext(t *testing.T) {
 	assertGeneratedSpecResult(t, projectDir, result)
 
 	request := model.requests[len(model.requests)-1]
-	if request.Action != quizmodel.QuizModelActionGenerateSpec {
+	if request.Action != quizmodel.ActionGenerateSpec {
 		t.Fatalf("Action = %q, want spec generation", request.Action)
 	}
 
@@ -64,7 +63,7 @@ func TestServiceGenerateSpecDoesNotWriteGeneratedFeature(t *testing.T) {
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizDraftSpecResponseWithFeature("response-spec", clock(), generationcore.AcceptanceFeatureGeneration{
 				Status: generationcore.AcceptanceFeatureStatusGenerated,
 				Body: `@spec:blog-spec @use-case:blog
@@ -199,7 +198,7 @@ func assertGeneratedSpecResult(t *testing.T, projectDir string, result SpecOpera
 	}
 }
 
-func assertSpecGenerationContext(t *testing.T, request quizmodel.QuizModelRequest) {
+func assertSpecGenerationContext(t *testing.T, request quizmodel.Request) {
 	t.Helper()
 
 	for _, section := range request.ContextSections {
@@ -255,7 +254,7 @@ case: "blog"
 
 	clock := serviceQuizClock()
 	model := &fakeServiceQuizModel{
-		responses: []quizmodel.QuizModelResponse{
+		responses: []quizmodel.Response{
 			serviceQuizDraftSpecResponse("response-spec", clock()),
 		},
 	}
@@ -346,10 +345,7 @@ type deadlineCapturingSpecModel struct {
 	remaining   time.Duration
 }
 
-func (m *deadlineCapturingSpecModel) InvokeQuizModel(
-	ctx context.Context,
-	request quizmodel.QuizModelRequest,
-) (quizmodel.QuizModelResponse, error) {
+func (m *deadlineCapturingSpecModel) Invoke(ctx context.Context, request quizmodel.Request) (quizmodel.Response, error) {
 	deadline, ok := ctx.Deadline()
 	m.hasDeadline = ok
 	m.remaining = time.Until(deadline)

@@ -1,7 +1,5 @@
 package core
 
-import slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
-
 import (
 	"context"
 	"fmt"
@@ -11,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
 )
 
 // DefaultTicketKeyPrefix defines a package boundary constant.

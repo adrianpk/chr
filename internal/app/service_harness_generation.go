@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"context"
 	"crypto/rand"
@@ -10,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -168,7 +167,7 @@ func (s service) generationAdapters(ctx context.Context) (service, error) {
 	return s, nil
 }
 
-func (s service) boundQuizAdapter(selection core.HarnessSelection) quizmodel.QuizModelAdapter {
+func (s service) boundQuizAdapter(selection core.HarnessSelection) quizmodel.Adapter {
 	switch adapter := s.quizModel.(type) {
 	case core.OpenAIQuizModelAdapter:
 		return s.selectedQuizAdapter(selection, adapter)
@@ -188,7 +187,7 @@ func (s service) boundQuizAdapter(selection core.HarnessSelection) quizmodel.Qui
 	}
 }
 
-func (s service) selectedQuizAdapter(selection core.HarnessSelection, api core.OpenAIQuizModelAdapter) quizmodel.QuizModelAdapter {
+func (s service) selectedQuizAdapter(selection core.HarnessSelection, api core.OpenAIQuizModelAdapter) quizmodel.Adapter {
 	if selection.Backend == "openai" {
 		api.Model = selection.Model
 		api.ProjectDir = s.projectContext.ProjectDir
@@ -244,7 +243,7 @@ func (s service) singlePassPlan(ctx context.Context) bool {
 }
 
 func (s service) materializeBoundPlanTracking(ctx context.Context, id string, scope quizcore.Scope, plan PlanView, path string) (PlanTrackingResult, error) {
-	bound, ctx, err := s.bindGeneration(ctx, "tracking-"+dumpRequestID(id), string(quizmodel.QuizModelActionMaterializePlanTracking))
+	bound, ctx, err := s.bindGeneration(ctx, "tracking-"+dumpRequestID(id), string(quizmodel.ActionMaterializePlanTracking))
 	if err != nil {
 		return PlanTrackingResult{}, err
 	}

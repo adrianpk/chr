@@ -2,10 +2,10 @@ package model
 
 import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
-
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 )
 
+// OutputFormatDefinition retains the named schema used by generation backends.
 type OutputFormatDefinition struct {
 	Type        string         `json:"type"`
 	Name        string         `json:"name"`
@@ -14,61 +14,63 @@ type OutputFormatDefinition struct {
 	Schema      map[string]any `json:"schema"`
 }
 
-func OutputFormat(request QuizModelRequest) OutputFormatDefinition {
+// OutputFormat selects the shared strict output contract for an action.
+func OutputFormat(request Request) OutputFormatDefinition {
 	switch {
-	case request.Action == QuizModelActionMaterializePlanTracking:
-		return quizModelTrackingFormat(request)
-	case request.Action == QuizModelActionGeneratePlan:
+	case request.Action == ActionMaterializePlanTracking:
+		return trackingFormat(request)
+	case request.Action == ActionGeneratePlan:
 		return NewOutputFormat(
 			"generated_plan",
 			"Implementation plan generated from project and use-case context.",
-			quizModelPlanJSONSchema(),
+			planJSONSchema(),
 		)
-	case request.Action == QuizModelActionGeneratePlanOutline:
+	case request.Action == ActionGeneratePlanOutline:
 		return NewOutputFormat(
 			"generated_plan_outline",
 			"Plan outline generated from project and use-case context.",
-			quizModelPlanOutlineJSONSchema(),
+			planOutlineJSONSchema(),
 		)
-	case request.Action == QuizModelActionGeneratePlanSliceDetail:
+	case request.Action == ActionGeneratePlanSliceDetail:
 		return NewOutputFormat(
 			"generated_plan_slice_detail",
 			"Implementation details generated for one outline slice.",
-			quizModelPlanSliceDetailJSONSchema(),
+			planSliceDetailJSONSchema(),
 		)
-	case request.Action == QuizModelActionGenerateSpec:
+	case request.Action == ActionGenerateSpec:
 		return NewOutputFormat(
 			"generated_spec",
 			"Draft specification generated from project and use-case context.",
-			quizModelSpecJSONSchema(),
+			specJSONSchema(),
 		)
-	case request.Action == QuizModelActionGenerateAcceptanceFeature:
+	case request.Action == ActionGenerateAcceptanceFeature:
 		return NewOutputFormat(
 			"acceptance_feature",
 			"Acceptance feature generated from project, use-case, quiz, dump, and spec context.",
-			quizModelFeatureJSONSchema(),
+			featureJSONSchema(),
 		)
-	case request.Action == QuizModelActionDraftSpec:
+	case request.Action == ActionDraftSpec:
 		return NewOutputFormat(
 			"quiz_draft_spec",
 			"Draft specification generated from project quiz context.",
-			quizModelDraftSpecJSONSchema(),
+			draftSpecJSONSchema(),
 		)
 	case request.Mode == quizcore.ModeFast:
 		return NewOutputFormat(
 			"quiz_fast_questions",
 			"A batch of project quiz questions.",
-			quizModelFastQuestionJSONSchema(),
+			fastQuestionJSONSchema(),
 		)
 	default:
 		return NewOutputFormat(
 			"quiz_next_question",
 			"The next project quiz question.",
-			quizModelQuestionJSONSchema(),
+			questionJSONSchema(),
 		)
 	}
 }
 
+// NewOutputFormat binds one named JSON schema without changing its fields.
 func NewOutputFormat(name, description string, schema map[string]any) OutputFormatDefinition {
 	return OutputFormatDefinition{
 		Type:        "json_schema",
@@ -80,7 +82,7 @@ func NewOutputFormat(name, description string, schema map[string]any) OutputForm
 }
 
 //nolint:funlen // JSON schema literals are clearer kept together.
-func quizModelPlanTrackingJSONSchema() map[string]any {
+func planTrackingJSONSchema() map[string]any {
 	ticketSchema := map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -159,11 +161,11 @@ func quizModelPlanTrackingJSONSchema() map[string]any {
 	}
 }
 
-func quizModelQuestionJSONSchema() map[string]any {
+func questionJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
-		"required":             QuizModelQuestionRequiredFields,
+		"required":             QuestionRequiredFields,
 		"properties": map[string]any{
 			"question": map[string]any{
 				"type":        "string",
@@ -187,7 +189,7 @@ func quizModelQuestionJSONSchema() map[string]any {
 	}
 }
 
-func quizModelFastQuestionJSONSchema() map[string]any {
+func fastQuestionJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -196,14 +198,14 @@ func quizModelFastQuestionJSONSchema() map[string]any {
 			"questions": map[string]any{
 				"type":     "array",
 				"minItems": 1,
-				"maxItems": QuizModelFastBatchSize,
-				"items":    quizModelQuestionJSONSchema(),
+				"maxItems": FastBatchSize,
+				"items":    questionJSONSchema(),
 			},
 		},
 	}
 }
 
-func quizModelDraftSpecJSONSchema() map[string]any {
+func draftSpecJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -224,11 +226,11 @@ func quizModelDraftSpecJSONSchema() map[string]any {
 	}
 }
 
-func quizModelSpecJSONSchema() map[string]any {
-	return quizModelDraftSpecJSONSchema()
+func specJSONSchema() map[string]any {
+	return draftSpecJSONSchema()
 }
 
-func quizModelFeatureJSONSchema() map[string]any {
+func featureJSONSchema() map[string]any {
 	promptSchema := map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -284,7 +286,7 @@ func quizModelFeatureJSONSchema() map[string]any {
 	}
 }
 
-func quizModelPlanJSONSchema() map[string]any {
+func planJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -306,7 +308,7 @@ func quizModelPlanJSONSchema() map[string]any {
 	}
 }
 
-func quizModelPlanOutlineJSONSchema() map[string]any {
+func planOutlineJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -329,13 +331,13 @@ func quizModelPlanOutlineJSONSchema() map[string]any {
 			"open_questions":      stringArrayJSONSchema(),
 			"risks":               stringArrayJSONSchema(),
 			"validation_strategy": map[string]any{"type": "string"},
-			"slices":              map[string]any{"type": "array", "items": quizModelPlanOutlineSliceJSONSchema()},
-			"dependencies":        map[string]any{"type": "array", "items": quizModelPlanOutlineDependencyJSONSchema()},
+			"slices":              map[string]any{"type": "array", "items": planOutlineSliceJSONSchema()},
+			"dependencies":        map[string]any{"type": "array", "items": planOutlineDependencyJSONSchema()},
 		},
 	}
 }
 
-func quizModelPlanOutlineSliceJSONSchema() map[string]any {
+func planOutlineSliceJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -366,7 +368,7 @@ func quizModelPlanOutlineSliceJSONSchema() map[string]any {
 	}
 }
 
-func quizModelPlanOutlineDependencyJSONSchema() map[string]any {
+func planOutlineDependencyJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -379,7 +381,7 @@ func quizModelPlanOutlineDependencyJSONSchema() map[string]any {
 	}
 }
 
-func quizModelPlanSliceDetailJSONSchema() map[string]any {
+func planSliceDetailJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -402,10 +404,10 @@ func quizModelPlanSliceDetailJSONSchema() map[string]any {
 			"short_name":              map[string]any{"type": "string"},
 			"objective":               map[string]any{"type": "string"},
 			"implementation_notes":    stringArrayJSONSchema(),
-			"tasks":                   map[string]any{"type": "array", "items": quizModelPlanSliceTaskJSONSchema()},
+			"tasks":                   map[string]any{"type": "array", "items": planSliceTaskJSONSchema()},
 			"acceptance_criteria":     stringArrayJSONSchema(),
-			"ticket_metadata":         quizModelPlanSliceTicketMetadataJSONSchema(),
-			"branch_metadata":         quizModelPlanSliceBranchMetadataJSONSchema(),
+			"ticket_metadata":         planSliceTicketMetadataJSONSchema(),
+			"branch_metadata":         planSliceBranchMetadataJSONSchema(),
 			"pr_expectations":         stringArrayJSONSchema(),
 			"validation_expectations": stringArrayJSONSchema(),
 			"dependencies":            stringArrayJSONSchema(),
@@ -414,7 +416,7 @@ func quizModelPlanSliceDetailJSONSchema() map[string]any {
 	}
 }
 
-func quizModelPlanSliceTaskJSONSchema() map[string]any {
+func planSliceTaskJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -427,7 +429,7 @@ func quizModelPlanSliceTaskJSONSchema() map[string]any {
 	}
 }
 
-func quizModelPlanSliceTicketMetadataJSONSchema() map[string]any {
+func planSliceTicketMetadataJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,
@@ -443,7 +445,7 @@ func quizModelPlanSliceTicketMetadataJSONSchema() map[string]any {
 	}
 }
 
-func quizModelPlanSliceBranchMetadataJSONSchema() map[string]any {
+func planSliceBranchMetadataJSONSchema() map[string]any {
 	return map[string]any{
 		"type":                 "object",
 		"additionalProperties": false,

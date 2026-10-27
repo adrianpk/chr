@@ -1,7 +1,5 @@
 package app
 
-import quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
-
 import (
 	"crypto/sha256"
 	"encoding/hex"
@@ -11,6 +9,7 @@ import (
 	"strings"
 
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
+	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 )
 
 func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcore.Entry) (quizcore.RuntimeState, error) {
@@ -35,7 +34,7 @@ func (s service) nextQuizQuestion(state quizcore.RuntimeState, entries []quizcor
 		return state, err
 	}
 
-	if response.Status == quizmodel.QuizModelResponseBlocked {
+	if response.Status == quizmodel.ResponseBlocked {
 		state.Status, state.ActiveQuestion = quizcore.RuntimeStatusBlocked, nil
 		state.ContinuationPending = true
 		state.ContinuationError = "More project context is required. Resume to retry."
@@ -103,7 +102,7 @@ func (s service) generateFastQuizBatch(state quizcore.RuntimeState, entries []qu
 		return state, err
 	}
 
-	if response.Status != quizmodel.QuizModelResponseReady {
+	if response.Status != quizmodel.ResponseReady {
 		return state, fmt.Errorf("fast question batch is blocked; retry after adding context")
 	}
 
@@ -121,7 +120,7 @@ func (s service) generateFastQuizBatch(state quizcore.RuntimeState, entries []qu
 	return state, nil
 }
 
-func fastQuizBatchQuestions(state quizcore.RuntimeState, entries []quizcore.Entry, response quizmodel.QuizModelResponse) []quizcore.Candidate {
+func fastQuizBatchQuestions(state quizcore.RuntimeState, entries []quizcore.Entry, response quizmodel.Response) []quizcore.Candidate {
 	question := response.Question
 	questions := append([]quizcore.Candidate{{ID: question.ID, Prompt: question.Prompt, Topic: question.Topic, Depth: 1, CreatedAt: question.CreatedAt}}, response.Candidates...)
 
