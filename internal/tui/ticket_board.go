@@ -69,11 +69,11 @@ func (m *Model) activeBoardColumn() string {
 		return m.previousNormalBoardColumn()
 	}
 
-	if ticketcore.IsNormalBoardTicketStatus(m.boardColumn) {
+	if ticketcore.NormalBoardStatus(m.boardColumn) {
 		return m.boardColumn
 	}
 
-	return ticketcore.TicketStatusBacklog
+	return ticketcore.StatusBacklog
 }
 
 func (m *Model) activeBoardColumnPosition() int {
@@ -134,11 +134,11 @@ func (m *Model) toggleBoardAttention() {
 }
 
 func (m *Model) previousNormalBoardColumn() string {
-	if ticketcore.IsNormalBoardTicketStatus(m.previousBoardColumn) {
+	if ticketcore.NormalBoardStatus(m.previousBoardColumn) {
 		return m.previousBoardColumn
 	}
 
-	return ticketcore.TicketStatusBacklog
+	return ticketcore.StatusBacklog
 }
 
 func (m *Model) selectPreviousBoardColumn() {
@@ -182,7 +182,7 @@ func (m *Model) boardColumnNavigationActive() bool {
 }
 
 func (m *Model) selectBoardColumn(column string) {
-	if !ticketcore.IsNormalBoardTicketStatus(column) {
+	if !ticketcore.NormalBoardStatus(column) {
 		return
 	}
 
@@ -200,5 +200,5 @@ func defaultBoardColumn(tickets []TicketView) string {
 		}
 	}
 
-	return ticketcore.TicketStatusBacklog
+	return ticketcore.StatusBacklog
 }

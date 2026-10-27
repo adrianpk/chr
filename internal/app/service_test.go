@@ -696,7 +696,7 @@ func TestServiceCreateDefaultTicketReloadsTickets(t *testing.T) {
 		t.Fatalf("ticket title = %q, want TUI created ticket", result.Tickets[0].Title)
 	}
 
-	if result.Tickets[0].Status != ticketcore.TicketStatusBacklog {
+	if result.Tickets[0].Status != ticketcore.StatusBacklog {
 		t.Fatalf("ticket status = %q, want backlog", result.Tickets[0].Status)
 	}
 
@@ -715,7 +715,7 @@ func TestServiceBoardReturnsSharedBoardReadModel(t *testing.T) {
 		Key:       "CHR-1",
 		Title:     "Backlog work",
 		Synopsis:  "Prepare backlog work.",
-		Status:    ticketcore.TicketStatusBacklog,
+		Status:    ticketcore.StatusBacklog,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "task",
@@ -907,7 +907,7 @@ func writeServiceEvidenceStrategyTicket(t *testing.T, projectDir string) string 
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Synopsis:  "Preserve ticket body while adding evidence strategy.",
-		Status:    ticketcore.TicketStatusReadyForDev,
+		Status:    ticketcore.StatusReadyForDev,
 		CreatedAt: testTime(),
 		UpdatedAt: testTime(),
 		Body: `# Description
@@ -1092,7 +1092,7 @@ status: "ready"
 	}
 	writeTicketMarkdownOnly(t, projectDir, "CHR-1-Write.md", ticket)
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

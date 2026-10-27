@@ -61,7 +61,7 @@ func workflowLooseLaterMembers(run workflowInvocationFile, selection workflowSel
 			continue
 		}
 
-		if record.Task.Status == ticketcore.TicketStatusReadyForDev && record.Task.Phase == "pending" {
+		if record.Task.Status == ticketcore.StatusReadyForDev && record.Task.Phase == "pending" {
 			later = append(later, workflowPreviewMember(record))
 		}
 	}

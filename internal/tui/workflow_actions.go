@@ -118,7 +118,7 @@ func (m *Model) planNativeWorkExtent(request *WorkActionRequest, extent string) 
 
 	native.Selection = workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: extent}, Limit: workflowstate.PageLimit}
 	if extent == "loose" {
-		native.Selection.Statuses = []string{ticketcore.TicketStatusReadyForDev}
+		native.Selection.Statuses = []string{ticketcore.StatusReadyForDev}
 
 		native.Selection.Order = m.agentWorkOrder
 		if m.agentWorkPriorityFilter != "" {

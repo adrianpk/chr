@@ -16,7 +16,7 @@ import (
 // actions.
 type ArtifactOperationResult struct {
 	Message           string
-	Tickets           []ticketcore.IndexedTicket
+	Tickets           []ticketcore.Indexed
 	AuthoringSessions []authoringcore.Session
 }
 
@@ -245,7 +245,7 @@ func (s service) reloadArtifactOperationState() (ArtifactOperationResult, error)
 // TicketOperationResult is the TUI-facing result for ticket mutations.
 type TicketOperationResult struct {
 	Message string
-	Tickets []ticketcore.IndexedTicket
+	Tickets []ticketcore.Indexed
 }
 
 // TicketCommentRequest describes a comment to append to a ticket.
@@ -432,8 +432,8 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 	}, nil
 }
 
-func (s service) validateReadyForReviewEvidence(ticket ticketcore.IndexedTicket, status string) error {
-	if strings.TrimSpace(status) != ticketcore.TicketStatusReadyForReview {
+func (s service) validateReadyForReviewEvidence(ticket ticketcore.Indexed, status string) error {
+	if strings.TrimSpace(status) != ticketcore.StatusReadyForReview {
 		return nil
 	}
 
@@ -452,7 +452,7 @@ func (s service) validateReadyForReviewEvidence(ticket ticketcore.IndexedTicket,
 	return fmt.Errorf("ticket ready_for_review evidence gate failed: %s", readiness.BlockerReason())
 }
 
-func (s service) listProjectTickets() ([]ticketcore.IndexedTicket, error) {
+func (s service) listProjectTickets() ([]ticketcore.Indexed, error) {
 	board, err := s.Board()
 	if err != nil {
 		return nil, err
@@ -482,10 +482,10 @@ func (s service) Board() (core.Board, error) {
 	})
 }
 
-func (s service) ticketByKey(key string) (ticketcore.IndexedTicket, error) {
+func (s service) ticketByKey(key string) (ticketcore.Indexed, error) {
 	index, err := core.NewTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	defer func() {
@@ -495,7 +495,7 @@ func (s service) ticketByKey(key string) (ticketcore.IndexedTicket, error) {
 
 	err = refreshProjectTicketIndex(s.ctx, index, s.projectContext)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	return index.GetProjectTicketByKey(s.ctx, s.projectContext.ProjectID, key)

@@ -72,7 +72,7 @@ func (p webViewProvider) BoardView(ctx context.Context, request webui.BoardReque
 
 func (p webViewProvider) TicketDetailView(ctx context.Context, request webui.TicketDetailRequest) (webui.TicketDetailView, error) {
 	if request.New {
-		return p.completeTicketEditor(webui.TicketDetailView{New: true, Fields: map[string]string{"status": ticketcore.TicketStatusBacklog, "priority": "normal", "severity": "unclassified", "type": "task"}})
+		return p.completeTicketEditor(webui.TicketDetailView{New: true, Fields: map[string]string{"status": ticketcore.StatusBacklog, "priority": "normal", "severity": "unclassified", "type": "task"}})
 	}
 
 	document, err := p.service(ctx).ReadTicketDocument(request.Key)
@@ -210,7 +210,7 @@ func webBoardView(board core.Board) webui.BoardView {
 	}
 }
 
-func webTicketViews(tickets []ticketcore.IndexedTicket) []webui.BoardTicketView {
+func webTicketViews(tickets []ticketcore.Indexed) []webui.BoardTicketView {
 	views := make([]webui.BoardTicketView, 0, len(tickets))
 	for _, ticket := range tickets {
 		views = append(views, webTicketView(ticket))
@@ -219,7 +219,7 @@ func webTicketViews(tickets []ticketcore.IndexedTicket) []webui.BoardTicketView 
 	return views
 }
 
-func webTicketView(ticket ticketcore.IndexedTicket) webui.BoardTicketView {
+func webTicketView(ticket ticketcore.Indexed) webui.BoardTicketView {
 	return webui.BoardTicketView{
 		Revision:          ticket.ContentHash,
 		Assignee:          ticket.Assignee,

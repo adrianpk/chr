@@ -319,19 +319,19 @@ func compactTicketCell(value string, width int, center bool) string {
 
 func compactTicketStatusLabel(status string) string {
 	labels := map[string]string{
-		ticketcore.TicketStatusBacklog:         "BL",
-		ticketcore.TicketStatusReadyForDev:     "RFD",
-		ticketcore.TicketStatusInProgress:      "IP",
-		ticketcore.TicketStatusReadyForReview:  "RFR",
-		ticketcore.TicketStatusReadyForMerge:   "RFM",
-		ticketcore.TicketStatusDone:            "DONE",
-		ticketcore.TicketStatusOpenLegacy:      "OPN",
-		ticketcore.TicketStatusReadyLegacy:     "RDY",
-		ticketcore.TicketStatusReviewingLegacy: "REV",
-		ticketcore.TicketStatusBlockedLegacy:   "BLK",
-		ticketcore.TicketStatusSolvedLegacy:    "SLV",
-		ticketcore.TicketStatusMergedLegacy:    "DONE",
-		ticketcore.TicketStatusClosedLegacy:    "CLS",
+		ticketcore.StatusBacklog:         "BL",
+		ticketcore.StatusReadyForDev:     "RFD",
+		ticketcore.StatusInProgress:      "IP",
+		ticketcore.StatusReadyForReview:  "RFR",
+		ticketcore.StatusReadyForMerge:   "RFM",
+		ticketcore.StatusDone:            "DONE",
+		ticketcore.StatusOpenLegacy:      "OPN",
+		ticketcore.StatusReadyLegacy:     "RDY",
+		ticketcore.StatusReviewingLegacy: "REV",
+		ticketcore.StatusBlockedLegacy:   "BLK",
+		ticketcore.StatusSolvedLegacy:    "SLV",
+		ticketcore.StatusMergedLegacy:    "DONE",
+		ticketcore.StatusClosedLegacy:    "CLS",
 	}
 
 	label, ok := labels[strings.TrimSpace(status)]
@@ -361,17 +361,17 @@ func compactBoardColumnLabel(column string) string {
 	switch strings.TrimSpace(column) {
 	case boardAttentionColumn:
 		return "ATT"
-	case ticketcore.TicketStatusBacklog:
+	case ticketcore.StatusBacklog:
 		return "BL"
-	case ticketcore.TicketStatusReadyForDev:
+	case ticketcore.StatusReadyForDev:
 		return "RFD"
-	case ticketcore.TicketStatusInProgress:
+	case ticketcore.StatusInProgress:
 		return "IP"
-	case ticketcore.TicketStatusReadyForReview:
+	case ticketcore.StatusReadyForReview:
 		return "RFR"
-	case ticketcore.TicketStatusReadyForMerge:
+	case ticketcore.StatusReadyForMerge:
 		return "RFM"
-	case ticketcore.TicketStatusDone:
+	case ticketcore.StatusDone:
 		return "Done"
 	default:
 		return truncatePlainLine(humanizeCompactToken(column), 5)

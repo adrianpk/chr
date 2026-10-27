@@ -30,7 +30,7 @@ const (
 
 // TicketReviewCommandOptions describes a package boundary value.
 type TicketReviewCommandOptions struct {
-	Ticket     ticketcore.IndexedTicket
+	Ticket     ticketcore.Indexed
 	Config     WorkspaceConfig
 	Result     string
 	Findings   []string
@@ -98,7 +98,7 @@ func RunTicketReviewCommand(ctx context.Context, opts TicketReviewCommandOptions
 	return plan, nil
 }
 
-func validateTicketReviewCommandInput(ticket ticketcore.IndexedTicket, result string, findings []string) error {
+func validateTicketReviewCommandInput(ticket ticketcore.Indexed, result string, findings []string) error {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return fmt.Errorf("ticket key is required")
 	}
@@ -107,8 +107,8 @@ func validateTicketReviewCommandInput(ticket ticketcore.IndexedTicket, result st
 		return fmt.Errorf("ticket path is required")
 	}
 
-	if ticket.Status != ticketcore.TicketStatusReadyForReview {
-		return fmt.Errorf("ticket review requires status %s: %s", ticketcore.TicketStatusReadyForReview, ticket.Status)
+	if ticket.Status != ticketcore.StatusReadyForReview {
+		return fmt.Errorf("ticket review requires status %s: %s", ticketcore.StatusReadyForReview, ticket.Status)
 	}
 
 	if !isValidTicketReviewCommandResult(result) {
@@ -134,7 +134,7 @@ func isValidTicketReviewCommandResult(result string) bool {
 	}
 }
 
-func ticketReviewCommandPullRequestRef(ticket ticketcore.IndexedTicket) (ticketmetadata.ReviewRef, error) {
+func ticketReviewCommandPullRequestRef(ticket ticketcore.Indexed) (ticketmetadata.ReviewRef, error) {
 	for _, ref := range ticket.ReviewRefs {
 		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
 			return ref, nil
@@ -145,7 +145,7 @@ func ticketReviewCommandPullRequestRef(ticket ticketcore.IndexedTicket) (ticketm
 }
 
 func ticketReviewCommandPlan(
-	ticket ticketcore.IndexedTicket,
+	ticket ticketcore.Indexed,
 	ref ticketmetadata.ReviewRef,
 	snapshot RemoteReviewSnapshot,
 	result string,
@@ -170,15 +170,15 @@ func ticketReviewCommandPlan(
 func ticketReviewCommandStateAndStatus(result string) (string, string) {
 	switch result {
 	case TicketReviewCommandResultPass:
-		return "pass", ticketcore.TicketStatusReadyForMerge
+		return "pass", ticketcore.StatusReadyForMerge
 	case TicketReviewCommandResultNeedsChanges:
-		return "changes_requested", ticketcore.TicketStatusReadyForDev
+		return "changes_requested", ticketcore.StatusReadyForDev
 	case TicketReviewCommandResultInsufficientEvidence:
-		return "insufficient_evidence", ticketcore.TicketStatusReadyForDev
+		return "insufficient_evidence", ticketcore.StatusReadyForDev
 	case TicketReviewCommandResultNeedsHumanDecision:
-		return "needs_human_decision", ticketcore.TicketStatusReadyForReview
+		return "needs_human_decision", ticketcore.StatusReadyForReview
 	default:
-		return "", ticketcore.TicketStatusReadyForReview
+		return "", ticketcore.StatusReadyForReview
 	}
 }
 

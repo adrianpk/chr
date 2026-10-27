@@ -59,7 +59,7 @@ func emitAgentWorkEvent(ctx context.Context, sink core.AgentEventSink, event cor
 	}
 }
 
-func agentWorkTicketRefs(ticket ticketcore.IndexedTicket) core.AgentEventRefs {
+func agentWorkTicketRefs(ticket ticketcore.Indexed) core.AgentEventRefs {
 	path := ticket.RelativePath
 	if path == "" {
 		path = ticket.Path
@@ -82,7 +82,7 @@ func agentWorkApplicationRefs(plan ticketApplyResultPlan) core.AgentEventRefs {
 	})
 }
 
-func agentWorkReviewRefs(ticket ticketcore.IndexedTicket) core.AgentEventRefs {
+func agentWorkReviewRefs(ticket ticketcore.Indexed) core.AgentEventRefs {
 	return compactAppAgentEventRefs(core.AgentEventRefs{
 		"ticket_path":         agentWorkTicketPath(ticket),
 		"ticket_branch":       ticket.Branch,
@@ -99,7 +99,7 @@ func agentWorkMergeRefs(result core.TicketMergeCommandResult) core.AgentEventRef
 	})
 }
 
-func agentWorkTicketPath(ticket ticketcore.IndexedTicket) string {
+func agentWorkTicketPath(ticket ticketcore.Indexed) string {
 	path := strings.TrimSpace(ticket.RelativePath)
 	if path != "" {
 		return path
@@ -108,7 +108,7 @@ func agentWorkTicketPath(ticket ticketcore.IndexedTicket) string {
 	return ticket.Path
 }
 
-func firstAgentWorkPullRequestURL(ticket ticketcore.IndexedTicket) string {
+func firstAgentWorkPullRequestURL(ticket ticketcore.Indexed) string {
 	for _, ref := range ticket.ReviewRefs {
 		if ref.Type == "pull_request" && strings.TrimSpace(ref.URL) != "" {
 			return ref.URL
@@ -170,7 +170,7 @@ func emitLoopStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, re
 	})
 }
 
-func emitTicketSelectedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, ticket ticketcore.IndexedTicket) {
+func emitTicketSelectedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
 		ProjectID: record.ProjectID,
 		LoopID:    record.ID,
@@ -210,7 +210,7 @@ func emitReviewStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, 
 	})
 }
 
-func emitReviewFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket ticketcore.IndexedTicket) {
+func emitReviewFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -223,7 +223,7 @@ func emitReviewFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink,
 	})
 }
 
-func emitRepairStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, ticket ticketcore.IndexedTicket) {
+func emitRepairStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
 		ProjectID: record.ProjectID,
 		LoopID:    record.ID,
@@ -234,7 +234,7 @@ func emitRepairStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, 
 	})
 }
 
-func emitRepairFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket ticketcore.IndexedTicket) {
+func emitRepairFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -247,7 +247,7 @@ func emitRepairFinishedAgentEvent(ctx context.Context, sink core.AgentEventSink,
 	})
 }
 
-func emitMergeStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket ticketcore.IndexedTicket) {
+func emitMergeStartedAgentEvent(ctx context.Context, sink core.AgentEventSink, record core.LoopRunRecord, execution core.ExecutionRecord, ticket ticketcore.Indexed) {
 	emitAgentWorkEvent(ctx, sink, core.AgentEvent{
 		ProjectID:   record.ProjectID,
 		LoopID:      record.ID,
@@ -385,7 +385,7 @@ func emitTicketBlockedAgentEvent(ctx context.Context, events ticketExecutionEven
 	})
 }
 
-func ticketReviewAgentEventLevel(ticket ticketcore.IndexedTicket) core.AgentEventLevel {
+func ticketReviewAgentEventLevel(ticket ticketcore.Indexed) core.AgentEventLevel {
 	warns := core.IsTicketReviewRepair(ticket) ||
 		ticket.ReviewResult == core.TicketReviewCommandResultInsufficientEvidence ||
 		ticket.ReviewResult == core.TicketReviewCommandResultNeedsHumanDecision
@@ -416,6 +416,6 @@ func nonEmptyAgentWorkEventValue(value, fallback string) string {
 type reviewStartedEvent struct {
 	Record    core.LoopRunRecord
 	Execution core.ExecutionRecord
-	Ticket    ticketcore.IndexedTicket
+	Ticket    ticketcore.Indexed
 	Mode      core.IntegrationCycleMode
 }

@@ -23,7 +23,7 @@ var newTicketStartHarnessExecutor = func() core.HarnessExecutor {
 	return core.OSHarnessExecutor{}
 }
 
-func newPendingExecutionRecord(projectID string, ticket ticketcore.IndexedTicket) core.ExecutionRecord {
+func newPendingExecutionRecord(projectID string, ticket ticketcore.Indexed) core.ExecutionRecord {
 	now := time.Now().UTC()
 
 	return core.ExecutionRecord{
@@ -37,7 +37,7 @@ func newPendingExecutionRecord(projectID string, ticket ticketcore.IndexedTicket
 	}
 }
 
-func ticketStartArtifactTitle(ticket ticketcore.IndexedTicket) string {
+func ticketStartArtifactTitle(ticket ticketcore.Indexed) string {
 	if strings.TrimSpace(ticket.Title) == "" {
 		return ticket.Key
 	}

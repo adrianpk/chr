@@ -122,7 +122,7 @@ func (s *WorkflowStore) workflowClosingMembers(ctx context.Context, id string) (
 			continue
 		}
 
-		if record.Task.Phase != "integrated" || record.Task.Status != ticketcore.TicketStatusDone || record.Task.AttemptID != "" {
+		if record.Task.Phase != "integrated" || record.Task.Status != ticketcore.StatusDone || record.Task.AttemptID != "" {
 			return nil, fmt.Errorf("%w: actual member %s requires integration", workflowstate.ErrConflict, record.Task.Key)
 		}
 

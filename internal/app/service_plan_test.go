@@ -637,10 +637,10 @@ func assertMaterializedPlanTrackingTicketContent(t *testing.T, ticket string) {
 	}
 }
 
-func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket ticketcore.IndexedTicket) {
+func assertMaterializedPlanTrackingTicketMetadata(t *testing.T, ticket ticketcore.Indexed) {
 	t.Helper()
 
-	if ticket.Status != ticketcore.TicketStatusReadyForDev {
+	if ticket.Status != ticketcore.StatusReadyForDev {
 		t.Fatalf("ticket status = %q, want ready_for_dev", ticket.Status)
 	}
 

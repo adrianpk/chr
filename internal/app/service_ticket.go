@@ -13,7 +13,7 @@ type ticketExecutionInput struct {
 }
 
 type ticketLoopSelection struct {
-	Tickets       []ticketcore.IndexedTicket
+	Tickets       []ticketcore.Indexed
 	EligibleCount int
 }
 

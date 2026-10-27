@@ -17,7 +17,7 @@ func recordWireFactories() map[string]func() any {
 		"workflow-start":  func() any { return &WorkflowStartRequest{} },
 		"invocation":      func() any { return &WorkflowInvocation{} },
 		"merger-input":    func() any { return &WorkflowMergerInput{} },
-		"indexed-ticket":  func() any { return &ticketcore.IndexedTicket{} },
+		"indexed-ticket":  func() any { return &ticketcore.Indexed{} },
 		"invocation-file": func() any { return &workflowInvocationFile{} },
 	}
 }

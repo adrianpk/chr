@@ -472,7 +472,7 @@ func loadWorkerEvidence(ctx context.Context, projectDir, ticketPath string) (*Wo
 
 	observed := parseWorkerEvidenceChecklist(string(content))
 
-	ticket, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{
+	ticket, err := ticketcore.NewParser().Parse(ctx, ticketcore.ParseOptions{
 		ProjectDir: projectDir,
 		Path:       ticketPath,
 		IndexedAt:  time.Now().UTC(),
@@ -509,7 +509,7 @@ func parseWorkerEvidenceChecklist(content string) workerChecklistObservation {
 }
 
 func workerRepairHandoff(ctx context.Context, projectDir, ticketPath string) (*WorkerRepairHandoff, error) {
-	ticket, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{
+	ticket, err := ticketcore.NewParser().Parse(ctx, ticketcore.ParseOptions{
 		ProjectDir: projectDir,
 		Path:       ticketPath,
 		IndexedAt:  time.Now().UTC(),

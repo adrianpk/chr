@@ -56,7 +56,7 @@ func checkWorkflowPlanOrderDeliveredHistory(t *testing.T, store *WorkflowStore, 
 
 	for _, task := range result.Tasks[:3] {
 		current, err := store.Read(t.Context(), task.Path)
-		if err != nil || current.Task.Status != ticketcore.TicketStatusDone || current.Task.DeliveryRef != receipt {
+		if err != nil || current.Task.Status != ticketcore.StatusDone || current.Task.DeliveryRef != receipt {
 			t.Fatal("amendment reset delivered work", current, err)
 		}
 	}

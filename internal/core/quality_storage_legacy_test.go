@@ -18,7 +18,7 @@ type qualityLegacyRecords struct {
 	Execution    ExecutionRecord           `json:"execution"`
 	Remote       RemoteCommandRecord       `json:"remote"`
 	Notification notifycore.AuditRecord    `json:"notification"`
-	Ticket       ticketcore.IndexedTicket  `json:"ticket"`
+	Ticket       ticketcore.Indexed        `json:"ticket"`
 	Conversation telegramcore.Conversation `json:"conversation"`
 }
 

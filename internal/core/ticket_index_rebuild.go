@@ -35,7 +35,7 @@ type TicketIndexRebuildParseError struct {
 
 type ticketIndexRebuilder struct {
 	discoverer TicketFileDiscoverer
-	parser     ticketcore.TicketParser
+	parser     ticketcore.Parser
 	index      TicketIndex
 	now        func() time.Time
 }
@@ -47,7 +47,7 @@ type TicketIndexRebuilderOption func(*ticketIndexRebuilder)
 func NewTicketIndexRebuilder(index TicketIndex, opts ...TicketIndexRebuilderOption) TicketIndexRebuilder {
 	rebuilder := &ticketIndexRebuilder{
 		discoverer: NewTicketFileDiscoverer(),
-		parser:     ticketcore.NewTicketParser(),
+		parser:     ticketcore.NewParser(),
 		index:      index,
 		now:        time.Now,
 	}
@@ -69,7 +69,7 @@ func WithTicketIndexRebuilderDiscoverer(discoverer TicketFileDiscoverer) TicketI
 }
 
 // WithTicketIndexRebuilderParser executes the corresponding package operation.
-func WithTicketIndexRebuilderParser(parser ticketcore.TicketParser) TicketIndexRebuilderOption {
+func WithTicketIndexRebuilderParser(parser ticketcore.Parser) TicketIndexRebuilderOption {
 	return func(rebuilder *ticketIndexRebuilder) {
 		if parser != nil {
 			rebuilder.parser = parser
@@ -116,7 +116,7 @@ func (r *ticketIndexRebuilder) RebuildProjectTickets(
 	}
 
 	for _, file := range files {
-		ticket, err := r.parser.ParseTicket(ctx, ticketcore.ParseTicketOptions{
+		ticket, err := r.parser.Parse(ctx, ticketcore.ParseOptions{
 			ProjectID:    opts.ProjectID,
 			ProjectDir:   opts.ProjectDir,
 			Path:         file.Path,

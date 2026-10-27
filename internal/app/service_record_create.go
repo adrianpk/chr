@@ -63,14 +63,14 @@ func (s service) prepareTicketRecord(request RecordMutationRequest) (core.Workfl
 	key := fmt.Sprintf("%s-%d", config.TicketKeyPrefix, number)
 	now := s.now().UTC()
 
-	body, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{Key: key, Title: *request.Title, Synopsis: *request.Synopsis, Status: ticketcore.TicketStatusBacklog, UseCase: request.UseCase, Body: recordString(request.Body), CreatedAt: now, UpdatedAt: now})
+	body, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{Key: key, Title: *request.Title, Synopsis: *request.Synopsis, Status: ticketcore.StatusBacklog, UseCase: request.UseCase, Body: recordString(request.Body), CreatedAt: now, UpdatedAt: now})
 	if err != nil {
 		return core.WorkflowRecord{}, err
 	}
 
 	contract, err := json.Marshal(struct{ Title, Synopsis, Body string }{*request.Title, *request.Synopsis, recordString(request.Body)})
 
-	return core.WorkflowRecord{Kind: "ticket", Body: []byte(body), Task: &core.WorkflowTask{Schema: core.WorkflowSchema, Key: key, Status: ticketcore.TicketStatusBacklog, Phase: "pending", UseCase: request.UseCase, ContractHash: recordDigest(contract)}}, err
+	return core.WorkflowRecord{Kind: "ticket", Body: []byte(body), Task: &core.WorkflowTask{Schema: core.WorkflowSchema, Key: key, Status: ticketcore.StatusBacklog, Phase: "pending", UseCase: request.UseCase, ContractHash: recordDigest(contract)}}, err
 }
 
 func (s service) prepareSetRecord(ctx context.Context, store *core.WorkflowStore, request RecordMutationRequest) (core.WorkflowRecord, error) {

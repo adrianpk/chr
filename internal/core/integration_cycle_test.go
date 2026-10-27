@@ -67,7 +67,7 @@ func TestIntegrationCyclePolicyFromReviewConfigRejectsInvalidConfig(t *testing.T
 }
 
 func TestPlanIntegrationCycleBuildsSelectedPendingPlan(t *testing.T) {
-	ticket := ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Add serialized loop"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}
+	ticket := ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Add serialized loop"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}
 
 	got, err := PlanIntegrationCycle(IntegrationCyclePlanOptions{
 		ProjectID: "project-1",
@@ -102,7 +102,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 		{
 			name: "missing project id",
 			opts: IntegrationCyclePlanOptions{
-				Ticket:       ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}},
+				Ticket:       ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}},
 				ReviewConfig: ReviewWorkflowConfig{Mode: workflowstate.ReviewHuman},
 			},
 			want: "integration cycle project id is required",
@@ -119,7 +119,7 @@ func TestPlanIntegrationCycleRejectsInvalidInput(t *testing.T) {
 			name: "invalid review config",
 			opts: IntegrationCyclePlanOptions{
 				ProjectID:    "project-1",
-				Ticket:       ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}},
+				Ticket:       ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}},
 				ReviewConfig: ReviewWorkflowConfig{Mode: "unknown"},
 			},
 			want: "invalid review workflow mode: unknown",

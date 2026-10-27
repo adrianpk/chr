@@ -58,7 +58,7 @@ func (s *WorkflowStore) workflowFinalizationTaskImages(run *workflowInvocationFi
 	files := []workflowstate.FileChange{}
 
 	for _, record := range tasks {
-		record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", ticketcore.TicketStatusDone, receipt.Path
+		record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", ticketcore.StatusDone, receipt.Path
 		record.Task.Delivery = workflowTaskDelivery(run.Lane.Branch, *receipt.Receipt)
 
 		changes, err := s.workflowClaimRecordChanges(run, &record)
@@ -140,7 +140,7 @@ func (s *WorkflowStore) checkWorkflowFinalizationImages(ctx context.Context, run
 }
 
 func workflowFinalizedTaskMatches(record WorkflowRecord, branch string, receipt WorkflowRecord) bool {
-	return record.Task != nil && record.Task.Phase == "integrated" && record.Task.Status == ticketcore.TicketStatusDone && record.Task.DeliveryRef == receipt.Path && workflowTaskDeliveryMatches(record.Task.Delivery, branch, *receipt.Receipt)
+	return record.Task != nil && record.Task.Phase == "integrated" && record.Task.Status == ticketcore.StatusDone && record.Task.DeliveryRef == receipt.Path && workflowTaskDeliveryMatches(record.Task.Delivery, branch, *receipt.Receipt)
 }
 
 func workflowTaskDeliveryMatches(delivery *WorkflowTaskDelivery, branch string, receipt WorkflowReceipt) bool {

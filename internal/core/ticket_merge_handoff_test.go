@@ -12,7 +12,7 @@ import (
 func TestValidateTicketMergeHandoffAcceptsPassedReview(t *testing.T) {
 	now := time.Date(2026, 6, 2, 10, 0, 0, 0, time.UTC)
 	ticket := validIndexedTicket(now)
-	ticket.Status = ticketcore.TicketStatusReadyForMerge
+	ticket.Status = ticketcore.StatusReadyForMerge
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
 	ticket.ReviewState = TicketReviewCommandResultPass
 	ticket.ReviewResult = TicketReviewCommandResultPass
@@ -41,7 +41,7 @@ func TestValidateTicketMergeHandoffAcceptsPassedReview(t *testing.T) {
 func TestValidateTicketMergeHandoffRejectsMissingPassedReview(t *testing.T) {
 	now := time.Date(2026, 6, 2, 10, 0, 0, 0, time.UTC)
 	ticket := validIndexedTicket(now)
-	ticket.Status = ticketcore.TicketStatusReadyForMerge
+	ticket.Status = ticketcore.StatusReadyForMerge
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
 	ticket.ReviewState = "changes_requested"
 	ticket.ReviewResult = TicketReviewCommandResultNeedsChanges
@@ -64,7 +64,7 @@ func TestValidateTicketMergeHandoffRejectsMissingPassedReview(t *testing.T) {
 func TestValidateTicketMergeHandoffRejectsMissingPullRequestRef(t *testing.T) {
 	now := time.Date(2026, 6, 2, 10, 0, 0, 0, time.UTC)
 	ticket := validIndexedTicket(now)
-	ticket.Status = ticketcore.TicketStatusReadyForMerge
+	ticket.Status = ticketcore.StatusReadyForMerge
 	ticket.Branch = "feat/slice-1-merger-handoff-contract"
 	ticket.ReviewState = TicketReviewCommandResultPass
 	ticket.ReviewResult = TicketReviewCommandResultPass

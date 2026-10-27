@@ -38,7 +38,7 @@ const (
 type AgenticReviewContext struct {
 	ProjectID           string
 	ProjectDir          string
-	Ticket              ticketcore.IndexedTicket
+	Ticket              ticketcore.Indexed
 	Execution           ExecutionRecord
 	Application         ResultApplication
 	ExecutionReportPath string
@@ -64,7 +64,7 @@ type AgenticReviewArtifact struct {
 
 // ApplyAgenticReviewResultOptions describes local ticket metadata application.
 type ApplyAgenticReviewResultOptions struct {
-	Ticket     ticketcore.IndexedTicket
+	Ticket     ticketcore.Indexed
 	Artifact   AgenticReviewArtifact
 	ReviewedAt time.Time
 }
@@ -360,7 +360,7 @@ func ApplyAgenticReviewResult(ctx context.Context, opts ApplyAgenticReviewResult
 		BlockingFindings: agenticReviewBlockingFindingBodies(opts.Artifact.Result),
 	}
 
-	if result.Status == ticketcore.TicketStatusReadyForMerge {
+	if result.Status == ticketcore.StatusReadyForMerge {
 		ticket := opts.Ticket
 		ticket.Status = result.Status
 		ticket.ReviewState = result.ReviewState
@@ -435,7 +435,7 @@ func ticketReviewStatusForResult(result string) string {
 	return status
 }
 
-func agenticReviewMetadataRef(ticket ticketcore.IndexedTicket, artifact AgenticReviewArtifact) ticketmetadata.ReviewRef {
+func agenticReviewMetadataRef(ticket ticketcore.Indexed, artifact AgenticReviewArtifact) ticketmetadata.ReviewRef {
 	if ref, ok := firstTicketPullRequestReviewRef(ticket.ReviewRefs); ok {
 		return ref
 	}

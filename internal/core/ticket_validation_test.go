@@ -12,11 +12,11 @@ import (
 func TestValidateIndexedTicketAcceptsBoardMetadata(t *testing.T) {
 	now := time.Date(2026, 5, 26, 10, 0, 0, 0, time.UTC)
 	ticket := validIndexedTicket(now)
-	ticket.Status = ticketcore.TicketStatusBacklog
+	ticket.Status = ticketcore.StatusBacklog
 	ticket.Synopsis = "Implement the Board ticket creation path."
 	ticket.SourceKind = "manual"
 
-	err := ticketcore.ValidateIndexedTicket(ticket)
+	err := ticketcore.ValidateIndexed(ticket)
 	if err != nil {
 		t.Fatalf("ValidateIndexedTicket returned error: %v", err)
 	}
@@ -25,10 +25,10 @@ func TestValidateIndexedTicketAcceptsBoardMetadata(t *testing.T) {
 func TestValidateIndexedTicketAcceptsLegacyTicketWithoutSynopsis(t *testing.T) {
 	now := time.Date(2026, 5, 26, 10, 0, 0, 0, time.UTC)
 	ticket := validIndexedTicket(now)
-	ticket.Status = ticketcore.TicketStatusOpenLegacy
+	ticket.Status = ticketcore.StatusOpenLegacy
 	ticket.Synopsis = ""
 
-	err := ticketcore.ValidateIndexedTicket(ticket)
+	err := ticketcore.ValidateIndexed(ticket)
 	if err != nil {
 		t.Fatalf("ValidateIndexedTicket returned error: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestValidateIndexedTicketRejectsUnknownStatus(t *testing.T) {
 	ticket := validIndexedTicket(now)
 	ticket.Status = "unknown"
 
-	err := ticketcore.ValidateIndexedTicket(ticket)
+	err := ticketcore.ValidateIndexed(ticket)
 	if err == nil {
 		t.Fatal("ValidateIndexedTicket returned nil error")
 	}
@@ -66,7 +66,7 @@ func TestValidateIndexedTicketAcceptsReviewMetadata(t *testing.T) {
 	ticket.ReviewCommentsURL = "https://forge.example.com/owner/repo/pulls/123"
 	ticket.BlockingFindings = []string{"RF-1"}
 
-	err := ticketcore.ValidateIndexedTicket(ticket)
+	err := ticketcore.ValidateIndexed(ticket)
 	if err != nil {
 		t.Fatalf("ValidateIndexedTicket returned error: %v", err)
 	}
@@ -82,7 +82,7 @@ func TestValidateIndexedTicketAcceptsMergeMetadata(t *testing.T) {
 	ticket.MergedAt = &now
 	ticket.MergeBlocker = "merge conflict"
 
-	err := ticketcore.ValidateIndexedTicket(ticket)
+	err := ticketcore.ValidateIndexed(ticket)
 	if err != nil {
 		t.Fatalf("ValidateIndexedTicket returned error: %v", err)
 	}
@@ -93,40 +93,40 @@ func TestValidateIndexedTicketRejectsInvalidReviewMetadata(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		mutate  func(*ticketcore.IndexedTicket)
+		mutate  func(*ticketcore.Indexed)
 		wantErr string
 	}{
 		{
 			name: "invalid review state",
-			mutate: func(ticket *ticketcore.IndexedTicket) {
+			mutate: func(ticket *ticketcore.Indexed) {
 				ticket.ReviewState = "pending"
 			},
 			wantErr: "invalid ticket review_state: pending",
 		},
 		{
 			name: "invalid review result",
-			mutate: func(ticket *ticketcore.IndexedTicket) {
+			mutate: func(ticket *ticketcore.Indexed) {
 				ticket.ReviewResult = "pass_with_notes"
 			},
 			wantErr: "invalid ticket review_result: pass_with_notes",
 		},
 		{
 			name: "negative review round",
-			mutate: func(ticket *ticketcore.IndexedTicket) {
+			mutate: func(ticket *ticketcore.Indexed) {
 				ticket.ReviewRound = -1
 			},
 			wantErr: "ticket review_round cannot be negative",
 		},
 		{
 			name: "review ref missing url",
-			mutate: func(ticket *ticketcore.IndexedTicket) {
+			mutate: func(ticket *ticketcore.Indexed) {
 				ticket.ReviewRefs = []ticketmetadata.ReviewRef{{Type: "pull_request", Provider: "forgejo"}}
 			},
 			wantErr: "ticket review ref url is required",
 		},
 		{
 			name: "empty blocking finding",
-			mutate: func(ticket *ticketcore.IndexedTicket) {
+			mutate: func(ticket *ticketcore.Indexed) {
 				ticket.BlockingFindings = []string{""}
 			},
 			wantErr: "ticket blocking_findings cannot contain empty values",
@@ -138,7 +138,7 @@ func TestValidateIndexedTicketRejectsInvalidReviewMetadata(t *testing.T) {
 			ticket := validIndexedTicket(now)
 			tt.mutate(&ticket)
 
-			err := ticketcore.ValidateIndexedTicket(ticket)
+			err := ticketcore.ValidateIndexed(ticket)
 			if err == nil {
 				t.Fatal("ValidateIndexedTicket returned nil error")
 			}
@@ -155,19 +155,19 @@ func TestValidateIndexedTicketRejectsInvalidMergeMetadata(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		mutate  func(*ticketcore.IndexedTicket)
+		mutate  func(*ticketcore.Indexed)
 		wantErr string
 	}{
 		{
 			name: "invalid merge state",
-			mutate: func(ticket *ticketcore.IndexedTicket) {
+			mutate: func(ticket *ticketcore.Indexed) {
 				ticket.MergeState = "waiting"
 			},
 			wantErr: "invalid ticket merge_state: waiting",
 		},
 		{
 			name: "invalid merge result",
-			mutate: func(ticket *ticketcore.IndexedTicket) {
+			mutate: func(ticket *ticketcore.Indexed) {
 				ticket.MergeResult = "approved"
 			},
 			wantErr: "invalid ticket merge_result: approved",
@@ -179,7 +179,7 @@ func TestValidateIndexedTicketRejectsInvalidMergeMetadata(t *testing.T) {
 			ticket := validIndexedTicket(now)
 			tt.mutate(&ticket)
 
-			err := ticketcore.ValidateIndexedTicket(ticket)
+			err := ticketcore.ValidateIndexed(ticket)
 			if err == nil {
 				t.Fatal("ValidateIndexedTicket returned nil error")
 			}
@@ -191,19 +191,19 @@ func TestValidateIndexedTicketRejectsInvalidMergeMetadata(t *testing.T) {
 	}
 }
 
-func validIndexedTicket(now time.Time) ticketcore.IndexedTicket {
-	return ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+func validIndexedTicket(now time.Time) ticketcore.Indexed {
+	return ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{
 			ProjectID:    "project-1",
 			Path:         "/tmp/project/.chr/default/tickets/CHR-1-Test.md",
 			RelativePath: "CHR-1-Test.md",
 			Key:          "CHR-1",
-		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Test ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusBacklog,
+		}, IndexedSummary: ticketcore.IndexedSummary{Title: "Test ticket"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusBacklog,
 			Priority: "normal",
 			Severity: "normal",
 			Type:     "task",
-		}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{
+		}, IndexedTimes: ticketcore.IndexedTimes{
 			CreatedAt: &now,
 			UpdatedAt: &now,
 		},

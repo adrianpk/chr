@@ -14,7 +14,7 @@ import (
 // WorkflowWorkObservation is a coherent, non-recovering read of native work.
 // Queue members retain shared readiness and native slice/task order.
 type WorkflowWorkObservation struct {
-	Tickets     []ticketcore.IndexedTicket
+	Tickets     []ticketcore.Indexed
 	Records     []WorkflowRecord
 	Invocations []WorkflowInvocation
 	Queue       []WorkflowPreviewMember

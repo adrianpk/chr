@@ -55,7 +55,7 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 	case workflowSliceValidationPurpose:
 		run.ResumeStatus = "waiting_integration"
 	default:
-		record.Task.Phase, record.Task.Status = "pending", ticketcore.TicketStatusReadyForDev
+		record.Task.Phase, record.Task.Status = "pending", ticketcore.StatusReadyForDev
 		run.ResumeStatus = "pending"
 	}
 

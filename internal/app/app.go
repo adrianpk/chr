@@ -280,7 +280,7 @@ type tuiOptionsData struct {
 	stdin                io.Reader
 	stdout               io.Writer
 	assetsFS             fs.FS
-	tickets              []ticketcore.IndexedTicket
+	tickets              []ticketcore.Indexed
 	documents            []tui.DocumentView
 	dumps                []tui.DumpView
 	quizzes              []tui.QuizView
@@ -339,7 +339,7 @@ func loadTUITickets(
 	env core.UserEnvironment,
 	projectContext commandProjectContext,
 	assetsFS fs.FS,
-) ([]ticketcore.IndexedTicket, error) {
+) ([]ticketcore.Indexed, error) {
 	board, err := newService(ctx, env, projectContext, assetsFS).Board()
 	if err != nil {
 		return nil, err

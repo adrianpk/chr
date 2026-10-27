@@ -151,9 +151,9 @@ func indexWorkflowTask(ctx context.Context, tx *sql.Tx, store *WorkflowStore, r 
 	return err
 }
 
-func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (ticketcore.IndexedTicket, error) {
+func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (ticketcore.Indexed, error) {
 	if strings.HasSuffix(r.Path, ".md") {
-		parsed, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), r.Path), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
+		parsed, err := ticketcore.NewParser().Parse(ctx, ticketcore.ParseOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), r.Path), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
 		parsed.Namespace = r.Namespace
 
 		return parsed, err
@@ -167,7 +167,7 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 
 	display, err := workflowPlainTicketDisplay(r)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	display.ProjectID, display.Namespace, display.Key = r.ProjectID, r.Namespace, r.Task.Key
@@ -179,12 +179,12 @@ func workflowIndexedTicket(ctx context.Context, store *WorkflowStore, r Workflow
 	return display, nil
 }
 
-func workflowCanonicalTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (ticketcore.IndexedTicket, error) {
+func workflowCanonicalTicket(ctx context.Context, store *WorkflowStore, r WorkflowRecord) (ticketcore.Indexed, error) {
 	relative := filepath.Join(filepath.Dir(r.Path), "artifact.md")
 
-	parsed, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), relative), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
+	parsed, err := ticketcore.NewParser().Parse(ctx, ticketcore.ParseOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), relative), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	parsed.Namespace, parsed.Key, parsed.Status = r.Namespace, r.Task.Key, r.Task.Status

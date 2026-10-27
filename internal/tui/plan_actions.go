@@ -36,7 +36,7 @@ type PlanActionResult struct {
 	Message   string
 	Documents []DocumentView
 	Plans     []PlanView
-	Tickets   []ticketcore.IndexedTicket
+	Tickets   []ticketcore.Indexed
 	Scope     QuizScope
 }
 

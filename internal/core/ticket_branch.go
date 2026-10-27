@@ -21,7 +21,7 @@ type TicketBranchSelection struct {
 }
 
 // SelectTicketBranch resolves the implementation branch for one ticket.
-func SelectTicketBranch(ticket ticketcore.IndexedTicket) (TicketBranchSelection, error) {
+func SelectTicketBranch(ticket ticketcore.Indexed) (TicketBranchSelection, error) {
 	key := strings.TrimSpace(ticket.Key)
 	if key == "" {
 		return TicketBranchSelection{}, fmt.Errorf("ticket key is required")

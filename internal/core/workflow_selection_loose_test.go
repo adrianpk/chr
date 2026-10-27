@@ -113,8 +113,8 @@ func TestWorkflowSelectionLooseFilters(t *testing.T) {
 func TestWorkflowSelectionNativeTies(t *testing.T) {
 	known := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 	later := known.Add(time.Hour)
-	tickets := []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-10"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "normal"}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: &known}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "critical"}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: &later}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-3"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Priority: "high", Severity: "normal"}}, {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-4"}}}
-	slices.SortFunc(tickets, func(left, right ticketcore.IndexedTicket) int {
+	tickets := []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-10"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "normal"}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: &known}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-2"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "normal"}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: &known}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-1"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "critical"}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: &later}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-3"}, IndexedClassification: ticketcore.IndexedClassification{Priority: "high", Severity: "normal"}}, {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-4"}}}
+	slices.SortFunc(tickets, func(left, right ticketcore.Indexed) int {
 		return compareTicketLoopOrder(workflowstate.TicketOrderPrioritySeverity, left, right)
 	})
 
@@ -132,12 +132,12 @@ func TestWorkflowSelectionLooseOwnership(t *testing.T) {
 	record := workflowTestTask("PRJ-9")
 	record.Task.UseCase = "example"
 
-	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", ticketcore.TicketStatusDone, "run/evidence/receipt.json"
+	record.Task.Phase, record.Task.Status, record.Task.DeliveryRef = "integrated", ticketcore.StatusDone, "run/evidence/receipt.json"
 	if _, err := store.Create(t.Context(), "Done", record); err != nil {
 		t.Fatal(err)
 	}
 
-	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Statuses: []string{ticketcore.TicketStatusReadyForDev, ticketcore.TicketStatusDone}, Filters: workflowstate.TicketFilters{UseCases: []string{"example"}}}
+	request := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "loose"}, Limit: 128, Statuses: []string{ticketcore.StatusReadyForDev, ticketcore.StatusDone}, Filters: workflowstate.TicketFilters{UseCases: []string{"example"}}}
 
 	preview, err := store.Preview(t.Context(), request)
 	if err != nil || preview.Total != 0 || preview.Excluded["slice_owned"] != len(result.Tasks) || preview.Excluded["integrated"] != 1 {
@@ -158,9 +158,9 @@ func TestWorkflowSelectionConcurrent(t *testing.T) {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			record.Task.Status = ticketcore.TicketStatusBacklog
+			record.Task.Status = ticketcore.StatusBacklog
 			if i%2 == 0 {
-				record.Task.Status = ticketcore.TicketStatusReadyForDev
+				record.Task.Status = ticketcore.StatusReadyForDev
 			}
 
 			next, err := store.Write(t.Context(), record, record.Revision)

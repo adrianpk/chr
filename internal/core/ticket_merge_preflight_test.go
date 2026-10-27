@@ -22,7 +22,7 @@ func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket:        ticket,
-		Tickets:       []ticketcore.IndexedTicket{ticket},
+		Tickets:       []ticketcore.Indexed{ticket},
 		Remote:        remote,
 		ExpectedBase:  "develop",
 		MergeStrategy: TicketMergeStrategyRebase,
@@ -123,9 +123,9 @@ func TestRunTicketMergePreflightBlocksSerialRepair(t *testing.T) {
 
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: ticket,
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			ticket,
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewState: "changes_requested"}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{ReviewState: "changes_requested"}},
 		},
 		Remote: fakeTicketMergePreflightRemote{},
 	})
@@ -149,16 +149,16 @@ func TestRunTicketMergePreflightBlocksInvalidMergeStrategy(t *testing.T) {
 	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockInvalidMergeStrategy, TicketMergePreflightBlockKindOperational)
 }
 
-func testMergePreflightTicket() ticketcore.IndexedTicket {
+func testMergePreflightTicket() ticketcore.Indexed {
 	now := time.Date(2026, 6, 2, 12, 0, 0, 0, time.UTC)
 
-	return ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+	return ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{
 			ProjectID:    "project-1",
 			Path:         "/tmp/project/.chr/default/tickets/CHR-2-Test.md",
 			RelativePath: "CHR-2-Test.md",
 			Key:          "CHR-2",
-		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Test ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForMerge}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: "feat/slice-2-merger-preflight"}, IndexedTicketReview: ticketcore.IndexedTicketReview{
+		}, IndexedSummary: ticketcore.IndexedSummary{Title: "Test ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForMerge}, IndexedSource: ticketcore.IndexedSource{Branch: "feat/slice-2-merger-preflight"}, IndexedReview: ticketcore.IndexedReview{
 			ReviewState:  TicketReviewCommandResultPass,
 			ReviewResult: TicketReviewCommandResultPass,
 			ReviewRefs: []ticketmetadata.ReviewRef{{
@@ -168,7 +168,7 @@ func testMergePreflightTicket() ticketcore.IndexedTicket {
 				ID:       "284",
 				Status:   "open",
 			}},
-		}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{
+		}, IndexedTimes: ticketcore.IndexedTimes{
 			CreatedAt: &now,
 			UpdatedAt: &now,
 		},

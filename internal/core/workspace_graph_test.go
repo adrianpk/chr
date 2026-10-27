@@ -318,7 +318,7 @@ func assertWorkspaceGraphNode(
 func ticketFixture(t *testing.T, ticket ticketcore.Ticket) string {
 	t.Helper()
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

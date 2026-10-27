@@ -106,12 +106,12 @@ type TicketView struct {
 }
 
 // NewTicketViews converts indexed tickets into TUI rows.
-func NewTicketViews(tickets []ticketcore.IndexedTicket) []TicketView {
+func NewTicketViews(tickets []ticketcore.Indexed) []TicketView {
 	views := make([]TicketView, 0, len(tickets))
 
 	for index, ticket := range tickets {
-		boardColumn, ok := ticketcore.BoardTicketStatusFor(ticket.Status)
-		if ok && ticketcore.IsNormalBoardTicketStatus(ticket.BoardColumn) {
+		boardColumn, ok := ticketcore.BoardStatus(ticket.Status)
+		if ok && ticketcore.NormalBoardStatus(ticket.BoardColumn) {
 			boardColumn = ticket.BoardColumn
 		}
 

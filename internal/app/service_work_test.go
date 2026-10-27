@@ -188,7 +188,7 @@ func TestServiceStartAgentWorkLoopPreparesOnlySelectedWorktree(t *testing.T) {
 	operations := newAgentWorkTestService(t, devRoot, projectDir)
 
 	result, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{
-		Statuses:      []string{ticketcore.TicketStatusReadyForDev},
+		Statuses:      []string{ticketcore.StatusReadyForDev},
 		Order:         workflowstate.TicketOrderCreatedAt,
 		MaxIterations: 1,
 	})
@@ -339,8 +339,8 @@ func TestServiceStartAllReadyAgentWorkRunsAgenticReviewPass(t *testing.T) {
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 1)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
 	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-2"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.TicketStatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.StatusDone)
 	assertAgenticReviewRunArtifact(t, projectDir, "CHR-1", result.Executions[0].ID)
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `review_result: "pass"`)
@@ -388,7 +388,7 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergePreflightBlocks(t *testing.T
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.TicketStatusReadyForMerge)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusReadyForMerge)
 	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_blocker: "not_mergeable"`)
@@ -434,7 +434,7 @@ func TestServiceStartAllReadyAgentWorkStopsWhenMergeProviderFails(t *testing.T) 
 
 	assertAgentWorkLoopRunBlockedAfterOneTicket(t, *result.LoopRun)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.TicketStatusReadyForMerge)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusReadyForMerge)
 	assertTicketContains(t, ticketPath, `merge_state: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_result: "blocked"`)
 	assertTicketContains(t, ticketPath, `merge_blocker: "provider failed"`)
@@ -482,8 +482,8 @@ func TestServiceStartAllReadyAgentWorkTrustedAutoMergeMergesBeforeNextTicket(t *
 	assertAgentWorkLoopRunProcessedTwoTickets(t, *result.LoopRun)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 1)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.TicketStatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.StatusDone)
 
 	if len(runner.reviews) != 0 {
 		t.Fatalf("agentic review calls = %d, want 0", len(runner.reviews))
@@ -539,8 +539,8 @@ func TestServiceStartAllReadyAgentWorkRepairsAgenticReviewNeedsChangesBeforeNext
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 2)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 1)
 	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-1", "CHR-2"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.TicketStatusDone)
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.TicketStatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusDone)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-2", ticketcore.StatusDone)
 	assertTicketContains(t, ticketPath, `review_round: 2`)
 	assertTicketContains(t, ticketPath, `review_state: "pass"`)
 	assertTicketContains(t, ticketPath, `merge_state: "merged"`)
@@ -584,7 +584,7 @@ func TestServiceStartAllReadyAgentWorkBlocksAfterRepairReviewNeedsChanges(t *tes
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-1", 2)
 	assertTicketExecutionRecordCount(t, devRoot, projectDir, "CHR-2", 0)
 	assertAgenticReviewRunnerCalls(t, runner, projectDir, []string{"CHR-1", "CHR-1"})
-	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.TicketStatusReadyForDev)
+	assertAgentWorkTicketState(t, result.Tickets, "CHR-1", ticketcore.StatusReadyForDev)
 	assertTicketContains(t, ticketPath, `review_round: 2`)
 	assertTicketContains(t, ticketPath, `review_state: "changes_requested"`)
 	assertTicketContains(t, ticketPath, `review_result: "needs_changes"`)
@@ -932,7 +932,7 @@ func writeTrustedAutoMergeLoopConfig(t *testing.T, projectDir string) {
 }
 
 func testLoopTicketWithPullRequestRef(key, title string) ticketcore.Ticket {
-	ticket := testLoopTicket(key, title, ticketcore.TicketStatusReadyForDev, "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"})
+	ticket := testLoopTicket(key, title, ticketcore.StatusReadyForDev, "high", "critical", "feature", "onboarding", "frontend", []string{"uxui"})
 	ticket.Branch = "feat/slice-2-pr-reference-workflow"
 	ticket.ReviewRefs = []ticketmetadata.ReviewRef{{
 		Type:     "pull_request",
@@ -973,7 +973,7 @@ func assertAgenticReviewRunArtifact(t *testing.T, projectDir, ticketKey, executi
 	assertPathExists(t, filepath.Join(runDir, "summary.md"))
 }
 
-func assertAgentWorkTicketState(t *testing.T, tickets []ticketcore.IndexedTicket, ticketKey, status string) {
+func assertAgentWorkTicketState(t *testing.T, tickets []ticketcore.Indexed, ticketKey, status string) {
 	t.Helper()
 
 	for _, ticket := range tickets {
@@ -1025,7 +1025,7 @@ func agenticReviewNeedsChangesResult(title string) core.AgenticReviewResult {
 	}
 }
 
-func indexedAgentWorkTicketKeys(tickets []ticketcore.IndexedTicket) []string {
+func indexedAgentWorkTicketKeys(tickets []ticketcore.Indexed) []string {
 	keys := make([]string, 0, len(tickets))
 	for _, ticket := range tickets {
 		keys = append(keys, ticket.Key)

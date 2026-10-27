@@ -15,7 +15,7 @@ import (
 // WorkOperationResult is the TUI-facing result for agent work operations.
 type WorkOperationResult struct {
 	Message string
-	Tickets []ticketcore.IndexedTicket
+	Tickets []ticketcore.Indexed
 }
 
 // AgentWorkResult summarizes runnable agent work for the dashboard.
@@ -25,12 +25,12 @@ type AgentWorkResult struct {
 	Excluded      map[string]int
 	Workflow      *core.WorkflowInvocation
 	Message       string
-	Tickets       []ticketcore.IndexedTicket
+	Tickets       []ticketcore.Indexed
 	Execution     *core.ExecutionRecord
 	LoopRun       *core.LoopRunRecord
 	Executions    []core.ExecutionRecord
 	Merges        []core.TicketMergeCommandResult
-	SelectedQueue []ticketcore.IndexedTicket
+	SelectedQueue []ticketcore.Indexed
 	EligibleCount int
 }
 
@@ -134,22 +134,22 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTicket, error) {
 	ticket, err := s.legacyAgentWorkTicket(ticketKey)
 	if err != nil {
-		return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
+		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
 
 	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
 	if err != nil {
-		return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
+		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
 
 	preflight, err := s.prepareTicketStart(s.ctx, ticket, ticketStartPreflightOptions{PrepareWorktree: true})
 	if err != nil {
 		releaseErr := lock.Release()
 		if releaseErr != nil {
-			return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
+			return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
 		}
 
-		return preparedAgentWorkTicket{Ticket: ticketcore.IndexedTicket{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
+		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, core.NewExecutionFailure(core.ExecutionFailurePreflight, err)
 	}
 
 	return preparedAgentWorkTicket{Ticket: ticket, Preflight: preflight, Release: releaseAgentOperationLock(lock)}, nil
@@ -321,45 +321,45 @@ func (s service) ensureAgentWorkRuntime() error {
 	return nil
 }
 
-func (s service) legacyAgentWorkTicket(ticketKey string) (ticketcore.IndexedTicket, error) {
+func (s service) legacyAgentWorkTicket(ticketKey string) (ticketcore.Indexed, error) {
 	if err := s.checkLegacyAgentWorkKey(ticketKey); err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	err := s.ensureAgentWorkRuntime()
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	ticket, err := s.ticketByKey(ticketKey)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	tickets, err := s.listProjectTickets()
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	tickets, _, err = core.FilterLegacyWorkTickets(s.ctx, tickets)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	err = enforceWorkSelectionPreflight(s.ctx, s.projectContext, tickets, ticket.Key)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	return ticket, nil
 }
 
 type preparedAgentWorkTicket struct {
-	Ticket    ticketcore.IndexedTicket
+	Ticket    ticketcore.Indexed
 	Preflight ticketStartPreflight
 	Release   func()
 }

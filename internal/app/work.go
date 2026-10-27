@@ -437,7 +437,7 @@ func printAgentWorkRunAllPreview(
 	return printAgentWorkTicketQueue(stdout, result.SelectedQueue)
 }
 
-func agentWorkPreviewCycleTicket(queue []ticketcore.IndexedTicket) string {
+func agentWorkPreviewCycleTicket(queue []ticketcore.Indexed) string {
 	if len(queue) == 0 {
 		return "(none)"
 	}
@@ -588,7 +588,7 @@ func workLogPathExists(path string) (bool, error) {
 	return false, fmt.Errorf("inspect work log path %s: %w", path, err)
 }
 
-func printAgentWorkTicketQueue(stdout io.Writer, tickets []ticketcore.IndexedTicket) error {
+func printAgentWorkTicketQueue(stdout io.Writer, tickets []ticketcore.Indexed) error {
 	for _, ticket := range tickets {
 		_, err := fmt.Fprintf(
 			stdout,

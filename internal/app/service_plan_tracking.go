@@ -30,7 +30,7 @@ type PlanTrackingResult struct {
 	Message      string
 	Plan         PlanView
 	TrackingPath string
-	Tickets      []ticketcore.IndexedTicket
+	Tickets      []ticketcore.Indexed
 }
 
 func (s service) MaterializePlanTracking(ctx context.Context, request PlanTrackingRequest) (PlanTrackingResult, error) {
@@ -149,7 +149,7 @@ func (s service) createPlanTrackingTickets(scope quizcore.Scope, planPath, track
 		result, err := s.CreateTicket(CreateTicketRequest{
 			Title:       payload.Title,
 			Synopsis:    payload.Synopsis,
-			Status:      ticketcore.TicketStatusReadyForDev,
+			Status:      ticketcore.StatusReadyForDev,
 			Priority:    payload.Priority,
 			Severity:    payload.Severity,
 			Type:        payload.Type,

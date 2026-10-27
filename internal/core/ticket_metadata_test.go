@@ -14,11 +14,11 @@ import (
 
 func TestTicketMetadataUpdaterUpdatesEditableFields(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "CHR-1.md")
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{
+	content, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Old title",
 		Synopsis:  "Old synopsis.",
-		Status:    ticketcore.TicketStatusReadyForDev,
+		Status:    ticketcore.StatusReadyForDev,
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		Body:      "# Comments\n",

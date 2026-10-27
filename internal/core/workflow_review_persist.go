@@ -108,9 +108,9 @@ func workflowReviewAttemptResult(run *workflowInvocationFile, data []byte) []wor
 }
 
 func (s *WorkflowStore) workflowReviewDomainChanges(run *workflowInvocationFile, observation workflowSliceObservation, authorized bool) ([]workflowstate.FileChange, error) {
-	status, phase := ticketcore.TicketStatusReadyForReview, "reviewing"
+	status, phase := ticketcore.StatusReadyForReview, "reviewing"
 	if authorized {
-		status, phase = ticketcore.TicketStatusReadyForMerge, "ready_for_merge"
+		status, phase = ticketcore.StatusReadyForMerge, "ready_for_merge"
 	}
 
 	files := []workflowstate.FileChange{}

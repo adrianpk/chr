@@ -39,7 +39,7 @@ type TicketActionRequest struct {
 // TicketActionResult contains refreshed ticket state after an action.
 type TicketActionResult struct {
 	Message string
-	Tickets []ticketcore.IndexedTicket
+	Tickets []ticketcore.Indexed
 }
 
 // TicketActionState stores pending confirmation state for a ticket action.

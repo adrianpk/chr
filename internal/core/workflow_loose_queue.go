@@ -131,7 +131,7 @@ func (s *WorkflowStore) selectWorkflowLooseQueue(ctx context.Context, run workfl
 }
 
 func selectWorkflowLoosePending(run *workflowInvocationFile, selection workflowSelection) {
-	tickets := map[string]ticketcore.IndexedTicket{}
+	tickets := map[string]ticketcore.Indexed{}
 	for _, ticket := range selection.tickets {
 		tickets[ticket.Key] = ticket
 	}

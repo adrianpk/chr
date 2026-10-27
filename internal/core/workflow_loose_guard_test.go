@@ -57,7 +57,7 @@ func changeWorkflowLooseInput(t *testing.T, store *WorkflowStore, record Workflo
 
 		record.Domain["execution_contract"] = data
 	case "phase":
-		record.Task.Phase, record.Task.Status = "blocked", ticketcore.TicketStatusBlockedLegacy
+		record.Task.Phase, record.Task.Status = "blocked", ticketcore.StatusBlockedLegacy
 	case "raw rank":
 		path := filepath.Join(store.layout.Root(), filepath.Dir(record.Path), "artifact.md")
 		if err := os.WriteFile(path, workflowLooseBody(record.Task.Key, "critical"), 0o600); err != nil {

@@ -63,7 +63,7 @@ func validateTicketResolution(document TicketDocument, request TicketEditRequest
 		status = value
 	}
 
-	if !slices.Contains([]string{"solved", "closed", ticketcore.TicketStatusDone}, status) {
+	if !slices.Contains([]string{"solved", "closed", ticketcore.StatusDone}, status) {
 		return fmt.Errorf("resolution is available only for resolved tickets")
 	}
 
@@ -115,11 +115,11 @@ func validateTicketEditorClassification(document TicketDocument, name, value str
 	} else {
 		switch name {
 		case "priority":
-			valid = ticketcore.IsValidTicketPriority(value)
+			valid = ticketcore.ValidPriority(value)
 		case "severity":
-			valid = ticketcore.IsValidTicketSeverity(value)
+			valid = ticketcore.ValidSeverity(value)
 		case "type":
-			valid = ticketcore.IsValidTicketType(value)
+			valid = ticketcore.ValidType(value)
 		}
 	}
 
@@ -136,19 +136,19 @@ func validateTicketEditStatus(document TicketDocument, request TicketEditRequest
 		return nil
 	}
 
-	if !ticketcore.IsNormalBoardTicketStatus(status) {
+	if !ticketcore.NormalBoardStatus(status) {
 		return fmt.Errorf("unsupported ticket destination")
 	}
 
 	if document.native != nil {
-		if document.Phase != "pending" || !slices.Contains([]string{ticketcore.TicketStatusBacklog, ticketcore.TicketStatusReadyForDev}, status) {
+		if document.Phase != "pending" || !slices.Contains([]string{ticketcore.StatusBacklog, ticketcore.StatusReadyForDev}, status) {
 			return fmt.Errorf("workflow phase and integration evidence own this transition")
 		}
 
 		return nil
 	}
 
-	if status == ticketcore.TicketStatusDone {
+	if status == ticketcore.StatusDone {
 		return fmt.Errorf("moving to Done requires recorded integration through the workflow owner")
 	}
 

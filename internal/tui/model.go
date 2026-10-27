@@ -81,7 +81,7 @@ type Options struct {
 	Cases                []authoringcore.CaseMetadata
 	Stdin                io.Reader
 	Stdout               io.Writer
-	Tickets              []ticketcore.IndexedTicket
+	Tickets              []ticketcore.Indexed
 	Documents            []DocumentView
 	Dumps                []DumpView
 	Quizzes              []QuizView

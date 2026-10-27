@@ -9,18 +9,18 @@ import (
 func TestTicketReviewRepairCountUsesReviewRound(t *testing.T) {
 	tests := []struct {
 		name   string
-		ticket ticketcore.IndexedTicket
+		ticket ticketcore.Indexed
 		want   int
 	}{
 		{
 			name:   "not repair",
-			ticket: ticketcore.IndexedTicket{IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewRound: 3}},
+			ticket: ticketcore.Indexed{IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{ReviewRound: 3}},
 			want:   0,
 		},
 		{
 			name: "initial changes request",
-			ticket: ticketcore.IndexedTicket{
-				IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{
+			ticket: ticketcore.Indexed{
+				IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{
 					ReviewState:  "changes_requested",
 					ReviewResult: "needs_changes",
 					ReviewRound:  1,
@@ -30,8 +30,8 @@ func TestTicketReviewRepairCountUsesReviewRound(t *testing.T) {
 		},
 		{
 			name: "one repair consumed",
-			ticket: ticketcore.IndexedTicket{
-				IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{
+			ticket: ticketcore.Indexed{
+				IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{
 					ReviewState:  "changes_requested",
 					ReviewResult: "needs_changes",
 					ReviewRound:  2,
@@ -41,8 +41,8 @@ func TestTicketReviewRepairCountUsesReviewRound(t *testing.T) {
 		},
 		{
 			name: "zero review round is defensive",
-			ticket: ticketcore.IndexedTicket{
-				IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{
+			ticket: ticketcore.Indexed{
+				IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{
 					ReviewState:  "changes_requested",
 					ReviewResult: "needs_changes",
 				},
@@ -61,8 +61,8 @@ func TestTicketReviewRepairCountUsesReviewRound(t *testing.T) {
 }
 
 func TestTicketReviewRepairAllowedUsesLimit(t *testing.T) {
-	ticket := ticketcore.IndexedTicket{
-		IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{
+	ticket := ticketcore.Indexed{
+		IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{
 			ReviewState:  "changes_requested",
 			ReviewResult: "needs_changes",
 			ReviewRound:  1,

@@ -9,9 +9,9 @@ import (
 )
 
 func TestTicketRendererRendersFrontmatterAndBody(t *testing.T) {
-	renderer := NewTicketRenderer()
+	renderer := NewRenderer()
 
-	content, err := renderer.RenderTicket(testRenderedTicket())
+	content, err := renderer.Render(testRenderedTicket())
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}
@@ -114,9 +114,9 @@ updated_at: "2026-05-18T13:45:00Z"
 `
 
 func TestTicketRendererKeepsOptionalFieldsEmpty(t *testing.T) {
-	renderer := NewTicketRenderer()
+	renderer := NewRenderer()
 
-	content, err := renderer.RenderTicket(Ticket{Key: "CHR-1", Title: "Do something"})
+	content, err := renderer.Render(Ticket{Key: "CHR-1", Title: "Do something"})
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

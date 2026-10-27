@@ -90,7 +90,7 @@ func (s *WorkflowStore) workflowTicketAdmissionFiles(run *workflowInvocationFile
 		return nil, workflowstate.ErrConflict
 	}
 
-	record.Task.Status = ticketcore.TicketStatusReadyForDev
+	record.Task.Status = ticketcore.StatusReadyForDev
 
 	return s.workflowClaimRecordChanges(run, &record)
 }

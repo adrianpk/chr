@@ -38,7 +38,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 	}
 
 	status := strings.TrimSpace(opts.Status)
-	if !ticketcore.IsValidTicketStatus(status) {
+	if !ticketcore.ValidStatus(status) {
 		return fmt.Errorf("invalid ticket status: %s", opts.Status)
 	}
 
@@ -74,7 +74,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 }
 
 func validateTicketStatusTransitionMetadata(content, status string) error {
-	if status != ticketcore.TicketStatusReadyForReview && status != ticketcore.TicketStatusReadyForMerge {
+	if status != ticketcore.StatusReadyForReview && status != ticketcore.StatusReadyForMerge {
 		return nil
 	}
 
@@ -83,7 +83,7 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 		return err
 	}
 
-	if status == ticketcore.TicketStatusReadyForMerge {
+	if status == ticketcore.StatusReadyForMerge {
 		return validateReadyForMergeTransitionMetadata(frontmatter)
 	}
 
@@ -100,13 +100,13 @@ func validateTicketStatusTransitionMetadata(content, status string) error {
 }
 
 func validateReadyForMergeTransitionMetadata(frontmatter ticketmetadata.Frontmatter) error {
-	reviewRound, err := ticketmetadata.OptionalTicketInt(frontmatter.Metadata["review_round"])
+	reviewRound, err := ticketmetadata.OptionalInteger(frontmatter.Metadata["review_round"])
 	if err != nil {
 		return err
 	}
 
-	ticket := ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: opsmetadata.Unquote(frontmatter.Metadata["key"])}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForMerge}, IndexedTicketSource: ticketcore.IndexedTicketSource{Branch: opsmetadata.Unquote(frontmatter.Metadata["branch"])}, IndexedTicketReview: ticketcore.IndexedTicketReview{
+	ticket := ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: opsmetadata.Unquote(frontmatter.Metadata["key"])}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForMerge}, IndexedSource: ticketcore.IndexedSource{Branch: opsmetadata.Unquote(frontmatter.Metadata["branch"])}, IndexedReview: ticketcore.IndexedReview{
 			ReviewRefs:   frontmatter.ReviewRefs,
 			ReviewState:  opsmetadata.Unquote(frontmatter.Metadata["review_state"]),
 			ReviewResult: opsmetadata.Unquote(frontmatter.Metadata["review_result"]),

@@ -33,7 +33,7 @@ func (s service) observeLegacyWork(ctx context.Context, config core.WorkspaceCon
 		return err
 	}
 
-	tickets := map[string]ticketcore.IndexedTicket{}
+	tickets := map[string]ticketcore.Indexed{}
 	for _, ticket := range queue.Tickets {
 		tickets[ticket.Key] = ticket
 	}

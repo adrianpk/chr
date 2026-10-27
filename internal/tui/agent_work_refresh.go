@@ -24,7 +24,7 @@ type AgentWorkRefreshRequest struct {
 // AgentWorkRefreshResult contains refreshed agent work rows for the dashboard.
 type AgentWorkRefreshResult struct {
 	Workflow      *WorkflowView
-	Tickets       []ticketcore.IndexedTicket
+	Tickets       []ticketcore.Indexed
 	Observability ObservabilityView
 	Readiness     WorkReadinessView
 }

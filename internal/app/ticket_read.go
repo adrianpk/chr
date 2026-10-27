@@ -75,7 +75,7 @@ func (factory commandFactory) runTicketShow(ctx context.Context, cmd *cli.Comman
 	return printTicketShow(factory.io.Stdout, ticket, ticketEvidenceSummary(ticket))
 }
 
-func printTicketShow(stdout io.Writer, ticket ticketcore.IndexedTicket, evidence core.EvidenceStrategySummary) error {
+func printTicketShow(stdout io.Writer, ticket ticketcore.Indexed, evidence core.EvidenceStrategySummary) error {
 	lines := []string{
 		"key: " + ticket.Key,
 		"title: " + ticket.Title,
@@ -221,7 +221,7 @@ func printTicketBoardColumn(stdout io.Writer, column core.BoardColumn) error {
 	return nil
 }
 
-func printTicketList(stdout io.Writer, tickets []ticketcore.IndexedTicket) error {
+func printTicketList(stdout io.Writer, tickets []ticketcore.Indexed) error {
 	for _, ticket := range tickets {
 		_, err := fmt.Fprintf(
 			stdout,
@@ -244,7 +244,7 @@ func printTicketList(stdout io.Writer, tickets []ticketcore.IndexedTicket) error
 	return nil
 }
 
-func ticketEvidenceSummary(ticket ticketcore.IndexedTicket) core.EvidenceStrategySummary {
+func ticketEvidenceSummary(ticket ticketcore.Indexed) core.EvidenceStrategySummary {
 	content, err := os.ReadFile(ticket.Path)
 	if err != nil {
 		return core.EvidenceStrategySummary{}

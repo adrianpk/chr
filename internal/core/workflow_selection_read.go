@@ -154,7 +154,7 @@ func (s *WorkflowStore) appendUnpreparedTicket(selection *workflowSelection, pat
 	return selection.appendObservedTicket(ticket)
 }
 
-func (selection *workflowSelection) appendObservedTicket(ticket ticketcore.IndexedTicket) error {
+func (selection *workflowSelection) appendObservedTicket(ticket ticketcore.Indexed) error {
 	for _, old := range selection.tickets {
 		if old.Key == ticket.Key {
 			return fmt.Errorf("duplicate observed ticket key: %s", ticket.Key)
@@ -169,20 +169,20 @@ func (selection *workflowSelection) appendObservedTicket(ticket ticketcore.Index
 	return nil
 }
 
-func workflowUnpreparedTicket(content []byte) (ticketcore.IndexedTicket, error) {
+func workflowUnpreparedTicket(content []byte) (ticketcore.Indexed, error) {
 	frontmatter, err := ticketmetadata.Parse(string(content))
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	metadata := frontmatter.Metadata
 
 	created, err := opsmetadata.OptionalTimestamp(metadata["created_at"])
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
-	return ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: opsmetadata.Unquote(metadata["key"])}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: opsmetadata.Unquote(metadata["status"]), UseCase: opsmetadata.Unquote(metadata["use_case"]), Priority: opsmetadata.Unquote(metadata["priority"]), Severity: opsmetadata.Unquote(metadata["severity"]), Type: opsmetadata.Unquote(metadata["type"]), ProjectArea: opsmetadata.Unquote(metadata["project_area"]), Tags: opsmetadata.ParseList(metadata["tags"])}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: created}, IndexedTicketProjection: ticketcore.IndexedTicketProjection{ContentHash: contenthash.Sum(content)}}, nil
+	return ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: opsmetadata.Unquote(metadata["key"])}, IndexedClassification: ticketcore.IndexedClassification{Status: opsmetadata.Unquote(metadata["status"]), UseCase: opsmetadata.Unquote(metadata["use_case"]), Priority: opsmetadata.Unquote(metadata["priority"]), Severity: opsmetadata.Unquote(metadata["severity"]), Type: opsmetadata.Unquote(metadata["type"]), ProjectArea: opsmetadata.Unquote(metadata["project_area"]), Tags: opsmetadata.ParseList(metadata["tags"])}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: created}, IndexedProjection: ticketcore.IndexedProjection{ContentHash: contenthash.Sum(content)}}, nil
 }
 
 func (s *WorkflowStore) hashWorkflowEvidence(ctx context.Context, selection *workflowSelection) error {

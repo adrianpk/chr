@@ -254,7 +254,7 @@ func guardAuthoringWorkOwner(prepared PreparedAuthoringWork, projectID string) e
 }
 
 func guardAuthoringWorkRecord(request core.WorkflowMutationRequest, scope authoringcore.WorkScope) error {
-	if request.Binding != scope.Binding || request.ExpectedRevision != 0 || request.Record.Task == nil || request.Record.Task.ContractHash != scope.ContractHash || request.Record.Task.Phase != "pending" || request.Record.Task.Status != ticketcore.TicketStatusBacklog {
+	if request.Binding != scope.Binding || request.ExpectedRevision != 0 || request.Record.Task == nil || request.Record.Task.ContractHash != scope.ContractHash || request.Record.Task.Phase != "pending" || request.Record.Task.Status != ticketcore.StatusBacklog {
 		return workflowstate.ErrConflict
 	}
 

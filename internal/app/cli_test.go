@@ -914,7 +914,7 @@ func writeWebServeBoardTestTicket(t *testing.T, projectDir string) {
 		Key:       "CHR-1",
 		Title:     "Ready frontend",
 		Synopsis:  "Build the browser board.",
-		Status:    ticketcore.TicketStatusReadyForDev,
+		Status:    ticketcore.StatusReadyForDev,
 		Priority:  "high",
 		Severity:  "critical",
 		Type:      "feature",
@@ -3266,7 +3266,7 @@ func TestTicketBoardPrintsBoardColumns(t *testing.T) {
 		Key:       "CHR-1",
 		Title:     "Backlog work",
 		Synopsis:  "Prepare backlog work.",
-		Status:    ticketcore.TicketStatusBacklog,
+		Status:    ticketcore.StatusBacklog,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "task",
@@ -3277,7 +3277,7 @@ func TestTicketBoardPrintsBoardColumns(t *testing.T) {
 		Key:       "CHR-2",
 		Title:     "Review work",
 		Synopsis:  "Review implemented work.",
-		Status:    ticketcore.TicketStatusReadyForReview,
+		Status:    ticketcore.StatusReadyForReview,
 		Priority:  "high",
 		Severity:  "normal",
 		Type:      "feature",
@@ -3420,7 +3420,7 @@ Loop behavior.
 
 func testReviewRepairTicket() ticketcore.Ticket {
 	ticket := testLoopTicket(
-		"CHR-1", "Review repair", ticketcore.TicketStatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
+		"CHR-1", "Review repair", ticketcore.StatusReadyForDev, "high", "critical", "bug", "review", "backend", []string{"repair"},
 	)
 	ticket.Branch = "feat/chr-1-review-repair"
 	ticket.ReviewState = "changes_requested"
@@ -5064,14 +5064,14 @@ func testTicketWithReviewRef() ticketcore.Ticket {
 
 func testTicketReadyForReview() ticketcore.Ticket {
 	ticket := testTicketWithReviewRef()
-	ticket.Status = ticketcore.TicketStatusReadyForReview
+	ticket.Status = ticketcore.StatusReadyForReview
 
 	return ticket
 }
 
 func testTicketReadyForMerge() ticketcore.Ticket {
 	ticket := testTicketWithReviewRef()
-	ticket.Status = ticketcore.TicketStatusReadyForMerge
+	ticket.Status = ticketcore.StatusReadyForMerge
 	ticket.ReviewState = core.TicketReviewCommandResultPass
 	ticket.ReviewResult = core.TicketReviewCommandResultPass
 	ticket.ReviewRound = 1
@@ -5470,7 +5470,7 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-1-Do-something.md")
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{
+	content, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
 		Status:    "open",
@@ -5491,12 +5491,12 @@ func writeIndexedTicketFile(t *testing.T, devRoot, projectDir string) string {
 		t.Fatalf("write ticket: %v", err)
 	}
 
-	indexTicket(t, devRoot, projectDir, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+	indexTicket(t, devRoot, projectDir, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{
 			Key:          "CHR-1",
 			RelativePath: filepath.Join(".chr", "default", "tickets", "CHR-1-Do-something.md"),
 			Path:         ticketPath,
-		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Do something"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"},
+		}, IndexedSummary: ticketcore.IndexedSummary{Title: "Do something"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"},
 	})
 
 	return ticketPath
@@ -5610,7 +5610,7 @@ func TestTicketReviewRefAttachesBranchAndPullRequest(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.TicketStatusReadyForReview,
+		ticketcore.StatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
@@ -5644,7 +5644,7 @@ func TestTicketStatusBlocksReadyForReviewWithoutEvidenceStrategy(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.TicketStatusReadyForReview,
+		ticketcore.StatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")
@@ -5677,7 +5677,7 @@ func TestTicketStatusAllowsReadyForReviewWithOptionalEvidenceStrategy(t *testing
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.TicketStatusReadyForReview,
+		ticketcore.StatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err != nil {
 		t.Fatalf("ticket status returned error: %v", err)
@@ -6292,7 +6292,7 @@ func TestTicketStatusRejectsReadyForReviewWithoutReviewRef(t *testing.T) {
 		"--dir",
 		projectDir,
 		"CHR-1",
-		ticketcore.TicketStatusReadyForReview,
+		ticketcore.StatusReadyForReview,
 	}, &bytes.Buffer{}, &bytes.Buffer{})
 	if err == nil {
 		t.Fatal("ticket status returned nil error")
@@ -6330,12 +6330,12 @@ func TestIndexRebuildIndexesTicketFiles(t *testing.T) {
 		CreatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 5, 18, 12, 0, 0, 0, time.UTC),
 	})
-	indexTicket(t, devRoot, projectDir, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+	indexTicket(t, devRoot, projectDir, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{
 			Key:          "CHR-9",
 			RelativePath: "CHR-9-Old.md",
 			Path:         filepath.Join(projectDir, ".chr", "default", "tickets", "CHR-9-Old.md"),
-		}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Old"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"},
+		}, IndexedSummary: ticketcore.IndexedSummary{Title: "Old"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"},
 	})
 
 	var stdout bytes.Buffer
@@ -7619,7 +7619,7 @@ func newDaemonStateRepositoryForTest(t *testing.T, devRoot string) daemoncore.Re
 	return repository
 }
 
-func indexTicket(t *testing.T, devRoot, projectDir string, ticket ticketcore.IndexedTicket) {
+func indexTicket(t *testing.T, devRoot, projectDir string, ticket ticketcore.Indexed) {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -7656,7 +7656,7 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket ticketcore.Ind
 	}
 }
 
-func listProjectTickets(t *testing.T, devRoot, projectDir string) []ticketcore.IndexedTicket {
+func listProjectTickets(t *testing.T, devRoot, projectDir string) []ticketcore.Indexed {
 	t.Helper()
 
 	env, err := core.NewUserEnvironment(core.UserEnvironmentOptions{
@@ -8102,7 +8102,7 @@ func writeTicketMarkdownOnly(t *testing.T, projectDir, relativePath string, tick
 
 	ticketPath := filepath.Join(projectDir, ".chr", "default", "tickets", filepath.FromSlash(relativePath))
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

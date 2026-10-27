@@ -8,13 +8,13 @@ const (
 )
 
 // IsTicketReviewRepair reports whether a ticket is waiting for review-requested repair work.
-func IsTicketReviewRepair(ticket ticketcore.IndexedTicket) bool {
-	return ticket.Status == ticketcore.TicketStatusReadyForDev &&
+func IsTicketReviewRepair(ticket ticketcore.Indexed) bool {
+	return ticket.Status == ticketcore.StatusReadyForDev &&
 		(ticket.ReviewState == "changes_requested" || ticket.ReviewResult == "needs_changes")
 }
 
 // TicketReviewRepairCount returns how many repair executions have already been consumed.
-func TicketReviewRepairCount(ticket ticketcore.IndexedTicket) int {
+func TicketReviewRepairCount(ticket ticketcore.Indexed) int {
 	if !IsTicketReviewRepair(ticket) || ticket.ReviewRound <= 1 {
 		return 0
 	}
@@ -23,12 +23,12 @@ func TicketReviewRepairCount(ticket ticketcore.IndexedTicket) int {
 }
 
 // TicketReviewRepairAllowed reports whether a repair ticket can still run another repair execution.
-func TicketReviewRepairAllowed(ticket ticketcore.IndexedTicket, limit int) bool {
+func TicketReviewRepairAllowed(ticket ticketcore.Indexed, limit int) bool {
 	return IsTicketReviewRepair(ticket) && TicketReviewRepairCount(ticket) < normalizedTicketReviewRepairLimit(limit)
 }
 
 // TicketReviewRepairLimitExceeded reports whether a repair ticket has exhausted its repair executions.
-func TicketReviewRepairLimitExceeded(ticket ticketcore.IndexedTicket, limit int) bool {
+func TicketReviewRepairLimitExceeded(ticket ticketcore.Indexed, limit int) bool {
 	return IsTicketReviewRepair(ticket) && TicketReviewRepairCount(ticket) >= normalizedTicketReviewRepairLimit(limit)
 }
 

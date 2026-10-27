@@ -11,7 +11,7 @@ import (
 
 // ApplyTrustedAutoMergeReviewOptions describes trusted auto-merge handoff input.
 type ApplyTrustedAutoMergeReviewOptions struct {
-	Ticket     ticketcore.IndexedTicket
+	Ticket     ticketcore.Indexed
 	ReviewedAt time.Time
 }
 
@@ -32,7 +32,7 @@ func ApplyTrustedAutoMergeReview(ctx context.Context, opts ApplyTrustedAutoMerge
 		ReviewState:  TicketReviewCommandResultPass,
 		ReviewResult: TicketReviewCommandResultPass,
 		ReviewRound:  opts.Ticket.ReviewRound + 1,
-		Status:       ticketcore.TicketStatusReadyForMerge,
+		Status:       ticketcore.StatusReadyForMerge,
 	}
 
 	ticket := opts.Ticket

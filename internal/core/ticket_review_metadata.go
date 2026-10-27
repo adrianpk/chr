@@ -101,7 +101,7 @@ func updateTicketReviewMetadataContent(
 }
 
 func upsertTicketReviewRef(content string, ref ticketmetadata.ReviewRef) (string, error) {
-	if err := ticketcore.ValidateTicketReviewRef(ref); err != nil {
+	if err := ticketcore.ValidateReviewRef(ref); err != nil {
 		return "", err
 	}
 
@@ -143,7 +143,7 @@ func reviewRefsMatch(existing, next ticketmetadata.ReviewRef) bool {
 func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (string, error) {
 	var rendered bytes.Buffer
 
-	err := ticketcore.WriteTicketReviewRefsField(&rendered, refs)
+	err := ticketcore.WriteReviewRefsField(&rendered, refs)
 	if err != nil {
 		return "", err
 	}

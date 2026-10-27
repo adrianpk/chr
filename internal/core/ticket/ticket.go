@@ -11,8 +11,8 @@ import (
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
-// DefaultTicketStatus defines a package boundary constant.
-const DefaultTicketStatus = TicketStatusOpenLegacy
+// DefaultStatus defines a package boundary constant.
+const DefaultStatus = StatusOpenLegacy
 
 // Ticket describes a package boundary value.
 type Ticket struct {
@@ -47,22 +47,22 @@ type Ticket struct {
 	UpdatedAt         time.Time
 }
 
-// TicketRenderer defines a package boundary interface.
-type TicketRenderer interface {
-	RenderTicket(ticket Ticket) (string, error)
+// Renderer defines a package boundary interface.
+type Renderer interface {
+	Render(ticket Ticket) (string, error)
 }
 
-type ticketRenderer struct{}
+type renderer struct{}
 
-// NewTicketRenderer constructs the corresponding package service or value.
-func NewTicketRenderer() TicketRenderer {
-	return &ticketRenderer{}
+// NewRenderer constructs the corresponding package service or value.
+func NewRenderer() Renderer {
+	return &renderer{}
 }
 
-// RenderTicket executes the corresponding package operation.
-func (r *ticketRenderer) RenderTicket(ticket Ticket) (string, error) {
+// Render executes the corresponding package operation.
+func (r *renderer) Render(ticket Ticket) (string, error) {
 	if ticket.Status == "" {
-		ticket.Status = DefaultTicketStatus
+		ticket.Status = DefaultStatus
 	}
 
 	var output bytes.Buffer
@@ -140,7 +140,7 @@ func renderTicketSourceFrontmatter(output *bytes.Buffer, ticket Ticket) error {
 }
 
 func renderTicketReviewFrontmatter(output *bytes.Buffer, ticket Ticket) error {
-	if err := WriteTicketReviewRefsField(output, ticket.ReviewRefs); err != nil {
+	if err := WriteReviewRefsField(output, ticket.ReviewRefs); err != nil {
 		return err
 	}
 
@@ -220,8 +220,8 @@ func writeTicketReviewRoundField(output *bytes.Buffer, value int) error {
 	return writeTicketEncodedField(output, "review_round", strconv.Itoa(value))
 }
 
-// WriteTicketReviewRefsField preserves the shared ticket metadata contract.
-func WriteTicketReviewRefsField(output *bytes.Buffer, refs []ticketmetadata.ReviewRef) error {
+// WriteReviewRefsField preserves the shared ticket metadata contract.
+func WriteReviewRefsField(output *bytes.Buffer, refs []ticketmetadata.ReviewRef) error {
 	if len(refs) == 0 {
 		return writeTicketEncodedField(output, "review_refs", "[]")
 	}

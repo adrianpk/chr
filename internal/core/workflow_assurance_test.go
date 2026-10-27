@@ -138,7 +138,7 @@ func checkWorkflowAssuranceMembers(t *testing.T, store *WorkflowStore, run Workf
 
 	for _, member := range run.Members {
 		record, err := store.Read(t.Context(), member.Admission.Path)
-		if err != nil || record.Task.Status != ticketcore.TicketStatusDone || record.Task.DeliveryRef == "" {
+		if err != nil || record.Task.Status != ticketcore.StatusDone || record.Task.DeliveryRef == "" {
 			t.Fatal("composed member lacks finalized delivery", err)
 		}
 
@@ -190,7 +190,7 @@ func workflowAssuranceLooseFixture(t *testing.T) (*WorkflowStore, WorkflowStartR
 	t.Helper()
 
 	store, first, request := workflowTicketFixture(t, "loose", workflowPreparationGate("ls PRJ-*.txt >/dev/null"))
-	workflowLooseClassify(t, store, first, "critical", ticketcore.TicketStatusReadyForDev)
+	workflowLooseClassify(t, store, first, "critical", ticketcore.StatusReadyForDev)
 	workflowLooseCreate(t, store, first, "PRJ-91", "high", nil)
 	workflowLooseCreate(t, store, first, "PRJ-92", "normal", []workflowstate.Ref{{Kind: "ticket", ID: first.Task.Key}})
 

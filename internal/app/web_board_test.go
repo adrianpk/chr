@@ -159,7 +159,7 @@ func TestWebBoardFailure(t *testing.T) {
 func writeWebBoardCanonicalTicket(t *testing.T, project string) {
 	t.Helper()
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{Key: "CHR-2", Title: "Canonical ticket", Synopsis: "Retained in ops.", Status: ticketcore.TicketStatusReadyForDev, Type: "task"})
+	content, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{Key: "CHR-2", Title: "Canonical ticket", Synopsis: "Retained in ops.", Status: ticketcore.StatusReadyForDev, Type: "task"})
 	if err != nil {
 		t.Fatal(err)
 	}

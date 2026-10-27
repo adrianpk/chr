@@ -66,7 +66,7 @@ func (r TicketReconciliationResult) FirstBlocker() (TicketReconciliationBlocker,
 
 type ticketReconciler struct {
 	rebuilder TicketIndexRebuilder
-	parser    ticketcore.TicketParser
+	parser    ticketcore.Parser
 	index     TicketIndex
 }
 
@@ -74,7 +74,7 @@ type ticketReconciler struct {
 func NewTicketReconciler(index TicketIndex) TicketReconciler {
 	return &ticketReconciler{
 		rebuilder: NewTicketIndexRebuilder(index),
-		parser:    ticketcore.NewTicketParser(),
+		parser:    ticketcore.NewParser(),
 		index:     index,
 	}
 }
@@ -138,8 +138,8 @@ func (r *ticketReconciler) parseProjectTicket(
 	ctx context.Context,
 	opts ReconcileProjectTicketOptions,
 	indexedAt time.Time,
-) (ticketcore.IndexedTicket, TicketReconciliationBlocker, bool) {
-	ticket, err := r.parser.ParseTicket(ctx, ticketcore.ParseTicketOptions{
+) (ticketcore.Indexed, TicketReconciliationBlocker, bool) {
+	ticket, err := r.parser.Parse(ctx, ticketcore.ParseOptions{
 		ProjectID:    opts.ProjectID,
 		ProjectDir:   opts.ProjectDir,
 		Path:         opts.TicketPath,
@@ -147,7 +147,7 @@ func (r *ticketReconciler) parseProjectTicket(
 		RelativeBase: ticketsDirectory(opts.ProjectDir),
 	})
 	if err != nil {
-		return ticketcore.IndexedTicket{}, TicketReconciliationBlocker{
+		return ticketcore.Indexed{}, TicketReconciliationBlocker{
 			Kind:         TicketReconciliationBlockerParseError,
 			Path:         opts.TicketPath,
 			RelativePath: relativeTicketPathForBlocker(opts.ProjectDir, opts.TicketPath),

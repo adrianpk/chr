@@ -61,7 +61,7 @@ type agentOperationLockRecord struct {
 // WorkSelectionPreflightOptions describes a package boundary value.
 type WorkSelectionPreflightOptions struct {
 	ProjectDir          string
-	Tickets             []ticketcore.IndexedTicket
+	Tickets             []ticketcore.Indexed
 	SelectedTicketKey   string
 	BranchPolicy        WorkBranchPolicy
 	Workspace           workspacecore.ExecutionConfig
@@ -72,7 +72,7 @@ type WorkSelectionPreflightOptions struct {
 // WorkSelectionPreflightResult describes a package boundary value.
 type WorkSelectionPreflightResult struct {
 	Allowed         bool
-	SelectedTickets []ticketcore.IndexedTicket
+	SelectedTickets []ticketcore.Indexed
 	BlockReasons    []WorkSelectionBlockReason
 }
 
@@ -329,8 +329,8 @@ func agentOperationLockPath(projectDir string) (string, error) {
 	return filepath.Join(layout.Root(), "lock", "agent-operation.lock"), nil
 }
 
-func reviewRepairTickets(tickets []ticketcore.IndexedTicket) []ticketcore.IndexedTicket {
-	repairs := make([]ticketcore.IndexedTicket, 0)
+func reviewRepairTickets(tickets []ticketcore.Indexed) []ticketcore.Indexed {
+	repairs := make([]ticketcore.Indexed, 0)
 
 	for _, ticket := range tickets {
 		if isReviewRepairTicket(ticket) {
@@ -341,11 +341,11 @@ func reviewRepairTickets(tickets []ticketcore.IndexedTicket) []ticketcore.Indexe
 	return repairs
 }
 
-func isReviewRepairTicket(ticket ticketcore.IndexedTicket) bool {
+func isReviewRepairTicket(ticket ticketcore.Indexed) bool {
 	return IsTicketReviewRepair(ticket)
 }
 
-func hasTicketKey(tickets []ticketcore.IndexedTicket, key string) bool {
+func hasTicketKey(tickets []ticketcore.Indexed, key string) bool {
 	for _, ticket := range tickets {
 		if ticket.Key == key {
 			return true

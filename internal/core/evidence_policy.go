@@ -50,7 +50,7 @@ type EvidencePolicyContext struct {
 }
 
 // DetectEvidencePolicyContext builds worker-facing evidence policy context.
-func DetectEvidencePolicyContext(projectDir string, config EvidenceStrategyConfig, ticket ticketcore.IndexedTicket) (EvidencePolicyContext, error) {
+func DetectEvidencePolicyContext(projectDir string, config EvidenceStrategyConfig, ticket ticketcore.Indexed) (EvidencePolicyContext, error) {
 	gherkin, err := DetectEvidenceGherkinContext(projectDir, config, ticket)
 	if err != nil {
 		return EvidencePolicyContext{}, err
@@ -63,7 +63,7 @@ func DetectEvidencePolicyContext(projectDir string, config EvidenceStrategyConfi
 }
 
 // DetectEvidenceGherkinContext detects whether Gherkin is active and applicable.
-func DetectEvidenceGherkinContext(projectDir string, config EvidenceStrategyConfig, ticket ticketcore.IndexedTicket) (EvidenceGherkinContext, error) {
+func DetectEvidenceGherkinContext(projectDir string, config EvidenceStrategyConfig, ticket ticketcore.Indexed) (EvidenceGherkinContext, error) {
 	featurePaths, err := acceptanceFeaturePaths(projectDir)
 	if err != nil {
 		return EvidenceGherkinContext{}, err
@@ -87,7 +87,7 @@ func DetectEvidenceGherkinContext(projectDir string, config EvidenceStrategyConf
 }
 
 // TicketNeedsGherkin reports whether a ticket affects observable behavior.
-func TicketNeedsGherkin(ticket ticketcore.IndexedTicket) bool {
+func TicketNeedsGherkin(ticket ticketcore.Indexed) bool {
 	kind := evidenceChangeKind(ticket)
 	switch kind {
 	case "behavior", "cli_behavior", "tui_behavior", "api_behavior":
@@ -100,7 +100,7 @@ func TicketNeedsGherkin(ticket ticketcore.IndexedTicket) bool {
 }
 
 // EvidenceGuidanceForTicket returns default evidence guidance for a ticket.
-func EvidenceGuidanceForTicket(ticket ticketcore.IndexedTicket, gherkin EvidenceGherkinContext) EvidenceStrategyGuidance {
+func EvidenceGuidanceForTicket(ticket ticketcore.Indexed, gherkin EvidenceGherkinContext) EvidenceStrategyGuidance {
 	kind := evidenceChangeKind(ticket)
 	guidance := EvidenceStrategyGuidance{
 		ChangeKind: kind,
@@ -184,7 +184,7 @@ func evidenceGherkinReason(config EvidenceStrategyConfig, featurePaths []string,
 	}
 }
 
-func evidenceRequiredGherkinPath(featurePaths []string, ticket ticketcore.IndexedTicket) string {
+func evidenceRequiredGherkinPath(featurePaths []string, ticket ticketcore.Indexed) string {
 	if len(featurePaths) == 1 {
 		return featurePaths[0]
 	}
@@ -199,7 +199,7 @@ func evidenceRequiredGherkinPath(featurePaths []string, ticket ticketcore.Indexe
 	return featurePaths[0]
 }
 
-func evidenceChangeKind(ticket ticketcore.IndexedTicket) string {
+func evidenceChangeKind(ticket ticketcore.Indexed) string {
 	text := strings.ToLower(strings.Join(evidenceTicketTerms(ticket), " "))
 
 	if ticket.Type == "docs" {
@@ -230,7 +230,7 @@ func evidenceChangeKind(ticket ticketcore.IndexedTicket) string {
 	return "unknown"
 }
 
-func evidenceTicketTerms(ticket ticketcore.IndexedTicket) []string {
+func evidenceTicketTerms(ticket ticketcore.Indexed) []string {
 	terms := []string{ticket.Title, ticket.Synopsis, ticket.Type, ticket.UseCase, ticket.ProjectArea}
 	terms = append(terms, ticket.Tags...)
 
@@ -271,7 +271,7 @@ func evidenceTextContainsAny(text string, terms []string) bool {
 	return false
 }
 
-func evidenceRisk(ticket ticketcore.IndexedTicket, kind string) string {
+func evidenceRisk(ticket ticketcore.Indexed, kind string) string {
 	if ticket.Severity == "critical" || ticket.Priority == "high" {
 		return "high"
 	}
@@ -350,7 +350,7 @@ func evidenceGuidanceReason(kind string) string {
 	}
 }
 
-func hasUserVisibleSignal(ticket ticketcore.IndexedTicket) bool {
+func hasUserVisibleSignal(ticket ticketcore.Indexed) bool {
 	text := strings.ToLower(strings.Join(evidenceTicketTerms(ticket), " "))
 
 	return strings.Contains(text, "user") ||

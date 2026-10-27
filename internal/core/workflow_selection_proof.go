@@ -262,7 +262,7 @@ func (s *WorkflowStore) observePrerequisites(ctx context.Context, selection work
 }
 
 func workflowTaskReadiness(task *WorkflowTask) string {
-	if task.Phase == "pending" && task.Status == ticketcore.TicketStatusReadyForDev {
+	if task.Phase == "pending" && task.Status == ticketcore.StatusReadyForDev {
 		return "ready"
 	}
 

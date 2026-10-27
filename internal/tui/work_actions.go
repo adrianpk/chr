@@ -43,7 +43,7 @@ type WorkActionResult struct {
 	WorkflowPage  *WorkflowPageView
 	Confirmation  *WorkActionState
 	Message       string
-	Tickets       []ticketcore.IndexedTicket
+	Tickets       []ticketcore.Indexed
 	Observability ObservabilityView
 	Readiness     WorkReadinessView
 }

@@ -44,7 +44,7 @@ func (s service) previewNativeAgentWorkSelection(config core.WorkspaceConfig, se
 	}
 
 	tickets, err := store.WorkflowTickets(s.ctx)
-	queue := []ticketcore.IndexedTicket{}
+	queue := []ticketcore.Indexed{}
 
 	if len(preview.Members) > 0 {
 		for _, ticket := range tickets {

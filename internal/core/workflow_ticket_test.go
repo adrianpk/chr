@@ -25,7 +25,7 @@ func workflowTicketFixture(t *testing.T, extent string, gate workflowstate.Valid
 		t.Fatal(err)
 	}
 
-	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: "PRJ-90", Status: ticketcore.TicketStatusReadyForDev, Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := WorkflowRecord{Kind: "ticket", Task: &WorkflowTask{Schema: WorkflowSchema, Key: "PRJ-90", Status: ticketcore.StatusReadyForDev, Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	record, err = store.Create(t.Context(), "Independent task", record)
 	if err != nil {
@@ -107,7 +107,7 @@ func checkWorkflowTicketNoHierarchy(t *testing.T, store *WorkflowStore) {
 	}
 
 	for _, record := range snapshot.Records {
-		if record.Set != nil || record.Task != nil && record.Task.Status == ticketcore.TicketStatusDone {
+		if record.Set != nil || record.Task != nil && record.Task.Status == ticketcore.StatusDone {
 			t.Fatal("candidate preparation fabricated a set or marked a task done")
 		}
 	}
@@ -222,7 +222,7 @@ func checkWorkflowTicketDelivery(t *testing.T, store *WorkflowStore, f workflowP
 	t.Helper()
 
 	record, err := store.Read(t.Context(), f.hierarchy.Tasks[0].Path)
-	if err != nil || record.Task.Status != ticketcore.TicketStatusDone || record.Task.Phase != "integrated" || record.Task.DeliveryRef != progress.Receipt.Path || record.Task.SetID != "" || record.Task.SliceID != "" {
+	if err != nil || record.Task.Status != ticketcore.StatusDone || record.Task.Phase != "integrated" || record.Task.DeliveryRef != progress.Receipt.Path || record.Task.SetID != "" || record.Task.SliceID != "" {
 		t.Fatal("independent delivery projection differs from its receipt", err)
 	}
 

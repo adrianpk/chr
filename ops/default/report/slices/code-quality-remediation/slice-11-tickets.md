@@ -47,6 +47,14 @@ Ticket model/parser/validation move checks passed:
 Required final candidate validation remains `make verify`, focused real SQLite/Git
 regressions and `git diff --check` through the controller.
 
+The separate naming change exposes ticket.Ticket, Indexed, Renderer, Parser,
+ParseOptions, ValidateIndexed, Status* and exact board/status predicates. Native
+metadata callers use the shared review-reference policy and renderer directly.
+The metadata child exposes OptionalInteger. All 65 source preimages and the
+same focused tests/signature-policy checks pass after naming.
+
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after naming.
+
 ## Risks and Follow-ups
 
 T11.1–T11.6 remain open; no Slice 11 PR is prepared yet.

@@ -33,7 +33,7 @@ type ProjectDocumentContextOptions struct {
 type ProjectDocumentContext struct {
 	ProjectDir        string
 	WorkspaceDir      string
-	Ticket            ticketcore.IndexedTicket
+	Ticket            ticketcore.Indexed
 	TicketDocument    authoringcore.ContextDocument
 	ReferencedDocs    []authoringcore.ContextDocument
 	ValidationCommand string
@@ -46,7 +46,7 @@ type projectDocumentPaths struct {
 }
 
 type contextTicketLoad struct {
-	Ticket   ticketcore.IndexedTicket
+	Ticket   ticketcore.Indexed
 	Document authoringcore.ContextDocument
 }
 
@@ -149,7 +149,7 @@ func loadContextTicket(
 		indexedAt = time.Now().UTC()
 	}
 
-	ticket, err := ticketcore.NewTicketParser().ParseTicket(context.Background(), ticketcore.ParseTicketOptions{
+	ticket, err := ticketcore.NewParser().Parse(context.Background(), ticketcore.ParseOptions{
 		ProjectID:  opts.ProjectID,
 		ProjectDir: projectDir,
 		Path:       ticketPath,

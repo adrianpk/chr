@@ -76,7 +76,7 @@ func workflowLegacyTicketFixture(t *testing.T, store *WorkflowStore, task genera
 
 	now := time.Date(2025, 1, 2, 3, 4, 5, 0, time.UTC)
 
-	text, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{Key: fmt.Sprintf("PRJ-%d", number), Title: task.Title, Synopsis: task.Outcome, Status: ticketcore.TicketStatusReadyForDev, Body: "Original instructions and history\n", CreatedAt: now, UpdatedAt: now})
+	text, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{Key: fmt.Sprintf("PRJ-%d", number), Title: task.Title, Synopsis: task.Outcome, Status: ticketcore.StatusReadyForDev, Body: "Original instructions and history\n", CreatedAt: now, UpdatedAt: now})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -119,14 +119,14 @@ func (factory commandFactory) runTicketStatus(ctx context.Context, cmd *cli.Comm
 	return nil
 }
 
-func ticketOperationResultTicket(result TicketOperationResult, key string) (ticketcore.IndexedTicket, error) {
+func ticketOperationResultTicket(result TicketOperationResult, key string) (ticketcore.Indexed, error) {
 	for _, ticket := range result.Tickets {
 		if ticket.Key == key {
 			return ticket, nil
 		}
 	}
 
-	return ticketcore.IndexedTicket{}, fmt.Errorf("ticket not found after operation: %s", key)
+	return ticketcore.Indexed{}, fmt.Errorf("ticket not found after operation: %s", key)
 }
 
 func (factory commandFactory) runTicketComment(ctx context.Context, cmd *cli.Command) error {

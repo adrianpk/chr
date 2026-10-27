@@ -29,7 +29,7 @@ func ticketEvidenceReadiness(ctx context.Context, request ticketEvidenceRequest)
 		return core.EvidenceReadinessResult{}, err
 	}
 
-	ticket, err := ticketcore.NewTicketParser().ParseTicket(ctx, ticketcore.ParseTicketOptions{
+	ticket, err := ticketcore.NewParser().Parse(ctx, ticketcore.ParseOptions{
 		ProjectDir: request.ProjectDir,
 		Path:       request.TicketPath,
 		IndexedAt:  time.Now().UTC(),

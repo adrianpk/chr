@@ -7,8 +7,8 @@ import (
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
-// ValidateIndexedTicket validates the corresponding package boundary value.
-func ValidateIndexedTicket(ticket IndexedTicket) error {
+// ValidateIndexed validates the corresponding package boundary value.
+func ValidateIndexed(ticket Indexed) error {
 	err := validateRequiredTicketMetadata(ticket)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func ValidateIndexedTicket(ticket IndexedTicket) error {
 	return validateTicketTimes(ticket)
 }
 
-func validateRequiredTicketMetadata(ticket IndexedTicket) error {
+func validateRequiredTicketMetadata(ticket Indexed) error {
 	if strings.TrimSpace(ticket.Key) == "" {
 		return fmt.Errorf("ticket key is required")
 	}
@@ -41,23 +41,23 @@ func validateRequiredTicketMetadata(ticket IndexedTicket) error {
 		return fmt.Errorf("ticket title is required")
 	}
 
-	if !IsValidTicketStatus(ticket.Status) {
+	if !ValidStatus(ticket.Status) {
 		return fmt.Errorf("invalid ticket status: %s", ticket.Status)
 	}
 
 	return nil
 }
 
-func validateTicketClassification(ticket IndexedTicket) error {
-	if !IsValidTicketPriority(ticket.Priority) {
+func validateTicketClassification(ticket Indexed) error {
+	if !ValidPriority(ticket.Priority) {
 		return fmt.Errorf("invalid ticket priority: %s", ticket.Priority)
 	}
 
-	if !IsValidTicketSeverity(ticket.Severity) {
+	if !ValidSeverity(ticket.Severity) {
 		return fmt.Errorf("invalid ticket severity: %s", ticket.Severity)
 	}
 
-	if !IsValidTicketType(ticket.Type) {
+	if !ValidType(ticket.Type) {
 		return fmt.Errorf("invalid ticket type: %s", ticket.Type)
 	}
 
@@ -70,7 +70,7 @@ func validateTicketClassification(ticket IndexedTicket) error {
 	return nil
 }
 
-func validateTicketTimes(ticket IndexedTicket) error {
+func validateTicketTimes(ticket Indexed) error {
 	if ticket.CreatedAt == nil {
 		return fmt.Errorf("ticket created_at is required")
 	}
@@ -86,8 +86,8 @@ func validateTicketTimes(ticket IndexedTicket) error {
 	return nil
 }
 
-// IsValidTicketPriority preserves the shared ticket metadata contract.
-func IsValidTicketPriority(priority string) bool {
+// ValidPriority preserves the shared ticket metadata contract.
+func ValidPriority(priority string) bool {
 	switch strings.TrimSpace(priority) {
 	case "", "unclassified", "low", "normal", "high", "critical":
 		return true
@@ -96,8 +96,8 @@ func IsValidTicketPriority(priority string) bool {
 	}
 }
 
-// IsValidTicketSeverity preserves the shared ticket metadata contract.
-func IsValidTicketSeverity(severity string) bool {
+// ValidSeverity preserves the shared ticket metadata contract.
+func ValidSeverity(severity string) bool {
 	switch strings.TrimSpace(severity) {
 	case "", "unclassified", "low", "normal", "high", "critical":
 		return true
@@ -106,8 +106,8 @@ func IsValidTicketSeverity(severity string) bool {
 	}
 }
 
-// IsValidTicketType preserves the shared ticket metadata contract.
-func IsValidTicketType(ticketType string) bool {
+// ValidType preserves the shared ticket metadata contract.
+func ValidType(ticketType string) bool {
 	switch strings.TrimSpace(ticketType) {
 	case "", "task", "bug", "feature", "cleanup", "research", "docs":
 		return true
@@ -116,7 +116,7 @@ func IsValidTicketType(ticketType string) bool {
 	}
 }
 
-func validateTicketReviewMetadata(ticket IndexedTicket) error {
+func validateTicketReviewMetadata(ticket Indexed) error {
 	if !isValidTicketReviewState(ticket.ReviewState) {
 		return fmt.Errorf("invalid ticket review_state: %s", ticket.ReviewState)
 	}
@@ -130,7 +130,7 @@ func validateTicketReviewMetadata(ticket IndexedTicket) error {
 	}
 
 	for _, ref := range ticket.ReviewRefs {
-		if err := ValidateTicketReviewRef(ref); err != nil {
+		if err := ValidateReviewRef(ref); err != nil {
 			return err
 		}
 	}
@@ -144,8 +144,8 @@ func validateTicketReviewMetadata(ticket IndexedTicket) error {
 	return nil
 }
 
-// ValidateTicketReviewRef preserves the shared ticket metadata contract.
-func ValidateTicketReviewRef(ref ticketmetadata.ReviewRef) error {
+// ValidateReviewRef preserves the shared ticket metadata contract.
+func ValidateReviewRef(ref ticketmetadata.ReviewRef) error {
 	if strings.TrimSpace(ref.Type) == "" {
 		return fmt.Errorf("ticket review ref type is required")
 	}
@@ -179,7 +179,7 @@ func isValidTicketReviewResult(result string) bool {
 	}
 }
 
-func validateTicketMergeMetadata(ticket IndexedTicket) error {
+func validateTicketMergeMetadata(ticket Indexed) error {
 	if !isValidTicketMergeState(ticket.MergeState) {
 		return fmt.Errorf("invalid ticket merge_state: %s", ticket.MergeState)
 	}

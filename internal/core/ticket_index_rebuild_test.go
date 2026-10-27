@@ -97,7 +97,7 @@ func TestTicketIndexRebuilderPreservesParseErrors(t *testing.T) {
 func writeRebuildTestTicket(t *testing.T, projectDir, relativePath string, ticket ticketcore.Ticket) {
 	t.Helper()
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

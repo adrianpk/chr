@@ -19,7 +19,7 @@ import (
 // TicketDocument is an observed editable document with its canonical write guards.
 type TicketDocument struct {
 	CommittedRevision string
-	Ticket            ticketcore.IndexedTicket
+	Ticket            ticketcore.Indexed
 	Description       string
 	Discussion        string
 	Fields            map[string]string
@@ -80,7 +80,7 @@ func (s *WorkflowStore) readTicketDocument(ctx context.Context, native bool, key
 	return TicketDocument{}, fmt.Errorf("ticket not found: %s", key)
 }
 
-func loadTicketDocument(ticket ticketcore.IndexedTicket) (TicketDocument, error) {
+func loadTicketDocument(ticket ticketcore.Indexed) (TicketDocument, error) {
 	content, err := opsfile.Read(ticket.Path)
 	if err != nil {
 		return TicketDocument{}, err

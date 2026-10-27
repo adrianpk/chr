@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-var defaultLoopEligibleStatuses = []string{ticketcore.TicketStatusReadyForDev}
+var defaultLoopEligibleStatuses = []string{ticketcore.StatusReadyForDev}
 
 // TicketLoopQueryOptions describes a package boundary value.
 type TicketLoopQueryOptions struct {
@@ -32,7 +32,7 @@ func NewTicketLoopQuery(index TicketIndex) TicketLoopQuery {
 }
 
 // EligibleTickets executes the corresponding package operation.
-func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQueryOptions) ([]ticketcore.IndexedTicket, error) {
+func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQueryOptions) ([]ticketcore.Indexed, error) {
 	if opts.ProjectID == "" {
 		return nil, fmt.Errorf("project id is required")
 	}
@@ -61,14 +61,14 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 		return nil, err
 	}
 
-	eligible := make([]ticketcore.IndexedTicket, 0, len(tickets))
+	eligible := make([]ticketcore.Indexed, 0, len(tickets))
 	for _, ticket := range tickets {
 		if slices.Contains(statuses, ticket.Status) && matchesTicketLoopFilters(filters, ticket) {
 			eligible = append(eligible, ticket)
 		}
 	}
 
-	slices.SortFunc(eligible, func(left, right ticketcore.IndexedTicket) int { return compareTicketLoopOrder(order, left, right) })
+	slices.SortFunc(eligible, func(left, right ticketcore.Indexed) int { return compareTicketLoopOrder(order, left, right) })
 
 	return eligible, nil
 }
@@ -76,17 +76,17 @@ func (q TicketLoopQuery) EligibleTickets(ctx context.Context, opts TicketLoopQue
 func normalizeTicketLoopFilters(filters workflowstate.TicketFilters) (workflowstate.TicketFilters, error) {
 	var err error
 
-	filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", ticketcore.IsValidTicketPriority)
+	filters.Priorities, err = normalizeTicketLoopValues(filters.Priorities, "priority", ticketcore.ValidPriority)
 	if err != nil {
 		return workflowstate.TicketFilters{}, err
 	}
 
-	filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", ticketcore.IsValidTicketSeverity)
+	filters.Severities, err = normalizeTicketLoopValues(filters.Severities, "severity", ticketcore.ValidSeverity)
 	if err != nil {
 		return workflowstate.TicketFilters{}, err
 	}
 
-	filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", ticketcore.IsValidTicketType)
+	filters.Types, err = normalizeTicketLoopValues(filters.Types, "type", ticketcore.ValidType)
 	if err != nil {
 		return workflowstate.TicketFilters{}, err
 	}
@@ -123,7 +123,7 @@ func normalizeTicketLoopFreeformValues(values []string) []string {
 	return normalized
 }
 
-func matchesTicketLoopFilters(filters workflowstate.TicketFilters, ticket ticketcore.IndexedTicket) bool {
+func matchesTicketLoopFilters(filters workflowstate.TicketFilters, ticket ticketcore.Indexed) bool {
 	return matchesTicketLoopValues(filters.Priorities, ticket.Priority) &&
 		matchesTicketLoopValues(filters.Severities, ticket.Severity) &&
 		matchesTicketLoopValues(filters.ProjectAreas, ticket.ProjectArea) &&
@@ -167,7 +167,7 @@ func normalizeTicketLoopOrder(order workflowstate.TicketOrder) (workflowstate.Ti
 	}
 }
 
-func compareTicketLoopOrder(order workflowstate.TicketOrder, left, right ticketcore.IndexedTicket) int {
+func compareTicketLoopOrder(order workflowstate.TicketOrder, left, right ticketcore.Indexed) int {
 	switch order {
 	case workflowstate.TicketOrderCreatedAt:
 		return compareIndexedTicketsByCreatedAt(left, right)
@@ -186,21 +186,21 @@ func compareTicketLoopOrder(order workflowstate.TicketOrder, left, right ticketc
 	}
 }
 
-func compareIndexedTicketsByPriority(left, right ticketcore.IndexedTicket) int {
+func compareIndexedTicketsByPriority(left, right ticketcore.Indexed) int {
 	return firstNonZero(
 		compareRank(priorityRank(left.Priority), priorityRank(right.Priority)),
 		compareIndexedTicketsByCreatedAt(left, right),
 	)
 }
 
-func compareIndexedTicketsBySeverity(left, right ticketcore.IndexedTicket) int {
+func compareIndexedTicketsBySeverity(left, right ticketcore.Indexed) int {
 	return firstNonZero(
 		compareRank(severityRank(left.Severity), severityRank(right.Severity)),
 		compareIndexedTicketsByCreatedAt(left, right),
 	)
 }
 
-func compareIndexedTicketsByCreatedAt(left, right ticketcore.IndexedTicket) int {
+func compareIndexedTicketsByCreatedAt(left, right ticketcore.Indexed) int {
 	if left.CreatedAt != nil && right.CreatedAt != nil {
 		switch {
 		case left.CreatedAt.Before(*right.CreatedAt):
@@ -230,7 +230,7 @@ func loopEligibleStatuses(statuses []string) ([]string, error) {
 
 	eligible := make([]string, 0, len(statuses))
 	for _, status := range statuses {
-		if !ticketcore.IsValidTicketStatus(status) {
+		if !ticketcore.ValidStatus(status) {
 			return nil, fmt.Errorf("invalid ticket status: %s", status)
 		}
 
@@ -293,7 +293,7 @@ func firstNonZero(values ...int) int {
 	return 0
 }
 
-func compareIndexedTicketsByKey(left, right ticketcore.IndexedTicket) int {
+func compareIndexedTicketsByKey(left, right ticketcore.Indexed) int {
 	leftPrefix, leftNumber, leftOK := splitTicketKey(left.Key)
 	rightPrefix, rightNumber, rightOK := splitTicketKey(right.Key)
 

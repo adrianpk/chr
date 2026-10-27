@@ -88,7 +88,7 @@ func TestMaterializeWorkerContextForExecutionUsesContainerPaths(t *testing.T) {
 	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Ready work",
-		Status:    ticketcore.TicketStatusReadyForDev,
+		Status:    ticketcore.StatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
@@ -164,7 +164,7 @@ func TestMaterializeWorkerContextForExecutionIncludesRepairHandoff(t *testing.T)
 	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:               "CHR-1",
 		Title:             "Repair work",
-		Status:            ticketcore.TicketStatusReadyForDev,
+		Status:            ticketcore.StatusReadyForDev,
 		Priority:          "normal",
 		Severity:          "normal",
 		Type:              "feature",
@@ -228,7 +228,7 @@ func TestMaterializeWorkerContextForExecutionIncludesEvidenceStrategy(t *testing
 	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Behavior work",
-		Status:    ticketcore.TicketStatusReadyForDev,
+		Status:    ticketcore.StatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
@@ -277,7 +277,7 @@ func TestMaterializeWorkerContextForExecutionIncludesGherkinPolicyGuidance(t *te
 	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Add CLI checkout command",
-		Status:      ticketcore.TicketStatusReadyForDev,
+		Status:      ticketcore.StatusReadyForDev,
 		Priority:    "normal",
 		Severity:    "normal",
 		Type:        "feature",
@@ -431,7 +431,7 @@ func TestMaterializeWorkerContextForExecutionBlocksRepairWithoutReviewComments(t
 	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:          "CHR-1",
 		Title:        "Repair work",
-		Status:       ticketcore.TicketStatusReadyForDev,
+		Status:       ticketcore.StatusReadyForDev,
 		Priority:     "normal",
 		Severity:     "normal",
 		Type:         "feature",
@@ -551,7 +551,7 @@ func testWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string)
 	writeWorkerContextTicket(t, record.TicketPath, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Ready work",
-		Status:    ticketcore.TicketStatusReadyForDev,
+		Status:    ticketcore.StatusReadyForDev,
 		Priority:  "normal",
 		Severity:  "normal",
 		Type:      "feature",
@@ -565,7 +565,7 @@ func testWorkerContextWorktreeRecord(t *testing.T, executionWorkspaceDir string)
 func writeWorkerContextTicket(t *testing.T, path string, ticket ticketcore.Ticket) {
 	t.Helper()
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

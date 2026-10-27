@@ -17,7 +17,7 @@ func telegramJourneyAdmissionFixture(t *testing.T) (*WorkflowStore, WorkflowReco
 	t.Helper()
 
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("test -f result.txt"))
-	record.Task.Status = ticketcore.TicketStatusBacklog
+	record.Task.Status = ticketcore.StatusBacklog
 	record = workflowTestWrite(t, store, record)
 	request.Selection.Limit = workflowstate.PageLimit
 
@@ -53,7 +53,7 @@ func TestTelegramJourneyAdmission(t *testing.T) {
 	store, record, request := telegramJourneyAdmissionFixture(t)
 
 	before, err := store.Read(t.Context(), record.Path)
-	if err != nil || before.Task.Status != ticketcore.TicketStatusBacklog || before.Revision != record.Revision {
+	if err != nil || before.Task.Status != ticketcore.StatusBacklog || before.Revision != record.Revision {
 		t.Fatal("preview changed backlog work", before, err)
 	}
 
@@ -78,12 +78,12 @@ func checkTelegramJourneyReady(t *testing.T, store *WorkflowStore, record Workfl
 	t.Helper()
 
 	ready, err := store.Read(t.Context(), record.Path)
-	if err != nil || ready.Task.Status != ticketcore.TicketStatusReadyForDev || ready.Revision != record.Revision+1 || len(run.Attempts) != 0 {
+	if err != nil || ready.Task.Status != ticketcore.StatusReadyForDev || ready.Revision != record.Revision+1 || len(run.Attempts) != 0 {
 		t.Fatal("admission did not atomically prepare the ticket without execution", ready, run, err)
 	}
 
 	member := run.Members[0]
-	if member.Admission.Status != ticketcore.TicketStatusBacklog || member.Admission.Revision != record.Revision || member.ExpectedRevision != ready.Revision || member.ExpectedSourceHash != ready.SourceHash {
+	if member.Admission.Status != ticketcore.StatusBacklog || member.Admission.Revision != record.Revision || member.ExpectedRevision != ready.Revision || member.ExpectedSourceHash != ready.SourceHash {
 		t.Fatal("admission lost original and accepted images", member)
 	}
 }
@@ -106,7 +106,7 @@ func TestTelegramJourneyAdmissionGuards(t *testing.T) {
 			}
 
 			after, err := store.Read(t.Context(), record.Path)
-			if err != nil || after.Revision != before.Revision || after.SourceHash != before.SourceHash || after.Task.Status != ticketcore.TicketStatusBacklog {
+			if err != nil || after.Revision != before.Revision || after.SourceHash != before.SourceHash || after.Task.Status != ticketcore.StatusBacklog {
 				t.Fatal("rejection changed ticket readiness", after, err)
 			}
 
@@ -156,7 +156,7 @@ func TestTelegramJourneyContract(t *testing.T) {
 	for _, change := range []string{"valid", "acceptance", "validation", "dependency", "status"} {
 		t.Run(change, func(t *testing.T) {
 			record := workflowTestTask("JRN-1")
-			record.Task.Status = ticketcore.TicketStatusBacklog
+			record.Task.Status = ticketcore.StatusBacklog
 			contract := workflowPlanFixture().Slices[0].Tasks[0]
 			telegramJourneyChangeContract(&record, &contract, change)
 
@@ -173,7 +173,7 @@ func TestTelegramJourneyContract(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if validateWorkflowClaimContract(prepared) != nil || prepared.Task.Status != ticketcore.TicketStatusBacklog || prepared.Task.ContractHash == record.Task.ContractHash || len(record.Domain["execution_contract"]) != 0 {
+			if validateWorkflowClaimContract(prepared) != nil || prepared.Task.Status != ticketcore.StatusBacklog || prepared.Task.ContractHash == record.Task.ContractHash || len(record.Domain["execution_contract"]) != 0 {
 				t.Fatal("preparation mutated its input or changed readiness", prepared, err)
 			}
 		})
@@ -189,6 +189,6 @@ func telegramJourneyChangeContract(record *WorkflowRecord, contract *generationc
 	case "dependency":
 		contract.DependsOn = []workflowstate.Ref{{Kind: "ticket", ID: "OTHER-1"}}
 	case "status":
-		record.Task.Status = ticketcore.TicketStatusReadyForDev
+		record.Task.Status = ticketcore.StatusReadyForDev
 	}
 }

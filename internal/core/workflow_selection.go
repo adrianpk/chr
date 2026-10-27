@@ -44,7 +44,7 @@ type WorkflowPreview struct {
 
 type workflowSelection struct {
 	snapshot       WorkflowSnapshot
-	tickets        []ticketcore.IndexedTicket
+	tickets        []ticketcore.Indexed
 	records        map[string]WorkflowRecord
 	sets           map[string]WorkflowRecord
 	slices         map[string]workflowstate.WorkflowSlice
@@ -202,7 +202,7 @@ func (selection workflowSelection) resolveSelector(selector workflowstate.Select
 	return nil
 }
 
-func (selection workflowSelection) matches(selector workflowstate.Selector, ticket ticketcore.IndexedTicket, record WorkflowRecord) bool {
+func (selection workflowSelection) matches(selector workflowstate.Selector, ticket ticketcore.Indexed, record WorkflowRecord) bool {
 	switch selector.Extent {
 	case "ticket":
 		return ticket.Key == selector.Identity
@@ -289,7 +289,7 @@ func validateWorkflowPreviewContext(request workflowstate.PreviewRequest) error 
 	return nil
 }
 
-func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket ticketcore.IndexedTicket, record WorkflowRecord, prepared bool) string {
+func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket ticketcore.Indexed, record WorkflowRecord, prepared bool) string {
 	reason := workflowSelectionExclusion(request.Selector, record, prepared)
 	if reason == "" && request.Selector.Extent == "loose" {
 		return workflowLooseExclusion(request, ticket)

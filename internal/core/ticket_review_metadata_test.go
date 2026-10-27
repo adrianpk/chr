@@ -16,7 +16,7 @@ func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
-		Status:    ticketcore.TicketStatusInProgress,
+		Status:    ticketcore.StatusInProgress,
 		CreatedAt: testReviewMetadataTime(12),
 		UpdatedAt: testReviewMetadataTime(12),
 	})
@@ -58,7 +58,7 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:    "CHR-1",
 		Title:  "Do something",
-		Status: ticketcore.TicketStatusInProgress,
+		Status: ticketcore.StatusInProgress,
 		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
 				Type:     "pull_request",
@@ -101,14 +101,14 @@ func TestTicketStatusUpdaterRequiresReviewMetadataForReadyForReview(t *testing.T
 	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:       "CHR-1",
 		Title:     "Do something",
-		Status:    ticketcore.TicketStatusInProgress,
+		Status:    ticketcore.StatusInProgress,
 		CreatedAt: testReviewMetadataTime(12),
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    ticketcore.TicketStatusReadyForReview,
+		Status:    ticketcore.StatusReadyForReview,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err == nil {
@@ -124,7 +124,7 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:    "CHR-1",
 		Title:  "Do something",
-		Status: ticketcore.TicketStatusInProgress,
+		Status: ticketcore.StatusInProgress,
 		Branch: "feat/slice-2-pr-reference-workflow",
 		ReviewRefs: []ticketmetadata.ReviewRef{
 			{
@@ -141,7 +141,7 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    ticketcore.TicketStatusReadyForReview,
+		Status:    ticketcore.StatusReadyForReview,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err != nil {
@@ -158,7 +158,7 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:         "CHR-1",
 		Title:       "Do something",
-		Status:      ticketcore.TicketStatusReadyForReview,
+		Status:      ticketcore.StatusReadyForReview,
 		Branch:      "feat/slice-1-merger-handoff-contract",
 		ReviewState: "changes_requested",
 		ReviewRefs: []ticketmetadata.ReviewRef{
@@ -176,7 +176,7 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    ticketcore.TicketStatusReadyForMerge,
+		Status:    ticketcore.StatusReadyForMerge,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err == nil {
@@ -192,7 +192,7 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 	path := writeReviewMetadataTicket(t, ticketcore.Ticket{
 		Key:          "CHR-1",
 		Title:        "Do something",
-		Status:       ticketcore.TicketStatusReadyForReview,
+		Status:       ticketcore.StatusReadyForReview,
 		Branch:       "feat/slice-1-merger-handoff-contract",
 		ReviewState:  TicketReviewCommandResultPass,
 		ReviewResult: TicketReviewCommandResultPass,
@@ -211,7 +211,7 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 
 	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
 		Path:      path,
-		Status:    ticketcore.TicketStatusReadyForMerge,
+		Status:    ticketcore.StatusReadyForMerge,
 		UpdatedAt: testReviewMetadataTime(13),
 	})
 	if err != nil {
@@ -227,7 +227,7 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 func writeReviewMetadataTicket(t *testing.T, ticket ticketcore.Ticket) string {
 	t.Helper()
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

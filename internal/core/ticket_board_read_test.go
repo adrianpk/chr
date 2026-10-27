@@ -68,12 +68,12 @@ func checkNativeBoardPage(t *testing.T, opts TicketBoardReadOptions, loaded, nex
 	return page
 }
 
-func checkNativeBoardTickets(t *testing.T, tickets []ticketcore.IndexedTicket) {
+func checkNativeBoardTickets(t *testing.T, tickets []ticketcore.Indexed) {
 	t.Helper()
 
 	seen := map[string]bool{}
 	for _, ticket := range tickets {
-		if seen[ticket.Key] || !ticket.NativeWorkflow || ticket.Status != ticketcore.TicketStatusReadyForDev || !strings.HasPrefix(ticket.Title, "Native ") {
+		if seen[ticket.Key] || !ticket.NativeWorkflow || ticket.Status != ticketcore.StatusReadyForDev || !strings.HasPrefix(ticket.Title, "Native ") {
 			t.Fatal("native identity duplicated or replaced by its projection", ticket)
 		}
 

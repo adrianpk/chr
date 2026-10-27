@@ -234,7 +234,7 @@ func (s *WorkflowStore) beginWorkflowAttempt(run *workflowInvocationFile, record
 
 	record.Task.AttemptID, record.Task.ClaimGeneration = claim.AttemptID, claim.Generation
 	if claim.purpose == "" {
-		record.Task.Phase, record.Task.Status = "running", ticketcore.TicketStatusInProgress
+		record.Task.Phase, record.Task.Status = "running", ticketcore.StatusInProgress
 	}
 
 	return nil

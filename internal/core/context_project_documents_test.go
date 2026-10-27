@@ -143,7 +143,7 @@ func renderProjectDocumentTestTicket(t *testing.T, ticket ticketcore.Ticket, bod
 		ticket.UpdatedAt = time.Date(2026, 5, 20, 10, 30, 0, 0, time.UTC)
 	}
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

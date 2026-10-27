@@ -146,9 +146,9 @@ func (s *WorkflowStore) commitWorkflowSliceRepair(run *workflowInvocationFile, o
 				continue
 			}
 
-			record.Task.Phase, record.Task.Status = "validated", ticketcore.TicketStatusInProgress
+			record.Task.Phase, record.Task.Status = "validated", ticketcore.StatusInProgress
 		} else {
-			record.Task.Phase, record.Task.Status, record.Task.Evidence, record.Task.AttemptID = "pending", ticketcore.TicketStatusReadyForDev, nil, ""
+			record.Task.Phase, record.Task.Status, record.Task.Evidence, record.Task.AttemptID = "pending", ticketcore.StatusReadyForDev, nil, ""
 		}
 
 		changes, err := s.workflowClaimRecordChanges(run, &record)

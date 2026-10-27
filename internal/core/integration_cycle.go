@@ -33,7 +33,7 @@ type IntegrationCyclePolicy struct {
 // IntegrationCyclePlan describes the next ticket integration cycle without side effects.
 type IntegrationCyclePlan struct {
 	ProjectID string
-	Ticket    ticketcore.IndexedTicket
+	Ticket    ticketcore.Indexed
 	Policy    IntegrationCyclePolicy
 	Phase     IntegrationCyclePhase
 	Status    IntegrationCycleStatus
@@ -43,7 +43,7 @@ type IntegrationCyclePlan struct {
 // IntegrationCyclePlanOptions describes input for planning one selected ticket cycle.
 type IntegrationCyclePlanOptions struct {
 	ProjectID    string
-	Ticket       ticketcore.IndexedTicket
+	Ticket       ticketcore.Indexed
 	ReviewConfig ReviewWorkflowConfig
 }
 

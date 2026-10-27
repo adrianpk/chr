@@ -130,7 +130,7 @@ func checkWorkflowLooseBoundedStep(t *testing.T, progress WorkflowContinuationPr
 func TestWorkflowLooseTerminal(t *testing.T) {
 	f := workflowLooseQueueFixture(t, true)
 	for _, key := range []string{"PRJ-91", "PRJ-92"} {
-		workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, key), "normal", ticketcore.TicketStatusBacklog)
+		workflowLooseClassify(t, f.store, workflowLooseRecord(t, f.store, key), "normal", ticketcore.StatusBacklog)
 	}
 
 	workflowFinalizeFrontier(t, f)

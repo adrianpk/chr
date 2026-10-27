@@ -28,7 +28,7 @@ type ArtifactActionExecutor interface {
 // ArtifactActionResult contains refreshed artifact-facing state after an action.
 type ArtifactActionResult struct {
 	Message           string
-	Tickets           []ticketcore.IndexedTicket
+	Tickets           []ticketcore.Indexed
 	Documents         []DocumentView
 	AuthoringSessions []authoringcore.Session
 }

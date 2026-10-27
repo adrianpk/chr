@@ -99,7 +99,7 @@ func (s *WorkflowStore) materializationTask(input generationcore.GeneratedWorkfl
 		return record, err
 	}
 
-	record.Task = &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: ticketcore.TicketStatusReadyForDev, UseCase: set.Set.UseCase, SetID: set.ID, SliceID: slice.ID, Order: input.Order, Phase: "pending", DependsOn: input.DependsOn}
+	record.Task = &WorkflowTask{Schema: WorkflowSchema, Key: key, Status: ticketcore.StatusReadyForDev, UseCase: set.Set.UseCase, SetID: set.ID, SliceID: slice.ID, Order: input.Order, Phase: "pending", DependsOn: input.DependsOn}
 
 	contract, err := json.Marshal(input)
 	if err != nil {
@@ -108,7 +108,7 @@ func (s *WorkflowStore) materializationTask(input generationcore.GeneratedWorkfl
 
 	record.Task.ContractHash = contenthash.Sum(append([]byte(set.ID+"\x00"+slice.ID+"\x00"), contract...))
 	record.Domain = map[string]json.RawMessage{"plan_task_id": json.RawMessage(fmt.Sprintf("%q", input.ID)), "execution_contract": contract}
-	body, err := ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{Key: key, Title: input.Title, Synopsis: input.Outcome, Status: ticketcore.TicketStatusReadyForDev, Priority: input.Priority, Severity: input.Severity, Type: input.Type, Tags: input.Tags, UseCase: set.Set.UseCase, ProjectArea: "plan", SourceKind: "plan_tracking", SourceRef: set.Set.PlanRef, Slice: slice.Label, Body: input.Body, CreatedAt: now, UpdatedAt: now})
+	body, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{Key: key, Title: input.Title, Synopsis: input.Outcome, Status: ticketcore.StatusReadyForDev, Priority: input.Priority, Severity: input.Severity, Type: input.Type, Tags: input.Tags, UseCase: set.Set.UseCase, ProjectArea: "plan", SourceKind: "plan_tracking", SourceRef: set.Set.PlanRef, Slice: slice.Label, Body: input.Body, CreatedAt: now, UpdatedAt: now})
 	record.Body = []byte(body)
 
 	return record, err

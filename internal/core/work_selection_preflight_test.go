@@ -46,9 +46,9 @@ func TestAgentOperationLockBlocksConcurrentOperation(t *testing.T) {
 }
 
 func TestWorkSelectionPreflightPrioritizesReviewRepair(t *testing.T) {
-	tickets := []ticketcore.IndexedTicket{
-		{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewState: "", ReviewResult: ""}},
-		{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewState: "changes_requested", ReviewResult: "needs_changes"}},
+	tickets := []ticketcore.Indexed{
+		{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{ReviewState: "", ReviewResult: ""}},
+		{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{ReviewState: "changes_requested", ReviewResult: "needs_changes"}},
 	}
 
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
@@ -69,9 +69,9 @@ func TestWorkSelectionPreflightPrioritizesReviewRepair(t *testing.T) {
 }
 
 func TestWorkSelectionPreflightBlocksLaterTicketWhenRepairPending(t *testing.T) {
-	tickets := []ticketcore.IndexedTicket{
-		{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewState: "changes_requested"}},
-		{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
+	tickets := []ticketcore.Indexed{
+		{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{ReviewState: "changes_requested"}},
+		{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 	}
 
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
@@ -95,7 +95,7 @@ func TestWorkSelectionPreflightBlocksLaterTicketWhenRepairPending(t *testing.T) 
 func TestWorkSelectionPreflightBlocksWrongIntegrationBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir:          t.TempDir(),
-		Tickets:             []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:             []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		RequireBranchPolicy: true,
 		Git: fakeWorkSelectionGit{
 			branch:      "feat/slice-7-serialized-work-preflight",
@@ -119,7 +119,7 @@ func TestWorkSelectionPreflightBlocksWrongIntegrationBranch(t *testing.T) {
 func TestWorkSelectionPreflightBlocksIntegrationBranchBehindRemote(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir:          t.TempDir(),
-		Tickets:             []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:             []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		RequireBranchPolicy: true,
 		Git: fakeWorkSelectionGit{
 			branch:      "dev",
@@ -143,7 +143,7 @@ func TestWorkSelectionPreflightBlocksIntegrationBranchBehindRemote(t *testing.T)
 func TestWorkSelectionPreflightAllowsConfiguredIntegrationBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                  WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "develop",
@@ -169,7 +169,7 @@ func TestWorkSelectionPreflightAllowsConfiguredIntegrationBranch(t *testing.T) {
 func TestWorkSelectionPreflightBlocksConfiguredIntegrationBranchBehindRemote(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                  WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "develop",
@@ -199,7 +199,7 @@ func TestWorkSelectionPreflightBlocksConfiguredIntegrationBranchBehindRemote(t *
 func TestWorkSelectionPreflightCurrentBranchModeAllowsAnyCleanBranch(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                 WorkBranchPolicyModeCurrentBranch,
 			RequireCleanWorktree: true,
@@ -222,7 +222,7 @@ func TestWorkSelectionPreflightCurrentBranchModeAllowsAnyCleanBranch(t *testing.
 func TestWorkSelectionPreflightCurrentBranchModeRequiresCleanWorktree(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                 WorkBranchPolicyModeCurrentBranch,
 			RequireCleanWorktree: true,
@@ -248,7 +248,7 @@ func TestWorkSelectionPreflightCurrentBranchModeRequiresCleanWorktree(t *testing
 func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode:                  WorkBranchPolicyModeIntegrationBranch,
 			IntegrationBranch:     "dev",
@@ -280,7 +280,7 @@ func TestWorkSelectionPreflightWorktreeModeAllowsDirtyUserCheckout(t *testing.T)
 func TestWorkSelectionPreflightNoGitEnforcementSkipsGitChecks(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets:    []ticketcore.IndexedTicket{{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}}},
+		Tickets:    []ticketcore.Indexed{{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}}},
 		BranchPolicy: WorkBranchPolicy{
 			Mode: WorkBranchPolicyModeNoGitEnforcement,
 		},
@@ -298,9 +298,9 @@ func TestWorkSelectionPreflightNoGitEnforcementSkipsGitChecks(t *testing.T) {
 func TestWorkSelectionPreflightNoGitEnforcementKeepsReviewRepairOrdering(t *testing.T) {
 	result, err := RunWorkSelectionPreflight(context.Background(), WorkSelectionPreflightOptions{
 		ProjectDir: t.TempDir(),
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketReview: ticketcore.IndexedTicketReview{ReviewState: "changes_requested"}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedReview: ticketcore.IndexedReview{ReviewState: "changes_requested"}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 		},
 		SelectedTicketKey: "CHR-2",
 		BranchPolicy: WorkBranchPolicy{

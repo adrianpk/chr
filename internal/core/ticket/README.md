@@ -12,3 +12,8 @@ serve the existing native metadata paths without compatibility re-exports.
 
 The metadata child owns frontmatter/review-reference parsing and optional integer
 decoding. It cannot depend on ticket records or their coordinator consumers.
+
+Ticket and Indexed are document/projection values. Renderer.Render, Parser.Parse,
+ValidateIndexed and the status/classification functions retain their original
+contracts. Native mutation paths consume the same WriteReviewRefsField and
+ValidateReviewRef implementation as document rendering and validation.

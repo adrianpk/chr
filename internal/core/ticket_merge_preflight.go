@@ -48,8 +48,8 @@ type TicketMergePreflightRemoteReader interface {
 
 // TicketMergePreflightOptions describes a package boundary value.
 type TicketMergePreflightOptions struct {
-	Ticket        ticketcore.IndexedTicket
-	Tickets       []ticketcore.IndexedTicket
+	Ticket        ticketcore.Indexed
+	Tickets       []ticketcore.Indexed
 	Remote        TicketMergePreflightRemoteReader
 	ExpectedBase  string
 	MergeStrategy string
@@ -175,7 +175,7 @@ func ticketMergeStrategyBlocker(strategy string) *TicketMergePreflightBlocker {
 	}
 }
 
-func ticketMergeSerialRepairBlocker(ticket ticketcore.IndexedTicket, tickets []ticketcore.IndexedTicket) *TicketMergePreflightBlocker {
+func ticketMergeSerialRepairBlocker(ticket ticketcore.Indexed, tickets []ticketcore.Indexed) *TicketMergePreflightBlocker {
 	for _, candidate := range tickets {
 		if candidate.Key == ticket.Key {
 			continue

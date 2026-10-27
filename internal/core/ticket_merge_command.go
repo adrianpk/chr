@@ -19,8 +19,8 @@ type TicketMergeCommandRemote interface {
 
 // TicketMergeCommandOptions describes a package boundary value.
 type TicketMergeCommandOptions struct {
-	Ticket        ticketcore.IndexedTicket
-	Tickets       []ticketcore.IndexedTicket
+	Ticket        ticketcore.Indexed
+	Tickets       []ticketcore.Indexed
 	Remote        TicketMergeCommandRemote
 	ExpectedBase  string
 	MergeStrategy string
@@ -90,7 +90,7 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 	}
 
 	result.Merge = merge
-	result.Status = ticketcore.TicketStatusDone
+	result.Status = ticketcore.StatusDone
 	result.MergeState = TicketMergeStateMerged
 	result.MergeResult = TicketMergeResultMerged
 	result.MergeCommit = merge.SHA
@@ -127,7 +127,7 @@ func ticketMergeCommandResult(ticketKey string, preflight TicketMergePreflightRe
 	result := TicketMergeCommandResult{
 		TicketKey:     ticketKey,
 		Preflight:     preflight,
-		Status:        ticketcore.TicketStatusReadyForMerge,
+		Status:        ticketcore.StatusReadyForMerge,
 		MergeState:    TicketMergeStatePending,
 		MergeResult:   "",
 		MergeActor:    TicketMergeActorMerger,

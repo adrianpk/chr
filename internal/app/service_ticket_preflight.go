@@ -14,7 +14,7 @@ type ticketStartPreflight struct {
 	AssetsFS       fs.FS
 	Env            core.UserEnvironment
 	ProjectContext commandProjectContext
-	Ticket         ticketcore.IndexedTicket
+	Ticket         ticketcore.Indexed
 	Record         core.ExecutionRecord
 	Runtime        harnessruntime.ValidationResult
 }
@@ -24,7 +24,7 @@ type ticketStartPreflightOptions struct {
 }
 
 type ticketStartWorkspace struct {
-	Ticket                ticketcore.IndexedTicket
+	Ticket                ticketcore.Indexed
 	TicketPath            string
 	TicketBranch          string
 	ExecutionWorkspaceDir string
@@ -33,7 +33,7 @@ type ticketStartWorkspace struct {
 	PreparedWorktree      bool
 }
 
-func (s service) prepareTicketStart(ctx context.Context, ticket ticketcore.IndexedTicket, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
+func (s service) prepareTicketStart(ctx context.Context, ticket ticketcore.Indexed, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
 	if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
 		return ticketStartPreflight{}, err
 	}
@@ -41,7 +41,7 @@ func (s service) prepareTicketStart(ctx context.Context, ticket ticketcore.Index
 	return s.buildLegacyTicketStartPreflight(ctx, ticket, opts)
 }
 
-func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket ticketcore.IndexedTicket, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
+func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket ticketcore.Indexed, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
 	config, err := core.LoadWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
 		return ticketStartPreflight{}, err
@@ -104,10 +104,10 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket tic
 	}, nil
 }
 
-func (s service) selectTicketStartTicket(ctx context.Context, key string) (ticketcore.IndexedTicket, error) {
+func (s service) selectTicketStartTicket(ctx context.Context, key string) (ticketcore.Indexed, error) {
 	index, err := core.NewTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 	defer func() {
 		//nolint:errcheck // The operation result already owns its failure; the index is a rebuildable projection.
@@ -115,21 +115,21 @@ func (s service) selectTicketStartTicket(ctx context.Context, key string) (ticke
 	}()
 
 	if err := refreshProjectTicketIndex(ctx, index, s.projectContext); err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	ticket, err := index.GetProjectTicketByKey(ctx, s.projectContext.ProjectID, key)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	tickets, err := index.ListProjectTickets(ctx, s.projectContext.ProjectID)
 	if err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	if err := enforceWorkSelectionPreflight(ctx, s.projectContext, tickets, ticket.Key); err != nil {
-		return ticketcore.IndexedTicket{}, err
+		return ticketcore.Indexed{}, err
 	}
 
 	return ticket, nil

@@ -49,14 +49,14 @@ func prepareTicketCreation(opts TicketBoardReadOptions, key string, request Tick
 	}
 
 	now := time.Now().UTC()
-	ticket := ticketcore.Ticket{Key: key, Title: request.Fields["title"], Body: *request.Body, Synopsis: boardDescription([]byte(*request.Body)), Status: ticketcore.TicketStatusBacklog, Priority: "normal", Severity: "normal", Type: "task", CreatedAt: now, UpdatedAt: now}
+	ticket := ticketcore.Ticket{Key: key, Title: request.Fields["title"], Body: *request.Body, Synopsis: boardDescription([]byte(*request.Body)), Status: ticketcore.StatusBacklog, Priority: "normal", Severity: "normal", Type: "task", CreatedAt: now, UpdatedAt: now}
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		return "", err
 	}
 
-	document := TicketDocument{content: []byte(content), Fields: map[string]string{"status": ticketcore.TicketStatusBacklog}, ReadOnly: map[string]string{}, Phase: "pending"}
+	document := TicketDocument{content: []byte(content), Fields: map[string]string{"status": ticketcore.StatusBacklog}, ReadOnly: map[string]string{}, Phase: "pending"}
 	if opts.NativeWorkflow {
 		document.native = &WorkflowRecord{}
 	}
@@ -101,7 +101,7 @@ func createNativeTicketDocument(ctx context.Context, opts TicketBoardReadOptions
 }
 
 func validateNewTicketStatus(request TicketEditRequest) error {
-	if status := request.Fields["status"]; status != "" && status != ticketcore.TicketStatusBacklog && status != ticketcore.TicketStatusReadyForDev {
+	if status := request.Fields["status"]; status != "" && status != ticketcore.StatusBacklog && status != ticketcore.StatusReadyForDev {
 		return fmt.Errorf("new tickets start in Backlog or Ready For Dev")
 	}
 

@@ -13,13 +13,13 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
-// TicketParser defines a package boundary interface.
-type TicketParser interface {
-	ParseTicket(ctx context.Context, opts ParseTicketOptions) (IndexedTicket, error)
+// Parser defines a package boundary interface.
+type Parser interface {
+	Parse(ctx context.Context, opts ParseOptions) (Indexed, error)
 }
 
-// ParseTicketOptions describes a package boundary value.
-type ParseTicketOptions struct {
+// ParseOptions describes a package boundary value.
+type ParseOptions struct {
 	ProjectID    string
 	ProjectDir   string
 	TicketsDir   string
@@ -28,86 +28,86 @@ type ParseTicketOptions struct {
 	RelativeBase string
 }
 
-type ticketParser struct{}
+type parser struct{}
 
-// NewTicketParser constructs the corresponding package service or value.
-func NewTicketParser() TicketParser {
-	return &ticketParser{}
+// NewParser constructs the corresponding package service or value.
+func NewParser() Parser {
+	return &parser{}
 }
 
-// ParseTicket executes the corresponding package operation.
-func (p *ticketParser) ParseTicket(ctx context.Context, opts ParseTicketOptions) (IndexedTicket, error) {
+// Parse executes the corresponding package operation.
+func (p *parser) Parse(ctx context.Context, opts ParseOptions) (Indexed, error) {
 	err := ctx.Err()
 	if err != nil {
-		return IndexedTicket{}, err
+		return Indexed{}, err
 	}
 
 	content, err := os.ReadFile(opts.Path)
 	if err != nil {
-		return IndexedTicket{}, fmt.Errorf("read ticket file: %w", err)
+		return Indexed{}, fmt.Errorf("read ticket file: %w", err)
 	}
 
 	info, err := os.Stat(opts.Path)
 	if err != nil {
-		return IndexedTicket{}, fmt.Errorf("stat ticket file: %w", err)
+		return Indexed{}, fmt.Errorf("stat ticket file: %w", err)
 	}
 
 	frontmatter, err := ticketmetadata.Parse(string(content))
 	if err != nil {
-		return IndexedTicket{}, err
+		return Indexed{}, err
 	}
 
 	relativePath, err := relativeTicketPath(opts)
 	if err != nil {
-		return IndexedTicket{}, err
+		return Indexed{}, err
 	}
 
 	return indexedTicketFromMetadata(opts, relativePath, info, content, frontmatter)
 }
 
 func indexedTicketFromMetadata(
-	opts ParseTicketOptions,
+	opts ParseOptions,
 	relativePath string,
 	info os.FileInfo,
 	content []byte,
 	frontmatter ticketmetadata.Frontmatter,
-) (IndexedTicket, error) {
+) (Indexed, error) {
 	metadata := frontmatter.Metadata
 
 	createdAt, updatedAt, mergedAt, reviewRound, err := parseIndexedTicketMetadataTimes(metadata)
 	if err != nil {
-		return IndexedTicket{}, err
+		return Indexed{}, err
 	}
 
-	ticket := IndexedTicket{
-		IndexedTicketIdentity: IndexedTicketIdentity{
+	ticket := Indexed{
+		IndexedIdentity: IndexedIdentity{
 			ProjectID:    opts.ProjectID,
 			Path:         opts.Path,
 			RelativePath: relativePath,
 			Key:          opsmetadata.Unquote(metadata["key"]),
-		}, IndexedTicketSummary: indexedTicketSummaryFromMetadata(metadata), IndexedTicketClassification: indexedTicketClassificationFromMetadata(metadata), IndexedTicketSource: IndexedTicketSource{
+		}, IndexedSummary: indexedTicketSummaryFromMetadata(metadata), IndexedClassification: indexedTicketClassificationFromMetadata(metadata), IndexedSource: IndexedSource{
 			SourceKind: opsmetadata.Unquote(metadata["source_kind"]),
 			SourceRef:  opsmetadata.Unquote(metadata["source_ref"]),
 			Slice:      opsmetadata.Unquote(metadata["slice"]),
 			Branch:     opsmetadata.Unquote(metadata["branch"]),
-		}, IndexedTicketReview: IndexedTicketReview{
+		}, IndexedReview: IndexedReview{
 			ReviewRefs:        frontmatter.ReviewRefs,
 			ReviewState:       opsmetadata.Unquote(metadata["review_state"]),
 			ReviewRound:       reviewRound,
 			ReviewResult:      opsmetadata.Unquote(metadata["review_result"]),
 			ReviewCommentsURL: opsmetadata.Unquote(metadata["review_comments_url"]),
 			BlockingFindings:  opsmetadata.ParseList(metadata["blocking_findings"]),
-		}, IndexedTicketMerge: IndexedTicketMerge{
+		}, IndexedMerge: IndexedMerge{
 			MergeState:   opsmetadata.Unquote(metadata["merge_state"]),
 			MergeResult:  opsmetadata.Unquote(metadata["merge_result"]),
 			MergeActor:   opsmetadata.Unquote(metadata["merge_actor"]),
 			MergeCommit:  opsmetadata.Unquote(metadata["merge_commit"]),
 			MergedAt:     mergedAt,
 			MergeBlocker: opsmetadata.Unquote(metadata["merge_blocker"]),
-		}, IndexedTicketTimes: IndexedTicketTimes{
+		}, IndexedTimes: IndexedTimes{
 			CreatedAt: createdAt,
 			UpdatedAt: updatedAt,
-		}, IndexedTicketProjection: IndexedTicketProjection{
+		}, IndexedProjection: IndexedProjection{
 			FileMTime:   info.ModTime().UTC(),
 			FileSize:    info.Size(),
 			ContentHash: contenthash.Sum(content),
@@ -115,11 +115,11 @@ func indexedTicketFromMetadata(
 		},
 	}
 
-	ticket.BoardColumn, _ = BoardTicketStatusFor(ticket.Status)
+	ticket.BoardColumn, _ = BoardStatus(ticket.Status)
 
-	err = ValidateIndexedTicket(ticket)
+	err = ValidateIndexed(ticket)
 	if err != nil {
-		return IndexedTicket{}, err
+		return Indexed{}, err
 	}
 
 	return ticket, nil
@@ -141,7 +141,7 @@ func parseIndexedTicketMetadataTimes(metadata map[string]string) (*time.Time, *t
 		return nil, nil, nil, 0, err
 	}
 
-	reviewRound, err := ticketmetadata.OptionalTicketInt(metadata["review_round"])
+	reviewRound, err := ticketmetadata.OptionalInteger(metadata["review_round"])
 	if err != nil {
 		return nil, nil, nil, 0, err
 	}
@@ -149,7 +149,7 @@ func parseIndexedTicketMetadataTimes(metadata map[string]string) (*time.Time, *t
 	return createdAt, updatedAt, mergedAt, reviewRound, nil
 }
 
-func relativeTicketPath(opts ParseTicketOptions) (string, error) {
+func relativeTicketPath(opts ParseOptions) (string, error) {
 	base := opts.RelativeBase
 	if base == "" {
 		base = opts.TicketsDir
@@ -167,16 +167,16 @@ func relativeTicketPath(opts ParseTicketOptions) (string, error) {
 	return filepath.ToSlash(relativePath), nil
 }
 
-func indexedTicketSummaryFromMetadata(metadata map[string]string) IndexedTicketSummary {
-	return IndexedTicketSummary{
+func indexedTicketSummaryFromMetadata(metadata map[string]string) IndexedSummary {
+	return IndexedSummary{
 		Title:    opsmetadata.Unquote(metadata["title"]),
 		Assignee: opsmetadata.Unquote(metadata["assignee"]),
 		Synopsis: opsmetadata.Unquote(metadata["synopsis"]),
 	}
 }
 
-func indexedTicketClassificationFromMetadata(metadata map[string]string) IndexedTicketClassification {
-	return IndexedTicketClassification{
+func indexedTicketClassificationFromMetadata(metadata map[string]string) IndexedClassification {
+	return IndexedClassification{
 		Status:      opsmetadata.Unquote(metadata["status"]),
 		Priority:    opsmetadata.Unquote(metadata["priority"]),
 		Severity:    opsmetadata.Unquote(metadata["severity"]),

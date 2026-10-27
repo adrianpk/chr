@@ -79,7 +79,7 @@ func validateWorkflowLooseInputBounds(request workflowstate.PreviewRequest) erro
 	return nil
 }
 
-func workflowLooseExclusion(request workflowstate.PreviewRequest, ticket ticketcore.IndexedTicket) string {
+func workflowLooseExclusion(request workflowstate.PreviewRequest, ticket ticketcore.Indexed) string {
 	if !slices.Contains(request.Statuses, ticket.Status) {
 		return "status_mismatch"
 	}
@@ -116,7 +116,7 @@ func workflowMeetsMinimum(value, minimum string) bool {
 }
 
 func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMember, order workflowstate.TicketOrder) {
-	tickets := map[string]ticketcore.IndexedTicket{}
+	tickets := map[string]ticketcore.Indexed{}
 	for _, ticket := range selection.tickets {
 		ticket.Priority, ticket.Severity = workflowRank(ticket.Priority), workflowRank(ticket.Severity)
 		tickets[ticket.Key] = ticket
@@ -129,7 +129,7 @@ func (selection workflowSelection) orderLooseMembers(members []WorkflowPreviewMe
 
 func validateWorkflowMinimumRanks(request workflowstate.PreviewRequest) error {
 	for _, rank := range []string{request.MinPriority, request.MinSeverity} {
-		if rank != "" && (!ticketcore.IsValidTicketPriority(rank) || rank == "unclassified") {
+		if rank != "" && (!ticketcore.ValidPriority(rank) || rank == "unclassified") {
 			return fmt.Errorf("minimum rank must be critical, high, normal or low")
 		}
 	}

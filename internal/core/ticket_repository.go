@@ -53,7 +53,7 @@ type TicketRepositoryOption func(*fileTicketRepository)
 type fileTicketRepository struct {
 	projectDir           string
 	keyPrefix            string
-	renderer             ticketcore.TicketRenderer
+	renderer             ticketcore.Renderer
 	now                  func() time.Time
 	nextKeyNumberFactory func(context.Context) (int, error)
 }
@@ -63,7 +63,7 @@ func NewTicketRepository(projectDir string, opts ...TicketRepositoryOption) Tick
 	repository := &fileTicketRepository{
 		projectDir: projectDir,
 		keyPrefix:  DefaultTicketKeyPrefix,
-		renderer:   ticketcore.NewTicketRenderer(),
+		renderer:   ticketcore.NewRenderer(),
 		now:        time.Now,
 	}
 
@@ -84,7 +84,7 @@ func WithTicketRepositoryKeyPrefix(keyPrefix string) TicketRepositoryOption {
 }
 
 // WithTicketRepositoryRenderer executes the corresponding package operation.
-func WithTicketRepositoryRenderer(renderer ticketcore.TicketRenderer) TicketRepositoryOption {
+func WithTicketRepositoryRenderer(renderer ticketcore.Renderer) TicketRepositoryOption {
 	return func(repository *fileTicketRepository) {
 		if renderer != nil {
 			repository.renderer = renderer
@@ -153,7 +153,7 @@ func (r *fileTicketRepository) CreateTicket(ctx context.Context, opts CreateTick
 		UpdatedAt:   now,
 	}
 
-	content, err := r.renderer.RenderTicket(ticket)
+	content, err := r.renderer.Render(ticket)
 	if err != nil {
 		return CreateTicketResult{}, err
 	}
@@ -196,7 +196,7 @@ func (r *fileTicketRepository) allocateKeyNumber(ctx context.Context) (int, erro
 func ticketStatusOrDefault(status string) string {
 	status = strings.TrimSpace(status)
 	if status == "" {
-		return ticketcore.TicketStatusBacklog
+		return ticketcore.StatusBacklog
 	}
 
 	return status

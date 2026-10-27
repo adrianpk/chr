@@ -9,7 +9,7 @@ import (
 )
 
 type agentWorkMergeCycleOptions struct {
-	Ticket       ticketcore.IndexedTicket
+	Ticket       ticketcore.Indexed
 	Execution    core.ExecutionRecord
 	WorkConfig   core.WorkConfig
 	ReviewConfig core.ReviewWorkflowConfig
@@ -45,7 +45,7 @@ func (s service) runAgentWorkMergeCycle(opts agentWorkMergeCycleOptions) (core.T
 	return result, nil
 }
 
-func (s service) agentWorkMergeTickets(execution core.ExecutionRecord, indexedAt time.Time) ([]ticketcore.IndexedTicket, error) {
+func (s service) agentWorkMergeTickets(execution core.ExecutionRecord, indexedAt time.Time) ([]ticketcore.Indexed, error) {
 	if execution.Workspace.Mode == workspacecore.ExecutionWorktree {
 		return parseProjectTicketsFromDir(s.ctx, s.projectContext.ProjectID, agenticReviewProjectDir(s.projectContext, execution), indexedAt)
 	}

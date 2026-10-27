@@ -13,10 +13,10 @@ import (
 
 func TestTicketLoopQuerySelectsDefaultReadyForDevTicketsOldestFirst(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-3"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: testLoopQueryTime("2026-05-18T13:00:00Z")}})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: testLoopQueryTime("2026-05-18T10:00:00Z")}})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: testLoopQueryTime("2026-05-18T12:00:00Z")}})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-4"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForReview}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: testLoopQueryTime("2026-05-18T09:00:00Z")}})
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-3"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: testLoopQueryTime("2026-05-18T13:00:00Z")}})
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: testLoopQueryTime("2026-05-18T10:00:00Z")}})
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: testLoopQueryTime("2026-05-18T12:00:00Z")}})
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-4"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForReview}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: testLoopQueryTime("2026-05-18T09:00:00Z")}})
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "project-1",
@@ -55,7 +55,7 @@ func TestTicketLoopQuerySelectsExplicitStatuses(t *testing.T) {
 
 func TestTicketLoopQueryScopesToProject(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicket(t, index, "CHR-1", ticketcore.TicketStatusReadyForDev)
+	upsertLoopQueryTicket(t, index, "CHR-1", ticketcore.StatusReadyForDev)
 
 	got, err := NewTicketLoopQuery(index).EligibleTickets(context.Background(), TicketLoopQueryOptions{
 		ProjectID: "other-project",
@@ -71,9 +71,9 @@ func TestTicketLoopQueryScopesToProject(t *testing.T) {
 
 func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:      ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:      ticketcore.StatusReadyForDev,
 			Priority:    "high",
 			Severity:    "critical",
 			Type:        "feature",
@@ -82,9 +82,9 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 			Tags:        []string{"uxui", "quick"},
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:      ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:      ticketcore.StatusReadyForDev,
 			Priority:    "normal",
 			Severity:    "normal",
 			Type:        "bug",
@@ -93,9 +93,9 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 			Tags:        []string{"api"},
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-3"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:      ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-3"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:      ticketcore.StatusReadyForDev,
 			Priority:    "high",
 			Severity:    "critical",
 			Type:        "feature",
@@ -128,17 +128,17 @@ func TestTicketLoopQueryFiltersByMetadata(t *testing.T) {
 
 func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "high",
 			Severity: "critical",
 			Type:     "feature",
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "normal",
 			Severity: "normal",
 			Type:     "bug",
@@ -163,21 +163,21 @@ func TestTicketLoopQueryAllowsAnyValueForEmptyFilterDimensions(t *testing.T) {
 
 func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "low",
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "critical",
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-3"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-3"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "high",
 		},
 	})
@@ -198,21 +198,21 @@ func TestTicketLoopQueryOrdersByPriority(t *testing.T) {
 
 func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Severity: "normal",
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Severity: "critical",
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-3"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-3"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Severity: "high",
 		},
 	})
@@ -233,23 +233,23 @@ func TestTicketLoopQueryOrdersBySeverity(t *testing.T) {
 
 func TestTicketLoopQueryOrdersByPrioritySeverityAndKey(t *testing.T) {
 	index := newTestTicketIndex(t)
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-3"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-3"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "high",
 			Severity: "normal",
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "high",
 			Severity: "critical",
 		},
 	})
-	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+	upsertLoopQueryTicketWithMetadata(t, index, ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "high",
 			Severity: "critical",
 		},
@@ -384,7 +384,7 @@ func upsertLoopQueryTicket(t *testing.T, index TicketIndex, key, status string) 
 	upsertLoopQueryTicketWithMetadata(t, index, ticket)
 }
 
-func upsertLoopQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata ticketcore.IndexedTicket) {
+func upsertLoopQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata ticketcore.Indexed) {
 	t.Helper()
 
 	ticket := testIndexedTicket(metadata.Key, metadata.Tags)
@@ -402,14 +402,14 @@ func upsertLoopQueryTicketWithMetadata(t *testing.T, index TicketIndex, metadata
 	}
 }
 
-func testLoopQueryTicketWithCreatedAt(key, createdAt string) ticketcore.IndexedTicket {
-	return ticketcore.IndexedTicket{
-		IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: key}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-			Status:   ticketcore.TicketStatusReadyForDev,
+func testLoopQueryTicketWithCreatedAt(key, createdAt string) ticketcore.Indexed {
+	return ticketcore.Indexed{
+		IndexedIdentity: ticketcore.IndexedIdentity{Key: key}, IndexedClassification: ticketcore.IndexedClassification{
+			Status:   ticketcore.StatusReadyForDev,
 			Priority: "normal",
 			Severity: "normal",
 			Type:     "task",
-		}, IndexedTicketTimes: ticketcore.IndexedTicketTimes{CreatedAt: testLoopQueryTime(createdAt)},
+		}, IndexedTimes: ticketcore.IndexedTimes{CreatedAt: testLoopQueryTime(createdAt)},
 	}
 }
 
@@ -422,7 +422,7 @@ func testLoopQueryTime(value string) *time.Time {
 	return &parsed
 }
 
-func indexedTicketKeys(tickets []ticketcore.IndexedTicket) []string {
+func indexedTicketKeys(tickets []ticketcore.Indexed) []string {
 	keys := make([]string, 0, len(tickets))
 	for _, ticket := range tickets {
 		keys = append(keys, ticket.Key)

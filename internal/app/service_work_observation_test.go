@@ -34,7 +34,7 @@ func TestWorkObservationNative(t *testing.T) {
 // event cannot overwrite it. Completed results survive without phase events.
 func TestWorkObservationContexts(t *testing.T) {
 	at := time.Now().UTC()
-	tickets := map[string]ticketcore.IndexedTicket{"PRJ-1": {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}}, "PRJ-2": {IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "PRJ-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Second"}}}
+	tickets := map[string]ticketcore.Indexed{"PRJ-1": {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}}, "PRJ-2": {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}}}
 	records := map[string]core.WorkflowRecord{"PRJ-1": {Task: &core.WorkflowTask{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &core.WorkflowTask{Phase: "working", AttemptID: "two"}}}
 	result := WorkObservation{}
 

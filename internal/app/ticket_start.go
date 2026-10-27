@@ -87,7 +87,7 @@ func runAndPrintTicketStartExecution(ctx context.Context, stdout io.Writer, pref
 	return record, err
 }
 
-func printTicketStartResult(stdout io.Writer, ticket ticketcore.IndexedTicket, record core.ExecutionRecord, result harnessruntime.ValidationResult, dryRun bool) error {
+func printTicketStartResult(stdout io.Writer, ticket ticketcore.Indexed, record core.ExecutionRecord, result harnessruntime.ValidationResult, dryRun bool) error {
 	lines := []string{
 		fmt.Sprintf("execution: %s", record.ID),
 		fmt.Sprintf("ticket: %s", ticket.Key),

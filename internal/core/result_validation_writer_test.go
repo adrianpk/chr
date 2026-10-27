@@ -83,7 +83,7 @@ func writeResultValidationTicket(t *testing.T, validationHistory string) string 
 		UpdatedAt: time.Date(2026, 5, 19, 12, 0, 0, 0, time.UTC),
 	}
 
-	content, err := ticketcore.NewTicketRenderer().RenderTicket(ticket)
+	content, err := ticketcore.NewRenderer().Render(ticket)
 	if err != nil {
 		t.Fatalf("RenderTicket returned error: %v", err)
 	}

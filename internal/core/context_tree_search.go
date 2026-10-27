@@ -25,7 +25,7 @@ const (
 // TreeSearchContextOptions describes a package boundary value.
 type TreeSearchContextOptions struct {
 	ProjectDir        string
-	Ticket            ticketcore.IndexedTicket
+	Ticket            ticketcore.Indexed
 	ValidationCommand string
 	MaxTreeEntries    int
 	MaxSearchHits     int
@@ -83,7 +83,7 @@ func LoadTreeSearchContext(opts TreeSearchContextOptions) (TreeSearchContext, er
 }
 
 // DeriveContextSearchTerms executes the corresponding package operation.
-func DeriveContextSearchTerms(ticket ticketcore.IndexedTicket, validationCommand string) []string {
+func DeriveContextSearchTerms(ticket ticketcore.Indexed, validationCommand string) []string {
 	seen := map[string]struct{}{}
 	terms := make([]string, 0, 16)
 

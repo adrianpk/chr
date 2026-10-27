@@ -64,7 +64,7 @@ func checkServiceWorkflowOwnerStarts(t *testing.T, operations service, key strin
 		{"ready", func() error { _, err := operations.StartReadyAgentWorkLoop(); return err }, true},
 		{"all ready", func() error { _, err := operations.StartAllReadyAgentWork(); return err }, true},
 		{"running selection", func() error {
-			_, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{Statuses: []string{ticketcore.TicketStatusInProgress}})
+			_, err := operations.StartAgentWorkLoop(t.Context(), AgentWorkSelectionOptions{Statuses: []string{ticketcore.StatusInProgress}})
 
 			return err
 		}, false},

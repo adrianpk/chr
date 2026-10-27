@@ -1675,13 +1675,13 @@ func TestModelAltEOpensSelectedTicketSource(t *testing.T) {
 	}
 	model := NewModel(Options{
 		SourceExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+				IndexedIdentity: ticketcore.IndexedIdentity{
 					Key: "CHR-1",
 
 					RelativePath: "local-preview/CHR-1-preview-command.md",
-				}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Preview command"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog},
+				}, IndexedSummary: ticketcore.IndexedSummary{Title: "Preview command"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog},
 			},
 		},
 	})
@@ -1717,13 +1717,13 @@ func TestModelCtrlEOpensSelectedTicketSource(t *testing.T) {
 	}
 	model := NewModel(Options{
 		SourceExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+				IndexedIdentity: ticketcore.IndexedIdentity{
 					Key: "CHR-1",
 
 					RelativePath: "local-preview/CHR-1-preview-command.md",
-				}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Preview command"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog},
+				}, IndexedSummary: ticketcore.IndexedSummary{Title: "Preview command"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog},
 			},
 		},
 	})
@@ -1749,13 +1749,13 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 	}
 	model := NewModel(Options{
 		SourceExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+				IndexedIdentity: ticketcore.IndexedIdentity{
 					Key: "CHR-1",
 
 					RelativePath: "CHR-1-preview-command.md",
-				}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Preview command"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog},
+				}, IndexedSummary: ticketcore.IndexedSummary{Title: "Preview command"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog},
 			},
 		},
 	})
@@ -1775,13 +1775,13 @@ func TestModelEOpensSelectedSourceWhenDetailPaneFocused(t *testing.T) {
 
 func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+				IndexedIdentity: ticketcore.IndexedIdentity{
 					Key: "CHR-1",
 
 					RelativePath: "CHR-1-long-detail.md",
-				}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Long detail"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog},
+				}, IndexedSummary: ticketcore.IndexedSummary{Title: "Long detail"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog},
 			},
 		},
 	})
@@ -1802,13 +1802,13 @@ func TestModelPageDownScrollsTicketDetailWithoutFocus(t *testing.T) {
 
 func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+				IndexedIdentity: ticketcore.IndexedIdentity{
 					Key: "CHR-1",
 
 					RelativePath: "CHR-1-long-detail.md",
-				}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Long detail"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog},
+				}, IndexedSummary: ticketcore.IndexedSummary{Title: "Long detail"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog},
 			},
 		},
 	})
@@ -1854,13 +1854,13 @@ func TestModelPageDownChangesVisibleTicketDetail(t *testing.T) {
 
 func TestModelScrollsFocusedTicketDetail(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+				IndexedIdentity: ticketcore.IndexedIdentity{
 					Key: "CHR-1",
 
 					RelativePath: "CHR-1-long-detail.md",
-				}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Long detail"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog},
+				}, IndexedSummary: ticketcore.IndexedSummary{Title: "Long detail"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog},
 			},
 		},
 	})
@@ -1979,8 +1979,8 @@ func TestModelConfirmsArtifactAction(t *testing.T) {
 	executor := &fakeArtifactActionExecutor{
 		result: ArtifactActionResult{
 			Message: "Created ticket CHR-1 at .chr/default/tickets/CHR-1-tui-created-ticket.md",
-			Tickets: []ticketcore.IndexedTicket{
-				{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "TUI created ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+			Tickets: []ticketcore.Indexed{
+				{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "TUI created ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 			},
 			Documents: []DocumentView{
 				{Index: 0, Title: "TUI Plan"},
@@ -2045,8 +2045,8 @@ func TestModelReportsArtifactActionError(t *testing.T) {
 
 func TestModelPlansTicketActionCommand(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 		},
 	})
 	model.commandPalette.Open = true
@@ -2091,8 +2091,8 @@ func TestModelPlansTicketActionCommand(t *testing.T) {
 
 func TestModelCancelsTicketAction(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 		},
 	})
 
@@ -2123,15 +2123,15 @@ func TestModelConfirmsTicketAction(t *testing.T) {
 	executor := &fakeTicketActionExecutor{
 		result: TicketActionResult{
 			Message: "Moved ticket CHR-1 to ready.",
-			Tickets: []ticketcore.IndexedTicket{
-				{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready"}},
+			Tickets: []ticketcore.Indexed{
+				{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready"}},
 			},
 		},
 	}
 	model := NewModel(Options{
 		TicketExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 		},
 	})
 
@@ -2174,8 +2174,8 @@ func TestModelReportsTicketActionError(t *testing.T) {
 	executor := &fakeTicketActionExecutor{err: errors.New("invalid ticket status")}
 	model := NewModel(Options{
 		TicketExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 		},
 	})
 
@@ -2204,8 +2204,8 @@ func TestModelReportsTicketActionError(t *testing.T) {
 
 func TestModelPlansWorkActionCommand(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready"}},
 		},
 	})
 	model.commandPalette.Open = true
@@ -2247,9 +2247,9 @@ func TestModelPlansWorkActionCommand(t *testing.T) {
 
 func TestModelRendersDashAgentWorkPanel(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Ready frontend"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready_for_dev", Priority: "high"}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Backlog backend"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "backlog", Priority: "normal"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Ready frontend"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev", Priority: "high"}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Backlog backend"}, IndexedClassification: ticketcore.IndexedClassification{Status: "backlog", Priority: "normal"}},
 		},
 		Observability: ObservabilityView{
 			LatestExecution: ExecutionView{ID: "exec-1", TicketKey: "CHR-1", Status: "succeeded"},
@@ -2399,9 +2399,9 @@ func TestModelDashRepairReadinessKeyPlansWorkAction(t *testing.T) {
 
 func TestModelDashCyclesAgentWorkFilters(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Ready normal"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready_for_dev", Priority: "normal", Severity: "normal"}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Ready critical"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready_for_dev", Priority: "critical", Severity: "critical"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Ready normal"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev", Priority: "normal", Severity: "normal"}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Ready critical"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev", Priority: "critical", Severity: "critical"}},
 		},
 	})
 	model.selected = 7
@@ -2465,8 +2465,8 @@ func TestModelDashRunAllUsesAgentWorkFilters(t *testing.T) {
 func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	executor := &fakeAgentWorkRefreshExecutor{
 		result: AgentWorkRefreshResult{
-			Tickets: []ticketcore.IndexedTicket{
-				{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Fresh ready"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready_for_dev"}},
+			Tickets: []ticketcore.Indexed{
+				{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Fresh ready"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev"}},
 			},
 			Observability: ObservabilityView{
 				LatestExecution: ExecutionView{ID: "exec-2", TicketKey: "CHR-2", Status: "running"},
@@ -2477,8 +2477,8 @@ func TestModelRefreshesDashAgentWorkOnTick(t *testing.T) {
 	}
 	model := NewModel(Options{
 		AgentWorkExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Old ready"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready_for_dev"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Old ready"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev"}},
 		},
 	})
 	model.selected = 7
@@ -2637,8 +2637,8 @@ func TestModelRendersDashRunningFailedAndBlockedStates(t *testing.T) {
 
 func TestModelCancelsWorkAction(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready"}},
 		},
 	})
 
@@ -2671,8 +2671,8 @@ func TestModelStartsWorkActionOnConfirm(t *testing.T) {
 	}
 	model := NewModel(Options{
 		WorkExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready"}},
 		},
 	})
 
@@ -2713,8 +2713,8 @@ func TestModelBlocksWorkActionWhenReadinessBlocked(t *testing.T) {
 	model := NewModel(Options{
 		WorkExecutor:  executor,
 		WorkReadiness: testBlockedWorkReadinessView(),
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready_for_dev"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready_for_dev"}},
 		},
 	})
 	model.selected = 7
@@ -2858,8 +2858,8 @@ func TestModelCompletesWorkAction(t *testing.T) {
 	}
 	model := NewModel(Options{
 		WorkExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready"}},
 		},
 	})
 
@@ -2900,8 +2900,8 @@ func TestModelReportsWorkActionError(t *testing.T) {
 	executor := &fakeWorkActionExecutor{err: errors.New("runtime validation failed")}
 	model := NewModel(Options{
 		WorkExecutor: executor,
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready"}},
 		},
 	})
 
@@ -2970,13 +2970,13 @@ func TestModelRendersTicketEvidenceDetail(t *testing.T) {
 	projectDir := t.TempDir()
 	ticketPath := writeTicketViewFile(t, projectDir, "evidence.md", testTicketEvidenceDetailBody())
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{{
-			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+		Tickets: []ticketcore.Indexed{{
+			IndexedIdentity: ticketcore.IndexedIdentity{
 				Path:         ticketPath,
 				RelativePath: "evidence.md",
 				Key:          "CHR-1",
-			}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Add CLI behavior"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-				Status: ticketcore.TicketStatusBacklog,
+			}, IndexedSummary: ticketcore.IndexedSummary{Title: "Add CLI behavior"}, IndexedClassification: ticketcore.IndexedClassification{
+				Status: ticketcore.StatusBacklog,
 				Type:   "feature",
 			},
 		}},
@@ -3008,13 +3008,13 @@ func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
 		"# Description\n\nFirst paragraph.\n\n    indented code\n\n- [ ] Task\n\n# Comments\n\n## 2026-05-22T10:00:00Z chr\n\nComment body.\n",
 	)
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+				IndexedIdentity: ticketcore.IndexedIdentity{
 					Path:         ticketPath,
 					RelativePath: "long.md",
 					Key:          "CHR-1",
-				}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Long body"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog},
+				}, IndexedSummary: ticketcore.IndexedSummary{Title: "Long body"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog},
 			},
 		},
 	})
@@ -3043,7 +3043,7 @@ func TestModelRendersFullTicketBodyWithoutPreviewSections(t *testing.T) {
 	}
 }
 
-func ticketBoardTestTickets(t *testing.T, projectDir string) []ticketcore.IndexedTicket {
+func ticketBoardTestTickets(t *testing.T, projectDir string) []ticketcore.Indexed {
 	t.Helper()
 
 	firstPath := writeTicketViewFile(
@@ -3054,34 +3054,34 @@ func ticketBoardTestTickets(t *testing.T, projectDir string) []ticketcore.Indexe
 	)
 	secondPath := writeTicketViewFile(t, projectDir, "ready.md", "- [ ] Ready\n")
 
-	return []ticketcore.IndexedTicket{
+	return []ticketcore.Indexed{
 		{
-			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+			IndexedIdentity: ticketcore.IndexedIdentity{
 				Path:         firstPath,
 				RelativePath: "open.md",
 				Key:          "CHR-1",
-			}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{
+			}, IndexedSummary: ticketcore.IndexedSummary{
 				Title:    "Fix publishing",
 				Synopsis: "Fix the publishing workflow.",
-			}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
+			}, IndexedClassification: ticketcore.IndexedClassification{
 				Status:      "open",
 				Priority:    "high",
 				Severity:    "critical",
 				Type:        "bug",
 				UseCase:     "cli-blog",
 				ProjectArea: "indexing",
-			}, IndexedTicketSource: ticketcore.IndexedTicketSource{
+			}, IndexedSource: ticketcore.IndexedSource{
 				SourceKind: "plan_tracking",
 				SourceRef:  ".chr/default/plans/blog-plan.md",
 				Slice:      "Slice 1",
 			},
 		},
 		{
-			IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{
+			IndexedIdentity: ticketcore.IndexedIdentity{
 				Path:         secondPath,
 				RelativePath: "ready.md",
 				Key:          "CHR-2",
-			}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Add completion"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
+			}, IndexedSummary: ticketcore.IndexedSummary{Title: "Add completion"}, IndexedClassification: ticketcore.IndexedClassification{
 				Status:      "ready",
 				Priority:    "normal",
 				Severity:    "normal",
@@ -3108,9 +3108,9 @@ func testTicketEvidenceDetailBody() string {
 
 func TestModelSelectsTickets(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Second"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 		},
 	})
 	model.selected = 6
@@ -3134,9 +3134,9 @@ func TestModelSelectsTickets(t *testing.T) {
 
 func TestModelNavigatesBoardColumns(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Second"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 		},
 	})
 	model.selected = 6
@@ -3148,7 +3148,7 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 		t.Fatalf("Update returned %T, want *Model", updated)
 	}
 
-	if navigated.activeBoardColumn() != ticketcore.TicketStatusReadyForDev {
+	if navigated.activeBoardColumn() != ticketcore.StatusReadyForDev {
 		t.Fatalf("board column = %q, want ready_for_dev", navigated.activeBoardColumn())
 	}
 
@@ -3169,9 +3169,9 @@ func TestModelNavigatesBoardColumns(t *testing.T) {
 
 func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Second"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 		},
 	})
 	model.selected = 6
@@ -3195,16 +3195,16 @@ func TestModelRendersActiveBoardColumnInCompactMasterPane(t *testing.T) {
 
 func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
+		Tickets: []ticketcore.Indexed{
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Legacy ready ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-					Status:   ticketcore.TicketStatusReadyLegacy,
+				IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Legacy ready ticket"}, IndexedClassification: ticketcore.IndexedClassification{
+					Status:   ticketcore.StatusReadyLegacy,
 					Priority: "high",
 				},
 			},
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-15"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Implement filesystem-backed Post store and slug normalization"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{
-					Status:   ticketcore.TicketStatusReadyForDev,
+				IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-15"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Implement filesystem-backed Post store and slug normalization"}, IndexedClassification: ticketcore.IndexedClassification{
+					Status:   ticketcore.StatusReadyForDev,
 					Priority: "normal",
 				},
 			},
@@ -3247,9 +3247,9 @@ func TestModelRendersCompactTicketRowsWithoutRawStatusOrWrapping(t *testing.T) {
 
 func TestModelTogglesBoardAttentionView(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Blocked"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBlockedLegacy}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Blocked"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBlockedLegacy}},
 		},
 	})
 	model.selected = 6
@@ -3280,20 +3280,20 @@ func TestModelTogglesBoardAttentionView(t *testing.T) {
 		t.Fatal("board attention view is still active")
 	}
 
-	if normal.activeBoardColumn() != ticketcore.TicketStatusBacklog {
+	if normal.activeBoardColumn() != ticketcore.StatusBacklog {
 		t.Fatalf("board column = %q, want backlog", normal.activeBoardColumn())
 	}
 }
 
 func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Backlog ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Ready ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-3"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Progress ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusInProgress}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-4"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Review ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForReview}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-5"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Merge ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForMerge}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-6"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Done ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusDone}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Backlog ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Ready ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-3"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Progress ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusInProgress}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-4"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Review ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForReview}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-5"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Merge ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForMerge}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-6"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Done ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusDone}},
 		},
 	})
 	model.selected = 6
@@ -3331,17 +3331,17 @@ func TestModelRendersMaximizedBoardColumns(t *testing.T) {
 		t.Fatalf("selectedTicket = %d, want 1", restored.selectedTicket)
 	}
 
-	if restored.activeBoardColumn() != ticketcore.TicketStatusReadyForDev {
+	if restored.activeBoardColumn() != ticketcore.StatusReadyForDev {
 		t.Fatalf("activeBoardColumn = %q, want ready_for_dev", restored.activeBoardColumn())
 	}
 }
 
 func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Second ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-3"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Third ticket with enough words to wrap across several card body lines"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusReadyForDev}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-3"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Third ticket with enough words to wrap across several card body lines"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusReadyForDev}},
 		},
 	})
 	model.selectedTicket = 2
@@ -3367,9 +3367,9 @@ func TestModelRendersMaximizedBoardColumnAroundSelectedTicket(t *testing.T) {
 
 func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Normal ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBacklog}},
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Blocked ticket"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: ticketcore.TicketStatusBlockedLegacy}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Normal ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBacklog}},
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Blocked ticket"}, IndexedClassification: ticketcore.IndexedClassification{Status: ticketcore.StatusBlockedLegacy}},
 		},
 	})
 	model.selected = 6
@@ -3401,13 +3401,13 @@ func TestModelRendersMaximizedBoardAttentionSeparately(t *testing.T) {
 
 func TestTicketFilterMatchesMetadata(t *testing.T) {
 	model := NewModel(Options{
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "Fix publishing"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Fix publishing"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 			{
-				IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-2"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{
+				IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-2"}, IndexedSummary: ticketcore.IndexedSummary{
 					Title:    "Add completion",
 					Synopsis: "Finish generated tickets from a plan.",
-				}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "ready"}, IndexedTicketSource: ticketcore.IndexedTicketSource{SourceKind: "plan_tracking"},
+				}, IndexedClassification: ticketcore.IndexedClassification{Status: "ready"}, IndexedSource: ticketcore.IndexedSource{SourceKind: "plan_tracking"},
 			},
 		},
 	})
@@ -4999,8 +4999,8 @@ func TestModelViewUsesWindowRealEstate(t *testing.T) {
 	model := NewModel(Options{
 		ProjectDir: "/workspace/project",
 		ProjectID:  "project-1",
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "open"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "open"}},
 		},
 	})
 
@@ -5223,8 +5223,8 @@ func (e *fakeWorkActionExecutor) ExecuteWorkAction(request WorkActionRequest) (W
 func testSuccessfulWorkActionResult() WorkActionResult {
 	return WorkActionResult{
 		Message: "Execution exec-1 for ticket CHR-1 finished with status succeeded.",
-		Tickets: []ticketcore.IndexedTicket{
-			{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: "CHR-1"}, IndexedTicketSummary: ticketcore.IndexedTicketSummary{Title: "First"}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{Status: "reviewing"}},
+		Tickets: []ticketcore.Indexed{
+			{IndexedIdentity: ticketcore.IndexedIdentity{Key: "CHR-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}, IndexedClassification: ticketcore.IndexedClassification{Status: "reviewing"}},
 		},
 		Observability: ObservabilityView{
 			LatestExecution: ExecutionView{ID: "exec-1", Status: "succeeded"},

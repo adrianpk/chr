@@ -3,55 +3,55 @@ package ticket
 import "strings"
 
 const (
-	// TicketStatusBacklog defines a package boundary constant.
-	TicketStatusBacklog = "backlog"
-	// TicketStatusReadyForDev defines a package boundary constant.
-	TicketStatusReadyForDev = "ready_for_dev"
-	// TicketStatusInProgress defines a package boundary constant.
-	TicketStatusInProgress = "in_progress"
-	// TicketStatusReadyForReview defines a package boundary constant.
-	TicketStatusReadyForReview = "ready_for_review"
-	// TicketStatusReadyForMerge defines a package boundary constant.
-	TicketStatusReadyForMerge = "ready_for_merge"
-	// TicketStatusDone defines a package boundary constant.
-	TicketStatusDone = "done"
+	// StatusBacklog defines a package boundary constant.
+	StatusBacklog = "backlog"
+	// StatusReadyForDev defines a package boundary constant.
+	StatusReadyForDev = "ready_for_dev"
+	// StatusInProgress defines a package boundary constant.
+	StatusInProgress = "in_progress"
+	// StatusReadyForReview defines a package boundary constant.
+	StatusReadyForReview = "ready_for_review"
+	// StatusReadyForMerge defines a package boundary constant.
+	StatusReadyForMerge = "ready_for_merge"
+	// StatusDone defines a package boundary constant.
+	StatusDone = "done"
 
-	// TicketStatusOpenLegacy defines a package boundary constant.
-	TicketStatusOpenLegacy = "open"
-	// TicketStatusReadyLegacy defines a package boundary constant.
-	TicketStatusReadyLegacy = "ready"
-	// TicketStatusReviewingLegacy defines a package boundary constant.
-	TicketStatusReviewingLegacy = "reviewing"
-	// TicketStatusBlockedLegacy defines a package boundary constant.
-	TicketStatusBlockedLegacy = "blocked"
-	// TicketStatusSolvedLegacy defines a package boundary constant.
-	TicketStatusSolvedLegacy = "solved"
-	// TicketStatusMergedLegacy defines a package boundary constant.
-	TicketStatusMergedLegacy = "merged"
-	// TicketStatusClosedLegacy defines a package boundary constant.
-	TicketStatusClosedLegacy = "closed"
+	// StatusOpenLegacy defines a package boundary constant.
+	StatusOpenLegacy = "open"
+	// StatusReadyLegacy defines a package boundary constant.
+	StatusReadyLegacy = "ready"
+	// StatusReviewingLegacy defines a package boundary constant.
+	StatusReviewingLegacy = "reviewing"
+	// StatusBlockedLegacy defines a package boundary constant.
+	StatusBlockedLegacy = "blocked"
+	// StatusSolvedLegacy defines a package boundary constant.
+	StatusSolvedLegacy = "solved"
+	// StatusMergedLegacy defines a package boundary constant.
+	StatusMergedLegacy = "merged"
+	// StatusClosedLegacy defines a package boundary constant.
+	StatusClosedLegacy = "closed"
 )
 
 var normalBoardTicketStatuses = map[string]struct{}{
-	TicketStatusBacklog:        {},
-	TicketStatusReadyForDev:    {},
-	TicketStatusInProgress:     {},
-	TicketStatusReadyForReview: {},
-	TicketStatusReadyForMerge:  {},
-	TicketStatusDone:           {},
+	StatusBacklog:        {},
+	StatusReadyForDev:    {},
+	StatusInProgress:     {},
+	StatusReadyForReview: {},
+	StatusReadyForMerge:  {},
+	StatusDone:           {},
 }
 
 var legacyTicketStatusAliases = map[string]string{
-	TicketStatusOpenLegacy:      TicketStatusBacklog,
-	TicketStatusReadyLegacy:     TicketStatusReadyForDev,
-	TicketStatusReviewingLegacy: TicketStatusReadyForReview,
-	TicketStatusSolvedLegacy:    TicketStatusReadyForMerge,
-	TicketStatusMergedLegacy:    TicketStatusDone,
-	TicketStatusClosedLegacy:    TicketStatusDone,
+	StatusOpenLegacy:      StatusBacklog,
+	StatusReadyLegacy:     StatusReadyForDev,
+	StatusReviewingLegacy: StatusReadyForReview,
+	StatusSolvedLegacy:    StatusReadyForMerge,
+	StatusMergedLegacy:    StatusDone,
+	StatusClosedLegacy:    StatusDone,
 }
 
-// IsValidTicketStatus executes the corresponding package operation.
-func IsValidTicketStatus(status string) bool {
+// ValidStatus executes the corresponding package operation.
+func ValidStatus(status string) bool {
 	status = strings.TrimSpace(status)
 	if _, ok := normalBoardTicketStatuses[status]; ok {
 		return true
@@ -61,20 +61,20 @@ func IsValidTicketStatus(status string) bool {
 		return true
 	}
 
-	return status == TicketStatusBlockedLegacy
+	return status == StatusBlockedLegacy
 }
 
-// IsNormalBoardTicketStatus executes the corresponding package operation.
-func IsNormalBoardTicketStatus(status string) bool {
+// NormalBoardStatus executes the corresponding package operation.
+func NormalBoardStatus(status string) bool {
 	_, ok := normalBoardTicketStatuses[strings.TrimSpace(status)]
 
 	return ok
 }
 
-// BoardTicketStatusFor executes the corresponding package operation.
-func BoardTicketStatusFor(status string) (string, bool) {
+// BoardStatus executes the corresponding package operation.
+func BoardStatus(status string) (string, bool) {
 	status = strings.TrimSpace(status)
-	if IsNormalBoardTicketStatus(status) {
+	if NormalBoardStatus(status) {
 		return status, true
 	}
 

@@ -58,7 +58,7 @@ func TestWorkflowProcess(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		r.Task.Status = ticketcore.TicketStatusBacklog
+		r.Task.Status = ticketcore.StatusBacklog
 		changes = append(changes, WorkflowChange{Record: r, ExpectedRevision: r.Revision})
 	}
 
@@ -100,7 +100,7 @@ func TestWorkflowCrash(t *testing.T) {
 			}
 
 			for _, r := range snapshot.Records {
-				if r.Revision != 2 || r.Task.Status != ticketcore.TicketStatusBacklog {
+				if r.Revision != 2 || r.Task.Status != ticketcore.StatusBacklog {
 					t.Fatal("mixed transition survived recovery")
 				}
 			}
@@ -237,7 +237,7 @@ func TestWorkflowCompetingWriters(t *testing.T) {
 		group.Go(func() {
 			copyOf := r
 			task := *r.Task
-			task.Status = ticketcore.TicketStatusBacklog
+			task.Status = ticketcore.StatusBacklog
 			copyOf.Task = &task
 
 			_, err := s.Write(context.Background(), copyOf, 1)

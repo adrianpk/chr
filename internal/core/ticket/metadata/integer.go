@@ -7,8 +7,8 @@ import (
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 )
 
-// OptionalTicketInt parses an optional ticket integer with the original empty-value contract.
-func OptionalTicketInt(value string) (int, error) {
+// OptionalInteger parses an optional ticket integer with the original empty-value contract.
+func OptionalInteger(value string) (int, error) {
 	value = opsmetadata.Unquote(value)
 	if value == "" {
 		return 0, nil

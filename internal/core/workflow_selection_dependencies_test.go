@@ -59,7 +59,7 @@ func writeSelectionProof(t *testing.T, store *WorkflowStore, record WorkflowReco
 		t.Fatal(err)
 	}
 
-	record.Task.Evidence, record.Task.Phase, record.Task.Status = []string{relative}, "validated", ticketcore.TicketStatusInProgress
+	record.Task.Evidence, record.Task.Phase, record.Task.Status = []string{relative}, "validated", ticketcore.StatusInProgress
 
 	return workflowTestWrite(t, store, record)
 }

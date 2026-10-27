@@ -158,7 +158,7 @@ func editableTicketContent(document TicketDocument) (string, error) {
 
 	record := document.native
 
-	return ticketcore.NewTicketRenderer().RenderTicket(ticketcore.Ticket{
+	return ticketcore.NewRenderer().Render(ticketcore.Ticket{
 		Key: record.Task.Key, Title: document.Ticket.Title, Synopsis: boardDescription(record.Body),
 		Status: record.Task.Status, UseCase: record.Task.UseCase,
 		Priority: document.Ticket.Priority, Severity: document.Ticket.Severity, Type: document.Ticket.Type,

@@ -36,7 +36,7 @@ func (s *WorkflowStore) checkWorkflowSelectionGuard(ctx context.Context, request
 		return workflowstate.ErrConflict
 	}
 
-	ticket := ticketcore.IndexedTicket{IndexedTicketIdentity: ticketcore.IndexedTicketIdentity{Key: guard.Key}, IndexedTicketClassification: ticketcore.IndexedTicketClassification{UseCase: record.Task.UseCase}}
+	ticket := ticketcore.Indexed{IndexedIdentity: ticketcore.IndexedIdentity{Key: guard.Key}, IndexedClassification: ticketcore.IndexedClassification{UseCase: record.Task.UseCase}}
 	if !selection.matches(request.Selection.Selector, ticket, record) {
 		return workflowstate.ErrConflict
 	}

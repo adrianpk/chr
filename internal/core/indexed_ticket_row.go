@@ -59,7 +59,7 @@ func (f *indexedTicketRow) values() []any {
 }
 
 type indexedTicketRow struct {
-	ticket *ticketcore.IndexedTicket
+	ticket *ticketcore.Indexed
 
 	createdAt            sql.NullString
 	updatedAt            sql.NullString

@@ -83,7 +83,7 @@ func readObservedLoops(ctx context.Context, db *sql.DB, projectID string) ([]Loo
 
 // LegacyWorkQueue separates shared eligible order from display metadata.
 type LegacyWorkQueue struct {
-	Tickets, Eligible []ticketcore.IndexedTicket
+	Tickets, Eligible []ticketcore.Indexed
 	Excluded          int
 }
 
@@ -112,7 +112,7 @@ func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID s
 		return result, err
 	}
 
-	slices.SortFunc(result.Eligible, func(left, right ticketcore.IndexedTicket) int { return compareTicketLoopOrder(order, left, right) })
+	slices.SortFunc(result.Eligible, func(left, right ticketcore.Indexed) int { return compareTicketLoopOrder(order, left, right) })
 
 	return result, nil
 }
