@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -27,9 +28,9 @@ func telegramPreparedWorkPreview(prepared PreparedAuthoringWork) string {
 		}
 	}
 
-	excerpt := core.TelegramDocumentExcerpt([]byte(body))
+	excerpt := tgmessage.DocumentExcerpt([]byte(body))
 
-	return fmt.Sprintf("Prepare ticket: %s\n\n%s\n\nOriginal request: %s\nConfirming authorizes this exact scope and creates the ticket in the backlog. Execution does not start.", title, excerpt, core.TelegramDocumentExcerpt([]byte(scope.Instruction)))
+	return fmt.Sprintf("Prepare ticket: %s\n\n%s\n\nOriginal request: %s\nConfirming authorizes this exact scope and creates the ticket in the backlog. Execution does not start.", title, excerpt, tgmessage.DocumentExcerpt([]byte(scope.Instruction)))
 }
 
 func telegramPreparedWorkFacts(result AuthoringWorkResult) (json.RawMessage, error) {

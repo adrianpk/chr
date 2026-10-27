@@ -9,6 +9,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // ResolveTelegramNotificationTarget uses the same canonical project-root binding
@@ -20,7 +21,7 @@ func ResolveTelegramNotificationTarget(project projectcore.Project, namespace, d
 	}
 
 	if !project.Enabled || !opsnamespace.Valid(namespace) || !validTelegramDigest(digest) {
-		return TelegramNotificationTarget{}, ErrTelegramDocumentUnavailable
+		return TelegramNotificationTarget{}, tgmessage.ErrDocumentUnavailable
 	}
 
 	return TelegramNotificationTarget{ProjectID: project.ID, Namespace: namespace, ProjectBindingDigest: binding, Destination: destination, ConfigDigest: contenthash.Sum([]byte(digest + "\x00" + binding + "\x00" + namespace))}, nil
@@ -51,7 +52,7 @@ func (r *sqliteNotificationEventRepository) ReadTelegramNotification(ctx context
 
 	if !m.payload.Valid {
 		if !m.isLegacy() {
-			return delivery, true, ErrTelegramDocumentUnavailable
+			return delivery, true, tgmessage.ErrDocumentUnavailable
 		}
 
 		return delivery, false, nil
@@ -66,7 +67,7 @@ func (r *sqliteNotificationEventRepository) ReadTelegramNotification(ctx context
 	if m.document.Valid {
 		document, err := r.readTelegramNotificationDocument(ctx, id, m.document.String, target, presentation.DocumentHash)
 		if err != nil {
-			return delivery, true, fmt.Errorf("%w: %w", ErrTelegramDocumentUnavailable, err)
+			return delivery, true, fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 		}
 
 		delivery.Document = &document
@@ -75,14 +76,14 @@ func (r *sqliteNotificationEventRepository) ReadTelegramNotification(ctx context
 	return delivery, true, nil
 }
 
-func decodeTelegramNotificationManifest(m telegramNotificationManifest, target TelegramNotificationTarget) (TelegramPresentation, bool, error) {
-	var presentation TelegramPresentation
+func decodeTelegramNotificationManifest(m telegramNotificationManifest, target TelegramNotificationTarget) (tgmessage.Presentation, bool, error) {
+	var presentation tgmessage.Presentation
 	if len(m.payload.String) > 64<<10 {
-		return presentation, true, ErrTelegramDocumentUnavailable
+		return presentation, true, tgmessage.ErrDocumentUnavailable
 	}
 
 	if err := json.Unmarshal([]byte(m.payload.String), &presentation); err != nil {
-		return presentation, true, fmt.Errorf("%w: %w", ErrTelegramDocumentUnavailable, err)
+		return presentation, true, fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 	}
 
 	if presentation.Version == 0 && m.isLegacy() {
@@ -94,7 +95,7 @@ func decodeTelegramNotificationManifest(m telegramNotificationManifest, target T
 	}
 
 	if !m.hash.Valid {
-		return presentation, true, ErrTelegramDocumentUnavailable
+		return presentation, true, tgmessage.ErrDocumentUnavailable
 	}
 
 	return presentation, true, validateTelegramNotificationManifest(m, presentation)
@@ -108,26 +109,26 @@ func (m telegramNotificationManifest) matchesTarget(target TelegramNotificationT
 	return m.destination.String == target.Destination && m.digest.String == target.ConfigDigest && m.namespace.String == target.Namespace && m.root.String == target.ProjectBindingDigest
 }
 
-func validateTelegramNotificationManifest(m telegramNotificationManifest, presentation TelegramPresentation) error {
+func validateTelegramNotificationManifest(m telegramNotificationManifest, presentation tgmessage.Presentation) error {
 	check := TelegramReceiverDelivery{Text: presentation.PlainFallback, DocumentID: m.document.String}
 	if err := decodeTelegramPresentationHash(m.payload.String, m.hash.String, &check); err != nil {
-		return fmt.Errorf("%w: %w", ErrTelegramDocumentUnavailable, err)
+		return fmt.Errorf("%w: %w", tgmessage.ErrDocumentUnavailable, err)
 	}
 
 	return validateTelegramNotificationActions(presentation)
 }
 
-func validateTelegramNotificationActions(p TelegramPresentation) error {
+func validateTelegramNotificationActions(p tgmessage.Presentation) error {
 	if p.ActionRef != "" || p.ScopeDigest != "" || len(p.ActionChoices) != 0 || len(p.ActionLabels) != 0 {
-		return ErrTelegramDocumentUnavailable
+		return tgmessage.ErrDocumentUnavailable
 	}
 
 	return nil
 }
 
-func (r *sqliteNotificationEventRepository) readTelegramNotificationDocument(ctx context.Context, owner, id string, target TelegramNotificationTarget, hash string) (TelegramDocument, error) {
+func (r *sqliteNotificationEventRepository) readTelegramNotificationDocument(ctx context.Context, owner, id string, target TelegramNotificationTarget, hash string) (tgmessage.Document, error) {
 	var (
-		d          TelegramDocument
+		d          tgmessage.Document
 		storedHash string
 	)
 
@@ -137,8 +138,8 @@ func (r *sqliteNotificationEventRepository) readTelegramNotificationDocument(ctx
 	}
 
 	if d.ProjectID != target.ProjectID || d.Namespace != target.Namespace || d.ProjectBindingDigest != target.ProjectBindingDigest || storedHash != hash || contenthash.Sum(d.Payload) != hash {
-		return TelegramDocument{}, ErrTelegramDocumentUnavailable
+		return tgmessage.Document{}, tgmessage.ErrDocumentUnavailable
 	}
 
-	return d, validateTelegramDocument(d)
+	return d, tgmessage.ValidateDocument(d)
 }

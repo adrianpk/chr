@@ -9,6 +9,7 @@ import (
 	"unicode/utf16"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // TestTelegramPresentationControlQuestions keeps a short question-led view while
@@ -26,7 +27,7 @@ func TestTelegramPresentationControlQuestions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	view := core.RenderTelegramDocument(response.Message)
+	view := tgmessage.RenderDocument(response.Message)
 	if !strings.HasPrefix(view.PlainFallback, "Which option should be used?") || len(utf16.Encode([]rune(view.PlainFallback))) > 900 {
 		t.Fatal("question was replaced by metadata or exceeded the caption bound", view)
 	}

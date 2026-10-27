@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // TelegramNotificationTarget binds the existing configured sender, project root
@@ -23,19 +24,19 @@ type TelegramNotificationTarget struct {
 type TelegramNotificationInput struct {
 	Record   NotificationAuditRecord
 	Target   TelegramNotificationTarget
-	Message  TelegramMessageBlocks
-	Document *TelegramDocument
+	Message  tgmessage.Blocks
+	Document *tgmessage.Document
 }
 
 // TelegramNotificationDelivery is retained presentation and transport state,
 // independent of native work validation or integration receipts.
 type TelegramNotificationDelivery struct {
-	Presentation    TelegramPresentation
-	Document        *TelegramDocument
+	Presentation    tgmessage.Presentation
+	Document        *tgmessage.Document
 	Attempts        int
 	PlainFallback   bool
 	Uncertain       bool
-	Acknowledgement TelegramDocumentAcknowledgement
+	Acknowledgement tgmessage.Acknowledgement
 	Status          NotificationStatus
 }
 

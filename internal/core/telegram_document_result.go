@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func queueTelegramOperationResult(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, text, receipt, configDigest string, now time.Time) error {
@@ -36,9 +38,9 @@ func queueTelegramOperationResult(ctx context.Context, tx *sql.Tx, request Teleg
 		return errors.Join(err, releaseErr)
 	}
 
-	if !errors.Is(err, ErrTelegramDocumentUnavailable) {
+	if !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		return err
 	}
 
-	return queueTelegramPresentation(ctx, tx, request.Source, TelegramMessageBlocks{InitialText: text, SecondaryText: "The complete document could not be attached: its image is invalid or document storage is full. The result is saved. Use local project commands to inspect it."}, configDigest, now)
+	return queueTelegramPresentation(ctx, tx, request.Source, tgmessage.Blocks{InitialText: text, SecondaryText: "The complete document could not be attached: its image is invalid or document storage is full. The result is saved. Use local project commands to inspect it."}, configDigest, now)
 }

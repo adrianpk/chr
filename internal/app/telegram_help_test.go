@@ -7,7 +7,7 @@ import (
 	"testing"
 	"unicode/utf16"
 
-	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // Help must be readable by category rather than one unstructured command list.
@@ -40,7 +40,7 @@ func TestTelegramHelpMetadata(t *testing.T) {
 		}
 	}
 
-	if len(core.TelegramResponseParts(reply.Text, "help")) != 1 || len(core.TelegramResponseParts(reply.PlainText, "help")) != 1 {
+	if len(tgmessage.ResponseParts(reply.Text, "help")) != 1 || len(tgmessage.ResponseParts(reply.PlainText, "help")) != 1 {
 		t.Fatal("current catalogue splits during actual response retention")
 	}
 

@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func telegramNotificationTestInput(t *testing.T) TelegramNotificationInput {
@@ -23,7 +24,7 @@ func telegramNotificationTestInput(t *testing.T) TelegramNotificationInput {
 
 	payload := []byte("# Complete worker-reported details\n\nLiteral `*_` 😀\n")
 
-	return TelegramNotificationInput{Record: record, Target: target, Message: TelegramMessageBlocks{Family: "47", InitialText: "Ticket blocked in Example project", ContentKind: "markdown", Content: TelegramDocumentExcerpt(payload), SecondaryText: "Complete original export attached. Integration requires its canonical receipt."}, Document: &TelegramDocument{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notification.md", SourceHash: contenthash.Sum(payload), Filename: "notification.md", MediaType: "text/markdown", Payload: payload}}
+	return TelegramNotificationInput{Record: record, Target: target, Message: tgmessage.Blocks{Family: "47", InitialText: "Ticket blocked in Example project", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete original export attached. Integration requires its canonical receipt."}, Document: &tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notification.md", SourceHash: contenthash.Sum(payload), Filename: "notification.md", MediaType: "text/markdown", Payload: payload}}
 }
 
 // A real database freezes the event's presentation and bytes together. Updating
@@ -121,7 +122,7 @@ func TestTelegramPresentationNotificationAllowance(t *testing.T) {
 func finishTelegramNotificationTest(t *testing.T, repository NotificationEventRepository, input TelegramNotificationInput) {
 	t.Helper()
 
-	ack := TelegramDocumentAcknowledgement{MessageID: 1001, FileID: "original-file"}
+	ack := tgmessage.Acknowledgement{MessageID: 1001, FileID: "original-file"}
 	if err := repository.FinishTelegramNotification(t.Context(), input.Record.Event.ID, input.Target, ack, "", false, time.Now().UTC()); err != nil {
 		t.Fatal(err)
 	}

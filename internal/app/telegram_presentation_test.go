@@ -8,6 +8,7 @@ import (
 	"unicode/utf16"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // A real HTTP/SQLite conversation keeps the request, human choices and exact
@@ -121,7 +122,7 @@ func TestTelegramPresentationFormatHTTP(t *testing.T) {
 			receiver, config := telegramAppTestReceiver(t, core.TelegramReceiverAPI{Client: server.Client(), BaseURL: server.URL})
 			update := retainTelegramHelpInput(t, receiver, 1, "/dump")
 
-			message := core.TelegramMessageBlocks{InitialText: "Saved 😀", ContentKind: "markdown", Content: "# Title\n```literal```\\_*[", SecondaryText: "Details retained."}
+			message := tgmessage.Blocks{InitialText: "Saved 😀", ContentKind: "markdown", Content: "# Title\n```literal```\\_*[", SecondaryText: "Details retained."}
 			if err := receiver.store.QueuePresentationResponse(t.Context(), update, message, config.Digest(), time.Now()); err != nil {
 				t.Fatal(err)
 			}
@@ -136,7 +137,7 @@ func TestTelegramPresentationFormatHTTP(t *testing.T) {
 	}
 }
 
-func checkTelegramPresentationPayloads(t *testing.T, payloads <-chan telegramHelpHTTPBody, sends int, message core.TelegramMessageBlocks) {
+func checkTelegramPresentationPayloads(t *testing.T, payloads <-chan telegramHelpHTTPBody, sends int, message tgmessage.Blocks) {
 	t.Helper()
 
 	if len(payloads) != sends {
@@ -150,7 +151,7 @@ func checkTelegramPresentationPayloads(t *testing.T, payloads <-chan telegramHel
 		}
 
 		if index == 0 {
-			if len(payload.Entities) != 1 || payload.Entities[0] != (core.TelegramTextEntity{Type: "pre", Offset: 10, Length: len(utf16.Encode([]rune(message.Content)))}) {
+			if len(payload.Entities) != 1 || payload.Entities[0] != (tgmessage.Entity{Type: "pre", Offset: 10, Length: len(utf16.Encode([]rune(message.Content)))}) {
 				t.Fatal("wire entity does not address the final literal content", payload)
 			}
 		} else if len(payload.Entities) != 0 {

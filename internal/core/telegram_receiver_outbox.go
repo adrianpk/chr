@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // TelegramReceiverDelivery retains a response independently of its send outcome.
@@ -27,7 +28,7 @@ type TelegramReceiverDelivery struct {
 	PlainText     string
 	PlainFallback bool
 	DocumentID    string
-	Presentation  *TelegramPresentation
+	Presentation  *tgmessage.Presentation
 }
 
 // QueueReadResponse records a response and acknowledges its retained input atomically.
@@ -57,7 +58,7 @@ func queueTelegramResponse(ctx context.Context, tx *sql.Tx, update TelegramRecei
 }
 
 func queueTelegramReferencedResponse(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, text, reference, configDigest string, now time.Time) error {
-	return queueTelegramResponseParts(ctx, tx, update, TelegramResponseParts(text, reference), configDigest, now)
+	return queueTelegramResponseParts(ctx, tx, update, tgmessage.ResponseParts(text, reference), configDigest, now)
 }
 
 func queueTelegramResponseParts(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, parts []string, configDigest string, now time.Time) error {
@@ -208,7 +209,7 @@ func (s *TelegramReceiverStore) DeliverySent(ctx context.Context, id string, mes
 
 // DeliveryDocumentSent retains the original upload acknowledgement without
 // changing its immutable source image or allocating another operation.
-func (s *TelegramReceiverStore) DeliveryDocumentSent(ctx context.Context, id string, ack TelegramDocumentAcknowledgement, now time.Time) error {
+func (s *TelegramReceiverStore) DeliveryDocumentSent(ctx context.Context, id string, ack tgmessage.Acknowledgement, now time.Time) error {
 	if ack.FileID == "" || len(ack.FileID) > 256 {
 		return errors.New("telegram document requires a definite file identity")
 	}

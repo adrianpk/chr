@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 	"unicode/utf16"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // Real SQLite projection freezes one bounded view under its original native
@@ -15,8 +17,8 @@ func TestTelegramPresentationProgressRetention(t *testing.T) {
 	now := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
 	telegramWorkDeliverInitial(t, f, now)
 
-	message := TelegramMessageBlocks{Family: "33", InitialText: "README work in Example project", Content: strings.Repeat("literal `*` 😀\n", 500), SecondaryText: "No confirmed integration receipt. Inspect: chr work status --json run-presentation"}
-	original := RenderTelegramMessage(message).PlainFallback
+	message := tgmessage.Blocks{Family: "33", InitialText: "README work in Example project", Content: strings.Repeat("literal `*` 😀\n", 500), SecondaryText: "No confirmed integration receipt. Inspect: chr work status --json run-presentation"}
+	original := tgmessage.Render(message).PlainFallback
 
 	observation := TelegramWorkObservation{Revision: 1, Phase: "executing", Kind: "progress", Text: original, Message: &message}
 	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {

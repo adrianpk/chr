@@ -13,6 +13,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,8 +21,8 @@ import (
 // PreparedInput is the caller's serialized, frozen shared-owner input.
 type TelegramOperationRequest struct {
 	// Delivery and Message are response-only data, outside operation authority.
-	Delivery       *TelegramDocumentResponse `json:"-"`
-	Message        *TelegramMessageBlocks    `json:"-"`
+	Delivery       *tgmessage.DocumentResponse `json:"-"`
+	Message        *tgmessage.Blocks           `json:"-"`
 	ID             string
 	Source         TelegramReceivedUpdate
 	Ordinal        int

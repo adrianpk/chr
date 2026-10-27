@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func (r telegramReceiver) queueReadReply(ctx context.Context, update core.TelegramReceivedUpdate, config core.TelegramReceiverConfig, reply telegramReadReply) error {
@@ -13,7 +14,7 @@ func (r telegramReceiver) queueReadReply(ctx context.Context, update core.Telegr
 		return r.store.QueueFormattedReadResponse(ctx, update, reply.Text, reply.PlainText, config.Digest(), time.Now())
 	}
 
-	return r.store.QueuePresentationResponse(ctx, update, core.TelegramMessageBlocks{InitialText: reply.Text}, config.Digest(), time.Now())
+	return r.store.QueuePresentationResponse(ctx, update, tgmessage.Blocks{InitialText: reply.Text}, config.Digest(), time.Now())
 }
 
 func telegramHelpRequest(update core.TelegramReceivedUpdate) (telegramReadReply, bool) {

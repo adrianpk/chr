@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 type telegramReadOperation int
@@ -89,7 +90,7 @@ func telegramProjectResponse(operations telegramReadService, ids []string) (stri
 		return "No projects are available to you. Project access must be configured locally.", nil
 	}
 
-	return core.RenderTelegramMessage(core.TelegramMessageBlocks{InitialText: "Available projects", ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: "Select one with /project <name>."}).PlainFallback, nil
+	return tgmessage.Render(tgmessage.Blocks{InitialText: "Available projects", ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: "Select one with /project <name>."}).PlainFallback, nil
 }
 
 func telegramReceiverHealthText(state core.TelegramReceiverState) string {

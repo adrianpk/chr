@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -21,7 +22,7 @@ type TelegramWorkObservation struct {
 	Phase    string
 	Kind     string
 	Text     string
-	Message  *TelegramMessageBlocks
+	Message  *tgmessage.Blocks
 }
 
 // ProjectTelegramWork reserves an observed notice and local phase atomically.
@@ -81,7 +82,7 @@ func sameTelegramWorkNotice(ctx context.Context, tx *sql.Tx, ref TelegramWorkRef
 	hash := ""
 
 	if observation.Message != nil {
-		image, err := json.Marshal(RenderTelegramMessage(*observation.Message))
+		image, err := json.Marshal(tgmessage.Render(*observation.Message))
 		if err != nil {
 			return false, err
 		}
@@ -117,12 +118,12 @@ func queueTelegramWorkObservation(ctx context.Context, tx *sql.Tx, ref TelegramW
 
 	key := fmt.Sprintf("work:%s:%d", ref.Request.Target.ConversationID, observation.Revision)
 
-	parts := TelegramResponseParts(observation.Text, "workflow:"+ref.Invocation.ID)
+	parts := tgmessage.ResponseParts(observation.Text, "workflow:"+ref.Invocation.ID)
 
 	var presentation []byte
 
 	if observation.Message != nil {
-		view := RenderTelegramMessage(*observation.Message)
+		view := tgmessage.Render(*observation.Message)
 		parts = []string{view.PlainFallback}
 
 		var err error

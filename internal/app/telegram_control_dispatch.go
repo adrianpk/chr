@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -145,7 +146,7 @@ func (r telegramReceiver) respondNativeStatus(ctx context.Context, operations te
 		}
 
 		err = r.store.QueueDocumentResponse(ctx, input.Update, response, input.Config.Digest(), time.Now())
-		if errors.Is(err, core.ErrTelegramDocumentUnavailable) {
+		if errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 			return r.recordDiagnostic(ctx, input.Update, input.Config, "The complete questions export could not be attached under the document or storage limits. Inspect canonical work status locally before answering.")
 		}
 

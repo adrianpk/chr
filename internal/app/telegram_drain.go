@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 const telegramUncertainDeliveryText = "Delivery confirmation was lost; this notice may be repeated."
@@ -60,7 +61,7 @@ func (r telegramReceiver) respond(ctx context.Context, update core.TelegramRecei
 	for _, handler := range []func(context.Context, core.TelegramAllowedUser, core.TelegramReceiverConfig, core.TelegramReceivedUpdate) (bool, error){r.respondGuidedStart, r.respondAction, r.respondGuided, r.respondHarness, r.respondControl, r.respondWork, r.respondRecord, r.respondPreparedWork, r.respondExplanation, r.respondAuthoring, r.respondIntent, r.respondConversation} {
 		if handled, err := handler(ctx, user, config, update); handled || err != nil {
 			if errors.Is(err, core.ErrTelegramRequestCapacity) {
-				return r.store.QueuePresentationResponse(ctx, update, core.TelegramMessageBlocks{Family: "42", InitialText: telegramRequestCapacityText}, config.Digest(), time.Now())
+				return r.store.QueuePresentationResponse(ctx, update, tgmessage.Blocks{Family: "42", InitialText: telegramRequestCapacityText}, config.Digest(), time.Now())
 			}
 
 			return err

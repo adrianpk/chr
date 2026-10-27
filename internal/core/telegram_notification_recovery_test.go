@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // Receiver and notification admissions contend for the same final 2 MiB on
@@ -25,10 +26,10 @@ func TestTelegramPresentationFailureSharedQuota(t *testing.T) {
 	}
 
 	input := telegramNotificationTestInput(t)
-	input.Document.Payload = bytes.Repeat([]byte("n"), telegramDocumentLimit)
+	input.Document.Payload = bytes.Repeat([]byte("n"), tgmessage.DocumentLimit)
 	input.Document.SourceHash = contenthash.Sum(input.Document.Payload)
 	response := telegramTestDocumentResponse()
-	response.Document.Payload = bytes.Repeat([]byte("r"), telegramDocumentLimit)
+	response.Document.Payload = bytes.Repeat([]byte("r"), tgmessage.DocumentLimit)
 	response.Document.SourceHash = contenthash.Sum(response.Document.Payload)
 
 	ready, results := make(chan struct{}), make(chan error, 2)
@@ -47,7 +48,7 @@ func TestTelegramPresentationFailureSharedQuota(t *testing.T) {
 		err := <-results
 		if err == nil {
 			successful++
-		} else if !errors.Is(err, ErrTelegramDocumentUnavailable) {
+		} else if !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 			t.Fatal(err)
 		}
 	}
@@ -66,7 +67,7 @@ func checkTelegramNotificationQuota(t *testing.T, repository *sqliteNotification
 	var usage int64
 
 	err := repository.db.QueryRowContext(t.Context(), `SELECT (SELECT COALESCE(SUM(length(payload)),0) FROM telegram_document_snapshots)+(SELECT COALESCE(SUM(length(payload)),0) FROM telegram_notification_documents)`).Scan(&usage)
-	if err != nil || usage != telegramDocumentQuota {
+	if err != nil || usage != tgmessage.DocumentQuota {
 		t.Fatal("shared quota changed", usage, err)
 	}
 }
@@ -94,7 +95,7 @@ func checkTelegramNotificationQuotaRollback(t *testing.T, repository *sqliteNoti
 	input := telegramNotificationTestInput(t)
 
 	input.Record.Event.ID = "rejected-notification"
-	if err := repository.CreateTelegramNotification(t.Context(), input); !errors.Is(err, ErrTelegramDocumentUnavailable) {
+	if err := repository.CreateTelegramNotification(t.Context(), input); !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		t.Fatal("full database admitted another export", err)
 	}
 
@@ -140,9 +141,9 @@ func finishTelegramNotificationRetention(t *testing.T, repository NotificationEv
 		t.Fatal(reserved, err)
 	}
 
-	ack, code, uncertain := TelegramDocumentAcknowledgement{MessageID: 77, FileID: "original-file"}, "", false
+	ack, code, uncertain := tgmessage.Acknowledgement{MessageID: 77, FileID: "original-file"}, "", false
 	if index == 21 {
-		ack, code, uncertain = TelegramDocumentAcknowledgement{}, "transport_failure", true
+		ack, code, uncertain = tgmessage.Acknowledgement{}, "transport_failure", true
 	}
 
 	if index == 23 {

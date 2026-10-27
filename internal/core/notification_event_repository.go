@@ -13,6 +13,7 @@ import (
 	_ "modernc.org/sqlite"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // ErrNotificationEventNotFound identifies a package boundary error.
@@ -29,7 +30,7 @@ type NotificationEventRepository interface {
 	CreateTelegramNotification(context.Context, TelegramNotificationInput) error
 	ReadTelegramNotification(context.Context, string, TelegramNotificationTarget) (TelegramNotificationDelivery, bool, error)
 	ReserveTelegramNotification(context.Context, string, TelegramNotificationTarget, bool) (bool, error)
-	FinishTelegramNotification(context.Context, string, TelegramNotificationTarget, TelegramDocumentAcknowledgement, string, bool, time.Time) error
+	FinishTelegramNotification(context.Context, string, TelegramNotificationTarget, tgmessage.Acknowledgement, string, bool, time.Time) error
 	CreateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
 	UpdateNotificationEvent(ctx context.Context, record NotificationAuditRecord) error
 	GetNotificationEvent(ctx context.Context, id string) (NotificationAuditRecord, error)

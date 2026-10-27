@@ -11,6 +11,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // CreateTelegramNotification admits the event, immutable view and complete
@@ -29,9 +30,9 @@ func (r *sqliteNotificationEventRepository) CreateTelegramNotification(ctx conte
 			return err
 		}
 
-		view := RenderTelegramMessage(input.Message)
+		view := tgmessage.Render(input.Message)
 		if input.Document != nil {
-			view = RenderTelegramDocument(input.Message)
+			view = tgmessage.RenderDocument(input.Message)
 			view.DocumentID = "tgndoc-" + contenthash.Sum([]byte(input.Record.Event.ID))[:32]
 
 			view.DocumentHash = contenthash.Sum(input.Document.Payload)
@@ -56,16 +57,16 @@ func validateTelegramNotificationInput(input TelegramNotificationInput) error {
 		return err
 	}
 
-	if len(input.Message.InitialText)+len(input.Message.Content)+len(input.Message.SecondaryText) > telegramDocumentLimit || len(input.Message.Family) > 64 {
-		return ErrTelegramDocumentUnavailable
+	if len(input.Message.InitialText)+len(input.Message.Content)+len(input.Message.SecondaryText) > tgmessage.DocumentLimit || len(input.Message.Family) > 64 {
+		return tgmessage.ErrDocumentUnavailable
 	}
 
 	if err := validateTelegramNotificationTarget(input); err != nil {
 		return err
 	}
 
-	if RenderTelegramMessage(input.Message).PlainFallback == "" {
-		return ErrTelegramDocumentUnavailable
+	if tgmessage.Render(input.Message).PlainFallback == "" {
+		return tgmessage.ErrDocumentUnavailable
 	}
 
 	return validateTelegramNotificationDocument(input.Document, input.Target)
@@ -84,17 +85,17 @@ func validateTelegramNotificationTarget(input TelegramNotificationInput) error {
 	return nil
 }
 
-func validateTelegramNotificationDocument(document *TelegramDocument, target TelegramNotificationTarget) error {
+func validateTelegramNotificationDocument(document *tgmessage.Document, target TelegramNotificationTarget) error {
 	if document == nil {
 		return nil
 	}
 
-	if err := validateTelegramDocument(*document); err != nil {
+	if err := tgmessage.ValidateDocument(*document); err != nil {
 		return err
 	}
 
 	if document.ProjectID != target.ProjectID || document.Namespace != target.Namespace || document.ProjectBindingDigest != target.ProjectBindingDigest {
-		return ErrTelegramDocumentUnavailable
+		return tgmessage.ErrDocumentUnavailable
 	}
 
 	return nil
@@ -114,7 +115,7 @@ func retainTelegramNotificationDocument(ctx context.Context, tx *sql.Tx, input T
 	}
 
 	if count != 1 {
-		return ErrTelegramDocumentUnavailable
+		return tgmessage.ErrDocumentUnavailable
 	}
 
 	return nil

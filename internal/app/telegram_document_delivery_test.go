@@ -15,6 +15,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 type telegramDocumentUpload struct {
@@ -90,7 +91,7 @@ func readTelegramDocumentUpload(t *testing.T, r *http.Request) telegramDocumentU
 	return upload
 }
 
-func queueTelegramDocumentFixture(t *testing.T, receiver telegramReceiver, config core.TelegramReceiverConfig) core.TelegramDocumentResponse {
+func queueTelegramDocumentFixture(t *testing.T, receiver telegramReceiver, config core.TelegramReceiverConfig) tgmessage.DocumentResponse {
 	t.Helper()
 	addTelegramAppTestProjects(t, receiver.env)
 
@@ -108,7 +109,7 @@ func queueTelegramDocumentFixture(t *testing.T, receiver telegramReceiver, confi
 
 	payload := []byte("---\nstatus: draft\n---\n# Original 😀\n```literal```\n")
 
-	response := core.TelegramDocumentResponse{Message: core.TelegramMessageBlocks{InitialText: "Draft ready", ContentKind: "markdown", Content: core.TelegramDocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: core.TelegramDocument{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "ops/default/spec/example.md", SourceHash: recordDigest(payload), Filename: "example.md", MediaType: "text/markdown", Payload: payload}}
+	response := tgmessage.DocumentResponse{Message: tgmessage.Blocks{InitialText: "Draft ready", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "ops/default/spec/example.md", SourceHash: recordDigest(payload), Filename: "example.md", MediaType: "text/markdown", Payload: payload}}
 	if err := receiver.store.QueueDocumentResponse(t.Context(), update, response, config.Digest(), time.Now()); err != nil {
 		t.Fatal(err)
 	}
@@ -162,7 +163,7 @@ func checkTelegramDocumentUploads(t *testing.T, uploads <-chan telegramDocumentU
 		if index == 0 {
 			caption = upload.Fields["caption"]
 
-			var entities []core.TelegramTextEntity
+			var entities []tgmessage.Entity
 			if err := json.Unmarshal([]byte(upload.Fields["caption_entities"]), &entities); err != nil || len(entities) != 1 {
 				t.Fatal("literal caption entities missing", entities, err)
 			}

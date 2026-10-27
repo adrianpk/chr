@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func telegramNotificationTarget(project commandProjectContext, config core.TelegramNotificationConfig) (core.TelegramNotificationTarget, error) {
@@ -33,7 +34,7 @@ func telegramNotificationTarget(project commandProjectContext, config core.Teleg
 func telegramNotificationInput(record core.NotificationAuditRecord, project commandProjectContext, config core.TelegramNotificationConfig) (core.TelegramNotificationInput, error) {
 	input := core.TelegramNotificationInput{Record: record}
 	if telegramNotificationEventBytes(record.Event) > 2<<20 {
-		return input, core.ErrTelegramDocumentUnavailable
+		return input, tgmessage.ErrDocumentUnavailable
 	}
 
 	target, err := telegramNotificationTarget(project, config)
@@ -48,9 +49,9 @@ func telegramNotificationInput(record core.NotificationAuditRecord, project comm
 		name = project.ProjectID
 	}
 
-	input.Message = core.TelegramMessageBlocks{Family: "47", InitialText: record.Event.Payload.Summary + " in " + name, Content: record.Event.Payload.Detail, SecondaryText: "This reports work activity. Integration requires its canonical receipt. Complete notification event export attached."}
+	input.Message = tgmessage.Blocks{Family: "47", InitialText: record.Event.Payload.Summary + " in " + name, Content: record.Event.Payload.Detail, SecondaryText: "This reports work activity. Integration requires its canonical receipt. Complete notification event export attached."}
 	if record.Event.Type == core.NotificationEventManualTest {
-		input.Message = core.TelegramMessageBlocks{Family: "48", InitialText: "Telegram notification test for " + name + "."}
+		input.Message = tgmessage.Blocks{Family: "48", InitialText: "Telegram notification test for " + name + "."}
 
 		return input, nil
 	}
@@ -61,7 +62,7 @@ func telegramNotificationInput(record core.NotificationAuditRecord, project comm
 	}
 
 	payload = append(payload, '\n')
-	document := core.TelegramDocument{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notifications/" + record.Event.ID + ".json", SourceHash: recordDigest(payload), Filename: "notification-event.json", MediaType: "application/json", Payload: payload}
+	document := tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: "exports/notifications/" + record.Event.ID + ".json", SourceHash: recordDigest(payload), Filename: "notification-event.json", MediaType: "application/json", Payload: payload}
 	input.Document = &document
 
 	return input, nil

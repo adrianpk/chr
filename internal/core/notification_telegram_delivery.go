@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -29,7 +30,7 @@ func (r *sqliteNotificationEventRepository) ReserveTelegramNotification(ctx cont
 
 // FinishTelegramNotification saves only transport evidence for the original
 // claimed event; it cannot publish work or create a native delivery receipt.
-func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx context.Context, id string, target TelegramNotificationTarget, ack TelegramDocumentAcknowledgement, code string, uncertain bool, now time.Time) error {
+func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx context.Context, id string, target TelegramNotificationTarget, ack tgmessage.Acknowledgement, code string, uncertain bool, now time.Time) error {
 	status := NotificationStatusFailed
 	minimumAttempts := 0
 
@@ -44,7 +45,7 @@ func (r *sqliteNotificationEventRepository) FinishTelegramNotification(ctx conte
 	}
 
 	if len(code) > 128 {
-		return ErrTelegramDocumentUnavailable
+		return tgmessage.ErrDocumentUnavailable
 	}
 
 	return r.notificationTransaction(ctx, func(tx *sql.Tx) error {

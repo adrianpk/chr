@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramDeliveryEntities(delivery core.TelegramReceiverDelivery, text string) []core.TelegramTextEntity {
+func telegramDeliveryEntities(delivery core.TelegramReceiverDelivery, text string) []tgmessage.Entity {
 	if delivery.Presentation == nil || delivery.PlainFallback {
 		return nil
 	}
@@ -46,7 +47,7 @@ func (r telegramReceiver) sendDocumentDelivery(ctx context.Context, delivery cor
 	return r.store.DeliveryDocumentSent(ctx, delivery.ID, acknowledgement, time.Now())
 }
 
-func (r telegramReceiver) validateDocumentDestination(document core.TelegramDocument, delivery core.TelegramReceiverDelivery) error {
+func (r telegramReceiver) validateDocumentDestination(document tgmessage.Document, delivery core.TelegramReceiverDelivery) error {
 	config, err := r.currentConfig()
 	if err != nil || config.Digest() != delivery.ConfigDigest {
 		return workflowstate.ErrConflict

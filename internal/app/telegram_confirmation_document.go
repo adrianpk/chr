@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func (r telegramReceiver) offerConfirmationDocument(ctx context.Context, request core.TelegramOperationRequest, offer core.TelegramActionOffer, family, text, complete string) error {
@@ -18,14 +19,14 @@ func (r telegramReceiver) offerConfirmationDocument(ctx context.Context, request
 	digest := sha256.Sum256(request.PreparedInput)
 	parts := strings.SplitN(text, "\n\n", 2)
 
-	message := core.TelegramMessageBlocks{Family: family, InitialText: parts[0]}
+	message := tgmessage.Blocks{Family: family, InitialText: parts[0]}
 	if len(parts) == 2 {
 		message.Content = parts[1]
 	}
 
 	if family == "25" {
 		message.ContentKind = "markdown"
-		message.Content = core.TelegramDocumentExcerpt([]byte(message.Content))
+		message.Content = tgmessage.DocumentExcerpt([]byte(message.Content))
 		message.InitialText += "\nCreates a backlog ticket; execution does not start."
 	}
 
@@ -37,10 +38,10 @@ func (r telegramReceiver) offerConfirmationDocument(ctx context.Context, request
 		}
 	}
 
-	offer.Delivery = &core.TelegramDocumentResponse{Message: message, Document: telegramDocumentForTarget(request.Target, "exports/confirmation/"+request.ID+".md", hex.EncodeToString(digest[:]), "confirmation-scope.md", "text/markdown", payload)}
+	offer.Delivery = &tgmessage.DocumentResponse{Message: message, Document: telegramDocumentForTarget(request.Target, "exports/confirmation/"+request.ID+".md", hex.EncodeToString(digest[:]), "confirmation-scope.md", "text/markdown", payload)}
 
 	_, err := r.store.OfferTelegramAction(ctx, offer, time.Now())
-	if !errors.Is(err, core.ErrTelegramDocumentUnavailable) {
+	if !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		return err
 	}
 
@@ -65,7 +66,7 @@ type telegramWorkConfirmation struct {
 func (r telegramReceiver) workConfirmationContents(ctx context.Context, request core.TelegramOperationRequest, preview WorkflowBoundPreview) (telegramWorkConfirmation, error) {
 	operations, ok := r.operations.(telegramWorkConfirmationService)
 	if !ok {
-		return telegramWorkConfirmation{}, core.ErrTelegramDocumentUnavailable
+		return telegramWorkConfirmation{}, tgmessage.ErrDocumentUnavailable
 	}
 
 	records, err := operations.ReadTelegramWorkConfirmation(ctx, request.Target, preview)
@@ -89,19 +90,19 @@ func (r telegramReceiver) workConfirmationContents(ctx context.Context, request 
 	return telegramWorkConfirmation{Complete: content.String(), Titles: titles}, nil
 }
 
-func telegramQuestionDocument(target core.TelegramOperationTarget, status WorkflowWorkStatus) (core.TelegramDocumentResponse, error) {
+func telegramQuestionDocument(target core.TelegramOperationTarget, status WorkflowWorkStatus) (tgmessage.DocumentResponse, error) {
 	payload, err := json.MarshalIndent(status.Integration, "", "  ")
 	if err != nil {
-		return core.TelegramDocumentResponse{}, err
+		return tgmessage.DocumentResponse{}, err
 	}
 
 	digest := sha256.Sum256(payload)
 	parts := strings.SplitN(telegramControlStatusText(status), "\n\n", 2)
 
-	message := core.TelegramMessageBlocks{Family: "37", InitialText: parts[0], SecondaryText: "Complete retained questions, options and bindings are attached as an identified JSON export."}
+	message := tgmessage.Blocks{Family: "37", InitialText: parts[0], SecondaryText: "Complete retained questions, options and bindings are attached as an identified JSON export."}
 	if len(parts) == 2 {
 		message.Content = parts[1]
 	}
 
-	return core.TelegramDocumentResponse{Message: message, Document: telegramDocumentForTarget(target, "exports/work-questions/"+status.ID+".json", hex.EncodeToString(digest[:]), "work-questions.json", "application/json", payload)}, nil
+	return tgmessage.DocumentResponse{Message: message, Document: telegramDocumentForTarget(target, "exports/work-questions/"+status.ID+".json", hex.EncodeToString(digest[:]), "work-questions.json", "application/json", payload)}, nil
 }

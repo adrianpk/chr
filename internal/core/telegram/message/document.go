@@ -1,4 +1,4 @@
-package core
+package message
 
 import (
 	"encoding/hex"
@@ -10,9 +10,9 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 )
 
-// TelegramDocument contains a complete authorized source image or an explicitly
+// Document contains a complete authorized source image or an explicitly
 // identified export. It never asks the uploader to open a mutable filesystem path.
-type TelegramDocument struct {
+type Document struct {
 	ProjectID            string
 	Namespace            string
 	ProjectBindingDigest string
@@ -23,28 +23,31 @@ type TelegramDocument struct {
 	Payload              []byte
 }
 
-// TelegramDocumentResponse pairs a short view with one complete frozen source.
+// DocumentResponse pairs a short view with one complete frozen source.
 // This is presentation data, not an operation or confirmation authorization.
-type TelegramDocumentResponse struct {
-	Message  TelegramMessageBlocks
-	Document TelegramDocument
+type DocumentResponse struct {
+	Message  Blocks
+	Document Document
 }
 
 const (
-	telegramDocumentLimit = 2 << 20
-	telegramDocumentQuota = 64 << 20
+	// DocumentLimit bounds a complete document payload in bytes.
+	DocumentLimit = 2 << 20
+	// DocumentQuota bounds total retained receiver and notification document bytes.
+	DocumentQuota = 64 << 20
 )
 
-// ErrTelegramDocumentUnavailable includes invalid images and exhausted storage.
+// ErrDocumentUnavailable includes invalid images and exhausted storage.
 // A completed operation keeps its original receipt when presentation fails.
-var ErrTelegramDocumentUnavailable = errors.New("complete telegram document unavailable")
+var ErrDocumentUnavailable = errors.New("complete telegram document unavailable")
 
-func validateTelegramDocument(document TelegramDocument) error {
-	if len(document.Payload) == 0 || len(document.Payload) > telegramDocumentLimit || !utf8.Valid(document.Payload) {
-		return ErrTelegramDocumentUnavailable
+// ValidateDocument checks frozen bytes, target, source identity and filename.
+func ValidateDocument(document Document) error {
+	if len(document.Payload) == 0 || len(document.Payload) > DocumentLimit || !utf8.Valid(document.Payload) {
+		return ErrDocumentUnavailable
 	}
 
-	for _, err := range []error{validateTelegramDocumentTarget(document), validateTelegramDocumentSource(document), validateTelegramDocumentFilename(document.Filename)} {
+	for _, err := range []error{validateDocumentTarget(document), validateDocumentSource(document), validateDocumentFilename(document.Filename)} {
 		if err != nil {
 			return err
 		}
@@ -54,50 +57,50 @@ func validateTelegramDocument(document TelegramDocument) error {
 	case "text/markdown", "application/json", "text/plain":
 		return nil
 	default:
-		return ErrTelegramDocumentUnavailable
+		return ErrDocumentUnavailable
 	}
 }
 
-func validateTelegramDocumentTarget(document TelegramDocument) error {
+func validateDocumentTarget(document Document) error {
 	if document.ProjectID == "" || !opsnamespace.Valid(document.Namespace) {
-		return ErrTelegramDocumentUnavailable
+		return ErrDocumentUnavailable
 	}
 
 	decoded, err := hex.DecodeString(document.ProjectBindingDigest)
 	if err != nil || len(decoded) != 32 {
-		return ErrTelegramDocumentUnavailable
+		return ErrDocumentUnavailable
 	}
 
 	return nil
 }
 
-func validateTelegramDocumentSource(document TelegramDocument) error {
+func validateDocumentSource(document Document) error {
 	if len(document.SourceRef) == 0 || len(document.SourceRef) > 4096 || !filepath.IsLocal(document.SourceRef) {
-		return ErrTelegramDocumentUnavailable
+		return ErrDocumentUnavailable
 	}
 
 	decoded, err := hex.DecodeString(document.SourceHash)
 	if err != nil || len(decoded) != 32 {
-		return ErrTelegramDocumentUnavailable
+		return ErrDocumentUnavailable
 	}
 
 	return nil
 }
 
-func validateTelegramDocumentFilename(filename string) error {
+func validateDocumentFilename(filename string) error {
 	if filename == "" || len(filename) > 128 || strings.ContainsAny(filename, "/\\\r\n\x00\"") || strings.HasPrefix(filename, ".") {
-		return ErrTelegramDocumentUnavailable
+		return ErrDocumentUnavailable
 	}
 
 	return nil
 }
 
-// TelegramDocumentExcerpt returns direct opening body lines without YAML front
+// DocumentExcerpt returns direct opening body lines without YAML front
 // matter. The shortening marker is included in its 600 UTF-16 unit allowance.
-func TelegramDocumentExcerpt(payload []byte) string {
+func DocumentExcerpt(payload []byte) string {
 	body := strings.TrimPrefix(string(payload), "\ufeff")
 	lines := strings.Split(strings.ReplaceAll(body, "\r\n", "\n"), "\n")
-	lines = telegramDocumentBodyLines(lines)
+	lines = documentBodyLines(lines)
 
 	var selected []string
 
@@ -113,20 +116,20 @@ func TelegramDocumentExcerpt(payload []byte) string {
 	}
 
 	excerpt := strings.Join(selected, "\n")
-	if telegramVisibleUnits(excerpt) > 600 {
+	if VisibleUnits(excerpt) > 600 {
 		shortened = true
 	}
 
 	if shortened {
 		const marker = "\n[excerpt shortened]"
 
-		excerpt = telegramResponsePrefix(excerpt, 600-len(marker)) + marker
+		excerpt = Prefix(excerpt, 600-len(marker)) + marker
 	}
 
 	return excerpt
 }
 
-func telegramDocumentBodyLines(lines []string) []string {
+func documentBodyLines(lines []string) []string {
 	if len(lines) == 0 || strings.TrimSpace(lines[0]) != "---" {
 		return lines
 	}
@@ -140,8 +143,8 @@ func telegramDocumentBodyLines(lines []string) []string {
 	return nil
 }
 
-// RenderTelegramDocument uses the same optional blocks within the 900-unit
+// RenderDocument uses the same optional blocks within the 900-unit
 // caption limit. The complete source image remains outside the shortened view.
-func RenderTelegramDocument(message TelegramMessageBlocks) TelegramPresentation {
-	return renderTelegramMessage(message, 900, "document-v1")
+func RenderDocument(message Blocks) Presentation {
+	return render(message, 900, "document-v1")
 }

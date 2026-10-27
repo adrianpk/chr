@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -62,7 +63,7 @@ func (r telegramReceiver) readRecord(ctx context.Context, operations telegramRec
 	}
 
 	if len(page.Records) == 0 {
-		return r.store.QueuePresentationResponse(ctx, update, core.TelegramMessageBlocks{Family: "28", InitialText: "No records matched this view."}, config.Digest(), time.Now())
+		return r.store.QueuePresentationResponse(ctx, update, tgmessage.Blocks{Family: "28", InitialText: "No records matched this view."}, config.Digest(), time.Now())
 	}
 
 	response, err := telegramRecordDocument(target, command, page)
@@ -71,7 +72,7 @@ func (r telegramReceiver) readRecord(ctx context.Context, operations telegramRec
 	}
 
 	err = r.store.QueueDocumentResponse(ctx, update, response, config.Digest(), time.Now())
-	if errors.Is(err, core.ErrTelegramDocumentUnavailable) {
+	if errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		return r.recordDiagnostic(ctx, update, config, "The records export could not be attached: its image is invalid or document storage is full. Use local project commands to inspect the records.")
 	}
 

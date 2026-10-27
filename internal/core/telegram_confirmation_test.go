@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func telegramConfirmationFixture(t *testing.T) (*telegramConversationFixture, TelegramActionOffer, TelegramAction) {
@@ -14,9 +15,9 @@ func telegramConfirmationFixture(t *testing.T) (*telegramConversationFixture, Te
 
 	return telegramOperationActionFixture(t, func(request TelegramOperationRequest, offer *TelegramActionOffer) {
 		payload := []byte("# Complete scope\n\nOne exact record and its validation.\n")
-		offer.Delivery = &TelegramDocumentResponse{
-			Message:  TelegramMessageBlocks{Family: "29", InitialText: "Create this ticket?", Content: "One exact record."},
-			Document: TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/confirmation.md", SourceHash: contenthash.Sum(payload), Filename: "confirmation.md", MediaType: "text/markdown", Payload: payload},
+		offer.Delivery = &tgmessage.DocumentResponse{
+			Message:  tgmessage.Blocks{Family: "29", InitialText: "Create this ticket?", Content: "One exact record."},
+			Document: tgmessage.Document{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/confirmation.md", SourceHash: contenthash.Sum(payload), Filename: "confirmation.md", MediaType: "text/markdown", Payload: payload},
 		}
 	})
 }
@@ -95,7 +96,7 @@ func checkTelegramConfirmationRollback(t *testing.T, f *telegramConversationFixt
 		t.Fatal(err)
 	}
 
-	_, err := f.store.OfferTelegramAction(t.Context(), TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm"}, Delivery: &TelegramDocumentResponse{Message: TelegramMessageBlocks{InitialText: "Confirm?"}, Document: document}, ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
+	_, err := f.store.OfferTelegramAction(t.Context(), TelegramActionOffer{Input: input, RequestID: request.ID, Choices: []string{"confirm"}, Delivery: &tgmessage.DocumentResponse{Message: tgmessage.Blocks{InitialText: "Confirm?"}, Document: document}, ExpiresAt: time.Now().Add(time.Hour)}, time.Now())
 	if err == nil {
 		t.Fatal("incomplete scope exposed a confirmation")
 	}
@@ -159,14 +160,14 @@ func reopenTelegramConfirmation(t *testing.T, f *telegramConversationFixture, of
 	}
 }
 
-func rejectedTelegramConfirmationDocument(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, kind string) TelegramDocument {
+func rejectedTelegramConfirmationDocument(t *testing.T, f *telegramConversationFixture, request TelegramOperationRequest, kind string) tgmessage.Document {
 	t.Helper()
 
-	document := TelegramDocument{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/scope.md", SourceHash: contenthash.Sum([]byte("scope")), Filename: "scope.md", MediaType: "text/markdown", Payload: []byte("scope")}
+	document := tgmessage.Document{ProjectID: request.Target.ProjectID, Namespace: request.Target.Namespace, ProjectBindingDigest: request.Target.ProjectBindingDigest, SourceRef: "exports/scope.md", SourceHash: contenthash.Sum([]byte("scope")), Filename: "scope.md", MediaType: "text/markdown", Payload: []byte("scope")}
 
 	switch kind {
 	case "oversized":
-		document.Payload = bytes.Repeat([]byte("x"), telegramDocumentLimit+1)
+		document.Payload = bytes.Repeat([]byte("x"), tgmessage.DocumentLimit+1)
 	case "wrong project":
 		document.ProjectID = "another-project"
 	default:

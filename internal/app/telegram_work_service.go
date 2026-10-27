@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 type telegramWorkService interface {
@@ -72,7 +73,7 @@ func (s service) ReadTelegramWorkConfirmation(ctx context.Context, target core.T
 
 	records, err := scoped.workflowConfirmationRecords(ctx, preview)
 	if errors.Is(err, errWorkflowConfirmationBound) {
-		return nil, core.ErrTelegramDocumentUnavailable
+		return nil, tgmessage.ErrDocumentUnavailable
 	}
 
 	return records, err

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // Direct body excerpts omit source metadata while the complete bytes stay intact.
@@ -21,7 +22,7 @@ func TestTelegramPresentationDocumentExcerpt(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			payload := []byte(test.input)
-			if actual := TelegramDocumentExcerpt(payload); actual != test.want || string(payload) != test.input {
+			if actual := tgmessage.DocumentExcerpt(payload); actual != test.want || string(payload) != test.input {
 				t.Fatal("excerpt changed source or exposed metadata", actual)
 			}
 		})
@@ -29,16 +30,16 @@ func TestTelegramPresentationDocumentExcerpt(t *testing.T) {
 
 	large := []byte(strings.Repeat("😀", 400) + "\nsecond\nthird\nfourth\nfifth\nsixth\nseventh")
 
-	excerpt := TelegramDocumentExcerpt(large)
-	if telegramVisibleUnits(excerpt) > 600 || !strings.HasSuffix(excerpt, "[excerpt shortened]") {
+	excerpt := tgmessage.DocumentExcerpt(large)
+	if tgmessage.VisibleUnits(excerpt) > 600 || !strings.HasSuffix(excerpt, "[excerpt shortened]") {
 		t.Fatal("excerpt exceeds final Unicode bound", excerpt)
 	}
 }
 
-func telegramTestDocumentResponse() TelegramDocumentResponse {
+func telegramTestDocumentResponse() tgmessage.DocumentResponse {
 	payload := []byte("---\nstatus: draft\n---\n# Original\n```literal```\n")
 
-	return TelegramDocumentResponse{Message: TelegramMessageBlocks{InitialText: "Draft ready", ContentKind: "markdown", Content: TelegramDocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: TelegramDocument{ProjectID: "example-project", Namespace: "default", ProjectBindingDigest: strings.Repeat("a", 64), SourceRef: "ops/default/spec/example.md", SourceHash: contenthash.Sum(payload), Filename: "example.md", MediaType: "text/markdown", Payload: payload}}
+	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{InitialText: "Draft ready", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: tgmessage.Document{ProjectID: "example-project", Namespace: "default", ProjectBindingDigest: strings.Repeat("a", 64), SourceRef: "ops/default/spec/example.md", SourceHash: contenthash.Sum(payload), Filename: "example.md", MediaType: "text/markdown", Payload: payload}}
 }
 
 // Atomic source acknowledgement freezes exact bytes, destination and caption;
@@ -106,7 +107,7 @@ func checkTelegramDocumentBytes(t *testing.T, store *TelegramReceiverStore, deli
 		t.Fatal("snapshot bytes changed", document, err)
 	}
 
-	if telegramVisibleUnits(delivery.Text) > 900 || strings.Contains(delivery.Text, "source_request_id:") {
+	if tgmessage.VisibleUnits(delivery.Text) > 900 || strings.Contains(delivery.Text, "source_request_id:") {
 		t.Fatal("invalid document caption", delivery.Text)
 	}
 }
@@ -123,7 +124,7 @@ func TestTelegramPresentationDocumentRollback(t *testing.T) {
 
 	response := telegramTestDocumentResponse()
 
-	response.Document.Payload = bytes.Repeat([]byte("x"), telegramDocumentLimit+1)
+	response.Document.Payload = bytes.Repeat([]byte("x"), tgmessage.DocumentLimit+1)
 	if err := store.QueueDocumentResponse(t.Context(), update, response, telegramReceiverTestConfig().Digest(), now); err == nil {
 		t.Fatal("oversized document admitted")
 	}

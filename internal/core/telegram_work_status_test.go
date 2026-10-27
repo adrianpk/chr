@@ -6,6 +6,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -34,7 +35,7 @@ func checkTelegramWorkStatusQueue(t *testing.T, f *telegramConversationFixture, 
 	t.Helper()
 
 	before := f.sessions(t)
-	message := TelegramMessageBlocks{Family: "33", InitialText: "Work has finished."}
+	message := tgmessage.Blocks{Family: "33", InitialText: "Work has finished."}
 
 	if err := f.store.QueueTelegramWorkStatus(t.Context(), input, target, "run-status", message, time.Now()); err != nil {
 		t.Fatal(err)

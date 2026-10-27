@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations telegramExplanationService, request core.TelegramOperationRequest, prepared PreparedAuthoringExplanation, config core.TelegramReceiverConfig) error {
@@ -28,8 +29,8 @@ func (r telegramReceiver) finishOriginalDocument(ctx context.Context, operations
 	}
 
 	payload := []byte(artifact.Body)
-	response := core.TelegramDocumentResponse{
-		Message:  core.TelegramMessageBlocks{Family: "24", InitialText: "Original " + string(artifact.Ref.Kind) + " document.", ContentKind: "markdown", Content: core.TelegramDocumentExcerpt(payload), SecondaryText: "Complete original document attached."},
+	response := tgmessage.DocumentResponse{
+		Message:  tgmessage.Blocks{Family: "24", InitialText: "Original " + string(artifact.Ref.Kind) + " document.", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete original document attached."},
 		Document: telegramDocumentForTarget(request.Target, artifact.Ref.Path, artifact.SourceHash, string(artifact.Ref.Kind)+".md", "text/markdown", payload),
 	}
 	request.Delivery = &response

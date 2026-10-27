@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func createTelegramNotification(ctx context.Context, repository core.NotificationEventRepository, record core.NotificationAuditRecord, project commandProjectContext, config core.TelegramNotificationConfig) (core.TelegramNotificationTarget, error) {
@@ -35,7 +36,7 @@ func dispatchTelegramNotification(ctx context.Context, repository core.Notificat
 	delivery, frozen, err := repository.ReadTelegramNotification(ctx, record.Event.ID, target)
 	if err != nil {
 		code, uncertain := core.TelegramNotificationFailure(err)
-		saveErr := repository.FinishTelegramNotification(ctx, record.Event.ID, target, core.TelegramDocumentAcknowledgement{}, code, uncertain, time.Now().UTC())
+		saveErr := repository.FinishTelegramNotification(ctx, record.Event.ID, target, tgmessage.Acknowledgement{}, code, uncertain, time.Now().UTC())
 
 		return core.TelegramSendResult{}, errors.Join(err, saveErr)
 	}
@@ -67,14 +68,14 @@ func dispatchTelegramNotification(ctx context.Context, repository core.Notificat
 	return core.TelegramSendResult{StatusCode: 200}, sendErr
 }
 
-func sendTelegramNotificationWithFallback(ctx context.Context, repository core.NotificationEventRepository, id string, project commandProjectContext, target core.TelegramNotificationTarget, delivery core.TelegramNotificationDelivery) (core.TelegramDocumentAcknowledgement, error) {
+func sendTelegramNotificationWithFallback(ctx context.Context, repository core.NotificationEventRepository, id string, project commandProjectContext, target core.TelegramNotificationTarget, delivery core.TelegramNotificationDelivery) (tgmessage.Acknowledgement, error) {
 	ack, sendErr := sendTelegramNotification(ctx, project, target, delivery)
 
 	var apiFailure *core.TelegramAPIError
 	if errors.As(sendErr, &apiFailure) && apiFailure.Code == "format_rejected" {
 		fallback, fallbackErr := repository.ReserveTelegramNotification(ctx, id, target, true)
 		if fallbackErr != nil {
-			return core.TelegramDocumentAcknowledgement{}, fallbackErr
+			return tgmessage.Acknowledgement{}, fallbackErr
 		}
 
 		if fallback {
@@ -86,15 +87,15 @@ func sendTelegramNotificationWithFallback(ctx context.Context, repository core.N
 	return ack, sendErr
 }
 
-func sendTelegramNotification(ctx context.Context, project commandProjectContext, target core.TelegramNotificationTarget, delivery core.TelegramNotificationDelivery) (core.TelegramDocumentAcknowledgement, error) {
+func sendTelegramNotification(ctx context.Context, project commandProjectContext, target core.TelegramNotificationTarget, delivery core.TelegramNotificationDelivery) (tgmessage.Acknowledgement, error) {
 	config, err := core.LoadWorkspaceConfig(project.ProjectDir)
 	if err != nil {
-		return core.TelegramDocumentAcknowledgement{}, core.ErrTelegramNotificationTargetUnavailable
+		return tgmessage.Acknowledgement{}, core.ErrTelegramNotificationTargetUnavailable
 	}
 
 	current, err := telegramNotificationTarget(project, config.Notifications.Telegram)
 	if err != nil || current != target {
-		return core.TelegramDocumentAcknowledgement{}, core.ErrTelegramNotificationTargetUnavailable
+		return tgmessage.Acknowledgement{}, core.ErrTelegramNotificationTargetUnavailable
 	}
 
 	return notifyTelegramSender.SendPresentation(ctx, os.Getenv(config.Notifications.Telegram.BotTokenEnv), target.Destination, delivery)

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // Upgrade retains both legacy Markdown and version-one text presentations with
@@ -40,7 +42,7 @@ func TestTelegramPresentationMigrationDocuments(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	payload, err := json.Marshal(RenderTelegramMessage(TelegramMessageBlocks{InitialText: "Old status"}))
+	payload, err := json.Marshal(tgmessage.Render(tgmessage.Blocks{InitialText: "Old status"}))
 	if err != nil {
 		t.Fatal(err)
 	}

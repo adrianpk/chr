@@ -3,6 +3,8 @@ package core
 import (
 	"testing"
 	"time"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // TestTelegramWorkProjection proves revision deduplication, unsent coalescing,
@@ -143,9 +145,9 @@ func TestTelegramWorkProjectionUnchanged(t *testing.T) {
 	now := time.Date(2030, 1, 1, 0, 0, 0, 0, time.UTC)
 	telegramWorkDeliverInitial(t, f, now)
 
-	message := TelegramMessageBlocks{Family: "33", InitialText: "Waiting for review"}
+	message := tgmessage.Blocks{Family: "33", InitialText: "Waiting for review"}
 
-	observation := TelegramWorkObservation{Revision: 1, Phase: "waiting", Kind: "progress", Text: RenderTelegramMessage(message).PlainFallback, Message: &message}
+	observation := TelegramWorkObservation{Revision: 1, Phase: "waiting", Kind: "progress", Text: tgmessage.Render(message).PlainFallback, Message: &message}
 	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now); err != nil {
 		t.Fatal(err)
 	}
@@ -175,7 +177,7 @@ func TestTelegramWorkProjectionUnchanged(t *testing.T) {
 
 	message.InitialText = "Integration confirmed"
 
-	observation.Revision, observation.Text = 3, RenderTelegramMessage(message).PlainFallback
+	observation.Revision, observation.Text = 3, tgmessage.Render(message).PlainFallback
 	if err := f.store.ProjectTelegramWork(t.Context(), ref, observation, f.input.Config.Digest(), now.Add(2*time.Minute)); err != nil {
 		t.Fatal(err)
 	}

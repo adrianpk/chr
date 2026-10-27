@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func queueTelegramActionView(op telegramConversationTransaction, request TelegramOperationRequest, offer TelegramActionOffer, token, legacy string) error {
@@ -20,7 +21,7 @@ func queueTelegramActionView(op telegramConversationTransaction, request Telegra
 
 	document := offer.Delivery.Document
 	if document.ProjectID != request.Target.ProjectID || document.Namespace != request.Target.Namespace || document.ProjectBindingDigest != request.Target.ProjectBindingDigest {
-		return ErrTelegramDocumentUnavailable
+		return tgmessage.ErrDocumentUnavailable
 	}
 
 	response := *offer.Delivery
@@ -35,7 +36,7 @@ func sealTelegramActionPresentation(op telegramConversationTransaction, request 
 		return err
 	}
 
-	var presentation TelegramPresentation
+	var presentation tgmessage.Presentation
 	if err := json.Unmarshal([]byte(data), &presentation); err != nil {
 		return err
 	}
@@ -117,7 +118,7 @@ func telegramActionManifestValid(payload, hash, configDigest string, delivery *T
 func validateTelegramActionDocument(ctx context.Context, reader telegramConversationReader, delivery TelegramReceiverDelivery, request TelegramOperationRequest) error {
 	var (
 		hash     string
-		document TelegramDocument
+		document tgmessage.Document
 	)
 
 	p := request.Source.Peer
@@ -125,7 +126,7 @@ func validateTelegramActionDocument(ctx context.Context, reader telegramConversa
 		return err
 	}
 
-	if validateTelegramDocument(document) != nil || document.ProjectID != request.Target.ProjectID || document.Namespace != request.Target.Namespace || document.ProjectBindingDigest != request.Target.ProjectBindingDigest || hash != delivery.Presentation.DocumentHash || contenthash.Sum(document.Payload) != hash {
+	if tgmessage.ValidateDocument(document) != nil || document.ProjectID != request.Target.ProjectID || document.Namespace != request.Target.Namespace || document.ProjectBindingDigest != request.Target.ProjectBindingDigest || hash != delivery.Presentation.DocumentHash || contenthash.Sum(document.Payload) != hash {
 		return ErrTelegramActionUnavailable
 	}
 

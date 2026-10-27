@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // TestTelegramPresentationConfirmationGuards rejects altered scope or retained
@@ -54,7 +55,7 @@ func changeTelegramConfirmationVersion(t *testing.T, f *telegramConversationFixt
 		t.Fatal(err)
 	}
 
-	var presentation TelegramPresentation
+	var presentation tgmessage.Presentation
 	if err := json.Unmarshal([]byte(payload), &presentation); err != nil {
 		t.Fatal(err)
 	}

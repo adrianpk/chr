@@ -3,10 +3,12 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func telegramConversationLabel(text string) string {
-	return boundTelegramPresentationBlock(strings.Join(strings.Fields(text), " "), 160)
+	return tgmessage.BoundBlock(strings.Join(strings.Fields(text), " "), 160)
 }
 
 func (op telegramConversationTransaction) projectLabel(id string) string {
@@ -32,12 +34,12 @@ func telegramConversationState(phase string) string {
 	return phase
 }
 
-func (op telegramConversationTransaction) presentation(text string, c *TelegramConversation) TelegramMessageBlocks {
+func (op telegramConversationTransaction) presentation(text string, c *TelegramConversation) tgmessage.Blocks {
 	families := map[TelegramConversationAction]string{
 		TelegramConversationSelect: "04", TelegramConversationStart: "07", TelegramConversationList: "09", TelegramConversationFocus: "10", TelegramConversationCapture: "12", TelegramConversationShow: "13", TelegramConversationDone: "15", TelegramConversationCancel: "16",
 	}
 
-	message := TelegramMessageBlocks{Family: families[op.input.Action], InitialText: text}
+	message := tgmessage.Blocks{Family: families[op.input.Action], InitialText: text}
 	if c == nil || op.input.Action != TelegramConversationShow {
 		return message
 	}

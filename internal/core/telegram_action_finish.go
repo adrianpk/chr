@@ -7,14 +7,15 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TelegramActionResult contains confirmed owner facts or an explicit blocked outcome.
 type TelegramActionResult struct {
-	Delivery          *TelegramDocumentResponse
+	Delivery          *tgmessage.DocumentResponse
 	Guided            *TelegramGuidedProgress
-	Message           *TelegramMessageBlocks
+	Message           *tgmessage.Blocks
 	Invocation        *TelegramInvocationBinding
 	InvocationPhase   string
 	State             string

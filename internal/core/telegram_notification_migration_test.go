@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // A physical pre-28 database upgrades without rewriting event status, payload,
@@ -92,7 +93,7 @@ func TestTelegramPresentationFailureNotificationMapping(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, _, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, input.Target); !errors.Is(err, ErrTelegramDocumentUnavailable) {
+			if _, _, err := repository.ReadTelegramNotification(t.Context(), input.Record.Event.ID, input.Target); !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 				t.Fatal("invalid retained image accepted", err)
 			}
 		})
@@ -108,7 +109,7 @@ func TestTelegramPresentationFailureNotificationInput(t *testing.T) {
 	}{
 		{"encoding", func(i *TelegramNotificationInput) { i.Document.Payload = []byte{0xff} }},
 		{"oversized", func(i *TelegramNotificationInput) {
-			i.Document.Payload = []byte(strings.Repeat("x", telegramDocumentLimit+1))
+			i.Document.Payload = []byte(strings.Repeat("x", tgmessage.DocumentLimit+1))
 		}},
 		{"wrong root", func(i *TelegramNotificationInput) {
 			i.Document.ProjectBindingDigest = contenthash.Sum([]byte("other root"))
@@ -119,7 +120,7 @@ func TestTelegramPresentationFailureNotificationInput(t *testing.T) {
 			input := telegramNotificationTestInput(t)
 			item.change(&input)
 
-			if err := repository.CreateTelegramNotification(t.Context(), input); !errors.Is(err, ErrTelegramDocumentUnavailable) {
+			if err := repository.CreateTelegramNotification(t.Context(), input); !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 				t.Fatal("invalid admission accepted", err)
 			}
 
@@ -145,7 +146,7 @@ func TestTelegramPresentationFailureNotificationReopen(t *testing.T) {
 		t.Fatal(reserved, err)
 	}
 
-	if err := repository.FinishTelegramNotification(t.Context(), input.Record.Event.ID, input.Target, TelegramDocumentAcknowledgement{}, "transport_failure", true, time.Now()); err != nil {
+	if err := repository.FinishTelegramNotification(t.Context(), input.Record.Event.ID, input.Target, tgmessage.Acknowledgement{}, "transport_failure", true, time.Now()); err != nil {
 		t.Fatal(err)
 	}
 

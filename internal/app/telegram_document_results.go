@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -26,11 +27,11 @@ func telegramDocumentName(kind, topic string) string {
 	return kind + "-" + slug + ".md"
 }
 
-func telegramDocumentForTarget(target core.TelegramOperationTarget, ref, hash, filename, mediaType string, payload []byte) core.TelegramDocument {
-	return core.TelegramDocument{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: ref, SourceHash: hash, Filename: filename, MediaType: mediaType, Payload: payload}
+func telegramDocumentForTarget(target core.TelegramOperationTarget, ref, hash, filename, mediaType string, payload []byte) tgmessage.Document {
+	return tgmessage.Document{ProjectID: target.ProjectID, Namespace: target.Namespace, ProjectBindingDigest: target.ProjectBindingDigest, SourceRef: ref, SourceHash: hash, Filename: filename, MediaType: mediaType, Payload: payload}
 }
 
-func (r telegramReceiver) authoringDocument(ctx context.Context, request core.TelegramOperationRequest, result core.AuthoringContinuationResult) (*core.TelegramDocumentResponse, error) {
+func (r telegramReceiver) authoringDocument(ctx context.Context, request core.TelegramOperationRequest, result core.AuthoringContinuationResult) (*tgmessage.DocumentResponse, error) {
 	if result.Question != nil {
 		return nil, nil
 	}
@@ -66,7 +67,7 @@ func (r telegramReceiver) authoringDocument(ctx context.Context, request core.Te
 	return telegramPrimaryAuthoringDocument(request.Target, result, snapshot, owner.Target)
 }
 
-func telegramPrimaryAuthoringDocument(target core.TelegramOperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) (*core.TelegramDocumentResponse, error) {
+func telegramPrimaryAuthoringDocument(target core.TelegramOperationTarget, result core.AuthoringContinuationResult, snapshot core.AuthoringSnapshot, kind core.AuthoringArtifactKind) (*tgmessage.DocumentResponse, error) {
 	for index := len(snapshot.Artifacts) - 1; index >= 0; index-- {
 		artifact := snapshot.Artifacts[index]
 		if artifact.Ref.Kind != kind || artifact.Body == "" {
@@ -83,13 +84,13 @@ func telegramPrimaryAuthoringDocument(target core.TelegramOperationTarget, resul
 			headline = "Your request and details are saved as a dump for " + result.Session.Topic + "."
 		}
 
-		return &core.TelegramDocumentResponse{Message: core.TelegramMessageBlocks{Family: "21", InitialText: headline, ContentKind: "markdown", Content: core.TelegramDocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: telegramDocumentForTarget(target, artifact.Ref.Path, artifact.SourceHash, telegramDocumentName(string(kind), result.Session.Topic), "text/markdown", payload)}, nil
+		return &tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "21", InitialText: headline, ContentKind: "markdown", Content: tgmessage.DocumentExcerpt(payload), SecondaryText: "Complete document attached."}, Document: telegramDocumentForTarget(target, artifact.Ref.Path, artifact.SourceHash, telegramDocumentName(string(kind), result.Session.Topic), "text/markdown", payload)}, nil
 	}
 
 	return nil, workflowstate.ErrConflict
 }
 
-func telegramExplanationDocument(target core.TelegramOperationTarget, requestID string, result AuthoringExplanation, source []byte) core.TelegramDocumentResponse {
+func telegramExplanationDocument(target core.TelegramOperationTarget, requestID string, result AuthoringExplanation, source []byte) tgmessage.DocumentResponse {
 	text := result.Text
 	if len(result.SourceRefs) > 0 {
 		text += "\n\nCanonical sources:\n" + strings.Join(result.SourceRefs, "\n")
@@ -97,13 +98,13 @@ func telegramExplanationDocument(target core.TelegramOperationTarget, requestID 
 
 	payload := []byte(text)
 
-	return core.TelegramDocumentResponse{Message: core.TelegramMessageBlocks{Family: "24", InitialText: "Explanation ready.", ContentKind: "markdown", Content: core.TelegramDocumentExcerpt([]byte(result.Text)), SecondaryText: "Complete explanation attached."}, Document: telegramDocumentForTarget(target, "exports/explanation-"+requestID+".md", recordDigest(source), "explanation.md", "text/markdown", payload)}
+	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "24", InitialText: "Explanation ready.", ContentKind: "markdown", Content: tgmessage.DocumentExcerpt([]byte(result.Text)), SecondaryText: "Complete explanation attached."}, Document: telegramDocumentForTarget(target, "exports/explanation-"+requestID+".md", recordDigest(source), "explanation.md", "text/markdown", payload)}
 }
 
-func telegramRecordDocument(target core.TelegramOperationTarget, command telegramRecordCommand, page RecordPage) (core.TelegramDocumentResponse, error) {
+func telegramRecordDocument(target core.TelegramOperationTarget, command telegramRecordCommand, page RecordPage) (tgmessage.DocumentResponse, error) {
 	payload, err := json.MarshalIndent(page, "", "  ")
 	if err != nil {
-		return core.TelegramDocumentResponse{}, err
+		return tgmessage.DocumentResponse{}, err
 	}
 
 	var lines []string
@@ -124,5 +125,5 @@ func telegramRecordDocument(target core.TelegramOperationTarget, command telegra
 
 	filename := fmt.Sprintf("records-%s-page-%d.json", command.Kind, command.Query.Offset)
 
-	return core.TelegramDocumentResponse{Message: core.TelegramMessageBlocks{Family: "28", InitialText: "Records in " + target.Namespace, ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: secondary}, Document: telegramDocumentForTarget(target, "exports/"+filename, recordDigest(payload), filename, "application/json", payload)}, nil
+	return tgmessage.DocumentResponse{Message: tgmessage.Blocks{Family: "28", InitialText: "Records in " + target.Namespace, ContentKind: "list", Content: strings.Join(lines, "\n"), SecondaryText: secondary}, Document: telegramDocumentForTarget(target, "exports/"+filename, recordDigest(payload), filename, "application/json", payload)}, nil
 }

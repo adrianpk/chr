@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // QueueFormattedReadResponse freezes both help renderings with source acknowledgement.
 // Existing plain responses and replayed sources keep their original contents.
 func (s *TelegramReceiverStore) QueueFormattedReadResponse(ctx context.Context, update TelegramReceivedUpdate, text, plain, configDigest string, now time.Time) error {
-	if !validTelegramReceiverText(text) || !validTelegramReceiverText(plain) || len(splitTelegramResponse(text)) != 1 || len(splitTelegramResponse(plain)) != 1 || len(configDigest) != 64 {
+	if !validTelegramReceiverText(text) || !validTelegramReceiverText(plain) || len(tgmessage.SplitResponse(text)) != 1 || len(tgmessage.SplitResponse(plain)) != 1 || len(configDigest) != 64 {
 		return errors.New("formatted telegram reply exceeds its single-message bounds")
 	}
 

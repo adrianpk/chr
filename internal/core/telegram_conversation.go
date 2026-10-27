@@ -14,6 +14,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -124,7 +125,7 @@ func (s *TelegramReceiverStore) ApplyTelegramConversation(ctx context.Context, i
 
 	var diagnostic telegramConversationDiagnostic
 	if errors.As(err, &diagnostic) {
-		return s.QueuePresentationResponse(ctx, input.Update, TelegramMessageBlocks{InitialText: string(diagnostic)}, input.Config.Digest(), now)
+		return s.QueuePresentationResponse(ctx, input.Update, tgmessage.Blocks{InitialText: string(diagnostic)}, input.Config.Digest(), now)
 	}
 
 	return err

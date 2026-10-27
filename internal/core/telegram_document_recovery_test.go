@@ -12,12 +12,13 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func seedTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore, count int) {
 	t.Helper()
 
-	zero := make([]byte, telegramDocumentLimit)
+	zero := make([]byte, tgmessage.DocumentLimit)
 
 	_, err := store.db.ExecContext(t.Context(), `WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM n WHERE x<?)
  INSERT INTO telegram_document_snapshots(id,owner_kind,owner_id,bot_id,chat_id,topic_id,user_id,config_digest,project_id,namespace,project_binding_digest,source_ref,source_hash,content_hash,filename,media_type,byte_count,payload,created_at)
@@ -41,9 +42,9 @@ func TestTelegramPresentationDocumentQuota(t *testing.T) {
 	}
 
 	response := telegramTestDocumentResponse()
-	response.Document.Payload = bytes.Repeat([]byte("q"), telegramDocumentLimit)
+	response.Document.Payload = bytes.Repeat([]byte("q"), tgmessage.DocumentLimit)
 	response.Document.SourceHash = contenthash.Sum(response.Document.Payload)
-	response.Message.Content = TelegramDocumentExcerpt(response.Document.Payload)
+	response.Message.Content = tgmessage.DocumentExcerpt(response.Document.Payload)
 	ready, results := make(chan struct{}), make(chan error, 2)
 
 	for index, store := range []*TelegramReceiverStore{first, second} {
@@ -62,7 +63,7 @@ func TestTelegramPresentationDocumentQuota(t *testing.T) {
 		err := <-results
 		if err == nil {
 			successful++
-		} else if !errors.Is(err, ErrTelegramDocumentUnavailable) {
+		} else if !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 			t.Fatal(err)
 		}
 	}
@@ -79,7 +80,7 @@ func checkTelegramDocumentQuota(t *testing.T, store *TelegramReceiverStore) {
 	t.Helper()
 
 	var usage int64
-	if err := store.db.QueryRowContext(t.Context(), "SELECT SUM(length(payload)) FROM telegram_document_snapshots").Scan(&usage); err != nil || usage != telegramDocumentQuota {
+	if err := store.db.QueryRowContext(t.Context(), "SELECT SUM(length(payload)) FROM telegram_document_snapshots").Scan(&usage); err != nil || usage != tgmessage.DocumentQuota {
 		t.Fatal("retained byte quota changed", usage, err)
 	}
 
@@ -219,19 +220,19 @@ func assertTelegramDocumentRetention(t *testing.T, store *TelegramReceiverStore,
 func TestTelegramPresentationDocumentGuards(t *testing.T) {
 	for _, test := range []struct {
 		name   string
-		change func(*TelegramDocument)
+		change func(*tgmessage.Document)
 	}{
-		{"path escape", func(d *TelegramDocument) { d.SourceRef = "../../secret" }},
-		{"absolute source", func(d *TelegramDocument) { d.SourceRef = "/private/config" }},
-		{"header injection", func(d *TelegramDocument) { d.Filename = "file.md\r\nX: value" }},
-		{"source digest", func(d *TelegramDocument) { d.SourceHash = strings.Repeat("z", 64) }},
-		{"future type", func(d *TelegramDocument) { d.MediaType = "application/unknown" }},
+		{"path escape", func(d *tgmessage.Document) { d.SourceRef = "../../secret" }},
+		{"absolute source", func(d *tgmessage.Document) { d.SourceRef = "/private/config" }},
+		{"header injection", func(d *tgmessage.Document) { d.Filename = "file.md\r\nX: value" }},
+		{"source digest", func(d *tgmessage.Document) { d.SourceHash = strings.Repeat("z", 64) }},
+		{"future type", func(d *tgmessage.Document) { d.MediaType = "application/unknown" }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			document := telegramTestDocumentResponse().Document
 			test.change(&document)
 
-			if err := validateTelegramDocument(document); !errors.Is(err, ErrTelegramDocumentUnavailable) {
+			if err := tgmessage.ValidateDocument(document); !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 				t.Fatal("invalid image accepted", err)
 			}
 		})
@@ -258,7 +259,7 @@ func applyingTelegramDocumentTestRequest(t *testing.T, store *TelegramReceiverSt
 func acknowledgeTelegramDocumentTest(t *testing.T, store *TelegramReceiverStore, id string, now time.Time) {
 	t.Helper()
 
-	if err := store.DeliveryDocumentSent(t.Context(), id, TelegramDocumentAcknowledgement{MessageID: 77, FileID: "original-file"}, now); err != nil {
+	if err := store.DeliveryDocumentSent(t.Context(), id, tgmessage.Acknowledgement{MessageID: 77, FileID: "original-file"}, now); err != nil {
 		t.Fatal(err)
 	}
 
@@ -293,7 +294,7 @@ func queueRetentionTestDocument(t *testing.T, f *telegramConversationFixture, in
 	}
 
 	if index < 2 {
-		if err := f.store.DeliveryDocumentSent(t.Context(), id, TelegramDocumentAcknowledgement{MessageID: int64(200 + index), FileID: "file"}, now); err != nil {
+		if err := f.store.DeliveryDocumentSent(t.Context(), id, tgmessage.Acknowledgement{MessageID: int64(200 + index), FileID: "file"}, now); err != nil {
 			t.Fatal(err)
 		}
 	}

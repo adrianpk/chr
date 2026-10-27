@@ -13,6 +13,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -33,8 +34,8 @@ type TelegramAction struct {
 
 // TelegramActionOffer contains current authority and one bounded, expiring prompt.
 type TelegramActionOffer struct {
-	Message           *TelegramMessageBlocks
-	Delivery          *TelegramDocumentResponse
+	Message           *tgmessage.Blocks
+	Delivery          *tgmessage.DocumentResponse
 	Input             TelegramConversationInput
 	RequestID         string
 	Choices           []string

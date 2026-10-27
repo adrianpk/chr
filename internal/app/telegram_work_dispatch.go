@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -117,7 +118,7 @@ func (r telegramReceiver) offerWorkAdmission(ctx context.Context, request core.T
 	}
 
 	complete, err := r.workConfirmationContents(ctx, request, preview)
-	if errors.Is(err, core.ErrTelegramDocumentUnavailable) {
+	if errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		return r.unavailableConfirmationDocument(ctx, request, input.Config)
 	}
 

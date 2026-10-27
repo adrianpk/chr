@@ -5,6 +5,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // Each admission retains its table's ownership shape and quota write reservation.
@@ -12,14 +13,14 @@ type telegramDocumentSnapshotRow struct {
 	id, owner    string
 	peer         TelegramPeerIdentity
 	configDigest string
-	document     TelegramDocument
+	document     tgmessage.Document
 	createdAt    time.Time
 }
 
 type telegramNotificationDocumentRow struct {
 	id, owner string
 	target    TelegramNotificationTarget
-	document  TelegramDocument
+	document  tgmessage.Document
 	createdAt time.Time
 }
 
@@ -53,7 +54,7 @@ func (row telegramDocumentSnapshotRow) values() []any {
 		document.Payload,
 		database.FormatTime(row.createdAt),
 		len(document.Payload),
-		telegramDocumentQuota,
+		tgmessage.DocumentQuota,
 	}
 }
 
@@ -81,6 +82,6 @@ func (row telegramNotificationDocumentRow) values() []any {
 		d.Payload,
 		database.FormatTime(row.createdAt),
 		len(d.Payload),
-		telegramDocumentQuota,
+		tgmessage.DocumentQuota,
 	}
 }

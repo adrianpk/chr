@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // TestGuidedUseCaseTelegramProjection prevents background display changes from
@@ -32,7 +34,7 @@ func TestGuidedUseCaseTelegramProjection(t *testing.T) {
 	}
 
 	progress.Binding = `{"revision":2,"view_digest":"second view"}`
-	if err := f.store.ProjectTelegramGuided(t.Context(), ref, progress, TelegramMessageBlocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.ProjectTelegramGuided(t.Context(), ref, progress, tgmessage.Blocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -45,7 +47,7 @@ func TestGuidedUseCaseTelegramProjection(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := f.store.ProjectTelegramGuided(t.Context(), ref, progress, TelegramMessageBlocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.ProjectTelegramGuided(t.Context(), ref, progress, tgmessage.Blocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -97,7 +99,7 @@ func assertGuidedTelegramCoalesced(t *testing.T, f *telegramConversationFixture,
 	before := refs[0].Conversation
 
 	progress.Binding = `{"revision":2,"native_revision":99,"view_digest":"second view"}`
-	if err := f.store.ProjectTelegramGuided(t.Context(), refs[0], progress, TelegramMessageBlocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
+	if err := f.store.ProjectTelegramGuided(t.Context(), refs[0], progress, tgmessage.Blocks{InitialText: "Second view"}, nil, f.input.Config.Digest(), time.Now()); err != nil {
 		t.Fatal(err)
 	}
 

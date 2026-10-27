@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func telegramControlPreviewText(preview telegramControlPreview) string {
@@ -104,6 +105,6 @@ func telegramActionReplayDetails(request core.TelegramOperationRequest) string {
 	return ""
 }
 
-func telegramOutcomeMessage(family, text string) *core.TelegramMessageBlocks {
-	return &core.TelegramMessageBlocks{Family: family, InitialText: text}
+func telegramOutcomeMessage(family, text string) *tgmessage.Blocks {
+	return &tgmessage.Blocks{Family: family, InitialText: text}
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/database"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 type telegramConversationReader interface {
@@ -224,7 +225,7 @@ func (op telegramConversationTransaction) list() (string, *TelegramConversation,
 
 	for index, c := range sessions {
 		row := op.conversationListRow(c, focus)
-		if telegramVisibleUnits(text.String()+row) > 1500 {
+		if tgmessage.VisibleUnits(text.String()+row) > 1500 {
 			fmt.Fprintf(&text, "\nShowing %d of %d retained conversations. References in earlier messages still select their original conversation.", index, len(sessions))
 
 			break

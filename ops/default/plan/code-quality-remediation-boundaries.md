@@ -229,3 +229,20 @@ storage preserve its errors and hashes without importing the root package.
 
 Focused original record-byte, old SQLite, notification snapshot/quota/retention,
 operational layout and workflow-mutation checks pass after these ownership changes.
+
+### Telegram payload prerequisite for T6.2
+
+core/telegram/message owns bounded blocks/entities, complete document values and
+retained-presentation validation shared by notification and receiver consumers.
+It imports only content hashes, namespace spelling and the standard library.
+The 27 original declaration token streams are unchanged after explicit identifier
+mapping; literals and tags are part of that proof. Frozen storage/presentation
+checks and original Unicode/format fixtures pass. The acknowledgement's two
+transport fields retain their types and meanings.
+
+The receiver still maps its own persisted delivery state, while the pure decoder
+checks hash, revision, rendering, text, entities and document binding once. Root
+notification HTTP behavior and receiver mutation ownership remain with their
+recorded transport owner. This prerequisite moves payload contracts only; no
+receiver state, delivery claim, retry allowance or storage transaction is moved
+into notification persistence.

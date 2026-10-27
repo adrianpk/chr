@@ -6,15 +6,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"slices"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // QueuePresentationResponse freezes one bounded message and acknowledges its
 // source atomically. Replayed sources cannot replace the original rendering.
-func (s *TelegramReceiverStore) QueuePresentationResponse(ctx context.Context, update TelegramReceivedUpdate, message TelegramMessageBlocks, configDigest string, now time.Time) error {
+func (s *TelegramReceiverStore) QueuePresentationResponse(ctx context.Context, update TelegramReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error {
 	return s.transaction(ctx, func(tx *sql.Tx) error {
 		pending, err := telegramReadResponsePending(ctx, tx, update)
 		if err != nil || !pending {
@@ -25,8 +25,8 @@ func (s *TelegramReceiverStore) QueuePresentationResponse(ctx context.Context, u
 	})
 }
 
-func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, message TelegramMessageBlocks, configDigest string, now time.Time) error {
-	presentation := RenderTelegramMessage(message)
+func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramReceivedUpdate, message tgmessage.Blocks, configDigest string, now time.Time) error {
+	presentation := tgmessage.Render(message)
 	if presentation.PlainFallback == "" || len(configDigest) != 64 {
 		return errors.New("invalid telegram presentation")
 	}
@@ -48,46 +48,15 @@ func queueTelegramPresentation(ctx context.Context, tx *sql.Tx, update TelegramR
 	return checkTelegramIntakeCapacity(ctx, tx, update.Peer.BotID)
 }
 
-func decodeTelegramPresentation(payload string, delivery *TelegramReceiverDelivery) error {
-	if payload == "" {
-		return nil
-	}
-
-	var presentation TelegramPresentation
-	if err := json.Unmarshal([]byte(payload), &presentation); err != nil {
-		return err
-	}
-
-	if presentation.Version != 1 || (presentation.TemplateRevision != "text-v1" && presentation.TemplateRevision != "document-v1") {
-		return errors.New("unsupported telegram presentation version")
-	}
-
-	rendered := RenderTelegramMessage(presentation.TelegramMessageBlocks)
-	if presentation.TemplateRevision == "document-v1" {
-		rendered = RenderTelegramDocument(presentation.TelegramMessageBlocks)
-	}
-
-	if rendered.PlainFallback != presentation.PlainFallback || delivery.Text != presentation.PlainFallback || !slices.Equal(rendered.Entities, presentation.Entities) {
-		return errors.New("invalid retained telegram presentation")
-	}
-
-	delivery.Presentation = &presentation
-	delivery.PlainText = presentation.PlainFallback
-
-	return nil
-}
-
 func decodeTelegramPresentationHash(payload, hash string, delivery *TelegramReceiverDelivery) error {
-	if hash != "" && contenthash.Sum([]byte(payload)) != hash {
-		return errors.New("retained telegram presentation hash mismatch")
-	}
-
-	if err := decodeTelegramPresentation(payload, delivery); err != nil {
+	presentation, err := tgmessage.DecodeRetained(tgmessage.RetainedInput{Payload: payload, Hash: hash, Text: delivery.Text, DocumentID: delivery.DocumentID})
+	if err != nil {
 		return err
 	}
 
-	if delivery.DocumentID != "" && (delivery.Presentation == nil || delivery.Presentation.DocumentID != delivery.DocumentID || hash == "") {
-		return ErrTelegramDocumentUnavailable
+	if presentation != nil {
+		delivery.Presentation = presentation
+		delivery.PlainText = presentation.PlainFallback
 	}
 
 	return nil

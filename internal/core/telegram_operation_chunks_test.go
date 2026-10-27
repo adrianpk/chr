@@ -5,12 +5,14 @@ import (
 	"testing"
 	"time"
 	"unicode/utf16"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // TestTelegramOperationUnicodeParts bounds new views without automatic chunks while retaining an inspection reference.
 func TestTelegramOperationUnicodeParts(t *testing.T) {
 	for _, text := range []string{strings.Repeat("é", 12000), strings.Repeat("🦋", 8000), strings.Repeat("x", 100000)} {
-		parts := TelegramResponseParts(text, "ops/default/ticket/PRJ-1")
+		parts := tgmessage.ResponseParts(text, "ops/default/ticket/PRJ-1")
 		if len(parts) != 1 {
 			t.Fatal("invalid part count", len(parts))
 		}

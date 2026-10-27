@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -76,7 +77,7 @@ func (s *TelegramReceiverStore) ResolveTelegramWorkStatusTarget(ctx context.Cont
 
 // QueueTelegramWorkStatus keeps a conversation-bound read reply inspectable
 // without creating a control request or changing the execution or conversation.
-func (s *TelegramReceiverStore) QueueTelegramWorkStatus(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget, invocation string, message TelegramMessageBlocks, now time.Time) error {
+func (s *TelegramReceiverStore) QueueTelegramWorkStatus(ctx context.Context, input TelegramConversationInput, target TelegramOperationTarget, invocation string, message tgmessage.Blocks, now time.Time) error {
 	if target.ConversationID == "" {
 		return s.QueuePresentationResponse(ctx, input.Update, message, input.Config.Digest(), now)
 	}

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
+
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 type telegramInlineButton struct {
@@ -28,11 +30,11 @@ func (a TelegramReceiverAPI) SendMarkdown(ctx context.Context, token string, pee
 }
 
 // SendPresentation sends frozen visible text with explicit formatting entities.
-func (a TelegramReceiverAPI) SendPresentation(ctx context.Context, token string, peer TelegramPeerIdentity, text string, entities []TelegramTextEntity) (int64, error) {
+func (a TelegramReceiverAPI) SendPresentation(ctx context.Context, token string, peer TelegramPeerIdentity, text string, entities []tgmessage.Entity) (int64, error) {
 	return a.sendAction(ctx, token, peer, text, "", "", nil, entities)
 }
 
-func (a TelegramReceiverAPI) sendAction(ctx context.Context, token string, peer TelegramPeerIdentity, text, parseMode, actionToken string, choices []string, entities []TelegramTextEntity, labels ...[]string) (int64, error) {
+func (a TelegramReceiverAPI) sendAction(ctx context.Context, token string, peer TelegramPeerIdentity, text, parseMode, actionToken string, choices []string, entities []tgmessage.Entity, labels ...[]string) (int64, error) {
 	if !validTelegramReceiverText(text) || peer.ChatID == 0 || peer.TopicID < 0 {
 		return 0, errors.New("invalid telegram delivery")
 	}
@@ -47,7 +49,7 @@ func (a TelegramReceiverAPI) sendAction(ctx context.Context, token string, peer 
 		TopicID   int64                   `json:"message_thread_id,omitempty"`
 		Text      string                  `json:"text"`
 		ParseMode string                  `json:"parse_mode,omitempty"`
-		Entities  []TelegramTextEntity    `json:"entities,omitempty"`
+		Entities  []tgmessage.Entity      `json:"entities,omitempty"`
 		Keyboard  *telegramInlineKeyboard `json:"reply_markup,omitempty"`
 	}{peer.ChatID, peer.TopicID, text, parseMode, entities, keyboard}
 
@@ -104,7 +106,7 @@ func telegramActionLabel(choice string) string {
 }
 
 // SendActionPresentation keeps the retained action keyboard with rich text.
-func (a TelegramReceiverAPI) SendActionPresentation(ctx context.Context, token string, peer TelegramPeerIdentity, text string, entities []TelegramTextEntity, actionToken string, choices, labels []string) (int64, error) {
+func (a TelegramReceiverAPI) SendActionPresentation(ctx context.Context, token string, peer TelegramPeerIdentity, text string, entities []tgmessage.Entity, actionToken string, choices, labels []string) (int64, error) {
 	return a.sendAction(ctx, token, peer, text, "", actionToken, choices, entities, labels)
 }
 
@@ -127,7 +129,7 @@ func telegramKeyboardLabels(choices []string, retained [][]string) ([]string, er
 	}
 
 	for _, label := range labels {
-		if label == "" || telegramVisibleUnits(label) > 64 {
+		if label == "" || tgmessage.VisibleUnits(label) > 64 {
 			return nil, ErrTelegramActionUnavailable
 		}
 	}

@@ -13,12 +13,13 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 type telegramHelpHTTPBody struct {
-	Entities  []core.TelegramTextEntity `json:"entities"`
-	Text      string                    `json:"text"`
-	ParseMode string                    `json:"parse_mode"`
+	Entities  []tgmessage.Entity `json:"entities"`
+	Text      string             `json:"text"`
+	ParseMode string             `json:"parse_mode"`
 }
 
 // Real HTTP and SQLite distinguish definite format rejection from uncertain delivery.

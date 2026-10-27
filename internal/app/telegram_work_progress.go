@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 func telegramWorkObservation(status WorkflowWorkStatus, projectName string) core.TelegramWorkObservation {
@@ -28,14 +29,14 @@ func telegramWorkObservation(status WorkflowWorkStatus, projectName string) core
 
 	message := telegramWorkProgressMessage(status, projectName)
 
-	return core.TelegramWorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: core.RenderTelegramMessage(message).PlainFallback, Message: &message}
+	return core.TelegramWorkObservation{Revision: status.Revision, Phase: phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
 }
 
 func telegramWorkProgressText(status WorkflowWorkStatus) string {
-	return core.RenderTelegramMessage(telegramWorkProgressMessage(status, "")).PlainFallback
+	return tgmessage.Render(telegramWorkProgressMessage(status, "")).PlainFallback
 }
 
-func telegramWorkProgressMessage(status WorkflowWorkStatus, projectName string) core.TelegramMessageBlocks {
+func telegramWorkProgressMessage(status WorkflowWorkStatus, projectName string) tgmessage.Blocks {
 	title := telegramWorkLabel(status.WorkTitle)
 	if title == "" {
 		title = "Selected " + strings.ReplaceAll(status.Selector.Extent, "_", " ") + " work"
@@ -66,7 +67,7 @@ func telegramWorkProgressMessage(status WorkflowWorkStatus, projectName string) 
 	secondary += "\n" + telegramWorkNextAction(status)
 	secondary += "\nInspect complete retained state locally: chr work status --json " + status.ID
 
-	return core.TelegramMessageBlocks{Family: "33", InitialText: telegramWorkStateText(status) + "\n" + title, Content: content, SecondaryText: secondary}
+	return tgmessage.Blocks{Family: "33", InitialText: telegramWorkStateText(status) + "\n" + title, Content: content, SecondaryText: secondary}
 }
 
 func telegramWorkStateText(status WorkflowWorkStatus) string {

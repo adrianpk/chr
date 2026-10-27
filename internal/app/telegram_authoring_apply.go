@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -184,11 +185,11 @@ func (r telegramReceiver) finishAuthoring(ctx context.Context, request core.Tele
 
 func telegramAuthoringResultText(conversation string, result core.AuthoringContinuationResult) string {
 	if result.Question != nil {
-		return core.RenderTelegramMessage(core.TelegramMessageBlocks{Content: result.Prompt, SecondaryText: "Reply to this message to answer. Use /reply " + conversation + " <answer> when you cannot reply directly."}).PlainFallback
+		return tgmessage.Render(tgmessage.Blocks{Content: result.Prompt, SecondaryText: "Reply to this message to answer. Use /reply " + conversation + " <answer> when you cannot reply directly."}).PlainFallback
 	}
 
 	if result.Session.Target == core.AuthoringTargetDump {
-		return core.RenderTelegramMessage(core.TelegramMessageBlocks{Family: "15", InitialText: "Your request and details are saved as a dump for " + result.Session.Topic + ".", SecondaryText: "Use /quiz " + conversation + " to clarify the requirements."}).PlainFallback
+		return tgmessage.Render(tgmessage.Blocks{Family: "15", InitialText: "Your request and details are saved as a dump for " + result.Session.Topic + ".", SecondaryText: "Use /quiz " + conversation + " to clarify the requirements."}).PlainFallback
 	}
 
 	var text strings.Builder

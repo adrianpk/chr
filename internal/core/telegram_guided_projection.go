@@ -9,11 +9,12 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
 )
 
 // ProjectTelegramGuided retains a changed human view and its next reply binding.
 // It does not acknowledge input, recover owners, or advance canonical work.
-func (s *TelegramReceiverStore) ProjectTelegramGuided(ctx context.Context, ref TelegramGuidedReference, progress TelegramGuidedProgress, message TelegramMessageBlocks, delivery *TelegramDocumentResponse, configDigest string, now time.Time) error {
+func (s *TelegramReceiverStore) ProjectTelegramGuided(ctx context.Context, ref TelegramGuidedReference, progress TelegramGuidedProgress, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
 	if err := validateTelegramGuidedProgress(progress, json.RawMessage(`{}`)); err != nil {
 		return err
 	}
@@ -41,7 +42,7 @@ func (s *TelegramReceiverStore) ProjectTelegramGuided(ctx context.Context, ref T
 			kind = "question"
 		}
 
-		observation := TelegramWorkObservation{Revision: uint64(updated.Revision), Phase: progress.Phase, Kind: kind, Text: RenderTelegramMessage(message).PlainFallback, Message: &message}
+		observation := TelegramWorkObservation{Revision: uint64(updated.Revision), Phase: progress.Phase, Kind: kind, Text: tgmessage.Render(message).PlainFallback, Message: &message}
 		if err := queueTelegramWorkObservation(ctx, tx, native, observation, configDigest, now); err != nil {
 			return err
 		}
@@ -91,7 +92,7 @@ func sameTelegramGuidedView(before, after string) bool {
 	return prior.ViewDigest != "" && prior.ViewDigest == current.ViewDigest
 }
 
-func bindTelegramGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, key string, message TelegramMessageBlocks, delivery *TelegramDocumentResponse, configDigest string, now time.Time) error {
+func bindTelegramGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request TelegramOperationRequest, key string, message tgmessage.Blocks, delivery *tgmessage.DocumentResponse, configDigest string, now time.Time) error {
 	if delivery == nil {
 		return nil
 	}
@@ -101,21 +102,21 @@ func bindTelegramGuidedNoticeDocument(ctx context.Context, tx *sql.Tx, request T
 		return err
 	}
 
-	err := validateTelegramDocument(delivery.Document)
+	err := tgmessage.ValidateDocument(delivery.Document)
 	if err == nil && (delivery.Document.ProjectID != request.Target.ProjectID || delivery.Document.Namespace != request.Target.Namespace || delivery.Document.ProjectBindingDigest != request.Target.ProjectBindingDigest) {
-		err = ErrTelegramDocumentUnavailable
+		err = tgmessage.ErrDocumentUnavailable
 	}
 
 	if err == nil {
 		err = bindTelegramDocumentImage(ctx, tx, id, request.Source.Peer, *delivery, configDigest, now)
 	}
 
-	if !errors.Is(err, ErrTelegramDocumentUnavailable) {
+	if !errors.Is(err, tgmessage.ErrDocumentUnavailable) {
 		return err
 	}
 
 	message.SecondaryText = "The complete original could not be attached. Saved input is retained; restore document storage before requesting its complete image."
-	presentation := RenderTelegramMessage(message)
+	presentation := tgmessage.Render(message)
 
 	payload, err := json.Marshal(presentation)
 	if err != nil {
