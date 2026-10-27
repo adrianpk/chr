@@ -32,7 +32,9 @@ owner; workflow/coordinator imports remain forbidden.
 ## Contracts Added or Changed
 
 Pure binding validation and lexical identity predicates moved without a root
-forwarding API. Package naming cleanup remains a separate task commit.
+forwarding API. A separate naming commit shortens the public contracts to
+harness.SealBinding, ValidateBinding and ValidProfileName; the focused binding,
+selection and wire regressions passed again after that rename.
 
 ## Files of Interest
 

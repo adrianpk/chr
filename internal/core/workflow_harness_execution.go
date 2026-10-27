@@ -46,7 +46,7 @@ func validateWorkflowTaskHarnessSchema(input WorkflowTaskInput) error {
 	}
 
 	if input.ExecutionMode == "manual" && len(input.Worker) == 0 {
-		return harnesscore.ValidateHarnessBinding(*input.HarnessBinding)
+		return harnesscore.ValidateBinding(*input.HarnessBinding)
 	}
 
 	return validateWorkflowHarnessPair(input.HarnessBinding, input.Worker)

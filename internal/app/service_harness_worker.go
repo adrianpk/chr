@@ -40,7 +40,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config core.Workspa
 		return core.WorkflowHarnessResolution{}, workflowstate.ErrConflict
 	}
 
-	binding, err := harnesscore.SealHarnessBinding(harnesscore.Binding{
+	binding, err := harnesscore.SealBinding(harnesscore.Binding{
 		SchemaVersion: 1, Role: harnesscore.Worker, Harness: resolved.View.Harness, Source: resolved.View.Source,
 		SelectionRevision: resolved.View.SelectionRevision, Profile: resolved.View.Profile, ProfileRevision: resolved.View.ProfileRevision,
 		ModelProvider: harnessWorkerProvider(resolved.View.ModelProvider), Model: resolved.View.Model, Thinking: resolved.View.Thinking,

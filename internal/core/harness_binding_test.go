@@ -65,7 +65,7 @@ func harnessBindingTestResolver(t *testing.T, command []string) WorkflowHarnessR
 	}
 
 	return func(_ context.Context, config WorkspaceConfig) (WorkflowHarnessResolution, error) {
-		binding, err := harnesscore.SealHarnessBinding(harnesscore.Binding{SchemaVersion: 1, Role: harnesscore.Worker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
+		binding, err := harnesscore.SealBinding(harnesscore.Binding{SchemaVersion: 1, Role: harnesscore.Worker, Harness: "codex", Source: "project", SelectionRevision: config.Revision(), Profile: config.Harnesses.Worker, ProfileRevision: contenthash.Sum([]byte("fixture-profile-" + config.Harnesses.Worker)), ModelProvider: "fixture-provider", Model: "fixture-model", ExecutableRef: executable, RuntimeRef: "native", ProtocolRevision: "fixture-exec/v1", Capabilities: harness.Capabilities{Worker: true}})
 
 		return WorkflowHarnessResolution{Binding: &binding, Command: slices.Clone(frozen)}, err
 	}
@@ -214,7 +214,7 @@ func checkHarnessBindingReplayModel(t *testing.T, store *WorkflowStore, request 
 	changed := request
 	binding.Model = "different-model"
 
-	sealed, err := harnesscore.SealHarnessBinding(binding)
+	sealed, err := harnesscore.SealBinding(binding)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -252,7 +252,7 @@ func checkHarnessBindingBudget(t *testing.T, identity string) {
 			resolved.Binding.RuntimeRef = "sha256:" + contenthash.Sum([]byte("pi-runtime"))
 		}
 
-		sealed, err := harnesscore.SealHarnessBinding(*resolved.Binding)
+		sealed, err := harnesscore.SealBinding(*resolved.Binding)
 
 		return WorkflowHarnessResolution{Binding: &sealed, Command: resolved.Command}, err
 	}

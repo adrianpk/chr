@@ -132,7 +132,7 @@ func validateHarnessSelectionChoices(r HarnessSelectionChangeRequest) error {
 	}
 
 	for _, value := range []*string{r.Worker, r.Generation} {
-		if value != nil && *value != "" && !harnesscore.ValidHarnessProfileName(*value) {
+		if value != nil && *value != "" && !harnesscore.ValidProfileName(*value) {
 			return errors.New("harness selection requires a named profile or clear")
 		}
 	}

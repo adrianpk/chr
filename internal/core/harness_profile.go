@@ -90,7 +90,7 @@ func HarnessProfileRevision(p HarnessProfile) string {
 }
 
 func validateHarnessProfile(p HarnessProfile) error {
-	if !harnesscore.ValidHarnessProfileName(p.Name) || !workflowConfigChoice(p.Harness, []string{"codex", "pi"}) || p.Command == "" {
+	if !harnesscore.ValidProfileName(p.Name) || !workflowConfigChoice(p.Harness, []string{"codex", "pi"}) || p.Command == "" {
 		return errors.New("a harness profile needs a unique name, supported harness and executable")
 	}
 
@@ -116,7 +116,7 @@ func applyHarnessSelection(config *WorkspaceConfig, values map[string]string) er
 
 		value = configvalue.String(value)
 
-		if !harnesscore.ValidHarnessProfileName(value) {
+		if !harnesscore.ValidProfileName(value) {
 			return errors.New("harness selection requires a named profile or null")
 		}
 

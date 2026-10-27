@@ -11,8 +11,8 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 )
 
-// SealHarnessBinding hashes a prepared identity without incorporating credentials.
-func SealHarnessBinding(binding Binding) (Binding, error) {
+// SealBinding hashes a prepared identity without incorporating credentials.
+func SealBinding(binding Binding) (Binding, error) {
 	binding.BindingHash = ""
 
 	capabilities, err := json.Marshal(binding.Capabilities)
@@ -29,11 +29,11 @@ func SealHarnessBinding(binding Binding) (Binding, error) {
 
 	binding.BindingHash = contenthash.Sum(data)
 
-	return binding, ValidateHarnessBinding(binding)
+	return binding, ValidateBinding(binding)
 }
 
-// ValidateHarnessBinding validates retained semantics without installing or running IO.
-func ValidateHarnessBinding(binding Binding) error {
+// ValidateBinding validates retained semantics without installing or running IO.
+func ValidateBinding(binding Binding) error {
 	if err := validateHarnessBindingProtocol(binding); err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func validateHarnessBindingSource(b Binding) error {
 		return errors.New("harness binding requires selection and profile revisions")
 	}
 
-	if b.Source == "project" && !ValidHarnessProfileName(b.Profile) {
+	if b.Source == "project" && !ValidProfileName(b.Profile) {
 		return errors.New("explicit harness binding requires a named profile")
 	}
 
@@ -108,8 +108,8 @@ func validateHarnessBindingSource(b Binding) error {
 	return nil
 }
 
-// ValidHarnessProfileName checks the existing bounded profile identifier.
-func ValidHarnessProfileName(value string) bool {
+// ValidProfileName checks the existing bounded profile identifier.
+func ValidProfileName(value string) bool {
 	return regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`).MatchString(value)
 }
 

@@ -25,7 +25,7 @@ func validateWorkflowHarnessPair(binding *harnesscore.Binding, command []string)
 		return nil
 	}
 
-	if err := harnesscore.ValidateHarnessBinding(*binding); err != nil {
+	if err := harnesscore.ValidateBinding(*binding); err != nil {
 		return err
 	}
 
@@ -34,7 +34,7 @@ func validateWorkflowHarnessPair(binding *harnesscore.Binding, command []string)
 
 func validateWorkflowRequestedHarness(binding *harnesscore.Binding, command []string) error {
 	if binding != nil && len(command) == 0 {
-		return harnesscore.ValidateHarnessBinding(*binding)
+		return harnesscore.ValidateBinding(*binding)
 	}
 
 	return validateWorkflowHarnessPair(binding, command)

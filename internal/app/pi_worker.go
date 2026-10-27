@@ -97,7 +97,7 @@ func piWorkerPrompt(data []byte, options pi.WorkerRuntimeOptions) (string, error
 	}
 
 	binding := *input.HarnessBinding
-	if err := harnesscore.ValidateHarnessBinding(binding); err != nil {
+	if err := harnesscore.ValidateBinding(binding); err != nil {
 		return "", err
 	}
 

@@ -81,7 +81,7 @@ func validateGenerationBindingText(binding HarnessGenerationBinding) error {
 }
 
 func validateGenerationBindingSource(s HarnessSelection) error {
-	if s.Source == "project" && harnesscore.ValidHarnessProfileName(s.Profile) {
+	if s.Source == "project" && harnesscore.ValidProfileName(s.Profile) {
 		return nil
 	}
 

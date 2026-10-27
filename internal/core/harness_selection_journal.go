@@ -145,7 +145,7 @@ func validateHarnessSelectionJournalResult(journal harnessSelectionJournal) erro
 			return errors.New("harness selection result changed requested choices")
 		}
 
-		if field.result != "" && !harnesscore.ValidHarnessProfileName(field.result) {
+		if field.result != "" && !harnesscore.ValidProfileName(field.result) {
 			return errors.New("invalid retained harness choice")
 		}
 	}
