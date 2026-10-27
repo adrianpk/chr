@@ -89,7 +89,7 @@ func (r *fileAuthoringSessionRepository) plannedWorkflowInput(ctx context.Contex
 	}
 
 	if contenthash.Sum(data) != binding.PlannedOrderHash {
-		return generationcore.GeneratedWorkflowPlan{}, ErrWorkflowProjectionStale
+		return generationcore.GeneratedWorkflowPlan{}, workflowstate.ErrProjectionStale
 	}
 
 	var order generationcore.PlanOrderDocument

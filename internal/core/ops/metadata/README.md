@@ -16,3 +16,7 @@ header diagnostic and original body bytes. Markdown reports presence explicitly;
 legacy authoring accepts a body without frontmatter. Native required-envelope
 classification remains in workflow/state. No schema recognition, adoption or
 publication authority is inferred by parsing.
+
+TableCell retains the original tracker Markdown escaping and newline folding.
+ReplaceLines retains the existing half-open replacement used by ticket and
+project metadata edits. Both operate on caller-supplied values without IO.

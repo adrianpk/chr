@@ -127,7 +127,7 @@ func checkWorkflowPublicationExternalFacts(t *testing.T, before WorkflowInvocati
 		t.Fatal("external history was misreported as the exact guarded submission")
 	}
 
-	if progress.Invocation.StopIntent != intent || intent != "" && progress.Invocation.Status != workflowStopStatus(intent) {
+	if progress.Invocation.StopIntent != intent || intent != "" && progress.Invocation.Status != workflowstate.StopStatus(intent) {
 		t.Fatal("delivery observation resumed stopped execution")
 	}
 }

@@ -43,7 +43,7 @@ func retainWorkflowNativeReceiptStop(run *workflowInvocationFile, entry Workflow
 		return
 	}
 
-	run.Status = workflowStopStatus(run.StopIntent)
+	run.Status = workflowstate.StopStatus(run.StopIntent)
 }
 
 func (s *WorkflowStore) checkWorkflowNativeReceiptContinuation(submission WorkflowSubmission) error {

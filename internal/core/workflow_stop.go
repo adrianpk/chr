@@ -71,14 +71,6 @@ func (s *WorkflowStore) ResumeWorkflow(ctx context.Context, id string, ports ...
 	return result, err
 }
 
-func workflowStopStatus(intent string) string {
-	if intent == "cancel" {
-		return "cancelled"
-	}
-
-	return "paused"
-}
-
 func (s *WorkflowStore) watchWorkflowStop(ctx context.Context, claim *WorkflowClaim) (context.Context, context.CancelFunc) {
 	watched, cancel := context.WithCancel(ctx)
 
@@ -180,7 +172,7 @@ func (s *WorkflowStore) stopWorkflow(ctx context.Context, run *workflowInvocatio
 			run.ResumeStatus = run.Status
 		}
 
-		run.Status = workflowStopStatus(intent)
+		run.Status = workflowstate.StopStatus(intent)
 	}
 
 	return s.commitWorkflowControlState(ctx, run, control)

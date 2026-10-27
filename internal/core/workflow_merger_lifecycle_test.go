@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeMergerDescendants holds the shared slot after the driver reports a
@@ -131,7 +133,7 @@ func nativeMergerStop(t *testing.T, intent string) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != workflowStopStatus(intent) || workflowAttemptQuiescent(run.Attempts[len(run.Attempts)-1]) != nil {
+	if run.Status != workflowstate.StopStatus(intent) || workflowAttemptQuiescent(run.Attempts[len(run.Attempts)-1]) != nil {
 		t.Fatal("stop discarded process ownership")
 	}
 

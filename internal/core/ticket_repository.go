@@ -228,7 +228,7 @@ func (r *fileTicketRepository) ticketPath(useCase, key, title string) string {
 		parts = append(parts, slug)
 	}
 
-	parts = append(parts, key+"-"+truncatedName(title)+".md")
+	parts = append(parts, key+"-"+slugcore.ArtifactName(title)+".md")
 
 	return filepath.Join(parts...)
 }
@@ -247,15 +247,4 @@ func keyNumberFromText(prefix, text string) (int, bool) {
 	}
 
 	return number, true
-}
-
-func truncatedName(value string) string {
-	const maxLength = 48
-
-	slug := slugcore.Normalize(value)
-	if len(slug) <= maxLength {
-		return slug
-	}
-
-	return strings.Trim(slug[:maxLength], "-")
 }

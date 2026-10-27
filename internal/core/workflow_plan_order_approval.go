@@ -93,7 +93,7 @@ func (s *WorkflowStore) validateApprovalOrderImages(binding workflowstate.PlanRe
 	}
 
 	if contenthash.Sum(order) != binding.OrderHash || contenthash.Sum(tracker) != binding.TrackerHash {
-		return ErrWorkflowProjectionStale
+		return workflowstate.ErrProjectionStale
 	}
 
 	var document generationcore.PlanOrderDocument
@@ -176,7 +176,7 @@ func (s *WorkflowStore) validateOrderScope(binding workflowstate.PlanRevisionBin
 	}
 
 	if contenthash.Sum(plannedTracker) != binding.PlannedTrackerHash {
-		return ErrWorkflowProjectionStale
+		return workflowstate.ErrProjectionStale
 	}
 
 	return nil

@@ -111,7 +111,7 @@ func (s *WorkflowStore) boundTrackerChanges(status WorkflowTrackerStatus, tracke
 		return nil, err
 	}
 
-	metadataRef, err := workflowTrackerMetadataPath(status.SetID)
+	metadataRef, err := workflowstate.TrackerMetadataPath(status.SetID)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (s *WorkflowStore) orderImageChange(reference string, body []byte, expected
 	}
 
 	if change.Before != "" && change.Before != expected && change.Before != replace {
-		return change, fmt.Errorf("%w: edited order image %s requires its observed hash", ErrWorkflowProjectionStale, reference)
+		return change, fmt.Errorf("%w: edited order image %s requires its observed hash", workflowstate.ErrProjectionStale, reference)
 	}
 
 	return change, nil
@@ -218,7 +218,7 @@ func (s *WorkflowStore) checkCurrentOrderOutput(binding workflowstate.PlanRevisi
 	}
 
 	if contenthash.Sum(tracker) != binding.TrackerHash {
-		return ErrWorkflowProjectionStale
+		return workflowstate.ErrProjectionStale
 	}
 
 	return nil

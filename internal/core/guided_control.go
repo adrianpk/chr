@@ -119,6 +119,6 @@ func completeGuidedControl(session *authoringcore.Session, operation authoringco
 
 	state.Status, state.Blocker = "blocked", "Stop requested; native work is stopping."
 	if control.NativeReceipt == nil || control.AcknowledgedRevision != 0 {
-		state.Status, state.Blocker = workflowStopStatus(operation.Action), ""
+		state.Status, state.Blocker = workflowstate.StopStatus(operation.Action), ""
 	}
 }

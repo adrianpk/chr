@@ -201,7 +201,7 @@ func checkPreviousPlanTracker(target planTargetObservation, image workflowstate.
 	}
 
 	if previous.TrackerHash == "" || previous.TrackerHash != image.Before {
-		return fmt.Errorf("%w: tracker edited; replacement requires its observed hash", ErrWorkflowProjectionStale)
+		return fmt.Errorf("%w: tracker edited; replacement requires its observed hash", workflowstate.ErrProjectionStale)
 	}
 
 	return nil

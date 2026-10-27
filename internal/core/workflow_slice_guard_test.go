@@ -123,7 +123,7 @@ func testWorkflowSliceStop(t *testing.T, intent string) {
 	}
 
 	retained := workflowTestValidatedSlice(t, store, hierarchy, run.Invocation.ID)
-	if retained.Status != workflowStopStatus(intent) || retained.CandidateRef != "" || retained.Attempts[3].CheckpointRef == "" {
+	if retained.Status != workflowstate.StopStatus(intent) || retained.CandidateRef != "" || retained.Attempts[3].CheckpointRef == "" {
 		t.Fatal("aggregate stop fabricated acceptance or lost its checkpoint")
 	}
 

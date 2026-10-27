@@ -75,7 +75,7 @@ func testWorkflowPreparationStop(t *testing.T, intent string) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != workflowStopStatus(intent) || run.Preparation.State != "stale" || run.ResumeStatus != "waiting_integration" {
+	if run.Status != workflowstate.StopStatus(intent) || run.Preparation.State != "stale" || run.ResumeStatus != "waiting_integration" {
 		t.Fatal("stop reset combined-result state")
 	}
 

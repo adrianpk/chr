@@ -160,7 +160,7 @@ func checkWorkflowAssuranceClosure(t *testing.T, store *WorkflowStore, hierarchy
 	}
 
 	stale, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{})
-	if !errors.Is(err, ErrWorkflowProjectionStale) || stale.Status != "stale" {
+	if !errors.Is(err, workflowstate.ErrProjectionStale) || stale.Status != "stale" {
 		t.Fatal("projection failure did not report stale state after successful closure", err)
 	}
 

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"os"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *WorkflowStore) stopWorkflowNativeSubmission(ctx context.Context, run *workflowInvocationFile, intent string, control *workflowControlCommit) (bool, error) {
@@ -43,7 +45,7 @@ func (s *WorkflowStore) stopWorkflowNativeSubmission(ctx context.Context, run *w
 
 func (s *WorkflowStore) retainWorkflowNativeStop(ctx context.Context, run *workflowInvocationFile, intent string, control *workflowControlCommit, projection workflowNativeProjection) error {
 	entry := projection.entry
-	if !projection.changed && run.StopIntent == intent && entry.StopIntent == intent && run.Status != workflowStopStatus(intent) {
+	if !projection.changed && run.StopIntent == intent && entry.StopIntent == intent && run.Status != workflowstate.StopStatus(intent) {
 		return s.retainWorkflowControlNoop(ctx, *run, control)
 	}
 
@@ -67,11 +69,11 @@ func (s *WorkflowStore) finishWorkflowNativeStop(ctx context.Context, run *workf
 		return err
 	}
 
-	if workflowInvocationTerminal(run.Status) || run.StopIntent == intent && run.Status == workflowStopStatus(intent) {
+	if workflowInvocationTerminal(run.Status) || run.StopIntent == intent && run.Status == workflowstate.StopStatus(intent) {
 		return s.retainWorkflowControlNoop(ctx, *run, control)
 	}
 
-	run.StopIntent, run.Status = intent, workflowStopStatus(intent)
+	run.StopIntent, run.Status = intent, workflowstate.StopStatus(intent)
 
 	return s.commitWorkflowControlState(ctx, run, control)
 }

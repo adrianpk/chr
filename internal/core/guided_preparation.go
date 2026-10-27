@@ -141,7 +141,7 @@ func guidedPreparationPaths(session authoringcore.Session) ([]string, error) {
 		references = append(references, filepath.Join(filepath.Dir(binding.OrderRef), file))
 	}
 
-	trackerMeta, err := workflowTrackerMetadataPath(materialized.SetID)
+	trackerMeta, err := workflowstate.TrackerMetadataPath(materialized.SetID)
 	if err != nil {
 		return nil, err
 	}

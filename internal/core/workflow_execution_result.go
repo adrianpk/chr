@@ -103,7 +103,7 @@ func workflowExecutionStopped(run workflowInvocationFile, interrupted bool) bool
 func (s *WorkflowStore) finishStoppedWorkflowTask(run workflowInvocationFile, record WorkflowRecord, claim *WorkflowClaim, result *WorkflowTaskResult) error {
 	result.Successful, result.Outcome = false, "interrupted"
 	if run.StopIntent != "" {
-		result.Outcome = workflowStopStatus(run.StopIntent)
+		result.Outcome = workflowstate.StopStatus(run.StopIntent)
 	}
 
 	if err := s.checkpointWorkflowAttempt(run, record, result.Outcome, result); err != nil {

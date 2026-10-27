@@ -4,6 +4,7 @@ import (
 	"context"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type guidedWorkflowObserver struct{ root string }
@@ -20,7 +21,7 @@ func (observer guidedWorkflowObserver) ObserveStop(ctx context.Context, session 
 	return authoringcore.GuidedStopObservation{
 		Status:       run.Status,
 		Revision:     run.Revision,
-		Acknowledged: run.Status == workflowStopStatus(intent) && run.StopIntent == intent,
+		Acknowledged: run.Status == workflowstate.StopStatus(intent) && run.StopIntent == intent,
 	}, err
 }
 

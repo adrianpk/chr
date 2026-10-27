@@ -17,14 +17,6 @@ import (
 
 var errWorkflowTrackerAbsent = errors.New("tracker is not registered")
 
-func workflowTrackerMetadataPath(setID string) (string, error) {
-	if setID == "" || setID == "." || setID == ".." || strings.ContainsAny(setID, "/\\") {
-		return "", fmt.Errorf("invalid tracker set identity")
-	}
-
-	return "tracker/projections/" + setID + ".json", nil
-}
-
 func (s *WorkflowStore) readWorkflowTrackerFile(relative string) ([]byte, error) {
 	path, err := s.safePath(relative)
 	if err != nil {
@@ -44,7 +36,7 @@ func (s *WorkflowStore) readWorkflowTrackerFile(relative string) ([]byte, error)
 }
 
 func (s *WorkflowStore) workflowTrackerOutput(setID string) (string, error) {
-	if _, err := workflowTrackerMetadataPath(setID); err != nil {
+	if _, err := workflowstate.TrackerMetadataPath(setID); err != nil {
 		return "", err
 	}
 
@@ -61,7 +53,7 @@ func (s *WorkflowStore) workflowTrackerOutput(setID string) (string, error) {
 }
 
 func (s *WorkflowStore) readWorkflowTracker(setID string) (WorkflowTrackerStatus, error) {
-	relative, err := workflowTrackerMetadataPath(setID)
+	relative, err := workflowstate.TrackerMetadataPath(setID)
 	if err != nil {
 		return WorkflowTrackerStatus{}, err
 	}
@@ -97,7 +89,7 @@ func (s *WorkflowStore) validateWorkflowTracker(result WorkflowTrackerStatus, se
 	}
 
 	if !validWorkflowTrackerSchema(result.Schema) || result.SetID != setID || result.ProjectID != s.projectID || result.Namespace != s.layout.Namespace() || result.Path != "tracker/"+setID+".md" || contenthash.Sum(data) != checksum {
-		return fmt.Errorf("%w: invalid or edited tracker metadata", ErrWorkflowProjectionStale)
+		return fmt.Errorf("%w: invalid or edited tracker metadata", workflowstate.ErrProjectionStale)
 	}
 
 	if result.Status != "current" && result.Status != "stale" {
@@ -108,7 +100,7 @@ func (s *WorkflowStore) validateWorkflowTracker(result WorkflowTrackerStatus, se
 }
 
 func (s *WorkflowStore) persistWorkflowTracker(result WorkflowTrackerStatus) error {
-	relative, err := workflowTrackerMetadataPath(result.SetID)
+	relative, err := workflowstate.TrackerMetadataPath(result.SetID)
 	if err != nil {
 		return err
 	}
@@ -134,11 +126,11 @@ func (s *WorkflowStore) persistWorkflowTracker(result WorkflowTrackerStatus) err
 
 func (s *WorkflowStore) writeWorkflowTracker(result WorkflowTrackerStatus, output []byte) (WorkflowTrackerStatus, error) {
 	if err := s.persistWorkflowTracker(result); err != nil {
-		return result, errors.Join(ErrWorkflowProjectionStale, err)
+		return result, errors.Join(workflowstate.ErrProjectionStale, err)
 	}
 
 	if err := s.workflowTrackerBoundary(0); err != nil {
-		return result, errors.Join(ErrWorkflowProjectionStale, err)
+		return result, errors.Join(workflowstate.ErrProjectionStale, err)
 	}
 
 	if err := s.checkWorkflowTrackerOutput(result.SetID, result.ObservedHash); err != nil {
@@ -167,7 +159,7 @@ func (s *WorkflowStore) confirmWorkflowTracker(result WorkflowTrackerStatus, out
 	if err := s.persistWorkflowTracker(result); err != nil {
 		result.Status, result.Reason = "stale", "projection_stale"
 
-		return result, errors.Join(ErrWorkflowProjectionStale, err)
+		return result, errors.Join(workflowstate.ErrProjectionStale, err)
 	}
 
 	if err := s.workflowTrackerBoundary(2); err != nil {

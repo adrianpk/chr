@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowTrackerFixture(t *testing.T) (*WorkflowStore, WorkflowMaterializationResult, WorkflowTrackerStatus) {
@@ -89,7 +90,7 @@ func checkWorkflowTrackerEdited(t *testing.T, existing bool) {
 
 	for _, hash := range []string{"", contenthash.Sum([]byte("old image"))} {
 		stale, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{ReplaceHash: hash})
-		if !errors.Is(err, ErrWorkflowProjectionStale) || stale.Status != "stale" || string(workflowTrackerRead(t, path)) != string(edited) {
+		if !errors.Is(err, workflowstate.ErrProjectionStale) || stale.Status != "stale" || string(workflowTrackerRead(t, path)) != string(edited) {
 			t.Fatal("edited view was overwritten", stale, err)
 		}
 	}
@@ -103,7 +104,7 @@ func checkWorkflowTrackerEdited(t *testing.T, existing bool) {
 func workflowTrackerTestMetadata(t *testing.T, id string) string {
 	t.Helper()
 
-	path, err := workflowTrackerMetadataPath(id)
+	path, err := workflowstate.TrackerMetadataPath(id)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +185,7 @@ func TestWorkflowTrackerProgress(t *testing.T) {
 	}
 
 	_, err = store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{})
-	if !errors.Is(err, ErrWorkflowProjectionStale) {
+	if !errors.Is(err, workflowstate.ErrProjectionStale) {
 		t.Fatal("edited projection silently refreshed", err)
 	}
 

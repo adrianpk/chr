@@ -10,9 +10,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ErrWorkflowProjectionStale preserves domain progress when a derived export fails.
-var ErrWorkflowProjectionStale = errors.New("projection_stale")
-
 // WorkflowTrackerSource binds an export to its authoritative revision and bytes.
 type WorkflowTrackerSource struct {
 	ID       string `json:"id,omitempty"`
@@ -104,7 +101,7 @@ func workflowTrackerResult(result WorkflowTrackerStatus, err error) (WorkflowTra
 	if err != nil && result.SetID != "" {
 		result.Status, result.Reason, result.Detail = "stale", "projection_stale", err.Error()
 
-		return result, errors.Join(ErrWorkflowProjectionStale, err)
+		return result, errors.Join(workflowstate.ErrProjectionStale, err)
 	}
 
 	return result, err
@@ -154,7 +151,7 @@ func (s *WorkflowStore) workflowTrackerPrevious(setID string) (WorkflowTrackerSt
 
 	ids, err := s.workflowTrackerRegistrations()
 	if err != nil || len(ids) >= workflowstate.PageLimit {
-		return previous, errors.Join(ErrWorkflowProjectionStale, fmt.Errorf("cannot register tracker within 128-projection bound"), err)
+		return previous, errors.Join(workflowstate.ErrProjectionStale, fmt.Errorf("cannot register tracker within 128-projection bound"), err)
 	}
 
 	return previous, nil
@@ -171,7 +168,7 @@ func workflowTrackerReplacement(observed string, previous WorkflowTrackerStatus,
 func (s *WorkflowStore) workflowTrackerFailure(result WorkflowTrackerStatus, failure error) (WorkflowTrackerStatus, error) {
 	result.Status, result.Reason, result.Detail = "stale", "projection_stale", failure.Error()
 
-	return result, errors.Join(ErrWorkflowProjectionStale, failure, s.persistWorkflowTracker(result))
+	return result, errors.Join(workflowstate.ErrProjectionStale, failure, s.persistWorkflowTracker(result))
 }
 
 func (s *WorkflowStore) prepareWorkflowTrackerImage(snapshot WorkflowSnapshot, setID string, opts WorkflowTrackerOptions) (WorkflowTrackerStatus, []byte, WorkflowTrackerStatus, error) {

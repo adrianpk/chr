@@ -219,7 +219,7 @@ func setTicketEditorField(content, key, value string) (string, error) {
 			end++
 		}
 
-		return replaceTicketFrontmatterLines(content, replaceStringLines(lines, i, end, []string{key + ": " + value}))
+		return replaceTicketFrontmatterLines(content, opsmetadata.ReplaceLines(lines, i, end, []string{key + ": " + value}))
 	}
 
 	return replaceTicketFrontmatterLines(content, append(lines, key+": "+value))

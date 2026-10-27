@@ -8,6 +8,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // Invalid generated identities cannot create a plan, map or ticket. Stable IDs
@@ -69,12 +70,12 @@ func TestPlanOrderEditedOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := WriteGeneratedPlan(t.Context(), project, plan); !errors.Is(err, ErrWorkflowProjectionStale) {
+	if _, err := WriteGeneratedPlan(t.Context(), project, plan); !errors.Is(err, workflowstate.ErrProjectionStale) {
 		t.Fatal("overwrote edited output", err)
 	}
 
 	plan.TrackerReplaceHash = contenthash.Sum([]byte("another observation"))
-	if _, err := WriteGeneratedPlan(t.Context(), project, plan); !errors.Is(err, ErrWorkflowProjectionStale) {
+	if _, err := WriteGeneratedPlan(t.Context(), project, plan); !errors.Is(err, workflowstate.ErrProjectionStale) {
 		t.Fatal("accepted wrong observation", err)
 	}
 

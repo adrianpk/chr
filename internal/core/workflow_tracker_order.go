@@ -171,7 +171,7 @@ func (s *WorkflowStore) workflowPlannedOrder(binding workflowstate.PlanRevisionB
 	}
 
 	if contenthash.Sum(body) != binding.BodyHash {
-		return generationcore.PlanOrderDocument{}, ErrWorkflowProjectionStale
+		return generationcore.PlanOrderDocument{}, workflowstate.ErrProjectionStale
 	}
 
 	planned, err := s.readWorkflowTrackerFile(filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "planned-order.json")))
@@ -180,7 +180,7 @@ func (s *WorkflowStore) workflowPlannedOrder(binding workflowstate.PlanRevisionB
 	}
 
 	if contenthash.Sum(planned) != binding.PlannedOrderHash {
-		return generationcore.PlanOrderDocument{}, ErrWorkflowProjectionStale
+		return generationcore.PlanOrderDocument{}, workflowstate.ErrProjectionStale
 	}
 
 	var document generationcore.PlanOrderDocument

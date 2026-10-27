@@ -46,7 +46,7 @@ func ObservePlanRevision(ctx context.Context, projectDir string, scope quizcore.
 	namespace := strings.Split(paths.RelativePath, "/")[1]
 
 	if binding.BodyHash != target.images[0].Before {
-		return binding, ErrWorkflowProjectionStale
+		return binding, workflowstate.ErrProjectionStale
 	}
 
 	if err := r.validatePlanRevisionImages(namespace, binding); err != nil {
@@ -98,7 +98,7 @@ func (r *fileAuthoringSessionRepository) checkPlanImages(root string, images map
 		}
 
 		if hash == "" || contenthash.Sum(data) != hash {
-			return ErrWorkflowProjectionStale
+			return workflowstate.ErrProjectionStale
 		}
 	}
 

@@ -120,6 +120,6 @@ func finishWorkflowNativeFanout(run *workflowInvocationFile, entry *WorkflowInte
 	entry.UpdatedAt = time.Now().UTC()
 
 	if run.StopIntent != "" {
-		run.Status = workflowStopStatus(run.StopIntent)
+		run.Status = workflowstate.StopStatus(run.StopIntent)
 	}
 }

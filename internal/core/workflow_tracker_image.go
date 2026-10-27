@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
@@ -115,21 +114,17 @@ func renderWorkflowTracker(result WorkflowTrackerStatus, set WorkflowRecord, tas
 	output.WriteString("---\nworkflow_projection: chr-tracker/v1\nstate_authority: tickets\n")
 	fmt.Fprintf(&output, "slice_set_id: %s\nsource_hash: %s\n---\n\n", opsmetadata.Quote(set.ID), result.SourceHash)
 	output.WriteString("# Workflow tracker\n\nGenerated view. Ticket records and receipts own progress. Do not execute or import this file.\n\n")
-	fmt.Fprintf(&output, "Set: %s (%s). Closure receipt: %s.\n\n", trackerCell(set.ID), trackerCell(set.Set.Status), trackerCell(set.Set.ClosureRef))
+	fmt.Fprintf(&output, "Set: %s (%s). Closure receipt: %s.\n\n", opsmetadata.TableCell(set.ID), opsmetadata.TableCell(set.Set.Status), opsmetadata.TableCell(set.Set.ClosureRef))
 	output.WriteString("| Slice | Phase | Pull request | Delivery receipt |\n| --- | --- | --- | --- |\n")
 	ordered := append([]workflowstate.WorkflowSlice(nil), set.Set.Slices...)
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Order < ordered[j].Order })
 	for _, slice := range ordered {
-		fmt.Fprintf(&output, "| %s | %s | %s | %s |\n", trackerCell(slice.ID), trackerCell(slice.Phase), trackerCell(slice.PullRequest), trackerCell(slice.DeliveryRef))
+		fmt.Fprintf(&output, "| %s | %s | %s | %s |\n", opsmetadata.TableCell(slice.ID), opsmetadata.TableCell(slice.Phase), opsmetadata.TableCell(slice.PullRequest), opsmetadata.TableCell(slice.DeliveryRef))
 	}
 	output.WriteString("\n| Ticket | Slice | Status | Phase | Delivery receipt |\n| --- | --- | --- | --- | --- |\n")
 	for _, task := range tasks {
-		fmt.Fprintf(&output, "| %s | %s | %s | %s | %s |\n", trackerCell(task.Task.Key), trackerCell(task.Task.SliceID), trackerCell(task.Task.Status), trackerCell(task.Task.Phase), trackerCell(task.Task.DeliveryRef))
+		fmt.Fprintf(&output, "| %s | %s | %s | %s | %s |\n", opsmetadata.TableCell(task.Task.Key), opsmetadata.TableCell(task.Task.SliceID), opsmetadata.TableCell(task.Task.Status), opsmetadata.TableCell(task.Task.Phase), opsmetadata.TableCell(task.Task.DeliveryRef))
 	}
 
 	return output.Bytes()
-}
-
-func trackerCell(value string) string {
-	return strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", "|", "&#124;", "\n", " ", "\r", " ").Replace(value)
 }

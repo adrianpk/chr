@@ -52,7 +52,7 @@ func replaceProjectMetadataField(lines []string, key, value string) []string {
 			end++
 		}
 
-		return replaceStringLines(lines, i, end, []string{key + ": " + value})
+		return opsmetadata.ReplaceLines(lines, i, end, []string{key + ": " + value})
 	}
 
 	return append(lines, key+": "+value)

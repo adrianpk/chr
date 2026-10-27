@@ -170,7 +170,7 @@ func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (
 		return replaceTicketFrontmatterLines(content, lines)
 	}
 
-	lines = replaceStringLines(lines, start, end, replacement)
+	lines = opsmetadata.ReplaceLines(lines, start, end, replacement)
 
 	return replaceTicketFrontmatterLines(content, lines)
 }
@@ -274,11 +274,4 @@ func insertStringLines(lines []string, index int, inserted []string) []string {
 	updated = append(updated, inserted...)
 
 	return append(updated, lines[index:]...)
-}
-
-func replaceStringLines(lines []string, start, end int, replacement []string) []string {
-	updated := append([]string{}, lines[:start]...)
-	updated = append(updated, replacement...)
-
-	return append(updated, lines[end:]...)
 }

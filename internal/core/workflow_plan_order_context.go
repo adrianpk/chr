@@ -55,19 +55,19 @@ func (s *WorkflowStore) requiredWorkflowOrderMap(ctx context.Context, record Wor
 func (s *WorkflowStore) checkRequiredOrderImages(source WorkflowTrackerStatus, output []byte) error {
 	binding := source.PlanRevision
 	if binding == nil || binding.OrderHash != source.SourceHash || binding.TrackerHash != contenthash.Sum(output) {
-		return ErrWorkflowProjectionStale
+		return workflowstate.ErrProjectionStale
 	}
 
 	current, err := s.readPlanOrderBinding(*binding)
 	if err != nil || current != *binding {
-		return errors.Join(ErrWorkflowProjectionStale, err)
+		return errors.Join(workflowstate.ErrProjectionStale, err)
 	}
 
 	images := map[string]string{source.Path: binding.TrackerHash, binding.TrackerRef: binding.TrackerHash, binding.OrderRef: binding.OrderHash}
 	for reference, hash := range images {
 		data, err := s.readWorkflowTrackerFile(reference)
 		if err != nil || contenthash.Sum(data) != hash {
-			return fmt.Errorf("%w: %s observed hash %s: %w", ErrWorkflowProjectionStale, reference, contenthash.Sum(data), err)
+			return fmt.Errorf("%w: %s observed hash %s: %w", workflowstate.ErrProjectionStale, reference, contenthash.Sum(data), err)
 		}
 	}
 
@@ -165,11 +165,11 @@ func (s *WorkflowStore) guardBoundWorkflowTaskOrder(old, next WorkflowRecord) er
 func (s *WorkflowStore) checkRequiredOrderStatus(source WorkflowTrackerStatus, output []byte) error {
 	status, err := s.readWorkflowTracker(source.SetID)
 	if err != nil {
-		return errors.Join(ErrWorkflowProjectionStale, err)
+		return errors.Join(workflowstate.ErrProjectionStale, err)
 	}
 
 	if status.Schema != "chr-tracker/v2" || status.SourceHash != source.SourceHash || status.OutputHash != contenthash.Sum(output) {
-		return ErrWorkflowProjectionStale
+		return workflowstate.ErrProjectionStale
 	}
 
 	if err := s.checkRequiredOrderImages(source, output); err != nil {
@@ -187,7 +187,7 @@ type workflowOrderRepairImage struct {
 func (s *WorkflowStore) requiredOrderRepairImages(snapshot WorkflowSnapshot, source WorkflowTrackerStatus, output []byte) ([]workflowOrderRepairImage, error) {
 	binding := source.PlanRevision
 	if binding == nil || binding.OrderHash != source.SourceHash || binding.TrackerHash != contenthash.Sum(output) {
-		return nil, ErrWorkflowProjectionStale
+		return nil, workflowstate.ErrProjectionStale
 	}
 
 	set, tasks, err := workflowTrackerMembers(snapshot, source.SetID)

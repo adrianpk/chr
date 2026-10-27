@@ -5,6 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeStopPending retains both stop pointers until possible publication is
@@ -121,7 +123,7 @@ func checkNativeStopPending(t *testing.T, intent string) {
 	}
 
 	stopped, err := f.store.StopWorkflow(t.Context(), f.entry.InvocationID, intent)
-	if err != nil || stopped.Status == workflowStopStatus(intent) || stopped.StopIntent != intent {
+	if err != nil || stopped.Status == workflowstate.StopStatus(intent) || stopped.StopIntent != intent {
 		t.Fatal("unreconciled native application became terminal stop", stopped.Status, err)
 	}
 
@@ -157,7 +159,7 @@ func checkNativeStoppedMetadata(t *testing.T, fixture nativeCanonicalFixture, st
 
 	nativeCanonicalPending(t, fixture, submission, budget)
 
-	if after := workflowTestRead(t, f.store, stopped.ID); after.Status == workflowStopStatus(intent) || after.StopIntent != intent {
+	if after := workflowTestRead(t, f.store, stopped.ID); after.Status == workflowstate.StopStatus(intent) || after.StopIntent != intent {
 		t.Fatal("merged metadata finalized stop before receipt/fanout")
 	}
 }

@@ -8,6 +8,7 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	slugcore "forge.adrianpk.com/chr/internal/core/ops/slug"
 )
 
 // AuthoringArtifactLayoutOptions describes a package boundary value.
@@ -165,12 +166,12 @@ func authoringArtifactType(kind authoringcore.ArtifactKind) string {
 }
 
 func authoringArtifactFileName(sessionID, name string) string {
-	slug := strings.ToLower(truncatedName(name))
+	slug := strings.ToLower(slugcore.ArtifactName(name))
 	if slug == "" {
 		slug = "artifact"
 	}
 
-	sessionSlug := strings.ToLower(truncatedName(sessionID))
+	sessionSlug := strings.ToLower(slugcore.ArtifactName(sessionID))
 	if sessionSlug == "" {
 		return slug + ".md"
 	}
@@ -184,7 +185,7 @@ func authoringArtifactID(opts AuthoringArtifactLayoutOptions) string {
 		name = opts.Topic
 	}
 
-	return string(opts.Kind) + ":" + strings.ToLower(truncatedName(opts.SessionID)) + ":" + strings.ToLower(truncatedName(name))
+	return string(opts.Kind) + ":" + strings.ToLower(slugcore.ArtifactName(opts.SessionID)) + ":" + strings.ToLower(slugcore.ArtifactName(name))
 }
 
 func authoringArtifactCollision(path string, allowReplace bool) (AuthoringArtifactCollision, error) {

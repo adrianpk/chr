@@ -113,7 +113,7 @@ func workflowMergerFinishedRun(run *workflowInvocationFile, claim *WorkflowClaim
 	}
 
 	if run.StopIntent != "" {
-		run.Status, current.Outcome = workflowStopStatus(run.StopIntent), workflowStopStatus(run.StopIntent)
+		run.Status, current.Outcome = workflowstate.StopStatus(run.StopIntent), workflowstate.StopStatus(run.StopIntent)
 	}
 
 	if run.Status == "paused" {

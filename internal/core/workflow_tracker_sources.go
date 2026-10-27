@@ -43,7 +43,7 @@ func (s *WorkflowStore) readWorkflowOrderSources(ctx context.Context, setID stri
 }
 
 func (s *WorkflowStore) readWorkflowOrderSet(setID string) (WorkflowRecord, error) {
-	if _, err := workflowTrackerMetadataPath(setID); err != nil {
+	if _, err := workflowstate.TrackerMetadataPath(setID); err != nil {
 		return WorkflowRecord{}, err
 	}
 

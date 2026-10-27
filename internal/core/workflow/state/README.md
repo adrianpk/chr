@@ -48,3 +48,8 @@ original JSON representation. Closing attempt and amendment references move with
 the set graph; field order, defaults and tags remain exact. Native set validation,
 selection, mutation, materialization and publication still have their existing
 owners. This value layer imports neither generation nor the coordinator.
+
+StopStatus retains the original cancel-to-cancelled mapping and paused fallback.
+TrackerMetadataPath retains the original set-identity check and projection path;
+ErrProjectionStale keeps the same error identity for committed domain progress
+with a failed derived export. These shared primitives perform no IO or recovery.

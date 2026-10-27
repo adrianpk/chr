@@ -107,7 +107,7 @@ func checkWorkflowClosingStopped(t *testing.T, store *WorkflowStore, path, id, i
 		t.Fatal("stopped gate confirmed completion or retained closing ownership")
 	}
 
-	if intent != "deadline" && run.Status != workflowStopStatus(intent) {
+	if intent != "deadline" && run.Status != workflowstate.StopStatus(intent) {
 		t.Fatal("closing finalization lost durable stop intent")
 	}
 }

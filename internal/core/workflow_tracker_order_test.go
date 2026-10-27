@@ -128,7 +128,7 @@ func TestWorkflowOrderEdited(t *testing.T) {
 	edited := []byte("Operator notes with unsupported processed checkboxes.\n")
 	workflowTrackerWrite(t, path, edited)
 
-	if _, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{}); !errors.Is(err, ErrWorkflowProjectionStale) {
+	if _, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{}); !errors.Is(err, workflowstate.ErrProjectionStale) {
 		t.Fatal("edited output replaced", err)
 	}
 
@@ -194,7 +194,7 @@ func TestWorkflowOrderSourceIntegrity(t *testing.T) {
 	reference := filepath.Join(filepath.Dir(projection.PlanRevision.OrderRef), "planned-order.json")
 	workflowTrackerWrite(t, filepath.Join(store.layout.Root(), reference), []byte(`{"schema":"chr-tracker/v2"}`))
 
-	if _, err := store.InspectWorkflowTracker(t.Context(), projection.SetID); !errors.Is(err, ErrWorkflowProjectionStale) {
+	if _, err := store.InspectWorkflowTracker(t.Context(), projection.SetID); !errors.Is(err, workflowstate.ErrProjectionStale) {
 		t.Fatal("edited immutable source accepted", err)
 	}
 }

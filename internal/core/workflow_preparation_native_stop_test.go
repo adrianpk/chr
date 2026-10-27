@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativePreparationStop projects a queue stop while the host gate owns its
@@ -32,7 +34,7 @@ func nativePreparationStop(t *testing.T, intent string) {
 
 	waitWorkflowClaimFile(t, marker)
 
-	request := nativeEntryTransition(t, f.store, fixture.entry, workflowStopStatus(intent))
+	request := nativeEntryTransition(t, f.store, fixture.entry, workflowstate.StopStatus(intent))
 	request.StopIntent = intent
 
 	if _, err := f.store.TransitionWorkflowIntegration(t.Context(), request); err != nil {
@@ -44,7 +46,7 @@ func nativePreparationStop(t *testing.T, intent string) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != workflowStopStatus(intent) || run.Preparation.State != "stale" || run.ResumeStatus != "waiting_integration" {
+	if run.Status != workflowstate.StopStatus(intent) || run.Preparation.State != "stale" || run.ResumeStatus != "waiting_integration" {
 		t.Fatal("native queue stop lost the integration frontier")
 	}
 

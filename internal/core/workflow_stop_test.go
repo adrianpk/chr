@@ -154,7 +154,7 @@ func checkWorkflowStoppedTask(t *testing.T, store *WorkflowStore, path, id, inte
 	t.Helper()
 
 	retained, err := store.ReadWorkflow(t.Context(), id)
-	if err != nil || retained.Status != workflowStopStatus(intent) || retained.Cursor != 0 || retained.Lane == nil {
+	if err != nil || retained.Status != workflowstate.StopStatus(intent) || retained.Cursor != 0 || retained.Lane == nil {
 		t.Fatalf("retained checkpoint: %+v, %v", retained, err)
 	}
 

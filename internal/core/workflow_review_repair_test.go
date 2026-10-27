@@ -175,7 +175,7 @@ func testWorkflowReviewStop(t *testing.T, intent string) {
 	}
 
 	retained := workflowTestRead(t, store, run.ID)
-	if retained.Status != workflowStopStatus(intent) || retained.ResumeStatus != "waiting_review" || retained.CandidateRef != run.CandidateRef {
+	if retained.Status != workflowstate.StopStatus(intent) || retained.ResumeStatus != "waiting_review" || retained.CandidateRef != run.CandidateRef {
 		t.Fatal("stop rewound validated slice work")
 	}
 

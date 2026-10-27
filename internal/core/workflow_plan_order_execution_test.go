@@ -26,7 +26,7 @@ func TestWorkflowPlanOrderContext(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.prepareWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker")); !errors.Is(err, ErrWorkflowProjectionStale) {
+	if _, err := store.prepareWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker")); !errors.Is(err, workflowstate.ErrProjectionStale) {
 		t.Fatal("missing map allowed worker input", err)
 	}
 
@@ -52,7 +52,7 @@ func TestWorkflowPlanOrderRepair(t *testing.T) {
 	edited := []byte("Manual retained-map notes.\n")
 	workflowTrackerWrite(t, path, edited)
 
-	if _, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{}); !errors.Is(err, ErrWorkflowProjectionStale) {
+	if _, err := store.ExportWorkflowTracker(t.Context(), hierarchy.Set.ID, WorkflowTrackerOptions{}); !errors.Is(err, workflowstate.ErrProjectionStale) {
 		t.Fatal("edited retained map overwritten", err)
 	}
 

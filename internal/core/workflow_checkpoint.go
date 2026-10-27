@@ -58,7 +58,7 @@ func (s *WorkflowStore) checkpointWorkflowAttempt(run workflowInvocationFile, re
 		run.ResumeStatus = "pending"
 	}
 
-	run.Status = workflowStopStatus(run.StopIntent)
+	run.Status = workflowstate.StopStatus(run.StopIntent)
 	run.Outcome = reason
 
 	return s.commitWorkflowClaim(run, record, append(extra, workflowstate.FileChange{Path: ref, After: data})...)

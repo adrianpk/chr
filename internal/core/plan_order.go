@@ -31,13 +31,13 @@ func planOrderBytes(document generationcore.PlanOrderDocument) (planOrderImages,
 	if document.SetID == "" {
 		output.WriteString("Planned order. Tickets are unbound; this map cannot authorize execution.\n\n")
 	} else {
-		fmt.Fprintf(&output, "Set: %s. Read live tickets for remaining work. This document supplies order only.\n\n", trackerCell(document.SetID))
+		fmt.Fprintf(&output, "Set: %s. Read live tickets for remaining work. This document supplies order only.\n\n", opsmetadata.TableCell(document.SetID))
 	}
 
 	output.WriteString("| Slice | Order | Title | Phase | Pull request | Delivery receipt |\n| --- | --- | --- | --- | --- | --- |\n")
 
 	for _, slice := range document.Slices {
-		fmt.Fprintf(&output, "| %s | %d | %s | | | |\n", trackerCell(slice.ID), slice.Order, trackerCell(slice.Title))
+		fmt.Fprintf(&output, "| %s | %d | %s | | | |\n", opsmetadata.TableCell(slice.ID), slice.Order, opsmetadata.TableCell(slice.Title))
 	}
 
 	output.WriteString("\n| Ticket | Slice | Task | Order | Title | Reference | Status | Phase | Delivery receipt |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n")
@@ -49,7 +49,7 @@ func planOrderBytes(document generationcore.PlanOrderDocument) (planOrderImages,
 				key = "unbound"
 			}
 
-			fmt.Fprintf(&output, "| %s | %s | %s | %d | %s | %s | | | |\n", trackerCell(key), trackerCell(slice.ID), trackerCell(task.ID), task.Order, trackerCell(task.Title), trackerCell(task.TicketRef))
+			fmt.Fprintf(&output, "| %s | %s | %s | %d | %s | %s | | | |\n", opsmetadata.TableCell(key), opsmetadata.TableCell(slice.ID), opsmetadata.TableCell(task.ID), task.Order, opsmetadata.TableCell(task.Title), opsmetadata.TableCell(task.TicketRef))
 		}
 	}
 
