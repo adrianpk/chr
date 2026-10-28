@@ -25,7 +25,7 @@ func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard 
 		return submission, err
 	}
 
-	observation, err := observeWorkflowNativeGit(ctx, submission, request, inspector, git)
+	observation, err := observeWorkflowNativeGit(ctx, submission, request, workflowNativeGitObservers{Transport: inspector, Prepared: git})
 	if err != nil {
 		return submission, err
 	}
@@ -86,8 +86,8 @@ func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard Int
 	return workflowNativeReconciliation{Submission: submission, Request: request, Update: update}, err
 }
 
-func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Submission, request GitPublication, inspector GitPublicationInspector, git PreparedIntegrationGit) (workflowstate.NativeGitObservation, error) {
-	advertisement, err := inspector.InspectWorkflowGitPublication(ctx, request)
+func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Submission, request GitPublication, observers workflowNativeGitObservers) (workflowstate.NativeGitObservation, error) {
+	advertisement, err := observers.Transport.InspectWorkflowGitPublication(ctx, request)
 	if err != nil && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowObservationRequired) && !errors.Is(err, workflowstate.ErrAtomicGuard) {
 		return workflowstate.NativeGitObservation{}, err
 	}
@@ -100,7 +100,7 @@ func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Subm
 	query := request.Git.IntegrationQuery
 	query.SourceDirectory = request.Directory
 
-	proof, proofErr := git.VerifyPreparedWorkflowIntegration(ctx, query, request.Git)
+	proof, proofErr := observers.Prepared.VerifyPreparedWorkflowIntegration(ctx, query, request.Git)
 	if err := ctx.Err(); err != nil {
 		return observation, err
 	}

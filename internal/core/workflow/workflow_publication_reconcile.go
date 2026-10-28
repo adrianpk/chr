@@ -46,7 +46,7 @@ func checkWorkflowVerifiedPR(ctx context.Context, run workflowInvocationFile, pr
 	return nil
 }
 
-func (s *Store) reconcileWorkflowPublishedSubmission(ctx context.Context, run *workflowInvocationFile, pr workflowstate.PullRequestSnapshot, provider PullRequestProvider, git IntegrationGit) error {
+func (s *Store) reconcileWorkflowPublishedSubmission(ctx context.Context, run *workflowInvocationFile, pr workflowstate.PullRequestSnapshot, observers workflowDeliveryObservers) error {
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, *run)
 	if err != nil || len(journal.Attempts) == 0 {
 		return err
@@ -63,7 +63,7 @@ func (s *Store) reconcileWorkflowPublishedSubmission(ctx context.Context, run *w
 		return s.projectWorkflowSubmission(run, journal)
 	}
 
-	observed, err := observeWorkflowSubmittedDelivery(ctx, last, pr, provider, git)
+	observed, err := observeWorkflowSubmittedDelivery(ctx, last, pr, observers)
 	if err != nil {
 		return err
 	}

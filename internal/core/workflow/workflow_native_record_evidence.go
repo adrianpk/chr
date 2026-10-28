@@ -100,7 +100,7 @@ func (s *Store) checkWorkflowNativeRecordEvidence(b workflowstate.NativeRecordBi
 		return err
 	}
 
-	if history.Schema != "chr-native-history/v1" || !workflowNativeRecordGitMatches(b, history.Git) {
+	if history.Schema != "chr-native-history/v1" || !workflowstate.NativeRecordGitMatches(b, history.Git) {
 		return workflowstate.ErrConflict
 	}
 
@@ -181,7 +181,7 @@ func (s *Store) checkWorkflowNativeValidationInput(b workflowstate.NativeRecordB
 		return err
 	}
 
-	if input.Preparation == nil || input.AttemptID != result.AttemptID || input.Generation != result.Generation || input.ContractHash != b.ContractHash || !workflowNativeRecordGitMatches(b, input.Preparation.Git) {
+	if input.Preparation == nil || input.AttemptID != result.AttemptID || input.Generation != result.Generation || input.ContractHash != b.ContractHash || !workflowstate.NativeRecordGitMatches(b, input.Preparation.Git) {
 		return workflowstate.ErrConflict
 	}
 
@@ -304,7 +304,7 @@ func validateWorkflowNativeReceiptObservation(receipt Receipt, observation workf
 		return workflowstate.ErrConflict
 	}
 
-	if !workflowNativeRecordGitMatches(native.NativeRecordBinding, git) || !workflowReceiptGitMatches(receipt, git) {
+	if !workflowstate.NativeRecordGitMatches(native.NativeRecordBinding, git) || !workflowReceiptGitMatches(receipt, git) {
 		return workflowstate.ErrConflict
 	}
 

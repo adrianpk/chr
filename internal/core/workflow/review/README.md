@@ -18,6 +18,12 @@ the five-second detached cleanup bound. `Result` retains the partial binding and
 role-selected repair task key. Command supervision and subsequent repair use the
 host-owned lifecycle and original operation context.
 
+`CheckNativeInput` owns native candidate/generation, owner, Git and capability
+binding policy. `NativeProofs` composes the existing host record and preparation
+validators without importing another stage or exposing mutable state. Current
+entry/source fences, capability re-observation and atomic decisions remain host
+operations. The exact record/Git predicate has one neutral state owner.
+
 The host uses named observations, retained records, claimed preparation, selected
 roles and hashed evidence references while keeping every context explicit.
 Partial failure values and reservation cleanup remain local.

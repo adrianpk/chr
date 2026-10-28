@@ -85,7 +85,7 @@ func validateWorkflowNativeGitObservation(submission workflowstate.Submission, o
 		return nil
 	}
 
-	if !workflowNativeRecordGitMatches(submission.Native.NativeRecordBinding, *proof) || proof.HistoryHash != submission.Guard.Git.HistoryHash || proof.ObservedTarget != observation.TargetCommit {
+	if !workflowstate.NativeRecordGitMatches(submission.Native.NativeRecordBinding, *proof) || proof.HistoryHash != submission.Guard.Git.HistoryHash || proof.ObservedTarget != observation.TargetCommit {
 		return workflowstate.ErrConflict
 	}
 

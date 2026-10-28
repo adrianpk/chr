@@ -28,7 +28,7 @@ func (s *Store) checkWorkflowNativeDispatchGuard(ctx context.Context, run workfl
 	input.PreparationRef, input.PreparationHash = run.Preparation.ResultRef, run.Preparation.ResultHash
 
 	input.PreparedGit = &candidate.Input.Git
-	if err := s.bindWorkflowNativeReviewCapability(ctx, run, candidate, provider, &input); err != nil {
+	if err := s.bindWorkflowNativeReviewCapability(ctx, candidate, provider, &input); err != nil {
 		return workflowstate.PublicationGuard{}, err
 	}
 

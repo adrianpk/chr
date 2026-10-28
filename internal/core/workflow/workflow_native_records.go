@@ -143,13 +143,6 @@ func validateWorkflowNativeCandidate(candidate workflowstate.IntegrationCandidat
 	return nil
 }
 
-func workflowNativeRecordGitMatches(b workflowstate.NativeRecordBinding, git workflowstate.IntegrationProof) bool {
-	expected := [7]string{b.SourceRepository, b.Method, b.OriginalSource, b.ValidatedBase, b.PreparedResult, b.PreparedTree, b.TargetRef}
-	actual := [7]string{git.Repository, git.Method, git.SourceCommit, git.BaseCommit, git.ResultCommit, git.PreparedTree, "refs/heads/" + git.TargetBranch}
-
-	return expected == actual
-}
-
 func validateWorkflowReceiptSchema(receipt Receipt) error {
 	if receipt.Schema == WorkflowSchema && receipt.Native == nil {
 		return nil
@@ -173,7 +166,7 @@ func validateWorkflowNativeReceiptSchema(receipt Receipt) error {
 	}
 
 	git := workflowstate.IntegrationProof{IntegrationQuery: workflowstate.IntegrationQuery{Repository: receipt.Repository, Method: receipt.Method, SourceCommit: receipt.SourceCommit, ResultCommit: receipt.ResultCommit, TargetBranch: strings.TrimPrefix(native.TargetRef, "refs/heads/")}, BaseCommit: receipt.BaseCommit, PreparedTree: receipt.PreparedTree}
-	if !workflowNativeRecordGitMatches(native.NativeRecordBinding, git) {
+	if !workflowstate.NativeRecordGitMatches(native.NativeRecordBinding, git) {
 		return workflowstate.ErrConflict
 	}
 
@@ -202,7 +195,7 @@ func validWorkflowNativeCandidateHeader(candidate workflowstate.IntegrationCandi
 func workflowNativeCandidateOwnerMatches(candidate workflowstate.IntegrationCandidate) bool {
 	native := candidate.Native
 
-	return native.InvocationID == candidate.InvocationID && native.Unit == candidate.Input.Source.Unit && native.ContractHash == candidate.Input.Source.Slice.ContractHash && workflowNativeRecordGitMatches(native.NativeRecordBinding, candidate.Input.Git)
+	return native.InvocationID == candidate.InvocationID && native.Unit == candidate.Input.Source.Unit && native.ContractHash == candidate.Input.Source.Slice.ContractHash && workflowstate.NativeRecordGitMatches(native.NativeRecordBinding, candidate.Input.Git)
 }
 
 func workflowNativeCandidateSourceMatches(candidate workflowstate.IntegrationCandidate) bool {

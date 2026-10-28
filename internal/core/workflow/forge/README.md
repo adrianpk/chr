@@ -23,6 +23,19 @@ workspace configuration, receives Store, retries uncertain creation or confirms
 receipt-backed delivery. Shared PR query/request/content values live in state;
 original field and JSON tag order are preserved.
 
+`ReviewClient` owns provider snapshot/diff/comment/check and merge protocol.
+Its immutable request/result values have direct ticket review/merge consumers.
+Optional Forgejo checks retain absence on unavailable metadata or IO; inline
+comment failure retains the existing general-comment fallback. Configured host
+methods keep canonical URL checks, prerequisite diagnostics and process lifetime.
+
+`ObserveNativeCapability` and `RecheckNativeCapability` consume current
+`NativePolicyReader`, `NativeCapabilityProvider` and `NativeCapabilityTransport`
+ports. The full callback-bearing transport request stays privately host-bound.
+The three-minute timeout, profile/denial/error order, publisher identity and exact
+source/base advertisement checks are preserved. Preliminary mechanism observation
+keeps its original caller context and requires prepared transport proof later.
+
 `Submitter` is the narrow guarded provider IO capability used by `Submit`.
 `Submit` receives an already journaled intent, dispatches once under the watched
 context, and invokes `Responses.Retain` within the original five-second detached

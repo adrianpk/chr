@@ -110,3 +110,15 @@ type workflowNativeObservers struct {
 	Canonical NativePublicationObserver
 	Git       IntegrationGit
 }
+
+// workflowDeliveryObservers supplies canonical PR and independently verified Git observations.
+type workflowDeliveryObservers struct {
+	Provider PullRequestProvider
+	Git      IntegrationGit
+}
+
+// workflowNativeGitObservers pairs transport advertisement with prepared history proof.
+type workflowNativeGitObservers struct {
+	Transport GitPublicationInspector
+	Prepared  PreparedIntegrationGit
+}

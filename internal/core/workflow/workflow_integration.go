@@ -81,7 +81,7 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 		return SliceDeliveryProof{}, err
 	}
 
-	if err := s.reconcileWorkflowPublishedSubmission(ctx, &run, pr, provider, git); err != nil {
+	if err := s.reconcileWorkflowPublishedSubmission(ctx, &run, pr, workflowDeliveryObservers{Provider: provider, Git: git}); err != nil {
 		return SliceDeliveryProof{}, err
 	}
 

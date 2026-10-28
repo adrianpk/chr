@@ -48,7 +48,7 @@ func validateWorkflowLegacySubmissionSchema(submission workflowstate.Submission,
 func validWorkflowNativeSubmissionOwner(submission workflowstate.Submission) bool {
 	native := submission.Native
 
-	return native.InvocationID == submission.InvocationID && native.Unit == submission.Unit && native.ClaimGeneration > 0 && native.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef && workflowstate.ValidFingerprint(native.CandidateHash) && workflowNativeRecordGitMatches(native.NativeRecordBinding, submission.Guard.Git) && native.CanonicalPR == submission.Guard.PullRequest.URL && native.CapabilityHash == submission.Guard.Capability.Revision
+	return native.InvocationID == submission.InvocationID && native.Unit == submission.Unit && native.ClaimGeneration > 0 && native.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef && workflowstate.ValidFingerprint(native.CandidateHash) && workflowstate.NativeRecordGitMatches(native.NativeRecordBinding, submission.Guard.Git) && native.CanonicalPR == submission.Guard.PullRequest.URL && native.CapabilityHash == submission.Guard.Capability.Revision
 }
 
 func validateWorkflowNativeSubmissionRefs(native workflowstate.NativeSubmission) error {

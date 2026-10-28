@@ -47,3 +47,11 @@ func (b NativeRecordBinding) EvidenceRefs() []EvidenceRef {
 
 	return append(refs, b.MergerAttemptRefs...)
 }
+
+// NativeRecordGitMatches compares the exact retained source, target, method and prepared result.
+func NativeRecordGitMatches(b NativeRecordBinding, git IntegrationProof) bool {
+	expected := [7]string{b.SourceRepository, b.Method, b.OriginalSource, b.ValidatedBase, b.PreparedResult, b.PreparedTree, b.TargetRef}
+	actual := [7]string{git.Repository, git.Method, git.SourceCommit, git.BaseCommit, git.ResultCommit, git.PreparedTree, "refs/heads/" + git.TargetBranch}
+
+	return expected == actual
+}

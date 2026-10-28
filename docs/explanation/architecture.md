@@ -118,3 +118,22 @@ The design keeps the project workflow auditable while avoiding hidden state:
 - Docker contains agent execution effects.
 - Context artifacts make each agent attempt inspectable.
 - Runtime plans and execution records preserve the boundary used for an attempt.
+
+
+## Publication and Review Terms
+
+These terms distinguish authority, observation and retained evidence in the
+[workflow stages](../../internal/core/workflow/README.md).
+
+| Term | Code-backed meaning |
+| --- | --- |
+| Ticket-native work | Canonical ticket-owned records, execution and continuation under the [ticket-native contract](../../ops/default/spec/stable/ticket-native-workflow.md). Provider selection does not rename this authority. |
+| Forge-native publication | The explicitly selected `git_atomic_dual_ref` mechanism. Current policy, publisher identity and actual receive-pack capability must bind the original source, target and prepared result. |
+| Source, base and prepared result | `NativeRecordBinding` retains the original source independently of the published source and prepared result. A provider's later merge metadata cannot rewrite this identity. |
+| Native capability | `forge.ObserveNativeCapability` combines current host grants with independent provider policy, identity and transport observations. A retained revision must be rechecked before intent. |
+| Review input | `review.InputHash` binds the exact immutable candidate, policy and evidence. `review.CheckNativeInput` checks native owner, generation, Git and capability binding through read-only proof ports. |
+| Review approval | A decision or explicit human approval for the exact current input. The host retains current-source checks, claims and atomic authorization; approval alone does not establish publication. |
+| Submission intent | A journaled command identity and exclusion barrier. `SubmissionIntent.Dispatch` permits one dispatch; uncertain outcomes must be observed rather than sent again. |
+| Transport result | `NativePublicationResult.Transport` records command output. Accepted, applied or unknown transport responses remain separate from canonical PR observation and receipt proof. |
+| Canonical observation | Independent PR and Git facts with exact target, source and method/history binding. Optional provider checks may be absent; an open PR or successful worker exit cannot confirm delivery. |
+| Receipt-backed delivery | Host-owned durable proof and atomic projection into the integration entry, invocation and member records. `Handled` and `Observed` are branch/barrier outcomes, including partial errors, rather than completion claims. |

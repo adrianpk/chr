@@ -192,7 +192,7 @@ func (s *Store) checkWorkflowNativeJournalObservations(submission workflowstate.
 			continue
 		}
 
-		if !workflowNativeRecordGitMatches(native.NativeRecordBinding, *observation.Git) || observation.Git.HistoryHash != submission.Guard.Git.HistoryHash {
+		if !workflowstate.NativeRecordGitMatches(native.NativeRecordBinding, *observation.Git) || observation.Git.HistoryHash != submission.Guard.Git.HistoryHash {
 			return workflowstate.ErrConflict
 		}
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"slices"
 
-	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -23,14 +23,14 @@ func (s *Store) checkWorkflowSourceReviewProfile() error {
 }
 
 func (s *Store) bindWorkflowNativeReview(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PullRequestProvider, input *workflowstate.ReviewInput) error {
-	if err := s.bindWorkflowNativeReviewCapability(ctx, run, candidate, provider, input); err != nil {
+	if err := s.bindWorkflowNativeReviewCapability(ctx, candidate, provider, input); err != nil {
 		return err
 	}
 
 	return s.checkWorkflowNativeReviewFence(run, input)
 }
 
-func (s *Store) bindWorkflowNativeReviewCapability(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PullRequestProvider, input *workflowstate.ReviewInput) error {
+func (s *Store) bindWorkflowNativeReviewCapability(ctx context.Context, candidate workflowstate.IntegrationCandidate, provider PullRequestProvider, input *workflowstate.ReviewInput) error {
 	native, err := workflowNativePreparationProfile(s.layout.ProjectDir(), candidate.Input.Capability)
 	if err != nil || !native {
 		return err
@@ -51,7 +51,7 @@ func (s *Store) bindWorkflowNativeReviewCapability(ctx context.Context, run work
 	}
 
 	input.Native = &workflowstate.NativeReviewInput{Candidate: *candidate.Native, ClaimGeneration: candidate.Input.Native.ClaimGeneration, Capability: capability}
-	if err := validateWorkflowNativeReviewInput(*input); err != nil {
+	if err := workflowreview.CheckNativeInput(*input, workflowNativeReviewProofs{}); err != nil {
 		return err
 	}
 
@@ -85,39 +85,4 @@ func (s *Store) checkWorkflowNativeReviewFence(run workflowInvocationFile, input
 
 func workflowNativeReviewEntryMatches(run workflowInvocationFile, entry IntegrationEntry, input *workflowstate.ReviewInput) bool {
 	return slices.Contains([]IntegrationState{"reviewing", "waiting_review", "ready_to_publish"}, entry.State) && entry.StopIntent == "" && entry.ClaimGeneration == input.Native.ClaimGeneration && workflowNativePreparedEntryMatches(run, entry) && entry.CandidateRef.Path == input.PreparationRef && entry.CandidateRef.Hash == input.PreparationHash
-}
-
-func validateWorkflowNativeReviewInput(input workflowstate.ReviewInput) error {
-	if input.Native == nil {
-		return nil
-	}
-
-	native := input.Native
-
-	binding := native.Candidate.NativeRecordBinding
-	if native.ClaimGeneration == 0 || !workflowstate.ValidFingerprint(native.Candidate.CandidateHash) || input.PreparedGit == nil {
-		return workflowstate.ErrConflict
-	}
-
-	if err := validateWorkflowNativeRecordBinding(binding); err != nil {
-		return err
-	}
-
-	if !workflowNativeReviewOwnerMatches(input) {
-		return workflowstate.ErrConflict
-	}
-
-	if binding.CapabilityHash != native.Capability.Revision || binding.PolicyHash != native.Capability.PolicyFingerprint {
-		return workflowstate.ErrConflict
-	}
-
-	preparation := workflowstate.PreparationInput{Source: workflowintegrate.SourceInput(input), Git: *input.PreparedGit}
-
-	return validateWorkflowPreparedNativeCapability(preparation, native.Capability)
-}
-
-func workflowNativeReviewOwnerMatches(input workflowstate.ReviewInput) bool {
-	binding := input.Native.Candidate.NativeRecordBinding
-
-	return binding.InvocationID == input.InvocationID && binding.Unit == input.Unit && binding.CanonicalPR == input.PullRequest.URL && binding.ContractHash == input.Slice.ContractHash && workflowNativeRecordGitMatches(binding, *input.PreparedGit)
 }

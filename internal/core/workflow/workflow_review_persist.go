@@ -173,7 +173,7 @@ func (s *Store) readWorkflowReview(run workflowInvocationFile) (workflowReviewRe
 		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, err
 	}
 
-	if err := validateWorkflowNativeReviewInput(input); err != nil {
+	if err := workflowreview.CheckNativeInput(input, workflowNativeReviewProofs{}); err != nil {
 		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, err
 	}
 

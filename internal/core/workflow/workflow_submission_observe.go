@@ -24,7 +24,7 @@ func observeWorkflowSubmission(ctx context.Context, submission workflowstate.Sub
 	}
 
 	if pr.Merged {
-		return observeWorkflowSubmittedDelivery(ctx, submission, pr, provider, git)
+		return observeWorkflowSubmittedDelivery(ctx, submission, pr, workflowDeliveryObservers{Provider: provider, Git: git})
 	}
 
 	observation, err := provider.ObserveWorkflowSubmission(ctx, submission)
@@ -68,11 +68,11 @@ func checkWorkflowUnpublishedObservation(ctx context.Context, submission workflo
 	return nil
 }
 
-func observeWorkflowSubmittedDelivery(ctx context.Context, submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot, provider PullRequestProvider, git IntegrationGit) (workflowstate.Submission, error) {
+func observeWorkflowSubmittedDelivery(ctx context.Context, submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot, observers workflowDeliveryObservers) (workflowstate.Submission, error) {
 	query := submission.Guard.Git.IntegrationQuery
 	query.ResultCommit, query.SourceDirectory = pr.ResultCommit, submission.PreparedLane.Worktree
 
-	proof, err := observeWorkflowSubmissionGit(ctx, git, query, submission.Guard.Git)
+	proof, err := observeWorkflowSubmissionGit(ctx, observers.Git, query, submission.Guard.Git)
 	if err != nil {
 		return submission, err
 	}
@@ -90,7 +90,7 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission workflowst
 		return submission, err
 	}
 
-	if err := checkWorkflowSubmittedObservation(ctx, submission, provider); err != nil {
+	if err := checkWorkflowSubmittedObservation(ctx, submission, observers.Provider); err != nil {
 		return submission, err
 	}
 
