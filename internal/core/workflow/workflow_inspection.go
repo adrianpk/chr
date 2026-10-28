@@ -21,7 +21,7 @@ type Inspection struct {
 	Integration *IntegrationInspection
 	Invocation  Invocation
 	Policy      workflowstate.ReviewPolicy
-	Tasks       []Record
+	Tasks       []workflowstate.Record
 }
 
 // InspectWorkflow does not replay transitions, reconcile ownership or admit work.
@@ -74,7 +74,7 @@ func (s *Store) InspectWorkflowPolicy(ctx context.Context) (policy workflowstate
 }
 
 // InspectWorkflowRecords reads native selection identities without recovery writes.
-func (s *Store) InspectWorkflowRecords(ctx context.Context) (snapshot Snapshot, err error) {
+func (s *Store) InspectWorkflowRecords(ctx context.Context) (snapshot workflowstate.Snapshot, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 

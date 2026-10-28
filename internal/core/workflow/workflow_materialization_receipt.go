@@ -59,8 +59,8 @@ type workflowMaterializationReplay struct {
 	Found  bool
 }
 
-func (s *Store) resumeMaterialization(snapshot Snapshot, plan generationcore.GeneratedWorkflowPlan) (workflowMaterializationReplay, error) {
-	var set *Record
+func (s *Store) resumeMaterialization(snapshot workflowstate.Snapshot, plan generationcore.GeneratedWorkflowPlan) (workflowMaterializationReplay, error) {
+	var set *workflowstate.Record
 
 	for i, record := range snapshot.Records {
 		if record.Set == nil {
@@ -94,7 +94,7 @@ func (s *Store) resumeMaterialization(snapshot Snapshot, plan generationcore.Gen
 	return workflowMaterializationReplay{Result: result, Found: true}, err
 }
 
-func (s *Store) readMaterializationReceipt(set Record, plan generationcore.GeneratedWorkflowPlan, snapshot Snapshot) (MaterializationResult, error) {
+func (s *Store) readMaterializationReceipt(set workflowstate.Record, plan generationcore.GeneratedWorkflowPlan, snapshot workflowstate.Snapshot) (MaterializationResult, error) {
 	observed, err := s.readRecord(set.Path)
 	if err != nil {
 		return MaterializationResult{}, err
@@ -142,12 +142,12 @@ func (s *Store) readMaterializationReceipt(set Record, plan generationcore.Gener
 	return MaterializationResult{Set: set, Tasks: tasks, ReceiptRef: filepath.ToSlash(filepath.Join("plan", set.ID, "evidence", "materialization.json"))}, nil
 }
 
-func (s *Store) readMaterializationBindings(set Record, receipt workflowMaterializationReceipt) ([]Record, error) {
+func (s *Store) readMaterializationBindings(set workflowstate.Record, receipt workflowMaterializationReceipt) ([]workflowstate.Record, error) {
 	if len(receipt.Tasks) == 0 || len(receipt.Tasks) > workflowstate.RecordLimit {
 		return nil, fmt.Errorf("invalid materialization receipt task bound")
 	}
 
-	tasks := []Record{}
+	tasks := []workflowstate.Record{}
 	seen := map[string]bool{}
 
 	for _, binding := range receipt.Tasks {
@@ -168,13 +168,13 @@ func (s *Store) readMaterializationBindings(set Record, receipt workflowMaterial
 	return tasks, nil
 }
 
-func matchingMaterializationTask(record Record, setID string, binding workflowMaterializationBinding) bool {
+func matchingMaterializationTask(record workflowstate.Record, setID string, binding workflowMaterializationBinding) bool {
 	task := record.Task
 
 	return task != nil && task.SetID == setID && task.Key == binding.Key && task.SliceID == binding.SliceID && task.Order == binding.Order && task.ContractHash == binding.ContractHash
 }
 
-func (s *Store) checkMaterializationSlices(set Record, receipt workflowMaterializationReceipt, snapshot Snapshot) error {
+func (s *Store) checkMaterializationSlices(set workflowstate.Record, receipt workflowMaterializationReceipt, snapshot workflowstate.Snapshot) error {
 	if len(receipt.Slices) != len(set.Set.Slices) {
 		return workflowstate.ErrConflict
 	}
@@ -203,6 +203,6 @@ func (s *Store) checkMaterializationSlices(set Record, receipt workflowMateriali
 	return nil
 }
 
-func matchingMaterializationReceipt(receipt workflowMaterializationReceipt, set Record, plan generationcore.GeneratedWorkflowPlan, hash string) bool {
+func matchingMaterializationReceipt(receipt workflowMaterializationReceipt, set workflowstate.Record, plan generationcore.GeneratedWorkflowPlan, hash string) bool {
 	return receipt.Schema == workflowMaterializationSchema && receipt.RequestID == plan.MaterializationID && receipt.InputHash == hash && receipt.SetID == set.ID && receipt.SetPath == set.Path
 }

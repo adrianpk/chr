@@ -152,7 +152,7 @@ func workflowPreparationAttemptMatches(attempt Attempt, result workflowstate.Tas
 	return attempt.ID == result.AttemptID && attempt.Purpose == workflowIntegrationValidationPurpose && attempt.Outcome == "prepared" && attempt.ResultHash == hash && attempt.InputRef == result.InputRef && attempt.InputHash == result.InputHash
 }
 
-func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record Record, candidate workflowstate.IntegrationCandidate) error {
+func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record workflowstate.Record, candidate workflowstate.IntegrationCandidate) error {
 	if err := s.checkWorkflowNativeCandidate(candidate); err != nil {
 		return err
 	}

@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -27,7 +28,7 @@ func TestNativeClosingFanout(t *testing.T) {
 	}
 
 	ports := nativeReceiptFrontierPorts(t, f.fixture, f.receipt.Receipt.ResultCommit)
-	request := SetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: f.receipt.Receipt.Repository, Branch: "dev"}
+	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: f.receipt.Receipt.Repository, Branch: "dev"}
 
 	if _, err := store.CloseWorkflowSet(t.Context(), request, ports); !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatal("physical receipt bypassed unfinished member fanout", err)
@@ -70,7 +71,7 @@ func TestNativeClosingRetry(t *testing.T) {
 func checkNativeClosingRetry(t *testing.T, f nativeClosingFixture, before map[string]string, closed SetClosureResult, restarted *Store, ports FrontierPorts, counter string) {
 	t.Helper()
 
-	request := SetClosureRequest{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}
+	request := workflowcloseout.Request{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}
 
 	again, err := restarted.CloseWorkflowSet(t.Context(), request, ports)
 	if err != nil || again.ReceiptRef != closed.ReceiptRef || again.Set.Revision != closed.Set.Revision || !reflect.DeepEqual(before, nativeClosingPreservedFiles(t, f)) || f.fixture.publisher.calls.Load() != 1 {
@@ -124,7 +125,7 @@ func TestNativeClosingSets(t *testing.T) {
 	before := workflowReadTestBytes(t, store, original.ReceiptRef)
 	set := nativeClosingCorrectiveSet(t, store)
 
-	request := SetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: original.Receipt.Target.Repository, Branch: "dev"}
+	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: original.Receipt.Target.Repository, Branch: "dev"}
 
 	failed, err := store.CloseWorkflowSet(t.Context(), request, ports)
 	if err == nil || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" {
@@ -141,14 +142,14 @@ func TestNativeClosingSets(t *testing.T) {
 	checkNativeClosingSetOutcomes(t, store, original, corrective, before)
 }
 
-func nativeClosingCorrectiveSet(t *testing.T, store *Store) Record {
+func nativeClosingCorrectiveSet(t *testing.T, store *Store) workflowstate.Record {
 	t.Helper()
 
 	plan := workflowPlanFixture()
 	counter := filepath.Join(t.TempDir(), "corrective-count")
 	gate := workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"sh", "-c", "n=0; [ ! -f \"$1\" ] || read -r n <\"$1\"; n=$((n+1)); printf '%s\\n' \"$n\" >\"$1\"; [ \"$n\" -gt 1 ]", "corrective-gate", counter}}}
 
-	set, err := store.Create(t.Context(), "Corrective closing set", Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
+	set, err := store.Create(t.Context(), "Corrective closing set", workflowstate.Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: workflowstate.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
 	if err != nil {
 		t.Fatal(err)
 	}

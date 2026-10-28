@@ -26,7 +26,7 @@ type workflowProofKey struct {
 	sliceID string
 }
 
-func (reader *workflowProofReader) prerequisiteReason(ctx context.Context, task Record, ref workflowstate.Ref) string {
+func (reader *workflowProofReader) prerequisiteReason(ctx context.Context, task workflowstate.Record, ref workflowstate.Ref) string {
 	key := workflowProofKey{ref: ref, sliceID: task.Task.SliceID}
 	if reason, found := reader.observations[key]; found {
 		return reason
@@ -51,7 +51,7 @@ func (reader *workflowProofReader) prerequisiteReason(ctx context.Context, task 
 	return reason
 }
 
-func (reader *workflowProofReader) taskProofReason(ctx context.Context, record Record) string {
+func (reader *workflowProofReader) taskProofReason(ctx context.Context, record workflowstate.Record) string {
 	if !slices.Contains([]string{"validated", "waiting_slice", "integrated"}, record.Task.Phase) {
 		return "task_validation_required"
 	}
@@ -79,7 +79,7 @@ func (reader *workflowProofReader) taskProofReason(ctx context.Context, record R
 	return "task_evidence_invalid"
 }
 
-func (reader *workflowProofReader) validTaskProof(ctx context.Context, record Record, proof workflowstate.TaskValidation) bool {
+func (reader *workflowProofReader) validTaskProof(ctx context.Context, record workflowstate.Record, proof workflowstate.TaskValidation) bool {
 	matches := proof.Schema == "chr-task-validation/v1" && proof.Successful && proof.Key == record.Task.Key && proof.ContractHash == record.Task.ContractHash && proof.Branch == reader.request.CumulativeBranch
 
 	return matches && reader.commitHasTree(ctx, proof.Commit, proof.Tree) && reader.isAncestor(ctx, proof.Commit, reader.request.CumulativeCommit) && reader.branchAtCommit(ctx)
@@ -125,7 +125,7 @@ func (reader *workflowProofReader) integrationProofReason(ctx context.Context, r
 	return "target_delivery_unproven"
 }
 
-func (reader *workflowProofReader) validReceiptTarget(ctx context.Context, receipt *Receipt) bool {
+func (reader *workflowProofReader) validReceiptTarget(ctx context.Context, receipt *workflowstate.Receipt) bool {
 	return reader.commitHasTree(ctx, receipt.ResultCommit, receipt.VerifiedTree) && reader.isAncestor(ctx, receipt.ResultCommit, receipt.ObservedTarget) && reader.isAncestor(ctx, receipt.ObservedTarget, reader.request.Target.Commit)
 }
 
@@ -235,7 +235,7 @@ func (s *Store) observePrerequisites(ctx context.Context, selection workflowSele
 	return nil
 }
 
-func workflowTaskReadiness(task *Task) string {
+func workflowTaskReadiness(task *workflowstate.Task) string {
 	if task.Phase == "pending" && task.Status == string(ticketcore.StatusReadyForDev) {
 		return "ready"
 	}

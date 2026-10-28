@@ -100,7 +100,7 @@ func (s *Store) workflowPullRequestDomainChanges(run *workflowInvocationFile, ob
 	return append(files, changes...), err
 }
 
-func (s *Store) workflowPullRequestTaskChanges(run *workflowInvocationFile, tasks []Record) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowPullRequestTaskChanges(run *workflowInvocationFile, tasks []workflowstate.Record) ([]workflowstate.FileChange, error) {
 	files := []workflowstate.FileChange{}
 
 	for _, record := range tasks {
@@ -121,7 +121,7 @@ func (s *Store) workflowPullRequestTaskChanges(run *workflowInvocationFile, task
 	return files, nil
 }
 
-func (s *Store) workflowPullRequestSetChanges(run *workflowInvocationFile, set Record) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowPullRequestSetChanges(run *workflowInvocationFile, set workflowstate.Record) ([]workflowstate.FileChange, error) {
 	if set.Set == nil {
 		return nil, nil
 	}
@@ -143,7 +143,7 @@ func (s *Store) workflowPullRequestSetChanges(run *workflowInvocationFile, set R
 	return s.workflowSetRecordChanges(run, &set)
 }
 
-func (s *Store) workflowSetRecordChanges(run *workflowInvocationFile, record *Record) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowSetRecordChanges(run *workflowInvocationFile, record *workflowstate.Record) ([]workflowstate.FileChange, error) {
 	record.Revision++
 	record.UpdatedAt = time.Now().UTC()
 
@@ -163,7 +163,7 @@ func (s *Store) workflowSetRecordChanges(run *workflowInvocationFile, record *Re
 		}
 	}
 
-	return files, record.Validate()
+	return files, validateWorkflowRecord(*record)
 }
 
 func (s *Store) commitWorkflowPullRequestFiles(run *workflowInvocationFile, files []workflowstate.FileChange, observation workflowstate.FileChange) error {

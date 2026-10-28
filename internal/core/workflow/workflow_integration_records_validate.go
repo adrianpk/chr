@@ -273,7 +273,7 @@ func (s *Store) checkWorkflowIntegrationEntryReceipt(run workflowInvocationFile,
 	return nil
 }
 
-func workflowIntegrationEntryReceiptMatches(run workflowInvocationFile, entry IntegrationEntry, record Record) bool {
+func workflowIntegrationEntryReceiptMatches(run workflowInvocationFile, entry IntegrationEntry, record workflowstate.Record) bool {
 	if record.ProjectID != run.ProjectID || record.Namespace != run.Namespace || record.Receipt == nil || record.Receipt.Native == nil || entry.CandidateRef == nil {
 		return false
 	}

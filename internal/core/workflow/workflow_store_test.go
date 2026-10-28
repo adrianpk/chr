@@ -72,7 +72,7 @@ func TestWorkflowRoundTrip(t *testing.T) {
 	testWorkflowManualEdit(t, s, written)
 }
 
-func testWorkflowManualEdit(t *testing.T, s *Store, written Record) {
+func testWorkflowManualEdit(t *testing.T, s *Store, written workflowstate.Record) {
 	t.Helper()
 
 	ctx := context.Background()
@@ -138,7 +138,7 @@ func TestWorkflowAdoption(t *testing.T) {
 	}
 }
 
-func workflowTestWrite(t *testing.T, s *Store, r Record) Record {
+func workflowTestWrite(t *testing.T, s *Store, r workflowstate.Record) workflowstate.Record {
 	t.Helper()
 
 	written, err := s.Write(context.Background(), r, r.Revision)

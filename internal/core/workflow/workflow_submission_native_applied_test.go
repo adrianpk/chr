@@ -28,7 +28,7 @@ func TestNativeSubmissionApplied(t *testing.T) {
 	nativeSubmissionConfirmReceipt(t, f, pending, record)
 }
 
-func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pending workflowstate.Submission, record Record) {
+func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pending workflowstate.Submission, record workflowstate.Record) {
 	t.Helper()
 
 	submission := pending
@@ -64,7 +64,7 @@ func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pen
 	}
 }
 
-func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, record Record) NativeSubmissionUpdate {
+func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, record workflowstate.Record) NativeSubmissionUpdate {
 	t.Helper()
 
 	update := nativeSubmissionUpdate(t, f, submission)

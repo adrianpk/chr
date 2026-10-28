@@ -81,7 +81,7 @@ func (s *Store) checkWorkflowSliceRepairPR(run workflowInvocationFile) error {
 }
 
 func (s *Store) repairWorkflowSlice(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, taskKey string) (err error) {
-	index := slices.IndexFunc(observation.tasks, func(record Record) bool { return record.Task.Key == taskKey })
+	index := slices.IndexFunc(observation.tasks, func(record workflowstate.Record) bool { return record.Task.Key == taskKey })
 	if index < 0 {
 		return fmt.Errorf("repair task is outside the retained slice")
 	}
@@ -177,7 +177,7 @@ func (s *Store) commitWorkflowSliceRepair(run *workflowInvocationFile, observati
 	return s.commitFiles(append(files, state))
 }
 
-func (s *Store) workflowRepairSetChanges(run *workflowInvocationFile, set Record) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowRepairSetChanges(run *workflowInvocationFile, set workflowstate.Record) ([]workflowstate.FileChange, error) {
 	if set.Set == nil {
 		return nil, nil
 	}

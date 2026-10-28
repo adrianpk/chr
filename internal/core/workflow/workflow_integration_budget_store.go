@@ -60,7 +60,7 @@ func (s *Store) workflowIntegrationUsage(ctx context.Context, run workflowInvoca
 	return usage, err
 }
 
-func (s *Store) workflowIntegrationClosingUsage(snapshot Snapshot, id string) ([]string, error) {
+func (s *Store) workflowIntegrationClosingUsage(snapshot workflowstate.Snapshot, id string) ([]string, error) {
 	attempts := []string{}
 
 	for _, record := range snapshot.Records {

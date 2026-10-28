@@ -27,7 +27,7 @@ func NewWorkflowStore(layout opscore.Layout, projectID string) *Store {
 }
 
 // Read observes one record under repository-wide mutation exclusion.
-func (s *Store) Read(ctx context.Context, path string) (record Record, err error) {
+func (s *Store) Read(ctx context.Context, path string) (record workflowstate.Record, err error) {
 	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		var readErr error
 
@@ -40,7 +40,7 @@ func (s *Store) Read(ctx context.Context, path string) (record Record, err error
 }
 
 // Snapshot validates all adopted records without trusting a tracker or cache.
-func (s *Store) Snapshot(ctx context.Context) (snapshot Snapshot, err error) {
+func (s *Store) Snapshot(ctx context.Context) (snapshot workflowstate.Snapshot, err error) {
 	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		var readErr error
 
@@ -53,7 +53,7 @@ func (s *Store) Snapshot(ctx context.Context) (snapshot Snapshot, err error) {
 }
 
 // Create allocates the existing ops envelope and attaches a workflow domain.
-func (s *Store) Create(ctx context.Context, title string, record Record) (created Record, err error) {
+func (s *Store) Create(ctx context.Context, title string, record workflowstate.Record) (created workflowstate.Record, err error) {
 	err = s.withLock(ctx, func() error {
 		if err := s.preflightCreation(ctx, record); err != nil {
 			return err
@@ -88,9 +88,9 @@ func (s *Store) Create(ctx context.Context, title string, record Record) (create
 	return created, err
 }
 
-func (s *Store) preflightCreation(ctx context.Context, r Record) error {
+func (s *Store) preflightCreation(ctx context.Context, r workflowstate.Record) error {
 	r.Identity = workflowstate.Identity{ID: "new-workflow-artifact", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
-	if err := r.Validate(); err != nil {
+	if err := validateWorkflowRecord(r); err != nil {
 		return err
 	}
 
@@ -101,13 +101,13 @@ func (s *Store) preflightCreation(ctx context.Context, r Record) error {
 
 	snapshot.Records = append(snapshot.Records, r)
 
-	return snapshot.Validate()
+	return validateWorkflowSnapshot(snapshot)
 }
 
 // CreateReceipt stores new immutable evidence beneath its owning invocation.
-func (s *Store) CreateReceipt(ctx context.Context, record Record) (created Record, err error) {
+func (s *Store) CreateReceipt(ctx context.Context, record workflowstate.Record) (created workflowstate.Record, err error) {
 	if record.Kind != "receipt" || !strings.HasPrefix(record.Path, "run/") || !strings.Contains(record.Path, "/evidence/") || !strings.HasSuffix(record.Path, ".json") {
-		return Record{}, fmt.Errorf("receipt requires owning run evidence path")
+		return workflowstate.Record{}, fmt.Errorf("receipt requires owning run evidence path")
 	}
 
 	err = s.withLock(ctx, func() error {
@@ -122,9 +122,9 @@ func (s *Store) CreateReceipt(ctx context.Context, record Record) (created Recor
 }
 
 // Write requires the observed revision and source image; it returns the next revision.
-func (s *Store) Write(ctx context.Context, record Record, expectedRevision uint64) (written Record, err error) {
+func (s *Store) Write(ctx context.Context, record workflowstate.Record, expectedRevision uint64) (written workflowstate.Record, err error) {
 	if expectedRevision == 0 {
-		return Record{}, fmt.Errorf("use explicit workflow creation or adoption")
+		return workflowstate.Record{}, fmt.Errorf("use explicit workflow creation or adoption")
 	}
 
 	err = s.withLock(ctx, func() error {
@@ -138,51 +138,51 @@ func (s *Store) Write(ctx context.Context, record Record, expectedRevision uint6
 	return written, err
 }
 
-func (s *Store) writeRecord(ctx context.Context, r Record, expected uint64) (Record, error) {
+func (s *Store) writeRecord(ctx context.Context, r workflowstate.Record, expected uint64) (workflowstate.Record, error) {
 	if err := s.guardWrite(&r, expected); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if r.Receipt != nil {
 		if err := s.checkWorkflowNativeReceipt(r); err != nil {
-			return Record{}, err
+			return workflowstate.Record{}, err
 		}
 	}
 
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := replaceWorkflowSnapshot(&snapshot, r); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	changes, err := s.encodeChanges(r)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	changes, err = s.workflowLooseWriteChanges(ctx, r, expected, changes)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	coordinator, err := s.workflowCoordinatorFiles(ctx)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	changes = append(changes, coordinator...)
 
 	if err := s.commitFiles(changes); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	return s.readRecord(r.Path)
 }
 
-func (s *Store) guardWrite(r *Record, expected uint64) error {
+func (s *Store) guardWrite(r *workflowstate.Record, expected uint64) error {
 	if r.ProjectID != s.projectID || r.Namespace != s.layout.Namespace() {
 		return fmt.Errorf("foreign workflow write scope")
 	}
@@ -191,7 +191,7 @@ func (s *Store) guardWrite(r *Record, expected uint64) error {
 	if expected == 0 && (errors.Is(err, fs.ErrNotExist) || errors.Is(err, workflowstate.ErrNotWorkflow)) {
 		r.Revision = 1
 
-		return r.Validate()
+		return validateWorkflowRecord(*r)
 	}
 
 	if err != nil {
@@ -213,14 +213,14 @@ func (s *Store) guardWrite(r *Record, expected uint64) error {
 	r.Revision = expected + 1
 	r.UpdatedAt = time.Now().UTC()
 
-	return r.Validate()
+	return validateWorkflowRecord(*r)
 }
 
-func conflictingWorkflowImage(old, next Record, expected uint64) bool {
+func conflictingWorkflowImage(old, next workflowstate.Record, expected uint64) bool {
 	return old.Revision != expected || old.SourceHash != next.SourceHash || old.ID != next.ID || !old.CreatedAt.Equal(next.CreatedAt)
 }
 
-func guardWorkflowDomain(old, next Record) error {
+func guardWorkflowDomain(old, next workflowstate.Record) error {
 	if old.Kind != next.Kind || old.Receipt != nil {
 		return fmt.Errorf("workflow domain kind and receipts are immutable")
 	}
@@ -240,7 +240,7 @@ func guardWorkflowDomain(old, next Record) error {
 	return nil
 }
 
-func guardWorkflowTaskChange(oldTask, nextTask *Task) error {
+func guardWorkflowTaskChange(oldTask, nextTask *workflowstate.Task) error {
 	if oldTask.Key != nextTask.Key || oldTask.ClaimGeneration != nextTask.ClaimGeneration || oldTask.AttemptID != nextTask.AttemptID {
 		return workflowstate.ErrConflict
 	}
@@ -253,7 +253,7 @@ func guardWorkflowTaskChange(oldTask, nextTask *Task) error {
 	return nil
 }
 
-func replaceWorkflowSnapshot(snapshot *Snapshot, r Record) error {
+func replaceWorkflowSnapshot(snapshot *workflowstate.Snapshot, r workflowstate.Record) error {
 	found := false
 
 	for i, old := range snapshot.Records {
@@ -266,11 +266,11 @@ func replaceWorkflowSnapshot(snapshot *Snapshot, r Record) error {
 		snapshot.Records = append(snapshot.Records, r)
 	}
 
-	return snapshot.Validate()
+	return validateWorkflowSnapshot(*snapshot)
 }
 
-func (s *Store) readSnapshot(ctx context.Context) (Snapshot, error) {
-	snapshot := Snapshot{}
+func (s *Store) readSnapshot(ctx context.Context) (workflowstate.Snapshot, error) {
+	snapshot := workflowstate.Snapshot{}
 
 	for _, kind := range []string{"ticket", "plan", "run"} {
 		err := filepath.WalkDir(filepath.Join(s.layout.Root(), kind), func(path string, entry fs.DirEntry, walkErr error) error {
@@ -289,18 +289,18 @@ func (s *Store) readSnapshot(ctx context.Context) (Snapshot, error) {
 			return s.appendSnapshotRecord(&snapshot, path)
 		})
 		if err != nil && !errors.Is(err, fs.ErrNotExist) {
-			return Snapshot{}, err
+			return workflowstate.Snapshot{}, err
 		}
 	}
 
-	return snapshot, snapshot.Validate()
+	return snapshot, validateWorkflowSnapshot(snapshot)
 }
 
 func workflowCandidatePath(path string) bool {
 	return filepath.Base(path) == "metadata.json" || strings.HasSuffix(path, ".md") || strings.Contains(filepath.ToSlash(path), "/evidence/") && strings.HasSuffix(path, ".json")
 }
 
-func (s *Store) appendSnapshotRecord(snapshot *Snapshot, path string) error {
+func (s *Store) appendSnapshotRecord(snapshot *workflowstate.Snapshot, path string) error {
 	relative, err := filepath.Rel(s.layout.Root(), path)
 	if err != nil {
 		return err

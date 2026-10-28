@@ -41,55 +41,55 @@ func workflowMarkdownFields(front string) (map[string]json.RawMessage, error) {
 	return fields, nil
 }
 
-func (s *Store) readMarkdown(relative, path string) (Record, error) {
+func (s *Store) readMarkdown(relative, path string) (workflowstate.Record, error) {
 	data, err := opsfile.Read(path)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	parsedMarkdown, err := workflowstate.RequireMarkdown(data)
 	front, body := parsedMarkdown.Front, parsedMarkdown.Body
 
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if !strings.Contains("\n"+front, "\nworkflow_schema:") {
-		return Record{}, workflowstate.ErrNotWorkflow
+		return workflowstate.Record{}, workflowstate.ErrNotWorkflow
 	}
 
 	fields, err := workflowMarkdownFields(front)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if _, ok := fields["workflow_schema"]; !ok {
-		return Record{}, workflowstate.ErrNotWorkflow
+		return workflowstate.Record{}, workflowstate.ErrNotWorkflow
 	}
 
-	r := Record{Kind: "ticket", Path: relative, Body: body, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: contenthash.Sum(data)}
+	r := workflowstate.Record{Kind: "ticket", Path: relative, Body: body, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: contenthash.Sum(data)}
 
 	encoded, err := json.Marshal(fields)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := json.Unmarshal(encoded, &r.Identity); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := decodeWorkflowDomain(&r, encoded); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if r.ID == "" {
 		r.ID = r.Task.Key
 	}
 
-	return r, r.Validate()
+	return r, validateWorkflowRecord(r)
 }
 
-func encodeWorkflowMarkdown(r Record) ([]byte, error) {
+func encodeWorkflowMarkdown(r workflowstate.Record) ([]byte, error) {
 	var front string
 	if raw, ok := r.Metadata["frontmatter"]; ok {
 		if err := json.Unmarshal(raw, &front); err != nil {
@@ -114,7 +114,7 @@ func encodeWorkflowMarkdown(r Record) ([]byte, error) {
 	return []byte("---\n" + patchWorkflowFrontmatter(front, fields, r) + "\n---\n" + string(r.Body)), nil
 }
 
-func patchWorkflowFrontmatter(front string, fields map[string]json.RawMessage, r Record) string {
+func patchWorkflowFrontmatter(front string, fields map[string]json.RawMessage, r workflowstate.Record) string {
 	owned := map[string]bool{}
 
 	for _, value := range []any{r.Identity, workflowDomainValue(r)} {
@@ -155,7 +155,7 @@ func patchWorkflowFrontmatter(front string, fields map[string]json.RawMessage, r
 }
 
 // Adopt explicitly binds an existing ticket while preserving its original location.
-func (s *Store) Adopt(ctx context.Context, path string, task Task, observedHash string) (adopted Record, err error) {
+func (s *Store) Adopt(ctx context.Context, path string, task workflowstate.Task, observedHash string) (adopted workflowstate.Record, err error) {
 	err = s.withLock(ctx, func() error {
 		record, readErr := s.prepareAdoption(path, task, observedHash)
 		if readErr != nil {
@@ -170,46 +170,46 @@ func (s *Store) Adopt(ctx context.Context, path string, task Task, observedHash 
 	return adopted, err
 }
 
-func (s *Store) prepareAdoption(relative string, task Task, observedHash string) (Record, error) {
+func (s *Store) prepareAdoption(relative string, task workflowstate.Task, observedHash string) (workflowstate.Record, error) {
 	path, err := s.safePath(relative)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	data, err := opsfile.Read(path)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if contenthash.Sum(data) != observedHash {
-		return Record{}, workflowstate.ErrConflict
+		return workflowstate.Record{}, workflowstate.ErrConflict
 	}
 
 	parsedMarkdown, err := workflowstate.RequireMarkdown(data)
 	front, body := parsedMarkdown.Front, parsedMarkdown.Body
 
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	fields, err := workflowMarkdownFields(front)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	var key, created string
 	if err := json.Unmarshal(fields["key"], &key); err != nil || key != task.Key {
-		return Record{}, fmt.Errorf("adoption must preserve ticket key")
+		return workflowstate.Record{}, fmt.Errorf("adoption must preserve ticket key")
 	}
 
 	if err := json.Unmarshal(fields["created_at"], &created); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	instant, err := time.Parse(time.RFC3339, created)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
-	return Record{Identity: workflowstate.Identity{ID: key, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: instant, UpdatedAt: time.Now().UTC()}, Kind: "ticket", Path: relative, Body: body, Task: &task, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: observedHash}, nil
+	return workflowstate.Record{Identity: workflowstate.Identity{ID: key, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: instant, UpdatedAt: time.Now().UTC()}, Kind: "ticket", Path: relative, Body: body, Task: &task, Metadata: map[string]json.RawMessage{"frontmatter": json.RawMessage(strconv.Quote(front))}, SourceHash: observedHash}, nil
 }

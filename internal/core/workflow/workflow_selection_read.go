@@ -27,7 +27,7 @@ func (s *Store) readWorkflowSelectionSources(ctx context.Context, unprepared boo
 		return workflowSelection{}, err
 	}
 
-	selection := workflowSelection{snapshot: snapshot, records: map[string]Record{}, sets: map[string]Record{}, slices: map[string]workflowstate.WorkflowSlice{}, evidenceHashes: map[string]string{}}
+	selection := workflowSelection{snapshot: snapshot, records: map[string]workflowstate.Record{}, sets: map[string]workflowstate.Record{}, slices: map[string]workflowstate.WorkflowSlice{}, evidenceHashes: map[string]string{}}
 	paths := map[string]bool{}
 
 	for _, record := range snapshot.Records {

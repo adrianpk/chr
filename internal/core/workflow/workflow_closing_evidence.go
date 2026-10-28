@@ -74,8 +74,13 @@ func (s *Store) checkWorkflowClosingInputs(ctx context.Context, claim *workflowC
 	return nil
 }
 
-func (s *Store) checkWorkflowClosingMembers(ctx context.Context, claim *workflowClosingClaim, set Record) error {
-	members, err := s.workflowClosingMembers(ctx, set.ID)
+func (s *Store) checkWorkflowClosingMembers(ctx context.Context, claim *workflowClosingClaim, set workflowstate.Record) error {
+	snapshot, err := s.readSnapshot(ctx)
+	if err != nil {
+		return err
+	}
+
+	members, err := workflowcloseout.Members(snapshot.Records, set.ID)
 	if err != nil {
 		return err
 	}
@@ -87,7 +92,7 @@ func (s *Store) checkWorkflowClosingMembers(ctx context.Context, claim *workflow
 	return s.checkWorkflowIntegrationSetReceipts(ctx, set)
 }
 
-func (s *Store) readWorkflowClosedSet(set Record) (SetClosureResult, error) {
+func (s *Store) readWorkflowClosedSet(set workflowstate.Record) (SetClosureResult, error) {
 	if set.Set.Closing == nil || len(set.Set.Closing.Attempts) == 0 {
 		return SetClosureResult{}, workflowstate.ErrConflict
 	}

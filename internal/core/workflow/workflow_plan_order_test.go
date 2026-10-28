@@ -156,7 +156,7 @@ func checkWorkflowPlanOrderRecovery(t *testing.T, stage int) {
 	}
 }
 
-func checkBoundTicketOrder(t *testing.T, before []byte, task Record) {
+func checkBoundTicketOrder(t *testing.T, before []byte, task workflowstate.Record) {
 	t.Helper()
 
 	if !strings.Contains(string(before), workflowRecordBodyRef(task)) || strings.Contains(string(before), "| unbound |") {

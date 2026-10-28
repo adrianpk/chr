@@ -14,8 +14,8 @@ import (
 
 type workflowAmendmentBuild struct {
 	result MaterializationResult
-	old    Record
-	tasks  map[string]Record
+	old    workflowstate.Record
+	tasks  map[string]workflowstate.Record
 	keys   map[string]string
 	files  []workflowstate.FileChange
 	number int
@@ -27,7 +27,7 @@ type workflowAmendmentPreparation struct {
 	Files  []workflowstate.FileChange
 }
 
-func (s *Store) buildWorkflowAmendment(ctx context.Context, set Record, request SetAmendmentRequest, body []byte) (workflowAmendmentPreparation, error) {
+func (s *Store) buildWorkflowAmendment(ctx context.Context, set workflowstate.Record, request SetAmendmentRequest, body []byte) (workflowAmendmentPreparation, error) {
 	builder, err := s.workflowAmendmentBuilder(ctx, set)
 	if err != nil {
 		return workflowAmendmentPreparation{Result: builder.result}, err
@@ -49,8 +49,8 @@ func (s *Store) buildWorkflowAmendment(ctx context.Context, set Record, request 
 	return workflowAmendmentPreparation{Result: builder.result, Files: builder.files}, nil
 }
 
-func (s *Store) workflowAmendmentBuilder(ctx context.Context, set Record) (workflowAmendmentBuild, error) {
-	builder := workflowAmendmentBuild{old: set, tasks: map[string]Record{}, keys: map[string]string{}, number: opscore.NextArtifactNumber(s.layout.Root()), root: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", fmt.Sprintf("amendment-%04d", set.Revision+1)))}
+func (s *Store) workflowAmendmentBuilder(ctx context.Context, set workflowstate.Record) (workflowAmendmentBuild, error) {
+	builder := workflowAmendmentBuild{old: set, tasks: map[string]workflowstate.Record{}, keys: map[string]string{}, number: opscore.NextArtifactNumber(s.layout.Root()), root: filepath.ToSlash(filepath.Join("plan", set.ID, "extension", "chr", fmt.Sprintf("amendment-%04d", set.Revision+1)))}
 
 	data, err := json.Marshal(set.Set)
 	if err != nil {
@@ -117,7 +117,7 @@ func (s *Store) buildWorkflowAmendmentTasks(ctx context.Context, builder *workfl
 	return nil
 }
 
-func (s *Store) buildWorkflowAmendedTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (Record, error) {
+func (s *Store) buildWorkflowAmendedTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (workflowstate.Record, error) {
 	if task, exists := builder.tasks[input.ID]; exists {
 		return task, checkWorkflowAmendedTask(task, input, slice)
 	}
@@ -125,7 +125,7 @@ func (s *Store) buildWorkflowAmendedTask(ctx context.Context, builder *workflowA
 	return s.newWorkflowAmendmentTask(ctx, builder, slice, input, allocate)
 }
 
-func checkWorkflowAmendedTask(task Record, input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice) error {
+func checkWorkflowAmendedTask(task workflowstate.Record, input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice) error {
 	var previous generationcore.GeneratedWorkflowTask
 	if err := json.Unmarshal(task.Domain["execution_contract"], &previous); err != nil {
 		return err
@@ -141,14 +141,14 @@ func checkWorkflowAmendedTask(task Record, input generationcore.GeneratedWorkflo
 	return nil
 }
 
-func (s *Store) newWorkflowAmendmentTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (Record, error) {
+func (s *Store) newWorkflowAmendmentTask(ctx context.Context, builder *workflowAmendmentBuild, slice generationcore.GeneratedWorkflowSlice, input generationcore.GeneratedWorkflowTask, allocate func(context.Context) (string, error)) (workflowstate.Record, error) {
 	if err := checkWorkflowAmendmentAddition(*builder, slice, input); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	key, err := allocate(ctx)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	task, err := s.materializationTask(input, slice, builder.result.Set, key, workflowArtifactAllocation{Number: builder.number, Time: time.Now().UTC()})

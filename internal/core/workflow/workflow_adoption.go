@@ -97,7 +97,7 @@ func (s *Store) adoptPlanWorkflow(ctx context.Context, opts PlanAdoptionOptions)
 	snapshot.Records = append(snapshot.Records, result.Set)
 
 	snapshot.Records = append(snapshot.Records, result.Tasks...)
-	if err := snapshot.Validate(); err != nil {
+	if err := validateWorkflowSnapshot(snapshot); err != nil {
 		return MaterializationResult{}, err
 	}
 
@@ -174,7 +174,7 @@ func (s *Store) planAdoptionFiles(result MaterializationResult, plan generationc
 	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", contenthash.Sum(receipt.After)))
 	files := []workflowstate.FileChange{}
 
-	for _, record := range append([]Record{result.Set}, result.Tasks...) {
+	for _, record := range append([]workflowstate.Record{result.Set}, result.Tasks...) {
 		encoded, err := s.encodeChanges(record)
 		if err != nil {
 			return nil, err
@@ -206,7 +206,7 @@ func workflowAdoptionPlanBody(path string) string {
 	return filepath.ToSlash(filepath.Join(filepath.Dir(path), "artifact.md"))
 }
 
-func (s *Store) resumePlanAdoption(snapshot Snapshot, opts PlanAdoptionOptions, hash string) (workflowMaterializationReplay, error) {
+func (s *Store) resumePlanAdoption(snapshot workflowstate.Snapshot, opts PlanAdoptionOptions, hash string) (workflowMaterializationReplay, error) {
 	retained, err := s.resumeMaterialization(snapshot, opts.Plan)
 	if err != nil || !retained.Found {
 		return retained, err

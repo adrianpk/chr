@@ -120,7 +120,7 @@ func workflowCrashWriter(t *testing.T, s *Store, paths []string) {
 	}
 }
 
-func workflowTestCreate(t *testing.T, s *Store, key string) Record {
+func workflowTestCreate(t *testing.T, s *Store, key string) workflowstate.Record {
 	t.Helper()
 
 	r, err := s.Create(context.Background(), key, workflowTestTask(key))
@@ -131,7 +131,7 @@ func workflowTestCreate(t *testing.T, s *Store, key string) Record {
 	return r
 }
 
-func workflowTestConflict(t *testing.T, s *Store, r Record) {
+func workflowTestConflict(t *testing.T, s *Store, r workflowstate.Record) {
 	t.Helper()
 
 	body := filepath.Join(s.layout.Root(), filepath.Dir(r.Path), "artifact.md")

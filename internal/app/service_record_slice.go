@@ -37,7 +37,7 @@ func (s service) prepareSliceRecordMutation(ctx context.Context, store *workflow
 	return workflowcore.MutationRequest{Binding: binding, Record: parent, ExpectedRevision: request.ExpectedRevision}, nil
 }
 
-func prepareSliceDescriptor(parent *workflowcore.Record, request RecordMutationRequest) error {
+func prepareSliceDescriptor(parent *workflowstate.Record, request RecordMutationRequest) error {
 	if request.Title != nil {
 		return ErrRecordUnsupported
 	}
@@ -64,7 +64,7 @@ func prepareSliceDescriptor(parent *workflowcore.Record, request RecordMutationR
 	return nil
 }
 
-func updateSliceDisplay(parent *workflowcore.Record, request RecordMutationRequest) error {
+func updateSliceDisplay(parent *workflowstate.Record, request RecordMutationRequest) error {
 	if !validRecordIdentity(request.Identity) || request.Title == nil || request.Slice != nil {
 		return ErrRecordUnsupported
 	}

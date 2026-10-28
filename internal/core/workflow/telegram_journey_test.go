@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramJourneyAdmissionFixture(t *testing.T) (*Store, Record, StartRequest) {
+func telegramJourneyAdmissionFixture(t *testing.T) (*Store, workflowstate.Record, StartRequest) {
 	t.Helper()
 
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("test -f result.txt"))
@@ -74,7 +74,7 @@ func TestTelegramJourneyAdmission(t *testing.T) {
 	}
 }
 
-func checkTelegramJourneyReady(t *testing.T, store *Store, record Record, run Invocation) {
+func checkTelegramJourneyReady(t *testing.T, store *Store, record workflowstate.Record, run Invocation) {
 	t.Helper()
 
 	ready, err := store.Read(t.Context(), record.Path)
@@ -119,7 +119,7 @@ func TestTelegramJourneyAdmissionGuards(t *testing.T) {
 	}
 }
 
-func telegramJourneyChangeAdmission(t *testing.T, store *Store, record Record, request *StartRequest, change string) AdmissionCheck {
+func telegramJourneyChangeAdmission(t *testing.T, store *Store, record workflowstate.Record, request *StartRequest, change string) AdmissionCheck {
 	t.Helper()
 
 	switch change {
@@ -181,7 +181,7 @@ func TestTelegramJourneyContract(t *testing.T) {
 	}
 }
 
-func telegramJourneyChangeContract(record *Record, contract *generationcore.GeneratedWorkflowTask, change string) {
+func telegramJourneyChangeContract(record *workflowstate.Record, contract *generationcore.GeneratedWorkflowTask, change string) {
 	switch change {
 	case "acceptance":
 		contract.Acceptance = nil

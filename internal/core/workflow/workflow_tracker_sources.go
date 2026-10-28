@@ -10,13 +10,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowTrackerSnapshot(ctx context.Context, setID, schema string) (Snapshot, error) {
+func (s *Store) workflowTrackerSnapshot(ctx context.Context, setID, schema string) (workflowstate.Snapshot, error) {
 	if schema == "" {
 		var err error
 
 		schema, err = s.inferWorkflowTrackerSchema(setID)
 		if err != nil {
-			return Snapshot{}, err
+			return workflowstate.Snapshot{}, err
 		}
 	}
 
@@ -29,12 +29,12 @@ func (s *Store) workflowTrackerSnapshot(ctx context.Context, setID, schema strin
 
 // Order-only inspection uses native set/task readers under the existing lock.
 // Receipt contents and lifecycle evidence do not participate in map freshness.
-func (s *Store) readWorkflowOrderSources(ctx context.Context, setID string) (Snapshot, error) {
+func (s *Store) readWorkflowOrderSources(ctx context.Context, setID string) (workflowstate.Snapshot, error) {
 	set, err := s.readWorkflowOrderSet(setID)
-	snapshot := Snapshot{Records: []Record{set}}
+	snapshot := workflowstate.Snapshot{Records: []workflowstate.Record{set}}
 
 	if err != nil {
-		return Snapshot{}, err
+		return workflowstate.Snapshot{}, err
 	}
 
 	err = s.walkWorkflowOrderTasks(ctx, &snapshot, setID)
@@ -42,9 +42,9 @@ func (s *Store) readWorkflowOrderSources(ctx context.Context, setID string) (Sna
 	return snapshot, err
 }
 
-func (s *Store) readWorkflowOrderSet(setID string) (Record, error) {
+func (s *Store) readWorkflowOrderSet(setID string) (workflowstate.Record, error) {
 	if _, err := workflowstate.TrackerMetadataPath(setID); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	set, err := s.readRecord("plan/" + setID + "/metadata.json")
@@ -59,7 +59,7 @@ func (s *Store) readWorkflowOrderSet(setID string) (Record, error) {
 	return set, nil
 }
 
-func (s *Store) walkWorkflowOrderTasks(ctx context.Context, snapshot *Snapshot, setID string) error {
+func (s *Store) walkWorkflowOrderTasks(ctx context.Context, snapshot *workflowstate.Snapshot, setID string) error {
 	root := filepath.Join(s.layout.Root(), "ticket")
 
 	return filepath.WalkDir(root, func(path string, entry fs.DirEntry, walkErr error) error {
@@ -83,7 +83,7 @@ func (s *Store) walkWorkflowOrderTasks(ctx context.Context, snapshot *Snapshot, 
 	})
 }
 
-func (s *Store) appendWorkflowOrderTask(snapshot *Snapshot, path, setID string) error {
+func (s *Store) appendWorkflowOrderTask(snapshot *workflowstate.Snapshot, path, setID string) error {
 	reference, err := filepath.Rel(s.layout.Root(), path)
 	if err != nil {
 		return err

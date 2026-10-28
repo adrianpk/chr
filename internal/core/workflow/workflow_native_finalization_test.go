@@ -42,7 +42,7 @@ func TestNativeFinalization(t *testing.T) {
 	checkNativeFinalization(t, fixture, receipt, before)
 }
 
-func checkNativeFinalization(t *testing.T, fixture nativeCanonicalFixture, receipt Record, original []byte) {
+func checkNativeFinalization(t *testing.T, fixture nativeCanonicalFixture, receipt workflowstate.Record, original []byte) {
 	t.Helper()
 
 	f := fixture.f
@@ -65,7 +65,7 @@ func checkNativeFinalization(t *testing.T, fixture nativeCanonicalFixture, recei
 	checkNativeFanoutRetry(t, fixture, receipt, original, run)
 }
 
-func checkNativeFanoutRetry(t *testing.T, fixture nativeCanonicalFixture, receipt Record, original []byte, run workflowInvocationFile) {
+func checkNativeFanoutRetry(t *testing.T, fixture nativeCanonicalFixture, receipt workflowstate.Record, original []byte, run workflowInvocationFile) {
 	t.Helper()
 
 	f := fixture.f
@@ -86,7 +86,7 @@ func checkNativeFanoutRetry(t *testing.T, fixture nativeCanonicalFixture, receip
 	}
 }
 
-func checkNativeFanoutMembers(t *testing.T, store *Store, run workflowInvocationFile, receipt Record) {
+func checkNativeFanoutMembers(t *testing.T, store *Store, run workflowInvocationFile, receipt workflowstate.Record) {
 	t.Helper()
 
 	for _, member := range run.Members {
@@ -214,7 +214,7 @@ func TestNativeFinalizationStop(t *testing.T) {
 	checkNativeFanoutMembers(t, f.store, nativeFanoutRun(t, fixture), receipt)
 }
 
-func nativeFanoutReceipt(t *testing.T, fixture nativeCanonicalFixture) (nativeCanonicalFixture, Record) {
+func nativeFanoutReceipt(t *testing.T, fixture nativeCanonicalFixture) (nativeCanonicalFixture, workflowstate.Record) {
 	t.Helper()
 
 	nativeReceiptMerged(t, fixture)

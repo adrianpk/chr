@@ -12,18 +12,18 @@ import (
 
 // PrepareIndependentWorkflowTask seals an executable description without making
 // a backlog ticket ready or admitting it, and leaves the input record unchanged.
-func PrepareIndependentWorkflowTask(record Record, contract generationcore.GeneratedWorkflowTask) (Record, error) {
+func PrepareIndependentWorkflowTask(record workflowstate.Record, contract generationcore.GeneratedWorkflowTask) (workflowstate.Record, error) {
 	if !workflowIndependentBacklog(record) || len(contract.DependsOn) != 0 {
-		return Record{}, workflowstate.ErrConflict
+		return workflowstate.Record{}, workflowstate.ErrConflict
 	}
 
 	if err := generationcore.ValidateWorkflowPlanTask(contract); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	encoded, err := json.Marshal(contract)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	task := *record.Task
@@ -39,6 +39,6 @@ func PrepareIndependentWorkflowTask(record Record, contract generationcore.Gener
 	return record, nil
 }
 
-func workflowIndependentBacklog(record Record) bool {
+func workflowIndependentBacklog(record workflowstate.Record) bool {
 	return record.Kind == "ticket" && record.Task != nil && record.Task.SetID == "" && record.Task.SliceID == "" && record.Task.Status == string(ticketcore.StatusBacklog) && record.Task.Phase == "pending" && record.Task.AttemptID == "" && len(record.Task.DependsOn) == 0
 }

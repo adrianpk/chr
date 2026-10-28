@@ -19,7 +19,7 @@ func workflowLooseQueueFixture(t *testing.T, includeLater bool) workflowIntegrat
 func workflowLooseConfiguredQueue(t *testing.T, includeLater bool, setup func(*Store, *StartRequest)) workflowIntegrationFixture {
 	t.Helper()
 
-	f, _ := workflowTicketConfiguredFixture(t, "rebase", "loose", func(store *Store, first Record, request *StartRequest) {
+	f, _ := workflowTicketConfiguredFixture(t, "rebase", "loose", func(store *Store, first workflowstate.Record, request *StartRequest) {
 		request.Selection.Order = workflowstate.TicketOrderPriority
 		request.Policy.IncludeLaterTickets = includeLater
 
@@ -43,7 +43,7 @@ func workflowLooseConfiguredQueue(t *testing.T, includeLater bool, setup func(*S
 	return workflowIntegrationFixture{store: f.store, run: workflowTestRead(t, f.store, f.run.ID), provider: f.provider.workflowPRProviderFixture, git: NewWorkflowIntegrationGit(f.provider.pr.Repository, f.remote), actor: f.actor, remote: f.remote, base: f.base, result: result, target: result}
 }
 
-func workflowLooseCreate(t *testing.T, store *Store, original Record, key, priority string, dependencies []workflowstate.Ref) Record {
+func workflowLooseCreate(t *testing.T, store *Store, original workflowstate.Record, key, priority string, dependencies []workflowstate.Ref) workflowstate.Record {
 	t.Helper()
 
 	var contract generationcore.GeneratedWorkflowTask
@@ -58,7 +58,7 @@ func workflowLooseCreate(t *testing.T, store *Store, original Record, key, prior
 		t.Fatal(err)
 	}
 
-	record := Record{Kind: "ticket", Task: &Task{Schema: WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), Phase: "pending", DependsOn: dependencies, ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: workflowLooseBody(key, priority), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := workflowstate.Record{Kind: "ticket", Task: &workflowstate.Task{Schema: workflowstate.WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), Phase: "pending", DependsOn: dependencies, ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: workflowLooseBody(key, priority), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	created, err := store.Create(t.Context(), key, record)
 	if err != nil {
@@ -72,7 +72,7 @@ func workflowLooseBody(key, priority string) []byte {
 	return []byte(fmt.Sprintf("---\nkey: %s\ntitle: Independent task\nstatus: ready_for_dev\ncreated_at: 2026-01-02T03:04:05Z\nupdated_at: 2026-01-02T03:04:05Z\npriority: %s\nseverity: high\nproject_area: frontend\ntype: task\ntags: [delivery, ui]\n---\nFrozen description\n", key, priority))
 }
 
-func workflowLooseClassify(t *testing.T, store *Store, record Record, priority, status string) Record {
+func workflowLooseClassify(t *testing.T, store *Store, record workflowstate.Record, priority, status string) workflowstate.Record {
 	t.Helper()
 
 	record.Body, record.Task.Status = workflowLooseBody(record.Task.Key, priority), status
@@ -85,7 +85,7 @@ func workflowLooseClassify(t *testing.T, store *Store, record Record, priority, 
 	return changed
 }
 
-func workflowLooseRecord(t *testing.T, store *Store, key string) Record {
+func workflowLooseRecord(t *testing.T, store *Store, key string) workflowstate.Record {
 	t.Helper()
 
 	snapshot, err := store.Snapshot(t.Context())
@@ -101,7 +101,7 @@ func workflowLooseRecord(t *testing.T, store *Store, key string) Record {
 
 	t.Fatal("missing queue ticket", key)
 
-	return Record{}
+	return workflowstate.Record{}
 }
 
 // TestWorkflowLooseReselection changes pending rank and status while the previous

@@ -74,7 +74,7 @@ func TestTelegramRecoveryValidation(t *testing.T) {
 	checkTelegramControlPool(t, operations, 1, 1)
 }
 
-func setTelegramRecoveryValidation(t *testing.T, store *workflowcore.Store, record workflowcore.Record, validation workflowstate.Validation) {
+func setTelegramRecoveryValidation(t *testing.T, store *workflowcore.Store, record workflowstate.Record, validation workflowstate.Validation) {
 	t.Helper()
 
 	var contract generationcore.GeneratedWorkflowTask

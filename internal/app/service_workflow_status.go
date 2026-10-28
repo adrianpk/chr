@@ -172,7 +172,7 @@ func workflowWorkStatus(inspection workflowcore.Inspection, request WorkflowStat
 }
 
 func workflowWorkMembers(result *WorkflowWorkStatus, inspection workflowcore.Inspection, request WorkflowStatusRequest) {
-	records := map[string]workflowcore.Record{}
+	records := map[string]workflowstate.Record{}
 
 	for _, record := range inspection.Tasks {
 		if record.Task != nil {

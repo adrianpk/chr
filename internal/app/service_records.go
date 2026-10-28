@@ -74,7 +74,7 @@ func (s service) scopedRecordStore(namespace string) (*workflowcore.Store, error
 	return workflowcore.NewWorkflowStore(layout, s.projectContext.ProjectID), nil
 }
 
-func nativeRecordViews(snapshot workflowcore.Snapshot, query RecordQuery) ([]RecordView, error) {
+func nativeRecordViews(snapshot workflowstate.Snapshot, query RecordQuery) ([]RecordView, error) {
 	if !nativeRecordKind(query.Kind) {
 		return nil, ErrRecordUnsupported
 	}
@@ -98,7 +98,7 @@ func nativeRecordViews(snapshot workflowcore.Snapshot, query RecordQuery) ([]Rec
 	return filterRecordViews(result, query)
 }
 
-func nativeRecordView(record workflowcore.Record, kind RecordKind) RecordView {
+func nativeRecordView(record workflowstate.Record, kind RecordKind) RecordView {
 	view := RecordView{Kind: kind, Identity: record.ID, Revision: record.Revision, SourceHash: record.SourceHash, Reference: record.Path, Body: string(record.Body)}
 	if err := json.Unmarshal(record.Metadata["title"], &view.Title); err != nil {
 		view.Title = record.ID
@@ -115,7 +115,7 @@ func nativeRecordView(record workflowcore.Record, kind RecordKind) RecordView {
 	return view
 }
 
-func sliceRecordViews(record workflowcore.Record) []RecordView {
+func sliceRecordViews(record workflowstate.Record) []RecordView {
 	var views []RecordView
 	for _, slice := range record.Set.Slices {
 		views = append(views, RecordView{Kind: RecordSlice, Identity: slice.ID, ParentID: record.ID, Title: slice.Title, Phase: slice.Phase, Revision: record.Revision, SourceHash: record.SourceHash, Reference: record.Path + "#" + slice.ID})

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +21,7 @@ func TestServiceWorkflowClosing(t *testing.T) {
 
 	plan := serviceWorkflowPlanFixture()
 
-	set, err := store.Create(t.Context(), "Empty service set", workflowcore.Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: workflowcore.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}}})
+	set, err := store.Create(t.Context(), "Empty service set", workflowstate.Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: workflowstate.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,7 +35,7 @@ func TestServiceWorkflowClosing(t *testing.T) {
 
 	operations.workflowIntegrationGit = workflowcore.NewWorkflowIntegrationGit(repository, remote)
 	operations.workflowPullRequests = &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{HeadCommit: target}}
-	request := workflowcore.SetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: repository, Branch: "dev"}
+	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: repository, Branch: "dev"}
 
 	closed, err := operations.CloseWorkflowSet(t.Context(), request)
 	if err != nil {

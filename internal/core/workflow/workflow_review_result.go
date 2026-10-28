@@ -72,7 +72,7 @@ func (s *Store) acceptWorkflowReview(ctx context.Context, claimed workflowClaimO
 	return *run.Review, claim.releaseReservation()
 }
 
-func (s *Store) checkpointFailedWorkflowReview(claim *Claim, run workflowInvocationFile, record Record, failure error) error {
+func (s *Store) checkpointFailedWorkflowReview(claim *Claim, run workflowInvocationFile, record workflowstate.Record, failure error) error {
 	run.Review.State = workflowstate.ReviewStale
 
 	err := s.checkpointWorkflowAttempt(run, record, "interrupted", nil)

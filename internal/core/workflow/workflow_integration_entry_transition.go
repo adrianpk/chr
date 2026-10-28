@@ -357,7 +357,7 @@ func workflowIntegrationCandidateExcluded(entry IntegrationEntry, submission wor
 	return !workflowNativeSubmissionEntryMatches(submission, entry)
 }
 
-func workflowIntegrationReceiptOwnerMatches(receipt *Receipt, run workflowInvocationFile, entry IntegrationEntry) bool {
+func workflowIntegrationReceiptOwnerMatches(receipt *workflowstate.Receipt, run workflowInvocationFile, entry IntegrationEntry) bool {
 	return receipt.Native != nil && receipt.Native.EntryID == entry.ID && receipt.Native.InvocationID == run.ID
 }
 

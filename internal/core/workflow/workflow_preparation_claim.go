@@ -287,7 +287,7 @@ func (s *Store) workflowPreparationQuery(ctx context.Context, run workflowInvoca
 	return workflowstate.PreparationQuery{IntegrationQuery: query, BaseCommit: source.TargetCommit, Lane: lane}, nil
 }
 
-func (s *Store) failClaimedWorkflowPreparation(run workflowInvocationFile, record Record, reason error) error {
+func (s *Store) failClaimedWorkflowPreparation(run workflowInvocationFile, record workflowstate.Record, reason error) error {
 	if err := s.checkpointWorkflowAttempt(run, record, "interrupted", nil); err != nil {
 		return errors.Join(reason, err)
 	}

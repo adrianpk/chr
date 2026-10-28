@@ -116,13 +116,13 @@ func workflowParallelPublicationStore(t *testing.T, original *Store) *Store {
 	return NewWorkflowStore(layout, original.projectID)
 }
 
-func workflowParallelPublicationSource(t *testing.T, store *Store, record Record, request StartRequest, path, remote string, number int) workflowParallelPublicationLane {
+func workflowParallelPublicationSource(t *testing.T, store *Store, record workflowstate.Record, request StartRequest, path, remote string, number int) workflowParallelPublicationLane {
 	t.Helper()
 
 	return workflowParallelPublicationTargetSource(t, store, record, request, path, remote, number, "dev")
 }
 
-func workflowParallelPublicationTargetSource(t *testing.T, store *Store, record Record, request StartRequest, path, remote string, number int, target string) workflowParallelPublicationLane {
+func workflowParallelPublicationTargetSource(t *testing.T, store *Store, record workflowstate.Record, request StartRequest, path, remote string, number int, target string) workflowParallelPublicationLane {
 	t.Helper()
 
 	request.RequestKey, request.Selection.Selector.Identity = record.Task.Key, record.Task.Key
@@ -147,7 +147,7 @@ func workflowParallelPublicationTargetSource(t *testing.T, store *Store, record 
 	return workflowParallelPublicationPrepare(t, store, record, run.ID, remote, pr)
 }
 
-func workflowParallelPublicationPrepare(t *testing.T, store *Store, record Record, id, remote string, pr workflowstate.PullRequestSnapshot) workflowParallelPublicationLane {
+func workflowParallelPublicationPrepare(t *testing.T, store *Store, record workflowstate.Record, id, remote string, pr workflowstate.PullRequestSnapshot) workflowParallelPublicationLane {
 	t.Helper()
 
 	provider := workflowParallelPublicationProviderFor(pr, remote)
@@ -158,7 +158,7 @@ func workflowParallelPublicationPrepare(t *testing.T, store *Store, record Recor
 		t.Fatal(err)
 	}
 
-	fixture := workflowPreparationFixture{store: store, hierarchy: MaterializationResult{Tasks: []Record{record}}, run: workflowTestRead(t, store, id), provider: provider.workflowPreparationProviderFixture, git: NewWorkflowPreparationGit(pr.Repository, remote), remote: remote, base: pr.BaseCommit}
+	fixture := workflowPreparationFixture{store: store, hierarchy: MaterializationResult{Tasks: []workflowstate.Record{record}}, run: workflowTestRead(t, store, id), provider: provider.workflowPreparationProviderFixture, git: NewWorkflowPreparationGit(pr.Repository, remote), remote: remote, base: pr.BaseCommit}
 
 	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, fixture.git); err != nil {
 		t.Fatal(err)

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -52,7 +53,7 @@ func workflowClosingExtentFixture(t *testing.T, extent string, policy workflowst
 	return fixture, ports
 }
 
-func workflowClosingContract(t *testing.T, fixture workflowIntegrationFixture, gate workflowstate.Validation) Record {
+func workflowClosingContract(t *testing.T, fixture workflowIntegrationFixture, gate workflowstate.Validation) workflowstate.Record {
 	t.Helper()
 
 	set, err := fixture.store.Read(t.Context(), fixture.hierarchy.Set.Path)
@@ -96,13 +97,13 @@ func TestWorkflowClosingRetry(t *testing.T) {
 	checkWorkflowClosingResult(t, fixture, set, closed)
 	checkWorkflowClosingTasks(t, fixture, before, run)
 
-	attached, err := store.CloseWorkflowSet(t.Context(), SetClosureRequest{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}, ports)
+	attached, err := store.CloseWorkflowSet(t.Context(), workflowcloseout.Request{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}, ports)
 	if err != nil || attached.ReceiptRef != closed.ReceiptRef || attached.Set.Revision != closed.Set.Revision {
 		t.Fatal("confirmed retry created another closure attempt", err)
 	}
 }
 
-func checkWorkflowClosingResult(t *testing.T, fixture workflowIntegrationFixture, set Record, closed SetClosureResult) {
+func checkWorkflowClosingResult(t *testing.T, fixture workflowIntegrationFixture, set workflowstate.Record, closed SetClosureResult) {
 	t.Helper()
 
 	if !workflowClosingResultComplete(closed) {
@@ -165,12 +166,12 @@ func testWorkflowClosingEmpty(t *testing.T, required bool) {
 		plan.ClosingValidation = workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}
 	}
 
-	set, err := fixture.store.Create(t.Context(), "Empty set", Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}})
+	set, err := fixture.store.Create(t.Context(), "Empty set", workflowstate.Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: workflowstate.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request := SetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: fixture.provider.pr.Repository, Branch: "dev"}
+	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: fixture.provider.pr.Repository, Branch: "dev"}
 
 	ports := workflowFrontierPorts(fixture)
 	ports.Target = workflowClosingDeadlineTarget{ports.Target}

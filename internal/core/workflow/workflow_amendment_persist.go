@@ -99,7 +99,7 @@ func (s *Store) workflowAmendmentRecordFiles(ctx context.Context, builder *workf
 	return nil
 }
 
-func (s *Store) workflowAmendmentInvocationFiles(ctx context.Context, runs []workflowInvocationFile, old, next Record, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowAmendmentInvocationFiles(ctx context.Context, runs []workflowInvocationFile, old, next workflowstate.Record, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	for _, run := range runs {
 		if run.Namespace != old.Namespace || workflowInvocationTerminal(run.Status) || run.OwnerRoot != s.layout.Root() {
 			continue

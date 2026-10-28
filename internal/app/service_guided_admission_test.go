@@ -168,7 +168,7 @@ func addGuidedUnrelatedTicket(t *testing.T, operations service, session authorin
 	task := *record.Task
 
 	task.Key, task.SetID, task.SliceID, task.UseCase, task.Order = key, "", "", "", 0
-	if _, err := store.Create(t.Context(), "Unrelated task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Unrelated task", workflowstate.Record{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
 		t.Fatal(err)
 	}
 }

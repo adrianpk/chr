@@ -17,7 +17,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func serviceWorkflowDependencyFixture(t *testing.T) (service, workflowcore.Record, workflowcore.StartRequest) {
+func serviceWorkflowDependencyFixture(t *testing.T) (service, workflowstate.Record, workflowcore.StartRequest) {
 	t.Helper()
 
 	operations, selected, request := serviceWorkflowTicketFixture(t)
@@ -30,7 +30,7 @@ func serviceWorkflowDependencyFixture(t *testing.T) (service, workflowcore.Recor
 	task := *selected.Task
 	task.Key, task.Status = "PRJ-89", string(ticketcore.StatusBacklog)
 
-	outside, err := store.Create(t.Context(), "Outside prerequisite", workflowcore.Record{Kind: "ticket", Task: &task, Body: selected.Body, Domain: maps.Clone(selected.Domain)})
+	outside, err := store.Create(t.Context(), "Outside prerequisite", workflowstate.Record{Kind: "ticket", Task: &task, Body: selected.Body, Domain: maps.Clone(selected.Domain)})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func checkServiceWorkflowResumed(t *testing.T, resumed workflowcore.Invocation, 
 	}
 }
 
-func serviceWorkflowConfirmDependency(t *testing.T, operations *service, outside workflowcore.Record, request workflowcore.StartRequest) {
+func serviceWorkflowConfirmDependency(t *testing.T, operations *service, outside workflowstate.Record, request workflowcore.StartRequest) {
 	t.Helper()
 
 	project := operations.projectContext.ProjectDir
@@ -129,7 +129,7 @@ func serviceWorkflowDependencyGit(t *testing.T, project string, args ...string) 
 	return strings.TrimSpace(string(output))
 }
 
-func serviceWorkflowDependencyReceipt(t *testing.T, operations service, outside workflowcore.Record, repository, commit, tree string) {
+func serviceWorkflowDependencyReceipt(t *testing.T, operations service, outside workflowstate.Record, repository, commit, tree string) {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -140,7 +140,7 @@ func serviceWorkflowDependencyReceipt(t *testing.T, operations service, outside 
 	now := time.Now().UTC()
 	identity := workflowstate.Identity{ID: "dependency-receipt", ProjectID: outside.ProjectID, Namespace: outside.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now}
 
-	receipt, err := store.CreateReceipt(t.Context(), workflowcore.Record{Identity: identity, Kind: "receipt", Path: "run/dependency/evidence/receipt.json", Receipt: &workflowcore.Receipt{Schema: workflowcore.WorkflowSchema, Unit: workflowstate.Ref{Kind: "ticket", ID: outside.Task.Key}, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: repository, PullRequest: repository + "/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: now}})
+	receipt, err := store.CreateReceipt(t.Context(), workflowstate.Record{Identity: identity, Kind: "receipt", Path: "run/dependency/evidence/receipt.json", Receipt: &workflowstate.Receipt{Schema: workflowstate.WorkflowSchema, Unit: workflowstate.Ref{Kind: "ticket", ID: outside.Task.Key}, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: repository, PullRequest: repository + "/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: now}})
 	if err != nil {
 		t.Fatal(err)
 	}

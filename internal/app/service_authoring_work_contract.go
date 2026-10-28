@@ -11,14 +11,14 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s service) authoringWorkContract(record workflowcore.Record, title string, request AuthoringWorkRequest, source authoringcore.ArtifactObservation) (workflowcore.Record, error) {
+func (s service) authoringWorkContract(record workflowstate.Record, title string, request AuthoringWorkRequest, source authoringcore.ArtifactObservation) (workflowstate.Record, error) {
 	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
-		return workflowcore.Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if strings.TrimSpace(config.Runtime.ValidationCommand) == "" {
-		return workflowcore.Record{}, errors.New("native work preparation requires a configured validation command")
+		return workflowstate.Record{}, errors.New("native work preparation requires a configured validation command")
 	}
 
 	timeout := config.Work.ValidationTimeoutSeconds

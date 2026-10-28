@@ -12,9 +12,10 @@ import (
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture, service, workflowcore.Record, workflowcore.StartRequest, string) {
+func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture, service, workflowstate.Record, workflowcore.StartRequest, string) {
 	t.Helper()
 
 	operations, record, request := serviceWorkflowTicketFixture(t)

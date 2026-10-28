@@ -23,7 +23,7 @@ type PublicationPorts struct {
 // IntegrationProgress exposes the retained barrier or shared receipt.
 type IntegrationProgress struct {
 	Invocation Invocation
-	Receipt    *Record
+	Receipt    *workflowstate.Record
 }
 
 // AdvanceWorkflowSliceIntegration observes before preparing, reviewing or
@@ -73,7 +73,7 @@ func (s *Store) advanceWorkflowLegacyIntegration(ctx context.Context, id string,
 	return s.workflowIntegrationProgress(ctx, id, nil, err)
 }
 
-func (s *Store) workflowIntegrationProgress(ctx context.Context, id string, receipt *Record, failure error) (IntegrationProgress, error) {
+func (s *Store) workflowIntegrationProgress(ctx context.Context, id string, receipt *workflowstate.Record, failure error) (IntegrationProgress, error) {
 	// A lost response may cancel the caller context; retain its latest checkpoint.
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
@@ -100,7 +100,7 @@ func (s *Store) blockWorkflowMissingPublisher(ctx context.Context, id string) er
 
 func (s *Store) observeWorkflowPublicationCheckpoint(ctx context.Context, id string, ports PublicationPorts) (result workflowPublicationCheckpoint, err error) {
 	var (
-		receipt   *Record
+		receipt   *workflowstate.Record
 		delivered bool
 	)
 

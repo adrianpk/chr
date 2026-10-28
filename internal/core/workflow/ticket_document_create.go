@@ -13,6 +13,7 @@ import (
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // CreateTicketDocument allocates through the existing canonical envelope owner.
@@ -58,7 +59,7 @@ func prepareTicketCreation(opts TicketBoardReadOptions, key string, request Tick
 
 	document := TicketDocument{content: []byte(content), Fields: map[string]string{"status": string(ticketcore.StatusBacklog)}, ReadOnly: map[string]string{}, Phase: "pending"}
 	if opts.NativeWorkflow {
-		document.native = &Record{}
+		document.native = &workflowstate.Record{}
 	}
 
 	content, err = prepareTicketEdit(document, request, now)
@@ -87,8 +88,8 @@ func createNativeTicketDocument(ctx context.Context, opts TicketBoardReadOptions
 		return TicketDocument{}, err
 	}
 
-	record := Record{Kind: "ticket", Body: []byte(content), Task: &Task{
-		Schema: WorkflowSchema, Key: key, Status: opsmetadata.Unquote(front.Metadata["status"]), Phase: "pending",
+	record := workflowstate.Record{Kind: "ticket", Body: []byte(content), Task: &workflowstate.Task{
+		Schema: workflowstate.WorkflowSchema, Key: key, Status: opsmetadata.Unquote(front.Metadata["status"]), Phase: "pending",
 		UseCase: request.Fields["use_case"], ContractHash: contenthash.Sum([]byte(key + "\x00" + content)),
 	}}
 

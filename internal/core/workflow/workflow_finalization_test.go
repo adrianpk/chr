@@ -50,7 +50,7 @@ func TestWorkflowFinalization(t *testing.T) {
 	}
 }
 
-func checkWorkflowFinalizedSlice(t *testing.T, fixture workflowIntegrationFixture, receipt Record) {
+func checkWorkflowFinalizedSlice(t *testing.T, fixture workflowIntegrationFixture, receipt workflowstate.Record) {
 	t.Helper()
 
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)
@@ -66,7 +66,7 @@ func checkWorkflowFinalizedSlice(t *testing.T, fixture workflowIntegrationFixtur
 	checkWorkflowFinalizedSet(t, fixture, receipt)
 }
 
-func checkWorkflowFinalizedTasks(t *testing.T, fixture workflowIntegrationFixture, receipt Record) {
+func checkWorkflowFinalizedTasks(t *testing.T, fixture workflowIntegrationFixture, receipt workflowstate.Record) {
 	t.Helper()
 
 	for _, task := range fixture.hierarchy.Tasks[:3] {
@@ -77,7 +77,7 @@ func checkWorkflowFinalizedTasks(t *testing.T, fixture workflowIntegrationFixtur
 	}
 }
 
-func checkWorkflowFinalizedSet(t *testing.T, fixture workflowIntegrationFixture, receipt Record) {
+func checkWorkflowFinalizedSet(t *testing.T, fixture workflowIntegrationFixture, receipt workflowstate.Record) {
 	t.Helper()
 
 	set, err := fixture.store.Read(t.Context(), fixture.hierarchy.Set.Path)

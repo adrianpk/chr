@@ -34,7 +34,7 @@ func TestWorkflowLooseChangedInput(t *testing.T) {
 	}
 }
 
-func changeWorkflowLooseInput(t *testing.T, store *Store, record Record, change string) {
+func changeWorkflowLooseInput(t *testing.T, store *Store, record workflowstate.Record, change string) {
 	t.Helper()
 
 	switch change {

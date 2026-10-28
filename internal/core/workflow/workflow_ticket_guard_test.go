@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowTicketValidated(t *testing.T) (*Store, Record, Invocation) {
+func workflowTicketValidated(t *testing.T) (*Store, workflowstate.Record, Invocation) {
 	t.Helper()
 
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("test -f result.txt"))
@@ -226,7 +226,7 @@ func TestWorkflowTicketBounded(t *testing.T) {
 	checkWorkflowTicketBoundedRestart(t, store, record, first, continuation)
 }
 
-func checkWorkflowTicketBoundedRestart(t *testing.T, store *Store, record Record, first ContinuationProgress, continuation ContinuationRequest) {
+func checkWorkflowTicketBoundedRestart(t *testing.T, store *Store, record workflowstate.Record, first ContinuationProgress, continuation ContinuationRequest) {
 	t.Helper()
 
 	restarted := NewWorkflowStore(store.layout, store.projectID)

@@ -35,7 +35,7 @@ func (s *Store) ResumePlanDelivery(ctx context.Context, input generationcore.Gen
 	return lookup, err
 }
 
-func (s *Store) resumePlanDelivery(snapshot Snapshot, input generationcore.GeneratedWorkflowPlan) (MaterializationLookup, error) {
+func (s *Store) resumePlanDelivery(snapshot workflowstate.Snapshot, input generationcore.GeneratedWorkflowPlan) (MaterializationLookup, error) {
 	for _, record := range snapshot.Records {
 		if record.Set == nil || record.Metadata["materialization_id"] == nil {
 			continue
@@ -63,7 +63,7 @@ func (s *Store) resumePlanDelivery(snapshot Snapshot, input generationcore.Gener
 	return MaterializationLookup{}, nil
 }
 
-func (s *Store) readPlanDeliveryContracts(input generationcore.GeneratedWorkflowPlan, set Record) (generationcore.GeneratedWorkflowPlan, error) {
+func (s *Store) readPlanDeliveryContracts(input generationcore.GeneratedWorkflowPlan, set workflowstate.Record) (generationcore.GeneratedWorkflowPlan, error) {
 	input.ClosingValidation = set.Set.ClosingValidation
 	input.UseCaseOrder = set.Set.UseCaseOrder
 	next := 0

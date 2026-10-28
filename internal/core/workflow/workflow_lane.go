@@ -17,7 +17,7 @@ type workflowLaneImage struct {
 	Tree   string
 }
 
-func workflowTaskUnit(record Record) workflowstate.Ref {
+func workflowTaskUnit(record workflowstate.Record) workflowstate.Ref {
 	if record.Task.SliceID != "" {
 		return workflowstate.Ref{Kind: "slice", ID: record.Task.SliceID}
 	}
@@ -25,7 +25,7 @@ func workflowTaskUnit(record Record) workflowstate.Ref {
 	return workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}
 }
 
-func (s *Store) retainedWorkflowLane(ctx context.Context, run workflowInvocationFile, record Record) (*workflowstate.Lane, error) {
+func (s *Store) retainedWorkflowLane(ctx context.Context, run workflowInvocationFile, record workflowstate.Record) (*workflowstate.Lane, error) {
 	unit := workflowTaskUnit(record)
 	if run.Lane != nil && run.Lane.Unit == unit {
 		lane := *run.Lane
@@ -68,7 +68,7 @@ func workflowRunHasLane(run workflowInvocationFile, namespace string, unit workf
 	return run.Namespace == namespace && run.Lane != nil && run.Lane.Unit == unit
 }
 
-func (s *Store) workflowLaneSelection(ctx context.Context, run workflowInvocationFile, record Record, request workflowstate.PreviewRequest) (workflowstate.PreviewRequest, error) {
+func (s *Store) workflowLaneSelection(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, request workflowstate.PreviewRequest) (workflowstate.PreviewRequest, error) {
 	lane, err := s.retainedWorkflowLane(ctx, run, record)
 	if err != nil || lane == nil {
 		return request, err
@@ -83,7 +83,7 @@ func (s *Store) workflowLaneSelection(ctx context.Context, run workflowInvocatio
 	return request, nil
 }
 
-func (s *Store) newWorkflowLane(run workflowInvocationFile, record Record) workflowstate.Lane {
+func (s *Store) newWorkflowLane(run workflowInvocationFile, record workflowstate.Record) workflowstate.Lane {
 	unit := workflowTaskUnit(record)
 	id := contenthash.Sum([]byte(run.Namespace + "\x00" + unit.Kind + "\x00" + unit.ID))[:24]
 

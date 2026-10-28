@@ -11,7 +11,7 @@ import (
 )
 
 // UpdateWorkflowTicketDisplay prepares native display fields without changing execution state.
-func UpdateWorkflowTicketDisplay(record Record, title, synopsis *string) (Record, error) {
+func UpdateWorkflowTicketDisplay(record workflowstate.Record, title, synopsis *string) (workflowstate.Record, error) {
 	if record.Task == nil {
 		return record, workflowstate.ErrNotWorkflow
 	}

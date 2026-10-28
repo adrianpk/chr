@@ -239,7 +239,7 @@ func checkWorkflowPRSet(t *testing.T, store *Store, path string, run Invocation)
 	}
 }
 
-func checkWorkflowPRTasks(t *testing.T, store *Store, tasks []Record) {
+func checkWorkflowPRTasks(t *testing.T, store *Store, tasks []workflowstate.Record) {
 	t.Helper()
 
 	for _, task := range tasks {

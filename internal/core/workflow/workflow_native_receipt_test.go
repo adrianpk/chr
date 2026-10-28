@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeRecordReceipt(t *testing.T, store *Store, candidate workflowstate.IntegrationCandidate) Record {
+func nativeRecordReceipt(t *testing.T, store *Store, candidate workflowstate.IntegrationCandidate) workflowstate.Record {
 	t.Helper()
 
 	b := candidate.Native.NativeRecordBinding
@@ -48,7 +48,7 @@ func nativeRecordReceipt(t *testing.T, store *Store, candidate workflowstate.Int
 	native.ObservationRefs = []workflowstate.EvidenceRef{retainNativeRecordEvidence(t, store, b.InvocationID, "observation", observation)}
 	r := workflowTestTask("native-delivery")
 	r.Kind, r.Task, r.Path = "receipt", nil, "run/"+b.InvocationID+"/evidence/native-delivery.json"
-	r.Receipt = &Receipt{Schema: workflowNativeReceiptSchema, Native: native, Unit: b.Unit, CandidateID: candidate.Input.Source.CandidateID, SubmissionID: "native-submission", Provider: "forgejo", Repository: b.SourceRepository, PullRequest: b.CanonicalPR, Method: b.Method, SourceCommit: b.OriginalSource, BaseCommit: b.ValidatedBase, PreparedTree: b.PreparedTree, HistoryProof: proof.HistoryHash, ResultCommit: b.PreparedResult, VerifiedTree: proof.VerifiedTree, ObservedTarget: proof.ObservedTarget, VerificationRef: native.ObservationRefs[0].Path, ValidationRefs: []string{native.CandidateRef.Path}, ConfirmedAt: candidate.Validation.FinishedAt}
+	r.Receipt = &workflowstate.Receipt{Schema: workflowNativeReceiptSchema, Native: native, Unit: b.Unit, CandidateID: candidate.Input.Source.CandidateID, SubmissionID: "native-submission", Provider: "forgejo", Repository: b.SourceRepository, PullRequest: b.CanonicalPR, Method: b.Method, SourceCommit: b.OriginalSource, BaseCommit: b.ValidatedBase, PreparedTree: b.PreparedTree, HistoryProof: proof.HistoryHash, ResultCommit: b.PreparedResult, VerifiedTree: proof.VerifiedTree, ObservedTarget: proof.ObservedTarget, VerificationRef: native.ObservationRefs[0].Path, ValidationRefs: []string{native.CandidateRef.Path}, ConfirmedAt: candidate.Validation.FinishedAt}
 
 	return r
 }
@@ -61,17 +61,17 @@ func TestNativeReceiptProof(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		change func(*Receipt)
+		change func(*workflowstate.Receipt)
 	}{
-		{"version", func(r *Receipt) { r.Schema = "chr-workflow-receipt/v3" }},
-		{"missing", func(r *Receipt) { r.Native = nil }},
-		{"source", func(r *Receipt) { r.SourceCommit = r.ResultCommit }},
-		{"transaction", func(r *Receipt) { r.Native.TransactionProofRef.Hash = "" }},
-		{"observation", func(r *Receipt) { r.Native.ObservationRefs = nil }},
-		{"merge", func(r *Receipt) { r.Native.ActualMergeResult = r.SourceCommit }},
-		{"candidate", func(r *Receipt) { r.CandidateID = "another-candidate" }},
-		{"profile", func(r *Receipt) { r.Native.CapabilityHash = contenthash.Sum([]byte("another-profile")) }},
-		{"mechanism", func(r *Receipt) { r.Native.Mechanism = "another-mechanism" }},
+		{"version", func(r *workflowstate.Receipt) { r.Schema = "chr-workflow-receipt/v3" }},
+		{"missing", func(r *workflowstate.Receipt) { r.Native = nil }},
+		{"source", func(r *workflowstate.Receipt) { r.SourceCommit = r.ResultCommit }},
+		{"transaction", func(r *workflowstate.Receipt) { r.Native.TransactionProofRef.Hash = "" }},
+		{"observation", func(r *workflowstate.Receipt) { r.Native.ObservationRefs = nil }},
+		{"merge", func(r *workflowstate.Receipt) { r.Native.ActualMergeResult = r.SourceCommit }},
+		{"candidate", func(r *workflowstate.Receipt) { r.CandidateID = "another-candidate" }},
+		{"profile", func(r *workflowstate.Receipt) { r.Native.CapabilityHash = contenthash.Sum([]byte("another-profile")) }},
+		{"mechanism", func(r *workflowstate.Receipt) { r.Native.Mechanism = "another-mechanism" }},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -104,7 +104,7 @@ func TestNativeReceiptProof(t *testing.T) {
 	testNativeReceiptPending(t, store, original)
 }
 
-func testNativeReceiptPending(t *testing.T, store *Store, record Record) {
+func testNativeReceiptPending(t *testing.T, store *Store, record workflowstate.Record) {
 	t.Helper()
 
 	var observation workflowstate.NativePublicationObservation
@@ -135,7 +135,7 @@ func TestNativeReceiptLegacy(t *testing.T) {
 	r := workflowTestTask("legacy-receipt")
 	r.Kind, r.Task, r.Path = "receipt", nil, "run/legacy/evidence/delivery.json"
 	object := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	r.Receipt = &Receipt{Schema: WorkflowSchema, Unit: workflowstate.Ref{Kind: "ticket", ID: "legacy-task"}, CandidateID: "old-candidate", SubmissionID: "old-submission", Provider: "forgejo", Repository: "https://forge.example/team/project", PullRequest: "https://forge.example/team/project/pulls/1", Method: "rebase", SourceCommit: object, BaseCommit: object, PreparedTree: object, HistoryProof: "old-history", ResultCommit: object, VerifiedTree: object, ObservedTarget: object, VerificationRef: "old-proof", ValidationRefs: []string{"old-validation"}, ConfirmedAt: r.CreatedAt}
+	r.Receipt = &workflowstate.Receipt{Schema: workflowstate.WorkflowSchema, Unit: workflowstate.Ref{Kind: "ticket", ID: "legacy-task"}, CandidateID: "old-candidate", SubmissionID: "old-submission", Provider: "forgejo", Repository: "https://forge.example/team/project", PullRequest: "https://forge.example/team/project/pulls/1", Method: "rebase", SourceCommit: object, BaseCommit: object, PreparedTree: object, HistoryProof: "old-history", ResultCommit: object, VerifiedTree: object, ObservedTarget: object, VerificationRef: "old-proof", ValidationRefs: []string{"old-validation"}, ConfirmedAt: r.CreatedAt}
 
 	created, err := store.CreateReceipt(t.Context(), r)
 	if err != nil {
@@ -154,7 +154,7 @@ func TestNativeReceiptLegacy(t *testing.T) {
 	}
 
 	again, err := store.Read(t.Context(), created.Path)
-	if err != nil || again.Receipt.Native != nil || again.Receipt.Schema != WorkflowSchema {
+	if err != nil || again.Receipt.Native != nil || again.Receipt.Schema != workflowstate.WorkflowSchema {
 		t.Fatalf("historical receipt changed: %v", err)
 	}
 
@@ -170,7 +170,7 @@ func TestNativeReceiptLegacy(t *testing.T) {
 	assertNativeReceiptLegacyFields(t, again.Receipt)
 }
 
-func assertNativeReceiptLegacyFields(t *testing.T, receipt *Receipt) {
+func assertNativeReceiptLegacyFields(t *testing.T, receipt *workflowstate.Receipt) {
 	t.Helper()
 
 	encoded, err := json.Marshal(receipt)

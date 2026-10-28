@@ -37,7 +37,7 @@ func TestWorkflowTaskIndependent(t *testing.T) {
 	}
 }
 
-func workflowIndependentTask(t *testing.T, grouped Record) Record {
+func workflowIndependentTask(t *testing.T, grouped workflowstate.Record) workflowstate.Record {
 	t.Helper()
 
 	var contract generationcore.GeneratedWorkflowTask
@@ -54,5 +54,5 @@ func workflowIndependentTask(t *testing.T, grouped Record) Record {
 	task.Key, task.SetID, task.SliceID, task.UseCase, task.Order = "PRJ-90", "", "", "", 0
 	task.ContractHash = contenthash.Sum(append([]byte("\x00\x00"), data...))
 
-	return Record{Kind: "ticket", Task: &task, Body: grouped.Body, Domain: map[string]json.RawMessage{"execution_contract": data}}
+	return workflowstate.Record{Kind: "ticket", Task: &task, Body: grouped.Body, Domain: map[string]json.RawMessage{"execution_contract": data}}
 }

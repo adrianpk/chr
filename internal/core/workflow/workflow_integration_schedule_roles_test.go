@@ -29,7 +29,7 @@ func nativeRolePeer(t *testing.T, store *Store, namespace, key, target string) (
 		t.Fatal(err)
 	}
 
-	record := Record{Kind: "ticket", Task: &Task{Schema: WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := workflowstate.Record{Kind: "ticket", Task: &workflowstate.Task{Schema: workflowstate.WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	record, err = peer.Create(t.Context(), "Independent task", record)
 	if err != nil {

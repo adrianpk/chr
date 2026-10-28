@@ -7,6 +7,7 @@ import (
 
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type harnessJourneyChoice struct{ transport, worker, generation string }
@@ -80,7 +81,7 @@ func (f *harnessJourney) checkAdmission(t *testing.T, index int, choice harnessJ
 	task := *f.record.Task
 
 	task.Key = fmt.Sprintf("PRJ-%d", 91+index)
-	if _, err := store.Create(t.Context(), "Independent role combination", workflowcore.Record{Kind: "ticket", Task: &task, Domain: f.record.Domain, Body: f.record.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Independent role combination", workflowstate.Record{Kind: "ticket", Task: &task, Domain: f.record.Domain, Body: f.record.Body}); err != nil {
 		t.Fatal(err)
 	}
 

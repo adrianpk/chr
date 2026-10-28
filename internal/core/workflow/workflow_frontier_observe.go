@@ -10,7 +10,7 @@ import (
 
 type workflowFrontierUnit struct {
 	Run       workflowInvocationFile
-	Receipt   Record
+	Receipt   workflowstate.Record
 	Candidate SliceCandidate
 }
 
@@ -101,6 +101,6 @@ func observeWorkflowFrontierProof(ctx context.Context, unit workflowFrontierUnit
 	return proof, nil
 }
 
-func workflowFrontierReceiptProofMatches(proof workflowstate.IntegrationProof, receipt Record, target workflowstate.PreviewTarget) bool {
+func workflowFrontierReceiptProofMatches(proof workflowstate.IntegrationProof, receipt workflowstate.Record, target workflowstate.PreviewTarget) bool {
 	return proof.ObservedTarget == target.Commit && proof.HistoryHash == receipt.Receipt.HistoryProof && proof.VerifiedTree == receipt.Receipt.VerifiedTree
 }

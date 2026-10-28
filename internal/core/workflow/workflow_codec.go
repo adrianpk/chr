@@ -13,27 +13,27 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func readWorkflowEnvelope(path string) (Record, error) {
+func readWorkflowEnvelope(path string) (workflowstate.Record, error) {
 	data, err := opsfile.Read(path)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
-	r := Record{Metadata: map[string]json.RawMessage{}}
+	r := workflowstate.Record{Metadata: map[string]json.RawMessage{}}
 	if err := json.Unmarshal(data, &r.Metadata); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if _, ok := r.Metadata["type"]; !ok {
-		return Record{}, workflowstate.ErrNotWorkflow
+		return workflowstate.Record{}, workflowstate.ErrNotWorkflow
 	}
 
 	if err := json.Unmarshal(data, &r.Identity); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := json.Unmarshal(r.Metadata["type"], &r.Kind); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	r.SourceHash = contenthash.Sum(data)
@@ -41,10 +41,10 @@ func readWorkflowEnvelope(path string) (Record, error) {
 	return r, nil
 }
 
-func (s *Store) readRecord(relative string) (Record, error) {
+func (s *Store) readRecord(relative string) (workflowstate.Record, error) {
 	path, err := s.safePath(relative)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if strings.HasSuffix(path, ".md") {
@@ -53,26 +53,26 @@ func (s *Store) readRecord(relative string) (Record, error) {
 
 	r, err := readWorkflowEnvelope(path)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if _, ok := r.Metadata["workflow"]; !ok {
-		return Record{}, workflowstate.ErrNotWorkflow
+		return workflowstate.Record{}, workflowstate.ErrNotWorkflow
 	}
 
 	var schema string
 	if err := json.Unmarshal(r.Metadata["schema_version"], &schema); err != nil || schema != "ops-layout/v1" {
-		return Record{}, fmt.Errorf("unsupported workflow envelope schema")
+		return workflowstate.Record{}, fmt.Errorf("unsupported workflow envelope schema")
 	}
 
 	if err := decodeWorkflowDomain(&r, r.Metadata["workflow"]); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if filepath.Base(path) == "metadata.json" {
 		r.Body, err = opsfile.Read(filepath.Join(filepath.Dir(path), "artifact.md"))
 		if err != nil {
-			return Record{}, err
+			return workflowstate.Record{}, err
 		}
 
 		r.SourceHash += ":" + contenthash.Sum(r.Body)
@@ -83,7 +83,7 @@ func (s *Store) readRecord(relative string) (Record, error) {
 	return r, s.validateWorkflowReadRecord(r)
 }
 
-func decodeWorkflowDomain(r *Record, data []byte) error {
+func decodeWorkflowDomain(r *workflowstate.Record, data []byte) error {
 	r.Domain = map[string]json.RawMessage{}
 	if err := json.Unmarshal(data, &r.Domain); err != nil {
 		return err
@@ -91,7 +91,7 @@ func decodeWorkflowDomain(r *Record, data []byte) error {
 
 	switch r.Kind {
 	case "ticket":
-		r.Task = &Task{}
+		r.Task = &workflowstate.Task{}
 
 		return json.Unmarshal(data, r.Task)
 	case "plan":
@@ -99,7 +99,7 @@ func decodeWorkflowDomain(r *Record, data []byte) error {
 
 		return json.Unmarshal(data, r.Set)
 	case "receipt":
-		r.Receipt = &Receipt{}
+		r.Receipt = &workflowstate.Receipt{}
 
 		return json.Unmarshal(data, r.Receipt)
 	}
@@ -107,7 +107,7 @@ func decodeWorkflowDomain(r *Record, data []byte) error {
 	return fmt.Errorf("unsupported workflow record kind: %s", r.Kind)
 }
 
-func workflowDomainValue(r Record) any {
+func workflowDomainValue(r workflowstate.Record) any {
 	if r.Task != nil {
 		return *r.Task
 	}
@@ -157,7 +157,7 @@ func mergeWorkflowFields(old map[string]json.RawMessage, value any) (map[string]
 	return result, nil
 }
 
-func encodeWorkflowRecord(r Record) ([]byte, error) {
+func encodeWorkflowRecord(r workflowstate.Record) ([]byte, error) {
 	if strings.HasSuffix(r.Path, ".md") {
 		return encodeWorkflowMarkdown(r)
 	}
@@ -189,7 +189,7 @@ func encodeWorkflowRecord(r Record) ([]byte, error) {
 	return append(data, '\n'), err
 }
 
-func preserveWorkflowSetFields(domain map[string]json.RawMessage, r Record) error {
+func preserveWorkflowSetFields(domain map[string]json.RawMessage, r workflowstate.Record) error {
 	if r.Set == nil {
 		return nil
 	}
@@ -214,7 +214,7 @@ func preserveWorkflowSetFields(domain map[string]json.RawMessage, r Record) erro
 	return preserveWorkflowSliceFields(domain, r)
 }
 
-func preserveWorkflowSliceFields(domain map[string]json.RawMessage, r Record) error {
+func preserveWorkflowSliceFields(domain map[string]json.RawMessage, r workflowstate.Record) error {
 	oldSlices := []map[string]json.RawMessage{}
 	if raw, ok := r.Domain["slices"]; ok {
 		if err := json.Unmarshal(raw, &oldSlices); err != nil {
@@ -246,12 +246,12 @@ func preserveWorkflowSliceFields(domain map[string]json.RawMessage, r Record) er
 	return err
 }
 
-func (s *Store) validateWorkflowReadRecord(r Record) error {
+func (s *Store) validateWorkflowReadRecord(r workflowstate.Record) error {
 	if r.Receipt != nil {
 		if err := s.checkWorkflowNativeReceipt(r); err != nil {
 			return err
 		}
 	}
 
-	return r.Validate()
+	return validateWorkflowRecord(r)
 }

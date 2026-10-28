@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowNativeReceipt(ctx context.Context, receipt Record, provider PullRequestProvider, git IntegrationGit) (workflowstate.NativePublicationObservation, error) {
+func (s *Store) observeWorkflowNativeReceipt(ctx context.Context, receipt workflowstate.Record, provider PullRequestProvider, git IntegrationGit) (workflowstate.NativePublicationObservation, error) {
 	observer, ok := provider.(NativePublicationObserver)
 	if !ok || git == nil {
 		return workflowstate.NativePublicationObservation{}, workflowstate.ErrAtomicGuard
@@ -21,7 +21,7 @@ func (s *Store) observeWorkflowNativeReceipt(ctx context.Context, receipt Record
 	return observeWorkflowNativeBounded(ctx, observer, binding, git)
 }
 
-func (s *Store) workflowNativeReceiptBinding(receipt Record) (workflowstate.NativePublicationBinding, error) {
+func (s *Store) workflowNativeReceiptBinding(receipt workflowstate.Record) (workflowstate.NativePublicationBinding, error) {
 	var binding workflowstate.NativePublicationBinding
 	if receipt.Receipt == nil || receipt.Receipt.Native == nil {
 		return binding, workflowstate.ErrConflict

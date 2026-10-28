@@ -9,7 +9,7 @@ import (
 )
 
 func validateWorkflowInvocation(run workflowInvocationFile) error {
-	if err := (Record{Identity: run.Identity}).validateIdentity(); err != nil {
+	if err := validateWorkflowRecordIdentity((workflowstate.Record{Identity: run.Identity})); err != nil {
 		return err
 	}
 

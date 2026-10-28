@@ -59,7 +59,7 @@ func (s *Store) freezeWorkflowSets(ctx context.Context, run *workflowInvocationF
 	return nil
 }
 
-func workflowFrozenSetMatches(set Record, selector workflowstate.Selector, memberSets map[string]bool) bool {
+func workflowFrozenSetMatches(set workflowstate.Record, selector workflowstate.Selector, memberSets map[string]bool) bool {
 	if selector.Extent == "slice_set" {
 		return set.ID == selector.Identity && set.Set.Status != "completed"
 	}
@@ -120,7 +120,7 @@ func (s *Store) checkWorkflowInputsPrepared(ctx context.Context, run workflowInv
 	return s.checkWorkflowSetImages(run)
 }
 
-func workflowMemberImageMatches(record Record, input Member, identity workflowstate.Identity) bool {
+func workflowMemberImageMatches(record workflowstate.Record, input Member, identity workflowstate.Identity) bool {
 	if record.ProjectID != identity.ProjectID || record.Namespace != identity.Namespace || record.Task == nil {
 		return false
 	}
@@ -147,7 +147,7 @@ func (s *Store) checkWorkflowSetImages(run workflowInvocationFile) error {
 	return nil
 }
 
-func validateWorkflowClaimContract(record Record) error {
+func validateWorkflowClaimContract(record workflowstate.Record) error {
 	contract := generationcore.GeneratedWorkflowTask{}
 	if err := json.Unmarshal(record.Domain["execution_contract"], &contract); err != nil {
 		return fmt.Errorf("task requires a complete execution contract: %w", err)
@@ -181,7 +181,7 @@ func (s *Store) checkWorkflowTarget(ctx context.Context, target workflowstate.Pr
 	return s.checkWorkflowCoordinatorTarget(ctx, target)
 }
 
-func guardWorkflowClaimImages(record Record, files []workflowstate.FileChange) error {
+func guardWorkflowClaimImages(record workflowstate.Record, files []workflowstate.FileChange) error {
 	observed := strings.Split(record.SourceHash, ":")
 	if len(files) != len(observed) {
 		return workflowstate.ErrConflict

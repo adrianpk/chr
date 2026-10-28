@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowTicketFixture(t *testing.T, extent string, gate workflowstate.Validation) (*Store, Record, StartRequest) {
+func workflowTicketFixture(t *testing.T, extent string, gate workflowstate.Validation) (*Store, workflowstate.Record, StartRequest) {
 	t.Helper()
 
 	store := workflowTestStore(t)
@@ -25,7 +25,7 @@ func workflowTicketFixture(t *testing.T, extent string, gate workflowstate.Valid
 		t.Fatal(err)
 	}
 
-	record := Record{Kind: "ticket", Task: &Task{Schema: WorkflowSchema, Key: "PRJ-90", Status: string(ticketcore.StatusReadyForDev), Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
+	record := workflowstate.Record{Kind: "ticket", Task: &workflowstate.Task{Schema: workflowstate.WorkflowSchema, Key: "PRJ-90", Status: string(ticketcore.StatusReadyForDev), Phase: "pending", ContractHash: contenthash.Sum(append([]byte("\x00\x00"), data...))}, Body: []byte(contract.Body), Domain: map[string]json.RawMessage{"execution_contract": data}}
 
 	record, err = store.Create(t.Context(), "Independent task", record)
 	if err != nil {
@@ -74,7 +74,7 @@ func TestWorkflowTicketCandidate(t *testing.T) {
 	}
 }
 
-func checkWorkflowTicketCandidate(t *testing.T, store *Store, record Record, id string, candidate SliceCandidate) {
+func checkWorkflowTicketCandidate(t *testing.T, store *Store, record workflowstate.Record, id string, candidate SliceCandidate) {
 	t.Helper()
 
 	data, err := json.Marshal(candidate)
@@ -117,7 +117,7 @@ func workflowTicketPreparationFixture(t *testing.T, method, extent string) (work
 	return workflowTicketConfiguredFixture(t, method, extent, nil)
 }
 
-func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup func(*Store, Record, *StartRequest)) (workflowPreparationFixture, StartRequest) {
+func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup func(*Store, workflowstate.Record, *StartRequest)) (workflowPreparationFixture, StartRequest) {
 	t.Helper()
 
 	gate := workflowPreparationGate("test -f result.txt && if test -f target.txt; then printf combined; else printf source; fi")
@@ -159,7 +159,7 @@ func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup 
 
 	provider.pr.BaseCommit, provider.target = base, base
 
-	f := workflowPreparationFixture{store: store, hierarchy: MaterializationResult{Tasks: []Record{record}}, run: workflowTestRead(t, store, run.ID), provider: provider, git: NewWorkflowPreparationGit(pr.Repository, remote), actor: actor, remote: remote, base: base}
+	f := workflowPreparationFixture{store: store, hierarchy: MaterializationResult{Tasks: []workflowstate.Record{record}}, run: workflowTestRead(t, store, run.ID), provider: provider, git: NewWorkflowPreparationGit(pr.Repository, remote), actor: actor, remote: remote, base: base}
 
 	return f, request
 }
@@ -259,6 +259,6 @@ func workflowTicketReviewConfig(t *testing.T, store *Store, method string, mode 
 	writeWorkflowTestConfigValue(t, store.layout.ProjectDir(), "work", "merge_strategy", method)
 }
 
-func workflowTicketReceiptMatches(record *Record, unit workflowstate.Ref, method string) bool {
+func workflowTicketReceiptMatches(record *workflowstate.Record, unit workflowstate.Ref, method string) bool {
 	return record != nil && record.Receipt != nil && record.Receipt.Unit == unit && record.Receipt.Method == method
 }

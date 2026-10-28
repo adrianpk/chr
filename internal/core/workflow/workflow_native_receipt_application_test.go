@@ -56,7 +56,7 @@ func TestNativeReceiptApplication(t *testing.T) {
 	checkNativeReceiptDelivery(t, f, submission, receipt, err)
 }
 
-func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission) Record {
+func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission) workflowstate.Record {
 	t.Helper()
 
 	run, err := f.store.readWorkflowInvocation(submission.InvocationID)

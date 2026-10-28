@@ -15,7 +15,7 @@ import (
 // Queue members retain shared readiness and native slice/task order.
 type WorkObservation struct {
 	Tickets     []ticketcore.Indexed
-	Records     []Record
+	Records     []workflowstate.Record
 	Invocations []Invocation
 	Queue       []PreviewMember
 	Excluded    map[string]int
@@ -60,7 +60,7 @@ func (s *Store) InspectWorkflowWork(ctx context.Context, target workflowstate.Pr
 
 func (s *Store) observeWorkflowQueues(ctx context.Context, selection workflowSelection, target workflowstate.PreviewTarget, observation *WorkObservation) error {
 	sets := slices.Collect(maps.Values(selection.sets))
-	slices.SortFunc(sets, func(a, b Record) int {
+	slices.SortFunc(sets, func(a, b workflowstate.Record) int {
 		if a.CreatedAt.Before(b.CreatedAt) {
 			return -1
 		}

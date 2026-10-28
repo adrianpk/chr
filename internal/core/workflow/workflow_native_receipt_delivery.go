@@ -16,7 +16,7 @@ import (
 // ConfirmWorkflowNativeReceipt seals delivery from retained host evidence for
 // the exact submission and latest original-PR observation. It performs no remote
 // mutation or task fanout; retries preserve the first immutable receipt bytes.
-func (s *Store) ConfirmWorkflowNativeReceipt(ctx context.Context, guard IntegrationBudgetGuard) (receipt Record, err error) {
+func (s *Store) ConfirmWorkflowNativeReceipt(ctx context.Context, guard IntegrationBudgetGuard) (receipt workflowstate.Record, err error) {
 	err = s.withLock(ctx, func() error {
 		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if readErr != nil {
@@ -31,31 +31,31 @@ func (s *Store) ConfirmWorkflowNativeReceipt(ctx context.Context, guard Integrat
 	return receipt, err
 }
 
-func (s *Store) confirmWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, guard IntegrationBudgetGuard) (Record, error) {
+func (s *Store) confirmWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, guard IntegrationBudgetGuard) (workflowstate.Record, error) {
 	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, guard)
 
 	entry, budget := budgetObservation.Entry, budgetObservation.Budget
 
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := guardWorkflowIntegrationBudget(run, entry, budget, guard); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if err != nil || len(journal.Attempts) == 0 {
-		return Record{}, errorsOrConflict(err)
+		return workflowstate.Record{}, errorsOrConflict(err)
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.Native == nil || !workflowNativeSubmissionEntryMatches(last, entry) {
-		return Record{}, workflowstate.ErrConflict
+		return workflowstate.Record{}, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, last); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	receipt, err := s.retainWorkflowNativeReceipt(ctx, run, last)
@@ -75,12 +75,12 @@ func (s *Store) confirmWorkflowNativeReceipt(ctx context.Context, run workflowIn
 	return receipt, nil
 }
 
-func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission) (Record, error) {
+func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission) (workflowstate.Record, error) {
 	receiptEvidence, err := s.workflowNativeReceiptObservation(submission)
 	observation, ref := receiptEvidence.Observation, receiptEvidence.Ref
 
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	record, err := s.readRecord(workflowNativeReceiptPath(run, submission))
@@ -128,10 +128,10 @@ func workflowNativeReceiptPath(run workflowInvocationFile, submission workflowst
 	return filepath.ToSlash(filepath.Join("run", run.ID, "evidence", workflowNativeReceiptID(run, submission)+".json"))
 }
 
-func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission workflowstate.Submission, observation workflowstate.NativePublicationObservation, ref workflowstate.EvidenceRef) (Record, error) {
+func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission workflowstate.Submission, observation workflowstate.NativePublicationObservation, ref workflowstate.EvidenceRef) (workflowstate.Record, error) {
 	reference, err := workflowforge.ParseReference(submission.Native.CanonicalPR)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	native, git := submission.Native, *observation.Git
@@ -140,23 +140,23 @@ func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission wor
 
 	facts.GitApplicationRef, err = s.workflowNativeReceiptApplication(submission)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	now := time.Now().UTC()
 
-	receipt := &Receipt{Schema: workflowNativeReceiptSchema, Native: facts, Unit: submission.Unit, CandidateID: submission.CandidateID, SubmissionID: submission.ID, Provider: string(reference.Provider), Repository: git.Repository, PullRequest: native.CanonicalPR, Method: git.Method, SourceCommit: native.OriginalSource, BaseCommit: native.ValidatedBase, PreparedTree: git.PreparedTree, HistoryProof: git.HistoryHash, ResultCommit: git.ResultCommit, VerifiedTree: git.VerifiedTree, ObservedTarget: git.ObservedTarget, VerificationRef: ref.Path, ValidationRefs: []string{native.CandidateRef.Path}, ConfirmedAt: now}
+	receipt := &workflowstate.Receipt{Schema: workflowNativeReceiptSchema, Native: facts, Unit: submission.Unit, CandidateID: submission.CandidateID, SubmissionID: submission.ID, Provider: string(reference.Provider), Repository: git.Repository, PullRequest: native.CanonicalPR, Method: git.Method, SourceCommit: native.OriginalSource, BaseCommit: native.ValidatedBase, PreparedTree: git.PreparedTree, HistoryProof: git.HistoryHash, ResultCommit: git.ResultCommit, VerifiedTree: git.VerifiedTree, ObservedTarget: git.ObservedTarget, VerificationRef: ref.Path, ValidationRefs: []string{native.CandidateRef.Path}, ConfirmedAt: now}
 	for _, validation := range native.ValidationRefs {
 		receipt.ValidationRefs = append(receipt.ValidationRefs, validation.Path)
 	}
 
 	identity := workflowstate.Identity{ID: workflowNativeReceiptID(run, submission), ProjectID: run.ProjectID, Namespace: run.Namespace, Revision: 1, CreatedAt: now, UpdatedAt: now}
-	record := Record{Identity: identity, Kind: "receipt", Path: workflowNativeReceiptPath(run, submission), Receipt: receipt}
+	record := workflowstate.Record{Identity: identity, Kind: "receipt", Path: workflowNativeReceiptPath(run, submission), Receipt: receipt}
 
-	return record, record.Validate()
+	return record, validateWorkflowRecord(record)
 }
 
-func (s *Store) checkWorkflowNativeRetainedReceipt(run workflowInvocationFile, submission workflowstate.Submission, record Record) error {
+func (s *Store) checkWorkflowNativeRetainedReceipt(run workflowInvocationFile, submission workflowstate.Submission, record workflowstate.Record) error {
 	if record.ID != workflowNativeReceiptID(run, submission) || record.ProjectID != run.ProjectID || record.Namespace != run.Namespace || !workflowNativeSubmissionReceiptMatches(submission, record) {
 		return workflowstate.ErrConflict
 	}

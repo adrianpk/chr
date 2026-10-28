@@ -95,7 +95,7 @@ func preparePiProjectContext(t *testing.T, operations service) string {
 	return strings.TrimSpace(string(output))
 }
 
-func clonePiIsolationTicket(t *testing.T, operations service, original workflowcore.Record, key string) string {
+func clonePiIsolationTicket(t *testing.T, operations service, original workflowstate.Record, key string) string {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -118,7 +118,7 @@ func clonePiIsolationTicket(t *testing.T, operations service, original workflowc
 	}
 
 	task.ContractHash = authoringcore.WorkflowContentHash(append([]byte("\x00\x00"), data...))
-	if _, err := store.Create(t.Context(), "Independent Pi isolation task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: map[string]json.RawMessage{"execution_contract": data}, Body: original.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Independent Pi isolation task", workflowstate.Record{Kind: "ticket", Task: &task, Domain: map[string]json.RawMessage{"execution_contract": data}, Body: original.Body}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -191,7 +191,7 @@ func checkPiIsolationCapacity(t *testing.T, operations service, available int) {
 	}
 }
 
-func checkPiIsolationOverflow(t *testing.T, operations service, original workflowcore.Record, target string) {
+func checkPiIsolationOverflow(t *testing.T, operations service, original workflowstate.Record, target string) {
 	t.Helper()
 
 	harnessSelectionWrite(t, filepath.Join(operations.env.ConfigDir(), "harnesses.yml"), "profiles:\n  worker:\n    harness: codex\n    command: sh\n")

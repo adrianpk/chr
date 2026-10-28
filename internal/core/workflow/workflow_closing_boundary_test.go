@@ -63,12 +63,12 @@ func TestWorkflowClosingChanges(t *testing.T) {
 // one frozen invocation. Unsliced work stays excluded and no task worker runs.
 func TestWorkflowClosingUseCase(t *testing.T) {
 	fixture := workflowDeliveryFixture(t, "rebase")
-	sets := []Record{}
+	sets := []workflowstate.Record{}
 
 	for _, order := range []int{2, 1} {
 		plan := workflowPlanFixture()
 
-		set, err := fixture.store.Create(t.Context(), "Ordered empty set", Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", UseCase: "empty-case", UseCaseOrder: order, PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{WaiverReason: "Approved ordered empty-set closure"}}})
+		set, err := fixture.store.Create(t.Context(), "Ordered empty set", workflowstate.Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: workflowstate.WorkflowSchema, Status: "ready", UseCase: "empty-case", UseCaseOrder: order, PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{WaiverReason: "Approved ordered empty-set closure"}}})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -122,7 +122,7 @@ func TestWorkflowClosingReopen(t *testing.T) {
 	checkWorkflowClosingReopen(t, fixture, changed.Set, closed, before, receipt)
 }
 
-func checkWorkflowClosingReopen(t *testing.T, fixture workflowIntegrationFixture, reopened Record, closed SetClosureResult, before, receipt []byte) {
+func checkWorkflowClosingReopen(t *testing.T, fixture workflowIntegrationFixture, reopened workflowstate.Record, closed SetClosureResult, before, receipt []byte) {
 	t.Helper()
 
 	if reopened.Set.Status != "ready" || reopened.Set.ClosureRef != "" || len(reopened.Set.ClosureHistory) != 1 || reopened.Set.ClosureHistory[0] != closed.ReceiptRef {

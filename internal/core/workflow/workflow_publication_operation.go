@@ -50,7 +50,7 @@ type workflowNativeDispatchEvidence struct {
 // It does not assert that finalization or a receipt transaction succeeded.
 type workflowNativeFinalization struct {
 	Handled bool
-	Receipt Record
+	Receipt workflowstate.Record
 }
 
 type workflowNativeRetention struct {
@@ -66,7 +66,7 @@ type workflowNativeReceiptEvidence struct {
 // Observed preserves the existing publication barrier even on proof errors.
 // Only Receipt carries successful finalization evidence.
 type workflowPublicationCheckpoint struct {
-	Receipt  *Record
+	Receipt  *workflowstate.Record
 	Observed bool
 }
 

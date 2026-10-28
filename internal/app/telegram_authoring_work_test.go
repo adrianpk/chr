@@ -15,7 +15,6 @@ import (
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -128,7 +127,7 @@ func telegramAuthoringWorkCheckRecord(t *testing.T, operations service, result A
 	telegramAuthoringWorkCheckProvenance(t, record, result)
 }
 
-func telegramAuthoringWorkCheckProvenance(t *testing.T, record workflowcore.Record, result AuthoringWorkResult) {
+func telegramAuthoringWorkCheckProvenance(t *testing.T, record workflowstate.Record, result AuthoringWorkResult) {
 	t.Helper()
 
 	var scope authoringcore.WorkScope

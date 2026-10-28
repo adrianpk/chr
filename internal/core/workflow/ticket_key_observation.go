@@ -93,7 +93,7 @@ func (r *ticketKeyObserver) observedTicketNumber(path string) (int, error) {
 		return 0, err
 	}
 
-	var task Task
+	var task workflowstate.Task
 	if raw, present := metadata.Metadata["workflow"]; present {
 		if err := json.Unmarshal(raw, &task); err != nil {
 			return 0, err

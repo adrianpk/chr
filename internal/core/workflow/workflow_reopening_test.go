@@ -53,7 +53,7 @@ func TestWorkflowReopening(t *testing.T) {
 	}
 }
 
-func checkWorkflowReopeningClosure(t *testing.T, store *Store, changed MaterializationResult, closed Record, closure, plan []byte) {
+func checkWorkflowReopeningClosure(t *testing.T, store *Store, changed MaterializationResult, closed workflowstate.Record, closure, plan []byte) {
 	t.Helper()
 
 	if changed.Set.Set.Status != "ready" || changed.Set.Set.ClosureRef != "" || len(changed.Set.Set.ClosureHistory) != 1 || changed.Set.Set.ClosureHistory[0] != closed.Set.ClosureRef {
@@ -82,7 +82,7 @@ func checkWorkflowReopeningTerminal(t *testing.T, store *Store, request StartReq
 	}
 }
 
-func workflowRetainPriorClosure(t *testing.T, store *Store, set Record) Record {
+func workflowRetainPriorClosure(t *testing.T, store *Store, set workflowstate.Record) workflowstate.Record {
 	t.Helper()
 
 	// This fixture represents a prior immutable closure. The closing gate and

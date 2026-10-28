@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // CloseWorkflowSet shares set-owned closing validation across operation adapters.
-func (s service) CloseWorkflowSet(ctx context.Context, request workflowcore.SetClosureRequest) (workflowcore.SetClosureResult, error) {
+func (s service) CloseWorkflowSet(ctx context.Context, request workflowcloseout.Request) (workflowcore.SetClosureResult, error) {
 	store, err := s.workflowStore()
 	if err != nil {
 		return workflowcore.SetClosureResult{}, err
@@ -31,10 +32,10 @@ func (s service) CloseWorkflowSet(ctx context.Context, request workflowcore.SetC
 }
 
 // ReconcileWorkflowClosing recovers a dead set-closing owner without rerunning work.
-func (s service) ReconcileWorkflowClosing(ctx context.Context, path string) (workflowcore.Record, error) {
+func (s service) ReconcileWorkflowClosing(ctx context.Context, path string) (workflowstate.Record, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	return store.ReconcileWorkflowClosing(ctx, path)

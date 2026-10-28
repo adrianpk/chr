@@ -340,7 +340,7 @@ func (s *Store) confirmWorkflowNativeSubmission(_ context.Context, submission *w
 	return validateWorkflowSubmissionProof(*submission)
 }
 
-func workflowNativeSubmissionReceiptMatches(submission workflowstate.Submission, record Record) bool {
+func workflowNativeSubmissionReceiptMatches(submission workflowstate.Submission, record workflowstate.Record) bool {
 	receipt, native := record.Receipt, submission.Native
 
 	return receipt != nil && receipt.Native != nil && receipt.SubmissionID == submission.ID && receipt.Native.CandidateRef == native.CandidateRef && receipt.Native.TransactionProofRef == *native.TransportResponseRef && receipt.Native.CandidateHash == native.CandidateHash

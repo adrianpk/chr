@@ -65,7 +65,7 @@ func (s service) StartTelegramWork(ctx context.Context, target telegramcore.Oper
 
 // ReadTelegramWorkConfirmation reads the exact selected source and contract images
 // through the existing scoped workflow owner, without changing readiness.
-func (s service) ReadTelegramWorkConfirmation(ctx context.Context, target telegramcore.OperationTarget, preview WorkflowBoundPreview) ([]workflowcore.Record, error) {
+func (s service) ReadTelegramWorkConfirmation(ctx context.Context, target telegramcore.OperationTarget, preview WorkflowBoundPreview) ([]workflowstate.Record, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return nil, err

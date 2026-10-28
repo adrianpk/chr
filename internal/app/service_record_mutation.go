@@ -109,14 +109,14 @@ func (s service) prepareNativeRecordUpdate(ctx context.Context, store *workflowc
 	return workflowcore.MutationRequest{Binding: binding, Record: record, ExpectedRevision: request.ExpectedRevision}, err
 }
 
-func (s service) nativeMutationTarget(ctx context.Context, store *workflowcore.Store, kind RecordKind, identity string) (workflowcore.Record, error) {
+func (s service) nativeMutationTarget(ctx context.Context, store *workflowcore.Store, kind RecordKind, identity string) (workflowstate.Record, error) {
 	if !validRecordIdentity(identity) {
-		return workflowcore.Record{}, errors.New("an exact record identity is required")
+		return workflowstate.Record{}, errors.New("an exact record identity is required")
 	}
 
 	snapshot, err := store.Snapshot(ctx)
 	if err != nil {
-		return workflowcore.Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	for _, record := range snapshot.Records {
@@ -129,10 +129,10 @@ func (s service) nativeMutationTarget(ctx context.Context, store *workflowcore.S
 		}
 	}
 
-	return workflowcore.Record{}, fmt.Errorf("%w: native record is absent; unadopted records require their explicit owner", ErrRecordUnsupported)
+	return workflowstate.Record{}, fmt.Errorf("%w: native record is absent; unadopted records require their explicit owner", ErrRecordUnsupported)
 }
 
-func guardRecordObservation(record workflowcore.Record, request RecordMutationRequest) error {
+func guardRecordObservation(record workflowstate.Record, request RecordMutationRequest) error {
 	if request.ExpectedRevision == 0 || request.ExpectedHash == "" || record.Revision != request.ExpectedRevision || record.SourceHash != request.ExpectedHash {
 		return workflowstate.ErrConflict
 	}
@@ -174,7 +174,7 @@ func unsupportedRecordDisplayPatch(request RecordMutationRequest) bool {
 	return request.Body != nil || request.Context != nil || request.Slice != nil || request.Validation != nil || request.PlanRef != "" || request.PlanHash != "" || request.UseCase != "" || request.ParentID != ""
 }
 
-func applyNativeRecordDisplay(record workflowcore.Record, request RecordMutationRequest) (workflowcore.Record, error) {
+func applyNativeRecordDisplay(record workflowstate.Record, request RecordMutationRequest) (workflowstate.Record, error) {
 	if record.Task != nil {
 		return workflowcore.UpdateWorkflowTicketDisplay(record, request.Title, request.Synopsis)
 	}
@@ -209,7 +209,7 @@ func validatePreparedRecordOwner(prepared PreparedRecordMutation) error {
 	return validatePreparedNativeKind(prepared.Kind, prepared.Native.Record)
 }
 
-func validatePreparedNativeKind(kind RecordKind, record workflowcore.Record) error {
+func validatePreparedNativeKind(kind RecordKind, record workflowstate.Record) error {
 	if kind == RecordTicket && record.Task != nil && record.Kind == "ticket" {
 		return nil
 	}

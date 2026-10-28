@@ -51,7 +51,7 @@ func workflowTestIndex(t *testing.T, path string) Index {
 	return workflow
 }
 
-func workflowTestGroupedTask(t *testing.T, store *Store, setID, key string, order int) Record {
+func workflowTestGroupedTask(t *testing.T, store *Store, setID, key string, order int) workflowstate.Record {
 	t.Helper()
 
 	r := workflowTestTask(key)
@@ -169,7 +169,7 @@ func TestWorkflowBounds(t *testing.T) {
 		t.Fatal("invalid admission allocated a partial envelope")
 	}
 
-	if err := (Snapshot{Records: make([]Record, workflowstate.RecordLimit+1)}).Validate(); err == nil {
+	if err := validateWorkflowSnapshot((workflowstate.Snapshot{Records: make([]workflowstate.Record, workflowstate.RecordLimit+1)})); err == nil {
 		t.Fatal("namespace record bound was ignored")
 	}
 }

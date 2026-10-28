@@ -143,8 +143,8 @@ func validateWorkflowNativeCandidate(candidate workflowstate.IntegrationCandidat
 	return nil
 }
 
-func validateWorkflowReceiptSchema(receipt Receipt) error {
-	if receipt.Schema == WorkflowSchema && receipt.Native == nil {
+func validateWorkflowReceiptSchema(receipt workflowstate.Receipt) error {
+	if receipt.Schema == workflowstate.WorkflowSchema && receipt.Native == nil {
 		return nil
 	}
 
@@ -155,7 +155,7 @@ func validateWorkflowReceiptSchema(receipt Receipt) error {
 	return validateWorkflowNativeReceiptSchema(receipt)
 }
 
-func validateWorkflowNativeReceiptSchema(receipt Receipt) error {
+func validateWorkflowNativeReceiptSchema(receipt workflowstate.Receipt) error {
 	native := receipt.Native
 	if err := validateWorkflowNativeRecordBinding(native.NativeRecordBinding); err != nil {
 		return err
@@ -206,7 +206,7 @@ func workflowNativeCandidateSourceMatches(candidate workflowstate.IntegrationCan
 	return expected == actual
 }
 
-func workflowNativeReceiptOwnerMatches(receipt Receipt) bool {
+func workflowNativeReceiptOwnerMatches(receipt workflowstate.Receipt) bool {
 	native := receipt.Native
 	if native.Mechanism != "" && native.Mechanism != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		return false

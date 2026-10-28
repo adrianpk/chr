@@ -64,7 +64,7 @@ func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, 
 	return p.pr, err
 }
 
-func serviceWorkNativeFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, workflowcore.Record, workflowcore.StartRequest, *serviceWorkEntryProvider) {
+func serviceWorkNativeFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, workflowstate.Record, workflowcore.StartRequest, *serviceWorkEntryProvider) {
 	t.Helper()
 
 	operations, record, request := serviceWorkflowTicketFixture(t, plans...)

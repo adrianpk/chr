@@ -34,7 +34,7 @@ func (s *Store) loadWorkflowManualTask(ctx context.Context, claim *Claim, execut
 	return prepared, err
 }
 
-func (s *Store) loadWorkflowManualInput(run workflowInvocationFile, record Record, execute bool) (workflowPreparedTask, error) {
+func (s *Store) loadWorkflowManualInput(run workflowInvocationFile, record workflowstate.Record, execute bool) (workflowPreparedTask, error) {
 	attempt := run.Attempts[len(run.Attempts)-1]
 
 	prepared, err := s.readWorkflowManualInput(attempt)

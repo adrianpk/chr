@@ -212,7 +212,7 @@ func (s *Store) appendWorkflowIntegrationClosingOwners(ctx context.Context, resu
 	return nil
 }
 
-func (s *Store) appendWorkflowIntegrationClosingOwner(result *IntegrationCapacity, slots map[int]bool, set Record) error {
+func (s *Store) appendWorkflowIntegrationClosingOwner(result *IntegrationCapacity, slots map[int]bool, set workflowstate.Record) error {
 	for i := range set.Set.Closing.Attempts {
 		state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, i, workflowClosingEvidence{store: s})
 		if err != nil {
@@ -307,7 +307,7 @@ func (s *Store) QueryWorkflowIntegrationSetClosure(ctx context.Context, setPath 
 	return status, integrationRecordError(setPath, err)
 }
 
-func (s *Store) workflowIntegrationClosureStatus(ctx context.Context, snapshot workflowIntegrationSnapshot, set Record) (IntegrationClosureStatus, error) {
+func (s *Store) workflowIntegrationClosureStatus(ctx context.Context, snapshot workflowIntegrationSnapshot, set workflowstate.Record) (IntegrationClosureStatus, error) {
 	status := IntegrationClosureStatus{}
 	if err := s.checkWorkflowIntegrationSetReceipts(ctx, set); err != nil {
 		status.Blockers = append(status.Blockers, "unit_receipts_or_fanout_required")
@@ -347,8 +347,13 @@ func (s *Store) workflowIntegrationClosureStatus(ctx context.Context, snapshot w
 	return status, nil
 }
 
-func (s *Store) checkWorkflowIntegrationSetReceipts(ctx context.Context, set Record) error {
-	if _, err := s.workflowClosingMembers(ctx, set.ID); err != nil {
+func (s *Store) checkWorkflowIntegrationSetReceipts(ctx context.Context, set workflowstate.Record) error {
+	snapshot, err := s.readSnapshot(ctx)
+	if err != nil {
+		return err
+	}
+
+	if _, err := workflowcloseout.Members(snapshot.Records, set.ID); err != nil {
 		return err
 	}
 

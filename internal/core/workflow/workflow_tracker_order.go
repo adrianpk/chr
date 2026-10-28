@@ -17,7 +17,7 @@ func validWorkflowTrackerSchema(schema string) bool {
 	return schema == "chr-tracker/v1" || schema == "chr-tracker/v2"
 }
 
-func workflowTrackerSchema(snapshot Snapshot, setID, requested, previous string) string {
+func workflowTrackerSchema(snapshot workflowstate.Snapshot, setID, requested, previous string) string {
 	if requested != "" {
 		return requested
 	}
@@ -35,7 +35,7 @@ func workflowTrackerSchema(snapshot Snapshot, setID, requested, previous string)
 	return "chr-tracker/v1"
 }
 
-func (s *Store) versionedWorkflowTrackerImage(snapshot Snapshot, setID, schema string) (workflowTrackerImageResult, error) {
+func (s *Store) versionedWorkflowTrackerImage(snapshot workflowstate.Snapshot, setID, schema string) (workflowTrackerImageResult, error) {
 	switch schema {
 	case "chr-tracker/v1":
 		return s.workflowTrackerImage(snapshot, setID)
@@ -46,7 +46,7 @@ func (s *Store) versionedWorkflowTrackerImage(snapshot Snapshot, setID, schema s
 	}
 }
 
-func (s *Store) workflowOrderTrackerImage(snapshot Snapshot, setID string) (workflowTrackerImageResult, error) {
+func (s *Store) workflowOrderTrackerImage(snapshot workflowstate.Snapshot, setID string) (workflowTrackerImageResult, error) {
 	trackerMembers, err := workflowTrackerMembers(snapshot, setID)
 	if err != nil {
 		return workflowTrackerImageResult{Status: TrackerStatus{}, Output: nil}, err
@@ -70,7 +70,7 @@ func (s *Store) workflowOrderTrackerImage(snapshot Snapshot, setID string) (work
 	return workflowTrackerImageResult{Status: result, Output: images.Tracker}, nil
 }
 
-func (s *Store) workflowOrderDocument(set Record, tasks []Record) (generationcore.PlanOrderDocument, error) {
+func (s *Store) workflowOrderDocument(set workflowstate.Record, tasks []workflowstate.Record) (generationcore.PlanOrderDocument, error) {
 	binding := set.Set.PlanRevision
 	if binding == nil || !authoringcore.ValidPlanBindingPaths(s.layout.Namespace(), *binding) || binding.BodyHash != set.Set.PlanHash {
 		return generationcore.PlanOrderDocument{}, fmt.Errorf("order-only tracker requires its retained plan revision")
@@ -103,7 +103,7 @@ func (s *Store) validateWorkflowOrderSource(document generationcore.PlanOrderDoc
 	return generationcore.ValidatePlannedOrder(document.Slices)
 }
 
-func workflowNativeOrder(set Record, tasks []Record) ([]generationcore.PlanOrderSlice, error) {
+func workflowNativeOrder(set workflowstate.Record, tasks []workflowstate.Record) ([]generationcore.PlanOrderSlice, error) {
 	slices := make([]generationcore.PlanOrderSlice, 0, len(set.Set.Slices))
 
 	indexes := map[string]int{}
@@ -133,7 +133,7 @@ func workflowNativeOrder(set Record, tasks []Record) ([]generationcore.PlanOrder
 	return generationcore.OrderedPlanSlices(slices), nil
 }
 
-func workflowOrderTask(record Record) (generationcore.PlanOrderTask, error) {
+func workflowOrderTask(record workflowstate.Record) (generationcore.PlanOrderTask, error) {
 	var id, title string
 	if err := json.Unmarshal(record.Domain["plan_task_id"], &id); err != nil {
 		return generationcore.PlanOrderTask{}, err
@@ -157,7 +157,7 @@ func validateBoundWorkflowOrder(slices []generationcore.PlanOrderSlice) error {
 	return generationcore.ValidatePlannedOrder(planned)
 }
 
-func workflowRecordBodyRef(record Record) string {
+func workflowRecordBodyRef(record workflowstate.Record) string {
 	if filepath.Base(record.Path) == "metadata.json" {
 		return filepath.ToSlash(filepath.Join(filepath.Dir(record.Path), "artifact.md"))
 	}

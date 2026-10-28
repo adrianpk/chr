@@ -15,7 +15,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowApprovedAmendment(t *testing.T, store *Store, set Record) SetAmendmentRequest {
+func workflowApprovedAmendment(t *testing.T, store *Store, set workflowstate.Record) SetAmendmentRequest {
 	t.Helper()
 
 	plan := generationcore.GeneratedWorkflowPlan{Title: "Approved changed delivery", PlanRef: "plan/approved-change.md", PlanHash: contenthash.Sum([]byte("approved amendment\n")), UseCase: set.Set.UseCase, UseCaseOrder: set.Set.UseCaseOrder, ClosingValidation: set.Set.ClosingValidation}
@@ -39,7 +39,7 @@ func workflowApprovedAmendment(t *testing.T, store *Store, set Record) SetAmendm
 	return SetAmendmentRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Plan: generationcore.OrderedWorkflowPlan(plan), ReserveTicketKey: func(context.Context) (string, error) { return "PRJ-7", nil }}
 }
 
-func workflowApprovedSlice(t *testing.T, store *Store, descriptor workflowstate.WorkflowSlice, snapshot Snapshot) generationcore.GeneratedWorkflowSlice {
+func workflowApprovedSlice(t *testing.T, store *Store, descriptor workflowstate.WorkflowSlice, snapshot workflowstate.Snapshot) generationcore.GeneratedWorkflowSlice {
 	t.Helper()
 
 	contract, err := store.readWorkflowSliceContract(descriptor)

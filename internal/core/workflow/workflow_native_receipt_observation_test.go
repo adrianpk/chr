@@ -89,7 +89,7 @@ func nativeReceiptDivergence(t *testing.T, method string) {
 	checkNativeReceiptPreserved(t, fixture, receipt, before)
 }
 
-func nativeReceiptObservedFixture(t *testing.T, method, extent string) (nativeCanonicalFixture, Record) {
+func nativeReceiptObservedFixture(t *testing.T, method, extent string) (nativeCanonicalFixture, workflowstate.Record) {
 	t.Helper()
 
 	f := nativePreparationExtentFixture(t, method, extent, workflowPreparationGate("test -f result.txt"))
@@ -114,7 +114,7 @@ func nativeReceiptObservedFixture(t *testing.T, method, extent string) (nativeCa
 	return fixture, receipt
 }
 
-func nativeReceiptPreservedFiles(t *testing.T, fixture nativeCanonicalFixture, receipt Record) map[string]string {
+func nativeReceiptPreservedFiles(t *testing.T, fixture nativeCanonicalFixture, receipt workflowstate.Record) map[string]string {
 	t.Helper()
 
 	run := nativeFanoutRun(t, fixture)
@@ -138,7 +138,7 @@ func nativeReceiptPreservedFiles(t *testing.T, fixture nativeCanonicalFixture, r
 	return files
 }
 
-func checkNativeReceiptPreserved(t *testing.T, fixture nativeCanonicalFixture, receipt Record, before map[string]string) {
+func checkNativeReceiptPreserved(t *testing.T, fixture nativeCanonicalFixture, receipt workflowstate.Record, before map[string]string) {
 	t.Helper()
 
 	if !reflect.DeepEqual(before, nativeReceiptPreservedFiles(t, fixture, receipt)) || fixture.publisher.calls.Load() != 1 {

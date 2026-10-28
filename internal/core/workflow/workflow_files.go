@@ -32,7 +32,7 @@ func (s *Store) safePath(relative string) (string, error) {
 	return path, nil
 }
 
-func (s *Store) encodeChanges(r Record) ([]workflowstate.FileChange, error) {
+func (s *Store) encodeChanges(r workflowstate.Record) ([]workflowstate.FileChange, error) {
 	content, err := encodeWorkflowRecord(r)
 	if err != nil {
 		return nil, err

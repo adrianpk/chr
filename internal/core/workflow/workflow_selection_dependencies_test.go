@@ -40,7 +40,7 @@ func workflowSelectionCommit(t *testing.T, store *Store) (string, string) {
 	return workflowSelectionGit(t, store, "rev-parse", "HEAD"), workflowSelectionGit(t, store, "rev-parse", "HEAD^{tree}")
 }
 
-func writeSelectionProof(t *testing.T, store *Store, record Record, proof workflowstate.TaskValidation) Record {
+func writeSelectionProof(t *testing.T, store *Store, record workflowstate.Record, proof workflowstate.TaskValidation) workflowstate.Record {
 	t.Helper()
 
 	relative := "run/fixture/evidence/" + record.Task.Key + ".json"
@@ -129,11 +129,11 @@ func TestWorkflowSelectionInvalidDependencies(t *testing.T) {
 	}
 }
 
-func selectionReceipt(t *testing.T, store *Store, unit workflowstate.Ref, commit, tree string) Record {
+func selectionReceipt(t *testing.T, store *Store, unit workflowstate.Ref, commit, tree string) workflowstate.Record {
 	t.Helper()
 
 	identity := workflowstate.Identity{ID: "receipt-1", ProjectID: store.projectID, Namespace: store.layout.Namespace(), Revision: 1, CreatedAt: time.Now().UTC(), UpdatedAt: time.Now().UTC()}
-	record := Record{Identity: identity, Kind: "receipt", Path: "run/fixture/evidence/receipt.json", Receipt: &Receipt{Schema: WorkflowSchema, Unit: unit, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: "https://forge.example/test/repo", PullRequest: "https://forge.example/test/repo/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: time.Now().UTC()}}
+	record := workflowstate.Record{Identity: identity, Kind: "receipt", Path: "run/fixture/evidence/receipt.json", Receipt: &workflowstate.Receipt{Schema: workflowstate.WorkflowSchema, Unit: unit, CandidateID: "candidate", SubmissionID: "submission", Provider: "forgejo", Repository: "https://forge.example/test/repo", PullRequest: "https://forge.example/test/repo/pulls/1", Method: "rebase", SourceCommit: commit, BaseCommit: commit, PreparedTree: tree, HistoryProof: "host-verification", ResultCommit: commit, VerifiedTree: tree, ObservedTarget: commit, VerificationRef: "host-proof", ValidationRefs: []string{"host-validation"}, ConfirmedAt: time.Now().UTC()}}
 
 	receipt, err := store.CreateReceipt(t.Context(), record)
 	if err != nil {

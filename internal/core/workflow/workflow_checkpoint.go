@@ -21,7 +21,7 @@ type AttemptCheckpoint struct {
 	Result     *workflowstate.TaskResult `json:"result"`
 }
 
-func (s *Store) checkpointWorkflowAttempt(run workflowInvocationFile, record Record, reason string, result *workflowstate.TaskResult, extra ...workflowstate.FileChange) error {
+func (s *Store) checkpointWorkflowAttempt(run workflowInvocationFile, record workflowstate.Record, reason string, result *workflowstate.TaskResult, extra ...workflowstate.FileChange) error {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	if err := workflowAttemptQuiescent(*attempt); err != nil {
 		return err

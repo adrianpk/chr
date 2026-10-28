@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -201,12 +202,12 @@ func TestWorkflowConfigClosing(t *testing.T) {
 
 	writeWorkspaceConfig(t, fixture.store.layout.ProjectDir(), "work:\n  validation_timeout_seconds: 1\n")
 
-	set, err := fixture.store.Create(t.Context(), "Deadline closing set", Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
+	set, err := fixture.store.Create(t.Context(), "Deadline closing set", workflowstate.Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: workflowstate.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: gate}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request := SetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: fixture.provider.pr.Repository, Branch: "dev"}
+	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: fixture.provider.pr.Repository, Branch: "dev"}
 
 	closed, err := fixture.store.CloseWorkflowSet(t.Context(), request, workflowFrontierPorts(fixture))
 	if err == nil || closed.Outcome != "closing_validation_failed" || len(closed.Receipt.Validation) != 1 {

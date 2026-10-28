@@ -43,10 +43,10 @@ type Preview struct {
 }
 
 type workflowSelection struct {
-	snapshot       Snapshot
+	snapshot       workflowstate.Snapshot
 	tickets        []ticketcore.Indexed
-	records        map[string]Record
-	sets           map[string]Record
+	records        map[string]workflowstate.Record
+	sets           map[string]workflowstate.Record
 	slices         map[string]workflowstate.WorkflowSlice
 	evidenceHashes map[string]string
 }
@@ -202,7 +202,7 @@ func (selection workflowSelection) resolveSelector(selector workflowstate.Select
 	return nil
 }
 
-func (selection workflowSelection) matches(selector workflowstate.Selector, ticket ticketcore.Indexed, record Record) bool {
+func (selection workflowSelection) matches(selector workflowstate.Selector, ticket ticketcore.Indexed, record workflowstate.Record) bool {
 	switch selector.Extent {
 	case "ticket":
 		return ticket.Key == selector.Identity
@@ -221,7 +221,7 @@ func (selection workflowSelection) matches(selector workflowstate.Selector, tick
 	}
 }
 
-func workflowSelectionExclusion(selector workflowstate.Selector, record Record, prepared bool) string {
+func workflowSelectionExclusion(selector workflowstate.Selector, record workflowstate.Record, prepared bool) string {
 	if !prepared {
 		return "unprepared"
 	}
@@ -241,7 +241,7 @@ func workflowSelectionExclusion(selector workflowstate.Selector, record Record, 
 	return ""
 }
 
-func workflowPreviewMember(record Record) PreviewMember {
+func workflowPreviewMember(record workflowstate.Record) PreviewMember {
 	task := record.Task
 
 	return PreviewMember{Key: task.Key, Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, ContractHash: task.ContractHash, SetID: task.SetID, SliceID: task.SliceID, TaskOrder: task.Order, Status: task.Status, Phase: task.Phase}
@@ -289,7 +289,7 @@ func validateWorkflowPreviewContext(request workflowstate.PreviewRequest) error 
 	return nil
 }
 
-func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket ticketcore.Indexed, record Record, prepared bool) string {
+func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket ticketcore.Indexed, record workflowstate.Record, prepared bool) string {
 	reason := workflowSelectionExclusion(request.Selector, record, prepared)
 	if reason == "" && request.Selector.Extent == "loose" {
 		return workflowLooseExclusion(request, ticket)

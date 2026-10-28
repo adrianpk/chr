@@ -228,36 +228,40 @@ func TestNativeSourceReceipt(t *testing.T) {
 	checkNativeSourceReceiptDenials(t, receipt, observed)
 }
 
-func nativeSourceResultReceipt(binding workflowstate.NativePublicationBinding, observed workflowstate.NativePublicationObservation) Receipt {
+func nativeSourceResultReceipt(binding workflowstate.NativePublicationBinding, observed workflowstate.NativePublicationObservation) workflowstate.Receipt {
 	proof := *observed.Git
 	native := &workflowstate.NativeReceipt{
 		NativeRecordBinding: workflowstate.NativeRecordBinding{CanonicalPR: binding.PullRequest.URL, SourceRepository: proof.Repository, SourceRef: binding.Capability.SourceRef, TargetRef: binding.Capability.TargetRef, Method: proof.Method, OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit, PreparedResult: proof.ResultCommit, PreparedTree: proof.PreparedTree},
 		ActualMergeResult:   observed.PullRequest.ResultCommit, ObservationContract: observed.ObservationContract,
 	}
 
-	return Receipt{Native: native, Repository: proof.Repository, Method: proof.Method, SourceCommit: proof.SourceCommit, BaseCommit: proof.BaseCommit, PreparedTree: proof.PreparedTree, ResultCommit: proof.ResultCommit, VerifiedTree: proof.VerifiedTree, ObservedTarget: proof.ObservedTarget, HistoryProof: proof.HistoryHash}
+	return workflowstate.Receipt{Native: native, Repository: proof.Repository, Method: proof.Method, SourceCommit: proof.SourceCommit, BaseCommit: proof.BaseCommit, PreparedTree: proof.PreparedTree, ResultCommit: proof.ResultCommit, VerifiedTree: proof.VerifiedTree, ObservedTarget: proof.ObservedTarget, HistoryProof: proof.HistoryHash}
 }
 
-func checkNativeSourceReceiptDenials(t *testing.T, receipt Receipt, observed workflowstate.NativePublicationObservation) {
+func checkNativeSourceReceiptDenials(t *testing.T, receipt workflowstate.Receipt, observed workflowstate.NativePublicationObservation) {
 	t.Helper()
 
 	cases := []struct {
 		name   string
-		change func(*Receipt, *workflowstate.NativePublicationObservation)
+		change func(*workflowstate.Receipt, *workflowstate.NativePublicationObservation)
 	}{
-		{"missing_receipt_contract", func(r *Receipt, _ *workflowstate.NativePublicationObservation) { r.Native.ObservationContract = "" }},
-		{"missing_observation_contract", func(_ *Receipt, o *workflowstate.NativePublicationObservation) { o.ObservationContract = "" }},
-		{"unverified_source", func(_ *Receipt, o *workflowstate.NativePublicationObservation) {
+		{"missing_receipt_contract", func(r *workflowstate.Receipt, _ *workflowstate.NativePublicationObservation) {
+			r.Native.ObservationContract = ""
+		}},
+		{"missing_observation_contract", func(_ *workflowstate.Receipt, o *workflowstate.NativePublicationObservation) {
+			o.ObservationContract = ""
+		}},
+		{"unverified_source", func(_ *workflowstate.Receipt, o *workflowstate.NativePublicationObservation) {
 			o.ObservedSourceCommit = o.Git.SourceCommit
 		}},
-		{"stale_source_metadata", func(_ *Receipt, o *workflowstate.NativePublicationObservation) {
+		{"stale_source_metadata", func(_ *workflowstate.Receipt, o *workflowstate.NativePublicationObservation) {
 			o.PullRequest.HeadCommit = o.Git.SourceCommit
 		}},
-		{"missing_git", func(_ *Receipt, o *workflowstate.NativePublicationObservation) { o.Git = nil }},
-		{"foreign_replay", func(_ *Receipt, o *workflowstate.NativePublicationObservation) {
+		{"missing_git", func(_ *workflowstate.Receipt, o *workflowstate.NativePublicationObservation) { o.Git = nil }},
+		{"foreign_replay", func(_ *workflowstate.Receipt, o *workflowstate.NativePublicationObservation) {
 			o.Git.History[len(o.Git.History)-1].Source = strings.Repeat("e", 40)
 		}},
-		{"wrong_method", func(_ *Receipt, o *workflowstate.NativePublicationObservation) { o.Git.Method = "squash" }},
+		{"wrong_method", func(_ *workflowstate.Receipt, o *workflowstate.NativePublicationObservation) { o.Git.Method = "squash" }},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {

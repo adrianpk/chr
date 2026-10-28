@@ -14,7 +14,7 @@ import (
 
 // Change binds a replacement record to its observed revision and image.
 type Change struct {
-	Record           Record
+	Record           workflowstate.Record
 	ExpectedRevision uint64
 }
 
@@ -42,7 +42,7 @@ func (s *Store) Transition(ctx context.Context, changes []Change) error {
 			return err
 		}
 
-		if err := snapshot.Validate(); err != nil {
+		if err := validateWorkflowSnapshot(snapshot); err != nil {
 			return err
 		}
 
@@ -50,7 +50,7 @@ func (s *Store) Transition(ctx context.Context, changes []Change) error {
 	})
 }
 
-func (s *Store) prepareTransition(snapshot *Snapshot, changes []Change) ([]workflowstate.FileChange, error) {
+func (s *Store) prepareTransition(snapshot *workflowstate.Snapshot, changes []Change) ([]workflowstate.FileChange, error) {
 	files := []workflowstate.FileChange{}
 	seen := map[string]bool{}
 
@@ -93,7 +93,7 @@ func (s *Store) commitAllocatedFiles(changes []workflowstate.FileChange, guard s
 		return err
 	}
 
-	journal := workflowJournal{Schema: WorkflowSchema, ID: contenthash.Sum(append([]byte(guard), data...)), Changes: changes, AllocationGuard: guard}
+	journal := workflowJournal{Schema: workflowstate.WorkflowSchema, ID: contenthash.Sum(append([]byte(guard), data...)), Changes: changes, AllocationGuard: guard}
 
 	encoded, err := json.Marshal(journal)
 	if err != nil {
@@ -155,7 +155,7 @@ func (s *Store) checkJournalImages(journal workflowJournal) error {
 		return err
 	}
 
-	if journal.Schema != WorkflowSchema || contenthash.Sum(append([]byte(journal.AllocationGuard), data...)) != journal.ID || len(journal.Changes) == 0 {
+	if journal.Schema != workflowstate.WorkflowSchema || contenthash.Sum(append([]byte(journal.AllocationGuard), data...)) != journal.ID || len(journal.Changes) == 0 {
 		return fmt.Errorf("invalid workflow transition journal")
 	}
 

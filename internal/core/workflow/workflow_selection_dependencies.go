@@ -17,13 +17,13 @@ type Blocker struct {
 
 type workflowDependencies struct {
 	selection     workflowSelection
-	tasks         map[string][]Record
+	tasks         map[string][]workflowstate.Record
 	orderedSlices map[string][]workflowstate.WorkflowSlice
 	refs          map[workflowstate.Ref][]workflowstate.Ref
 }
 
 func newWorkflowDependencies(selection workflowSelection) (workflowDependencies, error) {
-	dependencies := workflowDependencies{selection: selection, tasks: map[string][]Record{}, orderedSlices: map[string][]workflowstate.WorkflowSlice{}, refs: map[workflowstate.Ref][]workflowstate.Ref{}}
+	dependencies := workflowDependencies{selection: selection, tasks: map[string][]workflowstate.Record{}, orderedSlices: map[string][]workflowstate.WorkflowSlice{}, refs: map[workflowstate.Ref][]workflowstate.Ref{}}
 	for _, record := range selection.records {
 		if record.Task.SliceID != "" {
 			dependencies.tasks[record.Task.SliceID] = append(dependencies.tasks[record.Task.SliceID], record)
@@ -31,7 +31,7 @@ func newWorkflowDependencies(selection workflowSelection) (workflowDependencies,
 	}
 
 	for id, tasks := range dependencies.tasks {
-		slices.SortFunc(tasks, func(left, right Record) int { return cmp.Compare(left.Task.Order, right.Task.Order) })
+		slices.SortFunc(tasks, func(left, right workflowstate.Record) int { return cmp.Compare(left.Task.Order, right.Task.Order) })
 
 		dependencies.tasks[id] = tasks
 	}
@@ -71,7 +71,7 @@ func (dependencies *workflowDependencies) buildGraph() {
 	}
 }
 
-func (dependencies workflowDependencies) taskPrerequisites(record Record) []workflowstate.Ref {
+func (dependencies workflowDependencies) taskPrerequisites(record workflowstate.Record) []workflowstate.Ref {
 	task := record.Task
 	refs := slices.Clone(task.DependsOn)
 

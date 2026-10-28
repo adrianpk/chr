@@ -26,7 +26,7 @@ const (
 
 type workflowClaimObservation struct {
 	Run    workflowInvocationFile
-	Record Record
+	Record workflowstate.Record
 }
 
 // ErrWorkflowOwned identifies overlap with retained task or hierarchy ownership.
@@ -131,18 +131,18 @@ func (s *Store) prepareWorkflowClaimState(ctx context.Context, run *workflowInvo
 	return s.reuseWorkflowValidatedTasks(ctx, run)
 }
 
-func (s *Store) observeWorkflowClaim(ctx context.Context, run workflowInvocationFile) (Record, error) {
+func (s *Store) observeWorkflowClaim(ctx context.Context, run workflowInvocationFile) (workflowstate.Record, error) {
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := s.checkWorkflowTarget(ctx, run.ExecutionSelection().Target); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	selection, err := s.readWorkflowSelection(ctx)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	member := run.Members[run.Cursor]
@@ -151,31 +151,31 @@ func (s *Store) observeWorkflowClaim(ctx context.Context, run workflowInvocation
 
 	request, err = s.workflowLaneSelection(ctx, run, selection.records[member.Admission.Key], request)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	preview, err := selection.preview(request)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := s.observePrerequisites(ctx, selection, request, &preview); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := workflowClaimReadiness(preview, member.Admission.Key); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	record := selection.records[member.Admission.Key]
 	if err := validateWorkflowClaimableContract(record); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	return record, nil
 }
 
-func validateWorkflowClaimableContract(record Record) error {
+func validateWorkflowClaimableContract(record workflowstate.Record) error {
 	if !workflowTaskClaimable(record.Task) {
 		return ErrWorkflowOwned
 	}
@@ -204,11 +204,11 @@ func newWorkflowClaimToken() (string, error) {
 	return hex.EncodeToString(token), nil
 }
 
-func workflowTaskClaimable(task *Task) bool {
+func workflowTaskClaimable(task *workflowstate.Task) bool {
 	return task.AttemptID == "" && task.ClaimGeneration != math.MaxUint64
 }
 
-func (s *Store) beginWorkflowAttempt(run *workflowInvocationFile, record *Record, claim *Claim) error {
+func (s *Store) beginWorkflowAttempt(run *workflowInvocationFile, record *workflowstate.Record, claim *Claim) error {
 	count := 0
 
 	for _, attempt := range run.Attempts {
@@ -252,7 +252,7 @@ func (s *Store) beginWorkflowAttempt(run *workflowInvocationFile, record *Record
 	return nil
 }
 
-func (s *Store) commitWorkflowClaim(run workflowInvocationFile, record Record, extra ...workflowstate.FileChange) error {
+func (s *Store) commitWorkflowClaim(run workflowInvocationFile, record workflowstate.Record, extra ...workflowstate.FileChange) error {
 	files, err := s.workflowClaimRecordChanges(&run, &record)
 	if err != nil {
 		return err
@@ -271,7 +271,7 @@ func (s *Store) commitWorkflowClaim(run workflowInvocationFile, record Record, e
 	return s.commitFiles(append(files, state))
 }
 
-func (s *Store) workflowClaimRecordChanges(run *workflowInvocationFile, record *Record) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowClaimRecordChanges(run *workflowInvocationFile, record *workflowstate.Record) ([]workflowstate.FileChange, error) {
 	record.Revision++
 	record.UpdatedAt = time.Now().UTC()
 
@@ -293,14 +293,14 @@ func (s *Store) workflowClaimRecordChanges(run *workflowInvocationFile, record *
 		}
 	}
 
-	if err := record.Validate(); err != nil {
+	if err := validateWorkflowRecord(*record); err != nil {
 		return nil, err
 	}
 
 	return files, nil
 }
 
-func workflowClaimRecordHash(record Record, files []workflowstate.FileChange) string {
+func workflowClaimRecordHash(record workflowstate.Record, files []workflowstate.FileChange) string {
 	hash := contenthash.Sum(files[0].After)
 	if len(files) > 1 {
 		hash += ":" + contenthash.Sum(record.Body)
@@ -329,20 +329,20 @@ func (s *Store) checkWorkflowClaim(ctx context.Context, claim *Claim) (workflowC
 func (s *Store) checkWorkflowCredential(ctx context.Context, claim *Claim, check workflowCredentialCheck) (workflowClaimObservation, error) {
 	invocationLocation2, err := s.locateWorkflowClaim(ctx, claim)
 	if err != nil {
-		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, err
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, err
 	}
 
 	if invocationLocation2.Owner.layout.Root() != claim.store.layout.Root() || len(invocationLocation2.Run.Attempts) == 0 {
-		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, ErrWorkflowOwned
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, ErrWorkflowOwned
 	}
 
 	if err := invocationLocation2.Owner.checkWorkflowInputs(ctx, invocationLocation2.Run); err != nil {
-		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, err
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, err
 	}
 
 	attempt := invocationLocation2.Run.Attempts[len(invocationLocation2.Run.Attempts)-1]
 	if !workflowCredentialValid(invocationLocation2.Run, claim, attempt, check) {
-		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, ErrWorkflowOwned
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, ErrWorkflowOwned
 	}
 
 	record, err := invocationLocation2.Owner.readWorkflowAttemptTask(invocationLocation2.Run, attempt)
@@ -398,14 +398,14 @@ func workflowReplacedAttempt(run workflowInvocationFile, key, purpose string) st
 	return ""
 }
 
-func (s *Store) readWorkflowAttemptTask(run workflowInvocationFile, attempt Attempt) (Record, error) {
+func (s *Store) readWorkflowAttemptTask(run workflowInvocationFile, attempt Attempt) (workflowstate.Record, error) {
 	cursor := run.Cursor
 	if attempt.Purpose == workflowSliceValidationPurpose || attempt.Purpose == workflowSliceReviewPurpose || attempt.Purpose == workflowIntegrationValidationPurpose || attempt.Purpose == workflowMergerPurpose {
 		cursor--
 	}
 
 	if cursor < 0 || cursor >= len(run.Members) || run.Members[cursor].Admission.Key != attempt.TaskKey {
-		return Record{}, workflowstate.ErrConflict
+		return workflowstate.Record{}, workflowstate.ErrConflict
 	}
 
 	return s.readRecord(run.Members[cursor].Admission.Path)

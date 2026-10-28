@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -206,7 +206,7 @@ func webWorkflowRejectedControl(t *testing.T, operations service, handler http.H
 	}
 }
 
-func checkWebWorkflowPreview(t *testing.T, operations service, handler http.Handler, selected workflowcore.Record, query, identity string, total int, before map[string][32]byte) {
+func checkWebWorkflowPreview(t *testing.T, operations service, handler http.Handler, selected workflowstate.Record, query, identity string, total int, before map[string][32]byte) {
 	t.Helper()
 
 	response := webWorkflowHTTP(t, handler, http.MethodGet, "/workflows?"+query, nil)
@@ -257,7 +257,7 @@ func checkWebWorkflowApproval(t *testing.T, operations service, handler http.Han
 	}
 }
 
-func checkWebWorkflowSelectedGuard(t *testing.T, binding webWorkflowBinding, selected workflowcore.Record, query string) {
+func checkWebWorkflowSelectedGuard(t *testing.T, binding webWorkflowBinding, selected workflowstate.Record, query string) {
 	t.Helper()
 
 	if strings.Contains(query, "key=") && (binding.Selected == nil || binding.Selected.Key != selected.Task.Key || binding.Selected.Revision != selected.Revision) {

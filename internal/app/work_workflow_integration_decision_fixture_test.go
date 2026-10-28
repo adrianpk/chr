@@ -169,7 +169,7 @@ func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID st
 	return contract.Validation
 }
 
-func serviceIntegrationSliceDescriptor(t *testing.T, snapshot workflowcore.Snapshot, sliceID string) workflowstate.WorkflowSlice {
+func serviceIntegrationSliceDescriptor(t *testing.T, snapshot workflowstate.Snapshot, sliceID string) workflowstate.WorkflowSlice {
 	t.Helper()
 
 	for _, record := range snapshot.Records {

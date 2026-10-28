@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeFanoutCrashProcess exits the owned test host during the actual
@@ -86,7 +87,7 @@ func crashNativeFanout(t *testing.T, fixture nativeCanonicalFixture, index int) 
 	}
 }
 
-func nativeFanoutSnapshot(t *testing.T, store *Store) Snapshot {
+func nativeFanoutSnapshot(t *testing.T, store *Store) workflowstate.Snapshot {
 	t.Helper()
 
 	snapshot, err := store.Snapshot(t.Context())
@@ -97,7 +98,7 @@ func nativeFanoutSnapshot(t *testing.T, store *Store) Snapshot {
 	return snapshot
 }
 
-func checkNativeFanoutLater(t *testing.T, fixture nativeCanonicalFixture, before Snapshot) {
+func checkNativeFanoutLater(t *testing.T, fixture nativeCanonicalFixture, before workflowstate.Snapshot) {
 	t.Helper()
 
 	unit := fixture.f.candidate.Native.Unit
@@ -115,7 +116,7 @@ func checkNativeFanoutLater(t *testing.T, fixture nativeCanonicalFixture, before
 	}
 }
 
-func checkNativeFanoutSet(t *testing.T, store *Store, before Record, unit string) {
+func checkNativeFanoutSet(t *testing.T, store *Store, before workflowstate.Record, unit string) {
 	t.Helper()
 
 	after, err := store.Read(t.Context(), before.Path)

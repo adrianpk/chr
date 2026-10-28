@@ -55,7 +55,7 @@ func TestWorkflowLooseMarkdown(t *testing.T) {
 	}
 }
 
-func workflowLooseMarkdown(t *testing.T, store *Store) Record {
+func workflowLooseMarkdown(t *testing.T, store *Store) workflowstate.Record {
 	t.Helper()
 
 	record := workflowTestTask("PRJ-1")

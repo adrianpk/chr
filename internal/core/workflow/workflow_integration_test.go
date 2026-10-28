@@ -145,7 +145,7 @@ func TestWorkflowIntegrationMethods(t *testing.T) {
 	}
 }
 
-func checkWorkflowDeliveryProof(t *testing.T, fixture workflowIntegrationFixture, proof SliceDeliveryProof, method string) {
+func checkWorkflowDeliveryProof(t *testing.T, fixture workflowIntegrationFixture, proof workflowstate.SliceDeliveryProof, method string) {
 	t.Helper()
 	checkWorkflowDeliveryGit(t, fixture, proof.Git)
 

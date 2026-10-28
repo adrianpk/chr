@@ -59,7 +59,7 @@ func (s *Store) checkWorkflowClosingConfirmation(ctx context.Context, claim *wor
 		return err
 	}
 
-	request := SetClosureRequest{Repository: claim.input.Target.Repository, Branch: claim.input.Branch}
+	request := workflowcloseout.Request{Repository: claim.input.Target.Repository, Branch: claim.input.Branch}
 
 	target, err := s.observeWorkflowClosingTarget(ctx, request, ports)
 	if err != nil || target != claim.input.Target {

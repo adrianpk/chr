@@ -50,7 +50,7 @@ func (s *Store) checkWorkflowPreparedClaim(ctx context.Context, claim *Claim, pr
 	})
 }
 
-func checkWorkflowExecutionBinding(run workflowInvocationFile, record Record, prepared workflowPreparedTask) error {
+func checkWorkflowExecutionBinding(run workflowInvocationFile, record workflowstate.Record, prepared workflowPreparedTask) error {
 	if err := checkWorkflowTaskHarness(run, prepared.input); err != nil {
 		return err
 	}

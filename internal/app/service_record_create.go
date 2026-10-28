@@ -26,7 +26,7 @@ func (s service) prepareNativeRecordCreation(ctx context.Context, store *workflo
 	}
 
 	var (
-		record workflowcore.Record
+		record workflowstate.Record
 		err    error
 	)
 
@@ -42,23 +42,23 @@ func (s service) prepareNativeRecordCreation(ctx context.Context, store *workflo
 	return workflowcore.MutationRequest{Binding: binding, Title: *request.Title, Record: record}, err
 }
 
-func (s service) prepareTicketRecord(request RecordMutationRequest) (workflowcore.Record, error) {
+func (s service) prepareTicketRecord(request RecordMutationRequest) (workflowstate.Record, error) {
 	if request.Synopsis == nil || strings.TrimSpace(*request.Synopsis) == "" {
-		return workflowcore.Record{}, errors.New("ticket creation requires a synopsis")
+		return workflowstate.Record{}, errors.New("ticket creation requires a synopsis")
 	}
 
 	if unsupportedTicketCreation(request) {
-		return workflowcore.Record{}, ErrRecordUnsupported
+		return workflowstate.Record{}, ErrRecordUnsupported
 	}
 
 	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
-		return workflowcore.Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	number, err := s.reserveNextTicketKeyNumber(config.TicketKeyPrefix)
 	if err != nil {
-		return workflowcore.Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	key := fmt.Sprintf("%s-%d", config.TicketKeyPrefix, number)
@@ -66,29 +66,29 @@ func (s service) prepareTicketRecord(request RecordMutationRequest) (workflowcor
 
 	body, err := ticketcore.NewRenderer().Render(ticketcore.Ticket{Key: key, Title: *request.Title, Synopsis: *request.Synopsis, Status: ticketcore.StatusBacklog, UseCase: request.UseCase, Body: recordString(request.Body), CreatedAt: now, UpdatedAt: now})
 	if err != nil {
-		return workflowcore.Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	contract, err := json.Marshal(struct{ Title, Synopsis, Body string }{*request.Title, *request.Synopsis, recordString(request.Body)})
 
-	return workflowcore.Record{Kind: "ticket", Body: []byte(body), Task: &workflowcore.Task{Schema: workflowcore.WorkflowSchema, Key: key, Status: string(ticketcore.StatusBacklog), Phase: "pending", UseCase: request.UseCase, ContractHash: recordDigest(contract)}}, err
+	return workflowstate.Record{Kind: "ticket", Body: []byte(body), Task: &workflowstate.Task{Schema: workflowstate.WorkflowSchema, Key: key, Status: string(ticketcore.StatusBacklog), Phase: "pending", UseCase: request.UseCase, ContractHash: recordDigest(contract)}}, err
 }
 
-func (s service) prepareSetRecord(ctx context.Context, store *workflowcore.Store, request RecordMutationRequest) (workflowcore.Record, error) {
+func (s service) prepareSetRecord(ctx context.Context, store *workflowcore.Store, request RecordMutationRequest) (workflowstate.Record, error) {
 	if request.Validation == nil || request.PlanRef == "" || request.PlanHash == "" {
-		return workflowcore.Record{}, errors.New("slice-set creation requires an observed plan and explicit closing validation")
+		return workflowstate.Record{}, errors.New("slice-set creation requires an observed plan and explicit closing validation")
 	}
 
 	if request.Slice != nil || request.Synopsis != nil || request.Context != nil || request.Body != nil || request.ParentID != "" {
-		return workflowcore.Record{}, ErrRecordUnsupported
+		return workflowstate.Record{}, ErrRecordUnsupported
 	}
 
 	body, err := store.ReadContract(ctx, request.PlanRef, request.PlanHash)
 	if err != nil {
-		return workflowcore.Record{}, err
+		return workflowstate.Record{}, err
 	}
 
-	return workflowcore.Record{Kind: "plan", Body: body, Set: &workflowstate.WorkflowSet{Schema: workflowcore.WorkflowSchema, Status: "proposed", UseCase: request.UseCase, PlanRef: request.PlanRef, PlanHash: request.PlanHash, ClosingValidation: *request.Validation}}, nil
+	return workflowstate.Record{Kind: "plan", Body: body, Set: &workflowstate.WorkflowSet{Schema: workflowstate.WorkflowSchema, Status: "proposed", UseCase: request.UseCase, PlanRef: request.PlanRef, PlanHash: request.PlanHash, ClosingValidation: *request.Validation}}, nil
 }
 
 func recordString(value *string) string {

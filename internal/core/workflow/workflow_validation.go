@@ -12,9 +12,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// Validate rejects partial or inconsistent workflow records before persistence.
-func (r Record) Validate() error {
-	if err := r.validateIdentity(); err != nil {
+// validateWorkflowRecord rejects partial or inconsistent records before persistence.
+func validateWorkflowRecord(r workflowstate.Record) error {
+	if err := validateWorkflowRecordIdentity(r); err != nil {
 		return err
 	}
 
@@ -34,10 +34,10 @@ func (r Record) Validate() error {
 		return err
 	}
 
-	return r.validateDomain()
+	return validateWorkflowRecordDomain(r)
 }
 
-func (r Record) validateIdentity() error {
+func validateWorkflowRecordIdentity(r workflowstate.Record) error {
 	if r.ID == "" || r.ProjectID == "" || !opsnamespace.Valid(r.Namespace) || r.Revision == 0 {
 		return fmt.Errorf("workflow identity, scope and positive revision are required")
 	}
@@ -49,7 +49,7 @@ func (r Record) validateIdentity() error {
 	return nil
 }
 
-func validateWorkflowRecordBounds(r Record) error {
+func validateWorkflowRecordBounds(r workflowstate.Record) error {
 	if len(r.Body) > workflowstate.FileLimit || r.Revision > math.MaxInt64 {
 		return fmt.Errorf("workflow record size or revision bound exceeded")
 	}
@@ -66,7 +66,7 @@ func validateWorkflowRecordBounds(r Record) error {
 	return nil
 }
 
-func (r Record) validateDomain() error {
+func validateWorkflowRecordDomain(r workflowstate.Record) error {
 	switch {
 	case r.Kind == "ticket" && r.Task != nil:
 		return validateWorkflowTask(*r.Task)
@@ -83,8 +83,8 @@ func (r Record) validateDomain() error {
 	return fmt.Errorf("workflow record requires exactly one matching domain: %s", r.Kind)
 }
 
-func validateWorkflowTask(t Task) error {
-	if t.Schema != WorkflowSchema || t.Key == "" || t.ContractHash == "" {
+func validateWorkflowTask(t workflowstate.Task) error {
+	if t.Schema != workflowstate.WorkflowSchema || t.Key == "" || t.ContractHash == "" {
 		return fmt.Errorf("unsupported workflow schema or missing ticket key/contract")
 	}
 
@@ -99,7 +99,7 @@ func validateWorkflowTask(t Task) error {
 	return validateWorkflowTaskPhase(t)
 }
 
-func validateWorkflowTaskPhase(t Task) error {
+func validateWorkflowTaskPhase(t workflowstate.Task) error {
 	allowed := map[string][]string{
 		"pending":       {string(ticketcore.StatusBacklog), string(ticketcore.StatusReadyForDev)},
 		"running":       {string(ticketcore.StatusInProgress)},
@@ -115,7 +115,7 @@ func validateWorkflowTaskPhase(t Task) error {
 	return validateWorkflowTaskEvidence(t)
 }
 
-func validateWorkflowTaskEvidence(t Task) error {
+func validateWorkflowTaskEvidence(t workflowstate.Task) error {
 	if t.Phase == "running" && (t.AttemptID == "" || t.ClaimGeneration == 0) {
 		return fmt.Errorf("running task requires fenced ownership")
 	}
@@ -156,7 +156,7 @@ func validateWorkflowSet(s workflowstate.WorkflowSet) error {
 }
 
 func validateWorkflowSetContract(s workflowstate.WorkflowSet) error {
-	if s.Schema != WorkflowSchema || s.PlanRef == "" || s.PlanHash == "" || s.UseCaseOrder < 0 {
+	if s.Schema != workflowstate.WorkflowSchema || s.PlanRef == "" || s.PlanHash == "" || s.UseCaseOrder < 0 {
 		return fmt.Errorf("unsupported workflow set schema or missing plan contract")
 	}
 
@@ -225,7 +225,7 @@ func validateWorkflowDependencies(refs []workflowstate.Ref) error {
 	return nil
 }
 
-func validateWorkflowReceipt(r Receipt) error {
+func validateWorkflowReceipt(r workflowstate.Receipt) error {
 	if err := validateWorkflowReceiptSchema(r); err != nil {
 		return err
 	}

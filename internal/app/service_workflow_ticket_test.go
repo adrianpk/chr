@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, workflowcore.Record, workflowcore.StartRequest) {
+func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, workflowstate.Record, workflowcore.StartRequest) {
 	t.Helper()
 
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t, plans...)
@@ -38,7 +38,7 @@ func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.Generate
 		t.Fatal(err)
 	}
 
-	record, err := store.Create(t.Context(), "Independent task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: grouped.Domain, Body: grouped.Body})
+	record, err := store.Create(t.Context(), "Independent task", workflowstate.Record{Kind: "ticket", Task: &task, Domain: grouped.Domain, Body: grouped.Body})
 	if err != nil {
 		t.Fatal(err)
 	}

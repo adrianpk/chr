@@ -22,25 +22,10 @@ type PreparedIntegrationGit interface {
 	VerifyPreparedWorkflowIntegration(context.Context, workflowstate.IntegrationQuery, workflowstate.IntegrationProof) (workflowstate.IntegrationProof, error)
 }
 
-// SliceDeliveryProof retains verified external delivery before finalization.
-type SliceDeliveryProof struct {
-	Schema           string                            `json:"schema"`
-	InvocationID     string                            `json:"invocation_id"`
-	Unit             workflowstate.Ref                 `json:"unit"`
-	CandidateID      string                            `json:"candidate_id"`
-	CandidateRef     string                            `json:"candidate_ref"`
-	CandidateHash    string                            `json:"candidate_hash"`
-	SubmissionID     string                            `json:"submission_id"`
-	PullRequest      workflowstate.PullRequestSnapshot `json:"pull_request"`
-	Git              workflowstate.IntegrationProof    `json:"git"`
-	ConfirmedAt      time.Time                         `json:"confirmed_at"`
-	NativeReceiptRef *workflowstate.EvidenceRef        `json:"native_receipt_ref,omitempty"`
-}
-
 // VerifyWorkflowSliceIntegration observes external integration without publishing
 // a target or marking any task done. Worker claims and structural receipts cannot
 // substitute for canonical provider metadata and fetched method-specific proof.
-func (s *Store) VerifyWorkflowSliceIntegration(ctx context.Context, id, method string, provider PullRequestProvider, git IntegrationGit) (proof SliceDeliveryProof, err error) {
+func (s *Store) VerifyWorkflowSliceIntegration(ctx context.Context, id, method string, provider PullRequestProvider, git IntegrationGit) (proof workflowstate.SliceDeliveryProof, err error) {
 	if provider == nil || git == nil || !slices.Contains([]string{"merge", "rebase", "squash"}, method) {
 		return proof, fmt.Errorf("canonical provider, Git observer and supported integration method required")
 	}
@@ -62,49 +47,49 @@ func (s *Store) VerifyWorkflowSliceIntegration(ctx context.Context, id, method s
 	return proof, err
 }
 
-func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflowInvocationFile, method string, provider PullRequestProvider, git IntegrationGit) (SliceDeliveryProof, error) {
+func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflowInvocationFile, method string, provider PullRequestProvider, git IntegrationGit) (workflowstate.SliceDeliveryProof, error) {
 	deliveryPreparation, err := s.workflowDeliveryCandidate(ctx, run)
 
 	observation, candidate := deliveryPreparation.Observation, deliveryPreparation.Candidate
 
 	if err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	pr, err := s.observeWorkflowDeliveryPR(ctx, &run, observation, provider)
 	if err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	run, err = s.readWorkflowInvocation(run.ID)
 	if err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	if err := s.reconcileWorkflowPublishedSubmission(ctx, &run, pr, workflowDeliveryObservers{Provider: provider, Git: git}); err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	query := workflowIntegrationQuery(run, candidate, pr, method)
 
 	gitProof, err := git.VerifyWorkflowIntegration(ctx, query)
 	if err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	if err := workflowintegrate.CheckProof(query, gitProof, workflowIntegrationRepairs{}); err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	if err := checkWorkflowVerifiedPR(ctx, run, gitProof, provider); err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	if _, err := s.workflowDeliveryCandidate(ctx, run); err != nil {
-		return SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
-	proof := SliceDeliveryProof{Schema: "chr-slice-delivery-proof/v1", InvocationID: run.ID, Unit: candidate.UnitInput().Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, SubmissionID: workflowDeliverySubmissionID(run), PullRequest: pr, Git: gitProof, ConfirmedAt: time.Now().UTC()}
+	proof := workflowstate.SliceDeliveryProof{Schema: "chr-slice-delivery-proof/v1", InvocationID: run.ID, Unit: candidate.UnitInput().Unit, CandidateID: candidate.ID, CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, SubmissionID: workflowDeliverySubmissionID(run), PullRequest: pr, Git: gitProof, ConfirmedAt: time.Now().UTC()}
 
 	return s.persistWorkflowDeliveryProof(&run, proof)
 }

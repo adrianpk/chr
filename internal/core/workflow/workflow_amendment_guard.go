@@ -11,7 +11,7 @@ import (
 )
 
 type workflowAmendmentObservation struct {
-	Set         Record
+	Set         workflowstate.Record
 	Invocations []workflowInvocationFile
 }
 
@@ -47,11 +47,11 @@ func (s *Store) observeWorkflowAmendment(ctx context.Context, request SetAmendme
 	return workflowAmendmentObservation{Set: set, Invocations: runs}, nil
 }
 
-func (s *Store) workflowAmendmentImageMatches(set Record, request SetAmendmentRequest) bool {
+func (s *Store) workflowAmendmentImageMatches(set workflowstate.Record, request SetAmendmentRequest) bool {
 	return set.Set != nil && set.Revision == request.ExpectedRevision && set.SourceHash == request.ExpectedSourceHash && set.ProjectID == s.projectID && set.Namespace == s.layout.Namespace()
 }
 
-func (s *Store) checkWorkflowAmendmentPlan(set Record, request SetAmendmentRequest) error {
+func (s *Store) checkWorkflowAmendmentPlan(set workflowstate.Record, request SetAmendmentRequest) error {
 	if set.Set.Status == "closing" {
 		return ErrWorkflowOwned
 	}
@@ -107,7 +107,7 @@ func (s *Store) checkWorkflowAmendmentOwner(ctx context.Context, run workflowInv
 	return owner.checkWorkflowInputs(ctx, run)
 }
 
-func (s *Store) checkWorkflowSetAmendmentEvidence(set Record) error {
+func (s *Store) checkWorkflowSetAmendmentEvidence(set workflowstate.Record) error {
 	if err := workflowcloseout.CheckHistory(set.ID, set.Set.Closing, workflowClosingEvidence{store: s}); err != nil {
 		return err
 	}

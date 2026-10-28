@@ -7,19 +7,19 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// Validate checks shared hierarchy and uniqueness independently of SQLite.
-func (s Snapshot) Validate() error {
+// validateWorkflowSnapshot checks shared hierarchy and uniqueness independently of SQLite.
+func validateWorkflowSnapshot(s workflowstate.Snapshot) error {
 	if len(s.Records) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow namespace record limit exceeded")
 	}
 
 	ids := map[string]bool{}
-	sets := map[string]Record{}
+	sets := map[string]workflowstate.Record{}
 	sliceOwners := map[string]string{}
 	graph := map[workflowstate.Ref][]workflowstate.Ref{}
 
 	for _, r := range s.Records {
-		if err := r.Validate(); err != nil {
+		if err := validateWorkflowRecord(r); err != nil {
 			return err
 		}
 
@@ -38,7 +38,7 @@ func (s Snapshot) Validate() error {
 		}
 	}
 
-	if err := s.validateTasks(sets, sliceOwners, graph); err != nil {
+	if err := validateWorkflowSnapshotTasks(s, sets, sliceOwners, graph); err != nil {
 		return err
 	}
 
@@ -53,7 +53,7 @@ func (s Snapshot) Validate() error {
 	return validateWorkflowGraph(graph)
 }
 
-func addWorkflowSlices(r Record, owners map[string]string, graph map[workflowstate.Ref][]workflowstate.Ref) error {
+func addWorkflowSlices(r workflowstate.Record, owners map[string]string, graph map[workflowstate.Ref][]workflowstate.Ref) error {
 	ordered := append([]workflowstate.WorkflowSlice(nil), r.Set.Slices...)
 	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Order < ordered[j].Order })
 
@@ -74,7 +74,7 @@ func addWorkflowSlices(r Record, owners map[string]string, graph map[workflowsta
 	return nil
 }
 
-func (s Snapshot) validateTasks(sets map[string]Record, owners map[string]string, graph map[workflowstate.Ref][]workflowstate.Ref) error {
+func validateWorkflowSnapshotTasks(s workflowstate.Snapshot, sets map[string]workflowstate.Record, owners map[string]string, graph map[workflowstate.Ref][]workflowstate.Ref) error {
 	orders := map[string]map[int]bool{}
 
 	for _, r := range s.Records {
@@ -106,7 +106,7 @@ func (s Snapshot) validateTasks(sets map[string]Record, owners map[string]string
 	return nil
 }
 
-func validateWorkflowTaskOwner(task Task, sets map[string]Record, owners map[string]string, orders map[string]map[int]bool) error {
+func validateWorkflowTaskOwner(task workflowstate.Task, sets map[string]workflowstate.Record, owners map[string]string, orders map[string]map[int]bool) error {
 	set, exists := sets[task.SetID]
 	if !exists || owners[task.SliceID] != task.SetID || (task.UseCase != "" && task.UseCase != set.Set.UseCase) {
 		return fmt.Errorf("foreign or unresolved workflow task association")
@@ -125,7 +125,7 @@ func validateWorkflowTaskOwner(task Task, sets map[string]Record, owners map[str
 	return nil
 }
 
-func validateWorkflowSetOrders(sets map[string]Record) error {
+func validateWorkflowSetOrders(sets map[string]workflowstate.Record) error {
 	orders := map[string]map[int]bool{}
 
 	for _, r := range sets {
@@ -198,7 +198,7 @@ func validateWorkflowGraph(graph map[workflowstate.Ref][]workflowstate.Ref) erro
 	return nil
 }
 
-func validateWorkflowDeliveryBindings(records []Record) error {
+func validateWorkflowDeliveryBindings(records []workflowstate.Record) error {
 	bindings := map[string]bool{}
 
 	for _, r := range records {

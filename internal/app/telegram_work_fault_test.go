@@ -13,6 +13,7 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramWorkLostAck struct {
@@ -85,7 +86,7 @@ func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFi
 	}
 }
 
-func telegramWorkEditSource(t *testing.T, operations service, record workflowcore.Record) {
+func telegramWorkEditSource(t *testing.T, operations service, record workflowstate.Record) {
 	t.Helper()
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: "default"})
@@ -124,7 +125,7 @@ func TestTelegramWorkStalePreview(t *testing.T) {
 	}
 }
 
-func telegramWorkChangePreview(t *testing.T, operations service, record workflowcore.Record, change string) {
+func telegramWorkChangePreview(t *testing.T, operations service, record workflowstate.Record, change string) {
 	t.Helper()
 
 	project := operations.projectContext.ProjectDir

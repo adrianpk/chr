@@ -25,8 +25,8 @@ type MaterializationOptions struct {
 // MaterializationResult returns authoritative set and task records.
 type MaterializationResult struct {
 	ReceiptRef string
-	Set        Record
-	Tasks      []Record
+	Set        workflowstate.Record
+	Tasks      []workflowstate.Record
 }
 
 // MaterializePlan creates one set and one ticket per task, with one descriptor
@@ -82,7 +82,7 @@ func (s *Store) materializePlan(ctx context.Context, opts MaterializationOptions
 	return s.materializeNewPlan(ctx, opts, snapshot, body, coordinator)
 }
 
-func (s *Store) materializeNewPlan(ctx context.Context, opts MaterializationOptions, snapshot Snapshot, body []byte, coordinator []workflowstate.FileChange) (result MaterializationResult, err error) {
+func (s *Store) materializeNewPlan(ctx context.Context, opts MaterializationOptions, snapshot workflowstate.Snapshot, body []byte, coordinator []workflowstate.FileChange) (result MaterializationResult, err error) {
 	guard, err := s.acquireWorkflowAllocation()
 	if err != nil {
 		return result, err
@@ -102,7 +102,7 @@ func (s *Store) materializeNewPlan(ctx context.Context, opts MaterializationOpti
 	snapshot.Records = append(snapshot.Records, result.Set)
 
 	snapshot.Records = append(snapshot.Records, result.Tasks...)
-	if err := snapshot.Validate(); err != nil {
+	if err := validateWorkflowSnapshot(snapshot); err != nil {
 		return result, err
 	}
 
@@ -145,7 +145,7 @@ func (s *Store) materializationFiles(result MaterializationResult, plan generati
 	result.Set.Metadata["materialization_receipt_hash"] = json.RawMessage(fmt.Sprintf("%q", contenthash.Sum(receipt.After)))
 	files := []workflowstate.FileChange{}
 
-	for _, record := range append([]Record{result.Set}, result.Tasks...) {
+	for _, record := range append([]workflowstate.Record{result.Set}, result.Tasks...) {
 		encoded, err := s.encodeChanges(record)
 		if err != nil {
 			return nil, err

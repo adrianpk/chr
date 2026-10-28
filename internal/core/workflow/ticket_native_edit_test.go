@@ -49,7 +49,7 @@ func TestTicketNativeEditing(t *testing.T) {
 	}
 }
 
-func checkNativeTicketIdentity(t *testing.T, store *Store, created Record) {
+func checkNativeTicketIdentity(t *testing.T, store *Store, created workflowstate.Record) {
 	t.Helper()
 
 	read, err := store.Read(t.Context(), created.Path)
@@ -130,7 +130,7 @@ func TestTicketNativeOwnership(t *testing.T) {
 	}
 }
 
-func checkNativeTicketMetadata(t *testing.T, store *Store, opts TicketBoardReadOptions, document TicketDocument, original Record) {
+func checkNativeTicketMetadata(t *testing.T, store *Store, opts TicketBoardReadOptions, document TicketDocument, original workflowstate.Record) {
 	t.Helper()
 
 	_, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{Key: document.Ticket.Key, Revision: document.Revision, Fields: map[string]string{"title": "Display edit", "priority": "high"}, Binding: ticketEditorBinding("display-only")})

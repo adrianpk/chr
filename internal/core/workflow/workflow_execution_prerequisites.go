@@ -14,7 +14,7 @@ type workflowPrerequisiteObservation struct {
 	EvidenceHashes map[string]string
 }
 
-func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvocationFile, record Record) (workflowPrerequisiteObservation, error) {
+func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvocationFile, record workflowstate.Record) (workflowPrerequisiteObservation, error) {
 	selection, err := s.readWorkflowSelection(ctx)
 	if err != nil {
 		return workflowPrerequisiteObservation{Images: nil, EvidenceHashes: nil}, err
@@ -54,7 +54,7 @@ func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvo
 	return workflowPrerequisiteObservation{Images: images, EvidenceHashes: hashes}, nil
 }
 
-func workflowPrerequisiteRecord(selection workflowSelection, ref workflowstate.Ref) Record {
+func workflowPrerequisiteRecord(selection workflowSelection, ref workflowstate.Ref) workflowstate.Record {
 	if ref.Kind == "ticket" {
 		return selection.records[ref.ID]
 	}
@@ -67,7 +67,7 @@ func workflowPrerequisiteRecord(selection workflowSelection, ref workflowstate.R
 		}
 	}
 
-	return Record{}
+	return workflowstate.Record{}
 }
 
 func (s *Store) checkWorkflowPreparedInput(prepared workflowPreparedTask) error {

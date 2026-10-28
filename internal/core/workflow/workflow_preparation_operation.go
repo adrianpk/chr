@@ -1,6 +1,8 @@
 package workflow
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 type workflowClaimedPreparation struct {
 	Claim    *Claim
@@ -36,7 +38,7 @@ type workflowPreparationGitRequest struct {
 }
 
 type workflowPreparationInputChange struct {
-	Record      Record
+	Record      workflowstate.Record
 	Observation workflowSliceObservation
 	Preparation workflowPreparedIntegration
 }

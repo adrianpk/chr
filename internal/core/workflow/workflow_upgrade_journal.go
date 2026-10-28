@@ -153,7 +153,7 @@ func (s *Store) preflightWorkflowUpgradeAdoption(ctx context.Context, opts Upgra
 	snapshot.Records = append(snapshot.Records, result.Set)
 	snapshot.Records = append(snapshot.Records, result.Tasks...)
 
-	return snapshot.Validate()
+	return validateWorkflowSnapshot(snapshot)
 }
 
 func workflowUpgradeJournalImage(journal workflowUpgradeJournal, data []byte, opts UpgradeOptions) ([]byte, error) {

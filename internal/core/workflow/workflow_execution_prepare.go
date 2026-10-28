@@ -61,7 +61,7 @@ func (s *Store) prepareWorkflowTaskHarness(ctx context.Context, claim *Claim, wo
 
 type workflowAttemptPreparation struct {
 	Run     workflowInvocationFile
-	Record  Record
+	Record  workflowstate.Record
 	Worker  []string
 	Mode    workflowPreparationMode
 	Harness *AgentHarness
@@ -103,7 +103,7 @@ func (s *Store) prepareWorkflowAttempt(ctx context.Context, preparation workflow
 	return s.saveWorkflowTaskInput(ctx, preparation.Run, input, preparation.Harness)
 }
 
-func (s *Store) workflowTaskInput(ctx context.Context, run workflowInvocationFile, record Record, worker []string) (TaskInput, error) {
+func (s *Store) workflowTaskInput(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, worker []string) (TaskInput, error) {
 	attempt := run.Attempts[len(run.Attempts)-1]
 
 	input := TaskInput{Schema: "chr-task-input/v1", InvocationID: run.ID, AttemptID: attempt.ID, Generation: attempt.Generation, TaskKey: record.Task.Key, InputRevision: attempt.InputRevision, SourceHash: record.SourceHash, ContractHash: record.Task.ContractHash, Body: string(record.Body), Target: run.ExecutionSelection().Target, Lane: *run.Lane, Worker: slices.Clone(worker)}

@@ -54,7 +54,7 @@ func testWorkflowLooseResumeTarget(t *testing.T, reason string) {
 	}
 }
 
-func workflowLooseConfirmDependency(t *testing.T, f workflowIntegrationFixture, commit string) Record {
+func workflowLooseConfirmDependency(t *testing.T, f workflowIntegrationFixture, commit string) workflowstate.Record {
 	t.Helper()
 
 	record := workflowLooseRecord(t, f.store, "PRJ-89")

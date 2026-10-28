@@ -21,7 +21,7 @@ func (s *Store) workflowNativeReceiptApplication(submission workflowstate.Submis
 	return nil, nil
 }
 
-func (s *Store) checkWorkflowNativeReceiptApplication(receipt Receipt, transaction workflowstate.GitPublicationResult) error {
+func (s *Store) checkWorkflowNativeReceiptApplication(receipt workflowstate.Receipt, transaction workflowstate.GitPublicationResult) error {
 	native := receipt.Native
 	if native.GitApplicationRef == nil {
 		if !validWorkflowNativeReceiptTransaction(*native, transaction) {

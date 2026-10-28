@@ -180,7 +180,7 @@ func TestWorkflowTaskFailures(t *testing.T) {
 	}
 }
 
-func checkWorkflowTaskFailure(t *testing.T, store *Store, task Record, id string, conflict bool) {
+func checkWorkflowTaskFailure(t *testing.T, store *Store, task workflowstate.Record, id string, conflict bool) {
 	t.Helper()
 
 	record, err := store.Read(t.Context(), task.Path)

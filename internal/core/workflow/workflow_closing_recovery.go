@@ -15,7 +15,7 @@ import (
 // ReconcileWorkflowClosing records interruption only after the previous owner
 // expires or dies, every descendant stops, and common capacity is acquired.
 // It does not confirm a gate, remove attempt history or mutate task records.
-func (s *Store) ReconcileWorkflowClosing(ctx context.Context, setPath string) (result Record, err error) {
+func (s *Store) ReconcileWorkflowClosing(ctx context.Context, setPath string) (result workflowstate.Record, err error) {
 	err = s.withLock(ctx, func() error {
 		set, readErr := s.readRecord(setPath)
 		if readErr != nil {
@@ -34,7 +34,7 @@ func (s *Store) ReconcileWorkflowClosing(ctx context.Context, setPath string) (r
 	return result, err
 }
 
-func (s *Store) reconcileWorkflowClosing(ctx context.Context, set Record, control *workflowControlCommit) (result Record, err error) {
+func (s *Store) reconcileWorkflowClosing(ctx context.Context, set workflowstate.Record, control *workflowControlCommit) (result workflowstate.Record, err error) {
 	state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, len(set.Set.Closing.Attempts)-1, workflowClosingEvidence{store: s})
 	if err != nil {
 		return set, err
@@ -87,11 +87,11 @@ func (s *Store) reconcileWorkflowClosing(ctx context.Context, set Record, contro
 	return claim.set, releaseWorkflowAdoptionLocks(locks)
 }
 
-func workflowClosingAttemptID(set Record, generation int) string {
+func workflowClosingAttemptID(set workflowstate.Record, generation int) string {
 	return fmt.Sprintf("%s-attempt-%d", workflowClosingOwnerID(set), generation)
 }
 
-func (s *Store) workflowRecoveredClosingClaim(set Record, state workflowcloseout.Attempt) (*workflowClosingClaim, error) {
+func (s *Store) workflowRecoveredClosingClaim(set workflowstate.Record, state workflowcloseout.Attempt) (*workflowClosingClaim, error) {
 	data, err := (workflowClosingEvidence{store: s}).Read(state.Input.Ref)
 	if err != nil || contenthash.Sum(data) != state.Input.Hash {
 		return nil, errorsOrConflict(err)

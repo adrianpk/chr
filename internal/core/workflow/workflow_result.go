@@ -14,8 +14,8 @@ import (
 // ResultReceipt is validated delivery evidence from the native owner.
 type ResultReceipt struct {
 	Reference workflowstate.EvidenceRef
-	Receipt   Receipt
-	Proof     SliceDeliveryProof
+	Receipt   workflowstate.Receipt
+	Proof     workflowstate.SliceDeliveryProof
 }
 
 // ResultClosure is a successful set gate and its immutable reference.

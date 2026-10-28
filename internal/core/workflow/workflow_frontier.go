@@ -109,7 +109,7 @@ func (s *Store) advanceWorkflowFrontier(ctx context.Context, run *workflowInvoca
 	return nil
 }
 
-func (s *Store) refreshWorkflowNativeFrontier(run *workflowInvocationFile, receipt Record) error {
+func (s *Store) refreshWorkflowNativeFrontier(run *workflowInvocationFile, receipt workflowstate.Record) error {
 	if receipt.Receipt.Native == nil {
 		return nil
 	}

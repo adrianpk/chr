@@ -1,12 +1,16 @@
 package workflow
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestWorkflowFinalizationConcurrent serializes two independent host callers
 // and returns the identical receipt without repeated task fan-out or provider creation.
 func TestWorkflowFinalizationConcurrent(t *testing.T) {
 	fixture := workflowVerifiedDelivery(t, "merge")
-	results := make(chan Record, 2)
+	results := make(chan workflowstate.Record, 2)
 	errors := make(chan error, 2)
 	start := make(chan struct{})
 

@@ -22,7 +22,7 @@ func workflowQuerySQL(q Query) (string, error) {
 	return "", fmt.Errorf("unsupported workflow query kind: %s", q.Kind)
 }
 
-func (i *workflowTicketIndex) queryWorkflowPage(ctx context.Context, store *Store, snapshot Snapshot, q Query) (Page, error) {
+func (i *workflowTicketIndex) queryWorkflowPage(ctx context.Context, store *Store, snapshot workflowstate.Snapshot, q Query) (Page, error) {
 	query, err := workflowQuerySQL(q)
 	if err != nil {
 		return Page{}, err
@@ -63,7 +63,7 @@ func (i *workflowTicketIndex) queryWorkflowPage(ctx context.Context, store *Stor
 	return page, rows.Err()
 }
 
-func appendWorkflowQueryResult(page *Page, snapshot Snapshot, kind, key string) error {
+func appendWorkflowQueryResult(page *Page, snapshot workflowstate.Snapshot, kind, key string) error {
 	for _, r := range snapshot.Records {
 		if kind != "slice" && r.Path == key {
 			page.Records = append(page.Records, r)

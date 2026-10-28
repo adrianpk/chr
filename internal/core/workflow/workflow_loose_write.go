@@ -13,7 +13,7 @@ import (
 
 // Only a revision-guarded write can advance an inactive loose member's expected
 // image. Raw edits and execution/description changes still require reconciliation.
-func (s *Store) workflowLooseWriteChanges(ctx context.Context, next Record, expected uint64, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowLooseWriteChanges(ctx context.Context, next workflowstate.Record, expected uint64, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	if expected == 0 || next.Task == nil {
 		return files, nil
 	}
@@ -57,7 +57,7 @@ func (s *Store) workflowLooseWriteChanges(ctx context.Context, next Record, expe
 	return files, nil
 }
 
-func (s *Store) workflowLooseWriteMember(run *workflowInvocationFile, old, next Record) (bool, error) {
+func (s *Store) workflowLooseWriteMember(run *workflowInvocationFile, old, next workflowstate.Record) (bool, error) {
 	if run.OwnerRoot != s.layout.Root() || run.Namespace != old.Namespace || run.Selection.Selector.Extent != "loose" || workflowInvocationTerminal(run.Status) {
 		return false, nil
 	}
@@ -80,7 +80,7 @@ func (s *Store) workflowLooseWriteMember(run *workflowInvocationFile, old, next 
 	return false, nil
 }
 
-func workflowLooseDisplayWrite(old, next Record) bool {
+func workflowLooseDisplayWrite(old, next workflowstate.Record) bool {
 	if old.Task == nil || next.Task == nil || old.Task.SetID != "" || !slices.Contains([]string{"pending", "blocked"}, old.Task.Phase) {
 		return false
 	}
@@ -95,7 +95,7 @@ func workflowLooseDisplayWrite(old, next Record) bool {
 	return err == nil && reflect.DeepEqual(before, after)
 }
 
-func workflowLooseExecutionImage(record Record) (map[string]json.RawMessage, error) {
+func workflowLooseExecutionImage(record workflowstate.Record) (map[string]json.RawMessage, error) {
 	if strings.HasSuffix(record.Path, ".md") {
 		data, err := encodeWorkflowMarkdown(record)
 		if err != nil {

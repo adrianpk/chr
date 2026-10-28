@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -182,7 +183,7 @@ func webHarnessCheckRetained(t *testing.T, operations service, before workflowco
 	}
 }
 
-func webHarnessCheckNewInvocation(t *testing.T, operations service, record workflowcore.Record, request workflowcore.StartRequest) {
+func webHarnessCheckNewInvocation(t *testing.T, operations service, record workflowstate.Record, request workflowcore.StartRequest) {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -193,7 +194,7 @@ func webHarnessCheckNewInvocation(t *testing.T, operations service, record workf
 	task := *record.Task
 
 	task.Key = "PRJ-91"
-	if _, err := store.Create(t.Context(), "Later independent task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Later independent task", workflowstate.Record{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
 		t.Fatal(err)
 	}
 

@@ -8,8 +8,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// CheckAttempt validates bounded process and outcome records without observing live processes.
-func CheckAttempt(setID string, closing *workflowstate.WorkflowClosingBinding, index int, state Attempt) error {
+// checkAttempt validates bounded process and outcome records without observing live processes.
+func checkAttempt(setID string, closing *workflowstate.WorkflowClosingBinding, index int, state Attempt) error {
 	if !attemptIdentity(setID, index, state) {
 		return workflowstate.ErrConflict
 	}

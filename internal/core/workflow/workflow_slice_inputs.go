@@ -13,8 +13,8 @@ import (
 
 type workflowSliceObservation struct {
 	descriptor workflowstate.WorkflowSlice
-	set        Record
-	tasks      []Record
+	set        workflowstate.Record
+	tasks      []workflowstate.Record
 }
 
 func (s *Store) observeWorkflowSlice(ctx context.Context, run workflowInvocationFile) (workflowSliceObservation, error) {
@@ -100,7 +100,7 @@ func checkWorkflowSliceMembership(run workflowInvocationFile, observation workfl
 	return nil
 }
 
-func (s *Store) workflowSliceInput(ctx context.Context, run workflowInvocationFile, record Record, observation workflowSliceObservation) (TaskInput, error) {
+func (s *Store) workflowSliceInput(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, observation workflowSliceObservation) (TaskInput, error) {
 	input, err := s.workflowTaskInput(ctx, run, record, nil)
 	if err != nil {
 		return input, err
@@ -160,7 +160,7 @@ func (s *Store) readWorkflowSliceContract(descriptor workflowstate.WorkflowSlice
 	return contract, workflowstate.ValidateGate(contract.Validation)
 }
 
-func (s *Store) workflowSliceTaskProof(ctx context.Context, run workflowInvocationFile, record Record) (workflowstate.SliceTaskProof, error) {
+func (s *Store) workflowSliceTaskProof(ctx context.Context, run workflowInvocationFile, record workflowstate.Record) (workflowstate.SliceTaskProof, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
 		return workflowstate.SliceTaskProof{}, err

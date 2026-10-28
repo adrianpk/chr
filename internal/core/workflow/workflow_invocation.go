@@ -541,7 +541,7 @@ func (s *Store) attachWorkflowInvocation(run workflowInvocationFile, key string)
 	return owner.readWorkflowInvocation(run.ID)
 }
 
-func workflowInvocationCreationFiles(envelope Record, run workflowInvocationFile) ([]workflowstate.FileChange, error) {
+func workflowInvocationCreationFiles(envelope workflowstate.Record, run workflowInvocationFile) ([]workflowstate.FileChange, error) {
 	fields, err := mergeWorkflowFields(envelope.Metadata, envelope.Identity)
 	if err != nil {
 		return nil, err

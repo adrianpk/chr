@@ -45,7 +45,7 @@ func TestWorkflowAmendmentRecovery(t *testing.T) {
 	}
 }
 
-func checkWorkflowAmendmentRestart(t *testing.T, store *Store, id string, set Record, amend SetAmendmentRequest) {
+func checkWorkflowAmendmentRestart(t *testing.T, store *Store, id string, set workflowstate.Record, amend SetAmendmentRequest) {
 	t.Helper()
 
 	current, err := store.ReconcileWorkflowMembership(t.Context(), id)

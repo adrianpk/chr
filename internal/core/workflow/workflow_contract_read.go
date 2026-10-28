@@ -40,7 +40,7 @@ func (s *Store) readContractImage(reference, expectedHash string) ([]byte, error
 	return data, nil
 }
 
-func (s *Store) guardMutationContracts(record Record, expected uint64, snapshot Snapshot) error {
+func (s *Store) guardMutationContracts(record workflowstate.Record, expected uint64, snapshot workflowstate.Snapshot) error {
 	if record.Set == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func (s *Store) guardMutationContracts(record Record, expected uint64, snapshot 
 	return s.guardMutationSlices(record, snapshot)
 }
 
-func (s *Store) guardMutationSlices(record Record, snapshot Snapshot) error {
+func (s *Store) guardMutationSlices(record workflowstate.Record, snapshot workflowstate.Snapshot) error {
 	previous, err := s.readRecord(record.Path)
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (s *Store) guardMutationSlices(record Record, snapshot Snapshot) error {
 	return nil
 }
 
-func newMutationSlice(previous Record, next workflowstate.WorkflowSlice) bool {
+func newMutationSlice(previous workflowstate.Record, next workflowstate.WorkflowSlice) bool {
 	for _, old := range previous.Set.Slices {
 		if old.ID == next.ID {
 			return old.ContractRef != next.ContractRef || old.ContractHash != next.ContractHash || old.TaskInputHash != next.TaskInputHash
@@ -92,8 +92,8 @@ func newMutationSlice(previous Record, next workflowstate.WorkflowSlice) bool {
 	return true
 }
 
-func workflowMutationSetMembers(snapshot Snapshot, setID string) []Record {
-	var members []Record
+func workflowMutationSetMembers(snapshot workflowstate.Snapshot, setID string) []workflowstate.Record {
+	var members []workflowstate.Record
 
 	for _, member := range snapshot.Records {
 		if member.Task != nil && member.Task.SetID == setID {

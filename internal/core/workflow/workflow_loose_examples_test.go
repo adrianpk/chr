@@ -61,7 +61,7 @@ func configureWorkflowLooseExample(t *testing.T, store *Store, request *StartReq
 	}
 }
 
-func workflowLooseFields(t *testing.T, store *Store, key, area, priority, severity string) Record {
+func workflowLooseFields(t *testing.T, store *Store, key, area, priority, severity string) workflowstate.Record {
 	t.Helper()
 
 	record := workflowLooseRecord(t, store, key)

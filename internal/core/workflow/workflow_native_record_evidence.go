@@ -197,7 +197,7 @@ func (s *Store) checkWorkflowNativeValidationInput(b workflowstate.NativeRecordB
 	return workflowintegrate.CheckGate(input.Contract.Validation, result)
 }
 
-func (s *Store) checkWorkflowNativeReceipt(record Record) error {
+func (s *Store) checkWorkflowNativeReceipt(record workflowstate.Record) error {
 	receipt := record.Receipt
 	if err := validateWorkflowReceiptSchema(*receipt); err != nil || receipt.Native == nil {
 		return err
@@ -224,7 +224,7 @@ func (s *Store) checkWorkflowNativeReceipt(record Record) error {
 	return s.checkWorkflowNativeReceiptObservations(*receipt)
 }
 
-func (s *Store) checkWorkflowNativeReceiptObservations(receipt Receipt) error {
+func (s *Store) checkWorkflowNativeReceiptObservations(receipt workflowstate.Receipt) error {
 	native := receipt.Native
 
 	var transaction workflowstate.GitPublicationResult
@@ -260,7 +260,7 @@ func (s *Store) checkWorkflowNativeReceiptObservations(receipt Receipt) error {
 	return nil
 }
 
-func workflowNativeReceiptCandidateMatches(receipt Receipt, candidate workflowstate.IntegrationCandidate) bool {
+func workflowNativeReceiptCandidateMatches(receipt workflowstate.Receipt, candidate workflowstate.IntegrationCandidate) bool {
 	if candidate.Native == nil || receipt.CandidateID != candidate.Input.Source.CandidateID {
 		return false
 	}
@@ -293,7 +293,7 @@ func (s *Store) checkWorkflowNativeTransactionRevision(native workflowstate.Nati
 	return nil
 }
 
-func validateWorkflowNativeReceiptObservation(receipt Receipt, observation workflowstate.NativePublicationObservation) error {
+func validateWorkflowNativeReceiptObservation(receipt workflowstate.Receipt, observation workflowstate.NativePublicationObservation) error {
 	native := receipt.Native
 	if !workflowNativeObservationTargetValid(observation) || !validWorkflowNativeReceiptObservationHeader(receipt, observation) {
 		return workflowstate.ErrConflict
@@ -383,7 +383,7 @@ func validWorkflowNativeReceiptTransaction(native workflowstate.NativeReceipt, t
 	return expected == actual && transaction.CommandsSent && workflowstate.ValidFingerprint(transaction.CandidateRevision)
 }
 
-func validWorkflowNativeReceiptObservationHeader(receipt Receipt, observation workflowstate.NativePublicationObservation) bool {
+func validWorkflowNativeReceiptObservationHeader(receipt workflowstate.Receipt, observation workflowstate.NativePublicationObservation) bool {
 	native, pr := receipt.Native, observation.PullRequest
 	if observation.CanonicalPR != "" && observation.CanonicalPR != native.CanonicalPR {
 		return false

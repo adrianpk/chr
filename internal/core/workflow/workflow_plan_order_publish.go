@@ -62,7 +62,7 @@ func (s *Store) materializedOrderChanges(result *MaterializationResult, plan gen
 	return append(append(changes, registered...), current...), nil
 }
 
-func workflowBoundTrackerStatus(s *Store, set Record, binding workflowstate.PlanRevisionBinding, sourceHash string) TrackerStatus {
+func workflowBoundTrackerStatus(s *Store, set workflowstate.Record, binding workflowstate.PlanRevisionBinding, sourceHash string) TrackerStatus {
 	return TrackerStatus{Schema: "chr-tracker/v2", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: set.ID, Path: "tracker/" + set.ID + ".md", PlanRevision: &binding, SourceHash: sourceHash, OutputHash: binding.TrackerHash, ObservedHash: binding.TrackerHash, GeneratedAt: time.Now().UTC(), Status: "current", Sources: []TrackerSource{{ID: set.ID, Path: set.Path, Hash: sourceHash}, {Path: binding.BodyRef, Hash: binding.BodyHash}}}
 }
 

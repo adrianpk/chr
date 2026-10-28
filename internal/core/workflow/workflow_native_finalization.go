@@ -13,28 +13,28 @@ import (
 func (s *Store) finalizeWorkflowNativeUnit(ctx context.Context, run workflowInvocationFile) (workflowNativeFinalization, error) {
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if errors.Is(err, os.ErrNotExist) {
-		return workflowNativeFinalization{Handled: false, Receipt: Record{}}, nil
+		return workflowNativeFinalization{Handled: false, Receipt: workflowstate.Record{}}, nil
 	}
 
 	if err != nil {
-		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, err
+		return workflowNativeFinalization{Handled: true, Receipt: workflowstate.Record{}}, err
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
 	if last.Native == nil {
-		return workflowNativeFinalization{Handled: false, Receipt: Record{}}, nil
+		return workflowNativeFinalization{Handled: false, Receipt: workflowstate.Record{}}, nil
 	}
 
 	if last.State != workflowstate.SubmissionConfirmed {
-		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, ErrWorkflowObservationRequired
+		return workflowNativeFinalization{Handled: true, Receipt: workflowstate.Record{}}, ErrWorkflowObservationRequired
 	}
 
 	if err := s.checkWorkflowNativeSubmissionEvidence(ctx, last); err != nil {
-		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, err
+		return workflowNativeFinalization{Handled: true, Receipt: workflowstate.Record{}}, err
 	}
 
 	if err := s.projectWorkflowNativeSubmission(&run, journal); err != nil {
-		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, err
+		return workflowNativeFinalization{Handled: true, Receipt: workflowstate.Record{}}, err
 	}
 
 	receipt, err := s.finalizeWorkflowNativeReceipt(ctx, &run)
@@ -42,10 +42,10 @@ func (s *Store) finalizeWorkflowNativeUnit(ctx context.Context, run workflowInvo
 	return workflowNativeFinalization{Handled: true, Receipt: receipt}, err
 }
 
-func (s *Store) finalizeWorkflowNativeReceipt(ctx context.Context, run *workflowInvocationFile) (Record, error) {
+func (s *Store) finalizeWorkflowNativeReceipt(ctx context.Context, run *workflowInvocationFile) (workflowstate.Record, error) {
 	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if entry.State == "integrated" {
@@ -53,7 +53,7 @@ func (s *Store) finalizeWorkflowNativeReceipt(ctx context.Context, run *workflow
 	}
 
 	if entry.State != "finalizing" {
-		return Record{}, workflowstate.ErrConflict
+		return workflowstate.Record{}, workflowstate.ErrConflict
 	}
 
 	receipt, err := s.readWorkflowFinalizationReceipt(ctx, *run)
@@ -76,7 +76,7 @@ func (s *Store) finalizeWorkflowNativeReceipt(ctx context.Context, run *workflow
 	return s.readWorkflowSliceReceipt(ctx, *run)
 }
 
-func (s *Store) commitWorkflowNativeFanout(ctx context.Context, run *workflowInvocationFile, entry IntegrationEntry, observation workflowSliceObservation, receipt Record) error {
+func (s *Store) commitWorkflowNativeFanout(ctx context.Context, run *workflowInvocationFile, entry IntegrationEntry, observation workflowSliceObservation, receipt workflowstate.Record) error {
 	if entry.Revision == math.MaxUint64 || entry.StateRevision == math.MaxUint64 {
 		return workflowstate.IntegrationConflict("finalization revision exhausted")
 	}
@@ -96,7 +96,7 @@ func (s *Store) commitWorkflowNativeFanout(ctx context.Context, run *workflowInv
 		return err
 	}
 
-	if err := snapshot.Validate(); err != nil {
+	if err := validateWorkflowSnapshot(snapshot); err != nil {
 		return err
 	}
 

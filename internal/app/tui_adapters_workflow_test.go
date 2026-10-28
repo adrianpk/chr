@@ -148,7 +148,7 @@ func TestTUIWorkflowApproval(t *testing.T) {
 	checkTUIWorkflowApproval(t, operations, executor, *result.Workflow)
 }
 
-func checkTUIWorkflowPreview(t *testing.T, operations service, executor tuiWorkActionExecutor, request tui.WorkActionRequest, selected workflowcore.Record, identity string, before map[string][32]byte) {
+func checkTUIWorkflowPreview(t *testing.T, operations service, executor tuiWorkActionExecutor, request tui.WorkActionRequest, selected workflowstate.Record, identity string, before map[string][32]byte) {
 	t.Helper()
 
 	input := *request.Workflow

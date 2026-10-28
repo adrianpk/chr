@@ -163,7 +163,7 @@ func appendWorkflowAgentBudgetFile(files []workflowstate.FileChange, file workfl
 	return append(files, file)
 }
 
-func (s *Store) workflowAgentCreationFiles(ctx context.Context, envelope Record, run *workflowInvocationFile) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowAgentCreationFiles(ctx context.Context, envelope workflowstate.Record, run *workflowInvocationFile) ([]workflowstate.FileChange, error) {
 	file, err := s.workflowAgentBudgetCreation(ctx, run)
 	if err != nil {
 		return nil, err

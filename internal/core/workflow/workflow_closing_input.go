@@ -1,84 +1,40 @@
 package workflow
 
 import (
-	"cmp"
 	"context"
-	"encoding/json"
-	"fmt"
-	"slices"
-	"strings"
 
-	"forge.adrianpk.com/chr/internal/core/contenthash"
-	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowClosingInput(ctx context.Context, set Record, request SetClosureRequest, ports FrontierPorts) (workflowstate.ClosingInput, error) {
-	seconds, err := s.workflowClosingValidationTimeout(ctx, request.InvocationID, set.Set.ClosingValidation.TimeoutSeconds)
-	if err != nil {
-		return workflowstate.ClosingInput{}, err
-	}
-
-	target, err := s.observeWorkflowClosingTarget(ctx, request, ports)
-	if err != nil {
-		return workflowstate.ClosingInput{}, err
-	}
-
-	contract, err := json.Marshal(set.Set.ClosingValidation)
-	if err != nil {
-		return workflowstate.ClosingInput{}, err
-	}
-
-	input := workflowstate.ClosingInput{Schema: "chr-set-closing-input/v1", SetID: set.ID, SetRevision: set.Revision, SetSourceHash: set.SourceHash, ProjectID: set.ProjectID, Namespace: set.Namespace, Plan: workflowstate.ClosingEvidence{Ref: set.Set.PlanRef, Hash: set.Set.PlanHash}, Validation: set.Set.ClosingValidation, ContractHash: contenthash.Sum(contract), Target: target, Branch: request.Branch, EvidenceHashes: map[string]string{set.Set.PlanRef: set.Set.PlanHash}}
-	input.ValidationTimeoutSeconds = seconds
-	reader := workflowProofReader{store: s}
-
-	input.Tree, err = reader.gitOutput(ctx, "rev-parse", "--verify", target.Commit+"^{tree}")
-	if err != nil {
-		return input, err
-	}
-
-	input.Members, err = s.workflowClosingMembers(ctx, set.ID)
-	if err != nil {
-		return input, err
-	}
-
-	descriptors := slices.Clone(set.Set.Slices)
-	slices.SortFunc(descriptors, func(a, b workflowstate.WorkflowSlice) int { return cmp.Compare(a.Order, b.Order) })
-
-	for _, descriptor := range descriptors {
-		proof, err := s.workflowClosingSliceProof(ctx, input, descriptor, ports)
-		if err != nil {
-			return input, err
-		}
-
-		input.Slices = append(input.Slices, proof)
-	}
-
-	return input, s.checkWorkflowPrerequisiteEvidence(input.EvidenceHashes)
+// Bound IO keeps configuration, canonical observation and native guards with the host.
+type workflowClosingInputSource struct {
+	store *Store
+	ports FrontierPorts
 }
 
-func (s *Store) workflowClosingMembers(ctx context.Context, id string) ([]workflowstate.ClosingMember, error) {
-	snapshot, err := s.readSnapshot(ctx)
-	if err != nil {
-		return nil, err
-	}
+func (source workflowClosingInputSource) ValidationTimeout(ctx context.Context, id string, contract int) (int, error) {
+	return source.store.workflowClosingValidationTimeout(ctx, id, contract)
+}
 
-	members := []workflowstate.ClosingMember{}
+func (source workflowClosingInputSource) Target(ctx context.Context, request workflowcloseout.Request) (workflowstate.PreviewTarget, error) {
+	return source.store.observeWorkflowClosingTarget(ctx, request, source.ports)
+}
 
-	for _, record := range snapshot.Records {
-		if record.Task == nil || record.Task.SetID != id {
-			continue
-		}
+func (source workflowClosingInputSource) Tree(ctx context.Context, commit string) (string, error) {
+	reader := workflowProofReader{store: source.store}
 
-		if record.Task.Phase != "integrated" || record.Task.Status != string(ticketcore.StatusDone) || record.Task.AttemptID != "" {
-			return nil, fmt.Errorf("%w: actual member %s requires integration", workflowstate.ErrConflict, record.Task.Key)
-		}
+	return reader.gitOutput(ctx, "rev-parse", "--verify", commit+"^{tree}")
+}
 
-		members = append(members, workflowstate.ClosingMember{Identity: record.Identity, Key: record.Task.Key, Path: record.Path, SourceHash: record.SourceHash, SliceID: record.Task.SliceID, Order: record.Task.Order})
-	}
+func (source workflowClosingInputSource) Snapshot(ctx context.Context) (workflowstate.Snapshot, error) {
+	return source.store.readSnapshot(ctx)
+}
 
-	slices.SortFunc(members, func(a, b workflowstate.ClosingMember) int { return strings.Compare(a.Key, b.Key) })
+func (source workflowClosingInputSource) Slice(ctx context.Context, input workflowstate.ClosingInput, descriptor workflowstate.WorkflowSlice) (workflowstate.ClosingSlice, error) {
+	return source.store.workflowClosingSliceProof(ctx, input, descriptor, source.ports)
+}
 
-	return members, nil
+func (source workflowClosingInputSource) Check(hashes map[string]string) error {
+	return source.store.checkWorkflowPrerequisiteEvidence(hashes)
 }

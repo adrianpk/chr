@@ -143,7 +143,7 @@ func testWorkflowReviewApproval(t *testing.T, mode workflowstate.ReviewMode) {
 	}
 }
 
-func checkWorkflowReviewProjection(t *testing.T, store *Store, tasks []Record, binding workflowstate.ReviewBinding) {
+func checkWorkflowReviewProjection(t *testing.T, store *Store, tasks []workflowstate.Record, binding workflowstate.ReviewBinding) {
 	t.Helper()
 
 	for _, task := range tasks {

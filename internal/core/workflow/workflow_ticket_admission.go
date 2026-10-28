@@ -48,7 +48,7 @@ func (s *Store) PreviewWorkflowTicketAdmission(ctx context.Context, member Previ
 	return result, err
 }
 
-func workflowTicketAdmission(record Record) (*workflowstate.TicketAdmission, error) {
+func workflowTicketAdmission(record workflowstate.Record) (*workflowstate.TicketAdmission, error) {
 	if err := validateWorkflowClaimContract(record); err != nil {
 		return nil, err
 	}

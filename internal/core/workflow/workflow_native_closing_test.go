@@ -9,7 +9,7 @@ import (
 
 type nativeClosingFixture struct {
 	fixture nativeCanonicalFixture
-	receipt Record
+	receipt workflowstate.Record
 	setPath string
 }
 

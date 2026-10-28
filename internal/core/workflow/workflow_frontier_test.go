@@ -29,7 +29,7 @@ func workflowFrontierPorts(fixture workflowIntegrationFixture) FrontierPorts {
 	return FrontierPorts{Provider: workflowFrontierProvider{fixture.provider, fixture.remote}, Observer: fixture.git, Target: fixture.git}
 }
 
-func workflowFinalizeFrontier(t *testing.T, fixture workflowIntegrationFixture) Record {
+func workflowFinalizeFrontier(t *testing.T, fixture workflowIntegrationFixture) workflowstate.Record {
 	t.Helper()
 
 	if _, err := fixture.store.VerifyWorkflowSliceIntegration(t.Context(), fixture.run.ID, "rebase", fixture.provider, fixture.git); err != nil {
@@ -119,7 +119,7 @@ func checkWorkflowFrontierBarrier(t *testing.T, fixture workflowIntegrationFixtu
 	}
 }
 
-func checkWorkflowFrontierNext(t *testing.T, fixture workflowIntegrationFixture, run Invocation, receipt Record) {
+func checkWorkflowFrontierNext(t *testing.T, fixture workflowIntegrationFixture, run Invocation, receipt workflowstate.Record) {
 	t.Helper()
 	checkWorkflowFrontierCleared(t, run)
 

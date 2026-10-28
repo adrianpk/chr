@@ -18,14 +18,14 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) prepareLegacyWorkflowPlan(opts PlanAdoptionOptions) (Record, error) {
+func (s *Store) prepareLegacyWorkflowPlan(opts PlanAdoptionOptions) (workflowstate.Record, error) {
 	if err := validateLegacyWorkflowPlanPath(opts); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	path, err := s.safePath(opts.PlanPath)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	record, err := readWorkflowEnvelope(path)
@@ -63,7 +63,7 @@ func (s *Store) prepareLegacyWorkflowPlan(opts PlanAdoptionOptions) (Record, err
 }
 
 type workflowAdoptionTasks struct {
-	Records []Record
+	Records []workflowstate.Record
 	Keys    []string
 }
 
@@ -79,7 +79,7 @@ func (s *Store) prepareLegacyWorkflowTasks(plan generationcore.GeneratedWorkflow
 		byID[selection.TaskID], paths[selection.Path] = selection, true
 	}
 
-	records := []Record{}
+	records := []workflowstate.Record{}
 	keys := []string{}
 
 	for _, slice := range plan.Slices {
@@ -106,47 +106,47 @@ func (s *Store) prepareLegacyWorkflowTasks(plan generationcore.GeneratedWorkflow
 	return workflowAdoptionTasks{Records: records, Keys: keys}, nil
 }
 
-func (s *Store) prepareLegacyWorkflowTicket(selection AdoptionTask, body, useCase string) (Record, error) {
+func (s *Store) prepareLegacyWorkflowTicket(selection AdoptionTask, body, useCase string) (workflowstate.Record, error) {
 	if !strings.HasPrefix(selection.Path, "ticket/") {
-		return Record{}, fmt.Errorf("selected ticket must belong to the namespace")
+		return workflowstate.Record{}, fmt.Errorf("selected ticket must belong to the namespace")
 	}
 
 	path, err := s.safePath(selection.Path)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	data, err := opsfile.Read(path)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	parsedMarkdown, err := workflowstate.RequireMarkdown(data)
 	front, original := parsedMarkdown.Front, parsedMarkdown.Body
 
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	fields, err := workflowMarkdownFields(front)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := s.checkLegacyWorkflowTicket(fields, original, body, useCase); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	var key, status string
 	if err := json.Unmarshal(fields["key"], &key); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if err := json.Unmarshal(fields["status"], &status); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
-	task := Task{Schema: WorkflowSchema, Key: key, Status: status, Phase: "pending", ContractHash: "adoption-pending"}
+	task := workflowstate.Task{Schema: workflowstate.WorkflowSchema, Key: key, Status: status, Phase: "pending", ContractHash: "adoption-pending"}
 
 	return s.prepareAdoption(selection.Path, task, selection.SourceHash)
 }
@@ -178,7 +178,7 @@ func (s *Store) checkLegacyWorkflowTicket(fields map[string]json.RawMessage, bod
 	return nil
 }
 
-func (s *Store) bindLegacyWorkflowTasks(templates, selected []Record) ([]Record, error) {
+func (s *Store) bindLegacyWorkflowTasks(templates, selected []workflowstate.Record) ([]workflowstate.Record, error) {
 	for i := range templates {
 		record := selected[i]
 		task := *templates[i].Task
@@ -198,7 +198,7 @@ func (s *Store) bindLegacyWorkflowTasks(templates, selected []Record) ([]Record,
 	return templates, nil
 }
 
-func (s *Store) checkLegacyWorkflowKeys(ctx context.Context, selected []Record) error {
+func (s *Store) checkLegacyWorkflowKeys(ctx context.Context, selected []workflowstate.Record) error {
 	owners := map[string]string{}
 	for _, record := range selected {
 		if owners[record.Task.Key] != "" {
@@ -294,7 +294,7 @@ func (s *Store) checkLegacyWorkflowScope(fields map[string]json.RawMessage, useC
 	return validateLegacyWorkflowUseCase(fields, useCase)
 }
 
-func (s *Store) legacyWorkflowPlanScope(record Record) bool {
+func (s *Store) legacyWorkflowPlanScope(record workflowstate.Record) bool {
 	return record.Kind == "plan" && record.Namespace == s.layout.Namespace() && (record.ProjectID == "" || record.ProjectID == s.projectID)
 }
 

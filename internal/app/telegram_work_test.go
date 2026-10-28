@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramWorkFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, workflowcore.Record) {
+func telegramWorkFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, workflowstate.Record) {
 	t.Helper()
 
 	operations, record, _, _ := serviceWorkNativeFixture(t, plans...)
@@ -74,7 +74,7 @@ func telegramWorkBindCase(t *testing.T, operations service) {
 	}
 }
 
-func telegramWorkSelector(t *testing.T, operations service, independent workflowcore.Record, extent string) workflowstate.Selector {
+func telegramWorkSelector(t *testing.T, operations service, independent workflowstate.Record, extent string) workflowstate.Selector {
 	t.Helper()
 
 	selector := workflowstate.Selector{Extent: extent}

@@ -23,7 +23,7 @@ type nativeHostFixture struct {
 func newNativeHostFixture(t *testing.T) nativeHostFixture {
 	t.Helper()
 
-	f, _ := workflowTicketConfiguredFixture(t, "rebase", "ticket", func(_ *Store, _ Record, request *StartRequest) {
+	f, _ := workflowTicketConfiguredFixture(t, "rebase", "ticket", func(_ *Store, _ workflowstate.Record, request *StartRequest) {
 		request.Policy.MaxWorkerAttempts, request.Policy.MaxIntegrationAttempts = 1, 1
 	})
 	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "work", "integration.publication_profile", workspaceconfig.WorkflowPublicationGitAtomicDualRef)

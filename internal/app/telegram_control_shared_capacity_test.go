@@ -133,7 +133,7 @@ func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture
 		task := *original.Task
 
 		task.Key = fmt.Sprintf("PRJ-%d", 90+index)
-		if _, err := store.Create(t.Context(), "Independent capacity task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: original.Domain, Body: original.Body}); err != nil {
+		if _, err := store.Create(t.Context(), "Independent capacity task", workflowstate.Record{Kind: "ticket", Task: &task, Domain: original.Domain, Body: original.Body}); err != nil {
 			t.Fatal(err)
 		}
 

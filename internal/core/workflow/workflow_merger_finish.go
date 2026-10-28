@@ -47,7 +47,7 @@ func (s *Store) finishWorkflowMerger(ctx context.Context, claimed workflowClaime
 	})
 }
 
-func (s *Store) persistWorkflowMergerFinish(ctx context.Context, run *workflowInvocationFile, record Record, claim *Claim, result MergerAttempt) error {
+func (s *Store) persistWorkflowMergerFinish(ctx context.Context, run *workflowInvocationFile, record workflowstate.Record, claim *Claim, result MergerAttempt) error {
 	data, err := encodeWorkflowMergerAttempt(result)
 	if err != nil {
 		return err

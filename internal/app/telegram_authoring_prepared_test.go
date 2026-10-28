@@ -10,7 +10,7 @@ import (
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramAuthoringPreparedFixture(t *testing.T, start string) (*telegramConversationAppFixture, string, *atomic.Int64) {
@@ -67,7 +67,7 @@ func telegramAuthoringPreparedLatest(t *testing.T, f *telegramConversationAppFix
 	return request
 }
 
-func telegramAuthoringPreparedStore(t *testing.T, f *telegramConversationAppFixture) (service, []workflowcore.Record) {
+func telegramAuthoringPreparedStore(t *testing.T, f *telegramConversationAppFixture) (service, []workflowstate.Record) {
 	t.Helper()
 
 	operations := telegramOperationConcreteService(t, f.receiver)
@@ -115,7 +115,7 @@ func telegramAuthoringPreparedCheck(t *testing.T, f *telegramConversationAppFixt
 	return result
 }
 
-func telegramAuthoringPreparedRecord(t *testing.T, records []workflowcore.Record, result AuthoringWorkResult) {
+func telegramAuthoringPreparedRecord(t *testing.T, records []workflowstate.Record, result AuthoringWorkResult) {
 	t.Helper()
 
 	for _, record := range records {

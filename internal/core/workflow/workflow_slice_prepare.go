@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowSliceValidationPreparation struct {
@@ -103,7 +105,7 @@ func (s *Store) claimWorkflowSliceValidation(ctx context.Context, run workflowIn
 	return workflowSliceValidationClaim{Claim: claim, Prepared: prepared}, err
 }
 
-func (s *Store) commitWorkflowSliceInput(ctx context.Context, run workflowInvocationFile, record Record, observation workflowSliceObservation) (workflowPreparedTask, error) {
+func (s *Store) commitWorkflowSliceInput(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, observation workflowSliceObservation) (workflowPreparedTask, error) {
 	// Proofs are observed before the journal changes the anchor's claim image.
 	input, err := s.workflowSliceInput(ctx, run, record, observation)
 	if err != nil {

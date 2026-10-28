@@ -21,16 +21,16 @@ import (
 type MutationRequest struct {
 	Binding          workflowstate.MutationBinding `json:"binding"`
 	Title            string                        `json:"title"`
-	Record           Record                        `json:"record"`
+	Record           workflowstate.Record          `json:"record"`
 	ExpectedRevision uint64                        `json:"expected_revision"`
 }
 
 // MutationResult is the original confirmed record and its durable receipt.
 type MutationResult struct {
-	RequestID      string `json:"request_id"`
-	ArgumentDigest string `json:"argument_digest"`
-	ReceiptRef     string `json:"receipt_ref"`
-	Record         Record `json:"record"`
+	RequestID      string               `json:"request_id"`
+	ArgumentDigest string               `json:"argument_digest"`
+	ReceiptRef     string               `json:"receipt_ref"`
+	Record         workflowstate.Record `json:"record"`
 }
 
 // MutationLookup distinguishes a confirmed replay from a request without a receipt.
@@ -45,7 +45,7 @@ type workflowNormalizedMutation struct {
 }
 
 type workflowPreparedMutation struct {
-	Record  Record
+	Record  workflowstate.Record
 	Changes []workflowstate.FileChange
 }
 
@@ -169,7 +169,7 @@ func validateWorkflowMutationResult(receipt workflowMutationReceipt, request Mut
 		return fmt.Errorf("%w: mutation request payload changed", workflowstate.ErrConflict)
 	}
 
-	return result.Record.Validate()
+	return validateWorkflowRecord(result.Record)
 }
 
 func (s *Store) mutationReceiptChange(request MutationRequest, result MutationResult) (workflowstate.FileChange, error) {
@@ -340,7 +340,7 @@ func workflowMutationOperation(request MutationRequest) string {
 	return "record.update"
 }
 
-func (s *Store) prepareMutationRecord(request MutationRequest) (Record, error) {
+func (s *Store) prepareMutationRecord(request MutationRequest) (workflowstate.Record, error) {
 	record := request.Record
 	if err := s.validateMutationScope(record); err != nil {
 		return record, err
@@ -367,7 +367,7 @@ func (s *Store) prepareMutationRecord(request MutationRequest) (Record, error) {
 	return record, nil
 }
 
-func (s *Store) validateMutationScope(record Record) error {
+func (s *Store) validateMutationScope(record workflowstate.Record) error {
 	if record.ProjectID != "" && record.ProjectID != s.projectID {
 		return fmt.Errorf("%w: foreign mutation project", workflowstate.ErrConflict)
 	}

@@ -101,7 +101,7 @@ func seedWorkflowClosingBudget(t *testing.T, store *Store, path, id string) {
 	}
 }
 
-func workflowClosingBudgetImages(t *testing.T, set *Record, state workflowcloseout.Attempt, input []byte) []workflowstate.FileChange {
+func workflowClosingBudgetImages(t *testing.T, set *workflowstate.Record, state workflowcloseout.Attempt, input []byte) []workflowstate.FileChange {
 	t.Helper()
 
 	files := []workflowstate.FileChange{}

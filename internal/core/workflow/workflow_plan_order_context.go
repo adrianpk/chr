@@ -27,7 +27,7 @@ type OrderMapInput struct {
 	Content    string                            `json:"content"`
 }
 
-func (s *Store) requiredWorkflowOrderMap(ctx context.Context, record Record) (*OrderMapInput, error) {
+func (s *Store) requiredWorkflowOrderMap(ctx context.Context, record workflowstate.Record) (*OrderMapInput, error) {
 	if record.Task.SetID == "" {
 		return nil, nil
 	}
@@ -80,7 +80,7 @@ func (s *Store) checkRequiredOrderImages(source TrackerStatus, output []byte) er
 	return nil
 }
 
-func (s *Store) repairRequiredOrderImages(snapshot Snapshot, source TrackerStatus, output []byte, opts TrackerOptions) error {
+func (s *Store) repairRequiredOrderImages(snapshot workflowstate.Snapshot, source TrackerStatus, output []byte, opts TrackerOptions) error {
 	images, err := s.requiredOrderRepairImages(snapshot, source, output)
 	if err != nil {
 		return err
@@ -143,7 +143,7 @@ func (s *Store) retainedOrderRegistration(setID string) (workflowTrackerRegistra
 	return workflowTrackerRegistration{Status: status, Found: true}, nil
 }
 
-func (s *Store) guardBoundWorkflowTaskOrder(old, next Record) error {
+func (s *Store) guardBoundWorkflowTaskOrder(old, next workflowstate.Record) error {
 	if old.Task == nil || old.Task.SetID == "" {
 		return nil
 	}
@@ -190,7 +190,7 @@ type workflowOrderRepairImage struct {
 	body      []byte
 }
 
-func (s *Store) requiredOrderRepairImages(snapshot Snapshot, source TrackerStatus, output []byte) ([]workflowOrderRepairImage, error) {
+func (s *Store) requiredOrderRepairImages(snapshot workflowstate.Snapshot, source TrackerStatus, output []byte) ([]workflowOrderRepairImage, error) {
 	binding := source.PlanRevision
 	if binding == nil || binding.OrderHash != source.SourceHash || binding.TrackerHash != contenthash.Sum(output) {
 		return nil, workflowstate.ErrProjectionStale
@@ -221,7 +221,7 @@ func (s *Store) requiredOrderRepairImages(snapshot Snapshot, source TrackerStatu
 	return images, nil
 }
 
-func workflowTaskOrderChanged(old, next Record) bool {
+func workflowTaskOrderChanged(old, next workflowstate.Record) bool {
 	changed := old.Task.Key != next.Task.Key || old.Task.SetID != next.Task.SetID || old.Task.SliceID != next.Task.SliceID || old.Task.Order != next.Task.Order
 
 	return changed || string(old.Metadata["title"]) != string(next.Metadata["title"]) || string(old.Domain["plan_task_id"]) != string(next.Domain["plan_task_id"])

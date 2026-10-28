@@ -97,7 +97,7 @@ func TestWorkflowOrderStructure(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var changed Record
+	var changed workflowstate.Record
 
 	for i := range snapshot.Records {
 		if snapshot.Records[i].ID == hierarchy.Set.ID {

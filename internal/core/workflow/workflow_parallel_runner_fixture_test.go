@@ -169,7 +169,7 @@ func workflowParallelRunnerLanes(t *testing.T, capacity int) ([3]*Store, [3]Invo
 	stores := [3]*Store{store, linked, store}
 	runs := [3]Invocation{}
 
-	for i, record := range [3]Record{first, second, third} {
+	for i, record := range [3]workflowstate.Record{first, second, third} {
 		request.RequestKey, request.Selection.Selector.Identity = record.Task.Key, record.Task.Key
 		runs[i] = workflowTestStart(t, stores[i], request).Invocation
 	}

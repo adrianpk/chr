@@ -10,21 +10,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// SetClosureRequest requires the observed set and canonical target branch.
-// InvocationID is optional for an explicit standalone decision, including an
-// empty set. It cannot take ownership from another unfinished invocation.
-type SetClosureRequest struct {
-	SetPath            string
-	ExpectedRevision   uint64
-	ExpectedSourceHash string
-	Repository         string
-	Branch             string
-	InvocationID       string
-}
-
 // SetClosureResult distinguishes retained failures from confirmed closure.
 type SetClosureResult struct {
-	Set        Record
+	Set        workflowstate.Record
 	Receipt    workflowstate.ClosingReceipt
 	ReceiptRef string
 	Outcome    string
@@ -33,7 +21,7 @@ type SetClosureResult struct {
 // CloseWorkflowSet validates every actual member on an isolated exact target.
 // Failed gates retain their attempt and retry only closure. A confirmed receipt,
 // set projection and owning invocation share one replayable transition.
-func (s *Store) CloseWorkflowSet(ctx context.Context, request SetClosureRequest, ports FrontierPorts) (result SetClosureResult, err error) {
+func (s *Store) CloseWorkflowSet(ctx context.Context, request workflowcloseout.Request, ports FrontierPorts) (result SetClosureResult, err error) {
 	if request.ExpectedRevision == 0 || request.ExpectedSourceHash == "" || !workflowstate.ValidBranch(request.Branch) || ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
 		return result, fmt.Errorf("closing requires an observed set and canonical observation ports")
 	}
@@ -74,7 +62,7 @@ func (s *Store) CloseWorkflowSet(ctx context.Context, request SetClosureRequest,
 
 type workflowClosingClaim struct {
 	worker *Claim
-	set    Record
+	set    workflowstate.Record
 	state  workflowcloseout.Attempt
 	input  workflowstate.ClosingInput
 	data   []byte

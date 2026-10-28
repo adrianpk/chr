@@ -38,7 +38,7 @@ func TestWorkObservationNative(t *testing.T) {
 func TestWorkObservationContexts(t *testing.T) {
 	at := time.Now().UTC()
 	tickets := map[string]ticketcore.Indexed{"PRJ-1": {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}}, "PRJ-2": {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}}}
-	records := map[string]workflowcore.Record{"PRJ-1": {Task: &workflowcore.Task{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &workflowcore.Task{Phase: "working", AttemptID: "two"}}}
+	records := map[string]workflowstate.Record{"PRJ-1": {Task: &workflowstate.Task{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &workflowstate.Task{Phase: "working", AttemptID: "two"}}}
 	result := WorkObservation{}
 
 	for _, item := range []struct{ id, key, attempt string }{{"first", "PRJ-1", "one"}, {"second", "PRJ-2", "two"}} {

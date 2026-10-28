@@ -237,7 +237,7 @@ func writeNativeTicketEdit(ctx context.Context, opts TicketBoardReadOptions, doc
 	return result.Record.SourceHash, err
 }
 
-func prepareNativeTicketEdit(document TicketDocument, request TicketEditRequest, content string) (Record, error) {
+func prepareNativeTicketEdit(document TicketDocument, request TicketEditRequest, content string) (workflowstate.Record, error) {
 	record := *document.native
 	if err := setNativeTicketBody(&record, document, request, content); err != nil {
 		return record, err
@@ -267,7 +267,7 @@ func prepareNativeTicketEdit(document TicketDocument, request TicketEditRequest,
 	return record, nil
 }
 
-func setNativeTicketBody(record *Record, document TicketDocument, request TicketEditRequest, content string) error {
+func setNativeTicketBody(record *workflowstate.Record, document TicketDocument, request TicketEditRequest, content string) error {
 	parsedMarkdown, err := workflowstate.RequireMarkdown([]byte(content))
 	front, body := parsedMarkdown.Front, parsedMarkdown.Body
 
@@ -297,7 +297,7 @@ func setNativeTicketBody(record *Record, document TicketDocument, request Ticket
 	return nil
 }
 
-func setNativeTicketMetadata(record *Record, fields ticketmetadata.Frontmatter) error {
+func setNativeTicketMetadata(record *workflowstate.Record, fields ticketmetadata.Frontmatter) error {
 	for _, name := range []string{"title", "synopsis", "priority", "severity", "type", "project_area", "assignee", "owner", "branch", "pr", "source_kind", "resolution"} {
 		if _, exists := fields.Metadata[name]; !exists {
 			continue

@@ -18,7 +18,7 @@ type workflowClosingAdmission struct {
 	Result SetClosureResult
 }
 
-func (s *Store) beginWorkflowClosing(ctx context.Context, request SetClosureRequest, ports FrontierPorts) (admission workflowClosingAdmission, err error) {
+func (s *Store) beginWorkflowClosing(ctx context.Context, request workflowcloseout.Request, ports FrontierPorts) (admission workflowClosingAdmission, err error) {
 	set, err := s.readRecord(request.SetPath)
 	if err != nil {
 		return admission, err
@@ -63,7 +63,7 @@ func (s *Store) beginWorkflowClosing(ctx context.Context, request SetClosureRequ
 	return admission, err
 }
 
-func (s *Store) reserveWorkflowClosing(ctx context.Context, set Record, id string) (*Claim, error) {
+func (s *Store) reserveWorkflowClosing(ctx context.Context, set workflowstate.Record, id string) (*Claim, error) {
 	worker, err := s.reserveWorkflowRole(ctx, workflowClosingReservation(set), "closing")
 	if !errors.Is(err, ErrWorkflowCapacity) || id == "" {
 		return worker, err
@@ -77,11 +77,11 @@ func (s *Store) reserveWorkflowClosing(ctx context.Context, set Record, id strin
 	return nil, s.retainWorkflowCapacityWait(run, err)
 }
 
-func (s *Store) workflowClosingSetMatches(set Record, request SetClosureRequest) bool {
+func (s *Store) workflowClosingSetMatches(set workflowstate.Record, request workflowcloseout.Request) bool {
 	return set.Set != nil && set.ProjectID == s.projectID && set.Namespace == s.layout.Namespace() && set.Revision == request.ExpectedRevision && set.SourceHash == request.ExpectedSourceHash
 }
 
-func workflowClosingReservation(set Record) workflowInvocationFile {
+func workflowClosingReservation(set workflowstate.Record) workflowInvocationFile {
 	count := 0
 	if set.Set.Closing != nil {
 		count = len(set.Set.Closing.Attempts)
@@ -90,8 +90,8 @@ func workflowClosingReservation(set Record) workflowInvocationFile {
 	return workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: workflowClosingOwnerID(set)}, InvocationExecution: InvocationExecution{Attempts: make([]Attempt, count)}}}
 }
 
-func (s *Store) prepareWorkflowClosing(ctx context.Context, set Record, request SetClosureRequest, ports FrontierPorts, worker *Claim) (*workflowClosingClaim, error) {
-	input, err := s.workflowClosingInput(ctx, set, request, ports)
+func (s *Store) prepareWorkflowClosing(ctx context.Context, set workflowstate.Record, request workflowcloseout.Request, ports FrontierPorts, worker *Claim) (*workflowClosingClaim, error) {
+	input, err := workflowcloseout.BuildInput(ctx, set, request, workflowClosingInputSource{store: s, ports: ports})
 	if err != nil {
 		return nil, err
 	}
@@ -127,11 +127,11 @@ func (s *Store) prepareWorkflowClosing(ctx context.Context, set Record, request 
 	return &workflowClosingClaim{worker: worker, set: set, state: state, input: input, data: data}, nil
 }
 
-func workflowClosingOwnerID(set Record) string {
+func workflowClosingOwnerID(set workflowstate.Record) string {
 	return "set-closing-" + contenthash.Sum([]byte(set.Namespace+"\x00"+set.ID))
 }
 
-func (s *Store) workflowClosingReady(ctx context.Context, set Record, request SetClosureRequest) error {
+func (s *Store) workflowClosingReady(ctx context.Context, set workflowstate.Record, request workflowcloseout.Request) error {
 	if set.Set.Status == "closing" {
 		return ErrWorkflowOwned
 	}
@@ -169,7 +169,7 @@ func (s *Store) workflowClosingReady(ctx context.Context, set Record, request Se
 	return nil
 }
 
-func (s *Store) workflowClosingInvocationOwner(ctx context.Context, runs []workflowInvocationFile, set Record, id string) error {
+func (s *Store) workflowClosingInvocationOwner(ctx context.Context, runs []workflowInvocationFile, set workflowstate.Record, id string) error {
 	for _, run := range runs {
 		if run.Namespace != set.Namespace || workflowInvocationTerminal(run.Status) || !workflowClaimResources(run)["set:"+set.ID] {
 			continue

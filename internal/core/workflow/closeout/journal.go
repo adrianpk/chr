@@ -26,7 +26,7 @@ func ReadAttempt(setID string, closing *workflowstate.WorkflowClosingBinding, in
 		return state, err
 	}
 
-	return state, CheckAttempt(setID, closing, index, state)
+	return state, checkAttempt(setID, closing, index, state)
 }
 
 // ReadReceipt checks the exact attempt, input and confirmation binding.

@@ -80,7 +80,7 @@ func (s service) selectedWorkflowIdentity(ctx context.Context, extent, key strin
 	return workflowSelectedIdentity{Selector: workflowstate.Selector{}, Guard: workflowstate.SelectionGuard{}}, fmt.Errorf("selected ticket has no native workflow identity: %s", key)
 }
 
-func workflowSelectedExtentID(extent string, task *workflowcore.Task) string {
+func workflowSelectedExtentID(extent string, task *workflowstate.Task) string {
 	switch extent {
 	case "ticket":
 		return task.Key
@@ -170,7 +170,7 @@ func (s service) PreviewWorkflow(ctx context.Context, request workflowstate.Prev
 
 var errWorkflowConfirmationBound = errors.New("complete workflow confirmation exceeds source bounds")
 
-func (s service) workflowConfirmationRecords(ctx context.Context, preview WorkflowBoundPreview) ([]workflowcore.Record, error) {
+func (s service) workflowConfirmationRecords(ctx context.Context, preview WorkflowBoundPreview) ([]workflowstate.Record, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -184,7 +184,7 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 		return nil, err
 	}
 
-	var records []workflowcore.Record
+	var records []workflowstate.Record
 
 	size := 0
 
@@ -209,6 +209,6 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 	return records, nil
 }
 
-func (s service) workflowConfirmationRecordMatches(record workflowcore.Record, member workflowcore.PreviewMember) bool {
+func (s service) workflowConfirmationRecordMatches(record workflowstate.Record, member workflowcore.PreviewMember) bool {
 	return record.Task != nil && record.ProjectID == s.projectContext.ProjectID && record.Namespace == s.workflowNamespace && record.Task.Key == member.Key && record.Revision == member.Revision && record.SourceHash == member.SourceHash && record.Task.ContractHash == member.ContractHash
 }

@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) checkWorkflowAmendmentEvidence(set Record, binding workflowstate.WorkflowAmendmentRef) error {
+func (s *Store) checkWorkflowAmendmentEvidence(set workflowstate.Record, binding workflowstate.WorkflowAmendmentRef) error {
 	path, err := s.safePath(binding.Ref)
 	if err != nil {
 		return err
@@ -43,6 +43,6 @@ func (s *Store) checkWorkflowAmendmentEvidence(set Record, binding workflowstate
 	return s.checkWorkflowPrerequisiteEvidence(hashes)
 }
 
-func workflowAmendmentReceiptMatches(set Record, binding workflowstate.WorkflowAmendmentRef, receipt workflowSetAmendmentReceipt, root string) bool {
+func workflowAmendmentReceiptMatches(set workflowstate.Record, binding workflowstate.WorkflowAmendmentRef, receipt workflowSetAmendmentReceipt, root string) bool {
 	return receipt.Schema == "chr-set-amendment/v1" && receipt.SetID == set.ID && receipt.PreviousRevision+1 == binding.Revision && binding.Revision <= set.Revision && binding.Ref == root+"/amendment.json"
 }

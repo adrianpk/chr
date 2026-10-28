@@ -52,7 +52,7 @@ func (s *Store) readWorkflowTicketMembership(run workflowInvocationFile) (workfl
 		return workflowSliceObservation{}, workflowstate.ErrConflict
 	}
 
-	return workflowSliceObservation{tasks: []Record{record}}, nil
+	return workflowSliceObservation{tasks: []workflowstate.Record{record}}, nil
 }
 
 // PrepareWorkflowTicketCandidate binds existing host-accepted task evidence to

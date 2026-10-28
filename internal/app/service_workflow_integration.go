@@ -5,24 +5,25 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // VerifyWorkflowSliceIntegration checks provider and remote Git delivery facts.
-func (s service) VerifyWorkflowSliceIntegration(ctx context.Context, id, method string) (workflowcore.SliceDeliveryProof, error) {
+func (s service) VerifyWorkflowSliceIntegration(ctx context.Context, id, method string) (workflowstate.SliceDeliveryProof, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
-		return workflowcore.SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	provider, err := s.workflowIntegrationProvider()
 	if err != nil {
-		return workflowcore.SliceDeliveryProof{}, err
+		return workflowstate.SliceDeliveryProof{}, err
 	}
 
 	return store.VerifyWorkflowSliceIntegration(ctx, id, method, provider, s.workflowIntegrationObserver(run))

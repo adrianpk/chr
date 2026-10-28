@@ -48,7 +48,7 @@ func (s *Store) reuseWorkflowValidatedTasks(ctx context.Context, run *workflowIn
 	return nil
 }
 
-func (s *Store) reuseWorkflowTask(ctx context.Context, run *workflowInvocationFile, record Record) error {
+func (s *Store) reuseWorkflowTask(ctx context.Context, run *workflowInvocationFile, record workflowstate.Record) error {
 	if err := s.checkWorkflowTarget(ctx, run.ExecutionSelection().Target); err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (s *Store) reuseWorkflowTask(ctx context.Context, run *workflowInvocationFi
 	return nil
 }
 
-func workflowTaskBoundary(run *workflowInvocationFile, record Record) bool {
+func workflowTaskBoundary(run *workflowInvocationFile, record workflowstate.Record) bool {
 	run.Outcome = "task_validated"
 	if run.Selection.Selector.Extent == "ticket" && record.Task.SliceID != "" {
 		run.Status = workflowstate.InvocationCompleted
@@ -84,11 +84,11 @@ func workflowTaskBoundary(run *workflowInvocationFile, record Record) bool {
 	return false
 }
 
-func (s *Store) checkWorkflowReusableTask(ctx context.Context, run workflowInvocationFile, record Record, lane workflowstate.Lane) error {
+func (s *Store) checkWorkflowReusableTask(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, lane workflowstate.Lane) error {
 	return s.checkWorkflowReusableTaskPrepared(ctx, run, record, lane, (*Store).recoverTransition)
 }
 
-func (s *Store) checkWorkflowReusableTaskPrepared(ctx context.Context, run workflowInvocationFile, record Record, lane workflowstate.Lane, prepare func(*Store) error) error {
+func (s *Store) checkWorkflowReusableTaskPrepared(ctx context.Context, run workflowInvocationFile, record workflowstate.Record, lane workflowstate.Lane, prepare func(*Store) error) error {
 	if _, err := s.observeWorkflowLane(ctx, lane); err != nil {
 		return err
 	}
@@ -121,11 +121,11 @@ func (s *Store) checkWorkflowReusableTaskPrepared(ctx context.Context, run workf
 	return fmt.Errorf("%w: reusable task lacks unchanged host evidence", workflowstate.ErrConflict)
 }
 
-func workflowAttemptValidatesTask(attempt Attempt, record Record) bool {
+func workflowAttemptValidatesTask(attempt Attempt, record workflowstate.Record) bool {
 	return attempt.Purpose == "" && attempt.TaskKey == record.Task.Key && attempt.ContractHash == record.Task.ContractHash && attempt.Outcome == "validated" && slices.Contains(record.Task.Evidence, attempt.ResultRef)
 }
 
-func (s *Store) workflowRetainedResultMatches(ctx context.Context, run workflowInvocationFile, attempt Attempt, record Record, reader *workflowProofReader) bool {
+func (s *Store) workflowRetainedResultMatches(ctx context.Context, run workflowInvocationFile, attempt Attempt, record workflowstate.Record, reader *workflowProofReader) bool {
 	owner, err := s.workflowOwnerStore(run)
 	if err != nil {
 		return false
@@ -149,7 +149,7 @@ func (s *Store) workflowRetainedResultMatches(ctx context.Context, run workflowI
 	return result.AttemptID == attempt.ID && result.Generation == attempt.Generation && result.InputHash == attempt.InputHash && owner.workflowRetainedInputMatches(attempt, record) && reader.validTaskProof(ctx, record, result.TaskValidation)
 }
 
-func (s *Store) workflowRetainedInputMatches(attempt Attempt, record Record) bool {
+func (s *Store) workflowRetainedInputMatches(attempt Attempt, record workflowstate.Record) bool {
 	path, err := s.safePath(attempt.InputRef)
 	if err != nil {
 		return false

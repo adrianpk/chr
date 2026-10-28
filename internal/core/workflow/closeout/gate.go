@@ -26,3 +26,14 @@ type Evidence interface {
 	Read(string) ([]byte, error)
 	Check(map[string]string) error
 }
+
+// InputSource supplies bounded observations for one frozen closing input.
+// Configuration, Git IO, current-member guards and storage checks stay host-owned.
+type InputSource interface {
+	ValidationTimeout(context.Context, string, int) (int, error)
+	Target(context.Context, Request) (workflowstate.PreviewTarget, error)
+	Tree(context.Context, string) (string, error)
+	Snapshot(context.Context) (workflowstate.Snapshot, error)
+	Slice(context.Context, workflowstate.ClosingInput, workflowstate.WorkflowSlice) (workflowstate.ClosingSlice, error)
+	Check(map[string]string) error
+}

@@ -34,7 +34,7 @@ type Query struct {
 
 // Page returns domain records rather than SQL-owned lifecycle state.
 type Page struct {
-	Records      []Record
+	Records      []workflowstate.Record
 	Slices       []workflowstate.WorkflowSlice
 	SnapshotHash string
 	NextOffset   int
@@ -92,7 +92,7 @@ func clearWorkflowIndex(ctx context.Context, tx *sql.Tx, store *Store) error {
 	return nil
 }
 
-func indexWorkflowRecord(ctx context.Context, tx *sql.Tx, store *Store, r Record) error {
+func indexWorkflowRecord(ctx context.Context, tx *sql.Tx, store *Store, r workflowstate.Record) error {
 	if r.Task != nil {
 		return indexWorkflowTask(ctx, tx, store, r)
 	}
@@ -107,7 +107,7 @@ func indexWorkflowRecord(ctx context.Context, tx *sql.Tx, store *Store, r Record
 	return err
 }
 
-func indexWorkflowSet(ctx context.Context, tx *sql.Tx, r Record) error {
+func indexWorkflowSet(ctx context.Context, tx *sql.Tx, r workflowstate.Record) error {
 	set := r.Set
 
 	_, err := tx.ExecContext(ctx, "INSERT INTO workflow_sets VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", r.ProjectID, r.Namespace, r.ID, r.Path, r.Revision, r.SourceHash, set.UseCase, set.UseCaseOrder, r.CreatedAt.Format(time.RFC3339Nano), set.Status, set.ClosureRef)
@@ -125,7 +125,7 @@ func indexWorkflowSet(ctx context.Context, tx *sql.Tx, r Record) error {
 	return nil
 }
 
-func indexWorkflowTask(ctx context.Context, tx *sql.Tx, store *Store, r Record) error {
+func indexWorkflowTask(ctx context.Context, tx *sql.Tx, store *Store, r workflowstate.Record) error {
 	ticket, err := workflowIndexedTicket(ctx, store, r)
 	if err != nil {
 		return err
@@ -147,7 +147,7 @@ func indexWorkflowTask(ctx context.Context, tx *sql.Tx, store *Store, r Record) 
 	return err
 }
 
-func workflowIndexedTicket(ctx context.Context, store *Store, r Record) (ticketcore.Indexed, error) {
+func workflowIndexedTicket(ctx context.Context, store *Store, r workflowstate.Record) (ticketcore.Indexed, error) {
 	if strings.HasSuffix(r.Path, ".md") {
 		parsed, err := ticketcore.NewParser().Parse(ctx, ticketcore.ParseOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), r.Path), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
 		parsed.Namespace = r.Namespace
@@ -175,7 +175,7 @@ func workflowIndexedTicket(ctx context.Context, store *Store, r Record) (ticketc
 	return display, nil
 }
 
-func workflowCanonicalTicket(ctx context.Context, store *Store, r Record) (ticketcore.Indexed, error) {
+func workflowCanonicalTicket(ctx context.Context, store *Store, r workflowstate.Record) (ticketcore.Indexed, error) {
 	relative := filepath.Join(filepath.Dir(r.Path), "artifact.md")
 
 	parsed, err := ticketcore.NewParser().Parse(ctx, ticketcore.ParseOptions{ProjectID: r.ProjectID, ProjectDir: store.layout.ProjectDir(), Path: filepath.Join(store.layout.Root(), relative), RelativeBase: store.layout.Root(), IndexedAt: time.Now().UTC()})
@@ -189,7 +189,7 @@ func workflowCanonicalTicket(ctx context.Context, store *Store, r Record) (ticke
 	return parsed, nil
 }
 
-func workflowSnapshotHash(snapshot Snapshot) string {
+func workflowSnapshotHash(snapshot workflowstate.Snapshot) string {
 	images := []string{}
 	for _, r := range snapshot.Records {
 		images = append(images, r.Path+"\x00"+r.SourceHash)

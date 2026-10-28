@@ -71,7 +71,7 @@ func testNativeReceiptObservation(t *testing.T, fixture nativeCanonicalFixture, 
 	}
 }
 
-func checkNativeReceiptDelivery(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, receipt Record, failure error) {
+func checkNativeReceiptDelivery(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, receipt workflowstate.Record, failure error) {
 	t.Helper()
 
 	if failure != nil || receipt.Receipt == nil || receipt.Receipt.Native == nil {
@@ -93,7 +93,7 @@ func checkNativeReceiptDelivery(t *testing.T, f nativeSubmissionFixture, submiss
 	checkNativeReceiptRetained(t, f, submission, receipt)
 }
 
-func checkNativeReceiptRetained(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, receipt Record) {
+func checkNativeReceiptRetained(t *testing.T, f nativeSubmissionFixture, submission workflowstate.Submission, receipt workflowstate.Record) {
 	t.Helper()
 
 	confirmed, err := f.store.ReadWorkflowSubmission(t.Context(), submission.InvocationID)

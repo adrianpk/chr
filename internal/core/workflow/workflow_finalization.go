@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // FinalizeWorkflowSlice journals a verified receipt and task/run images, plus
 // the set descriptor only when the integration unit is a slice.
 // It accepts no worker-supplied receipt and never creates or integrates a PR.
-func (s *Store) FinalizeWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, git IntegrationGit) (receipt Record, err error) {
+func (s *Store) FinalizeWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, git IntegrationGit) (receipt workflowstate.Record, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
@@ -27,7 +29,7 @@ func (s *Store) FinalizeWorkflowSlice(ctx context.Context, id string, provider P
 	return receipt, err
 }
 
-func (s *Store) finalizeWorkflowSlice(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider, git IntegrationGit) (Record, error) {
+func (s *Store) finalizeWorkflowSlice(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider, git IntegrationGit) (workflowstate.Record, error) {
 	if run.Integration != nil {
 		nativeFinalization, err := s.finalizeWorkflowNativeUnit(ctx, run)
 
@@ -40,27 +42,27 @@ func (s *Store) finalizeWorkflowSlice(ctx context.Context, run workflowInvocatio
 	return s.finalizeWorkflowLegacySlice(ctx, run, provider, git)
 }
 
-func (s *Store) finalizeWorkflowLegacySlice(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider, git IntegrationGit) (Record, error) {
+func (s *Store) finalizeWorkflowLegacySlice(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider, git IntegrationGit) (workflowstate.Record, error) {
 	if run.DeliveryRef != "" {
 		return s.readWorkflowSliceReceipt(ctx, run)
 	}
 
 	proof, err := s.readWorkflowDeliveryProof(run)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	if provider == nil || git == nil {
-		return Record{}, fmt.Errorf("finalization requires canonical provider and Git observation")
+		return workflowstate.Record{}, fmt.Errorf("finalization requires canonical provider and Git observation")
 	}
 
 	if _, err := s.verifyWorkflowSliceIntegration(ctx, run, proof.Git.Method, provider, git); err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	run, err = s.readWorkflowInvocation(run.ID)
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	deliveryPreparation, err := s.workflowDeliveryCandidate(ctx, run)
@@ -68,7 +70,7 @@ func (s *Store) finalizeWorkflowLegacySlice(ctx context.Context, run workflowInv
 	observation, candidate := deliveryPreparation.Observation, deliveryPreparation.Candidate
 
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
 	receipt, err := workflowSliceReceipt(run, proof, candidate)

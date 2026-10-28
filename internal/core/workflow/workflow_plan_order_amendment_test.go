@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowOrderAmendment(t *testing.T, store *Store, set Record) SetAmendmentRequest {
+func workflowOrderAmendment(t *testing.T, store *Store, set workflowstate.Record) SetAmendmentRequest {
 	t.Helper()
 
 	request := workflowApprovedAmendment(t, store, set)

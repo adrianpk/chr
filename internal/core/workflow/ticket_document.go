@@ -28,7 +28,7 @@ type TicketDocument struct {
 	Revision          string
 	Phase             string
 	content           []byte
-	native            *Record
+	native            *workflowstate.Record
 }
 
 // ReadTicketDocument resolves the same identity and authority as the Board.
@@ -191,7 +191,7 @@ func (s *Store) nativeTicketDocument(ctx context.Context, document TicketDocumen
 	return document, workflowstate.ErrConflict
 }
 
-func nativeTicketDocumentImage(document TicketDocument, record Record) bool {
+func nativeTicketDocumentImage(document TicketDocument, record workflowstate.Record) bool {
 	if strings.HasSuffix(record.Path, ".md") {
 		return contenthash.Sum(document.content) == record.SourceHash
 	}
@@ -199,7 +199,7 @@ func nativeTicketDocumentImage(document TicketDocument, record Record) bool {
 	return bytes.Equal(document.content, record.Body)
 }
 
-func applyNativeTicketFields(document *TicketDocument, record Record) {
+func applyNativeTicketFields(document *TicketDocument, record workflowstate.Record) {
 	for _, name := range []string{"title", "synopsis", "priority", "severity", "type", "project_area", "assignee", "owner", "branch", "pr", "resolution", "source_kind"} {
 		if _, present := document.Fields[name]; present {
 			continue
@@ -217,7 +217,7 @@ func applyNativeTicketFields(document *TicketDocument, record Record) {
 	}
 }
 
-func nativeTicketReadOnly(document *TicketDocument, record Record) {
+func nativeTicketReadOnly(document *TicketDocument, record workflowstate.Record) {
 	if record.Task.AttemptID != "" {
 		document.ReadOnlyReason = "An active workflow claim owns this ticket."
 	}
@@ -243,7 +243,7 @@ func nativeTicketReadOnly(document *TicketDocument, record Record) {
 	}
 }
 
-func nativeTicketOrderReadOnly(document *TicketDocument, record Record, snapshot Snapshot) {
+func nativeTicketOrderReadOnly(document *TicketDocument, record workflowstate.Record, snapshot workflowstate.Snapshot) {
 	for _, owner := range snapshot.Records {
 		if owner.Set != nil && owner.ID == record.Task.SetID && owner.Set.PlanRevision != nil {
 			document.ReadOnly["title"] = "The approved plan order owns this title; use its amendment operation."

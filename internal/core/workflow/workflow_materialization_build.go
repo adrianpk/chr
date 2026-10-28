@@ -24,12 +24,12 @@ type workflowArtifactAllocation struct {
 type workflowMaterializationSetInput struct {
 	Plan       generationcore.GeneratedWorkflowPlan
 	Body       []byte
-	Set        Record
+	Set        workflowstate.Record
 	Allocation workflowArtifactAllocation
 }
 
 type workflowMaterializationTasks struct {
-	Records []Record
+	Records []workflowstate.Record
 	Keys    map[string]string
 }
 
@@ -49,7 +49,7 @@ func (s *Store) buildMaterializationForSet(ctx context.Context, opts Materializa
 	plan, body, set := input.Plan, input.Body, input.Set
 	set.Metadata["materialization_id"] = json.RawMessage(fmt.Sprintf("%q", plan.MaterializationID))
 	set.Body = body
-	set.Set = &workflowstate.WorkflowSet{Schema: WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
+	set.Set = &workflowstate.WorkflowSet{Schema: workflowstate.WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
 
 	tasks, err := s.buildMaterializationTasks(ctx, opts, set, plan, input.Allocation)
 	if err != nil {
@@ -68,21 +68,21 @@ func (s *Store) buildMaterializationForSet(ctx context.Context, opts Materializa
 	return MaterializationResult{Set: set, Tasks: tasks.Records}, nil
 }
 
-func (s *Store) materializationEnvelope(kind, title string, number int, now time.Time) (Record, error) {
+func (s *Store) materializationEnvelope(kind, title string, number int, now time.Time) (workflowstate.Record, error) {
 	id := fmt.Sprintf("%05d-%s", number, opscore.ArtifactSlugOrDefault(title))
 	opts := opscore.ArtifactOptions{Layout: s.layout, Type: kind, Title: title, Producer: "chr"}
 
 	metadata, err := workflowJSONFields(opscore.NewArtifactMetadata(opts, id, now))
 	if err != nil {
-		return Record{}, err
+		return workflowstate.Record{}, err
 	}
 
-	return Record{Identity: workflowstate.Identity{ID: id, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: now, UpdatedAt: now}, Kind: kind, Path: kind + "/" + id + "/metadata.json", Metadata: metadata}, nil
+	return workflowstate.Record{Identity: workflowstate.Identity{ID: id, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: now, UpdatedAt: now}, Kind: kind, Path: kind + "/" + id + "/metadata.json", Metadata: metadata}, nil
 }
 
-func (s *Store) buildMaterializationTasks(ctx context.Context, opts MaterializationOptions, set Record, plan generationcore.GeneratedWorkflowPlan, allocation workflowArtifactAllocation) (workflowMaterializationTasks, error) {
+func (s *Store) buildMaterializationTasks(ctx context.Context, opts MaterializationOptions, set workflowstate.Record, plan generationcore.GeneratedWorkflowPlan, allocation workflowArtifactAllocation) (workflowMaterializationTasks, error) {
 	keys := map[string]string{}
-	tasks := []Record{}
+	tasks := []workflowstate.Record{}
 
 	for _, slice := range plan.Slices {
 		for _, input := range slice.Tasks {
@@ -111,7 +111,7 @@ func (s *Store) buildMaterializationTasks(ctx context.Context, opts Materializat
 	return workflowMaterializationTasks{Records: tasks, Keys: keys}, nil
 }
 
-func (s *Store) materializationTask(input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice, set Record, key string, allocation workflowArtifactAllocation) (Record, error) {
+func (s *Store) materializationTask(input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice, set workflowstate.Record, key string, allocation workflowArtifactAllocation) (workflowstate.Record, error) {
 	now := allocation.Time
 
 	record, err := s.materializationEnvelope("ticket", input.Title, allocation.Number, now)
@@ -119,7 +119,7 @@ func (s *Store) materializationTask(input generationcore.GeneratedWorkflowTask, 
 		return record, err
 	}
 
-	record.Task = &Task{Schema: WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), UseCase: set.Set.UseCase, SetID: set.ID, SliceID: slice.ID, Order: input.Order, Phase: "pending", DependsOn: input.DependsOn}
+	record.Task = &workflowstate.Task{Schema: workflowstate.WorkflowSchema, Key: key, Status: string(ticketcore.StatusReadyForDev), UseCase: set.Set.UseCase, SetID: set.ID, SliceID: slice.ID, Order: input.Order, Phase: "pending", DependsOn: input.DependsOn}
 
 	contract, err := json.Marshal(input)
 	if err != nil {
@@ -145,7 +145,7 @@ func resolveMaterializationRefs(refs []workflowstate.Ref, keys map[string]string
 	return resolved
 }
 
-func materializationSlice(input generationcore.GeneratedWorkflowSlice, set Record, tasks []Record, keys map[string]string) (workflowstate.WorkflowSlice, error) {
+func materializationSlice(input generationcore.GeneratedWorkflowSlice, set workflowstate.Record, tasks []workflowstate.Record, keys map[string]string) (workflowstate.WorkflowSlice, error) {
 	// Membership is a digest of ordered ticket keys and contracts, never a second
 	// editable task list on the set descriptor.
 	contract, err := json.Marshal(struct {
@@ -160,8 +160,8 @@ func materializationSlice(input generationcore.GeneratedWorkflowSlice, set Recor
 }
 
 // TaskInputHash detects membership or contract changes in a slice.
-func TaskInputHash(records []Record, sliceID string) string {
-	tasks := []Task{}
+func TaskInputHash(records []workflowstate.Record, sliceID string) string {
+	tasks := []workflowstate.Task{}
 
 	for _, record := range records {
 		if record.Task != nil && record.Task.SliceID == sliceID {

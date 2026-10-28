@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowPlainTicketDisplay(record Record) (ticketcore.Indexed, error) {
+func workflowPlainTicketDisplay(record workflowstate.Record) (ticketcore.Indexed, error) {
 	data, err := json.Marshal(record.Metadata)
 	if err != nil {
 		return ticketcore.Indexed{}, err

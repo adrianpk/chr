@@ -16,18 +16,18 @@ type workflowTrackerImageResult struct {
 	Output []byte
 }
 type workflowTrackerMembership struct {
-	Set   Record
-	Tasks []Record
+	Set   workflowstate.Record
+	Tasks []workflowstate.Record
 }
 
-func (s *Store) workflowTrackerImage(snapshot Snapshot, setID string) (workflowTrackerImageResult, error) {
+func (s *Store) workflowTrackerImage(snapshot workflowstate.Snapshot, setID string) (workflowTrackerImageResult, error) {
 	trackerMembers, err := workflowTrackerMembers(snapshot, setID)
 	if err != nil {
 		return workflowTrackerImageResult{Status: TrackerStatus{}, Output: nil}, err
 	}
 
 	result := TrackerStatus{Schema: "chr-tracker/v1", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: setID, Path: "tracker/" + setID + ".md"}
-	for _, record := range append([]Record{trackerMembers.Set}, trackerMembers.Tasks...) {
+	for _, record := range append([]workflowstate.Record{trackerMembers.Set}, trackerMembers.Tasks...) {
 		result.Sources = append(result.Sources, TrackerSource{ID: record.ID, Path: record.Path, Revision: record.Revision, Hash: record.SourceHash})
 	}
 
@@ -52,10 +52,10 @@ func (s *Store) workflowTrackerImage(snapshot Snapshot, setID string) (workflowT
 	return workflowTrackerImageResult{Status: result, Output: output}, nil
 }
 
-func workflowTrackerMembers(snapshot Snapshot, setID string) (workflowTrackerMembership, error) {
+func workflowTrackerMembers(snapshot workflowstate.Snapshot, setID string) (workflowTrackerMembership, error) {
 	var (
-		set   Record
-		tasks []Record
+		set   workflowstate.Record
+		tasks []workflowstate.Record
 	)
 
 	for _, record := range snapshot.Records {
@@ -88,7 +88,7 @@ func workflowTrackerMembers(snapshot Snapshot, setID string) (workflowTrackerMem
 	return workflowTrackerMembership{Set: set, Tasks: tasks}, nil
 }
 
-func (s *Store) workflowTrackerReceiptSources(result *TrackerStatus, set Record, tasks []Record) error {
+func (s *Store) workflowTrackerReceiptSources(result *TrackerStatus, set workflowstate.Record, tasks []workflowstate.Record) error {
 	refs := map[string]bool{}
 	for _, task := range tasks {
 		refs[task.Task.DeliveryRef] = true
@@ -118,7 +118,7 @@ func (s *Store) workflowTrackerReceiptSources(result *TrackerStatus, set Record,
 }
 
 //nolint:wsl_v5 // Adjacent writes form one generated Markdown document.
-func renderWorkflowTracker(result TrackerStatus, set Record, tasks []Record) []byte {
+func renderWorkflowTracker(result TrackerStatus, set workflowstate.Record, tasks []workflowstate.Record) []byte {
 	var output bytes.Buffer
 	output.WriteString("---\nworkflow_projection: chr-tracker/v1\nstate_authority: tickets\n")
 	fmt.Fprintf(&output, "slice_set_id: %s\nsource_hash: %s\n---\n\n", opsmetadata.Quote(set.ID), result.SourceHash)

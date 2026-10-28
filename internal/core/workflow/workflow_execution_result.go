@@ -76,7 +76,7 @@ func (s *Store) checkWorkflowTaskCandidate(ctx context.Context, run *workflowInv
 	return ctx.Err()
 }
 
-func applyWorkflowTaskResult(run *workflowInvocationFile, record *Record, result workflowstate.TaskResult, ref string) {
+func applyWorkflowTaskResult(run *workflowInvocationFile, record *workflowstate.Record, result workflowstate.TaskResult, ref string) {
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	attempt.ResultRef, attempt.FinishedAt = ref, time.Now().UTC()
 	record.Task.AttemptID = ""
@@ -102,7 +102,7 @@ func workflowExecutionStopped(run workflowInvocationFile, interrupted bool) bool
 	return run.StopIntent != "" || interrupted || !time.Now().Before(run.Attempts[len(run.Attempts)-1].LeaseUntil)
 }
 
-func (s *Store) finishStoppedWorkflowTask(run workflowInvocationFile, record Record, claim *Claim, result *workflowstate.TaskResult) error {
+func (s *Store) finishStoppedWorkflowTask(run workflowInvocationFile, record workflowstate.Record, claim *Claim, result *workflowstate.TaskResult) error {
 	result.Successful, result.Outcome = false, "interrupted"
 	if run.StopIntent != "" {
 		result.Outcome = string(workflowstate.StopStatus(run.StopIntent))

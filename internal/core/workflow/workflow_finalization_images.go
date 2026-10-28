@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) commitWorkflowSliceFinalization(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, receipt Record) error {
+func (s *Store) commitWorkflowSliceFinalization(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, receipt workflowstate.Record) error {
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func (s *Store) commitWorkflowSliceFinalization(ctx context.Context, run *workfl
 		return err
 	}
 
-	if err := snapshot.Validate(); err != nil {
+	if err := validateWorkflowSnapshot(snapshot); err != nil {
 		return err
 	}
 
@@ -54,7 +54,7 @@ func (s *Store) commitWorkflowSliceFinalization(ctx context.Context, run *workfl
 	return s.commitWorkflowPullRequestFiles(run, append(files, changes...), workflowstate.FileChange{})
 }
 
-func (s *Store) workflowFinalizationTaskImages(run *workflowInvocationFile, snapshot *Snapshot, tasks []Record, receipt Record) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowFinalizationTaskImages(run *workflowInvocationFile, snapshot *workflowstate.Snapshot, tasks []workflowstate.Record, receipt workflowstate.Record) ([]workflowstate.FileChange, error) {
 	files := []workflowstate.FileChange{}
 
 	for _, record := range tasks {
@@ -74,11 +74,11 @@ func (s *Store) workflowFinalizationTaskImages(run *workflowInvocationFile, snap
 	return files, nil
 }
 
-func workflowTaskDelivery(branch string, receipt Receipt) *TaskDelivery {
-	return &TaskDelivery{PullRequest: receipt.PullRequest, Branch: branch, Method: receipt.Method, ResultCommit: receipt.ResultCommit, ConfirmedAt: receipt.ConfirmedAt}
+func workflowTaskDelivery(branch string, receipt workflowstate.Receipt) *workflowstate.TaskDelivery {
+	return &workflowstate.TaskDelivery{PullRequest: receipt.PullRequest, Branch: branch, Method: receipt.Method, ResultCommit: receipt.ResultCommit, ConfirmedAt: receipt.ConfirmedAt}
 }
 
-func (s *Store) workflowFinalizationSetImages(run *workflowInvocationFile, snapshot *Snapshot, set Record) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowFinalizationSetImages(run *workflowInvocationFile, snapshot *workflowstate.Snapshot, set workflowstate.Record) ([]workflowstate.FileChange, error) {
 	if set.Set == nil {
 		return nil, nil
 	}
@@ -100,7 +100,7 @@ func (s *Store) workflowFinalizationSetImages(run *workflowInvocationFile, snaps
 	return files, nil
 }
 
-func replaceWorkflowFinalizationRecord(snapshot *Snapshot, record Record) {
+func replaceWorkflowFinalizationRecord(snapshot *workflowstate.Snapshot, record workflowstate.Record) {
 	for i := range snapshot.Records {
 		if snapshot.Records[i].Path == record.Path {
 			snapshot.Records[i] = record
@@ -110,7 +110,7 @@ func replaceWorkflowFinalizationRecord(snapshot *Snapshot, record Record) {
 	}
 }
 
-func (s *Store) checkWorkflowFinalizationImages(ctx context.Context, run workflowInvocationFile, receipt Record) error {
+func (s *Store) checkWorkflowFinalizationImages(ctx context.Context, run workflowInvocationFile, receipt workflowstate.Record) error {
 	for _, member := range run.Members {
 		if !workflowMemberOwnsUnit(member, receipt.Receipt.Unit) {
 			continue
@@ -139,10 +139,10 @@ func (s *Store) checkWorkflowFinalizationImages(ctx context.Context, run workflo
 	return nil
 }
 
-func workflowFinalizedTaskMatches(record Record, branch string, receipt Record) bool {
+func workflowFinalizedTaskMatches(record workflowstate.Record, branch string, receipt workflowstate.Record) bool {
 	return record.Task != nil && record.Task.Phase == "integrated" && record.Task.Status == string(ticketcore.StatusDone) && record.Task.DeliveryRef == receipt.Path && workflowTaskDeliveryMatches(record.Task.Delivery, branch, *receipt.Receipt)
 }
 
-func workflowTaskDeliveryMatches(delivery *TaskDelivery, branch string, receipt Receipt) bool {
+func workflowTaskDeliveryMatches(delivery *workflowstate.TaskDelivery, branch string, receipt workflowstate.Receipt) bool {
 	return delivery != nil && delivery.PullRequest == receipt.PullRequest && delivery.Branch == branch && delivery.Method == receipt.Method && delivery.ResultCommit == receipt.ResultCommit && delivery.ConfirmedAt.Equal(receipt.ConfirmedAt)
 }

@@ -64,7 +64,7 @@ func checkWorkflowReviewRepairState(t *testing.T, retained Invocation, binding w
 	}
 }
 
-func checkWorkflowReviewRepairPrefix(t *testing.T, store *Store, tasks []Record) {
+func checkWorkflowReviewRepairPrefix(t *testing.T, store *Store, tasks []workflowstate.Record) {
 	t.Helper()
 
 	for _, task := range tasks {

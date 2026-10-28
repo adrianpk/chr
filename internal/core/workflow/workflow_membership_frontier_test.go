@@ -61,7 +61,7 @@ func TestWorkflowMembershipFrontier(t *testing.T) {
 	}
 }
 
-func checkWorkflowMembershipFrontier(t *testing.T, fixture workflowIntegrationFixture, current Invocation, changed MaterializationResult, previous Record) {
+func checkWorkflowMembershipFrontier(t *testing.T, fixture workflowIntegrationFixture, current Invocation, changed MaterializationResult, previous workflowstate.Record) {
 	t.Helper()
 
 	if len(current.Members) != 7 || current.Cursor != 3 || current.ConfirmedCursor != 3 || len(current.Deliveries) != 1 || current.ExecutionSelection().Target.Commit != fixture.target {
@@ -143,7 +143,7 @@ func workflowMaterializeLaterSet(t *testing.T, fixture workflowIntegrationFixtur
 	return result
 }
 
-func workflowImportEarlierSet(t *testing.T, store *Store, set Record, first time.Time) {
+func workflowImportEarlierSet(t *testing.T, store *Store, set workflowstate.Record, first time.Time) {
 	t.Helper()
 
 	// An imported set can have an older immutable creation time. Its existing

@@ -27,7 +27,7 @@ func validateWorkflowDeliveryRef(run workflowInvocationFile) error {
 	return nil
 }
 
-func (s *Store) persistWorkflowDeliveryProof(run *workflowInvocationFile, proof SliceDeliveryProof) (SliceDeliveryProof, error) {
+func (s *Store) persistWorkflowDeliveryProof(run *workflowInvocationFile, proof workflowstate.SliceDeliveryProof) (workflowstate.SliceDeliveryProof, error) {
 	if run.DeliveryProofRef != "" {
 		previous, err := s.readWorkflowDeliveryProof(*run)
 		if err != nil {
@@ -57,8 +57,8 @@ func (s *Store) persistWorkflowDeliveryProof(run *workflowInvocationFile, proof 
 	return proof, s.commitWorkflowPullRequestFiles(run, nil, change)
 }
 
-func (s *Store) readWorkflowDeliveryProof(run workflowInvocationFile) (SliceDeliveryProof, error) {
-	var proof SliceDeliveryProof
+func (s *Store) readWorkflowDeliveryProof(run workflowInvocationFile) (workflowstate.SliceDeliveryProof, error) {
+	var proof workflowstate.SliceDeliveryProof
 	if run.DeliveryProofRef == "" || validateWorkflowDeliveryRef(run) != nil {
 		return proof, workflowstate.ErrConflict
 	}
@@ -84,7 +84,7 @@ func (s *Store) readWorkflowDeliveryProof(run workflowInvocationFile) (SliceDeli
 	return proof, checkWorkflowLegacyDeliveryProof(run, proof)
 }
 
-func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof SliceDeliveryProof) error {
+func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof workflowstate.SliceDeliveryProof) error {
 	if !workflowDeliveryProofMatchesRun(run, proof) || !proof.PullRequest.Merged || workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{proof.PullRequest}) != "" {
 		return workflowstate.ErrConflict
 	}
@@ -94,7 +94,7 @@ func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof SliceDel
 	return workflowintegrate.CheckProof(query, proof.Git, workflowIntegrationRepairs{})
 }
 
-func workflowDeliveryProofMatchesRun(run workflowInvocationFile, proof SliceDeliveryProof) bool {
+func workflowDeliveryProofMatchesRun(run workflowInvocationFile, proof workflowstate.SliceDeliveryProof) bool {
 	if proof.Schema != "chr-slice-delivery-proof/v1" || proof.InvocationID != run.ID || proof.Unit != run.Lane.Unit || proof.ConfirmedAt.IsZero() {
 		return false
 	}

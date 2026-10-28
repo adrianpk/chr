@@ -113,7 +113,7 @@ func workflowTrackerResult(result TrackerStatus, err error) (TrackerStatus, erro
 	return result, err
 }
 
-func (s *Store) exportWorkflowTracker(snapshot Snapshot, setID string, opts TrackerOptions) (TrackerStatus, error) {
+func (s *Store) exportWorkflowTracker(snapshot workflowstate.Snapshot, setID string, opts TrackerOptions) (TrackerStatus, error) {
 	trackerPreparation, err := s.prepareWorkflowTrackerImage(snapshot, setID, opts)
 	if err != nil {
 		return trackerPreparation.Status, err
@@ -181,7 +181,7 @@ func (s *Store) workflowTrackerFailure(result TrackerStatus, failure error) (Tra
 	return result, errors.Join(workflowstate.ErrProjectionStale, failure, s.persistWorkflowTracker(result))
 }
 
-func (s *Store) prepareWorkflowTrackerImage(snapshot Snapshot, setID string, opts TrackerOptions) (workflowTrackerPreparation, error) {
+func (s *Store) prepareWorkflowTrackerImage(snapshot workflowstate.Snapshot, setID string, opts TrackerOptions) (workflowTrackerPreparation, error) {
 	previous, err := s.workflowTrackerPrevious(setID)
 	if err != nil {
 		return workflowTrackerPreparation{Status: TrackerStatus{}, Output: nil, Previous: previous}, err
@@ -214,7 +214,7 @@ func workflowTrackerMayReplace(result, previous TrackerStatus, opts TrackerOptio
 	return result.Schema == "chr-tracker/v2" && workflowTrackerReplacement(result.ObservedHash, previous, TrackerOptions{})
 }
 
-func (s *Store) inspectRequiredOrderImages(snapshot Snapshot, source TrackerStatus) error {
+func (s *Store) inspectRequiredOrderImages(snapshot workflowstate.Snapshot, source TrackerStatus) error {
 	if source.Schema != "chr-tracker/v2" {
 		return nil
 	}
@@ -227,7 +227,7 @@ func (s *Store) inspectRequiredOrderImages(snapshot Snapshot, source TrackerStat
 	return s.checkRequiredOrderImages(source, trackerImage3.Output)
 }
 
-func (s *Store) repairWorkflowTrackerCompanions(snapshot Snapshot, result TrackerStatus, output []byte, opts TrackerOptions) error {
+func (s *Store) repairWorkflowTrackerCompanions(snapshot workflowstate.Snapshot, result TrackerStatus, output []byte, opts TrackerOptions) error {
 	if result.Schema != "chr-tracker/v2" {
 		return nil
 	}

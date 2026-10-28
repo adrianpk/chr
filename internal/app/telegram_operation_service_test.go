@@ -18,7 +18,7 @@ func TestTelegramOperationService(t *testing.T) {
 	}
 
 	operations := newTestService(t, project)
-	request := workflowcore.MutationRequest{Binding: workflowstate.MutationBinding{RequestID: "caller-neutral", Operator: "maintainer"}, Title: "Shared request", Record: workflowcore.Record{Kind: "ticket", Body: []byte("# Task\n"), Task: &workflowcore.Task{Schema: workflowcore.WorkflowSchema, Key: "CHR-1", Status: string(ticketcore.StatusBacklog), Phase: "pending", ContractHash: "contract"}}}
+	request := workflowcore.MutationRequest{Binding: workflowstate.MutationBinding{RequestID: "caller-neutral", Operator: "maintainer"}, Title: "Shared request", Record: workflowstate.Record{Kind: "ticket", Body: []byte("# Task\n"), Task: &workflowstate.Task{Schema: workflowstate.WorkflowSchema, Key: "CHR-1", Status: string(ticketcore.StatusBacklog), Phase: "pending", ContractHash: "contract"}}}
 
 	first, err := operations.ApplyWorkflowRecordMutation(t.Context(), "default", request)
 	if err != nil {

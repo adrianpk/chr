@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"slices"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -175,7 +176,7 @@ func (s *Store) CloseWorkflowInvocationSet(ctx context.Context, id, branch strin
 		branch = retained
 	}
 
-	request := SetClosureRequest{SetPath: image.Path, ExpectedRevision: image.Revision, ExpectedSourceHash: image.SourceHash, Repository: run.Selection.Target.Repository, Branch: branch, InvocationID: run.ID}
+	request := workflowcloseout.Request{SetPath: image.Path, ExpectedRevision: image.Revision, ExpectedSourceHash: image.SourceHash, Repository: run.Selection.Target.Repository, Branch: branch, InvocationID: run.ID}
 
 	return s.CloseWorkflowSet(ctx, request, ports)
 }

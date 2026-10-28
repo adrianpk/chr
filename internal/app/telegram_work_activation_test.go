@@ -34,7 +34,7 @@ func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversatio
 	return f, operations, refs[0]
 }
 
-func telegramWorkAdmissionFixture(t *testing.T, extent string) (*telegramConversationAppFixture, service, workflowcore.Record) {
+func telegramWorkAdmissionFixture(t *testing.T, extent string) (*telegramConversationAppFixture, service, workflowstate.Record) {
 	t.Helper()
 
 	if extent != "ticket" {

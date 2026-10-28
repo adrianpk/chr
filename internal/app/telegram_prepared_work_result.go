@@ -10,7 +10,6 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -68,7 +67,7 @@ func (r telegramReceiver) finishPreparedWork(ctx context.Context, request telegr
 	return err
 }
 
-func telegramWorkflowRecordTitle(record workflowcore.Record) string {
+func telegramWorkflowRecordTitle(record workflowstate.Record) string {
 	var title string
 	if err := json.Unmarshal(record.Metadata["title"], &title); err == nil && title != "" {
 		return title
