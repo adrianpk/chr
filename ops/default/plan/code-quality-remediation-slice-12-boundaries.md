@@ -156,3 +156,16 @@ with bound claim/cancellation input; heartbeat completion retains cancel-and-wai
 The real consumer reconciliation removes the app control-guard alias. No temporary
 compile-time bridge remains. One Store still owns all 908 methods and all existing
 locks, journal/recovery entries and atomic acceptance.
+
+## Slice 15 final method inspection
+
+The existing 908-row method map now separates final ownership disposition,
+body-specific basis and inspected revision from the original coarse source
+responsibility and reachability fields. Twenty-five record/transition/path/lock
+methods retain guarded persistence ownership because their actual bodies bind
+complete preimages, contained reads, source/revision guards, exclusion or
+idempotent journal replay. Closing status policy has its actual closeout owner
+through direct Proofs and StatusSource. The remaining 882 source rows are
+explicitly pending final inspection; current identities and hashes continue to
+resolve all rows. Relocation, an unused receiver or a reachable lock alone does
+not close a row.
