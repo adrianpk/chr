@@ -55,8 +55,18 @@ boundary. The current resolution fields record ten review/cycle value dependenci
 owned directly by workflow/state, eleven ticket projection dependencies owned by
 core/ticket and one integer comparator supplied by the standard library. The shared parsed configuration and its admission/recovery operations now have
 the workspace/config owner, resolving another fifteen dependencies. There are
-42 direct root couplings before family relocation. A temporary compile-time bridge, if necessary, must be recorded with
+39 direct root couplings before family relocation after three shared ticket
+text dependencies moved to their existing metadata owner. A temporary compile-time bridge, if necessary, must be recorded with
 its explicit approved removal owner by Slice 15.
+
+The current compiler graph also includes private struct-field uses and all
+methods of every relocated type. Many remaining direct dependencies are fringe
+workflow declarations that move in the same mechanical unit; they do not all
+require another leaf package. Constructors and consumers of private fields move
+with the owning type. Legacy read/replace consumers require real guarded file
+operation contracts at the existing authority, preserving adopted-ticket refusal,
+source equality, shared repository/non-Git locks and complete replacement. No
+public recovery hook or mutable-store escape is implemented as a prerequisite.
 
 The [signature entry map](code-quality-remediation-slice-12-signatures.csv)
 reconciles all 71 assigned baseline rows to 68 current declarations. At entry,

@@ -217,7 +217,7 @@ func applyTicketReviewCommandResult(ctx context.Context, path string, result Tic
 		{key: "blocking_findings", value: opsmetadata.QuoteList(result.BlockingFindings), beforeKeys: []string{"created_at"}},
 		{key: "updated_at", value: opsmetadata.Timestamp(updatedAt), beforeKeys: nil},
 	} {
-		updated, err = setTicketFrontmatterScalarField(updated, field.key, field.value, field.beforeKeys)
+		updated, err = ticketmetadata.SetField(updated, field.key, field.value, field.beforeKeys)
 		if err != nil {
 			return err
 		}

@@ -57,7 +57,7 @@ func (u *ticketStatusUpdater) UpdateStatus(ctx context.Context, opts UpdateTicke
 		updatedAt = time.Now().UTC()
 	}
 
-	updated, err := updateTicketMetadata(string(content), map[string]string{
+	updated, err := ticketmetadata.UpdateFields(string(content), map[string]string{
 		"status":     opsmetadata.Quote(string(status)),
 		"updated_at": opsmetadata.Timestamp(updatedAt),
 	})

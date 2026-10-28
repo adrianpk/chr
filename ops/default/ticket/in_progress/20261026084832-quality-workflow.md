@@ -103,3 +103,12 @@ Fifteen more direct dependencies resolve, leaving 42; all 908 store methods and
 native workflow upgrade transactions remain at their original receiver. The
 existing Slice 15 upgrade-journal tuple now qualifies the same Config value;
 no new signature debt or relaxed check is introduced.
+
+
+Shared ticket frontmatter edits and ranges now have the existing ticket/metadata
+owner: ten declaration moves and one zero-width use of ops/metadata.ReplaceLines.
+Token/body comparison preserves required-field errors, delimiter/body bytes,
+negative bounds, iteration/insertion order and nil/empty behavior. Existing
+native, legacy, adapter and frozen wire/storage tests, strict lint and the
+ceiling-six policy pass. Three more direct dependencies resolve, leaving 39;
+all 908 store methods still await their one-owner family relocation.

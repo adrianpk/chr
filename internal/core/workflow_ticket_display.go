@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -47,7 +48,7 @@ func UpdateWorkflowTicketDisplay(record WorkflowRecord, title, synopsis *string)
 		return record, nil
 	}
 
-	body, err := updateTicketMetadata(string(record.Body), fields)
+	body, err := ticketmetadata.UpdateFields(string(record.Body), fields)
 	record.Body = []byte(body)
 
 	return record, err

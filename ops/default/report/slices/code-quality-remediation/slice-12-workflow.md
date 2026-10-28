@@ -48,7 +48,7 @@ direct app, adapter and native read consumers. Forty-two declaration moves retai
 exact tokens after qualification, API naming and cmp.Compare substitution; the
 removed integer comparator has the same standard-library result. These resolve
 another twelve dependencies. Configuration relocation resolves fifteen more,
-leaving 42 direct root couplings. No type
+and shared ticket text edits resolve three more, leaving 39 direct root couplings. No type
 bridge or coordinator/transport/persistence authority moved into the value owner.
 The 114 configuration declarations retain exact tokens after qualification/API
 names, insignificant parameter commas and the original rebase default's literal
@@ -56,6 +56,10 @@ value. Raw-image revision, explicit presence, defaults, validation order, locks
 and journal/image/receipt replay are unchanged. Config.Explicit exposes only a
 read-only key-presence query. The existing upgrade-journal tuple debt now names
 workspaceconfig.Config; its shape and Slice 15 ownership are retained.
+Ten ticket frontmatter/range declarations also have the existing metadata owner.
+Their token sequences and the removed insertion helper body match after naming
+and zero-width line-range correspondence. Required-field errors, exact delimiter/
+body bytes, range sentinels, insertion order and nil/empty behavior are unchanged.
 All 908 store methods still retain their original root receiver. Full family
 relocation and assigned signature remediation remain open.
 
@@ -100,10 +104,19 @@ All 114 configuration declaration token comparisons pass. Earlier test/lint
 overlap hit the existing one-second deadline fixture; unchanged dev and the same
 candidate selection run after lint passed. Assertions and timeout bounds are
 unchanged. This is focused batch evidence, not final controller validation.
+The ticket text prerequisite passed:
+
+- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui -run '^Test(Ticket|ValidateTicket|QualityRecordWire|QualityStorage|ApplyAgenticReview|WorkflowRoundTrip)' -count=1 -timeout=3m`: ticket query/document/status/review, guarded native and legacy file operations, frozen wire/storage, app and TUI regressions pass.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui`: zero issues.
+- `make check-go-style`: pass; 9305 production declarations, ceiling six, 162 exact debts and one existing external exception.
+
+Ten declaration token sequences and the insertion/range body correspondence pass.
 Final exact-head controller validation has not run.
 
 ## Risks and Follow-ups
 
 Remaining transport, guided admission, native document and operation-lock
-dependencies must have real boundaries before family relocation. Assigned signatures, stage ports, candidate validation and canonical
+dependencies include workflow-owned fringe functions that move with their types
+and all methods. Shared legacy read/replace consumers must retain the current
+native guards through real operation contracts during that relocation. Assigned signatures, stage ports, candidate validation and canonical
 integration remain outstanding.

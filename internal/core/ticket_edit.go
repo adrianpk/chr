@@ -168,7 +168,7 @@ func editableTicketContent(document TicketDocument) (string, error) {
 }
 
 func replaceTicketDescription(content, description, discussion string) (string, error) {
-	bounds, err := ticketFrontmatterBounds(content)
+	bounds, err := ticketmetadata.FrontmatterBounds(content)
 	if err != nil {
 		return "", err
 	}
@@ -182,7 +182,7 @@ func replaceTicketDescription(content, description, discussion string) (string, 
 		body += "\n" + strings.TrimSpace(discussion) + "\n"
 	}
 
-	return content[:bounds.end+len("\n---")] + "\n\n" + body, nil
+	return content[:bounds.End+len("\n---")] + "\n\n" + body, nil
 }
 
 func ticketEditFields(document TicketDocument, request TicketEditRequest, now time.Time) map[string]string {
@@ -204,7 +204,7 @@ func ticketEditFields(document TicketDocument, request TicketEditRequest, now ti
 }
 
 func setTicketEditorField(content, key, value string) (string, error) {
-	lines, err := ticketFrontmatterLines(content)
+	lines, err := ticketmetadata.FrontmatterLines(content)
 	if err != nil {
 		return "", err
 	}
@@ -220,10 +220,10 @@ func setTicketEditorField(content, key, value string) (string, error) {
 			end++
 		}
 
-		return replaceTicketFrontmatterLines(content, opsmetadata.ReplaceLines(lines, i, end, []string{key + ": " + value}))
+		return ticketmetadata.ReplaceFrontmatterLines(content, opsmetadata.ReplaceLines(lines, i, end, []string{key + ": " + value}))
 	}
 
-	return replaceTicketFrontmatterLines(content, append(lines, key+": "+value))
+	return ticketmetadata.ReplaceFrontmatterLines(content, append(lines, key+": "+value))
 }
 
 func writeNativeTicketEdit(ctx context.Context, opts TicketBoardReadOptions, document TicketDocument, request TicketEditRequest, content string) (string, error) {

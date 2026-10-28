@@ -66,7 +66,7 @@ func updateTicketReviewMetadataContent(content string, opts UpdateTicketReviewMe
 	if strings.TrimSpace(opts.Branch) != "" {
 		var err error
 
-		updated, err = setTicketFrontmatterScalarField(
+		updated, err = ticketmetadata.SetField(
 			updated,
 			"branch",
 			opsmetadata.Quote(strings.TrimSpace(opts.Branch)),
@@ -91,7 +91,7 @@ func updateTicketReviewMetadataContent(content string, opts UpdateTicketReviewMe
 		updatedAt = time.Now().UTC()
 	}
 
-	return setTicketFrontmatterScalarField(updated, "updated_at", opsmetadata.Timestamp(updatedAt), nil)
+	return ticketmetadata.SetField(updated, "updated_at", opsmetadata.Timestamp(updatedAt), nil)
 }
 
 func upsertTicketReviewRef(content string, ref ticketmetadata.ReviewRef) (string, error) {
@@ -142,16 +142,16 @@ func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (
 		return "", err
 	}
 
-	lines, err := ticketFrontmatterLines(content)
+	lines, err := ticketmetadata.FrontmatterLines(content)
 	if err != nil {
 		return "", err
 	}
 
 	replacement := strings.Split(strings.TrimRight(rendered.String(), "\n"), "\n")
 
-	block := ticketFrontmatterBlockRange(lines, "review_refs")
-	if block.start < 0 {
-		insertAt := ticketFrontmatterInsertIndex(lines, []string{
+	block := ticketmetadata.FrontmatterBlockRange(lines, "review_refs")
+	if block.Start < 0 {
+		insertAt := ticketmetadata.FrontmatterInsertIndex(lines, []string{
 			"review_state",
 			"review_result",
 			"review_comments_url",
@@ -160,112 +160,12 @@ func setTicketReviewRefsField(content string, refs []ticketmetadata.ReviewRef) (
 			"created_at",
 		})
 
-		lines = insertStringLines(lines, insertAt, replacement)
+		lines = opsmetadata.ReplaceLines(lines, insertAt, insertAt, replacement)
 
-		return replaceTicketFrontmatterLines(content, lines)
+		return ticketmetadata.ReplaceFrontmatterLines(content, lines)
 	}
 
-	lines = opsmetadata.ReplaceLines(lines, block.start, block.end, replacement)
+	lines = opsmetadata.ReplaceLines(lines, block.Start, block.End, replacement)
 
-	return replaceTicketFrontmatterLines(content, lines)
-}
-
-func setTicketFrontmatterScalarField(content, key, value string, beforeKeys []string) (string, error) {
-	lines, err := ticketFrontmatterLines(content)
-	if err != nil {
-		return "", err
-	}
-
-	for index, line := range lines {
-		lineKey, _, ok := strings.Cut(line, ":")
-		if ok && lineKey == key {
-			lines[index] = key + ": " + value
-
-			return replaceTicketFrontmatterLines(content, lines)
-		}
-	}
-
-	insertAt := ticketFrontmatterInsertIndex(lines, beforeKeys)
-	lines = insertStringLines(lines, insertAt, []string{key + ": " + value})
-
-	return replaceTicketFrontmatterLines(content, lines)
-}
-
-func ticketFrontmatterLines(content string) ([]string, error) {
-	bounds, err := ticketFrontmatterBounds(content)
-	if err != nil {
-		return nil, err
-	}
-
-	return strings.Split(content[bounds.start:bounds.end], "\n"), nil
-}
-
-type ticketTextRange struct {
-	start, end int
-}
-
-func ticketFrontmatterBounds(content string) (ticketTextRange, error) {
-	if !strings.HasPrefix(content, "---\n") {
-		return ticketTextRange{}, fmt.Errorf("ticket frontmatter opening delimiter is required")
-	}
-
-	start := len("---\n")
-
-	end := strings.Index(content[start:], "\n---")
-	if end < 0 {
-		return ticketTextRange{}, fmt.Errorf("ticket frontmatter closing delimiter is required")
-	}
-
-	return ticketTextRange{start: start, end: start + end}, nil
-}
-
-func replaceTicketFrontmatterLines(content string, lines []string) (string, error) {
-	bounds, err := ticketFrontmatterBounds(content)
-	if err != nil {
-		return "", err
-	}
-
-	return content[:bounds.start] + strings.Join(lines, "\n") + content[bounds.end:], nil
-}
-
-func ticketFrontmatterBlockRange(lines []string, key string) ticketTextRange {
-	for index, line := range lines {
-		lineKey, _, ok := strings.Cut(line, ":")
-		if !ok || lineKey != key {
-			continue
-		}
-
-		end := index + 1
-		for end < len(lines) && strings.HasPrefix(lines[end], "  ") {
-			end++
-		}
-
-		return ticketTextRange{start: index, end: end}
-	}
-
-	return ticketTextRange{start: -1, end: -1}
-}
-
-func ticketFrontmatterInsertIndex(lines, beforeKeys []string) int {
-	for index, line := range lines {
-		lineKey, _, ok := strings.Cut(line, ":")
-		if !ok {
-			continue
-		}
-
-		for _, beforeKey := range beforeKeys {
-			if strings.TrimSpace(lineKey) == beforeKey {
-				return index
-			}
-		}
-	}
-
-	return len(lines)
-}
-
-func insertStringLines(lines []string, index int, inserted []string) []string {
-	updated := append([]string{}, lines[:index]...)
-	updated = append(updated, inserted...)
-
-	return append(updated, lines[index:]...)
+	return ticketmetadata.ReplaceFrontmatterLines(content, lines)
 }

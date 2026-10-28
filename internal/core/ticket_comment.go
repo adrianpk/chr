@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // TicketCommenter defines a package boundary interface.
@@ -72,7 +74,7 @@ type ticketComment struct {
 }
 
 func addTicketComment(content string, comment ticketComment) (string, error) {
-	updatedContent, err := updateTicketUpdatedAt(content, comment.CreatedAt)
+	updatedContent, err := ticketmetadata.UpdateUpdatedAt(content, comment.CreatedAt)
 	if err != nil {
 		return "", err
 	}

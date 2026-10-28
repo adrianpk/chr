@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // TicketEvidenceStrategyChecklistWriter writes evidence strategy blocks to tickets.
@@ -46,7 +48,7 @@ func (w *ticketEvidenceStrategyChecklistWriter) UpsertEvidenceStrategyChecklist(
 		updatedAt = time.Now().UTC()
 	}
 
-	updatedContent, err := updateTicketUpdatedAt(string(content), updatedAt)
+	updatedContent, err := ticketmetadata.UpdateUpdatedAt(string(content), updatedAt)
 	if err != nil {
 		return err
 	}

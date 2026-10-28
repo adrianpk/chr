@@ -820,3 +820,16 @@ same request. No production test export or recovery hook is introduced. Dependen
 checks reject config-to-root, config-to-coordinator and parent-to-child cycles.
 The existing Slice 15 upgrade-journal tuple debt is qualified through the same
 configuration value; its result shape, expiry and the ceiling-six ratchet remain.
+
+
+## Slice 12 ticket text prerequisite
+
+The existing ticket/metadata owner supplies shared frontmatter field updates and
+line/block/body ranges. Ten declarations retain their original tokens after owner
+and public range-field naming; the removed insertion helper is the existing
+ops/metadata.ReplaceLines with identical start and end positions. The original
+required-field error, scalar iteration/insertion order, delimiter/body bytes,
+negative block bounds, nil/empty values and timestamp format remain unchanged.
+Native workflow and legacy ticket/evidence operations use these pure edits
+directly. Authority, status transitions, locks, source guards and file writes
+remain with their operation owners; no test-only production export is added.

@@ -9,6 +9,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
@@ -189,7 +190,7 @@ func applyTicketMergeCommandResult(ctx context.Context, path string, result Tick
 		{key: "merged_at", value: mergedAtValue, beforeKeys: []string{"created_at"}},
 		{key: "updated_at", value: opsmetadata.Timestamp(now), beforeKeys: nil},
 	} {
-		updated, err = setTicketFrontmatterScalarField(updated, field.key, field.value, field.beforeKeys)
+		updated, err = ticketmetadata.SetField(updated, field.key, field.value, field.beforeKeys)
 		if err != nil {
 			return err
 		}

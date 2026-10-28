@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 )
 
 // TicketResultBlockedReasonWriter defines a package boundary interface.
@@ -68,7 +70,7 @@ func (w *ticketResultBlockedReasonWriter) WriteBlockedReason(
 }
 
 func addResultBlockedReason(content string, application ResultApplication, createdAt time.Time) (string, error) {
-	updatedContent, err := updateTicketUpdatedAt(content, createdAt)
+	updatedContent, err := ticketmetadata.UpdateUpdatedAt(content, createdAt)
 	if err != nil {
 		return "", err
 	}

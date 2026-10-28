@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -150,7 +151,7 @@ func workflowLooseExecutionBody(body []byte) (string, error) {
 		return content, nil
 	}
 
-	lines, err := ticketFrontmatterLines(content)
+	lines, err := ticketmetadata.FrontmatterLines(content)
 	if err != nil {
 		return "", err
 	}
@@ -169,5 +170,5 @@ func workflowLooseExecutionBody(body []byte) (string, error) {
 		}
 	}
 
-	return replaceTicketFrontmatterLines(content, filtered)
+	return ticketmetadata.ReplaceFrontmatterLines(content, filtered)
 }
