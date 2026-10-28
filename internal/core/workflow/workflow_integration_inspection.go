@@ -52,7 +52,7 @@ func (s *Store) inspectWorkflowIntegration(ctx context.Context, run workflowInvo
 		return nil, err
 	}
 
-	result.Capacity, err = s.workflowIntegrationCapacity(ctx, snapshot.Runs)
+	result.Capacity, err = (workflowCapacityObserver{store: s}).observe(ctx, snapshot.Runs)
 	if err != nil {
 		return nil, err
 	}

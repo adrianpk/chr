@@ -22,5 +22,5 @@ func (source workflowClosingStatusSource) Publications() []workflowstate.Submiss
 }
 
 func (source workflowClosingStatusSource) Capacity(ctx context.Context) (workflowstate.Capacity, error) {
-	return source.store.workflowIntegrationCapacity(ctx, source.snapshot.Runs)
+	return (workflowCapacityObserver{store: source.store}).observe(ctx, source.snapshot.Runs)
 }

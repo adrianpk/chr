@@ -20,14 +20,17 @@ type workflowFrontierObservation struct {
 	Proof  workflowstate.IntegrationProof
 }
 
-func (s *Store) observeWorkflowFrontier(ctx context.Context, unit workflowFrontierUnit, ports FrontierPorts) (workflowFrontierObservation, error) {
+// workflowFrontierObserver sequences canonical IO inside the Store-owned frontier transaction.
+type workflowFrontierObserver struct{ store *Store }
+
+func (observer workflowFrontierObserver) observe(ctx context.Context, unit workflowFrontierUnit, ports FrontierPorts) (workflowFrontierObservation, error) {
 	if ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
 		return workflowFrontierObservation{}, workflowstate.ErrObservationRequired
 	}
 
 	run := unit.Run
 	binding := run.PullRequest
-	query := TargetQuery{Repository: binding.Request.Repository, Branch: binding.Request.BaseBranch, Directory: s.layout.ProjectDir()}
+	query := TargetQuery{Repository: binding.Request.Repository, Branch: binding.Request.BaseBranch, Directory: observer.store.layout.ProjectDir()}
 
 	target, err := ports.Target.ObserveWorkflowTarget(ctx, query)
 	if err != nil {
@@ -38,7 +41,7 @@ func (s *Store) observeWorkflowFrontier(ctx context.Context, unit workflowFronti
 		return workflowFrontierObservation{Target: target}, workflowstate.ErrConflict
 	}
 
-	proof, err := s.workflowFrontierReceiptProof(ctx, unit, target, ports)
+	proof, err := observer.receiptProof(ctx, unit, target, ports)
 	if err != nil {
 		return workflowFrontierObservation{Target: target, Proof: proof}, err
 	}
@@ -48,19 +51,19 @@ func (s *Store) observeWorkflowFrontier(ctx context.Context, unit workflowFronti
 		return workflowFrontierObservation{Target: target, Proof: proof}, errorsOrConflict(err)
 	}
 
-	return workflowFrontierObservation{Target: target, Proof: proof}, s.checkWorkflowTarget(ctx, target)
+	return workflowFrontierObservation{Target: target, Proof: proof}, observer.store.checkWorkflowTarget(ctx, target)
 }
 
-func (s *Store) workflowFrontierReceiptProof(ctx context.Context, unit workflowFrontierUnit, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
+func (observer workflowFrontierObserver) receiptProof(ctx context.Context, unit workflowFrontierUnit, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error) {
 	run, receipt := unit.Run, unit.Receipt
 
 	if receipt.Receipt.Native == nil {
 		return observeWorkflowFrontierProof(ctx, unit, target, ports)
 	}
 
-	observation, err := (workflowNativeObservationHost{store: s}).receipt(ctx, receipt, ports.Provider, ports.Observer)
+	observation, err := workflowNativeObservationHost(observer).receipt(ctx, receipt, ports.Provider, ports.Observer)
 
-	retained, retainErr := s.retainWorkflowNativeReceiptObservation(ctx, run, observation)
+	retained, retainErr := observer.store.retainWorkflowNativeReceiptObservation(ctx, run, observation)
 	if failure := errors.Join(err, retainErr); failure != nil {
 		return workflowstate.IntegrationProof{}, failure
 	}

@@ -15,6 +15,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// workflowCapacityObserver observes live processes and retained capacity without claiming a slot.
+type workflowCapacityObserver struct{ store *Store }
+
 // QueryWorkflowIntegrationCapacity observes capacity without pruning dead ledgers.
 func (s *Store) QueryWorkflowIntegrationCapacity(ctx context.Context) (result workflowstate.Capacity, err error) {
 	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
@@ -23,7 +26,7 @@ func (s *Store) QueryWorkflowIntegrationCapacity(ctx context.Context) (result wo
 			return readErr
 		}
 
-		result, readErr = s.workflowIntegrationCapacity(ctx, snapshot.Runs)
+		result, readErr = (workflowCapacityObserver{store: s}).observe(ctx, snapshot.Runs)
 
 		return readErr
 	})
@@ -31,13 +34,13 @@ func (s *Store) QueryWorkflowIntegrationCapacity(ctx context.Context) (result wo
 	return result, integrationRecordError("capacity observations", err)
 }
 
-func (s *Store) workflowIntegrationCapacity(ctx context.Context, runs []workflowInvocationFile) (workflowstate.Capacity, error) {
-	limits, err := s.workflowRepositoryCapacity(ctx, runs)
+func (observer workflowCapacityObserver) observe(ctx context.Context, runs []workflowInvocationFile) (workflowstate.Capacity, error) {
+	limits, err := observer.store.workflowRepositoryCapacity(ctx, runs)
 	if err != nil {
 		return workflowstate.Capacity{}, err
 	}
 
-	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, observer.store.layout.ProjectDir())
 	if err != nil {
 		return workflowstate.Capacity{}, err
 	}
@@ -66,7 +69,7 @@ func (s *Store) workflowIntegrationCapacity(ctx context.Context, runs []workflow
 		return result, err
 	}
 
-	if err := s.appendWorkflowIntegrationClosingOwners(ctx, &result, slots); err != nil {
+	if err := observer.closingOwners(ctx, &result, slots); err != nil {
 		return result, err
 	}
 
@@ -165,14 +168,14 @@ func observeWorkflowIntegrationSlots(result *workflowstate.Capacity, slots map[i
 	return err
 }
 
-func (s *Store) appendWorkflowIntegrationClosingOwners(ctx context.Context, result *workflowstate.Capacity, slots map[int]bool) error {
-	layouts, err := s.workflowRepositoryLayouts(ctx)
+func (observer workflowCapacityObserver) closingOwners(ctx context.Context, result *workflowstate.Capacity, slots map[int]bool) error {
+	layouts, err := observer.store.workflowRepositoryLayouts(ctx)
 	if err != nil {
 		return err
 	}
 
 	for _, layout := range layouts {
-		owner := NewWorkflowStore(layout, s.projectID)
+		owner := NewWorkflowStore(layout, observer.store.projectID)
 
 		snapshot, err := owner.readSnapshot(ctx)
 		if err != nil {
@@ -184,7 +187,7 @@ func (s *Store) appendWorkflowIntegrationClosingOwners(ctx context.Context, resu
 				continue
 			}
 
-			if err := owner.appendWorkflowIntegrationClosingOwner(result, slots, record); err != nil {
+			if err := (workflowCapacityObserver{store: owner}).closingOwner(result, slots, record); err != nil {
 				return err
 			}
 		}
@@ -193,9 +196,9 @@ func (s *Store) appendWorkflowIntegrationClosingOwners(ctx context.Context, resu
 	return nil
 }
 
-func (s *Store) appendWorkflowIntegrationClosingOwner(result *workflowstate.Capacity, slots map[int]bool, set workflowstate.Record) error {
+func (observer workflowCapacityObserver) closingOwner(result *workflowstate.Capacity, slots map[int]bool, set workflowstate.Record) error {
 	for i := range set.Set.Closing.Attempts {
-		state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, i, workflowClosingEvidence{store: s})
+		state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, i, workflowClosingEvidence(observer))
 		if err != nil {
 			return err
 		}

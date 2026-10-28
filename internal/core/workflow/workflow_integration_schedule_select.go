@@ -8,7 +8,7 @@ import (
 )
 
 func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, q IntegrationQueueQuery) (workflowTaskSelections, error) {
-	roles, err := scheduler.store.workflowIntegrationRoles(ctx, scheduler.snapshot)
+	roles, err := (workflowIntegrationRoleSelector{store: scheduler.store}).roles(ctx, scheduler.snapshot)
 	if err != nil {
 		return workflowTaskSelections{Items: nil, Excluded: nil}, err
 	}

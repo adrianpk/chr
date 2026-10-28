@@ -24,7 +24,7 @@ func (s *Store) guardWorkflowIntegrationRole(ctx context.Context, run workflowIn
 		return err
 	}
 
-	roles, err := s.workflowIntegrationRoles(ctx, snapshot)
+	roles, err := (workflowIntegrationRoleSelector{store: s}).roles(ctx, snapshot)
 	if err != nil {
 		return err
 	}

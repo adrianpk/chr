@@ -29,6 +29,9 @@ type IntegrationRolePage struct {
 	NextOffset   int
 }
 
+// workflowIntegrationRoleSelector orders read-only continuations under the caller-owned repository lock.
+type workflowIntegrationRoleSelector struct{ store *Store }
+
 // QueryWorkflowIntegrationRoles observes admitted integration continuations.
 // Provider and current-policy checks still belong to each existing launch owner.
 func (s *Store) QueryWorkflowIntegrationRoles(ctx context.Context, q IntegrationScheduleQuery) (page IntegrationRolePage, err error) {
@@ -42,7 +45,7 @@ func (s *Store) QueryWorkflowIntegrationRoles(ctx context.Context, q Integration
 			return readErr
 		}
 
-		items, readErr := s.workflowIntegrationRoles(ctx, snapshot)
+		items, readErr := (workflowIntegrationRoleSelector{store: s}).roles(ctx, snapshot)
 		if readErr != nil {
 			return readErr
 		}
@@ -86,7 +89,7 @@ func (s *Store) QueryWorkflowIntegrationRoles(ctx context.Context, q Integration
 	return page, integrationRecordError("integration roles", err)
 }
 
-func (s *Store) workflowIntegrationRoles(ctx context.Context, snapshot workflowIntegrationSnapshot) ([]IntegrationRoleSelection, error) {
+func (selector workflowIntegrationRoleSelector) roles(ctx context.Context, snapshot workflowIntegrationSnapshot) ([]IntegrationRoleSelection, error) {
 	items := []IntegrationRoleSelection{}
 
 	for _, view := range snapshot.Views {
@@ -99,12 +102,12 @@ func (s *Store) workflowIntegrationRoles(ctx context.Context, snapshot workflowI
 			continue
 		}
 
-		owner, err := s.workflowOwnerStore(run)
+		owner, err := selector.store.workflowOwnerStore(run)
 		if err != nil {
 			return nil, err
 		}
 
-		role, err := owner.workflowIntegrationAvailableRole(ctx, snapshot, run, view.Entry)
+		role, err := (workflowIntegrationRoleSelector{store: owner}).available(ctx, snapshot, run, view.Entry)
 		if err != nil {
 			return nil, integrationRecordError(workflowInvocationPath(run.ID), err)
 		}
@@ -135,8 +138,8 @@ func workflowIntegrationRoleReady(run workflowInvocationFile, entry IntegrationE
 	return workflowIntegrationFinishedFrontier(run, entry)
 }
 
-func (s *Store) workflowIntegrationNextRole(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry) (string, error) {
-	observation, err := s.observeWorkflowSlicePrepared(ctx, run, (*Store).requireNoWorkflowTransition)
+func (selector workflowIntegrationRoleSelector) next(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry) (string, error) {
+	observation, err := selector.store.observeWorkflowSlicePrepared(ctx, run, (*Store).requireNoWorkflowTransition)
 	if err != nil {
 		return "", err
 	}
@@ -153,7 +156,7 @@ func (s *Store) workflowIntegrationNextRole(ctx context.Context, run workflowInv
 		return "", nil
 	}
 
-	if _, err := s.readWorkflowSliceCandidate(ctx, run, observation); err != nil {
+	if _, err := selector.store.readWorkflowSliceCandidate(ctx, run, observation); err != nil {
 		return "", err
 	}
 
@@ -165,10 +168,10 @@ func (s *Store) workflowIntegrationNextRole(ctx context.Context, run workflowInv
 		return workflowMergerPurpose, nil
 	}
 
-	return s.workflowIntegrationPreparedRole(ctx, run)
+	return selector.prepared(ctx, run)
 }
 
-func (s *Store) workflowIntegrationPreparedRole(ctx context.Context, run workflowInvocationFile) (string, error) {
+func (selector workflowIntegrationRoleSelector) prepared(ctx context.Context, run workflowInvocationFile) (string, error) {
 	if run.Preparation == nil || run.Preparation.State == "stale" {
 		return "preparation", nil
 	}
@@ -177,16 +180,16 @@ func (s *Store) workflowIntegrationPreparedRole(ctx context.Context, run workflo
 		return "", nil
 	}
 
-	candidate, err := s.readWorkflowPreparation(run)
+	candidate, err := selector.store.readWorkflowPreparation(run)
 	if err != nil {
 		return "", err
 	}
 
-	if err := s.checkWorkflowPreparationGit(ctx, candidate); err != nil {
+	if err := selector.store.checkWorkflowPreparationGit(ctx, candidate); err != nil {
 		return "", err
 	}
 
-	policy, err := s.readWorkflowReviewPolicy(run)
+	policy, err := selector.store.readWorkflowReviewPolicy(run)
 	if err != nil {
 		return "", err
 	}
@@ -226,13 +229,13 @@ func workflowIntegrationFinishedFrontier(run workflowInvocationFile, entry Integ
 	return run.Cursor == len(run.Members) || !workflowMemberOwnsUnit(run.Members[run.Cursor], entry.Unit)
 }
 
-func (s *Store) workflowIntegrationAvailableRole(ctx context.Context, snapshot workflowIntegrationSnapshot, run workflowInvocationFile, entry IntegrationEntry) (string, error) {
-	role, err := s.workflowIntegrationNextRole(ctx, run, entry)
+func (selector workflowIntegrationRoleSelector) available(ctx context.Context, snapshot workflowIntegrationSnapshot, run workflowInvocationFile, entry IntegrationEntry) (string, error) {
+	role, err := selector.next(ctx, run, entry)
 	if err != nil || role != "preparation" {
 		return role, err
 	}
 
-	err = s.guardWorkflowPreparedCapacity(ctx, snapshot, run)
+	err = selector.store.guardWorkflowPreparedCapacity(ctx, snapshot, run)
 	if errors.Is(err, ErrWorkflowCapacity) {
 		return "", nil
 	}
