@@ -16,8 +16,8 @@ func workflowMergerWorkspaceID(input workflowstate.MergerInput) string {
 	return contenthash.Sum([]byte(input.InvocationID + "\x00" + input.EntryID + "\x00" + input.ID))
 }
 
-func (s *Store) workflowMergerWorkspace(ctx context.Context, input workflowstate.MergerInput, seed string) (workflowMergerWorkspace, error) {
-	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
+func (host workflowMergerHost) workspace(ctx context.Context, input workflowstate.MergerInput, seed string) (workflowMergerWorkspace, error) {
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, host.store.layout.ProjectDir())
 	if err != nil {
 		return workflowMergerWorkspace{}, err
 	}

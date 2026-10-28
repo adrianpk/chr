@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowMergerCall(input workflowstate.MergerInput) (workflowmerge.Call, error) {
+func (host workflowMergerHost) call(input workflowstate.MergerInput) (workflowmerge.Call, error) {
 	call := workflowmerge.Call{Protocol: workflowmerge.BrokerProtocol, Input: input, Evidence: map[string]string{}}
 	total := 0
 
@@ -16,7 +16,7 @@ func (s *Store) workflowMergerCall(input workflowstate.MergerInput) (workflowmer
 			continue
 		}
 
-		data, err := s.readWorkflowReviewImage(ref.Path, ref.Hash)
+		data, err := host.store.readWorkflowReviewImage(ref.Path, ref.Hash)
 		if err != nil {
 			return call, err
 		}

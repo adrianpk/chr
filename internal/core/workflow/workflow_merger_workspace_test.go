@@ -26,7 +26,7 @@ func TestNativeMergerWorkspace(t *testing.T) {
 			input.OwnedWorkspaceID = workflowMergerWorkspaceID(input)
 			before := workflowIntegrationCommand(t, dir, "status", "--porcelain")
 
-			workspace, err := store.workflowMergerWorkspace(t.Context(), input, seed)
+			workspace, err := (workflowMergerHost{store: store}).workspace(t.Context(), input, seed)
 			if err != nil {
 				t.Fatal(err)
 			}

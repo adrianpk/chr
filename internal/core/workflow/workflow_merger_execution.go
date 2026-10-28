@@ -93,7 +93,7 @@ func (host workflowMergerHost) run(ctx context.Context, claimed workflowClaimedM
 		return workflowMergerDriverResult{err: err}
 	}
 
-	call, err := claim.store.workflowMergerCall(*prepared.input.Merger)
+	call, err := (workflowMergerHost{store: claim.store}).call(*prepared.input.Merger)
 	if err != nil {
 		return workflowMergerDriverResult{err: fmt.Errorf("merger evidence input: %w", err)}
 	}
