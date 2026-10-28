@@ -91,6 +91,17 @@ real stage, stop/lost-response, wire/storage, policy/admission and dependency te
 pass; strict lint is clean with 9,316 production declarations, unchanged ceiling
 six, 162 exact debts and one external exception.
 
-Assigned signature and typed mode changes, D08
-receipt semantics, final caller reconciliation, exact-head controller validation
-and canonical PR preparation remain open. The ticket stays in_progress.
+T12.4's receipt/materialization batch implements ten assigned declarations (11
+baseline rows): named mutation lookup/normalization/preparation and materialization
+replay/task results, plus cohesive set/allocation inputs. Actual authoring and
+amendment/adoption callers consume those values. D08 shares only contained receipt
+read/absence/decode; operation-specific schemas, checksum/order and request guards,
+receipt writers and lock/journal authority remain. Typed operation states retain
+existing bytes. Thirty focused real IO/recovery/replay/adoption/amendment/authoring
+checks and ten receipt corruption/cross-schema cases pass; strict lint is clean.
+The current signature policy has 9,317 declarations, unchanged ceiling six,
+152 debts and one external exception.
+
+Thirty-seven required declarations, typed mode and cohesion-watch reconciliation,
+final caller reconciliation, exact-head controller validation and canonical PR
+preparation remain open. The ticket stays in_progress.

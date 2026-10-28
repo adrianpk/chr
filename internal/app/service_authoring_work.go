@@ -137,14 +137,14 @@ func (s service) applyAuthoringWork(ctx context.Context, prepared PreparedAuthor
 		return result, err
 	}
 
-	retained, found, err := store.ReserveRecordMutation(ctx, *mutation.Native)
+	retained, err := store.ReserveRecordMutation(ctx, *mutation.Native)
 	if err != nil {
 		return result, err
 	}
 
-	if found {
-		view := nativeRecordView(retained.Record, RecordTicket)
-		result.Result = RecordMutationResult{Record: view, ReceiptRef: retained.ReceiptRef, ArgumentDigest: retained.ArgumentDigest}
+	if retained.Found {
+		view := nativeRecordView(retained.Result.Record, RecordTicket)
+		result.Result = RecordMutationResult{Record: view, ReceiptRef: retained.Result.ReceiptRef, ArgumentDigest: retained.Result.ArgumentDigest}
 
 		return result, nil
 	}

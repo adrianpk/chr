@@ -146,7 +146,7 @@ func (s *Store) newWorkflowAmendmentTask(ctx context.Context, builder *workflowA
 		return Record{}, err
 	}
 
-	task, err := s.materializationTask(input, slice, builder.result.Set, key, builder.number, time.Now().UTC())
+	task, err := s.materializationTask(input, slice, builder.result.Set, key, workflowArtifactAllocation{Number: builder.number, Time: time.Now().UTC()})
 	if err != nil {
 		return task, err
 	}

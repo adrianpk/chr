@@ -62,13 +62,18 @@ func (s *Store) prepareLegacyWorkflowPlan(opts PlanAdoptionOptions) (Record, err
 	return record, nil
 }
 
-func (s *Store) prepareLegacyWorkflowTasks(plan generationcore.GeneratedWorkflowPlan, selections []AdoptionTask) ([]Record, []string, error) {
+type workflowAdoptionTasks struct {
+	Records []Record
+	Keys    []string
+}
+
+func (s *Store) prepareLegacyWorkflowTasks(plan generationcore.GeneratedWorkflowPlan, selections []AdoptionTask) (workflowAdoptionTasks, error) {
 	byID := map[string]AdoptionTask{}
 
 	paths := map[string]bool{}
 	for _, selection := range selections {
 		if byID[selection.TaskID].Path != "" || paths[selection.Path] || selection.SourceHash == "" {
-			return nil, nil, fmt.Errorf("ambiguous legacy task selection")
+			return workflowAdoptionTasks{}, fmt.Errorf("ambiguous legacy task selection")
 		}
 
 		byID[selection.TaskID], paths[selection.Path] = selection, true
@@ -81,12 +86,12 @@ func (s *Store) prepareLegacyWorkflowTasks(plan generationcore.GeneratedWorkflow
 		for _, task := range slice.Tasks {
 			selection, ok := byID[task.ID]
 			if !ok {
-				return nil, nil, fmt.Errorf("missing selected legacy task: %s", task.ID)
+				return workflowAdoptionTasks{}, fmt.Errorf("missing selected legacy task: %s", task.ID)
 			}
 
 			record, err := s.prepareLegacyWorkflowTicket(selection, task.Body, plan.UseCase)
 			if err != nil {
-				return nil, nil, err
+				return workflowAdoptionTasks{}, err
 			}
 
 			records = append(records, record)
@@ -95,10 +100,10 @@ func (s *Store) prepareLegacyWorkflowTasks(plan generationcore.GeneratedWorkflow
 	}
 
 	if len(records) != len(selections) {
-		return nil, nil, fmt.Errorf("legacy selection contains tasks outside the approved plan")
+		return workflowAdoptionTasks{}, fmt.Errorf("legacy selection contains tasks outside the approved plan")
 	}
 
-	return records, keys, nil
+	return workflowAdoptionTasks{Records: records, Keys: keys}, nil
 }
 
 func (s *Store) prepareLegacyWorkflowTicket(selection AdoptionTask, body, useCase string) (Record, error) {

@@ -13,7 +13,6 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
-	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -34,31 +33,49 @@ type MutationResult struct {
 	Record         Record `json:"record"`
 }
 
+// MutationLookup distinguishes a confirmed replay from a request without a receipt.
+type MutationLookup struct {
+	Result MutationResult
+	Found  bool
+}
+
+type workflowNormalizedMutation struct {
+	Request MutationRequest
+	Digest  string
+}
+
+type workflowPreparedMutation struct {
+	Record  Record
+	Changes []workflowstate.FileChange
+}
+
 type workflowMutationReceipt struct {
-	State            string         `json:"state"`
-	Operation        string         `json:"operation"`
-	ExpectedRevision uint64         `json:"expected_revision"`
-	BeforeSourceHash string         `json:"before_source_hash"`
-	Schema           string         `json:"schema"`
-	ProjectID        string         `json:"project_id"`
-	Namespace        string         `json:"namespace"`
-	Operator         string         `json:"operator"`
-	Result           MutationResult `json:"result"`
-	Checksum         string         `json:"checksum"`
+	State            workflowOperationState `json:"state"`
+	Operation        string                 `json:"operation"`
+	ExpectedRevision uint64                 `json:"expected_revision"`
+	BeforeSourceHash string                 `json:"before_source_hash"`
+	Schema           string                 `json:"schema"`
+	ProjectID        string                 `json:"project_id"`
+	Namespace        string                 `json:"namespace"`
+	Operator         string                 `json:"operator"`
+	Result           MutationResult         `json:"result"`
+	Checksum         string                 `json:"checksum"`
 }
 
 // ApplyRecordMutation journals the record and its result receipt under repository
 // exclusion. Recovery completes the same reserved images before observing replay.
 func (s *Store) ApplyRecordMutation(ctx context.Context, request MutationRequest) (result MutationResult, err error) {
-	request, digest, err := s.normalizeMutation(request)
+	normalized, err := s.normalizeMutation(request)
 	if err != nil {
 		return result, err
 	}
 
+	request, digest := normalized.Request, normalized.Digest
+
 	err = s.withLock(ctx, func() error {
-		retained, found, readErr := s.readMutationReceipt(request, digest)
-		if readErr != nil || found {
-			result = retained
+		retained, readErr := s.readMutationReceipt(request, digest)
+		if readErr != nil || retained.Found {
+			result = retained.Result
 
 			return readErr
 		}
@@ -77,17 +94,17 @@ func (s *Store) ApplyRecordMutation(ctx context.Context, request MutationRequest
 	return result, err
 }
 
-func (s *Store) normalizeMutation(request MutationRequest) (MutationRequest, string, error) {
+func (s *Store) normalizeMutation(request MutationRequest) (workflowNormalizedMutation, error) {
 	request.Binding.RequestID = strings.TrimSpace(request.Binding.RequestID)
 	request.Binding.Operator = strings.TrimSpace(request.Binding.Operator)
 
 	request.Title = strings.TrimSpace(request.Title)
 	if strings.TrimSpace(s.projectID) == "" {
-		return request, "", errors.New("mutation owner requires a project identity")
+		return workflowNormalizedMutation{Request: request}, errors.New("mutation owner requires a project identity")
 	}
 
 	if err := request.Binding.Validate(); err != nil {
-		return request, "", err
+		return workflowNormalizedMutation{Request: request}, err
 	}
 
 	if request.Record.Metadata == nil {
@@ -103,41 +120,27 @@ func (s *Store) normalizeMutation(request MutationRequest) (MutationRequest, str
 		Request              MutationRequest
 	}{s.projectID, s.layout.Namespace(), request})
 	if err != nil {
-		return request, "", err
+		return workflowNormalizedMutation{Request: request}, err
 	}
 
 	if len(data) > 64*1024 {
-		return request, "", errors.New("record mutation arguments exceed 64 KiB")
+		return workflowNormalizedMutation{Request: request}, errors.New("record mutation arguments exceed 64 KiB")
 	}
 
-	return request, contenthash.Sum(data), nil
+	return workflowNormalizedMutation{Request: request, Digest: contenthash.Sum(data)}, nil
 }
 
-func (s *Store) readMutationReceipt(request MutationRequest, digest string) (MutationResult, bool, error) {
-	path, err := s.safePath(workflowstate.MutationReceiptPath(request.Binding.RequestID))
-	if err != nil {
-		return MutationResult{}, false, err
+func (s *Store) readMutationReceipt(request MutationRequest, digest string) (MutationLookup, error) {
+	observed, err := readWorkflowOperationReceipt[workflowMutationReceipt](s, request.Binding.RequestID)
+	if err != nil || !observed.Found {
+		return MutationLookup{}, err
 	}
 
-	data, err := opsfile.Read(path)
-	if errors.Is(err, os.ErrNotExist) {
-		return MutationResult{}, false, nil
+	if err := s.validateMutationReceipt(observed.Receipt, request, digest); err != nil {
+		return MutationLookup{}, err
 	}
 
-	if err != nil {
-		return MutationResult{}, false, err
-	}
-
-	var receipt workflowMutationReceipt
-	if err := json.Unmarshal(data, &receipt); err != nil {
-		return MutationResult{}, false, err
-	}
-
-	if err := s.validateMutationReceipt(receipt, request, digest); err != nil {
-		return MutationResult{}, false, err
-	}
-
-	return receipt.Result, true, nil
+	return MutationLookup{Result: observed.Receipt.Result, Found: true}, nil
 }
 
 func (s *Store) validateMutationReceipt(receipt workflowMutationReceipt, request MutationRequest, digest string) error {
@@ -158,7 +161,7 @@ func (s *Store) validateMutationReceipt(receipt workflowMutationReceipt, request
 
 func validateWorkflowMutationResult(receipt workflowMutationReceipt, request MutationRequest, digest string) error {
 	result := receipt.Result
-	if receipt.State != "confirmed" || receipt.Operation != workflowMutationOperation(request) || receipt.ExpectedRevision != request.ExpectedRevision || receipt.BeforeSourceHash != request.Record.SourceHash {
+	if receipt.State != workflowOperationConfirmed || receipt.Operation != workflowMutationOperation(request) || receipt.ExpectedRevision != request.ExpectedRevision || receipt.BeforeSourceHash != request.Record.SourceHash {
 		return fmt.Errorf("%w: mutation receipt guard changed", workflowstate.ErrConflict)
 	}
 
@@ -170,7 +173,7 @@ func validateWorkflowMutationResult(receipt workflowMutationReceipt, request Mut
 }
 
 func (s *Store) mutationReceiptChange(request MutationRequest, result MutationResult) (workflowstate.FileChange, error) {
-	receipt := workflowMutationReceipt{State: "confirmed", Operation: workflowMutationOperation(request), ExpectedRevision: request.ExpectedRevision, BeforeSourceHash: request.Record.SourceHash, Schema: "chr-record-mutation/v1", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Operator: request.Binding.Operator, Result: result}
+	receipt := workflowMutationReceipt{State: workflowOperationConfirmed, Operation: workflowMutationOperation(request), ExpectedRevision: request.ExpectedRevision, BeforeSourceHash: request.Record.SourceHash, Schema: "chr-record-mutation/v1", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Operator: request.Binding.Operator, Result: result}
 
 	data, err := json.Marshal(receipt)
 	if err != nil {
@@ -193,12 +196,12 @@ func (s *Store) applyNewMutation(ctx context.Context, request MutationRequest, d
 		defer func() { err = errors.Join(err, s.releaseUnusedMutationAllocation(guard)) }()
 	}
 
-	record, changes, err := s.prepareMutation(ctx, request)
+	prepared, err := s.prepareMutation(ctx, request)
 	if err != nil {
 		return result, err
 	}
 
-	result = MutationResult{RequestID: request.Binding.RequestID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), Record: record}
+	result = MutationResult{RequestID: request.Binding.RequestID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), Record: prepared.Record}
 
 	receipt, err := s.mutationReceiptChange(request, result)
 	if err != nil {
@@ -210,7 +213,7 @@ func (s *Store) applyNewMutation(ctx context.Context, request MutationRequest, d
 		return result, err
 	}
 
-	changes = append(changes, coordinator...)
+	changes := append(prepared.Changes, coordinator...)
 
 	if err := ctx.Err(); err != nil {
 		return result, err
@@ -263,46 +266,46 @@ func (s *Store) releaseUnusedMutationAllocation(guard string) error {
 	return s.releaseWorkflowAllocation(guard)
 }
 
-func (s *Store) prepareMutation(ctx context.Context, request MutationRequest) (Record, []workflowstate.FileChange, error) {
+func (s *Store) prepareMutation(ctx context.Context, request MutationRequest) (workflowPreparedMutation, error) {
 	record, err := s.prepareMutationRecord(request)
 	if err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	if err := s.guardWrite(&record, request.ExpectedRevision); err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	snapshot, err := s.readSnapshot(ctx)
 	if err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	if err := s.guardMutationContracts(record, request.ExpectedRevision, snapshot); err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	if err := replaceWorkflowSnapshot(&snapshot, record); err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	files, err := s.encodeChanges(record)
 	if err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	if err := guardMutationCreation(files, request.ExpectedRevision); err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	files, err = s.workflowLooseWriteChanges(ctx, record, request.ExpectedRevision, files)
 	if err != nil {
-		return record, nil, err
+		return workflowPreparedMutation{Record: record}, err
 	}
 
 	record.SourceHash = workflowClaimRecordHash(record, files)
 
-	return record, files, nil
+	return workflowPreparedMutation{Record: record, Changes: files}, nil
 }
 
 func mergeMutationMetadata(base, extra map[string]json.RawMessage) map[string]json.RawMessage {

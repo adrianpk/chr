@@ -14,7 +14,7 @@ import (
 
 type workflowControlReceipt struct {
 	Schema    string                      `json:"schema"`
-	State     string                      `json:"state"`
+	State     workflowOperationState      `json:"state"`
 	ProjectID string                      `json:"project_id"`
 	Namespace string                      `json:"namespace"`
 	Operator  string                      `json:"operator"`
@@ -24,7 +24,7 @@ type workflowControlReceipt struct {
 
 type workflowControlReservation struct {
 	Schema           string                        `json:"schema"`
-	State            string                        `json:"state"`
+	State            workflowOperationState        `json:"state"`
 	ProjectID        string                        `json:"project_id"`
 	Namespace        string                        `json:"namespace"`
 	Binding          workflowstate.MutationBinding `json:"binding"`
@@ -64,30 +64,16 @@ func (commit *workflowControlCommit) files(ctx context.Context, revision uint64)
 }
 
 func (s *Store) readWorkflowControlReceipt(request workflowstate.ControlMutationRequest, digest string) (workflowstate.ControlResult, bool, error) {
-	path, err := s.safePath(workflowstate.MutationReceiptPath(request.Binding.RequestID))
-	if err != nil {
+	observed, err := readWorkflowOperationReceipt[workflowControlReceipt](s, request.Binding.RequestID)
+	if err != nil || !observed.Found {
 		return workflowstate.ControlResult{}, false, err
 	}
 
-	data, err := opsfile.Read(path)
-	if errors.Is(err, os.ErrNotExist) {
-		return workflowstate.ControlResult{}, false, nil
-	}
-
-	if err != nil {
+	if err := s.validateWorkflowControlReceipt(observed.Receipt, request, digest); err != nil {
 		return workflowstate.ControlResult{}, false, err
 	}
 
-	var receipt workflowControlReceipt
-	if err := json.Unmarshal(data, &receipt); err != nil {
-		return workflowstate.ControlResult{}, false, err
-	}
-
-	if err := s.validateWorkflowControlReceipt(receipt, request, digest); err != nil {
-		return workflowstate.ControlResult{}, false, err
-	}
-
-	return receipt.Result, true, nil
+	return observed.Receipt.Result, true, nil
 }
 
 func (s *Store) validateWorkflowControlReceipt(receipt workflowControlReceipt, request workflowstate.ControlMutationRequest, digest string) error {
@@ -100,7 +86,7 @@ func (s *Store) validateWorkflowControlReceipt(receipt workflowControlReceipt, r
 	}
 
 	expected := workflowstate.ControlResult{RequestID: request.Binding.RequestID, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), PriorRevision: request.ExpectedRevision, Revision: request.ExpectedRevision + 1}
-	if receipt.Schema != "chr-workflow-control/v1" || receipt.State != "confirmed" || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() || receipt.Operator != request.Binding.Operator || checksum != contenthash.Sum(encoded) || receipt.Result != expected {
+	if receipt.Schema != "chr-workflow-control/v1" || receipt.State != workflowOperationConfirmed || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() || receipt.Operator != request.Binding.Operator || checksum != contenthash.Sum(encoded) || receipt.Result != expected {
 		return workflowstate.ErrConflict
 	}
 
@@ -108,7 +94,7 @@ func (s *Store) validateWorkflowControlReceipt(receipt workflowControlReceipt, r
 }
 
 func (s *Store) reserveWorkflowControlBinding(request workflowstate.ControlMutationRequest, digest string) error {
-	reservation := workflowControlReservation{Schema: "chr-workflow-control-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID)}
+	reservation := workflowControlReservation{Schema: "chr-workflow-control-binding/v1", State: workflowOperationReserved, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID)}
 
 	path, err := s.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))
 	if err != nil {

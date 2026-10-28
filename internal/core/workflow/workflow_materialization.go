@@ -61,8 +61,8 @@ func (s *Store) materializePlan(ctx context.Context, opts MaterializationOptions
 		return result, err
 	}
 
-	if previous, found, err := s.resumeMaterialization(snapshot, opts.Plan); found || err != nil {
-		return previous, err
+	if previous, err := s.resumeMaterialization(snapshot, opts.Plan); previous.Found || err != nil {
+		return previous.Result, err
 	}
 
 	body, err := s.readApprovedPlan(opts.Plan)

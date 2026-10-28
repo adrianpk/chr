@@ -60,6 +60,24 @@ records each binding and its approved subsequent policy extraction task. Locks,
 source/revision checks, cleanup, error joins and atomic acceptance remain in the
 existing operations. Stage interfaces contain no coordinator or mutable-store type.
 
+T12.4's first batch replaces ten assigned declarations (11 baseline rows) with
+named mutation normalization/preparation/lookup, materialization replay and task
+results. Set construction takes an explicit input and artifact number/time form
+one allocation value; task numbering, timestamps, nil/empty results and replay
+presence on errors retain their existing meaning. Authoring and amendment/adoption
+callers consume the actual named contracts directly.
+
+D08 shares only contained receipt reads, absence and typed JSON decoding. Record
+and control schemas, checksum field order, request/operator/revision guards and
+receipt writers remain separate at the original owner. Named receipt/reservation
+states retain the exact `reserved` and `confirmed` bytes. Ten new table cases
+exercise both real readers against confirmed, missing, malformed, null and the
+other operation's correctly checksummed receipt. The four assigned mutation tuple
+allowances and six materialization/adoption allowances are removed explicitly.
+Current policy: 9,317 declarations, ceiling six, 152 debts and one external exception.
+Thirty-seven assigned declarations and the retained cohesion-watch reconciliation
+still need T12.4 work; this batch does not complete that task.
+
 ## Contracts Added or Changed
 
 `ReadLegacyTicketFile` refuses adopted sources. `ReplaceLegacyTicketFile` takes
@@ -88,6 +106,14 @@ actual workflow package. The frozen controller gate is unchanged.
 - The method, boundary, dependency, signature and move CSVs linked from the authority map.
 
 ## Validation
+
+The T12.4 receipt/materialization batch passes:
+
+- `go test ./internal/core/workflow ./internal/app -run '^Test(OperationReceiptGuards|TelegramOperationOwner[A-Za-z]+|TelegramControlReceiptMissing|TelegramControlJournal|TelegramControlLifecycleJournal|TelegramAuthoringWork[A-Za-z]+|WorkflowMaterialization[A-Za-z]*|WorkflowPlanAdoption[A-Za-z]*|WorkflowAmendment[A-Za-z]*)$' -count=1 -timeout=20m -v`: 30 top-level checks pass through the existing fixture-owning runner; real filesystem/Git replay, crash/restart, conflict, concurrent owner, adoption/amendment, control journal and authoring guards retain their behavior. No owned descendants remain.
+- `go test ./internal/core/workflow -run '^TestOperationReceiptGuards$' -count=1 -timeout=3m`: pass after separating the test fixture's image replacement from its table, preserving all ten cases.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after test-complexity and whitespace corrections.
+- `make check-go-style`: pass; unchanged ceiling six, 152 exact debts and one external exception.
+- `git diff --check`: pass.
 
 The T12.3 boundary batch passes:
 
@@ -119,6 +145,6 @@ has not run.
 
 ## Risks and Follow-ups
 
-T12.4 assigned signatures/typed modes and D08 receipt semantics, final caller
-reconciliation, exact-head validation and the
+T12.4 remaining assigned signatures/typed modes and cohesion-watch decisions,
+final caller reconciliation, exact-head validation and the
 canonical PR remain outstanding. Slice 12 is active and has not been integrated.

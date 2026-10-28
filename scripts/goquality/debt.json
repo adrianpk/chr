@@ -32,16 +32,6 @@
       "reason": "Existing production debt; assigned to Slice 14 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/workflow/workflow_adoption.go::Store.resumePlanAdoption",
-      "signature": "func(snapshot Snapshot, opts PlanAdoptionOptions, hash string) (MaterializationResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_adoption_records.go::Store.prepareLegacyWorkflowTasks",
-      "signature": "func(plan generationcore.GeneratedWorkflowPlan, selections []AdoptionTask) ([]Record, []string, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/workflow/workflow_agent_reserve.go::Store.encodeWorkflowAgentInput",
       "signature": "func(ctx context.Context, run *workflowInvocationFile, input TaskInput, harness *AgentHarness) (workflowPreparedTask, workflowstate.FileChange, workflowstate.FileChange, error)",
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
@@ -347,26 +337,6 @@
       "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/workflow/workflow_materialization_build.go::Store.buildMaterializationForSet",
-      "signature": "func(ctx context.Context, opts MaterializationOptions, plan generationcore.GeneratedWorkflowPlan, body []byte, number int, now time.Time, set Record) (MaterializationResult, error)",
-      "reason": "Existing above-six workflow debt; assigned to approved Slice 12. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_materialization_build.go::Store.buildMaterializationTasks",
-      "signature": "func(ctx context.Context, opts MaterializationOptions, set Record, plan generationcore.GeneratedWorkflowPlan, number int, now time.Time) ([]Record, map[string]string, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_materialization_build.go::Store.materializationTask",
-      "signature": "func(input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice, set Record, key string, number int, now time.Time) (Record, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_materialization_receipt.go::Store.resumeMaterialization",
-      "signature": "func(snapshot Snapshot, plan generationcore.GeneratedWorkflowPlan) (MaterializationResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/workflow/workflow_merger_acceptance.go::Store.acceptWorkflowMerger",
       "signature": "func(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, git MergerRepairGit, attempt *MergerAttempt) (err error)",
       "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -460,26 +430,6 @@
       "id": "internal/core/workflow/workflow_merger_workspace.go::Store.workflowMergerWorkspace",
       "signature": "func(ctx context.Context, input workflowstate.MergerInput, seed string) (workflowstate.Lane, string, error)",
       "reason": "Existing production debt; assigned to Slice 13 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_mutation.go::Store.normalizeMutation",
-      "signature": "func(request MutationRequest) (MutationRequest, string, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_mutation.go::Store.readMutationReceipt",
-      "signature": "func(request MutationRequest, digest string) (MutationResult, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_mutation.go::Store.prepareMutation",
-      "signature": "func(ctx context.Context, request MutationRequest) (Record, []workflowstate.FileChange, error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16. T9.1 reassociates the unchanged retained image through workflow/state.FileChange."
-    },
-    {
-      "id": "internal/core/workflow/workflow_mutation_reserve.go::Store.ReserveRecordMutation",
-      "signature": "func(ctx context.Context, request MutationRequest) (result MutationResult, found bool, err error)",
-      "reason": "Existing production debt; assigned to Slice 12 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
       "id": "internal/core/workflow/workflow_native_dispatch.go::Store.PublishWorkflowNativeSubmission",

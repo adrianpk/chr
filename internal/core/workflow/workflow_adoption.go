@@ -84,8 +84,8 @@ func (s *Store) adoptPlanWorkflow(ctx context.Context, opts PlanAdoptionOptions)
 		return MaterializationResult{}, err
 	}
 
-	if result, found, err := s.resumePlanAdoption(snapshot, opts, hash); found || err != nil {
-		return result, err
+	if retained, err := s.resumePlanAdoption(snapshot, opts, hash); retained.Found || err != nil {
+		return retained.Result, err
 	}
 
 	result, err := s.preparePlanAdoption(ctx, opts)
@@ -139,28 +139,28 @@ func (s *Store) preparePlanAdoption(ctx context.Context, opts PlanAdoptionOption
 
 	plan := generationcore.OrderedWorkflowPlan(opts.Plan)
 
-	selected, keys, err := s.prepareLegacyWorkflowTasks(plan, opts.Tasks)
+	selected, err := s.prepareLegacyWorkflowTasks(plan, opts.Tasks)
 	if err != nil {
 		return MaterializationResult{}, err
 	}
 
-	if err := s.checkLegacyWorkflowKeys(ctx, selected); err != nil {
+	if err := s.checkLegacyWorkflowKeys(ctx, selected.Records); err != nil {
 		return MaterializationResult{}, err
 	}
 
-	if err := opts.CheckQuiescent(ctx, keys); err != nil {
+	if err := opts.CheckQuiescent(ctx, selected.Keys); err != nil {
 		return MaterializationResult{}, err
 	}
 
 	next := 0
-	materialize := MaterializationOptions{Plan: plan, ReserveTicketKey: func(context.Context) (string, error) { key := keys[next]; next++; return key, nil }}
+	materialize := MaterializationOptions{Plan: plan, ReserveTicketKey: func(context.Context) (string, error) { key := selected.Keys[next]; next++; return key, nil }}
 
-	result, err := s.buildMaterializationForSet(ctx, materialize, plan, set.Body, 1, time.Now().UTC(), set)
+	result, err := s.buildMaterializationForSet(ctx, materialize, workflowMaterializationSetInput{Plan: plan, Body: set.Body, Set: set, Allocation: workflowArtifactAllocation{Number: 1, Time: time.Now().UTC()}})
 	if err != nil {
 		return result, err
 	}
 
-	result.Tasks, err = s.bindLegacyWorkflowTasks(result.Tasks, selected)
+	result.Tasks, err = s.bindLegacyWorkflowTasks(result.Tasks, selected.Records)
 
 	return result, err
 }
@@ -206,15 +206,15 @@ func workflowAdoptionPlanBody(path string) string {
 	return filepath.ToSlash(filepath.Join(filepath.Dir(path), "artifact.md"))
 }
 
-func (s *Store) resumePlanAdoption(snapshot Snapshot, opts PlanAdoptionOptions, hash string) (MaterializationResult, bool, error) {
-	result, found, err := s.resumeMaterialization(snapshot, opts.Plan)
-	if err != nil || !found {
-		return result, found, err
+func (s *Store) resumePlanAdoption(snapshot Snapshot, opts PlanAdoptionOptions, hash string) (workflowMaterializationReplay, error) {
+	retained, err := s.resumeMaterialization(snapshot, opts.Plan)
+	if err != nil || !retained.Found {
+		return retained, err
 	}
 
-	if string(result.Set.Metadata["adoption_hash"]) != fmt.Sprintf("%q", hash) {
-		return result, true, workflowstate.ErrConflict
+	if string(retained.Result.Set.Metadata["adoption_hash"]) != fmt.Sprintf("%q", hash) {
+		return retained, workflowstate.ErrConflict
 	}
 
-	return result, true, nil
+	return retained, nil
 }

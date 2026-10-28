@@ -54,7 +54,12 @@ func materializationReceiptFile(plan generationcore.GeneratedWorkflowPlan, resul
 	return workflowstate.FileChange{Path: filepath.ToSlash(filepath.Join("plan", result.Set.ID, "evidence", "materialization.json")), After: data}, err
 }
 
-func (s *Store) resumeMaterialization(snapshot Snapshot, plan generationcore.GeneratedWorkflowPlan) (MaterializationResult, bool, error) {
+type workflowMaterializationReplay struct {
+	Result MaterializationResult
+	Found  bool
+}
+
+func (s *Store) resumeMaterialization(snapshot Snapshot, plan generationcore.GeneratedWorkflowPlan) (workflowMaterializationReplay, error) {
 	var set *Record
 
 	for i, record := range snapshot.Records {
@@ -65,7 +70,7 @@ func (s *Store) resumeMaterialization(snapshot Snapshot, plan generationcore.Gen
 		var requestID string
 		if raw, ok := record.Metadata["materialization_id"]; ok {
 			if err := json.Unmarshal(raw, &requestID); err != nil {
-				return MaterializationResult{}, false, err
+				return workflowMaterializationReplay{}, err
 			}
 		}
 
@@ -74,19 +79,19 @@ func (s *Store) resumeMaterialization(snapshot Snapshot, plan generationcore.Gen
 		}
 
 		if set != nil {
-			return MaterializationResult{}, false, fmt.Errorf("duplicate materialization identity")
+			return workflowMaterializationReplay{}, fmt.Errorf("duplicate materialization identity")
 		}
 
 		set = &snapshot.Records[i]
 	}
 
 	if set == nil {
-		return MaterializationResult{}, false, nil
+		return workflowMaterializationReplay{}, nil
 	}
 
 	result, err := s.readMaterializationReceipt(*set, plan, snapshot)
 
-	return result, true, err
+	return workflowMaterializationReplay{Result: result, Found: true}, err
 }
 
 func (s *Store) readMaterializationReceipt(set Record, plan generationcore.GeneratedWorkflowPlan, snapshot Snapshot) (MaterializationResult, error) {

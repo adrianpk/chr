@@ -14,7 +14,7 @@ import (
 
 type workflowMutationReservation struct {
 	Schema             string                        `json:"schema"`
-	State              string                        `json:"state"`
+	State              workflowOperationState        `json:"state"`
 	ProjectID          string                        `json:"project_id"`
 	Namespace          string                        `json:"namespace"`
 	Binding            workflowstate.MutationBinding `json:"binding"`
@@ -28,7 +28,7 @@ type workflowMutationReservation struct {
 // Reserve accepted identities before preparing any effect. A failed preparation
 // can retry its original payload, but cannot exchange it for another operation.
 func (s *Store) reserveMutationBinding(request MutationRequest, digest string) error {
-	reservation := workflowMutationReservation{Schema: "chr-record-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Operation: workflowMutationOperation(request), ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ObservedSourceHash: request.Record.SourceHash, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID)}
+	reservation := workflowMutationReservation{Schema: "chr-record-binding/v1", State: workflowOperationReserved, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Operation: workflowMutationOperation(request), ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ObservedSourceHash: request.Record.SourceHash, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID)}
 
 	path, err := s.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))
 	if err != nil {

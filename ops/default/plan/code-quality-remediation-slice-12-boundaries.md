@@ -123,6 +123,15 @@ revision/operation guards differ. Any shared decode/read operation must retain
 those checks at their current operation owner and preserve absence versus error;
 a generic receipt writer cannot be inferred from this duplicate.
 
+T12.4 now shares only the contained read, missing-file distinction and typed JSON
+decode in `readWorkflowOperationReceipt`. Both operation readers still validate
+their original schema/checksum and request/operator/revision guards before
+reporting a confirmed replay. Separate writers and their exact field/tag order
+remain at the original transaction owner. Receipt and reservation states use a
+named string type with the unchanged `reserved` and `confirmed` encodings.
+The control readers' assigned result-shape work remains in Slice 15; no control
+public API or admission/recovery contract changes here.
+
 ## Validation
 
 The compiler-resolved source graph and exact CSV coverage/hash checks passed.

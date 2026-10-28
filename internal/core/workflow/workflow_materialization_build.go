@@ -16,6 +16,23 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowArtifactAllocation struct {
+	Number int
+	Time   time.Time
+}
+
+type workflowMaterializationSetInput struct {
+	Plan       generationcore.GeneratedWorkflowPlan
+	Body       []byte
+	Set        Record
+	Allocation workflowArtifactAllocation
+}
+
+type workflowMaterializationTasks struct {
+	Records []Record
+	Keys    map[string]string
+}
+
 func (s *Store) buildMaterialization(ctx context.Context, opts MaterializationOptions, body []byte, number int) (MaterializationResult, error) {
 	plan := generationcore.OrderedWorkflowPlan(opts.Plan)
 	now := time.Now().UTC()
@@ -25,21 +42,22 @@ func (s *Store) buildMaterialization(ctx context.Context, opts MaterializationOp
 		return MaterializationResult{}, err
 	}
 
-	return s.buildMaterializationForSet(ctx, opts, plan, body, number+1, now, set)
+	return s.buildMaterializationForSet(ctx, opts, workflowMaterializationSetInput{Plan: plan, Body: body, Set: set, Allocation: workflowArtifactAllocation{Number: number + 1, Time: now}})
 }
 
-func (s *Store) buildMaterializationForSet(ctx context.Context, opts MaterializationOptions, plan generationcore.GeneratedWorkflowPlan, body []byte, number int, now time.Time, set Record) (MaterializationResult, error) {
+func (s *Store) buildMaterializationForSet(ctx context.Context, opts MaterializationOptions, input workflowMaterializationSetInput) (MaterializationResult, error) {
+	plan, body, set := input.Plan, input.Body, input.Set
 	set.Metadata["materialization_id"] = json.RawMessage(fmt.Sprintf("%q", plan.MaterializationID))
 	set.Body = body
 	set.Set = &workflowstate.WorkflowSet{Schema: WorkflowSchema, UseCase: plan.UseCase, UseCaseOrder: plan.UseCaseOrder, Status: "ready", PlanRef: filepath.ToSlash(filepath.Join("plan", set.ID, "artifact.md")), PlanHash: plan.PlanHash, ClosingValidation: plan.ClosingValidation}
 
-	tasks, keys, err := s.buildMaterializationTasks(ctx, opts, set, plan, number, now)
+	tasks, err := s.buildMaterializationTasks(ctx, opts, set, plan, input.Allocation)
 	if err != nil {
 		return MaterializationResult{}, err
 	}
 
 	for _, slice := range plan.Slices {
-		descriptor, err := materializationSlice(slice, set, tasks, keys)
+		descriptor, err := materializationSlice(slice, set, tasks.Records, tasks.Keys)
 		if err != nil {
 			return MaterializationResult{}, err
 		}
@@ -47,7 +65,7 @@ func (s *Store) buildMaterializationForSet(ctx context.Context, opts Materializa
 		set.Set.Slices = append(set.Set.Slices, descriptor)
 	}
 
-	return MaterializationResult{Set: set, Tasks: tasks}, nil
+	return MaterializationResult{Set: set, Tasks: tasks.Records}, nil
 }
 
 func (s *Store) materializationEnvelope(kind, title string, number int, now time.Time) (Record, error) {
@@ -62,7 +80,7 @@ func (s *Store) materializationEnvelope(kind, title string, number int, now time
 	return Record{Identity: workflowstate.Identity{ID: id, ProjectID: s.projectID, Namespace: s.layout.Namespace(), Revision: 1, CreatedAt: now, UpdatedAt: now}, Kind: kind, Path: kind + "/" + id + "/metadata.json", Metadata: metadata}, nil
 }
 
-func (s *Store) buildMaterializationTasks(ctx context.Context, opts MaterializationOptions, set Record, plan generationcore.GeneratedWorkflowPlan, number int, now time.Time) ([]Record, map[string]string, error) {
+func (s *Store) buildMaterializationTasks(ctx context.Context, opts MaterializationOptions, set Record, plan generationcore.GeneratedWorkflowPlan, allocation workflowArtifactAllocation) (workflowMaterializationTasks, error) {
 	keys := map[string]string{}
 	tasks := []Record{}
 
@@ -70,17 +88,17 @@ func (s *Store) buildMaterializationTasks(ctx context.Context, opts Materializat
 		for _, input := range slice.Tasks {
 			key, err := opts.ReserveTicketKey(ctx)
 			if err != nil {
-				return nil, nil, err
+				return workflowMaterializationTasks{}, err
 			}
 
 			keys[input.ID] = key
 
-			record, err := s.materializationTask(input, slice, set, key, number, now)
+			record, err := s.materializationTask(input, slice, set, key, allocation)
 			if err != nil {
-				return nil, nil, err
+				return workflowMaterializationTasks{}, err
 			}
 
-			number++
+			allocation.Number++
 
 			tasks = append(tasks, record)
 		}
@@ -90,11 +108,13 @@ func (s *Store) buildMaterializationTasks(ctx context.Context, opts Materializat
 		tasks[i].Task.DependsOn = resolveMaterializationRefs(tasks[i].Task.DependsOn, keys)
 	}
 
-	return tasks, keys, nil
+	return workflowMaterializationTasks{Records: tasks, Keys: keys}, nil
 }
 
-func (s *Store) materializationTask(input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice, set Record, key string, number int, now time.Time) (Record, error) {
-	record, err := s.materializationEnvelope("ticket", input.Title, number, now)
+func (s *Store) materializationTask(input generationcore.GeneratedWorkflowTask, slice generationcore.GeneratedWorkflowSlice, set Record, key string, allocation workflowArtifactAllocation) (Record, error) {
+	now := allocation.Time
+
+	record, err := s.materializationEnvelope("ticket", input.Title, allocation.Number, now)
 	if err != nil {
 		return record, err
 	}
