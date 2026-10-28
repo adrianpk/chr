@@ -29,7 +29,7 @@ func checkWorkflowAmendmentAddition(builder workflowAmendmentBuild, slice genera
 	return nil
 }
 
-func (s *Store) buildWorkflowAmendmentSlices(builder *workflowAmendmentBuild, plan generationcore.GeneratedWorkflowPlan) error {
+func buildWorkflowAmendmentSlices(builder *workflowAmendmentBuild, plan generationcore.GeneratedWorkflowPlan) error {
 	old := map[string]workflowstate.WorkflowSlice{}
 	for _, descriptor := range builder.old.Set.Slices {
 		old[descriptor.ID] = descriptor

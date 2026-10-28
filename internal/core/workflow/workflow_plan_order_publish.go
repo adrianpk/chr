@@ -242,7 +242,7 @@ func (s *Store) boundCurrentPlanChanges(previous, next workflowstate.PlanRevisio
 		planMetadata2.Metadata["plan_binding"] = next
 	}
 
-	if err := s.registerBoundProjection(planMetadata2.Metadata, next); err != nil {
+	if err := registerBoundProjection(planMetadata2.Metadata, next); err != nil {
 		return nil, err
 	}
 
@@ -301,7 +301,7 @@ func (s *Store) boundCurrentTrackerChanges(previous, next workflowstate.PlanRevi
 	return []workflowstate.FileChange{output, {Path: metadataRef, Before: contenthash.Sum(current), After: encoded}}, nil
 }
 
-func (s *Store) registerBoundProjection(metadata map[string]any, binding workflowstate.PlanRevisionBinding) error {
+func registerBoundProjection(metadata map[string]any, binding workflowstate.PlanRevisionBinding) error {
 	reference := filepath.ToSlash(filepath.Join(filepath.Dir(binding.OrderRef), "projection.json"))
 
 	relative, err := filepath.Rel(filepath.Dir(binding.Reference), reference)

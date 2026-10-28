@@ -160,7 +160,7 @@ func (s *Store) materializationFiles(result MaterializationResult, plan generati
 		files = append(files, encoded...)
 	}
 
-	contracts, err := s.materializationContractFiles(result, plan)
+	contracts, err := materializationContractFiles(result, plan)
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +172,7 @@ func (s *Store) materializationFiles(result MaterializationResult, plan generati
 	return files, nil
 }
 
-func (s *Store) materializationContractFiles(result MaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowstate.FileChange, error) {
+func materializationContractFiles(result MaterializationResult, plan generationcore.GeneratedWorkflowPlan) ([]workflowstate.FileChange, error) {
 	files := []workflowstate.FileChange{}
 
 	for _, slice := range plan.Slices {

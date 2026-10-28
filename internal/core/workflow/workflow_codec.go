@@ -48,7 +48,7 @@ func (s *Store) readRecord(relative string) (workflowstate.Record, error) {
 	}
 
 	if strings.HasSuffix(path, ".md") {
-		return s.readMarkdown(relative, path)
+		return readWorkflowMarkdown(relative, path)
 	}
 
 	r, err := readWorkflowEnvelope(path)

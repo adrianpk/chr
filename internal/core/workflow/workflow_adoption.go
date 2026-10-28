@@ -160,7 +160,7 @@ func (s *Store) preparePlanAdoption(ctx context.Context, opts PlanAdoptionOption
 		return result, err
 	}
 
-	result.Tasks, err = s.bindLegacyWorkflowTasks(result.Tasks, selected.Records)
+	result.Tasks, err = bindLegacyWorkflowTasks(result.Tasks, selected.Records)
 
 	return result, err
 }
@@ -192,7 +192,7 @@ func (s *Store) planAdoptionFiles(result MaterializationResult, plan generationc
 		files = append(files, encoded...)
 	}
 
-	contracts, err := s.materializationContractFiles(result, plan)
+	contracts, err := materializationContractFiles(result, plan)
 	if err != nil {
 		return nil, err
 	}

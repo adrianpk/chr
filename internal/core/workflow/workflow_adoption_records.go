@@ -178,7 +178,7 @@ func (s *Store) checkLegacyWorkflowTicket(fields map[string]json.RawMessage, bod
 	return nil
 }
 
-func (s *Store) bindLegacyWorkflowTasks(templates, selected []workflowstate.Record) ([]workflowstate.Record, error) {
+func bindLegacyWorkflowTasks(templates, selected []workflowstate.Record) ([]workflowstate.Record, error) {
 	for i := range templates {
 		record := selected[i]
 		task := *templates[i].Task

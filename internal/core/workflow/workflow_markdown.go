@@ -41,7 +41,7 @@ func workflowMarkdownFields(front string) (map[string]json.RawMessage, error) {
 	return fields, nil
 }
 
-func (s *Store) readMarkdown(relative, path string) (workflowstate.Record, error) {
+func readWorkflowMarkdown(relative, path string) (workflowstate.Record, error) {
 	data, err := opsfile.Read(path)
 	if err != nil {
 		return workflowstate.Record{}, err

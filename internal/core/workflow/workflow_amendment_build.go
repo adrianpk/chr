@@ -38,7 +38,7 @@ func (s *Store) buildWorkflowAmendment(ctx context.Context, set workflowstate.Re
 		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
-	if err := s.buildWorkflowAmendmentSlices(&builder, plan); err != nil {
+	if err := buildWorkflowAmendmentSlices(&builder, plan); err != nil {
 		return workflowAmendmentPreparation{Result: builder.result}, err
 	}
 
