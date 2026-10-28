@@ -5,7 +5,7 @@ Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-16-quality-closure`
-PR: pending
+PR: [#453](https://forge.adrianpk.com/adrianpk/chr/pulls/453)
 
 ## Purpose
 
@@ -96,10 +96,26 @@ Completed task checks, before final clean-head controller acceptance:
 - Baseline/current identity, source-line, declaration/hash, field/move/port and cleanup maps reconcile; all new Markdown links resolve; the original review/detection SHA-256 values remain unchanged.
 - `git diff --check` passed for the task changes.
 
-Required clean-head `make verify` and the combined real persistence/recovery,
-provider/process, Telegram/document, TUI/Web wire and focused shared-state race
-selections will be recorded through the controller. The unchanged full gate and
-final integrated acceptance remain controller-owned.
+Initial controller receipt `KUKRMY5XTCSSLX2ILXIGDFK3ZP` passed ordered
+`make verify` and `git diff --check` on clean
+`178a5d91760c1efab2ffcad986542f5f4ba6c917` in 50.014 seconds before opening
+canonical PR #453. Its title, target dev and immutable report-introduction link
+match the approved identity. This follow-up records the actual PR and moves the
+ticket to reviewing.
+
+Final acceptance is recorded by `looper validate` after this reference commit,
+keyed to the exact clean HEAD and ordered commands below. The canonical PR lists
+only successful checks. Its final receipt remains outside Git so adding the
+receipt cannot invalidate its own HEAD. The combined selection has 34 actual
+roots, and the focused race selection has four; source bindings were checked
+before execution.
+
+- `make verify`
+- `go test -p=1 ./internal/core ./internal/core/workflow ./internal/core/execution ./internal/core/telegram ./internal/harness/pi ./internal/tui ./internal/webui ./internal/app -run '^Test(QualityRecordWire|QualityStorage[A-Za-z]+|WorkflowRoundTrip|WorkflowRecoveryProcess|WorkflowClosingRecovery|OperationReceiptGuards|ExecutionRepository[A-Za-z]+|TelegramReceiver(HTTP|HTTPFailures|LockProcess|Batch|ReadJourney|Revocation|Shutdown)|TelegramPresentation(MigrationDocuments|Document(Snapshot|Rollback|Quota)|DeliveryRecovery|DocumentReadRecovery|DeliveryHTTP)|PiTransport(Failures|Worker|WorkerOutput)|ModelOwnership|DocumentCatalogFrames|GuidedViewWire)$' -count=1 -timeout=5m -json`
+- `go test -race -p=1 ./internal/core/workflow ./internal/core/telegram ./internal/tui -run '^Test(WorkflowRoundTrip|OperationReceiptGuards|TelegramReceiverBatch|ModelOwnership)$' -count=1 -timeout=5m -json`
+- `git diff --check`
+
+The unchanged full gate and final integrated acceptance remain controller-owned.
 
 ## Risks and Follow-ups
 

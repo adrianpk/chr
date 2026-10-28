@@ -11,7 +11,7 @@ Final gate evidence: pending
 ## Delivered source changes
 
 The first fifteen slices are integrated into dev through PRs #438 through #452.
-Slice 16 prepares permanent enforcement, residual error naming and cleanup
+Slice 16 [PR #453](https://forge.adrianpk.com/adrianpk/chr/pulls/453) prepares permanent enforcement, residual error naming and cleanup
 explanations, complete source reconciliation and durable architecture references.
 This report is prepared for the controller's later closure phase; the delivery
 set remains in progress until the sixteenth PR and exact integrated gate pass.

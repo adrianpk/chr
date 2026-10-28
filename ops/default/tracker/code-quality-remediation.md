@@ -6,7 +6,7 @@ Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 16, Final enforcement, documentation and integrated closure; activated after verified integration of PR #452.
+Active slice: Slice 16, Final enforcement, documentation and integrated closure; reviewing PR #453 after verified integration of PR #452.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -217,7 +217,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | T16.4 | Publish the final package map and glossary under docs/reference or docs/explanation, update moved API references and package READMEs, and record every source-report resolution with commit and validation evidence. Preserve the source review itself until real fixes are integrated. | reviewing | 33c680a17a0f9a0d830cbe5a43d0906ed02bcce0 | Final capability map, workflow glossary, moved owner/API references and package README links published. All new local links resolve; original review/detection hashes remain unchanged. Complete source resolution links identify commits and merged task checks. |
 | T16.5 | Run the selected exact-candidate integrated gate, including real persistence/recovery, provider/process and representative Web/TUI/Telegram boundaries. Compare the TUI benchmark with baseline. Record command timings and failures without expanding to historical or exhaustive gates mechanically. | in_progress | 942814b08615ded7c87afac155e7dccbedc266ae | Final fifteen-sample TUI comparison passed on clean 50d562611bfb5d8e725ff62da389fd9c2e372818 in 3.689s: no idle/resize allocations, focus 1096 bytes/nine allocations; measured model 49832 bytes. Combined focused PR-head checks and controller-owned integrated gate remain pending. |
 | T16.6 | Close all 16 slice tickets, tracker rows and reports only after verified dev integration and the required final gate. Produce one cycle report with before/after counts, compatibility evidence and any justified exclusions. Do not create a second plan, a successor Looper run or a seventeenth slice for known work. | pending | 33c680a17a0f9a0d830cbe5a43d0906ed02bcce0 | One cycle report is prepared with before/after dispositions, compatibility and measured exclusions. Final candidate/gate fields remain pending; no post-gate delivery-set closure is claimed. |
-| T16.7 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | in_progress | 0573533a59a8f1a76f1d9feb54798cf9f3df7151 | Slice report is reviewing and predecessor #452 is closed after verified dev integration. Canonical PR-reference follow-up, clean-head controller validation and eventual integration remain pending. |
+| T16.7 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | reviewing | 178a5d91760c1efab2ffcad986542f5f4ba6c917 | Canonical PR #453 is open with immutable report introduction 0573533a59a8f1a76f1d9feb54798cf9f3df7151. Initial controller receipt KUKRMY5XTCSSLX2ILXIGDFK3ZP passed make verify and diff check on clean 178a5d91760c1efab2ffcad986542f5f4ba6c917 in 50.014s. Final ordered clean-head behavior/race acceptance precedes handoff; dev integration and final gate remain controller-owned. |
 
 ## Slice delivery
 
@@ -238,7 +238,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | 13 | delivered | TKT-20261026084833 | #450 | 53b2adb23b9b1d20529d00bbe3b32b3be5990b4e | `ops/default/report/slices/code-quality-remediation/slice-13-integration.md` |
 | 14 | delivered | TKT-20261026084834 | #451 | 8b5659a71af5d393919593c5e0d8c9a6ec0f497c | `ops/default/report/slices/code-quality-remediation/slice-14-publication.md` |
 | 15 | delivered | TKT-20261026084835 | #452 | a41e62be3b2a14daf04b470e8d9344d350480f34 | `ops/default/report/slices/code-quality-remediation/slice-15-closeout.md` |
-| 16 | in_progress | TKT-20261026084836 | pending | — | `ops/default/report/slices/code-quality-remediation/slice-16-closure.md` |
+| 16 | reviewing | TKT-20261026084836 | #453 | — | `ops/default/report/slices/code-quality-remediation/slice-16-closure.md` |
 
 ## Acceptance ledger
 
