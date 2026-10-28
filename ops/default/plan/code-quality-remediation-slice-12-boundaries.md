@@ -160,12 +160,13 @@ locks, journal/recovery entries and atomic acceptance.
 ## Slice 15 final method inspection
 
 The 908-row method map separates ownership disposition, body-specific basis and
-inspected revision from original responsibility/reachability. It records 242
-decisions: 194 guarded-persistence methods, 23 closing policies, one contained
-evidence adapter, five coordinator functions, one private reader, nine lifecycle
-owners and nine coordinator operations. Task/slice/manual/closing coordinator
-operations, private task/closing hosts and the stop watcher have direct consumers.
-Store retains complete claim, frozen-input, process-record, replay, candidate,
-result and confirmation transactions and their original locks. The remaining
-666 Store rows remain explicitly pending; receiver use or reachable IO alone does
-not establish cohesive persistence ownership.
+inspected revision from original responsibility/reachability. It records 331
+decisions: 266 guarded-persistence methods, 23 closing policies, one contained
+evidence adapter, five coordinator functions, one private reader, 18 lifecycle
+owners and 17 coordinator operations. Actual task/closing/role/publication
+coordinators and private hosts have direct service, continuation and stage
+consumers. Store retains original claim, approval, budget, frozen-input,
+process-record, replay, candidate, result and receipt transactions and locks.
+The remaining 577 Store rows stay explicitly pending, including review-policy
+dispatch and preparation Git responsibility. A reachable lock or IO alone is not
+an ownership decision.

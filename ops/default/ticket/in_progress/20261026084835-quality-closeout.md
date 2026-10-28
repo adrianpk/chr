@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
+commits: [72253efe04a5f0ca41a2393b442f89c98aac8637, 0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -150,3 +150,14 @@ short tests, signature checks and strict lint pass. Source inspection now record
 242/908 specific decisions, with 666 Store rows pending. C15.14 preserves manual
 empty-worker handoff, frozen execution and explicit verified reconciliation.
 Final API/compatibility, guided parity and exact-head slice/PR work remain open.
+
+Preparation/review/merger/submission execution now uses actual coordinator and
+private role-host owners; 17 Store methods are removed without changing original
+claim/approval/budget/process/candidate/result/receipt transactions. All 25
+production and 135 test streams match after owner/call and exact repair-port
+pairing. All 107 selected fixtures pass across the original batch and ten unfinished
+submission retries after its retained 15-minute package timeout. Eleven races
+and short/signature/strict lint checks pass without test skips or owned leaks. Method assessment covers 331/908 rows with
+577 pending. C15.15 preserves proposal-only versus trusted repair acceptance.
+Review-policy/preparation-Git separation, remaining API/compatibility work,
+guided parity, exact-head slice validation and PR preparation remain open.

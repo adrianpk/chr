@@ -92,6 +92,15 @@ verified replay and complete result/claim transactions retain their Store owner.
 Manual handoff and successful worker exit still require explicit host-verified
 candidate reconciliation before task acceptance.
 
+Preparation, review, merger and submission execution now use actual coordinator
+operations and private role hosts. Merger workspace handles, driver/procedure
+lifetimes, trusted Git repair observation and partial acceptance evidence retain
+their existing bounds and order. The exact provider and trusted repair Git ports
+share one operation value; proposal-only execution cannot accept a repair.
+Guarded claims, approval, budgets, process birth, candidate and complete result
+or receipt transactions remain with Store. Accepted repair still requires the
+original candidate validation and review before publication.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -106,11 +115,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 161 source/extraction/consolidation images. Current identities and hashes are updated
+retains 186 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Forty-eight former Store methods now have actual
+frozen source fields remain unchanged. Sixty-five former Store methods now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 860 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 843 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -163,11 +172,11 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 242 body-specific decisions in
-the existing 908-row method map: 194 guarded-persistence methods, 23 closing
+contracts. Final method inspection now records 331 body-specific decisions in
+the existing 908-row method map: 266 guarded-persistence methods, 23 closing
 policies, one host evidence adapter, five coordinator functions, one persistence
-reader, nine lifecycle owners and nine coordinator operations. The remaining
-666 source rows stay explicitly pending final assessment.
+reader, 18 lifecycle owners and 17 coordinator operations. The remaining
+577 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -197,6 +206,15 @@ bases: actual task/manual/slice/stop owners are separate from guarded claim,
 input, replay, current-image and complete result transactions. C15.14 records the
 supported manual empty-worker and execute/reconcile distinction. Final API and
 compatibility acceptance remain active.
+
+Role/publication lifecycle separation is in `72253efe04a5f0ca41a2393b442f89c98aac8637`. Twenty-five production
+and 135 test declaration streams match after explicit owner/call substitutions
+and the exact MergerRepairPorts field pairing. Seventeen operations leave Store;
+72 further transaction/authority/read methods retain individual source bases.
+The review-policy dispatcher and preparation Git helper remain pending because
+their policy/lifecycle responsibility still needs separation. C15.15 records
+proposal-only execution versus trusted host repair acceptance, including declared
+regeneration, pending validation and the absence of a publication grant.
 
 ## Contracts Added or Changed
 
@@ -265,6 +283,16 @@ fixtures, plus 11 focused races, without skips or leaked owned descendants.
 Affected short tests, unchanged signature bounds and strict lint pass. These are
 task checks; guided parity and exact-head slice/controller acceptance remain open.
 
+The original combined role/publication selection hit its 15-minute package cap
+after 97 fixtures passed; it recorded no assertion failure and cleaned its owned
+descendants. That package failure is retained. Only the ten unfinished submission
+fixtures were selected again under the unchanged 15-minute limit, and all passed.
+Across those commands, all 107 selected fixtures (104 workflow and 3
+application) passed without test skips. The 11 focused races, affected short
+tests, unchanged signature bounds and strict lint pass; owned fixtures are clean.
+These are task checks; guided parity and exact-head controller validation remain
+pending.
+
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|UseCase|Reopen|SetAdvance|Budget|Recovery|Journal|PostObservation|Stop)|NativeClosing(Gate|Divergence|Evidence|PublicationRace)|WorkflowParallelClosingRecovery|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow ./internal/core/workflow/closeout -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|Execute)$' -count=1 -timeout=10m -json`
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|Budget|Recovery|Journal|Stop)|NativeClosing(Gate|Divergence|Evidence|Lost))$' -count=1 -timeout=15m -json`
@@ -303,6 +331,10 @@ task checks; guided parity and exact-head slice/controller acceptance remain ope
 
 - `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(WorkflowTask.*|WorkflowManual.*|WorkflowSlice(Aggregate|Prefix|Retry|Repair|Changed|GateMutation|Stop|Waiver|Partial|Budget|Fence|Journal|RepairJournal)|WorkflowStop.*|TelegramControlStopOwner|WorkflowClosingStop|WorkflowContinuationRecovery|WorkflowCapacityRoleWait|NativeQueueClosure|ServiceWorkflow.*Task|DaemonWorkflow.*)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow -run '^Test(WorkflowTaskJournal|WorkflowTaskProcess|WorkflowManualStop|WorkflowManualJournal|WorkflowManualFencing|WorkflowSliceStop|WorkflowSliceJournal|WorkflowStop|TelegramControlStopOwner|WorkflowClosingStop|WorkflowCapacityRoleWait)$' -count=1 -timeout=10m -json`
+
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(Workflow(Preparation|Review|Submission).*|Native(Merger|Preparation|Review|Dispatch|Candidate).*|NativeHost(Publication|PreparationRetry)|NativeAgentReview|WorkflowContinuation(Recovery|PreparationRetryAuthority)|ServiceWorkflow(Preparation|Review|Submission).*)$' -skip 'CrashProcess$' -count=1 -timeout=15m -json` — package timeout after 97 passed fixtures; unfinished cases passed in the residual selection below.
+- `go test ./internal/core/workflow -run ^(TestWorkflowSubmissionAtomicGuard|TestWorkflowSubmissionExclusion|TestWorkflowSubmissionProjectionLoss|TestWorkflowSubmissionStop|TestWorkflowSubmissionBudget|TestWorkflowSubmissionPolicy|TestWorkflowSubmissionCorruption|TestWorkflowSubmissionJournal|TestWorkflowSubmissionMethods|TestWorkflowSubmissionLostResponse)$ -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowPreparationJournal|WorkflowReviewJournal|WorkflowReviewConcurrent|WorkflowReviewStop|WorkflowSubmissionLostResponse|WorkflowSubmissionStop|NativeDispatchConcurrent|NativePreparationStop|NativeMergerStop|NativeMergerHostRegeneration|NativeCandidateReviewRepair)$' -count=1 -timeout=10m -json`
 
 - `go test -short ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality`
 - `go test ./internal/core/workflow/closeout -count=1`
@@ -354,6 +386,15 @@ ownership decisions with 666 pending rows. Frozen source/baseline/introduction
 fields remain unchanged across 33 ledgers. Relative links, named regressions,
 14 compatibility cases, T15 columns and whitespace pass. Runtime checks are not
 repeated for this metadata-only update.
+
+Role/publication ledger reconciliation verifies 4,300 current declaration
+hashes, all 908 original method mappings, four signature ledgers, 25 new frozen
+source preimages, 67 commit objects and 22 actual ports. It records 331 specific
+ownership decisions with 577 pending rows. Frozen source/baseline/introduction
+fields remain unchanged across 33 ledgers. Relative links, named regressions,
+15 compatibility cases, T15 columns and whitespace pass. Metadata-only changes
+do not repeat runtime checks. The combined package timeout and successful
+unfinished-case recovery remain explicit in the validation evidence above.
 
 ## Risks and Follow-ups
 
