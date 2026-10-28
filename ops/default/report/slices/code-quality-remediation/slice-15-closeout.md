@@ -108,6 +108,15 @@ Ordinary and candidate-repair preparation Git effects use a private host under
 the existing admission guard and lease. Accepted repair/evidence reads, current
 source fences and complete claim/input/approval/result transactions retain Store.
 
+Publication advancement, explicit native reconciliation and continuation now use
+actual coordinator operations. The private continuation host owns only the
+accepted bounded step loop. Each native observation still reconciles Git,
+re-reads the current guard, selects one observation or bounded polling, re-reads
+again and confirms only the retained receipt. The sole poll-only forwarding
+method is removed; its caller supplies the same explicit poll mode. Acceptance
+locks and complete journal, budget, decision, projection, receipt and checkpoint
+transactions remain with Store.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -122,11 +131,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 202 source/extraction/consolidation images. Current identities and hashes are updated
+retains 225 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Sixty-seven former Store methods now have actual
+frozen source fields remain unchanged. Eighty-six former Store methods now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 841 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 822 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -146,7 +155,7 @@ replaces the removed policy methods.
 
 The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
 defines frontier, adoption, loose selection, continuation, amendment and closing
-from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Fifteen current compatibility/control cases identify actual
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Sixteen current compatibility/control cases identify actual
 consumers, existing regression protection and retirement conditions. Remaining
 legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
 
@@ -179,11 +188,11 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 378 body-specific decisions in
-the existing 908-row method map: 311 guarded-persistence methods, 23 closing
+contracts. Final method inspection now records 449 body-specific decisions in
+the existing 908-row method map: 363 guarded-persistence methods, 23 closing
 policies, one host evidence adapter, five coordinator functions, one persistence
-reader, 20 lifecycle owners and 17 coordinator operations. The remaining
-530 source rows stay explicitly pending final assessment.
+reader, 21 lifecycle owners and 35 coordinator operation mappings. The remaining
+459 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -234,6 +243,19 @@ Forty-seven new body-specific decisions also cover mutation receipt/allocation,
 native record/submission evidence and integration-entry transactions. C15.8 binds
 the actual stage policy to existing public restriction/upgrade contracts.
 
+Publication/continuation separation is in `6e281666ac251b7f6cbdf997122dee845fff87bf`. Nineteen Store
+methods now map to seventeen coordinator functions and one private loop; the
+nineteenth source body was an exact poll-only forwarding method consolidated
+into its sole caller. Twenty-two complete production declarations and 38 test
+declarations match after explicit owner/call normalization, including that exact
+call consolidation. Frozen bounds, membership refresh, operator preparation
+retry, barriers, partial step/progress values and five-second detached settlement
+retain original behavior. Seventy-one new source decisions include 52 concrete
+persistence bases for publication checkpoints, submission intents, budget/agent
+reservations and operator decisions. Mixed lifecycle-control ownership remains
+pending separately. C15.16 preserves polling versus explicit reconciliation and
+its retained observation contract/deadline, barrier and consumed budget.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -257,6 +279,21 @@ changes.
 - Existing Store method, declaration, authority/dependency and ownership ledgers.
 
 ## Validation
+
+Publication/continuation task checks passed all 27 selected real fixtures and six
+focused races, with no test skips or owned fixture leaks. The process-only crash
+helper was excluded explicitly; its owning crash fixture ran. Affected short
+tests, style/signature checks and pinned strict lint pass. Production signatures
+remain within five inputs. The 22 production/38 test declaration comparisons and
+exact forwarding consolidation are distinct evidence. Guided parity and final
+exact-head controller validation remain pending.
+
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(WorkflowPublication.*|WorkflowContinuation.*|NativeHost(Publication|PreparationRetry|Denials)|ServiceWorkflow(Publication.*|Continuation)|TelegramWorkContinuationGuard|TelegramControlLifecycle(Journal|Fence)|WorkflowPreparationRetryAuthority)$' -skip 'CrashProcess$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowPublicationDuringIO|WorkflowPublicationLateResponse|WorkflowPublicationCrash|WorkflowContinuationRecovery|TelegramControlLifecycleJournal|NativeHostPreparationRetry)$' -count=1 -timeout=10m -json`
+- `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+- `make check-go-style`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+- `git diff --check`
 
 Review-admission/preparation task checks passed 16 selected real fixtures and four
 focused races, with no test skips or owned fixture leaks. Affected short tests,
@@ -436,6 +473,14 @@ ownership decisions with 530 pending rows. Frozen source/baseline/introduction
 fields remain unchanged across 33 ledgers. Current owner declarations, relative
 links, named regressions, 15 compatibility cases, T15 columns and whitespace
 pass. Runtime checks are not repeated for this metadata-only update.
+
+Publication/continuation ledger reconciliation verifies 4,339 current declaration
+hashes, all 908 original method mappings, four signature ledgers, 23 new frozen
+source preimages, 71 commit objects and 22 actual ports. It records 449 specific
+ownership decisions with 459 pending rows. Frozen source/baseline/introduction
+fields remain unchanged across 33 ledgers. Current owner declarations, relative
+links, named regressions, 16 compatibility cases, T15 columns and whitespace pass.
+Runtime checks are not repeated for this metadata-only update.
 
 ## Risks and Follow-ups
 

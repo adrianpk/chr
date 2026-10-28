@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [12eb09162d1a2dd2256bd5197b28e9be70c66312, 72253efe04a5f0ca41a2393b442f89c98aac8637, 0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
+commits: [6e281666ac251b7f6cbdf997122dee845fff87bf, 12eb09162d1a2dd2256bd5197b28e9be70c66312, 72253efe04a5f0ca41a2393b442f89c98aac8637, 0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -175,3 +175,16 @@ The method map records 378/908 body-specific decisions with 530 pending; 841
 methods remain on Store. C15.8 names the actual human-only stage restriction.
 Final API/compatibility assessment, guided parity, exact-head slice validation
 and PR preparation remain open.
+
+Publication advancement, explicit native reconciliation and continuation have
+actual coordinator/private-loop owners in `6e281666ac251b7f6cbdf997122dee845fff87bf`. Nineteen Store methods
+are removed, including the sole poll-only forwarding method; original guard
+rereads, acceptance locks and complete journal/budget/decision/receipt/checkpoint
+transactions remain. All 22 production and 38 test declaration comparisons pass
+after explicit normalization and exact forwarding consolidation. All 27 selected
+real fixtures, six races, short/signature/style and strict lint checks pass with
+no test skips or owned leaks. The method map now records 449/908 decisions, with
+459 pending and 822 methods remaining on Store. C15.16 preserves observation
+versus bounded polling without resending or refilling budget. Mixed lifecycle
+control, remaining API/compatibility work, guided parity, exact-head slice
+validation and PR preparation remain open.
