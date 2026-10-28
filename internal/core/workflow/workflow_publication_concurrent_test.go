@@ -25,7 +25,7 @@ func TestWorkflowPublicationLateResponse(t *testing.T) {
 	<-started
 	workflowPublicationExternalResult(t, f, p, "rebase")
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, workflowPublicationPorts(f, p))
 
 	close(release)
 
@@ -56,12 +56,12 @@ func TestWorkflowPublicationDuringIO(t *testing.T) {
 		}
 	}}
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	if !errors.Is(err, workflowstate.ErrConflict) || progress.Receipt != nil || progress.Invocation.DeliveryProofRef != "" {
 		t.Fatal("target changed during IO but stale delivery proof was accepted", err)
 	}
 
-	progress, err = f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+	progress, err = AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, workflowPublicationPorts(f, p))
 	if err != nil || progress.Receipt == nil || p.calls != 0 {
 		t.Fatal("fresh canonical observation failed or submitted work", err)
 	}

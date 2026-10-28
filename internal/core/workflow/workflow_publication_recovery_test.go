@@ -53,7 +53,7 @@ func TestWorkflowPublicationCrashProcess(t *testing.T) {
 	pr := journal.Attempts[len(journal.Attempts)-1].Guard.PullRequest
 	provider := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: &workflowPreparationProviderFixture{workflowReviewProviderFixture: &workflowReviewProviderFixture{workflowPRProviderFixture: &workflowPRProviderFixture{pr: pr}}}, remote: os.Getenv("CHR_PUBLICATION_CRASH_REMOTE")}
 	ports := PublicationPorts{Provider: provider, Observer: NewWorkflowIntegrationGit(pr.Repository, provider.remote)}
-	_, err = store.AdvanceWorkflowSliceIntegration(t.Context(), id, ports)
+	_, err = AdvanceWorkflowSliceIntegration(t.Context(), store, id, ports)
 	t.Fatalf("owned publication writer did not exit: %v", err)
 }
 
@@ -71,7 +71,7 @@ func TestWorkflowPublicationCrash(t *testing.T) {
 
 			restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-			progress, err := restarted.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+			progress, err := AdvanceWorkflowSliceIntegration(t.Context(), restarted, f.run.ID, workflowPublicationPorts(f, p))
 			if err != nil || progress.Receipt == nil || progress.Invocation.Submission.State != workflowstate.SubmissionConfirmed || p.calls != 1 {
 				t.Fatal("publication recovery lost verified intent or repeated mutation", err)
 			}

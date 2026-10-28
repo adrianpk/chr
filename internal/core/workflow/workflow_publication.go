@@ -29,56 +29,56 @@ type IntegrationProgress struct {
 // AdvanceWorkflowSliceIntegration observes before preparing, reviewing or
 // submitting. One call processes only the retained slice and performs at most
 // one combined gate, one review and one submission. It never starts task work.
-func (s *Store) AdvanceWorkflowSliceIntegration(ctx context.Context, id string, ports PublicationPorts) (IntegrationProgress, error) {
+func AdvanceWorkflowSliceIntegration(ctx context.Context, store *Store, id string, ports PublicationPorts) (IntegrationProgress, error) {
 	if ports.Provider == nil || ports.Observer == nil {
 		return IntegrationProgress{}, fmt.Errorf("canonical provider and Git observer required")
 	}
 
-	native, err := s.workflowNativeContinuationProfile(ctx, id)
+	native, err := store.workflowNativeContinuationProfile(ctx, id)
 	if err != nil {
-		return s.workflowIntegrationProgress(ctx, id, nil, err)
+		return workflowIntegrationProgress(ctx, store, id, nil, err)
 	}
 
 	if native {
-		return s.advanceWorkflowNativeIntegration(ctx, id, ports)
+		return advanceWorkflowNativeIntegration(ctx, store, id, ports)
 	}
 
-	return s.advanceWorkflowLegacyIntegration(ctx, id, ports)
+	return advanceWorkflowLegacyIntegration(ctx, store, id, ports)
 }
 
-func (s *Store) advanceWorkflowLegacyIntegration(ctx context.Context, id string, ports PublicationPorts) (IntegrationProgress, error) {
-	publicationCheckpoint, err := s.observeWorkflowPublicationCheckpoint(ctx, id, ports)
+func advanceWorkflowLegacyIntegration(ctx context.Context, store *Store, id string, ports PublicationPorts) (IntegrationProgress, error) {
+	publicationCheckpoint, err := store.observeWorkflowPublicationCheckpoint(ctx, id, ports)
 
 	receipt, delivered := publicationCheckpoint.Receipt, publicationCheckpoint.Observed
 	if err != nil || delivered {
-		return s.workflowIntegrationProgress(ctx, id, receipt, err)
+		return workflowIntegrationProgress(ctx, store, id, receipt, err)
 	}
 
 	publisher, ok := ports.Provider.(PublicationProvider)
 	if !ok || ports.Preparer == nil {
-		return s.workflowIntegrationProgress(ctx, id, nil, s.blockWorkflowMissingPublisher(ctx, id))
+		return workflowIntegrationProgress(ctx, store, id, nil, store.blockWorkflowMissingPublisher(ctx, id))
 	}
 
-	if _, err := PrepareIntegration(ctx, s, id, publisher, ports.Preparer); err != nil {
-		return s.workflowIntegrationProgress(ctx, id, nil, err)
+	if _, err := PrepareIntegration(ctx, store, id, publisher, ports.Preparer); err != nil {
+		return workflowIntegrationProgress(ctx, store, id, nil, err)
 	}
 
-	review, err := ReviewSlice(ctx, s, id, publisher, ports.Reviewer)
+	review, err := ReviewSlice(ctx, store, id, publisher, ports.Reviewer)
 	if err != nil || review.State != workflowstate.ReviewAuthorized {
-		return s.workflowIntegrationProgress(ctx, id, nil, err)
+		return workflowIntegrationProgress(ctx, store, id, nil, err)
 	}
 
-	_, err = SubmitIntegration(ctx, s, id, publisher, ports.Observer)
+	_, err = SubmitIntegration(ctx, store, id, publisher, ports.Observer)
 
-	return s.workflowIntegrationProgress(ctx, id, nil, err)
+	return workflowIntegrationProgress(ctx, store, id, nil, err)
 }
 
-func (s *Store) workflowIntegrationProgress(ctx context.Context, id string, receipt *workflowstate.Record, failure error) (IntegrationProgress, error) {
+func workflowIntegrationProgress(ctx context.Context, store *Store, id string, receipt *workflowstate.Record, failure error) (IntegrationProgress, error) {
 	// A lost response may cancel the caller context; retain its latest checkpoint.
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
-	run, err := s.ReadWorkflow(cleanup, id)
+	run, err := store.ReadWorkflow(cleanup, id)
 
 	return IntegrationProgress{Invocation: run, Receipt: receipt}, errors.Join(failure, err)
 }

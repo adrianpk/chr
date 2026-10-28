@@ -133,7 +133,7 @@ func submitWorkflowParallelPublication(t *testing.T, lane workflowParallelPublic
 func finalizeWorkflowParallelPublication(t *testing.T, lane workflowParallelPublicationLane) IntegrationProgress {
 	t.Helper()
 
-	progress, err := lane.fixture.store.AdvanceWorkflowSliceIntegration(t.Context(), lane.fixture.run.ID, workflowPublicationPorts(lane.fixture, lane.provider))
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), lane.fixture.store, lane.fixture.run.ID, workflowPublicationPorts(lane.fixture, lane.provider))
 	if err != nil || progress.Receipt == nil || progress.Invocation.Status != workflowstate.InvocationCompleted {
 		t.Fatal("canonical publication was not finalized", err)
 	}

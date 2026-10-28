@@ -41,7 +41,7 @@ func testWorkflowPublicationExternal(t *testing.T, method, intent string) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 	result := workflowPublicationExternalResult(t, f, p, method)
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, workflowPublicationPorts(f, p))
 	if err != nil || progress.Receipt == nil || progress.Receipt.Receipt.ResultCommit != result || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 1 {
 		t.Fatal("external delivery was replaced by new work or publication", err)
 	}
@@ -84,7 +84,7 @@ func assertWorkflowPublicationStopped(t *testing.T, f workflowPreparationFixture
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	again, err := restarted.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+	again, err := AdvanceWorkflowSliceIntegration(t.Context(), restarted, f.run.ID, workflowPublicationPorts(f, p))
 	if err != nil || again.Invocation.Revision != progress.Invocation.Revision || again.Receipt.SourceHash != progress.Receipt.SourceHash || p.calls != 1 {
 		t.Fatal("restart repeated external finalization", err)
 	}
@@ -112,7 +112,7 @@ func TestWorkflowPublicationReadOnly(t *testing.T) {
 	ports := workflowPublicationPorts(f, workflowReadOnlyPublicationProvider{p})
 	ports.Preparer, ports.Reviewer = nil, nil
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	if err != nil || progress.Receipt == nil || progress.Invocation.Status != workflowstate.InvocationCancelled || progress.Invocation.Submission != nil || p.calls != 0 {
 		t.Fatal("read-only external delivery required execution authority", err)
 	}

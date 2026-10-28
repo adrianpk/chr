@@ -23,7 +23,7 @@ func TestWorkflowAssuranceLost(t *testing.T) {
 	restarted := NewWorkflowStore(store.layout, store.projectID)
 	before := workflowTestRead(t, restarted, run.ID)
 
-	progress, err := restarted.ContinueWorkflow(t.Context(), run.ID, ContinuationRequest{Worker: workflowTaskCommand(t, "worker"), PullRequest: workflowPRContent()}, ports)
+	progress, err := ContinueWorkflow(t.Context(), restarted, run.ID, ContinuationRequest{Worker: workflowTaskCommand(t, "worker"), PullRequest: workflowPRContent()}, ports)
 	if err != nil || progress.Steps != 0 || progress.Invocation.Revision != before.Revision || provider.calls != 3 {
 		t.Fatal("terminal retry repeated work, publication or finalization", err)
 	}
@@ -38,7 +38,7 @@ func workflowAssuranceLosses(t *testing.T, store *Store, id string, ports Contin
 		restarted := NewWorkflowStore(store.layout, store.projectID)
 		request := ContinuationRequest{Worker: workflowTaskCommand(t, "worker"), PullRequest: workflowPRContent(), StepLimit: 1}
 
-		progress, err := restarted.ContinueWorkflow(t.Context(), id, request, ports)
+		progress, err := ContinueWorkflow(t.Context(), restarted, id, request, ports)
 		losses += workflowAssuranceLostResponse(t, store, progress, err)
 
 		if progress.Invocation.Status == workflowstate.InvocationCompleted {

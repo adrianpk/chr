@@ -110,7 +110,7 @@ func nativeHostPublication(t *testing.T, mode string) {
 		t.Fatal(err)
 	}
 
-	if err := f.store.transitionWorkflowNativeContinuation(t.Context(), entry, guard, "ready_to_publish"); err != nil {
+	if err := transitionWorkflowNativeContinuation(t.Context(), f.store, entry, guard, "ready_to_publish"); err != nil {
 		t.Fatal(err)
 	}
 
@@ -150,7 +150,7 @@ func checkNativeHostReceipt(t *testing.T, host nativeHostFixture, result, mode s
 		t.Fatal("real provider could not confirm its publication receipt", err)
 	}
 
-	if _, err := host.f.store.AdvanceWorkflowSliceIntegration(t.Context(), host.f.run.ID, ports); err != nil {
+	if _, err := AdvanceWorkflowSliceIntegration(t.Context(), host.f.store, host.f.run.ID, ports); err != nil {
 		t.Fatal("real provider could not finalize its publication receipt", err)
 	}
 
@@ -163,12 +163,12 @@ func confirmNativeHostReceipt(t *testing.T, host nativeHostFixture, ports Public
 	t.Helper()
 
 	if mode == "explicit" {
-		_, err := host.f.store.ReconcileWorkflowNativeIntegration(t.Context(), host.f.run.ID, ports)
+		_, err := ReconcileWorkflowNativeIntegration(t.Context(), host.f.store, host.f.run.ID, ports)
 
 		return err
 	}
 
-	_, err := host.f.store.AdvanceWorkflowSliceIntegration(t.Context(), host.f.run.ID, ports)
+	_, err := AdvanceWorkflowSliceIntegration(t.Context(), host.f.store, host.f.run.ID, ports)
 
 	return err
 }

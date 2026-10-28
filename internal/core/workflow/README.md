@@ -133,6 +133,15 @@ original intent/exclusion, BeforeSend checks, response/observation journals,
 claims, budgets, explicit approval and complete acceptance transactions. Actual
 service and continuation callers use these operations directly.
 
+`AdvanceWorkflowSliceIntegration`, `ContinueWorkflow` and
+`ReconcileWorkflowNativeIntegration` are coordinator operations over those same
+guarded owners. The private continuation host runs only the accepted bounded
+step loop. It preserves membership refresh, retry authority, barriers and partial
+step counts. Explicit native reconciliation selects one observation; continuation
+selects bounded polling. Both re-read current guards between Git reconciliation,
+canonical observation and receipt confirmation. The poll-only forwarding method
+is removed; Store retains journal/projection, acceptance and checkpoint commits.
+
 ## Bounded operation results
 
 Capacity observations pair the retained process with liveness; owned worker

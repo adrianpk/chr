@@ -35,7 +35,7 @@ func (s service) ReconcileWorkflowSubmission(ctx context.Context, id string) (wo
 			return workflowstate.Submission{}, err
 		}
 
-		return store.ReconcileWorkflowNativeIntegration(ctx, id, ports.Publication)
+		return workflowcore.ReconcileWorkflowNativeIntegration(ctx, store, id, ports.Publication)
 	}
 
 	return workflowcore.ReconcileSubmission(ctx, store, id, provider, s.workflowIntegrationObserver(run))

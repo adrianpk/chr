@@ -29,7 +29,7 @@ func TestWorkflowCapacityContinuation(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	continued, err := store.ContinueWorkflow(t.Context(), run.ID, request, ContinuationPorts{})
+	continued, err := ContinueWorkflow(t.Context(), store, run.ID, request, ContinuationPorts{})
 	if err != nil || continued.Steps != 1 || len(continued.Invocation.Attempts) != 1 || continued.Invocation.Cursor != 1 || continued.Invocation.CapacityResumeStatus != workflowstate.InvocationUnspecified {
 		t.Fatal("capacity wait could not continue its frozen task", continued, err)
 	}
@@ -38,12 +38,12 @@ func TestWorkflowCapacityContinuation(t *testing.T) {
 func assertWorkflowContinuationWait(t *testing.T, store *Store, id string, request ContinuationRequest) {
 	t.Helper()
 
-	waiting, err := store.ContinueWorkflow(t.Context(), id, request, ContinuationPorts{})
+	waiting, err := ContinueWorkflow(t.Context(), store, id, request, ContinuationPorts{})
 	if !errors.Is(err, ErrWorkflowCapacity) || waiting.Reason != "waiting_capacity" || waiting.Steps != 0 {
 		t.Fatal("capacity reported as a generic blocker", waiting, err)
 	}
 
-	again, err := store.ContinueWorkflow(t.Context(), id, request, ContinuationPorts{})
+	again, err := ContinueWorkflow(t.Context(), store, id, request, ContinuationPorts{})
 	if !errors.Is(err, ErrWorkflowCapacity) || again.Invocation.Revision != waiting.Invocation.Revision || again.Invocation.Continuation.Sequence != waiting.Invocation.Continuation.Sequence || len(again.Invocation.Attempts) != 0 {
 		t.Fatal("unchanged wait grew checkpoints or attempts", again, err)
 	}

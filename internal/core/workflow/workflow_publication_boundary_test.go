@@ -25,7 +25,7 @@ func TestWorkflowPublicationUnknown(t *testing.T) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 
 	ports := workflowPublicationPorts(f, p)
-	if _, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports); !errors.Is(err, workflowstate.ErrObservationRequired) {
+	if _, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("unknown result allowed another publication phase", err)
 	}
 
@@ -42,7 +42,7 @@ func TestWorkflowPublicationUnknown(t *testing.T) {
 	workflowIntegrationCommit(t, f.actor, "new-base.txt", "Fresh target after sealed attempt")
 	workflowIntegrationCommand(t, f.actor, "push", "origin", "dev")
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	if err != nil || progress.Invocation.Submission.Attempt != 2 || progress.Invocation.Preparation.Round != before.Preparation.Round+1 || p.calls != 2 {
 		t.Fatal("sealed retry lost its budget or reused a stale base", err)
 	}
@@ -71,7 +71,7 @@ func TestWorkflowPublicationCorrupt(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+			progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, workflowPublicationPorts(f, p))
 			if err == nil || progress.Receipt != nil || progress.Invocation.DeliveryRef != "" || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 0 {
 				t.Fatal("corrupt delivery evidence completed tasks or started work")
 			}
@@ -87,7 +87,7 @@ func TestWorkflowPublicationUnsupported(t *testing.T) {
 	p := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: f.provider, remote: f.remote}
 	before := workflowTestRead(t, f.store, f.run.ID)
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, workflowPublicationPorts(f, p))
 	if !errors.Is(err, workflowstate.ErrAtomicGuard) || progress.Invocation.Status != workflowstate.InvocationBlocked || progress.Invocation.Blocker == nil || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 0 {
 		t.Fatal("unsupported provider bypassed the guard contract", err)
 	}

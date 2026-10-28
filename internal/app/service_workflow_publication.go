@@ -30,7 +30,7 @@ func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string,
 	ports := workflowcore.PublicationPorts{Provider: provider, Preparer: preparer, Observer: s.workflowIntegrationObserver(run), Reviewer: reviewer}
 	bindWorkflowNativePublicationPorts(&ports, run)
 
-	return store.AdvanceWorkflowSliceIntegration(ctx, id, ports)
+	return workflowcore.AdvanceWorkflowSliceIntegration(ctx, store, id, ports)
 }
 
 func bindWorkflowNativePublicationPorts(ports *workflowcore.PublicationPorts, run workflowstate.Invocation) {

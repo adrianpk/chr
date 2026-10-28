@@ -35,7 +35,7 @@ func (s service) ContinueWorkflow(ctx context.Context, id string, request workfl
 		return workflowcore.ContinuationProgress{Invocation: run}, err
 	}
 
-	return store.ContinueWorkflow(ctx, id, request, ports)
+	return workflowcore.ContinueWorkflow(ctx, store, id, request, ports)
 }
 
 func (s service) workflowContinuationPorts(run workflowstate.Invocation, provider workflowcore.PullRequestProvider, reviewer []string) (workflowcore.ContinuationPorts, error) {

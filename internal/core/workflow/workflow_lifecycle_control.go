@@ -54,8 +54,8 @@ func (s *Store) ControlWorkflowLifecycle(ctx context.Context, request workflowst
 
 	ports.Continuation.StepLimit = request.StepLimit
 	ports.Continuation.ExpectedRevision = request.ExpectedRevision
-	step, err := s.continueWorkflowSteps(ctx, request.ID, ports.Continuation, ports.Execution, accepted.limit)
-	_, err = s.finishWorkflowContinuation(ctx, request.ID, step, err)
+	step, err := (workflowContinuationHost{store: s}).run(ctx, request.ID, ports.Continuation, ports.Execution, accepted.limit)
+	_, err = finishWorkflowContinuation(ctx, s, request.ID, step, err)
 
 	return accepted.receipt, err
 }

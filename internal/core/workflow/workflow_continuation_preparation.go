@@ -23,13 +23,13 @@ func workflowInterruptedPreparation(run workflowstate.Invocation) bool {
 // An accepted operator continuation can retry preparation that failed before
 // its gate started. The common preparer retains counts and rechecks every guard.
 // Failed gates, unbound calls and receipt replay cannot take this path.
-func (s *Store) retryWorkflowContinuationPreparation(ctx context.Context, id string, ports ContinuationPorts) (workflowContinuationStep, error) {
+func retryWorkflowContinuationPreparation(ctx context.Context, store *Store, id string, ports ContinuationPorts) (workflowContinuationStep, error) {
 	provider, ok := ports.Publication.Provider.(PublicationGuardProvider)
 	if !ok || ports.Publication.Preparer == nil {
 		return workflowContinuationStep{Steps: 0, Reason: "blocked"}, workflowstate.ErrAtomicGuard
 	}
 
-	if _, err := PrepareIntegration(ctx, s, id, provider, ports.Publication.Preparer); err != nil {
+	if _, err := PrepareIntegration(ctx, store, id, provider, ports.Publication.Preparer); err != nil {
 		return workflowContinuationStep{Steps: 0, Reason: "blocked"}, err
 	}
 

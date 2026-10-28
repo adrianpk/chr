@@ -199,7 +199,7 @@ func testWorkflowTicketDelivery(t *testing.T, method, extent string, mode workfl
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	final, err := restarted.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	final, err := AdvanceWorkflowSliceIntegration(t.Context(), restarted, f.run.ID, ports)
 	if err != nil || final.Receipt == nil || !workflowTicketReceiptMatches(final.Receipt, f.run.Lane.Unit, method) || final.Invocation.ConfirmedCursor != 1 || final.Invocation.Outcome != "ticket_integrated" {
 		t.Fatal("ticket did not finalize from actual canonical delivery", err)
 	}

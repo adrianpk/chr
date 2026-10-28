@@ -37,8 +37,8 @@ type ContinuationProgress struct {
 // ContinueWorkflow executes bounded transitions on one frozen invocation.
 // Accepted task, PR and delivery checkpoints are reused after restart. Waiting
 // authority, failed gates and set closure return without executing successors.
-func (s *Store) ContinueWorkflow(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts) (ContinuationProgress, error) {
-	run, err := s.ReadWorkflow(ctx, id)
+func ContinueWorkflow(ctx context.Context, store *Store, id string, request ContinuationRequest, ports ContinuationPorts) (ContinuationProgress, error) {
+	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
 		return ContinuationProgress{}, err
 	}
@@ -49,16 +49,16 @@ func (s *Store) ContinueWorkflow(ctx context.Context, id string, request Continu
 	}
 
 	if request.ExpectedRevision != 0 {
-		if _, err := s.acceptWorkflowContinuation(ctx, id, request.ExpectedRevision, request.AuthorizationCheck); err != nil {
+		if _, err := store.acceptWorkflowContinuation(ctx, id, request.ExpectedRevision, request.AuthorizationCheck); err != nil {
 			return ContinuationProgress{Invocation: run}, err
 		}
 	} else if request.AuthorizationCheck != nil {
 		return ContinuationProgress{Invocation: run}, workflowstate.ErrConflict
 	}
 
-	step, err := s.continueWorkflowSteps(ctx, id, request, ports, limit)
+	step, err := (workflowContinuationHost{store: store}).run(ctx, id, request, ports, limit)
 
-	return s.finishWorkflowContinuation(ctx, id, step, err)
+	return finishWorkflowContinuation(ctx, store, id, step, err)
 }
 
 func workflowContinuationLimit(run workflowstate.Invocation, requested int) (int, error) {
@@ -82,13 +82,13 @@ func workflowContinuationLimit(run workflowstate.Invocation, requested int) (int
 	return requested, nil
 }
 
-func (s *Store) finishWorkflowContinuation(ctx context.Context, id string, step workflowContinuationStep, failure error) (ContinuationProgress, error) {
+func finishWorkflowContinuation(ctx context.Context, store *Store, id string, step workflowContinuationStep, failure error) (ContinuationProgress, error) {
 	steps, reason := step.Steps, step.Reason
 
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
-	run, err := s.ReadWorkflow(cleanup, id)
+	run, err := store.ReadWorkflow(cleanup, id)
 	if err != nil {
 		return ContinuationProgress{Steps: steps, Reason: reason}, errors.Join(failure, err)
 	}
@@ -98,7 +98,7 @@ func (s *Store) finishWorkflowContinuation(ctx context.Context, id string, step 
 	}
 
 	if !workflowstate.InvocationTerminal(run.Status) {
-		run, err = s.retainWorkflowContinuation(cleanup, run, steps, reason)
+		run, err = store.retainWorkflowContinuation(cleanup, run, steps, reason)
 	}
 
 	return ContinuationProgress{Invocation: run, Steps: steps, Reason: reason}, errors.Join(failure, err)

@@ -16,7 +16,7 @@ func TestTelegramWorkContinuationGuard(t *testing.T) {
 	calls := 0
 	check := func(context.Context) error { calls++; return workflowstate.ErrConflict }
 
-	_, err := store.ContinueWorkflow(t.Context(), run.ID, ContinuationRequest{ExpectedRevision: run.Revision, StepLimit: 1, AuthorizationCheck: check}, ContinuationPorts{})
+	_, err := ContinueWorkflow(t.Context(), store, run.ID, ContinuationRequest{ExpectedRevision: run.Revision, StepLimit: 1, AuthorizationCheck: check}, ContinuationPorts{})
 	if !errors.Is(err, workflowstate.ErrConflict) || calls != 1 {
 		t.Fatal("continuation authority was not checked", calls, err)
 	}

@@ -40,7 +40,7 @@ func workflowContinuationFixture(t *testing.T) (*Store, StartRequest, workflowst
 func workflowContinueOne(t *testing.T, store *Store, id string, ports ContinuationPorts) ContinuationProgress {
 	t.Helper()
 
-	progress, err := store.ContinueWorkflow(t.Context(), id, ContinuationRequest{Worker: workflowPRWorker(), PullRequest: workflowPRContent(), StepLimit: 1}, ports)
+	progress, err := ContinueWorkflow(t.Context(), store, id, ContinuationRequest{Worker: workflowPRWorker(), PullRequest: workflowPRContent(), StepLimit: 1}, ports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func checkWorkflowContinuationIdentity(t *testing.T, checkpoint *workflowstate.C
 func TestWorkflowContinuationBounds(t *testing.T) {
 	store, request, run := workflowContinuationFixture(t)
 	for _, limit := range []int{-1, 3, 129} {
-		if _, err := store.ContinueWorkflow(t.Context(), run.ID, ContinuationRequest{StepLimit: limit}, ContinuationPorts{}); err == nil {
+		if _, err := ContinueWorkflow(t.Context(), store, run.ID, ContinuationRequest{StepLimit: limit}, ContinuationPorts{}); err == nil {
 			t.Fatal("invalid or broadened call budget accepted")
 		}
 	}

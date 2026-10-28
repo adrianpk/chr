@@ -27,7 +27,7 @@ func TestWorkflowContinuationRecovery(t *testing.T) {
 				return nil
 			}
 
-			if _, err := store.ContinueWorkflow(t.Context(), run.ID, ContinuationRequest{StepLimit: 1}, ContinuationPorts{}); err == nil {
+			if _, err := ContinueWorkflow(t.Context(), store, run.ID, ContinuationRequest{StepLimit: 1}, ContinuationPorts{}); err == nil {
 				t.Fatal("checkpoint replacement was not interrupted")
 			}
 
@@ -53,7 +53,7 @@ func TestWorkflowContinuationCorruption(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ContinueWorkflow(t.Context(), run.ID, ContinuationRequest{Worker: workflowPRWorker(), StepLimit: 1}, ContinuationPorts{}); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ContinueWorkflow(t.Context(), store, run.ID, ContinuationRequest{Worker: workflowPRWorker(), StepLimit: 1}, ContinuationPorts{}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("corrupt continuation admitted more work", err)
 	}
 

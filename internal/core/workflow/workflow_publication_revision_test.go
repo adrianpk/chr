@@ -48,7 +48,7 @@ func testWorkflowPublicationRevision(t *testing.T, external bool) {
 		workflowPublicationExternalResult(t, f, p, "rebase")
 	}
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, workflowPublicationPorts(f, p))
 	if err != nil {
 		t.Fatal("sealed candidate history prevented reconciliation", err)
 	}
@@ -89,7 +89,7 @@ func checkWorkflowPublicationRevision(t *testing.T, f workflowPreparationFixture
 		t.Fatal("repaired candidate reset or reused a consumed attempt")
 	}
 
-	final, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
+	final, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, workflowPublicationPorts(f, p))
 	if err != nil || final.Receipt == nil || final.Receipt.Receipt.SubmissionID != progress.Invocation.Submission.ID {
 		t.Fatal("repaired guarded result did not finalize its new intent", err)
 	}

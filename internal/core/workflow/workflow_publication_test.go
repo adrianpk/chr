@@ -64,7 +64,7 @@ func TestWorkflowPublicationMovedBase(t *testing.T) {
 
 	ports := workflowPublicationPorts(f, p)
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +77,7 @@ func TestWorkflowPublicationMovedBase(t *testing.T) {
 	moved := workflowIntegrationCommit(t, f.actor, "movement.txt", "New canonical target content")
 	workflowIntegrationCommand(t, f.actor, "push", "origin", "dev")
 
-	progress, err = f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	progress, err = AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	if err != nil || progress.Invocation.Review.State != workflowstate.ReviewWaitingApproval || progress.Invocation.Review.InputHash == old.Review.InputHash || progress.Invocation.Preparation.Round != old.Preparation.Round+1 || p.calls != 0 {
 		t.Fatal("moved base reused old validation or approval", err)
 	}
@@ -109,11 +109,11 @@ func assertWorkflowPublicationMoved(t *testing.T, f workflowPreparationFixture, 
 	}
 
 	ports := workflowPublicationPorts(f, p)
-	if _, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports); err != nil {
+	if _, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports); err != nil {
 		t.Fatal(err)
 	}
 
-	final, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	final, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	if err != nil || final.Receipt == nil || p.calls != 1 {
 		t.Fatal("new exact approval did not produce one verified delivery", err)
 	}
@@ -122,7 +122,7 @@ func assertWorkflowPublicationMoved(t *testing.T, f workflowPreparationFixture, 
 func workflowPublicationModeStart(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, ports PublicationPorts, mode workflowstate.ReviewMode) (IntegrationProgress, error) {
 	t.Helper()
 
-	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	if mode == workflowstate.ReviewHuman {
 		if err != nil || progress.Invocation.Review.State != workflowstate.ReviewWaitingApproval || p.calls != 0 {
 			t.Fatal("human policy skipped exact approval", err)
@@ -132,7 +132,7 @@ func workflowPublicationModeStart(t *testing.T, f workflowPreparationFixture, p 
 			t.Fatal(err)
 		}
 
-		progress, err = f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+		progress, err = AdvanceWorkflowSliceIntegration(t.Context(), f.store, f.run.ID, ports)
 	}
 
 	return progress, err
@@ -143,7 +143,7 @@ func checkWorkflowPublicationConfirmation(t *testing.T, f workflowPreparationFix
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	progress, err := restarted.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
+	progress, err := AdvanceWorkflowSliceIntegration(t.Context(), restarted, f.run.ID, ports)
 	if err != nil || progress.Receipt == nil || progress.Invocation.Status != workflowstate.InvocationCompleted || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 1 {
 		t.Fatal("verified delivery did not finalize without more work", err)
 	}
@@ -160,7 +160,7 @@ func checkWorkflowPublicationConfirmation(t *testing.T, f workflowPreparationFix
 func checkWorkflowPublicationReuse(t *testing.T, restarted *Store, id string, ports PublicationPorts, progress IntegrationProgress) {
 	t.Helper()
 
-	again, err := restarted.AdvanceWorkflowSliceIntegration(t.Context(), id, ports)
+	again, err := AdvanceWorkflowSliceIntegration(t.Context(), restarted, id, ports)
 	if err != nil || again.Invocation.Revision != progress.Invocation.Revision || again.Receipt.SourceHash != progress.Receipt.SourceHash {
 		t.Fatal("completed slice repeated finalization", err)
 	}

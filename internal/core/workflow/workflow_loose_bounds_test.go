@@ -66,7 +66,7 @@ func checkWorkflowLooseFailure(t *testing.T, store *Store, id string, attempts i
 
 	before := workflowTestRead(t, store, id)
 
-	progress, err := store.ContinueWorkflow(t.Context(), id, ContinuationRequest{Worker: workflowPRWorker()}, ContinuationPorts{})
+	progress, err := ContinueWorkflow(t.Context(), store, id, ContinuationRequest{Worker: workflowPRWorker()}, ContinuationPorts{})
 	if err != nil || progress.Reason != "stopped" || progress.Steps != 0 || progress.Invocation.Status != workflowstate.InvocationPaused || progress.Invocation.Cursor != 0 || len(progress.Invocation.Attempts) != attempts || progress.Invocation.Lane.Unit.ID != "PRJ-90" {
 		t.Fatal("failed ticket did not stop its invocation", err)
 	}
@@ -151,7 +151,7 @@ func TestWorkflowLooseTerminal(t *testing.T) {
 	}}
 	retry := workflowTestStart(t, f.store, request)
 
-	progress, err := f.store.ContinueWorkflow(t.Context(), run.ID, ContinuationRequest{Worker: workflowPRWorker()}, ContinuationPorts{})
+	progress, err := ContinueWorkflow(t.Context(), f.store, run.ID, ContinuationRequest{Worker: workflowPRWorker()}, ContinuationPorts{})
 	if err != nil || !retry.Attached || progress.Reason != "completed" || progress.Steps != 0 || !reflect.DeepEqual(progress.Invocation, run) {
 		t.Fatal("terminal retry admitted or executed a later ticket", err)
 	}

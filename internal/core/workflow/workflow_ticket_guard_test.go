@@ -218,7 +218,7 @@ func TestWorkflowTicketBounded(t *testing.T) {
 	run := workflowTestStart(t, store, request).Invocation
 	continuation := ContinuationRequest{Worker: workflowPRWorker(), StepLimit: 1}
 
-	first, err := store.ContinueWorkflow(t.Context(), run.ID, continuation, ContinuationPorts{})
+	first, err := ContinueWorkflow(t.Context(), store, run.ID, continuation, ContinuationPorts{})
 	if err != nil || first.Steps != 1 || first.Reason != "step_limit" || first.Invocation.Cursor != 1 || first.Invocation.CandidateRef != "" {
 		t.Fatal("first bounded call skipped task validation or candidate boundary", err)
 	}
@@ -231,7 +231,7 @@ func checkWorkflowTicketBoundedRestart(t *testing.T, store *Store, record workfl
 
 	restarted := NewWorkflowStore(store.layout, store.projectID)
 
-	second, err := restarted.ContinueWorkflow(t.Context(), first.Invocation.ID, continuation, ContinuationPorts{})
+	second, err := ContinueWorkflow(t.Context(), restarted, first.Invocation.ID, continuation, ContinuationPorts{})
 	if err != nil || second.Steps != 1 || second.Invocation.CandidateRef == "" || second.Invocation.ConfirmedCursor != 0 || len(second.Invocation.Attempts) != 1 {
 		t.Fatal("bounded restart reran the worker or claimed delivery", err)
 	}

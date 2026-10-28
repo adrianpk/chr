@@ -32,7 +32,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 
 	ports := ContinuationPorts{Publication: PublicationPorts{Provider: provider, Preparer: f.git, Observer: NewWorkflowIntegrationGit(host.profile.Repository, f.remote)}}
-	if _, err := f.store.ContinueWorkflow(t.Context(), f.run.ID, ContinuationRequest{StepLimit: 1}, ports); err != nil {
+	if _, err := ContinueWorkflow(t.Context(), f.store, f.run.ID, ContinuationRequest{StepLimit: 1}, ports); err != nil {
 		t.Fatal(err)
 	}
 

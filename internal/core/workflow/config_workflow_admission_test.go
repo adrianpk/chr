@@ -27,7 +27,7 @@ func TestWorkflowConfigAdmission(t *testing.T) {
 	policy := run.Policy
 	checkWorkflowConfigFrozen(t, policy, body)
 
-	progress, err := store.ContinueWorkflow(t.Context(), run.ID, ContinuationRequest{Worker: workflowTaskCommand(t, "worker")}, ContinuationPorts{})
+	progress, err := ContinueWorkflow(t.Context(), store, run.ID, ContinuationRequest{Worker: workflowTaskCommand(t, "worker")}, ContinuationPorts{})
 	if err != nil || progress.Steps != 2 || progress.Invocation.Cursor != 2 {
 		t.Fatal("configured checkpoint limit was not enforced", progress, err)
 	}

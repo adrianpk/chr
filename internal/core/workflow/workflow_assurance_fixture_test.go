@@ -158,7 +158,7 @@ func workflowAssuranceContinue(t *testing.T, store *Store, id string, ports Cont
 	restarted := NewWorkflowStore(store.layout, store.projectID)
 	request := ContinuationRequest{Worker: workflowTaskCommand(t, "worker"), PullRequest: workflowPRContent(), StepLimit: 1}
 
-	progress, err := restarted.ContinueWorkflow(t.Context(), id, request, ports)
+	progress, err := ContinueWorkflow(t.Context(), restarted, id, request, ports)
 	if err != nil {
 		t.Fatalf("composed continuation (%s, cursor %d, confirmed %d, outcome %s): %v", progress.Reason, progress.Invocation.Cursor, progress.Invocation.ConfirmedCursor, progress.Invocation.Outcome, err)
 	}

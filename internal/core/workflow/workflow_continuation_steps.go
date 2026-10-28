@@ -12,9 +12,12 @@ type workflowContinuationState struct {
 	MembershipChanged bool
 }
 
-func (s *Store) continueWorkflowSteps(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts, limit int) (workflowContinuationStep, error) {
+// workflowContinuationHost owns the bounded accepted-step loop.
+type workflowContinuationHost struct{ store *Store }
+
+func (host workflowContinuationHost) run(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts, limit int) (workflowContinuationStep, error) {
 	for steps := 0; steps < limit; steps++ {
-		observed, err := s.readWorkflowContinuation(ctx, id)
+		observed, err := readWorkflowContinuation(ctx, host.store, id)
 		if err != nil {
 			return workflowContinuationStep{Steps: steps, Reason: "blocked"}, err
 		}
@@ -26,7 +29,7 @@ func (s *Store) continueWorkflowSteps(ctx context.Context, id string, request Co
 		run := observed.Invocation
 
 		if workflowContinuationPreparationRetry(run, request, steps) {
-			retry, err := s.retryWorkflowContinuationPreparation(ctx, id, ports)
+			retry, err := retryWorkflowContinuationPreparation(ctx, host.store, id, ports)
 
 			return retry, err
 		}
@@ -35,11 +38,11 @@ func (s *Store) continueWorkflowSteps(ctx context.Context, id string, request Co
 			return workflowContinuationStep{Steps: steps, Reason: reason}, nil
 		}
 
-		if err := s.advanceWorkflowContinuation(ctx, run, request, ports); err != nil {
+		if err := advanceWorkflowContinuation(ctx, host.store, run, request, ports); err != nil {
 			return workflowContinuationStep{Steps: steps, Reason: workflowContinuationFailureReason(err)}, err
 		}
 
-		after, err := s.ReadWorkflow(ctx, id)
+		after, err := host.store.ReadWorkflow(ctx, id)
 		if err != nil {
 			return workflowContinuationStep{Steps: steps, Reason: "blocked"}, err
 		}
@@ -61,13 +64,13 @@ func workflowContinuationFailureReason(err error) string {
 	return "blocked"
 }
 
-func (s *Store) readWorkflowContinuation(ctx context.Context, id string) (workflowContinuationState, error) {
-	run, err := s.ReadWorkflow(ctx, id)
+func readWorkflowContinuation(ctx context.Context, store *Store, id string) (workflowContinuationState, error) {
+	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
 		return workflowContinuationState{Invocation: run}, err
 	}
 
-	refreshed, err := s.ReconcileWorkflowMembership(ctx, id)
+	refreshed, err := store.ReconcileWorkflowMembership(ctx, id)
 
 	return workflowContinuationState{Invocation: run, MembershipChanged: refreshed.Revision != run.Revision}, err
 }
@@ -104,67 +107,67 @@ func workflowContinuationBarrier(run workflowstate.Invocation) string {
 	return ""
 }
 
-func (s *Store) advanceWorkflowContinuation(ctx context.Context, run workflowstate.Invocation, request ContinuationRequest, ports ContinuationPorts) error {
+func advanceWorkflowContinuation(ctx context.Context, store *Store, run workflowstate.Invocation, request ContinuationRequest, ports ContinuationPorts) error {
 	state := workflowInvocationFile{Invocation: run}
 	restoreWorkflowCapacityWait(&state)
 
 	run = state.Invocation
 
 	if workflowContinuationClosing(run) {
-		_, err := CloseInvocationSet(ctx, s, run.ID, request.PullRequest.BaseBranch, FrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
+		_, err := CloseInvocationSet(ctx, store, run.ID, request.PullRequest.BaseBranch, FrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
 
 		return err
 	}
 
 	if run.DeliveryRef != "" {
-		return s.advanceWorkflowContinuationDelivery(ctx, run, ports)
+		return advanceWorkflowContinuationDelivery(ctx, store, run, ports)
 	}
 
 	if run.CandidateRef != "" {
 		if workflowCandidateNeedsPR(run) {
-			return s.ensureWorkflowContinuationPR(ctx, run, request, ports)
+			return ensureWorkflowContinuationPR(ctx, store, run, request, ports)
 		}
 
-		_, err := s.AdvanceWorkflowSliceIntegration(ctx, run.ID, ports.Publication)
+		_, err := AdvanceWorkflowSliceIntegration(ctx, store, run.ID, ports.Publication)
 
 		return err
 	}
 
 	if run.Lane != nil && run.Lane.Unit.Kind == "ticket" && workflowSliceValidationReady(run) {
-		_, err := s.PrepareWorkflowTicketCandidate(ctx, run.ID)
+		_, err := store.PrepareWorkflowTicketCandidate(ctx, run.ID)
 
 		return err
 	}
 
 	if workflowSliceValidationReady(run) {
-		_, err := ValidateSlice(ctx, s, run.ID)
+		_, err := ValidateSlice(ctx, store, run.ID)
 
 		return err
 	}
 
-	return executeWorkflowSliceTask(ctx, s, run.ID, request.Worker)
+	return executeWorkflowSliceTask(ctx, store, run.ID, request.Worker)
 }
 
-func (s *Store) advanceWorkflowContinuationDelivery(ctx context.Context, run workflowstate.Invocation, ports ContinuationPorts) error {
+func advanceWorkflowContinuationDelivery(ctx context.Context, store *Store, run workflowstate.Invocation, ports ContinuationPorts) error {
 	if run.Integration != nil && run.ConfirmedCursor < run.Cursor {
-		_, err := s.AdvanceWorkflowSliceIntegration(ctx, run.ID, ports.Publication)
+		_, err := AdvanceWorkflowSliceIntegration(ctx, store, run.ID, ports.Publication)
 
 		return err
 	}
 
-	_, err := s.AdvanceWorkflowFrontier(ctx, run.ID, FrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
+	_, err := store.AdvanceWorkflowFrontier(ctx, run.ID, FrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
 
 	return err
 }
 
-func (s *Store) ensureWorkflowContinuationPR(ctx context.Context, run workflowstate.Invocation, request ContinuationRequest, ports ContinuationPorts) error {
+func ensureWorkflowContinuationPR(ctx context.Context, store *Store, run workflowstate.Invocation, request ContinuationRequest, ports ContinuationPorts) error {
 	if ports.Source != nil && (run.PullRequest == nil || run.PullRequest.State == "prepared" || run.PullRequest.State == "bound") {
-		if err := s.PublishWorkflowSource(ctx, run.ID, ports.Source); err != nil {
+		if err := store.PublishWorkflowSource(ctx, run.ID, ports.Source); err != nil {
 			return err
 		}
 	}
 
-	_, err := s.EnsureWorkflowSlicePullRequest(ctx, run.ID, request.PullRequest, ports.Publication.Provider)
+	_, err := store.EnsureWorkflowSlicePullRequest(ctx, run.ID, request.PullRequest, ports.Publication.Provider)
 
 	return err
 }
