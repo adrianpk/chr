@@ -42,7 +42,7 @@ func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run w
 		return err
 	}
 
-	if input.Reason != repair.Reason || !workflowmerge.WorkflowMergerRepairIdentity(input, repair.Candidate.Input.Git) {
+	if input.Reason != repair.Reason || !workflowmerge.RepairMatches(input, repair.Candidate.Input.Git) {
 		return workflowstate.ErrConflict
 	}
 

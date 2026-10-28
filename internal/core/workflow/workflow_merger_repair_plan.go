@@ -13,7 +13,7 @@ import (
 // an explicit integration fix or ownership decision. It does not accept edits.
 func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workflowstate.MergerInput, proof workflowstate.IntegrationProof, fix *workflowstate.ReviewFinding) (workflowstate.MergerRepairPlan, error) {
 	plan := workflowstate.MergerRepairPlan{InputHash: input.InputHash}
-	if workflowmerge.CheckInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil || !workflowmerge.WorkflowMergerRepairIdentity(input, proof) {
+	if workflowmerge.CheckInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil || !workflowmerge.RepairMatches(input, proof) {
 		return plan, workflowstate.ErrConflict
 	}
 
@@ -48,7 +48,7 @@ func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workf
 		return plan, err
 	}
 
-	return workflowmerge.WorkflowMergerSemanticPlan(plan, input, owners, fix)
+	return workflowmerge.PlanRepair(plan, input, owners, fix)
 }
 
 func (reader workflowIntegrationReader) mergerSemanticOwners(ctx context.Context, input workflowstate.MergerInput, proof workflowstate.IntegrationProof) ([]string, error) {
@@ -63,12 +63,12 @@ func (reader workflowIntegrationReader) mergerSemanticOwners(ctx context.Context
 			return nil, err
 		}
 
-		paths, err := workflowmerge.WorkflowMergerChangedPaths(data)
+		paths, err := workflowmerge.ChangedPaths(data)
 		if err != nil {
 			return nil, err
 		}
 
-		if workflowmerge.WorkflowMergerOwnsConflict(input.Conflicts, paths, owned) {
+		if workflowmerge.OwnsConflict(input.Conflicts, paths, owned) {
 			owners = append(owners, entry.Source)
 		}
 

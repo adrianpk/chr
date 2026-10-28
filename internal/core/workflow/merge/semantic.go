@@ -6,13 +6,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowMergerRepairIdentity checks the retained repair observations without executing Git or accepting a candidate.
-func WorkflowMergerRepairIdentity(input workflowstate.MergerInput, proof workflowstate.IntegrationProof) bool {
+// RepairMatches compares the immutable source, target and method of a repair.
+func RepairMatches(input workflowstate.MergerInput, proof workflowstate.IntegrationProof) bool {
 	return input.Source == proof.SourceCommit && input.Base == proof.BaseCommit && input.Repository == proof.Repository && input.TargetRef == "refs/heads/"+proof.TargetBranch && input.Method == proof.Method
 }
 
-// WorkflowMergerOwnsConflict checks the retained repair observations without executing Git or accepting a candidate.
-func WorkflowMergerOwnsConflict(conflicts []workflowstate.MergerConflict, paths []string, owned map[string]bool) bool {
+// OwnsConflict records which retained conflicts belong to the observed changed paths.
+func OwnsConflict(conflicts []workflowstate.MergerConflict, paths []string, owned map[string]bool) bool {
 	matched := false
 
 	for _, conflict := range conflicts {
@@ -24,9 +24,9 @@ func WorkflowMergerOwnsConflict(conflicts []workflowstate.MergerConflict, paths 
 	return matched
 }
 
-// WorkflowMergerSemanticPlan checks the retained repair observations without executing Git or accepting a candidate.
-func WorkflowMergerSemanticPlan(plan workflowstate.MergerRepairPlan, input workflowstate.MergerInput, owners []string, fix *workflowstate.ReviewFinding) (workflowstate.MergerRepairPlan, error) {
-	if answeredRepair, err := workflowMergerAnsweredPlan(plan, input, owners); answeredRepair.Found || err != nil {
+// PlanRepair selects an explicit replay owner or actionable fix and otherwise requests a decision.
+func PlanRepair(plan workflowstate.MergerRepairPlan, input workflowstate.MergerInput, owners []string, fix *workflowstate.ReviewFinding) (workflowstate.MergerRepairPlan, error) {
+	if answeredRepair, err := answeredPlan(plan, input, owners); answeredRepair.Found || err != nil {
 		return answeredRepair.Plan, err
 	}
 
@@ -58,9 +58,9 @@ func WorkflowMergerSemanticPlan(plan workflowstate.MergerRepairPlan, input workf
 	return plan, CheckDecisions(plan.Decisions, input)
 }
 
-func workflowMergerAnsweredPlan(plan workflowstate.MergerRepairPlan, input workflowstate.MergerInput, owners []string) (workflowAnsweredRepair, error) {
+func answeredPlan(plan workflowstate.MergerRepairPlan, input workflowstate.MergerInput, owners []string) (answeredRepair, error) {
 	if input.OperatorDecisionRef == nil {
-		return workflowAnsweredRepair{Plan: plan, Found: false}, nil
+		return answeredRepair{Plan: plan, Found: false}, nil
 	}
 
 	for i := len(input.OperatorAnswers) - 1; i >= 0; i-- {
@@ -70,34 +70,34 @@ func workflowMergerAnsweredPlan(plan workflowstate.MergerRepairPlan, input workf
 		}
 
 		if answer.Action != "resolve" {
-			return workflowAnsweredRepair{Plan: plan, Found: false}, nil
+			return answeredRepair{Plan: plan, Found: false}, nil
 		}
 
 		if answer.OriginalCommit != "" {
 			if !slices.Contains(owners, answer.OriginalCommit) {
-				return workflowAnsweredRepair{Plan: plan, Found: false}, workflowstate.ErrConflict
+				return answeredRepair{Plan: plan, Found: false}, workflowstate.ErrConflict
 			}
 
 			plan.Outcome, plan.OriginalCommit = "replay_step", answer.OriginalCommit
 
-			return workflowAnsweredRepair{Plan: plan, Found: true}, nil
+			return answeredRepair{Plan: plan, Found: true}, nil
 		}
 
 		if answer.IntegrationFix == nil || workflowstate.ValidateReviewFinding(*answer.IntegrationFix) != nil || answer.IntegrationFix.Category == workflowstate.AgenticReviewFindingCosmetic {
-			return workflowAnsweredRepair{Plan: plan, Found: false}, workflowstate.ErrConflict
+			return answeredRepair{Plan: plan, Found: false}, workflowstate.ErrConflict
 		}
 
 		finding := *answer.IntegrationFix
 		plan.Outcome, plan.IntegrationFix = "integration_fix", &finding
 
-		return workflowAnsweredRepair{Plan: plan, Found: true}, nil
+		return answeredRepair{Plan: plan, Found: true}, nil
 	}
 
-	return workflowAnsweredRepair{Plan: plan, Found: false}, nil
+	return answeredRepair{Plan: plan, Found: false}, nil
 }
 
-// workflowAnsweredRepair retains an explicit repair answer without granting acceptance.
-type workflowAnsweredRepair struct {
+// answeredRepair retains an explicit repair answer without granting acceptance.
+type answeredRepair struct {
 	Plan  workflowstate.MergerRepairPlan
 	Found bool
 }

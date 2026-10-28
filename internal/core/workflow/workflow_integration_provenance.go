@@ -75,11 +75,11 @@ func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof)
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowmerge.ValidateWorkflowTreeRepairs(proof); err != nil {
+	if err := workflowmerge.CheckRepairs(proof); err != nil {
 		return err
 	}
 
-	if err := workflowmerge.ValidateWorkflowRepairHistory(proof); err != nil {
+	if err := workflowmerge.CheckHistory(proof); err != nil {
 		return err
 	}
 

@@ -14,7 +14,7 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 		return reader.preparedTree(ctx, original, parent, source)
 	}
 
-	if err := workflowmerge.ValidateWorkflowTreeRepairs(proof); err != nil {
+	if err := workflowmerge.CheckRepairs(proof); err != nil {
 		return "", err
 	}
 
@@ -30,7 +30,7 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 			continue
 		}
 
-		if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.WorkflowMergerRepairPosition{OriginalParent: original, PreparedParent: parent, Source: source, BaselineTree: tree}, baseline.conflicts); err != nil {
+		if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.RepairPosition{OriginalParent: original, PreparedParent: parent, Source: source, BaselineTree: tree}, baseline.conflicts); err != nil {
 			return "", err
 		}
 
@@ -44,10 +44,10 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 	return tree, nil
 }
 
-func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair workflowstate.IntegrationTreeRepair, position workflowmerge.WorkflowMergerRepairPosition, conflicts []string) error {
+func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair workflowstate.IntegrationTreeRepair, position workflowmerge.RepairPosition, conflicts []string) error {
 	tree := position.BaselineTree
 
-	if err := workflowmerge.ValidateWorkflowRepairPosition(repair, position); err != nil {
+	if err := workflowmerge.CheckPosition(repair, position); err != nil {
 		return err
 	}
 

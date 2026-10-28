@@ -122,5 +122,5 @@ func validWorkflowAcceptedRepair(run workflowInvocationFile, entry IntegrationEn
 func workflowAcceptedRepairFenceMatches(run workflowInvocationFile, entry IntegrationEntry, result MergerAttempt) bool {
 	input := result.Input
 
-	return input.EntryID == entry.ID && input.Unit == entry.Unit && input.ClaimGeneration == entry.ClaimGeneration && input.CandidateHash == workflowMergerCandidateHash(run, entry) && workflowmerge.WorkflowMergerRepairIdentity(input, *result.Acceptance.Next.Result)
+	return input.EntryID == entry.ID && input.Unit == entry.Unit && input.ClaimGeneration == entry.ClaimGeneration && input.CandidateHash == workflowMergerCandidateHash(run, entry) && workflowmerge.RepairMatches(input, *result.Acceptance.Next.Result)
 }

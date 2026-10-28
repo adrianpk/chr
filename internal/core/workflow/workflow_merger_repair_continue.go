@@ -21,15 +21,15 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 	}
 
 	proof := workflowMergerRepairProof(state)
-	if len(state.Repairs) >= workflowstate.PageLimit || workflowmerge.ValidateWorkflowTreeRepair(proof, repair) != nil {
+	if len(state.Repairs) >= workflowstate.PageLimit || workflowmerge.CheckRepair(proof, repair) != nil {
 		return state, workflowstate.ErrConflict
 	}
 
-	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.WorkflowMergerRepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
+	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.RepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
 		return state, err
 	}
 
-	if err := workflowmerge.CheckWorkflowRepairPredecessors(workflowmerge.WorkflowRepairHistory{ReplayIndex: state.ReplayIndex, History: state.History}, repair.Input); err != nil {
+	if err := workflowmerge.CheckPredecessors(workflowmerge.RepairHistory{ReplayIndex: state.ReplayIndex, History: state.History}, repair.Input); err != nil {
 		return state, err
 	}
 

@@ -6,8 +6,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ValidateWorkflowRepairHistory checks the retained repair observations without executing Git or accepting a candidate.
-func ValidateWorkflowRepairHistory(proof workflowstate.IntegrationProof) error {
+// CheckHistory checks each repair against the retained ordered replay history.
+func CheckHistory(proof workflowstate.IntegrationProof) error {
 	for _, repair := range proof.Provenance.Repairs {
 		index := slices.IndexFunc(proof.History, func(entry workflowstate.IntegrationCommit) bool { return entry.Source == repair.Source })
 		if index < 0 || proof.History[index].Parent != repair.PreparedParent {
@@ -23,8 +23,8 @@ func ValidateWorkflowRepairHistory(proof workflowstate.IntegrationProof) error {
 			return workflowstate.ErrConflict
 		}
 
-		state := WorkflowRepairHistory{ReplayIndex: index, History: proof.History[:index]}
-		if err := CheckWorkflowRepairPredecessors(state, repair.Input); err != nil {
+		state := RepairHistory{ReplayIndex: index, History: proof.History[:index]}
+		if err := CheckPredecessors(state, repair.Input); err != nil {
 			return err
 		}
 	}
@@ -32,8 +32,8 @@ func ValidateWorkflowRepairHistory(proof workflowstate.IntegrationProof) error {
 	return nil
 }
 
-// CheckWorkflowRepairPredecessors checks the retained repair observations without executing Git or accepting a candidate.
-func CheckWorkflowRepairPredecessors(state WorkflowRepairHistory, input workflowstate.MergerInput) error {
+// CheckPredecessors checks the original replay index and every retained predecessor.
+func CheckPredecessors(state RepairHistory, input workflowstate.MergerInput) error {
 	if input.Method != "rebase" {
 		return nil
 	}
@@ -52,8 +52,9 @@ func CheckWorkflowRepairPredecessors(state WorkflowRepairHistory, input workflow
 	return nil
 }
 
-// WorkflowRepairHistory checks the retained repair observations without executing Git or accepting a candidate.
-type WorkflowRepairHistory struct {
+// RepairHistory checks the retained repair observations without executing Git or accepting a candidate.
+// RepairHistory contains only the retained replay index and predecessor commits.
+type RepairHistory struct {
 	ReplayIndex int
 	History     []workflowstate.IntegrationCommit
 }

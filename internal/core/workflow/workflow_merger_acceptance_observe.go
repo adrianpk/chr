@@ -50,11 +50,11 @@ func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claimed workflo
 		return repair, err
 	}
 
-	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.WorkflowMergerRepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
+	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.RepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
 		return repair, err
 	}
 
-	return repair, workflowmerge.ValidateWorkflowTreeRepair(workflowMergerRepairProof(state), repair)
+	return repair, workflowmerge.CheckRepair(workflowMergerRepairProof(state), repair)
 }
 
 func (reader workflowIntegrationReader) checkMergerGeneratedEdits(ctx context.Context, input workflowstate.MergerInput, baseline, proposal string) error {
