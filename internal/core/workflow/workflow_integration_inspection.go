@@ -22,7 +22,7 @@ type IntegrationInspection struct {
 	Entry         *IntegrationEntry
 	Budget        IntegrationBudget
 	Usage         IntegrationUsage
-	Capacity      IntegrationCapacity
+	Capacity      workflowstate.Capacity
 	Roles         []IntegrationRoleObservation
 	QueuePosition int
 	Candidate     *workflowstate.IntegrationCandidate
@@ -149,7 +149,7 @@ func workflowIntegrationObservedSubmission(journals []workflowSubmissionJournal,
 	return nil, workflowstate.ErrConflict
 }
 
-func workflowIntegrationObservedRoles(run workflowInvocationFile, capacity IntegrationCapacity) ([]IntegrationRoleObservation, error) {
+func workflowIntegrationObservedRoles(run workflowInvocationFile, capacity workflowstate.Capacity) ([]IntegrationRoleObservation, error) {
 	result := []IntegrationRoleObservation{}
 
 	for _, attempt := range run.Attempts {
@@ -179,7 +179,7 @@ func workflowIntegrationObservedRoles(run workflowInvocationFile, capacity Integ
 	return result, nil
 }
 
-func workflowIntegrationObservedClosingRoles(run workflowInvocationFile, capacity IntegrationCapacity) []IntegrationRoleObservation {
+func workflowIntegrationObservedClosingRoles(run workflowInvocationFile, capacity workflowstate.Capacity) []IntegrationRoleObservation {
 	result := []IntegrationRoleObservation{}
 
 	for _, owner := range capacity.UnexpiredOwners {
