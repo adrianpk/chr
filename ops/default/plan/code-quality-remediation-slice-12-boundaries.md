@@ -160,13 +160,14 @@ locks, journal/recovery entries and atomic acceptance.
 ## Slice 15 final method inspection
 
 The 908-row method map separates ownership disposition, body-specific basis and
-inspected revision from original responsibility/reachability. It records 449
-decisions: 363 guarded-persistence methods, 23 closing policies, one contained
+inspected revision from original responsibility/reachability. It records 514
+decisions: 428 guarded-persistence methods, 23 closing policies, one contained
 evidence adapter, five coordinator functions, one private reader, 21 lifecycle
-owners and 35 coordinator mappings. Publication advancement, continuation and
-explicit native reconciliation now use actual coordinators and a private bounded
-step loop. The sole poll-only forwarding method is consolidated into its caller.
-Store retains original acceptance locks and complete authority, journal/intent,
-projection, budget/reservation, decision, receipt and checkpoint transactions.
-The remaining 459 Store rows, including mixed lifecycle control, stay explicitly
-pending. Reachable locking or IO alone is not an ownership decision.
+owners and 35 coordinator mappings. Lifecycle control now has an actual
+coordinator and a cohesive Store acceptance operation using the original frozen
+request/digest. The minute-bounded lock and complete action/receipt transaction
+remain with Store; cancellation precedes continuation and receipt replay starts
+no steps. Additional source bases cover recovery, admission, frontier, native
+dispatch/delivery evidence and tracker order reads. The remaining 394 Store rows
+stay explicitly pending. Reachable locking, IO or a lower method count alone is
+not an ownership decision.
