@@ -7,7 +7,7 @@ Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 16, Final enforcement, documentation and integrated closure; reviewing PR #453 after verified integration of PR #452.
+Active slice: none; all 16 recorded slices are integrated into dev. Controller full-gate preparation is active; final acceptance remains pending.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -306,7 +306,7 @@ Focused selection: Existing continuation/closing/process/budget/stop recovery te
 ### Slice 16: Final enforcement, documentation and integrated closure
 
 Findings: R1-R10.
-Ticket: [TKT-20261026084836](../ticket/reviewing/20261026084836-quality-closure.md).
+Ticket: [TKT-20261026084836](../ticket/solved/20261026084836-quality-closure.md).
 
 1. **T16.1:** Reconcile all 771 baseline inventory entries, all 14 large files, six wide structs, 11 duplicate pairs, seven dead symbols and every minor item against code and merged task evidence. Fix residual accepted defects in this set; metrics or migrated paths are not resolution evidence.
 2. **T16.2:** Set the final maximum to five parameters and two results, with second result error or bool. Enable compatible revive argument/result rules and dupl at the approved threshold 150 only after their debt is removed; keep the AST check for semantic result shapes and exact external-interface exceptions.
@@ -404,24 +404,24 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 
 ## Tickets, ownership and controller handoff
 
-| Number | Ticket | Slice | Initial state |
+| Number | Ticket | Slice | Delivery state |
 | --- | --- | --- | --- |
-| 1 | [TKT-20261026084821](../ticket/solved/20261026084821-quality-policy.md) | Inventory and enforceable quality policy | ready; predecessor applies |
-| 2 | [TKT-20261026084822](../ticket/solved/20261026084822-quality-values.md) | Shared boundary values and residual core helpers | ready; predecessor applies |
-| 3 | [TKT-20261026084823](../ticket/solved/20261026084823-quality-storage.md) | Stable records and positional SQL | ready; predecessor applies |
-| 4 | [TKT-20261026084824](../ticket/solved/20261026084824-quality-commands.md) | Typed commands and central application operations | ready; predecessor applies |
-| 5 | [TKT-20261026084825](../ticket/solved/20261026084825-quality-views.md) | TUI model ownership and Web view sections | ready; predecessor applies |
-| 6 | [TKT-20261026084826](../ticket/solved/20261026084826-quality-leaves.md) | Gate, notifications and project packages | ready; predecessor applies |
-| 7 | [TKT-20261026084827](../ticket/solved/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | ready; predecessor applies |
-| 8 | [TKT-20261026084828](../ticket/solved/20261026084828-quality-quiz.md) | Quiz domain and model adapter | ready; predecessor applies |
-| 9 | [TKT-20261026084829](../ticket/solved/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | delivered; PR #446 |
+| 1 | [TKT-20261026084821](../ticket/solved/20261026084821-quality-policy.md) | Inventory and enforceable quality policy | delivered; PR #438 verified |
+| 2 | [TKT-20261026084822](../ticket/solved/20261026084822-quality-values.md) | Shared boundary values and residual core helpers | delivered; PR #439 verified |
+| 3 | [TKT-20261026084823](../ticket/solved/20261026084823-quality-storage.md) | Stable records and positional SQL | delivered; PR #440 verified |
+| 4 | [TKT-20261026084824](../ticket/solved/20261026084824-quality-commands.md) | Typed commands and central application operations | delivered; PR #441 verified |
+| 5 | [TKT-20261026084825](../ticket/solved/20261026084825-quality-views.md) | TUI model ownership and Web view sections | delivered; PR #442 verified |
+| 6 | [TKT-20261026084826](../ticket/solved/20261026084826-quality-leaves.md) | Gate, notifications and project packages | delivered; PR #443 verified |
+| 7 | [TKT-20261026084827](../ticket/solved/20261026084827-quality-telegram.md) | Telegram transport, receiver and retained delivery | delivered; PR #444 verified |
+| 8 | [TKT-20261026084828](../ticket/solved/20261026084828-quality-quiz.md) | Quiz domain and model adapter | delivered; PR #445 verified |
+| 9 | [TKT-20261026084829](../ticket/solved/20261026084829-quality-authoring.md) | Authoring, document generation and guided preparation | delivered; PR #446 verified |
 | 10 | [TKT-20261026084830](../ticket/solved/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | delivered; PR #447 verified |
 | 11 | [TKT-20261026084831](../ticket/solved/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | delivered; PR #448 verified |
 | 12 | [TKT-20261026084832](../ticket/solved/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | delivered; PR #449 verified |
-| 13 | [TKT-20261026084833](../ticket/solved/20261026084833-quality-integration.md) | Candidate validation and merge stages | in_progress; PR #449 verified |
-| 14 | [TKT-20261026084834](../ticket/solved/20261026084834-quality-publication.md) | Forge publication and review stages | delivered; PR #451 |
-| 15 | [TKT-20261026084835](../ticket/solved/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | delivered; PR #452 |
-| 16 | [TKT-20261026084836](../ticket/reviewing/20261026084836-quality-closure.md) | Final enforcement, documentation and integrated closure | reviewing; PR #453 |
+| 13 | [TKT-20261026084833](../ticket/solved/20261026084833-quality-integration.md) | Candidate validation and merge stages | delivered; PR #450 verified |
+| 14 | [TKT-20261026084834](../ticket/solved/20261026084834-quality-publication.md) | Forge publication and review stages | delivered; PR #451 verified |
+| 15 | [TKT-20261026084835](../ticket/solved/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | delivered; PR #452 verified |
+| 16 | [TKT-20261026084836](../ticket/solved/20261026084836-quality-closure.md) | Final enforcement, documentation and integrated closure | delivered; PR #453 verified |
 
 Each ticket is one slice-sized review unit, linked to this plan and tracker. The tracker owns task execution evidence; Looper owns controller checkpoints and merges only under separately recorded delegation. Tickets are not a second executor and must not be submitted independently to chr native work. On verified integration, mirror that slice's resolved status and commits into its ticket; do not mark a ticket solved merely because code compiled or a PR opened.
 

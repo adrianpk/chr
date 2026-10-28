@@ -1,6 +1,6 @@
 # Slice 16: Final enforcement, documentation and integrated closure
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -32,8 +32,8 @@ raw literals, failure kinds, sentinels and unwrapping remain unchanged. Cleanup
 comments explain resource-specific handling without changing executable tokens.
 
 The capability map and glossary locate real package/stage APIs and distinguish
-ticket-native authority from forge publication. The cycle report is prepared,
-with final integrated candidate and gate evidence explicitly pending.
+ticket-native authority from forge publication. The cycle report is prepared. PR #453 is verified integrated; the controller
+full-gate candidate and acceptance evidence remain pending.
 
 ## Implementation Notes
 
@@ -100,11 +100,10 @@ Initial controller receipt `KUKRMY5XTCSSLX2ILXIGDFK3ZP` passed ordered
 `make verify` and `git diff --check` on clean
 `178a5d91760c1efab2ffcad986542f5f4ba6c917` in 50.014 seconds before opening
 canonical PR #453. Its title, target dev and immutable report-introduction link
-match the approved identity. This follow-up records the actual PR and moves the
-ticket to reviewing.
+match the approved identity. That follow-up recorded the actual PR and moved the ticket to reviewing.
 
-Final acceptance is recorded by `looper validate` after this reference commit,
-keyed to the exact clean HEAD and ordered commands below. The canonical PR lists
+Slice acceptance was recorded by `looper validate` after the PR-reference commit,
+keyed to exact clean HEAD `dbaa4bce2c86daaf33f8b41b2e025be44535a5db` and the ordered commands below. The canonical PR lists
 only successful checks. Its final receipt remains outside Git so adding the
 receipt cannot invalidate its own HEAD. The combined selection has 34 actual
 roots, and the focused race selection has four; source bindings were checked
@@ -117,9 +116,18 @@ before execution.
 
 The unchanged full gate and final integrated acceptance remain controller-owned.
 
+Canonical PR #453 is verified merged into dev at
+`dbaa4bce2c86daaf33f8b41b2e025be44535a5db`. Controller receipt
+`52XOJZYFDDGRBWZ2VM6OGGREK4` passed all four commands above in 61.665 seconds:
+34 boundary roots and four race roots, with no failures/skips or owned fixture
+leaks. The controller recorded merge event `01M61QH8BEKHPVTD7E4R6C1T4T` in Acta.
+All 16 canonical merges and ancestor relationships were rechecked before
+preparing the full gate. The implementation report and ticket are closed on dev.
+
 ## Risks and Follow-ups
 
-T16.1 through T16.4 are implemented and pending PR-head acceptance. The benchmark
-and cycle report are prepared. T16.5/T16.6 integration/full-gate closure and
-T16.7 verified integration remain open until the controller supplies their exact
-evidence. This report does not mark Slice 16 or the delivery set delivered.
+Slice 16 implementation and PR-head acceptance are delivered. The unchanged
+controller full gate has not run. T16.5 integrated/browser acceptance and T16.6
+requirement-level/cycle closure remain pending until the controller supplies
+its exact gate evidence. No source finding or whole-cycle acceptance is closed
+merely because the sixteenth PR merged.

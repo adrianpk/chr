@@ -1,6 +1,6 @@
 # Code quality remediation
 
-Status: prepared; final integration and controller gate pending
+Status: prepared; all 16 slices integrated, controller gate pending
 Delivery set: code-quality-remediation
 Plan: [Approved delivery](../../plan/code-quality-remediation.md)
 Tracker: [Task and integration evidence](../../tracker/code-quality-remediation.md)
@@ -10,11 +10,14 @@ Final gate evidence: pending
 
 ## Delivered source changes
 
-The first fifteen slices are integrated into dev through PRs #438 through #452.
-Slice 16 [PR #453](https://forge.adrianpk.com/adrianpk/chr/pulls/453) prepares permanent enforcement, residual error naming and cleanup
-explanations, complete source reconciliation and durable architecture references.
-This report is prepared for the controller's later closure phase; the delivery
-set remains in progress until the sixteenth PR and exact integrated gate pass.
+All 16 recorded slices are integrated into dev through canonical PRs #438
+through #453. The final implementation commit is
+`dbaa4bce2c86daaf33f8b41b2e025be44535a5db`; each PR's exact branch/title, dev base,
+merge SHA and ancestry were verified against the controller checkpoint. Slice 16
+completed permanent enforcement, residual error naming/cleanup explanations,
+source reconciliation and durable architecture references. Its implementation
+entries are closed. This cycle remains in progress until the controller's
+unchanged full gate passes on the candidate it freezes after metadata preparation.
 
 | Approved finding | Final source disposition |
 | --- | --- |
@@ -57,11 +60,28 @@ measurements do not justify blanket pointer changes for 4,374 heuristic warnings
 ## Validation and closure
 
 Owning slice reports retain exact task and PR-head checks, failures/corrections,
-controller receipts and verified merge references. The Slice 16 report will
-identify its actual clean PR-head validation separately from the benchmark's
-measured revision. Controller-owned integrated validation remains pending.
+controller receipts and verified merge references. Slice 16 controller receipt
+`52XOJZYFDDGRBWZ2VM6OGGREK4` passed ordered make verify, 34 boundary roots, four race roots and diff check on exact merged
+`dbaa4bce2c86daaf33f8b41b2e025be44535a5db` in 61.665 seconds, with no failures,
+skips or owned fixture leaks. Its benchmark retains its separate measured
+revision. Controller-owned integrated validation remains pending.
 
 No main promotion, tag, release, mirror publication, successor plan or additional
 slice is part of this report. Final closure must record the controller's exact
 integrated commit, ordered gate commands, evidence identity and outcomes before
-changing the delivery-set and Slice 16 statuses to delivered.
+closing the delivery-set status and final acceptance ledger.
+
+## Prepared gate prerequisites
+
+The frozen configuration retains exactly this full gate:
+
+```sh
+make verify && go test ./internal/app -run '^TestGuidedUseCaseParityNative$' -count=1 -timeout=3m && CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser)$' -count=1 -timeout=3m
+```
+
+The configured Chromium executable exists and reports version 151.0.7922.173.
+Go 1.27.1, make, Python 3 and Git are present. All three exact Go test entrypoints
+exist. The selected native/browser tests create their own temporary project,
+Git/SQLite, local HTTP and isolated browser-profile fixtures, then own cleanup.
+No persistent fixture needs to remain running for the controller. This
+preparation does not run any selected test or change the frozen gate.
