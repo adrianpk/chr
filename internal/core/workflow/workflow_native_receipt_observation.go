@@ -83,7 +83,7 @@ func (s *Store) retainWorkflowNativeReceiptObservation(ctx context.Context, run 
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
-	if last.State != "confirmed" || !workflowNativeSubmissionEntryMatches(last, entry) {
+	if last.State != workflowstate.SubmissionConfirmed || !workflowNativeSubmissionEntryMatches(last, entry) {
 		return run, workflowstate.ErrConflict
 	}
 

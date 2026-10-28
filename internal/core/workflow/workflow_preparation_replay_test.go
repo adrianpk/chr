@@ -113,7 +113,7 @@ func publishNativeReplay(t *testing.T, f workflowGitFixture, proof workflowstate
 	publisher := NewWorkflowGitPublisher(f.request.Repository, f.remote)
 
 	result, err := publisher.PublishWorkflowGit(t.Context(), f.request)
-	if err != nil || result.State != "applied" {
+	if err != nil || result.State != workflowstate.GitPublicationApplied {
 		t.Fatalf("retained replay publication: %+v, %v", result, err)
 	}
 

@@ -114,7 +114,7 @@ func (s *Store) checkWorkflowReviewAfterIO(ctx context.Context, run workflowInvo
 }
 
 func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowstate.ReviewInput, error) {
-	if run.Review == nil || run.Review.State != "authorized" {
+	if run.Review == nil || run.Review.State != workflowstate.ReviewAuthorized {
 		return workflowstate.ReviewInput{}, fmt.Errorf("exact candidate review is not authorized")
 	}
 
@@ -138,7 +138,7 @@ func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvoca
 }
 
 func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocationFile, bindingHash string, provider PullRequestProvider, control *workflowControlCommit) (workflowstate.ReviewBinding, error) {
-	if run.Review == nil || bindingHash != run.Review.InputHash || !slices.Contains([]string{"waiting_approval", "human_required", "authorized"}, run.Review.State) {
+	if run.Review == nil || bindingHash != run.Review.InputHash || !slices.Contains([]workflowstate.ReviewState{workflowstate.ReviewWaitingApproval, workflowstate.ReviewHumanRequired, workflowstate.ReviewAuthorized}, run.Review.State) {
 		return workflowstate.ReviewBinding{}, fmt.Errorf("%w: approval does not name the current human decision", workflowstate.ErrConflict)
 	}
 
@@ -159,7 +159,7 @@ func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocation
 		return *run.Review, fmt.Errorf("%w: approval inputs changed", workflowstate.ErrConflict)
 	}
 
-	if run.Review.State == "authorized" {
+	if run.Review.State == workflowstate.ReviewAuthorized {
 		return *run.Review, s.retainWorkflowControlNoop(ctx, run, control)
 	}
 
@@ -169,7 +169,7 @@ func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocation
 	}
 
 	decision := workflowstate.ReviewDecision{BindingHash: hash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Explicit human approval of this exact candidate and current policy."}}
-	err = s.persistWorkflowReviewDecision(&run, observation, decision, "authorized", files...)
+	err = s.persistWorkflowReviewDecision(&run, observation, decision, workflowstate.ReviewAuthorized, files...)
 
 	return *run.Review, err
 }

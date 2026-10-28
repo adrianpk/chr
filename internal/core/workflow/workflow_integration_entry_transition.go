@@ -152,7 +152,7 @@ func (s *Store) checkWorkflowIntegrationCandidate(entry IntegrationEntry) error 
 }
 
 func (s *Store) checkWorkflowIntegrationAuthorization(run workflowInvocationFile, entry IntegrationEntry) error {
-	if entry.CandidateRef == nil || run.Preparation == nil || run.Review == nil || run.Review.State != "authorized" || run.Preparation.State != "validated" {
+	if entry.CandidateRef == nil || run.Preparation == nil || run.Review == nil || run.Review.State != workflowstate.ReviewAuthorized || run.Preparation.State != "validated" {
 		return workflowstate.IntegrationConflict("requires retained preparation and exact review authorization")
 	}
 
@@ -196,11 +196,11 @@ func (s *Store) checkWorkflowIntegrationPublication(ctx context.Context, run wor
 }
 
 func guardWorkflowIntegrationSubmissionPhase(entry IntegrationEntry, submission workflowstate.Submission) error {
-	if submission.State == "awaiting_observation" && !slices.Contains([]IntegrationState{"publishing", "observing", "blocked"}, entry.State) {
+	if submission.State == workflowstate.SubmissionAwaitingObservation && !slices.Contains([]IntegrationState{"publishing", "observing", "blocked"}, entry.State) {
 		return ErrWorkflowObservationRequired
 	}
 
-	if submission.State == "confirmed" && !slices.Contains([]IntegrationState{"observing", "finalizing", "integrated", "blocked"}, entry.State) {
+	if submission.State == workflowstate.SubmissionConfirmed && !slices.Contains([]IntegrationState{"observing", "finalizing", "integrated", "blocked"}, entry.State) {
 		return workflowstate.IntegrationConflict("confirmed publication cannot be requeued or cancelled")
 	}
 
@@ -221,7 +221,7 @@ func checkWorkflowIntegrationSubmissionBinding(run workflowInvocationFile, entry
 
 func (s *Store) checkWorkflowIntegrationFinalization(ctx context.Context, run workflowInvocationFile, old, next IntegrationEntry, submission workflowstate.Submission) error {
 	if workflowIntegrationNeedsRequeueProof(next, submission) {
-		if submission.State != "unpublished" {
+		if submission.State != workflowstate.SubmissionUnpublished {
 			return ErrWorkflowObservationRequired
 		}
 
@@ -267,7 +267,7 @@ func (s *Store) checkWorkflowIntegrationReceiptImages(ctx context.Context, run w
 }
 
 func workflowIntegrationReceiptBindingMatches(run workflowInvocationFile, entry IntegrationEntry, submission workflowstate.Submission) bool {
-	return submission.State == "confirmed" && entry.ReceiptRef != nil && entry.ReceiptRef.Path == run.DeliveryRef && entry.ReceiptRef.Hash == run.DeliveryHash
+	return submission.State == workflowstate.SubmissionConfirmed && entry.ReceiptRef != nil && entry.ReceiptRef.Path == run.DeliveryRef && entry.ReceiptRef.Hash == run.DeliveryHash
 }
 
 func projectWorkflowIntegrationPhase(run *workflowInvocationFile, entry IntegrationEntry) {
@@ -350,7 +350,7 @@ func retainWorkflowIntegrationStop(entry *IntegrationEntry, run workflowInvocati
 }
 
 func workflowIntegrationCandidateExcluded(entry IntegrationEntry, submission workflowstate.Submission) bool {
-	if submission.Native == nil || submission.State == "unpublished" {
+	if submission.Native == nil || submission.State == workflowstate.SubmissionUnpublished {
 		return false
 	}
 

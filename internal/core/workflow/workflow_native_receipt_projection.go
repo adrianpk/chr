@@ -21,7 +21,7 @@ func (s *Store) projectWorkflowNativeReceiptObservation(run *workflowInvocationF
 		return nil
 	}
 
-	if observation.State != "merged" {
+	if observation.State != workflowstate.NativeMerged {
 		entry.State = "blocked"
 		entry.Blocker = &IntegrationBlocker{Reason: observation.Condition, RequiredAction: "reconcile the original canonical PR and retained receipt history", ResumeState: "finalizing"}
 
@@ -61,7 +61,7 @@ func (s *Store) checkWorkflowNativeReceiptContinuation(submission workflowstate.
 		return err
 	}
 
-	if observation.State != "merged" {
+	if observation.State != workflowstate.NativeMerged {
 		return ErrWorkflowObservationRequired
 	}
 
@@ -69,7 +69,7 @@ func (s *Store) checkWorkflowNativeReceiptContinuation(submission workflowstate.
 }
 
 func (s *Store) recoverWorkflowNativeReceiptProjection(ctx context.Context, run *workflowInvocationFile, guard IntegrationBudgetGuard) error {
-	if run.Integration == nil || run.Submission == nil || run.Submission.State != "confirmed" {
+	if run.Integration == nil || run.Submission == nil || run.Submission.State != workflowstate.SubmissionConfirmed {
 		return nil
 	}
 
@@ -101,7 +101,7 @@ func (s *Store) repairWorkflowNativeReceiptOwner(ctx context.Context, run *workf
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
-	if last.State != "confirmed" || !workflowNativeSubmissionEntryMatches(last, entry) {
+	if last.State != workflowstate.SubmissionConfirmed || !workflowNativeSubmissionEntryMatches(last, entry) {
 		return workflowstate.ErrConflict
 	}
 

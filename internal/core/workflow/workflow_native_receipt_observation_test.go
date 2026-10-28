@@ -30,7 +30,7 @@ func nativeReceiptDescendant(t *testing.T, method string) {
 	target := nativeReceiptAdvanceTarget(t, fixture)
 
 	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
-	if err != nil || submission.State != "confirmed" {
+	if err != nil || submission.State != workflowstate.SubmissionConfirmed {
 		t.Fatal("confirmed receipt could not observe its later descendant", err)
 	}
 
@@ -60,7 +60,7 @@ func nativeReceiptDivergence(t *testing.T, method string) {
 	workflowIntegrationCommand(t, fixture.remote, "update-ref", b.TargetRef, b.ValidatedBase, b.PreparedResult)
 
 	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
-	if !errors.Is(err, workflowstate.ErrHistoryDivergence) || submission.State != "confirmed" {
+	if !errors.Is(err, workflowstate.ErrHistoryDivergence) || submission.State != workflowstate.SubmissionConfirmed {
 		t.Fatal("removed result was not retained as history divergence", err)
 	}
 

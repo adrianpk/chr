@@ -27,7 +27,7 @@ func (p *nativeDispatchPublisherFixture) PublishWorkflowGit(ctx context.Context,
 	}
 
 	native := submission.Native
-	if native.DispatchState != "dispatching" || native.ApplicationState != "unknown" || native.DispatchIdentity == nil {
+	if native.DispatchState != workflowstate.NativeDispatching || native.ApplicationState != workflowstate.NativeApplicationUnknown || native.DispatchIdentity == nil {
 		p.t.Fatal("publisher reached IO before durable dispatch identity")
 	}
 
@@ -64,7 +64,7 @@ func TestNativeDispatch(t *testing.T) {
 	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
 
 	submission, result := nativePublication.Submission, nativePublication.Transport
-	if err != nil || result.State != "applied" || publisher.calls.Load() != 1 {
+	if err != nil || result.State != workflowstate.GitPublicationApplied || publisher.calls.Load() != 1 {
 		t.Fatal("authorized atomic dispatch did not run once", err)
 	}
 
@@ -75,7 +75,7 @@ func TestNativeDispatch(t *testing.T) {
 		}
 	}
 
-	if submission.State != "awaiting_observation" || submission.Native.ApplicationState != "unknown" {
+	if submission.State != workflowstate.SubmissionAwaitingObservation || submission.Native.ApplicationState != workflowstate.NativeApplicationUnknown {
 		t.Fatal("raw transport response manufactured delivery")
 	}
 

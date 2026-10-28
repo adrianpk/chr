@@ -97,7 +97,7 @@ func nativeHostPublication(t *testing.T, mode string) {
 	}
 
 	review, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, provider, nil)
-	if err != nil || review.State != "authorized" {
+	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		t.Fatal("trusted review did not authorize the combined result", review, err)
 	}
 
@@ -124,7 +124,7 @@ func nativeHostPublication(t *testing.T, mode string) {
 	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, provider, provider)
 
 	publication := nativePublication.Transport
-	if err != nil || publication.State != "applied" {
+	if err != nil || publication.State != workflowstate.GitPublicationApplied {
 		t.Fatal("real provider failed native publication", publication.State, err)
 	}
 

@@ -7,26 +7,26 @@ import (
 )
 
 // ResponseState classifies a provider reply without turning acceptance into confirmed delivery.
-func ResponseState(response workflowstate.SubmissionResponse, err error) string {
+func ResponseState(response workflowstate.SubmissionResponse, err error) workflowstate.SubmissionResponseState {
 	if err != nil {
-		return "error_unknown"
+		return workflowstate.SubmissionResponseUnknown
 	}
 
 	if response.Accepted {
-		return "accepted"
+		return workflowstate.SubmissionResponseAccepted
 	}
 
-	return "unaccepted"
+	return workflowstate.SubmissionResponseUnaccepted
 }
 
 // ValidSubmissionState recognizes the original retained publication state spellings.
-func ValidSubmissionState(state string) bool {
-	return slices.Contains([]string{"awaiting_observation", "unpublished", "confirmed"}, state)
+func ValidSubmissionState(state workflowstate.SubmissionState) bool {
+	return slices.Contains([]workflowstate.SubmissionState{workflowstate.SubmissionAwaitingObservation, workflowstate.SubmissionUnpublished, workflowstate.SubmissionConfirmed}, state)
 }
 
 // CheckUnpublishedProof requires a sealed, identity-bound unpublished observation.
 func CheckUnpublishedProof(submission workflowstate.Submission) error {
-	if submission.State == "unpublished" {
+	if submission.State == workflowstate.SubmissionUnpublished {
 		if submission.Unpublished == nil || submission.Unpublished.SubmissionID != submission.ID || !submission.Unpublished.Unpublished {
 			return workflowstate.ErrConflict
 		}

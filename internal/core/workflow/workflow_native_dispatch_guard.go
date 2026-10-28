@@ -50,7 +50,7 @@ func (s *Store) checkWorkflowNativeDispatchGuard(ctx context.Context, run workfl
 }
 
 func (s *Store) checkWorkflowNativeDispatchOwner(run workflowInvocationFile, submission workflowstate.Submission) error {
-	if run.Integration == nil || submission.Native == nil || run.Review == nil || run.Review.State != "authorized" {
+	if run.Integration == nil || submission.Native == nil || run.Review == nil || run.Review.State != workflowstate.ReviewAuthorized {
 		return workflowstate.ErrConflict
 	}
 

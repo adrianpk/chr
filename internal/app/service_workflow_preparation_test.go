@@ -31,7 +31,7 @@ func TestServiceWorkflowPreparation(t *testing.T) {
 	}
 
 	binding, err := operations.ReviewWorkflowSlice(t.Context(), id, nil)
-	if err != nil || binding.State != "waiting_approval" {
+	if err != nil || binding.State != workflowstate.ReviewWaitingApproval {
 		t.Fatalf("manual wait: %+v, %v", binding, err)
 	}
 

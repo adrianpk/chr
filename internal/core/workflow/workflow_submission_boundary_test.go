@@ -32,7 +32,7 @@ func testWorkflowSubmissionAtomicGuard(t *testing.T, changed string) {
 	}
 
 	submission, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
-	if err == nil || submission.State != "awaiting_observation" || submission.Response != "error_unknown" {
+	if err == nil || submission.State != workflowstate.SubmissionAwaitingObservation || submission.Response != workflowstate.SubmissionResponseUnknown {
 		t.Fatalf("guard rejection: %+v, %v", submission, err)
 	}
 
@@ -41,7 +41,7 @@ func testWorkflowSubmissionAtomicGuard(t *testing.T, changed string) {
 	}
 
 	observed, err := f.store.ReconcileWorkflowSubmission(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
-	if err != nil || observed.State != "unpublished" || observed.ID != submission.ID || provider.calls != 1 {
+	if err != nil || observed.State != workflowstate.SubmissionUnpublished || observed.ID != submission.ID || provider.calls != 1 {
 		t.Fatalf("sealed guard rejection: %+v, %v", observed, err)
 	}
 }
@@ -94,7 +94,7 @@ func testWorkflowSubmissionExclusion(t *testing.T, intent string) {
 	provider.seal(first.ID)
 
 	sealed, err := restarted.ReconcileWorkflowSubmission(t.Context(), f.run.ID, provider, git)
-	if err != nil || sealed.State != "unpublished" || workflowTestRead(t, restarted, f.run.ID).StopIntent != intent {
+	if err != nil || sealed.State != workflowstate.SubmissionUnpublished || workflowTestRead(t, restarted, f.run.ID).StopIntent != intent {
 		t.Fatalf("observation changed the stop or failed to seal: %+v, %v", sealed, err)
 	}
 
@@ -207,7 +207,7 @@ func assertWorkflowSubmissionStopped(t *testing.T, f workflowPreparationFixture,
 	}
 
 	last, err := f.store.ReadWorkflowSubmission(t.Context(), f.run.ID)
-	if err != nil || last.State != "awaiting_observation" || provider.calls != 1 || workflowTestRead(t, f.store, f.run.ID).Status != workflowstate.InvocationCancelled {
+	if err != nil || last.State != workflowstate.SubmissionAwaitingObservation || provider.calls != 1 || workflowTestRead(t, f.store, f.run.ID).Status != workflowstate.InvocationCancelled {
 		t.Fatal("cancelled IO discarded exclusion or consumed another attempt")
 	}
 }

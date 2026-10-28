@@ -41,7 +41,7 @@ func TestNativeReceiptLost(t *testing.T) {
 	}
 
 	var response workflowstate.GitPublicationResult
-	if err := f.store.readWorkflowNativeEvidence(submission.InvocationID, receipt.Receipt.Native.TransactionProofRef, &response); err != nil || response.State != "unknown" || response.PublishedSourceCommit != "" {
+	if err := f.store.readWorkflowNativeEvidence(submission.InvocationID, receipt.Receipt.Native.TransactionProofRef, &response); err != nil || response.State != workflowstate.GitPublicationUnknown || response.PublishedSourceCommit != "" {
 		t.Fatal("receipt rewrote lost transport response", err)
 	}
 }

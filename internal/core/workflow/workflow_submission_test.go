@@ -28,14 +28,14 @@ func testWorkflowSubmissionMethod(t *testing.T, method string) {
 	git := workflowSubmissionObserver(f)
 
 	submission, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git)
-	if err != nil || submission.State != "awaiting_observation" || submission.Response != "accepted" || provider.calls != 1 {
+	if err != nil || submission.State != workflowstate.SubmissionAwaitingObservation || submission.Response != workflowstate.SubmissionResponseAccepted || provider.calls != 1 {
 		t.Fatalf("accepted response was not retained: %+v, %v", submission, err)
 	}
 
 	checkWorkflowPreparationTaskProofs(t, f.store, workflowTestRead(t, f.store, f.run.ID))
 
 	confirmed, err := f.store.ReconcileWorkflowSubmission(t.Context(), f.run.ID, provider, git)
-	if err != nil || confirmed.State != "confirmed" || confirmed.Proof == nil || confirmed.Proof.ResultCommit != submission.Guard.Git.ResultCommit {
+	if err != nil || confirmed.State != workflowstate.SubmissionConfirmed || confirmed.Proof == nil || confirmed.Proof.ResultCommit != submission.Guard.Git.ResultCommit {
 		t.Fatalf("actual delivery: %+v, %v", confirmed, err)
 	}
 
@@ -46,7 +46,7 @@ func assertWorkflowSubmissionIntent(t *testing.T, ctx context.Context, f workflo
 	t.Helper()
 
 	retained, err := f.store.ReadWorkflowSubmission(ctx, f.run.ID)
-	if err != nil || retained.ID != submission.ID || retained.State != "awaiting_observation" {
+	if err != nil || retained.ID != submission.ID || retained.State != workflowstate.SubmissionAwaitingObservation {
 		t.Fatalf("provider IO preceded durable intent: %+v, %v", retained, err)
 	}
 
@@ -60,7 +60,7 @@ func assertWorkflowSubmissionRetry(t *testing.T, f workflowPreparationFixture, p
 	t.Helper()
 
 	again, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
-	if err != nil || again.ID != submission.ID || again.State != "confirmed" || provider.calls != 1 {
+	if err != nil || again.ID != submission.ID || again.State != workflowstate.SubmissionConfirmed || provider.calls != 1 {
 		t.Fatal("confirmed retry allocated another submission")
 	}
 
@@ -77,14 +77,14 @@ func TestWorkflowSubmissionLostResponse(t *testing.T) {
 	git := workflowSubmissionObserver(f)
 
 	first, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git)
-	if !errors.Is(err, context.DeadlineExceeded) || first.State != "awaiting_observation" || first.Response != "error_unknown" {
+	if !errors.Is(err, context.DeadlineExceeded) || first.State != workflowstate.SubmissionAwaitingObservation || first.Response != workflowstate.SubmissionResponseUnknown {
 		t.Fatalf("lost response: %+v, %v", first, err)
 	}
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
 	confirmed, err := restarted.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git)
-	if err != nil || confirmed.ID != first.ID || confirmed.State != "confirmed" || confirmed.Attempt != 1 || provider.calls != 1 {
+	if err != nil || confirmed.ID != first.ID || confirmed.State != workflowstate.SubmissionConfirmed || confirmed.Attempt != 1 || provider.calls != 1 {
 		t.Fatalf("restart repeated publication: %+v, %v", confirmed, err)
 	}
 

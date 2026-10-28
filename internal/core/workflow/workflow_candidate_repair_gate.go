@@ -47,7 +47,7 @@ func (s *Store) commitWorkflowCandidateRepairGate(run *workflowInvocationFile, e
 	}
 
 	if run.Review != nil {
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 	}
 
 	updateWorkflowIntegrationEntry(&entry, request)

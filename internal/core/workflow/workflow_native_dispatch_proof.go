@@ -49,7 +49,7 @@ func workflowNativeCompletionMatches(submission workflowstate.Submission, comple
 		return false
 	}
 
-	return completion.SchemaVersion == 1 && completion.SubmissionID == submission.ID && completion.Identity == *native.DispatchIdentity && native.DispatchState == "quiescent" && !completion.FinishedAt.Before(native.IntentTime)
+	return completion.SchemaVersion == 1 && completion.SubmissionID == submission.ID && completion.Identity == *native.DispatchIdentity && native.DispatchState == workflowstate.NativeDispatchQuiescent && !completion.FinishedAt.Before(native.IntentTime)
 }
 
 func (s *Store) checkWorkflowNativeGitObservations(submission workflowstate.Submission) error {
@@ -144,11 +144,11 @@ func validWorkflowNativeNonApplicationHeader(submission workflowstate.Submission
 }
 
 func workflowNativeDefiniteResponse(native workflowstate.NativeSubmission, result workflowstate.GitPublicationResult) bool {
-	if result.State == "not_sent" {
+	if result.State == workflowstate.GitPublicationNotSent {
 		return !result.CommandsSent
 	}
 
-	return result.State == "rejected" && result.CommandsSent && native.CommandManifestRef != nil && native.AdvertisementRef != nil
+	return result.State == workflowstate.GitPublicationRejected && result.CommandsSent && native.CommandManifestRef != nil && native.AdvertisementRef != nil
 }
 
 func workflowNativeNonApplicationObservation(native workflowstate.NativeSubmission, proof NativeNonApplicationProof, observation workflowstate.NativeGitObservation) bool {

@@ -111,7 +111,7 @@ func staleWorkflowNativePreparation(run *workflowInvocationFile) {
 	}
 
 	if run.Review != nil {
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 	}
 
 	run.CandidateRepair = nil

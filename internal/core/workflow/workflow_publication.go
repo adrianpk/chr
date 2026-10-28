@@ -64,7 +64,7 @@ func (s *Store) advanceWorkflowLegacyIntegration(ctx context.Context, id string,
 	}
 
 	review, err := s.ReviewWorkflowSlice(ctx, id, publisher, ports.Reviewer)
-	if err != nil || review.State != "authorized" {
+	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		return s.workflowIntegrationProgress(ctx, id, nil, err)
 	}
 
@@ -214,7 +214,7 @@ func (s *Store) reconcileWorkflowUnmergedSubmission(ctx context.Context, run *wo
 	}
 
 	// Delivery can occur while the unpublished observation is being checked.
-	if observed.State == "confirmed" {
+	if observed.State == workflowstate.SubmissionConfirmed {
 		return ErrWorkflowObservationRequired
 	}
 

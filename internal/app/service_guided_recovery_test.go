@@ -12,6 +12,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type guidedRecoveryModel func(context.Context, quizmodel.Request) (quizmodel.Response, error)
@@ -171,7 +172,7 @@ func TestGuidedUseCaseRecoveryAdmission(t *testing.T) {
 	current := waitGuidedRecovery(t, operations, pending, func(current authoringcore.Session) bool {
 		run, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
 
-		return err == nil && current.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"
+		return err == nil && current.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == workflowstate.ReviewWaitingApproval
 	})
 
 	host.close()
@@ -270,5 +271,5 @@ func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, workf
 func guidedRecoveryReviewReady(ctx context.Context, operations service, session authoringcore.Session) bool {
 	run, err := workflowcore.ReadGuidedInvocation(ctx, operations.projectContext.ProjectDir, session)
 
-	return err == nil && session.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"
+	return err == nil && session.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == workflowstate.ReviewWaitingApproval
 }

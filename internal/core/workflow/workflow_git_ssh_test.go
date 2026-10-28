@@ -164,7 +164,7 @@ func TestWorkflowGitSSH(t *testing.T) {
 				return
 			}
 
-			if err != nil || result.State != "applied" {
+			if err != nil || result.State != workflowstate.GitPublicationApplied {
 				t.Fatalf("publication: %+v, %v", result, err)
 			}
 

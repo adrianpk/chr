@@ -19,7 +19,7 @@ func (s *Store) retainWorkflowNativeDispatch(ctx context.Context, run workflowIn
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
-	if last.ID != submission.ID || last.Native == nil || last.Native.DispatchState != "not_started" {
+	if last.ID != submission.ID || last.Native == nil || last.Native.DispatchState != workflowstate.NativeDispatchNotStarted {
 		return last, ErrWorkflowObservationRequired
 	}
 
@@ -29,7 +29,7 @@ func (s *Store) retainWorkflowNativeDispatch(ctx context.Context, run workflowIn
 	}
 
 	native := *last.Native
-	native.DispatchIdentity, native.DispatchState, native.ApplicationState = &identity, "dispatching", "unknown"
+	native.DispatchIdentity, native.DispatchState, native.ApplicationState = &identity, workflowstate.NativeDispatching, workflowstate.NativeApplicationUnknown
 	guard := IntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, BudgetRevision: run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
 	request := NativeSubmissionUpdate{IntegrationBudgetGuard: guard, SubmissionID: last.ID, JournalHash: journal.sourceHash, Facts: native}
 

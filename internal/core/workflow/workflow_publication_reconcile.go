@@ -26,7 +26,7 @@ func workflowRetainDeliveryStatus(run *workflowInvocationFile, outcome string, c
 }
 
 func workflowDeliverySubmissionID(run workflowInvocationFile) string {
-	if run.Submission != nil && run.Submission.State == "confirmed" && !run.Submission.ExternalDelivery {
+	if run.Submission != nil && run.Submission.State == workflowstate.SubmissionConfirmed && !run.Submission.ExternalDelivery {
 		return run.Submission.ID
 	}
 
@@ -56,7 +56,7 @@ func (s *Store) reconcileWorkflowPublishedSubmission(ctx context.Context, run *w
 	if !workflowSubmissionMatchesCandidate(*run, last) {
 		// A permanent unpublished seal remains history after a repaired candidate.
 		// This delivery must not be attributed to that older guarded command.
-		if last.State != "unpublished" {
+		if last.State != workflowstate.SubmissionUnpublished {
 			return workflowstate.ErrConflict
 		}
 
@@ -81,15 +81,15 @@ func (s *Store) retainWorkflowSubmissionObservation(ctx context.Context, journal
 		return workflowstate.ErrConflict
 	}
 
-	if last.State == "confirmed" {
-		if observed.State != "confirmed" || last.Proof.HistoryHash != observed.Proof.HistoryHash {
+	if last.State == workflowstate.SubmissionConfirmed {
+		if observed.State != workflowstate.SubmissionConfirmed || last.Proof.HistoryHash != observed.Proof.HistoryHash {
 			return workflowstate.ErrConflict
 		}
 
 		return nil
 	}
 
-	if last.State == "unpublished" && observed.State == "unpublished" {
+	if last.State == workflowstate.SubmissionUnpublished && observed.State == workflowstate.SubmissionUnpublished {
 		return nil
 	}
 
@@ -120,7 +120,7 @@ func (s *Store) guardWorkflowPublicationJournal(ctx context.Context, run workflo
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
-	if last.State != "unpublished" || run.Submission == nil || *run.Submission != workflowSubmissionProjection(journal) {
+	if last.State != workflowstate.SubmissionUnpublished || run.Submission == nil || *run.Submission != workflowSubmissionProjection(journal) {
 		return ErrWorkflowObservationRequired
 	}
 
@@ -148,7 +148,7 @@ func workflowSubmissionMatchesCandidate(run workflowInvocationFile, submission w
 }
 
 func checkWorkflowSupersededSubmission(ctx context.Context, run workflowInvocationFile, submission workflowstate.Submission, provider PublicationProvider) error {
-	if submission.State != "unpublished" {
+	if submission.State != workflowstate.SubmissionUnpublished {
 		return ErrWorkflowObservationRequired
 	}
 

@@ -28,13 +28,13 @@ type ReviewDecision struct {
 
 // ReviewBinding retains one current decision and immutable evidence.
 type ReviewBinding struct {
-	Round         int    `json:"round"`
-	Unit          Ref    `json:"unit"`
-	State         string `json:"state"`
-	InputRef      string `json:"input_ref"`
-	InputHash     string `json:"input_hash"`
-	ResultRef     string `json:"result_ref"`
-	ResultHash    string `json:"result_hash"`
-	DecisionCount int    `json:"decision_count"`
-	RepairTaskKey string `json:"repair_task_key"`
+	Round         int         `json:"round"`
+	Unit          Ref         `json:"unit"`
+	State         ReviewState `json:"state"`
+	InputRef      string      `json:"input_ref"`
+	InputHash     string      `json:"input_hash"`
+	ResultRef     string      `json:"result_ref"`
+	ResultHash    string      `json:"result_hash"`
+	DecisionCount int         `json:"decision_count"`
+	RepairTaskKey string      `json:"repair_task_key"`
 }

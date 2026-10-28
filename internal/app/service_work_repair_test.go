@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkRepair publishes a revised exact source onto the same bound PR
@@ -40,7 +41,7 @@ func serviceWorkApprovalRun(t *testing.T, operations service) workflowcore.Invoc
 	t.Helper()
 
 	first, err := operations.StartAllReadyAgentWork()
-	if err != nil || first.Workflow == nil || first.Workflow.Review == nil || first.Workflow.Review.State != "waiting_approval" {
+	if err != nil || first.Workflow == nil || first.Workflow.Review == nil || first.Workflow.Review.State != workflowstate.ReviewWaitingApproval {
 		t.Fatal("initial candidate did not wait for approval", err)
 	}
 
@@ -50,7 +51,7 @@ func serviceWorkApprovalRun(t *testing.T, operations service) workflowcore.Invoc
 func checkServiceWorkRepaired(t *testing.T, first workflowcore.Invocation, second AgentWorkResult, creates int, failure error) {
 	t.Helper()
 
-	if failure != nil || second.Workflow == nil || second.Workflow.ID != first.ID || second.Workflow.Review == nil || second.Workflow.Review.State != "waiting_approval" || creates != 1 || second.Workflow.PullRequest.SourceCommit == first.PullRequest.SourceCommit {
+	if failure != nil || second.Workflow == nil || second.Workflow.ID != first.ID || second.Workflow.Review == nil || second.Workflow.Review.State != workflowstate.ReviewWaitingApproval || creates != 1 || second.Workflow.PullRequest.SourceCommit == first.PullRequest.SourceCommit {
 		t.Fatal("repair failed to reuse bound PR source", failure)
 	}
 }

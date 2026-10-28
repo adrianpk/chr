@@ -74,7 +74,7 @@ func checkWorkflowParallelUnknown(t *testing.T, lanes [2]workflowParallelPublica
 	first.provider.seal(id)
 
 	sealed, err := first.fixture.store.ReconcileWorkflowSubmission(t.Context(), first.fixture.run.ID, first.provider, workflowSubmissionObserver(first.fixture))
-	if err != nil || sealed.State != "unpublished" {
+	if err != nil || sealed.State != workflowstate.SubmissionUnpublished {
 		t.Fatal("definitive unpublished observation did not release target", err)
 	}
 
@@ -125,7 +125,7 @@ func submitWorkflowParallelPublication(t *testing.T, lane workflowParallelPublic
 	t.Helper()
 
 	submission, err := lane.fixture.store.SubmitWorkflowSliceIntegration(t.Context(), lane.fixture.run.ID, lane.provider, workflowSubmissionObserver(lane.fixture))
-	if err != nil || submission.Response != "accepted" {
+	if err != nil || submission.Response != workflowstate.SubmissionResponseAccepted {
 		t.Fatal("eligible independent lane failed guarded publication", err)
 	}
 }
@@ -172,7 +172,7 @@ func TestWorkflowParallelPublicationHuman(t *testing.T) {
 	}
 
 	waiting, err := first.fixture.store.ReviewWorkflowSlice(t.Context(), first.fixture.run.ID, first.provider, nil)
-	if err != nil || waiting.State != "waiting_approval" {
+	if err != nil || waiting.State != workflowstate.ReviewWaitingApproval {
 		t.Fatal("human approval was not retained", err)
 	}
 

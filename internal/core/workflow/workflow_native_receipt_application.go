@@ -51,7 +51,7 @@ func (s *Store) checkWorkflowNativeReceiptApplication(receipt Receipt, transacti
 	}
 
 	intent := workflowstate.NativeSubmission{NativeRecordBinding: native.NativeRecordBinding}
-	if !validWorkflowNativeResponse(intent, transaction) || transaction.State != "applied" && transaction.State != "unknown" {
+	if !validWorkflowNativeResponse(intent, transaction) || transaction.State != workflowstate.GitPublicationApplied && transaction.State != workflowstate.GitPublicationUnknown {
 		return workflowstate.ErrConflict
 	}
 

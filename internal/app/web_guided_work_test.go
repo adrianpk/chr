@@ -8,6 +8,7 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -66,7 +67,7 @@ func TestGuidedUseCaseAdmissionWeb(t *testing.T) {
 	started := readWebGuidedSession(t, operations, current.ID)
 
 	run := assertGuidedNativeAdmission(t, operations, started)
-	if len(run.Members) != 1 || serviceWorkTaskAttempts(run) != 1 || run.Review == nil || run.Review.State != "waiting_approval" || model.plan.calls != 1 || len(model.plan.base.requests) != 1 {
+	if len(run.Members) != 1 || serviceWorkTaskAttempts(run) != 1 || run.Review == nil || run.Review.State != workflowstate.ReviewWaitingApproval || model.plan.calls != 1 || len(model.plan.base.requests) != 1 {
 		t.Fatal("HTTP progression repeated work or skipped the native review boundary")
 	}
 

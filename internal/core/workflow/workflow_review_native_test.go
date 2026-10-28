@@ -121,11 +121,11 @@ func nativeReviewAuthorize(t *testing.T, f nativePreparationFixture) workflowsta
 		t.Fatal(err)
 	}
 
-	if binding.State == "waiting_approval" {
+	if binding.State == workflowstate.ReviewWaitingApproval {
 		binding, err = f.f.store.ApproveWorkflowSlice(t.Context(), f.f.run.ID, binding.InputHash, f.provider)
 	}
 
-	if err != nil || binding.State != "authorized" {
+	if err != nil || binding.State != workflowstate.ReviewAuthorized {
 		t.Fatal("native review was not authorized", err)
 	}
 

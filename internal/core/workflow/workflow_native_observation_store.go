@@ -23,7 +23,7 @@ func (s *Store) workflowNativeObservationBinding(ctx context.Context, submission
 
 func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Submission, request GitPublication, binding *workflowstate.NativePublicationBinding) error {
 	native := submission.Native
-	if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil {
+	if native.ApplicationState != workflowstate.NativeApplicationGitApplied || native.TransportResponseRef == nil {
 		return ErrWorkflowObservationRequired
 	}
 

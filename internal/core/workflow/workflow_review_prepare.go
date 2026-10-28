@@ -53,11 +53,11 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 		}
 
 		binding = *invocationLocation.Run.Review
-		if binding.State == "repair_limit_exceeded" {
+		if binding.State == workflowstate.ReviewRepairLimitExceeded {
 			return ErrWorkflowReviewRepairBudget
 		}
 
-		if binding.State != "pending" {
+		if binding.State != workflowstate.ReviewPending {
 			return nil
 		}
 
@@ -86,11 +86,11 @@ func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observati
 		return err
 	}
 
-	if run.Review.State == "running" {
+	if run.Review.State == workflowstate.ReviewRunning {
 		return ErrWorkflowOwned
 	}
 
-	if hash == run.Review.InputHash && run.Review.State != "stale" {
+	if hash == run.Review.InputHash && run.Review.State != workflowstate.ReviewStale {
 		return nil
 	}
 
@@ -115,13 +115,13 @@ func (s *Store) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowIn
 
 	switch input.Policy.Mode {
 	case workflowstate.ReviewHuman:
-		run.Review.State, run.Outcome = "waiting_approval", "slice_review_waiting_approval"
+		run.Review.State, run.Outcome = workflowstate.ReviewWaitingApproval, "slice_review_waiting_approval"
 
 		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.commitWorkflowState(run)
 	case workflowstate.ReviewTrustedAutoMerge:
 		decision := workflowstate.ReviewDecision{BindingHash: run.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
 
-		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.persistWorkflowReviewDecision(run, observation, decision, "authorized")
+		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.persistWorkflowReviewDecision(run, observation, decision, workflowstate.ReviewAuthorized)
 	case workflowstate.ReviewAgentic:
 		if err := workflowstate.ValidateCommand(reviewer); err != nil {
 			return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, fmt.Errorf("separate workflow review command required: %w", err)
@@ -179,7 +179,7 @@ func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocation
 
 	taskInput.SourceHash, taskInput.ExecutionMode, taskInput.Review = record.SourceHash, "automatic", &input
 	taskInput.ReviewHash = run.Review.InputHash
-	run.Review.State, run.Outcome = "running", "slice_review_running"
+	run.Review.State, run.Outcome = workflowstate.ReviewRunning, "slice_review_running"
 
 	encodedAgentInput, encodedAgentInputErr := s.encodeWorkflowAgentInput(ctx, run, taskInput, role.Harness)
 

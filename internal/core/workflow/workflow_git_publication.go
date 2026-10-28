@@ -74,7 +74,7 @@ type workflowReceivePack interface {
 // PublishWorkflowGit sends both old/new commands only after checking the actual
 // receive-pack advertisement. No CLI push or non-atomic fallback is used.
 func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, request GitPublication) (result workflowstate.GitPublicationResult, err error) {
-	result = workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "not_sent", OriginalSourceCommit: request.Git.SourceCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
+	result = workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: workflowstate.GitPublicationNotSent, OriginalSourceCommit: request.Git.SourceCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
@@ -166,7 +166,7 @@ func validateWorkflowPublicationRefs(request GitPublication) error {
 func exchangeWorkflowPublication(session workflowReceivePack, request GitPublication, pack []byte, result workflowstate.GitPublicationResult) (workflowstate.GitPublicationResult, error) {
 	commands := workflowPublicationCommands(request)
 	commands = append(commands, pack...)
-	result.CommandsSent, result.State = true, "unknown"
+	result.CommandsSent, result.State = true, workflowstate.GitPublicationUnknown
 
 	report, err := session.Send(commands)
 	if err != nil {
@@ -183,7 +183,7 @@ func exchangeWorkflowPublication(session workflowReceivePack, request GitPublica
 	}
 
 	result.State = state
-	if state == "rejected" {
+	if state == workflowstate.GitPublicationRejected {
 		return result, workflowstate.ErrConflict
 	}
 

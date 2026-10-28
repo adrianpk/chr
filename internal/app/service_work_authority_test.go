@@ -94,7 +94,7 @@ func TestServiceWorkNative(t *testing.T) {
 	checkServiceWorkNativeSteps(t, operations)
 
 	result, err := operations.StartAllReadyAgentWork()
-	if err != nil || result.Workflow == nil || result.Workflow.Review == nil || result.Workflow.Review.State != "waiting_approval" || provider.creates != 1 || serviceWorkTaskAttempts(*result.Workflow) != 1 || len(result.Workflow.Members) != 1 {
+	if err != nil || result.Workflow == nil || result.Workflow.Review == nil || result.Workflow.Review.State != workflowstate.ReviewWaitingApproval || provider.creates != 1 || serviceWorkTaskAttempts(*result.Workflow) != 1 || len(result.Workflow.Members) != 1 {
 		t.Fatalf("legacy run-all result: %+v, creates=%d, err=%v", result.Workflow, provider.creates, err)
 	}
 

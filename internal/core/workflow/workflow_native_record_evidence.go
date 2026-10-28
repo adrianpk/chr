@@ -246,11 +246,11 @@ func (s *Store) checkWorkflowNativeReceiptObservations(receipt Receipt) error {
 			return err
 		}
 
-		if i == len(native.ObservationRefs)-1 && observation.State != "merged" {
+		if i == len(native.ObservationRefs)-1 && observation.State != workflowstate.NativeMerged {
 			return workflowstate.ErrConflict
 		}
 
-		if observation.State == "merged" {
+		if observation.State == workflowstate.NativeMerged {
 			if err := validateWorkflowNativeReceiptObservation(receipt, observation); err != nil {
 				return err
 			}
@@ -378,7 +378,7 @@ func validateWorkflowNativeSourceMapping(b workflowstate.NativeRecordBinding, co
 
 func validWorkflowNativeReceiptTransaction(native workflowstate.NativeReceipt, transaction workflowstate.GitPublicationResult) bool {
 	expected := [7]string{"chr-git-publication-result/v1", "applied", native.OriginalSource, native.OriginalSource, native.ValidatedBase, native.PreparedResult, native.PreparedResult}
-	actual := [7]string{transaction.Schema, transaction.State, transaction.OriginalSourceCommit, transaction.AdvertisedSourceCommit, transaction.AdvertisedTargetCommit, transaction.PublishedSourceCommit, transaction.ResultCommit}
+	actual := [7]string{transaction.Schema, string(transaction.State), transaction.OriginalSourceCommit, transaction.AdvertisedSourceCommit, transaction.AdvertisedTargetCommit, transaction.PublishedSourceCommit, transaction.ResultCommit}
 
 	return expected == actual && transaction.CommandsSent && workflowstate.ValidFingerprint(transaction.CandidateRevision)
 }

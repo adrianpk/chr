@@ -62,7 +62,7 @@ func TestNativeGitFence(t *testing.T) {
 	}
 
 	retained, err = f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, submission.InvocationID), transport, git)
-	if err != nil || retained.Native.ApplicationState != "git_applied" || publisher.calls.Load() != 1 {
+	if err != nil || retained.Native.ApplicationState != workflowstate.NativeApplicationGitApplied || publisher.calls.Load() != 1 {
 		t.Fatal("fresh observation failed to recover the same submission", err)
 	}
 }

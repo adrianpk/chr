@@ -24,7 +24,7 @@ func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, operation 
 		}
 
 		submission = journal.Attempts[len(journal.Attempts)-1]
-		if submission.ID != submissionID || submission.State != "awaiting_observation" {
+		if submission.ID != submissionID || submission.State != workflowstate.SubmissionAwaitingObservation {
 			return nil // A concurrent definitive observation wins over a late response.
 		}
 

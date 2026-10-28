@@ -42,7 +42,7 @@ func nativePRChange(t *testing.T, state string, profile nativeLiveProfile, scena
 	result, err := f.publisher.PublishWorkflowGit(t.Context(), f.request)
 
 	f.evidence.Native.Binding.Publication = result
-	if err != nil || result.State != "applied" {
+	if err != nil || result.State != workflowstate.GitPublicationApplied {
 		t.Fatalf("metadata edit unexpectedly prevented exact Git application: %s, %v", result.State, err)
 	}
 
@@ -57,7 +57,7 @@ func nativePRChange(t *testing.T, state string, profile nativeLiveProfile, scena
 		expected = "canonical_pr_retargeted"
 	}
 
-	if err != nil || observed.State != "reconciliation_required" || observed.Condition != expected || observed.PullRequest.Merged {
+	if err != nil || observed.State != workflowstate.NativeReconciliationRequired || observed.Condition != expected || observed.PullRequest.Merged {
 		t.Fatalf("changed original PR did not require reconciliation: %s/%s, %v", observed.State, observed.Condition, err)
 	}
 

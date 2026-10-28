@@ -17,7 +17,7 @@ func TestServiceWorkflowPublication(t *testing.T) {
 	operations.workflowPullRequests = provider
 
 	progress, err := operations.AdvanceWorkflowSliceIntegration(t.Context(), id, nil)
-	if err != nil || progress.Invocation.Review.State != "waiting_approval" || len(provider.submissions) != 0 {
+	if err != nil || progress.Invocation.Review.State != workflowstate.ReviewWaitingApproval || len(provider.submissions) != 0 {
 		t.Fatal("central operation skipped manual approval", err)
 	}
 
@@ -26,7 +26,7 @@ func TestServiceWorkflowPublication(t *testing.T) {
 	}
 
 	progress, err = operations.AdvanceWorkflowSliceIntegration(t.Context(), id, nil)
-	if !errors.Is(err, context.DeadlineExceeded) || progress.Invocation.Submission.State != "awaiting_observation" {
+	if !errors.Is(err, context.DeadlineExceeded) || progress.Invocation.Submission.State != workflowstate.SubmissionAwaitingObservation {
 		t.Fatal("central operation lost publication intent", err)
 	}
 

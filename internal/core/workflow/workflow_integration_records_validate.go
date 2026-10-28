@@ -191,7 +191,7 @@ func workflowIntegrationJournalMatches(view IntegrationView, submission workflow
 		return false
 	}
 
-	if submission.State != "unpublished" && !workflowNativeSubmissionEntryMatches(submission, entry) {
+	if submission.State != workflowstate.SubmissionUnpublished && !workflowNativeSubmissionEntryMatches(submission, entry) {
 		return false
 	}
 
@@ -226,7 +226,7 @@ func checkWorkflowIntegrationProjections(snapshot workflowIntegrationSnapshot) e
 func checkWorkflowIntegrationNativeProjections(snapshot workflowIntegrationSnapshot) error {
 	for _, journal := range snapshot.Journals {
 		last := journal.Attempts[len(journal.Attempts)-1]
-		if last.Native == nil || last.State == "unpublished" {
+		if last.Native == nil || last.State == workflowstate.SubmissionUnpublished {
 			continue
 		}
 

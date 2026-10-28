@@ -62,7 +62,7 @@ func nativeReviewFailedCheckpoint(t *testing.T, f nativePreparationFixture, mark
 	run := workflowTestRead(t, f.f.store, f.f.run.ID)
 
 	last := run.Attempts[len(run.Attempts)-1]
-	if run.Review.State != "stale" || last.CheckpointRef == "" || last.Outcome != "interrupted" {
+	if run.Review.State != workflowstate.ReviewStale || last.CheckpointRef == "" || last.Outcome != "interrupted" {
 		t.Fatal("stale reviewer lost its checkpoint")
 	}
 

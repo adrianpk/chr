@@ -98,7 +98,7 @@ func checkWorkflowPublicationRevision(t *testing.T, f workflowPreparationFixture
 func checkWorkflowPublicationRevisedExternal(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, progress IntegrationProgress) {
 	t.Helper()
 
-	if progress.Receipt == nil || p.calls != 1 || progress.Invocation.Submission.State != "unpublished" || progress.Receipt.Receipt.SubmissionID != progress.Invocation.PullRequest.ID {
+	if progress.Receipt == nil || p.calls != 1 || progress.Invocation.Submission.State != workflowstate.SubmissionUnpublished || progress.Receipt.Receipt.SubmissionID != progress.Invocation.PullRequest.ID {
 		t.Fatal("external revised delivery was attributed to an old intent")
 	}
 

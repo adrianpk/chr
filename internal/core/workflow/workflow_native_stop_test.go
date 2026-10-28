@@ -36,7 +36,7 @@ func TestNativeStopBeforeSend(t *testing.T) {
 	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 
 	submission, result := nativePublication.Submission, nativePublication.Transport
-	if err == nil || result.CommandsSent || result.State != "not_sent" || submission.Native.DispatchState != "quiescent" {
+	if err == nil || result.CommandsSent || result.State != "not_sent" || submission.Native.DispatchState != workflowstate.NativeDispatchQuiescent {
 		t.Fatal("stopped host sent commands or lost completion", err)
 	}
 
@@ -77,7 +77,7 @@ func TestNativeStopRejected(t *testing.T) {
 	}
 
 	submission, err = f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, stopped.ID), transport, NewWorkflowIntegrationGit(b.SourceRepository, remote))
-	if err != nil || submission.State != "unpublished" {
+	if err != nil || submission.State != workflowstate.SubmissionUnpublished {
 		t.Fatal("definitive changed-input rejection was not sealed", err)
 	}
 
@@ -100,7 +100,7 @@ func TestNativeStopReceipt(t *testing.T) {
 	nativeSubmissionConfirmReceipt(t, f, submission, record)
 
 	confirmed, err := f.store.ReadWorkflowSubmission(t.Context(), f.entry.InvocationID)
-	if err != nil || confirmed.State != "confirmed" {
+	if err != nil || confirmed.State != workflowstate.SubmissionConfirmed {
 		t.Fatal("physical receipt was not confirmed", err)
 	}
 
@@ -157,7 +157,7 @@ func checkNativeStoppedMetadata(t *testing.T, fixture nativeCanonicalFixture, st
 	setNativePRFixture(t, fixture.forge, pr)
 
 	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, stopped.ID), fixture.forge.adapter, fixture.git)
-	if err != nil || nativeCanonicalLast(t, f.store, submission).State != "merged" {
+	if err != nil || nativeCanonicalLast(t, f.store, submission).State != workflowstate.NativeMerged {
 		t.Fatal("stopped intent could not reconcile actual delivery metadata", err)
 	}
 

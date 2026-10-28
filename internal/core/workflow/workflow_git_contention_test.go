@@ -83,7 +83,7 @@ func checkWorkflowGitContention(t *testing.T, transport, mode, endpoint, config 
 func checkWorkflowGitApplied(t *testing.T, fixture workflowGitFixture, result workflowstate.GitPublicationResult, err error) {
 	t.Helper()
 
-	if err != nil || result.State != "applied" || !result.CommandsSent || result.PublishedSourceCommit != fixture.request.Git.ResultCommit || result.OriginalSourceCommit != fixture.request.Git.SourceCommit {
+	if err != nil || result.State != workflowstate.GitPublicationApplied || !result.CommandsSent || result.PublishedSourceCommit != fixture.request.Git.ResultCommit || result.OriginalSourceCommit != fixture.request.Git.SourceCommit {
 		t.Fatalf("exact publication failed: %+v, %v", result, err)
 	}
 
@@ -93,7 +93,7 @@ func checkWorkflowGitApplied(t *testing.T, fixture workflowGitFixture, result wo
 func checkWorkflowGitRejected(t *testing.T, fixture workflowGitFixture, mode string, result workflowstate.GitPublicationResult, err error) {
 	t.Helper()
 
-	if !errors.Is(err, workflowstate.ErrConflict) || result.State != "rejected" || !result.CommandsSent || result.PublishedSourceCommit != "" {
+	if !errors.Is(err, workflowstate.ErrConflict) || result.State != workflowstate.GitPublicationRejected || !result.CommandsSent || result.PublishedSourceCommit != "" {
 		t.Fatalf("atomic rejection lost: %+v, %v", result, err)
 	}
 

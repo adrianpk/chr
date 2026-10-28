@@ -47,7 +47,7 @@ func (s *Store) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (re
 
 		readErr = invocationLocation.Owner.repairWorkflowSlice(ctx, &invocationLocation.Run, observation, taskKey)
 		if errors.Is(readErr, ErrWorkflowReviewRepairBudget) {
-			invocationLocation.Run.Review.State = "repair_limit_exceeded"
+			invocationLocation.Run.Review.State = workflowstate.ReviewRepairLimitExceeded
 			invocationLocation.Run.Status, invocationLocation.Run.Outcome = workflowstate.InvocationWaitingReview, "review_repair_limit_exceeded"
 			invocationLocation.Run.Blocker = &Blocker{Dependency: invocationLocation.Run.Review.Unit, Reason: invocationLocation.Run.Outcome, NextActionOwner: "workflow_operator"}
 			readErr = errors.Join(readErr, invocationLocation.Owner.commitWorkflowState(&invocationLocation.Run))
@@ -123,7 +123,7 @@ func (s *Store) repairWorkflowSlice(ctx context.Context, run *workflowInvocation
 	}
 
 	if run.Review != nil {
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 	}
 
 	return s.commitWorkflowSliceRepair(run, observation, index)

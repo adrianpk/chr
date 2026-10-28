@@ -135,7 +135,7 @@ func (s *Store) blockWorkflowPublication(run *workflowInvocationFile, reason err
 
 	run.Blocker = &Blocker{Dependency: run.Lane.Unit, Reason: "atomic_source_base_guard_required", NextActionOwner: "workflow_operator"}
 	if run.Review != nil {
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 	}
 
 	return errors.Join(reason, s.commitWorkflowState(run))
@@ -266,7 +266,7 @@ func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source wor
 
 	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingIntegration, "integration_preparing", nil
 	if run.Review != nil {
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 	}
 
 	id := contenthash.Sum([]byte(fmt.Sprintf("%s:%d", run.ID, run.PreparationCount)))[:24]

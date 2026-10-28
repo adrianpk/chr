@@ -15,7 +15,7 @@ func TestNativeCandidateReviewRepair(t *testing.T) {
 	key := before.Members[len(before.Members)-1].Admission.Key
 
 	binding, err := store.ReviewWorkflowSlice(t.Context(), id, f.provider, workflowReviewWorker("needs_changes", key, ""))
-	if err != nil || binding.State != "needs_repair" {
+	if err != nil || binding.State != workflowstate.ReviewNeedsRepair {
 		t.Fatal("native review did not retain actionable findings", err)
 	}
 

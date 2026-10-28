@@ -38,7 +38,7 @@ func validWorkflowNativeSubmissionHistory(native workflowstate.NativeSubmission)
 }
 
 func validateWorkflowLegacySubmissionSchema(submission workflowstate.Submission, schema string) error {
-	if schema == "chr-integration-journal/v2" && submission.State != "unpublished" {
+	if schema == "chr-integration-journal/v2" && submission.State != workflowstate.SubmissionUnpublished {
 		return workflowstate.ErrConflict
 	}
 
@@ -79,15 +79,15 @@ func validateWorkflowNativeApplication(submission workflowstate.Submission) erro
 	}
 
 	switch native.ApplicationState {
-	case "not_started", "unknown":
-		if submission.State != "awaiting_observation" || native.ReceiptRef != nil || native.NonApplicationRef != nil {
+	case workflowstate.NativeApplicationNotStarted, workflowstate.NativeApplicationUnknown:
+		if submission.State != workflowstate.SubmissionAwaitingObservation || native.ReceiptRef != nil || native.NonApplicationRef != nil {
 			return workflowstate.ErrConflict
 		}
-	case "not_applied":
+	case workflowstate.NativeApplicationNotApplied:
 		if !validWorkflowNativeUnpublished(submission) {
 			return workflowstate.ErrConflict
 		}
-	case "git_applied":
+	case workflowstate.NativeApplicationGitApplied:
 		return validateWorkflowNativeApplied(submission)
 	default:
 		return workflowstate.ErrConflict
@@ -97,26 +97,26 @@ func validateWorkflowNativeApplication(submission workflowstate.Submission) erro
 }
 
 func validWorkflowNativeDispatch(native workflowstate.NativeSubmission) bool {
-	if native.DispatchState == "not_started" {
-		return native.DispatchIdentity == nil && native.ApplicationState == "not_started"
+	if native.DispatchState == workflowstate.NativeDispatchNotStarted {
+		return native.DispatchIdentity == nil && native.ApplicationState == workflowstate.NativeApplicationNotStarted
 	}
 
-	return slices.Contains([]string{"dispatching", "quiescent"}, native.DispatchState) && native.DispatchIdentity != nil && validWorkflowProcessIdentity(*native.DispatchIdentity)
+	return slices.Contains([]workflowstate.NativeDispatchState{workflowstate.NativeDispatching, workflowstate.NativeDispatchQuiescent}, native.DispatchState) && native.DispatchIdentity != nil && validWorkflowProcessIdentity(*native.DispatchIdentity)
 }
 
 func validWorkflowNativeUnpublished(submission workflowstate.Submission) bool {
 	native := submission.Native
 
-	return slices.Contains([]string{"unpublished", "awaiting_observation"}, submission.State) && native.DispatchState == "quiescent" && native.NonApplicationRef != nil && native.ReceiptRef == nil
+	return slices.Contains([]workflowstate.SubmissionState{workflowstate.SubmissionUnpublished, workflowstate.SubmissionAwaitingObservation}, submission.State) && native.DispatchState == workflowstate.NativeDispatchQuiescent && native.NonApplicationRef != nil && native.ReceiptRef == nil
 }
 
 func validateWorkflowNativeApplied(submission workflowstate.Submission) error {
 	native := submission.Native
-	if native.TransportResponseRef == nil || native.CommandManifestRef == nil || native.AdvertisementRef == nil || native.NonApplicationRef != nil || submission.State == "unpublished" {
+	if native.TransportResponseRef == nil || native.CommandManifestRef == nil || native.AdvertisementRef == nil || native.NonApplicationRef != nil || submission.State == workflowstate.SubmissionUnpublished {
 		return workflowstate.ErrConflict
 	}
 
-	if (submission.State == "confirmed") != (native.ReceiptRef != nil) {
+	if (submission.State == workflowstate.SubmissionConfirmed) != (native.ReceiptRef != nil) {
 		return workflowstate.ErrConflict
 	}
 
@@ -148,15 +148,15 @@ func workflowNativeDispatchProgresses(old, next workflowstate.NativeSubmission) 
 		return false
 	}
 
-	return old.DispatchState != "quiescent" || next.DispatchState == "quiescent"
+	return old.DispatchState != workflowstate.NativeDispatchQuiescent || next.DispatchState == workflowstate.NativeDispatchQuiescent
 }
 
 func workflowNativeApplicationProgresses(old, next workflowstate.NativeSubmission) bool {
 	switch old.ApplicationState {
-	case "git_applied", "not_applied":
+	case workflowstate.NativeApplicationGitApplied, workflowstate.NativeApplicationNotApplied:
 		return next.ApplicationState == old.ApplicationState
-	case "unknown":
-		return next.ApplicationState != "not_started"
+	case workflowstate.NativeApplicationUnknown:
+		return next.ApplicationState != workflowstate.NativeApplicationNotStarted
 	default:
 		return true
 	}

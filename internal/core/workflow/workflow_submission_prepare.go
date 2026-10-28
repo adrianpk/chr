@@ -95,7 +95,7 @@ func (s *Store) checkWorkflowSubmissionRetry(ctx context.Context, run *workflowI
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
-	if last.State == "awaiting_observation" {
+	if last.State == workflowstate.SubmissionAwaitingObservation {
 		return SubmissionIntent{Submission: last, Dispatch: false}, s.projectWorkflowSubmission(run, *journal)
 	}
 
@@ -107,7 +107,7 @@ func (s *Store) checkWorkflowSubmissionRetry(ctx context.Context, run *workflowI
 		return SubmissionIntent{Submission: last, Dispatch: true}, s.projectWorkflowSubmission(run, *journal)
 	}
 
-	if last.State == "confirmed" && run.Submission != nil && *run.Submission == workflowSubmissionProjection(*journal) {
+	if last.State == workflowstate.SubmissionConfirmed && run.Submission != nil && *run.Submission == workflowSubmissionProjection(*journal) {
 		return SubmissionIntent{Submission: last, Dispatch: false}, nil
 	}
 
@@ -124,7 +124,7 @@ func (s *Store) observeWorkflowSubmissionRetry(ctx context.Context, run *workflo
 		return SubmissionIntent{Submission: last, Dispatch: false}, err
 	}
 
-	if observed.State == "unpublished" {
+	if observed.State == workflowstate.SubmissionUnpublished {
 		return SubmissionIntent{Submission: last, Dispatch: true}, s.projectWorkflowSubmission(run, *journal)
 	}
 
@@ -176,7 +176,7 @@ func (s *Store) persistWorkflowSubmissionIntent(ctx context.Context, run *workfl
 
 	now := time.Now().UTC()
 	number := len(journal.Attempts) + 1
-	submission := workflowstate.Submission{ID: workflowSubmissionID(journal.Key, number, guard.PreparationHash), InvocationID: run.ID, Unit: run.Lane.Unit, Attempt: number, CandidateID: run.PullRequest.CandidateID, CandidateHash: run.CandidateHash, Guard: guard, PreparedLane: candidate.Lane, State: "awaiting_observation", SubmittedAt: now, UpdatedAt: now}
+	submission := workflowstate.Submission{ID: workflowSubmissionID(journal.Key, number, guard.PreparationHash), InvocationID: run.ID, Unit: run.Lane.Unit, Attempt: number, CandidateID: run.PullRequest.CandidateID, CandidateHash: run.CandidateHash, Guard: guard, PreparedLane: candidate.Lane, State: workflowstate.SubmissionAwaitingObservation, SubmittedAt: now, UpdatedAt: now}
 	journal.Attempts = append(journal.Attempts, submission)
 	// This single atomic image contains intent, consumed budget and exclusion.
 	// The invocation projection is written afterwards; a crash cannot free it.
@@ -201,7 +201,7 @@ func (s *Store) projectWorkflowSubmission(run *workflowInvocationFile, journal w
 
 	run.Submission = &binding
 	if run.StopIntent == "" && !workflowInvocationTerminal(run.Status) && run.Status != workflowstate.InvocationPaused {
-		run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, last.State
+		run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, string(last.State)
 	}
 
 	return s.commitWorkflowState(run)

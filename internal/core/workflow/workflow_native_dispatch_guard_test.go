@@ -75,7 +75,7 @@ func TestNativeDispatchPolicy(t *testing.T) {
 	f.store.afterReplace = nil
 
 	retained, err := f.store.ReadWorkflowSubmission(t.Context(), f.entry.InvocationID)
-	if err != nil || retained.ID != submission.ID || retained.Native.DispatchState != "not_started" {
+	if err != nil || retained.ID != submission.ID || retained.Native.DispatchState != workflowstate.NativeDispatchNotStarted {
 		t.Fatal("policy race discarded the durable intent", err)
 	}
 

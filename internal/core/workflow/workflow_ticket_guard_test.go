@@ -253,7 +253,7 @@ func TestWorkflowTicketRepair(t *testing.T) {
 	}
 
 	binding, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, workflowReviewWorker("needs_changes", "PRJ-90", ""))
-	if err != nil || binding.State != "needs_repair" {
+	if err != nil || binding.State != workflowstate.ReviewNeedsRepair {
 		t.Fatal("independent task review did not request repair", err)
 	}
 

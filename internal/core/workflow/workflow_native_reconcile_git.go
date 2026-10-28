@@ -21,7 +21,7 @@ func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard 
 	nativeReconciliation, err := s.workflowNativeReconciliationInput(ctx, guard)
 
 	submission, request, update := nativeReconciliation.Submission, nativeReconciliation.Request, nativeReconciliation.Update
-	if err != nil || submission.Native.ApplicationState == "not_applied" {
+	if err != nil || submission.Native.ApplicationState == workflowstate.NativeApplicationNotApplied {
 		return submission, err
 	}
 
@@ -154,7 +154,7 @@ func (s *Store) classifyWorkflowNativeGitObservation(submission workflowstate.Su
 	}
 
 	if workflowNativeObservedApplication(*native, response, observation) {
-		native.ApplicationState = "git_applied"
+		native.ApplicationState = workflowstate.NativeApplicationGitApplied
 
 		return nil
 	}
@@ -171,13 +171,13 @@ func (s *Store) classifyWorkflowNativeGitObservation(submission workflowstate.Su
 		return err
 	}
 
-	native.NonApplicationRef, native.ApplicationState = &ref, "not_applied"
+	native.NonApplicationRef, native.ApplicationState = &ref, workflowstate.NativeApplicationNotApplied
 
 	return nil
 }
 
 func workflowNativeObservedApplication(native workflowstate.NativeSubmission, response workflowstate.GitPublicationResult, observation workflowstate.NativeGitObservation) bool {
-	return observation.Git != nil && (response.State == "applied" || response.State == "unknown" && observation.SourceCommit == native.PreparedResult)
+	return observation.Git != nil && (response.State == workflowstate.GitPublicationApplied || response.State == workflowstate.GitPublicationUnknown && observation.SourceCommit == native.PreparedResult)
 }
 
 func workflowNativeMaySealRejection(native workflowstate.NativeSubmission, response workflowstate.GitPublicationResult, observation workflowstate.NativeGitObservation) bool {

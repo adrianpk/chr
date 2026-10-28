@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowPublicationCrashProcess exits while the shared delivery fan-out
@@ -71,7 +72,7 @@ func TestWorkflowPublicationCrash(t *testing.T) {
 			restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
 			progress, err := restarted.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
-			if err != nil || progress.Receipt == nil || progress.Invocation.Submission.State != "confirmed" || p.calls != 1 {
+			if err != nil || progress.Receipt == nil || progress.Invocation.Submission.State != workflowstate.SubmissionConfirmed || p.calls != 1 {
 				t.Fatal("publication recovery lost verified intent or repeated mutation", err)
 			}
 

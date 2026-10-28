@@ -94,7 +94,7 @@ func testWorkflowReviewMode(t *testing.T, mode workflowstate.ReviewMode, decisio
 	store, hierarchy, run, provider := workflowReviewFixture(t, mode)
 
 	binding, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, workflowReviewWorker(decision, "", ""))
-	if err != nil || binding.State != state {
+	if err != nil || string(binding.State) != state {
 		t.Fatalf("review: %+v, %v", binding, err)
 	}
 
@@ -132,7 +132,7 @@ func testWorkflowReviewApproval(t *testing.T, mode workflowstate.ReviewMode) {
 	}
 
 	approved, err := store.ApproveWorkflowSlice(t.Context(), run.ID, binding.InputHash, provider)
-	if err != nil || approved.State != "authorized" {
+	if err != nil || approved.State != workflowstate.ReviewAuthorized {
 		t.Fatalf("approval: %+v, %v", approved, err)
 	}
 
@@ -152,7 +152,7 @@ func checkWorkflowReviewProjection(t *testing.T, store *Store, tasks []Record, b
 			t.Fatal("review completed a task without integration")
 		}
 
-		if (record.Task.Status == string(ticketcore.StatusReadyForMerge)) != (binding.State == "authorized") {
+		if (record.Task.Status == string(ticketcore.StatusReadyForMerge)) != (binding.State == workflowstate.ReviewAuthorized) {
 			t.Fatal("task projection differs from review grant")
 		}
 	}
@@ -161,7 +161,7 @@ func checkWorkflowReviewProjection(t *testing.T, store *Store, tasks []Record, b
 func checkWorkflowReviewAuthorized(t *testing.T, store *Store, id string, provider *workflowReviewProviderFixture, binding workflowstate.ReviewBinding) {
 	t.Helper()
 
-	if binding.State == "authorized" {
+	if binding.State == workflowstate.ReviewAuthorized {
 		if _, err := store.CheckWorkflowReviewGrant(t.Context(), id, provider); err != nil {
 			t.Fatal(err)
 		}

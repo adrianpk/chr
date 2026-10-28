@@ -217,7 +217,7 @@ func (s *Store) checkWorkflowSubmissionProjection(ctx context.Context, run workf
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
-	if last.State != "awaiting_observation" && journal.sourceHash != run.Submission.JournalHash {
+	if last.State != workflowstate.SubmissionAwaitingObservation && journal.sourceHash != run.Submission.JournalHash {
 		return fmt.Errorf("%w: %w: resolved journal needs fresh owner observation", ErrWorkflowOwned, ErrWorkflowObservationRequired)
 	}
 
@@ -240,7 +240,7 @@ func checkWorkflowSubmissionTargets(dir string, entries []os.DirEntry, key, targ
 		}
 
 		last := journal.Attempts[len(journal.Attempts)-1]
-		if journal.Key != key && journal.TargetKey == target && last.State == "awaiting_observation" {
+		if journal.Key != key && journal.TargetKey == target && last.State == workflowstate.SubmissionAwaitingObservation {
 			return fmt.Errorf("%w: target excluded by submission %s", ErrWorkflowOwned, last.ID)
 		}
 	}

@@ -123,7 +123,7 @@ type workflowReadOnlyPublicationProvider struct{ PullRequestProvider }
 func checkWorkflowPublicationExternalFacts(t *testing.T, before Invocation, progress IntegrationProgress, intent string) {
 	t.Helper()
 
-	if !progress.Invocation.Submission.ExternalDelivery || progress.Invocation.Submission.State != "confirmed" || progress.Receipt.Receipt.SubmissionID != before.PullRequest.ID {
+	if !progress.Invocation.Submission.ExternalDelivery || progress.Invocation.Submission.State != workflowstate.SubmissionConfirmed || progress.Receipt.Receipt.SubmissionID != before.PullRequest.ID {
 		t.Fatal("external history was misreported as the exact guarded submission")
 	}
 

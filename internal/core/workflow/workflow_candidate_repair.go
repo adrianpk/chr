@@ -75,7 +75,7 @@ func (s *Store) repairWorkflowReviewedSlice(ctx context.Context, id, key string,
 }
 
 func (s *Store) repairWorkflowNativeReview(ctx context.Context, run workflowInvocationFile, key string, provider PullRequestProvider) error {
-	if run.Review.State != "needs_repair" || run.Review.RepairTaskKey != key {
+	if run.Review.State != workflowstate.ReviewNeedsRepair || run.Review.RepairTaskKey != key {
 		return workflowstate.ErrConflict
 	}
 

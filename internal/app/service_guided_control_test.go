@@ -94,7 +94,7 @@ func assertGuidedResumedAttempts(t *testing.T, operations service, before workfl
 	host.wait.Wait()
 
 	after := assertGuidedNativeAdmission(t, operations, resumed)
-	if after.ID != before.ID || after.Policy != before.Policy || serviceWorkTaskAttempts(after) != 2 || after.Review == nil || after.Review.State != "waiting_approval" {
+	if after.ID != before.ID || after.Policy != before.Policy || serviceWorkTaskAttempts(after) != 2 || after.Review == nil || after.Review.State != workflowstate.ReviewWaitingApproval {
 		t.Fatal("resume replaced work, refilled attempts or bypassed review")
 	}
 }

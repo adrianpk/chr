@@ -246,7 +246,7 @@ func TestGuidedUseCaseAdmissionHost(t *testing.T) {
 	host.wait.Wait()
 
 	run := assertGuidedNativeAdmission(t, operations, started)
-	if serviceWorkTaskAttempts(run) != 1 || run.Review == nil || run.Review.State != "waiting_approval" || len(run.Deliveries) != 0 {
+	if serviceWorkTaskAttempts(run) != 1 || run.Review == nil || run.Review.State != workflowstate.ReviewWaitingApproval || len(run.Deliveries) != 0 {
 		t.Fatalf("native progression did not stop at its actual review boundary: status=%s outcome=%s review=%+v attempts=%d", run.Status, run.Outcome, run.Review, len(run.Attempts))
 	}
 
@@ -298,7 +298,7 @@ func TestGuidedUseCaseAdmissionStartedAck(t *testing.T) {
 	host.wait.Wait()
 
 	run := assertGuidedNativeAdmission(t, operations, recovered)
-	if run.ID != pending.Guided.Work.Invocation.ID || serviceWorkTaskAttempts(run) != 1 || run.Review == nil || run.Review.State != "waiting_approval" {
+	if run.ID != pending.Guided.Work.Invocation.ID || serviceWorkTaskAttempts(run) != 1 || run.Review == nil || run.Review.State != workflowstate.ReviewWaitingApproval {
 		t.Fatal("start reconciliation repeated work or lost the native review wait")
 	}
 }

@@ -55,7 +55,7 @@ func TestNativeDriftExclusion(t *testing.T) {
 		t.Fatal("replacement refunded dispatch or failed to charge drift", err)
 	}
 
-	if retained, err := store.ReadWorkflowSubmission(t.Context(), id); err != nil || retained.ID != submission.ID || retained.State != "unpublished" {
+	if retained, err := store.ReadWorkflowSubmission(t.Context(), id); err != nil || retained.ID != submission.ID || retained.State != workflowstate.SubmissionUnpublished {
 		t.Fatal("replacement lost the sealed submission", err)
 	}
 }
@@ -74,12 +74,12 @@ func nativeDriftSealInputs(t *testing.T, submit nativeSubmissionFixture, submiss
 	identity, stop := nativeSubmissionDispatcher(t)
 	stop()
 
-	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = "quiescent", "not_applied", &identity
+	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = workflowstate.NativeDispatchQuiescent, workflowstate.NativeApplicationNotApplied, &identity
 	proof := NativeNonApplicationProof{SchemaVersion: 1, SubmissionID: submission.ID, CannotApply: true, InputChanged: true, ObservedSource: source, ObservedTarget: target}
 	ref := retainNativeRecordEvidence(t, store, id, "target-drift-non-application", proof)
 
 	update.Facts.NonApplicationRef = &ref
-	if sealed, err := store.RetainWorkflowNativeSubmission(t.Context(), update); err != nil || sealed.State != "unpublished" {
+	if sealed, err := store.RetainWorkflowNativeSubmission(t.Context(), update); err != nil || sealed.State != workflowstate.SubmissionUnpublished {
 		t.Fatal("changed input did not seal the failed dispatch", err)
 	}
 }

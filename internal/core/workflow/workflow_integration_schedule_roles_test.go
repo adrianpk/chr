@@ -260,7 +260,7 @@ func TestNativeRoleHumanWait(t *testing.T) {
 	nativeRoleAdmit(t, f.store, f.run.ID)
 
 	binding, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
-	if err != nil || binding.State != "waiting_approval" {
+	if err != nil || binding.State != workflowstate.ReviewWaitingApproval {
 		t.Fatal("fixture did not retain human approval", binding, err)
 	}
 

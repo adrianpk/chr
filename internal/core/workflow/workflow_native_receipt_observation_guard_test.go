@@ -30,7 +30,7 @@ func TestNativeReceiptUncertainty(t *testing.T) {
 			f := fixture.f
 
 			submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, git)
-			if errors.Is(err, workflowstate.ErrHistoryDivergence) || submission.State != "confirmed" {
+			if errors.Is(err, workflowstate.ErrHistoryDivergence) || submission.State != workflowstate.SubmissionConfirmed {
 				t.Fatal("uncertain observation invented removed history", err)
 			}
 

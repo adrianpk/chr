@@ -32,7 +32,7 @@ func (s *Store) PollWorkflowNativeSubmission(ctx context.Context, guard Integrat
 		nativeObservation2, err := s.observeWorkflowNativeSubmission(ctx, guard, workflowNativeObservers{Canonical: observer, Git: git}, true)
 
 		submission, observation, next := nativeObservation2.Submission, nativeObservation2.Observation, nativeObservation2.Next
-		if err != nil || observation.State != "observing" {
+		if err != nil || observation.State != workflowstate.NativeObserving {
 			return submission, err
 		}
 
@@ -114,7 +114,7 @@ func observeWorkflowNativeBounded(ctx context.Context, observer NativePublicatio
 		}
 
 		if observation.Condition == "" {
-			observation.State, observation.Condition = "reconciliation_required", "canonical_observation_unavailable"
+			observation.State, observation.Condition = workflowstate.NativeReconciliationRequired, "canonical_observation_unavailable"
 		}
 	}
 
@@ -125,5 +125,5 @@ func observeWorkflowNativeBounded(ctx context.Context, observer NativePublicatio
 }
 
 func workflowNativeDeadlineObservation(binding workflowstate.NativePublicationBinding) workflowstate.NativePublicationObservation {
-	return workflowstate.NativePublicationObservation{CanonicalPR: binding.PullRequest.URL, State: "reconciliation_required", Condition: "canonical_pr_observation_deadline", PullRequest: binding.PullRequest, OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
+	return workflowstate.NativePublicationObservation{CanonicalPR: binding.PullRequest.URL, State: workflowstate.NativeReconciliationRequired, Condition: "canonical_pr_observation_deadline", PullRequest: binding.PullRequest, OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
 }

@@ -174,7 +174,7 @@ func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record R
 
 	run.CandidateRepair = nil
 	if run.Review != nil {
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 	}
 
 	files, err := s.workflowClaimRecordChanges(run, &record)

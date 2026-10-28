@@ -38,7 +38,7 @@ func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observat
 
 	run.ReviewCount++
 	ref := workflowReviewPath(run.ID, run.ReviewCount, "input.json")
-	run.Review = &workflowstate.ReviewBinding{Round: run.ReviewCount, Unit: input.Unit, State: "pending", InputRef: ref, InputHash: contenthash.Sum(data)}
+	run.Review = &workflowstate.ReviewBinding{Round: run.ReviewCount, Unit: input.Unit, State: workflowstate.ReviewPending, InputRef: ref, InputHash: contenthash.Sum(data)}
 	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingReview, "slice_review_pending", nil
 
 	files, err := s.workflowReviewDomainChanges(run, observation, false)
@@ -49,7 +49,7 @@ func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observat
 	return s.commitWorkflowPullRequestFiles(run, files, workflowstate.FileChange{Path: ref, After: data})
 }
 
-func (s *Store) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision workflowstate.ReviewDecision, state string, extra ...workflowstate.FileChange) error {
+func (s *Store) persistWorkflowReviewDecision(run *workflowInvocationFile, observation workflowSliceObservation, decision workflowstate.ReviewDecision, state workflowstate.ReviewState, extra ...workflowstate.FileChange) error {
 	if run.Review.DecisionCount >= 2 {
 		return fmt.Errorf("workflow review decision history budget exhausted")
 	}
@@ -72,16 +72,16 @@ func (s *Store) persistWorkflowReviewDecision(run *workflowInvocationFile, obser
 	run.Review.ResultRef, run.Review.ResultHash, run.Review.State = ref, contenthash.Sum(data), state
 	run.Review.RepairTaskKey = decision.RepairTaskKey
 
-	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingReview, "slice_review_"+state, nil
-	if state == "authorized" {
+	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingReview, "slice_review_"+string(state), nil
+	if state == workflowstate.ReviewAuthorized {
 		run.Status = workflowstate.InvocationWaitingIntegration
 	}
 
-	if state == "insufficient_evidence" || state == "human_required" {
-		run.Blocker = &Blocker{Dependency: run.Review.Unit, Reason: "review_" + state, NextActionOwner: "workflow_operator"}
+	if state == workflowstate.ReviewInsufficientEvidence || state == workflowstate.ReviewHumanRequired {
+		run.Blocker = &Blocker{Dependency: run.Review.Unit, Reason: "review_" + string(state), NextActionOwner: "workflow_operator"}
 	}
 
-	files, err := s.workflowReviewDomainChanges(run, observation, state == "authorized")
+	files, err := s.workflowReviewDomainChanges(run, observation, state == workflowstate.ReviewAuthorized)
 	if err != nil {
 		return err
 	}
@@ -196,8 +196,8 @@ func (s *Store) readWorkflowReviewImage(ref, hash string) ([]byte, error) {
 	return data, nil
 }
 
-func (s *Store) workflowReviewOrigin(run workflowInvocationFile, state string) (string, error) {
-	if state != "authorized" {
+func (s *Store) workflowReviewOrigin(run workflowInvocationFile, state workflowstate.ReviewState) (string, error) {
+	if state != workflowstate.ReviewAuthorized {
 		return "agentic", nil
 	}
 
@@ -213,7 +213,7 @@ func (s *Store) workflowReviewOrigin(run workflowInvocationFile, state string) (
 		return "trusted", nil
 	}
 
-	if run.Review.State == "waiting_approval" || run.Review.State == "human_required" {
+	if run.Review.State == workflowstate.ReviewWaitingApproval || run.Review.State == workflowstate.ReviewHumanRequired {
 		return "human", nil
 	}
 

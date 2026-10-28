@@ -224,7 +224,7 @@ func checkNativeFaultApplication(t *testing.T, f nativeSubmissionFixture, submis
 		b := f.candidate.Native
 
 		observed, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), NewWorkflowGitPublisher(b.SourceRepository, remote), NewWorkflowIntegrationGit(b.SourceRepository, remote))
-		if err != nil || observed.Native.ApplicationState != "git_applied" || observed.ID != submission.ID {
+		if err != nil || observed.Native.ApplicationState != workflowstate.NativeApplicationGitApplied || observed.ID != submission.ID {
 			t.Fatal("actual server application was not recovered", err)
 		}
 	}
@@ -242,7 +242,7 @@ func finishNativeFaultLease(t *testing.T, f nativeSubmissionFixture, command *ex
 	}
 
 	retained, err := f.store.ReadWorkflowSubmission(t.Context(), f.entry.InvocationID)
-	if err != nil || retained.ID != submission.ID || retained.Native.DispatchState != "quiescent" {
+	if err != nil || retained.ID != submission.ID || retained.Native.DispatchState != workflowstate.NativeDispatchQuiescent {
 		t.Fatal("original host did not finish its same intent", err)
 	}
 

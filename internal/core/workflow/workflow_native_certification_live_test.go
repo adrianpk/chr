@@ -88,7 +88,7 @@ func nativeMethodCase(t *testing.T, state string, profile nativeLiveProfile, ser
 		return
 	}
 
-	if err != nil || result.State != "applied" || !result.CommandsSent {
+	if err != nil || result.State != workflowstate.GitPublicationApplied || !result.CommandsSent {
 		t.Fatalf("live publication: %s, %v", result.State, err)
 	}
 
@@ -123,7 +123,7 @@ func installNativeContention(t *testing.T, profile nativeLiveProfile, request *G
 func checkNativeContention(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication, advanced string, result workflowstate.GitPublicationResult, err error, evidence *nativeCertificationEvidence) {
 	t.Helper()
 
-	if !errors.Is(err, workflowstate.ErrConflict) || !result.CommandsSent || result.State != "rejected" {
+	if !errors.Is(err, workflowstate.ErrConflict) || !result.CommandsSent || result.State != workflowstate.GitPublicationRejected {
 		t.Fatalf("atomic contention outcome: %s, %v", result.State, err)
 	}
 

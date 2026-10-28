@@ -43,7 +43,7 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 	claim, prepared, binding := reviewPreparation.Claim, reviewPreparation.Prepared, reviewPreparation.Binding
 
 	if err != nil || claim == nil {
-		if err == nil && binding.State == "needs_repair" {
+		if err == nil && binding.State == workflowstate.ReviewNeedsRepair {
 			err = s.repairWorkflowReviewedSlice(ctx, id, binding.RepairTaskKey, provider)
 		}
 
@@ -77,7 +77,7 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 	completed, err := workflowreview.Complete(ctx, watched, workflowreview.Execution{Input: prepared.input.Review, Output: command, Failure: executionErr}, decisions)
 
 	result = completed.Binding
-	if err == nil && result.State == "needs_repair" {
+	if err == nil && result.State == workflowstate.ReviewNeedsRepair {
 		err = s.repairWorkflowReviewedSlice(ctx, id, completed.RepairTaskKey, provider)
 	}
 

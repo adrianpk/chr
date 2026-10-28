@@ -20,7 +20,7 @@ func TestNativeSubmissionApplied(t *testing.T) {
 	update := nativeSubmissionApplied(t, f, submission, record)
 
 	pending, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update)
-	if err != nil || pending.State != "awaiting_observation" || pending.Native.ApplicationState != "git_applied" || pending.Native.ReceiptRef != nil {
+	if err != nil || pending.State != workflowstate.SubmissionAwaitingObservation || pending.Native.ApplicationState != workflowstate.NativeApplicationGitApplied || pending.Native.ReceiptRef != nil {
 		t.Fatal("Git application manufactured delivery", err)
 	}
 
@@ -54,7 +54,7 @@ func nativeSubmissionConfirmReceipt(t *testing.T, f nativeSubmissionFixture, pen
 	update.Facts.ReceiptRef = &workflowstate.EvidenceRef{Path: created.Path, Hash: created.SourceHash}
 
 	confirmed, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update)
-	if err != nil || confirmed.State != "confirmed" || confirmed.Native.ReceiptRef == nil || confirmed.Proof.ResultCommit != f.candidate.Native.PreparedResult {
+	if err != nil || confirmed.State != workflowstate.SubmissionConfirmed || confirmed.Native.ReceiptRef == nil || confirmed.Proof.ResultCommit != f.candidate.Native.PreparedResult {
 		t.Fatal("exact original PR receipt not confirmed", err)
 	}
 
@@ -74,7 +74,7 @@ func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission
 		t.Fatal(err)
 	}
 
-	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = "dispatching", "git_applied", &identity
+	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = workflowstate.NativeDispatching, workflowstate.NativeApplicationGitApplied, &identity
 	native := update.Facts
 
 	var capability workflowstate.NativeCapability
@@ -100,7 +100,7 @@ func TestNativeSubmissionNonApplication(t *testing.T) {
 	update := nativeSubmissionUpdate(t, f, submission)
 	identity, stop := nativeSubmissionDispatcher(t)
 
-	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = "quiescent", "not_applied", &identity
+	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = workflowstate.NativeDispatchQuiescent, workflowstate.NativeApplicationNotApplied, &identity
 	proof := NativeNonApplicationProof{SchemaVersion: 1, SubmissionID: submission.ID, CannotApply: true, InputChanged: true, ObservedSource: f.candidate.Native.OriginalSource, ObservedTarget: f.candidate.Native.PreparedResult}
 	ref := retainNativeRecordEvidence(t, f.store, submission.InvocationID, "no-application", proof)
 
@@ -112,7 +112,7 @@ func TestNativeSubmissionNonApplication(t *testing.T) {
 	stop()
 
 	sealed, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update)
-	if err != nil || sealed.State != "unpublished" {
+	if err != nil || sealed.State != workflowstate.SubmissionUnpublished {
 		t.Fatal("quiescent changed-input proof was not retained", err)
 	}
 

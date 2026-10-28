@@ -21,10 +21,10 @@ func TestNativeSubmissionResponses(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result.State, result.PublishedSourceCommit = "unknown", ""
+	result.State, result.PublishedSourceCommit = workflowstate.GitPublicationUnknown, ""
 	ref := retainNativeRecordEvidence(t, f.store, submission.InvocationID, "lost-response", result)
 	unknown := applied
-	unknown.Facts.ApplicationState, unknown.Facts.TransportResponseRef = "unknown", &ref
+	unknown.Facts.ApplicationState, unknown.Facts.TransportResponseRef = workflowstate.NativeApplicationUnknown, &ref
 
 	retained, err := f.store.RetainWorkflowNativeSubmission(t.Context(), unknown)
 	if err != nil {
@@ -32,7 +32,7 @@ func TestNativeSubmissionResponses(t *testing.T) {
 	}
 
 	request := nativeSubmissionUpdate(t, f, retained)
-	request.Facts.ApplicationState = "git_applied"
+	request.Facts.ApplicationState = workflowstate.NativeApplicationGitApplied
 
 	request.Facts.TransportResponseRef = applied.Facts.TransportResponseRef
 	if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), request); !errors.Is(err, workflowstate.ErrConflict) {
@@ -42,7 +42,7 @@ func TestNativeSubmissionResponses(t *testing.T) {
 	request.Facts.TransportResponseHistory = []workflowstate.EvidenceRef{ref}
 
 	retained, err = f.store.RetainWorkflowNativeSubmission(t.Context(), request)
-	if err != nil || retained.State != "awaiting_observation" || len(retained.Native.TransportResponseHistory) != 1 {
+	if err != nil || retained.State != workflowstate.SubmissionAwaitingObservation || len(retained.Native.TransportResponseHistory) != 1 {
 		t.Fatal("reconciled evidence not retained", err)
 	}
 
@@ -74,8 +74,14 @@ func TestNativeSubmissionFences(t *testing.T) {
 		name   string
 		change func(*NativeSubmissionUpdate)
 	}{
-		{"revision", func(r *NativeSubmissionUpdate) { r.InvocationRevision++; r.Facts.ApplicationState = "unknown" }},
-		{"generation", func(r *NativeSubmissionUpdate) { r.ClaimGeneration++; r.Facts.ApplicationState = "unknown" }},
+		{"revision", func(r *NativeSubmissionUpdate) {
+			r.InvocationRevision++
+			r.Facts.ApplicationState = workflowstate.NativeApplicationUnknown
+		}},
+		{"generation", func(r *NativeSubmissionUpdate) {
+			r.ClaimGeneration++
+			r.Facts.ApplicationState = workflowstate.NativeApplicationUnknown
+		}},
 		{"candidate", func(r *NativeSubmissionUpdate) {
 			r.Facts.CandidateHash = contenthash.Sum([]byte("replacement"))
 		}},

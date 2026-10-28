@@ -150,7 +150,7 @@ func workflowWorkStatus(inspection workflowcore.Inspection, request WorkflowStat
 
 	result.HarnessBinding = run.HarnessBinding
 	if run.Review != nil {
-		result.ApprovalHash, result.ReviewState = run.Review.InputHash, run.Review.State
+		result.ApprovalHash, result.ReviewState = run.Review.InputHash, string(run.Review.State)
 	}
 
 	workflowWorkProgress(&result, run)

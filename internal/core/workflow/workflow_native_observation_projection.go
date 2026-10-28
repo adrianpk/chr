@@ -18,7 +18,7 @@ func (s *Store) projectWorkflowNativeCanonicalObservation(entry *IntegrationEntr
 		return err
 	}
 
-	if observation.State == "reconciliation_required" {
+	if observation.State == workflowstate.NativeReconciliationRequired {
 		entry.State = "blocked"
 		entry.Blocker = &IntegrationBlocker{Reason: observation.Condition, RequiredAction: "reconcile the original canonical PR and exact target history", ResumeState: "observing"}
 	} else {

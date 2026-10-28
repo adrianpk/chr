@@ -26,7 +26,7 @@ func validateWorkflowSubmissionBinding(run workflowInvocationFile) error {
 }
 
 func validWorkflowSubmissionProjection(b SubmissionBinding) bool {
-	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && workflowforge.ValidSubmissionState(b.State) && (!b.ExternalDelivery || b.State == "confirmed")
+	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && workflowforge.ValidSubmissionState(b.State) && (!b.ExternalDelivery || b.State == workflowstate.SubmissionConfirmed)
 }
 
 func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error {
@@ -44,7 +44,7 @@ func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error 
 			return workflowstate.ErrConflict
 		}
 
-		if i < len(journal.Attempts)-1 && submission.State != "unpublished" {
+		if i < len(journal.Attempts)-1 && submission.State != workflowstate.SubmissionUnpublished {
 			return fmt.Errorf("another submission requires sealed unpublished proof")
 		}
 
@@ -75,7 +75,7 @@ func validateWorkflowSubmission(submission workflowstate.Submission, journal wor
 		return err
 	}
 
-	if !slices.Contains([]string{"", "accepted", "unaccepted", "error_unknown"}, submission.Response) || submission.ResponseCommit != "" && !workflowstate.ValidCommitID(submission.ResponseCommit) {
+	if !slices.Contains([]workflowstate.SubmissionResponseState{"", workflowstate.SubmissionResponseAccepted, workflowstate.SubmissionResponseUnaccepted, workflowstate.SubmissionResponseUnknown}, submission.Response) || submission.ResponseCommit != "" && !workflowstate.ValidCommitID(submission.ResponseCommit) {
 		return workflowstate.ErrConflict
 	}
 
@@ -111,7 +111,7 @@ func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error
 }
 
 func validateWorkflowSubmissionProof(submission workflowstate.Submission) error {
-	if submission.State != "confirmed" {
+	if submission.State != workflowstate.SubmissionConfirmed {
 		if submission.Proof != nil || submission.ObservedPR != nil || submission.ExternalDelivery {
 			return workflowstate.ErrConflict
 		}

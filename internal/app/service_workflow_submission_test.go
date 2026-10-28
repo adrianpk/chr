@@ -52,7 +52,7 @@ func assertServiceWorkflowSubmission(t *testing.T, operations service, id string
 	t.Helper()
 
 	first, err := operations.SubmitWorkflowSliceIntegration(t.Context(), id)
-	if !errors.Is(err, context.DeadlineExceeded) || first.State != "awaiting_observation" {
+	if !errors.Is(err, context.DeadlineExceeded) || first.State != workflowstate.SubmissionAwaitingObservation {
 		t.Fatalf("submission: %+v, %v", first, err)
 	}
 
@@ -63,7 +63,7 @@ func assertServiceWorkflowSubmission(t *testing.T, operations service, id string
 	provider.unpublished = true
 
 	last, err := operations.ReconcileWorkflowSubmission(t.Context(), id)
-	if err != nil || last.ID != first.ID || last.State != "unpublished" || len(provider.submissions) != 1 {
+	if err != nil || last.ID != first.ID || last.State != workflowstate.SubmissionUnpublished || len(provider.submissions) != 1 {
 		t.Fatalf("sealed observation: %+v, %v", last, err)
 	}
 

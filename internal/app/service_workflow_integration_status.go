@@ -103,20 +103,20 @@ func workflowIntegrationPublicationStatus(submission *workflowstate.Submission) 
 		return "not_started"
 	}
 
-	if submission.State == "confirmed" {
+	if submission.State == workflowstate.SubmissionConfirmed {
 		return "verified"
 	}
 
-	if submission.State == "unpublished" {
+	if submission.State == workflowstate.SubmissionUnpublished {
 		return "unpublished"
 	}
 
 	if submission.Native != nil {
-		if submission.Native.ApplicationState != "not_started" {
-			return submission.Native.ApplicationState
+		if submission.Native.ApplicationState != workflowstate.NativeApplicationNotStarted {
+			return string(submission.Native.ApplicationState)
 		}
 
-		if submission.Native.DispatchState != "not_started" {
+		if submission.Native.DispatchState != workflowstate.NativeDispatchNotStarted {
 			return "in_flight"
 		}
 	}

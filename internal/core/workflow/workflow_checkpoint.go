@@ -51,7 +51,7 @@ func (s *Store) checkpointWorkflowAttempt(run workflowInvocationFile, record Rec
 		run.Preparation.State = "stale"
 	case workflowSliceReviewPurpose:
 		run.ResumeStatus = workflowstate.InvocationWaitingReview
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 	case workflowSliceValidationPurpose:
 		run.ResumeStatus = workflowstate.InvocationWaitingIntegration
 	default:

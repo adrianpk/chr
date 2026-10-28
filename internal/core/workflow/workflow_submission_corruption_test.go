@@ -88,7 +88,7 @@ func editWorkflowSubmissionJournal(t *testing.T, path string, journal *workflowS
 	case "schema":
 		journal.Schema = "chr-integration-journal/v99"
 	case "sealed":
-		journal.Attempts[0].State = "unpublished"
+		journal.Attempts[0].State = workflowstate.SubmissionUnpublished
 		journal.Attempts[0].Unpublished = &workflowstate.SubmissionObservation{SubmissionID: first.ID, Unpublished: true}
 	}
 

@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowGitReceiveProxy is the owned real-process fault fixture invoked
@@ -98,7 +100,7 @@ func TestWorkflowGitSSHUnknown(t *testing.T) {
 	publisher := NewWorkflowGitPublisher(fixture.request.Repository, endpoint+fixture.remote).WithSSHConfig(config)
 
 	result, err := publisher.PublishWorkflowGit(t.Context(), fixture.request)
-	if !errors.Is(err, ErrWorkflowObservationRequired) || result.State != "unknown" || !result.CommandsSent || result.PublishedSourceCommit != "" {
+	if !errors.Is(err, ErrWorkflowObservationRequired) || result.State != workflowstate.GitPublicationUnknown || !result.CommandsSent || result.PublishedSourceCommit != "" {
 		t.Fatalf("lost SSH response was not retained: %+v, %v", result, err)
 	}
 

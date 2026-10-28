@@ -35,7 +35,7 @@ func TestNativeAgentReview(t *testing.T) {
 	}
 
 	review, err := store.ReviewWorkflowSliceWithHarness(t.Context(), run.Invocation.ID, provider, harness)
-	if err != nil || review.State != "authorized" {
+	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		t.Fatal("certified reviewer failed", err)
 	}
 

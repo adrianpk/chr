@@ -49,7 +49,7 @@ func validateWorkflowCurrentReviewBinding(run workflowInvocationFile) error {
 		return workflowstate.ErrConflict
 	}
 
-	if !slices.Contains([]string{"pending", "running", "waiting_approval", "authorized", "needs_repair", "insufficient_evidence", "human_required", "stale", "repair_limit_exceeded"}, binding.State) {
+	if !slices.Contains([]workflowstate.ReviewState{workflowstate.ReviewPending, workflowstate.ReviewRunning, workflowstate.ReviewWaitingApproval, workflowstate.ReviewAuthorized, workflowstate.ReviewNeedsRepair, workflowstate.ReviewInsufficientEvidence, workflowstate.ReviewHumanRequired, workflowstate.ReviewStale, workflowstate.ReviewRepairLimitExceeded}, binding.State) {
 		return workflowstate.ErrConflict
 	}
 
@@ -58,7 +58,7 @@ func validateWorkflowCurrentReviewBinding(run workflowInvocationFile) error {
 
 func validateWorkflowReviewDecisionRefs(id string, binding workflowstate.ReviewBinding) error {
 	if binding.DecisionCount == 0 {
-		if !slices.Contains([]string{"pending", "running", "waiting_approval", "stale"}, binding.State) || binding.ResultRef != "" || binding.ResultHash != "" {
+		if !slices.Contains([]workflowstate.ReviewState{workflowstate.ReviewPending, workflowstate.ReviewRunning, workflowstate.ReviewWaitingApproval, workflowstate.ReviewStale}, binding.State) || binding.ResultRef != "" || binding.ResultHash != "" {
 			return workflowstate.ErrConflict
 		}
 
@@ -94,7 +94,7 @@ func (s *Store) readWorkflowReviewDecisions(run workflowInvocationFile, input wo
 		return newest, workflowstate.ErrConflict
 	}
 
-	if run.Review.State == "authorized" && newest.Result.Decision != workflowstate.IntegrationReviewDecisionPass {
+	if run.Review.State == workflowstate.ReviewAuthorized && newest.Result.Decision != workflowstate.IntegrationReviewDecisionPass {
 		return newest, workflowstate.ErrConflict
 	}
 

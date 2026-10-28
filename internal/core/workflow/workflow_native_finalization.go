@@ -25,7 +25,7 @@ func (s *Store) finalizeWorkflowNativeUnit(ctx context.Context, run workflowInvo
 		return workflowNativeFinalization{Handled: false, Receipt: Record{}}, nil
 	}
 
-	if last.State != "confirmed" {
+	if last.State != workflowstate.SubmissionConfirmed {
 		return workflowNativeFinalization{Handled: true, Receipt: Record{}}, ErrWorkflowObservationRequired
 	}
 

@@ -76,7 +76,7 @@ func nativeDriftParallelLane(t *testing.T, lane workflowParallelPublicationLane)
 		t.Fatal(err)
 	}
 
-	run.Preparation.State, run.Review.State = "stale", "stale"
+	run.Preparation.State, run.Review.State = "stale", workflowstate.ReviewStale
 	if err := f.store.commitWorkflowState(&run); err != nil {
 		t.Fatal(err)
 	}

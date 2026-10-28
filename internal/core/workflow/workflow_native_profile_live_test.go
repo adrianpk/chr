@@ -61,7 +61,7 @@ func nativeLiveRebase(t *testing.T, state string, profile nativeLiveProfile) {
 
 	observeNativeLiveRebase(t, adapter, profile, &evidence)
 
-	if publicationErr != nil || result.State != "applied" {
+	if publicationErr != nil || result.State != workflowstate.GitPublicationApplied {
 		t.Fatalf("transport requires reconciliation despite observed delivery: %s, %v", result.State, publicationErr)
 	}
 }
@@ -156,7 +156,7 @@ func observeNativeLiveRebase(t *testing.T, adapter RemoteReviewAdapter, profile 
 		}
 
 		evidence.Observations = append(evidence.Observations, observed)
-		if observed.State == "merged" {
+		if observed.State == workflowstate.NativeMerged {
 			nativeLiveActivity(t, adapter, profile, observed.PullRequest, "merged")
 
 			return

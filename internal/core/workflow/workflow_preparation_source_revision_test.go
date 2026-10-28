@@ -81,7 +81,7 @@ func nativeSourceDriftFacts(t *testing.T, f nativePreparationFixture, before Inv
 	after := workflowTestRead(t, store, id)
 
 	entry := nativeReviewEntry(t, store, id)
-	if entry.State != "blocked" || entry.Blocker.Reason != "source_revision_requires_reconciliation" || after.Preparation.State != "stale" || after.Review.State != "stale" {
+	if entry.State != "blocked" || entry.Blocker.Reason != "source_revision_requires_reconciliation" || after.Preparation.State != "stale" || after.Review.State != workflowstate.ReviewStale {
 		t.Fatal("changed source retained authority or changed its frozen owner")
 	}
 

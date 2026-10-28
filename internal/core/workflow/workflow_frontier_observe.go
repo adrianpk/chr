@@ -50,7 +50,7 @@ func (s *Store) workflowFrontierReceiptProof(ctx context.Context, run workflowIn
 		return workflowstate.IntegrationProof{}, failure
 	}
 
-	if retained.Blocker != nil || observation.State != "merged" || observation.Git == nil || !workflowFrontierReceiptProofMatches(*observation.Git, receipt, target) {
+	if retained.Blocker != nil || observation.State != workflowstate.NativeMerged || observation.Git == nil || !workflowFrontierReceiptProofMatches(*observation.Git, receipt, target) {
 		return workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
 	}
 

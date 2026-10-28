@@ -79,9 +79,9 @@ func (s *Store) checkWorkflowNativeTransportEvidence(ctx context.Context, submis
 	}
 
 	switch submission.Native.ApplicationState {
-	case "git_applied":
+	case workflowstate.NativeApplicationGitApplied:
 		return s.checkWorkflowNativeAppliedEvidence(submission)
-	case "not_applied":
+	case workflowstate.NativeApplicationNotApplied:
 		return s.checkWorkflowNativeNonApplication(ctx, submission)
 	default:
 		return nil
@@ -161,7 +161,7 @@ func validWorkflowNativeResponse(native workflowstate.NativeSubmission, response
 		return false
 	}
 
-	if response.State == "not_sent" {
+	if response.State == workflowstate.GitPublicationNotSent {
 		return !response.CommandsSent && response.PublishedSourceCommit == ""
 	}
 
@@ -169,11 +169,11 @@ func validWorkflowNativeResponse(native workflowstate.NativeSubmission, response
 		return false
 	}
 
-	if response.State == "applied" {
+	if response.State == workflowstate.GitPublicationApplied {
 		return response.PublishedSourceCommit == native.PreparedResult
 	}
 
-	return slices.Contains([]string{"unknown", "rejected"}, response.State) && response.PublishedSourceCommit == ""
+	return slices.Contains([]workflowstate.GitPublicationState{workflowstate.GitPublicationUnknown, workflowstate.GitPublicationRejected}, response.State) && response.PublishedSourceCommit == ""
 }
 
 func (s *Store) checkWorkflowNativeJournalObservations(submission workflowstate.Submission) error {
@@ -214,7 +214,7 @@ func workflowNativeJournalObservationMatches(native workflowstate.NativeSubmissi
 		bound = observation.PullRequest.URL == native.CanonicalPR && observation.PullRequest.Repository == native.SourceRepository
 	}
 
-	return bound && slices.Contains([]string{"observing", "merged", "reconciliation_required"}, observation.State)
+	return bound && slices.Contains([]workflowstate.NativeObservationState{workflowstate.NativeObserving, workflowstate.NativeMerged, workflowstate.NativeReconciliationRequired}, observation.State)
 }
 
 func (s *Store) checkWorkflowNativeAppliedEvidence(submission workflowstate.Submission) error {
@@ -230,7 +230,7 @@ func (s *Store) checkWorkflowNativeAppliedEvidence(submission workflowstate.Subm
 
 	receipt := workflowstate.NativeReceipt{NativeRecordBinding: native.NativeRecordBinding}
 	if !validWorkflowNativeReceiptTransaction(receipt, result) {
-		if result.State != "unknown" || !result.CommandsSent || !s.workflowNativeGitApplied(submission) {
+		if result.State != workflowstate.GitPublicationUnknown || !result.CommandsSent || !s.workflowNativeGitApplied(submission) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -240,7 +240,7 @@ func (s *Store) checkWorkflowNativeAppliedEvidence(submission workflowstate.Subm
 
 func (s *Store) checkWorkflowNativeNonApplication(_ context.Context, submission workflowstate.Submission) error {
 	native := submission.Native
-	if native.NonApplicationRef == nil || native.DispatchState != "quiescent" || native.DispatchIdentity == nil {
+	if native.NonApplicationRef == nil || native.DispatchState != workflowstate.NativeDispatchQuiescent || native.DispatchIdentity == nil {
 		return workflowstate.ErrConflict
 	}
 
@@ -281,20 +281,20 @@ func (s *Store) applyWorkflowNativeSubmissionEvidence(ctx context.Context, submi
 	}
 
 	native := submission.Native
-	if native.ApplicationState == "not_applied" {
+	if native.ApplicationState == workflowstate.NativeApplicationNotApplied {
 		var proof NativeNonApplicationProof
 		if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.NonApplicationRef, &proof); err != nil {
 			return err
 		}
 
 		if proof.InputChanged {
-			submission.State = "unpublished"
+			submission.State = workflowstate.SubmissionUnpublished
 			submission.Unpublished = &workflowstate.SubmissionObservation{SubmissionID: submission.ID, Unpublished: true}
 		}
 	}
 
 	if native.ReceiptRef != nil {
-		if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil {
+		if native.ApplicationState != workflowstate.NativeApplicationGitApplied || native.TransportResponseRef == nil {
 			return workflowstate.ErrConflict
 		}
 
@@ -335,7 +335,7 @@ func (s *Store) confirmWorkflowNativeSubmission(_ context.Context, submission *w
 		return err
 	}
 
-	submission.State, submission.ObservedPR, submission.Proof = "confirmed", &observation.PullRequest, observation.Git
+	submission.State, submission.ObservedPR, submission.Proof = workflowstate.SubmissionConfirmed, &observation.PullRequest, observation.Git
 
 	return validateWorkflowSubmissionProof(*submission)
 }

@@ -164,7 +164,7 @@ func nativeCanonicalLast(t *testing.T, store *Store, submission workflowstate.Su
 func nativeCanonicalPending(t *testing.T, fixture nativeCanonicalFixture, submission workflowstate.Submission, before IntegrationBudget) {
 	t.Helper()
 
-	if submission.State != "awaiting_observation" || submission.Native.ApplicationState != "git_applied" || submission.Native.ReceiptRef != nil || fixture.publisher.calls.Load() != 1 {
+	if submission.State != workflowstate.SubmissionAwaitingObservation || submission.Native.ApplicationState != workflowstate.NativeApplicationGitApplied || submission.Native.ReceiptRef != nil || fixture.publisher.calls.Load() != 1 {
 		t.Fatal("canonical observation created delivery or dispatched again")
 	}
 
@@ -210,7 +210,7 @@ func TestNativeCanonicalPoll(t *testing.T) {
 	}
 
 	submission, err := f.store.PollWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, before.ID), observer, fixture.git)
-	if err != nil || observer.calls != 3 || len(submission.Native.ObservationRefs) != 2 || nativeCanonicalLast(t, f.store, submission).State != "merged" {
+	if err != nil || observer.calls != 3 || len(submission.Native.ObservationRefs) != 2 || nativeCanonicalLast(t, f.store, submission).State != workflowstate.NativeMerged {
 		t.Fatal("bounded canonical polling did not converge", err)
 	}
 
@@ -321,7 +321,7 @@ func checkNativeDeadlineRecovery(t *testing.T, fixture nativeCanonicalFixture, s
 	setNativePRFixture(t, fixture.forge, pr)
 
 	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
-	if err != nil || nativeCanonicalLast(t, f.store, submission).State != "merged" || nativeReviewEntry(t, f.store, submission.InvocationID).State != "observing" || fixture.publisher.calls.Load() != 1 {
+	if err != nil || nativeCanonicalLast(t, f.store, submission).State != workflowstate.NativeMerged || nativeReviewEntry(t, f.store, submission.InvocationID).State != "observing" || fixture.publisher.calls.Load() != 1 {
 		t.Fatal("explicit reconciliation did not recover the same publication", err)
 	}
 }
@@ -371,7 +371,7 @@ func TestNativeCanonicalLost(t *testing.T) {
 	}
 
 	var result workflowstate.GitPublicationResult
-	if err := f.store.readWorkflowNativeEvidence(submission.InvocationID, *submission.Native.TransportResponseRef, &result); err != nil || result.State != "unknown" || result.PublishedSourceCommit != "" {
+	if err := f.store.readWorkflowNativeEvidence(submission.InvocationID, *submission.Native.TransportResponseRef, &result); err != nil || result.State != workflowstate.GitPublicationUnknown || result.PublishedSourceCommit != "" {
 		t.Fatal("canonical observation fabricated a transport response", err)
 	}
 

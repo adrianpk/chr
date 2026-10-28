@@ -8,6 +8,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func guidedTelegramSharedFixture(t *testing.T) (*telegramConversationAppFixture, service, webViewProvider, *guidedWorkHost, *guidedWebPublicationFixture) {
@@ -70,7 +71,7 @@ func TestGuidedUseCaseTelegramJourney(t *testing.T) {
 	started := readGuidedTelegramSession(t, operations, f.sessions(t)[0])
 
 	run := assertGuidedNativeAdmission(t, operations, started)
-	if run.Review == nil || run.Review.State != "waiting_approval" || serviceWorkTaskAttempts(run) != 1 {
+	if run.Review == nil || run.Review.State != workflowstate.ReviewWaitingApproval || serviceWorkTaskAttempts(run) != 1 {
 		t.Fatal("shared activation bypassed review or repeated work")
 	}
 

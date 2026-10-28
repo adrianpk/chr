@@ -97,7 +97,7 @@ func checkNativeReceiptRetained(t *testing.T, f nativeSubmissionFixture, submiss
 	t.Helper()
 
 	confirmed, err := f.store.ReadWorkflowSubmission(t.Context(), submission.InvocationID)
-	if err != nil || confirmed.State != "confirmed" || confirmed.Native.ReceiptRef == nil || confirmed.Native.ReceiptRef.Path != receipt.Path {
+	if err != nil || confirmed.State != workflowstate.SubmissionConfirmed || confirmed.Native.ReceiptRef == nil || confirmed.Native.ReceiptRef.Path != receipt.Path {
 		t.Fatal("receipt not retained in original journal", err)
 	}
 

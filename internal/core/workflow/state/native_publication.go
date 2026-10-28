@@ -50,31 +50,31 @@ type NativePublicationBinding struct {
 // NativePublicationObservation distinguishes Git proof from canonical
 // merged metadata. Only merged supplies both; no outcome issues a receipt.
 type NativePublicationObservation struct {
-	ObservationContract   string              `json:"observation_contract,omitempty"`
-	CanonicalPR           string              `json:"canonical_pr,omitempty"`
-	State                 string              `json:"state"`
-	Condition             string              `json:"condition,omitempty"`
-	PullRequest           PullRequestSnapshot `json:"pull_request"`
-	Git                   *IntegrationProof   `json:"git,omitempty"`
-	OriginalSourceCommit  string              `json:"original_source_commit"`
-	PublishedSourceCommit string              `json:"published_source_commit"`
-	ObservedSourceCommit  string              `json:"observed_source_commit,omitempty"`
-	LaterSourceCommit     string              `json:"later_source_commit,omitempty"`
-	ObservedTargetCommit  string              `json:"observed_target_commit,omitempty"`
+	ObservationContract   string                 `json:"observation_contract,omitempty"`
+	CanonicalPR           string                 `json:"canonical_pr,omitempty"`
+	State                 NativeObservationState `json:"state"`
+	Condition             string                 `json:"condition,omitempty"`
+	PullRequest           PullRequestSnapshot    `json:"pull_request"`
+	Git                   *IntegrationProof      `json:"git,omitempty"`
+	OriginalSourceCommit  string                 `json:"original_source_commit"`
+	PublishedSourceCommit string                 `json:"published_source_commit"`
+	ObservedSourceCommit  string                 `json:"observed_source_commit,omitempty"`
+	LaterSourceCommit     string                 `json:"later_source_commit,omitempty"`
+	ObservedTargetCommit  string                 `json:"observed_target_commit,omitempty"`
 }
 
 // GitPublicationResult distinguishes transport application from delivery.
 // Unknown means commands may have reached the server and must not be retried.
 type GitPublicationResult struct {
-	Schema                 string `json:"schema"`
-	State                  string `json:"state"`
-	CommandsSent           bool   `json:"commands_sent"`
-	OriginalSourceCommit   string `json:"original_source_commit"`
-	AdvertisedSourceCommit string `json:"advertised_source_commit"`
-	AdvertisedTargetCommit string `json:"advertised_target_commit"`
-	PublishedSourceCommit  string `json:"published_source_commit,omitempty"`
-	ResultCommit           string `json:"result_commit"`
-	CandidateRevision      string `json:"candidate_revision"`
+	Schema                 string              `json:"schema"`
+	State                  GitPublicationState `json:"state"`
+	CommandsSent           bool                `json:"commands_sent"`
+	OriginalSourceCommit   string              `json:"original_source_commit"`
+	AdvertisedSourceCommit string              `json:"advertised_source_commit"`
+	AdvertisedTargetCommit string              `json:"advertised_target_commit"`
+	PublishedSourceCommit  string              `json:"published_source_commit,omitempty"`
+	ResultCommit           string              `json:"result_commit"`
+	CandidateRevision      string              `json:"candidate_revision"`
 }
 
 // GitPublicationAdvertisement is a read-only observation of the actual

@@ -17,7 +17,7 @@ func (s *Store) ReconcileWorkflowNativeIntegration(ctx context.Context, id strin
 		return workflowstate.Submission{}, err
 	}
 
-	if err := s.observeWorkflowNativeIntegration(ctx, guard, ports, false); err != nil {
+	if err := s.observeWorkflowNativeIntegration(ctx, guard, ports, workflowNativeObservationOnce); err != nil {
 		return workflowstate.Submission{}, err
 	}
 

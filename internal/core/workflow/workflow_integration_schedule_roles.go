@@ -195,7 +195,7 @@ func (s *Store) workflowIntegrationPreparedRole(ctx context.Context, run workflo
 		return "", nil
 	}
 
-	if run.Review != nil && !slices.Contains([]string{"pending", "stale"}, run.Review.State) {
+	if run.Review != nil && !slices.Contains([]workflowstate.ReviewState{workflowstate.ReviewPending, workflowstate.ReviewStale}, run.Review.State) {
 		return "", nil
 	}
 
@@ -214,7 +214,7 @@ func workflowIntegrationTargetBlocked(snapshot workflowIntegrationSnapshot, entr
 	target := contenthash.Sum([]byte(entry.Repository + "\n" + entry.TargetRef))
 
 	return slices.ContainsFunc(snapshot.Journals, func(j workflowSubmissionJournal) bool {
-		return j.TargetKey == target && j.Attempts[len(j.Attempts)-1].State == "awaiting_observation"
+		return j.TargetKey == target && j.Attempts[len(j.Attempts)-1].State == workflowstate.SubmissionAwaitingObservation
 	})
 }
 

@@ -155,7 +155,7 @@ func publishGuidedWebResult(t *testing.T, operations service, host *guidedWorkHo
 	host.wait.Wait()
 
 	submission, err := operations.ReadWorkflowSubmission(t.Context(), id)
-	if err != nil || submission.Response != "error_unknown" || len(publication.submissions) != 1 {
+	if err != nil || submission.Response != workflowstate.SubmissionResponseUnknown || len(publication.submissions) != 1 {
 		t.Fatal("publication response fault was not retained", err)
 	}
 

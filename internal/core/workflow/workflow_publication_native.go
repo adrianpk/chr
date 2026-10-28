@@ -122,7 +122,7 @@ func (s *Store) continueWorkflowNativePhase(ctx context.Context, owner workflowN
 
 func (s *Store) reviewWorkflowNativeContinuation(ctx context.Context, guard IntegrationBudgetGuard, provider NativePreparationProvider, ports PublicationPorts) error {
 	review, err := s.ReviewWorkflowSlice(ctx, guard.InvocationID, provider, ports.Reviewer)
-	if err != nil || review.State != "authorized" {
+	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		return err
 	}
 
@@ -148,10 +148,10 @@ func (s *Store) transitionWorkflowNativeContinuation(ctx context.Context, entry 
 }
 
 func (s *Store) observeWorkflowNativeContinuation(ctx context.Context, guard IntegrationBudgetGuard, ports PublicationPorts) error {
-	return s.observeWorkflowNativeIntegration(ctx, guard, ports, true)
+	return s.observeWorkflowNativeIntegration(ctx, guard, ports, workflowNativeObservationPoll)
 }
 
-func (s *Store) observeWorkflowNativeIntegration(ctx context.Context, guard IntegrationBudgetGuard, ports PublicationPorts, poll bool) error {
+func (s *Store) observeWorkflowNativeIntegration(ctx context.Context, guard IntegrationBudgetGuard, ports PublicationPorts, mode workflowNativeObservationMode) error {
 	inspector, ok := ports.NativePublisher.(GitPublicationInspector)
 	git, prepared := ports.Observer.(PreparedIntegrationGit)
 
@@ -170,7 +170,7 @@ func (s *Store) observeWorkflowNativeIntegration(ctx context.Context, guard Inte
 		return err
 	}
 
-	if poll {
+	if mode == workflowNativeObservationPoll {
 		_, err = s.PollWorkflowNativeSubmission(ctx, guard, ports.NativeObserver, ports.Observer)
 	} else {
 		_, err = s.ObserveWorkflowNativeSubmission(ctx, guard, ports.NativeObserver, ports.Observer)
@@ -191,3 +191,12 @@ func (s *Store) observeWorkflowNativeIntegration(ctx context.Context, guard Inte
 
 	return err
 }
+
+// The selected observation operation changes repetition only. Both modes retain
+// the same reconciled intent, current guard, caller context and receipt checks.
+type workflowNativeObservationMode uint8
+
+const (
+	workflowNativeObservationOnce workflowNativeObservationMode = iota
+	workflowNativeObservationPoll
+)

@@ -147,7 +147,7 @@ func TestWorkflowPreparationApproval(t *testing.T) {
 	}
 
 	fresh, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
-	if err != nil || fresh.State != "waiting_approval" {
+	if err != nil || fresh.State != workflowstate.ReviewWaitingApproval {
 		t.Fatalf("combined approval wait: %+v, %v", fresh, err)
 	}
 

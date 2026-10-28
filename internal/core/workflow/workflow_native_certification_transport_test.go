@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeTransportLoss drops the real HTTPS result only after the remote
@@ -60,7 +62,7 @@ func nativeTransportLoss(t *testing.T, state string, profile nativeLiveProfile) 
 	result, err := f.publisher.WithHTTPClient(&http.Client{Transport: fault}).PublishWorkflowGit(t.Context(), f.request)
 
 	f.evidence.Native.Binding.Publication, f.evidence.Posts = result, fault.posts
-	if !errors.Is(err, ErrWorkflowObservationRequired) || result.State != "unknown" || !result.CommandsSent || !fault.dropped || fault.posts != 1 {
+	if !errors.Is(err, ErrWorkflowObservationRequired) || result.State != workflowstate.GitPublicationUnknown || !result.CommandsSent || !fault.dropped || fault.posts != 1 {
 		t.Fatalf("lost reply did not retain one unknown publication: %s, posts %d, %v", result.State, fault.posts, err)
 	}
 

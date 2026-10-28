@@ -1,6 +1,10 @@
 package workflow
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *Store) checkWorkflowClosingPublications(ctx context.Context) error {
 	journals, err := s.workflowIntegrationJournals(ctx)
@@ -9,7 +13,7 @@ func (s *Store) checkWorkflowClosingPublications(ctx context.Context) error {
 	}
 
 	for _, journal := range journals {
-		if journal.Attempts[len(journal.Attempts)-1].State == "awaiting_observation" {
+		if journal.Attempts[len(journal.Attempts)-1].State == workflowstate.SubmissionAwaitingObservation {
 			return ErrWorkflowObservationRequired
 		}
 	}

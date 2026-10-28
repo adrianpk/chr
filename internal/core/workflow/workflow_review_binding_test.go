@@ -26,7 +26,7 @@ func TestWorkflowReviewRevocation(t *testing.T) {
 	}
 
 	current, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
-	if err != nil || current.State != "waiting_approval" || current.InputHash == old.InputHash || current.Round != old.Round+1 {
+	if err != nil || current.State != workflowstate.ReviewWaitingApproval || current.InputHash == old.InputHash || current.Round != old.Round+1 {
 		t.Fatal("changed policy reused another candidate grant")
 	}
 

@@ -159,37 +159,37 @@ func (advertisement workflowAdvertisement) check(request GitPublication) error {
 	return nil
 }
 
-func readWorkflowPublicationReport(reader io.Reader, request GitPublication) (string, error) {
+func readWorkflowPublicationReport(reader io.Reader, request GitPublication) (workflowstate.GitPublicationState, error) {
 	data, err := io.ReadAll(io.LimitReader(reader, workflowPublicationTextLimit+1))
 	if err != nil || len(data) > workflowPublicationTextLimit {
-		return "unknown", fmt.Errorf("publication report exceeds bounds or is incomplete")
+		return workflowstate.GitPublicationUnknown, fmt.Errorf("publication report exceeds bounds or is incomplete")
 	}
 
 	packets := bytes.NewReader(data)
 
 	unpack, err := readWorkflowPublicationPacket(packets)
 	if err != nil || !bytes.HasPrefix(unpack, []byte("unpack ")) {
-		return "unknown", fmt.Errorf("missing unpack status")
+		return workflowstate.GitPublicationUnknown, fmt.Errorf("missing unpack status")
 	}
 
 	statuses, err := workflowPublicationRefStatuses(packets, request)
 	if err != nil {
-		return "unknown", err
+		return workflowstate.GitPublicationUnknown, err
 	}
 
 	return classifyWorkflowPublicationReport(string(unpack), statuses)
 }
 
-func classifyWorkflowPublicationReport(unpack string, statuses [2]string) (string, error) {
+func classifyWorkflowPublicationReport(unpack string, statuses [2]string) (workflowstate.GitPublicationState, error) {
 	if statuses[0] == "ng" && statuses[1] == "ng" {
-		return "rejected", nil
+		return workflowstate.GitPublicationRejected, nil
 	}
 
 	if strings.TrimSuffix(unpack, "\n") != "unpack ok" || statuses[0] != "ok" || statuses[1] != "ok" {
-		return "unknown", fmt.Errorf("inconsistent atomic publication report")
+		return workflowstate.GitPublicationUnknown, fmt.Errorf("inconsistent atomic publication report")
 	}
 
-	return "applied", nil
+	return workflowstate.GitPublicationApplied, nil
 }
 
 func workflowPublicationRefStatuses(reader *bytes.Reader, request GitPublication) ([2]string, error) {

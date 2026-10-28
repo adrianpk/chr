@@ -73,7 +73,7 @@ func (s *Store) acceptWorkflowReview(ctx context.Context, claimed workflowClaimO
 }
 
 func (s *Store) checkpointFailedWorkflowReview(claim *Claim, run workflowInvocationFile, record Record, failure error) error {
-	run.Review.State = "stale"
+	run.Review.State = workflowstate.ReviewStale
 
 	err := s.checkpointWorkflowAttempt(run, record, "interrupted", nil)
 	if err == nil {
@@ -84,7 +84,7 @@ func (s *Store) checkpointFailedWorkflowReview(claim *Claim, run workflowInvocat
 }
 
 func consumeWorkflowReviewRepair(run *workflowInvocationFile, taskKey string) error {
-	if run.Review == nil || run.Review.State != "needs_repair" {
+	if run.Review == nil || run.Review.State != workflowstate.ReviewNeedsRepair {
 		return nil
 	}
 
@@ -103,13 +103,13 @@ func consumeWorkflowReviewRepair(run *workflowInvocationFile, taskKey string) er
 		}
 
 		budget.Consumed++
-		run.Review.State = "stale"
+		run.Review.State = workflowstate.ReviewStale
 
 		return nil
 	}
 
 	run.ReviewRepairs = append(run.ReviewRepairs, ReviewRepairBudget{Unit: run.Review.Unit, Consumed: 1})
-	run.Review.State = "stale"
+	run.Review.State = workflowstate.ReviewStale
 
 	return nil
 }

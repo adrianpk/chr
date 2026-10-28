@@ -82,7 +82,7 @@ func TestWorkflowGitReports(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			state, err := readWorkflowPublicationReport(bytes.NewBufferString(test.data), request)
-			if state != test.state || (err != nil) != (test.state == "unknown") {
+			if string(state) != test.state || (err != nil) != (test.state == "unknown") {
 				t.Fatalf("report = %s, %v", state, err)
 			}
 		})

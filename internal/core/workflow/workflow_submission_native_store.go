@@ -17,7 +17,7 @@ func (s *Store) beginWorkflowNativeSubmission(ctx context.Context, run workflowI
 		return SubmissionIntent{Submission: workflowstate.Submission{}, Dispatch: false}, err
 	}
 
-	if len(journal.Attempts) > 0 && journal.Attempts[len(journal.Attempts)-1].State != "unpublished" {
+	if len(journal.Attempts) > 0 && journal.Attempts[len(journal.Attempts)-1].State != workflowstate.SubmissionUnpublished {
 		return s.retryWorkflowNativeSubmission(&run, journal)
 	}
 
@@ -101,7 +101,7 @@ func (s *Store) persistWorkflowNativeIntent(ctx context.Context, run workflowInv
 	}
 
 	native := workflowNativeSubmissionIntent(candidate, run, entry)
-	submission := workflowstate.Submission{ID: id, InvocationID: run.ID, Unit: entry.Unit, Attempt: number, CandidateID: run.PullRequest.CandidateID, CandidateHash: run.CandidateHash, Guard: guard, PreparedLane: candidate.Lane, State: "awaiting_observation", SubmittedAt: native.IntentTime, UpdatedAt: native.IntentTime, Native: &native}
+	submission := workflowstate.Submission{ID: id, InvocationID: run.ID, Unit: entry.Unit, Attempt: number, CandidateID: run.PullRequest.CandidateID, CandidateHash: run.CandidateHash, Guard: guard, PreparedLane: candidate.Lane, State: workflowstate.SubmissionAwaitingObservation, SubmittedAt: native.IntentTime, UpdatedAt: native.IntentTime, Native: &native}
 	journal.Schema = "chr-integration-journal/v2"
 
 	journal.Attempts = append(journal.Attempts, submission)
@@ -184,7 +184,7 @@ func workflowNativeSubmissionProjected(run workflowInvocationFile, entry Integra
 }
 
 func (s *Store) projectWorkflowNativeSubmissionPhase(entry *IntegrationEntry, last workflowstate.Submission) error {
-	if last.State == "confirmed" {
+	if last.State == workflowstate.SubmissionConfirmed {
 		return nil
 	}
 
@@ -205,13 +205,13 @@ func (s *Store) projectWorkflowNativeSubmissionPhase(entry *IntegrationEntry, la
 	entry.Blocker = nil
 
 	switch last.Native.ApplicationState {
-	case "not_started":
+	case workflowstate.NativeApplicationNotStarted:
 		entry.State = "publishing"
-	case "not_applied":
+	case workflowstate.NativeApplicationNotApplied:
 		entry.State = "blocked"
 
 		entry.Blocker = &IntegrationBlocker{Reason: "native_not_applied", RequiredAction: "reconcile changed input and dispatch quiescence", ResumeState: "queued"}
-		if last.State != "unpublished" {
+		if last.State != workflowstate.SubmissionUnpublished {
 			entry.Blocker = &IntegrationBlocker{Reason: "native_publication_rejected", RequiredAction: "resolve publication permissions or capability before new authorization", ResumeState: "observing"}
 		}
 	default:
@@ -268,7 +268,7 @@ func workflowNativeSubmissionCallbackMatches(last workflowstate.Submission, entr
 }
 
 func workflowNativeDispatchStopped(native workflowstate.NativeSubmission, run workflowInvocationFile, entry IntegrationEntry) bool {
-	return native.DispatchState == "not_started" && workflowIntegrationReservationStopped(run, entry)
+	return native.DispatchState == workflowstate.NativeDispatchNotStarted && workflowIntegrationReservationStopped(run, entry)
 }
 
 func checkWorkflowNativeSubmissionCallback(run workflowInvocationFile, current workflowNativeCallbackSnapshot, request NativeSubmissionUpdate) error {
@@ -290,7 +290,7 @@ func checkWorkflowNativeSubmissionCallback(run workflowInvocationFile, current w
 }
 
 func projectWorkflowNativeStop(entry *IntegrationEntry, last workflowstate.Submission) bool {
-	if last.State != "unpublished" || entry.StopIntent == "" {
+	if last.State != workflowstate.SubmissionUnpublished || entry.StopIntent == "" {
 		return false
 	}
 

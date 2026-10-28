@@ -40,7 +40,7 @@ func observeWorkflowSubmission(ctx context.Context, submission workflowstate.Sub
 		return submission, err
 	}
 
-	submission.State = "unpublished"
+	submission.State = workflowstate.SubmissionUnpublished
 	submission.Unpublished = &observation
 
 	return submission, nil
@@ -81,7 +81,7 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission workflowst
 		return submission, err
 	}
 
-	submission.State, submission.Proof, submission.ObservedPR = "confirmed", &proof, &pr
+	submission.State, submission.Proof, submission.ObservedPR = workflowstate.SubmissionConfirmed, &proof, &pr
 
 	submission.Unpublished = nil
 

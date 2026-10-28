@@ -81,9 +81,9 @@ func workflowSubmissionCrashReady(t *testing.T, store *Store, run workflowInvoca
 
 	switch stage {
 	case "confirmed", "confirmation_projection":
-		return last.State == "confirmed"
+		return last.State == workflowstate.SubmissionConfirmed
 	case "response":
-		return last.Response == "accepted"
+		return last.Response == workflowstate.SubmissionResponseAccepted
 	default:
 		return false
 	}
@@ -128,14 +128,14 @@ func assertWorkflowSubmissionRecovery(t *testing.T, f workflowPreparationFixture
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
 	first, err := restarted.ReadWorkflowSubmission(t.Context(), f.run.ID)
-	if err != nil || first.Attempt != 1 || first.State != "awaiting_observation" && first.State != "confirmed" {
+	if err != nil || first.Attempt != 1 || first.State != workflowstate.SubmissionAwaitingObservation && first.State != workflowstate.SubmissionConfirmed {
 		t.Fatalf("durable crash intent: %+v, %v", first, err)
 	}
 
 	expected := sealWorkflowSubmissionCrash(t, restarted, f, provider, first, stage)
 	last, err := restarted.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
 
-	if err != nil || last.ID != first.ID || last.State != expected || provider.calls != baseline {
+	if err != nil || last.ID != first.ID || string(last.State) != expected || provider.calls != baseline {
 		t.Fatalf("crash recovery repeated publication: %+v, %v", last, err)
 	}
 

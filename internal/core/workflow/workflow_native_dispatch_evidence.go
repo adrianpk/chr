@@ -42,7 +42,7 @@ func (s *Store) retainWorkflowNativeSend(ctx context.Context, submission workflo
 		}
 
 		native.CommandManifestRef = &commandRef
-		result := workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "unknown", CommandsSent: true, OriginalSourceCommit: native.OriginalSource, AdvertisedSourceCommit: native.OriginalSource, AdvertisedTargetCommit: native.ValidatedBase, ResultCommit: native.PreparedResult, CandidateRevision: request.CandidateRevision}
+		result := workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: workflowstate.GitPublicationUnknown, CommandsSent: true, OriginalSourceCommit: native.OriginalSource, AdvertisedSourceCommit: native.OriginalSource, AdvertisedTargetCommit: native.ValidatedBase, ResultCommit: native.PreparedResult, CandidateRevision: request.CandidateRevision}
 
 		return owner.retainWorkflowNativeDispatchResponse(submission, native, result)
 	})
@@ -76,7 +76,7 @@ func (s *Store) completeWorkflowNativeDispatch(ctx context.Context, submission w
 			return err
 		}
 
-		native.DispatchCompletionRef, native.DispatchState = &ref, "quiescent"
+		native.DispatchCompletionRef, native.DispatchState = &ref, workflowstate.NativeDispatchQuiescent
 
 		return nil
 	})
@@ -165,7 +165,7 @@ func (s *Store) readWorkflowOwnedDispatch(ctx context.Context, run workflowInvoc
 	}
 
 	identity, err := workflowProcessIdentity(os.Getpid())
-	if err != nil || identity != *last.Native.DispatchIdentity || last.Native.DispatchState != "dispatching" {
+	if err != nil || identity != *last.Native.DispatchIdentity || last.Native.DispatchState != workflowstate.NativeDispatching {
 		return workflowNativeDispatchEvidence{Journal: journal, Entry: IntegrationEntry{}}, fmt.Errorf("%w: dispatch owner changed", workflowstate.ErrConflict)
 	}
 

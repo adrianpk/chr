@@ -89,7 +89,7 @@ func TestNativeSubmissionUnknown(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = "dispatching", "unknown", &identity
+	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = workflowstate.NativeDispatching, workflowstate.NativeApplicationUnknown, &identity
 
 	submission, err = f.store.RetainWorkflowNativeSubmission(t.Context(), update)
 	if err != nil {

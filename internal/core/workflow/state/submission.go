@@ -8,24 +8,24 @@ import (
 // State is awaiting_observation, unpublished or confirmed; responses alone never
 // release exclusion or complete tasks.
 type Submission struct {
-	Native           *NativeSubmission      `json:"native,omitempty"`
-	ID               string                 `json:"id"`
-	InvocationID     string                 `json:"invocation_id"`
-	Unit             Ref                    `json:"unit"`
-	Attempt          int                    `json:"attempt"`
-	CandidateID      string                 `json:"candidate_id"`
-	CandidateHash    string                 `json:"candidate_hash"`
-	Guard            PublicationGuard       `json:"guard"`
-	PreparedLane     Lane                   `json:"prepared_lane"`
-	State            string                 `json:"state"`
-	SubmittedAt      time.Time              `json:"submitted_at"`
-	UpdatedAt        time.Time              `json:"updated_at"`
-	Response         string                 `json:"response,omitempty"`
-	ResponseCommit   string                 `json:"response_commit,omitempty"`
-	ObservedPR       *PullRequestSnapshot   `json:"observed_pr,omitempty"`
-	Proof            *IntegrationProof      `json:"proof,omitempty"`
-	ExternalDelivery bool                   `json:"external_delivery,omitempty"`
-	Unpublished      *SubmissionObservation `json:"unpublished_observation,omitempty"`
+	Native           *NativeSubmission       `json:"native,omitempty"`
+	ID               string                  `json:"id"`
+	InvocationID     string                  `json:"invocation_id"`
+	Unit             Ref                     `json:"unit"`
+	Attempt          int                     `json:"attempt"`
+	CandidateID      string                  `json:"candidate_id"`
+	CandidateHash    string                  `json:"candidate_hash"`
+	Guard            PublicationGuard        `json:"guard"`
+	PreparedLane     Lane                    `json:"prepared_lane"`
+	State            SubmissionState         `json:"state"`
+	SubmittedAt      time.Time               `json:"submitted_at"`
+	UpdatedAt        time.Time               `json:"updated_at"`
+	Response         SubmissionResponseState `json:"response,omitempty"`
+	ResponseCommit   string                  `json:"response_commit,omitempty"`
+	ObservedPR       *PullRequestSnapshot    `json:"observed_pr,omitempty"`
+	Proof            *IntegrationProof       `json:"proof,omitempty"`
+	ExternalDelivery bool                    `json:"external_delivery,omitempty"`
+	Unpublished      *SubmissionObservation  `json:"unpublished_observation,omitempty"`
 }
 
 // SubmissionResponse records an untrusted command response for later

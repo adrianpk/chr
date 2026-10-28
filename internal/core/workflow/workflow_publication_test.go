@@ -33,7 +33,7 @@ func testWorkflowPublicationMode(t *testing.T, mode workflowstate.ReviewMode) {
 
 	progress, err := workflowPublicationModeStart(t, f, p, ports, mode)
 
-	if !errors.Is(err, context.DeadlineExceeded) || progress.Receipt != nil || progress.Invocation.Submission.State != "awaiting_observation" || p.calls != 1 {
+	if !errors.Is(err, context.DeadlineExceeded) || progress.Receipt != nil || progress.Invocation.Submission.State != workflowstate.SubmissionAwaitingObservation || p.calls != 1 {
 		t.Fatal("response replaced observation or repeated publication", err)
 	}
 
@@ -78,7 +78,7 @@ func TestWorkflowPublicationMovedBase(t *testing.T) {
 	workflowIntegrationCommand(t, f.actor, "push", "origin", "dev")
 
 	progress, err = f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
-	if err != nil || progress.Invocation.Review.State != "waiting_approval" || progress.Invocation.Review.InputHash == old.Review.InputHash || progress.Invocation.Preparation.Round != old.Preparation.Round+1 || p.calls != 0 {
+	if err != nil || progress.Invocation.Review.State != workflowstate.ReviewWaitingApproval || progress.Invocation.Review.InputHash == old.Review.InputHash || progress.Invocation.Preparation.Round != old.Preparation.Round+1 || p.calls != 0 {
 		t.Fatal("moved base reused old validation or approval", err)
 	}
 
@@ -124,7 +124,7 @@ func workflowPublicationModeStart(t *testing.T, f workflowPreparationFixture, p 
 
 	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
 	if mode == workflowstate.ReviewHuman {
-		if err != nil || progress.Invocation.Review.State != "waiting_approval" || p.calls != 0 {
+		if err != nil || progress.Invocation.Review.State != workflowstate.ReviewWaitingApproval || p.calls != 0 {
 			t.Fatal("human policy skipped exact approval", err)
 		}
 

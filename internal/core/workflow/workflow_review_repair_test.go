@@ -55,7 +55,7 @@ func checkWorkflowReviewRepairStep(t *testing.T, store *Store, hierarchy Materia
 func checkWorkflowReviewRepairState(t *testing.T, retained Invocation, binding workflowstate.ReviewBinding, count int) {
 	t.Helper()
 
-	if binding.State != "needs_repair" || retained.Cursor != 2 || retained.Status != workflowstate.InvocationPending || retained.CandidateRef != "" {
+	if binding.State != workflowstate.ReviewNeedsRepair || retained.Cursor != 2 || retained.Status != workflowstate.InvocationPending || retained.CandidateRef != "" {
 		t.Fatal("repair did not rewind the affected suffix")
 	}
 
@@ -82,7 +82,7 @@ func checkWorkflowReviewExhausted(t *testing.T, store *Store, id, key string, pr
 	_, err := caller.ReviewWorkflowSlice(t.Context(), id, provider, workflowReviewWorker("needs_changes", key, ""))
 
 	retained := workflowTestRead(t, store, id)
-	if !errors.Is(err, ErrWorkflowReviewRepairBudget) || retained.Review.State != "repair_limit_exceeded" || retained.Blocker == nil {
+	if !errors.Is(err, ErrWorkflowReviewRepairBudget) || retained.Review.State != workflowstate.ReviewRepairLimitExceeded || retained.Blocker == nil {
 		t.Fatalf("repair budget: %+v, %v", retained.Review, err)
 	}
 
@@ -145,7 +145,7 @@ func testWorkflowReviewDuringIO(t *testing.T, name, before string) {
 	}
 
 	retained := workflowTestRead(t, store, run.ID)
-	if retained.Status != workflowstate.InvocationPaused || retained.ResumeStatus != workflowstate.InvocationWaitingReview || retained.CandidateRef != run.CandidateRef || retained.Review.State != "stale" {
+	if retained.Status != workflowstate.InvocationPaused || retained.ResumeStatus != workflowstate.InvocationWaitingReview || retained.CandidateRef != run.CandidateRef || retained.Review.State != workflowstate.ReviewStale {
 		t.Fatal("review failure lost retained candidate or resume boundary")
 	}
 

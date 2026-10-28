@@ -174,7 +174,7 @@ func workflowReviewRepairCheckpoint(t *testing.T, store *Store, id, key string, 
 			return err
 		}
 
-		if run.Review != nil && run.Review.State == "needs_repair" {
+		if run.Review != nil && run.Review.State == workflowstate.ReviewNeedsRepair {
 			return interrupted
 		}
 
@@ -238,7 +238,7 @@ func testWorkflowReviewRoleJournal(t *testing.T, stage string, index int) {
 	}
 
 	binding, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, reviewer)
-	if err != nil || binding.State != "authorized" {
+	if err != nil || binding.State != workflowstate.ReviewAuthorized {
 		t.Fatalf("role replay: %+v, %v", binding, err)
 	}
 

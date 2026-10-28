@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativeProcessTargets shares target journals between admitted work and
@@ -81,7 +82,7 @@ func TestNativeProcessUnknown(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = "dispatching", "unknown", &identity
+	update.Facts.DispatchState, update.Facts.ApplicationState, update.Facts.DispatchIdentity = workflowstate.NativeDispatching, workflowstate.NativeApplicationUnknown, &identity
 	if _, err := f.store.RetainWorkflowNativeSubmission(t.Context(), update); err != nil {
 		t.Fatal(err)
 	}

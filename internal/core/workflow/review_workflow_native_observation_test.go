@@ -70,7 +70,7 @@ func checkNativeObservationCases(t *testing.T, fixture nativeCapabilityFixture, 
 			setNativePRFixture(t, fixture, pr)
 
 			observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote))
-			if err != nil || observed.State != test.state || observed.Condition != test.condition || observed.OriginalSourceCommit != binding.Git.SourceCommit || observed.PublishedSourceCommit != binding.Git.ResultCommit {
+			if err != nil || string(observed.State) != test.state || observed.Condition != test.condition || observed.OriginalSourceCommit != binding.Git.SourceCommit || observed.PublishedSourceCommit != binding.Git.ResultCommit {
 				t.Fatalf("native observation: %+v, %v", observed, err)
 			}
 
@@ -82,7 +82,7 @@ func checkNativeObservationCases(t *testing.T, fixture nativeCapabilityFixture, 
 func checkNativeObservedHistory(t *testing.T, observed workflowstate.NativePublicationObservation, binding workflowstate.NativePublicationBinding) {
 	t.Helper()
 
-	if observed.State == "merged" && (observed.Git == nil || observed.Git.HistoryHash != binding.Git.HistoryHash || observed.Git.ObservedTarget != binding.Git.ResultCommit) {
+	if observed.State == workflowstate.NativeMerged && (observed.Git == nil || observed.Git.HistoryHash != binding.Git.HistoryHash || observed.Git.ObservedTarget != binding.Git.ResultCommit) {
 		t.Fatal("merged metadata lacked the actual exact target history")
 	}
 }
@@ -109,14 +109,14 @@ func TestNativeLaterSource(t *testing.T) {
 	fixture.runner.outputs[fixture.prefix+"/branches/chr%2Fworkflow%2Ffixture"] = []byte(`{"commit":{"sha":"` + later + `"}}`)
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
-	if err != nil || observed.State != "merged" || observed.LaterSourceCommit != later || observed.PublishedSourceCommit != binding.Git.ResultCommit {
+	if err != nil || observed.State != workflowstate.NativeMerged || observed.LaterSourceCommit != later || observed.PublishedSourceCommit != binding.Git.ResultCommit {
 		t.Fatalf("later source replaced original published proof: %+v, %v", observed, err)
 	}
 
-	binding.Publication.State, binding.Publication.PublishedSourceCommit = "unknown", ""
+	binding.Publication.State, binding.Publication.PublishedSourceCommit = workflowstate.GitPublicationUnknown, ""
 
 	observed, err = fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
-	if err != nil || observed.State != "reconciliation_required" {
+	if err != nil || observed.State != workflowstate.NativeReconciliationRequired {
 		t.Fatal("unknown transaction attributed a later source without proof")
 	}
 
@@ -131,7 +131,7 @@ func checkNativeLaterAttribution(t *testing.T, fixture nativeCapabilityFixture, 
 	binding.GitApplication = &workflowstate.NativeGitObservation{SchemaVersion: 1, CandidateRevision: binding.Publication.CandidateRevision, SourceCommit: binding.Git.ResultCommit, TargetCommit: prior.ObservedTarget, Condition: "result_verified", Git: &prior}
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
-	if err != nil || observed.State != "merged" || observed.LaterSourceCommit != later {
+	if err != nil || observed.State != workflowstate.NativeMerged || observed.LaterSourceCommit != later {
 		t.Fatal("retained actual application lost attribution after source advanced", err)
 	}
 
@@ -151,7 +151,7 @@ func TestNativeObservationProof(t *testing.T) {
 	binding.ObservationDeadline = time.Now().Add(-time.Second)
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
-	if err != nil || observed.State != "reconciliation_required" || observed.Condition != "canonical_pr_observation_deadline" {
+	if err != nil || observed.State != workflowstate.NativeReconciliationRequired || observed.Condition != "canonical_pr_observation_deadline" {
 		t.Fatal("expired metadata observation did not retain reconciliation")
 	}
 

@@ -48,7 +48,7 @@ func checkNativeReceiptCompatibility(t *testing.T, evidence *nativeCertification
 	binding := evidence.Native.Binding
 
 	observed := evidence.Native.Observations[len(evidence.Native.Observations)-1]
-	if observed.State != "merged" || observed.Git == nil || observed.Git.ObservedTarget != binding.Git.ResultCommit {
+	if observed.State != workflowstate.NativeMerged || observed.Git == nil || observed.Git.ObservedTarget != binding.Git.ResultCommit {
 		t.Fatal("original canonical PR lacks exact merged Git proof")
 	}
 

@@ -17,15 +17,15 @@ func CheckPolicy(policy workflowstate.ReviewPolicy) error {
 }
 
 // DecisionState maps a role decision to its original retained review state.
-func DecisionState(decision workflowstate.IntegrationReviewDecision) string {
+func DecisionState(decision workflowstate.IntegrationReviewDecision) workflowstate.ReviewState {
 	switch decision {
 	case workflowstate.IntegrationReviewDecisionPass:
-		return "authorized"
+		return workflowstate.ReviewAuthorized
 	case workflowstate.IntegrationReviewDecisionNeedsChanges:
-		return "needs_repair"
+		return workflowstate.ReviewNeedsRepair
 	case workflowstate.IntegrationReviewDecisionHumanRequired:
-		return "human_required"
+		return workflowstate.ReviewHumanRequired
 	default:
-		return "insufficient_evidence"
+		return workflowstate.ReviewInsufficientEvidence
 	}
 }

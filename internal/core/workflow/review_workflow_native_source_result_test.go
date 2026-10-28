@@ -16,7 +16,7 @@ func TestNativeSourceResult(t *testing.T) {
 	setNativePRFixture(t, fixture, pr)
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote))
-	if err != nil || observed.State != "merged" || observed.Git == nil {
+	if err != nil || observed.State != workflowstate.NativeMerged || observed.Git == nil {
 		t.Fatalf("exact Git result and original PR attribution were not reconciled: %s, %s, %v", observed.State, observed.Condition, err)
 	}
 
@@ -73,7 +73,7 @@ func TestNativeSourceResultGuards(t *testing.T) {
 		}},
 		{"foreign_pr", "reconciliation_required", func(_ *workflowstate.NativePublicationBinding, pr *workflowstate.PullRequestSnapshot) { pr.URL += "0" }},
 		{"lost_response", "merged", func(b *workflowstate.NativePublicationBinding, _ *workflowstate.PullRequestSnapshot) {
-			b.Publication.State, b.Publication.PublishedSourceCommit = "unknown", ""
+			b.Publication.State, b.Publication.PublishedSourceCommit = workflowstate.GitPublicationUnknown, ""
 		}},
 	}
 	for _, test := range cases {
@@ -83,11 +83,11 @@ func TestNativeSourceResultGuards(t *testing.T) {
 			setNativePRFixture(t, fixture, pr)
 
 			observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote))
-			if err != nil || observed.State != test.state {
+			if err != nil || string(observed.State) != test.state {
 				t.Fatalf("source attribution guard: %s, %s, %v", observed.State, observed.Condition, err)
 			}
 
-			if observed.State == "observing" && !workflowNativeCanonicalResultValid(binding, observed) {
+			if observed.State == workflowstate.NativeObserving && !workflowNativeCanonicalResultValid(binding, observed) {
 				t.Fatal("source metadata lag could not retain its pending observation")
 			}
 		})
@@ -112,7 +112,7 @@ func TestNativeSourceRepair(t *testing.T) {
 	setNativePRFixture(t, fixture, pr)
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, NewWorkflowIntegrationGit(proof.Repository, fixture.remote))
-	if err != nil || observed.State != "merged" {
+	if err != nil || observed.State != workflowstate.NativeMerged {
 		t.Fatal("declared repair lost exact-result source attribution", err)
 	}
 
@@ -139,7 +139,7 @@ func TestNativeSourceLater(t *testing.T) {
 	fixture.runner.outputs[fixture.prefix+"/branches/chr%2Fworkflow%2Ffixture"] = []byte(`{"commit":{"sha":"` + later + `"}}`)
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
-	if err != nil || observed.State != "merged" || observed.LaterSourceCommit != later || observed.Git.ObservedTarget != later {
+	if err != nil || observed.State != workflowstate.NativeMerged || observed.LaterSourceCommit != later || observed.Git.ObservedTarget != later {
 		t.Fatal("later refs lost the original verified result", err)
 	}
 
@@ -148,10 +148,10 @@ func TestNativeSourceLater(t *testing.T) {
 		t.Fatal("later refs substituted for the original receipt proof")
 	}
 
-	binding.Publication.State, binding.Publication.PublishedSourceCommit = "unknown", ""
+	binding.Publication.State, binding.Publication.PublishedSourceCommit = workflowstate.GitPublicationUnknown, ""
 
 	observed, err = fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
-	if err != nil || observed.State != "reconciliation_required" {
+	if err != nil || observed.State != workflowstate.NativeReconciliationRequired {
 		t.Fatal("uncertain transaction attributed later source without application proof", err)
 	}
 
@@ -216,7 +216,7 @@ func TestNativeSourceReceipt(t *testing.T) {
 	setNativePRFixture(t, fixture, pr)
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote))
-	if err != nil || observed.State != "merged" {
+	if err != nil || observed.State != workflowstate.NativeMerged {
 		t.Fatal("source receipt fixture is not verified", err)
 	}
 

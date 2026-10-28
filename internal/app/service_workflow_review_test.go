@@ -25,7 +25,7 @@ func TestServiceWorkflowReview(t *testing.T) {
 	operations, id, provider := serviceWorkflowReviewReady(t)
 
 	binding, err := operations.ReviewWorkflowSlice(t.Context(), id, nil)
-	if err != nil || binding.State != "waiting_approval" {
+	if err != nil || binding.State != workflowstate.ReviewWaitingApproval {
 		t.Fatalf("service review: %+v, %v", binding, err)
 	}
 

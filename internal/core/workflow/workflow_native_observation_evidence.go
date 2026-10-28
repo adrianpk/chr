@@ -18,7 +18,7 @@ func (s *Store) workflowNativeCanonicalObservationValid(submission workflowstate
 	}
 
 	condition := workflowforge.NativeObservationCondition(binding, observation.PullRequest, workflowNativePublicationProofs{})
-	if observation.State == "reconciliation_required" {
+	if observation.State == workflowstate.NativeReconciliationRequired {
 		return workflowNativeReconciliationObservationValid(submission, binding, observation, condition)
 	}
 
@@ -33,13 +33,13 @@ func workflowNativeCanonicalResultValid(binding workflowstate.NativePublicationB
 	contractMatches := observation.ObservationContract == binding.Capability.ObservationContract
 
 	sourceResult := contractMatches && workflowforge.NativeSourceResultObserved(observation, workflowNativePublicationProofs{})
-	if observation.State == "merged" {
+	if observation.State == workflowstate.NativeMerged {
 		return observation.PullRequest.Merged && (observation.PullRequest.ResultCommit == binding.Git.ResultCommit || sourceResult)
 	}
 
 	pendingSource := contractMatches && workflowforge.NativeSourceResultCompatible(binding.Capability.ObservationContract, binding.Git, observation.PullRequest, workflowNativePublicationProofs{}) && !sourceResult
 
-	return observation.State == "observing" && (!observation.PullRequest.Merged || pendingSource)
+	return observation.State == workflowstate.NativeObserving && (!observation.PullRequest.Merged || pendingSource)
 }
 
 func workflowNativeObservationTargetValid(observation workflowstate.NativePublicationObservation) bool {
@@ -55,7 +55,7 @@ func workflowNativeObservationTargetValid(observation workflowstate.NativePublic
 		return observation.ObservedTargetCommit == observation.Git.ObservedTarget
 	}
 
-	return observation.State == "reconciliation_required" && observation.Condition == "canonical_target_history_diverged"
+	return observation.State == workflowstate.NativeReconciliationRequired && observation.Condition == "canonical_target_history_diverged"
 }
 
 func (s *Store) workflowNativeCanonicalEvidenceBinding(submission workflowstate.Submission) (workflowstate.NativePublicationBinding, bool) {
@@ -97,7 +97,7 @@ func workflowNativeReconciliationObservationValid(submission workflowstate.Submi
 	case "canonical_target_history_diverged", "canonical_receipt_pr_unmerged":
 		return workflowNativeReceiptReconciliationValid(*native, observation, condition)
 	case "published_source_unattributed":
-		return binding.Publication.State == "unknown" && !workflowforge.NativeApplicationAttributed(binding, workflowNativePublicationProofs{}) && observation.Git != nil && observation.ObservedSourceCommit != native.PreparedResult
+		return binding.Publication.State == workflowstate.GitPublicationUnknown && !workflowforge.NativeApplicationAttributed(binding, workflowNativePublicationProofs{}) && observation.Git != nil && observation.ObservedSourceCommit != native.PreparedResult
 	default:
 		return condition != "" && condition == observation.Condition
 	}

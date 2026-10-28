@@ -93,7 +93,7 @@ func TestWorkflowGitAtomic(t *testing.T) {
 			publisher := NewWorkflowGitPublisher(fixture.request.Repository, fixture.remote)
 
 			result, err := publisher.PublishWorkflowGit(t.Context(), fixture.request)
-			if err != nil || result.State != "applied" || !result.CommandsSent {
+			if err != nil || result.State != workflowstate.GitPublicationApplied || !result.CommandsSent {
 				t.Fatalf("publication: %+v, %v", result, err)
 			}
 

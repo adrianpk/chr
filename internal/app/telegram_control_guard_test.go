@@ -131,7 +131,7 @@ func TestTelegramControlStaleReview(t *testing.T) {
 			}
 
 			after, err := operations.ReadWorkflow(t.Context(), id)
-			if err != nil || after.Revision != before.Revision || after.Review.State != "waiting_approval" {
+			if err != nil || after.Revision != before.Revision || after.Review.State != workflowstate.ReviewWaitingApproval {
 				t.Fatal("old preview approved changed input", after, err)
 			}
 

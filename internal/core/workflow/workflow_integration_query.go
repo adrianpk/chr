@@ -170,7 +170,7 @@ func workflowIntegrationEligible(entry IntegrationEntry, journals []workflowSubm
 	target := contenthash.Sum([]byte(entry.Repository + "\n" + entry.TargetRef))
 
 	return !slices.ContainsFunc(journals, func(j workflowSubmissionJournal) bool {
-		return j.TargetKey == target && j.Attempts[len(j.Attempts)-1].State == "awaiting_observation"
+		return j.TargetKey == target && j.Attempts[len(j.Attempts)-1].State == workflowstate.SubmissionAwaitingObservation
 	})
 }
 

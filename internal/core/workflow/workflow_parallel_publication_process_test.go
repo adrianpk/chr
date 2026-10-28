@@ -52,7 +52,7 @@ func TestWorkflowParallelPublisher(t *testing.T) {
 
 	git := NewWorkflowIntegrationGit(spec.PullRequest.Repository, spec.Remote)
 	submission, err := store.SubmitWorkflowSliceIntegration(t.Context(), spec.InvocationID, provider, git)
-	result := workflowParallelPublisherResult{ID: submission.ID, State: submission.State, Owned: errors.Is(err, ErrWorkflowOwned), Unknown: errors.Is(err, context.DeadlineExceeded)}
+	result := workflowParallelPublisherResult{ID: submission.ID, State: string(submission.State), Owned: errors.Is(err, ErrWorkflowOwned), Unknown: errors.Is(err, context.DeadlineExceeded)}
 
 	if err != nil {
 		result.Error = err.Error()
@@ -65,7 +65,7 @@ func workflowParallelPublisherBarrier(t *testing.T, ctx context.Context, store *
 	t.Helper()
 
 	retained, err := store.ReadWorkflowSubmission(ctx, spec.InvocationID)
-	if err != nil || retained.ID != submission.ID || retained.State != "awaiting_observation" {
+	if err != nil || retained.ID != submission.ID || retained.State != workflowstate.SubmissionAwaitingObservation {
 		t.Fatal("provider IO preceded durable target intent", err)
 	}
 

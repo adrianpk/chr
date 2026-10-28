@@ -79,7 +79,7 @@ func workflowClosingNativeView(run workflowInvocationFile, receipt Record) (work
 
 func (s *Store) checkWorkflowClosingNativeSubmission(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, receipt Record) error {
 	binding := entry.SubmissionRef
-	if binding == nil || binding.State != "confirmed" {
+	if binding == nil || binding.State != workflowstate.SubmissionConfirmed {
 		return ErrWorkflowObservationRequired
 	}
 
@@ -98,7 +98,7 @@ func (s *Store) checkWorkflowClosingNativeSubmission(ctx context.Context, run wo
 		return workflowstate.ErrConflict
 	}
 
-	if last.ID != receipt.Receipt.SubmissionID || last.State != "confirmed" || !workflowNativeSubmissionEntryMatches(last, entry) {
+	if last.ID != receipt.Receipt.SubmissionID || last.State != workflowstate.SubmissionConfirmed || !workflowNativeSubmissionEntryMatches(last, entry) {
 		return ErrWorkflowObservationRequired
 	}
 
@@ -118,7 +118,7 @@ func (s *Store) observeWorkflowClosingNativeSlice(ctx context.Context, input wor
 		return workflowstate.IntegrationProof{}, err
 	}
 
-	if observation.State != "merged" || observation.Git == nil {
+	if observation.State != workflowstate.NativeMerged || observation.Git == nil {
 		return workflowstate.IntegrationProof{}, ErrWorkflowObservationRequired
 	}
 

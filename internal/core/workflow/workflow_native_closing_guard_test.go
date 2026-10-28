@@ -285,7 +285,7 @@ func TestNativeClosingLost(t *testing.T) {
 	}
 
 	var response workflowstate.GitPublicationResult
-	if err := store.readWorkflowNativeEvidence(id, f.receipt.Receipt.Native.TransactionProofRef, &response); err != nil || response.State != "unknown" || f.fixture.publisher.calls.Load() != 1 {
+	if err := store.readWorkflowNativeEvidence(id, f.receipt.Receipt.Native.TransactionProofRef, &response); err != nil || response.State != workflowstate.GitPublicationUnknown || f.fixture.publisher.calls.Load() != 1 {
 		t.Fatal("closure rewrote or repeated the lost exchange", err)
 	}
 }

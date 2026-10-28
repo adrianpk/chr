@@ -63,7 +63,7 @@ func nativeGitOutcome(t *testing.T, name, application, state string) {
 	git := NewWorkflowIntegrationGit(f.candidate.Native.SourceRepository, remote)
 
 	retained, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), transport, git)
-	if err != nil || retained.ID != submission.ID || retained.Native.ApplicationState != application || retained.State != state {
+	if err != nil || retained.ID != submission.ID || string(retained.Native.ApplicationState) != application || string(retained.State) != state {
 		t.Fatal("actual refs and prepared history were not classified", err)
 	}
 
@@ -157,7 +157,7 @@ func nativeUnknownExchange(ctx context.Context, request GitPublication, transpor
 		return workflowstate.GitPublicationResult{}, err
 	}
 
-	result := workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "unknown", CommandsSent: true, OriginalSourceCommit: request.Git.SourceCommit, AdvertisedSourceCommit: advertisement.SourceCommit, AdvertisedTargetCommit: advertisement.TargetCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
+	result := workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: workflowstate.GitPublicationUnknown, CommandsSent: true, OriginalSourceCommit: request.Git.SourceCommit, AdvertisedSourceCommit: advertisement.SourceCommit, AdvertisedTargetCommit: advertisement.TargetCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
 
 	return result, context.DeadlineExceeded
 }
@@ -165,20 +165,20 @@ func nativeUnknownExchange(ctx context.Context, request GitPublication, transpor
 func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *nativeDispatchPublisherFixture, remote, name string, result workflowstate.GitPublicationResult, retained workflowstate.Submission) {
 	t.Helper()
 
-	if retained.Native.ReceiptRef != nil || retained.State == "confirmed" {
+	if retained.Native.ReceiptRef != nil || retained.State == workflowstate.SubmissionConfirmed {
 		t.Fatal("Git observation manufactured forge delivery")
 	}
 
 	if name == "lost response" {
 		var response workflowstate.GitPublicationResult
-		if err := f.store.readWorkflowNativeEvidence(retained.InvocationID, *retained.Native.TransportResponseRef, &response); err != nil || response.State != "unknown" || result.State != "unknown" {
+		if err := f.store.readWorkflowNativeEvidence(retained.InvocationID, *retained.Native.TransportResponseRef, &response); err != nil || response.State != workflowstate.GitPublicationUnknown || result.State != workflowstate.GitPublicationUnknown {
 			t.Fatal("observation invented a successful response", err)
 		}
 	}
 
 	checkNativeGitOutcomeRefs(t, f, remote, name)
 
-	if retained.State == "unpublished" {
+	if retained.State == workflowstate.SubmissionUnpublished {
 		guard := nativeBudgetGuard(t, f.store, retained.InvocationID)
 		if _, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher); !errors.Is(err, workflowstate.ErrConflict) || publisher.calls.Load() != 1 {
 			t.Fatal("sealed rejection reused stale authorization", err)

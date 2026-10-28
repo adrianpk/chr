@@ -20,11 +20,11 @@ func (s *Store) stopWorkflowNativeSubmission(ctx context.Context, run *workflowI
 	}
 
 	last := journal.Attempts[len(journal.Attempts)-1]
-	if last.Native == nil || last.State == "unpublished" {
+	if last.Native == nil || last.State == workflowstate.SubmissionUnpublished {
 		return false, nil
 	}
 
-	if last.State == "confirmed" && run.DeliveryRef != "" {
+	if last.State == workflowstate.SubmissionConfirmed && run.DeliveryRef != "" {
 		entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
 		if err != nil {
 			return true, err

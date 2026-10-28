@@ -38,7 +38,7 @@ type nativeObservationReaders struct {
 // forge adapter and independently fetches the canonical target's exact history.
 // It never submits another push, merges/closes a PR, or rolls target history back.
 func ObserveNativePublication(ctx context.Context, binding workflowstate.NativePublicationBinding, adapter NativePullRequests, git NativeGit, proofs NativeProofs) (workflowstate.NativePublicationObservation, error) {
-	observed := workflowstate.NativePublicationObservation{ObservationContract: binding.Capability.ObservationContract, CanonicalPR: binding.PullRequest.URL, State: "observing", OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
+	observed := workflowstate.NativePublicationObservation{ObservationContract: binding.Capability.ObservationContract, CanonicalPR: binding.PullRequest.URL, State: workflowstate.NativeObserving, OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
 	if err := CheckNativeBinding(binding, proofs); err != nil || git == nil {
 		return observed, fmt.Errorf("invalid native observation binding")
 	}
@@ -53,7 +53,7 @@ func ObserveNativePublication(ctx context.Context, binding workflowstate.NativeP
 
 	observed.PullRequest, observed.ObservedSourceCommit = pr, pr.HeadCommit
 	if condition := NativeObservationCondition(binding, pr, proofs); condition != "" {
-		observed.State, observed.Condition = "reconciliation_required", condition
+		observed.State, observed.Condition = workflowstate.NativeReconciliationRequired, condition
 
 		return observed, nil
 	}
@@ -105,7 +105,7 @@ func CheckNativeCapability(capability workflowstate.NativeCapability) error {
 
 func checkNativeResult(binding workflowstate.NativePublicationBinding) error {
 	proof, publication := binding.Git, binding.Publication
-	if !publication.CommandsSent || (publication.State != "applied" && publication.State != "unknown") {
+	if !publication.CommandsSent || (publication.State != workflowstate.GitPublicationApplied && publication.State != workflowstate.GitPublicationUnknown) {
 		return workflowstate.ErrConflict
 	}
 
@@ -116,7 +116,7 @@ func checkNativeResult(binding workflowstate.NativePublicationBinding) error {
 		return workflowstate.ErrConflict
 	}
 
-	if publication.State == "applied" && publication.PublishedSourceCommit != proof.ResultCommit {
+	if publication.State == workflowstate.GitPublicationApplied && publication.PublishedSourceCommit != proof.ResultCommit {
 		return workflowstate.ErrConflict
 	}
 
@@ -178,7 +178,7 @@ func nativeSourceCompatible(binding workflowstate.NativePublicationBinding, pr w
 		return true
 	}
 
-	return workflowstate.ValidCommitID(pr.HeadCommit) && (binding.Publication.State == "applied" || NativeApplicationAttributed(binding, proofs)) && pr.Merged
+	return workflowstate.ValidCommitID(pr.HeadCommit) && (binding.Publication.State == workflowstate.GitPublicationApplied || NativeApplicationAttributed(binding, proofs)) && pr.Merged
 }
 
 // NativeApplicationAttributed requires the exact journaled Git application and complete method proof.
@@ -208,7 +208,7 @@ func verifyNativeObservation(ctx context.Context, binding workflowstate.NativePu
 
 	proof, err := VerifyNativeTarget(ctx, binding, git, proofs)
 	if err != nil {
-		observed.State, observed.Condition = "reconciliation_required", "canonical_target_unverified"
+		observed.State, observed.Condition = workflowstate.NativeReconciliationRequired, "canonical_target_unverified"
 		if nativeReceiptHistoryDiverged(binding, proof, err) {
 			observed.Condition = "canonical_target_history_diverged"
 			observed.ObservedTargetCommit = proof.ObservedTarget
@@ -226,8 +226,8 @@ func verifyNativeObservation(ctx context.Context, binding workflowstate.NativePu
 	}
 
 	observed.ObservedSourceCommit = source
-	if binding.Publication.State == "unknown" && source != binding.Git.ResultCommit && !NativeApplicationAttributed(binding, proofs) {
-		observed.State, observed.Condition = "reconciliation_required", "published_source_unattributed"
+	if binding.Publication.State == workflowstate.GitPublicationUnknown && source != binding.Git.ResultCommit && !NativeApplicationAttributed(binding, proofs) {
+		observed.State, observed.Condition = workflowstate.NativeReconciliationRequired, "published_source_unattributed"
 
 		return observed, nil
 	}
@@ -273,13 +273,13 @@ func VerifyNativeTarget(ctx context.Context, binding workflowstate.NativePublica
 func finishNativeObservation(binding workflowstate.NativePublicationBinding, observed workflowstate.NativePublicationObservation, proofs NativeProofs) workflowstate.NativePublicationObservation {
 	pr := observed.PullRequest
 	if condition := NativeObservationCondition(binding, pr, proofs); condition != "" {
-		observed.State, observed.Condition = "reconciliation_required", condition
+		observed.State, observed.Condition = workflowstate.NativeReconciliationRequired, condition
 
 		return observed
 	}
 
 	if pr.Merged && (pr.ResultCommit == binding.Git.ResultCommit || NativeSourceResultObserved(observed, proofs)) {
-		observed.State = "merged"
+		observed.State = workflowstate.NativeMerged
 		if observed.ObservedSourceCommit != binding.Git.SourceCommit && observed.ObservedSourceCommit != binding.Git.ResultCommit {
 			observed.LaterSourceCommit = observed.ObservedSourceCommit
 		}
@@ -288,7 +288,7 @@ func finishNativeObservation(binding workflowstate.NativePublicationBinding, obs
 	}
 
 	if !binding.ObservationDeadline.IsZero() && !time.Now().Before(binding.ObservationDeadline) {
-		observed.State, observed.Condition = "reconciliation_required", "canonical_pr_observation_deadline"
+		observed.State, observed.Condition = workflowstate.NativeReconciliationRequired, "canonical_pr_observation_deadline"
 	}
 
 	return observed

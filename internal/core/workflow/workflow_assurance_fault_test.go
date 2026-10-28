@@ -58,7 +58,7 @@ func workflowAssuranceLostResponse(t *testing.T, store *Store, progress Continua
 		return 0
 	}
 
-	if progress.Invocation.Submission == nil || progress.Invocation.Submission.State != "awaiting_observation" {
+	if progress.Invocation.Submission == nil || progress.Invocation.Submission.State != workflowstate.SubmissionAwaitingObservation {
 		t.Fatal("a lost response did not retain its uncertain submission", failure)
 	}
 
@@ -76,7 +76,7 @@ func checkWorkflowAssuranceLostProof(t *testing.T, store *Store, submission work
 	t.Helper()
 
 	var response workflowstate.GitPublicationResult
-	if err := store.readWorkflowNativeEvidence(submission.InvocationID, *submission.Native.TransportResponseRef, &response); err != nil || response.State != "unknown" || !response.CommandsSent || response.PublishedSourceCommit != "" {
+	if err := store.readWorkflowNativeEvidence(submission.InvocationID, *submission.Native.TransportResponseRef, &response); err != nil || response.State != workflowstate.GitPublicationUnknown || !response.CommandsSent || response.PublishedSourceCommit != "" {
 		t.Fatal("lost native report was replaced with an applied response", err)
 	}
 }

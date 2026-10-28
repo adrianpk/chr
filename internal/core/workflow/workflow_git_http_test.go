@@ -216,7 +216,7 @@ func checkWorkflowHTTPOutcome(t *testing.T, mode string, result workflowstate.Gi
 func checkWorkflowHTTPStatus(t *testing.T, result workflowstate.GitPublicationResult, err error, posts int64, expectedState string, sent bool) {
 	t.Helper()
 
-	if result.State != expectedState || result.CommandsSent != sent || (posts == 1) != sent || posts > 1 {
+	if string(result.State) != expectedState || result.CommandsSent != sent || (posts == 1) != sent || posts > 1 {
 		t.Fatalf("unexpected HTTP result: %+v, posts=%d, error=%v", result, posts, err)
 	}
 

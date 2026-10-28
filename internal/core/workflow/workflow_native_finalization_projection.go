@@ -11,7 +11,7 @@ import (
 
 func (s *Store) workflowNativeReceiptProjection(run *workflowInvocationFile, entry IntegrationEntry, last workflowstate.Submission) (workflowNativeProjection, error) {
 	projection := workflowNativeProjection{entry: entry}
-	if last.State != "confirmed" || entry.State == "integrated" || entry.State == "blocked" {
+	if last.State != workflowstate.SubmissionConfirmed || entry.State == "integrated" || entry.State == "blocked" {
 		return projection, nil
 	}
 
@@ -37,7 +37,7 @@ func (s *Store) workflowNativeReceiptProjection(run *workflowInvocationFile, ent
 }
 
 func (s *Store) projectWorkflowNativeReceipt(run *workflowInvocationFile, entry *IntegrationEntry, last workflowstate.Submission) ([]workflowstate.FileChange, error) {
-	if last.State != "confirmed" {
+	if last.State != workflowstate.SubmissionConfirmed {
 		return nil, nil
 	}
 
@@ -98,7 +98,7 @@ func (s *Store) workflowNativeDeliveryProof(run workflowInvocationFile, record R
 }
 
 func workflowNativeDeliveryReceiptMatches(run workflowInvocationFile, record Record) bool {
-	if run.Lane == nil || run.PullRequest == nil || run.Submission == nil || run.Submission.State != "confirmed" {
+	if run.Lane == nil || run.PullRequest == nil || run.Submission == nil || run.Submission.State != workflowstate.SubmissionConfirmed {
 		return false
 	}
 

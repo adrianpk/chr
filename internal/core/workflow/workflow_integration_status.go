@@ -317,7 +317,7 @@ func (s *Store) workflowIntegrationClosureStatus(ctx context.Context, snapshot w
 	status.ReceiptsVerified = true
 
 	for _, journal := range snapshot.Journals {
-		if journal.Attempts[len(journal.Attempts)-1].State == "awaiting_observation" {
+		if journal.Attempts[len(journal.Attempts)-1].State == workflowstate.SubmissionAwaitingObservation {
 			status.Blockers = append(status.Blockers, "publication_requires_observation")
 		}
 	}
@@ -384,7 +384,7 @@ func (s *Store) QueryWorkflowPublicationBarriers(ctx context.Context, targetKey 
 
 		for _, journal := range journals {
 			last := journal.Attempts[len(journal.Attempts)-1]
-			if last.State == "awaiting_observation" && (targetKey == "" || journal.TargetKey == targetKey) {
+			if last.State == workflowstate.SubmissionAwaitingObservation && (targetKey == "" || journal.TargetKey == targetKey) {
 				result = append(result, workflowPublicationBarrier(journal, last))
 			}
 		}
