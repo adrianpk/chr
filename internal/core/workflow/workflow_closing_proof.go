@@ -10,6 +10,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowClosingProof struct {
+	Proof            SliceDeliveryProof
+	VerificationHash string
+}
+
 func (s *Store) observeWorkflowClosingTarget(ctx context.Context, request SetClosureRequest, ports FrontierPorts) (workflowstate.PreviewTarget, error) {
 	query := TargetQuery{Repository: request.Repository, Branch: request.Branch, Directory: s.layout.ProjectDir()}
 
@@ -40,10 +45,12 @@ func (s *Store) workflowClosingSliceProof(ctx context.Context, input workflowsta
 		return workflowstate.ClosingSlice{}, err
 	}
 
-	proof, hash, err := s.workflowClosingDeliveryProof(ctx, receipt)
+	observed, err := s.workflowClosingDeliveryProof(ctx, receipt)
 	if err != nil {
 		return workflowstate.ClosingSlice{}, err
 	}
+
+	proof := observed.Proof
 
 	if err := s.workflowClosingSliceMembers(ctx, descriptor, receipt, proof); err != nil {
 		return workflowstate.ClosingSlice{}, err
@@ -61,35 +68,33 @@ func (s *Store) workflowClosingSliceProof(ctx context.Context, input workflowsta
 		return workflowstate.ClosingSlice{}, err
 	}
 
-	return workflowstate.ClosingSlice{ID: descriptor.ID, Order: descriptor.Order, Receipt: workflowstate.ClosingEvidence{Ref: receipt.Path, Hash: receipt.SourceHash}, Verification: workflowstate.ClosingEvidence{Ref: receipt.Receipt.VerificationRef, Hash: hash}, Proof: fresh}, nil
+	return workflowstate.ClosingSlice{ID: descriptor.ID, Order: descriptor.Order, Receipt: workflowstate.ClosingEvidence{Ref: receipt.Path, Hash: receipt.SourceHash}, Verification: workflowstate.ClosingEvidence{Ref: receipt.Receipt.VerificationRef, Hash: observed.VerificationHash}, Proof: fresh}, nil
 }
 
-func (s *Store) workflowClosingDeliveryProof(ctx context.Context, receipt Record) (SliceDeliveryProof, string, error) {
+func (s *Store) workflowClosingDeliveryProof(ctx context.Context, receipt Record) (workflowClosingProof, error) {
 	if receipt.Receipt == nil || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() {
-		return SliceDeliveryProof{}, "", workflowstate.ErrConflict
+		return workflowClosingProof{}, workflowstate.ErrConflict
 	}
 
 	if receipt.Receipt.Native != nil {
-		closingProof, err := s.workflowClosingNativeDeliveryProof(ctx, receipt)
-
-		return closingProof.Proof, closingProof.VerificationHash, err
+		return s.workflowClosingNativeDeliveryProof(ctx, receipt)
 	}
 
 	data, err := s.workflowClosingRead(receipt.Receipt.VerificationRef)
 	if err != nil {
-		return SliceDeliveryProof{}, "", err
+		return workflowClosingProof{}, err
 	}
 
 	var proof SliceDeliveryProof
 	if err := json.Unmarshal(data, &proof); err != nil {
-		return proof, "", err
+		return workflowClosingProof{Proof: proof}, err
 	}
 
 	if proof.Schema != "chr-slice-delivery-proof/v1" || !workflowReceiptMatchesProof(receipt, proof, receipt.Receipt.VerificationRef) {
-		return proof, "", workflowstate.ErrConflict
+		return workflowClosingProof{Proof: proof}, workflowstate.ErrConflict
 	}
 
-	return proof, contenthash.Sum(data), nil
+	return workflowClosingProof{Proof: proof, VerificationHash: contenthash.Sum(data)}, nil
 }
 
 func (s *Store) observeWorkflowClosingSlice(ctx context.Context, input workflowstate.ClosingInput, receipt Record, retained SliceDeliveryProof, ports FrontierPorts) (workflowstate.IntegrationProof, error) {

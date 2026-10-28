@@ -80,11 +80,6 @@ type workflowNativeContinuation struct {
 	Guard IntegrationBudgetGuard
 }
 
-type workflowClosingNativeProof struct {
-	Proof            SliceDeliveryProof
-	VerificationHash string
-}
-
 // The owner and callback snapshot bind inputs observed from the same image.
 // Run and context stay explicit; guarded writes retain their existing Store owner.
 type workflowNativeIntentOwner struct {

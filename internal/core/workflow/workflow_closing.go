@@ -41,9 +41,9 @@ func (s *Store) CloseWorkflowSet(ctx context.Context, request SetClosureRequest,
 
 	admission, cancelAdmission := context.WithTimeout(ctx, 3*time.Minute)
 	err = s.withLock(admission, func() error {
-		var beginErr error
+		begun, beginErr := s.beginWorkflowClosing(admission, request, ports)
 
-		claim, result, beginErr = s.beginWorkflowClosing(admission, request, ports)
+		claim, result = begun.Claim, begun.Result
 
 		return beginErr
 	})

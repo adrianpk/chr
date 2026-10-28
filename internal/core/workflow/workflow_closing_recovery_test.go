@@ -47,9 +47,9 @@ func workflowClosingBeginTest(t *testing.T, fixture workflowIntegrationFixture, 
 	var claim *workflowClosingClaim
 
 	err := fixture.store.withLock(t.Context(), func() error {
-		var err error
+		admission, err := fixture.store.beginWorkflowClosing(t.Context(), request, ports)
 
-		claim, _, err = fixture.store.beginWorkflowClosing(t.Context(), request, ports)
+		claim = admission.Claim
 
 		return err
 	})
@@ -71,7 +71,7 @@ func expireWorkflowClosingTest(t *testing.T, store *Store, claim *workflowClosin
 
 	claim.state.LeaseUntil = time.Now().Add(-time.Second)
 
-	if err := store.withLock(t.Context(), func() error { return store.commitWorkflowClosingState(t.Context(), claim) }); err != nil {
+	if err := store.withLock(t.Context(), func() error { return store.commitWorkflowClosingState(claim) }); err != nil {
 		t.Fatal(err)
 	}
 

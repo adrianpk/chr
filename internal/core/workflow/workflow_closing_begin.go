@@ -13,33 +13,38 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) beginWorkflowClosing(ctx context.Context, request SetClosureRequest, ports FrontierPorts) (claim *workflowClosingClaim, result SetClosureResult, err error) {
+type workflowClosingAdmission struct {
+	Claim  *workflowClosingClaim
+	Result SetClosureResult
+}
+
+func (s *Store) beginWorkflowClosing(ctx context.Context, request SetClosureRequest, ports FrontierPorts) (admission workflowClosingAdmission, err error) {
 	set, err := s.readRecord(request.SetPath)
 	if err != nil {
-		return nil, result, err
+		return admission, err
 	}
 
 	if !s.workflowClosingSetMatches(set, request) {
-		return nil, result, workflowstate.ErrConflict
+		return admission, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowSetAmendmentEvidence(set); err != nil {
-		return nil, result, err
+		return admission, err
 	}
 
 	if set.Set.Status == "completed" {
-		result, err = s.readWorkflowClosedSet(set)
+		admission.Result, err = s.readWorkflowClosedSet(set)
 
-		return nil, result, err
+		return admission, err
 	}
 
 	if err := s.workflowClosingReady(ctx, set, request); err != nil {
-		return nil, result, err
+		return admission, err
 	}
 
 	worker, err := s.reserveWorkflowClosing(ctx, set, request.InvocationID)
 	if err != nil {
-		return nil, result, err
+		return admission, err
 	}
 	defer func() {
 		if err != nil {
@@ -47,14 +52,15 @@ func (s *Store) beginWorkflowClosing(ctx context.Context, request SetClosureRequ
 		}
 	}()
 
-	claim, err = s.prepareWorkflowClosing(ctx, set, request, ports, worker)
+	claim, err := s.prepareWorkflowClosing(ctx, set, request, ports, worker)
 	if err != nil {
-		return nil, result, err
+		return admission, err
 	}
 
-	err = s.commitWorkflowClosingStart(ctx, claim)
+	admission.Claim = claim
+	err = s.commitWorkflowClosingStart(claim)
 
-	return claim, result, err
+	return admission, err
 }
 
 func (s *Store) reserveWorkflowClosing(ctx context.Context, set Record, id string) (*Claim, error) {

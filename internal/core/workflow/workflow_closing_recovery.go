@@ -79,7 +79,7 @@ func (s *Store) reconcileWorkflowClosing(ctx context.Context, set Record, contro
 		return set, err
 	}
 
-	if err := s.commitWorkflowClosingState(ctx, claim, files...); err != nil {
+	if err := s.commitWorkflowClosingState(claim, files...); err != nil {
 		return set, err
 	}
 

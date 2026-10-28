@@ -37,21 +37,6 @@
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/workflow/workflow_closing_begin.go::Store.beginWorkflowClosing",
-      "signature": "func(ctx context.Context, request SetClosureRequest, ports FrontierPorts) (claim *workflowClosingClaim, result SetClosureResult, err error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_closing_command.go::Store.waitWorkflowClosingCommand",
-      "signature": "func(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *opsfile.CommandOutput, base string) (workflowstate.CommandResult, error)",
-      "reason": "Existing above-six workflow debt; assigned to approved Slice 15. Exact current declaration/signature is retained for that workflow task and must be removed or explicitly reconciled there; expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_closing_proof.go::Store.workflowClosingDeliveryProof",
-      "signature": "func(ctx context.Context, receipt Record) (SliceDeliveryProof, string, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/workflow/workflow_continuation_steps.go::Store.continueWorkflowSteps",
       "signature": "func(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts, limit int) (int, string, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."

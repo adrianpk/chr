@@ -64,7 +64,7 @@ func workflowClosingRunFrontier(run workflowInvocationFile, setID string) bool {
 	return run.Lane == nil && run.Submission == nil && run.Cursor == run.ConfirmedCursor && workflowNextClosingSet(run.Invocation) == setID
 }
 
-func (s *Store) workflowClosingInvocationFiles(ctx context.Context, claim *workflowClosingClaim, previous InputImage, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowClosingInvocationFiles(claim *workflowClosingClaim, previous InputImage, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	if claim.state.InvocationID == "" {
 		return files, nil
 	}

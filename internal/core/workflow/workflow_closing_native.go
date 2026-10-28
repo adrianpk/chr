@@ -6,39 +6,39 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowClosingNativeDeliveryProof(ctx context.Context, receipt Record) (workflowClosingNativeProof, error) {
+func (s *Store) workflowClosingNativeDeliveryProof(ctx context.Context, receipt Record) (workflowClosingProof, error) {
 	native := receipt.Receipt.Native
 
 	run, err := s.readWorkflowInvocation(native.InvocationID)
 	if err != nil {
-		return workflowClosingNativeProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowClosingProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	entry, err := s.workflowClosingNativeEntry(run, receipt)
 	if err != nil {
-		return workflowClosingNativeProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowClosingProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	if err := s.checkWorkflowClosingNativeSubmission(ctx, run, entry, receipt); err != nil {
-		return workflowClosingNativeProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowClosingProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	view, err := workflowClosingNativeView(run, receipt)
 	if err != nil {
-		return workflowClosingNativeProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
+		return workflowClosingProof{Proof: SliceDeliveryProof{}, VerificationHash: ""}, err
 	}
 
 	proof, err := s.readWorkflowDeliveryProof(view)
 	if err != nil || proof.NativeReceiptRef == nil || !workflowReceiptMatchesProof(receipt, proof, receipt.Receipt.VerificationRef) {
-		return workflowClosingNativeProof{Proof: proof, VerificationHash: ""}, errorsOrConflict(err)
+		return workflowClosingProof{Proof: proof, VerificationHash: ""}, errorsOrConflict(err)
 	}
 
 	refs := native.ObservationRefs
 	if len(refs) == 0 || refs[len(refs)-1].Path != receipt.Receipt.VerificationRef {
-		return workflowClosingNativeProof{Proof: proof, VerificationHash: ""}, workflowstate.ErrConflict
+		return workflowClosingProof{Proof: proof, VerificationHash: ""}, workflowstate.ErrConflict
 	}
 
-	return workflowClosingNativeProof{Proof: proof, VerificationHash: refs[len(refs)-1].Hash}, nil
+	return workflowClosingProof{Proof: proof, VerificationHash: refs[len(refs)-1].Hash}, nil
 }
 
 func (s *Store) workflowClosingNativeEntry(run workflowInvocationFile, receipt Record) (IntegrationEntry, error) {

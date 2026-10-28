@@ -11,7 +11,6 @@ import (
 	"slices"
 	"time"
 
-	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -53,20 +52,28 @@ func (s *Store) runWorkflowClosingCommand(ctx context.Context, claim *workflowCl
 		return result, errors.Join(err, permit.Close(), process.Wait())
 	}
 
-	return s.waitWorkflowClosingCommand(ctx, claim, command, process, permit, stdout, stderr, base)
+	return s.waitWorkflowClosingCommand(ctx, claim, workflowClosingCommandExecution{Command: command, Process: process, Permit: permit, Output: workflowCommandOutput{Stdout: stdout, Stderr: stderr}, Base: base})
 }
 
-func (s *Store) waitWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, command []string, process *exec.Cmd, permit *os.File, stdout, stderr *opsfile.CommandOutput, base string) (workflowstate.CommandResult, error) {
-	registered, err := s.registerWorkflowClosingProcess(ctx, claim, command, process.Process.Pid, base)
+type workflowClosingCommandExecution struct {
+	Command []string
+	Process *exec.Cmd
+	Permit  *os.File
+	Output  workflowCommandOutput
+	Base    string
+}
+
+func (s *Store) waitWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, execution workflowClosingCommandExecution) (workflowstate.CommandResult, error) {
+	registered, err := s.registerWorkflowClosingProcess(ctx, claim, execution.Command, execution.Process.Process.Pid, execution.Base)
 	if err == nil {
-		_, err = fmt.Fprintln(permit, "run")
+		_, err = fmt.Fprintln(execution.Permit, "run")
 	}
 
-	err = errors.Join(err, permit.Close(), process.Wait())
+	err = errors.Join(err, execution.Permit.Close(), execution.Process.Wait())
 
-	result := workflowstate.CommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.Buffer.String(), Stderr: stderr.Buffer.String(), Truncated: stdout.Truncated || stderr.Truncated}
-	if process.ProcessState != nil {
-		result.ExitCode = process.ProcessState.ExitCode()
+	result := workflowstate.CommandResult{Command: slices.Clone(execution.Command), ExitCode: -1, Stdout: execution.Output.Stdout.Buffer.String(), Stderr: execution.Output.Stderr.Buffer.String(), Truncated: execution.Output.Stdout.Truncated || execution.Output.Stderr.Truncated}
+	if execution.Process.ProcessState != nil {
+		result.ExitCode = execution.Process.ProcessState.ExitCode()
 	}
 
 	if registered.State != "" {
@@ -97,7 +104,7 @@ func (s *Store) registerWorkflowClosingProcess(ctx context.Context, claim *workf
 		registered = Process{CapacitySlot: workflowWorkerSlotNumber(claim.worker.reservation.Name()), Identity: identity, GroupID: pid, Command: slices.Clone(command), State: ProcessRunning, StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
 
 		claim.state.Processes = append(claim.state.Processes, registered)
-		if err := s.commitWorkflowClosingState(ctx, claim); err != nil {
+		if err := s.commitWorkflowClosingState(claim); err != nil {
 			return err
 		}
 
@@ -128,6 +135,6 @@ func (s *Store) finishWorkflowClosingProcess(ctx context.Context, claim *workflo
 			return err
 		}
 
-		return s.commitWorkflowClosingState(ctx, claim)
+		return s.commitWorkflowClosingState(claim)
 	})
 }

@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) commitWorkflowClosingStart(ctx context.Context, claim *workflowClosingClaim) error {
+func (s *Store) commitWorkflowClosingStart(claim *workflowClosingClaim) error {
 	if claim.set.Set.Closing == nil {
 		claim.set.Set.Closing = &workflowstate.WorkflowClosingBinding{}
 	}
@@ -17,10 +17,10 @@ func (s *Store) commitWorkflowClosingStart(ctx context.Context, claim *workflowC
 	claim.set.Set.Closing.Attempts = append(claim.set.Set.Closing.Attempts, workflowstate.ClosingEvidence{})
 	claim.set.Set.Status = "closing"
 
-	return s.commitWorkflowClosingState(ctx, claim, workflowstate.FileChange{Path: claim.state.Input.Ref, After: claim.data})
+	return s.commitWorkflowClosingState(claim, workflowstate.FileChange{Path: claim.state.Input.Ref, After: claim.data})
 }
 
-func (s *Store) commitWorkflowClosingState(ctx context.Context, claim *workflowClosingClaim, extra ...workflowstate.FileChange) error {
+func (s *Store) commitWorkflowClosingState(claim *workflowClosingClaim, extra ...workflowstate.FileChange) error {
 	previous := InputImage{Path: claim.set.Path, Revision: claim.set.Revision, SourceHash: claim.set.SourceHash}
 	index := claim.state.Generation - 1
 	binding := &claim.set.Set.Closing.Attempts[index]
@@ -45,7 +45,7 @@ func (s *Store) commitWorkflowClosingState(ctx context.Context, claim *workflowC
 	files = append(files, stateFile)
 	files = append(files, extra...)
 
-	files, err = s.workflowClosingInvocationFiles(ctx, claim, previous, files)
+	files, err = s.workflowClosingInvocationFiles(claim, previous, files)
 	if err != nil {
 		return err
 	}

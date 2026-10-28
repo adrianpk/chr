@@ -361,12 +361,12 @@ func (s *Store) checkWorkflowIntegrationSetReceipts(ctx context.Context, set Rec
 			return err
 		}
 
-		proof, _, err := s.workflowClosingDeliveryProof(ctx, receipt)
+		observed, err := s.workflowClosingDeliveryProof(ctx, receipt)
 		if err != nil {
 			return err
 		}
 
-		if err := s.workflowClosingSliceMembers(ctx, descriptor, receipt, proof); err != nil {
+		if err := s.workflowClosingSliceMembers(ctx, descriptor, receipt, observed.Proof); err != nil {
 			return err
 		}
 	}

@@ -40,7 +40,7 @@ func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosin
 		claim.set.Set.Status, claim.set.Set.ClosureRef = "completed", claim.state.Result.Ref
 	}
 
-	if err := s.commitWorkflowClosingState(ctx, claim, workflowstate.FileChange{Path: claim.state.Result.Ref, After: data}); err != nil {
+	if err := s.commitWorkflowClosingState(claim, workflowstate.FileChange{Path: claim.state.Result.Ref, After: data}); err != nil {
 		return SetClosureResult{}, errors.Join(failure, err)
 	}
 
