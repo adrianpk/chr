@@ -29,7 +29,7 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 			continue
 		}
 
-		if err := reader.verifyMergerTreeRepair(ctx, repair, original, parent, source, tree, baseline.conflicts); err != nil {
+		if err := reader.verifyMergerTreeRepair(ctx, repair, workflowMergerRepairPosition{OriginalParent: original, PreparedParent: parent, Source: source, BaselineTree: tree}, baseline.conflicts); err != nil {
 			return "", err
 		}
 
@@ -43,12 +43,14 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 	return tree, nil
 }
 
-func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair workflowstate.IntegrationTreeRepair, original, parent, source, tree string, conflicts []string) error {
-	if err := validateWorkflowRepairPosition(repair, original, parent, source, tree); err != nil {
+func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair workflowstate.IntegrationTreeRepair, position workflowMergerRepairPosition, conflicts []string) error {
+	tree := position.BaselineTree
+
+	if err := validateWorkflowRepairPosition(repair, position); err != nil {
 		return err
 	}
 
-	if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, tree, repair.ResolvedTree, true); err != nil {
+	if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, workflowMergerPathCheck{Before: tree, After: repair.ResolvedTree, Mode: workflowMergerExactPaths}); err != nil {
 		return err
 	}
 

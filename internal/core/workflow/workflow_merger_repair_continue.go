@@ -24,7 +24,7 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 		return state, workflowstate.ErrConflict
 	}
 
-	if err := reader.verifyMergerTreeRepair(ctx, repair, state.OriginalParent, state.PreparedParent, state.CurrentSource, state.Tree, state.Conflicts); err != nil {
+	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowMergerRepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
 		return state, err
 	}
 

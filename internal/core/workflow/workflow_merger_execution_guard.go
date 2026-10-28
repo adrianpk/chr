@@ -26,7 +26,8 @@ func checkWorkflowMergerRemote(ctx context.Context, provider PullRequestProvider
 	return nil
 }
 
-func (s *Store) checkWorkflowMergerPrepared(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider) error {
+func (s *Store) checkWorkflowMergerPrepared(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider) error {
+	claim, prepared := claimed.Claim, claimed.Prepared
 	if err := checkWorkflowMergerRemote(ctx, provider, *prepared.input.Merger); err != nil {
 		return err
 	}
@@ -36,7 +37,7 @@ func (s *Store) checkWorkflowMergerPrepared(ctx context.Context, claim *Claim, p
 	}
 
 	return s.withLock(ctx, func() error {
-		if err := s.checkWorkflowMergerOwned(ctx, claim, prepared); err != nil {
+		if err := s.checkWorkflowMergerOwned(ctx, claimed); err != nil {
 			return err
 		}
 
@@ -54,7 +55,9 @@ func (s *Store) checkWorkflowMergerPrepared(ctx context.Context, claim *Claim, p
 	})
 }
 
-func (s *Store) checkWorkflowMergerOwned(ctx context.Context, claim *Claim, prepared workflowPreparedTask) error {
+func (s *Store) checkWorkflowMergerOwned(ctx context.Context, claimed workflowClaimedMerger) error {
+	claim, prepared := claimed.Claim, claimed.Prepared
+
 	claimObservation2, err := s.checkWorkflowClaim(ctx, claim)
 	if err != nil {
 		return err

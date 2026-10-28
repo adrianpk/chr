@@ -79,7 +79,9 @@ func (reader workflowIntegrationReader) mergerDiffPaths(ctx context.Context, bef
 	return workflowMergerChangedPaths(data)
 }
 
-func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Context, input workflowstate.MergerInput, proposal workflowstate.MergerResult, before, after string, exact bool) error {
+func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Context, input workflowstate.MergerInput, proposal workflowstate.MergerResult, check workflowMergerPathCheck) error {
+	before, after := check.Before, check.After
+
 	paths, err := reader.mergerDiffPaths(ctx, before, after)
 	if err != nil {
 		return err
@@ -88,7 +90,7 @@ func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Con
 	declared := slices.Clone(proposal.ChangedPaths)
 	slices.Sort(declared)
 
-	if exact && !slices.Equal(paths, declared) {
+	if check.Mode == workflowMergerExactPaths && !slices.Equal(paths, declared) {
 		return workflowstate.ErrConflict
 	}
 

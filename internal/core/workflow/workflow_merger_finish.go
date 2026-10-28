@@ -10,8 +10,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) finishWorkflowMerger(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, attempt *MergerAttempt, executionErr error) error {
-	freshErr := s.checkWorkflowMergerPrepared(ctx, claim, prepared, provider)
+func (s *Store) finishWorkflowMerger(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, attempt *MergerAttempt, executionErr error) error {
+	claim, prepared := claimed.Claim, claimed.Prepared
+	freshErr := s.checkWorkflowMergerPrepared(ctx, claimed, provider)
 
 	return s.withLock(ctx, func() error {
 		claimObservation, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)

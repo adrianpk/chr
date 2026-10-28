@@ -11,18 +11,21 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowMergerAdmission(ctx context.Context, run workflowInvocationFile, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (IntegrationEntry, IntegrationBudget, string, error) {
+func (s *Store) workflowMergerAdmission(ctx context.Context, run workflowInvocationFile, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (workflowMergerAdmissionResult, error) {
 	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	admission := workflowMergerAdmissionResult{Run: run, Entry: entry, Budget: budget}
+
 	if err != nil {
-		return entry, budget, "", err
+		return admission, err
 	}
 
 	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.IntegrationBudgetGuard); err != nil {
-		return entry, budget, "", err
+		return admission, err
 	}
 
-	if err := s.checkWorkflowMergerAdmissionInputs(ctx, run, entry, budget, request.Input, harness, provider); err != nil {
-		return entry, budget, "", err
+	if err := s.checkWorkflowMergerAdmissionInputs(ctx, admission, request.Input, harness, provider); err != nil {
+		return admission, err
 	}
 
 	seed, err := s.workflowMergerSeed(ctx, run, entry, request.Input)
@@ -30,10 +33,14 @@ func (s *Store) workflowMergerAdmission(ctx context.Context, run workflowInvocat
 		_, err = s.readWorkflowMergerCheckpoint(request.Input)
 	}
 
-	return entry, budget, seed, err
+	admission.Seed = seed
+
+	return admission, err
 }
 
-func (s *Store) checkWorkflowMergerAdmissionInputs(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, input workflowstate.MergerInput, harness MergerHarness, provider PullRequestProvider) error {
+func (s *Store) checkWorkflowMergerAdmissionInputs(ctx context.Context, admission workflowMergerAdmissionResult, input workflowstate.MergerInput, harness MergerHarness, provider PullRequestProvider) error {
+	run, entry, budget := admission.Run, admission.Entry, admission.Budget
+
 	if !workflowMergerRunnable(run, entry) {
 		return ErrWorkflowOwned
 	}

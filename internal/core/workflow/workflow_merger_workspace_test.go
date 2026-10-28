@@ -26,10 +26,12 @@ func TestNativeMergerWorkspace(t *testing.T) {
 			input.OwnedWorkspaceID = workflowMergerWorkspaceID(input)
 			before := workflowIntegrationCommand(t, dir, "status", "--porcelain")
 
-			lane, _, err := store.workflowMergerWorkspace(t.Context(), input, seed)
+			workspace, err := store.workflowMergerWorkspace(t.Context(), input, seed)
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			lane := workspace.Lane
 
 			if workflowIntegrationCommand(t, lane.Worktree, "rev-parse", "HEAD") != seed || workflowIntegrationCommand(t, lane.Worktree, "remote") != "" {
 				t.Fatal("private checkout changed object format or acquired a remote")

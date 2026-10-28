@@ -8,10 +8,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) prepareWorkflowMerger(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (claim *Claim, prepared workflowPreparedTask, err error) {
+func (s *Store) prepareWorkflowMerger(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (claimed workflowClaimedMerger, err error) {
 	request, err = freezeWorkflowMergerRequest(request)
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedMerger{}, err
 	}
 
 	err = s.withLock(ctx, func() error {
@@ -20,27 +20,29 @@ func (s *Store) prepareWorkflowMerger(ctx context.Context, request MergerRequest
 			return readErr
 		}
 
-		entry, budget, seed, readErr := invocationLocation.Owner.workflowMergerAdmission(ctx, invocationLocation.Run, request, harness, provider)
+		admission, readErr := invocationLocation.Owner.workflowMergerAdmission(ctx, invocationLocation.Run, request, harness, provider)
 		if readErr != nil {
 			return readErr
 		}
 
-		claim, prepared, readErr = invocationLocation.Owner.claimWorkflowMerger(ctx, invocationLocation.Run, entry, budget, request.Input, harness, seed)
+		claimed, readErr = invocationLocation.Owner.claimWorkflowMerger(ctx, admission, request.Input, harness)
 
 		return readErr
 	})
 
-	return claim, prepared, err
+	return claimed, err
 }
 
-func (s *Store) claimWorkflowMerger(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, input workflowstate.MergerInput, harness MergerHarness, seed string) (claim *Claim, prepared workflowPreparedTask, err error) {
+func (s *Store) claimWorkflowMerger(ctx context.Context, admission workflowMergerAdmissionResult, input workflowstate.MergerInput, harness MergerHarness) (claimed workflowClaimedMerger, err error) {
+	run, entry, budget, seed := admission.Run, admission.Entry, admission.Budget, admission.Seed
+
 	if err := checkWorkflowIntegrationCounterCharge(budget, IntegrationReservation{Kind: "agent_call", Role: "merger", Unit: entry.Unit}, "merger"); err != nil {
-		return nil, prepared, err
+		return workflowClaimedMerger{}, err
 	}
 
-	claim, err = s.reserveWorkflowRole(ctx, run, workflowMergerPurpose)
+	claim, err := s.reserveWorkflowRole(ctx, run, workflowMergerPurpose)
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedMerger{}, err
 	}
 
 	owned := claim
@@ -53,29 +55,33 @@ func (s *Store) claimWorkflowMerger(ctx context.Context, run workflowInvocationF
 
 	claim.Token, err = newWorkflowClaimToken()
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedMerger{}, err
 	}
 
-	lane, root, err := s.workflowMergerWorkspace(ctx, input, seed)
+	workspace, err := s.workflowMergerWorkspace(ctx, input, seed)
+
+	lane := workspace.Lane
 	if err == nil && input.RepairCheckpointRef != nil {
 		lane, err = s.seedWorkflowMergerCheckpoint(ctx, input, lane)
 	}
 
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedMerger{}, err
 	}
 
 	observation, err := s.observeWorkflowSlice(ctx, run)
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedMerger{}, err
 	}
 
 	record := observation.tasks[len(observation.tasks)-1]
 	if err := s.beginWorkflowAttempt(&run, &record, claim); err != nil {
-		return nil, prepared, err
+		return workflowClaimedMerger{}, err
 	}
 
-	return s.persistWorkflowMergerClaim(ctx, run, record, claim, budget, input, harness, lane, root)
+	workspace.Lane = lane
+
+	return s.persistWorkflowMergerClaim(ctx, claim, workflowMergerClaimInput{Observation: workflowClaimObservation{Run: run, Record: record}, Budget: budget, Input: input, Harness: harness, Workspace: workspace})
 }
 
 func workflowMergerReservation(run *workflowInvocationFile, budget IntegrationBudget, input *workflowstate.MergerInput, claim *Claim) (IntegrationReservation, error) {

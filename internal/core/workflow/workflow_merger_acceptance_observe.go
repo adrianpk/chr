@@ -10,7 +10,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, state MergerRepairState, attempt *MergerAttempt) (workflowstate.IntegrationTreeRepair, error) {
+func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, state MergerRepairState, attempt *MergerAttempt) (workflowstate.IntegrationTreeRepair, error) {
+	prepared := claimed.Prepared
 	input, proposal := attempt.Input, *attempt.Proposal
 	repair := workflowstate.IntegrationTreeRepair{Input: input, Proposal: proposal, OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: prepared.input.Lane.Worktree, Environment: workflowMergerEnvironment(filepath.Dir(prepared.input.Lane.Worktree))}}
@@ -21,7 +22,7 @@ func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, p
 	}
 
 	repair.ProposalTree, repair.ResolvedTree = tree, tree
-	if err := reader.checkMergerObservedPaths(ctx, input, proposal, state.Tree, tree, false); err != nil {
+	if err := reader.checkMergerObservedPaths(ctx, input, proposal, workflowMergerPathCheck{Before: state.Tree, After: tree, Mode: workflowMergerDeclaredPaths}); err != nil {
 		return repair, err
 	}
 
@@ -33,7 +34,7 @@ func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, p
 		return repair, err
 	}
 
-	evidence, err := s.regenerateWorkflowMerger(ctx, claim, prepared, provider, reader, state, repair)
+	evidence, err := s.regenerateWorkflowMerger(ctx, claimed, provider, reader, workflowMergerRepairInput{State: state, Repair: repair})
 
 	repair.Regeneration = evidence
 	if err != nil {
@@ -45,11 +46,11 @@ func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, p
 	}
 
 	repair.CompletedAt = time.Now().UTC()
-	if err := reader.checkMergerObservedPaths(ctx, input, proposal, state.Tree, repair.ResolvedTree, true); err != nil {
+	if err := reader.checkMergerObservedPaths(ctx, input, proposal, workflowMergerPathCheck{Before: state.Tree, After: repair.ResolvedTree, Mode: workflowMergerExactPaths}); err != nil {
 		return repair, err
 	}
 
-	if err := reader.verifyMergerTreeRepair(ctx, repair, state.OriginalParent, state.PreparedParent, state.CurrentSource, state.Tree, state.Conflicts); err != nil {
+	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowMergerRepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
 		return repair, err
 	}
 

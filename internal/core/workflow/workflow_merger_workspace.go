@@ -16,24 +16,24 @@ func workflowMergerWorkspaceID(input workflowstate.MergerInput) string {
 	return contenthash.Sum([]byte(input.InvocationID + "\x00" + input.EntryID + "\x00" + input.ID))
 }
 
-func (s *Store) workflowMergerWorkspace(ctx context.Context, input workflowstate.MergerInput, seed string) (workflowstate.Lane, string, error) {
+func (s *Store) workflowMergerWorkspace(ctx context.Context, input workflowstate.MergerInput, seed string) (workflowMergerWorkspace, error) {
 	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
-		return workflowstate.Lane{}, "", err
+		return workflowMergerWorkspace{}, err
 	}
 
 	parent := filepath.Join(common, "chr-merger-workspaces")
 	if err := os.MkdirAll(parent, 0o700); err != nil {
-		return workflowstate.Lane{}, "", err
+		return workflowMergerWorkspace{}, err
 	}
 
 	if resolved, err := filepath.EvalSymlinks(parent); err != nil || resolved != parent {
-		return workflowstate.Lane{}, "", workflowstate.ErrConflict
+		return workflowMergerWorkspace{}, workflowstate.ErrConflict
 	}
 
 	root := filepath.Join(parent, workflowMergerWorkspaceID(input))
 	if err := os.Mkdir(root, 0o700); err != nil {
-		return workflowstate.Lane{}, "", errors.Join(workflowstate.ErrConflict, err)
+		return workflowMergerWorkspace{}, errors.Join(workflowstate.ErrConflict, err)
 	}
 
 	// A private repository has no credential helpers, remotes, hooks or shared
@@ -51,11 +51,11 @@ func (s *Store) workflowMergerWorkspace(ctx context.Context, input workflowstate
 
 		command.Env = workflowMergerEnvironment(root)
 		if err := command.Run(); err != nil {
-			return workflowstate.Lane{}, "", err
+			return workflowMergerWorkspace{}, err
 		}
 	}
 
-	return workflowstate.Lane{Unit: input.Unit, Branch: "refs/heads/chr/workflow/merger/" + input.OwnedWorkspaceID, Worktree: worktree, BaseCommit: seed, HeadCommit: seed}, root, nil
+	return workflowMergerWorkspace{Lane: workflowstate.Lane{Unit: input.Unit, Branch: "refs/heads/chr/workflow/merger/" + input.OwnedWorkspaceID, Worktree: worktree, BaseCommit: seed, HeadCommit: seed}, Root: root}, nil
 }
 
 func workflowMergerEnvironment(root string) []string {

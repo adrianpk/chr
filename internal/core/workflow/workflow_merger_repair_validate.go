@@ -95,7 +95,9 @@ func validWorkflowRegenerationEvidence(conflict workflowstate.MergerConflict, ev
 	return evidence.Command.ExitCode == 0 && evidence.Validation.ExitCode == 0 && workflowstate.ValidCommitID(evidence.InputTree) && workflowstate.ValidCommitID(evidence.OutputTree) && evidence.OutputTree == tree && !evidence.Command.Truncated && !evidence.Validation.Truncated
 }
 
-func validateWorkflowRepairPosition(repair workflowstate.IntegrationTreeRepair, original, parent, source, tree string) error {
+func validateWorkflowRepairPosition(repair workflowstate.IntegrationTreeRepair, position workflowMergerRepairPosition) error {
+	original, parent, source, tree := position.OriginalParent, position.PreparedParent, position.Source, position.BaselineTree
+
 	if repair.OriginalParent != original || repair.PreparedParent != parent || repair.Source != source || repair.BaselineTree != tree {
 		return workflowstate.ErrConflict
 	}

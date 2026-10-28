@@ -43,7 +43,8 @@ func (s *Store) ExecuteWorkflowMergerRepair(ctx context.Context, request MergerR
 	return s.executeWorkflowMerger(ctx, request, harness, provider, git)
 }
 
-func (s *Store) acceptWorkflowMerger(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, git MergerRepairGit, attempt *MergerAttempt) (err error) {
+func (s *Store) acceptWorkflowMerger(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, git MergerRepairGit, attempt *MergerAttempt) (err error) {
+	claim := claimed.Claim
 	acceptance := &MergerAcceptance{SchemaVersion: 1, AttemptID: claim.AttemptID, InputHash: attempt.Input.InputHash, CheckpointRef: *attempt.Input.RepairCheckpointRef, Outcome: "rejected", CheckedAt: time.Now().UTC()}
 
 	attempt.Acceptance = acceptance
@@ -58,7 +59,7 @@ func (s *Store) acceptWorkflowMerger(ctx context.Context, claim *Claim, prepared
 		return nil
 	}
 
-	if err := s.guardWorkflowMergerAcceptance(ctx, claim, prepared, provider); err != nil {
+	if err := s.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
 		return err
 	}
 
@@ -71,22 +72,25 @@ func (s *Store) acceptWorkflowMerger(ctx context.Context, claim *Claim, prepared
 		return err
 	}
 
-	repair, err := s.observeWorkflowMergerRepair(ctx, claim, prepared, provider, state, attempt)
+	repair, err := s.observeWorkflowMergerRepair(ctx, claimed, provider, state, attempt)
 	acceptance.Repair = &repair
 
 	if err != nil {
 		return err
 	}
 
-	return s.commitWorkflowMergerRepair(ctx, claim, prepared, provider, git, state, repair, acceptance)
+	return s.commitWorkflowMergerRepair(ctx, claimed, provider, git, workflowMergerRepairCommit{State: state, Repair: repair, Acceptance: acceptance})
 }
 
-func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, git MergerRepairGit, state MergerRepairState, repair workflowstate.IntegrationTreeRepair, acceptance *MergerAcceptance) error {
+func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, git MergerRepairGit, commit workflowMergerRepairCommit) error {
+	state, repair, acceptance := commit.State, commit.Repair, commit.Acceptance
+
+	prepared := claimed.Prepared
 	if err := importWorkflowMergerRepairTrees(ctx, git, state, prepared.input.Lane.Worktree, repair); err != nil {
 		return err
 	}
 
-	if err := s.guardWorkflowMergerAcceptance(ctx, claim, prepared, provider); err != nil {
+	if err := s.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
 		return err
 	}
 
@@ -97,7 +101,7 @@ func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claim *Claim, pr
 
 	acceptance.Next = &next
 
-	if err := s.guardWorkflowMergerAcceptance(ctx, claim, prepared, provider); err != nil {
+	if err := s.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
 		return err
 	}
 
@@ -106,8 +110,9 @@ func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claim *Claim, pr
 	return nil
 }
 
-func (s *Store) guardWorkflowMergerAcceptance(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider) error {
-	if err := s.checkWorkflowMergerPrepared(ctx, claim, prepared, provider); err != nil {
+func (s *Store) guardWorkflowMergerAcceptance(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider) error {
+	claim, prepared := claimed.Claim, claimed.Prepared
+	if err := s.checkWorkflowMergerPrepared(ctx, claimed, provider); err != nil {
 		return err
 	}
 

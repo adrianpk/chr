@@ -20,10 +20,12 @@ func (s *Store) ExecuteWorkflowMerger(ctx context.Context, request MergerRequest
 func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider, git MergerRepairGit) (attempt MergerAttempt, err error) {
 	harness.Command = slices.Clone(harness.Command)
 
-	claim, prepared, err := s.prepareWorkflowMerger(ctx, request, harness, provider)
+	claimed, err := s.prepareWorkflowMerger(ctx, request, harness, provider)
 	if err != nil {
 		return attempt, err
 	}
+
+	claim, prepared := claimed.Claim, claimed.Prepared
 	defer func() { err = errors.Join(err, closeWorkflowSliceCapacity(claim)) }()
 
 	if err := beginWorkflowClaimExecution(claim); err != nil {
@@ -41,7 +43,7 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 
 	harness = MergerHarness{Command: prepared.input.Worker, Certificate: *prepared.input.MergerHarnessRef}
 	attempt = MergerAttempt{SchemaVersion: 1, Input: *prepared.input.Merger, HarnessRef: harness.Certificate}
-	result := s.runWorkflowMerger(deadline, claim, prepared, provider, harness)
+	result := s.runWorkflowMerger(deadline, claimed, provider, harness)
 	attempt.Harness, attempt.TrustedUsage = result.command, result.usage
 
 	attempt.Checks = result.checks
@@ -55,7 +57,7 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 	}
 
 	if result.err == nil && git != nil {
-		result.err = s.acceptWorkflowMerger(deadline, claim, prepared, provider, git, &attempt)
+		result.err = s.acceptWorkflowMerger(deadline, claimed, provider, git, &attempt)
 	}
 
 	if result.err != nil {
@@ -65,13 +67,14 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finish()
 
-	err = s.finishWorkflowMerger(cleanup, claim, prepared, provider, &attempt, result.err)
+	err = s.finishWorkflowMerger(cleanup, claimed, provider, &attempt, result.err)
 
 	return attempt, errors.Join(result.err, err)
 }
 
-func (s *Store) runWorkflowMerger(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, harness MergerHarness) workflowMergerDriverResult {
-	if err := s.checkWorkflowMergerPrepared(ctx, claim, prepared, provider); err != nil {
+func (s *Store) runWorkflowMerger(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, harness MergerHarness) workflowMergerDriverResult {
+	claim, prepared := claimed.Claim, claimed.Prepared
+	if err := s.checkWorkflowMergerPrepared(ctx, claimed, provider); err != nil {
 		return workflowMergerDriverResult{err: fmt.Errorf("merger execution admission: %w", err)}
 	}
 
@@ -96,7 +99,9 @@ func (s *Store) runWorkflowMerger(ctx context.Context, claim *Claim, prepared wo
 	}
 	defer func() { _ = root.Close() }() //nolint:errcheck
 
-	tools := workflowmerge.NewTools(*prepared.input.Merger, root, func(ctx context.Context) error { return s.checkWorkflowMergerPrepared(ctx, claim, prepared, provider) })
+	tools := workflowmerge.NewTools(*prepared.input.Merger, root, func(ctx context.Context) error {
+		return s.checkWorkflowMergerPrepared(ctx, claimed, provider)
+	})
 	result := runWorkflowMergerDriver(ctx, workflowMergerDriverInput{Claim: claim, Prepared: prepared, Tools: tools, Call: call})
 
 	result.checks = tools.Checks()

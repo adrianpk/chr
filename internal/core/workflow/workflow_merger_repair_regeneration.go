@@ -26,7 +26,7 @@ func importWorkflowMergerRepairTrees(ctx context.Context, git MergerRepairGit, s
 
 func (reader workflowIntegrationReader) verifyMergerRegenerationTrees(ctx context.Context, repair workflowstate.IntegrationTreeRepair) error {
 	if repair.ProposalTree != "" {
-		if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, repair.BaselineTree, repair.ProposalTree, false); err != nil {
+		if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, workflowMergerPathCheck{Before: repair.BaselineTree, After: repair.ProposalTree, Mode: workflowMergerDeclaredPaths}); err != nil {
 			return err
 		}
 
@@ -36,7 +36,7 @@ func (reader workflowIntegrationReader) verifyMergerRegenerationTrees(ctx contex
 	}
 
 	for _, evidence := range repair.Regeneration {
-		if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, evidence.InputTree, evidence.OutputTree, false); err != nil {
+		if err := reader.checkMergerObservedPaths(ctx, repair.Input, repair.Proposal, workflowMergerPathCheck{Before: evidence.InputTree, After: evidence.OutputTree, Mode: workflowMergerDeclaredPaths}); err != nil {
 			return err
 		}
 	}
