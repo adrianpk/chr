@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -32,7 +33,7 @@ func (s *Store) checkWorkflowNativeDispatchGuard(ctx context.Context, run workfl
 		return workflowstate.PublicationGuard{}, err
 	}
 
-	hash, err := workflowReviewInputHash(input)
+	hash, err := workflowreview.WorkflowReviewInputHash(input)
 	if err != nil || hash != run.Review.InputHash {
 		return workflowstate.PublicationGuard{}, workflowstate.ErrConflict
 	}

@@ -2,11 +2,10 @@ package workflow
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"slices"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
@@ -47,13 +46,5 @@ func parseWorkflowReviewPolicy(data []byte) (workflowstate.ReviewPolicy, error) 
 	value := workspaceconfig.WorkflowValue(config, "review.mode", string(config.Review.Mode))
 	policy := workflowstate.ReviewPolicy{Mode: config.Review.Mode, Method: config.Work.MergeStrategy, Source: value.Source, Revision: config.Revision()}
 
-	return policy, validateWorkflowReviewPolicy(policy)
-}
-
-func validateWorkflowReviewPolicy(policy workflowstate.ReviewPolicy) error {
-	if !workflowstate.IntegrationCycleMode(policy.Mode).Valid() || !slices.Contains([]string{"merge", "rebase", "squash"}, policy.Method) || !slices.Contains([]string{"legacy_default", "version_default", "project", "invocation_restriction"}, policy.Source) || len(policy.Revision) != 64 {
-		return fmt.Errorf("invalid current workflow review policy")
-	}
-
-	return nil
+	return policy, workflowreview.ValidateWorkflowReviewPolicy(policy)
 }

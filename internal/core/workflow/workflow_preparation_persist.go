@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -92,7 +93,7 @@ func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate 
 		return workflowstate.ErrConflict
 	}
 
-	hash, err := workflowReviewInputHash(candidate.Input.Source)
+	hash, err := workflowreview.WorkflowReviewInputHash(candidate.Input.Source)
 	if err != nil || hash != b.SourceHash {
 		return workflowstate.ErrConflict
 	}

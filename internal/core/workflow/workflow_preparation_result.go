@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -47,7 +48,7 @@ func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflow
 		return err
 	}
 
-	if err := checkWorkflowReviewInputHash(source, run.Preparation.SourceHash); err != nil {
+	if err := workflowreview.CheckWorkflowReviewInputHash(source, run.Preparation.SourceHash); err != nil {
 		return err
 	}
 

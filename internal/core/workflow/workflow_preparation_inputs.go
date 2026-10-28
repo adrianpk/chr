@@ -7,6 +7,7 @@ import (
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -71,7 +72,7 @@ func (s *Store) currentWorkflowPreparation(ctx context.Context, run workflowInvo
 		return candidate, err
 	}
 
-	hash, err := workflowReviewInputHash(source)
+	hash, err := workflowreview.WorkflowReviewInputHash(source)
 	if err != nil || hash != run.Preparation.SourceHash {
 		return candidate, fmt.Errorf("%w: prepared source, base or current policy changed", workflowstate.ErrConflict)
 	}

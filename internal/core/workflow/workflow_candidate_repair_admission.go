@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -62,7 +63,7 @@ func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run w
 
 func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider) error {
 	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
-	if err != nil || checkWorkflowReviewInputHash(source, run.Preparation.SourceHash) != nil {
+	if err != nil || workflowreview.CheckWorkflowReviewInputHash(source, run.Preparation.SourceHash) != nil {
 		return errorsOrConflict(err)
 	}
 
@@ -72,7 +73,7 @@ func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run wor
 	}
 
 	_, source, err = s.workflowReviewSourceInputs(ctx, run, provider)
-	if err != nil || checkWorkflowReviewInputHash(source, run.Preparation.SourceHash) != nil {
+	if err != nil || workflowreview.CheckWorkflowReviewInputHash(source, run.Preparation.SourceHash) != nil {
 		return errorsOrConflict(err)
 	}
 

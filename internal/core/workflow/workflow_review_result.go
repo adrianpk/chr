@@ -3,9 +3,9 @@ package workflow
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -46,14 +46,14 @@ func (s *Store) acceptWorkflowReview(ctx context.Context, claim *Claim, run work
 
 	observation, input, err := s.workflowReviewInputs(ctx, run, provider)
 	if err == nil {
-		err = checkWorkflowReviewInputHash(input, run.Review.InputHash)
+		err = workflowreview.CheckWorkflowReviewInputHash(input, run.Review.InputHash)
 	}
 
 	if failure := errors.Join(executionErr, err); failure != nil {
 		return workflowstate.ReviewBinding{}, s.checkpointFailedWorkflowReview(claim, run, record, failure)
 	}
 
-	state := workflowReviewDecisionState(decision.Result.Decision)
+	state := workflowreview.WorkflowReviewDecisionState(decision.Result.Decision)
 	attempt := &run.Attempts[len(run.Attempts)-1]
 	attempt.Outcome, attempt.FinishedAt = "reviewed", time.Now().UTC()
 
@@ -62,15 +62,6 @@ func (s *Store) acceptWorkflowReview(ctx context.Context, claim *Claim, run work
 	}
 
 	return *run.Review, claim.releaseReservation()
-}
-
-func checkWorkflowReviewInputHash(input workflowstate.ReviewInput, expected string) error {
-	hash, err := workflowReviewInputHash(input)
-	if err != nil || hash != expected {
-		return fmt.Errorf("%w: review inputs changed during execution", workflowstate.ErrConflict)
-	}
-
-	return nil
 }
 
 func (s *Store) checkpointFailedWorkflowReview(claim *Claim, run workflowInvocationFile, record Record, failure error) error {
@@ -82,19 +73,6 @@ func (s *Store) checkpointFailedWorkflowReview(claim *Claim, run workflowInvocat
 	}
 
 	return errors.Join(failure, err)
-}
-
-func workflowReviewDecisionState(decision workflowstate.IntegrationReviewDecision) string {
-	switch decision {
-	case workflowstate.IntegrationReviewDecisionPass:
-		return "authorized"
-	case workflowstate.IntegrationReviewDecisionNeedsChanges:
-		return "needs_repair"
-	case workflowstate.IntegrationReviewDecisionHumanRequired:
-		return "human_required"
-	default:
-		return "insufficient_evidence"
-	}
 }
 
 func consumeWorkflowReviewRepair(run *workflowInvocationFile, taskKey string) error {

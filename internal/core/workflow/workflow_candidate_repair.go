@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -83,7 +84,7 @@ func (s *Store) repairWorkflowNativeReview(ctx context.Context, run workflowInvo
 	}
 
 	_, fresh, err := s.workflowReviewInputs(ctx, run, provider)
-	if err != nil || checkWorkflowReviewInputHash(fresh, run.Review.InputHash) != nil {
+	if err != nil || workflowreview.CheckWorkflowReviewInputHash(fresh, run.Review.InputHash) != nil {
 		return errorsOrConflict(err)
 	}
 

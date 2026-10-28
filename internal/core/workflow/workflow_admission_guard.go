@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -35,7 +36,7 @@ func validateWorkflowAdmissionPolicy(guard *workflowstate.AdmissionGuard) error 
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowReviewPolicy(guard.Policy)
+	return workflowreview.ValidateWorkflowReviewPolicy(guard.Policy)
 }
 
 func (s *Store) checkWorkflowAdmissionGuard(ctx context.Context, request StartRequest) error {

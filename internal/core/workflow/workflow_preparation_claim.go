@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -98,7 +99,7 @@ func (s *Store) cachedWorkflowPreparation(ctx context.Context, run workflowInvoc
 		return nil, err
 	}
 
-	hash, err := workflowReviewInputHash(source)
+	hash, err := workflowreview.WorkflowReviewInputHash(source)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +254,7 @@ func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source wor
 		return workflowstate.Lane{}, fmt.Errorf("workflow preparation history budget exhausted")
 	}
 
-	hash, err := workflowReviewInputHash(source)
+	hash, err := workflowreview.WorkflowReviewInputHash(source)
 	if err != nil {
 		return workflowstate.Lane{}, err
 	}

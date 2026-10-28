@@ -9,6 +9,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -30,7 +31,7 @@ func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observat
 		return fmt.Errorf("workflow review history budget exhausted")
 	}
 
-	data, err := workflowReviewInputBytes(input)
+	data, err := workflowreview.WorkflowReviewInputBytes(input)
 	if err != nil {
 		return err
 	}
@@ -168,7 +169,7 @@ func (s *Store) readWorkflowReview(run workflowInvocationFile) (workflowstate.Re
 		return input, workflowstate.ReviewDecision{}, workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowReviewPolicy(input.Policy); err != nil {
+	if err := workflowreview.ValidateWorkflowReviewPolicy(input.Policy); err != nil {
 		return input, workflowstate.ReviewDecision{}, err
 	}
 

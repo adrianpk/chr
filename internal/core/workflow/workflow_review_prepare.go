@@ -7,6 +7,7 @@ import (
 	"slices"
 	"time"
 
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -61,7 +62,7 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 }
 
 func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput) error {
-	hash, err := workflowReviewInputHash(input)
+	hash, err := workflowreview.WorkflowReviewInputHash(input)
 	if err != nil {
 		return err
 	}

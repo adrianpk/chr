@@ -7,6 +7,7 @@ import (
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -97,7 +98,7 @@ func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowReviewPolicy(guard.Policy); err != nil {
+	if err := workflowreview.ValidateWorkflowReviewPolicy(guard.Policy); err != nil {
 		return err
 	}
 

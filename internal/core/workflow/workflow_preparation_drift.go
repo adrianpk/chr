@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"slices"
 
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -66,7 +67,7 @@ func (s *Store) reprepareWorkflowNativeInputs(ctx context.Context, run *workflow
 }
 
 func workflowNativePreparationChanged(ctx context.Context, run workflowInvocationFile, previous workflowstate.PreparationInput, source workflowstate.ReviewInput, provider PublicationGuardProvider) (bool, error) {
-	hash, err := workflowReviewInputHash(source)
+	hash, err := workflowreview.WorkflowReviewInputHash(source)
 	if err != nil || hash != run.Preparation.SourceHash {
 		return err == nil, err
 	}
@@ -99,7 +100,7 @@ func (s *Store) retainedWorkflowNativePreparation(run workflowInvocationFile) (w
 			return workflowstate.PreparationInput{}, errorsOrConflict(err)
 		}
 
-		if err := checkWorkflowReviewInputHash(input.Preparation.Source, run.Preparation.SourceHash); err != nil {
+		if err := workflowreview.CheckWorkflowReviewInputHash(input.Preparation.Source, run.Preparation.SourceHash); err != nil {
 			return workflowstate.PreparationInput{}, err
 		}
 

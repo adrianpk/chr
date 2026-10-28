@@ -2,11 +2,10 @@ package workflow
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"slices"
 
-	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -109,21 +108,6 @@ func (s *Store) checkWorkflowReviewAfterIO(ctx context.Context, run workflowInvo
 	return nil
 }
 
-func workflowReviewInputBytes(input workflowstate.ReviewInput) ([]byte, error) {
-	data, err := json.MarshalIndent(input, "", "  ")
-	if err != nil || len(data) >= workflowstate.FileLimit {
-		return nil, fmt.Errorf("review input exceeds file bounds")
-	}
-
-	return append(data, '\n'), nil
-}
-
-func workflowReviewInputHash(input workflowstate.ReviewInput) (string, error) {
-	data, err := workflowReviewInputBytes(input)
-
-	return contenthash.Sum(data), err
-}
-
 func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider) (workflowstate.ReviewInput, error) {
 	if run.Review == nil || run.Review.State != "authorized" {
 		return workflowstate.ReviewInput{}, fmt.Errorf("exact candidate review is not authorized")
@@ -138,7 +122,7 @@ func (s *Store) checkWorkflowReviewGrant(ctx context.Context, run workflowInvoca
 		return input, err
 	}
 
-	hash, err := workflowReviewInputHash(input)
+	hash, err := workflowreview.WorkflowReviewInputHash(input)
 	if err != nil || hash != run.Review.InputHash {
 		return input, fmt.Errorf("%w: review grant inputs changed", workflowstate.ErrConflict)
 	}
@@ -160,7 +144,7 @@ func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocation
 		return *run.Review, err
 	}
 
-	hash, err := workflowReviewInputHash(input)
+	hash, err := workflowreview.WorkflowReviewInputHash(input)
 	if err != nil || hash != bindingHash {
 		return *run.Review, fmt.Errorf("%w: approval inputs changed", workflowstate.ErrConflict)
 	}

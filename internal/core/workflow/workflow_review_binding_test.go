@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -85,7 +86,7 @@ func TestWorkflowReviewDecisionChecks(t *testing.T) {
 			d := valid
 			test.change(&d)
 
-			if err := validateWorkflowReviewDecision(d, input); err == nil {
+			if err := workflowreview.ValidateWorkflowReviewDecision(d, input); err == nil {
 				t.Fatal("unsafe role evidence accepted")
 			}
 		})

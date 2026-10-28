@@ -69,7 +69,7 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 		return result, executionErr
 	}
 
-	decision, parseErr := parseWorkflowReviewDecision(command.Stdout, prepared.input.Review)
+	decision, parseErr := workflowreview.ParseWorkflowReviewDecision(command.Stdout, prepared.input.Review)
 
 	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finish()
