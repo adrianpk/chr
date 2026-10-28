@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-12
 source: review
 reported_at: 2026-10-26T08:48:32Z
-commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398, 3fb0f46aff5421452d6b602fe91e4e483e93dfbc, 20ca6c3e508b7c0964baaef4f345c87199e3d81b, 9c74db45a790d03f7d710b2ffac2e7dcdc4d5e88, fe0df936e6152c0ad346e1e680ad2dd246825e60]
+commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398, 3fb0f46aff5421452d6b602fe91e4e483e93dfbc, 20ca6c3e508b7c0964baaef4f345c87199e3d81b, 9c74db45a790d03f7d710b2ffac2e7dcdc4d5e88, fe0df936e6152c0ad346e1e680ad2dd246825e60, 4ffe06de32d98e02ab388fa0613fd9f0b61e2933]
 started_at: 2026-10-27T23:03:10Z
 branch: refactor/slice-12-quality-workflow
 ready_at: 2026-10-26T08:57:09Z
@@ -91,7 +91,7 @@ real stage, stop/lost-response, wire/storage, policy/admission and dependency te
 pass; strict lint is clean with 9,316 production declarations, unchanged ceiling
 six, 162 exact debts and one external exception.
 
-T12.4 and T12.5 are implemented. All 71 signature rows are reconciled to 47
+T12.4 and T12.5 implementation: `4ffe06de32d98e02ab388fa0613fd9f0b61e2933`. All 71 signature rows are reconciled to 47
 implemented contracts, 20 cohesive five-parameter contracts with individual
 reasons and one prior shared-owner fix. Named operation inputs/results, typed
 coordinator/process/receipt states and explicit inherited context/cancellation

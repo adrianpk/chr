@@ -45,7 +45,7 @@ request, operator and revision before confirming replay. Writers remain separate
 The relocation is `20ca6c3e508b7c0964baaef4f345c87199e3d81b`; stage bindings are
 `9c74db45a790d03f7d710b2ffac2e7dcdc4d5e88`. The first ten signature changes are
 `fe0df936e6152c0ad346e1e680ad2dd246825e60`.
-T12.4 completion and T12.5 reconciliation commit: pending.
+T12.4 completion and T12.5 reconciliation: `4ffe06de32d98e02ab388fa0613fd9f0b61e2933`.
 
 The [authority map](../../../plan/code-quality-remediation-slice-12-boundaries.md)
 and its method, boundary, dependency, signature, move and port CSVs retain frozen
