@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [6afffc97a34bc31483d9f7f8acd4ff045e827bc3, 85256e808df3824ddaf4b1eb230ff4a5ad8ae757, 4d4f74804e857046b099ea3db91e87ec5d1258f6, 6e281666ac251b7f6cbdf997122dee845fff87bf, 12eb09162d1a2dd2256bd5197b28e9be70c66312, 72253efe04a5f0ca41a2393b442f89c98aac8637, 0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
+commits: [e5fbc60981a76a7b25cf76e69b63ce6260140252, 6afffc97a34bc31483d9f7f8acd4ff045e827bc3, 85256e808df3824ddaf4b1eb230ff4a5ad8ae757, 4d4f74804e857046b099ea3db91e87ec5d1258f6, 6e281666ac251b7f6cbdf997122dee845fff87bf, 12eb09162d1a2dd2256bd5197b28e9be70c66312, 72253efe04a5f0ca41a2393b442f89c98aac8637, 0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -227,3 +227,16 @@ the map to 689/908 assessed rows with 219 pending; Store has 816 methods. C15.16
 records actual observation owners and C15.19 resolves registration/read control.
 Remaining API/compatibility assessment, guided parity, exact-head slice validation
 and PR preparation remain open.
+
+Frontier/capacity observation and role selection are separated in `e5fbc60981a76a7b25cf76e69b63ce6260140252`.
+Private observers and role selector retain original canonical proof ordering,
+partial results, shared process/slot exclusion and stable eligibility. Store
+retains all query/admission/frontier locks, exact evidence fences and complete
+receipt/entry/invocation transactions. All 16 normalized production streams match, including two verified private-owner
+conversions required by strict lint; no tests are edited. All 34 real fixtures, six races, short/signature/style and
+strict lint pass without skips or owned leaks. Ninety-nine source-specific
+decisions bring the map to 788/908 assessed rows with 120 pending; Store has 807
+methods. Merger checkpoint Git seeding remains pending separately. C15.20 resolves
+shared capacity/role priority without granting execution. Remaining API/
+compatibility assessment, guided parity, exact-head slice validation and PR
+preparation remain open.

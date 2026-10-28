@@ -137,6 +137,14 @@ binding, callback fences and complete journal/projection transactions. Actual
 continuation, closing and frontier consumers call these owners directly. The
 persisted deadline, bounded backoff, cancellation and partial outcomes are exact.
 
+Frontier target/receipt/branch IO and live capacity process/slot/closing-owner
+aggregation now have private observers. A private integration role selector owns
+ordered finishable validation, preparation, merger and agentic-review eligibility.
+Store retains original coherent query, admission and frontier locks, current
+record/candidate/target fences and complete receipt/entry/invocation transactions.
+Unknown process/slot exclusion, partial observations, role priority and human or
+uncertain-publication barriers preserve their original behavior.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -151,11 +159,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 252 source/extraction/consolidation images. Current identities and hashes are updated
+retains 268 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Ninety-two former Store method rows now have actual
+frozen source fields remain unchanged. 101 former Store method rows now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 816 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 807 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -175,7 +183,7 @@ replaces the removed policy methods.
 
 The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
 defines frontier, adoption, loose selection, continuation, amendment and closing
-from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Nineteen current compatibility/control cases identify actual
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Twenty current compatibility/control cases identify actual
 consumers, existing regression protection and retirement conditions. Remaining
 legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
 
@@ -208,11 +216,11 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 689 body-specific decisions in
-the existing 908-row method map: 597 guarded-persistence methods, 23 closing
+contracts. Final method inspection now records 788 body-specific decisions in
+the existing 908-row method map: 687 guarded-persistence methods, 23 closing
 policies, one host evidence adapter, five coordinator functions, one persistence
-reader, 24 lifecycle owners and 38 coordinator operation mappings. The remaining
-219 source rows stay explicitly pending final assessment.
+reader, 29 lifecycle owners and 42 coordinator operation mappings. The remaining
+120 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -311,6 +319,19 @@ transition/budget, coherent inspection/selection and coordinator registration.
 Store has 816 methods; 219 source rows remain pending. C15.16 records the actual
 observation owners and C15.19 resolves the explicit registration/read control.
 
+Frontier/capacity observation and role selection are separated in
+`e5fbc60981a76a7b25cf76e69b63ce6260140252`. All 16 affected production declaration streams match after
+explicit receiver/private-owner/call normalization and two verified sole-Store-field
+conversions; no tests are edited. Original
+canonical proof order, current-record fences, partial target/proof/capacity
+results, unknown slot/process exclusion, lease semantics, stable role priority,
+human waits and target barriers remain exact. Ninety-nine new source-specific
+decisions cover these owners and guarded repair/preparation, decisions, stop,
+mutation, result, merger/guided admission and coordinator reads. Store has 807
+methods; 120 source rows remain pending. Merger checkpoint Git seeding remains
+pending separately and is not classified as persistence from its filename.
+C15.20 resolves shared capacity/role priority and its observational boundary.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -334,6 +355,28 @@ changes.
 - Existing Store method, declaration, authority/dependency and ownership ledgers.
 
 ## Validation
+
+Frontier/capacity/role task checks passed all 34 selected real fixtures and six
+focused races without skips or owned fixture leaks. They cover canonical and
+receipt-backed frontier, role priority/prepared bounds/human waits, shared
+process capacity and orphan/stop handling, closing publication barriers and
+actual application operations. All 16 affected production streams match after
+explicit owner/call normalization; no tests changed. Affected short tests,
+signature/style checks pass. Strict lint first required two explicit private-owner
+conversions in place of identical single-field literals. Both types retain exactly
+the same sole Store pointer; normalized streams still match. Short compilation
+and the same pinned strict lint command then passed. Real fixtures/races were not
+repeated for those proven field-preserving conversions. Prior task failures remain
+recorded below. Guided parity and final exact-head controller acceptance remain pending.
+
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(NativeSchedule.*|NativeRole(Priority|Pool|HumanWait|Blocked)|NativePrepared(Bound|Wait)|NativeProcessCapacity|NativeQueue(Capacity|DeadProcess|Closure)|NativeInspectionRole|WorkflowFrontier(Order|Reject|Recovery|Race)|NativeReceipt(Frontier|FrontierBlock)|WorkflowCapacity(RoleWait|Overlap|Orphan|StoppedWait)|NativeClosing(Gate|Evidence|Divergence|PublicationRace)|ServiceWorkflow(Frontier|Closing)|WorkflowMembershipFrontier)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(NativeRolePool|NativeProcessCapacity|NativeClosingPublicationRace|WorkflowCapacity(Overlap|RoleWait)|WorkflowFrontierRace)$' -count=1 -timeout=10m -json`
+- `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+- `go test -short ./internal/core/workflow` — after the private-owner conversions.
+- `make check-go-style` — 9,410 declarations; zero exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/... ./scripts/goquality` — zero issues.
+- `git diff --check`
+
 
 Native observation task checks passed all 33 selected real fixtures. The initial
 race command passed five cases; its closing-publication case failed the existing
@@ -616,6 +659,14 @@ source preimages, 77 commit objects and 22 actual ports. It records 689 specific
 ownership decisions with 219 pending rows. Frozen source/baseline/introduction
 fields remain unchanged across 33 ledgers. Current owner declarations, relative
 links, named regressions, 19 compatibility cases, T15 columns and whitespace pass.
+Runtime checks are not repeated for this metadata-only update.
+
+Frontier/capacity/role ledger reconciliation verifies 4,382 current declaration
+hashes, all 908 original method mappings, four signature ledgers, 16 new frozen
+source preimages, 79 commit objects and 22 actual ports. It records 788 specific
+ownership decisions with 120 pending rows. Frozen source/baseline/introduction
+fields remain unchanged across 33 ledgers. Current owner declarations, relative
+links, named regressions, 20 compatibility cases, T15 columns and whitespace pass.
 Runtime checks are not repeated for this metadata-only update.
 
 ## Risks and Follow-ups
