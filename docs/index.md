@@ -74,6 +74,7 @@ Exact contracts and command behavior:
 - [Workflow execution](reference/workflow-execution.md)
 - [Workflow controls](reference/workflow-controls.md)
 - [Workflow configuration](reference/workflow-configuration.md)
+- [Workflow glossary](reference/workflow-glossary.md)
 - [Native integration](reference/native-integration.md)
 - [Ticket loop](reference/ticket-loop.md)
 - [Ticket result application](reference/ticket-result-application.md)
@@ -117,6 +118,7 @@ Exact contracts and command behavior:
 Rationale and system shape:
 
 - [Architecture](explanation/architecture.md)
+- [Capability boundaries](explanation/capability-boundaries.md)
 - [Agent sandbox and runtime](explanation/agent-sandbox-and-runtime.md)
 - [Document generation model](explanation/document-generation-model.md)
 - [Agent review model](explanation/agent-review-model.md)

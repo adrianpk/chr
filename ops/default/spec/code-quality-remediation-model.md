@@ -13,15 +13,15 @@ Define the persistence and value-model invariants that structural remediation mu
 
 | Value or record | Current owner | Proposed grouping | Stored/wire constraints | Owning slices |
 | --- | --- | --- | --- | --- |
-| WorkflowInvocation | core/workflow_invocation.go and guarded workflow files | identity, admitted inputs, execution policy, process/attempt ownership, integration, outcome/timing | Existing JSON tags, ordering on hashed paths, omitempty, revisions and retained references remain identical | 3, 12, 15 |
-| WorkflowMergerInput | core/workflow_merger.go | role identity, immutable Git input, source/evidence references, validation contract, reservations/budget | Preserve protocol version, complete original payload and binding hashes; do not hash a new nested envelope | 3, 13 |
-| IndexedTicket | core/indexed_ticket.go plus index/repository mappings | identity/source, presentation, review, merge, timestamps/index metadata | SQLite projection remains rebuildable; canonical Markdown/native records remain authoritative; preserve null timestamp and status meanings | 3, 11 |
+| WorkflowInvocation | core/workflow/state/invocation.go and guarded workflow host | identity, admitted inputs, execution policy, process/attempt ownership, integration, outcome/timing | Existing JSON tags, ordering on hashed paths, omitempty, revisions and retained references remain identical | 3, 12, 15 |
+| WorkflowMergerInput | core/workflow/state/merger.go | role identity, immutable Git input, source/evidence references, validation contract, reservations/budget | Preserve protocol version, complete original payload and binding hashes; do not hash a new nested envelope | 3, 13 |
+| IndexedTicket | core/ticket/indexed.go plus index/repository mappings | identity/source, presentation, review, merge, timestamps/index metadata | SQLite projection remains rebuildable; canonical Markdown/native records remain authoritative; preserve null timestamp and status meanings | 3, 11 |
 | WorkflowWorkStatus | app/service_workflow_status.go | identity/selection, progress, review/integration, evidence/pagination | Keep public JSON keys, omission/default behavior and read-only semantics; no TUI/Web types in service results | 3, 5, 12 |
 | GuidedUseCaseView | webui/guided_use_case.go | existing page/current-step, question, documents, progress, lifecycle actions | Presentation-only; original operation/revision/request identities stay bound to each action | 5 |
 | Model | tui/model.go and owned view states | navigation, interaction, layout, background work, per-view state | In-memory owner; pointer conversion is not permission for goroutines to mutate shared state | 5 |
-| Execution rows | core/execution_repository.go | one table-specific row, columns, values and scan targets | Same table/schema, key, update predicates, transactions and field order | 3, 11 |
+| Execution rows | core/execution/repository.go | one table-specific row, columns, values and scan targets | Same table/schema, key, update predicates, transactions and field order | 3, 11 |
 | Remote command rows | core/remote_command_record_repository.go | one table-specific row and ordered binding | Same request/idempotency key, status/response meaning and null handling | 3, 11 |
-| Telegram notice/document/action rows | core/telegram_* and retained outboxes | narrow row/request values with one transactional owner | Same quotas, bytes, retry identity, acknowledgement, lease and restart semantics | 3, 7 |
+| Telegram notice/document/action rows | core/telegram, core/notify and retained outboxes | narrow row/request values with one transactional owner | Same quotas, bytes, retry identity, acknowledgement, lease and restart semantics | 3, 7 |
 
 ## Field completeness
 

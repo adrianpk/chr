@@ -39,6 +39,13 @@ harness-selection changes live in `core/workspace/config`.
 
 ## API
 
+The [capability map](../../docs/explanation/capability-boundaries.md) locates the
+current package APIs and their dependency direction. Workflow consumers import
+`core/workflow` or `core/workflow/state` directly; coordinator operations are not
+re-exported from root core. The
+[glossary](../../docs/reference/workflow-glossary.md) preserves the distinction
+between ticket-native authority and forge publication.
+
 Exported types are internal application contracts shared across adapters and
 package-local services. Constructors generally use `New...`, validation helpers
 use `Validate...`, and render/parse/decode helpers expose stable document or
