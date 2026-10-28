@@ -44,7 +44,7 @@ and journal/lock order stay unchanged. Thirty-three shared fixture declarations
 without private owner references remain in both test packages; private workflow
 checks move beside their owner. Frozen wire fixture bytes are unchanged.
 
-T12.3 moves 60 shared protocol types and both evidence-enumeration methods into
+T12.3 implementation is `9c74db45a790d03f7d710b2ffac2e7dcdc4d5e88`. It moves 60 shared protocol types and both evidence-enumeration methods into
 workflow/state. All 62 declaration token sequences match after qualification and
 the EvidenceRefs operation name; public type/embedded-field names, field/tag order,
 wire strings and nil/empty representations stay unchanged. Six cross-package

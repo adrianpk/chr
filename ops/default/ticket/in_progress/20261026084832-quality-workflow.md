@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-12
 source: review
 reported_at: 2026-10-26T08:48:32Z
-commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398, 3fb0f46aff5421452d6b602fe91e4e483e93dfbc, 20ca6c3e508b7c0964baaef4f345c87199e3d81b]
+commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398, 3fb0f46aff5421452d6b602fe91e4e483e93dfbc, 20ca6c3e508b7c0964baaef4f345c87199e3d81b, 9c74db45a790d03f7d710b2ffac2e7dcdc4d5e88]
 started_at: 2026-10-27T23:03:10Z
 branch: refactor/slice-12-quality-workflow
 ready_at: 2026-10-26T08:57:09Z
@@ -80,7 +80,8 @@ and package README checks pass. All seven focused journal/crash-recovery checks
 pass through the existing QA fixture-owning runner. The signature policy remains 9,305 declarations,
 ceiling six, 162 exact debts and one external exception.
 
-T12.3 now connects integrate.Validation, merge.Evidence, review.Decisions,
+T12.3 implementation: `9c74db45a790d03f7d710b2ffac2e7dcdc4d5e88`.
+It connects integrate.Validation, merge.Evidence, review.Decisions,
 forge.Responses and closeout.Gate to their actual production operations. Private
 bindings retain claim/prepared/provider or journal/closing identities; all 908
 Store methods and existing mutation/recovery authority remain local. Sixty shared
