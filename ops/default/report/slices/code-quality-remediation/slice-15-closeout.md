@@ -145,6 +145,13 @@ record/candidate/target fences and complete receipt/entry/invocation transaction
 Unknown process/slot exclusion, partial observations, role priority and human or
 uncertain-publication barriers preserve their original behavior.
 
+The existing private merger host now creates isolated repositories, imports exact
+retained checkpoint objects, materializes the prepared tree and assembles bounded
+broker evidence. Actual admission/execution consumers use it directly. Store
+retains original admission locks, claims, contained checkpoint/image validation
+and complete atomic state transitions; host isolation and partial failures remain
+unchanged.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -159,11 +166,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 268 source/extraction/consolidation images. Current identities and hashes are updated
+retains 274 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. 101 former Store method rows now have actual
+frozen source fields remain unchanged. 104 former Store method rows now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 807 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 804 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -216,11 +223,11 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 788 body-specific decisions in
-the existing 908-row method map: 687 guarded-persistence methods, 23 closing
+contracts. Final method inspection now records 850 body-specific decisions in
+the existing 908-row method map: 746 guarded-persistence methods, 23 closing
 policies, one host evidence adapter, five coordinator functions, one persistence
-reader, 29 lifecycle owners and 42 coordinator operation mappings. The remaining
-120 source rows stay explicitly pending final assessment.
+reader, 32 lifecycle owners and 42 coordinator operation mappings. The remaining
+58 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -328,9 +335,20 @@ results, unknown slot/process exclusion, lease semantics, stable role priority,
 human waits and target barriers remain exact. Ninety-nine new source-specific
 decisions cover these owners and guarded repair/preparation, decisions, stop,
 mutation, result, merger/guided admission and coordinator reads. Store has 807
-methods; 120 source rows remain pending. Merger checkpoint Git seeding remains
-pending separately and is not classified as persistence from its filename.
+methods; 120 source rows remain pending. At that checkpoint merger Git seeding remained
+pending separately; the following extraction resolves it through the existing host.
 C15.20 resolves shared capacity/role priority and its observational boundary.
+
+Merger workspace, checkpoint Git seeding and broker assembly move to the existing
+private host in `3e1896c7f42a0a802d78a23ff036adbe3298d8e4`. All six affected declarations (five production
+and the direct workspace test consumer) match after owner/call normalization.
+Both Git object formats, exact private workspace identity/environment, ordered
+four-object checkpoint import/materialization, partial lane/errors and bounded
+UTF-8 deduplicated evidence remain unchanged. Sixty-two new source-specific
+decisions cover these three host lifetimes and 59 actual admission, current
+record/evidence, membership, repair, amendment and journal transactions. Store
+has 804 methods and the original method map has 58 pending decisions. C15.15 now
+also records the retained workspace/checkpoint and broker-input boundaries.
 
 ## Contracts Added or Changed
 
@@ -355,6 +373,23 @@ changes.
 - Existing Store method, declaration, authority/dependency and ownership ledgers.
 
 ## Validation
+
+Merger IO task checks passed all 17 selected real fixtures and five focused races
+without skips or owned-process leaks. They cover private SHA-1/SHA-256 workspace
+isolation, checkpoint history/binding, bounded evidence, cancellation, execution/
+admission/child lifetime, repair/acceptance, regeneration and timeout/descendant
+cleanup. Six normalized declaration streams match; the sole test edit changes
+its actual owner call without changing assertions. Affected short tests,
+signature/style and the pinned strict lint check pass with zero issues. Earlier
+task failures remain recorded below; final exact-head acceptance remains pending.
+
+- `go test ./internal/core/workflow -run '^TestNativeMerger(Workspace|Checkpoint|CheckpointGuards|CheckpointBinding|Evidence|Cancellation|Execution|Admission|Child|Scope|HostRegeneration|HostRegenerationFailure|Repair|RepairGuards|Acceptance|Timeout|Descendants)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^TestNativeMerger(Workspace|CheckpointBinding|Cancellation|Timeout|Descendants)$' -count=1 -timeout=10m -json`
+- `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+- `make check-go-style` — 9,410 declarations; zero exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/... ./scripts/goquality` — zero issues.
+- `git diff --check`
+
 
 Frontier/capacity/role task checks passed all 34 selected real fixtures and six
 focused races without skips or owned fixture leaks. They cover canonical and
@@ -668,6 +703,14 @@ ownership decisions with 120 pending rows. Frozen source/baseline/introduction
 fields remain unchanged across 33 ledgers. Current owner declarations, relative
 links, named regressions, 20 compatibility cases, T15 columns and whitespace pass.
 Runtime checks are not repeated for this metadata-only update.
+
+Merger IO ledger reconciliation verifies 4,388 current declaration hashes, all
+908 original method mappings, four signature ledgers, six new frozen source
+preimages, 81 commit objects and 22 actual ports. It records 850 individual
+ownership decisions with 58 pending rows. Frozen source/baseline/introduction
+fields remain unchanged across 33 ledgers. Owner declarations, links, named
+regressions, 20 compatibility cases, T15 columns and whitespace pass. Runtime
+checks are not repeated for this metadata-only update.
 
 ## Risks and Follow-ups
 
