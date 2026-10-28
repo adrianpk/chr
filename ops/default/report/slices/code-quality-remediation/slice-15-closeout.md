@@ -71,6 +71,12 @@ outcomes retain their order. The host supplies only those observations through
 StatusSource; locked snapshots and private journals stay with the host. Capacity
 and credential-free role records have direct shared-state consumers.
 
+Adoption binding, amendment slice construction, materialization contract images
+and projection registration are private coordinator functions with no Store
+receiver. The Markdown reader is a private persistence function; readRecord
+still resolves its contained path first. Six actual callers use these functions
+directly, preserving the original bodies, partial outcomes and atomic guards.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -85,11 +91,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 118 source/extraction/consolidation images. Current identities and hashes are updated
+retains 123 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Twenty-four former Store methods now have actual
-closeout policy or host evidence adapter owners. The original 908 method rows
-retain frozen source evidence and current identities; 884 methods remain on Store. This count does not establish
+frozen source fields remain unchanged. Twenty-nine former Store methods now have actual
+closeout policy, host evidence adapter or private coordinator/read owners. The original 908 method rows
+retain frozen source evidence and current identities; 879 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -109,7 +115,7 @@ replaces the removed policy methods.
 
 The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
 defines frontier, adoption, loose selection, continuation, amendment and closing
-from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Eleven current compatibility/control cases identify actual
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Twelve current compatibility/control cases identify actual
 consumers, existing regression protection and retirement conditions. Remaining
 legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
 
@@ -142,12 +148,21 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection records 25 body-specific record, transition,
-path and lock retention decisions plus the extracted closing status decision in
-the existing 908-row method map. Its new ownership fields keep the remaining
-882 source rows explicitly pending final assessment. The five identified unused
-receivers still need individual disposition; filename and selector counts do
-not establish durable ownership.
+contracts. Final method inspection now records 104 body-specific decisions in
+the existing 908-row method map: 75 guarded-persistence methods, 23 closing
+policies, one contained host evidence adapter, four private coordinator
+functions and one private Markdown reader. The remaining 804 source rows stay
+explicitly pending final assessment; filename, receiver-use and lock-reachability
+counts do not establish durable ownership.
+
+Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
+match after receiver removal and the Markdown reader name; all 879 remaining
+Store receivers have actual uses. Source inspection adds explicit decisions for
+contract/allocation reads, invocation/owner lookup, control receipts, process
+records, publication journals and immutable upgrade recovery, plus every already
+extracted closing method. None is accepted from its filename alone. The retained
+upgrade snapshot case permits omitted publication/prepared-limit keys only at
+their established defaults, with changed policy still rejected.
 
 ## Contracts Added or Changed
 
@@ -199,6 +214,12 @@ regressions and six focused races, without skips or leaked owned descendants.
 Affected workflow/app short tests, the production signature check and strict
 lint pass. The final slice gate and shared guided parity remain pending.
 
+The receiver cleanup passed 33 selected real adoption, amendment,
+materialization, plan-order and record regressions and four focused recovery /
+concurrency races, without skips or leaked owned descendants. Affected
+workflow/app/checker short tests, unchanged production signature bounds and
+strict lint pass.
+
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|UseCase|Reopen|SetAdvance|Budget|Recovery|Journal|PostObservation|Stop)|NativeClosing(Gate|Divergence|Evidence|PublicationRace)|WorkflowParallelClosingRecovery|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow ./internal/core/workflow/closeout -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|Execute)$' -count=1 -timeout=10m -json`
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|Budget|Recovery|Journal|Stop)|NativeClosing(Gate|Divergence|Evidence|Lost))$' -count=1 -timeout=15m -json`
@@ -227,6 +248,11 @@ lint pass. The final slice gate and shared guided parity remain pending.
 - `go test -short ./internal/core/workflow/... ./internal/app/...`
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/...`
 
+- `go test ./internal/core/workflow -run '^Test(WorkflowPlanAdoption.*|WorkflowAmendment.*|WorkflowMaterialization.*|WorkflowPlanOrder.*|WorkflowLooseMarkdown|WorkflowRoundTrip|WorkflowAdoption|NativeRecord.*|QualityRecordWire)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowMaterializationConcurrent|WorkflowPlanAdoptionRestart|WorkflowAmendmentRecovery|WorkflowPlanOrderRecovery)$' -count=1 -timeout=10m -json`
+- `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+
 - `go test -short ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality`
 - `go test ./internal/core/workflow/closeout -count=1`
 - `go test -short ./internal/core/workflow/... ./internal/app ./scripts/goquality`
@@ -252,6 +278,14 @@ Invocation ledger reconciliation checks 4,228 current declaration hashes, all
 preimages, 57 commit objects and 21 actual ports. Relative links, named regression
 declarations, T15 columns and whitespace pass. Source fields and original
 introduction commits remain frozen. Runtime checks are not repeated for the
+metadata-only update.
+
+Receiver and ownership ledger reconciliation checks 4,237 current declaration
+hashes, all 908 original method mappings, four signature ledgers, five new frozen
+source preimages, 61 commit objects, 22 unchanged actual ports and 104 explicit
+ownership decisions. Relative links, named regression declarations, twelve
+compatibility rows, T15 columns and whitespace pass. Original source fields and
+introduction commits stay frozen; runtime checks are not repeated for this
 metadata-only update.
 
 ## Risks and Follow-ups

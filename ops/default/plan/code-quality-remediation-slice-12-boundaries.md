@@ -159,13 +159,15 @@ locks, journal/recovery entries and atomic acceptance.
 
 ## Slice 15 final method inspection
 
-The existing 908-row method map now separates final ownership disposition,
+The existing 908-row method map separates final ownership disposition,
 body-specific basis and inspected revision from the original coarse source
-responsibility and reachability fields. Twenty-five record/transition/path/lock
-methods retain guarded persistence ownership because their actual bodies bind
-complete preimages, contained reads, source/revision guards, exclusion or
-idempotent journal replay. Closing status policy has its actual closeout owner
-through direct Proofs and StatusSource. The remaining 882 source rows are
-explicitly pending final inspection; current identities and hashes continue to
-resolve all rows. Relocation, an unused receiver or a reachable lock alone does
-not close a row.
+responsibility and reachability fields. It records 104 decisions: 75 guarded
+persistence methods, 23 actual closing policies, one contained host evidence
+adapter, four private coordinator functions and one private persistence reader.
+The source inspection covers complete preimages, contract/allocation boundaries,
+invocation and owner lookup, control receipts, process records, publication and
+upgrade journals, contained reads and idempotent recovery. Five unused receivers
+are removed with unchanged bodies and actual direct callers. The remaining 804
+source rows stay explicitly pending final inspection; current identities and
+hashes continue to resolve all rows. Relocation, receiver use or a reachable
+lock alone does not close a row.
