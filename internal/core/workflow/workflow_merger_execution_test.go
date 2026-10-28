@@ -35,7 +35,7 @@ func nativeMergerExecution(t *testing.T, id string) (workflowPreparationFixture,
 	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
 	input.Conflicts = []workflowstate.MergerConflict{{ID: "conflict-1", Path: "result.txt", Kind: "text", Evidence: diagnostic, RequirementIDs: []string{"source-api", "target-validation"}}}
 
-	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,7 +201,7 @@ func TestNativeMergerAdmission(t *testing.T) {
 			driver := harness
 			change(&request, &driver)
 
-			request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
+			request.Input, err = workflowmerge.SealInput(request.Input, time.Now().UTC())
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -96,7 +96,7 @@ func (s *Store) checkWorkflowDecisionAdmission(ctx context.Context, run workflow
 		return err
 	}
 
-	return workflowmerge.ValidateWorkflowMergerDecisions(request.Decisions, request.Input)
+	return workflowmerge.CheckDecisions(request.Decisions, request.Input)
 }
 
 func workflowDecisionFile(entry *IntegrationEntry, record IntegrationDecisions) (workflowstate.FileChange, error) {
@@ -206,7 +206,7 @@ func (s *Store) checkWorkflowMergerOperatorEvidence(input workflowstate.MergerIn
 		return workflowstate.ErrConflict
 	}
 
-	expected, actual := workflowmerge.WorkflowMergerFence(record.Input), workflowmerge.WorkflowMergerFence(input)
+	expected, actual := workflowmerge.InputFence(record.Input), workflowmerge.InputFence(input)
 	expected.CandidateRevision = record.CandidateRevision
 
 	expected.OwnedWorkspaceID = actual.OwnedWorkspaceID

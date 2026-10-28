@@ -11,9 +11,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// MergerFence is the host's current immutable acceptance identity.
+// Fence is the host's current immutable acceptance identity.
 // Callers obtain it from retained state; an agent-supplied fence is not trusted.
-type MergerFence struct {
+type Fence struct {
 	EntryID, CandidateHash, ScopeHash, OwnedWorkspaceID string
 	Repository, SourceRef, TargetRef                    string
 	Source, Base, Method                                string
@@ -21,30 +21,30 @@ type MergerFence struct {
 	CandidateRevision, ClaimGeneration                  uint64
 }
 
-// ParseWorkflowMergerResult rejects malformed or stale proposals before host
+// ParseResult rejects malformed or stale proposals before host
 // diff verification. Parsing a resolved proposal is never candidate approval.
-func ParseWorkflowMergerResult(data []byte, input workflowstate.MergerInput, current MergerFence, now time.Time) (workflowstate.MergerResult, error) {
+func ParseResult(data []byte, input workflowstate.MergerInput, current Fence, now time.Time) (workflowstate.MergerResult, error) {
 	var result workflowstate.MergerResult
-	if err := ValidateWorkflowMergerInput(input, now); err != nil {
+	if err := CheckInput(input, now); err != nil {
 		return result, err
 	}
 
-	if WorkflowMergerFence(input) != current {
+	if InputFence(input) != current {
 		return result, fmt.Errorf("%w: merger generation or candidate is stale", workflowstate.ErrConflict)
 	}
 
-	if err := decodeWorkflowMergerResult(data, &result); err != nil {
+	if err := decodeResult(data, &result); err != nil {
 		return workflowstate.MergerResult{}, err
 	}
 
-	if err := ValidateWorkflowMergerResult(result, input); err != nil {
+	if err := CheckResult(result, input); err != nil {
 		return workflowstate.MergerResult{}, err
 	}
 
 	return result, nil
 }
 
-func decodeWorkflowMergerResult(data []byte, result *workflowstate.MergerResult) error {
+func decodeResult(data []byte, result *workflowstate.MergerResult) error {
 	if len(data) == 0 || len(data) > workflowstate.FileLimit {
 		return fmt.Errorf("%w: merger result exceeds file bound", workflowstate.ErrConflict)
 	}
@@ -67,8 +67,8 @@ func decodeWorkflowMergerResult(data []byte, result *workflowstate.MergerResult)
 	return nil
 }
 
-// ValidateWorkflowMergerReportedUsage checks reported whole-call usage against the retained allowance.
-func ValidateWorkflowMergerReportedUsage(usage *workflowstate.MergerUsage, allowance *workflowstate.TokenAllowance) error {
+// CheckReportedUsage checks reported whole-call usage against the retained allowance.
+func CheckReportedUsage(usage *workflowstate.MergerUsage, allowance *workflowstate.TokenAllowance) error {
 	if usage == nil {
 		return nil
 	}
@@ -85,8 +85,8 @@ func ValidateWorkflowMergerReportedUsage(usage *workflowstate.MergerUsage, allow
 	return nil
 }
 
-// ValidateWorkflowMergerResult checks proposal identity, scope, evidence, resolutions and outcome.
-func ValidateWorkflowMergerResult(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
+// CheckResult checks proposal identity, scope, evidence, resolutions and outcome.
+func CheckResult(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
 	if result.ProtocolVersion != input.ProtocolVersion || result.InputHash != input.InputHash || !slices.Contains([]string{"resolved", "needs_decision", "failed"}, result.Outcome) {
 		return fmt.Errorf("%w: merger result version or input is stale", workflowstate.ErrConflict)
 	}
@@ -101,18 +101,18 @@ func ValidateWorkflowMergerResult(result workflowstate.MergerResult, input workf
 		}
 	}
 
-	if err := validateWorkflowMergerResultEvidence(result, input); err != nil {
+	if err := checkResultEvidence(result, input); err != nil {
 		return err
 	}
 
-	if err := validateWorkflowMergerResolutions(result, input); err != nil {
+	if err := checkResolutions(result, input); err != nil {
 		return err
 	}
 
-	return validateWorkflowMergerOutcome(result, input)
+	return checkOutcome(result, input)
 }
 
-func validateWorkflowMergerResultEvidence(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
+func checkResultEvidence(result workflowstate.MergerResult, input workflowstate.MergerInput) error {
 	if len(result.LocalCheckRefs) > 16 {
 		return workflowstate.ErrConflict
 	}
@@ -124,17 +124,17 @@ func validateWorkflowMergerResultEvidence(result workflowstate.MergerResult, inp
 	}
 
 	if len(result.PreservedRequirements) > 0 {
-		if err := validateWorkflowMergerRequirementIDs(result.PreservedRequirements, input.Requirements); err != nil {
+		if err := checkRequirementIDs(result.PreservedRequirements, input.Requirements); err != nil {
 			return err
 		}
 	}
 
-	return ValidateWorkflowMergerReportedUsage(result.Usage, input.TokenAllowance)
+	return CheckReportedUsage(result.Usage, input.TokenAllowance)
 }
 
-// WorkflowMergerFence copies immutable acceptance identity from a retained merger input.
-func WorkflowMergerFence(input workflowstate.MergerInput) MergerFence {
-	return MergerFence{
+// InputFence copies immutable acceptance identity from a retained merger input.
+func InputFence(input workflowstate.MergerInput) Fence {
+	return Fence{
 		EntryID: input.EntryID, CandidateHash: input.CandidateHash, ScopeHash: input.ScopeHash,
 		OwnedWorkspaceID: input.OwnedWorkspaceID, Source: input.Source, Base: input.Base,
 		Method: input.Method, Unit: input.Unit, CandidateRevision: input.CandidateRevision,

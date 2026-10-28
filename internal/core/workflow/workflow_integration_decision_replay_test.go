@@ -36,7 +36,7 @@ func TestNativeDecisionReplay(t *testing.T) {
 			input.OperatorDecisionRef = &input.SourceManifestRef
 			input.OperatorAnswers = []workflowstate.IntegrationAnswer{tc.answer}
 
-			input, err := workflowmerge.SealWorkflowMergerInput(input, now)
+			input, err := workflowmerge.SealInput(input, now)
 			if err != nil {
 				t.Fatal(err)
 			}

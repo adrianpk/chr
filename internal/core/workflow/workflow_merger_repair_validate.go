@@ -27,7 +27,7 @@ func validateWorkflowTreeRepairs(proof workflowstate.IntegrationProof) error {
 }
 
 func validateWorkflowTreeRepair(proof workflowstate.IntegrationProof, repair workflowstate.IntegrationTreeRepair) error {
-	if repair.CompletedAt.IsZero() || workflowmerge.ValidateWorkflowMergerInput(repair.Input, repair.CompletedAt) != nil {
+	if repair.CompletedAt.IsZero() || workflowmerge.CheckInput(repair.Input, repair.CompletedAt) != nil {
 		return workflowstate.ErrConflict
 	}
 
@@ -36,7 +36,7 @@ func validateWorkflowTreeRepair(proof workflowstate.IntegrationProof, repair wor
 		return workflowstate.ErrConflict
 	}
 
-	if repair.Proposal.Outcome != "resolved" || workflowmerge.ValidateWorkflowMergerResult(repair.Proposal, input) != nil {
+	if repair.Proposal.Outcome != "resolved" || workflowmerge.CheckResult(repair.Proposal, input) != nil {
 		return workflowstate.ErrConflict
 	}
 
@@ -79,7 +79,7 @@ func validateWorkflowRepairRegeneration(repair workflowstate.IntegrationTreeRepa
 	}
 
 	for _, conflict := range repair.Input.Conflicts {
-		if workflowmerge.WorkflowMergerProcedureRequired(conflict) && !seen[conflict.ID] {
+		if workflowmerge.ProcedureRequired(conflict) && !seen[conflict.ID] {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -132,7 +132,7 @@ func validateWorkflowRegenerationStep(input workflowstate.MergerInput, evidence 
 	}
 
 	conflict := input.Conflicts[index]
-	if !workflowmerge.WorkflowMergerProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, evidence.OutputTree) || evidence.InputTree != tree {
+	if !workflowmerge.ProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, evidence.OutputTree) || evidence.InputTree != tree {
 		return workflowstate.ErrConflict
 	}
 

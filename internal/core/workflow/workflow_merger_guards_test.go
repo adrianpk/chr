@@ -53,7 +53,7 @@ func TestNativeMergerInput(t *testing.T) {
 			_, input, now := nativeMergerInput(t)
 			mutate(&input)
 
-			if _, err := workflowmerge.SealWorkflowMergerInput(input, now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.SealInput(input, now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("invalid role input was admitted", err)
 			}
 		})
@@ -62,7 +62,7 @@ func TestNativeMergerInput(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
 
 	input.ValidationCommands[0][0] = "false"
-	if err := workflowmerge.ValidateWorkflowMergerInput(input, now); !errors.Is(err, workflowstate.ErrConflict) {
+	if err := workflowmerge.CheckInput(input, now); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("mutated validation contract retained its old input hash", err)
 	}
 }
@@ -78,7 +78,7 @@ func TestNativeMergerScope(t *testing.T) {
 			result := nativeMergerResolved(input)
 
 			result.ChangedPaths = []string{path}
-			if _, err := workflowmerge.ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowmerge.WorkflowMergerFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.ParseResult(nativeMergerJSON(t, result), input, workflowmerge.InputFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("out-of-scope role change was accepted", err)
 			}
 		})
@@ -87,7 +87,7 @@ func TestNativeMergerScope(t *testing.T) {
 	for _, path := range []string{"ops/default/ticket/ready", "ops/default/spec/stable", "ops/default/plan", "ops/default/tracker", ".git", ".chr", ".agents"} {
 		t.Run(path, func(t *testing.T) {
 			input.AllowedPaths = []string{path}
-			if _, err := workflowmerge.SealWorkflowMergerInput(input, now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.SealInput(input, now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("workflow or scope mutation was granted to the role", err)
 			}
 		})
@@ -131,7 +131,7 @@ func TestNativeMergerResults(t *testing.T) {
 			result := nativeMergerResolved(input)
 			mutate(&result)
 
-			if _, err := workflowmerge.ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowmerge.WorkflowMergerFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.ParseResult(nativeMergerJSON(t, result), input, workflowmerge.InputFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("invalid repair proposal was accepted", err)
 			}
 		})

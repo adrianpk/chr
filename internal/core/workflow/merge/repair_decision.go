@@ -9,16 +9,16 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// MergerRequiredDecisions identifies incompatible intent and unsupported
+// RequiredDecisions identifies incompatible intent and unsupported
 // procedures before a model call. These questions cannot be answered by time.
-func MergerRequiredDecisions(input workflowstate.MergerInput) ([]workflowstate.MergerDecision, error) {
-	if err := validateWorkflowMergerIntent(input); err != nil {
+func RequiredDecisions(input workflowstate.MergerInput) ([]workflowstate.MergerDecision, error) {
+	if err := checkIntent(input); err != nil {
 		return nil, err
 	}
 
-	decisions := workflowMergerIntentDecisions(input)
+	decisions := intentDecisions(input)
 	for _, conflict := range input.Conflicts {
-		if WorkflowMergerProcedureRequired(conflict) && !workflowMergerProcedureDeclared(input, conflict) {
+		if ProcedureRequired(conflict) && !procedureDeclared(input, conflict) {
 			decisions = append(decisions, workflowstate.MergerDecision{ID: "procedure-" + contenthash.Sum([]byte(conflict.ID))[:16], Issue: fmt.Sprintf("%s conflict at %s has no declared deterministic regeneration and validation procedure.", conflict.Kind, conflict.Path), RequirementIDs: slices.Clone(conflict.RequirementIDs), Options: []string{"Declare a repository-owned resolution and validation procedure", "Leave this conflict unresolved"}, Authority: "maintainer"})
 		}
 	}
@@ -28,13 +28,13 @@ func MergerRequiredDecisions(input workflowstate.MergerInput) ([]workflowstate.M
 	}
 
 	decisions = slices.DeleteFunc(decisions, func(d workflowstate.MergerDecision) bool {
-		return input.OperatorDecisionRef != nil && strings.HasPrefix(d.ID, "intent-") && WorkflowDecisionResolved(input.OperatorAnswers, d.ID)
+		return input.OperatorDecisionRef != nil && strings.HasPrefix(d.ID, "intent-") && DecisionResolved(input.OperatorAnswers, d.ID)
 	})
 
-	return decisions, ValidateWorkflowMergerDecisions(decisions, input)
+	return decisions, CheckDecisions(decisions, input)
 }
 
-func validateWorkflowMergerIntentConflicts(requirements []workflowstate.MergerRequirement) error {
+func checkIntentConflicts(requirements []workflowstate.MergerRequirement) error {
 	for _, requirement := range requirements {
 		if len(requirement.ConflictsWith) == 0 {
 			continue
@@ -44,7 +44,7 @@ func validateWorkflowMergerIntentConflicts(requirements []workflowstate.MergerRe
 			return workflowstate.ErrConflict
 		}
 
-		if err := validateWorkflowMergerRequirementIDs(requirement.ConflictsWith, requirements); err != nil {
+		if err := checkRequirementIDs(requirement.ConflictsWith, requirements); err != nil {
 			return err
 		}
 	}
@@ -52,7 +52,7 @@ func validateWorkflowMergerIntentConflicts(requirements []workflowstate.MergerRe
 	return nil
 }
 
-func workflowMergerIntentDecisions(input workflowstate.MergerInput) []workflowstate.MergerDecision {
+func intentDecisions(input workflowstate.MergerInput) []workflowstate.MergerDecision {
 	var decisions []workflowstate.MergerDecision
 
 	seen := map[string]bool{}
@@ -75,11 +75,11 @@ func workflowMergerIntentDecisions(input workflowstate.MergerInput) []workflowst
 	return decisions
 }
 
-func workflowMergerProcedureDeclared(input workflowstate.MergerInput, conflict workflowstate.MergerConflict) bool {
+func procedureDeclared(input workflowstate.MergerInput, conflict workflowstate.MergerConflict) bool {
 	return ValidCommand(conflict.RegenerationCommand) && ValidCommand(conflict.ValidationCommand) && slices.ContainsFunc(input.ValidationCommands, func(command []string) bool { return slices.Equal(command, conflict.ValidationCommand) })
 }
 
-// WorkflowMergerProcedureRequired identifies conflicts that require a declared deterministic procedure.
-func WorkflowMergerProcedureRequired(conflict workflowstate.MergerConflict) bool {
+// ProcedureRequired identifies conflicts that require a declared deterministic procedure.
+func ProcedureRequired(conflict workflowstate.MergerConflict) bool {
 	return conflict.Kind != "text" && conflict.Kind != "semantic"
 }

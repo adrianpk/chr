@@ -72,7 +72,7 @@ func retainServiceIntegrationDecision(t *testing.T, operations service, entry wo
 
 	input := serviceIntegrationDecisionInput(t, operations, run, entry)
 
-	questions, err := workflowmerge.MergerRequiredDecisions(input)
+	questions, err := workflowmerge.RequiredDecisions(input)
 	if err != nil || len(questions) == 0 {
 		t.Fatal("sealed requirements did not retain an operator choice", err)
 	}
@@ -99,7 +99,7 @@ func serviceIntegrationDecisionInput(t *testing.T, operations service, run workf
 	input.IntentRefs, input.TargetChangeRefs, input.FindingRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}, []workflowstate.EvidenceRef{finding}
 	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source, ConflictsWith: []string{"target-validation"}}, {ID: "target-validation", Origin: "target", Evidence: target}}
 
-	sealed, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	sealed, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}

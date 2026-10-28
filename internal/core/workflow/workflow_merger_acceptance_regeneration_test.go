@@ -32,7 +32,7 @@ func nativeMergerRegenerationFixture(t *testing.T, failing bool) (workflowPrepar
 
 	var err error
 
-	*input, err = workflowmerge.SealWorkflowMergerInput(*input, time.Now().UTC())
+	*input, err = workflowmerge.SealInput(*input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}

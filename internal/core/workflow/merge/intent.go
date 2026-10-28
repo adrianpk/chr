@@ -6,39 +6,39 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validWorkflowMergerCheckpointObjects(input workflowstate.MergerInput, checkpoint workflowstate.MergerCheckpoint) bool {
+func validCheckpointObjects(input workflowstate.MergerInput, checkpoint workflowstate.MergerCheckpoint) bool {
 	return workflowstate.ValidCommitID(checkpoint.OriginalCommit) && workflowstate.ValidCommitID(checkpoint.PreparedParent) && len(checkpoint.OriginalCommit) == len(input.Source) && len(checkpoint.PreparedParent) == len(input.Base)
 }
 
-func validWorkflowMergerCheckpointPosition(input workflowstate.MergerInput, checkpoint workflowstate.MergerCheckpoint) bool {
+func validCheckpointPosition(input workflowstate.MergerInput, checkpoint workflowstate.MergerCheckpoint) bool {
 	return input.Method == "rebase" && checkpoint.ReplayIndex >= 0 && checkpoint.ReplayIndex < workflowstate.RecordLimit && len(checkpoint.Predecessors) == checkpoint.ReplayIndex
 }
 
-func validWorkflowMergerConflictProcedure(conflict workflowstate.MergerConflict) bool {
+func validConflictProcedure(conflict workflowstate.MergerConflict) bool {
 	return slices.Contains([]string{"text", "generated", "lockfile", "binary", "submodule", "lfs", "semantic"}, conflict.Kind) && (len(conflict.RegenerationCommand) == 0 || ValidCommand(conflict.RegenerationCommand)) && (len(conflict.ValidationCommand) == 0 || ValidCommand(conflict.ValidationCommand))
 }
 
-func validWorkflowMergerPredecessor(replay workflowstate.IntegrationReplay, size int) bool {
+func validPredecessor(replay workflowstate.IntegrationReplay, size int) bool {
 	return workflowstate.ValidCommitID(replay.Source) && workflowstate.ValidCommitID(replay.Commit) && len(replay.Source) == size && len(replay.Commit) == size && slices.Contains([]string{"nonempty", "source_empty", "already_applied"}, replay.EmptyDecision)
 }
 
-func validateWorkflowMergerCheckpoint(input workflowstate.MergerInput) error {
+func checkCheckpoint(input workflowstate.MergerInput) error {
 	checkpoint := input.HistoryCheckpoint
 	if checkpoint == nil {
 		return nil
 	}
 
-	if !validWorkflowMergerCheckpointPosition(input, *checkpoint) {
+	if !validCheckpointPosition(input, *checkpoint) {
 		return workflowstate.ErrConflict
 	}
 
-	if !validWorkflowMergerCheckpointObjects(input, *checkpoint) {
+	if !validCheckpointObjects(input, *checkpoint) {
 		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{checkpoint.OriginalCommit: true}
 	for _, replay := range checkpoint.Predecessors {
-		if !validWorkflowMergerPredecessor(replay, len(input.Source)) || seen[replay.Source] {
+		if !validPredecessor(replay, len(input.Source)) || seen[replay.Source] {
 			return workflowstate.ErrConflict
 		}
 
@@ -57,18 +57,18 @@ func validateWorkflowMergerCheckpoint(input workflowstate.MergerInput) error {
 	return nil
 }
 
-func validateWorkflowMergerConflicts(input workflowstate.MergerInput) error {
+func checkConflicts(input workflowstate.MergerInput) error {
 	seen := map[string]bool{}
 	for _, conflict := range input.Conflicts {
 		if !workflowstate.ValidRequestKey(conflict.ID) || seen[conflict.ID] || !PathAllowed(input, conflict.Path) {
 			return workflowstate.ErrConflict
 		}
 
-		if err := validateWorkflowMergerRequirementIDs(conflict.RequirementIDs, input.Requirements); err != nil {
+		if err := checkRequirementIDs(conflict.RequirementIDs, input.Requirements); err != nil {
 			return err
 		}
 
-		if !validWorkflowMergerConflictProcedure(conflict) {
+		if !validConflictProcedure(conflict) {
 			return workflowstate.ErrConflict
 		}
 
@@ -78,7 +78,7 @@ func validateWorkflowMergerConflicts(input workflowstate.MergerInput) error {
 	return nil
 }
 
-func validateWorkflowMergerRequirementIDs(ids []string, requirements []workflowstate.MergerRequirement) error {
+func checkRequirementIDs(ids []string, requirements []workflowstate.MergerRequirement) error {
 	if len(ids) == 0 || len(ids) > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
@@ -95,7 +95,7 @@ func validateWorkflowMergerRequirementIDs(ids []string, requirements []workflows
 	return nil
 }
 
-func validateWorkflowMergerRequirements(requirements []workflowstate.MergerRequirement) error {
+func checkRequirements(requirements []workflowstate.MergerRequirement) error {
 	seen := map[string]bool{}
 	source, target := false, false
 
@@ -113,5 +113,5 @@ func validateWorkflowMergerRequirements(requirements []workflowstate.MergerRequi
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowMergerIntentConflicts(requirements)
+	return checkIntentConflicts(requirements)
 }

@@ -83,7 +83,7 @@ func checkWorkflowAgentResponse(response AgentResponse, input TaskInput) error {
 	}
 
 	usage := workflowstate.MergerUsage{CapabilityRevision: response.CapabilityRevision, WholeCall: response.WholeCall, Input: *response.Input, Output: *response.Output}
-	if err := workflowmerge.ValidateWorkflowMergerReportedUsage(&usage, &call.Allowance); err != nil {
+	if err := workflowmerge.CheckReportedUsage(&usage, &call.Allowance); err != nil {
 		return errors.Join(ErrWorkflowIntegrationBudget, err)
 	}
 

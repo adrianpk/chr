@@ -37,7 +37,7 @@ func TestNativeMergerSemantic(t *testing.T) {
 	input.Repository, input.Source, input.Base, input.Method = complete.Query.Repository, complete.Query.SourceCommit, complete.Query.BaseCommit, "rebase"
 	input.AllowedPaths, input.Conflicts[0].Path = []string{"next.txt"}, "next.txt"
 
-	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +86,7 @@ func TestNativeMergerFix(t *testing.T) {
 	input.Repository, input.Source, input.Base, input.Method = state.Query.Repository, state.Query.SourceCommit, state.Query.BaseCommit, "rebase"
 	input.AllowedPaths, input.Conflicts[0].Path = []string{"repair.txt"}, "repair.txt"
 
-	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -14,11 +14,11 @@ import (
 // an explicit integration fix or ownership decision. It does not accept edits.
 func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workflowstate.MergerInput, proof workflowstate.IntegrationProof, fix *workflowstate.ReviewFinding) (MergerRepairPlan, error) {
 	plan := MergerRepairPlan{InputHash: input.InputHash}
-	if workflowmerge.ValidateWorkflowMergerInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil || !workflowMergerRepairIdentity(input, proof) {
+	if workflowmerge.CheckInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil || !workflowMergerRepairIdentity(input, proof) {
 		return plan, workflowstate.ErrConflict
 	}
 
-	decisions, err := workflowmerge.MergerRequiredDecisions(input)
+	decisions, err := workflowmerge.RequiredDecisions(input)
 	if err != nil {
 		return plan, err
 	}
@@ -129,5 +129,5 @@ func workflowMergerSemanticPlan(plan MergerRepairPlan, input workflowstate.Merge
 	plan.Outcome = "needs_decision"
 	plan.Decisions = []workflowstate.MergerDecision{{ID: "replay-owner", Issue: "The semantic repair has no unique original replay owner. Select the owning source step or declare an actionable integration fix.", RequirementIDs: requirements, Options: []string{"Identify the original source step", "Declare an integration fix with an actionable finding"}, Authority: "maintainer"}}
 
-	return plan, workflowmerge.ValidateWorkflowMergerDecisions(plan.Decisions, input)
+	return plan, workflowmerge.CheckDecisions(plan.Decisions, input)
 }

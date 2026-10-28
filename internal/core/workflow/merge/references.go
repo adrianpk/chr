@@ -4,7 +4,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowMergerReferences(input workflowstate.MergerInput) error {
+func checkReferences(input workflowstate.MergerInput) error {
 	refs := input.EvidenceRefs()
 	if len(input.IntentRefs) == 0 || len(input.TargetChangeRefs) == 0 || len(refs) > workflowstate.PageLimit {
 		return workflowstate.ErrConflict

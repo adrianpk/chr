@@ -89,12 +89,12 @@ func TestNativeDecisionBatch(t *testing.T) {
 	other.ID, other.ConflictsWith = "target-extra", []string{"source-api"}
 	request.Input.Requirements = append(request.Input.Requirements, other)
 
-	input, err := workflowmerge.SealWorkflowMergerInput(request.Input, request.Input.AdmittedAt)
+	input, err := workflowmerge.SealInput(request.Input, request.Input.AdmittedAt)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	questions, err := workflowmerge.MergerRequiredDecisions(input)
+	questions, err := workflowmerge.RequiredDecisions(input)
 	if err != nil || len(questions) != 2 {
 		t.Fatal("batch fixture lost questions", err)
 	}

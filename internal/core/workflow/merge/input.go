@@ -12,15 +12,15 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// SealWorkflowMergerInput validates and hashes a host-assembled immutable input.
+// SealInput validates and hashes a host-assembled immutable input.
 // It preserves the caller's input and does not grant a capacity or budget slot.
-func SealWorkflowMergerInput(input workflowstate.MergerInput, now time.Time) (workflowstate.MergerInput, error) {
+func SealInput(input workflowstate.MergerInput, now time.Time) (workflowstate.MergerInput, error) {
 	input.InputHash = ""
-	if err := validateWorkflowMergerInputContent(input, now); err != nil {
+	if err := checkInputContent(input, now); err != nil {
 		return workflowstate.MergerInput{}, err
 	}
 
-	hash, err := workflowMergerInputHash(input)
+	hash, err := inputHash(input)
 	if err != nil {
 		return workflowstate.MergerInput{}, err
 	}
@@ -30,13 +30,13 @@ func SealWorkflowMergerInput(input workflowstate.MergerInput, now time.Time) (wo
 	return input, nil
 }
 
-func validWorkflowMergerDeadline(input workflowstate.MergerInput, now time.Time) bool {
+func validDeadline(input workflowstate.MergerInput, now time.Time) bool {
 	maximum := input.AdmittedAt.Add(time.Duration(input.WorkerTimeoutSeconds) * time.Second)
 
 	return !input.AdmittedAt.IsZero() && !input.AdmittedAt.After(now) && input.Deadline.After(now) && !input.Deadline.After(maximum)
 }
 
-func validWorkflowMergerIdentity(input workflowstate.MergerInput) bool {
+func validIdentity(input workflowstate.MergerInput) bool {
 	keys := []string{input.ID, input.InvocationID, input.Unit.ID, input.CapacityReservationID, input.BudgetReservationID}
 	for _, key := range keys {
 		if !workflowstate.ValidRequestKey(key) || !filepath.IsLocal(key) || filepath.Base(key) != key || strings.ContainsRune(key, '\\') || key == "." {
@@ -47,11 +47,11 @@ func validWorkflowMergerIdentity(input workflowstate.MergerInput) bool {
 	return input.ProtocolVersion == 1 && input.CandidateRevision > 0 && input.ClaimGeneration > 0 && slices.Contains([]string{"slice", "ticket"}, input.Unit.Kind)
 }
 
-func validWorkflowMergerLimits(input workflowstate.MergerInput) bool {
+func validLimits(input workflowstate.MergerInput) bool {
 	return input.RemainingAttempts >= 1 && input.RemainingAttempts <= 10 && input.WorkerTimeoutSeconds >= 1 && input.WorkerTimeoutSeconds <= 86400
 }
 
-func validWorkflowMergerObjects(input workflowstate.MergerInput) bool {
+func validObjects(input workflowstate.MergerInput) bool {
 	for _, hash := range []string{input.EntryID, input.CandidateHash, input.ScopeHash, input.OwnedWorkspaceID} {
 		if !workflowstate.ValidFingerprint(hash) {
 			return false
@@ -61,12 +61,12 @@ func validWorkflowMergerObjects(input workflowstate.MergerInput) bool {
 	return workflowstate.ValidCommitID(input.Source) && workflowstate.ValidCommitID(input.Base) && len(input.Source) == len(input.Base) && slices.Contains([]string{"merge", "rebase", "squash"}, input.Method)
 }
 
-func validateWorkflowMergerAllowance(input workflowstate.MergerInput, now time.Time) error {
-	if !validWorkflowMergerLimits(input) {
+func checkAllowance(input workflowstate.MergerInput, now time.Time) error {
+	if !validLimits(input) {
 		return fmt.Errorf("%w: merger requires finite attempts and runtime", workflowstate.ErrConflict)
 	}
 
-	if !validWorkflowMergerDeadline(input, now) {
+	if !validDeadline(input, now) {
 		return fmt.Errorf("%w: merger deadline is stale or exceeds the worker timeout", workflowstate.ErrConflict)
 	}
 
@@ -78,13 +78,13 @@ func validateWorkflowMergerAllowance(input workflowstate.MergerInput, now time.T
 	return nil
 }
 
-// ValidateWorkflowMergerInput checks the full retained input, allowance and exact encoding hash.
-func ValidateWorkflowMergerInput(input workflowstate.MergerInput, now time.Time) error {
-	if err := validateWorkflowMergerInputContent(input, now); err != nil {
+// CheckInput checks the full retained input, allowance and exact encoding hash.
+func CheckInput(input workflowstate.MergerInput, now time.Time) error {
+	if err := checkInputContent(input, now); err != nil {
 		return err
 	}
 
-	hash, err := workflowMergerInputHash(input)
+	hash, err := inputHash(input)
 	if err != nil || !workflowstate.ValidFingerprint(input.InputHash) || hash != input.InputHash {
 		return fmt.Errorf("%w: merger input hash changed", workflowstate.ErrConflict)
 	}
@@ -92,16 +92,16 @@ func ValidateWorkflowMergerInput(input workflowstate.MergerInput, now time.Time)
 	return nil
 }
 
-func validateWorkflowMergerInputContent(input workflowstate.MergerInput, now time.Time) error {
-	if !validWorkflowMergerIdentity(input) || !validWorkflowMergerObjects(input) {
+func checkInputContent(input workflowstate.MergerInput, now time.Time) error {
+	if !validIdentity(input) || !validObjects(input) {
 		return fmt.Errorf("%w: invalid merger identity or objects", workflowstate.ErrConflict)
 	}
 
-	if err := validateWorkflowMergerRepository(input); err != nil {
+	if err := checkRepository(input); err != nil {
 		return err
 	}
 
-	if err := validateWorkflowMergerAllowance(input, now); err != nil {
+	if err := checkAllowance(input, now); err != nil {
 		return err
 	}
 
@@ -109,34 +109,34 @@ func validateWorkflowMergerInputContent(input workflowstate.MergerInput, now tim
 		return err
 	}
 
-	if err := validateWorkflowMergerIntent(input); err != nil {
+	if err := checkIntent(input); err != nil {
 		return err
 	}
 
-	return validateWorkflowMergerReferences(input)
+	return checkReferences(input)
 }
 
-func validateWorkflowMergerIntent(input workflowstate.MergerInput) error {
+func checkIntent(input workflowstate.MergerInput) error {
 	if len(input.Requirements) == 0 || len(input.Requirements) > workflowstate.PageLimit || len(input.Conflicts) > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowMergerRequirements(input.Requirements); err != nil {
+	if err := checkRequirements(input.Requirements); err != nil {
 		return err
 	}
 
-	if err := validateWorkflowMergerConflicts(input); err != nil {
+	if err := checkConflicts(input); err != nil {
 		return err
 	}
 
-	if err := validateWorkflowMergerReason(input); err != nil {
+	if err := checkReason(input); err != nil {
 		return err
 	}
 
-	return validateWorkflowMergerCheckpoint(input)
+	return checkCheckpoint(input)
 }
 
-func validateWorkflowMergerReason(input workflowstate.MergerInput) error {
+func checkReason(input workflowstate.MergerInput) error {
 	switch input.Reason {
 	case "preparation_conflict":
 		if len(input.Conflicts) == 0 {
@@ -153,7 +153,7 @@ func validateWorkflowMergerReason(input workflowstate.MergerInput) error {
 	return nil
 }
 
-func validateWorkflowMergerRepository(input workflowstate.MergerInput) error {
+func checkRepository(input workflowstate.MergerInput) error {
 	repository, err := workflowstate.CanonicalRepository(input.Repository)
 	if err != nil || repository != input.Repository || input.SourceRef == input.TargetRef {
 		return workflowstate.ErrConflict
@@ -168,7 +168,7 @@ func validateWorkflowMergerRepository(input workflowstate.MergerInput) error {
 	return nil
 }
 
-func workflowMergerInputHash(input workflowstate.MergerInput) (string, error) {
+func inputHash(input workflowstate.MergerInput) (string, error) {
 	input.InputHash = ""
 
 	data, err := json.Marshal(input)

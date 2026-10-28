@@ -14,7 +14,7 @@ func checkWorkflowMergerHarnessUsage(input workflowstate.MergerInput, certificat
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowmerge.ValidateWorkflowMergerReportedUsage(usage, input.TokenAllowance); err != nil {
+	if err := workflowmerge.CheckReportedUsage(usage, input.TokenAllowance); err != nil {
 		return err
 	}
 

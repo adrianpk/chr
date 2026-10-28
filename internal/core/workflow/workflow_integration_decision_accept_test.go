@@ -13,12 +13,12 @@ func TestNativeDecisionRepair(t *testing.T) {
 	f, request, harness, state := nativeMergerAcceptanceFixture(t, "merger-answer", "merge")
 	request.Input.Requirements[0].ConflictsWith = []string{"target-validation"}
 
-	input, err := workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	input, err := workflowmerge.SealInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	questions, err := workflowmerge.MergerRequiredDecisions(input)
+	questions, err := workflowmerge.RequiredDecisions(input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func nativeDecisionRepairRequest(t *testing.T, f workflowPreparationFixture, req
 	request.Input.OperatorDecisionRef, request.Input.OperatorAnswers = entry.DecisionRef, resolved.Answers
 	request.Input.Deadline = time.Now().UTC().Add(25 * time.Second)
 
-	request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	request.Input, err = workflowmerge.SealInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func nativeDecisionRepairRequest(t *testing.T, f workflowPreparationFixture, req
 
 	request.Input.RepairCheckpointRef = &ref
 
-	request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	request.Input, err = workflowmerge.SealInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}

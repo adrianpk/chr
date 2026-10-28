@@ -13,11 +13,11 @@ func validateWorkflowDecisionRecord(record IntegrationDecisions) error {
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowmerge.ValidateWorkflowMergerDecisions(record.Requests, record.Input); err != nil {
+	if err := workflowmerge.CheckDecisions(record.Requests, record.Input); err != nil {
 		return err
 	}
 
-	if err := workflowmerge.ValidateWorkflowMergerInput(record.Input, record.Input.AdmittedAt); err != nil {
+	if err := workflowmerge.CheckInput(record.Input, record.Input.AdmittedAt); err != nil {
 		return err
 	}
 
@@ -109,7 +109,7 @@ func validWorkflowDecisionAnswerSeal(record IntegrationDecisions, answer workflo
 }
 
 func validWorkflowDecisionAnswerActor(answer workflowstate.IntegrationAnswer) bool {
-	return workflowstate.ValidRequestKey(answer.ID) && workflowstate.ValidRequestKey(answer.Actor) && workflowmerge.ValidWorkflowMergerText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
+	return workflowstate.ValidRequestKey(answer.ID) && workflowstate.ValidRequestKey(answer.Actor) && workflowmerge.ValidText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
 }
 
 func validWorkflowDecisionInterpretation(question workflowstate.MergerDecision, answer workflowstate.IntegrationAnswer) bool {

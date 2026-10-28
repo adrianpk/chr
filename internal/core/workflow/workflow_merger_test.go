@@ -42,7 +42,7 @@ func nativeMergerInput(t *testing.T) (*Store, workflowstate.MergerInput, time.Ti
 	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
 	input.Conflicts = []workflowstate.MergerConflict{{ID: "conflict-1", Path: "src/service.go", Kind: "text", Evidence: source, RequirementIDs: []string{"source-api", "target-validation"}}}
 
-	sealed, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	sealed, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestNativeMergerProtocol(t *testing.T) {
 				result.Failure = "No compatible repair was found within the bounded call."
 			}
 
-			parsed, err := workflowmerge.ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowmerge.WorkflowMergerFence(input), now)
+			parsed, err := workflowmerge.ParseResult(nativeMergerJSON(t, result), input, workflowmerge.InputFence(input), now)
 			if err != nil || !workflowNativeJSONEqual(parsed, result) {
 				t.Fatal("valid proposal lost its immutable binding", err)
 			}
@@ -123,7 +123,7 @@ func TestNativeMergerMalformed(t *testing.T) {
 
 	for name, data := range cases {
 		t.Run(name, func(t *testing.T) {
-			if _, err := workflowmerge.ParseWorkflowMergerResult([]byte(data), input, workflowmerge.WorkflowMergerFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.ParseResult([]byte(data), input, workflowmerge.InputFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("malformed or authority-bearing proposal was accepted", err)
 			}
 		})
@@ -134,34 +134,34 @@ func TestNativeMergerMalformed(t *testing.T) {
 // changes, without trusting a role's unchanged input hash or success narrative.
 func TestNativeMergerFence(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
-	cases := map[string]func(*workflowmerge.MergerFence){
-		"entry":      func(f *workflowmerge.MergerFence) { f.EntryID = contenthash.Sum([]byte("other")) },
-		"candidate":  func(f *workflowmerge.MergerFence) { f.CandidateHash = contenthash.Sum([]byte("new candidate")) },
-		"revision":   func(f *workflowmerge.MergerFence) { f.CandidateRevision++ },
-		"generation": func(f *workflowmerge.MergerFence) { f.ClaimGeneration++ },
-		"scope":      func(f *workflowmerge.MergerFence) { f.ScopeHash = contenthash.Sum([]byte("expanded scope")) },
-		"workspace":  func(f *workflowmerge.MergerFence) { f.OwnedWorkspaceID = contenthash.Sum([]byte("user checkout")) },
-		"source":     func(f *workflowmerge.MergerFence) { f.Source = strings.Repeat("3", 40) },
-		"base":       func(f *workflowmerge.MergerFence) { f.Base = strings.Repeat("4", 40) },
-		"method":     func(f *workflowmerge.MergerFence) { f.Method = "squash" },
-		"target":     func(f *workflowmerge.MergerFence) { f.TargetRef = "refs/heads/main" },
-		"repository": func(f *workflowmerge.MergerFence) { f.Repository = "https://forge.example.test/testing/other" },
-		"unit":       func(f *workflowmerge.MergerFence) { f.Unit.ID = "slice-2" },
+	cases := map[string]func(*workflowmerge.Fence){
+		"entry":      func(f *workflowmerge.Fence) { f.EntryID = contenthash.Sum([]byte("other")) },
+		"candidate":  func(f *workflowmerge.Fence) { f.CandidateHash = contenthash.Sum([]byte("new candidate")) },
+		"revision":   func(f *workflowmerge.Fence) { f.CandidateRevision++ },
+		"generation": func(f *workflowmerge.Fence) { f.ClaimGeneration++ },
+		"scope":      func(f *workflowmerge.Fence) { f.ScopeHash = contenthash.Sum([]byte("expanded scope")) },
+		"workspace":  func(f *workflowmerge.Fence) { f.OwnedWorkspaceID = contenthash.Sum([]byte("user checkout")) },
+		"source":     func(f *workflowmerge.Fence) { f.Source = strings.Repeat("3", 40) },
+		"base":       func(f *workflowmerge.Fence) { f.Base = strings.Repeat("4", 40) },
+		"method":     func(f *workflowmerge.Fence) { f.Method = "squash" },
+		"target":     func(f *workflowmerge.Fence) { f.TargetRef = "refs/heads/main" },
+		"repository": func(f *workflowmerge.Fence) { f.Repository = "https://forge.example.test/testing/other" },
+		"unit":       func(f *workflowmerge.Fence) { f.Unit.ID = "slice-2" },
 	}
 	data := nativeMergerJSON(t, nativeMergerResolved(input))
 
 	for name, mutate := range cases {
 		t.Run(name, func(t *testing.T) {
-			current := workflowmerge.WorkflowMergerFence(input)
+			current := workflowmerge.InputFence(input)
 			mutate(&current)
 
-			if _, err := workflowmerge.ParseWorkflowMergerResult(data, input, current, now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.ParseResult(data, input, current, now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale proposal passed the host fence", err)
 			}
 		})
 	}
 
-	if _, err := workflowmerge.ParseWorkflowMergerResult(data, input, workflowmerge.WorkflowMergerFence(input), input.Deadline); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := workflowmerge.ParseResult(data, input, workflowmerge.InputFence(input), input.Deadline); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("elapsed deadline was treated as continuing authority", err)
 	}
 }
@@ -172,7 +172,7 @@ func TestNativeMergerUsage(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
 	input.TokenAllowance = &workflowstate.TokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("harness")), Deadline: input.Deadline}
 
-	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func TestNativeMergerUsage(t *testing.T) {
 			result := nativeMergerResolved(input)
 			result.Usage = test.usage
 
-			_, err := workflowmerge.ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowmerge.WorkflowMergerFence(input), now)
+			_, err := workflowmerge.ParseResult(nativeMergerJSON(t, result), input, workflowmerge.InputFence(input), now)
 			if (err == nil) != test.valid {
 				t.Fatal("usage escaped the immutable call allowance", err)
 			}

@@ -79,13 +79,13 @@ func checkWorkflowMergerEntry(run workflowInvocationFile, entry IntegrationEntry
 		hash = entry.CandidateRef.Hash
 	}
 
-	current := workflowmerge.MergerFence{
+	current := workflowmerge.Fence{
 		EntryID: entry.ID, CandidateHash: hash, ScopeHash: entry.FrozenScopeHash,
 		OwnedWorkspaceID: workflowMergerWorkspaceID(input), Source: run.Lane.HeadCommit, Base: input.Base,
 		Method: input.Method, Unit: entry.Unit, CandidateRevision: entry.StateRevision,
 		ClaimGeneration: entry.ClaimGeneration, Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef,
 	}
-	if input.InvocationID != run.ID || current != workflowmerge.WorkflowMergerFence(input) {
+	if input.InvocationID != run.ID || current != workflowmerge.InputFence(input) {
 		return workflowstate.ErrConflict
 	}
 

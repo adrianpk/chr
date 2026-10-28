@@ -26,7 +26,7 @@ func (s *Store) persistWorkflowMergerClaim(ctx context.Context, run workflowInvo
 
 	budget.Reservations = append(budget.Reservations, reservation)
 
-	input, err = workflowmerge.SealWorkflowMergerInput(input, time.Now().UTC())
+	input, err = workflowmerge.SealInput(input, time.Now().UTC())
 	if err != nil {
 		return nil, workflowPreparedTask{}, err
 	}

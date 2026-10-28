@@ -43,7 +43,7 @@ func TestNativeMergerCheckpointBinding(t *testing.T) {
 	f, request, harness, _ := nativeMergerAcceptanceFixture(t, "merger-checkpoint-binding", "merge")
 	request.Input.CandidateRevision++
 
-	input, err := workflowmerge.SealWorkflowMergerInput(request.Input, request.Input.AdmittedAt)
+	input, err := workflowmerge.SealInput(request.Input, request.Input.AdmittedAt)
 	if err != nil {
 		t.Fatal(err)
 	}

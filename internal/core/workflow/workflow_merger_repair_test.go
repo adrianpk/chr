@@ -63,7 +63,7 @@ func nativeMergerTreeRepair(t *testing.T, state MergerRepairState, path, content
 		input.HistoryCheckpoint = nativeMergerReplayCheckpoint(t, state)
 	}
 
-	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}

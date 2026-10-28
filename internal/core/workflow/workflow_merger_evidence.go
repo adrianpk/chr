@@ -13,7 +13,7 @@ import (
 // CheckWorkflowMergerEvidence reads immutable evidence through the existing
 // contained store port. It neither mutates an invocation nor acquires a slot.
 func (s *Store) CheckWorkflowMergerEvidence(ctx context.Context, input workflowstate.MergerInput, now time.Time) error {
-	if err := workflowmerge.ValidateWorkflowMergerInput(input, now); err != nil {
+	if err := workflowmerge.CheckInput(input, now); err != nil {
 		return err
 	}
 

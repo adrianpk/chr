@@ -14,7 +14,7 @@ func workflowMergerTokenSettlement(reservation *IntegrationReservation, result M
 		return workflowstate.FileChange{}, nil
 	}
 
-	if err := workflowmerge.ValidateWorkflowMergerReportedUsage(usage, result.Input.TokenAllowance); err != nil {
+	if err := workflowmerge.CheckReportedUsage(usage, result.Input.TokenAllowance); err != nil {
 		return workflowstate.FileChange{}, err
 	}
 

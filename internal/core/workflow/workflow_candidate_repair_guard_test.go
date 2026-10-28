@@ -38,7 +38,7 @@ func nativeCandidateRepairGuard(t *testing.T, change string) {
 
 	var err error
 
-	request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	request.Input, err = workflowmerge.SealInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}

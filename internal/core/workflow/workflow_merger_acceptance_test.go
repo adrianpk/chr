@@ -47,7 +47,7 @@ func nativeMergerAcceptanceFixture(t *testing.T, id, method string) (workflowPre
 
 	request.Input.Deadline = time.Now().UTC().Add(25 * time.Second)
 
-	request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	request.Input, err = workflowmerge.SealInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}

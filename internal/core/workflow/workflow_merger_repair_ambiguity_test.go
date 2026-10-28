@@ -18,7 +18,7 @@ func TestNativeMergerAmbiguity(t *testing.T) {
 	other.ID, other.Path = "conflict-2", "next.txt"
 	input.Conflicts = append(input.Conflicts, other)
 
-	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
