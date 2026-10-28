@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -56,9 +55,7 @@ func (s *Store) CloseWorkflowSet(ctx context.Context, request SetClosureRequest,
 	}
 	defer func() { err = errors.Join(err, claim.worker.releaseReservation()) }()
 
-	var gate workflowcloseout.Gate = workflowClosingGate{store: s, claim: claim}
-
-	receipt, gateErr := gate.Execute(ctx)
+	receipt, gateErr := s.executeWorkflowClosing(ctx, claim)
 
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Minute)
 	defer cancel()

@@ -6,8 +6,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowClosingLeaseSeconds preserves the existing closing contract.
-func WorkflowClosingLeaseSeconds(validation workflowstate.Validation) time.Duration {
+// LeaseDuration preserves the finite closing lease, including the waiver bound.
+func LeaseDuration(validation workflowstate.Validation) time.Duration {
 	if !validation.Required {
 		return time.Minute
 	}

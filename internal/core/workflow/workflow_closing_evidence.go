@@ -170,5 +170,5 @@ func (s *Store) checkWorkflowClosingResult(state workflowClosingAttempt) error {
 		return workflowstate.ErrConflict
 	}
 
-	return workflowcloseout.ValidateWorkflowClosingResults(input.Validation, receipt)
+	return workflowcloseout.CheckResults(input.Validation, receipt)
 }

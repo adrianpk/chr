@@ -132,7 +132,7 @@ func validateWorkflowTaskEvidence(t Task) error {
 }
 
 func validateWorkflowSet(s workflowstate.WorkflowSet) error {
-	if err := workflowcloseout.ValidateWorkflowClosingBinding(s); err != nil {
+	if err := workflowcloseout.CheckBinding(s); err != nil {
 		return err
 	}
 

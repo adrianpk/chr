@@ -6,8 +6,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ValidateWorkflowClosingResults preserves the existing closing contract.
-func ValidateWorkflowClosingResults(gate workflowstate.Validation, receipt workflowstate.ClosingReceipt) error {
+// CheckResults validates ordered command results, including failed partial output.
+func CheckResults(gate workflowstate.Validation, receipt workflowstate.ClosingReceipt) error {
 	if len(receipt.Validation) > len(gate.Commands) || receipt.Outcome == "completed" && len(receipt.Validation) != len(gate.Commands) {
 		return workflowstate.ErrConflict
 	}

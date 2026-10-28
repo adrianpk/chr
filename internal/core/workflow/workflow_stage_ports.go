@@ -47,20 +47,29 @@ func (operation workflowSubmissionResponses) Retain(ctx context.Context, respons
 	return operation.store.retainWorkflowSubmissionResponse(ctx, operation, response)
 }
 
-type workflowClosingGate struct {
+type workflowClosingWorkspace struct {
 	store *Store
 	claim *workflowClosingClaim
 }
 
-func (operation workflowClosingGate) Execute(ctx context.Context) (workflowstate.ClosingReceipt, error) {
-	return operation.store.executeWorkflowClosing(ctx, operation.claim)
+func (operation workflowClosingWorkspace) Prepare(ctx context.Context) (string, error) {
+	return operation.store.prepareWorkflowClosingCheckout(ctx, operation.claim)
+}
+
+func (operation workflowClosingWorkspace) Check(ctx context.Context, directory string) error {
+	return checkWorkflowClosingCheckout(ctx, directory, operation.claim.input)
+}
+
+func (operation workflowClosingWorkspace) Run(ctx context.Context, directory string, command []string) (workflowstate.CommandResult, error) {
+	return operation.store.runWorkflowClosingCommand(ctx, operation.claim, directory, command)
 }
 
 var (
 	_ workflowintegrate.Validation = workflowIntegrationValidation{}
 	_ workflowreview.Decisions     = workflowReviewDecisions{}
 	_ workflowforge.Responses      = workflowSubmissionResponses{}
-	_ workflowcloseout.Gate        = workflowClosingGate{}
+	_ workflowcloseout.Workspace   = workflowClosingWorkspace{}
+	_ workflowcloseout.Commands    = workflowClosingWorkspace{}
 )
 
 // workflowIntegrationRepairs composes pure repair checks without sibling imports.

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -23,30 +24,9 @@ func (s *Store) executeWorkflowClosing(ctx context.Context, claim *workflowClosi
 		ctx = watched
 	}
 
-	receipt := workflowstate.ClosingReceipt{ClosingInput: claim.input, Input: claim.state.Input, Waiver: claim.input.Validation.WaiverReason}
-	receipt.Schema, receipt.Outcome = "chr-set-closure/v1", "closing_validation_failed"
+	workspace := workflowClosingWorkspace{store: s, claim: claim}
 
-	worktree, err := s.prepareWorkflowClosingCheckout(ctx, claim)
-	if err != nil {
-		return receipt, err
-	}
-
-	for _, command := range claim.input.Validation.Commands {
-		result, err := s.runWorkflowClosingCommand(ctx, claim, worktree, command)
-
-		receipt.Validation = append(receipt.Validation, result)
-		if err != nil || result.ExitCode != 0 {
-			return receipt, errorsOrConflict(err)
-		}
-	}
-
-	if err := checkWorkflowClosingCheckout(ctx, worktree, claim.input); err != nil {
-		return receipt, err
-	}
-
-	receipt.Outcome = "completed"
-
-	return receipt, ctx.Err()
+	return workflowcloseout.Execute(ctx, workflowcloseout.Execution{Input: claim.input, Evidence: claim.state.Input}, workspace, workspace)
 }
 
 func (s *Store) prepareWorkflowClosingCheckout(ctx context.Context, claim *workflowClosingClaim) (string, error) {

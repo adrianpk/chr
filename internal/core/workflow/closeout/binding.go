@@ -7,8 +7,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ValidateWorkflowClosingBinding preserves the existing closing contract.
-func ValidateWorkflowClosingBinding(set workflowstate.WorkflowSet) error {
+// CheckBinding checks the bounded retained attempt references before reading evidence.
+func CheckBinding(set workflowstate.WorkflowSet) error {
 	if set.Closing == nil {
 		return nil
 	}

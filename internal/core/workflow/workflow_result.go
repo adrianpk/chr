@@ -128,7 +128,7 @@ func (s *Store) workflowResultClosure(closure InvocationClosure) (ResultClosure,
 		return ResultClosure{}, err
 	}
 
-	if err := workflowcloseout.ValidateWorkflowClosingResults(receipt.ClosingInput.Validation, receipt); err != nil {
+	if err := workflowcloseout.CheckResults(receipt.ClosingInput.Validation, receipt); err != nil {
 		return ResultClosure{}, err
 	}
 
