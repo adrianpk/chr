@@ -101,6 +101,10 @@ is retained with that head by the controller and the canonical PR. Task-level
 successful commands and evidence follow; they do not substitute for that final
 head-bound validation.
 
+The first final `make verify` stopped at `nlreturn` for the repair-port adapter
+return separator. The formatting is corrected; the controller reruns the ordered
+checks for the replacement clean head.
+
 - `go test ./internal/core/workflow ./scripts/goquality -run '^Test(WorkflowPreparation(Methods|GateFailure|Stop|Guard|Journal)|NativePreparation(Methods|Failure|Stop)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; ten top-level checks, including real Git, stop, failure, journal/restart and frozen wire evidence. The existing runner owns and cleans its fixtures.
 
 - `go test ./internal/core/workflow/integrate -count=1`: pass; deadline versus stop, detached acceptance, error preservation and accepted candidate retention.

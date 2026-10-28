@@ -70,6 +70,7 @@ func (workflowIntegrationRepairs) Check(proof workflowstate.IntegrationProof) er
 	if err := workflowmerge.CheckRepairs(proof); err != nil {
 		return err
 	}
+
 	return workflowmerge.CheckHistory(proof)
 }
 
