@@ -30,6 +30,7 @@ their owning Go type. The ticket-projection prerequisite is implemented in
 `a96c05cee2000654f23e2ce0b0347b1155ec17ca`. Shared stage data belongs in workflow/state when needed
 without transferring persistence, coordination or transport behavior. The shared
 configuration prerequisite is implemented in `bedb07a4cca4d39c5f7099d594a83c6650002398`.
+The shared ticket text prerequisite is implemented in `3fb0f46aff5421452d6b602fe91e4e483e93dfbc`.
 
 ## Contracts Added or Changed
 

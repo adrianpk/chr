@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-12
 source: review
 reported_at: 2026-10-26T08:48:32Z
-commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398]
+commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398, 3fb0f46aff5421452d6b602fe91e4e483e93dfbc]
 started_at: 2026-10-27T23:03:10Z
 branch: refactor/slice-12-quality-workflow
 ready_at: 2026-10-26T08:57:09Z
@@ -105,6 +105,7 @@ existing Slice 15 upgrade-journal tuple now qualifies the same Config value;
 no new signature debt or relaxed check is introduced.
 
 
+The ticket text prerequisite is implemented in `3fb0f46aff5421452d6b602fe91e4e483e93dfbc`.
 Shared ticket frontmatter edits and ranges now have the existing ticket/metadata
 owner: ten declaration moves and one zero-width use of ops/metadata.ReplaceLines.
 Token/body comparison preserves required-field errors, delimiter/body bytes,
