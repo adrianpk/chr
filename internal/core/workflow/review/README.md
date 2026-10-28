@@ -2,19 +2,31 @@
 
 ## Purpose
 
-This package owns the consumer contract for review decision acceptance.
+This package owns immutable review input and decision policy and the bounded
+completion flow that consumes the host's guarded decision-acceptance port.
 
 ## Contract
 
-`Decisions` is used by `Store.reviewWorkflowSlice`. Accept binds the role decision, execution failure and interruption to the reserved claim and exact input. Current policy, approval, repair and receipt guards remain with the owner.
+`InputBytes`, `InputHash` and `CheckInputHash` retain the bounded JSON and exact
+input binding. `ParseDecision` rejects unknown fields, trailing output and invalid
+decisions before acceptance. `CheckPolicy` and `DecisionState` preserve the current
+policy rules and stored state spellings.
 
-The contract imports shared `workflow/state` protocol values. The workflow owner
-implements it with the existing operations and retains claims, reservations,
-source/revision guards, repository locks, journals, atomic writes and recovery.
-The port exposes the required operation without exposing a mutable store.
+`Complete` combines one role's observed output/failure with its immutable input,
+observes the watched context's interruption and calls `Decisions.Accept` within
+the five-second detached cleanup bound. `Result` retains the partial binding and
+role-selected repair task key. Command supervision and subsequent repair use the
+host-owned lifecycle and original operation context.
+
+The private workflow adapter binds claim, prepared input and provider. It retains
+credential/execution/current-input checks, explicit human approval, repair budgets,
+repository locks, journals, atomic writes and recovery. No mutable Store or claim
+capability is exposed to this package.
 
 ## Validation
 
-Existing workflow integration tests exercise this binding through real Git,
-filesystem and process fixtures. The production dependency check permits shared
-state and rejects coordinator, filesystem mutation and configuration imports.
+Existing real Git, filesystem and process fixtures cover policy changes, source
+and provider fences, repairs, interruption and journal recovery. Focused races cover
+concurrent review, IO, stop and native provider fences. The dependency checker
+permits only shared `workflow/state` and `contenthash` module dependencies, and
+rejects coordinator, configuration and mutation imports.

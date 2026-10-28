@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-14
 source: review
 reported_at: 2026-10-26T08:48:34Z
-commits: []
+commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6]
 started_at: 2026-10-28T04:43:13Z
 branch: refactor/slice-14-quality-publication
 ready_at: 2026-10-26T08:57:09Z
@@ -57,6 +57,15 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 
 Existing native provider/transport permission and review fixtures through local HTTP/Git; existing review/publication receipt tests; make verify.
 
-All commands above are planned. None ran as implementation validation during this planning task.
+Task checks for the review extraction and bounded completion pass: 26 real
+review/policy/journal tests, six focused race/wire/dependency checks, pinned strict
+lint and `make check-go-style`. Exact commands are in the canonical report.
+`make verify` and publication/receipt selections remain pending.
 
-Slice 13 PR #450 is verified merged into dev at `53b2adb23b9b1d20529d00bbe3b32b3be5990b4e`. Slice 14 is active. The assigned signature ledger freezes all 61 original rows and their current declarations; stage ownership and runtime changes are not yet claimed.
+Slice 13 PR #450 is verified merged into dev at
+`53b2adb23b9b1d20529d00bbe3b32b3be5990b4e`. Slice 14 is active. The separate
+mechanical review move preserves all eight normalized declaration streams;
+completion uses the existing consumer-owned port with host claim/process/write
+authority retained. Two assigned category A rows are implemented and 59 rows are
+pending; exact debt is 60. Forge extraction, native binding policy and remaining
+state/flag/error/glossary work must finish before a PR is ready.
