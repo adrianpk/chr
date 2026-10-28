@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-13
 source: review
 reported_at: 2026-10-26T08:48:33Z
-commits: [290ebfc8f299cf5ab2a6ef28174b44d2b34b18bb, 05a7a106029d64ee5aa1ba8b62703afc40437d72, c7a15133e0a07f8eb3fec735e36c967730aff038, 962e03aef96bf7aefd2b075fe218041b9cd00dc6, 8e3630b9b074ec7b15d7b0de252429c3844dd283, af02c72f04ec8fb1c8554f7fa777a2e18958dacc, a4fa20fe7344c49dbc164e726dcac9883b574c32, 7f2d18b1a04821084af93f0c825d3f3376c791cf]
+commits: [290ebfc8f299cf5ab2a6ef28174b44d2b34b18bb, 05a7a106029d64ee5aa1ba8b62703afc40437d72, c7a15133e0a07f8eb3fec735e36c967730aff038, 962e03aef96bf7aefd2b075fe218041b9cd00dc6, 8e3630b9b074ec7b15d7b0de252429c3844dd283, af02c72f04ec8fb1c8554f7fa777a2e18958dacc, a4fa20fe7344c49dbc164e726dcac9883b574c32, 7f2d18b1a04821084af93f0c825d3f3376c791cf, d9bfaa918823edcdeb698e7fff13139663ce9d63, 77b24972b7361457978889a8f7f69476fae8d860, 40ab73aaaed653ee7606801c09f9ad43b2e933c1]
 started_at: 2026-10-28T02:15:11Z
 branch: refactor/slice-13-quality-integration
 ready_at: 2026-10-26T08:57:09Z
@@ -60,10 +60,13 @@ Existing preparation/admission/merger repair/cancellation and lost-ack fixtures 
 All commands above are planned. None ran as implementation validation during this planning task.
 
 Slice 12 PR #449 is verified integrated at
-`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Candidate validation and merger policy extraction are active. The merge stage now
-owns immutable input/result/intent/decision validation; shared lexical checks live
-in state. Thirty-eight assigned signature rows are implemented; 49 remain pending.
-The exact debt manifest has 87 entries. Strict lint, 26 focused real Git/process,
-wire and dependency checks and nine focused race checks pass. All 908 Store
-methods retain their local authority, and the owned-fixture runner completed
-cleanup. No Slice 13 PR or final controller validation has been completed.
+`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Candidate validation and merger policy extraction are active. All 87 assigned
+signature rows are reconciled: 64 have implemented replacements and 23 retain
+specific cohesive five-parameter contracts. No Slice 13 signature debt remains;
+the exact repository manifest has 62 entries owned by the remaining slices.
+Thirty additional attribution/replay/signature declarations have the integrate
+owner with exact mechanical token evidence. Strict lint, 41 focused real boundary
+checks, seven race checks, 12 candidate extraction checks and 16 naming/mode checks
+pass. The 908 Store methods retain their local authority. Remaining candidate and
+repair policy assembly and stored-state entries are still assigned here. No
+Slice 13 PR or final controller validation has been completed.

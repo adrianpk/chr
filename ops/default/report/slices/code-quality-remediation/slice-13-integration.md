@@ -22,9 +22,10 @@ Nine preparation declarations now use named selection, claim, observation and
 Git results or bound completion inputs. Partial inputs on failure, cache presence,
 reservation release and the existing transaction order are preserved. A private
 failure mode replaces the actionable/target-moved pair with the same precedence.
-The preparation, broker/driver and merger admission/repair contracts implement
-38 of 87 assigned signature rows; 49 remain pending. The exact debt manifest now
-has 87 entries at ceiling six, with one external exception.
+All 87 assigned signature rows are reconciled: 64 have implemented replacements
+and 23 retain specific cohesive five-parameter contracts. The exact repository
+debt manifest now has 62 entries, with no Slice 13 signature entry, at ceiling
+six and one external exception.
 
 The first merge batch relocates 28 broker, JSON, path/scope and contained-tool
 declarations into workflow/merge. The mechanical commit preserves declaration
@@ -56,6 +57,22 @@ Role reservation, lease/generation checks, immutable evidence reads, host Git
 continuation, journal writes and resource cleanup retain their existing owner
 and order.
 
+Named evidence, budget/grant, scheduler, delivery, signing and retry results
+preserve absent, present and failed outcomes, including partial values. The last
+six high-arity inputs now bind their actual snapshot, replay or commit data.
+
+The next mechanical extraction moves 30 attribution, provenance/replay,
+preparation identity/collision and signing declarations into integrate. All 30
+declaration token streams match after owner naming in the mechanical commit.
+Production callers now use integrate.ParseCommit, integrate.SignaturePayload,
+integrate.DistinctResult and the named provenance/signing checks directly. Git
+reads/writes, private signer access, source/target observation and guarded
+acceptance remain with their native host/Store owners. Typed committer and
+merge-tree modes preserve their original rules. Eight owned production close
+suppressions have precise explanations. The
+[boundary ledger](../../../plan/code-quality-remediation-slice-13-boundaries.csv)
+records these decisions and the stored-state work still pending.
+
 ## Implementation Notes
 
 The predecessor PR #449 is verified merged into dev at
@@ -72,6 +89,10 @@ Completed task commits:
 - Merger stage naming: `a4fa20fe7344c49dbc164e726dcac9883b574c32`.
 - Named merger claims and repair observations: `7f2d18b1a04821084af93f0c825d3f3376c791cf`.
 
+- Named evidence/budget/scheduling contracts: `d9bfaa918823edcdeb698e7fff13139663ce9d63`.
+- Mechanical integrate attribution/signing policy: `77b24972b7361457978889a8f7f69476fae8d860`.
+- Candidate API names, explicit modes and close explanations: `40ab73aaaed653ee7606801c09f9ad43b2e933c1`.
+
 All 908 Store methods retain one local receiver owner. Current method and move
 hashes follow these changes while their original source identities/hashes remain
 frozen. The current-file owner map records the actual stage files and private
@@ -82,7 +103,9 @@ preparation resource bindings.
 `ValidationInput` carries immutable candidate identity, preparation, lane and
 initial task result. The stage consumes `Validation`; it receives neither a
 mutable store nor claim/process resources. Execution and stop contexts remain
-explicit parameters. The stage import bound remains shared-state-only. No alias
+explicit parameters. The integrate module dependency bound is shared state plus contenthash for
+existing retained checksums; coordinator, configuration and mutation authorities
+remain blocked. No alias
 or forwarding compatibility layer retains the moved names.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-13-moves.csv)
@@ -117,8 +140,17 @@ retains the frozen source identities and hashes for the extracted policy.
 - `make check-go-style`: pass on the current contracts; ceiling six, 87 exact debt entries, one external exception.
 - `scripts/check-package-readmes.sh`: pass.
 
+- `go test ./internal/core/workflow ./internal/app ./scripts/goquality -run '^Test(NativeBudget(Bounds|Grants|Recovery|Legacy|Unknown)|NativeSchedule(Order|Waits|Tasks|Prerequisite|NoReplay|Inputs)|NativeDecision(Answer|Guards|Retry|Defer|Replay|IntegrationFix|Batch)|NativeReplay(Proof|Guard|Fix|Blocked|Observation)|NativePreparation(Signing|Methods)|NativeSigningBlocked|NativeCandidate(Repair|Clean)|WorkflowPreparation(Methods|Unsupported|Conflict|Journal)|WorkflowIntegration(Methods|Reject|WrongMethod|ChangedInput|History|HostConfig|Cancelled)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v`: pass; 41 top-level checks after named evidence/budget/scheduler and remaining high-arity contracts. Real budget/grant/recovery, selection exclusions, decisions/retry, signing/replay, candidate repair, preparation and delivery pass.
+- `go test -race ./internal/core/workflow ./scripts/goquality -run '^Test(NativeBudgetRace|NativeScheduleWaits|NativeDecisionRetry|WorkflowPreparationRetryAuthority|NativeHostPreparationRetry|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=10m -v`: pass; seven top-level checks for budget concurrency, scheduler waits, decision retry and authorized interrupted-preparation retry. The owned-fixture runner completes cleanup.
+- `go test ./internal/core/workflow ./internal/core/workflow/integrate ./internal/app ./scripts/goquality -run '^Test(WorkflowPreparationMethods|WorkflowIntegrationMethods|NativePreparationSigning|NativeSigningBlocked|NativeReplay(Proof|Guard|Fix)|NativePreparationCollision|NativeCollisionBudget|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; 12 top-level checks after the 30-declaration mechanical move, including actual Git signing, replay, collision bounds, method proof and frozen wire/dependency checks.
+- `go test ./internal/core/workflow ./internal/core/workflow/integrate ./internal/core/workflow/merge ./internal/app ./scripts/goquality -run '^Test(NativePreparationSigning|NativeSigningBlocked|NativeReplay(Proof|Fix)|NativeMerger(ReplaySteps|RepairProof|Semantic|Fix|HostRegeneration|HostRegenerationFailure|Execution|Descendants|Stop)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; 16 top-level checks after candidate naming, explicit modes and narrow predecessor observation. Real signing/replay, semantic repair, host regeneration failures and supervised process/descendant cleanup pass. No owned fixtures remain.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality`: zero issues on the current candidate naming/mode contracts.
+- `make check-go-style`: pass; ceiling six, 62 exact debt entries, one external exception. All 87 assigned Slice 13 rows satisfy the final five-parameter/result policy.
+- `scripts/check-package-readmes.sh`: pass.
+
 ## Risks and Follow-ups
 
-Forty-nine assigned signature rows and remaining candidate/repair policy and
-minor entries remain. The slice is active; final controller validation and the
-canonical PR are pending.
+Remaining candidate proof/capability assembly and semantic/tree-repair policy
+still need their final stage boundaries. The boundary ledger retains three
+pending stored-state entries. The slice is active; final controller validation
+and the canonical PR are pending.
