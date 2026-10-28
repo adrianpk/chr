@@ -59,7 +59,7 @@ func checkWorkflowUpgradePending(t *testing.T, store *Store, opts UpgradeOptions
 		t.Fatal("partial upgrade exposed policy")
 	}
 
-	if _, err := store.workflowReviewPolicy(workflowInvocationFile{}); err == nil {
+	if _, err := store.readWorkflowReviewPolicy(workflowInvocationFile{}); err == nil {
 		t.Fatal("partial upgrade exposed publication policy")
 	}
 

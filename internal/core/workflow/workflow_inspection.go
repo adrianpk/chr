@@ -37,7 +37,7 @@ func (s *Store) InspectWorkflow(ctx context.Context, id string) (result Inspecti
 
 		result.Invocation = invocationLocation.Run.Invocation
 
-		result.Policy, readErr = invocationLocation.Owner.workflowReviewPolicy(invocationLocation.Run)
+		result.Policy, readErr = invocationLocation.Owner.readWorkflowReviewPolicy(invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
@@ -65,7 +65,7 @@ func (s *Store) InspectWorkflowPolicy(ctx context.Context) (policy workflowstate
 	err = s.withWorkflowInspection(ctx, func() error {
 		var readErr error
 
-		policy, readErr = s.workflowReviewPolicy(workflowInvocationFile{})
+		policy, readErr = s.readWorkflowReviewPolicy(workflowInvocationFile{})
 
 		return readErr
 	})

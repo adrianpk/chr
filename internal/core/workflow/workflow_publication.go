@@ -155,7 +155,7 @@ func (s *Store) reconcileWorkflowPublicationCheckpoint(ctx context.Context, run 
 }
 
 func (s *Store) finalizeWorkflowObservedPublication(ctx context.Context, run workflowInvocationFile, journal workflowSubmissionJournal, ports PublicationPorts) (workflowPublicationCheckpoint, error) {
-	policy, err := s.workflowReviewPolicy(run)
+	policy, err := s.readWorkflowReviewPolicy(run)
 	if len(journal.Attempts) > 0 && workflowSubmissionMatchesCandidate(run, journal.Attempts[len(journal.Attempts)-1]) {
 		policy, err = journal.Attempts[len(journal.Attempts)-1].Guard.Policy, nil
 	}

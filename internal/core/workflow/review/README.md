@@ -12,6 +12,12 @@ input binding. `ParseDecision` rejects unknown fields, trailing output and inval
 decisions before acceptance. `CheckPolicy` and `DecisionState` preserve the current
 policy rules and stored state spellings.
 
+`Prepare` selects human waiting, the exact trusted decision or validated agentic
+execution without claiming or writing. `Restrict` applies the existing human-only
+invocation override by value. The host reads configuration and applies admission
+inside the original Store lock, retaining explicit approval, atomic decisions
+and reservation ownership. Only trusted admission reads the retained binding.
+
 `Complete` combines one role's observed output/failure with its immutable input,
 observes the watched context's interruption and calls `Decisions.Accept` within
 the five-second detached cleanup bound. `Result` retains the partial binding and

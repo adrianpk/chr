@@ -108,7 +108,7 @@ func (s *Store) readWorkflowMergerCheckpoint(input workflowstate.MergerInput) (M
 }
 
 func (s *Store) checkWorkflowMergerCheckpointOwner(run workflowInvocationFile, entry IntegrationEntry, state MergerRepairState) error {
-	policy, err := s.workflowReviewPolicy(run)
+	policy, err := s.readWorkflowReviewPolicy(run)
 	if err != nil || run.Lane == nil {
 		return workflowstate.ErrConflict
 	}

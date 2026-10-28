@@ -25,7 +25,7 @@ func (adapter *NativeReviewAdapter) ReadWorkflowNativePolicy(ctx context.Context
 		return workflowstate.NativePolicy{}, fmt.Errorf("%w: source ownership or method is outside the publisher profile", workflowstate.ErrAtomicGuard)
 	}
 
-	policy, err := owner.workflowReviewPolicy(run)
+	policy, err := owner.readWorkflowReviewPolicy(run)
 	if err != nil || policy.Method != method {
 		return workflowstate.NativePolicy{}, workflowstate.ErrConflict
 	}

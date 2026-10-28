@@ -128,7 +128,7 @@ func TestWorkflowReviewRestriction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	policy, err := store.workflowReviewPolicy(file)
+	policy, err := store.readWorkflowReviewPolicy(file)
 	if err != nil || policy.Mode != workflowstate.ReviewHuman || policy.Source != "invocation_restriction" {
 		t.Fatal("invocation relaxed project policy")
 	}

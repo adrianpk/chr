@@ -102,7 +102,7 @@ func checkWorkflowMergerEntry(run workflowInvocationFile, entry IntegrationEntry
 }
 
 func (s *Store) workflowMergerSeed(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, input workflowstate.MergerInput) (string, error) {
-	policy, err := s.workflowReviewPolicy(run)
+	policy, err := s.readWorkflowReviewPolicy(run)
 	if err != nil || policy.Method != input.Method {
 		return "", workflowstate.ErrConflict
 	}

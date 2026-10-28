@@ -56,7 +56,7 @@ func (s *Store) workflowReviewSourceInputs(ctx context.Context, run workflowInvo
 		return workflowReviewObservation{Observation: observation, Input: workflowstate.ReviewInput{}}, err
 	}
 
-	policy, err := s.workflowReviewPolicy(run)
+	policy, err := s.readWorkflowReviewPolicy(run)
 	if err != nil {
 		return workflowReviewObservation{Observation: observation, Input: workflowstate.ReviewInput{}}, err
 	}
@@ -105,7 +105,7 @@ func (s *Store) checkWorkflowReviewAfterIO(ctx context.Context, run workflowInvo
 		return err
 	}
 
-	current, err := s.workflowReviewPolicy(run)
+	current, err := s.readWorkflowReviewPolicy(run)
 	if err != nil || current != policy {
 		return workflowstate.ErrConflict
 	}

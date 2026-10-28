@@ -186,7 +186,7 @@ func (s *Store) workflowIntegrationPreparedRole(ctx context.Context, run workflo
 		return "", err
 	}
 
-	policy, err := s.workflowReviewPolicy(run)
+	policy, err := s.readWorkflowReviewPolicy(run)
 	if err != nil {
 		return "", err
 	}

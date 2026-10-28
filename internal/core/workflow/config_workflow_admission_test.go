@@ -45,14 +45,14 @@ func TestWorkflowConfigPublication(t *testing.T) {
 
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "workflow:\n  version: 1\nreview:\n  mode: human_review\n")
 
-	policy, err := store.workflowReviewPolicy(workflowInvocationFile{})
+	policy, err := store.readWorkflowReviewPolicy(workflowInvocationFile{})
 	if err != nil || policy.Mode != workflowstate.ReviewHuman || policy.Source != "project" {
 		t.Fatal("publication read policy from the wrong owner", policy, err)
 	}
 
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "workflow:\n  version: 1\n")
 
-	policy, err = store.workflowReviewPolicy(workflowInvocationFile{})
+	policy, err = store.readWorkflowReviewPolicy(workflowInvocationFile{})
 	if err != nil || policy.Mode != workflowstate.ReviewTrustedAutoMerge || policy.Source != "version_default" {
 		t.Fatal("publication missed version defaults", policy, err)
 	}

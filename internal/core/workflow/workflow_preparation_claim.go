@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
-	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -175,7 +174,7 @@ func (s *Store) claimWorkflowIntegrationValidation(ctx context.Context, run *wor
 	preparationContext, cancel := context.WithDeadline(ctx, run.Attempts[len(run.Attempts)-1].LeaseUntil)
 	defer cancel()
 
-	preparedGit, err := s.prepareWorkflowIntegrationGit(preparationContext, run, workflowPreparationGitRequest{Preflight: preflight, Lane: lane}, services)
+	preparedGit, err := (workflowPreparationHost{store: s}).prepareGit(preparationContext, run, workflowPreparationGitRequest{Preflight: preflight, Lane: lane}, services)
 
 	result.Input = preparedGit.Input
 	if err != nil {
@@ -186,44 +185,6 @@ func (s *Store) claimWorkflowIntegrationValidation(ctx context.Context, run *wor
 	result.Claim = claim
 
 	return result, err
-}
-
-func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflowInvocationFile, request workflowPreparationGitRequest, services workflowPreparationServices) (workflowPreparedIntegration, error) {
-	result := workflowPreparedIntegration{Lane: request.Lane}
-	preflight := request.Preflight
-
-	query, err := s.workflowPreparationQuery(ctx, *run, preflight.Observation, preflight.Source, result.Lane)
-	if err != nil {
-		return result, err
-	}
-
-	query.RequiredSignatures, query.SigningProfile = preflight.Capability.RequiredSignatures, preflight.Capability.SigningProfile
-
-	repairGit, err := s.prepareWorkflowCandidateRepairGit(ctx, *run, services.Git, query)
-	if err != nil {
-		return result, err
-	}
-
-	if err := workflowintegrate.CheckPrepared(query, repairGit.Proof, workflowIntegrationRepairs{}); err != nil {
-		return result, err
-	}
-
-	result.Lane.HeadCommit = repairGit.Proof.ResultCommit
-
-	result.Input = workflowstate.PreparationInput{Source: preflight.Source, Capability: preflight.Capability, Git: repairGit.Proof, MergerAttemptRefs: repairGit.Evidence}
-	if err := s.bindWorkflowNativePreparation(ctx, *run, &result.Input, services.Provider); err != nil {
-		return result, err
-	}
-
-	if err := s.checkWorkflowPreparationGit(ctx, workflowstate.IntegrationCandidate{Input: result.Input, Lane: result.Lane}); err != nil {
-		return result, err
-	}
-
-	if err := s.checkWorkflowPreparationSource(ctx, *run, result.Input, services.Provider); err != nil {
-		return result, err
-	}
-
-	return result, nil
 }
 
 func (s *Store) beginWorkflowPreparationClaim(run *workflowInvocationFile, observation workflowSliceObservation, source workflowstate.ReviewInput, claim *Claim) (workflowstate.Lane, error) {

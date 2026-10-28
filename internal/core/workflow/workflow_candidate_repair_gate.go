@@ -67,31 +67,3 @@ func (s *Store) commitWorkflowCandidateRepairGate(run *workflowInvocationFile, e
 func workflowMergerRepairSourceMatches(source workflowstate.ReviewInput, proof workflowstate.IntegrationProof) bool {
 	return source.PullRequest.HeadCommit == proof.SourceCommit && source.TargetCommit == proof.BaseCommit && source.Policy.Method == proof.Method && source.PullRequest.Repository == proof.Repository && source.PullRequest.BaseBranch == proof.TargetBranch
 }
-
-func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query workflowstate.PreparationQuery) (workflowCandidateRepairGit, error) {
-	acceptedRepair, err := s.acceptedWorkflowCandidateRepair(run)
-
-	state, refs := acceptedRepair.State, acceptedRepair.Refs
-
-	if err != nil {
-		return workflowCandidateRepairGit{Proof: workflowstate.IntegrationProof{}, Evidence: nil}, err
-	}
-
-	if state == nil {
-		proof, err := git.PrepareWorkflowIntegration(ctx, query)
-
-		return workflowCandidateRepairGit{Proof: proof, Evidence: nil}, err
-	}
-
-	repaired, ok := git.(RepairedPreparationGit)
-	if !ok {
-		return workflowCandidateRepairGit{Proof: workflowstate.IntegrationProof{}, Evidence: nil}, workflowstate.ErrConflict
-	}
-
-	proof, err := repaired.PrepareWorkflowRepairedIntegration(ctx, query, *state)
-	if err == nil && !workflowNativeJSONEqual(proof, *state.Result) {
-		err = workflowstate.ErrConflict
-	}
-
-	return workflowCandidateRepairGit{Proof: proof, Evidence: refs}, err
-}

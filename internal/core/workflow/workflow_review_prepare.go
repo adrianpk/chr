@@ -3,7 +3,6 @@ package workflow
 import (
 	"context"
 	"errors"
-	"fmt"
 	"slices"
 	"time"
 
@@ -61,7 +60,7 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 			return nil
 		}
 
-		reviewClaim, readErr := invocationLocation.Owner.prepareWorkflowReviewPolicy(ctx, &invocationLocation.Run, workflowReviewObservation{Observation: observation, Input: input}, role)
+		reviewClaim, readErr := invocationLocation.Owner.applyWorkflowReviewAdmission(ctx, &invocationLocation.Run, workflowReviewObservation{Observation: observation, Input: input}, role)
 
 		claim, prepared = reviewClaim.Claim, reviewClaim.Prepared
 		binding = *invocationLocation.Run.Review
@@ -109,24 +108,20 @@ func (s *Store) replaceWorkflowReviewInput(run *workflowInvocationFile, observat
 	return err
 }
 
-func (s *Store) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, source workflowReviewObservation, role workflowReviewRole) (workflowClaimedReview, error) {
-	observation, input := source.Observation, source.Input
-	reviewer := role.Command
+func (s *Store) applyWorkflowReviewAdmission(ctx context.Context, run *workflowInvocationFile, source workflowReviewObservation, role workflowReviewRole) (workflowClaimedReview, error) {
+	admission, err := workflowreview.Prepare(source.Input.Policy.Mode, run.Review, role.Command)
+	if err != nil {
+		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, err
+	}
 
-	switch input.Policy.Mode {
-	case workflowstate.ReviewHuman:
-		run.Review.State, run.Outcome = workflowstate.ReviewWaitingApproval, "slice_review_waiting_approval"
+	switch admission.State {
+	case workflowstate.ReviewWaitingApproval:
+		run.Review.State, run.Outcome = admission.State, admission.Outcome
 
 		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.commitWorkflowState(run)
-	case workflowstate.ReviewTrustedAutoMerge:
-		decision := workflowstate.ReviewDecision{BindingHash: run.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
-
-		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.persistWorkflowReviewDecision(run, observation, decision, workflowstate.ReviewAuthorized)
-	case workflowstate.ReviewAgentic:
-		if err := workflowstate.ValidateCommand(reviewer); err != nil {
-			return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, fmt.Errorf("separate workflow review command required: %w", err)
-		}
-
+	case workflowstate.ReviewAuthorized:
+		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.persistWorkflowReviewDecision(run, source.Observation, admission.Decision, admission.State)
+	case workflowstate.ReviewRunning:
 		return s.claimWorkflowReview(ctx, run, source, role)
 	default:
 		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, workflowstate.ErrConflict

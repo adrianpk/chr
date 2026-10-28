@@ -120,6 +120,13 @@ commands and partial execution evidence. `MergerRepairPorts` pairs the provider
 fence with the trusted repair Git capability. An accepted repair still requires
 candidate validation; it does not grant review or publication.
 
+Review admission and human-only restriction policy use `workflow/review` directly.
+Store reads the configured policy and applies the returned admission under its
+existing lock. A private `workflowPreparationHost` executes ordinary or candidate
+repair Git preparation under the original admission guard and lease; Store
+retains accepted repair reads, current source fences and complete claim/input
+and result transactions.
+
 `SubmitIntegration`, `ReconcileSubmission` and `PublishNativeSubmission` keep
 bounded transport and observation sequencing outside Store. Store retains the
 original intent/exclusion, BeforeSend checks, response/observation journals,

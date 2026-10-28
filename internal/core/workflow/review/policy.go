@@ -29,3 +29,12 @@ func DecisionState(decision workflowstate.IntegrationReviewDecision) workflowsta
 		return workflowstate.ReviewInsufficientEvidence
 	}
 }
+
+// Restrict applies the existing human-only invocation restriction to a policy copy.
+func Restrict(policy workflowstate.ReviewPolicy, restriction workflowstate.ReviewMode) workflowstate.ReviewPolicy {
+	if restriction == workflowstate.ReviewHuman {
+		policy.Mode, policy.Source = workflowstate.ReviewHuman, "invocation_restriction"
+	}
+
+	return policy
+}

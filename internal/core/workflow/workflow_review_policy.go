@@ -11,7 +11,7 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s *Store) workflowReviewPolicy(run workflowInvocationFile) (workflowstate.ReviewPolicy, error) {
+func (s *Store) readWorkflowReviewPolicy(run workflowInvocationFile) (workflowstate.ReviewPolicy, error) {
 	if err := workspaceconfig.RequireNoWorkflowUpgrade(s.layout.ProjectDir()); err != nil {
 		return workflowstate.ReviewPolicy{}, err
 	}
@@ -30,11 +30,7 @@ func (s *Store) workflowReviewPolicy(run workflowInvocationFile) (workflowstate.
 		return policy, err
 	}
 
-	if run.ReviewRestriction == workflowstate.ReviewHuman {
-		policy.Mode, policy.Source = workflowstate.ReviewHuman, "invocation_restriction"
-	}
-
-	return policy, nil
+	return workflowreview.Restrict(policy, run.ReviewRestriction), nil
 }
 
 func parseWorkflowReviewPolicy(data []byte) (workflowstate.ReviewPolicy, error) {
