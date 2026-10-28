@@ -51,7 +51,7 @@ func workflowOccupiedProcessSlots(common string) (map[int]bool, error) {
 }
 
 type workflowCapacityObservation struct {
-	Process Process
+	Process workflowstate.Process
 	Alive   bool
 }
 
@@ -70,7 +70,7 @@ func observeWorkflowCapacityProcess(path string) (workflowCapacityObservation, e
 		return workflowCapacityObservation{}, err
 	}
 
-	var process Process
+	var process workflowstate.Process
 	if err := json.Unmarshal(data, &process); err != nil {
 		return workflowCapacityObservation{Process: process}, err
 	}
@@ -92,6 +92,6 @@ func observeWorkflowCapacityProcess(path string) (workflowCapacityObservation, e
 	return workflowCapacityObservation{Process: process}, nil
 }
 
-func validWorkflowCapacityProcess(process Process) bool {
-	return validWorkflowProcessIdentity(process.Identity) && process.GroupID == process.Identity.PID && process.CapacitySlot >= 0 && process.CapacitySlot <= workflowWorkerSlotLimit
+func validWorkflowCapacityProcess(process workflowstate.Process) bool {
+	return workflowstate.ValidProcessIdentity(process.Identity) && process.GroupID == process.Identity.PID && process.CapacitySlot >= 0 && process.CapacitySlot <= workflowstate.WorkerSlotLimit
 }

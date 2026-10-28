@@ -10,6 +10,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeAgentFaultMode(t *testing.T, mode string) {
@@ -85,7 +86,7 @@ func nativeAgentStoppedCharge(t *testing.T, store *Store, id string) {
 func nativeAgentStoppedEvidence(t *testing.T, attempt Attempt) {
 	t.Helper()
 
-	if len(attempt.Processes) != 1 || workflowAttemptQuiescent(attempt) != nil || attempt.Processes[0].State != ProcessStopped {
+	if len(attempt.Processes) != 1 || workflowAttemptQuiescent(attempt) != nil || attempt.Processes[0].State != workflowstate.ProcessStopped {
 		t.Fatal("actual driver birth did not retain quiescent ownership")
 	}
 

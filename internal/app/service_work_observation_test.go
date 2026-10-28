@@ -42,7 +42,7 @@ func TestWorkObservationContexts(t *testing.T) {
 	result := WorkObservation{}
 
 	for _, item := range []struct{ id, key, attempt string }{{"first", "PRJ-1", "one"}, {"second", "PRJ-2", "two"}} {
-		run := workflowcore.Invocation{Identity: workflowstate.Identity{ID: item.id, UpdatedAt: at}, InvocationExecution: workflowcore.InvocationExecution{Status: workflowstate.InvocationRunning, Attempts: []workflowcore.Attempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []workflowcore.Process{{State: workflowcore.ProcessRunning, Command: []string{"go", "test"}}}}}}}
+		run := workflowcore.Invocation{Identity: workflowstate.Identity{ID: item.id, UpdatedAt: at}, InvocationExecution: workflowcore.InvocationExecution{Status: workflowstate.InvocationRunning, Attempts: []workflowcore.Attempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []workflowstate.Process{{State: workflowstate.ProcessRunning, Command: []string{"go", "test"}}}}}}}
 		appendNativeWork(&result, run, tickets, records)
 	}
 

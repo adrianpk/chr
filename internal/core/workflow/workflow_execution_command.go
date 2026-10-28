@@ -80,7 +80,7 @@ func workflowCommandGroupStopped(pid int) bool {
 		return false
 	}
 
-	alive, err := workflowProcessGroupAlive(Process{Identity: workflowstate.ProcessIdentity{BootID: strings.TrimSpace(string(boot))}, GroupID: pid})
+	alive, err := workflowProcessGroupAlive(workflowstate.Process{Identity: workflowstate.ProcessIdentity{BootID: strings.TrimSpace(string(boot))}, GroupID: pid})
 
 	return err == nil && !alive
 }

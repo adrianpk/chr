@@ -11,6 +11,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // DelegateWorkerRuntimeReservation converts the inherited slot to shared mode
@@ -67,7 +68,7 @@ func inheritedRuntimeFile(fd int) (string, error) {
 
 func inheritedWorkerRuntimeReservation(common string) (harnessruntime.Reservation, error) {
 	slot, err := inheritedRuntimeFile(3)
-	if err != nil || filepath.Dir(slot) != common || workflowWorkerSlotNumber(slot) < 1 || workflowWorkerSlotNumber(slot) > workflowWorkerSlotLimit || filepath.Base(slot) != workflowWorkerSlotName(workflowWorkerSlotNumber(slot)) {
+	if err != nil || filepath.Dir(slot) != common || workflowWorkerSlotNumber(slot) < 1 || workflowWorkerSlotNumber(slot) > workflowstate.WorkerSlotLimit || filepath.Base(slot) != workflowWorkerSlotName(workflowWorkerSlotNumber(slot)) {
 		return harnessruntime.Reservation{}, errors.New("worker runtime requires its inherited admitted capacity slot")
 	}
 

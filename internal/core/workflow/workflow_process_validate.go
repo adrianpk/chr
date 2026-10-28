@@ -3,7 +3,6 @@ package workflow
 import (
 	"fmt"
 	"slices"
-	"strconv"
 
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -35,25 +34,19 @@ func validateWorkflowAttemptProcesses(invocationID string, attempt Attempt) erro
 }
 
 func validateWorkflowAttemptOwner(attempt Attempt) error {
-	if attempt.CapacitySlot < 0 || attempt.CapacitySlot > workflowWorkerSlotLimit {
+	if attempt.CapacitySlot < 0 || attempt.CapacitySlot > workflowstate.WorkerSlotLimit {
 		return workflowstate.ErrConflict
 	}
 
-	if attempt.OwnerProcess != nil && !validWorkflowProcessIdentity(*attempt.OwnerProcess) {
+	if attempt.OwnerProcess != nil && !workflowstate.ValidProcessIdentity(*attempt.OwnerProcess) {
 		return fmt.Errorf("invalid workflow owner process identity")
 	}
 
 	return nil
 }
 
-func validWorkflowProcessIdentity(identity workflowstate.ProcessIdentity) bool {
-	birth, err := strconv.ParseUint(identity.StartTicks, 10, 64)
-
-	return identity.PID > 0 && len(identity.BootID) == 36 && err == nil && birth > 0
-}
-
-func validateWorkflowProcess(invocationID, attemptID string, index int, process Process) error {
-	if !validWorkflowCapacityProcess(process) || !slices.Contains([]ProcessState{ProcessRunning, ProcessStopped}, process.State) {
+func validateWorkflowProcess(invocationID, attemptID string, index int, process workflowstate.Process) error {
+	if !validWorkflowCapacityProcess(process) || !slices.Contains([]workflowstate.ProcessState{workflowstate.ProcessRunning, workflowstate.ProcessStopped}, process.State) {
 		return fmt.Errorf("invalid workflow command process identity or state")
 	}
 
@@ -66,7 +59,7 @@ func validateWorkflowProcess(invocationID, attemptID string, index int, process 
 		return fmt.Errorf("invalid workflow process output references")
 	}
 
-	if process.State == ProcessStopped && (len(process.StdoutHash) != 64 || len(process.StderrHash) != 64) {
+	if process.State == workflowstate.ProcessStopped && (len(process.StdoutHash) != 64 || len(process.StderrHash) != 64) {
 		return fmt.Errorf("stopped process requires output hashes")
 	}
 

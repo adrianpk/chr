@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -31,7 +32,7 @@ func (s *Store) commitWorkflowClosingState(claim *workflowClosingClaim, extra ..
 	}
 
 	data = append(data, '\n')
-	stateFile := workflowstate.FileChange{Path: workflowClosingFile(claim.set.ID, claim.state.Generation, "state.json"), Before: binding.Hash, After: data}
+	stateFile := workflowstate.FileChange{Path: workflowcloseout.File(claim.set.ID, claim.state.Generation, "state.json"), Before: binding.Hash, After: data}
 	*binding = workflowstate.ClosingEvidence{Ref: stateFile.Path, Hash: contenthash.Sum(data)}
 	claim.set.Revision++
 	claim.set.UpdatedAt = time.Now().UTC()
@@ -75,7 +76,7 @@ func (s *Store) checkWorkflowClosingCredential(claim *workflowClosingClaim) erro
 		return errorsOrConflict(err)
 	}
 
-	state, err := s.readWorkflowClosingAttempt(claim.set, claim.state.Generation-1)
+	state, err := workflowcloseout.ReadAttempt(claim.set.ID, claim.set.Set.Closing, claim.state.Generation-1, workflowClosingEvidence{store: s})
 	if err != nil || state.TokenHash != contenthash.Sum([]byte(claim.worker.Token)) || state.Outcome != "running" {
 		return errorsOrConflict(err)
 	}

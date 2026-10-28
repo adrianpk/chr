@@ -121,7 +121,7 @@ func (s *Store) prepareWorkflowClosing(ctx context.Context, set Record, request 
 	data = append(data, '\n')
 	lease := input.Validation
 	lease.TimeoutSeconds = input.ValidationTimeoutSeconds
-	state := workflowClosingAttempt{Schema: "chr-set-closing-attempt/v1", SetID: set.ID, Generation: generation, BudgetID: workflowClosingBudgetID(set, request.InvocationID), OwnerRoot: s.layout.Root(), Owner: owner, InvocationID: request.InvocationID, TokenHash: contenthash.Sum([]byte(worker.Token)), Outcome: "running", LeaseUntil: time.Now().UTC().Add(workflowcloseout.LeaseDuration(lease)), Input: workflowstate.ClosingEvidence{Ref: workflowClosingFile(set.ID, generation, "input.json"), Hash: contenthash.Sum(data)}}
+	state := workflowcloseout.Attempt{Schema: "chr-set-closing-attempt/v1", SetID: set.ID, Generation: generation, BudgetID: workflowcloseout.BudgetID(*set.Set, request.InvocationID), OwnerRoot: s.layout.Root(), Owner: owner, InvocationID: request.InvocationID, TokenHash: contenthash.Sum([]byte(worker.Token)), Outcome: "running", LeaseUntil: time.Now().UTC().Add(workflowcloseout.LeaseDuration(lease)), Input: workflowstate.ClosingEvidence{Ref: workflowcloseout.File(set.ID, generation, "input.json"), Hash: contenthash.Sum(data)}}
 	state.CapacitySlot = workflowWorkerSlotNumber(worker.reservation.Name())
 
 	return &workflowClosingClaim{worker: worker, set: set, state: state, input: input, data: data}, nil
@@ -140,11 +140,11 @@ func (s *Store) workflowClosingReady(ctx context.Context, set Record, request Se
 		return err
 	}
 
-	if err := s.checkWorkflowClosingEvidence(set); err != nil {
+	if err := workflowcloseout.CheckHistory(set.ID, set.Set.Closing, workflowClosingEvidence{store: s}); err != nil {
 		return err
 	}
 
-	if err := s.workflowClosingBudget(set, request.InvocationID); err != nil {
+	if err := workflowcloseout.CheckBudget(set.ID, *set.Set, request.InvocationID, workflowClosingEvidence{store: s}); err != nil {
 		return err
 	}
 

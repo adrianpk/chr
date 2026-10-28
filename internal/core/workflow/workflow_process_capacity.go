@@ -16,7 +16,7 @@ import (
 
 // A durable group ledger complements flock when the supervisor is killed before
 // its children actually stop. All work-start entrypoints consult it under flock.
-func registerWorkflowProcessCapacity(ctx context.Context, claim *Claim, process Process) error {
+func registerWorkflowProcessCapacity(ctx context.Context, claim *Claim, process workflowstate.Process) error {
 	common, err := projectcore.ResolveRepositoryDirectory(ctx, claim.store.layout.ProjectDir())
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func registerWorkflowProcessCapacity(ctx context.Context, claim *Claim, process 
 	return opsfile.WriteAtomic(filepath.Join(common, "chr-workflow-processes", name), data)
 }
 
-func workflowCapacityProcessName(process Process) (string, error) {
+func workflowCapacityProcessName(process workflowstate.Process) (string, error) {
 	data, err := json.Marshal(process.Identity)
 
 	return contenthash.Sum(data) + ".json", err

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -34,7 +35,7 @@ func (s *Store) ReconcileWorkflowClosing(ctx context.Context, setPath string) (r
 }
 
 func (s *Store) reconcileWorkflowClosing(ctx context.Context, set Record, control *workflowControlCommit) (result Record, err error) {
-	state, err := s.readWorkflowClosingAttempt(set, len(set.Set.Closing.Attempts)-1)
+	state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, len(set.Set.Closing.Attempts)-1, workflowClosingEvidence{store: s})
 	if err != nil {
 		return set, err
 	}
@@ -90,8 +91,8 @@ func workflowClosingAttemptID(set Record, generation int) string {
 	return fmt.Sprintf("%s-attempt-%d", workflowClosingOwnerID(set), generation)
 }
 
-func (s *Store) workflowRecoveredClosingClaim(set Record, state workflowClosingAttempt) (*workflowClosingClaim, error) {
-	data, err := s.workflowClosingRead(state.Input.Ref)
+func (s *Store) workflowRecoveredClosingClaim(set Record, state workflowcloseout.Attempt) (*workflowClosingClaim, error) {
+	data, err := (workflowClosingEvidence{store: s}).Read(state.Input.Ref)
 	if err != nil || contenthash.Sum(data) != state.Input.Hash {
 		return nil, errorsOrConflict(err)
 	}
@@ -104,7 +105,7 @@ func (s *Store) workflowRecoveredClosingClaim(set Record, state workflowClosingA
 	for i := range claim.state.Processes {
 		process := &claim.state.Processes[i]
 
-		process.State = ProcessStopped
+		process.State = workflowstate.ProcessStopped
 		if err := s.hashWorkflowProcessOutput(process); err != nil {
 			return nil, err
 		}

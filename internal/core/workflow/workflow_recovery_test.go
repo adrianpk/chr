@@ -175,7 +175,7 @@ func TestWorkflowProcessEdit(t *testing.T) {
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || retained.Status != workflowstate.InvocationRunning || retained.Cursor != 0 || retained.Attempts[0].Processes[0].State != ProcessRunning {
+	if err != nil || retained.Status != workflowstate.InvocationRunning || retained.Cursor != 0 || retained.Attempts[0].Processes[0].State != workflowstate.ProcessRunning {
 		t.Fatal("host overwrote the incompatible process image")
 	}
 }

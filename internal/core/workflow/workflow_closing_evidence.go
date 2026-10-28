@@ -2,9 +2,7 @@ package workflow
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"reflect"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
@@ -13,12 +11,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowClosingFile(id string, generation int, name string) string {
-	return filepath.ToSlash(filepath.Join("plan", id, "extension", "chr", "closing", fmt.Sprintf("%04d", generation), name))
-}
+type workflowClosingEvidence struct{ store *Store }
 
-func (s *Store) workflowClosingRead(relative string) ([]byte, error) {
-	path, err := s.safePath(relative)
+func (e workflowClosingEvidence) Read(relative string) ([]byte, error) {
+	path, err := e.store.safePath(relative)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +66,7 @@ func (s *Store) checkWorkflowClosingInputs(ctx context.Context, claim *workflowC
 		return err
 	}
 
-	data, err := s.workflowClosingRead(claim.state.Input.Ref)
+	data, err := (workflowClosingEvidence{store: s}).Read(claim.state.Input.Ref)
 	if err != nil || contenthash.Sum(data) != claim.state.Input.Hash {
 		return errorsOrConflict(err)
 	}
@@ -91,33 +87,17 @@ func (s *Store) checkWorkflowClosingMembers(ctx context.Context, claim *workflow
 	return s.checkWorkflowIntegrationSetReceipts(ctx, set)
 }
 
-func (s *Store) readWorkflowClosingAttempt(set Record, index int) (workflowClosingAttempt, error) {
-	binding := set.Set.Closing.Attempts[index]
-
-	data, err := s.workflowClosingRead(binding.Ref)
-	if err != nil || contenthash.Sum(data) != binding.Hash {
-		return workflowClosingAttempt{}, errorsOrConflict(err)
-	}
-
-	var state workflowClosingAttempt
-	if err := json.Unmarshal(data, &state); err != nil {
-		return state, err
-	}
-
-	return state, validateWorkflowClosingAttempt(set, index, state)
-}
-
 func (s *Store) readWorkflowClosedSet(set Record) (SetClosureResult, error) {
 	if set.Set.Closing == nil || len(set.Set.Closing.Attempts) == 0 {
 		return SetClosureResult{}, workflowstate.ErrConflict
 	}
 
-	state, err := s.readWorkflowClosingAttempt(set, len(set.Set.Closing.Attempts)-1)
+	state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, len(set.Set.Closing.Attempts)-1, workflowClosingEvidence{store: s})
 	if err != nil || state.Outcome != "completed" || state.Result.Ref != set.Set.ClosureRef {
 		return SetClosureResult{}, errorsOrConflict(err)
 	}
 
-	receipt, err := s.readWorkflowClosingReceipt(state)
+	receipt, err := workflowcloseout.ReadReceipt(state, workflowClosingEvidence{store: s})
 	if err != nil {
 		return SetClosureResult{}, err
 	}
@@ -125,50 +105,6 @@ func (s *Store) readWorkflowClosedSet(set Record) (SetClosureResult, error) {
 	return SetClosureResult{Set: set, Receipt: receipt, ReceiptRef: state.Result.Ref, Outcome: state.Outcome}, nil
 }
 
-func (s *Store) readWorkflowClosingReceipt(state workflowClosingAttempt) (workflowstate.ClosingReceipt, error) {
-	data, err := s.workflowClosingRead(state.Result.Ref)
-	if err != nil || contenthash.Sum(data) != state.Result.Hash {
-		return workflowstate.ClosingReceipt{}, errorsOrConflict(err)
-	}
-
-	var receipt workflowstate.ClosingReceipt
-	if err := json.Unmarshal(data, &receipt); err != nil {
-		return receipt, err
-	}
-
-	if receipt.Schema != "chr-set-closure/v1" || receipt.SetID != state.SetID || receipt.Outcome != state.Outcome || receipt.Input != state.Input || receipt.ConfirmedAt != state.FinishedAt {
-		return receipt, workflowstate.ErrConflict
-	}
-
-	return receipt, nil
-}
-
-func (s *Store) checkWorkflowClosingResult(state workflowClosingAttempt) error {
-	if state.Result.Ref == "" {
-		return nil
-	}
-
-	data, err := s.workflowClosingRead(state.Input.Ref)
-	if err != nil {
-		return err
-	}
-
-	var input workflowstate.ClosingInput
-	if err := json.Unmarshal(data, &input); err != nil {
-		return err
-	}
-
-	receipt, err := s.readWorkflowClosingReceipt(state)
-	if err != nil {
-		return err
-	}
-
-	retained := receipt.ClosingInput
-
-	retained.Schema = input.Schema
-	if input.Schema != "chr-set-closing-input/v1" || !reflect.DeepEqual(retained, input) || receipt.Waiver != input.Validation.WaiverReason {
-		return workflowstate.ErrConflict
-	}
-
-	return workflowcloseout.CheckResults(input.Validation, receipt)
+func (e workflowClosingEvidence) Check(hashes map[string]string) error {
+	return e.store.checkWorkflowPrerequisiteEvidence(hashes)
 }

@@ -101,7 +101,7 @@ func validWorkflowNativeDispatch(native workflowstate.NativeSubmission) bool {
 		return native.DispatchIdentity == nil && native.ApplicationState == workflowstate.NativeApplicationNotStarted
 	}
 
-	return slices.Contains([]workflowstate.NativeDispatchState{workflowstate.NativeDispatching, workflowstate.NativeDispatchQuiescent}, native.DispatchState) && native.DispatchIdentity != nil && validWorkflowProcessIdentity(*native.DispatchIdentity)
+	return slices.Contains([]workflowstate.NativeDispatchState{workflowstate.NativeDispatching, workflowstate.NativeDispatchQuiescent}, native.DispatchState) && native.DispatchIdentity != nil && workflowstate.ValidProcessIdentity(*native.DispatchIdentity)
 }
 
 func validWorkflowNativeUnpublished(submission workflowstate.Submission) bool {

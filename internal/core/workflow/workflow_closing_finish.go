@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -33,7 +34,7 @@ func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosin
 
 	data = append(data, '\n')
 	claim.state.Outcome, claim.state.FinishedAt = receipt.Outcome, receipt.ConfirmedAt
-	claim.state.Result = workflowstate.ClosingEvidence{Ref: workflowClosingFile(claim.set.ID, claim.state.Generation, "result.json"), Hash: contenthash.Sum(data)}
+	claim.state.Result = workflowstate.ClosingEvidence{Ref: workflowcloseout.File(claim.set.ID, claim.state.Generation, "result.json"), Hash: contenthash.Sum(data)}
 
 	claim.set.Set.Status = "blocked"
 	if receipt.Outcome == "completed" {

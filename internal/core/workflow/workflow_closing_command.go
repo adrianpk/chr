@@ -11,13 +11,14 @@ import (
 	"slices"
 	"time"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *Store) runWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, directory string, command []string) (result workflowstate.CommandResult, err error) {
 	result = workflowstate.CommandResult{Command: slices.Clone(command), ExitCode: -1}
 	index := len(claim.state.Processes)
-	base := workflowClosingFile(claim.set.ID, claim.state.Generation, fmt.Sprintf("command-%d", index+1))
+	base := workflowcloseout.File(claim.set.ID, claim.state.Generation, fmt.Sprintf("command-%d", index+1))
 
 	stdout, err := openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stdout"))
 	if err != nil {
@@ -86,7 +87,7 @@ func (s *Store) waitWorkflowClosingCommand(ctx context.Context, claim *workflowC
 	return result, err
 }
 
-func (s *Store) registerWorkflowClosingProcess(ctx context.Context, claim *workflowClosingClaim, command []string, pid int, base string) (registered Process, err error) {
+func (s *Store) registerWorkflowClosingProcess(ctx context.Context, claim *workflowClosingClaim, command []string, pid int, base string) (registered workflowstate.Process, err error) {
 	identity, err := workflowProcessIdentity(pid)
 	if err != nil {
 		return registered, err
@@ -101,7 +102,7 @@ func (s *Store) registerWorkflowClosingProcess(ctx context.Context, claim *workf
 			return workflowstate.ErrConflict
 		}
 
-		registered = Process{CapacitySlot: workflowWorkerSlotNumber(claim.worker.reservation.Name()), Identity: identity, GroupID: pid, Command: slices.Clone(command), State: ProcessRunning, StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
+		registered = workflowstate.Process{CapacitySlot: workflowWorkerSlotNumber(claim.worker.reservation.Name()), Identity: identity, GroupID: pid, Command: slices.Clone(command), State: workflowstate.ProcessRunning, StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
 
 		claim.state.Processes = append(claim.state.Processes, registered)
 		if err := s.commitWorkflowClosingState(claim); err != nil {
@@ -114,7 +115,7 @@ func (s *Store) registerWorkflowClosingProcess(ctx context.Context, claim *workf
 	return registered, err
 }
 
-func (s *Store) finishWorkflowClosingProcess(ctx context.Context, claim *workflowClosingClaim, expected Process) error {
+func (s *Store) finishWorkflowClosingProcess(ctx context.Context, claim *workflowClosingClaim, expected workflowstate.Process) error {
 	return s.withLock(ctx, func() error {
 		if err := s.checkWorkflowClosingCredential(claim); err != nil {
 			return err
@@ -130,7 +131,7 @@ func (s *Store) finishWorkflowClosingProcess(ctx context.Context, claim *workflo
 			return errors.Join(err, ErrWorkflowCapacity)
 		}
 
-		process.State = ProcessStopped
+		process.State = workflowstate.ProcessStopped
 		if err := s.hashWorkflowProcessOutput(process); err != nil {
 			return err
 		}

@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -93,7 +94,7 @@ func checkWorkflowClosingStopped(t *testing.T, store *Store, path, id, intent st
 		t.Fatal(err)
 	}
 
-	state, err := store.readWorkflowClosingAttempt(set, 0)
+	state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, 0, workflowClosingEvidence{store: store})
 	if err != nil {
 		t.Fatal(err)
 	}

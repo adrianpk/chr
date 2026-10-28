@@ -11,29 +11,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ProcessState names the existing supervised-command lifecycle.
-type ProcessState string
-
-// Process states retain the running/stopped journal protocol.
-const (
-	ProcessRunning ProcessState = "running"
-	ProcessStopped ProcessState = "stopped"
-)
-
-// Process retains each supervised worker or validation command.
-type Process struct {
-	CapacitySlot int                           `json:"capacity_slot,omitempty"`
-	Identity     workflowstate.ProcessIdentity `json:"identity"`
-	GroupID      int                           `json:"group_id"`
-	Command      []string                      `json:"command"`
-	State        ProcessState                  `json:"state"`
-	StdoutRef    string                        `json:"stdout_ref"`
-	StderrRef    string                        `json:"stderr_ref"`
-	StdoutHash   string                        `json:"stdout_hash"`
-	StderrHash   string                        `json:"stderr_hash"`
-	Result       *workflowstate.CommandResult  `json:"result"`
-}
-
 type workflowProcStat struct {
 	state, birth string
 	group        int
@@ -96,7 +73,7 @@ func workflowProcessAlive(identity workflowstate.ProcessIdentity) (bool, error) 
 	return stat.state != "Z" && stat.state != "X", err
 }
 
-func workflowProcessGroupAlive(process Process) (bool, error) {
+func workflowProcessGroupAlive(process workflowstate.Process) (bool, error) {
 	boot, err := os.ReadFile("/proc/sys/kernel/random/boot_id")
 	if err != nil {
 		return false, err

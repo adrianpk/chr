@@ -12,6 +12,7 @@ import (
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowWorkerReservation struct {
@@ -117,7 +118,7 @@ func reserveWorkflowWorkerSlot(ctx context.Context, common string, workers int) 
 func workflowFreeWorkerSlots(common string, occupied map[int]bool) (map[int]*os.File, error) {
 	free := map[int]*os.File{}
 
-	for slot := 1; slot <= workflowWorkerSlotLimit; slot++ {
+	for slot := 1; slot <= workflowstate.WorkerSlotLimit; slot++ {
 		if occupied[slot] {
 			continue
 		}

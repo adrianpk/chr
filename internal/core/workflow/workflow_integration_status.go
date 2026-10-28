@@ -11,6 +11,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -29,7 +30,7 @@ type RoleReservation struct {
 type IntegrationCapacity struct {
 	Maximum         int
 	Available       int
-	LiveProcesses   []Process
+	LiveProcesses   []workflowstate.Process
 	UnexpiredOwners []RoleReservation
 }
 
@@ -164,7 +165,7 @@ func observeWorkflowIntegrationSlot(path string) (held bool, err error) {
 }
 
 func observeWorkflowIntegrationSlots(result *IntegrationCapacity, slots map[int]bool, common string) error {
-	for slot := 1; slot <= workflowWorkerSlotLimit; slot++ {
+	for slot := 1; slot <= workflowstate.WorkerSlotLimit; slot++ {
 		held, err := observeWorkflowIntegrationSlot(filepath.Join(common, workflowWorkerSlotName(slot)))
 		if err != nil {
 			return err
@@ -213,7 +214,7 @@ func (s *Store) appendWorkflowIntegrationClosingOwners(ctx context.Context, resu
 
 func (s *Store) appendWorkflowIntegrationClosingOwner(result *IntegrationCapacity, slots map[int]bool, set Record) error {
 	for i := range set.Set.Closing.Attempts {
-		state, err := s.readWorkflowClosingAttempt(set, i)
+		state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, i, workflowClosingEvidence{store: s})
 		if err != nil {
 			return err
 		}
@@ -241,7 +242,7 @@ func (s *Store) appendWorkflowIntegrationClosingOwner(result *IntegrationCapacit
 	return nil
 }
 
-func observeWorkflowIntegrationProcesses(common string) ([]Process, error) {
+func observeWorkflowIntegrationProcesses(common string) ([]workflowstate.Process, error) {
 	dir := filepath.Join(common, "chr-workflow-processes")
 
 	files, err := os.ReadDir(dir)
@@ -253,7 +254,7 @@ func observeWorkflowIntegrationProcesses(common string) ([]Process, error) {
 		return nil, errorsOrConflict(err)
 	}
 
-	processes := []Process{}
+	processes := []workflowstate.Process{}
 
 	for _, file := range files {
 		if !file.Type().IsRegular() {

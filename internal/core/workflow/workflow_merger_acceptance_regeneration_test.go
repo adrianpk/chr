@@ -74,7 +74,7 @@ func checkNativeMergerAcceptanceRetainedProcedures(t *testing.T, f workflowPrepa
 
 	run := workflowTestRead(t, f.store, f.run.ID)
 	for _, process := range run.Attempts[len(run.Attempts)-1].Processes {
-		if process.State != ProcessStopped || process.StdoutHash == "" || process.StderrHash == "" {
+		if process.State != workflowstate.ProcessStopped || process.StdoutHash == "" || process.StderrHash == "" {
 			t.Fatal("host procedure has unresolved ownership")
 		}
 	}

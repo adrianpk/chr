@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -107,7 +108,7 @@ func (s *Store) checkWorkflowAmendmentOwner(ctx context.Context, run workflowInv
 }
 
 func (s *Store) checkWorkflowSetAmendmentEvidence(set Record) error {
-	if err := s.checkWorkflowClosingEvidence(set); err != nil {
+	if err := workflowcloseout.CheckHistory(set.ID, set.Set.Closing, workflowClosingEvidence{store: s}); err != nil {
 		return err
 	}
 

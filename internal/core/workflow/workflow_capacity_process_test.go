@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowCapacityProcess is an owned process barrier. It holds the actual
@@ -218,7 +219,7 @@ func workflowCapacityOrphanFixture(t *testing.T, store *Store, slot *os.File, st
 		t.Fatal(err)
 	}
 
-	observation := Process{Identity: identity, GroupID: identity.PID, CapacitySlot: workflowWorkerSlotNumber(slot.Name())}
+	observation := workflowstate.Process{Identity: identity, GroupID: identity.PID, CapacitySlot: workflowWorkerSlotNumber(slot.Name())}
 	if err := registerWorkflowProcessCapacity(t.Context(), &Claim{store: store}, observation); err != nil {
 		t.Fatal(err)
 	}

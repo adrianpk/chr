@@ -30,7 +30,7 @@ func validateWorkflowInvocationClosures(run workflowInvocationFile) error {
 
 func (s *Store) checkWorkflowInvocationClosureEvidence(run workflowInvocationFile) error {
 	for _, closure := range run.Closures {
-		data, err := s.workflowClosingRead(closure.Receipt.Ref)
+		data, err := (workflowClosingEvidence{store: s}).Read(closure.Receipt.Ref)
 		if err != nil || contenthash.Sum(data) != closure.Receipt.Hash {
 			return errorsOrConflict(err)
 		}

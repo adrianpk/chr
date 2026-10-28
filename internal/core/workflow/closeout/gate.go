@@ -19,3 +19,10 @@ type Workspace interface {
 type Commands interface {
 	Run(context.Context, string, []string) (workflowstate.CommandResult, error)
 }
+
+// Evidence reads retained closing images and checks immutable prerequisite hashes.
+// The host retains safe path resolution, file bounds and storage error semantics.
+type Evidence interface {
+	Read(string) ([]byte, error)
+	Check(map[string]string) error
+}

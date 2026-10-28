@@ -153,7 +153,7 @@ func bindNativeWorkProcess(current *WorkContext, attempt workflowcore.Attempt) {
 
 	for index := len(attempt.Processes) - 1; index >= 0; index-- {
 		process := attempt.Processes[index]
-		if process.State == workflowcore.ProcessRunning && len(process.Command) > 0 {
+		if process.State == workflowstate.ProcessRunning && len(process.Command) > 0 {
 			current.Message = "Running " + filepath.Base(process.Command[0])
 
 			return

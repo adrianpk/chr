@@ -10,8 +10,6 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-const workflowWorkerSlotLimit = 8
-
 type workflowCapacityLimits struct {
 	Workers  int
 	Queue    int
@@ -25,7 +23,7 @@ func workflowCapacityConfig(projectDir string) (workflowCapacityLimits, error) {
 	}
 
 	limits := workflowCapacityLimits{Workers: config.Work.MaxActiveWorkers, Queue: config.Work.ReadyQueueCapacity, Prepared: min(config.Work.Integration.MaxPreparedPerTarget, config.Work.ReadyQueueCapacity)}
-	if limits.Workers < 1 || limits.Workers > workflowWorkerSlotLimit || limits.Queue < 1 || limits.Queue > 1024 {
+	if limits.Workers < 1 || limits.Workers > workflowstate.WorkerSlotLimit || limits.Queue < 1 || limits.Queue > 1024 {
 		return limits, fmt.Errorf("work.max_active_workers must be 1..8 and work.ready_queue_capacity must be 1..1024")
 	}
 

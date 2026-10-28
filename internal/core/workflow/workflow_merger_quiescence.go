@@ -3,9 +3,11 @@ package workflow
 import (
 	"context"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func waitWorkflowMergerProcessGroup(ctx context.Context, process Process, deadline time.Time) error {
+func waitWorkflowMergerProcessGroup(ctx context.Context, process workflowstate.Process, deadline time.Time) error {
 	ctx, cancel := context.WithDeadline(ctx, deadline)
 	defer cancel()
 

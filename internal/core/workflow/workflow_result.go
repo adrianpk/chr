@@ -118,7 +118,7 @@ func (s *Store) workflowResultReceipt(run workflowInvocationFile) (ResultReceipt
 }
 
 func (s *Store) workflowResultClosure(closure InvocationClosure) (ResultClosure, error) {
-	data, err := s.workflowClosingRead(closure.Receipt.Ref)
+	data, err := (workflowClosingEvidence{store: s}).Read(closure.Receipt.Ref)
 	if err != nil || contenthash.Sum(data) != closure.Receipt.Hash {
 		return ResultClosure{}, errors.Join(workflowstate.ErrConflict, err)
 	}

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -68,7 +69,7 @@ func (s *Store) workflowIntegrationClosingUsage(snapshot Snapshot, id string) ([
 		}
 
 		for i := range record.Set.Closing.Attempts {
-			attempt, err := s.readWorkflowClosingAttempt(record, i)
+			attempt, err := workflowcloseout.ReadAttempt(record.ID, record.Set.Closing, i, workflowClosingEvidence{store: s})
 			if err != nil {
 				return nil, err
 			}

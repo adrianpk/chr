@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -59,12 +60,12 @@ func seedWorkflowClosingBudget(t *testing.T, store *Store, path, id string) {
 			return err
 		}
 
-		state, err := store.readWorkflowClosingAttempt(set, 0)
+		state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, 0, workflowClosingEvidence{store: store})
 		if err != nil {
 			return err
 		}
 
-		input, err := store.workflowClosingRead(state.Input.Ref)
+		input, err := (workflowClosingEvidence{store: store}).Read(state.Input.Ref)
 		if err != nil {
 			return err
 		}
@@ -100,14 +101,14 @@ func seedWorkflowClosingBudget(t *testing.T, store *Store, path, id string) {
 	}
 }
 
-func workflowClosingBudgetImages(t *testing.T, set *Record, state workflowClosingAttempt, input []byte) []workflowstate.FileChange {
+func workflowClosingBudgetImages(t *testing.T, set *Record, state workflowcloseout.Attempt, input []byte) []workflowstate.FileChange {
 	t.Helper()
 
 	files := []workflowstate.FileChange{}
 
 	for generation := 2; generation <= workflowstate.PageLimit; generation++ {
 		state.Generation = generation
-		state.Input.Ref = workflowClosingFile(set.ID, generation, "input.json")
+		state.Input.Ref = workflowcloseout.File(set.ID, generation, "input.json")
 
 		data, err := json.MarshalIndent(state, "", "  ")
 		if err != nil {
@@ -115,7 +116,7 @@ func workflowClosingBudgetImages(t *testing.T, set *Record, state workflowClosin
 		}
 
 		data = append(data, '\n')
-		ref := workflowClosingFile(set.ID, generation, "state.json")
+		ref := workflowcloseout.File(set.ID, generation, "state.json")
 		set.Set.Closing.Attempts = append(set.Set.Closing.Attempts, workflowstate.ClosingEvidence{Ref: ref, Hash: contenthash.Sum(data)})
 		files = append(files, workflowstate.FileChange{Path: ref, After: data}, workflowstate.FileChange{Path: state.Input.Ref, After: input})
 	}

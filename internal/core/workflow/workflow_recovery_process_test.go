@@ -320,7 +320,7 @@ func stopWorkflowRecoveryChildren(t *testing.T, store *Store, id, release string
 	}
 }
 
-func stopWorkflowRecoveryGroup(process Process, release string) error {
+func stopWorkflowRecoveryGroup(process workflowstate.Process, release string) error {
 	alive, err := workflowProcessGroupAlive(process)
 	if err != nil || !alive {
 		return err

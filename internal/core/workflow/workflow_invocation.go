@@ -62,7 +62,7 @@ type Attempt struct {
 	ResultRef      string                         `json:"result_ref,omitempty"`
 	ResultHash     string                         `json:"result_hash,omitempty"`
 	OwnerProcess   *workflowstate.ProcessIdentity `json:"owner_process,omitempty"`
-	Processes      []Process                      `json:"processes"`
+	Processes      []workflowstate.Process        `json:"processes"`
 	Replaces       string                         `json:"replaces"`
 	CheckpointRef  string                         `json:"checkpoint_ref"`
 	CheckpointHash string                         `json:"checkpoint_hash"`

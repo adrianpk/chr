@@ -17,7 +17,7 @@ type AttemptCheckpoint struct {
 	Generation uint64                    `json:"generation"`
 	Reason     string                    `json:"reason"`
 	FinishedAt time.Time                 `json:"finished_at"`
-	Processes  []Process                 `json:"processes"`
+	Processes  []workflowstate.Process   `json:"processes"`
 	Result     *workflowstate.TaskResult `json:"result"`
 }
 
@@ -72,7 +72,7 @@ func (s *Store) retainWorkflowProcessOutputs(attempt *Attempt) error {
 			return err
 		}
 
-		process.State = ProcessStopped
+		process.State = workflowstate.ProcessStopped
 	}
 
 	return nil

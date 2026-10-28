@@ -80,7 +80,7 @@ func (s *Store) workflowClosingDeliveryProof(ctx context.Context, receipt Record
 		return s.workflowClosingNativeDeliveryProof(ctx, receipt)
 	}
 
-	data, err := s.workflowClosingRead(receipt.Receipt.VerificationRef)
+	data, err := (workflowClosingEvidence{store: s}).Read(receipt.Receipt.VerificationRef)
 	if err != nil {
 		return workflowClosingProof{}, err
 	}
