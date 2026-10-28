@@ -1,4 +1,4 @@
-package core
+package workflow
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -24,7 +23,7 @@ func TestHarnessBindingHostProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	store := workflowcore.NewWorkflowStore(layout, os.Getenv("CHR_BINDING_TEST_PROJECT_ID"))
+	store := NewWorkflowStore(layout, os.Getenv("CHR_BINDING_TEST_PROJECT_ID"))
 	id := os.Getenv("CHR_BINDING_TEST_INVOCATION")
 
 	run, err := store.ResumeWorkflow(t.Context(), id)
@@ -32,7 +31,7 @@ func TestHarnessBindingHostProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	retry := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
+	retry := StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey:        run.RequestKey,
 		Selection:         run.Selection,
 		Policy:            run.Policy,
