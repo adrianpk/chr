@@ -76,7 +76,10 @@ func (s *Store) freezeWorkflowNativeSourceRevision(ctx context.Context, run *wor
 		SourceHead  string                            `json:"source_head"`
 	}{pr, head}
 
-	file, _, err := workflowNativePreparationEvidenceFile(run.ID, observation)
+	preparationEvidence, err := workflowNativePreparationEvidenceFile(run.ID, observation)
+
+	file, _ := preparationEvidence.Change, preparationEvidence.Ref
+
 	if err != nil {
 		return err
 	}

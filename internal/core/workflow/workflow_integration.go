@@ -62,7 +62,10 @@ func (s *Store) VerifyWorkflowSliceIntegration(ctx context.Context, id, method s
 }
 
 func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflowInvocationFile, method string, provider PullRequestProvider, git IntegrationGit) (SliceDeliveryProof, error) {
-	observation, candidate, err := s.workflowDeliveryCandidate(ctx, run)
+	deliveryPreparation, err := s.workflowDeliveryCandidate(ctx, run)
+
+	observation, candidate := deliveryPreparation.Observation, deliveryPreparation.Candidate
+
 	if err != nil {
 		return SliceDeliveryProof{}, err
 	}
@@ -96,7 +99,7 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 		return SliceDeliveryProof{}, err
 	}
 
-	if _, _, err := s.workflowDeliveryCandidate(ctx, run); err != nil {
+	if _, err := s.workflowDeliveryCandidate(ctx, run); err != nil {
 		return SliceDeliveryProof{}, err
 	}
 
@@ -105,33 +108,33 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 	return s.persistWorkflowDeliveryProof(&run, proof)
 }
 
-func (s *Store) workflowDeliveryCandidate(ctx context.Context, run workflowInvocationFile) (workflowSliceObservation, SliceCandidate, error) {
+func (s *Store) workflowDeliveryCandidate(ctx context.Context, run workflowInvocationFile) (workflowDeliveryPreparation, error) {
 	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" || !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingReview, workflowstate.InvocationWaitingIntegration, workflowstate.InvocationBlocked, workflowstate.InvocationPaused, workflowstate.InvocationCancelled}, run.Status) {
-		return workflowSliceObservation{}, SliceCandidate{}, fmt.Errorf("workflow requires an unchanged bound slice PR at its delivery barrier")
+		return workflowDeliveryPreparation{Observation: workflowSliceObservation{}, Candidate: SliceCandidate{}}, fmt.Errorf("workflow requires an unchanged bound slice PR at its delivery barrier")
 	}
 
 	if _, err := s.readWorkflowPullRequestObservation(*run.PullRequest); err != nil {
-		return workflowSliceObservation{}, SliceCandidate{}, err
+		return workflowDeliveryPreparation{Observation: workflowSliceObservation{}, Candidate: SliceCandidate{}}, err
 	}
 
 	if err := s.checkWorkflowDeliveryEvidence(run); err != nil {
-		return workflowSliceObservation{}, SliceCandidate{}, err
+		return workflowDeliveryPreparation{Observation: workflowSliceObservation{}, Candidate: SliceCandidate{}}, err
 	}
 
 	if run.DeliveryProofRef != "" {
 		if _, err := s.readWorkflowDeliveryProof(run); err != nil {
-			return workflowSliceObservation{}, SliceCandidate{}, err
+			return workflowDeliveryPreparation{Observation: workflowSliceObservation{}, Candidate: SliceCandidate{}}, err
 		}
 	}
 
 	observation, err := s.observeWorkflowSlice(ctx, run)
 	if err != nil {
-		return observation, SliceCandidate{}, err
+		return workflowDeliveryPreparation{Observation: observation, Candidate: SliceCandidate{}}, err
 	}
 
 	candidate, err := s.readWorkflowSliceCandidate(ctx, run, observation)
 
-	return observation, candidate, err
+	return workflowDeliveryPreparation{Observation: observation, Candidate: candidate}, err
 }
 
 func workflowIntegrationQuery(run workflowInvocationFile, candidate SliceCandidate, pr workflowstate.PullRequestSnapshot, method string) workflowstate.IntegrationQuery {

@@ -38,13 +38,16 @@ func (s *Store) readWorkflowDecisionRecord(ctx context.Context, run workflowInvo
 }
 
 func (s *Store) recordWorkflowDecisions(ctx context.Context, run workflowInvocationFile, request IntegrationDecisionRequest, provider PullRequestProvider) (IntegrationDecisions, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return IntegrationDecisions{}, err
 	}
 
-	if prior, found, err := s.workflowDecisionRequestRetry(ctx, run, entry, request, provider); found || err != nil {
-		return prior, err
+	if decisionRetry, err := s.workflowDecisionRequestRetry(ctx, run, entry, request, provider); decisionRetry.Found || err != nil {
+		return decisionRetry.Record, err
 	}
 
 	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.IntegrationBudgetGuard); err != nil {
@@ -242,23 +245,23 @@ func (s *Store) guardWorkflowDecisionTransition(ctx context.Context, run workflo
 	return nil
 }
 
-func (s *Store) workflowDecisionRequestRetry(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, request IntegrationDecisionRequest, provider PullRequestProvider) (IntegrationDecisions, bool, error) {
+func (s *Store) workflowDecisionRequestRetry(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, request IntegrationDecisionRequest, provider PullRequestProvider) (workflowDecisionRetry, error) {
 	if entry.DecisionRef == nil {
-		return IntegrationDecisions{}, false, nil
+		return workflowDecisionRetry{Record: IntegrationDecisions{}, Found: false}, nil
 	}
 
 	prior, err := s.readWorkflowDecisionRecord(ctx, run, entry)
 	if err != nil {
-		return prior, false, err
+		return workflowDecisionRetry{Record: prior, Found: false}, err
 	}
 
 	if prior.ID != request.ID {
-		return prior, false, nil
+		return workflowDecisionRetry{Record: prior, Found: false}, nil
 	}
 
 	if !reflect.DeepEqual(prior.Input, request.Input) || !reflect.DeepEqual(prior.Requests, request.Decisions) {
-		return prior, false, workflowstate.ErrConflict
+		return workflowDecisionRetry{Record: prior, Found: false}, workflowstate.ErrConflict
 	}
 
-	return prior, true, s.checkWorkflowDecisionCurrent(ctx, run, entry, prior, provider)
+	return workflowDecisionRetry{Record: prior, Found: true}, s.checkWorkflowDecisionCurrent(ctx, run, entry, prior, provider)
 }

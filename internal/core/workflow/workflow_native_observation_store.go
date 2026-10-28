@@ -121,7 +121,10 @@ func appendWorkflowNativeCanonicalObservation(native *workflowstate.NativeSubmis
 }
 
 func (s *Store) checkWorkflowNativeCanonicalCallback(ctx context.Context, run workflowInvocationFile, update NativeSubmissionUpdate) error {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, update.IntegrationBudgetGuard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, update.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return err
 	}

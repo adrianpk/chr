@@ -32,7 +32,10 @@ func (s *Store) retainWorkflowCandidateRepair(ctx context.Context, run *workflow
 
 	record := CandidateRepair{Schema: "chr-candidate-repair/v1", Reason: reason, Candidate: candidate, FindingRefs: refs}
 
-	file, ref, err := workflowNativePreparationEvidenceFile(run.ID, record)
+	preparationEvidence, err := workflowNativePreparationEvidenceFile(run.ID, record)
+
+	file, ref := preparationEvidence.Change, preparationEvidence.Ref
+
 	if err != nil {
 		return err
 	}

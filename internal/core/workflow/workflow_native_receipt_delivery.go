@@ -31,7 +31,10 @@ func (s *Store) ConfirmWorkflowNativeReceipt(ctx context.Context, guard Integrat
 }
 
 func (s *Store) confirmWorkflowNativeReceipt(ctx context.Context, run workflowInvocationFile, guard IntegrationBudgetGuard) (Record, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, guard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, guard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return Record{}, err
 	}

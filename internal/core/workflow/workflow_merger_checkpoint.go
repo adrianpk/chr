@@ -48,7 +48,10 @@ func (s *Store) RetainWorkflowMergerCheckpoint(ctx context.Context, guard Integr
 			return err
 		}
 
-		entry, budget, err := invocationLocation.Owner.currentWorkflowIntegrationBudget(ctx, invocationLocation.Run, guard)
+		budgetObservation, err := invocationLocation.Owner.currentWorkflowIntegrationBudget(ctx, invocationLocation.Run, guard)
+
+		entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 		if err != nil {
 			return err
 		}

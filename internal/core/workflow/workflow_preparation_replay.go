@@ -22,11 +22,11 @@ func (reader workflowIntegrationReader) replayCommit(ctx context.Context, tree, 
 
 	_, message, _ := strings.Cut(data, "\n\n")
 
-	return reader.attributedPreparationCommit(ctx, tree, parent, attribution.Author, attribution.Encoding, message)
+	return reader.attributedPreparationCommit(ctx, tree, parent, workflowPreparationAuthorship{Author: attribution.Author, Encoding: attribution.Encoding, Message: message})
 }
 
-func (reader workflowIntegrationReader) attributedPreparationCommit(ctx context.Context, tree, parent string, author workflowstate.IntegrationIdentity, encoding, message string) (string, error) {
-	return reader.preparationObject(ctx, tree, []string{parent}, author, encoding, message)
+func (reader workflowIntegrationReader) attributedPreparationCommit(ctx context.Context, tree, parent string, authorship workflowPreparationAuthorship) (string, error) {
+	return reader.preparationObject(ctx, workflowPreparationCommit{Tree: tree, Parents: []string{parent}, Authorship: authorship})
 }
 
 func (reader workflowIntegrationReader) preparationCommitterDate() string {
@@ -37,7 +37,10 @@ func (reader workflowIntegrationReader) preparationCommitterDate() string {
 	return fmt.Sprintf("%d +0000", time.Now().Unix())
 }
 
-func (reader workflowIntegrationReader) preparationObject(ctx context.Context, tree string, parents []string, author workflowstate.IntegrationIdentity, encoding, message string) (string, error) {
+func (reader workflowIntegrationReader) preparationObject(ctx context.Context, object workflowPreparationCommit) (string, error) {
+	tree, parents := object.Tree, object.Parents
+	author, encoding, message := object.Authorship.Author, object.Authorship.Encoding, object.Authorship.Message
+
 	if !validWorkflowPreparationObject(tree, parents, author, encoding) {
 		return "", workflowstate.ErrConflict
 	}
@@ -102,7 +105,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 
 	author := workflowstate.IntegrationIdentity{Name: "Workflow Host", Email: "workflow@example.invalid", Date: fmt.Sprintf("%d +0000", time.Now().Unix())}
 
-	commit, err := reader.attributedPreparationCommit(ctx, tree, proof.ResultCommit, author, "", "fix(integration): "+finding.Title+"\n\n"+finding.Detail+"\n")
+	commit, err := reader.attributedPreparationCommit(ctx, tree, proof.ResultCommit, workflowPreparationAuthorship{Author: author, Encoding: "", Message: "fix(integration): " + finding.Title + "\n\n" + finding.Detail + "\n"})
 	if err != nil {
 		return proof, err
 	}

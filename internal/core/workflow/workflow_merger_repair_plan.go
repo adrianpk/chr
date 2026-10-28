@@ -100,8 +100,8 @@ func workflowMergerOwnsConflict(conflicts []workflowstate.MergerConflict, paths 
 }
 
 func workflowMergerSemanticPlan(plan MergerRepairPlan, input workflowstate.MergerInput, owners []string, fix *workflowstate.ReviewFinding) (MergerRepairPlan, error) {
-	if answered, found, err := workflowMergerAnsweredPlan(plan, input, owners); found || err != nil {
-		return answered, err
+	if answeredRepair, err := workflowMergerAnsweredPlan(plan, input, owners); answeredRepair.Found || err != nil {
+		return answeredRepair.Plan, err
 	}
 
 	if len(owners) == 1 && owners[0] != "" {

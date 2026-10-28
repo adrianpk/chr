@@ -61,7 +61,10 @@ func (s *Store) finalizeWorkflowLegacySlice(ctx context.Context, run workflowInv
 		return Record{}, err
 	}
 
-	observation, candidate, err := s.workflowDeliveryCandidate(ctx, run)
+	deliveryPreparation, err := s.workflowDeliveryCandidate(ctx, run)
+
+	observation, candidate := deliveryPreparation.Observation, deliveryPreparation.Candidate
+
 	if err != nil {
 		return Record{}, err
 	}

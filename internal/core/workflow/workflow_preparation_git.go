@@ -201,7 +201,7 @@ func (reader workflowIntegrationReader) prepareRebase(ctx context.Context, proof
 func (reader workflowIntegrationReader) preparationCommit(ctx context.Context, tree string, parents []string) (string, error) {
 	author := workflowstate.IntegrationIdentity{Name: "Workflow Host", Email: "workflow@example.invalid", Date: reader.preparationCommitterDate()}
 
-	return reader.preparationObject(ctx, tree, parents, author, "", "Prepare configured workflow integration\n")
+	return reader.preparationObject(ctx, workflowPreparationCommit{Tree: tree, Parents: parents, Authorship: workflowPreparationAuthorship{Author: author, Encoding: "", Message: "Prepare configured workflow integration\n"}})
 }
 
 func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationReader, query PreparationQuery, proof workflowstate.IntegrationProof) error {

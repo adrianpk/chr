@@ -14,14 +14,14 @@ type RepairedPreparationGit interface {
 	PrepareWorkflowRepairedIntegration(context.Context, PreparationQuery, MergerRepairState) (workflowstate.IntegrationProof, error)
 }
 
-func (s *Store) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (*MergerRepairState, []workflowstate.EvidenceRef, error) {
+func (s *Store) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (workflowAcceptedRepair, error) {
 	if run.Integration == nil {
-		return nil, nil, nil
+		return workflowAcceptedRepair{State: nil, Refs: nil}, nil
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
 	if err != nil {
-		return nil, nil, err
+		return workflowAcceptedRepair{State: nil, Refs: nil}, err
 	}
 
 	for i := len(run.Attempts) - 1; i >= 0; i-- {
@@ -30,37 +30,40 @@ func (s *Store) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (*Me
 			continue
 		}
 
-		state, refs, err := s.readWorkflowAcceptedRepair(run, entry, attempt)
+		acceptedRepair, err := s.readWorkflowAcceptedRepair(run, entry, attempt)
+
+		state, refs := acceptedRepair.State, acceptedRepair.Refs
+
 		if state != nil || err != nil {
-			return state, refs, err
+			return workflowAcceptedRepair{State: state, Refs: refs}, err
 		}
 	}
 
-	return nil, nil, nil
+	return workflowAcceptedRepair{State: nil, Refs: nil}, nil
 }
 
-func (s *Store) readWorkflowAcceptedRepair(run workflowInvocationFile, entry IntegrationEntry, attempt Attempt) (*MergerRepairState, []workflowstate.EvidenceRef, error) {
+func (s *Store) readWorkflowAcceptedRepair(run workflowInvocationFile, entry IntegrationEntry, attempt Attempt) (workflowAcceptedRepair, error) {
 	ref := workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}
 
 	var result MergerAttempt
 	if err := s.readWorkflowNativeEvidence(run.ID, ref, &result); err != nil {
-		return nil, nil, err
+		return workflowAcceptedRepair{State: nil, Refs: nil}, err
 	}
 
 	// Superseded generations remain retained history, never a new-base result.
 	if result.Input.ClaimGeneration < entry.ClaimGeneration {
-		return nil, nil, nil
+		return workflowAcceptedRepair{State: nil, Refs: nil}, nil
 	}
 
 	if !validWorkflowAcceptedRepair(run, entry, attempt, result) {
-		return nil, nil, workflowstate.ErrConflict
+		return workflowAcceptedRepair{State: nil, Refs: nil}, workflowstate.ErrConflict
 	}
 
 	a := result.Acceptance
 
 	refs, err := s.workflowCandidateRepairAttemptRefs(run, *a.Next.Result)
 
-	return a.Next, refs, err
+	return workflowAcceptedRepair{State: a.Next, Refs: refs}, err
 }
 
 func (s *Store) workflowCandidateRepairAttemptRefs(run workflowInvocationFile, proof workflowstate.IntegrationProof) ([]workflowstate.EvidenceRef, error) {

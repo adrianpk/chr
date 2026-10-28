@@ -12,7 +12,9 @@ import (
 )
 
 func (s *Store) workflowMergerAdmission(ctx context.Context, run workflowInvocationFile, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (workflowMergerAdmissionResult, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
 
 	admission := workflowMergerAdmissionResult{Run: run, Entry: entry, Budget: budget}
 

@@ -22,11 +22,11 @@ func workflowIntegrationHistoryTipMatches(proof workflowstate.IntegrationProof, 
 	return last.Commit == proof.ResultCommit && last.Tree == proof.PreparedTree
 }
 
-func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof workflowstate.IntegrationProof, count int) ([]string, string, error) {
+func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof workflowstate.IntegrationProof, count int) (workflowRebaseResults, error) {
 	base := proof.ResultCommit
 	if p := proof.Provenance; p != nil {
 		if !validWorkflowProvenanceHeader(proof, *p) || len(p.Source) != count {
-			return nil, "", workflowstate.ErrConflict
+			return workflowRebaseResults{Commits: nil, Base: ""}, workflowstate.ErrConflict
 		}
 
 		base = p.Prepared[count-1].Commit
@@ -38,13 +38,13 @@ func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof
 
 		parents, err := reader.parents(ctx, base)
 		if err != nil || len(parents) != 1 {
-			return nil, "", fmt.Errorf("rebase result requires the complete ordered linear history")
+			return workflowRebaseResults{Commits: nil, Base: ""}, fmt.Errorf("rebase result requires the complete ordered linear history")
 		}
 
 		base = parents[0]
 	}
 
-	return results, base, nil
+	return workflowRebaseResults{Commits: results, Base: base}, nil
 }
 
 func (reader workflowIntegrationReader) verifyRebaseProvenance(ctx context.Context, proof *workflowstate.IntegrationProof) error {

@@ -10,7 +10,10 @@ import (
 
 // PrepareWorkflowSliceIntegration runs the shared guarded combined-result gate.
 func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string) (workflowstate.IntegrationCandidate, error) {
-	store, provider, err := s.workflowPreparationDependencies(id)
+	preparationDependencies, err := s.workflowPreparationDependencies(id)
+
+	store, provider := preparationDependencies.Store, preparationDependencies.Provider
+
 	if err != nil {
 		return workflowstate.IntegrationCandidate{}, err
 	}
@@ -30,7 +33,10 @@ func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string)
 
 // CheckWorkflowPublicationGuard returns exact current authority for submission.
 func (s service) CheckWorkflowPublicationGuard(ctx context.Context, id string) (workflowstate.PublicationGuard, error) {
-	store, provider, err := s.workflowPreparationDependencies(id)
+	preparationDependencies, err := s.workflowPreparationDependencies(id)
+
+	store, provider := preparationDependencies.Store, preparationDependencies.Provider
+
 	if err != nil {
 		return workflowstate.PublicationGuard{}, err
 	}
@@ -38,16 +44,21 @@ func (s service) CheckWorkflowPublicationGuard(ctx context.Context, id string) (
 	return store.CheckWorkflowPublicationGuard(ctx, id, provider)
 }
 
-func (s service) workflowPreparationDependencies(id string) (*workflowcore.Store, workflowcore.PublicationGuardProvider, error) {
+func (s service) workflowPreparationDependencies(id string) (servicePreparationDependencies, error) {
 	store, provider, err := s.workflowReviewDependencies(id)
 	if err != nil {
-		return nil, nil, err
+		return servicePreparationDependencies{Store: nil, Provider: nil}, err
 	}
 
 	guarded, ok := provider.(workflowcore.PublicationGuardProvider)
 	if !ok {
-		return nil, nil, fmt.Errorf("%w: configured provider has no guarded integration contract", workflowcore.ErrWorkflowAtomicGuard)
+		return servicePreparationDependencies{Store: nil, Provider: nil}, fmt.Errorf("%w: configured provider has no guarded integration contract", workflowcore.ErrWorkflowAtomicGuard)
 	}
 
-	return store, guarded, nil
+	return servicePreparationDependencies{Store: store, Provider: guarded}, nil
+}
+
+type servicePreparationDependencies struct {
+	Store    *workflowcore.Store
+	Provider workflowcore.PublicationGuardProvider
 }

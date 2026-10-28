@@ -61,7 +61,10 @@ func (s *Store) finalizeWorkflowNativeReceipt(ctx context.Context, run *workflow
 		return receipt, err
 	}
 
-	observation, _, err := s.workflowDeliveryCandidate(ctx, *run)
+	deliveryPreparation, err := s.workflowDeliveryCandidate(ctx, *run)
+
+	observation, _ := deliveryPreparation.Observation, deliveryPreparation.Candidate
+
 	if err != nil {
 		return receipt, err
 	}

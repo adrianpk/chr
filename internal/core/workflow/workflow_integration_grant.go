@@ -7,29 +7,29 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowGrantBudget(ctx context.Context, run workflowInvocationFile, guard IntegrationBudgetGuard) (IntegrationEntry, IntegrationBudget, error) {
+func (s *Store) workflowGrantBudget(ctx context.Context, run workflowInvocationFile, guard IntegrationBudgetGuard) (workflowBudgetObservation, error) {
 	if run.Integration != nil {
 		return s.currentWorkflowIntegrationBudget(ctx, run, guard)
 	}
 
 	var entry IntegrationEntry
 	if guard.EntryID != "" || guard.EntryRevision != 0 || guard.ClaimGeneration != 0 {
-		return entry, IntegrationBudget{}, workflowstate.ErrConflict
+		return workflowBudgetObservation{Entry: entry, Budget: IntegrationBudget{}}, workflowstate.ErrConflict
 	}
 
 	if err := s.checkWorkflowIntegrationRetainedRecords(ctx, run); err != nil {
-		return entry, IntegrationBudget{}, err
+		return workflowBudgetObservation{Entry: entry, Budget: IntegrationBudget{}}, err
 	}
 
 	if run.IntegrationBudget == nil {
 		budget, err := s.workflowGrantBudgetAdmission(ctx, run, guard)
 
-		return entry, budget, err
+		return workflowBudgetObservation{Entry: entry, Budget: budget}, err
 	}
 
 	budget, err := s.readWorkflowIntegrationBudget(run)
 
-	return entry, budget, err
+	return workflowBudgetObservation{Entry: entry, Budget: budget}, err
 }
 
 func guardWorkflowGrant(run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, guard IntegrationBudgetGuard) error {

@@ -150,7 +150,9 @@ func (s *Store) workflowIntegrationBudgetChange(ctx context.Context, run *workfl
 	budget.Usage = usage
 	budget.Revision++
 
-	budget.TokensSettled, budget.TokensReserved, err = workflowIntegrationTokenTotals(budget.Reservations)
+	tokenTotals, resultErr := workflowIntegrationTokenTotals(budget.Reservations)
+
+	budget.TokensSettled, budget.TokensReserved, err = tokenTotals.Settled, tokenTotals.Reserved, resultErr
 	if err != nil {
 		return workflowstate.FileChange{}, err
 	}
@@ -192,23 +194,23 @@ func (s *Store) commitWorkflowIntegrationBudget(ctx context.Context, run *workfl
 	return s.commitFiles(append([]workflowstate.FileChange{file, invocation}, extra...))
 }
 
-func (s *Store) currentWorkflowIntegrationBudget(ctx context.Context, run workflowInvocationFile, guard IntegrationBudgetGuard) (IntegrationEntry, IntegrationBudget, error) {
+func (s *Store) currentWorkflowIntegrationBudget(ctx context.Context, run workflowInvocationFile, guard IntegrationBudgetGuard) (workflowBudgetObservation, error) {
 	if err := s.checkWorkflowIntegrationRetainedRecords(ctx, run); err != nil {
-		return IntegrationEntry{}, IntegrationBudget{}, err
+		return workflowBudgetObservation{Entry: IntegrationEntry{}, Budget: IntegrationBudget{}}, err
 	}
 
 	if run.Integration == nil || run.Integration.EntryID != guard.EntryID {
-		return IntegrationEntry{}, IntegrationBudget{}, workflowstate.ErrConflict
+		return workflowBudgetObservation{Entry: IntegrationEntry{}, Budget: IntegrationBudget{}}, workflowstate.ErrConflict
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
 	if err != nil {
-		return entry, IntegrationBudget{}, err
+		return workflowBudgetObservation{Entry: entry, Budget: IntegrationBudget{}}, err
 	}
 
 	budget, err := s.readWorkflowIntegrationBudget(run)
 	if err != nil {
-		return entry, budget, err
+		return workflowBudgetObservation{Entry: entry, Budget: budget}, err
 	}
 
 	usage, err := s.workflowIntegrationUsage(ctx, run)
@@ -217,7 +219,7 @@ func (s *Store) currentWorkflowIntegrationBudget(ctx context.Context, run workfl
 	}
 
 	if err != nil {
-		return entry, budget, err
+		return workflowBudgetObservation{Entry: entry, Budget: budget}, err
 	}
 
 	budget.Usage = usage
@@ -227,7 +229,7 @@ func (s *Store) currentWorkflowIntegrationBudget(ctx context.Context, run workfl
 		err = checkWorkflowIntegrationLegacySubmissions(budget, counters)
 	}
 
-	return entry, budget, err
+	return workflowBudgetObservation{Entry: entry, Budget: budget}, err
 }
 
 func (s *Store) checkWorkflowIntegrationBudgetEvidence(run workflowInvocationFile, budget IntegrationBudget) error {

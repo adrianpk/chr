@@ -10,7 +10,10 @@ import (
 )
 
 func (s *Store) reserveWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request IntegrationReserve) (IntegrationBudget, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return budget, err
 	}
@@ -197,7 +200,10 @@ func (s *Store) GrantWorkflowIntegration(ctx context.Context, request Integratio
 }
 
 func (s *Store) grantWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request IntegrationGrantRequest, control *workflowControlCommit) (IntegrationBudget, error) {
-	entry, budget, err := s.workflowGrantBudget(ctx, run, request.IntegrationBudgetGuard)
+	budgetObservation, err := s.workflowGrantBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return budget, err
 	}
@@ -261,7 +267,10 @@ func checkWorkflowIntegrationRoleBudget(run workflowInvocationFile, budget Integ
 		return workflowstate.ErrConflict
 	}
 
-	consumed, limit := workflowIntegrationRoleUsage(budget, reservation.Role)
+	roleUsage := workflowIntegrationRoleUsage(budget, reservation.Role)
+
+	consumed, limit := roleUsage.Consumed, roleUsage.Limit
+
 	consumed += workflowAgentUnrecordedCalls(run, budget, reservation.Role)
 
 	if consumed > limit || consumed == limit && !workflowAgentUsageRecorded(run, reservation) {
@@ -271,16 +280,16 @@ func checkWorkflowIntegrationRoleBudget(run workflowInvocationFile, budget Integ
 	return nil
 }
 
-func workflowIntegrationRoleUsage(budget IntegrationBudget, role string) (int64, int64) {
+func workflowIntegrationRoleUsage(budget IntegrationBudget, role string) workflowRoleUsage {
 	switch role {
 	case "executor":
-		return int64(budget.Usage.WorkerCount), budget.LimitsSnapshot.Worker
+		return workflowRoleUsage{Consumed: int64(budget.Usage.WorkerCount), Limit: budget.LimitsSnapshot.Worker}
 	case "reviewer":
-		return int64(budget.Usage.ReviewCount), budget.LimitsSnapshot.Review
+		return workflowRoleUsage{Consumed: int64(budget.Usage.ReviewCount), Limit: budget.LimitsSnapshot.Review}
 	case "closing":
-		return int64(len(budget.Usage.ClosingAttempts)), budget.LimitsSnapshot.Closing
+		return workflowRoleUsage{Consumed: int64(len(budget.Usage.ClosingAttempts)), Limit: budget.LimitsSnapshot.Closing}
 	default:
-		return 0, 0
+		return workflowRoleUsage{Consumed: 0, Limit: 0}
 	}
 }
 

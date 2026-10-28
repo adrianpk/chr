@@ -107,7 +107,7 @@ func validateWorkflowRebaseProvenance(proof workflowstate.IntegrationProof, p wo
 
 	for i, source := range p.Source {
 		entry := p.Prepared[i]
-		if !validWorkflowReplayMapping(proof.History[i], p.Replays[i], source, entry, original, prepared) || seen[entry.Commit] {
+		if !validWorkflowReplayMapping(proof.History[i], p.Replays[i], workflowReplayMapping{Source: source, Prepared: entry, OriginalParent: original, PreparedParent: prepared}) || seen[entry.Commit] {
 			return workflowstate.ErrConflict
 		}
 
@@ -133,7 +133,10 @@ func validateWorkflowRebaseProvenance(proof workflowstate.IntegrationProof, p wo
 	return nil
 }
 
-func validWorkflowReplayMapping(history workflowstate.IntegrationCommit, replay workflowstate.IntegrationReplay, source, prepared workflowstate.IntegrationAttribution, originalParent, preparedParent string) bool {
+func validWorkflowReplayMapping(history workflowstate.IntegrationCommit, replay workflowstate.IntegrationReplay, mapping workflowReplayMapping) bool {
+	source, prepared := mapping.Source, mapping.Prepared
+	originalParent, preparedParent := mapping.OriginalParent, mapping.PreparedParent
+
 	if !validWorkflowIntegrationAttribution(prepared) || !slices.Equal(source.Parents, []string{originalParent}) || !slices.Equal(prepared.Parents, []string{preparedParent}) {
 		return false
 	}

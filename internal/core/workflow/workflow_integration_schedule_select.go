@@ -7,10 +7,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, q IntegrationQueueQuery) ([]IntegrationSelection, map[string]int, error) {
+func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, q IntegrationQueueQuery) (workflowTaskSelections, error) {
 	roles, err := scheduler.store.workflowIntegrationRoles(ctx, scheduler.snapshot)
 	if err != nil {
-		return nil, nil, err
+		return workflowTaskSelections{Items: nil, Excluded: nil}, err
 	}
 
 	priority := len(roles) > 0
@@ -22,9 +22,12 @@ func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, 
 			continue
 		}
 
-		item, reason, err := scheduler.selectTask(ctx, view.Entry)
+		taskSelection, err := scheduler.selectTask(ctx, view.Entry)
+
+		item, reason := taskSelection.Item, taskSelection.Reason
+
 		if err != nil {
-			return nil, nil, integrationRecordError(workflowInvocationPath(view.Entry.InvocationID), err)
+			return workflowTaskSelections{Items: nil, Excluded: nil}, integrationRecordError(workflowInvocationPath(view.Entry.InvocationID), err)
 		}
 
 		if reason != "" {
@@ -42,43 +45,43 @@ func (scheduler *workflowIntegrationScheduler) selectTasks(ctx context.Context, 
 		items = append(items, item)
 	}
 
-	return items, excluded, nil
+	return workflowTaskSelections{Items: items, Excluded: excluded}, nil
 }
 
-func (scheduler *workflowIntegrationScheduler) selectTask(ctx context.Context, entry IntegrationEntry) (IntegrationSelection, string, error) {
+func (scheduler *workflowIntegrationScheduler) selectTask(ctx context.Context, entry IntegrationEntry) (workflowTaskSelection, error) {
 	run, err := workflowIntegrationScheduleRun(scheduler.snapshot.Runs, entry)
 	if err != nil {
-		return IntegrationSelection{}, "", err
+		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: ""}, err
 	}
 
 	owner, err := scheduler.store.workflowOwnerStore(run)
 	if err != nil {
-		return IntegrationSelection{}, "", err
+		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: ""}, err
 	}
 
 	selection, err := scheduler.selection(ctx, owner)
 	if err != nil {
-		return IntegrationSelection{}, "", err
+		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: ""}, err
 	}
 
 	if reason := workflowIntegrationScheduleExclusion(run, entry); reason != "" {
-		return IntegrationSelection{}, reason, nil
+		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: reason}, nil
 	}
 
 	if err := owner.checkWorkflowInputsPrepared(ctx, run, (*Store).requireNoWorkflowTransition); err != nil {
-		return IntegrationSelection{}, "", err
+		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: ""}, err
 	}
 
 	task, err := owner.workflowIntegrationScheduledTask(ctx, run, selection)
 	if err != nil {
-		return IntegrationSelection{}, "", err
+		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: ""}, err
 	}
 
 	if task.Readiness != "ready" {
-		return IntegrationSelection{}, "task_prerequisite", nil
+		return workflowTaskSelection{Item: IntegrationSelection{}, Reason: "task_prerequisite"}, nil
 	}
 
-	return IntegrationSelection{Entry: entry, InvocationRevision: run.Revision, Task: task}, "", nil
+	return workflowTaskSelection{Item: IntegrationSelection{Entry: entry, InvocationRevision: run.Revision, Task: task}, Reason: ""}, nil
 }
 
 func (scheduler *workflowIntegrationScheduler) selection(ctx context.Context, owner *Store) (workflowSelection, error) {

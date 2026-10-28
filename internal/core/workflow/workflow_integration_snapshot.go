@@ -115,10 +115,12 @@ func (s *Store) appendWorkflowIntegrationViews(ctx context.Context, snapshot *wo
 		return err
 	}
 
-	return owner.appendWorkflowIntegrationRunEntries(ctx, snapshot, run, entries, budget, usage)
+	return owner.appendWorkflowIntegrationRunEntries(ctx, snapshot, run, entries, workflowIntegrationRunUsage{Budget: budget, Usage: usage})
 }
 
-func (s *Store) appendWorkflowIntegrationRunEntries(ctx context.Context, snapshot *workflowIntegrationSnapshot, run workflowInvocationFile, entries []IntegrationEntry, budget IntegrationBudget, usage IntegrationUsage) error {
+func (s *Store) appendWorkflowIntegrationRunEntries(ctx context.Context, snapshot *workflowIntegrationSnapshot, run workflowInvocationFile, entries []IntegrationEntry, current workflowIntegrationRunUsage) error {
+	budget, usage := current.Budget, current.Usage
+
 	for _, entry := range entries {
 		if entry.InvocationID == run.ID && entry.Namespace == run.Namespace {
 			if err := s.checkWorkflowIntegrationEntryRecords(ctx, run, entry); err != nil {

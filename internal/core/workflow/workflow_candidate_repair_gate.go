@@ -21,7 +21,10 @@ func (s *Store) resumeWorkflowCandidateRepairGate(ctx context.Context, run *work
 		return err
 	}
 
-	state, _, err := s.acceptedWorkflowCandidateRepair(*run)
+	acceptedRepair, err := s.acceptedWorkflowCandidateRepair(*run)
+
+	state, _ := acceptedRepair.State, acceptedRepair.Refs
+
 	if err != nil || state == nil || !workflowMergerRepairSourceMatches(source, *state.Result) {
 		return errorsOrConflict(err)
 	}
@@ -66,7 +69,10 @@ func workflowMergerRepairSourceMatches(source workflowstate.ReviewInput, proof w
 }
 
 func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query PreparationQuery) (workflowCandidateRepairGit, error) {
-	state, refs, err := s.acceptedWorkflowCandidateRepair(run)
+	acceptedRepair, err := s.acceptedWorkflowCandidateRepair(run)
+
+	state, refs := acceptedRepair.State, acceptedRepair.Refs
+
 	if err != nil {
 		return workflowCandidateRepairGit{Proof: workflowstate.IntegrationProof{}, Evidence: nil}, err
 	}

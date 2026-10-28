@@ -23,9 +23,9 @@ func (s *Store) checkWorkflowDecisionReplayAnswer(record IntegrationDecisions, a
 	return nil
 }
 
-func workflowMergerAnsweredPlan(plan MergerRepairPlan, input workflowstate.MergerInput, owners []string) (MergerRepairPlan, bool, error) {
+func workflowMergerAnsweredPlan(plan MergerRepairPlan, input workflowstate.MergerInput, owners []string) (workflowAnsweredRepair, error) {
 	if input.OperatorDecisionRef == nil {
-		return plan, false, nil
+		return workflowAnsweredRepair{Plan: plan, Found: false}, nil
 	}
 
 	for i := len(input.OperatorAnswers) - 1; i >= 0; i-- {
@@ -35,28 +35,28 @@ func workflowMergerAnsweredPlan(plan MergerRepairPlan, input workflowstate.Merge
 		}
 
 		if answer.Action != "resolve" {
-			return plan, false, nil
+			return workflowAnsweredRepair{Plan: plan, Found: false}, nil
 		}
 
 		if answer.OriginalCommit != "" {
 			if !slices.Contains(owners, answer.OriginalCommit) {
-				return plan, false, workflowstate.ErrConflict
+				return workflowAnsweredRepair{Plan: plan, Found: false}, workflowstate.ErrConflict
 			}
 
 			plan.Outcome, plan.OriginalCommit = "replay_step", answer.OriginalCommit
 
-			return plan, true, nil
+			return workflowAnsweredRepair{Plan: plan, Found: true}, nil
 		}
 
 		if answer.IntegrationFix == nil || workflowstate.ValidateReviewFinding(*answer.IntegrationFix) != nil || answer.IntegrationFix.Category == workflowstate.AgenticReviewFindingCosmetic {
-			return plan, false, workflowstate.ErrConflict
+			return workflowAnsweredRepair{Plan: plan, Found: false}, workflowstate.ErrConflict
 		}
 
 		finding := *answer.IntegrationFix
 		plan.Outcome, plan.IntegrationFix = "integration_fix", &finding
 
-		return plan, true, nil
+		return workflowAnsweredRepair{Plan: plan, Found: true}, nil
 	}
 
-	return plan, false, nil
+	return workflowAnsweredRepair{Plan: plan, Found: false}, nil
 }

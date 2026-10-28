@@ -21,7 +21,10 @@ func (s *Store) beginWorkflowNativeSubmission(ctx context.Context, run workflowI
 		return s.retryWorkflowNativeSubmission(&run, journal)
 	}
 
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, fence)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, fence)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return workflowstate.Submission{}, false, err
 	}
@@ -215,7 +218,10 @@ func (s *Store) projectWorkflowNativeSubmissionPhase(entry *IntegrationEntry, la
 }
 
 func (s *Store) retainWorkflowNativeSubmission(ctx context.Context, run workflowInvocationFile, request NativeSubmissionUpdate) (workflowstate.Submission, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return workflowstate.Submission{}, err
 	}

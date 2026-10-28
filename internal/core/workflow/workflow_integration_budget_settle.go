@@ -9,7 +9,10 @@ import (
 )
 
 func (s *Store) settleWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request IntegrationSettlement) (IntegrationBudget, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return budget, err
 	}

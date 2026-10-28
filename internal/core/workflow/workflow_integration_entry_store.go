@@ -100,14 +100,16 @@ func (s *Store) admitWorkflowIntegration(ctx context.Context, runs []workflowInv
 				return IntegrationEntry{}, err
 			}
 
-			return owner.admitWorkflowIntegrationUnit(ctx, run, runs, entries, request, coordinator)
+			return owner.admitWorkflowIntegrationUnit(ctx, run, request, workflowIntegrationAdmissionSnapshot{Runs: runs, Entries: entries, Coordinator: coordinator})
 		}
 	}
 
 	return IntegrationEntry{}, workflowstate.IntegrationConflict("invocation not found")
 }
 
-func (s *Store) admitWorkflowIntegrationUnit(ctx context.Context, run workflowInvocationFile, runs []workflowInvocationFile, entries []IntegrationEntry, request IntegrationAdmission, coordinator workflowCoordinator) (IntegrationEntry, error) {
+func (s *Store) admitWorkflowIntegrationUnit(ctx context.Context, run workflowInvocationFile, request IntegrationAdmission, snapshot workflowIntegrationAdmissionSnapshot) (IntegrationEntry, error) {
+	runs, entries, coordinator := snapshot.Runs, snapshot.Entries, snapshot.Coordinator
+
 	if !slices.Contains(run.RequestKeys, request.AdmissionKey) || !workflowstate.ValidRequestKey(request.AdmissionKey) {
 		return IntegrationEntry{}, workflowstate.IntegrationConflict("retry key is not attached to its invocation")
 	}

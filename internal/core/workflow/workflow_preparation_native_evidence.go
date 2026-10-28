@@ -87,7 +87,10 @@ func workflowNativePreparationEvidence(candidate *workflowstate.IntegrationCandi
 	files := make([]workflowstate.FileChange, 0, len(values))
 
 	for _, value := range values {
-		file, ref, err := workflowNativePreparationEvidenceFile(b.InvocationID, value.value)
+		preparationEvidence, err := workflowNativePreparationEvidenceFile(b.InvocationID, value.value)
+
+		file, ref := preparationEvidence.Change, preparationEvidence.Ref
+
 		if err != nil {
 			return nil, err
 		}
@@ -100,16 +103,16 @@ func workflowNativePreparationEvidence(candidate *workflowstate.IntegrationCandi
 	return files, nil
 }
 
-func workflowNativePreparationEvidenceFile(id string, value any) (workflowstate.FileChange, workflowstate.EvidenceRef, error) {
+func workflowNativePreparationEvidenceFile(id string, value any) (workflowPreparationEvidence, error) {
 	data, err := json.Marshal(value)
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowstate.FileChange{}, workflowstate.EvidenceRef{}, workflowstate.ErrConflict
+		return workflowPreparationEvidence{Change: workflowstate.FileChange{}, Ref: workflowstate.EvidenceRef{}}, workflowstate.ErrConflict
 	}
 
 	hash := contenthash.Sum(data)
 	ref := workflowstate.EvidenceRef{Path: filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", "evidence", hash+".json")), Hash: hash}
 
-	return workflowstate.FileChange{Path: ref.Path, After: data}, ref, nil
+	return workflowPreparationEvidence{Change: workflowstate.FileChange{Path: ref.Path, After: data}, Ref: ref}, nil
 }
 
 func (s *Store) workflowNativePreparedEntryChange(run *workflowInvocationFile, candidate workflowstate.IntegrationCandidate) (workflowstate.FileChange, error) {

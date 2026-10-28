@@ -75,7 +75,10 @@ func (s *Store) workflowIntegrationSchedule(ctx context.Context, q IntegrationSc
 
 	scheduler := workflowIntegrationScheduler{store: s, snapshot: snapshot, selections: map[string]workflowSelection{}}
 
-	items, excluded, err := scheduler.selectTasks(ctx, q.queueQuery())
+	taskSelections, err := scheduler.selectTasks(ctx, q.queueQuery())
+
+	items, excluded := taskSelections.Items, taskSelections.Excluded
+
 	if err != nil {
 		return IntegrationSchedulePage{}, err
 	}

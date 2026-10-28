@@ -35,7 +35,7 @@ func nativeAlteredTree(t *testing.T, directory string, proof workflowstate.Integ
 
 	_, message, _ := strings.Cut(raw, "\n\n")
 
-	commit, err := reader.preparationObject(t.Context(), proof.SourceTree, entry.Parents, entry.Author, entry.Encoding, message)
+	commit, err := reader.preparationObject(t.Context(), workflowPreparationCommit{Tree: proof.SourceTree, Parents: entry.Parents, Authorship: workflowPreparationAuthorship{Author: entry.Author, Encoding: entry.Encoding, Message: message}})
 	if err != nil {
 		t.Fatal(err)
 	}

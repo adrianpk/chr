@@ -102,7 +102,10 @@ func (reader workflowIntegrationReader) verifyRebase(ctx context.Context, proof 
 		return err
 	}
 
-	results, base, err := reader.rebaseResults(ctx, *proof, len(sources))
+	rebaseResults, err := reader.rebaseResults(ctx, *proof, len(sources))
+
+	results, base := rebaseResults.Commits, rebaseResults.Base
+
 	if err != nil {
 		return err
 	}

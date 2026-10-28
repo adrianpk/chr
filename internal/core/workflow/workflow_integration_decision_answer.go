@@ -11,7 +11,10 @@ import (
 )
 
 func (s *Store) answerWorkflowDecision(ctx context.Context, run workflowInvocationFile, request IntegrationAnswerRequest, provider PullRequestProvider, control *workflowControlCommit) (IntegrationDecisions, error) {
-	entry, budget, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+	budgetObservation, err := s.currentWorkflowIntegrationBudget(ctx, run, request.IntegrationBudgetGuard)
+
+	entry, budget := budgetObservation.Entry, budgetObservation.Budget
+
 	if err != nil {
 		return IntegrationDecisions{}, err
 	}
@@ -32,7 +35,7 @@ func (s *Store) answerWorkflowDecision(ctx context.Context, run workflowInvocati
 	answer := request.Answer
 
 	answer.PriorRevision, answer.QuestionHash, answer.RecordedAt = record.Revision, entry.DecisionRef.Hash, time.Now().UTC()
-	if err := s.checkWorkflowFreshAnswer(run, entry, budget, record, request, answer); err != nil {
+	if err := s.checkWorkflowFreshAnswer(run, entry, budget, record, workflowFreshDecision{Request: request, Answer: answer}); err != nil {
 		return record, err
 	}
 
@@ -115,7 +118,9 @@ func workflowDecisionAnswerRetry(record IntegrationDecisions, request Integratio
 	return false, nil
 }
 
-func (s *Store) checkWorkflowFreshAnswer(run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, record IntegrationDecisions, request IntegrationAnswerRequest, answer workflowstate.IntegrationAnswer) error {
+func (s *Store) checkWorkflowFreshAnswer(run workflowInvocationFile, entry IntegrationEntry, budget IntegrationBudget, record IntegrationDecisions, decision workflowFreshDecision) error {
+	request, answer := decision.Request, decision.Answer
+
 	if err := guardWorkflowIntegrationBudget(run, entry, budget, request.IntegrationBudgetGuard); err != nil {
 		return err
 	}

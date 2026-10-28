@@ -38,7 +38,10 @@ func validateWorkflowIntegrationTokens(b IntegrationBudget) error {
 		return workflowstate.ErrConflict
 	}
 
-	settled, reserved, err := workflowIntegrationTokenTotals(b.Reservations)
+	tokenTotals, err := workflowIntegrationTokenTotals(b.Reservations)
+
+	settled, reserved := tokenTotals.Settled, tokenTotals.Reserved
+
 	if err != nil || settled != b.TokensSettled || reserved != b.TokensReserved {
 		return workflowstate.ErrConflict
 	}
@@ -148,23 +151,28 @@ func addWorkflowIntegrationLimit(limits *IntegrationLimits, kind string, amount 
 	return nil
 }
 
-func workflowIntegrationTokenTotals(reservations []IntegrationReservation) (settled, reserved int64, err error) {
+func workflowIntegrationTokenTotals(reservations []IntegrationReservation) (workflowTokenTotals, error) {
+	var (
+		settled, reserved int64
+		err               error
+	)
+
 	ids := map[string]bool{}
 	for _, r := range reservations {
 		if ids[r.ID] {
-			return 0, 0, workflowstate.ErrConflict
+			return workflowTokenTotals{Settled: 0, Reserved: 0}, workflowstate.ErrConflict
 		}
 
 		ids[r.ID] = true
 		if err := validateWorkflowIntegrationReservation(r); err != nil {
-			return 0, 0, err
+			return workflowTokenTotals{Settled: 0, Reserved: 0}, err
 		}
 
 		switch r.State {
 		case "settled":
 			usage, sumErr := workflowstate.TokenSum(r.ReportedInput, r.ReportedOutput)
 			if sumErr != nil || usage > r.Allowance.Maximum {
-				return 0, 0, workflowstate.ErrConflict
+				return workflowTokenTotals{Settled: 0, Reserved: 0}, workflowstate.ErrConflict
 			}
 
 			settled, err = workflowstate.TokenSum(settled, usage)
@@ -173,11 +181,11 @@ func workflowIntegrationTokenTotals(reservations []IntegrationReservation) (sett
 		}
 
 		if err != nil {
-			return 0, 0, err
+			return workflowTokenTotals{Settled: 0, Reserved: 0}, err
 		}
 	}
 
-	return settled, reserved, nil
+	return workflowTokenTotals{Settled: settled, Reserved: reserved}, nil
 }
 
 func validateWorkflowIntegrationReservation(r IntegrationReservation) error {

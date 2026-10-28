@@ -147,7 +147,10 @@ func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.C
 		return workflowstate.IntegrationSignature{}, err
 	}
 
-	payload, signature, err := workflowPreparationSignaturePayload(data)
+	signedPayload, err := workflowPreparationSignaturePayload(data)
+
+	payload, signature := signedPayload.Payload, signedPayload.Signature
+
 	if err != nil {
 		return workflowstate.IntegrationSignature{}, err
 	}
@@ -159,10 +162,10 @@ func (reader workflowIntegrationReader) verifyPreparationSignature(ctx context.C
 	return workflowstate.IntegrationSignature{Commit: commit, SignatureHash: contenthash.Sum([]byte(signature))}, nil
 }
 
-func workflowPreparationSignaturePayload(data string) (string, string, error) {
+func workflowPreparationSignaturePayload(data string) (workflowSignedPayload, error) {
 	header, message, ok := strings.Cut(data, "\n\n")
 	if !ok {
-		return "", "", workflowstate.ErrConflict
+		return workflowSignedPayload{Payload: "", Signature: ""}, workflowstate.ErrConflict
 	}
 
 	var unsigned, signature []string
@@ -172,7 +175,7 @@ func workflowPreparationSignaturePayload(data string) (string, string, error) {
 	for _, line := range strings.Split(header, "\n") {
 		switch {
 		case strings.HasPrefix(line, "gpgsig ") && len(signature) != 0:
-			return "", "", workflowstate.ErrConflict
+			return workflowSignedPayload{Payload: "", Signature: ""}, workflowstate.ErrConflict
 		case strings.HasPrefix(line, "gpgsig "):
 			inside = true
 
@@ -187,10 +190,10 @@ func workflowPreparationSignaturePayload(data string) (string, string, error) {
 	}
 
 	if len(signature) == 0 {
-		return "", "", fmt.Errorf("prepared commit lacks a required signature")
+		return workflowSignedPayload{Payload: "", Signature: ""}, fmt.Errorf("prepared commit lacks a required signature")
 	}
 
-	return strings.Join(unsigned, "\n") + "\n\n" + message, strings.Join(signature, "\n") + "\n", nil
+	return workflowSignedPayload{Payload: strings.Join(unsigned, "\n") + "\n\n" + message, Signature: strings.Join(signature, "\n") + "\n"}, nil
 }
 
 func verifyWorkflowSSHSignature(ctx context.Context, payload, signature string, profile workflowstate.CommitSigningProfile) (err error) {
