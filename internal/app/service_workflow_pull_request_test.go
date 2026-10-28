@@ -14,7 +14,7 @@ type serviceWorkflowPRFixture struct {
 	creates int
 }
 
-func (p *serviceWorkflowPRFixture) FindWorkflowPullRequests(context.Context, workflowcore.PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) FindWorkflowPullRequests(context.Context, workflowstate.PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
 	return nil, nil
 }
 
@@ -26,7 +26,7 @@ func (p *serviceWorkflowPRFixture) ReadWorkflowPullRequest(context.Context, stri
 	return p.pr, nil
 }
 
-func (p *serviceWorkflowPRFixture) CreateWorkflowPullRequest(context.Context, workflowcore.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) CreateWorkflowPullRequest(context.Context, workflowstate.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	p.creates++
 
 	return p.pr, nil
@@ -56,7 +56,7 @@ func TestServiceWorkflowSlicePR(t *testing.T) {
 	provider := &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
 	operations.workflowPullRequests = provider
 
-	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
+	content := workflowstate.PullRequestContent{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
 	for range 2 {
 		pr, err := operations.EnsureWorkflowSlicePullRequest(t.Context(), run.Invocation.ID, content)
 		if err != nil || pr != provider.pr {

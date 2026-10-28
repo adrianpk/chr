@@ -10,7 +10,7 @@ import (
 )
 
 // EnsureWorkflowSlicePullRequest creates or reuses the slice's shared provider PR.
-func (s service) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, request workflowcore.SlicePullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
+func (s service) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, request workflowstate.PullRequestContent) (workflowstate.PullRequestSnapshot, error) {
 	store, err := s.workflowStore()
 	if err != nil {
 		return workflowstate.PullRequestSnapshot{}, err

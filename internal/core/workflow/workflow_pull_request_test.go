@@ -21,7 +21,7 @@ type workflowPRProviderFixture struct {
 	creates, reads, finds, branches int
 }
 
-func (p *workflowPRProviderFixture) FindWorkflowPullRequests(_ context.Context, _ PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
+func (p *workflowPRProviderFixture) FindWorkflowPullRequests(_ context.Context, _ workflowstate.PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -45,7 +45,7 @@ func (p *workflowPRProviderFixture) ReadWorkflowPullRequest(_ context.Context, _
 	return p.pr, nil
 }
 
-func (p *workflowPRProviderFixture) CreateWorkflowPullRequest(_ context.Context, _ PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
+func (p *workflowPRProviderFixture) CreateWorkflowPullRequest(_ context.Context, _ workflowstate.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -104,8 +104,8 @@ func TestWorkflowSlicePRConcurrent(t *testing.T) {
 	checkWorkflowPRBinding(t, store, hierarchy, run.ID, provider.pr)
 }
 
-func workflowPRContent() SlicePullRequestRequest {
-	return SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver approved slice", Body: "Deliver the aggregate candidate."}
+func workflowPRContent() workflowstate.PullRequestContent {
+	return workflowstate.PullRequestContent{BaseBranch: "dev", Title: "Deliver approved slice", Body: "Deliver the aggregate candidate."}
 }
 
 func workflowPRFixture(t *testing.T) (*Store, MaterializationResult, Invocation, *workflowPRProviderFixture) {

@@ -193,7 +193,7 @@ func nativeRolePool(t *testing.T, purpose string) {
 	// Merger payload and credential fencing remain with its role owner. This
 	// boundary certifies its pool reservation using the exact production purpose.
 	if purpose == workflowMergerPurpose {
-		firstRun.PullRequest = &PullRequestBinding{Request: PullRequestRequest{PullRequestQuery: PullRequestQuery{Repository: "https://forge.example/test/repo", BaseBranch: "dev"}}}
+		firstRun.PullRequest = &PullRequestBinding{Request: workflowstate.PullRequestRequest{PullRequestQuery: workflowstate.PullRequestQuery{Repository: "https://forge.example/test/repo", BaseBranch: "dev"}}}
 	}
 
 	var first *Claim

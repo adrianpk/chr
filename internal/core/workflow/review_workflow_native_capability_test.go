@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -72,7 +73,7 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
-	runner.outputs[remoteReviewCommandKey(config.CLI, workflowRemoteAPIArgs(repository, reference, "GET", "/user", false)...)] = []byte(`{"id":1,"login":"fixture-publisher"}`)
+	runner.outputs[remoteReviewCommandKey(config.CLI, workflowForgeEndpoint(repository, reference, config).Arguments(workflowforge.Request{Method: "GET", Path: "/user"})...)] = []byte(`{"id":1,"login":"fixture-publisher"}`)
 
 	setNativePRFixture(t, result, pr)
 
@@ -98,13 +99,13 @@ func nativePolicyCommand(t *testing.T, fixture nativeCapabilityFixture, suffix s
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
-	return remoteReviewCommandKey(config.CLI, workflowRemoteAPIArgs(fixture.request.PullRequest.Repository, reference, "GET", workflowRemoteRepositoryPath(reference)+suffix, false)...)
+	return remoteReviewCommandKey(config.CLI, workflowForgeEndpoint(fixture.request.PullRequest.Repository, reference, config).Arguments(workflowforge.Request{Method: "GET", Path: workflowForgeEndpoint(fixture.request.PullRequest.Repository, reference, config).RepositoryPath() + suffix})...)
 }
 
 func setNativePRFixture(t *testing.T, fixture nativeCapabilityFixture, pr workflowstate.PullRequestSnapshot) {
 	t.Helper()
 
-	remote := workflowRemotePRJSON{URL: pr.URL, State: pr.State, Merged: pr.Merged, ResultCommit: pr.ResultCommit}
+	remote := workflowPRWireFixture{URL: pr.URL, State: pr.State, Merged: pr.Merged, ResultCommit: pr.ResultCommit}
 	remote.Head.Ref, remote.Head.SHA, remote.Head.Repo.URL = pr.HeadBranch, pr.HeadCommit, pr.HeadRepository
 	remote.Base.Ref, remote.Base.SHA, remote.Base.Repo.URL = pr.BaseBranch, pr.BaseCommit, pr.Repository
 

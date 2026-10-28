@@ -69,8 +69,8 @@ func nativeLiveRebase(t *testing.T, state string, profile nativeLiveProfile) {
 func createNativeLivePR(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication) workflowstate.PullRequestSnapshot {
 	t.Helper()
 
-	pr, err := adapter.CreateWorkflowPullRequest(t.Context(), PullRequestRequest{
-		PullRequestQuery: PullRequestQuery{Repository: profile.URL, HeadBranch: strings.TrimPrefix(request.SourceRef, "refs/heads/"), BaseBranch: request.Git.TargetBranch},
+	pr, err := adapter.CreateWorkflowPullRequest(t.Context(), workflowstate.PullRequestRequest{
+		PullRequestQuery: workflowstate.PullRequestQuery{Repository: profile.URL, HeadBranch: strings.TrimPrefix(request.SourceRef, "refs/heads/"), BaseBranch: request.Git.TargetBranch},
 		Title:            "test(integration): certify native atomic " + request.Git.Method, Body: "Synthetic owned-source fixture for exact-result publication and same-original-PR observation.",
 	})
 	if err != nil || pr.HeadCommit != request.Git.SourceCommit || pr.BaseCommit != request.Git.BaseCommit || pr.State != "open" {

@@ -85,7 +85,7 @@ func checkServiceWorkflowTicketPR(t *testing.T, operations service, id string, r
 	provider := &serviceWorkflowPRFixture{pr: workflowstate.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}}
 	operations.workflowPullRequests = provider
 
-	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver independent task", Body: "Deliver its host-validated candidate."}
+	content := workflowstate.PullRequestContent{BaseBranch: "dev", Title: "Deliver independent task", Body: "Deliver its host-validated candidate."}
 	for range 2 {
 		if _, err := operations.EnsureWorkflowSlicePullRequest(t.Context(), id, content); err != nil {
 			t.Fatal(err)

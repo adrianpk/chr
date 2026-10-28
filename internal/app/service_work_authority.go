@@ -130,7 +130,7 @@ func (s service) startNativeAgentWork(config workspaceconfig.Config, selection w
 		worker = (codex.Runner{}).WorkflowWorker()
 	}
 
-	request := workflowcore.ContinuationRequest{Worker: worker, StepLimit: limit, PullRequest: workflowcore.SlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
+	request := workflowcore.ContinuationRequest{Worker: worker, StepLimit: limit, PullRequest: workflowstate.PullRequestContent{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
 
 	progress, err := s.ContinueWorkflow(s.ctx, started.Invocation.ID, request, worker)
 	if progress.Invocation.ID == "" {

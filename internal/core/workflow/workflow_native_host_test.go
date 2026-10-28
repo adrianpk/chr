@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -48,7 +49,7 @@ func newNativeHostFixture(t *testing.T) nativeHostFixture {
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
-	runner.outputs[remoteReviewCommandKey(config.CLI, workflowRemoteAPIArgs(profile.Repository, reference, "GET", "/user", false)...)] = []byte(`{"id":1,"login":"fixture-publisher"}`)
+	runner.outputs[remoteReviewCommandKey(config.CLI, workflowForgeEndpoint(profile.Repository, reference, config).Arguments(workflowforge.Request{Method: "GET", Path: "/user"})...)] = []byte(`{"id":1,"login":"fixture-publisher"}`)
 
 	return nativeHostFixture{f, provider, profile, forge}
 }

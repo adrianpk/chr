@@ -26,7 +26,7 @@ type workflowAssuranceProvider struct {
 	lostPublisher GitPublisher
 }
 
-func (p *workflowAssuranceProvider) FindWorkflowPullRequests(_ context.Context, query PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
+func (p *workflowAssuranceProvider) FindWorkflowPullRequests(_ context.Context, query workflowstate.PullRequestQuery) ([]workflowstate.PullRequestSnapshot, error) {
 	var found []workflowstate.PullRequestSnapshot
 
 	for _, pr := range p.prs {
@@ -38,7 +38,7 @@ func (p *workflowAssuranceProvider) FindWorkflowPullRequests(_ context.Context, 
 	return found, nil
 }
 
-func (p *workflowAssuranceProvider) CreateWorkflowPullRequest(ctx context.Context, request PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
+func (p *workflowAssuranceProvider) CreateWorkflowPullRequest(ctx context.Context, request workflowstate.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	head, err := p.ReadWorkflowBranch(ctx, request.Repository, request.HeadBranch)
 	if err != nil {
 		return workflowstate.PullRequestSnapshot{}, err

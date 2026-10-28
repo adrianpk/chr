@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +20,7 @@ func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
 	}
 
 	repository, err := workflowstate.CanonicalRepository(run.ExecutionSelection().Target.Repository)
-	if err != nil || repository != binding.Request.Repository || !validWorkflowPullRequestContent(SlicePullRequestRequest{BaseBranch: binding.Request.BaseBranch, Title: binding.Request.Title, Body: binding.Request.Body}) {
+	if err != nil || repository != binding.Request.Repository || !workflowforge.ValidPullRequestContent(workflowstate.PullRequestContent{BaseBranch: binding.Request.BaseBranch, Title: binding.Request.Title, Body: binding.Request.Body}) {
 		return workflowstate.ErrConflict
 	}
 

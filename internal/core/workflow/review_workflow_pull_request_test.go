@@ -34,7 +34,7 @@ func (r *workflowPRCommandFixture) Input(_ context.Context, command string, data
 func workflowRemotePRBytes(t *testing.T, repository, marker string) []byte {
 	t.Helper()
 
-	pr := workflowRemotePRJSON{URL: repository + marker + "7", State: "open"}
+	pr := workflowPRWireFixture{URL: repository + marker + "7", State: "open"}
 	pr.Head.Ref, pr.Head.SHA, pr.Head.Repo.URL = "chr/workflow/branch", strings.Repeat("a", 40), repository
 	pr.Base.Ref, pr.Base.SHA, pr.Base.Repo.URL = "dev", strings.Repeat("b", 40), repository
 
@@ -88,7 +88,12 @@ func TestWorkflowPRBranch(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			observed, err := decodeWorkflowRemoteBranch([]byte(tc.data))
+			runner := newFakeRemoteReviewRunner()
+			runner.outputs["tea api -X GET https://forge.example/api/v1/repos/test/repo/branches/dev"] = []byte(tc.data)
+
+			adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
+
+			observed, err := adapter.ReadWorkflowBranch(t.Context(), "https://forge.example/test/repo", "dev")
 			if (err == nil) != tc.valid {
 				t.Fatalf("canonical branch observation: %s, %v", observed, err)
 			}
@@ -103,7 +108,7 @@ func TestWorkflowPRBranch(t *testing.T) {
 func checkWorkflowPRAdapter(t *testing.T, adapter RemoteReviewAdapter, runner *workflowPRCommandFixture, repository, inputKey string) {
 	t.Helper()
 
-	request := PullRequestRequest{PullRequestQuery: PullRequestQuery{Repository: repository, HeadBranch: "chr/workflow/branch", BaseBranch: "dev"}, Title: "Deliver slice", Body: "A literal body\nwith `code` and $(text)."}
+	request := workflowstate.PullRequestRequest{PullRequestQuery: workflowstate.PullRequestQuery{Repository: repository, HeadBranch: "chr/workflow/branch", BaseBranch: "dev"}, Title: "Deliver slice", Body: "A literal body\nwith `code` and $(text)."}
 
 	items, err := adapter.FindWorkflowPullRequests(t.Context(), request.PullRequestQuery)
 	if err != nil || len(items) != 1 {
@@ -128,7 +133,7 @@ func checkWorkflowPRAdapter(t *testing.T, adapter RemoteReviewAdapter, runner *w
 	checkWorkflowPRPayload(t, runner, inputKey, request)
 }
 
-func checkWorkflowPRPayload(t *testing.T, runner *workflowPRCommandFixture, inputKey string, request PullRequestRequest) {
+func checkWorkflowPRPayload(t *testing.T, runner *workflowPRCommandFixture, inputKey string, request workflowstate.PullRequestRequest) {
 	t.Helper()
 
 	var payload map[string]string
@@ -145,7 +150,11 @@ func TestWorkflowPRAdapterBounds(t *testing.T) {
 		data []byte
 	}{{"null", []byte("null")}, {"malformed", []byte("{")}, {"oversized", []byte(strings.Repeat("x", workflowstate.FileLimit+1))}} {
 		t.Run(tc.name, func(t *testing.T) {
-			if _, err := decodeWorkflowPRList(tc.data); err == nil {
+			runner := newFakeRemoteReviewRunner()
+			runner.outputs["tea api -X GET https://forge.example/api/v1/repos/test/repo/pulls?state=all&limit=50&per_page=50&page=1"] = tc.data
+
+			adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
+			if _, err := adapter.FindWorkflowPullRequests(t.Context(), workflowstate.PullRequestQuery{Repository: "https://forge.example/test/repo", HeadBranch: "chr/workflow/branch", BaseBranch: "dev"}); err == nil {
 				t.Fatal("invalid provider page accepted")
 			}
 		})
@@ -157,7 +166,24 @@ func TestWorkflowPRAdapterBounds(t *testing.T) {
 	}
 
 	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
-	if _, err := adapter.FindWorkflowPullRequests(t.Context(), PullRequestQuery{Repository: "https://forge.example/test/repo", HeadBranch: "chr/workflow/branch", BaseBranch: "dev"}); err == nil {
+	if _, err := adapter.FindWorkflowPullRequests(t.Context(), workflowstate.PullRequestQuery{Repository: "https://forge.example/test/repo", HeadBranch: "chr/workflow/branch", BaseBranch: "dev"}); err == nil {
 		t.Fatal("incomplete short-page pagination licensed replacement PR creation")
 	}
+}
+
+type workflowPRWireFixture struct {
+	URL          string                      `json:"html_url"`
+	State        string                      `json:"state"`
+	Merged       bool                        `json:"merged"`
+	ResultCommit string                      `json:"merge_commit_sha"`
+	Head         workflowPRWireBranchFixture `json:"head"`
+	Base         workflowPRWireBranchFixture `json:"base"`
+}
+
+type workflowPRWireBranchFixture struct {
+	Ref  string `json:"ref"`
+	SHA  string `json:"sha"`
+	Repo struct {
+		URL string `json:"html_url"`
+	} `json:"repo"`
 }

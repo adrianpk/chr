@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) prepareWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, request SlicePullRequestRequest) (workflowSliceObservation, error) {
+func (s *Store) prepareWorkflowPullRequest(ctx context.Context, run *workflowInvocationFile, request workflowstate.PullRequestContent) (workflowSliceObservation, error) {
 	if err := s.checkWorkflowPullRequestReady(*run); err != nil {
 		return workflowSliceObservation{}, err
 	}
@@ -50,13 +50,13 @@ func (s *Store) checkWorkflowPullRequestReady(run workflowInvocationFile) error 
 	return nil
 }
 
-func prepareWorkflowPullRequestBinding(run *workflowInvocationFile, observation workflowSliceObservation, candidate SliceCandidate, request SlicePullRequestRequest) error {
+func prepareWorkflowPullRequestBinding(run *workflowInvocationFile, observation workflowSliceObservation, candidate SliceCandidate, request workflowstate.PullRequestContent) error {
 	repository, err := workflowstate.CanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil {
 		return err
 	}
 
-	prRequest := PullRequestRequest{PullRequestQuery: PullRequestQuery{Repository: repository, HeadBranch: strings.TrimPrefix(run.Lane.Branch, "refs/heads/"), BaseBranch: request.BaseBranch}, Title: request.Title, Body: request.Body}
+	prRequest := workflowstate.PullRequestRequest{PullRequestQuery: workflowstate.PullRequestQuery{Repository: repository, HeadBranch: strings.TrimPrefix(run.Lane.Branch, "refs/heads/"), BaseBranch: request.BaseBranch}, Title: request.Title, Body: request.Body}
 	if !workflowstate.ValidBranch(prRequest.HeadBranch) || prRequest.HeadBranch == prRequest.BaseBranch {
 		return workflowstate.ErrConflict
 	}
@@ -84,7 +84,7 @@ func workflowPullRequestCandidateMayAdvance(binding PullRequestBinding, id strin
 	return binding.CandidateID == "" || binding.CandidateID == id || binding.State == "prepared" || binding.State == "bound" && binding.URL != ""
 }
 
-func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descriptor workflowstate.WorkflowSlice, request PullRequestRequest) error {
+func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descriptor workflowstate.WorkflowSlice, request workflowstate.PullRequestRequest) error {
 	if run.PullRequest != nil {
 		if run.PullRequest.Request != request || run.PullRequest.Unit != run.Lane.Unit || run.PullRequest.TargetCommit != run.ExecutionSelection().Target.Commit {
 			return fmt.Errorf("%w: retained PR request changed", workflowstate.ErrConflict)

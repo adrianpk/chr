@@ -31,7 +31,7 @@ func (p *serviceWorkEntryProvider) ReadWorkflowBranch(ctx context.Context, repos
 	return strings.TrimSpace(string(output)), err
 }
 
-func (p *serviceWorkEntryProvider) CreateWorkflowPullRequest(ctx context.Context, request workflowcore.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
+func (p *serviceWorkEntryProvider) CreateWorkflowPullRequest(ctx context.Context, request workflowstate.PullRequestRequest) (workflowstate.PullRequestSnapshot, error) {
 	head, err := p.ReadWorkflowBranch(ctx, request.Repository, request.HeadBranch)
 	if err != nil {
 		return workflowstate.PullRequestSnapshot{}, err

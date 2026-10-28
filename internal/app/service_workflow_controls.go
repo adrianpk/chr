@@ -164,7 +164,7 @@ func (s service) workflowContinuationInput(steps int) (workflowcore.Continuation
 		worker = (codex.Runner{}).WorkflowWorker()
 	}
 
-	request := workflowcore.ContinuationRequest{Worker: worker, StepLimit: steps, PullRequest: workflowcore.SlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
+	request := workflowcore.ContinuationRequest{Worker: worker, StepLimit: steps, PullRequest: workflowstate.PullRequestContent{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
 
 	return request, nil
 }

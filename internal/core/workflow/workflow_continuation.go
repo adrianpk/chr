@@ -16,7 +16,7 @@ type ContinuationRequest struct {
 	AuthorizationCheck AdmissionCheck `json:"-"`
 	ExpectedRevision   uint64
 	Worker             []string
-	PullRequest        SlicePullRequestRequest
+	PullRequest        workflowstate.PullRequestContent
 	StepLimit          int
 }
 

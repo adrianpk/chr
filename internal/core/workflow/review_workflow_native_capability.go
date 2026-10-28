@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -174,21 +175,23 @@ func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context,
 		return workflowNativePolicyObservation{}, err
 	}
 
-	reference, config := resolvedReview.reference, resolvedReview.config
+	reference := resolvedReview.reference
 
-	paths := []string{workflowRemoteRepositoryPath(reference), workflowRemoteRepositoryPath(reference) + "/branches/" + url.PathEscape(pr.BaseBranch), workflowRemoteRepositoryPath(reference) + "/branches/" + url.PathEscape(pr.HeadBranch)}
+	client := adapter.workflowForgeClient(pr.Repository, resolvedReview)
+
+	paths := []string{client.Endpoint.RepositoryPath(), client.Endpoint.RepositoryPath() + "/branches/" + url.PathEscape(pr.BaseBranch), client.Endpoint.RepositoryPath() + "/branches/" + url.PathEscape(pr.HeadBranch)}
 
 	contract := "forgejo_same_pr_git_auto_merge/v1"
 	if reference.Provider == ReviewProviderGitHub {
 		contract = "github_same_pr_git_merge/v1"
 
-		paths = append(paths, workflowRemoteRepositoryPath(reference)+"/rules/branches/"+url.PathEscape(pr.BaseBranch), workflowRemoteRepositoryPath(reference)+"/rules/branches/"+url.PathEscape(pr.HeadBranch))
+		paths = append(paths, client.Endpoint.RepositoryPath()+"/rules/branches/"+url.PathEscape(pr.BaseBranch), client.Endpoint.RepositoryPath()+"/rules/branches/"+url.PathEscape(pr.HeadBranch))
 	}
 
 	var responses []json.RawMessage
 
 	for _, path := range paths {
-		data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(pr.Repository, reference, "GET", path, false)...)
+		data, err := client.Request(ctx, workflowforge.Request{Method: "GET", Path: path})
 		if err != nil || len(data) > workflowstate.FileLimit || !json.Valid(data) {
 			return workflowNativePolicyObservation{contract: contract}, fmt.Errorf("native publication policy could not be completely observed")
 		}

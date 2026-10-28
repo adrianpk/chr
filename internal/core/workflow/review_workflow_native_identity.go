@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,9 +17,9 @@ func (adapter RemoteReviewAdapter) readWorkflowNativeIdentity(ctx context.Contex
 		return "", err
 	}
 
-	reference, config := resolvedReview.reference, resolvedReview.config
+	client := adapter.workflowForgeClient(pr.Repository, resolvedReview)
 
-	data, err := adapter.workflowProviderRunner().Output(ctx, config.CLI, workflowRemoteAPIArgs(pr.Repository, reference, "GET", "/user", false)...)
+	data, err := client.Request(ctx, workflowforge.Request{Method: "GET", Path: "/user"})
 	if err != nil || len(data) > workflowstate.FileLimit {
 		return "", fmt.Errorf("current publisher API identity could not be observed")
 	}

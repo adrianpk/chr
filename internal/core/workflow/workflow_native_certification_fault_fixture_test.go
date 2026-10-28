@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -71,13 +72,14 @@ func nativeFixtureAPI(t *testing.T, ctx context.Context, profile nativeLiveProfi
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
-	if err != nil || !validNativeLiveProfile(profile) || !strings.HasPrefix(endpoint, workflowRemoteRepositoryPath(reference)+"/") {
+	if err != nil || !validNativeLiveProfile(profile) || !strings.HasPrefix(endpoint, workflowForgeEndpoint(profile.URL, reference, config).RepositoryPath()+"/") {
 		t.Fatal("fixture API mutation escaped its designated repository")
 	}
 
-	args := workflowRemoteAPIArgs(profile.URL, reference, method, endpoint, payload != nil)
+	client := adapter.workflowForgeClient(profile.URL, resolvedReview)
+
 	if payload == nil {
-		data, readErr := adapter.workflowProviderRunner().Output(ctx, config.CLI, args...)
+		data, readErr := client.Request(ctx, workflowforge.Request{Method: method, Path: endpoint})
 		if readErr != nil {
 			t.Fatal(readErr)
 		}
@@ -90,7 +92,7 @@ func nativeFixtureAPI(t *testing.T, ctx context.Context, profile nativeLiveProfi
 		t.Fatal(err)
 	}
 
-	response, err := adapter.workflowProviderRunner().Input(ctx, config.CLI, data, args...)
+	response, err := client.Request(ctx, workflowforge.Request{Method: method, Path: endpoint, Body: data})
 	if err != nil {
 		t.Fatalf("designated fixture API %s failed: %v", method, err)
 	}

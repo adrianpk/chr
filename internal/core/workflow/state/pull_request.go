@@ -13,3 +13,24 @@ type PullRequestSnapshot struct {
 	Merged         bool   `json:"merged"`
 	ResultCommit   string `json:"result_commit"`
 }
+
+// PullRequestQuery locates all PR states for one retained source branch.
+type PullRequestQuery struct {
+	Repository string `json:"repository"`
+	HeadBranch string `json:"head_branch"`
+	BaseBranch string `json:"base_branch"`
+}
+
+// PullRequestRequest supplies the initial canonical PR content.
+type PullRequestRequest struct {
+	PullRequestQuery
+	Title string `json:"title"`
+	Body  string `json:"body"`
+}
+
+// PullRequestContent freezes target branch and initial content.
+type PullRequestContent struct {
+	BaseBranch string
+	Title      string
+	Body       string
+}
