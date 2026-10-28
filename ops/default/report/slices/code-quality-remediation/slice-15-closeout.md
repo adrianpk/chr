@@ -1,6 +1,6 @@
 # Slice 15: Workflow closeout and coordinator cleanup
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -177,6 +177,13 @@ point to the actual native/capacity observers. This is source/contract acceptanc
 canonical PR-head behavioral validation and integration remain separate.
 
 ## Implementation Notes
+
+Canonical PR #452 is verified merged into dev through Rebase + Fast-forward at
+`a41e62be3b2a14daf04b470e8d9344d350480f34`. The controller recorded all five final ordered validation commands
+on that clean head. All 28 behavior fixtures, eight lifecycle races and the shared
+guided parity journey passed without failures/skips; owned fixture cleanup passed.
+Slice 15 is delivered. Final set enforcement and integrated gate evidence belong
+to Slice 16. Earlier task failures remain recorded below.
 
 Predecessor PR #451 is verified merged into dev at
 `8b5659a71af5d393919593c5e0d8c9a6ec0f497c`. Its exact controller evidence
@@ -889,6 +896,5 @@ and whitespace pass. Runtime checks are not repeated for this metadata-only upda
 
 Source-method, bridge and owned compatibility reconciliation are complete.
 Supported retained protocols have explicit retirement conditions. Canonical PR [#452](https://forge.adrianpk.com/adrianpk/chr/pulls/452) is
-open. PR readiness requires successful final ordered controller evidence for the
-clean PR head after its reference follow-up. The controller owns dev integration;
-no task check alone marks the slice delivered.
+open. Integration is verified at `a41e62be3b2a14daf04b470e8d9344d350480f34`.
+Final delivery-set enforcement and gate closure remain Slice 16 work.

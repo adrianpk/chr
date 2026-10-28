@@ -7,7 +7,7 @@ Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: Slice 15, Workflow closeout and coordinator cleanup; activated after verified integration of PR #451.
+Active slice: Slice 16, Final enforcement, documentation and integrated closure; activated after verified integration of PR #452.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -290,7 +290,7 @@ Focused selection: Existing native provider/transport permission and review fixt
 ### Slice 15: Workflow closeout and coordinator cleanup
 
 Findings: R1, R2, R3, R7, R10.
-Ticket: [TKT-20261026084835](../ticket/reviewing/20261026084835-quality-closeout.md).
+Ticket: [TKT-20261026084835](../ticket/solved/20261026084835-quality-closeout.md).
 
 1. **T15.1:** Extract closing-gate and closure behavior into internal/core/workflow/closeout; leave core/workflow responsible for sequencing, dispatch and lifecycle. Preserve confirmation, closing-gate waiver, exact-candidate and terminal outcome distinctions.
 2. **T15.2:** Complete result/input conversions for remaining workflow lifecycle, loose queue, frontier, continuation, amendment, process and capacity paths. Remove workflowClosingInvocationFiles unused context and prepareWorkflowTask/withoutWorkflowPublicationProfile production-only wrappers where still applicable.
@@ -306,7 +306,7 @@ Focused selection: Existing continuation/closing/process/budget/stop recovery te
 ### Slice 16: Final enforcement, documentation and integrated closure
 
 Findings: R1-R10.
-Ticket: [TKT-20261026084836](../ticket/ready/20261026084836-quality-closure.md).
+Ticket: [TKT-20261026084836](../ticket/in_progress/20261026084836-quality-closure.md).
 
 1. **T16.1:** Reconcile all 771 baseline inventory entries, all 14 large files, six wide structs, 11 duplicate pairs, seven dead symbols and every minor item against code and merged task evidence. Fix residual accepted defects in this set; metrics or migrated paths are not resolution evidence.
 2. **T16.2:** Set the final maximum to five parameters and two results, with second result error or bool. Enable compatible revive argument/result rules and dupl at the approved threshold 150 only after their debt is removed; keep the AST check for semantic result shapes and exact external-interface exceptions.
@@ -420,8 +420,8 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 12 | [TKT-20261026084832](../ticket/solved/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | delivered; PR #449 verified |
 | 13 | [TKT-20261026084833](../ticket/solved/20261026084833-quality-integration.md) | Candidate validation and merge stages | in_progress; PR #449 verified |
 | 14 | [TKT-20261026084834](../ticket/solved/20261026084834-quality-publication.md) | Forge publication and review stages | delivered; PR #451 |
-| 15 | [TKT-20261026084835](../ticket/reviewing/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | reviewing; PR #452 |
-| 16 | [TKT-20261026084836](../ticket/ready/20261026084836-quality-closure.md) | Final enforcement, documentation and integrated closure | ready; predecessor applies |
+| 15 | [TKT-20261026084835](../ticket/solved/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | delivered; PR #452 |
+| 16 | [TKT-20261026084836](../ticket/in_progress/20261026084836-quality-closure.md) | Final enforcement, documentation and integrated closure | in_progress; predecessor verified |
 
 Each ticket is one slice-sized review unit, linked to this plan and tracker. The tracker owns task execution evidence; Looper owns controller checkpoints and merges only under separately recorded delegation. Tickets are not a second executor and must not be submitted independently to chr native work. On verified integration, mirror that slice's resolved status and commits into its ticket; do not mark a ticket solved merely because code compiled or a PR opened.
 
