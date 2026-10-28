@@ -19,7 +19,7 @@ func observeWorkflowSubmission(ctx context.Context, submission workflowstate.Sub
 		return submission, err
 	}
 
-	if !workflowforge.WorkflowSubmissionPRMatches(submission, pr) {
+	if !workflowforge.MatchesPullRequest(submission, pr) {
 		return submission, workflowstate.ErrConflict
 	}
 
@@ -52,7 +52,7 @@ func checkWorkflowUnpublishedObservation(ctx context.Context, submission workflo
 		return err
 	}
 
-	if !workflowforge.WorkflowSubmissionPRMatches(submission, pr) || pr.Merged {
+	if !workflowforge.MatchesPullRequest(submission, pr) || pr.Merged {
 		return ErrWorkflowObservationRequired
 	}
 
@@ -103,7 +103,7 @@ func checkWorkflowSubmittedObservation(ctx context.Context, submission workflows
 		return err
 	}
 
-	if !workflowforge.WorkflowSubmissionPRMatches(submission, pr) || !pr.Merged || pr.ResultCommit != submission.Proof.ResultCommit {
+	if !workflowforge.MatchesPullRequest(submission, pr) || !pr.Merged || pr.ResultCommit != submission.Proof.ResultCommit {
 		return workflowstate.ErrConflict
 	}
 

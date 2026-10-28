@@ -26,7 +26,7 @@ func validateWorkflowSubmissionBinding(run workflowInvocationFile) error {
 }
 
 func validWorkflowSubmissionProjection(b SubmissionBinding) bool {
-	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && workflowforge.ValidWorkflowSubmissionState(b.State) && (!b.ExternalDelivery || b.State == "confirmed")
+	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && workflowforge.ValidSubmissionState(b.State) && (!b.ExternalDelivery || b.State == "confirmed")
 }
 
 func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error {
@@ -87,7 +87,7 @@ func validateWorkflowSubmission(submission workflowstate.Submission, journal wor
 }
 
 func validWorkflowSubmissionIdentity(submission workflowstate.Submission, journal workflowSubmissionJournal) bool {
-	return submission.ID == workflowSubmissionID(journal.Key, submission.Attempt, submission.Guard.PreparationHash) && submission.CandidateID != "" && len(submission.CandidateHash) == 64 && workflowforge.ValidWorkflowSubmissionState(submission.State) && !submission.SubmittedAt.IsZero() && !submission.UpdatedAt.Before(submission.SubmittedAt)
+	return submission.ID == workflowSubmissionID(journal.Key, submission.Attempt, submission.Guard.PreparationHash) && submission.CandidateID != "" && len(submission.CandidateHash) == 64 && workflowforge.ValidSubmissionState(submission.State) && !submission.SubmittedAt.IsZero() && !submission.UpdatedAt.Before(submission.SubmittedAt)
 }
 
 func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error {
@@ -116,7 +116,7 @@ func validateWorkflowSubmissionProof(submission workflowstate.Submission) error 
 			return workflowstate.ErrConflict
 		}
 
-		return workflowforge.ValidateWorkflowUnpublishedProof(submission)
+		return workflowforge.CheckUnpublishedProof(submission)
 	}
 
 	if !validWorkflowConfirmedSubmissionHeader(submission) {
@@ -137,5 +137,5 @@ func validateWorkflowSubmissionProof(submission workflowstate.Submission) error 
 }
 
 func validWorkflowConfirmedSubmissionHeader(submission workflowstate.Submission) bool {
-	return submission.Unpublished == nil && submission.Proof != nil && submission.ObservedPR != nil && submission.ObservedPR.Merged && workflowforge.WorkflowSubmissionPRMatches(submission, *submission.ObservedPR)
+	return submission.Unpublished == nil && submission.Proof != nil && submission.ObservedPR != nil && submission.ObservedPR.Merged && workflowforge.MatchesPullRequest(submission, *submission.ObservedPR)
 }

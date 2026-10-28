@@ -44,7 +44,7 @@ type workflowSubmissionResponses struct {
 }
 
 func (operation workflowSubmissionResponses) Retain(ctx context.Context, response workflowforge.Response) (workflowstate.Submission, error) {
-	return operation.store.retainWorkflowSubmissionResponse(ctx, operation.invocationID, operation.submissionID, response.Reply, response.Failure)
+	return operation.store.retainWorkflowSubmissionResponse(ctx, operation, response)
 }
 
 type workflowClosingGate struct {

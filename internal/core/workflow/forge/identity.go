@@ -4,13 +4,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowSubmissionPRMatches preserves the retained submission identity and observation contract.
-func WorkflowSubmissionPRMatches(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
+// MatchesPullRequest checks the retained legacy or native publication PR identity.
+func MatchesPullRequest(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
 	if submission.Native != nil {
-		return workflowNativeSubmissionPRMatches(submission, pr)
+		return matchesNativePullRequest(submission, pr)
 	}
 
-	if !workflowLegacySubmissionPRIdentityMatches(submission, pr) {
+	if !matchesLegacyPullRequest(submission, pr) {
 		return false
 	}
 
@@ -21,7 +21,7 @@ func WorkflowSubmissionPRMatches(submission workflowstate.Submission, pr workflo
 	return pr.State == "open" || pr.State == "closed"
 }
 
-func workflowNativeSubmissionPRMatches(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
+func matchesNativePullRequest(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
 	native := submission.Native
 	expected := [5]string{native.CanonicalPR, native.SourceRepository, native.SourceRepository, native.SourceRef, native.TargetRef}
 	actual := [5]string{pr.URL, pr.Repository, pr.HeadRepository, "refs/heads/" + pr.HeadBranch, "refs/heads/" + pr.BaseBranch}
@@ -31,7 +31,7 @@ func workflowNativeSubmissionPRMatches(submission workflowstate.Submission, pr w
 	return expected == actual && workflowstate.ValidCommitID(pr.HeadCommit) && pr.Merged && pr.State == "closed" && pr.ResultCommit == native.PreparedResult
 }
 
-func workflowLegacySubmissionPRIdentityMatches(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
+func matchesLegacyPullRequest(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {
 	expected := submission.Guard.PullRequest
 
 	return pr.URL == expected.URL && pr.Repository == expected.Repository && pr.HeadRepository == expected.HeadRepository && pr.HeadBranch == expected.HeadBranch && pr.BaseBranch == expected.BaseBranch && pr.HeadCommit == expected.HeadCommit

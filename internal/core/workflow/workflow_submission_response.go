@@ -8,7 +8,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submissionID string, response workflowstate.SubmissionResponse, submitErr error) (submission workflowstate.Submission, err error) {
+func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, operation workflowSubmissionResponses, reply workflowforge.Response) (submission workflowstate.Submission, err error) {
+	id, submissionID := operation.invocationID, operation.submissionID
+	response, submitErr := reply.Reply, reply.Failure
+
 	err = s.withLock(ctx, func() error {
 		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -25,7 +28,7 @@ func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submis
 			return nil // A concurrent definitive observation wins over a late response.
 		}
 
-		submission.Response, submission.UpdatedAt = workflowforge.WorkflowSubmissionResponseState(response, submitErr), time.Now().UTC()
+		submission.Response, submission.UpdatedAt = workflowforge.ResponseState(response, submitErr), time.Now().UTC()
 		if workflowstate.ValidCommitID(response.ResultCommit) {
 			submission.ResponseCommit = response.ResultCommit
 		}

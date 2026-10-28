@@ -34,7 +34,7 @@ type SubmissionBinding struct {
 // in one server transaction. It never falls back to an unguarded merge endpoint.
 type PublicationProvider interface {
 	PublicationGuardProvider
-	SubmitWorkflowIntegration(context.Context, workflowstate.Submission) (workflowstate.SubmissionResponse, error)
+	workflowforge.Submitter
 	ObserveWorkflowSubmission(context.Context, workflowstate.Submission) (workflowstate.SubmissionObservation, error)
 }
 
@@ -58,16 +58,9 @@ func (s *Store) SubmitWorkflowSliceIntegration(ctx context.Context, id string, p
 	s.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: id}, Cancel: stop})
 	defer stop()
 
-	response, submitErr := provider.SubmitWorkflowIntegration(watched, submission)
+	responses := workflowSubmissionResponses{store: s, invocationID: id, submissionID: submission.ID}
 
-	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
-	defer finish()
-
-	var responses workflowforge.Responses = workflowSubmissionResponses{store: s, invocationID: id, submissionID: submission.ID}
-
-	submission, err = responses.Retain(cleanup, workflowforge.Response{Reply: response, Failure: submitErr})
-
-	return submission, errors.Join(submitErr, err)
+	return workflowforge.Submit(ctx, watched, submission, provider, responses)
 }
 
 // ReconcileWorkflowSubmission observes actual canonical delivery or a sealed

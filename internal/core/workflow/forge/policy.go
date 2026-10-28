@@ -6,8 +6,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowSubmissionResponseState preserves the retained submission identity and observation contract.
-func WorkflowSubmissionResponseState(response workflowstate.SubmissionResponse, err error) string {
+// ResponseState classifies a provider reply without turning acceptance into confirmed delivery.
+func ResponseState(response workflowstate.SubmissionResponse, err error) string {
 	if err != nil {
 		return "error_unknown"
 	}
@@ -19,13 +19,13 @@ func WorkflowSubmissionResponseState(response workflowstate.SubmissionResponse, 
 	return "unaccepted"
 }
 
-// ValidWorkflowSubmissionState preserves the retained submission identity and observation contract.
-func ValidWorkflowSubmissionState(state string) bool {
+// ValidSubmissionState recognizes the original retained publication state spellings.
+func ValidSubmissionState(state string) bool {
 	return slices.Contains([]string{"awaiting_observation", "unpublished", "confirmed"}, state)
 }
 
-// ValidateWorkflowUnpublishedProof preserves the retained submission identity and observation contract.
-func ValidateWorkflowUnpublishedProof(submission workflowstate.Submission) error {
+// CheckUnpublishedProof requires a sealed, identity-bound unpublished observation.
+func CheckUnpublishedProof(submission workflowstate.Submission) error {
 	if submission.State == "unpublished" {
 		if submission.Unpublished == nil || submission.Unpublished.SubmissionID != submission.ID || !submission.Unpublished.Unpublished {
 			return workflowstate.ErrConflict
