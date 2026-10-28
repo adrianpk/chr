@@ -68,6 +68,23 @@ diagnostics and the existing bounded process runner. Shared PR query, request an
 content values live in state; direct application and host callers use that owner.
 The separate transport input boolean is replaced by the request body's nil state.
 
+Native retained policy, transport replies/advertisements, observation bindings,
+receipts and the history-divergence sentinel now have a shared state owner.
+Provider reference parsing and enum values have a forge owner. Direct consumers,
+including ticket merge diagnostics, use those owners without compatibility aliases.
+
+Forge owns effective repository/branch policy reads and decoding, publisher API
+identity hashing, capability sealing, immutable publication revision encoding and
+canonical native observation/classification. The existing native policy test moved
+beside its private implementation without removing assertions. The host retains
+configuration/grant composition, bounded processes and the callback-bearing Git
+request; only immutable identity crosses the stage boundary.
+
+Canonical PR/branch and Git observers are read-only ports. The native proof port
+passes both expected query and observed proof to the unchanged integration/history
+validator. Exact source/result attribution, uncertain outcomes, receipt descendants,
+history divergence, partial values and the three-minute observation bound remain.
+
 ## Implementation Notes
 
 Predecessor PR #450 is verified merged into dev at
@@ -99,11 +116,18 @@ checkout remains on dev; implementation uses the recorded slice branch.
   entries retain their original host configuration gates; provider IO does not gain
   store, claim, approval or receipt authority.
 
+- `f026941182c708d20a5a36979dd8e71e3cd54ba7` moves eight neutral retained values/errors and eleven provider reference
+  declarations. Sixteen complete declaration streams match after owner naming;
+  the split provider enum group retains exact values and host diagnostic constants.
+- `41595fd23b14704199d3b7b94ae0022bd8b10cff` moves native provider policy/identity and canonical observation into
+  forge. Nineteen additional declaration streams match after recorded API/field/
+  type naming. Exact query/proof composition, callback ownership and immutable
+  revision projection remain explicit; 47 real local checks and five focused races pass.
+
 The [extraction ledger](../../../plan/code-quality-remediation-slice-14-moves.csv)
-keeps 35 entries, including 25 pure declarations with matching token evidence,
-six explicit flow extractions and four endpoint/request protocol transformations.
-Flow and inlined-path entries identify their original host operations without
-claiming whole-method moves or token equivalence. Current images reconcile all 908 Store methods, 2,918 prior
+keeps 91 entries. Pure stream checks, explicit input/port transformations,
+split constant members, inlined paths and host/leaf flow extractions are identified
+individually. Flow entries do not claim whole-method moves or token equivalence. Current images reconcile all 908 Store methods, 2,918 prior
 relocations, 146 Slice 13 extractions, 100 authority boundaries and 79 dependencies;
 original source identities and hashes remain frozen. The standard-library
 `cmp.Compare[int]` reference remains an external dependency identity.
@@ -116,18 +140,23 @@ original source identities and hashes remain frozen. The standard-library
 host adapter binds the claim, prepared input and provider without exposing Store.
 
 The review package imports only shared state and contenthash within the module.
-Forge imports only shared state. Its `Submitter` is a direct consumer-owned host IO
+Forge imports shared state and contenthash. Its `Submitter` is a direct consumer-owned host IO
 port; `PublicationProvider` includes that unchanged guarded submission method.
 `Responses` stays bound to the private host operation, which now receives one
 reply/failure value instead of parallel response parameters.
-The dependency checker permits that actual hash dependency and continues to reject
+The dependency checker permits those actual hash dependencies and continues to reject
 coordinator, configuration and mutation imports. Wire/hash encodings and persisted
 state spellings remain unchanged. Service/adapter callers now consume the shared
 state PR input types directly; no compatibility aliases are introduced.
 `forge.Commands` exposes only bounded command Output/Input IO to `Client.Request`.
 The host resolves configuration before constructing an endpoint; leaf modules
-still import only shared state for this transport work. PR creation is metadata
+import only shared state and contenthash within the module. PR creation is metadata
 IO, not permission to dispatch integration or proof of delivered work.
+Native observation consumes `NativePullRequests`, `NativeGit`, optional
+`PreparedNativeGit` and `NativeProofs`; the host supplies configured read-only IO
+and stateless exact method/history validation. The leaf receives no Store, claim,
+lock, process or dispatch callback. The capability observation still uses current
+host grants, and canonical observation issues no receipt.
 Ticket-native execution and forge-native publication remain distinct terms.
 
 ## Files of Interest
@@ -135,7 +164,8 @@ Ticket-native execution and forge-native publication remain distinct terms.
 - `internal/core/workflow/review/{input,parse,policy,execution,decision}.go`.
 - `workflow_review.go`, `workflow_review_result.go` and `workflow_stage_ports.go`.
 - `forge/{identity,policy,dispatch,response,client,pull_request}.go` and `workflow_review_operation.go`.
-- `state/pull_request.go`, `review_workflow_pull_request.go` and native policy/identity reads.
+- `state/{pull_request,native_publication}.go` and `forge/{reference,native_*}.go`.
+- `workflow_publication_identity.go` and native observation/config/proof assembly.
 - `workflow_publication_operation.go`, native dispatch/observation/receipt owners
   and the existing closeout proof reader.
 - `internal/app/service_workflow_review.go` and its direct control/continuation callers.
@@ -206,9 +236,28 @@ which completed cleanup after each command.
 - Current hashes, frozen source columns and report/ticket/tracker links resolve.
 - `git diff --check` — PASS after report and provenance reconciliation.
 
+
+- `go test ./internal/core ./internal/core/workflow ./internal/app ./scripts/goquality -run '^Test(DetectReviewProviderReference|RunReviewProviderDiagnostics.*|RemoteReviewAdapter.*|RunTicketMerge(Preflight|Command).*|QualityRecordWire|LeafDependencies|WorkflowPRAdapter|NativeMergePolicy)$' -count=1 -timeout=5m -v` — PASS, 29 top-level checks for provider URL/diagnostic and remote/ticket-merge
+  consumers, immutable nested wire values, PR adapter/policy and leaf dependencies.
+- `go test ./internal/core/workflow ./internal/core/workflow/forge ./internal/app ./scripts/goquality -run '^Test(Native(Capability|CapabilityDenials|MergePolicy|Observation|LaterSource|ObservationProof|Source(Result|ResultGuards|Repair|Later|Contract|Capability|Receipt)|Host(Publication|Denials)|Canonical(Outcomes|Poll|Fence|Deadline|Timeout|Lost)|Receipt.*|Closing(Publication|Evidence))|Service(NativeReview|NativeProvider|WorkflowSubmission)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v` — PASS, 47 top-level real local checks for native capability/denials, exact
+  observation, source attribution, canonical deadlines/fences/lost responses,
+  receipt proof/recovery/descendants/history divergence and application callers.
+- `go test -race ./internal/core/workflow ./internal/core/workflow/forge ./scripts/goquality -run '^Test(NativeCanonicalFence|NativeFinalizationConcurrent|NativeReceiptTransition|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v` — PASS, five top-level checks for canonical observation fences, concurrent
+  finalization, receipt transitions, frozen wire values and dependency guards.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/core/workflow/... ./internal/app ./scripts/goquality` — PASS with zero issues.
+- `make check-go-style` — PASS: 9,344 production declarations, ceiling six,
+  24 exact debt entries and one external exception.
+- Sixteen complete retained/reference and nineteen additional policy/revision
+  declaration streams match recorded naming/type/field normalizations. The original
+  publication revision payload is unchanged; the host projection excludes live callbacks.
+- Ninety-one extraction images, source hashes, split provider/diagnostic constant
+  lineage, current method/declaration images, links and package READMEs resolve.
+- `git diff --check` — PASS after documentation/provenance reconciliation.
+
 ## Risks and Follow-ups
 
-Native publication/review binding policy extraction,
+Remaining review transport, host native capability composition and review-input
+binding policy extraction,
 the remaining 11 category B cohesion dispositions and local stored-state/flag/error/
 suppression/glossary reconciliation are active Slice 14 work. Final `make verify`,
 remaining focused publication/receipt checks and exact-head controller validation

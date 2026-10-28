@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-14
 source: review
 reported_at: 2026-10-26T08:48:34Z
-commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429, 23453a58cbb8f780065ea29f780e4dd37b76d0fc, 187a9ec4c15fef69e137c158fe574163aaae5497, 1ae59fa07af7ecffc330fd384269860baa9273b2, f22302613d1462d2bee9d20f522bc1cb15127040]
+commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429, 23453a58cbb8f780065ea29f780e4dd37b76d0fc, 187a9ec4c15fef69e137c158fe574163aaae5497, 1ae59fa07af7ecffc330fd384269860baa9273b2, f22302613d1462d2bee9d20f522bc1cb15127040, 79a581e5f32aca05b74f5bde4879289338c87c3f, f026941182c708d20a5a36979dd8e71e3cd54ba7, 41595fd23b14704199d3b7b94ae0022bd8b10cff]
 started_at: 2026-10-28T04:43:13Z
 branch: refactor/slice-14-quality-publication
 ready_at: 2026-10-26T08:57:09Z
@@ -71,7 +71,8 @@ Slice 13 PR #450 is verified merged into dev at
 policy declarations have independent review/forge owners and matching mechanical
 token evidence; completion and dispatch use consumer-owned ports with host
 claim/process/write authority retained. Fifty assigned rows are implemented, including all category A/C rows;
-11 category B rows remain pending. Exact debt is 24. Remaining native binding policy and state/flag/error/glossary work must finish
+11 category B rows remain pending. Exact debt is 24. Remaining review transport, host native capability composition, review-input
+binding policy and state/flag/error/glossary work must finish
 before a PR is ready.
 
 The publication value conversion preserves dispatch permission, transport,
@@ -87,3 +88,11 @@ canonical endpoint resolution and bounded process supervision stay with the host
 Eleven additional pure declaration streams match their frozen sources, and the
 35-entry extraction ledger distinguishes pure moves, protocol transformations
 and flow extractions. Exact commands and live-certification limits are in the report.
+
+Native retained values/errors and provider references now have shared state/forge
+owners without aliases. Effective native policy, identity hashing, immutable
+revision encoding and canonical observation/source-result classification live in
+forge. Host callbacks/config/grants and exact query/proof composition remain
+explicit. The 91-entry ledger traces split enum members and every flow/input
+transformation. This unit adds 29 direct-consumer checks, 47 real local native
+checks and five focused races with strict lint and unchanged 24-entry debt.

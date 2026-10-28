@@ -86,3 +86,12 @@ own distinct phase types. ErrAtomicGuard is the same single sentinel used for
 insufficient atomic/source/base/result or signing guarantees. Existing fields,
 JSON order/tags, hashes and nil/empty representations remain unchanged. These
 values confer no execution, acceptance, receipt or publication authority.
+
+## Native retained values
+
+Native policy, transport replies/advertisements, canonical observations/bindings
+and receipt values retain their original field order and JSON tags here.
+`ErrHistoryDivergence` preserves the canonical missing-history sentinel and error
+text. Callback-bearing publication requests, live contexts, config, processes,
+claims and receipt writes remain host-owned; these retained values grant no IO or
+mutation authority.

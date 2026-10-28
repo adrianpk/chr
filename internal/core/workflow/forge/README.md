@@ -3,7 +3,9 @@
 ## Purpose
 
 This package owns forge submission dispatch, provider PR protocol and the immutable
-policy that relates replies and observations to retained submission identity.
+policy that relates replies and observations to retained submission identity. It
+also owns native capability/protection policy, publisher identity, publication
+revision encoding and canonical observation/source-result classification.
 
 ## Contract
 
@@ -26,6 +28,24 @@ original field and JSON tag order are preserved.
 context, and invokes `Responses.Retain` within the original five-second detached
 cleanup bound. It preserves the joined provider and retention errors.
 
+`ParseReference` owns the existing provider URL forms and partial reference
+results. Configuration diagnostics remain host-owned. Provider enum values and
+retained native protocol spellings are unchanged.
+
+`PublicationIdentity` excludes the live `BeforeSend` callback, transport config
+and local directory. The host projects exact hash inputs into it; the original
+revision payload and field order are retained. Capability and publisher identity
+seals use the existing content hash owner.
+
+`ObserveNativePublication` retains the original three-minute bound and separates
+Git application/proof from canonical PR merge metadata. `NativePullRequests`,
+`NativeGit` and optional `PreparedNativeGit` provide read-only observations.
+`NativeProofs` checks the explicit expected query and observed proof through the
+host's existing integration validator; no sibling-stage dependency is added.
+Original-source attribution, complete history, receipt-backed descendant and
+history-divergence rules retain their precise conditions. An uncertain transport
+reply or PR state cannot establish a receipt or permit another dispatch.
+
 The host binds `Responses` to exact invocation/submission journal identity and
 retains intent exclusion, current authorization, stop supervision, definitive
 observation, receipt transactions and recovery. A late response cannot replace a
@@ -46,5 +66,11 @@ Mechanical token checks preserve the six original pure declarations and 11 new
 PR decoder/content/input declarations after owner naming. Existing adapter tests
 retain exact command/payload/pagination assertions through the host boundary;
 real local Git/provider and focused concurrent PR checks pass. The dependency
-checker permits only shared `workflow/state` within the module and rejects
-coordinator, configuration and mutation imports.
+checker permits only shared `workflow/state` and `contenthash` within the module
+and rejects coordinator, configuration and mutation imports.
+
+Sixteen retained/reference and nineteen pure policy/revision declaration streams
+match the recorded naming/type/field normalizations. Real local native capability,
+observation, source attribution, receipt/recovery and application checks pass,
+including focused observation/finalization races. Live-forge certification remains
+a separate opt-in fixture contract.

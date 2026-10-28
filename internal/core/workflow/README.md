@@ -59,3 +59,11 @@ configuration and canonical URLs/repositories, chooses the bounded command runne
 and retains prerequisite diagnostics before delegating IO. Immutable PR inputs
 live in `workflow/state`. Guarded PR intents, uncertain outcome reconciliation,
 source identity checks, approval and receipt transactions retain their host owner.
+
+Native publication policy and observation classification live in forge. The host
+keeps callback-bearing transport requests and projects only immutable identity.
+Its stateless native proof adapter passes the explicit expected query and proof
+to the existing integration validator. Enabled configuration, current host grants,
+process lifetime, intent fences and receipt transactions retain their owners.
+Native retained values and the history-divergence sentinel live in state; direct
+consumers use those owners without compatibility aliases.
