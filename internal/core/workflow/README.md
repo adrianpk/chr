@@ -142,6 +142,14 @@ selects bounded polling. Both re-read current guards between Git reconciliation,
 canonical observation and receipt confirmation. The poll-only forwarding method
 is removed; Store retains journal/projection, acceptance and checkpoint commits.
 
+`ControlWorkflowLifecycle` freezes the original request before guarded acceptance
+and runs continuation only after that acceptance returns. Store owns the original
+minute-bounded lock, request reservation, revision/authorization checks and atomic
+action/receipt commit. It cancels the acceptance context before continuation uses
+the caller context. Verified receipt replay returns immediately; it never starts
+another checkpoint. The existing frozen request/digest value crosses this boundary
+without changing JSON, hashes, partial results or detached settlement.
+
 ## Bounded operation results
 
 Capacity observations pair the retained process with liveness; owned worker

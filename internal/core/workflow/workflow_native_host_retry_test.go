@@ -44,7 +44,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 	request := workflowstate.ControlMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "native-preparation-retry", Operator: "operator"}, Action: "continue", ID: f.run.ID, ExpectedRevision: blocked.Revision, StepLimit: 1}
 
 	control := LifecycleControlPorts{Execution: ports}
-	if _, err := f.store.ControlWorkflowLifecycle(t.Context(), request, control, nil); err != nil {
+	if _, err := ControlWorkflowLifecycle(t.Context(), f.store, request, control, nil); err != nil {
 		t.Fatal("explicit continuation could not recover preparation", err)
 	}
 
@@ -59,7 +59,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 func checkNativeHostRetryReplay(t *testing.T, host nativeHostFixture, request workflowstate.ControlMutationRequest, control LifecycleControlPorts, after workflowstate.Invocation) {
 	t.Helper()
 
-	if _, err := host.f.store.ControlWorkflowLifecycle(t.Context(), request, control, nil); err != nil {
+	if _, err := ControlWorkflowLifecycle(t.Context(), host.f.store, request, control, nil); err != nil {
 		t.Fatal(err)
 	}
 

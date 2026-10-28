@@ -89,7 +89,7 @@ func (s service) applyGuidedNativeControl(ctx context.Context, store *workflowco
 		return result, err
 	}
 
-	result, err = store.ControlWorkflowLifecycle(ctx, request, ports, nil)
+	result, err = workflowcore.ControlWorkflowLifecycle(ctx, store, request, ports, nil)
 	if !errors.Is(err, workflowstate.ErrConflict) {
 		return result, err
 	}

@@ -25,20 +25,38 @@ type workflowLifecycleAcceptance struct {
 // ControlWorkflowLifecycle commits lifecycle acceptance and its request receipt
 // together. Continuation runs outside exclusion after acceptance; a replay only
 // returns that original receipt and never starts another checkpoint.
-func (s *Store) ControlWorkflowLifecycle(ctx context.Context, request workflowstate.ControlMutationRequest, ports LifecycleControlPorts, check AdmissionCheck) (workflowstate.ControlResult, error) {
+func ControlWorkflowLifecycle(ctx context.Context, store *Store, request workflowstate.ControlMutationRequest, ports LifecycleControlPorts, check AdmissionCheck) (workflowstate.ControlResult, error) {
 	frozen, err := freezeWorkflowControlMutation(request)
 
-	request, digest := frozen.Request, frozen.Digest
+	request = frozen.Request
 
 	if err != nil || !slices.Contains([]string{"pause", "cancel", "resume", "continue", "reconcile"}, request.Action) {
 		return workflowstate.ControlResult{}, errorsOrConflict(err)
 	}
 
+	accepted, err := store.prepareWorkflowLifecycleControl(ctx, frozen, ports, check)
+
+	if err != nil || accepted.replay || accepted.limit == 0 {
+		return accepted.receipt, err
+	}
+
+	ports.Continuation.StepLimit = request.StepLimit
+	ports.Continuation.ExpectedRevision = request.ExpectedRevision
+	step, err := (workflowContinuationHost{store: store}).run(ctx, request.ID, ports.Continuation, ports.Execution, accepted.limit)
+	_, err = finishWorkflowContinuation(ctx, store, request.ID, step, err)
+
+	return accepted.receipt, err
+}
+
+// prepareWorkflowLifecycleControl keeps acceptance and its receipt under one lock.
+func (s *Store) prepareWorkflowLifecycleControl(ctx context.Context, frozen workflowFrozenControl, ports LifecycleControlPorts, check AdmissionCheck) (workflowLifecycleAcceptance, error) {
+	request, digest := frozen.Request, frozen.Digest
+
 	acceptCtx, cancel := context.WithTimeout(ctx, time.Minute)
 
 	var accepted workflowLifecycleAcceptance
 
-	err = s.withLock(acceptCtx, func() error {
+	err := s.withLock(acceptCtx, func() error {
 		var err error
 
 		accepted, err = s.acceptWorkflowLifecycleControl(acceptCtx, request, digest, ports, check)
@@ -48,16 +66,7 @@ func (s *Store) ControlWorkflowLifecycle(ctx context.Context, request workflowst
 
 	cancel()
 
-	if err != nil || accepted.replay || accepted.limit == 0 {
-		return accepted.receipt, err
-	}
-
-	ports.Continuation.StepLimit = request.StepLimit
-	ports.Continuation.ExpectedRevision = request.ExpectedRevision
-	step, err := (workflowContinuationHost{store: s}).run(ctx, request.ID, ports.Continuation, ports.Execution, accepted.limit)
-	_, err = finishWorkflowContinuation(ctx, s, request.ID, step, err)
-
-	return accepted.receipt, err
+	return accepted, err
 }
 
 func (s *Store) acceptWorkflowLifecycleControl(ctx context.Context, request workflowstate.ControlMutationRequest, digest string, ports LifecycleControlPorts, check AdmissionCheck) (workflowLifecycleAcceptance, error) {

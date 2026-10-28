@@ -15,7 +15,7 @@ func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *work
 
 	native := workflowNativeControlRequest(request)
 
-	result, err := store.ControlWorkflowLifecycle(ctx, native, ports, request.AuthorizationCheck)
+	result, err := workflowcore.ControlWorkflowLifecycle(ctx, store, native, ports, request.AuthorizationCheck)
 	if result.RequestID == "" {
 		return nil, err
 	}
