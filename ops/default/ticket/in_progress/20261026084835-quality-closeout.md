@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
+commits: [e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -95,3 +95,14 @@ Original 908 method rows now map to 890 Store methods and 18 stage/adapter owner
 legacy receipt/proof disposition raises the compatibility ledger to eleven
 cases. Remaining final method/bridge/compatibility and exact-head slice acceptance
 are still active.
+
+Public invocation checkpoints and their complete retained-data dependency graph
+now share exact state definitions. Closing readiness, frontier/projection,
+retained closure/evidence reads and budget enumeration have closeout owners.
+RunGuard retains ordered live-process checks and final source/input fences;
+projection preserves the live target alias and immutable history value. Forty
+normalized declarations match; 34 workflow tests, one projection test, seven
+races, affected broad short tests and strict lint pass. The original 908 method
+rows resolve to 885 Store methods and 23 stage/adapter owners through 21 actual
+ports. Closing status aggregation, final Store/bridge/compatibility work and
+exact-head slice acceptance remain open.

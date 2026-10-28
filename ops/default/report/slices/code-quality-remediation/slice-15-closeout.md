@@ -54,6 +54,16 @@ evidence map. Native record, task, receipt, snapshot and delivery-proof values
 have one state owner. Record/snapshot validation remains explicit in the host,
 with original value copies and guarded writes preserved.
 
+Invocation closing eligibility, ordered per-attempt process checks, frontier
+selection and accepted outcome projection now execute in closeout. The host
+supplies RunGuard for process quiescence and final input fences. Projection keeps
+the live execution-target alias while retained closure history copies its value.
+Retained closed-set attachment, invocation receipt/evidence inspection and
+closing budget enumeration use Evidence with their distinct original error and
+validation contracts. Twenty-seven public checkpoint records have exact state
+owners; private token hashes, unknown JSON fields, source hashes and atomic
+journal operations remain with the host.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -68,11 +78,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 68 source/extraction/consolidation images. Current identities and hashes are updated
+retains 114 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Eighteen former Store methods now have actual
+frozen source fields remain unchanged. Twenty-three former Store methods now have actual
 closeout policy or host evidence adapter owners. The original 908 method rows
-retain frozen source evidence and current identities; 890 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 885 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -113,6 +123,17 @@ unchanged whole-method token claims. Host native journal guards, integration
 history policy and final post-observation authority/input checks retain their
 original owners. The port ledger now records 20 live contracts.
 
+Invocation closing extraction is in `e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c`. Its dependency graph moves
+27 public records, execution selection, the terminal predicate and the two
+owned/stop error identities to their actual state owner. Thirty-six owner/name
+comparisons and four explicit public-checkpoint/owner-root comparisons match.
+The remaining six policy extractions have finite guard/evidence/projection
+contracts, not unchanged whole-method token claims. Actual runtime, application,
+TUI and web consumers use the new definitions directly. No migration aliases
+replace them, and the empty closing-frontier shell is removed. The port ledger
+now records 21 live contracts. Closing status aggregation and final Store API
+assessment remain active.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -152,6 +173,12 @@ skips or leaked owned descendants. Workflow/app/checker short tests and strict
 lint pass. An initial lint failure for exported comments/import grouping was
 corrected before the successful strict check.
 
+The invocation extraction passed 34 selected workflow regressions plus the
+projection target-alias/history regression and seven focused races, without
+skips or leaked owned descendants. These include real closing/continuation
+fixtures and wire/retained-result checks. Affected broad core/app/TUI/web short
+tests and strict lint pass.
+
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|UseCase|Reopen|SetAdvance|Budget|Recovery|Journal|PostObservation|Stop)|NativeClosing(Gate|Divergence|Evidence|PublicationRace)|WorkflowParallelClosingRecovery|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow ./internal/core/workflow/closeout -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|Execute)$' -count=1 -timeout=10m -json`
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|Budget|Recovery|Journal|Stop)|NativeClosing(Gate|Divergence|Evidence|Lost))$' -count=1 -timeout=15m -json`
@@ -172,10 +199,13 @@ corrected before the successful strict check.
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing.*|NativeClosing.*|WorkflowParallelClosingRecovery|WorkflowFinalization.*|WorkflowFrontier.*|NativeReceipt(Frontier|FrontierBlock|Proof|Legacy)|WorkflowMaterialization(Recovery|Rejects)|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowFinalizationConcurrent|WorkflowFrontierRace|QualityRecordWire)$' -count=1 -timeout=10m -json`
 
+- `go test -p=1 ./internal/core/workflow ./internal/core/workflow/closeout -run '^Test(WorkflowClosing.*|NativeClosing.*|WorkflowParallelClosingRecovery|WorkflowContinuation.*|WorkflowResult.*|NativeResult.*|WorkflowFrontier(Order|Recovery)|WorkflowRecord|WorkflowRoundTrip|QualityRecordWire|ProjectionTarget)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowContinuationRecovery|WorkflowFrontierRace|WorkflowControlCAS|QualityRecordWire)$' -count=1 -timeout=10m -json`
+
 - `go test -short ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality`
 - `go test ./internal/core/workflow/closeout -count=1`
 - `go test -short ./internal/core/workflow/... ./internal/app ./scripts/goquality`
-- `make check-go-style` — 9,399 production declarations, zero exact debts and one external exception.
+- `make check-go-style` — 9,403 production declarations, zero exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality` — zero issues.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./scripts/goquality` — zero issues after the final private-result conversions.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality` — zero issues after native input/record extraction.
@@ -191,6 +221,13 @@ all 908 original method mappings, four signature ledgers, 21 new frozen source
 preimages, 55 commit objects and 20 actual ports. Relative links, named regression
 declarations, eleven compatibility rows, T15 table columns and whitespace pass.
 Runtime checks are not repeated for this documentation-only update.
+
+Invocation ledger reconciliation checks 4,228 current declaration hashes, all
+908 original method mappings, four signature ledgers, 46 new frozen source
+preimages, 57 commit objects and 21 actual ports. Relative links, named regression
+declarations, T15 columns and whitespace pass. Source fields and original
+introduction commits remain frozen. Runtime checks are not repeated for the
+metadata-only update.
 
 ## Risks and Follow-ups
 
