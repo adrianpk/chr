@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -110,7 +111,7 @@ func validateWorkflowNativeReviewInput(input workflowstate.ReviewInput) error {
 		return workflowstate.ErrConflict
 	}
 
-	preparation := workflowstate.PreparationInput{Source: workflowPreparationSource(input), Git: *input.PreparedGit}
+	preparation := workflowstate.PreparationInput{Source: workflowintegrate.WorkflowPreparationSource(input), Git: *input.PreparedGit}
 
 	return validateWorkflowPreparedNativeCapability(preparation, native.Capability)
 }

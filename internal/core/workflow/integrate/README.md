@@ -2,11 +2,20 @@
 
 ## Purpose
 
-This package owns the consumer contract for candidate validation.
+This package owns candidate validation execution, exact gate evidence and the
+consumer contract for guarded acceptance.
 
 ## Contract
 
-`Validation` is used by `Store.PrepareWorkflowSliceIntegration`. Validate runs the bound host validation. Accept rechecks the claim, prepared input and current source before the existing atomic acceptance transition.
+`ExecuteWorkflowValidation` runs the bound validation, builds the exact candidate
+and requests acceptance through `Validation`. It keeps validation deadlines
+separate from operator stops and preserves bounded detached cleanup. Gate checks
+compare the exact ordered commands, exit/truncation outcomes or explicit waiver.
+Source observations omit prepared-only evidence.
+
+`Store.PrepareWorkflowSliceIntegration` retains claim admission, execution ownership,
+lease/stop contexts and capacity cleanup. The bound acceptance operation rechecks
+the claim, prepared input and current source before the existing atomic transition.
 
 The contract imports shared `workflow/state` protocol values. The workflow owner
 implements it with the existing operations and retains claims, reservations,

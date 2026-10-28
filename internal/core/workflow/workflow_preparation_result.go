@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -121,7 +122,7 @@ func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *
 func (s *Store) checkpointWorkflowPreparationFailure(ctx context.Context, run workflowInvocationFile, record Record, claim *Claim, candidate workflowstate.IntegrationCandidate, prepared workflowPreparedTask, provider PublicationGuardProvider, validationErr, failure error) error {
 	// Only an observed command failure on the still-current clean result can
 	// request semantic repair. Stops, mutation and stale fences remain failures.
-	actionable := candidate.Input.Native != nil && workflowCandidateGateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
+	actionable := candidate.Input.Native != nil && workflowintegrate.WorkflowCandidateGateFailed(candidate.Validation) && s.checkWorkflowCandidateFailureCurrent(ctx, run, candidate, provider) == nil
 
 	targetMoved := s.workflowNativePreparationTargetMoved(ctx, run, candidate, provider)
 	if err := s.checkpointWorkflowAttempt(run, record, "interrupted", &candidate.Validation); err != nil {
@@ -158,18 +159,8 @@ func (s *Store) checkWorkflowCandidateFailureCurrent(ctx context.Context, run wo
 	return errors.Join(s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, candidate), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
 }
 
-func workflowCandidateGateFailed(result workflowstate.TaskResult) bool {
-	for _, command := range result.Validation {
-		if command.ExitCode != 0 && !command.Truncated {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (s *Store) checkWorkflowPreparationCompletion(ctx context.Context, run workflowInvocationFile, prepared workflowPreparedTask, candidate *workflowstate.IntegrationCandidate, provider PublicationGuardProvider, validationErr error) error {
-	failure := errors.Join(validationErr, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), validateWorkflowPreparationGate(prepared.input, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
+	failure := errors.Join(validationErr, s.checkWorkflowPreparationSource(ctx, run, candidate.Input, provider), s.checkWorkflowPreparationGit(ctx, *candidate), workflowintegrate.ValidateWorkflowPreparationGate(prepared.input.Contract.Validation, candidate.Validation), s.checkWorkflowNativePreparationFence(run, candidate.Input.Native))
 	if failure != nil {
 		return failure
 	}

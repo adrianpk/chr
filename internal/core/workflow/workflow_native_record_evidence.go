@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -192,7 +193,7 @@ func (s *Store) checkWorkflowNativeValidationInput(b workflowstate.NativeRecordB
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowPreparationGate(input, result)
+	return workflowintegrate.ValidateWorkflowPreparationGate(input.Contract.Validation, result)
 }
 
 func (s *Store) checkWorkflowNativeReceipt(record Record) error {

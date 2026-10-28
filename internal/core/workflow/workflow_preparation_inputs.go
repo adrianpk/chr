@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -61,7 +62,7 @@ func (s *Store) checkWorkflowPublicationGuard(ctx context.Context, run workflowI
 		return workflowstate.PublicationGuard{}, err
 	}
 
-	source := workflowPreparationSource(review)
+	source := workflowintegrate.WorkflowPreparationSource(review)
 
 	candidate, err := s.currentWorkflowPreparation(ctx, run, source)
 	if err != nil {
@@ -78,13 +79,6 @@ func (s *Store) checkWorkflowPublicationGuard(ctx context.Context, run workflowI
 	}
 
 	return workflowstate.PublicationGuard{PullRequest: review.PullRequest, Capability: capability, Git: candidate.Input.Git, PreparationRef: run.Preparation.ResultRef, PreparationHash: run.Preparation.ResultHash, ReviewHash: run.Review.InputHash, Policy: review.Policy}, nil
-}
-
-func workflowPreparationSource(input workflowstate.ReviewInput) workflowstate.ReviewInput {
-	input.PreparationRef, input.PreparationHash, input.PreparedGit = "", "", nil
-	input.Native = nil
-
-	return input
 }
 
 func (s *Store) currentWorkflowPreparation(ctx context.Context, run workflowInvocationFile, source workflowstate.ReviewInput) (workflowstate.IntegrationCandidate, error) {

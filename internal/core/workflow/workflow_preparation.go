@@ -73,26 +73,9 @@ func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)
 	defer cancel()
 
-	result := newWorkflowTaskResult(prepared)
-	result.Schema, result.Outcome, result.IntegrationPending = "chr-integration-validation/v1", "integration_validated", true
+	validation := workflowIntegrationValidation{store: s, claim: claim, prepared: prepared, provider: provider}
 
-	var validation workflowintegrate.Validation = workflowIntegrationValidation{store: s, claim: claim, prepared: prepared, provider: provider}
-
-	validationErr := validation.Validate(deadline, &result)
-
-	result.Successful, result.FinishedAt = validationErr == nil, time.Now().UTC()
-	if validationErr != nil {
-		result.Outcome, result.Failure = "integration_validation_failed", workflowFailureText(validationErr)
-	}
-
-	candidate = workflowstate.IntegrationCandidate{Schema: "chr-integration-candidate/v1", InvocationID: id, Round: round, Input: input, Lane: prepared.input.Lane, Validation: result}
-
-	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
-	defer finish()
-
-	err = validation.Accept(cleanup, workflowintegrate.Completion{Candidate: &candidate, Failure: validationErr, Interrupted: watched.Err() != nil})
-
-	return candidate, errors.Join(validationErr, err)
+	return workflowintegrate.ExecuteWorkflowValidation(deadline, watched, workflowintegrate.ValidationInput{InvocationID: id, Round: round, Preparation: input, Lane: prepared.input.Lane, Result: newWorkflowTaskResult(prepared)}, validation)
 }
 
 // CheckWorkflowPublicationGuard rechecks policy, review, combined validation,

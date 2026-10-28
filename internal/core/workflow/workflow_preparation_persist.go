@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"slices"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -72,7 +72,7 @@ func (s *Store) checkWorkflowRetainedPreparationInput(run workflowInvocationFile
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowPreparationGate(input, result)
+	return workflowintegrate.ValidateWorkflowPreparationGate(input.Contract.Validation, result)
 }
 
 func workflowPreparationInputMatches(input TaskInput, candidate workflowstate.IntegrationCandidate) bool {
@@ -193,28 +193,4 @@ func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record R
 	}
 
 	return s.commitWorkflowPullRequestFiles(run, files, workflowstate.FileChange{Path: ref, After: data})
-}
-
-func validateWorkflowPreparationGate(input TaskInput, result workflowstate.TaskResult) error {
-	gate := input.Contract.Validation
-	if !gate.Required {
-		if result.WaiverReason != gate.WaiverReason || len(result.Validation) != 0 {
-			return workflowstate.ErrConflict
-		}
-
-		return nil
-	}
-
-	if len(result.Validation) != len(gate.Commands) {
-		return workflowstate.ErrConflict
-	}
-
-	for i, command := range gate.Commands {
-		observed := result.Validation[i]
-		if !slices.Equal(command, observed.Command) || observed.ExitCode != 0 || observed.Truncated {
-			return workflowstate.ErrConflict
-		}
-	}
-
-	return nil
 }
