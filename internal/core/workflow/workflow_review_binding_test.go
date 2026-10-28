@@ -56,7 +56,10 @@ func TestWorkflowReviewDecisionChecks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	input, _, err := store.readWorkflowReview(file)
+	reviewRecord, err := store.readWorkflowReview(file)
+
+	input := reviewRecord.Input
+
 	if err != nil {
 		t.Fatal(err)
 	}

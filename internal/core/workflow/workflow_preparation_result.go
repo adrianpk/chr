@@ -43,7 +43,9 @@ func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflo
 }
 
 func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflowInvocationFile, input workflowstate.PreparationInput, provider PublicationGuardProvider) error {
-	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
+	reviewSource, err := s.workflowReviewSourceInputs(ctx, run, provider)
+	source := reviewSource.Input
+
 	if err != nil {
 		return err
 	}

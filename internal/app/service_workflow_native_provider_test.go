@@ -13,7 +13,10 @@ func TestServiceNativeProvider(t *testing.T) {
 	operations.workflowPullRequests = nil
 	writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "review:\n  mode: trusted_auto_merge\nwork:\n  merge_strategy: rebase\n  integration:\n    publication_profile: git_atomic_dual_ref\n")
 
-	store, provider, err := operations.workflowReviewDependencies(id)
+	reviewDependencies, err := operations.workflowReviewDependencies(id)
+
+	store, provider := reviewDependencies.Store, reviewDependencies.Provider
+
 	if err != nil {
 		t.Fatal(err)
 	}

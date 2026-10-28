@@ -12,7 +12,10 @@ func (s *Store) checkWorkflowNativeDispatchGuard(ctx context.Context, run workfl
 		return workflowstate.PublicationGuard{}, err
 	}
 
-	observation, input, err := s.workflowReviewSourceInputs(ctx, run, provider)
+	reviewSource, err := s.workflowReviewSourceInputs(ctx, run, provider)
+
+	observation, input := reviewSource.Observation, reviewSource.Input
+
 	if err != nil {
 		return workflowstate.PublicationGuard{}, err
 	}
@@ -60,7 +63,7 @@ func (s *Store) checkWorkflowNativeDispatchOwner(run workflowInvocationFile, sub
 		return workflowstate.ErrConflict
 	}
 
-	if _, _, err := s.readWorkflowReview(run); err != nil {
+	if _, err := s.readWorkflowReview(run); err != nil {
 		return err
 	}
 

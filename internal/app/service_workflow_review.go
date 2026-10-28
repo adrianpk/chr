@@ -10,49 +10,54 @@ import (
 
 // ReviewWorkflowSlice uses the shared policy, evidence and supervised role path.
 func (s service) ReviewWorkflowSlice(ctx context.Context, id string, reviewer []string) (workflowstate.ReviewBinding, error) {
-	store, provider, err := s.workflowReviewDependencies(id)
+	dependencies, err := s.workflowReviewDependencies(id)
 	if err != nil {
 		return workflowstate.ReviewBinding{}, err
 	}
 
-	return store.ReviewWorkflowSlice(ctx, id, provider, reviewer)
+	return dependencies.Store.ReviewWorkflowSlice(ctx, id, dependencies.Provider, reviewer)
 }
 
 // ApproveWorkflowSlice binds explicit approval to the current displayed hash.
 func (s service) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string, expected ...uint64) (workflowstate.ReviewBinding, error) {
-	store, provider, err := s.workflowReviewDependencies(id)
+	dependencies, err := s.workflowReviewDependencies(id)
 	if err != nil {
 		return workflowstate.ReviewBinding{}, err
 	}
 
-	return store.ApproveWorkflowSlice(ctx, id, bindingHash, provider, expected...)
+	return dependencies.Store.ApproveWorkflowSlice(ctx, id, bindingHash, dependencies.Provider, expected...)
 }
 
 // CheckWorkflowReviewGrant rechecks authorization for a guarded publication.
 func (s service) CheckWorkflowReviewGrant(ctx context.Context, id string) (workflowstate.ReviewInput, error) {
-	store, provider, err := s.workflowReviewDependencies(id)
+	dependencies, err := s.workflowReviewDependencies(id)
 	if err != nil {
 		return workflowstate.ReviewInput{}, err
 	}
 
-	return store.CheckWorkflowReviewGrant(ctx, id, provider)
+	return dependencies.Store.CheckWorkflowReviewGrant(ctx, id, dependencies.Provider)
 }
 
-func (s service) workflowReviewDependencies(id string) (*workflowcore.Store, workflowcore.PullRequestProvider, error) {
+type workflowReviewDependencies struct {
+	Store    *workflowcore.Store
+	Provider workflowcore.PullRequestProvider
+}
+
+func (s service) workflowReviewDependencies(id string) (result workflowReviewDependencies, err error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return nil, nil, err
+		return workflowReviewDependencies{}, err
 	}
 
 	provider, err := s.workflowIntegrationProvider()
 	if err != nil {
-		return nil, nil, err
+		return workflowReviewDependencies{}, err
 	}
 
 	if remote, ok := provider.(workflowcore.RemoteReviewAdapter); ok {
 		config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 		if err != nil {
-			return nil, nil, err
+			return workflowReviewDependencies{}, err
 		}
 
 		if config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
@@ -60,5 +65,5 @@ func (s service) workflowReviewDependencies(id string) (*workflowcore.Store, wor
 		}
 	}
 
-	return store, provider, nil
+	return workflowReviewDependencies{Store: store, Provider: provider}, nil
 }

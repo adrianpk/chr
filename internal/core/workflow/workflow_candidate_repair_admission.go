@@ -62,7 +62,9 @@ func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run w
 }
 
 func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run workflowInvocationFile, candidate workflowstate.IntegrationCandidate, provider PublicationGuardProvider) error {
-	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
+	reviewSource, err := s.workflowReviewSourceInputs(ctx, run, provider)
+
+	source := reviewSource.Input
 	if err != nil || workflowreview.CheckInputHash(source, run.Preparation.SourceHash) != nil {
 		return errorsOrConflict(err)
 	}
@@ -72,7 +74,9 @@ func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run wor
 		return errorsOrConflict(err)
 	}
 
-	_, source, err = s.workflowReviewSourceInputs(ctx, run, provider)
+	reviewSource2, err := s.workflowReviewSourceInputs(ctx, run, provider)
+
+	source = reviewSource2.Input
 	if err != nil || workflowreview.CheckInputHash(source, run.Preparation.SourceHash) != nil {
 		return errorsOrConflict(err)
 	}

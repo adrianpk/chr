@@ -11,7 +11,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider PullRequestProvider, reviewer []string, harness *AgentHarness) (claim *Claim, prepared workflowPreparedTask, binding workflowstate.ReviewBinding, err error) {
+func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider PullRequestProvider, role workflowReviewRole) (result workflowReviewPreparation, err error) {
+	var (
+		claim    *Claim
+		prepared workflowPreparedTask
+		binding  workflowstate.ReviewBinding
+	)
+
 	ctx, cancel := context.WithTimeout(ctx, time.Minute)
 	defer cancel()
 
@@ -27,7 +33,10 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 			return readErr
 		}
 
-		observation, input, readErr := invocationLocation.Owner.workflowReviewInputs(ctx, invocationLocation.Run, provider)
+		reviewInputs, readErr := invocationLocation.Owner.workflowReviewInputs(ctx, invocationLocation.Run, provider)
+
+		observation, input := reviewInputs.Observation, reviewInputs.Input
+
 		if readErr != nil {
 			return readErr
 		}
@@ -52,13 +61,15 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 			return nil
 		}
 
-		claim, prepared, readErr = invocationLocation.Owner.prepareWorkflowReviewPolicy(ctx, &invocationLocation.Run, observation, input, reviewer, harness)
+		reviewClaim, readErr := invocationLocation.Owner.prepareWorkflowReviewPolicy(ctx, &invocationLocation.Run, workflowReviewObservation{Observation: observation, Input: input}, role)
+
+		claim, prepared = reviewClaim.Claim, reviewClaim.Prepared
 		binding = *invocationLocation.Run.Review
 
 		return readErr
 	})
 
-	return claim, prepared, binding, err
+	return workflowReviewPreparation{Claim: claim, Prepared: prepared, Binding: binding}, err
 }
 
 func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput) error {
@@ -71,7 +82,7 @@ func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observati
 		return s.replaceWorkflowReviewInput(run, observation, input)
 	}
 
-	if _, _, err := s.readWorkflowReview(*run); err != nil {
+	if _, err := s.readWorkflowReview(*run); err != nil {
 		return err
 	}
 
@@ -98,31 +109,38 @@ func (s *Store) replaceWorkflowReviewInput(run *workflowInvocationFile, observat
 	return err
 }
 
-func (s *Store) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput, reviewer []string, harness *AgentHarness) (*Claim, workflowPreparedTask, error) {
+func (s *Store) prepareWorkflowReviewPolicy(ctx context.Context, run *workflowInvocationFile, source workflowReviewObservation, role workflowReviewRole) (workflowClaimedReview, error) {
+	observation, input := source.Observation, source.Input
+	reviewer := role.Command
+
 	switch input.Policy.Mode {
 	case workflowstate.ReviewHuman:
 		run.Review.State, run.Outcome = "waiting_approval", "slice_review_waiting_approval"
 
-		return nil, workflowPreparedTask{}, s.commitWorkflowState(run)
+		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.commitWorkflowState(run)
 	case workflowstate.ReviewTrustedAutoMerge:
 		decision := workflowstate.ReviewDecision{BindingHash: run.Review.InputHash, Result: workflowstate.AgenticReviewResult{Decision: workflowstate.IntegrationReviewDecisionPass, Summary: "Required host validation accepted under current trusted policy."}}
 
-		return nil, workflowPreparedTask{}, s.persistWorkflowReviewDecision(run, observation, decision, "authorized")
+		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, s.persistWorkflowReviewDecision(run, observation, decision, "authorized")
 	case workflowstate.ReviewAgentic:
 		if err := workflowstate.ValidateCommand(reviewer); err != nil {
-			return nil, workflowPreparedTask{}, fmt.Errorf("separate workflow review command required: %w", err)
+			return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, fmt.Errorf("separate workflow review command required: %w", err)
 		}
 
-		return s.claimWorkflowReview(ctx, run, observation, input, reviewer, harness)
+		return s.claimWorkflowReview(ctx, run, source, role)
 	default:
-		return nil, workflowPreparedTask{}, workflowstate.ErrConflict
+		return workflowClaimedReview{Claim: nil, Prepared: workflowPreparedTask{}}, workflowstate.ErrConflict
 	}
 }
 
-func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocationFile, observation workflowSliceObservation, input workflowstate.ReviewInput, reviewer []string, harness *AgentHarness) (claim *Claim, prepared workflowPreparedTask, err error) {
-	claim, err = s.reserveWorkflowRole(ctx, *run, workflowSliceReviewPurpose)
+func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocationFile, source workflowReviewObservation, role workflowReviewRole) (result workflowClaimedReview, err error) {
+	observation, input := source.Observation, source.Input
+
+	var prepared workflowPreparedTask
+
+	claim, err := s.reserveWorkflowRole(ctx, *run, workflowSliceReviewPurpose)
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, err
 	}
 
 	owned := claim
@@ -137,44 +155,44 @@ func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocation
 
 	claim.Token, err = newWorkflowClaimToken()
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, err
 	}
 
 	record := observation.tasks[len(observation.tasks)-1]
 	if !workflowTaskClaimable(record.Task) {
-		return nil, prepared, ErrWorkflowOwned
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, ErrWorkflowOwned
 	}
 
 	if err := s.beginWorkflowAttempt(run, &record, claim); err != nil {
-		return nil, prepared, err
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, err
 	}
 
-	taskInput, err := s.workflowTaskInput(ctx, *run, record, reviewer)
+	taskInput, err := s.workflowTaskInput(ctx, *run, record, role.Command)
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, err
 	}
 
 	files, err := s.workflowClaimRecordChanges(run, &record)
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, err
 	}
 
 	taskInput.SourceHash, taskInput.ExecutionMode, taskInput.Review = record.SourceHash, "automatic", &input
 	taskInput.ReviewHash = run.Review.InputHash
 	run.Review.State, run.Outcome = "running", "slice_review_running"
 
-	encodedAgentInput, encodedAgentInputErr := s.encodeWorkflowAgentInput(ctx, run, taskInput, harness)
+	encodedAgentInput, encodedAgentInputErr := s.encodeWorkflowAgentInput(ctx, run, taskInput, role.Harness)
 
 	prepared, file, budgetFile, err := encodedAgentInput.Prepared, encodedAgentInput.Input, encodedAgentInput.Budget, encodedAgentInputErr
 	if err != nil {
-		return nil, prepared, err
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, err
 	}
 
 	files = appendWorkflowAgentBudgetFile(files, budgetFile)
 
 	err = s.commitWorkflowPullRequestFiles(run, files, file)
 
-	return claim, prepared, err
+	return workflowClaimedReview{Claim: claim, Prepared: prepared}, err
 }
 
 func (s *Store) checkWorkflowReviewAdmission(ctx context.Context, run workflowInvocationFile) error {

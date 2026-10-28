@@ -47,7 +47,10 @@ func (s service) workflowLifecycleControlPorts(ctx context.Context, store *workf
 		return ports, err
 	}
 
-	_, provider, err := s.workflowReviewDependencies(request.ID)
+	reviewDependencies, err := s.workflowReviewDependencies(request.ID)
+
+	provider := reviewDependencies.Provider
+
 	if err != nil {
 		return ports, err
 	}

@@ -9,7 +9,9 @@ import (
 // AdvanceWorkflowSliceIntegration reconciles delivery before guarded publication.
 // Adapters share this operation; it never starts another task or slice.
 func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string, reviewer []string) (workflowcore.IntegrationProgress, error) {
-	store, provider, err := s.workflowReviewDependencies(id)
+	reviewDependencies, err := s.workflowReviewDependencies(id)
+	store, provider := reviewDependencies.Store, reviewDependencies.Provider
+
 	if err != nil {
 		return workflowcore.IntegrationProgress{}, err
 	}

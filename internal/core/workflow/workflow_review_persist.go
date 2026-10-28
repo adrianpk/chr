@@ -150,36 +150,36 @@ func (s *Store) workflowReviewDomainChanges(run *workflowInvocationFile, observa
 	return files, nil
 }
 
-func (s *Store) readWorkflowReview(run workflowInvocationFile) (workflowstate.ReviewInput, workflowstate.ReviewDecision, error) {
+func (s *Store) readWorkflowReview(run workflowInvocationFile) (workflowReviewRecord, error) {
 	var input workflowstate.ReviewInput
 	if run.Review == nil {
-		return input, workflowstate.ReviewDecision{}, workflowstate.ErrConflict
+		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, workflowstate.ErrConflict
 	}
 
 	data, err := s.readWorkflowReviewImage(run.Review.InputRef, run.Review.InputHash)
 	if err != nil {
-		return input, workflowstate.ReviewDecision{}, err
+		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, err
 	}
 
 	if err := json.Unmarshal(data, &input); err != nil {
-		return input, workflowstate.ReviewDecision{}, err
+		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, err
 	}
 
 	if input.Schema != "chr-workflow-review-input/v1" || input.InvocationID != run.ID || input.Unit != run.Review.Unit || !workflowstate.ValidCommitID(input.TargetCommit) {
-		return input, workflowstate.ReviewDecision{}, workflowstate.ErrConflict
+		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, workflowstate.ErrConflict
 	}
 
 	if err := workflowreview.CheckPolicy(input.Policy); err != nil {
-		return input, workflowstate.ReviewDecision{}, err
+		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, err
 	}
 
 	if err := validateWorkflowNativeReviewInput(input); err != nil {
-		return input, workflowstate.ReviewDecision{}, err
+		return workflowReviewRecord{Input: input, Decision: workflowstate.ReviewDecision{}}, err
 	}
 
 	decision, err := s.readWorkflowReviewDecisions(run, input)
 
-	return input, decision, err
+	return workflowReviewRecord{Input: input, Decision: decision}, err
 }
 
 func (s *Store) readWorkflowReviewImage(ref, hash string) ([]byte, error) {
@@ -201,7 +201,10 @@ func (s *Store) workflowReviewOrigin(run workflowInvocationFile, state string) (
 		return "agentic", nil
 	}
 
-	input, _, err := s.readWorkflowReview(run)
+	reviewRecord, err := s.readWorkflowReview(run)
+
+	input := reviewRecord.Input
+
 	if err != nil {
 		return "", err
 	}

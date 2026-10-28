@@ -64,7 +64,9 @@ func (s *Store) workflowPreparationPreflight(ctx context.Context, run *workflowI
 		return result, err
 	}
 
-	result.Observation, result.Source, err = s.workflowReviewSourceInputs(ctx, *run, provider)
+	reviewSource, err := s.workflowReviewSourceInputs(ctx, *run, provider)
+
+	result.Observation, result.Source = reviewSource.Observation, reviewSource.Input
 	if err != nil {
 		return result, err
 	}

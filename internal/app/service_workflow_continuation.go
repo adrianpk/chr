@@ -10,7 +10,9 @@ import (
 // ContinueWorkflow resumes an existing invocation through the common bounded
 // operation. Adapters cannot replace its selector, target or frozen policy.
 func (s service) ContinueWorkflow(ctx context.Context, id string, request workflowcore.ContinuationRequest, reviewer []string) (workflowcore.ContinuationProgress, error) {
-	store, provider, err := s.workflowReviewDependencies(id)
+	reviewDependencies, err := s.workflowReviewDependencies(id)
+	store, provider := reviewDependencies.Store, reviewDependencies.Provider
+
 	if err != nil {
 		return workflowcore.ContinuationProgress{}, err
 	}

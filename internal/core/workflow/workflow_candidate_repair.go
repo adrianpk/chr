@@ -54,7 +54,9 @@ func (s *Store) repairWorkflowReviewedSlice(ctx context.Context, id, key string,
 			return err
 		}
 
-		input, _, err := invocationLocation2.Owner.readWorkflowReview(invocationLocation2.Run)
+		reviewRecord, err := invocationLocation2.Owner.readWorkflowReview(invocationLocation2.Run)
+
+		input := reviewRecord.Input
 		if err != nil || input.Native == nil {
 			return err
 		}
@@ -83,7 +85,9 @@ func (s *Store) repairWorkflowNativeReview(ctx context.Context, run workflowInvo
 		return err
 	}
 
-	_, fresh, err := s.workflowReviewInputs(ctx, run, provider)
+	reviewInputs, err := s.workflowReviewInputs(ctx, run, provider)
+
+	fresh := reviewInputs.Input
 	if err != nil || workflowreview.CheckInputHash(fresh, run.Review.InputHash) != nil {
 		return errorsOrConflict(err)
 	}

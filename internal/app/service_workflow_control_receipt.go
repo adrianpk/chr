@@ -26,8 +26,11 @@ func (s service) executeWorkflowControlResult(ctx context.Context, request Workf
 	}
 
 	var provider workflowcore.PullRequestProvider
+
 	if request.Action != "grant" {
-		_, provider, err = s.workflowReviewDependencies(request.ID)
+		reviewDependencies, dependencyErr := s.workflowReviewDependencies(request.ID)
+
+		provider, err = reviewDependencies.Provider, dependencyErr
 		if err != nil {
 			return nil, err
 		}

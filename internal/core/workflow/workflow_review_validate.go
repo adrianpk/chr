@@ -78,7 +78,7 @@ func (s *Store) readWorkflowReviewDecisions(run workflowInvocationFile, input wo
 	var newest workflowstate.ReviewDecision
 
 	for count := run.Review.DecisionCount; count > 0; count-- {
-		evidence, err := s.readWorkflowReviewEvidence(run, input, count, ref, hash)
+		evidence, err := s.readWorkflowReviewEvidence(run, input, count, workflowstate.EvidenceRef{Path: ref, Hash: hash})
 		if err != nil {
 			return newest, err
 		}
@@ -105,7 +105,9 @@ func (s *Store) readWorkflowReviewDecisions(run workflowInvocationFile, input wo
 	return newest, nil
 }
 
-func (s *Store) readWorkflowReviewEvidence(run workflowInvocationFile, input workflowstate.ReviewInput, count int, ref, hash string) (workflowReviewEvidence, error) {
+func (s *Store) readWorkflowReviewEvidence(run workflowInvocationFile, input workflowstate.ReviewInput, count int, image workflowstate.EvidenceRef) (workflowReviewEvidence, error) {
+	ref, hash := image.Path, image.Hash
+
 	var evidence workflowReviewEvidence
 	if ref != workflowReviewPath(run.ID, run.Review.Round, fmt.Sprintf("decision-%d.json", count)) {
 		return evidence, workflowstate.ErrConflict

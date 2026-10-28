@@ -50,7 +50,9 @@ func (s *Store) acceptWorkflowReview(ctx context.Context, claimed workflowClaimO
 		return workflowstate.ReviewBinding{}, err
 	}
 
-	observation, input, err := s.workflowReviewInputs(ctx, run, provider)
+	reviewInputs, err := s.workflowReviewInputs(ctx, run, provider)
+
+	observation, input := reviewInputs.Observation, reviewInputs.Input
 	if err == nil {
 		err = workflowreview.CheckInputHash(input, run.Review.InputHash)
 	}
@@ -114,7 +116,7 @@ func consumeWorkflowReviewRepair(run *workflowInvocationFile, taskKey string) er
 
 func (s *Store) prepareWorkflowReviewRepair(run *workflowInvocationFile, taskKey string) error {
 	if run.Review != nil {
-		if _, _, err := s.readWorkflowReview(*run); err != nil {
+		if _, err := s.readWorkflowReview(*run); err != nil {
 			return err
 		}
 	}

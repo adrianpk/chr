@@ -135,7 +135,7 @@ func (s *Store) checkWorkflowDeliveryEvidence(run workflowInvocationFile) error 
 	}
 
 	if run.Review != nil {
-		if _, _, err := s.readWorkflowReview(run); err != nil {
+		if _, err := s.readWorkflowReview(run); err != nil {
 			return err
 		}
 	}

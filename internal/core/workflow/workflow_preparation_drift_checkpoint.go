@@ -11,7 +11,9 @@ func (s *Store) workflowNativePreparationTargetMoved(ctx context.Context, run wo
 		return false
 	}
 
-	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
+	reviewSource, err := s.workflowReviewSourceInputs(ctx, run, provider)
+
+	source := reviewSource.Input
 
 	return err == nil && source.TargetCommit != candidate.Input.Git.BaseCommit
 }

@@ -27,16 +27,20 @@ type ReviewRepairBudget struct {
 // trusted mode grants validated inputs; agentic mode runs a separate owned role.
 // It never publishes a target or completes a task.
 func (s *Store) ReviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, reviewer []string) (result workflowstate.ReviewBinding, err error) {
-	return s.reviewWorkflowSlice(ctx, id, provider, reviewer, nil)
+	return s.reviewWorkflowSlice(ctx, id, provider, workflowReviewRole{Command: reviewer})
 }
 
 // ReviewWorkflowSliceWithHarness shares the invocation ceiling with executor and merger calls.
 func (s *Store) ReviewWorkflowSliceWithHarness(ctx context.Context, id string, provider PullRequestProvider, harness AgentHarness) (workflowstate.ReviewBinding, error) {
-	return s.reviewWorkflowSlice(ctx, id, provider, harness.Command, &harness)
+	return s.reviewWorkflowSlice(ctx, id, provider, workflowReviewRole{Command: harness.Command, Harness: &harness})
 }
 
-func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, reviewer []string, harness *AgentHarness) (result workflowstate.ReviewBinding, err error) {
-	claim, prepared, binding, err := s.prepareWorkflowReview(ctx, id, provider, reviewer, harness)
+func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, role workflowReviewRole) (result workflowstate.ReviewBinding, err error) {
+	reviewer := role.Command
+
+	reviewPreparation, err := s.prepareWorkflowReview(ctx, id, provider, role)
+
+	claim, prepared, binding := reviewPreparation.Claim, reviewPreparation.Prepared, reviewPreparation.Binding
 
 	if err != nil || claim == nil {
 		if err == nil && binding.State == "needs_repair" {

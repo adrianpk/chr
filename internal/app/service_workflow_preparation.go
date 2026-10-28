@@ -45,7 +45,9 @@ func (s service) CheckWorkflowPublicationGuard(ctx context.Context, id string) (
 }
 
 func (s service) workflowPreparationDependencies(id string) (servicePreparationDependencies, error) {
-	store, provider, err := s.workflowReviewDependencies(id)
+	reviewDependencies, err := s.workflowReviewDependencies(id)
+
+	store, provider := reviewDependencies.Store, reviewDependencies.Provider
 	if err != nil {
 		return servicePreparationDependencies{Store: nil, Provider: nil}, err
 	}
