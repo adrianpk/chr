@@ -76,7 +76,7 @@ func (reader workflowIntegrationReader) mergerDiffPaths(ctx context.Context, bef
 		return nil, err
 	}
 
-	return workflowMergerChangedPaths(data)
+	return workflowmerge.WorkflowMergerChangedPaths(data)
 }
 
 func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Context, input workflowstate.MergerInput, proposal workflowstate.MergerResult, check workflowMergerPathCheck) error {

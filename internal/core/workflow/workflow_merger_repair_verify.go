@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -13,7 +14,7 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 		return reader.preparedTree(ctx, original, parent, source)
 	}
 
-	if err := validateWorkflowTreeRepairs(proof); err != nil {
+	if err := workflowmerge.ValidateWorkflowTreeRepairs(proof); err != nil {
 		return "", err
 	}
 
@@ -29,7 +30,7 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 			continue
 		}
 
-		if err := reader.verifyMergerTreeRepair(ctx, repair, workflowMergerRepairPosition{OriginalParent: original, PreparedParent: parent, Source: source, BaselineTree: tree}, baseline.conflicts); err != nil {
+		if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.WorkflowMergerRepairPosition{OriginalParent: original, PreparedParent: parent, Source: source, BaselineTree: tree}, baseline.conflicts); err != nil {
 			return "", err
 		}
 
@@ -43,10 +44,10 @@ func (reader workflowIntegrationReader) expectedIntegrationTree(ctx context.Cont
 	return tree, nil
 }
 
-func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair workflowstate.IntegrationTreeRepair, position workflowMergerRepairPosition, conflicts []string) error {
+func (reader workflowIntegrationReader) verifyMergerTreeRepair(ctx context.Context, repair workflowstate.IntegrationTreeRepair, position workflowmerge.WorkflowMergerRepairPosition, conflicts []string) error {
 	tree := position.BaselineTree
 
-	if err := validateWorkflowRepairPosition(repair, position); err != nil {
+	if err := workflowmerge.ValidateWorkflowRepairPosition(repair, position); err != nil {
 		return err
 	}
 

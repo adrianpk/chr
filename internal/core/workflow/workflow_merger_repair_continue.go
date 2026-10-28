@@ -5,6 +5,7 @@ import (
 	"slices"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,15 +21,15 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 	}
 
 	proof := workflowMergerRepairProof(state)
-	if len(state.Repairs) >= workflowstate.PageLimit || validateWorkflowTreeRepair(proof, repair) != nil {
+	if len(state.Repairs) >= workflowstate.PageLimit || workflowmerge.ValidateWorkflowTreeRepair(proof, repair) != nil {
 		return state, workflowstate.ErrConflict
 	}
 
-	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowMergerRepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
+	if err := reader.verifyMergerTreeRepair(ctx, repair, workflowmerge.WorkflowMergerRepairPosition{OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}, state.Conflicts); err != nil {
 		return state, err
 	}
 
-	if err := checkWorkflowRepairPredecessors(workflowRepairHistory{ReplayIndex: state.ReplayIndex, History: state.History}, repair.Input); err != nil {
+	if err := workflowmerge.CheckWorkflowRepairPredecessors(workflowmerge.WorkflowRepairHistory{ReplayIndex: state.ReplayIndex, History: state.History}, repair.Input); err != nil {
 		return state, err
 	}
 
@@ -47,23 +48,4 @@ func (git OSWorkflowPreparationGit) ContinueWorkflowMergerRepair(ctx context.Con
 	err = reader.advanceMergerRepair(ctx, &state)
 
 	return state, err
-}
-
-func checkWorkflowRepairPredecessors(state workflowRepairHistory, input workflowstate.MergerInput) error {
-	if input.Method != "rebase" {
-		return nil
-	}
-
-	checkpoint := input.HistoryCheckpoint
-	if checkpoint == nil || checkpoint.ReplayIndex != state.ReplayIndex || len(checkpoint.Predecessors) != len(state.History) {
-		return workflowstate.ErrConflict
-	}
-
-	for i, entry := range state.History {
-		if checkpoint.Predecessors[i].Source != entry.Source || checkpoint.Predecessors[i].Commit != entry.Commit {
-			return workflowstate.ErrConflict
-		}
-	}
-
-	return nil
 }

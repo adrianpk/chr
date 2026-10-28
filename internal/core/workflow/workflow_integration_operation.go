@@ -75,9 +75,3 @@ type workflowPreparationCommit struct {
 	Parents    []string
 	Authorship workflowPreparationAuthorship
 }
-
-// workflowAnsweredRepair retains an explicit repair answer without granting acceptance.
-type workflowAnsweredRepair struct {
-	Plan  MergerRepairPlan
-	Found bool
-}

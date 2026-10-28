@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -41,7 +42,7 @@ func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run w
 		return err
 	}
 
-	if input.Reason != repair.Reason || !workflowMergerRepairIdentity(input, repair.Candidate.Input.Git) {
+	if input.Reason != repair.Reason || !workflowmerge.WorkflowMergerRepairIdentity(input, repair.Candidate.Input.Git) {
 		return workflowstate.ErrConflict
 	}
 

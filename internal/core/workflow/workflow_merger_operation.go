@@ -1,6 +1,8 @@
 package workflow
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // Private merger values bind only the observations/resources used together.
 // Contexts, cancellation and Store mutation authority remain with the caller.
@@ -46,14 +48,6 @@ type workflowMergerRepairInput struct {
 	Repair workflowstate.IntegrationTreeRepair
 }
 
-// Observations keep object identities and comparison mode distinct from IO.
-type workflowMergerRepairPosition struct {
-	OriginalParent string
-	PreparedParent string
-	Source         string
-	BaselineTree   string
-}
-
 type workflowMergerPathMode uint8
 
 const (
@@ -65,9 +59,4 @@ type workflowMergerPathCheck struct {
 	Before string
 	After  string
 	Mode   workflowMergerPathMode
-}
-
-type workflowRepairHistory struct {
-	ReplayIndex int
-	History     []workflowstate.IntegrationCommit
 }

@@ -84,19 +84,19 @@ func TestNativeMergerRegeneration(t *testing.T) {
 	repair.Proposal.ResolutionNotes[0].RegenerationCommand = []string{"make", "regenerate"}
 
 	proof := workflowMergerRepairProof(state)
-	if validateWorkflowTreeRepair(proof, repair) == nil {
+	if workflowmerge.ValidateWorkflowTreeRepair(proof, repair) == nil {
 		t.Fatal("model procedure declaration substituted for host observations")
 	}
 
 	evidence := workflowstate.MergerRegenerationEvidence{ConflictID: repair.Input.Conflicts[0].ID, Command: workflowstate.CommandResult{Command: []string{"make", "regenerate"}}, Validation: workflowstate.CommandResult{Command: slices.Clone(repair.Input.ValidationCommands[0])}, InputTree: repair.BaselineTree, OutputTree: repair.ResolvedTree}
 
 	repair.Regeneration = []workflowstate.MergerRegenerationEvidence{evidence}
-	if validateWorkflowTreeRepair(proof, repair) != nil {
+	if workflowmerge.ValidateWorkflowTreeRepair(proof, repair) != nil {
 		t.Fatal("complete host procedure observations were rejected")
 	}
 
 	repair.Regeneration[0].Validation.Command = []string{"make", "weaker-check"}
-	if validateWorkflowTreeRepair(proof, repair) == nil {
+	if workflowmerge.ValidateWorkflowTreeRepair(proof, repair) == nil {
 		t.Fatal("undeclared validation substituted for frozen validation")
 	}
 }

@@ -69,7 +69,7 @@ func TestNativeMergerSemantic(t *testing.T) {
 	}
 }
 
-func checkNativeMergerSemanticPlan(t *testing.T, plan MergerRepairPlan, err error, original string) {
+func checkNativeMergerSemanticPlan(t *testing.T, plan workflowstate.MergerRepairPlan, err error, original string) {
 	t.Helper()
 
 	if err != nil || plan.Outcome != "replay_step" || plan.OriginalCommit != original {

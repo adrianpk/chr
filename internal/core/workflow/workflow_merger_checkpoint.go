@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -103,7 +104,7 @@ func (s *Store) readWorkflowMergerCheckpoint(input workflowstate.MergerInput) (M
 		return record.State, workflowstate.ErrConflict
 	}
 
-	return record.State, checkWorkflowRepairPredecessors(workflowRepairHistory{ReplayIndex: record.State.ReplayIndex, History: record.State.History}, input)
+	return record.State, workflowmerge.CheckWorkflowRepairPredecessors(workflowmerge.WorkflowRepairHistory{ReplayIndex: record.State.ReplayIndex, History: record.State.History}, input)
 }
 
 func (s *Store) checkWorkflowMergerCheckpointOwner(run workflowInvocationFile, entry IntegrationEntry, state MergerRepairState) error {

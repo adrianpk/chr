@@ -1,14 +1,14 @@
-package workflow
+package merge
 
 import (
 	"slices"
 	"strings"
 
-	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowTreeRepairs(proof workflowstate.IntegrationProof) error {
+// ValidateWorkflowTreeRepairs checks the retained repair observations without executing Git or accepting a candidate.
+func ValidateWorkflowTreeRepairs(proof workflowstate.IntegrationProof) error {
 	if proof.Provenance == nil {
 		return nil
 	}
@@ -18,7 +18,7 @@ func validateWorkflowTreeRepairs(proof workflowstate.IntegrationProof) error {
 	}
 
 	for _, repair := range proof.Provenance.Repairs {
-		if err := validateWorkflowTreeRepair(proof, repair); err != nil {
+		if err := ValidateWorkflowTreeRepair(proof, repair); err != nil {
 			return err
 		}
 	}
@@ -26,17 +26,18 @@ func validateWorkflowTreeRepairs(proof workflowstate.IntegrationProof) error {
 	return nil
 }
 
-func validateWorkflowTreeRepair(proof workflowstate.IntegrationProof, repair workflowstate.IntegrationTreeRepair) error {
-	if repair.CompletedAt.IsZero() || workflowmerge.CheckInput(repair.Input, repair.CompletedAt) != nil {
+// ValidateWorkflowTreeRepair checks the retained repair observations without executing Git or accepting a candidate.
+func ValidateWorkflowTreeRepair(proof workflowstate.IntegrationProof, repair workflowstate.IntegrationTreeRepair) error {
+	if repair.CompletedAt.IsZero() || CheckInput(repair.Input, repair.CompletedAt) != nil {
 		return workflowstate.ErrConflict
 	}
 
 	input := repair.Input
-	if !workflowMergerRepairIdentity(input, proof) {
+	if !WorkflowMergerRepairIdentity(input, proof) {
 		return workflowstate.ErrConflict
 	}
 
-	if repair.Proposal.Outcome != "resolved" || workflowmerge.CheckResult(repair.Proposal, input) != nil {
+	if repair.Proposal.Outcome != "resolved" || CheckResult(repair.Proposal, input) != nil {
 		return workflowstate.ErrConflict
 	}
 
@@ -79,7 +80,7 @@ func validateWorkflowRepairRegeneration(repair workflowstate.IntegrationTreeRepa
 	}
 
 	for _, conflict := range repair.Input.Conflicts {
-		if workflowmerge.ProcedureRequired(conflict) && !seen[conflict.ID] {
+		if ProcedureRequired(conflict) && !seen[conflict.ID] {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -95,7 +96,8 @@ func validWorkflowRegenerationEvidence(conflict workflowstate.MergerConflict, ev
 	return evidence.Command.ExitCode == 0 && evidence.Validation.ExitCode == 0 && workflowstate.ValidCommitID(evidence.InputTree) && workflowstate.ValidCommitID(evidence.OutputTree) && evidence.OutputTree == tree && !evidence.Command.Truncated && !evidence.Validation.Truncated
 }
 
-func validateWorkflowRepairPosition(repair workflowstate.IntegrationTreeRepair, position workflowMergerRepairPosition) error {
+// ValidateWorkflowRepairPosition checks the retained repair observations without executing Git or accepting a candidate.
+func ValidateWorkflowRepairPosition(repair workflowstate.IntegrationTreeRepair, position WorkflowMergerRepairPosition) error {
 	original, parent, source, tree := position.OriginalParent, position.PreparedParent, position.Source, position.BaselineTree
 
 	if repair.OriginalParent != original || repair.PreparedParent != parent || repair.Source != source || repair.BaselineTree != tree {
@@ -112,13 +114,14 @@ func validateWorkflowRepairPosition(repair workflowstate.IntegrationTreeRepair, 
 	return nil
 }
 
-func workflowMergerChangedPaths(data string) ([]string, error) {
+// WorkflowMergerChangedPaths checks the retained repair observations without executing Git or accepting a candidate.
+func WorkflowMergerChangedPaths(data string) ([]string, error) {
 	paths := strings.Split(strings.TrimSuffix(data, "\x00"), "\x00")
 	if data == "" {
 		paths = nil
 	}
 
-	if err := workflowmerge.CheckPaths(paths); err != nil {
+	if err := CheckPaths(paths); err != nil {
 		return nil, err
 	}
 
@@ -134,9 +137,17 @@ func validateWorkflowRegenerationStep(input workflowstate.MergerInput, evidence 
 	}
 
 	conflict := input.Conflicts[index]
-	if !workflowmerge.ProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, evidence.OutputTree) || evidence.InputTree != tree {
+	if !ProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, evidence.OutputTree) || evidence.InputTree != tree {
 		return workflowstate.ErrConflict
 	}
 
 	return nil
+}
+
+// Observations keep object identities and comparison mode distinct from IO.
+type WorkflowMergerRepairPosition struct {
+	OriginalParent string
+	PreparedParent string
+	Source         string
+	BaselineTree   string
 }
