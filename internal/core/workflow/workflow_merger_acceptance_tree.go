@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -61,7 +62,7 @@ func checkWorkflowMergerSnapshotFiles(directory string) error {
 			return err
 		}
 
-		if !workflowMergerRegularFile(info) {
+		if !workflowmerge.WorkflowMergerRegularFile(info) {
 			return workflowstate.ErrConflict
 		}
 
@@ -92,7 +93,7 @@ func (reader workflowIntegrationReader) checkMergerObservedPaths(ctx context.Con
 	}
 
 	for _, path := range paths {
-		if !slices.Contains(declared, path) || !workflowMergerPathAllowed(input, path) {
+		if !slices.Contains(declared, path) || !workflowmerge.WorkflowMergerPathAllowed(input, path) {
 			return workflowstate.ErrConflict
 		}
 	}

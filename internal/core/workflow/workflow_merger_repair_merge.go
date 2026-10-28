@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -52,7 +53,7 @@ func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, 
 			break
 		}
 
-		if !validWorkflowMergerPath(path) || len(result.conflicts) >= workflowstate.PageLimit {
+		if !workflowmerge.ValidWorkflowMergerPath(path) || len(result.conflicts) >= workflowstate.PageLimit {
 			return workflowMergerTree{}, workflowstate.ErrConflict
 		}
 

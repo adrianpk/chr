@@ -8,10 +8,9 @@ import (
 	"path/filepath"
 	"slices"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
-
-const workflowMergerBrokerProtocol = "chr-merger-broker/v1"
 
 // MergerHarness identifies a trusted model driver, not an unrestricted
 // worker CLI. Its retained certificate must establish that model tool calls use
@@ -82,7 +81,7 @@ func (s *Store) checkWorkflowMergerHarness(ctx context.Context, input workflowst
 }
 
 func checkWorkflowMergerExecutable(command []string, hash string) error {
-	if !validWorkflowMergerCommand(command) || !filepath.IsAbs(command[0]) || !validWorkflowNativeFingerprint(hash) {
+	if !workflowmerge.ValidWorkflowMergerCommand(command) || !filepath.IsAbs(command[0]) || !validWorkflowNativeFingerprint(hash) {
 		return workflowstate.ErrConflict
 	}
 
@@ -119,7 +118,7 @@ func encodeWorkflowMergerAttempt(attempt MergerAttempt) ([]byte, error) {
 }
 
 func checkWorkflowMergerCertificate(certificate MergerHarnessCertificate, command []string) error {
-	if certificate.SchemaVersion != 1 || certificate.Protocol != workflowMergerBrokerProtocol || !certificate.BuiltinToolsDisabled || !slices.Equal(certificate.Command, command) || !validWorkflowNativeFingerprint(certificate.CapabilityRevision) {
+	if certificate.SchemaVersion != 1 || certificate.Protocol != workflowmerge.WorkflowMergerBrokerProtocol || !certificate.BuiltinToolsDisabled || !slices.Equal(certificate.Command, command) || !validWorkflowNativeFingerprint(certificate.CapabilityRevision) {
 		return fmt.Errorf("%w: certified broker-only merger driver required", workflowstate.ErrConflict)
 	}
 

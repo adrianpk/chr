@@ -8,6 +8,7 @@ import (
 	"os"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +20,7 @@ type workflowMergerDriverResult struct {
 	err     error
 }
 
-func runWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall) workflowMergerDriverResult {
+func runWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflowPreparedTask, tools *workflowmerge.WorkflowMergerTools, call workflowmerge.WorkflowMergerCall) workflowMergerDriverResult {
 	run, err := claim.store.ReadWorkflow(ctx, claim.InvocationID)
 	if err != nil {
 		return workflowMergerDriverResult{err: err}
@@ -43,7 +44,7 @@ func runWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflo
 	return executeWorkflowMergerDriver(ctx, claim, prepared, tools, call, gate, permit, index, commandOutput.Stdout, commandOutput.Stderr)
 }
 
-func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall, gate, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) workflowMergerDriverResult {
+func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflowPreparedTask, tools *workflowmerge.WorkflowMergerTools, call workflowmerge.WorkflowMergerCall, gate, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) workflowMergerDriverResult {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -92,10 +93,10 @@ func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared wor
 	return result
 }
 
-func exchangeWorkflowMerger(ctx context.Context, tools *workflowMergerTools, call workflowMergerCall, reader io.Reader, writer io.Writer) (json.RawMessage, *workflowstate.MergerUsage, error) {
+func exchangeWorkflowMerger(ctx context.Context, tools *workflowmerge.WorkflowMergerTools, call workflowmerge.WorkflowMergerCall, reader io.Reader, writer io.Writer) (json.RawMessage, *workflowstate.MergerUsage, error) {
 	if err := json.NewEncoder(writer).Encode(call); err != nil {
 		return nil, nil, err
 	}
 
-	return serveWorkflowMergerBroker(ctx, tools, reader, writer)
+	return workflowmerge.ServeWorkflowMergerBroker(ctx, tools, reader, writer)
 }

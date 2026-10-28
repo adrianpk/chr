@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -62,7 +63,7 @@ func workflowMergerProcedureRequired(conflict workflowstate.MergerConflict) bool
 }
 
 func workflowMergerProcedureDeclared(input workflowstate.MergerInput, conflict workflowstate.MergerConflict) bool {
-	return validWorkflowMergerCommand(conflict.RegenerationCommand) && validWorkflowMergerCommand(conflict.ValidationCommand) && slices.ContainsFunc(input.ValidationCommands, func(command []string) bool { return slices.Equal(command, conflict.ValidationCommand) })
+	return workflowmerge.ValidWorkflowMergerCommand(conflict.RegenerationCommand) && workflowmerge.ValidWorkflowMergerCommand(conflict.ValidationCommand) && slices.ContainsFunc(input.ValidationCommands, func(command []string) bool { return slices.Equal(command, conflict.ValidationCommand) })
 }
 
 func validateWorkflowMergerIntentConflicts(requirements []workflowstate.MergerRequirement) error {

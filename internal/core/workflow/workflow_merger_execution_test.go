@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -70,7 +71,7 @@ func nativeMergerTestHarness(t *testing.T, store *Store, id string) MergerHarnes
 	}
 
 	command := []string{executable, "-test.run=^TestNativeMergerChild$"}
-	certificate := MergerHarnessCertificate{SchemaVersion: 1, Protocol: workflowMergerBrokerProtocol, Command: command, ExecutableHash: hash, CapabilityRevision: contenthash.Sum([]byte("fixture-broker/v1")), BuiltinToolsDisabled: true}
+	certificate := MergerHarnessCertificate{SchemaVersion: 1, Protocol: workflowmerge.WorkflowMergerBrokerProtocol, Command: command, ExecutableHash: hash, CapabilityRevision: contenthash.Sum([]byte("fixture-broker/v1")), BuiltinToolsDisabled: true}
 
 	return MergerHarness{Command: command, Certificate: retainNativeRecordEvidence(t, store, id, "execution-harness", certificate)}
 }
@@ -216,12 +217,12 @@ func TestNativeMergerAdmission(t *testing.T) {
 	}
 }
 
-func nativeMergerChildRequest(encoder *json.Encoder, decoder *json.Decoder, request workflowMergerToolRequest) workflowMergerToolResponse {
+func nativeMergerChildRequest(encoder *json.Encoder, decoder *json.Decoder, request nativeMergerToolRequest) nativeMergerToolResponse {
 	if err := encoder.Encode(request); err != nil {
 		os.Exit(71)
 	}
 
-	var response workflowMergerToolResponse
+	var response nativeMergerToolResponse
 	if err := decoder.Decode(&response); err != nil {
 		os.Exit(72)
 	}
@@ -238,7 +239,7 @@ func TestNativeMergerChild(t *testing.T) {
 
 	decoder, encoder := json.NewDecoder(os.Stdin), json.NewEncoder(os.Stdout)
 
-	var call workflowMergerCall
+	var call workflowmerge.WorkflowMergerCall
 	if err := decoder.Decode(&call); err != nil {
 		os.Exit(70)
 	}
@@ -256,7 +257,7 @@ func TestNativeMergerChild(t *testing.T) {
 		os.Exit(77)
 	}
 
-	for _, request := range []workflowMergerToolRequest{{Operation: "push"}, {Operation: "merge"}, {Operation: "approve"}, {Operation: "receipt"}, {Operation: "write", Path: ".git/config", Content: "remote"}, {Operation: "write", Path: "ops/default/ticket/ready/scope.md", Content: "changed scope"}, {Operation: "check", Check: new(int), Content: "git push"}} {
+	for _, request := range []nativeMergerToolRequest{{Operation: "push"}, {Operation: "merge"}, {Operation: "approve"}, {Operation: "receipt"}, {Operation: "write", Path: ".git/config", Content: "remote"}, {Operation: "write", Path: "ops/default/ticket/ready/scope.md", Content: "changed scope"}, {Operation: "check", Check: new(int), Content: "git push"}} {
 		if response := nativeMergerChildRequest(encoder, decoder, request); response.Error == "" {
 			os.Exit(73)
 		}
@@ -264,7 +265,7 @@ func TestNativeMergerChild(t *testing.T) {
 
 	nativeMergerChildEdit(encoder, decoder, call.Input)
 
-	if response := nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "check", Check: new(int)}); response.Error == "" {
+	if response := nativeMergerChildRequest(encoder, decoder, nativeMergerToolRequest{Operation: "check", Check: new(int)}); response.Error == "" {
 		os.Exit(75)
 	}
 
@@ -277,7 +278,7 @@ func TestNativeMergerChild(t *testing.T) {
 
 	nativeMergerChildDescendant(call.Input.ID)
 
-	_ = nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "result", Result: data, Usage: nativeMergerChildMeter(call.Input)})
+	_ = nativeMergerChildRequest(encoder, decoder, nativeMergerToolRequest{Operation: "result", Result: data, Usage: nativeMergerChildMeter(call.Input)})
 
 	os.Exit(0)
 }
@@ -333,7 +334,7 @@ func nativeMergerChildEdit(encoder *json.Encoder, decoder *json.Decoder, input w
 		path, content = "manual.txt", "Retain the approved source input\n"
 	}
 
-	if response := nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "write", Path: path, Content: content}); response.Error != "" {
+	if response := nativeMergerChildRequest(encoder, decoder, nativeMergerToolRequest{Operation: "write", Path: path, Content: content}); response.Error != "" {
 		os.Exit(74)
 	}
 }
@@ -367,7 +368,24 @@ func nativeMergerChildDecision(encoder *json.Encoder, decoder *json.Decoder, inp
 		os.Exit(76)
 	}
 
-	_ = nativeMergerChildRequest(encoder, decoder, workflowMergerToolRequest{Operation: "result", Result: data})
+	_ = nativeMergerChildRequest(encoder, decoder, nativeMergerToolRequest{Operation: "result", Result: data})
 
 	return true
+}
+
+// The child fixture retains the original wire fields without exporting broker
+// internals or importing its decoder as the expected protocol.
+type nativeMergerToolRequest struct {
+	Operation string                     `json:"operation"`
+	Path      string                     `json:"path,omitempty"`
+	Content   string                     `json:"content,omitempty"`
+	Check     *int                       `json:"check,omitempty"`
+	Result    json.RawMessage            `json:"result,omitempty"`
+	Usage     *workflowstate.MergerUsage `json:"usage,omitempty"`
+}
+
+type nativeMergerToolResponse struct {
+	Content string                       `json:"content,omitempty"`
+	Check   *workflowstate.CommandResult `json:"check,omitempty"`
+	Error   string                       `json:"error,omitempty"`
 }

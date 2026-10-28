@@ -1,4 +1,4 @@
-package workflow
+package merge
 
 import (
 	"bytes"
@@ -11,7 +11,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func checkWorkflowMergerJSON(data []byte) error {
+// CheckWorkflowMergerJSON rejects invalid encoding, duplicate keys, nesting and trailing output.
+func CheckWorkflowMergerJSON(data []byte) error {
 	if !utf8.Valid(data) {
 		return fmt.Errorf("%w: merger JSON is not UTF-8", workflowstate.ErrConflict)
 	}

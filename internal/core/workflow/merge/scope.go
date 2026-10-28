@@ -1,4 +1,4 @@
-package workflow
+package merge
 
 import (
 	"path/filepath"
@@ -8,18 +8,20 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validWorkflowMergerPath(path string) bool {
+// ValidWorkflowMergerPath accepts only bounded, canonical local pathnames.
+func ValidWorkflowMergerPath(path string) bool {
 	return len(path) > 0 && len(path) <= 4096 && filepath.IsLocal(path) && filepath.ToSlash(filepath.Clean(path)) == path && !strings.ContainsAny(path, "\\\x00\n\r") && path != "."
 }
 
-func validateWorkflowMergerPaths(paths []string) error {
+// ValidateWorkflowMergerPaths rejects duplicate, invalid or excessive scoped paths.
+func ValidateWorkflowMergerPaths(paths []string) error {
 	if len(paths) > workflowstate.PageLimit {
 		return workflowstate.ErrConflict
 	}
 
 	seen := map[string]bool{}
 	for _, path := range paths {
-		if !validWorkflowMergerPath(path) || seen[path] {
+		if !ValidWorkflowMergerPath(path) || seen[path] {
 			return workflowstate.ErrConflict
 		}
 
@@ -50,20 +52,22 @@ func workflowMergerControlPath(path string) bool {
 	return false
 }
 
-func workflowMergerPathAllowed(input workflowstate.MergerInput, path string) bool {
-	return validWorkflowMergerPath(path) && !workflowMergerControlPath(path) && workflowMergerPathWithin(path, input.AllowedPaths) && !workflowMergerPathWithin(path, input.ProtectedPaths)
+// WorkflowMergerPathAllowed excludes control records and protected paths from the editable scope.
+func WorkflowMergerPathAllowed(input workflowstate.MergerInput, path string) bool {
+	return ValidWorkflowMergerPath(path) && !workflowMergerControlPath(path) && workflowMergerPathWithin(path, input.AllowedPaths) && !workflowMergerPathWithin(path, input.ProtectedPaths)
 }
 
-func validateWorkflowMergerScope(input workflowstate.MergerInput) error {
+// ValidateWorkflowMergerScope checks allowed/protected paths and bounded host validation commands.
+func ValidateWorkflowMergerScope(input workflowstate.MergerInput) error {
 	if len(input.AllowedPaths) == 0 {
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowMergerPaths(input.AllowedPaths); err != nil {
+	if err := ValidateWorkflowMergerPaths(input.AllowedPaths); err != nil {
 		return err
 	}
 
-	if err := validateWorkflowMergerPaths(input.ProtectedPaths); err != nil {
+	if err := ValidateWorkflowMergerPaths(input.ProtectedPaths); err != nil {
 		return err
 	}
 
@@ -82,7 +86,7 @@ func validateWorkflowMergerCommands(commands [][]string) error {
 	}
 
 	for _, command := range commands {
-		if !validWorkflowMergerCommand(command) {
+		if !ValidWorkflowMergerCommand(command) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -90,7 +94,8 @@ func validateWorkflowMergerCommands(commands [][]string) error {
 	return nil
 }
 
-func validWorkflowMergerCommand(command []string) bool {
+// ValidWorkflowMergerCommand checks bounded command arguments without granting execution.
+func ValidWorkflowMergerCommand(command []string) bool {
 	if len(command) == 0 || len(command) > workflowstate.PageLimit || command[0] == "" {
 		return false
 	}

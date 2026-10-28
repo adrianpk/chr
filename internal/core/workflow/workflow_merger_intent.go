@@ -3,6 +3,7 @@ package workflow
 import (
 	"slices"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -47,7 +48,7 @@ func validateWorkflowMergerRequirementIDs(ids []string, requirements []workflows
 func validateWorkflowMergerConflicts(input workflowstate.MergerInput) error {
 	seen := map[string]bool{}
 	for _, conflict := range input.Conflicts {
-		if !workflowstate.ValidRequestKey(conflict.ID) || seen[conflict.ID] || !workflowMergerPathAllowed(input, conflict.Path) {
+		if !workflowstate.ValidRequestKey(conflict.ID) || seen[conflict.ID] || !workflowmerge.WorkflowMergerPathAllowed(input, conflict.Path) {
 			return workflowstate.ErrConflict
 		}
 
@@ -66,7 +67,7 @@ func validateWorkflowMergerConflicts(input workflowstate.MergerInput) error {
 }
 
 func validWorkflowMergerConflictProcedure(conflict workflowstate.MergerConflict) bool {
-	return slices.Contains([]string{"text", "generated", "lockfile", "binary", "submodule", "lfs", "semantic"}, conflict.Kind) && (len(conflict.RegenerationCommand) == 0 || validWorkflowMergerCommand(conflict.RegenerationCommand)) && (len(conflict.ValidationCommand) == 0 || validWorkflowMergerCommand(conflict.ValidationCommand))
+	return slices.Contains([]string{"text", "generated", "lockfile", "binary", "submodule", "lfs", "semantic"}, conflict.Kind) && (len(conflict.RegenerationCommand) == 0 || workflowmerge.ValidWorkflowMergerCommand(conflict.RegenerationCommand)) && (len(conflict.ValidationCommand) == 0 || workflowmerge.ValidWorkflowMergerCommand(conflict.ValidationCommand))
 }
 
 func validateWorkflowMergerCheckpoint(input workflowstate.MergerInput) error {

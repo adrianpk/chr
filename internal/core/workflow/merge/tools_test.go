@@ -1,4 +1,4 @@
-package workflow
+package merge
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 // TestNativeMergerTools checks actual filesystem aliases, not just path strings.
 // A permitted pathname must never grant a write to protected or external data.
 func TestNativeMergerTools(t *testing.T) {
-	_, input, _ := nativeMergerInput(t)
+	input := workflowstate.MergerInput{MergerScope: workflowstate.MergerScope{AllowedPaths: []string{"src", "docs"}, ProtectedPaths: []string{"src/validation.go", "Makefile"}}}
 
 	tools, protected, external := nativeMergerToolFiles(t, input)
 
@@ -36,7 +36,7 @@ func TestNativeMergerTools(t *testing.T) {
 	}
 }
 
-func nativeMergerDeniedTools(t *testing.T, tools *workflowMergerTools) {
+func nativeMergerDeniedTools(t *testing.T, tools *WorkflowMergerTools) {
 	t.Helper()
 
 	for _, path := range []string{"../external.go", "/etc/passwd", "src/../Makefile", ".git/config", ".chr/receipt.json", "ops/default/ticket/ready/scope.md", "src/validation.go", "src/alias.go", "src/hard.go"} {
@@ -50,7 +50,7 @@ func nativeMergerDeniedTools(t *testing.T, tools *workflowMergerTools) {
 	}
 }
 
-func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*workflowMergerTools, string, string) {
+func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*WorkflowMergerTools, string, string) {
 	t.Helper()
 
 	dir := t.TempDir()
@@ -83,7 +83,7 @@ func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*work
 
 	t.Cleanup(func() { _ = root.Close() }) //nolint:errcheck
 
-	tools := &workflowMergerTools{input: input, root: root, guard: func(ctx context.Context) error { return ctx.Err() }}
+	tools := &WorkflowMergerTools{input: input, root: root, guard: func(ctx context.Context) error { return ctx.Err() }}
 
 	return tools, protected, external
 }

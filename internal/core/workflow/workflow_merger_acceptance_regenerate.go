@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -88,7 +89,7 @@ func (s *Store) runWorkflowMergerProcedure(ctx context.Context, claim *Claim, pr
 		return workflowstate.CommandResult{}, err
 	}
 
-	if !validWorkflowMergerCommand(command) || time.Now().After(prepared.leaseUntil) {
+	if !workflowmerge.ValidWorkflowMergerCommand(command) || time.Now().After(prepared.leaseUntil) {
 		return workflowstate.CommandResult{}, workflowstate.ErrConflict
 	}
 

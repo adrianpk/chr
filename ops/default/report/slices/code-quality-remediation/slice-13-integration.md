@@ -23,6 +23,13 @@ Git results or bound completion inputs. Partial inputs on failure, cache presenc
 reservation release and the existing transaction order are preserved. A private
 failure mode replaces the actionable/target-moved pair with the same precedence.
 These contracts resolve 11 of 87 assigned signature rows; 76 remain pending.
+The first merge batch relocates 28 broker, JSON, path/scope and contained-tool
+declarations into workflow/merge. Twenty-seven retain declaration tokens after
+owner naming; the response formatter inlines the same 4096-byte failure bound.
+The host still opens/closes the checkout and supervises the exact claimed driver.
+Existing tool escape/alias assertions move beside their owner; the child fixture
+retains independent original request/response fields.
+
 The remaining candidate and merge extraction tasks are in progress.
 
 ## Implementation Notes
@@ -57,6 +64,8 @@ retains the frozen source identities and hashes for the extracted policy.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./scripts/goquality`: zero issues.
 
 - `go test ./internal/core/workflow ./internal/core/workflow/integrate ./internal/app ./scripts/goquality -run '^Test(WorkflowPreparation(Methods|GateFailure|Stop|Guard|Journal|Unsupported|Conflict)|NativePreparation(Methods|Failure|Stop|Admission|Fence|Generation)|Native(DriftDuringGate|SourceDuringGate|CandidateRepair|CandidateClean|TargetDrift)|QualityRecordWire|LeafDependencies|ValidationCompletion)$' -count=1 -timeout=15m -v`: pass; 22 top-level checks through the existing owned-fixture runner. Real target/source drift, claim generations/fences, repair, normal/failed/cancelled preparation, journal recovery, app wire and stage/import contracts pass.
+
+- `go test ./internal/core/workflow ./internal/core/workflow/merge ./internal/app ./scripts/goquality -run '^Test(NativeMerger(Execution|Input|Results|Malformed|Tools|Descendants|Stop)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; ten top-level checks through the existing owned-fixture runner. Actual child execution, protocol/input/result rejection, stop/descendant cleanup, filesystem aliases and frozen wire/import bounds pass.
 
 ## Risks and Follow-ups
 

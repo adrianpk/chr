@@ -8,6 +8,7 @@ import (
 	"slices"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -59,7 +60,7 @@ func decodeWorkflowMergerResult(data []byte, result *workflowstate.MergerResult)
 		return fmt.Errorf("%w: merger result exceeds file bound", workflowstate.ErrConflict)
 	}
 
-	if err := checkWorkflowMergerJSON(data); err != nil {
+	if err := workflowmerge.CheckWorkflowMergerJSON(data); err != nil {
 		return err
 	}
 
@@ -82,12 +83,12 @@ func validateWorkflowMergerResult(result workflowstate.MergerResult, input workf
 		return fmt.Errorf("%w: merger result version or input is stale", workflowstate.ErrConflict)
 	}
 
-	if err := validateWorkflowMergerPaths(result.ChangedPaths); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerPaths(result.ChangedPaths); err != nil {
 		return err
 	}
 
 	for _, path := range result.ChangedPaths {
-		if !workflowMergerPathAllowed(input, path) {
+		if !workflowmerge.WorkflowMergerPathAllowed(input, path) {
 			return fmt.Errorf("%w: merger result escapes approved scope", workflowstate.ErrConflict)
 		}
 	}

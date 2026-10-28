@@ -1,4 +1,4 @@
-package workflow
+package merge
 
 import (
 	"context"
@@ -28,14 +28,15 @@ type workflowMergerToolResponse struct {
 	Error   string                       `json:"error,omitempty"`
 }
 
-type workflowMergerTools struct {
+// WorkflowMergerTools owns the guarded, contained model file-operation surface.
+type WorkflowMergerTools struct {
 	input  workflowstate.MergerInput
 	root   *os.Root
 	checks []workflowstate.CommandResult
 	guard  func(context.Context) error
 }
 
-func (tools *workflowMergerTools) apply(ctx context.Context, request workflowMergerToolRequest) (workflowMergerToolResponse, error) {
+func (tools *WorkflowMergerTools) apply(ctx context.Context, request workflowMergerToolRequest) (workflowMergerToolResponse, error) {
 	if err := tools.guard(ctx); err != nil {
 		return workflowMergerToolResponse{}, err
 	}
@@ -51,7 +52,7 @@ func (tools *workflowMergerTools) apply(ctx context.Context, request workflowMer
 		return workflowMergerToolResponse{}, fmt.Errorf("%w: local validation process is not granted", workflowstate.ErrConflict)
 	}
 
-	if request.Check != nil || !workflowMergerPathAllowed(tools.input, request.Path) {
+	if request.Check != nil || !WorkflowMergerPathAllowed(tools.input, request.Path) {
 		return workflowMergerToolResponse{}, workflowstate.ErrConflict
 	}
 
@@ -62,7 +63,7 @@ func (tools *workflowMergerTools) apply(ctx context.Context, request workflowMer
 	return tools.file(request)
 }
 
-func (tools *workflowMergerTools) file(request workflowMergerToolRequest) (workflowMergerToolResponse, error) {
+func (tools *WorkflowMergerTools) file(request workflowMergerToolRequest) (workflowMergerToolResponse, error) {
 	switch request.Operation {
 	case "read":
 		if request.Content != "" {
@@ -83,7 +84,7 @@ func (tools *workflowMergerTools) file(request workflowMergerToolRequest) (workf
 	}
 }
 
-func (tools *workflowMergerTools) checkPath(path string) error {
+func (tools *WorkflowMergerTools) checkPath(path string) error {
 	parts := strings.Split(path, "/")
 	for i := range parts {
 		info, err := tools.root.Lstat(strings.Join(parts[:i+1], "/"))
@@ -95,7 +96,7 @@ func (tools *workflowMergerTools) checkPath(path string) error {
 			return err
 		}
 
-		if info.Mode()&os.ModeSymlink != 0 || i < len(parts)-1 && !info.IsDir() || i == len(parts)-1 && !workflowMergerRegularFile(info) {
+		if info.Mode()&os.ModeSymlink != 0 || i < len(parts)-1 && !info.IsDir() || i == len(parts)-1 && !WorkflowMergerRegularFile(info) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -103,8 +104,20 @@ func (tools *workflowMergerTools) checkPath(path string) error {
 	return nil
 }
 
-func workflowMergerRegularFile(info os.FileInfo) bool {
+// WorkflowMergerRegularFile requires a regular file without another hard-link alias.
+func WorkflowMergerRegularFile(info os.FileInfo) bool {
 	stat, ok := info.Sys().(*syscall.Stat_t)
 
 	return info.Mode().IsRegular() && ok && stat.Nlink == 1
+}
+
+// NewWorkflowMergerTools binds a scoped checkout and its exact claimed guard.
+// The caller owns root closure; every model operation rechecks the guard.
+func NewWorkflowMergerTools(input workflowstate.MergerInput, root *os.Root, guard func(context.Context) error) *WorkflowMergerTools {
+	return &WorkflowMergerTools{input: input, root: root, guard: guard}
+}
+
+// Checks returns the host checks retained during this completed broker exchange.
+func (tools *WorkflowMergerTools) Checks() []workflowstate.CommandResult {
+	return tools.checks
 }

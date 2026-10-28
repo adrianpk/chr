@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -67,7 +68,7 @@ func validateWorkflowMergerInputContent(input workflowstate.MergerInput, now tim
 		return err
 	}
 
-	if err := validateWorkflowMergerScope(input); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerScope(input); err != nil {
 		return err
 	}
 

@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -115,7 +116,7 @@ func workflowMergerChangedPaths(data string) ([]string, error) {
 		paths = nil
 	}
 
-	if err := validateWorkflowMergerPaths(paths); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerPaths(paths); err != nil {
 		return nil, err
 	}
 
