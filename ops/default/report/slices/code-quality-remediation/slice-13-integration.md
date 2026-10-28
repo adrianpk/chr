@@ -22,9 +22,9 @@ Nine preparation declarations now use named selection, claim, observation and
 Git results or bound completion inputs. Partial inputs on failure, cache presence,
 reservation release and the existing transaction order are preserved. A private
 failure mode replaces the actionable/target-moved pair with the same precedence.
-Together with the broker/driver contracts, 18 of 87 assigned signature rows are
-implemented; 69 remain pending. The exact debt manifest now has 101 entries at
-ceiling six, with one external exception.
+The preparation, broker/driver and merger admission/repair contracts implement
+38 of 87 assigned signature rows; 49 remain pending. The exact debt manifest now
+has 87 entries at ceiling six, with one external exception.
 
 The first merge batch relocates 28 broker, JSON, path/scope and contained-tool
 declarations into workflow/merge. The mechanical commit preserves declaration
@@ -39,6 +39,23 @@ checks. BrokerResult retains the raw proposal and usage beside its error; driver
 inputs separate the bound claim/prepared call from owned pipe/output resources.
 The remaining candidate and merge extraction tasks are in progress.
 
+A subsequent mechanical batch moves 41 immutable input/result/intent/decision
+policy declarations into merge and 14 shared lexical validators into state. All
+55 normalized declaration token streams match the frozen source before and after
+stage naming. Production callers use merge.SealInput, merge.CheckInput,
+merge.ParseResult, merge.InputFence and merge.RequiredDecisions directly. There
+is no forwarding layer. The merge dependency bound now permits only shared
+state and contenthash for existing protocol checksums.
+
+Named admission, claimed preparation and workspace results preserve original
+partial values and errors. Private repair/regeneration inputs bind the same
+claim, prepared task and observations; contexts remain explicit. Typed
+exact/declared path checks replace internal boolean choices. All 20 newly
+implemented signature rows have at most five parameters and bounded results.
+Role reservation, lease/generation checks, immutable evidence reads, host Git
+continuation, journal writes and resource cleanup retain their existing owner
+and order.
+
 ## Implementation Notes
 
 The predecessor PR #449 is verified merged into dev at
@@ -51,6 +68,9 @@ Completed task commits:
 - Preparation contracts: `c7a15133e0a07f8eb3fec735e36c967730aff038`.
 - Mechanical merger broker: `962e03aef96bf7aefd2b075fe218041b9cd00dc6`.
 - Stage naming and broker/driver contracts: `8e3630b9b074ec7b15d7b0de252429c3844dd283`.
+- Mechanical immutable merger policy: `af02c72f04ec8fb1c8554f7fa777a2e18958dacc`.
+- Merger stage naming: `a4fa20fe7344c49dbc164e726dcac9883b574c32`.
+- Named merger claims and repair observations: `7f2d18b1a04821084af93f0c825d3f3376c791cf`.
 
 All 908 Store methods retain one local receiver owner. Current method and move
 hashes follow these changes while their original source identities/hashes remain
@@ -89,6 +109,16 @@ retains the frozen source identities and hashes for the extracted policy.
 
 - `go test -race ./internal/core/workflow ./internal/core/workflow/merge ./internal/core/workflow/integrate ./scripts/goquality -run '^Test(WorkflowPreparationStop|NativePreparationFence|NativeMerger(Execution|Tools|Malformed|Results|Descendants|Stop)|ValidationCompletion|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; 11 top-level checks, including real preparation stop/fence, child execution/cleanup, broker rejection, tools and stage/dependency contracts. No owned descendants remain.
 
+- `go test ./internal/core/workflow ./internal/core/workflow/merge ./internal/core/workflow/state ./internal/app ./scripts/goquality -run '^(Test(NativeMerger(Protocol|Malformed|Fence|Usage|Input|Scope|Results|Decisions|IntentDecision|Regeneration|Unmetered|Settlement|MeterGuards|Execution|Admission|Acceptance|AcceptanceReject|AcceptanceStale|HostRegeneration|HostRegenerationFailure)|NativeRepositoryAliases|NativeBudget(Bounds|Grants|Recovery)|QualityRecordWire|LeafDependencies)|FuzzNativeMergerJSON)$' -count=1 -timeout=15m -v`: pass; 28 top-level checks after the mechanical protocol extraction. Existing protocol/fuzz seeds, repository aliases, real acceptance/regeneration, budget and wire/import contracts pass.
+- `go test ./internal/core/workflow ./internal/core/workflow/merge -run '^(TestNativeMerger(Protocol|Malformed|Fence|Usage|Input|Scope|Results)|FuzzNativeMergerJSON)$' -count=1 -timeout=3m`: pass after package-qualified stage naming.
+- `go test ./internal/core/workflow ./internal/core/workflow/merge ./internal/app ./scripts/goquality -run '^Test(NativeMerger(Execution|Admission|Acceptance|AcceptanceReject|AcceptanceStale|HostRegeneration|HostRegenerationFailure|Workspace|Repair|RepairGuards|RepairProof|ReplaySteps|Binary|Semantic|Fix|Descendants|Timeout|Stop|CheckpointGuards|CheckpointBinding)|NativeBudget(Recovery|Grants|Bounds)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v`: pass; 26 top-level checks after named merger admission/claim/repair contracts. Real acceptance/rejection/staleness, regeneration/config protection, both Git object formats, repair proof/replay, budget and supervised cleanup pass. The existing fixture-owning runner completes cleanup.
+- `go test -race ./internal/core/workflow ./internal/core/workflow/merge ./scripts/goquality -run '^Test(NativeMerger(Execution|Admission|AcceptanceStale|HostRegenerationFailure|Descendants|Stop|Workspace)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; nine top-level checks after the same contract changes. Real child admission, stale acceptance, failed regeneration, descendants/stop cleanup and workspace isolation pass with the race detector; no owned fixtures remain.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality`: zero issues on the named merger contracts.
+- `make check-go-style`: pass on the current contracts; ceiling six, 87 exact debt entries, one external exception.
+- `scripts/check-package-readmes.sh`: pass.
+
 ## Risks and Follow-ups
 
-The slice remains active until its approved tasks and exact-head checks pass.
+Forty-nine assigned signature rows and remaining candidate/repair policy and
+minor entries remain. The slice is active; final controller validation and the
+canonical PR are pending.
