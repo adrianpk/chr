@@ -109,7 +109,7 @@ func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate workf
 	proof := candidate.Input.Git
 
 	capability := candidate.Input.Capability
-	if err := checkWorkflowPreparationSigning(proof, capability.RequiredSignatures, capability.SigningProfile); err != nil {
+	if err := workflowintegrate.CheckWorkflowPreparationSigning(proof, capability.RequiredSignatures, capability.SigningProfile); err != nil {
 		return err
 	}
 

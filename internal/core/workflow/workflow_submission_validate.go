@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -104,7 +105,7 @@ func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error
 		return err
 	}
 
-	if err := checkWorkflowPreparationSigning(guard.Git, guard.Capability.RequiredSignatures, guard.Capability.SigningProfile); err != nil {
+	if err := workflowintegrate.CheckWorkflowPreparationSigning(guard.Git, guard.Capability.RequiredSignatures, guard.Capability.SigningProfile); err != nil {
 		return err
 	}
 

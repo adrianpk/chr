@@ -1,6 +1,8 @@
 package workflow
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // Private operation results preserve related observations and partial outcomes.
 // These values carry no context, cancellation handle or new mutation authority.
@@ -63,10 +65,7 @@ type workflowIntegrationAdmissionSnapshot struct {
 	Entries     []IntegrationEntry
 	Coordinator workflowCoordinator
 }
-type workflowReplayMapping struct {
-	Source, Prepared               workflowstate.IntegrationAttribution
-	OriginalParent, PreparedParent string
-}
+
 type workflowIntegrationRunUsage struct {
 	Budget IntegrationBudget
 	Usage  IntegrationUsage
@@ -80,6 +79,3 @@ type workflowPreparationCommit struct {
 	Parents    []string
 	Authorship workflowPreparationAuthorship
 }
-
-// workflowSignedPayload retains exact unsigned bytes and the extracted SSH signature.
-type workflowSignedPayload struct{ Payload, Signature string }

@@ -112,7 +112,7 @@ func validateWorkflowPreparationProofBinding(candidate workflowstate.Integration
 	proof, source := candidate.Input.Git, candidate.Input.Source
 
 	capability := candidate.Input.Capability
-	if err := checkWorkflowPreparationSigning(proof, capability.RequiredSignatures, capability.SigningProfile); err != nil {
+	if err := workflowintegrate.CheckWorkflowPreparationSigning(proof, capability.RequiredSignatures, capability.SigningProfile); err != nil {
 		return err
 	}
 

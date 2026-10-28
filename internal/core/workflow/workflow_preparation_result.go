@@ -49,7 +49,7 @@ func checkWorkflowPreparedProof(query PreparationQuery, proof workflowstate.Inte
 		return workflowstate.ErrConflict
 	}
 
-	if err := checkWorkflowPreparationSigning(proof, query.RequiredSignatures, query.SigningProfile); err != nil {
+	if err := workflowintegrate.CheckWorkflowPreparationSigning(proof, query.RequiredSignatures, query.SigningProfile); err != nil {
 		return err
 	}
 

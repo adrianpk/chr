@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -246,7 +247,7 @@ func TestNativeCollisionBudget(t *testing.T) {
 				return nativeCollisionBuild(tc.name, calls)
 			}
 
-			result, err := workflowDistinctPreparation("source", p, build)
+			result, err := workflowintegrate.WorkflowDistinctPreparation("source", p, build)
 			if calls != tc.calls || p.NoOpCollisions != tc.collisions || p.CommitterDate != tc.date || result != tc.result || (tc.result != "") != (err == nil) {
 				t.Fatal("collision bound or recorded metadata changed")
 			}

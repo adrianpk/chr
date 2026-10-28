@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -97,7 +98,7 @@ func nativeAlteredPreparationDate(proof *workflowstate.IntegrationProof) {
 	p := proof.Provenance.Preparation
 	p.InitialCommitterDate, p.CommitterDate = "1700000000 +0000", "1700000000 +0000"
 
-	p.Identity = workflowPreparationIdentity(*proof, *p)
+	p.Identity = workflowintegrate.WorkflowPreparationIdentity(*proof, *p)
 	for i := range proof.Provenance.Prepared {
 		proof.Provenance.Prepared[i].Committer.Date = p.CommitterDate
 	}

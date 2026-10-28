@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -36,12 +37,12 @@ func (git OSWorkflowPreparationGit) resumeMergerRepairReader(ctx context.Context
 }
 
 func validWorkflowRepairPreparation(p, policy workflowstate.IntegrationPreparation) bool {
-	if !validWorkflowCommitDate(p.InitialCommitterDate) || !validWorkflowCommitDate(p.CommitterDate) || p.RequiredSignatures != policy.RequiredSignatures || !workflowNativeJSONEqual(p.Signing, policy.Signing) {
+	if !workflowintegrate.ValidWorkflowCommitDate(p.InitialCommitterDate) || !workflowintegrate.ValidWorkflowCommitDate(p.CommitterDate) || p.RequiredSignatures != policy.RequiredSignatures || !workflowNativeJSONEqual(p.Signing, policy.Signing) {
 		return false
 	}
 
 	initial, err := strconv.ParseInt(strings.Fields(p.InitialCommitterDate)[0], 10, 64)
-	if err != nil || initial > 1<<63-1-workflowPreparationCollisionLimit || p.NoOpCollisions < 0 || p.NoOpCollisions > workflowPreparationCollisionLimit {
+	if err != nil || initial > 1<<63-1-workflowintegrate.WorkflowPreparationCollisionLimit || p.NoOpCollisions < 0 || p.NoOpCollisions > workflowintegrate.WorkflowPreparationCollisionLimit {
 		return false
 	}
 
@@ -96,7 +97,7 @@ func (reader workflowIntegrationReader) verifyMergerReplayObject(ctx context.Con
 	}
 
 	prepared, err := reader.commitAttribution(ctx, entry.Commit)
-	if err != nil || prepared.Tree != entry.Tree || !slices.Equal(prepared.Parents, []string{entry.Parent}) || !workflowReplayAttributionMatches(source, prepared) || !workflowPreparationCommitterMatches(prepared, p, true) {
+	if err != nil || prepared.Tree != entry.Tree || !slices.Equal(prepared.Parents, []string{entry.Parent}) || !workflowintegrate.WorkflowReplayAttributionMatches(source, prepared) || !workflowintegrate.WorkflowPreparationCommitterMatches(prepared, p, true) {
 		return errorsOrConflict(err)
 	}
 

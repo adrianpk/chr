@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,7 +16,7 @@ func (reader workflowIntegrationReader) replayCommit(ctx context.Context, tree, 
 		return "", err
 	}
 
-	attribution, err := workflowCommitAttribution(source, data)
+	attribution, err := workflowintegrate.WorkflowCommitAttribution(source, data)
 	if err != nil {
 		return "", err
 	}
@@ -41,7 +42,7 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, o
 	tree, parents := object.Tree, object.Parents
 	author, encoding, message := object.Authorship.Author, object.Authorship.Encoding, object.Authorship.Message
 
-	if !validWorkflowPreparationObject(tree, parents, author, encoding) {
+	if !workflowintegrate.ValidWorkflowPreparationObject(tree, parents, author, encoding) {
 		return "", workflowstate.ErrConflict
 	}
 
@@ -70,20 +71,6 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, o
 	id, err := reader.RawInput(ctx, data, "hash-object", "-t", "commit", "-w", "--stdin")
 
 	return strings.TrimSpace(id), err
-}
-
-func validWorkflowPreparationObject(tree string, parents []string, author workflowstate.IntegrationIdentity, encoding string) bool {
-	if !workflowstate.ValidCommitID(tree) || !validWorkflowCommitIdentity(author) || strings.ContainsAny(encoding, "\x00\r\n") || len(parents) < 1 || len(parents) > 2 {
-		return false
-	}
-
-	for _, parent := range parents {
-		if !workflowstate.ValidCommitID(parent) || len(parent) != len(tree) {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, proof workflowstate.IntegrationProof, tree string, finding workflowstate.ReviewFinding) (workflowstate.IntegrationProof, error) {

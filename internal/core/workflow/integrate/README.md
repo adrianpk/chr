@@ -3,7 +3,10 @@
 ## Purpose
 
 This package owns candidate validation execution, exact gate evidence and the
-consumer contract for guarded acceptance.
+consumer contract for guarded acceptance. Pure Git attribution, replay
+correspondence, bounded identity-collision retries and preparation signing
+metadata rules live with that policy. Host callers still read/write Git objects
+and invoke the certified signer.
 
 ## Contract
 
@@ -26,4 +29,5 @@ The port exposes the required operation without exposing a mutable store.
 
 Existing workflow integration tests exercise this binding through real Git,
 filesystem and process fixtures. The production dependency check permits shared
-state and rejects coordinator, filesystem mutation and configuration imports.
+state and contenthash for existing evidence checksums. It rejects coordinator,
+filesystem mutation and configuration imports.

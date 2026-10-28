@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -61,15 +62,15 @@ func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof)
 		return nil
 	}
 
-	if !validWorkflowProvenanceHeader(proof, *p) {
+	if !workflowintegrate.ValidWorkflowProvenanceHeader(proof, *p) {
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowProvenanceCommits(proof, *p); err != nil {
+	if err := workflowintegrate.ValidateWorkflowProvenanceCommits(proof, *p); err != nil {
 		return err
 	}
 
-	if p.Preparation != nil && !validWorkflowPreparationMetadata(proof, *p.Preparation) {
+	if p.Preparation != nil && !workflowintegrate.ValidWorkflowPreparationMetadata(proof, *p.Preparation) {
 		return workflowstate.ErrConflict
 	}
 
@@ -83,67 +84,6 @@ func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof)
 
 	data, err := json.Marshal(p)
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowstate.ErrConflict
-	}
-
-	return nil
-}
-
-func validWorkflowProvenanceHeader(proof workflowstate.IntegrationProof, p workflowstate.IntegrationProvenance) bool {
-	if !validWorkflowProvenanceEnvelope(proof, p) || !validWorkflowProvenanceCount(p) {
-		return false
-	}
-
-	if proof.Method == "rebase" {
-		return p.AttributionPolicy == "preserve_source_authorship" && len(p.Replays) == len(p.Source) && len(p.Prepared) == len(p.Source)+len(p.IntegrationFixes)
-	}
-
-	return p.AttributionPolicy == "host_author_with_original_source_manifest" && len(p.Prepared) == 1 && len(p.Replays) == 0 && len(p.IntegrationFixes) == 0
-}
-
-func validWorkflowProvenanceEnvelope(proof workflowstate.IntegrationProof, p workflowstate.IntegrationProvenance) bool {
-	expectedFormat := "sha1"
-	if len(proof.ResultCommit) == 64 {
-		expectedFormat = "sha256"
-	}
-
-	return p.Schema == "chr-integration-provenance/v1" && workflowstate.ValidFingerprint(p.CombinedDiffHash) && p.ObjectFormat == expectedFormat
-}
-
-func validWorkflowProvenanceCount(p workflowstate.IntegrationProvenance) bool {
-	return len(p.Source) > 0 && len(p.Source) <= workflowstate.RecordLimit && len(p.Prepared) > 0 && len(p.Prepared) <= workflowstate.RecordLimit
-}
-
-func validWorkflowAttributedSources(proof workflowstate.IntegrationProof, sources []workflowstate.IntegrationAttribution) bool {
-	seen := map[string]bool{}
-	for _, entry := range sources {
-		if !validWorkflowIntegrationAttribution(entry) || len(entry.Commit) != len(proof.SourceCommit) || seen[entry.Commit] {
-			return false
-		}
-
-		seen[entry.Commit] = true
-	}
-
-	return sources[len(sources)-1].Commit == proof.SourceCommit
-}
-
-func validateWorkflowProvenanceCommits(proof workflowstate.IntegrationProof, p workflowstate.IntegrationProvenance) error {
-	if !validWorkflowAttributedSources(proof, p.Source) {
-		return workflowstate.ErrConflict
-	}
-
-	if proof.Method == "rebase" {
-		return validateWorkflowRebaseProvenance(proof, p)
-	}
-
-	result := p.Prepared[0]
-
-	parents := []string{proof.BaseCommit}
-	if proof.Method == "merge" {
-		parents = append(parents, proof.SourceCommit)
-	}
-
-	if !validWorkflowIntegrationAttribution(result) || result.Commit != proof.ResultCommit || result.Tree != proof.PreparedTree || !slices.Equal(result.Parents, parents) {
 		return workflowstate.ErrConflict
 	}
 

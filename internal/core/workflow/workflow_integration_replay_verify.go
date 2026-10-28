@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowIntegrationHistoryTipMatches(proof workflowstate.IntegrationProof, last workflowstate.IntegrationCommit) bool {
 	if proof.Method == "rebase" && proof.Provenance != nil {
 		p := proof.Provenance
-		if !validWorkflowProvenanceHeader(proof, *p) || len(p.Source) != len(proof.History) {
+		if !workflowintegrate.ValidWorkflowProvenanceHeader(proof, *p) || len(p.Source) != len(proof.History) {
 			return false
 		}
 
@@ -25,7 +26,7 @@ func workflowIntegrationHistoryTipMatches(proof workflowstate.IntegrationProof, 
 func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof workflowstate.IntegrationProof, count int) (workflowRebaseResults, error) {
 	base := proof.ResultCommit
 	if p := proof.Provenance; p != nil {
-		if !validWorkflowProvenanceHeader(proof, *p) || len(p.Source) != count {
+		if !workflowintegrate.ValidWorkflowProvenanceHeader(proof, *p) || len(p.Source) != count {
 			return workflowRebaseResults{Commits: nil, Base: ""}, workflowstate.ErrConflict
 		}
 
@@ -55,7 +56,7 @@ func (reader workflowIntegrationReader) verifyRebaseProvenance(ctx context.Conte
 	parent := proof.History[len(proof.History)-1].Commit
 	for _, fix := range proof.Provenance.IntegrationFixes {
 		entry, err := reader.commitAttribution(ctx, fix.Commit)
-		if err != nil || !validWorkflowIntegrationFix(fix, entry, parent) || entry.Tree == proof.PreparedTree {
+		if err != nil || !workflowintegrate.ValidWorkflowIntegrationFix(fix, entry, parent) || entry.Tree == proof.PreparedTree {
 			return workflowstate.ErrConflict
 		}
 
