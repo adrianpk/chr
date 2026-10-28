@@ -1,12 +1,13 @@
 # Code quality remediation
 
-Status: prepared; all 16 slices integrated, controller gate pending
+Status: Completed
+Completed: 2026-10-28T17:22:50Z
 Delivery set: code-quality-remediation
 Plan: [Approved delivery](../../plan/code-quality-remediation.md)
 Tracker: [Task and integration evidence](../../tracker/code-quality-remediation.md)
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
-Final integrated candidate: pending
-Final gate evidence: pending
+Final integrated candidate: `2a4390aeb70d783d40a132fe6583d8dfb428fa7d`
+Final gate evidence: controller receipt `KSTGSZNOX5ESTLZXEPAAPJKJ6L` (passed)
 
 ## Delivered source changes
 
@@ -16,8 +17,9 @@ through #453. The final implementation commit is
 merge SHA and ancestry were verified against the controller checkpoint. Slice 16
 completed permanent enforcement, residual error naming/cleanup explanations,
 source reconciliation and durable architecture references. Its implementation
-entries are closed. This cycle remains in progress until the controller's
-unchanged full gate passes on the candidate it freezes after metadata preparation.
+entries are closed. The controller subsequently passed the unchanged full gate
+on the exact prepared candidate above. All 97 tasks and requirement-level acceptance are
+completed.
 
 | Approved finding | Final source disposition |
 | --- | --- |
@@ -32,9 +34,11 @@ unchanged full gate passes on the candidate it freezes after metadata preparatio
 
 The [complete final reconciliation](../../plan/code-quality-remediation-slice-16-findings.md)
 links every category to its original identities, implementation commits, actual
-owners and merged task checks. The source review and detections remain preserved
-for controller-owned final closure. Their original counts are not silently
-rewritten to the broader final signature-check scope.
+owners and merged task checks. The original review body and detections remain baseline evidence. Closure
+updates only the review status and adds a resolution appendix; original counts
+are not rewritten to the broader final signature-check scope. Frozen source
+assessment ledgers retain their tested snapshots; this report supplies their
+final integrated acceptance.
 
 ## Compatibility and measured exclusions
 
@@ -64,12 +68,32 @@ controller receipts and verified merge references. Slice 16 controller receipt
 `52XOJZYFDDGRBWZ2VM6OGGREK4` passed ordered make verify, 34 boundary roots, four race roots and diff check on exact merged
 `dbaa4bce2c86daaf33f8b41b2e025be44535a5db` in 61.665 seconds, with no failures,
 skips or owned fixture leaks. Its benchmark retains its separate measured
-revision. Controller-owned integrated validation remains pending.
+revision. Controller-owned integrated validation passed on the final candidate above.
 
-No main promotion, tag, release, mirror publication, successor plan or additional
-slice is part of this report. Final closure must record the controller's exact
-integrated commit, ordered gate commands, evidence identity and outcomes before
-closing the delivery-set status and final acceptance ledger.
+The final gate ran from 2026-10-28T17:14:49.372466324Z through
+2026-10-28T17:16:31.910741976Z, taking 102.538 seconds. Controller receipt
+`KSTGSZNOX5ESTLZXEPAAPJKJ6L` retains the exact candidate and complete command below.
+Its log reports 9,411 production declarations, maximum five parameters, one
+external exception and zero lint issues. Strict lint, short package tests, eight
+CI-script checks and the build passed. The named shared native parity journey
+passed (Go package elapsed 9.814s), followed by the two named Chromium journeys
+(17.140s). These are the approved integrated checks; the earlier focused
+persistence/recovery, provider/process and race receipts remain separate.
+
+Receipt: `checks/2a4390aeb70d783d40a132fe6583d8dfb428fa7d.json`.
+Log: `checks/2a4390aeb70d783d40a132fe6583d8dfb428fa7d.KSTGSZNOX5ESTLZXEPAAPJKJ6L.log`.
+Both are retained by the controller beside its checkpoint. No full gate is rerun
+and no evidence is relabeled as belonging to the documentation closure commit.
+
+## Final handoff
+
+All 16 canonical PRs #438 through #453, all 97 tasks, all sixteen delivered
+reports and all sixteen solved tickets are reconciled. The requirement ledger is
+accepted. The final documentation commit may differ from the tested candidate
+only under the configured closure paths; runtime sources, tests, lint settings,
+fixtures and gate commands remain identical. Closure starts no test fixtures or
+persistent services. There is no remaining delivery task or successor slice.
+Main promotion, tagging, releases and mirror publication were not performed.
 
 ## Prepared gate prerequisites
 
@@ -83,5 +107,6 @@ The configured Chromium executable exists and reports version 151.0.7922.173.
 Go 1.27.1, make, Python 3 and Git are present. All three exact Go test entrypoints
 exist. The selected native/browser tests create their own temporary project,
 Git/SQLite, local HTTP and isolated browser-profile fixtures, then own cleanup.
-No persistent fixture needs to remain running for the controller. This
-preparation does not run any selected test or change the frozen gate.
+No persistent fixture needed to remain running for the controller. That
+preparation did not run any selected test or change the frozen gate; the
+controller subsequently ran and passed the exact command above.

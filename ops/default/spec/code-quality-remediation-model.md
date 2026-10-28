@@ -1,6 +1,8 @@
 # Code Quality Remediation Compatibility Model
 
 Status: accepted
+Implementation: Completed
+Final acceptance: [Completed cycle evidence](../report/cycles/code-quality-remediation.md)
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 Specification: [Code Quality Remediation](code-quality-remediation.md)
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -66,7 +68,7 @@ candidate `de3691d3b0155f850006f242ee2d99062a995ce0`.
 
 Before grouping, the exact declared field names, Go types, JSON tags (including
 omitempty), anonymous fields and order were captured in the
-[core field manifest](../../../internal/core/testdata/quality-records/field-manifest.json)
+[core field manifest](../../../internal/core/workflow/testdata/quality-records/field-manifest.json)
 and [status field manifest](../../../internal/app/testdata/quality-records/field-manifest.json).
 The adjacent frozen JSON fixtures cover zero/nil values, non-nil empty
 collections and populated distinct values with fixed nonzero timestamps. They
@@ -833,3 +835,17 @@ negative block bounds, nil/empty values and timestamp format remain unchanged.
 Native workflow and legacy ticket/evidence operations use these pure edits
 directly. Authority, status transitions, locks, source guards and file writes
 remain with their operation owners; no test-only production export is added.
+
+
+## Final integrated acceptance
+
+All 16 recorded slices and 97 tasks are delivered. Controller receipt
+`KSTGSZNOX5ESTLZXEPAAPJKJ6L` passed the unchanged full gate on
+`2a4390aeb70d783d40a132fe6583d8dfb428fa7d` in 102.538 seconds. The
+[completed cycle report](../report/cycles/code-quality-remediation.md) identifies
+exact commands, source resolutions, compatibility evidence, measured exclusions
+and final handoff. This accepted specification remains at its stable path;
+closure changes no behavioral, wire, storage or validation requirement.
+Historical slice notes retain the state and validation available at their
+recorded revisions; this final acceptance supersedes their earlier pending
+migration or acceptance markers.

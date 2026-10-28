@@ -32,8 +32,8 @@ raw literals, failure kinds, sentinels and unwrapping remain unchanged. Cleanup
 comments explain resource-specific handling without changing executable tokens.
 
 The capability map and glossary locate real package/stage APIs and distinguish
-ticket-native authority from forge publication. The cycle report is prepared. PR #453 is verified integrated; the controller
-full-gate candidate and acceptance evidence remain pending.
+ticket-native authority from forge publication. The cycle report is prepared. PR #453 is verified integrated, and the controller full gate passed on the
+prepared candidate `2a4390aeb70d783d40a132fe6583d8dfb428fa7d`.
 
 ## Implementation Notes
 
@@ -64,7 +64,8 @@ D08 shares contained receipt read/absence/decode. Its mutation/control writers
 retain distinct schemas, checksums, identity/revision validation and locked atomic
 transactions. Existing grammar, dispatch, constructor and schema complexity
 exceptions have specific in-source rationales and are not migration allowances.
-Original review/detection bytes remain unchanged pending real integration.
+Original review/detection bytes remained unchanged through the tested candidate;
+closure updates only review status and its resolution appendix.
 
 ## Contracts Added or Changed
 
@@ -124,10 +125,23 @@ leaks. The controller recorded merge event `01M61QH8BEKHPVTD7E4R6C1T4T` in Acta.
 All 16 canonical merges and ancestor relationships were rechecked before
 preparing the full gate. The implementation report and ticket are closed on dev.
 
+The controller full gate passed on immutable integrated candidate
+`2a4390aeb70d783d40a132fe6583d8dfb428fa7d`, receipt `KSTGSZNOX5ESTLZXEPAAPJKJ6L`, in 102.538 seconds
+(2026-10-28T17:14:49.372466324Z through 2026-10-28T17:16:31.910741976Z):
+
+```sh
+make verify && go test ./internal/app -run '^TestGuidedUseCaseParityNative$' -count=1 -timeout=3m && CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser)$' -count=1 -timeout=3m
+```
+
+The production check reports 9,411 declarations, maximum five and one external
+exception; lint has zero issues. The shared native parity journey and both
+Chromium journeys pass. T16.5 and T16.6, all 97 tracker tasks and final cycle
+acceptance are now closed. The
+[completed cycle report](../../cycles/code-quality-remediation.md) records the
+controller receipt/log identity, retained exclusions and final handoff. Closure
+changes only approved documentation after the tested candidate; it reruns no
+gate and changes no runtime, test, fixture or lint source.
+
 ## Risks and Follow-ups
 
-Slice 16 implementation and PR-head acceptance are delivered. The unchanged
-controller full gate has not run. T16.5 integrated/browser acceptance and T16.6
-requirement-level/cycle closure remain pending until the controller supplies
-its exact gate evidence. No source finding or whole-cycle acceptance is closed
-merely because the sixteenth PR merged.
+None recorded.

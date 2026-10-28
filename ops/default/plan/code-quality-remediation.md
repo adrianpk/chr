@@ -1,13 +1,14 @@
 # Code Quality Remediation Delivery
 
-Status: in_progress
+Status: Completed
+Completed: 2026-10-28T17:22:50Z
 Date: 2026-10-26
 Delivery set: code-quality-remediation
 Planning authorization: maintainer request, 2026-10-26.
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: none; all 16 recorded slices are integrated into dev. Controller full-gate preparation is active; final acceptance remains pending.
+Active slice: none; all 16 slices and 97 tasks are delivered. The controller full gate passed on the exact integrated candidate; this delivery set is completed.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b` on dev.
 
 Spec: [Remediation requirements](../spec/code-quality-remediation.md)
@@ -19,7 +20,7 @@ Detections: [Original complete lists](../report/code-quality-review-2026-10-26/d
 
 ## Outcome and strategy
 
-Resolve all accepted findings in one plan, one tracker, 16 linked slice tickets and one future Looper configuration/run. The package split is part of this same delivery set. There is no separate architecture cycle, chained successor configuration or generic future cleanup phase.
+Resolve all accepted findings in one plan, one tracker, 16 linked slice tickets and one recorded controller run. The package split is part of this same delivery set. There is no separate architecture cycle, chained successor configuration or generic future cleanup phase.
 
 Slice strategy: layered.
 
@@ -437,8 +438,35 @@ Known fixes must stay in this plan; a failed gate is not permission to start a s
 
 ## Planning validation
 
-The planning consistency check passed for the 21 new artifacts: one specification, one compatibility model, this plan, one tracker, one declaration inventory and 16 tickets. The plan and tracker contain identical consecutive 16-slice maps, with matching branch, PR title, report and task identities. At that initial planning checkpoint all 97 tasks were pending, all tickets were open and both Approved fields were empty. Maintainer approval was subsequently recorded on 2026-10-26 and the 16 tickets were moved to ready with matching references; task execution evidence remains pending.
+The planning consistency check passed for the 21 new artifacts: one specification, one compatibility model, this plan, one tracker, one declaration inventory and 16 tickets. The plan and tracker contain identical consecutive 16-slice maps, with matching branch, PR title, report and task identities. At that initial planning checkpoint all 97 tasks were pending, all tickets were open and both Approved fields were empty. Maintainer approval was subsequently recorded on 2026-10-26 and the 16 tickets were moved to ready with matching references; task execution evidence was pending at that planning checkpoint; all 97 tasks are now delivered.
 
 The inventory contains exactly 121 A rows, 230 B rows and 420 C rows, each assigned to one slice. Local Markdown links, ticket metadata, unique identities, new-file whitespace and unchanged baseline/working-tree state were checked. The original report and detections retain SHA-256 values 7e3004e74fdc91ae752b7483922514de32f643d141890be520ab14bafeb6e33e and 25f8d3e235705bced0c161f1851ee250ceab059b72815e258cee961450c2b36b respectively.
 
-These checks validate the proposal's structure and preservation of its sources. Runtime gates, performance measurements and remediation acceptance remain unexecuted.
+These checks validate the proposal's structure and preservation of its sources. Runtime gates, performance measurements and remediation acceptance were unexecuted at that planning checkpoint. Final outcomes are recorded below.
+
+
+## Completed delivery and handoff
+
+All 16 canonical PRs #438 through #453 are verified merged into dev. All 97
+tracker tasks, 16 slice implementation reports and 16 solved tickets are closed.
+The controller full gate passed on immutable candidate
+`2a4390aeb70d783d40a132fe6583d8dfb428fa7d` with receipt `KSTGSZNOX5ESTLZXEPAAPJKJ6L`.
+It ran from 2026-10-28T17:14:49.372466324Z to
+2026-10-28T17:16:31.910741976Z (102.538 seconds):
+
+```sh
+make verify && go test ./internal/app -run '^TestGuidedUseCaseParityNative$' -count=1 -timeout=3m && CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser)$' -count=1 -timeout=3m
+```
+
+The [completed cycle report](../report/cycles/code-quality-remediation.md)
+records source resolutions, retained compatibility contracts, benchmark evidence,
+exact gate outcomes and the final handoff. The approved production checker
+reported 9,411 declarations, maximum five parameters and one imposed external
+exception; pinned lint reported zero issues. The shared native parity journey
+and both named Chromium journeys passed. Earlier focused persistence/recovery,
+process/provider and race evidence remains attached to the actual slice heads.
+
+Closure changes only configured documentation paths after the tested candidate.
+Runtime sources, tests, lint settings and the frozen gate are unchanged. No
+successor slice or delivery set is activated. This closes the approved dev
+delivery; it does not promote main or publish a release.

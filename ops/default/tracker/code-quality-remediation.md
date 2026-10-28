@@ -1,12 +1,13 @@
 # Code Quality Remediation Tracker
 
-Status: in_progress
+Status: Completed
+Completed: 2026-10-28T17:22:50Z
 Date: 2026-10-26
 Delivery set: code-quality-remediation
 Approved: maintainer, 2026-10-26; exact 16-slice map, specification/model, AST checker and lint changes approved.
 Implementation authority: maintainer, 2026-10-26; execute all 16 recorded slices through one Looper run.
 Merge authority: maintainer, 2026-10-26; Looper may merge the 16 recorded slice PRs into dev with Rebase + Fast-forward after their required checks pass.
-Active slice: none; all 16 recorded slices are integrated into dev. Controller full-gate preparation is active; final acceptance remains pending.
+Active slice: none; all 16 slices and 97 tasks are delivered. The controller full gate passed on the exact integrated candidate; this delivery set is completed.
 Baseline: `28c3db337cc0b08d249c65c8f2fd68efd5d0966b`
 
 Plan: [Single-cycle plan](../plan/code-quality-remediation.md)
@@ -17,7 +18,7 @@ Source: [Quality review](../report/code-quality-review-2026-10-26/report.md)
 
 ## Authority and state
 
-The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. All 16 recorded slice PRs #438 through #453 are verified merged into dev. Slice implementation is delivered; final integrated acceptance and cycle closure remain pending. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
+The maintainer approved implementation, conventional commit/push and startup of one Looper run on 2026-10-26. Merge delegation covers the exact 16 slice PRs into dev after their required checks. All 16 recorded slice PRs #438 through #453 are verified merged into dev. All 97 tasks and the integrated acceptance ledger are closed against the controller's exact passing gate evidence. This tracker owns task/commit/validation evidence; slice tickets mirror verified delivery state. Existing completed/blocked sets and unrelated tickets are not modified.
 
 ## Canonical slice map
 
@@ -101,7 +102,7 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T6.1 | Move gate behavior into internal/core/gate with its narrow inputs and results. Resolve its shared-error and path dependencies before moving; update direct callers in the same compiling change. | delivered | cacbf861e1d3; aabf8c55c1bd; ca51bf101665 | 125 exact moved declarations; focused real Git/child validation and app gate regressions passed; four named result conversions, no root facade; strict core/app/gate/configvalue lint passed; final slice checks pending |
+| T6.1 | Move gate behavior into internal/core/gate with its narrow inputs and results. Resolve its shared-error and path dependencies before moving; update direct callers in the same compiling change. | delivered | cacbf861e1d3; aabf8c55c1bd; ca51bf101665 | 125 exact moved declarations; focused real Git/child validation and app gate regressions passed; four named result conversions, no root facade; strict core/app/gate/configvalue lint passed; final slice checks passed on c7d7040fde4385a64b20322da1bc5874a38c2deb, as recorded in T6.6 |
 | T6.2 | Move notification state, delivery ownership and persistence into internal/core/notify. Keep notification idempotency, event ordering, backoff and acknowledgement semantics; do not fold it into Telegram receiver storage. | delivered | b4f60d9e2612; ee3144d5d28c; 101ff15a3c7b; 241227d6066f; 439667cfd815 | 76 exact notification move proofs and 27 shared-payload token proofs; real SQLite/HTTP snapshot, quota, retention, uncertainty/reopen and conditional-delivery checks passed; strict lint passed |
 | T6.3 | Move project identity, registry and configuration behavior into internal/core/project as justified by the dependency ledger. Retain neutral shared primitives at their actual lowest owner, not copied package helpers. | delivered | aafd48f494c9; bb30375e56de; f4722f65a22e; 31c756cc3659 | 39 exact project move proofs; explicit directory inputs and root-binding digest; focused real SQLite/registry/active selection/Telegram and app maintenance checks passed; strict core/app/project/database lint and signature policy passed |
 | T6.4 | For each package, move files with git mv in one commit, then apply precise package-qualified names and typed inputs/results in subsequent commits. Remove old entrypoints, re-exports and duplicate ownership after callers move. | delivered | aabf8c55c1bd; ca51bf101665; f4722f65a22e; 31c756cc3659; 241227d6066f; 439667cfd815; 69d0358d9912 | 240 exact mechanical declarations, followed by separate qualified-name and named operation/result changes; direct callers and no root facades |
@@ -200,8 +201,8 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 | Task | Work | State | Commits | Validation |
 | --- | --- | --- | --- | --- |
-| T15.1 | Extract closing-gate and closure behavior into internal/core/workflow/closeout; leave core/workflow responsible for sequencing, dispatch and lifecycle. Preserve confirmation, closing-gate waiver, exact-candidate and terminal outcome distinctions. | delivered | 72d968844ee6ee3d4915cb7f2e200a3f049487d1; 38b7f97593a2df3d2af6c465c809dca4bb4c1345; 5f58bc1cf3f22c0553035b9935d66530cb4762dd; c737a56d85e5fb0532d20b18a3c56c9d86a21fb1; 93708ffd89d4eee64d111ad71424a5fc3fcfed19; e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c; 5f506a41dee1e172f8915f5712bbc9d6292a7bea; b5b75ade5cbf21eb68ab3521b26545a20c5ee970 | Closing policy has closeout owners; CloseSet/CloseInvocationSet now sequence actual coordinator operations and a private host owns watched checkout/process lifetime. Store retains original guarded admission, process records, confirmation and recovery. All closing method rows have source-specific decisions. Eleven normalized declarations, 31 workflow plus 1 application fixture, 6 races, affected short tests and strict lint pass. Final slice acceptance remains pending. |
-| T15.2 | Complete result/input conversions for remaining workflow lifecycle, loose queue, frontier, continuation, amendment, process and capacity paths. Remove workflowClosingInvocationFiles unused context and prepareWorkflowTask/withoutWorkflowPublicationProfile production-only wrappers where still applicable. | delivered | 663c49213963ec459a32015b8feedbda32271f2e; d4844af16cce52e3a44ad9bba5e2a59e80adb520; c111c9df77898601331cd83c6df4932a9c2add8b; c3d57b9927bb8d739808fea8d5db2809c5915398 | All 40 signatures reconciled: 26 implemented and 14 cohesive five-input contracts. Capacity/process, continuation, control/receipt, amendment/frontier and upgrade outcomes preserve partial values, absence, resource ownership and atomic receipts. Unused closing context/profile wrapper removed; prepareWorkflowTask is test-only. Real task selections 12/27/24/31 and focused races 2/5/5/5, short checks and pinned lint pass. Zero exact debts; final slice validation pending. |
+| T15.1 | Extract closing-gate and closure behavior into internal/core/workflow/closeout; leave core/workflow responsible for sequencing, dispatch and lifecycle. Preserve confirmation, closing-gate waiver, exact-candidate and terminal outcome distinctions. | delivered | 72d968844ee6ee3d4915cb7f2e200a3f049487d1; 38b7f97593a2df3d2af6c465c809dca4bb4c1345; 5f58bc1cf3f22c0553035b9935d66530cb4762dd; c737a56d85e5fb0532d20b18a3c56c9d86a21fb1; 93708ffd89d4eee64d111ad71424a5fc3fcfed19; e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c; 5f506a41dee1e172f8915f5712bbc9d6292a7bea; b5b75ade5cbf21eb68ab3521b26545a20c5ee970 | Closing policy has closeout owners; CloseSet/CloseInvocationSet now sequence actual coordinator operations and a private host owns watched checkout/process lifetime. Store retains original guarded admission, process records, confirmation and recovery. All closing method rows have source-specific decisions. Eleven normalized declarations, 31 workflow plus 1 application fixture, 6 races, affected short tests and strict lint pass. Final slice acceptance passed on a41e62be3b2a14daf04b470e8d9344d350480f34, as recorded in T15.6. |
+| T15.2 | Complete result/input conversions for remaining workflow lifecycle, loose queue, frontier, continuation, amendment, process and capacity paths. Remove workflowClosingInvocationFiles unused context and prepareWorkflowTask/withoutWorkflowPublicationProfile production-only wrappers where still applicable. | delivered | 663c49213963ec459a32015b8feedbda32271f2e; d4844af16cce52e3a44ad9bba5e2a59e80adb520; c111c9df77898601331cd83c6df4932a9c2add8b; c3d57b9927bb8d739808fea8d5db2809c5915398 | All 40 signatures reconciled: 26 implemented and 14 cohesive five-input contracts. Capacity/process, continuation, control/receipt, amendment/frontier and upgrade outcomes preserve partial values, absence, resource ownership and atomic receipts. Unused closing context/profile wrapper removed; prepareWorkflowTask is test-only. Real task selections 12/27/24/31 and focused races 2/5/5/5, short checks and pinned lint pass. Zero exact debts; final slice validation passed on a41e62be3b2a14daf04b470e8d9344d350480f34, as recorded in T15.6. |
 | T15.3 | Drain policy methods from the persistence owner into their proper stages without moving atomic state transitions or locks to callers. Inspect the final store API method by method for cohesive persistence ownership; do not close merely because 909 methods moved to another directory. | delivered | 5f58bc1cf3f22c0553035b9935d66530cb4762dd; c737a56d85e5fb0532d20b18a3c56c9d86a21fb1; 93708ffd89d4eee64d111ad71424a5fc3fcfed19; e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c; 5f506a41dee1e172f8915f5712bbc9d6292a7bea; 3ed65239b85570183865b74e169bcbf5a62c1819; b5b75ade5cbf21eb68ab3521b26545a20c5ee970; 0ce09547cb796604fb01ee41851a1e9a709cf02e; 72253efe04a5f0ca41a2393b442f89c98aac8637; 12eb09162d1a2dd2256bd5197b28e9be70c66312; 6e281666ac251b7f6cbdf997122dee845fff87bf; 4d4f74804e857046b099ea3db91e87ec5d1258f6; 85256e808df3824ddaf4b1eb230ff4a5ad8ae757; 6afffc97a34bc31483d9f7f8acd4ff045e827bc3; e5fbc60981a76a7b25cf76e69b63ce6260140252; 3e1896c7f42a0a802d78a23ff036adbe3298d8e4; 178e8fcdcc0d5091d5e51b92813a7fa8f576f58b; 6f7184ab351c8548d43b0ee25c30d3a23e1cd8b5; 42049e668f8c077450d6e7491d05b1996c0d28fb | All 908 source methods have individual ownership decisions: 777 guarded persistence, 23 closing policy, 1 evidence adapter, 5 coordinator functions, 1 reader, 55 lifecycle owners and 46 coordinator mappings. Store retains original locks, current image/evidence/claim guards and complete atomic transactions. Current hashes/signatures and actual private/stage consumers resolve. Focused task and failure/correction evidence is in the report; final ordered behavioral acceptance and integration remain separate. |
 | T15.4 | Remove all temporary core/workflow type aliases, pass-through facades and migration-only interfaces introduced by the set. Check that core contains only the shared responsibilities recorded in the dependency ledger. | delivered | 38b7f97593a2df3d2af6c465c809dca4bb4c1345; d4844af16cce52e3a44ad9bba5e2a59e80adb520; c111c9df77898601331cd83c6df4932a9c2add8b; c737a56d85e5fb0532d20b18a3c56c9d86a21fb1; 93708ffd89d4eee64d111ad71424a5fc3fcfed19; e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c; 5f506a41dee1e172f8915f5712bbc9d6292a7bea; 3ed65239b85570183865b74e169bcbf5a62c1819; b5b75ade5cbf21eb68ab3521b26545a20c5ee970; 0ce09547cb796604fb01ee41851a1e9a709cf02e; 72253efe04a5f0ca41a2393b442f89c98aac8637; 12eb09162d1a2dd2256bd5197b28e9be70c66312; 6e281666ac251b7f6cbdf997122dee845fff87bf; 4d4f74804e857046b099ea3db91e87ec5d1258f6; 85256e808df3824ddaf4b1eb230ff4a5ad8ae757; 6afffc97a34bc31483d9f7f8acd4ff045e827bc3; e5fbc60981a76a7b25cf76e69b63ce6260140252; 3e1896c7f42a0a802d78a23ff036adbe3298d8e4; 178e8fcdcc0d5091d5e51b92813a7fa8f576f58b; 6f7184ab351c8548d43b0ee25c30d3a23e1cd8b5 ; f3fc48d21dae09efb4c329d4e985546b6bb3739a; 42049e668f8c077450d6e7491d05b1996c0d28fb | Source acceptance confirms zero core/workflow type aliases or root workflow forwarding facades, all 65 root production files at recorded shared composition/dependency owners and 22 actual finite ports without Store/claim/opaque escape. Two stale observer names in the port map are corrected. Both relocated harness subprocess regressions pass with unchanged assertions/schema/timeouts; all 34 exact workflow subprocess selectors resolve. |
 | T15.5 | Finish the naming/compatibility ledger: define frontier, adoption, loose selection, continuation, amendment and closing from governing specs, then make only internal unambiguous renames. Resolve each legacy path and control flag as a supported contract, safe removal or evidence-backed retained case within this cycle. | delivered | 05d68ed95bc5b154df6be54f0279bc18856eab96; 93708ffd89d4eee64d111ad71424a5fc3fcfed19; 3ed65239b85570183865b74e169bcbf5a62c1819; b5b75ade5cbf21eb68ab3521b26545a20c5ee970; 0ce09547cb796604fb01ee41851a1e9a709cf02e; 72253efe04a5f0ca41a2393b442f89c98aac8637; 12eb09162d1a2dd2256bd5197b28e9be70c66312; 6e281666ac251b7f6cbdf997122dee845fff87bf; 4d4f74804e857046b099ea3db91e87ec5d1258f6; 85256e808df3824ddaf4b1eb230ff4a5ad8ae757; 6afffc97a34bc31483d9f7f8acd4ff045e827bc3; e5fbc60981a76a7b25cf76e69b63ce6260140252; 3e1896c7f42a0a802d78a23ff036adbe3298d8e4; 178e8fcdcc0d5091d5e51b92813a7fa8f576f58b; 6f7184ab351c8548d43b0ee25c30d3a23e1cd8b5; 42049e668f8c077450d6e7491d05b1996c0d28fb | Six governing-spec definitions and 32 compatibility/control cases reconcile all 217 owned secondary references: 158 compatibility, 48 boolean candidates and 11 cleanup exceptions. Exact baseline lines and current compiler-owned declarations/hashes resolve, including non-workflow filenames. Every actual control or retained protocol has an individual meaning, existing regression protection and retirement condition. Named observations, typed modes and supported public/wire contracts remain distinct; no runtime change is needed. |
@@ -215,8 +216,8 @@ The maintainer approved implementation, conventional commit/push and startup of 
 | T16.2 | Set the final maximum to five parameters and two results, with second result error or bool. Enable compatible revive argument/result rules and dupl at the approved threshold 150 only after their debt is removed; keep the AST check for semantic result shapes and exact external-interface exceptions. | delivered | 3b1d6ee0844c51fedd93aacd1d2c3fcb3afa06d8 | Permanent five-parameter/result policy, exact external exceptions, pinned revive five/two and production dupl 150 pass whole-tree task checks. The six-input dev fixture failed before correction and all checker tests pass afterward. Exact-head controller receipt 52XOJZYFDDGRBWZ2VM6OGGREK4 passed the four ordered checks on dbaa4bce2c86daaf33f8b41b2e025be44535a5db; PR #453 is verified integrated. |
 | T16.3 | Remove the temporary debt manifest/ratchet and every provisional linter suppression introduced by this set. Resolve stale exception entries and check the complete production tree on dev, not only the branch diff. Retain intentional semantic duplicate and external-interface exceptions only with exact rationale and evidence. | delivered | 3b1d6ee0844c51fedd93aacd1d2c3fcb3afa06d8; 436f6742f7f224ac8c25bfde7cc61bb6ab328332; 942814b08615ded7c87afac155e7dccbedc266ae | No temporary manifest, ratchet, allowance, bare errcheck or unused suppression remains. All 23 source cleanup sites and eight error names have exact dispositions; nineteen affected classification/process tests and whole-tree task lint pass. Intentional grammar/dispatch/schema and exact external-interface contracts are documented. Exact-head controller receipt 52XOJZYFDDGRBWZ2VM6OGGREK4 passed the four ordered checks on dbaa4bce2c86daaf33f8b41b2e025be44535a5db; PR #453 is verified integrated. |
 | T16.4 | Publish the final package map and glossary under docs/reference or docs/explanation, update moved API references and package READMEs, and record every source-report resolution with commit and validation evidence. Preserve the source review itself until real fixes are integrated. | delivered | 33c680a17a0f9a0d830cbe5a43d0906ed02bcce0 | Final capability map, workflow glossary, moved owner/API references and package README links published. All new local links resolve; original review/detection hashes remain unchanged. Complete source resolution links identify commits and merged task checks. Exact-head controller receipt 52XOJZYFDDGRBWZ2VM6OGGREK4 passed the four ordered checks on dbaa4bce2c86daaf33f8b41b2e025be44535a5db; PR #453 is verified integrated. |
-| T16.5 | Run the selected exact-candidate integrated gate, including real persistence/recovery, provider/process and representative Web/TUI/Telegram boundaries. Compare the TUI benchmark with baseline. Record command timings and failures without expanding to historical or exhaustive gates mechanically. | in_progress | 942814b08615ded7c87afac155e7dccbedc266ae | Benchmark comparison passed in 3.689s on 50d562611bfb5d8e725ff62da389fd9c2e372818. Controller receipt 52XOJZYFDDGRBWZ2VM6OGGREK4 passed make verify, 34 boundary roots, four race roots and diff check in 61.665s on dbaa4bce2c86daaf33f8b41b2e025be44535a5db. Browser/full integrated gate remains controller-owned and has not run. |
-| T16.6 | Close all 16 slice tickets, tracker rows and reports only after verified dev integration and the required final gate. Produce one cycle report with before/after counts, compatibility evidence and any justified exclusions. Do not create a second plan, a successor Looper run or a seventeenth slice for known work. | pending | 33c680a17a0f9a0d830cbe5a43d0906ed02bcce0 | All 16 slice PRs are verified integrated and their implementation entries are closed. One cycle report records source dispositions and prerequisites. Final gate acceptance, requirement-level closure and the completed cycle report remain pending; no full-gate result is claimed. |
+| T16.5 | Run the selected exact-candidate integrated gate, including real persistence/recovery, provider/process and representative Web/TUI/Telegram boundaries. Compare the TUI benchmark with baseline. Record command timings and failures without expanding to historical or exhaustive gates mechanically. | delivered | 942814b08615ded7c87afac155e7dccbedc266ae; 2a4390aeb70d783d40a132fe6583d8dfb428fa7d | Benchmark comparison passed on its recorded revision. Slice receipt 52XOJZYFDDGRBWZ2VM6OGGREK4 passed 34 boundary roots/four races and required checks. Controller gate KSTGSZNOX5ESTLZXEPAAPJKJ6L passed on 2a4390aeb70d783d40a132fe6583d8dfb428fa7d in 102.538s on 2026-10-28; all sixteen canonical PRs are verified integrated. The native parity package reported 9.814s; the two Chromium journeys reported 17.140s. |
+| T16.6 | Close all 16 slice tickets, tracker rows and reports only after verified dev integration and the required final gate. Produce one cycle report with before/after counts, compatibility evidence and any justified exclusions. Do not create a second plan, a successor Looper run or a seventeenth slice for known work. | delivered | 33c680a17a0f9a0d830cbe5a43d0906ed02bcce0; 2a4390aeb70d783d40a132fe6583d8dfb428fa7d | All sixteen canonical merges, solved tickets and delivered reports are verified. Controller gate KSTGSZNOX5ESTLZXEPAAPJKJ6L passed on 2a4390aeb70d783d40a132fe6583d8dfb428fa7d in 102.538s on 2026-10-28; all sixteen canonical PRs are verified integrated. Requirement-level acceptance and the cycle report are completed. Closure is confined to configured documentation paths; no successor or additional slice is created. |
 | T16.7 | Validate this slice, update its ticket/tracker, produce its report, and verify integration into dev. | delivered | dbaa4bce2c86daaf33f8b41b2e025be44535a5db | Canonical PR #453 is verified merged into dev at dbaa4bce2c86daaf33f8b41b2e025be44535a5db; Acta merge event 01M61QH8BEKHPVTD7E4R6C1T4T. Controller receipt 52XOJZYFDDGRBWZ2VM6OGGREK4 passed all four ordered commands at that exact clean head with 34 boundary roots/four race roots, no failures/skips or owned fixture leaks. |
 
 ## Slice delivery
@@ -242,39 +243,44 @@ The maintainer approved implementation, conventional commit/push and startup of 
 
 ## Acceptance ledger
 
-| Contract | Required evidence | State |
+| Contract | Accepted evidence | State |
 | --- | --- | --- |
-| R1 | All 121 A rows fixed; 230 B rows reviewed; final production maximum five; no temporary allowances | pending |
-| R2 | All 420 C rows fixed or precise proved external-interface exceptions; second-result check active | pending |
-| R3 | Owned capability/stage graph, central service, narrow ports, no cycle/monolith/bridge | pending |
-| R4 | 14 file dispositions tied to actual cohesive owners | pending |
-| R5 | Six type/view dispositions; original wire/hash compatibility; measured TUI change | pending |
-| R6 | D01-D11 have semantic comparison and fix or exact justified retention | pending |
-| R7 | All seven symbols have live-path/deletion/test-helper evidence | pending |
-| R8 | Typed command injection throughout; service locator removed | pending |
-| R9 | High-arity bind/scan inventory, owned row mapping, real distinguishable-value insert/update/rollback | pending |
-| R10 | Error/dispatch/suppression/unused/state/mode fixes; flag/legacy/performance dispositions | pending |
-| Recovery | Original operation identity, authority, budgets, locks, receipts and terminal semantics preserved | pending |
-| Integrated gate | Plan-selected commands passed on exact final dev candidate; timings and environment boundary retained | pending |
-| Cycle closure | 16 verified merges, all tasks/tickets/reports consistent, cycle report complete | pending |
+| R1 | 771-row final signature map, individual B decisions; gate production scan: 9,411 declarations, maximum five, no temporary allowance. | accepted |
+| R2 | 420 source C identities resolved; permanent semantic result check; one exact installed Bubble Tea Update exception. | accepted |
+| R3 | Core/method/move ledgers, 22 finite ports and final capability map; dependency checks passed in the full gate. | accepted |
+| R4 | Fourteen exact large-file dispositions with current owners and owning-slice regressions in the final secondary map. | accepted |
+| R5 | Six value/view maps, frozen JSON/SQL images, pointer-model ownership and measured baseline/final TUI comparison. | accepted |
+| R6 | D01-D11 semantic dispositions and implementation checks; distinct receipt writers retain separate guarded contracts; production dupl 150 passed. | accepted |
+| R7 | All seven original dead production declarations are removed or test-only; actual live paths and tests retained. | accepted |
+| R8 | 134 constructor mappings use typed dependency injection; metadata service lookup removed and command/service behavior verified. | accepted |
+| R9 | Fourteen wide bindings/scans across eight tables; frozen and real SQLite identity/NULL/insert/update/rollback checks passed. | accepted |
+| R10 | 454 secondary rows with exact contracts/removal conditions; eight error names and 23 cleanup sites resolved; measured heuristic exclusions recorded. | accepted |
+| Recovery | Actual slice-head persistence/restart/process/receipt and race batches passed; the final shared native journey and browser journeys passed. | accepted |
+| Integrated gate | Controller gate KSTGSZNOX5ESTLZXEPAAPJKJ6L passed on 2a4390aeb70d783d40a132fe6583d8dfb428fa7d in 102.538s on 2026-10-28; all sixteen canonical PRs are verified integrated. | accepted |
+| Cycle closure | All sixteen merges and 97 tasks are closed; one completed cycle report and handoff; only configured documentation differs after the gate. | accepted |
 
 ## Baseline metrics and migration checkpoints
 
-| Signal | Source baseline | After Slice 1 | After Slice 11 | Final |
+| Signal | Source baseline | After Slice 1 | After Slice 11 | Accepted final result |
 | --- | --- | --- | --- | --- |
-| Above five parameters | 121 | pending | pending | zero unapproved |
-| Exactly five parameters | 230 watch items | pending | pending | allowed; cohesion reviewed |
-| Above seven parameters | 19 | pending | pending | zero unapproved |
-| Outside result policy | 420, including imposed signatures | pending | pending | zero unapproved |
-| WorkflowStore methods | 909 | pending | pending | cohesive durable operations only; not a numerical target |
-| Temporary debt entries / bridges | not introduced yet | pending | pending | zero |
-| TUI Update/View benchmark | unmeasured in this planning task | pending | pending | measured comparison |
+| Above five parameters | 121 source A occurrences | Ceiling seven, exact manifest | Ceiling six, eighteen above-six declarations assigned | Zero unapproved above five in the whole production tree |
+| Exactly five parameters | 230 source B watch items | All identities assigned | Owning-slice cohesion decisions retained | All 230 reviewed; 200 baseline cohesive five-input contracts retained |
+| Above seven parameters | 19 source occurrences | Rejected except exact migration entries | Zero unapproved above six | Zero unapproved |
+| Outside result policy | 420 source C occurrences | 532 exact combined debts; one external exception | 162 exact combined debts; one external exception | Zero unapproved shapes; one exact external Update exception |
+| WorkflowStore methods | Review metric 909 | Source ownership inventory established | Ticket/execution boundaries extracted | 908 source method decisions; 777 actual guarded persistence methods |
+| Temporary debt / bridges | Not introduced at baseline | Explicit shrinking manifest | Recorded later-slice owners | Zero; permanent five-input/result policy and approved dupl 150 |
+| TUI Update/View benchmark | Captured in Slice 5 | Not yet measured in this slice | Slice 5 before/after evidence retained | Final fifteen samples compared; zero idle/resize allocation and 1,096 bytes/nine focus allocations |
 
-Do not treat these baseline counts as fresh gate output. Each exception needs its declaration, actual external interface/contract, reason and retained validation. Explicitly reassociate moved declarations; no allowance grows automatically after a rename.
+Historical migration details remain in the delivered Slice 1 and Slice 11
+reports. Complete final source dispositions and measured exclusions are in the
+[final findings](../plan/code-quality-remediation-slice-16-findings.md) and
+[cycle report](../report/cycles/code-quality-remediation.md). Their source
+identities and measured revisions are retained; no historical task timing is
+relabeled as the final gate.
 
 ## Prerequisites and decisions
 
-1. Source review and local code match the stated baseline; the two original review files are preserved byte for byte.
+1. The original source review and detections were preserved through the tested candidate. Closure updates only the review status and a resolution appendix; original findings, detection bytes and baseline inventory fields remain intact.
 2. The maintainer approved the specification/model, exact 16-slice map and local AST/lint work on 2026-10-26.
 3. Implementation, conditional Rebase + Fast-forward merge delegation for the 16 slice PRs, conventional commit/push and startup of one Looper run were authorized on 2026-10-26. Controller progress belongs to its retained checkpoint and this tracker.
 4. The plan pins three existing full-gate entrypoints before controller configuration. Slice 1 records timing and the focused package selections; later moves update slice evidence while preserving the accepted contracts.
@@ -282,9 +288,22 @@ Do not treat these baseline counts as fresh gate output. Each exception needs it
 
 ## Closure evidence
 
-Final candidate: pending.
-Final integrated gate: not run.
-Cycle report: prepared at `ops/default/report/cycles/code-quality-remediation.md`; all 16 slice integrations are verified. Final integrated acceptance and cycle closure await the controller gate.
+Final tested candidate: `2a4390aeb70d783d40a132fe6583d8dfb428fa7d`.
+Final integrated gate: passed, controller receipt `KSTGSZNOX5ESTLZXEPAAPJKJ6L`.
+Gate timing: 102.538 seconds, 2026-10-28T17:14:49.372466324Z through
+2026-10-28T17:16:31.910741976Z.
+Cycle report: [Completed delivery](../report/cycles/code-quality-remediation.md).
+Controller-owned receipt: `checks/2a4390aeb70d783d40a132fe6583d8dfb428fa7d.json`.
+Controller-owned log: `checks/2a4390aeb70d783d40a132fe6583d8dfb428fa7d.KSTGSZNOX5ESTLZXEPAAPJKJ6L.log`.
+
+```sh
+make verify && go test ./internal/app -run '^TestGuidedUseCaseParityNative$' -count=1 -timeout=3m && CHR_WEB_BROWSER=/usr/bin/chromium go test ./internal/app -run '^Test(GuidedUseCaseWebBrowser|WebQuizBrowser)$' -count=1 -timeout=3m
+```
+
+All 97 task rows and all sixteen slice deliveries are closed. The accepted
+candidate and exact command list remain unchanged. The subsequent closure
+commit is restricted to configured documentation paths; runtime and validation
+sources are identical to the tested candidate. No full gate is rerun for closure.
 
 ## Full-gate preparation
 
@@ -292,7 +311,8 @@ All 16 canonical PRs are closed/merged into dev at the recorded hashes. Source
 implementation ends at `dbaa4bce2c86daaf33f8b41b2e025be44535a5db`; this preparation
 changes delivery metadata only. Slice 16's exact-head four-command receipt is
 `52XOJZYFDDGRBWZ2VM6OGGREK4`; its recorded local boundary/race checks are not a
-full-gate result. All acceptance-ledger rows remain pending until that gate.
+full-gate result. Final acceptance now uses the separate passing controller
+gate above.
 
 The configured `/usr/bin/chromium` is executable (Chromium
 151.0.7922.173). Go 1.27.1, make, Python 3 and Git are available. All three
@@ -301,4 +321,5 @@ Git/SQLite/project state, local HTTP providers and isolated browser profiles;
 the tests own process cancellation/wait and server/profile cleanup. No persistent
 fixture service, external model account or live-forge credentials are required.
 The browser command supplies CHR_WEB_BROWSER explicitly and does not use short
-mode. No gate test or full gate is run during this preparation.
+mode. No gate test or full gate was run during that preparation. The controller
+subsequently executed the exact gate recorded above.

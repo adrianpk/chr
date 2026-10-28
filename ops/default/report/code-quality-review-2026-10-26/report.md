@@ -1,6 +1,6 @@
 # Code Quality Review
 
-Status: reviewed; maintainer decisions recorded; remediation not started
+Status: reviewed; accepted findings remediated; integrated acceptance completed
 
 Source baseline: `28c3db33` on `dev`, inspected on 2026-10-26.
 
@@ -507,3 +507,23 @@ result. Report the detection count before and after for findings 1 and 2.
 5. Findings 1 and 2 enforcement and the result-shape check change lint
    configuration and add a repository tool. Both need approval before
    implementation.
+
+
+## Remediation closure
+
+The approved sixteen-slice remediation is integrated into dev through canonical
+PRs #438 through #453. All 97 tasks are delivered. The controller full gate
+passed on `2a4390aeb70d783d40a132fe6583d8dfb428fa7d`, receipt
+`KSTGSZNOX5ESTLZXEPAAPJKJ6L`, in 102.538 seconds. The
+[completed cycle report](../cycles/code-quality-remediation.md) records exact
+commands and outcomes. The
+[final source reconciliation](../../plan/code-quality-remediation-slice-16-findings.md)
+links every original signature/secondary identity, structural finding and minor
+item to actual current code, owning commits and validation. Supported compatibility,
+imposed interfaces, intentionally distinct rules and measured heuristic exclusions
+have individual evidence; none is unknown migration debt.
+
+The original review body above remains a baseline snapshot. Closure changes its
+status and adds this appendix; it does not rewrite original detections, counts,
+maintainer decisions or proposed remedies. The detections and baseline inventory
+remain unchanged. Later ledgers and the cycle report supply final dispositions.

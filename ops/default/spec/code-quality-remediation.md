@@ -1,6 +1,8 @@
 # Code Quality Remediation
 
 Status: accepted
+Implementation: Completed
+Final acceptance: [Completed cycle evidence](../report/cycles/code-quality-remediation.md)
 Date: 2026-10-26
 Delivery set: code-quality-remediation
 Planning authorization: maintainer request, 2026-10-26.
@@ -163,3 +165,17 @@ Every slice SHALL compile and pass its recorded focused checks and the repositor
 4. Preserve supported compatibility paths and precise existing domain terms when evidence shows they remain necessary. Record exact retained cases within this cycle, not a generic promise of later work.
 
 On 2026-10-26 the maintainer approved the complete proposal and requested its conventional commit, push and startup through one Looper run. The plan and tracker record implementation authority and conditional Rebase + Fast-forward merge delegation for the 16 recorded slice PRs into dev. This approval includes the standard-library AST checker and proposed lint changes.
+
+
+## Final integrated acceptance
+
+All 16 recorded slices and 97 tasks are delivered. Controller receipt
+`KSTGSZNOX5ESTLZXEPAAPJKJ6L` passed the unchanged full gate on
+`2a4390aeb70d783d40a132fe6583d8dfb428fa7d` in 102.538 seconds. The
+[completed cycle report](../report/cycles/code-quality-remediation.md) identifies
+exact commands, source resolutions, compatibility evidence, measured exclusions
+and final handoff. This accepted specification remains at its stable path;
+closure changes no behavioral, wire, storage or validation requirement.
+Historical slice notes retain the state and validation available at their
+recorded revisions; this final acceptance supersedes their earlier pending
+migration or acceptance markers.
