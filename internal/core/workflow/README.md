@@ -8,7 +8,10 @@ them through admission, execution, review, integration and closure.
 ## Boundary
 
 `Store` owns repository locking, journals, guarded source-image checks, atomic
-multi-record writes and recovery. Every method of the store stays with its type.
+multi-record writes and recovery. Closing history, receipt and retry policy now
+belong to closeout through a read-only evidence adapter. Remaining Store methods
+are still being reconciled under Slice 15; their count does not establish final
+persistence ownership.
 Core composition and application adapters call this owner directly. The package
 cannot import root core or application adapters.
 

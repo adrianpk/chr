@@ -2,8 +2,8 @@
 
 ## Purpose
 
-This package owns closing lease, binding and result policy, plus ordered gate
-execution against one frozen closing input.
+This package owns closing attempt, history, retry-budget, receipt, lease and
+result policy, plus ordered gate execution against one frozen closing input.
 
 ## Contract
 
@@ -14,15 +14,23 @@ checkout. It receives the host's watched deadline context through narrow
 exact checkout. `LeaseDuration`, `CheckBinding` and `CheckResults` preserve the
 existing lease bound, retained-reference checks and ordered result validation.
 
+`Attempt` retains the original exact journal fields. `ReadAttempt` and
+`ReadReceipt` preserve hash verification, partial decode results, schema and
+confirmation binding. `CheckHistory` checks attempt order, per-budget counts and
+result/input/process evidence. `CheckBudget` keeps the invocation or standalone
+reopening budget. The read-only `Evidence` port delegates contained bounded reads
+and original prerequisite hash verification to the host. Failed or interrupted
+attempts remain distinct from confirmed completion; the stage never confirms one.
+
 The host keeps the private claim, process identity registration, bounded output,
 capacity reservation, stop supervision and process journals. It rechecks current
 source, candidate and authority before atomically confirming the receipt, set
 and invocation. Execution alone cannot establish closure. The ports expose no
 mutable store or context retained as state.
 
-The package imports only shared `workflow/state` protocol values within the
-module. Remaining closeout policy extraction and final Store responsibility
-dispositions are active Slice 15 work.
+The package imports shared `workflow/state` protocol values and `contenthash`
+within the module. Remaining closeout policy extraction and final Store
+responsibility dispositions are active Slice 15 work.
 
 ## Validation
 

@@ -106,3 +106,12 @@ They add no custom JSON codec, default, normalization or unknown-value rejection
 existing host validators retain those decisions. Display/IPC projections convert
 at their original string boundary. NativeRecordGitMatches is the shared exact
 source/target/method/prepared-result predicate and performs no IO or authorization.
+
+## Supervised process records
+
+Process, ProcessState and the running/stopped values retain their exact original
+field order, JSON tags, enum strings and nil/empty representation. WorkerSlotLimit
+keeps the common pool bound of eight. ValidProcessIdentity checks only retained
+PID/boot/birth shape. Live identity/group observation, process handles, capacity
+reservation, registration-before-permit, stop/recovery and journals remain with
+the host. Shared records confer no process execution or release authority.

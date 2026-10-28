@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398]
+commits: [66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -60,3 +60,11 @@ Existing continuation/closing/process/budget/stop recovery tests, one shared gui
 All commands above are planned. None ran as implementation validation during this planning task.
 
 Predecessor PR #451 is verified merged into dev at `8b5659a71af5d393919593c5e0d8c9a6ec0f497c`. Slice 15 is active. Its source ledger freezes 40 assigned signature rows and current declaration identities before closing/lifecycle conversion. Closeout execution/pure policy and all 40 assigned signature dispositions are committed: 26 implemented and 14 retained cohesive five-input contracts. The Slice 15 report records real closing, capacity/process, continuation, control/receipt, amendment/frontier, upgrade and focused race checks plus strict lint. Production signatures have at most five parameters and zero exact debts. Remaining policy ownership, final bridge/compatibility work and slice acceptance remain active.
+
+Closing history extraction now gives attempt validation, receipt binding, retry
+budgets and ordered evidence checks a real closeout owner through a read-only
+port. Thirteen mechanical relocations match after owner/name qualification;
+shared process fields and enum values remain exact. Seven Store methods have
+stage/adapter owners and 901 remain; final method ownership is still active.
+The report records 30 real closing/recovery/budget/process/capacity tests and
+five focused races, plus wire, short and strict checks.

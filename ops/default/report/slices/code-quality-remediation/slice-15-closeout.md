@@ -21,6 +21,12 @@ ports. Explicit waivers still prepare and check that checkout. Pure lease,
 retained-binding and result checks have one closeout owner. Watched deadlines,
 process supervision, capacity and guarded confirmation retain their host owners.
 
+Closing attempt shape, ordered history, retry budgets and receipt/input/result
+binding now belong to closeout through read-only Evidence. Reads keep the
+original containment, file bounds and storage error semantics. Shared process
+records and the eight-slot bound live in state; live process observation and
+registration stay with the host.
+
 Closing admission pairs an optional reserved claim with the existing retained
 closure result. Delivery proof and its verification hash use one named result
 for ticket-native and legacy evidence, including partial decoded proof on error.
@@ -55,10 +61,12 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains eight source/extraction/consolidation images. Current identities and hashes are updated
+retains 31 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. There are still 908 Store methods; that
-count and file movement do not establish final policy/persistence separation.
+frozen source fields remain unchanged. Seven former Store methods now have actual
+closeout policy or host evidence adapter owners. The original 908 method rows retain frozen source evidence and
+current identities; 901 methods remain on Store. This count does not establish
+final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
 conversion in `c111c9df77898601331cd83c6df4932a9c2add8b`, and amendment/frontier/upgrade conversion
@@ -69,6 +77,12 @@ unused production publication-profile wrapper is removed; its sole test caller
 uses the live configuration-key filter with the same key. `prepareWorkflowTask`
 already exists only in test fixtures.
 
+Closing history extraction is in `5f58bc1cf3f22c0553035b9935d66530cb4762dd`. Thirteen mechanical declaration moves
+match after owner/name qualification. Read/validation/budget changes use the
+actual Evidence port and have explicit semantic evidence, not a whole-method
+token-equivalence claim. No compatibility alias or forwarding Store facade
+replaces the removed policy methods.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -76,7 +90,7 @@ contains 40 original rows: 26 implemented and 14 retained as cohesive five-input
 contracts, each with its operation-specific reason. Production signatures now
 have at most five parameters and zero exact debts. The configured intermediate
 ceiling remains six; final enforcement and removal of the empty debt manifest
-belong to Slice 16. Closeout imports only shared state within the module.
+belong to Slice 16. Closeout imports shared state and contenthash within the module.
 
 The host still registers process identity before permitting execution, joins
 wait/close/finalization errors, uses the original five-second detached process
@@ -97,7 +111,8 @@ Task checks passed; final slice validation remains pending. Closeout extraction
 passed 18 real tests and four focused races; closing exchanges passed 12 and two.
 Capacity/continuation passed 27 real tests and five focused races, control/receipt
 passed 24 and five, and amendment/frontier/upgrade passed 31 and five. These are
-separate task selections, not a unique-test total or the full gate. All passed
+separate task selections, not a unique-test total or the full gate. The later
+closing-history extraction passed 30 real tests and five focused races. All passed
 without skips; owned-fixture cleanup reported no leaked descendants.
 
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|UseCase|Reopen|SetAdvance|Budget|Recovery|Journal|PostObservation|Stop)|NativeClosing(Gate|Divergence|Evidence|PublicationRace)|WorkflowParallelClosingRecovery|QualityRecordWire)$' -count=1 -timeout=15m -json`
@@ -111,9 +126,12 @@ without skips; owned-fixture cleanup reported no leaked descendants.
 - `go test ./internal/core/workflow -run '^Test(WorkflowAmendment(Admission|Gate|Rejects|LiveOwner|Recovery|Evidence)|WorkflowPlanOrder(Amendment|ActiveAmendment)|WorkflowUpgrade(Policy|Preserves|Adoption|Rejects|Ambiguous|Recovery|AdoptionRecovery|Edited|Owned|Native|Path|Restart)|HarnessSelectionUpgradeFence|Native(ProfileUpgrade|LegacySnapshot|ReceiptFrontier|ReceiptFrontierBlock)|WorkflowFrontier(Order|Reject|Recovery|Race)|WorkflowMembershipFrontier|WorkflowClosingRetry)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow -run '^Test(WorkflowAmendmentLiveOwner|WorkflowFrontierRace|WorkflowUpgradeOwned|WorkflowUpgradeRestart|WorkflowPlanOrderActiveAmendment)$' -count=1 -timeout=10m -json`
 
+- `go test ./internal/core/workflow -run '^Test(WorkflowClosing.*|NativeClosing.*|WorkflowProcess(Birth|Edit|Signal|Observation)|WorkflowCapacity(Process|Overlap|Orphan)|QualityRecordWire)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowCapacityOverlap|QualityRecordWire)$' -count=1 -timeout=10m -json`
+
 - `go test ./internal/core/workflow/closeout -count=1`
 - `go test -short ./internal/core/workflow/... ./internal/app ./scripts/goquality`
-- `make check-go-style` — 9,363 production declarations, zero exact debts and one external exception.
+- `make check-go-style` — 9,366 production declarations, zero exact debts and one external exception.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality` — zero issues.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./scripts/goquality` — zero issues after the final private-result conversions.
 - `git diff --check`
