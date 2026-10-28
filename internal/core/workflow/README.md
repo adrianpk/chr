@@ -40,3 +40,13 @@ exporting private state to tests.
 ```sh
 go test ./internal/core/workflow -run '^TestWorkflowRoundTrip$' -count=1
 ```
+
+## Publication operation values
+
+Transient publication results distinguish `SubmissionIntent` dispatch permission
+from `NativePublicationResult` transport output, canonical observation and
+receipt-backed finalization. Private values bind each callback to its current
+entry/budget/journal image and pair read-only canonical/Git observation ports.
+Contexts remain explicit and Store retains claim, journal, lock and receipt
+transactions. Internal `Handled` and `Observed` flags preserve native/publication
+barriers on partial errors; they do not assert completed delivery.

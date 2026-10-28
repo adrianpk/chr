@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-14
 source: review
 reported_at: 2026-10-26T08:48:34Z
-commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429]
+commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429, 23453a58cbb8f780065ea29f780e4dd37b76d0fc, 187a9ec4c15fef69e137c158fe574163aaae5497]
 started_at: 2026-10-28T04:43:13Z
 branch: refactor/slice-14-quality-publication
 ready_at: 2026-10-26T08:57:09Z
@@ -60,13 +60,21 @@ Existing native provider/transport permission and review fixtures through local 
 Task checks for review and forge extraction pass: 42 real review/preparation/
 application-control checks, 17 real submission/recovery checks and focused races,
 with pinned lint and finite-debt validation. Exact commands are in the canonical
-report. The first review completion unit's evidence remains recorded separately.
+report. The first review completion unit's evidence remains recorded separately. The
+publication value conversion adds 35 real native/legacy checks and six focused
+race/wire/dependency checks.
 `make verify` and final exact-head controller validation remain pending.
 
 Slice 13 PR #450 is verified merged into dev at
 `53b2adb23b9b1d20529d00bbe3b32b3be5990b4e`. Slice 14 is active. Fourteen pure
 policy declarations have independent review/forge owners and matching mechanical
 token evidence; completion and dispatch use consumer-owned ports with host
-claim/process/write authority retained. Sixteen assigned rows are implemented and
-45 remain pending; exact debt is 52. Remaining PR/native observation, binding
+claim/process/write authority retained. Fifty assigned rows are implemented, including all category A/C rows;
+11 category B rows remain pending. Exact debt is 24. Remaining PR/native observation, binding
 policy and state/flag/error/glossary work must finish before a PR is ready.
+
+The publication value conversion preserves dispatch permission, transport,
+canonical observation, revision fences and receipt evidence as distinct outcomes.
+Native-path/publication barriers retain partial/error behavior and cannot be read
+as successful delivery. All direct consumers retain their current authority and
+assertions; real IO/recovery and focused races are recorded in the report.

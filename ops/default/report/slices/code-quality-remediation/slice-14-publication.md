@@ -28,8 +28,8 @@ the original operation context. Both seven-parameter acceptance methods now use
 bound operation/completion inputs, taking three and four parameters respectively.
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-14-signatures.csv)
-records 16 implemented rows and 45 pending rows. The exact debt manifest
-has 52 entries, with its six-parameter ceiling and external exception unchanged.
+records 50 implemented rows and 11 pending category B rows. All assigned
+category A/C rows are implemented. The exact debt manifest has 24 entries, with its six-parameter ceiling and external exception unchanged.
 
 Named host values now bind review observations to their inputs, retained inputs to
 decisions, and claims to partial prepared results. The selected command/harness and
@@ -45,6 +45,19 @@ reply within the original five-second detached cleanup bound. Provider acceptanc
 remains an uncertain response until canonical observation confirms delivery. The
 host's response adapter retains exact invocation/submission identity and the rule
 that a definitive concurrent observation wins over a late reply.
+
+Submission and publication values now distinguish journaled intent and dispatch
+permission, sanitized transport output, canonical observation, next revision fence
+and receipt evidence. `SubmissionIntent` preserves the original retry decision;
+`NativePublicationResult` keeps the transport result separate from delivery proof.
+Private callback snapshots and owner/service bundles replace parallel parameters
+while contexts and guarded Store transitions remain explicit.
+
+`Handled` and `Observed` preserve the existing native-path and publication barriers,
+including partial/error paths. They do not claim that finalization succeeded.
+Partial journal, owner, PR, transport, observation, fence, proof and receipt values
+survive the same errors and deferred cleanup as before. The existing closeout
+reader adapts the native proof/hash value while retaining its own current API.
 
 ## Implementation Notes
 
@@ -66,6 +79,11 @@ checkout remains on dev; implementation uses the recorded slice branch.
   streams preserved; compilation, frozen wire and dependency checks pass.
 - `932090eb2531dba22e53b2ec57264c38c49d9429` applies concise forge API names and extracts dispatch/response flow.
   The private response operation retains its guarded journal transaction.
+
+- `187a9ec4c15fef69e137c158fe574163aaae5497` converts 34 additional assigned rows, including all remaining
+  submission/publication result tuples and the three high-arity native callbacks.
+  All direct consumers retain their assertion and authority behavior. Original
+  named/unnamed error scope and conditional-initializer variable scope are preserved.
 
 The [extraction ledger](../../../plan/code-quality-remediation-slice-14-moves.csv)
 keeps 14 mechanical preimages plus two explicit flow extractions.
@@ -97,6 +115,8 @@ Ticket-native execution and forge-native publication remain distinct terms.
 - `internal/core/workflow/review/{input,parse,policy,execution,decision}.go`.
 - `workflow_review.go`, `workflow_review_result.go` and `workflow_stage_ports.go`.
 - `forge/{identity,policy,dispatch,response}.go` and `workflow_review_operation.go`.
+- `workflow_publication_operation.go`, native dispatch/observation/receipt owners
+  and the existing closeout proof reader.
 - `internal/app/service_workflow_review.go` and its direct control/continuation callers.
 - The assigned-signature, extraction, Store-method, owner and stage-port ledgers.
 
@@ -134,10 +154,24 @@ which completed cleanup after each command.
   in the extraction, signature, method, authority and dependency ledgers resolve.
 - `git diff --check` — PASS after report, tracker and ledger updates.
 
+- `go test ./internal/core/workflow ./internal/app ./scripts/goquality -run '^Test(WorkflowSubmission(Methods|LostResponse|AtomicGuard|Journal)|WorkflowPublication(Modes|Unknown|LateResponse|Crash)|NativeSubmission(Unknown|Recovery|Responses|Fences|Applied)|NativeDispatch(|Guard|Policy|Evidence)|NativeGitOutcomes|NativeCanonical(Outcomes|Poll|Fence|Lost)|NativeReceipt(Proof|Delivery|Recovery)|NativeFinalization(|Ticket)|NativeClosing(Publication|Evidence)|NativeHost(Publication|Denials)|ServiceWorkflowSubmission|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v` — PASS, 35 top-level checks for converted native dispatch,
+  callbacks/observation, receipts/finalization, legacy publication/recovery and
+  application dependency paths. The existing owned-process runner completed cleanup.
+- `go test -race ./internal/core/workflow ./scripts/goquality -run '^Test(NativeDispatchConcurrent|NativeCanonicalFence|NativeFinalizationConcurrent|WorkflowPublicationLateResponse|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v` — PASS, 6 top-level checks for changed concurrent dispatch,
+  observation/finalization and late-response paths, plus frozen wire/dependency guards.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality` — PASS with zero issues for this conversion.
+- `make check-go-style` — PASS: 9,325 production declarations, ceiling six,
+  24 exact debt entries and one external exception. No assigned Slice 14 declaration
+  remains in temporary exact debt; the 11 pending rows still require their five-input
+  cohesion disposition.
+- Current AST images, immutable source columns, report/ticket/tracker links and
+  package READMEs resolve; all 908 Store methods retain their guarded owner.
+- `git diff --check` — PASS after documentation/provenance updates.
+
 ## Risks and Follow-ups
 
 PR creation/observation and native publication/review binding policy extraction,
-the remaining 45 assigned signature rows and local stored-state/flag/error/
+the remaining 11 category B cohesion dispositions and local stored-state/flag/error/
 suppression/glossary reconciliation are active Slice 14 work. Final `make verify`,
 remaining focused publication/receipt checks and exact-head controller validation
 must finish before the canonical PR is ready; no Slice 14 PR is open yet.
