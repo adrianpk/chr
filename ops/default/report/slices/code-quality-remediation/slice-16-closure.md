@@ -16,8 +16,13 @@ or the unchanged final delivery-set gate.
 
 ## Delivered Behavior
 
-Implementation and reconciliation are in progress. No Slice 16 runtime or gate
-acceptance is claimed.
+All 771 baseline signature rows now resolve to actual current declarations and
+owning contracts: 121 A, 230 B and 420 C. There are 570 conforming named-contract
+dispositions, 200 retained cohesive five-input cases and one exact external
+Bubble Tea Model.Update exception. The two-declaration capability recheck maps
+both its real adapter and stage policy owner. Current production has 9,411
+signature declarations, no function above five inputs and no other invalid
+result shape. This is source reconciliation, not runtime or integrated acceptance.
 
 ## Implementation Notes
 
@@ -34,6 +39,8 @@ wire, persistence, authority, hashing and process contracts remain governing.
 
 ## Files of Interest
 
+- [Final baseline signatures](../../../plan/code-quality-remediation-slice-16-signatures.csv): all 771 original identities, current signatures and code-backed contract provenance.
+
 - `scripts/goquality/`: complete production source and dependency policy.
 - `.golangci.yml`: pinned repository lint settings.
 - `ops/default/plan/code-quality-remediation-*.csv`: baseline and source evidence.
@@ -41,8 +48,13 @@ wire, persistence, authority, hashing and process contracts remain governing.
 ## Validation
 
 Activation is metadata only. The predecessor's exact-head evidence is retained
-in its report and controller receipt. Slice 16 focused and required checks have
-not run.
+in its report and controller receipt. The final 771-row ledger verifies current
+identities/signatures against the production inventory and the owning source-move
+and semantic disposition ledgers. All 230 B rows have individual existing
+cohesion decisions. Ten remaining qualified-method/relocation gaps are resolved
+from the actual Slice 9/12 move entries and the shared database extraction commit.
+The secondary-file/type/duplicate/dead-code/minor reconciliation remains active.
+No complete Slice 16 runtime or integrated acceptance is claimed.
 
 ## Risks and Follow-ups
 
