@@ -101,7 +101,7 @@ func nativeRolePriorityFixture(t *testing.T, role string) (*Store, string, func(
 	f := newWorkflowPreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
 	if role == "preparation" {
 		return f.store, f.run.ID, func() error {
-			_, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
+			_, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git)
 
 			return err
 		}
@@ -109,12 +109,12 @@ func nativeRolePriorityFixture(t *testing.T, role string) (*Store, string, func(
 
 	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "review", "mode", "agentic_review")
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); err != nil {
 		t.Fatal(err)
 	}
 
 	return f.store, f.run.ID, func() error {
-		_, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, workflowReviewWorker("pass", "", ""))
+		_, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, workflowReviewWorker("pass", "", ""))
 
 		return err
 	}
@@ -253,13 +253,13 @@ func TestNativeRoleHumanWait(t *testing.T) {
 	f := newWorkflowPreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
 	writeWorkflowTestConfigValue(t, f.store.layout.ProjectDir(), "review", "mode", "human_review")
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); err != nil {
 		t.Fatal(err)
 	}
 
 	nativeRoleAdmit(t, f.store, f.run.ID)
 
-	binding, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
+	binding, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, nil)
 	if err != nil || binding.State != workflowstate.ReviewWaitingApproval {
 		t.Fatal("fixture did not retain human approval", binding, err)
 	}
@@ -326,7 +326,7 @@ func TestNativeRoleBlocked(t *testing.T) {
 	peer, next := nativeRolePeer(t, f.store, "peer", "PRJ-91", "refs/heads/dev")
 
 	before := nativeQueueImages(t, f.store.layout.Root())
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrOwned) {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("preparation resumed a blocked native owner", err)
 	}
 

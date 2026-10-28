@@ -9,9 +9,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// PublishWorkflowNativeSubmission journals the host dispatch before invoking the
+// PublishNativeSubmission journals the host dispatch before invoking the
 // exact atomic Git publisher once. A transport result is not a delivery receipt.
-func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider, publisher GitPublisher) (NativePublicationResult, error) {
+func PublishNativeSubmission(ctx context.Context, store *Store, guard IntegrationBudgetGuard, provider PublicationGuardProvider, publisher GitPublisher) (NativePublicationResult, error) {
 	if provider == nil || publisher == nil {
 		return NativePublicationResult{Submission: workflowstate.Submission{}, Transport: workflowstate.GitPublicationResult{}}, workflowstate.ErrAtomicGuard
 	}
@@ -19,7 +19,7 @@ func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard Integ
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	nativeDispatch, err := s.prepareWorkflowNativeDispatch(ctx, guard, provider)
+	nativeDispatch, err := store.prepareWorkflowNativeDispatch(ctx, guard, provider)
 
 	submission, request := nativeDispatch.Submission, nativeDispatch.Request
 	if err != nil {
@@ -31,17 +31,17 @@ func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard Integ
 	}
 
 	request.BeforeSend = func(ctx context.Context, advertisement workflowstate.GitPublicationAdvertisement) error {
-		return s.retainWorkflowNativeSend(ctx, submission, request, advertisement)
+		return store.retainWorkflowNativeSend(ctx, submission, request, advertisement)
 	}
 
 	watched, stop := context.WithCancel(ctx)
 
-	watchWorkflowStop(watched, s, workflowStopWatch{Claim: &Claim{InvocationID: guard.InvocationID}, Cancel: stop})
+	watchWorkflowStop(watched, store, workflowStopWatch{Claim: &Claim{InvocationID: guard.InvocationID}, Cancel: stop})
 	defer stop()
 
 	result, err := publisher.PublishWorkflowGit(watched, request)
 
-	finished, finishErr := s.completeWorkflowNativeDispatch(ctx, submission, result)
+	finished, finishErr := store.completeWorkflowNativeDispatch(ctx, submission, result)
 
 	return NativePublicationResult{Submission: finished, Transport: result}, errors.Join(err, finishErr)
 }

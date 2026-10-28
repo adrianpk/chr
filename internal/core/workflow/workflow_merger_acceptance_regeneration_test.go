@@ -45,7 +45,7 @@ func nativeMergerRegenerationFixture(t *testing.T, failing bool) (workflowPrepar
 func TestNativeMergerHostRegeneration(t *testing.T) {
 	f, request, harness := nativeMergerRegenerationFixture(t, false)
 
-	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git)
+	attempt, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.git})
 	if err != nil || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "accepted_pending_validation" {
 		t.Fatal("host regeneration rejected", attempt.Failure, err)
 	}
@@ -94,7 +94,7 @@ func checkNativeMergerAcceptanceRetainedProcedures(t *testing.T, f workflowPrepa
 func TestNativeMergerHostRegenerationFailure(t *testing.T) {
 	f, request, harness := nativeMergerRegenerationFixture(t, true)
 
-	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git)
+	attempt, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.git})
 	if err == nil || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "rejected" || attempt.Acceptance.Next != nil {
 		t.Fatal("failed procedure accepted", err)
 	}

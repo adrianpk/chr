@@ -25,7 +25,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 	entry = nativeRoleTransition(t, f.store, entry, "preparing")
 	nativeRoleTransition(t, f.store, entry, "validating")
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, provider, unavailableNativePreparation{}); err == nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, provider, unavailableNativePreparation{}); err == nil {
 		t.Fatal("missing credentials did not block preparation")
 	}
 

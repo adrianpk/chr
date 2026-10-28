@@ -33,7 +33,7 @@ func TestNativeStopBeforeSend(t *testing.T) {
 		return transport.PublishWorkflowGit(ctx, request)
 	}}
 
-	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication, err := PublishNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 
 	submission, result := nativePublication.Submission, nativePublication.Transport
 	if err == nil || result.CommandsSent || result.State != "not_sent" || submission.Native.DispatchState != workflowstate.NativeDispatchQuiescent {
@@ -59,7 +59,7 @@ func TestNativeStopRejected(t *testing.T) {
 	transport := NewWorkflowGitPublisher(b.SourceRepository, remote)
 	publisher.publisher = nativeOutcomePublisher(t, f, remote, transport, "source race")
 
-	nativePublication2, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication2, err := PublishNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 	submission := nativePublication2.Submission
 
 	if err == nil {

@@ -191,7 +191,7 @@ func TestNativeMergerAcceptanceStale(t *testing.T) {
 	f, request, harness, _ := nativeMergerAcceptanceFixture(t, "merger-stale-accept", "merge")
 	git := nativeMergerAcceptanceGit{OSWorkflowPreparationGit: f.git, afterCommit: func() { f.provider.target = strings.Repeat("f", 40) }}
 
-	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, git)
+	attempt, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: git})
 	if !errors.Is(err, workflowstate.ErrConflict) || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "rejected" || attempt.Acceptance.Next == nil {
 		t.Fatal("stale result accepted or private evidence lost", err)
 	}
@@ -207,7 +207,7 @@ func testNativeMergerAcceptance(t *testing.T, method string) {
 	f, request, harness, state := nativeMergerAcceptanceFixture(t, "merger-accept", method)
 	sourceStatus := workflowIntegrationCommand(t, f.run.Lane.Worktree, "status", "--porcelain")
 
-	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git)
+	attempt, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.git})
 	if err != nil || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "accepted_pending_validation" || attempt.Acceptance.Next == nil {
 		t.Fatal("host acceptance failed", attempt.Failure, err)
 	}
@@ -232,7 +232,7 @@ func testNativeMergerAcceptanceReject(t *testing.T, mutate func(*testing.T, work
 		}
 	}}
 
-	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, git)
+	attempt, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: git})
 	if !errors.Is(err, workflowstate.ErrConflict) || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "rejected" || attempt.Acceptance.Next != nil {
 		t.Fatal("invalid actual edit accepted", attempt.Failure, err)
 	}

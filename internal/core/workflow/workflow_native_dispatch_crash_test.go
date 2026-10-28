@@ -52,7 +52,7 @@ func TestNativeFaultProcess(t *testing.T) {
 	transport := NewWorkflowGitPublisher(candidate.Native.SourceRepository, os.Getenv("CHR_NATIVE_FAULT_REMOTE"))
 
 	publisher := nativeFaultPublisher(t, transport, stage)
-	if _, err := store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, store, id), provider, publisher); err != nil {
+	if _, err := PublishNativeSubmission(t.Context(), store, nativeBudgetGuard(t, store, id), provider, publisher); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -88,7 +88,7 @@ func TestNativeFaultLease(t *testing.T) {
 
 	f.store = NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication, err := PublishNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 	submission := nativePublication.Submission
 
 	if !errors.Is(err, workflowstate.ErrObservationRequired) || publisher.calls.Load() != 0 {
@@ -155,7 +155,7 @@ func checkNativeFaultCrash(t *testing.T, stage string) {
 
 	f.store = NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	nativePublication2, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication2, err := PublishNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 
 	submission := nativePublication2.Submission
 	if !errors.Is(err, workflowstate.ErrObservationRequired) || publisher.calls.Load() != 0 || submission.ID == "" {

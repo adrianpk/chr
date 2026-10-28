@@ -18,7 +18,7 @@ func TestWorkflowPublicationLateResponse(t *testing.T) {
 	finished := make(chan error, 1)
 
 	go func() {
-		_, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, p, workflowSubmissionObserver(f))
+		_, err := SubmitIntegration(t.Context(), f.store, f.run.ID, p, workflowSubmissionObserver(f))
 		finished <- err
 	}()
 

@@ -15,7 +15,7 @@ func (s service) ReviewWorkflowSlice(ctx context.Context, id string, reviewer []
 		return workflowstate.ReviewBinding{}, err
 	}
 
-	return dependencies.Store.ReviewWorkflowSlice(ctx, id, dependencies.Provider, reviewer)
+	return workflowcore.ReviewSlice(ctx, dependencies.Store, id, dependencies.Provider, reviewer)
 }
 
 // ApproveWorkflowSlice binds explicit approval to the current displayed hash.

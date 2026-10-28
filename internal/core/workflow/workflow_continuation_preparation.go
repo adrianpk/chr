@@ -29,7 +29,7 @@ func (s *Store) retryWorkflowContinuationPreparation(ctx context.Context, id str
 		return workflowContinuationStep{Steps: 0, Reason: "blocked"}, workflowstate.ErrAtomicGuard
 	}
 
-	if _, err := s.PrepareWorkflowSliceIntegration(ctx, id, provider, ports.Publication.Preparer); err != nil {
+	if _, err := PrepareIntegration(ctx, s, id, provider, ports.Publication.Preparer); err != nil {
 		return workflowContinuationStep{Steps: 0, Reason: "blocked"}, err
 	}
 

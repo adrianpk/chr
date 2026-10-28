@@ -59,7 +59,7 @@ func TestNativeDecisionDefer(t *testing.T) {
 func TestNativeDecisionDriver(t *testing.T) {
 	f, request, harness := nativeMergerExecution(t, "merger-decision")
 
-	attempt, err := f.store.ExecuteWorkflowMerger(t.Context(), request, harness, f.provider)
+	attempt, err := ExecuteMerger(t.Context(), f.store, request, harness, f.provider)
 	if err != nil || attempt.Proposal == nil || attempt.Proposal.Outcome != "needs_decision" {
 		t.Fatal("driver question failed", attempt.Failure, err)
 	}

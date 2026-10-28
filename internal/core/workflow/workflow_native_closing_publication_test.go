@@ -43,12 +43,12 @@ func nativeClosingPublicationPeer(t *testing.T, f nativeClosingFixture) nativeSu
 	entry = nativeRoleTransition(t, peer, nativeReviewEntry(t, peer, entry.InvocationID), "preparing")
 	nativeRoleTransition(t, peer, entry, "validating")
 
-	prepared, err := peer.PrepareWorkflowSliceIntegration(t.Context(), entry.InvocationID, provider, NewWorkflowPreparationGit(repo, f.fixture.remote))
+	prepared, err := PrepareIntegration(t.Context(), peer, entry.InvocationID, provider, NewWorkflowPreparationGit(repo, f.fixture.remote))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := peer.ReviewWorkflowSlice(t.Context(), entry.InvocationID, provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), peer, entry.InvocationID, provider, nil); err != nil {
 		t.Fatal(err)
 	}
 

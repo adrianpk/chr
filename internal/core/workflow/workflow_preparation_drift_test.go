@@ -20,7 +20,7 @@ func nativeTargetDrift(t *testing.T, method string) {
 	f := newNativePreparationFixture(t, method, workflowPreparationGate("test -f result.txt && if test -f target.txt; then cat target.txt; fi"))
 	store, id := f.f.store, f.f.run.ID
 
-	first, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git)
+	first, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +32,7 @@ func nativeTargetDrift(t *testing.T, method string) {
 	store = NewWorkflowStore(store.layout, store.projectID)
 	f.f.store = store
 
-	fresh, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git)
+	fresh, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git)
 	if err != nil {
 		t.Fatal("changed target was not revalidated", err)
 	}
@@ -78,7 +78,7 @@ func nativeDriftRetained(t *testing.T, f nativePreparationFixture, before workfl
 		t.Fatal("replacement base was not charged once", err)
 	}
 
-	again, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git)
+	again, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git)
 	if err != nil || again.Validation.AttemptID != fresh.Validation.AttemptID {
 		t.Fatal("unchanged replacement repeated its gate", err)
 	}

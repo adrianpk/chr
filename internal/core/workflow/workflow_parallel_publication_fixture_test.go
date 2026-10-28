@@ -160,11 +160,11 @@ func workflowParallelPublicationPrepare(t *testing.T, store *Store, record workf
 
 	fixture := workflowPreparationFixture{store: store, hierarchy: MaterializationResult{Tasks: []workflowstate.Record{record}}, run: workflowTestRead(t, store, id), provider: provider.workflowPreparationProviderFixture, git: NewWorkflowPreparationGit(pr.Repository, remote), remote: remote, base: pr.BaseCommit}
 
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, fixture.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), store, id, provider, fixture.git); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), id, provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), store, id, provider, nil); err != nil {
 		t.Fatal(err)
 	}
 

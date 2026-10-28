@@ -41,7 +41,7 @@ func nativeDecisionRepairExecute(t *testing.T, f workflowPreparationFixture, req
 
 	request = nativeDecisionRepairRequest(t, f, request, resolved, state)
 
-	attempt, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git)
+	attempt, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.git})
 	if err != nil || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "accepted_pending_validation" {
 		t.Fatal("current answer did not reach host repair", attempt.Failure, err)
 	}

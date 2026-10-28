@@ -83,7 +83,7 @@ func TestNativeMergerExecution(t *testing.T) {
 	source := workflowIntegrationCommand(t, f.run.Lane.Worktree, "status", "--porcelain")
 	head := workflowIntegrationCommand(t, f.run.Lane.Worktree, "rev-parse", "HEAD")
 
-	attempt, err := f.store.ExecuteWorkflowMerger(t.Context(), request, harness, f.provider)
+	attempt, err := ExecuteMerger(t.Context(), f.store, request, harness, f.provider)
 	if err != nil || attempt.Proposal == nil || attempt.Proposal.Outcome != "resolved" || len(attempt.Checks) != 0 {
 		t.Fatal("bounded merger failed", attempt.Failure, err)
 	}
@@ -206,7 +206,7 @@ func TestNativeMergerAdmission(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if _, err := f.store.ExecuteWorkflowMerger(t.Context(), request, driver, f.provider); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := ExecuteMerger(t.Context(), f.store, request, driver, f.provider); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("invalid admission dispatched", err)
 			}
 		})

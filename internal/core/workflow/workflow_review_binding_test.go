@@ -14,7 +14,7 @@ import (
 func TestWorkflowReviewRevocation(t *testing.T) {
 	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 
-	old, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
+	old, err := ReviewSlice(t.Context(), store, run.ID, provider, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func TestWorkflowReviewRevocation(t *testing.T) {
 		t.Fatal("policy change retained old grant")
 	}
 
-	current, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
+	current, err := ReviewSlice(t.Context(), store, run.ID, provider, nil)
 	if err != nil || current.State != workflowstate.ReviewWaitingApproval || current.InputHash == old.InputHash || current.Round != old.Round+1 {
 		t.Fatal("changed policy reused another candidate grant")
 	}
@@ -47,7 +47,7 @@ func TestWorkflowReviewRevocation(t *testing.T) {
 // outside membership, subjective blocking notes and decisions for another input.
 func TestWorkflowReviewDecisionChecks(t *testing.T) {
 	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewHuman)
-	if _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), store, run.ID, provider, nil); err != nil {
 		t.Fatal(err)
 	}
 

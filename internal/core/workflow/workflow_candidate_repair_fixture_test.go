@@ -108,7 +108,7 @@ func nativeCandidateRepairStart(t *testing.T, method, reason string) (nativePrep
 		writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "review", "mode", string(workflowstate.ReviewAgentic))
 	}
 
-	candidate, err := f.f.store.PrepareWorkflowSliceIntegration(t.Context(), f.f.run.ID, f.provider, f.f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.f.store, f.f.run.ID, f.provider, f.f.git)
 	if reason == "combined_gate_regression" && err == nil {
 		t.Fatal("semantic regression did not fail its exact host gate")
 	}
@@ -119,7 +119,7 @@ func nativeCandidateRepairStart(t *testing.T, method, reason string) (nativePrep
 		}
 
 		key := f.f.run.Members[len(f.f.run.Members)-1].Admission.Key
-		if _, err := f.f.store.ReviewWorkflowSlice(t.Context(), f.f.run.ID, f.provider, workflowReviewWorker("needs_changes", key, "")); err != nil {
+		if _, err := ReviewSlice(t.Context(), f.f.store, f.f.run.ID, f.provider, workflowReviewWorker("needs_changes", key, "")); err != nil {
 			t.Fatal("review repair failed", err)
 		}
 	}

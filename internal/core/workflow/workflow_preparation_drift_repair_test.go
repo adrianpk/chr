@@ -15,12 +15,12 @@ func TestNativeRepairedTargetDrift(t *testing.T) {
 	f, request, harness := nativeCandidateRepairFixture(t, "rebase", "combined_gate_regression")
 	store, id := f.f.store, f.f.run.ID
 
-	attempt, err := store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.f.git)
+	attempt, err := ExecuteMergerRepair(t.Context(), store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.f.git})
 	if err != nil || attempt.Acceptance == nil {
 		t.Fatal("repair was not accepted", err)
 	}
 
-	first, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git)
+	first, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,7 +30,7 @@ func TestNativeRepairedTargetDrift(t *testing.T) {
 
 	store = NewWorkflowStore(store.layout, store.projectID)
 
-	fresh, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git)
+	fresh, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git)
 	if err == nil || fresh.Input.Git.BaseCommit != f.f.base || fresh.Input.Native.ClaimGeneration != first.Input.Native.ClaimGeneration+1 || len(fresh.Input.MergerAttemptRefs) != 0 {
 		t.Fatal("replacement reused old semantic repair or missed the unchanged gate", err)
 	}
@@ -70,7 +70,7 @@ func TestNativeDriftLimit(t *testing.T) {
 		nativeDriftMoveTarget(t, &f, "Bounded replacement "+strconv.Itoa(round+1))
 
 		store = NewWorkflowStore(store.layout, store.projectID)
-		if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git); err != nil {
+		if _, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git); err != nil {
 			t.Fatal("admitted drift failed", err)
 		}
 	}
@@ -78,7 +78,7 @@ func TestNativeDriftLimit(t *testing.T) {
 	before := workflowTestRead(t, store, id)
 	nativeDriftMoveTarget(t, &f, "Exhausted replacement")
 
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git); !errors.Is(err, ErrWorkflowIntegrationBudget) {
+	if _, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("exhausted invocation admitted another replacement", err)
 	}
 

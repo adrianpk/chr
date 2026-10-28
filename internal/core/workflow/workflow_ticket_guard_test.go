@@ -248,11 +248,11 @@ func TestWorkflowTicketRepair(t *testing.T) {
 	f, _ := workflowTicketPreparationFixture(t, "rebase", "ticket")
 	workflowTicketReviewConfig(t, f.store, "rebase", workflowstate.ReviewAgentic)
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); err != nil {
 		t.Fatal(err)
 	}
 
-	binding, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, workflowReviewWorker("needs_changes", "PRJ-90", ""))
+	binding, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, workflowReviewWorker("needs_changes", "PRJ-90", ""))
 	if err != nil || binding.State != workflowstate.ReviewNeedsRepair {
 		t.Fatal("independent task review did not request repair", err)
 	}

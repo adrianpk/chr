@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, state MergerRepairState, attempt *MergerAttempt) (workflowstate.IntegrationTreeRepair, error) {
+func (host workflowMergerHost) observeRepair(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, state MergerRepairState, attempt *MergerAttempt) (workflowstate.IntegrationTreeRepair, error) {
 	prepared := claimed.Prepared
 	input, proposal := attempt.Input, *attempt.Proposal
 	repair := workflowstate.IntegrationTreeRepair{Input: input, Proposal: proposal, OriginalParent: state.OriginalParent, PreparedParent: state.PreparedParent, Source: state.CurrentSource, BaselineTree: state.Tree}
@@ -34,7 +34,7 @@ func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claimed workflo
 		return repair, err
 	}
 
-	evidence, err := s.regenerateWorkflowMerger(ctx, claimed, provider, reader, workflowMergerRepairInput{State: state, Repair: repair})
+	evidence, err := host.regenerate(ctx, claimed, provider, reader, workflowMergerRepairInput{State: state, Repair: repair})
 
 	repair.Regeneration = evidence
 	if err != nil {

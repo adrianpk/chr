@@ -100,13 +100,13 @@ func (s *Store) continueWorkflowNativePhase(ctx context.Context, owner workflowN
 	case "preparing":
 		return s.transitionWorkflowNativeContinuation(ctx, entry, guard, "validating")
 	case "validating":
-		_, err := s.PrepareWorkflowSliceIntegration(ctx, guard.InvocationID, provider, ports.Preparer)
+		_, err := PrepareIntegration(ctx, s, guard.InvocationID, provider, ports.Preparer)
 
 		return err
 	case "reviewing", "waiting_review":
 		return s.reviewWorkflowNativeContinuation(ctx, guard, provider, ports)
 	case "ready_to_publish":
-		_, err := s.PublishWorkflowNativeSubmission(ctx, guard, provider, ports.NativePublisher)
+		_, err := PublishNativeSubmission(ctx, s, guard, provider, ports.NativePublisher)
 
 		return err
 	case "publishing", "observing":
@@ -121,7 +121,7 @@ func (s *Store) continueWorkflowNativePhase(ctx context.Context, owner workflowN
 }
 
 func (s *Store) reviewWorkflowNativeContinuation(ctx context.Context, guard IntegrationBudgetGuard, provider NativePreparationProvider, ports PublicationPorts) error {
-	review, err := s.ReviewWorkflowSlice(ctx, guard.InvocationID, provider, ports.Reviewer)
+	review, err := ReviewSlice(ctx, s, guard.InvocationID, provider, ports.Reviewer)
 	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		return err
 	}

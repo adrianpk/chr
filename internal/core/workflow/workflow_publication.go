@@ -59,16 +59,16 @@ func (s *Store) advanceWorkflowLegacyIntegration(ctx context.Context, id string,
 		return s.workflowIntegrationProgress(ctx, id, nil, s.blockWorkflowMissingPublisher(ctx, id))
 	}
 
-	if _, err := s.PrepareWorkflowSliceIntegration(ctx, id, publisher, ports.Preparer); err != nil {
+	if _, err := PrepareIntegration(ctx, s, id, publisher, ports.Preparer); err != nil {
 		return s.workflowIntegrationProgress(ctx, id, nil, err)
 	}
 
-	review, err := s.ReviewWorkflowSlice(ctx, id, publisher, ports.Reviewer)
+	review, err := ReviewSlice(ctx, s, id, publisher, ports.Reviewer)
 	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		return s.workflowIntegrationProgress(ctx, id, nil, err)
 	}
 
-	_, err = s.SubmitWorkflowSliceIntegration(ctx, id, publisher, ports.Observer)
+	_, err = SubmitIntegration(ctx, s, id, publisher, ports.Observer)
 
 	return s.workflowIntegrationProgress(ctx, id, nil, err)
 }

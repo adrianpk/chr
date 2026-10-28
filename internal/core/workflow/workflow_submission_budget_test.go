@@ -25,7 +25,7 @@ func TestWorkflowSubmissionBudget(t *testing.T) {
 			workflowSubmissionMoveBase(t, f, provider, store, attempt)
 		}
 
-		submission, err := store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git)
+		submission, err := SubmitIntegration(t.Context(), store, f.run.ID, provider, git)
 		if !errors.Is(err, context.DeadlineExceeded) || submission.Attempt != attempt || submission.Guard.PreparationHash == previousHash {
 			t.Fatalf("attempt %d: %+v, %v", attempt, submission, err)
 		}
@@ -33,7 +33,7 @@ func TestWorkflowSubmissionBudget(t *testing.T) {
 		previousHash = submission.Guard.PreparationHash
 		provider.seal(submission.ID)
 
-		if _, err := store.ReconcileWorkflowSubmission(t.Context(), f.run.ID, provider, git); err != nil {
+		if _, err := ReconcileSubmission(t.Context(), store, f.run.ID, provider, git); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -44,7 +44,7 @@ func TestWorkflowSubmissionBudget(t *testing.T) {
 func assertWorkflowSubmissionBudget(t *testing.T, f workflowPreparationFixture, provider *workflowSubmissionProviderFixture) {
 	t.Helper()
 
-	if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, ErrWorkflowIntegrationBudget) {
+	if _, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatalf("exhausted budget: %v", err)
 	}
 
@@ -62,11 +62,11 @@ func workflowSubmissionMoveBase(t *testing.T, f workflowPreparationFixture, prov
 	workflowIntegrationCommit(t, f.actor, fmt.Sprintf("target-%d.txt", number), "More target content")
 	workflowIntegrationCommand(t, f.actor, "push", "origin", "dev")
 
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, provider, f.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), store, f.run.ID, provider, f.git); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), f.run.ID, provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), store, f.run.ID, provider, nil); err != nil {
 		t.Fatal(err)
 	}
 }

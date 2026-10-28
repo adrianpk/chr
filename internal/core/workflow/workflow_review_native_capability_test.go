@@ -58,7 +58,7 @@ func nativeReviewRejectEntryPoints(t *testing.T, f nativePreparationFixture, bin
 		t.Fatal("changed native inputs reused a grant")
 	}
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), id, provider, nil); err == nil {
+	if _, err := ReviewSlice(t.Context(), store, id, provider, nil); err == nil {
 		t.Fatal("changed native inputs reused review")
 	}
 

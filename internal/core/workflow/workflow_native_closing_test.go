@@ -35,12 +35,12 @@ func newNativeClosingTransportFixture(t *testing.T, method string, gate workflow
 
 	provider := &nativePreparationProviderFixture{f.provider, "policy-v1"}
 
-	candidate, err := store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, provider, f.git)
+	candidate, err := PrepareIntegration(t.Context(), store, f.run.ID, provider, f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), f.run.ID, provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), store, f.run.ID, provider, nil); err != nil {
 		t.Fatal(err)
 	}
 

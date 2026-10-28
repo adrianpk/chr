@@ -28,7 +28,7 @@ func (s service) PrepareWorkflowSliceIntegration(ctx context.Context, id string)
 		git = workflowcore.NewWorkflowPreparationGit(run.Selection.Target.Repository, run.Selection.Target.Repository)
 	}
 
-	return store.PrepareWorkflowSliceIntegration(ctx, id, provider, git)
+	return workflowcore.PrepareIntegration(ctx, store, id, provider, git)
 }
 
 // CheckWorkflowPublicationGuard returns exact current authority for submission.

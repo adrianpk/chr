@@ -21,18 +21,18 @@ type PublicationProvider interface {
 	ObserveWorkflowSubmission(context.Context, workflowstate.Submission) (workflowstate.SubmissionObservation, error)
 }
 
-// SubmitWorkflowSliceIntegration journals intent and exclusion before provider
+// SubmitIntegration journals intent and exclusion before provider
 // IO. An existing uncertain intent is observed, never submitted again blindly.
-func (s *Store) SubmitWorkflowSliceIntegration(ctx context.Context, id string, provider PublicationProvider, git IntegrationGit) (submission workflowstate.Submission, err error) {
+func SubmitIntegration(ctx context.Context, store *Store, id string, provider PublicationProvider, git IntegrationGit) (submission workflowstate.Submission, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	submissionIntent, err := s.beginWorkflowSubmission(ctx, id, provider, git)
+	submissionIntent, err := store.beginWorkflowSubmission(ctx, id, provider, git)
 
 	submission, submit := submissionIntent.Submission, submissionIntent.Dispatch
 	if err != nil || !submit {
 		if err == nil && submission.State == workflowstate.SubmissionAwaitingObservation {
-			return s.ReconcileWorkflowSubmission(ctx, id, provider, git)
+			return ReconcileSubmission(ctx, store, id, provider, git)
 		}
 
 		return submission, err
@@ -40,21 +40,21 @@ func (s *Store) SubmitWorkflowSliceIntegration(ctx context.Context, id string, p
 
 	watched, stop := context.WithCancel(ctx)
 
-	watchWorkflowStop(watched, s, workflowStopWatch{Claim: &Claim{InvocationID: id}, Cancel: stop})
+	watchWorkflowStop(watched, store, workflowStopWatch{Claim: &Claim{InvocationID: id}, Cancel: stop})
 	defer stop()
 
-	responses := workflowSubmissionResponses{store: s, invocationID: id, submissionID: submission.ID}
+	responses := workflowSubmissionResponses{store: store, invocationID: id, submissionID: submission.ID}
 
 	return workflowforge.Submit(ctx, watched, submission, provider, responses)
 }
 
-// ReconcileWorkflowSubmission observes actual canonical delivery or a sealed
+// ReconcileSubmission observes actual canonical delivery or a sealed
 // unpublished operation without consuming another attempt or running a worker.
-func (s *Store) ReconcileWorkflowSubmission(ctx context.Context, id string, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, error) {
+func ReconcileSubmission(ctx context.Context, store *Store, id string, provider PublicationProvider, git IntegrationGit) (workflowstate.Submission, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	submission, err := s.ReadWorkflowSubmission(ctx, id)
+	submission, err := store.ReadWorkflowSubmission(ctx, id)
 	if err != nil {
 		return submission, err
 	}
@@ -68,7 +68,7 @@ func (s *Store) ReconcileWorkflowSubmission(ctx context.Context, id string, prov
 		return submission, err
 	}
 
-	return s.finishWorkflowSubmissionObservation(ctx, id, observed)
+	return store.finishWorkflowSubmissionObservation(ctx, id, observed)
 }
 
 // ReadWorkflowSubmission reads the durable common-directory journal, including

@@ -19,7 +19,7 @@ func TestWorkflowReviewConcurrent(t *testing.T) {
 
 			caller := NewWorkflowStore(store.layout, store.projectID)
 
-			_, err := caller.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
+			_, err := ReviewSlice(t.Context(), caller, run.ID, provider, nil)
 			results <- err
 		}()
 	}

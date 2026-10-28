@@ -111,6 +111,21 @@ path. Store retains input freezing, credentials, process records, replay checks,
 candidate fences and complete result/claim transactions. A successful manual
 worker exit still requires explicit candidate reconciliation and host validation.
 
+## Review, merger and publication lifecycle
+
+`PrepareIntegration`, `ReviewSlice`, `ReviewSliceWithHarness`, `ExecuteMerger` and
+`ExecuteMergerRepair` coordinate the existing guarded operations. Private review
+and merger hosts own role deadlines, stop watches, workspace handles, supervised
+commands and partial execution evidence. `MergerRepairPorts` pairs the provider
+fence with the trusted repair Git capability. An accepted repair still requires
+candidate validation; it does not grant review or publication.
+
+`SubmitIntegration`, `ReconcileSubmission` and `PublishNativeSubmission` keep
+bounded transport and observation sequencing outside Store. Store retains the
+original intent/exclusion, BeforeSend checks, response/observation journals,
+claims, budgets, explicit approval and complete acceptance transactions. Actual
+service and continuation callers use these operations directly.
+
 ## Bounded operation results
 
 Capacity observations pair the retained process with liveness; owned worker

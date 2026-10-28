@@ -24,10 +24,10 @@ type PreparationGit interface {
 	PrepareWorkflowIntegration(context.Context, workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error)
 }
 
-// PrepareWorkflowSliceIntegration validates the configured combined result on
+// PrepareIntegration validates the configured combined result on
 // a separate owned lane. It preserves task proofs and the canonical PR identity.
-func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, provider PublicationGuardProvider, git PreparationGit) (candidate workflowstate.IntegrationCandidate, err error) {
-	selection, err := s.prepareWorkflowIntegrationValidation(ctx, id, provider, git)
+func PrepareIntegration(ctx context.Context, store *Store, id string, provider PublicationGuardProvider, git PreparationGit) (candidate workflowstate.IntegrationCandidate, err error) {
+	selection, err := store.prepareWorkflowIntegrationValidation(ctx, id, provider, git)
 	if err != nil || selection.Cached != nil {
 		if selection.Cached != nil {
 			return *selection.Cached, err
@@ -48,13 +48,13 @@ func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, 
 
 	watched, stop := context.WithCancel(ctx)
 
-	watchWorkflowStop(watched, s, workflowStopWatch{Claim: claim, Cancel: stop})
+	watchWorkflowStop(watched, store, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)
 	defer cancel()
 
-	validation := workflowIntegrationValidation{store: s, claim: claim, prepared: prepared, provider: provider}
+	validation := workflowIntegrationValidation{store: store, claim: claim, prepared: prepared, provider: provider}
 
 	return workflowintegrate.ValidateCandidate(deadline, watched, workflowintegrate.ValidationInput{InvocationID: id, Round: selection.Round, Preparation: input, Lane: prepared.input.Lane, Result: newWorkflowTaskResult(prepared)}, validation)
 }

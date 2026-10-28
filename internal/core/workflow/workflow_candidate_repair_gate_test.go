@@ -23,7 +23,7 @@ func nativeCandidateRepairGate(t *testing.T, method, reason string) {
 	store, id := f.f.store, f.f.run.ID
 	before := workflowTestRead(t, store, id)
 
-	attempt, err := store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.f.git)
+	attempt, err := ExecuteMergerRepair(t.Context(), store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.f.git})
 	if err != nil || attempt.Acceptance == nil || attempt.Acceptance.Outcome != "accepted_pending_validation" || attempt.Acceptance.Next.Result == nil {
 		t.Fatal("semantic repair was not accepted", attempt.Failure, err)
 	}
@@ -34,7 +34,7 @@ func nativeCandidateRepairGate(t *testing.T, method, reason string) {
 
 	store = NewWorkflowStore(store.layout, store.projectID)
 
-	candidate, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git)
+	candidate, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git)
 	if err != nil {
 		t.Fatal("accepted result did not receive the unchanged host gate", err)
 	}

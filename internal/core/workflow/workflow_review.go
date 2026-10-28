@@ -17,28 +17,33 @@ const (
 // ErrWorkflowReviewRepairBudget requires an explicit operator action.
 var ErrWorkflowReviewRepairBudget = errors.New("automatic review repair budget exhausted")
 
-// ReviewWorkflowSlice applies current policy. Human review retains a wait;
+// workflowReviewHost owns bounded role execution outside persistence.
+type workflowReviewHost struct {
+	store *Store
+}
+
+// ReviewSlice applies current policy. Human review retains a wait;
 // trusted mode grants validated inputs; agentic mode runs a separate owned role.
 // It never publishes a target or completes a task.
-func (s *Store) ReviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, reviewer []string) (result workflowstate.ReviewBinding, err error) {
-	return s.reviewWorkflowSlice(ctx, id, provider, workflowReviewRole{Command: reviewer})
+func ReviewSlice(ctx context.Context, store *Store, id string, provider PullRequestProvider, reviewer []string) (result workflowstate.ReviewBinding, err error) {
+	return (workflowReviewHost{store: store}).execute(ctx, id, provider, workflowReviewRole{Command: reviewer})
 }
 
-// ReviewWorkflowSliceWithHarness shares the invocation ceiling with executor and merger calls.
-func (s *Store) ReviewWorkflowSliceWithHarness(ctx context.Context, id string, provider PullRequestProvider, harness AgentHarness) (workflowstate.ReviewBinding, error) {
-	return s.reviewWorkflowSlice(ctx, id, provider, workflowReviewRole{Command: harness.Command, Harness: &harness})
+// ReviewSliceWithHarness shares the invocation ceiling with executor and merger calls.
+func ReviewSliceWithHarness(ctx context.Context, store *Store, id string, provider PullRequestProvider, harness AgentHarness) (workflowstate.ReviewBinding, error) {
+	return (workflowReviewHost{store: store}).execute(ctx, id, provider, workflowReviewRole{Command: harness.Command, Harness: &harness})
 }
 
-func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider PullRequestProvider, role workflowReviewRole) (result workflowstate.ReviewBinding, err error) {
+func (host workflowReviewHost) execute(ctx context.Context, id string, provider PullRequestProvider, role workflowReviewRole) (result workflowstate.ReviewBinding, err error) {
 	reviewer := role.Command
 
-	reviewPreparation, err := s.prepareWorkflowReview(ctx, id, provider, role)
+	reviewPreparation, err := host.store.prepareWorkflowReview(ctx, id, provider, role)
 
 	claim, prepared, binding := reviewPreparation.Claim, reviewPreparation.Prepared, reviewPreparation.Binding
 
 	if err != nil || claim == nil {
 		if err == nil && binding.State == workflowstate.ReviewNeedsRepair {
-			err = s.repairWorkflowReviewedSlice(ctx, id, binding.RepairTaskKey, provider)
+			err = host.store.repairWorkflowReviewedSlice(ctx, id, binding.RepairTaskKey, provider)
 		}
 
 		return binding, err
@@ -52,7 +57,7 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 
 	watched, stop := context.WithCancel(ctx)
 
-	watchWorkflowStop(watched, s, workflowStopWatch{Claim: claim, Cancel: stop})
+	watchWorkflowStop(watched, host.store, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)
@@ -67,12 +72,12 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 		return result, executionErr
 	}
 
-	decisions := workflowReviewDecisions{store: s, claim: claim, prepared: prepared, provider: provider}
+	decisions := workflowReviewDecisions{store: host.store, claim: claim, prepared: prepared, provider: provider}
 	completed, err := workflowreview.Complete(ctx, watched, workflowreview.Execution{Input: prepared.input.Review, Output: command, Failure: executionErr}, decisions)
 
 	result = completed.Binding
 	if err == nil && result.State == workflowstate.ReviewNeedsRepair {
-		err = s.repairWorkflowReviewedSlice(ctx, id, completed.RepairTaskKey, provider)
+		err = host.store.repairWorkflowReviewedSlice(ctx, id, completed.RepairTaskKey, provider)
 	}
 
 	return result, err

@@ -66,7 +66,7 @@ func nativeSourceDrift(t *testing.T, name, path string) {
 	nativeDriftMoveSource(t, &f, name, path)
 
 	provider := nativeDriftProviderFixture{f.provider, f.f.remote}
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := PrepareIntegration(t.Context(), store, id, provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed source did not require a scope decision", err)
 	}
 
@@ -134,7 +134,7 @@ func nativeSourceDriftRetry(t *testing.T, f nativePreparationFixture, provider n
 	store := NewWorkflowStore(f.f.store.layout, f.f.store.projectID)
 
 	id := f.f.run.ID
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git); err == nil || workflowTestRead(t, store, id).Revision != before.Revision {
+	if _, err := PrepareIntegration(t.Context(), store, id, provider, f.f.git); err == nil || workflowTestRead(t, store, id).Revision != before.Revision {
 		t.Fatal("restart admitted unverified source or repeated a decision", err)
 	}
 

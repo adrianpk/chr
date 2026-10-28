@@ -32,7 +32,7 @@ func checkWorkflowReviewRepairStep(t *testing.T, store *Store, hierarchy Materia
 
 	caller := NewWorkflowStore(store.layout, store.projectID)
 
-	binding, err := caller.ReviewWorkflowSlice(t.Context(), id, provider, workflowReviewWorker("needs_changes", key, ""))
+	binding, err := ReviewSlice(t.Context(), caller, id, provider, workflowReviewWorker("needs_changes", key, ""))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,14 +79,14 @@ func checkWorkflowReviewExhausted(t *testing.T, store *Store, id, key string, pr
 	t.Helper()
 
 	caller := NewWorkflowStore(store.layout, store.projectID)
-	_, err := caller.ReviewWorkflowSlice(t.Context(), id, provider, workflowReviewWorker("needs_changes", key, ""))
+	_, err := ReviewSlice(t.Context(), caller, id, provider, workflowReviewWorker("needs_changes", key, ""))
 
 	retained := workflowTestRead(t, store, id)
 	if !errors.Is(err, ErrWorkflowReviewRepairBudget) || retained.Review.State != workflowstate.ReviewRepairLimitExceeded || retained.Blocker == nil {
 		t.Fatalf("repair budget: %+v, %v", retained.Review, err)
 	}
 
-	if _, err := caller.ReviewWorkflowSlice(t.Context(), id, provider, []string{"false"}); !errors.Is(err, ErrWorkflowReviewRepairBudget) {
+	if _, err := ReviewSlice(t.Context(), caller, id, provider, []string{"false"}); !errors.Is(err, ErrWorkflowReviewRepairBudget) {
 		t.Fatal(err)
 	}
 
@@ -140,7 +140,7 @@ func testWorkflowReviewDuringIO(t *testing.T, name, before string) {
 		worker[2] += "\nprint(' '*20000)"
 	}
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, worker); err == nil {
+	if _, err := ReviewSlice(t.Context(), store, run.ID, provider, worker); err == nil {
 		t.Fatal("role returned an unauthorized grant")
 	}
 
@@ -162,7 +162,7 @@ func testWorkflowReviewStop(t *testing.T, intent string) {
 	worker := []string{"sh", "-c", "printf started > \"$1\"; sleep 20", "review", marker}
 	done := make(chan error, 1)
 
-	go func() { _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, worker); done <- err }()
+	go func() { _, err := ReviewSlice(t.Context(), store, run.ID, provider, worker); done <- err }()
 
 	waitWorkflowClaimFile(t, marker)
 
@@ -179,7 +179,7 @@ func testWorkflowReviewStop(t *testing.T, intent string) {
 		t.Fatal("stop rewound validated slice work")
 	}
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, []string{"false"}); err == nil {
+	if _, err := ReviewSlice(t.Context(), store, run.ID, provider, []string{"false"}); err == nil {
 		t.Fatal("stopped review restarted")
 	}
 
@@ -195,7 +195,7 @@ func checkWorkflowReviewResume(t *testing.T, store *Store, id string, provider *
 			t.Fatal(err)
 		}
 
-		if _, err := store.ReviewWorkflowSlice(t.Context(), id, provider, workflowReviewWorker("pass", "", "")); err != nil {
+		if _, err := ReviewSlice(t.Context(), store, id, provider, workflowReviewWorker("pass", "", "")); err != nil {
 			t.Fatal(err)
 		}
 	}

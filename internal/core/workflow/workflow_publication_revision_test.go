@@ -61,7 +61,7 @@ func workflowPublicationSealedAttempt(t *testing.T, f workflowPreparationFixture
 
 	p.unknown = true
 
-	submission, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, p, workflowSubmissionObserver(f))
+	submission, err := SubmitIntegration(t.Context(), f.store, f.run.ID, p, workflowSubmissionObserver(f))
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
@@ -69,7 +69,7 @@ func workflowPublicationSealedAttempt(t *testing.T, f workflowPreparationFixture
 	p.seal(submission.ID)
 
 	p.unknown = false
-	if _, err := f.store.ReconcileWorkflowSubmission(t.Context(), f.run.ID, p, workflowSubmissionObserver(f)); err != nil {
+	if _, err := ReconcileSubmission(t.Context(), f.store, f.run.ID, p, workflowSubmissionObserver(f)); err != nil {
 		t.Fatal(err)
 	}
 

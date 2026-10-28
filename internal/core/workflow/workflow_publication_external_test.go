@@ -28,7 +28,7 @@ func testWorkflowPublicationExternal(t *testing.T, method, intent string) {
 	f, p := newWorkflowSubmissionFixture(t, method)
 
 	p.unknown = true
-	if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, p, workflowSubmissionObserver(f)); !errors.Is(err, context.DeadlineExceeded) {
+	if _, err := SubmitIntegration(t.Context(), f.store, f.run.ID, p, workflowSubmissionObserver(f)); !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
 

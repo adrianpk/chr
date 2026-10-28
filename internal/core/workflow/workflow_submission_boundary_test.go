@@ -31,7 +31,7 @@ func testWorkflowSubmissionAtomicGuard(t *testing.T, changed string) {
 		moveWorkflowSubmissionRef(t, ctx, f.remote, changed, s)
 	}
 
-	submission, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+	submission, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f))
 	if err == nil || submission.State != workflowstate.SubmissionAwaitingObservation || submission.Response != workflowstate.SubmissionResponseUnknown {
 		t.Fatalf("guard rejection: %+v, %v", submission, err)
 	}
@@ -40,7 +40,7 @@ func testWorkflowSubmissionAtomicGuard(t *testing.T, changed string) {
 		t.Fatal("stale source or base was published")
 	}
 
-	observed, err := f.store.ReconcileWorkflowSubmission(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+	observed, err := ReconcileSubmission(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f))
 	if err != nil || observed.State != workflowstate.SubmissionUnpublished || observed.ID != submission.ID || provider.calls != 1 {
 		t.Fatalf("sealed guard rejection: %+v, %v", observed, err)
 	}
@@ -75,7 +75,7 @@ func testWorkflowSubmissionExclusion(t *testing.T, intent string) {
 	provider.unknown = true
 	git := workflowSubmissionObserver(f)
 
-	first, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git)
+	first, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, git)
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func testWorkflowSubmissionExclusion(t *testing.T, intent string) {
 	}
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
-	if _, err := restarted.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, git); !errors.Is(err, workflowstate.ErrObservationRequired) || provider.calls != 1 {
+	if _, err := SubmitIntegration(t.Context(), restarted, f.run.ID, provider, git); !errors.Is(err, workflowstate.ErrObservationRequired) || provider.calls != 1 {
 		t.Fatal("stop intent or restart cleared an unknown submission", err)
 	}
 
@@ -93,7 +93,7 @@ func testWorkflowSubmissionExclusion(t *testing.T, intent string) {
 	assertWorkflowSubmissionExcluded(t, alias, first)
 	provider.seal(first.ID)
 
-	sealed, err := restarted.ReconcileWorkflowSubmission(t.Context(), f.run.ID, provider, git)
+	sealed, err := ReconcileSubmission(t.Context(), restarted, f.run.ID, provider, git)
 	if err != nil || sealed.State != workflowstate.SubmissionUnpublished || workflowTestRead(t, restarted, f.run.ID).StopIntent != intent {
 		t.Fatalf("observation changed the stop or failed to seal: %+v, %v", sealed, err)
 	}
@@ -146,7 +146,7 @@ func TestWorkflowSubmissionProjectionLoss(t *testing.T) {
 	f, provider := newWorkflowSubmissionFixture(t, "squash")
 	provider.unknown = true
 
-	submission, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+	submission, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f))
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func TestWorkflowSubmissionStop(t *testing.T) {
 	finished := make(chan error, 1)
 
 	go func() {
-		_, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+		_, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f))
 		finished <- err
 	}()
 
@@ -183,7 +183,7 @@ func TestWorkflowSubmissionStop(t *testing.T) {
 		t.Fatal("owned provider call did not start")
 	}
 
-	if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, workflowstate.ErrObservationRequired) {
+	if _, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("concurrent publisher repeated an uncertain intent", err)
 	}
 

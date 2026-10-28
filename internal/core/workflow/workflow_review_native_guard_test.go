@@ -62,7 +62,7 @@ func TestNativeReviewObserver(t *testing.T) {
 	f, _ := nativeReviewFixture(t, workflowstate.ReviewHuman)
 	store, id := f.f.store, f.f.run.ID
 
-	binding, err := store.ReviewWorkflowSlice(t.Context(), id, f.provider, nil)
+	binding, err := ReviewSlice(t.Context(), store, id, f.provider, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestNativeReviewPolicyIO(t *testing.T) {
 				}
 			}}
 
-			if _, err := store.ReviewWorkflowSlice(t.Context(), id, provider, nil); err == nil {
+			if _, err := ReviewSlice(t.Context(), store, id, provider, nil); err == nil {
 				t.Fatal("capability IO used stale local policy")
 			}
 

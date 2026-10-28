@@ -93,7 +93,7 @@ func testWorkflowReviewMode(t *testing.T, mode workflowstate.ReviewMode, decisio
 
 	store, hierarchy, run, provider := workflowReviewFixture(t, mode)
 
-	binding, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, workflowReviewWorker(decision, "", ""))
+	binding, err := ReviewSlice(t.Context(), store, run.ID, provider, workflowReviewWorker(decision, "", ""))
 	if err != nil || string(binding.State) != state {
 		t.Fatalf("review: %+v, %v", binding, err)
 	}
@@ -105,7 +105,7 @@ func testWorkflowReviewMode(t *testing.T, mode workflowstate.ReviewMode, decisio
 
 	checkWorkflowReviewProjection(t, store, hierarchy.Tasks[:len(run.Members)], binding)
 
-	again, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, []string{"false"})
+	again, err := ReviewSlice(t.Context(), store, run.ID, provider, []string{"false"})
 	if err != nil || again != binding || workflowTestRead(t, store, run.ID).Revision != retained.Revision {
 		t.Fatal("review retry repeated a decision")
 	}
@@ -118,7 +118,7 @@ func testWorkflowReviewApproval(t *testing.T, mode workflowstate.ReviewMode) {
 
 	store, _, run, provider := workflowReviewFixture(t, mode)
 
-	binding, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, workflowReviewWorker("human_required", "", ""))
+	binding, err := ReviewSlice(t.Context(), store, run.ID, provider, workflowReviewWorker("human_required", "", ""))
 	if err != nil {
 		t.Fatal(err)
 	}

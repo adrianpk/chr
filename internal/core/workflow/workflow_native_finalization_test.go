@@ -116,12 +116,12 @@ func TestNativeFinalizationTicket(t *testing.T) {
 
 	provider := &nativePreparationProviderFixture{f.provider, "policy-v1"}
 
-	candidate, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, provider, f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.store, f.run.ID, provider, f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), f.store, f.run.ID, provider, nil); err != nil {
 		t.Fatal(err)
 	}
 

@@ -12,7 +12,7 @@ func TestNativeDispatchEvidence(t *testing.T) {
 	f := newNativeSubmissionFixture(t)
 	publisher, _ := nativeDispatchPublisher(t, f)
 
-	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
+	nativePublication, err := PublishNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), f.provider, publisher)
 	submission := nativePublication.Submission
 
 	if err != nil {

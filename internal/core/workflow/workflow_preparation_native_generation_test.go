@@ -14,7 +14,7 @@ func TestNativePreparationGeneration(t *testing.T) {
 	fixture := newNativePreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
 	f := fixture.f
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, fixture.provider, f.git); err != nil {
 		t.Fatal(err)
 	}
 
@@ -35,7 +35,7 @@ func TestNativePreparationGeneration(t *testing.T) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	if _, err := restarted.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := PrepareIntegration(t.Context(), restarted, f.run.ID, fixture.provider, f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("prior queue generation reused combined evidence", err)
 	}
 

@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) regenerateWorkflowMerger(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, reader workflowIntegrationReader, input workflowMergerRepairInput) ([]workflowstate.MergerRegenerationEvidence, error) {
+func (host workflowMergerHost) regenerate(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, reader workflowIntegrationReader, input workflowMergerRepairInput) ([]workflowstate.MergerRegenerationEvidence, error) {
 	state, repair := input.State, input.Repair
 	evidence := []workflowstate.MergerRegenerationEvidence{}
 
@@ -25,7 +25,7 @@ func (s *Store) regenerateWorkflowMerger(ctx context.Context, claimed workflowCl
 			return evidence, workflowstate.ErrConflict
 		}
 
-		observation, err := s.runWorkflowMergerRegeneration(ctx, claimed, provider, reader, workflowMergerRegenerationInput{State: state, Conflict: conflict, Tree: tree})
+		observation, err := host.runRegeneration(ctx, claimed, provider, reader, workflowMergerRegenerationInput{State: state, Conflict: conflict, Tree: tree})
 
 		evidence = append(evidence, observation)
 		if err != nil {
@@ -42,7 +42,7 @@ func (s *Store) regenerateWorkflowMerger(ctx context.Context, claimed workflowCl
 	return evidence, nil
 }
 
-func (s *Store) runWorkflowMergerRegeneration(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, reader workflowIntegrationReader, input workflowMergerRegenerationInput) (workflowstate.MergerRegenerationEvidence, error) {
+func (host workflowMergerHost) runRegeneration(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, reader workflowIntegrationReader, input workflowMergerRegenerationInput) (workflowstate.MergerRegenerationEvidence, error) {
 	state, conflict, tree := input.State, input.Conflict, input.Tree
 	claim, prepared := claimed.Claim, claimed.Prepared
 	evidence := workflowstate.MergerRegenerationEvidence{ConflictID: conflict.ID, InputTree: tree}
@@ -56,7 +56,7 @@ func (s *Store) runWorkflowMergerRegeneration(ctx context.Context, claimed workf
 	commandInput.mergerProcedure = true
 	commandInput.directory = prepared.input.Lane.Worktree
 
-	evidence.Command, err = s.runWorkflowMergerProcedure(ctx, workflowClaimedMerger{Claim: claim, Prepared: commandInput}, provider, conflict.RegenerationCommand)
+	evidence.Command, err = host.runProcedure(ctx, workflowClaimedMerger{Claim: claim, Prepared: commandInput}, provider, conflict.RegenerationCommand)
 	if err != nil {
 		return evidence, err
 	}
@@ -70,7 +70,7 @@ func (s *Store) runWorkflowMergerRegeneration(ctx context.Context, claimed workf
 		return evidence, err
 	}
 
-	evidence.Validation, err = s.runWorkflowMergerProcedure(ctx, workflowClaimedMerger{Claim: claim, Prepared: commandInput}, provider, conflict.ValidationCommand)
+	evidence.Validation, err = host.runProcedure(ctx, workflowClaimedMerger{Claim: claim, Prepared: commandInput}, provider, conflict.ValidationCommand)
 	if err != nil {
 		return evidence, err
 	}
@@ -87,9 +87,9 @@ func (s *Store) runWorkflowMergerRegeneration(ctx context.Context, claimed workf
 	return evidence, nil
 }
 
-func (s *Store) runWorkflowMergerProcedure(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, command []string) (workflowstate.CommandResult, error) {
+func (host workflowMergerHost) runProcedure(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, command []string) (workflowstate.CommandResult, error) {
 	claim, prepared := claimed.Claim, claimed.Prepared
-	if err := s.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
+	if err := host.store.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
 		return workflowstate.CommandResult{}, err
 	}
 
@@ -106,7 +106,7 @@ func (s *Store) runWorkflowMergerProcedure(ctx context.Context, claimed workflow
 		return result, workflowstate.ErrConflict
 	}
 
-	return result, s.guardWorkflowMergerAcceptance(ctx, claimed, provider)
+	return result, host.store.guardWorkflowMergerAcceptance(ctx, claimed, provider)
 }
 
 func checkWorkflowMergerLocalConfig(directory string, expected []byte) error {

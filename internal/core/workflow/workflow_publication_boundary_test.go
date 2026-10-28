@@ -17,7 +17,7 @@ func TestWorkflowPublicationUnknown(t *testing.T) {
 	f, p := newWorkflowSubmissionFixture(t, "merge")
 	p.unknown = true
 
-	submission, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, p, workflowSubmissionObserver(f))
+	submission, err := SubmitIntegration(t.Context(), f.store, f.run.ID, p, workflowSubmissionObserver(f))
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
@@ -101,11 +101,11 @@ func checkWorkflowPublicationUnknownInputs(t *testing.T, f workflowPreparationFi
 		run  func() error
 	}{
 		{"preparation", func() error {
-			_, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, p, f.git)
+			_, err := PrepareIntegration(t.Context(), f.store, f.run.ID, p, f.git)
 
 			return err
 		}},
-		{"review", func() error { _, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, p, nil); return err }},
+		{"review", func() error { _, err := ReviewSlice(t.Context(), f.store, f.run.ID, p, nil); return err }},
 		{"repair", func() error {
 			_, err := f.store.RepairWorkflowSlice(t.Context(), f.run.ID, f.run.Members[0].Admission.Key)
 

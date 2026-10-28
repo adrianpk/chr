@@ -30,7 +30,7 @@ func nativeReviewFence(t *testing.T, change string) {
 	done := make(chan error, 1)
 
 	go func() {
-		_, err := store.ReviewWorkflowSlice(t.Context(), id, f.provider, workflowReviewWorker("pass", "", before))
+		_, err := ReviewSlice(t.Context(), store, id, f.provider, workflowReviewWorker("pass", "", before))
 		done <- err
 	}()
 

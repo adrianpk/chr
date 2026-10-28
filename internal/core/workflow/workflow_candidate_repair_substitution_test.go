@@ -20,12 +20,12 @@ func TestNativeCandidateSubstitution(t *testing.T) {
 	f, request, harness := nativeCandidateRepairFixture(t, "rebase", "actionable_review_finding")
 	store, id := f.f.store, f.f.run.ID
 
-	if _, err := store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.f.git); err != nil {
+	if _, err := ExecuteMergerRepair(t.Context(), store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.f.git}); err != nil {
 		t.Fatal(err)
 	}
 
 	git := nativeCandidateRegenerateGit{f.f.git}
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := PrepareIntegration(t.Context(), store, id, f.provider, git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("host gate substituted another P for accepted repair", err)
 	}
 

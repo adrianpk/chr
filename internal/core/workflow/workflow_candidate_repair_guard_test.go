@@ -43,7 +43,7 @@ func nativeCandidateRepairGuard(t *testing.T, change string) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ExecuteMergerRepair(t.Context(), store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.f.git}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("changed admission acquired merger authority", err)
 	}
 

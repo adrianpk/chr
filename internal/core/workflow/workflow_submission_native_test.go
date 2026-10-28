@@ -23,7 +23,7 @@ func newNativeSubmissionFixture(t *testing.T) nativeSubmissionFixture {
 	fixture, candidate := nativeReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 	store, id := fixture.f.store, fixture.f.run.ID
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), id, fixture.provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), store, id, fixture.provider, nil); err != nil {
 		t.Fatal(err)
 	}
 

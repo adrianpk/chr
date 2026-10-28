@@ -31,7 +31,7 @@ func TestNativeParallelDrift(t *testing.T) {
 		t.Fatal("changed target reached native dispatch", err)
 	}
 
-	fresh, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, second.f.git)
+	fresh, err := PrepareIntegration(t.Context(), store, id, provider, second.f.git)
 	if err != nil || fresh.Input.Git.BaseCommit != one.Input.Git.ResultCommit || fresh.Validation.Validation[0].Stdout != "combined" || fresh.Input.Native.ClaimGeneration != old.Input.Native.ClaimGeneration+1 {
 		t.Fatal("parallel target was not revalidated as a combined result", err)
 	}
@@ -50,7 +50,7 @@ func nativeDriftParallelReview(t *testing.T, store *Store, id string, provider n
 		t.Fatal("fresh parallel gate inherited old review")
 	}
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), id, provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), store, id, provider, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -81,12 +81,12 @@ func nativeDriftParallelLane(t *testing.T, lane workflowParallelPublicationLane)
 		t.Fatal(err)
 	}
 
-	candidate, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, observed, f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.store, f.run.ID, observed, f.git)
 	if err != nil {
 		t.Fatal("native parallel preparation", err)
 	}
 
-	if _, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, observed, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), f.store, f.run.ID, observed, nil); err != nil {
 		t.Fatal(err)
 	}
 

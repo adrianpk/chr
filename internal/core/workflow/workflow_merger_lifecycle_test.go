@@ -18,7 +18,7 @@ func TestNativeMergerDescendants(t *testing.T) {
 	finished := make(chan error, 1)
 
 	go func() {
-		_, err := f.store.ExecuteWorkflowMerger(t.Context(), request, harness, f.provider)
+		_, err := ExecuteMerger(t.Context(), f.store, request, harness, f.provider)
 		finished <- err
 	}()
 
@@ -89,7 +89,7 @@ func TestNativeMergerTimeout(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	attempt, err := f.store.ExecuteWorkflowMerger(t.Context(), request, harness, f.provider)
+	attempt, err := ExecuteMerger(t.Context(), f.store, request, harness, f.provider)
 	if err == nil || attempt.Proposal != nil {
 		t.Fatal("timeout produced a proposal", err)
 	}
@@ -119,7 +119,7 @@ func nativeMergerStop(t *testing.T, intent string) {
 	finished := make(chan error, 1)
 
 	go func() {
-		_, err := f.store.ExecuteWorkflowMerger(t.Context(), request, harness, f.provider)
+		_, err := ExecuteMerger(t.Context(), f.store, request, harness, f.provider)
 		finished <- err
 	}()
 

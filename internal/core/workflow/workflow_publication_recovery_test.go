@@ -63,7 +63,7 @@ func TestWorkflowPublicationCrash(t *testing.T) {
 	for _, index := range []int{0, 5, 9} {
 		t.Run(strconv.Itoa(index), func(t *testing.T) {
 			f, p := newWorkflowSubmissionFixture(t, "rebase")
-			if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, p, workflowSubmissionObserver(f)); err != nil {
+			if _, err := SubmitIntegration(t.Context(), f.store, f.run.ID, p, workflowSubmissionObserver(f)); err != nil {
 				t.Fatal(err)
 			}
 

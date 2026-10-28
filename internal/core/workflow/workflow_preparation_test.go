@@ -113,12 +113,12 @@ func testWorkflowPreparationMethod(t *testing.T, method string) {
 	gate := workflowPreparationGate("test -f result.txt && if test -f target.txt; then printf combined; else printf source; fi")
 	f := newWorkflowPreparationFixture(t, method, gate)
 
-	old, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
+	old, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	candidate, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func testWorkflowPreparationMethod(t *testing.T, method string) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	again, err := restarted.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
+	again, err := PrepareIntegration(t.Context(), restarted, f.run.ID, f.provider, f.git)
 	if err != nil || again.Validation.AttemptID != candidate.Validation.AttemptID || workflowTestRead(t, restarted, f.run.ID).Revision != before.Revision {
 		t.Fatal("preparation retry repeated validation or changed evidence")
 	}
@@ -155,7 +155,7 @@ func checkWorkflowPreparationReview(t *testing.T, f workflowPreparationFixture, 
 		t.Fatal("source-only review authorized new combined content")
 	}
 
-	fresh, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
+	fresh, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, nil)
 	if err != nil || fresh.InputHash == old.InputHash {
 		t.Fatalf("fresh combined review: %+v, %v", fresh, err)
 	}

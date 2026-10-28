@@ -30,11 +30,11 @@ func TestNativeAgentReview(t *testing.T) {
 
 	provider := nativeAgentReviewProvider(t, store, request, run.Invocation.ID, candidate)
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), run.Invocation.ID, provider, workflowReviewWorker("pass", "", "")); !errors.Is(err, ErrWorkflowIntegrationBudget) {
+	if _, err := ReviewSlice(t.Context(), store, run.Invocation.ID, provider, workflowReviewWorker("pass", "", "")); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("raw reviewer bypassed invocation accounting", err)
 	}
 
-	review, err := store.ReviewWorkflowSliceWithHarness(t.Context(), run.Invocation.ID, provider, harness)
+	review, err := ReviewSliceWithHarness(t.Context(), store, run.Invocation.ID, provider, harness)
 	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		t.Fatal("certified reviewer failed", err)
 	}

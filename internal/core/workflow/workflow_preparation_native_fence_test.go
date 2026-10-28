@@ -29,7 +29,7 @@ func nativePreparationFence(t *testing.T, change string) {
 	done := make(chan error, 1)
 
 	go func() {
-		_, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git)
+		_, err := PrepareIntegration(t.Context(), f.store, f.run.ID, fixture.provider, f.git)
 		done <- err
 	}()
 

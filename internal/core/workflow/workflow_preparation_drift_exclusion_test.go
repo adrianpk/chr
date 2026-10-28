@@ -36,7 +36,7 @@ func TestNativeDriftExclusion(t *testing.T) {
 	submission := beginNativeSubmission(t, submit)
 	nativeDriftMoveTarget(t, &f, "Externally advanced target")
 
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, f.f.git); !errors.Is(err, workflowstate.ErrObservationRequired) {
+	if _, err := PrepareIntegration(t.Context(), store, id, f.provider, f.f.git); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("pending native intent admitted replacement", err)
 	}
 
@@ -45,7 +45,7 @@ func TestNativeDriftExclusion(t *testing.T) {
 	store = NewWorkflowStore(store.layout, store.projectID)
 	git := nativeDriftExclusionGit{f.f.git, store, contenthash.Sum([]byte("independent queue")), contenthash.Sum([]byte(candidate.Native.SourceRepository + "\n" + candidate.Native.TargetRef))}
 
-	fresh, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, f.provider, git)
+	fresh, err := PrepareIntegration(t.Context(), store, id, f.provider, git)
 	if err != nil || fresh.Input.Git.BaseCommit != f.f.base {
 		t.Fatal("target exclusion remained held during replacement", err)
 	}
@@ -99,7 +99,7 @@ func TestNativeSealedSourceDrift(t *testing.T) {
 	nativeDriftSealInputs(t, submit, submission, f.provider.pr.HeadCommit, f.f.base)
 
 	provider := nativeDriftProviderFixture{f.provider, f.f.remote}
-	if _, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := PrepareIntegration(t.Context(), store, id, provider, f.f.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("sealed source drift did not require a scope decision", err)
 	}
 

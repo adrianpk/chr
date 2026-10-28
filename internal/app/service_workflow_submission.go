@@ -17,7 +17,7 @@ func (s service) SubmitWorkflowSliceIntegration(ctx context.Context, id string) 
 		return workflowstate.Submission{}, err
 	}
 
-	return store.SubmitWorkflowSliceIntegration(ctx, id, provider, s.workflowIntegrationObserver(run))
+	return workflowcore.SubmitIntegration(ctx, store, id, provider, s.workflowIntegrationObserver(run))
 }
 
 // ReconcileWorkflowSubmission observes a retained submission without retrying it.
@@ -38,7 +38,7 @@ func (s service) ReconcileWorkflowSubmission(ctx context.Context, id string) (wo
 		return store.ReconcileWorkflowNativeIntegration(ctx, id, ports.Publication)
 	}
 
-	return store.ReconcileWorkflowSubmission(ctx, id, provider, s.workflowIntegrationObserver(run))
+	return workflowcore.ReconcileSubmission(ctx, store, id, provider, s.workflowIntegrationObserver(run))
 }
 
 // ReadWorkflowSubmission reports the common-directory submission checkpoint.

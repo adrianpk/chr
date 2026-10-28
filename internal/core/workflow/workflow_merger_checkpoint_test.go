@@ -26,7 +26,7 @@ func TestNativeMergerCheckpointGuards(t *testing.T) {
 			}
 
 			before := nativeQueueImages(t, f.store.layout.Root())
-			if _, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git); err == nil {
+			if _, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.git}); err == nil {
 				t.Fatal("unverified checkpoint dispatched")
 			}
 
@@ -49,7 +49,7 @@ func TestNativeMergerCheckpointBinding(t *testing.T) {
 	}
 
 	request.Input = input
-	if _, err := f.store.ExecuteWorkflowMergerRepair(t.Context(), request, harness, f.provider, f.git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ExecuteMergerRepair(t.Context(), f.store, request, harness, MergerRepairPorts{Provider: f.provider, Git: f.git}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale checkpoint binding accepted", err)
 	}
 }

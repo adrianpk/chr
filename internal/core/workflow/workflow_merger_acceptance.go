@@ -32,11 +32,17 @@ type MergerAcceptance struct {
 	Failure       string                               `json:"failure,omitempty"`
 }
 
-// ExecuteWorkflowMergerRepair runs a certified driver at a frozen checkpoint,
+// MergerRepairPorts binds the provider fence and trusted repair Git capability.
+type MergerRepairPorts struct {
+	Provider PullRequestProvider
+	Git      MergerRepairGit
+}
+
+// ExecuteMergerRepair runs a certified driver at a frozen checkpoint,
 // independently verifies its edits and commits only through the trusted Git
 // port. It retains accepted/rejected evidence without granting publication.
-func (s *Store) ExecuteWorkflowMergerRepair(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider, git MergerRepairGit) (MergerAttempt, error) {
-	if request.Input.RepairCheckpointRef == nil || git == nil {
+func ExecuteMergerRepair(ctx context.Context, store *Store, request MergerRequest, harness MergerHarness, ports MergerRepairPorts) (MergerAttempt, error) {
+	if request.Input.RepairCheckpointRef == nil || ports.Git == nil {
 		return MergerAttempt{}, workflowstate.ErrConflict
 	}
 
@@ -46,14 +52,14 @@ func (s *Store) ExecuteWorkflowMergerRepair(ctx context.Context, request MergerR
 	}
 
 	request = frozen
-	if err := s.checkWorkflowMergerRepairRequest(ctx, request.Input, git); err != nil {
+	if err := store.checkWorkflowMergerRepairRequest(ctx, request.Input, ports.Git); err != nil {
 		return MergerAttempt{}, err
 	}
 
-	return s.executeWorkflowMerger(ctx, request, harness, provider, git)
+	return (workflowMergerHost{store: store}).execute(ctx, request, harness, ports.Provider, ports.Git)
 }
 
-func (s *Store) acceptWorkflowMerger(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, git MergerRepairGit, attempt *MergerAttempt) (err error) {
+func (host workflowMergerHost) accept(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, git MergerRepairGit, attempt *MergerAttempt) (err error) {
 	claim := claimed.Claim
 	acceptance := &MergerAcceptance{SchemaVersion: 1, AttemptID: claim.AttemptID, InputHash: attempt.Input.InputHash, CheckpointRef: *attempt.Input.RepairCheckpointRef, Outcome: MergerRejected, CheckedAt: time.Now().UTC()}
 
@@ -69,7 +75,7 @@ func (s *Store) acceptWorkflowMerger(ctx context.Context, claimed workflowClaime
 		return nil
 	}
 
-	if err := s.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
+	if err := host.store.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
 		return err
 	}
 
@@ -82,17 +88,17 @@ func (s *Store) acceptWorkflowMerger(ctx context.Context, claimed workflowClaime
 		return err
 	}
 
-	repair, err := s.observeWorkflowMergerRepair(ctx, claimed, provider, state, attempt)
+	repair, err := host.observeRepair(ctx, claimed, provider, state, attempt)
 	acceptance.Repair = &repair
 
 	if err != nil {
 		return err
 	}
 
-	return s.commitWorkflowMergerRepair(ctx, claimed, provider, git, workflowMergerRepairCommit{State: state, Repair: repair, Acceptance: acceptance})
+	return host.commitRepair(ctx, claimed, provider, git, workflowMergerRepairCommit{State: state, Repair: repair, Acceptance: acceptance})
 }
 
-func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, git MergerRepairGit, commit workflowMergerRepairCommit) error {
+func (host workflowMergerHost) commitRepair(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, git MergerRepairGit, commit workflowMergerRepairCommit) error {
 	state, repair, acceptance := commit.State, commit.Repair, commit.Acceptance
 
 	prepared := claimed.Prepared
@@ -100,7 +106,7 @@ func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claimed workflow
 		return err
 	}
 
-	if err := s.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
+	if err := host.store.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
 		return err
 	}
 
@@ -111,7 +117,7 @@ func (s *Store) commitWorkflowMergerRepair(ctx context.Context, claimed workflow
 
 	acceptance.Next = &next
 
-	if err := s.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
+	if err := host.store.guardWorkflowMergerAcceptance(ctx, claimed, provider); err != nil {
 		return err
 	}
 

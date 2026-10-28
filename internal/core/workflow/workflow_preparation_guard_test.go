@@ -52,12 +52,12 @@ func TestWorkflowPreparationGuard(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Guard fixture checks host proof"})
 
-			c, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
+			c, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			if _, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil); err != nil {
+			if _, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, nil); err != nil {
 				t.Fatal(err)
 			}
 
@@ -77,7 +77,7 @@ func TestWorkflowPreparationUnsupported(t *testing.T) {
 	f.provider.guarded = false
 
 	before := workflowTestRead(t, f.store, f.run.ID)
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrAtomicGuard) {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrAtomicGuard) {
 		t.Fatalf("guard: %v", err)
 	}
 
@@ -137,7 +137,7 @@ func TestWorkflowPreparationIO(t *testing.T) {
 	f := newWorkflowPreparationFixture(t, "merge", workflowstate.Validation{WaiverReason: "Preparation IO fixture"})
 
 	git := workflowPreparationGitHook{git: f.git, after: func() { f.provider.revision = "changed-after-Git" }}
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("stale preparation: %v", err)
 	}
 

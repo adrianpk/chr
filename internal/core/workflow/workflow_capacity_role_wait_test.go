@@ -65,7 +65,7 @@ func workflowCapacityRoleFixture(t *testing.T, role string) (*Store, string, fun
 		fixture := newWorkflowPreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
 
 		return fixture.store, fixture.run.ID, func() error {
-			_, err := fixture.store.PrepareWorkflowSliceIntegration(t.Context(), fixture.run.ID, fixture.provider, fixture.git)
+			_, err := PrepareIntegration(t.Context(), fixture.store, fixture.run.ID, fixture.provider, fixture.git)
 
 			return err
 		}
@@ -115,7 +115,7 @@ func workflowCapacityReviewFixture(t *testing.T, role string) (*Store, string, f
 	}
 
 	return store, run.ID, func() error {
-		_, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, workflowReviewWorker("pass", "", ""))
+		_, err := ReviewSlice(t.Context(), store, run.ID, provider, workflowReviewWorker("pass", "", ""))
 
 		return err
 	}

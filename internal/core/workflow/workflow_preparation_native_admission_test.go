@@ -28,7 +28,7 @@ func nativePreparationAdmission(t *testing.T, condition string) {
 	provider := nativePreparationAdmissionProvider(t, fixture, condition)
 	before := workflowTestRead(t, f.store, f.run.ID)
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, provider, f.git); err == nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, provider, f.git); err == nil {
 		t.Fatal("unsupported native entrypoint claimed validation")
 	}
 

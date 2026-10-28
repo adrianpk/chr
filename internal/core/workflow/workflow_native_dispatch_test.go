@@ -61,7 +61,7 @@ func TestNativeDispatch(t *testing.T) {
 	publisher, remote := nativeDispatchPublisher(t, f)
 	guard := nativeBudgetGuard(t, f.store, f.entry.InvocationID)
 
-	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+	nativePublication, err := PublishNativeSubmission(t.Context(), f.store, guard, f.provider, publisher)
 
 	submission, result := nativePublication.Submission, nativePublication.Transport
 	if err != nil || result.State != workflowstate.GitPublicationApplied || publisher.calls.Load() != 1 {
@@ -88,7 +88,7 @@ func nativeDispatchNoRepeat(t *testing.T, f nativeSubmissionFixture, publisher *
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 	guard := nativeBudgetGuard(t, restarted, f.entry.InvocationID)
 
-	nativePublication2, err := restarted.PublishWorkflowNativeSubmission(t.Context(), guard, f.provider, publisher)
+	nativePublication2, err := PublishNativeSubmission(t.Context(), restarted, guard, f.provider, publisher)
 
 	again := nativePublication2.Submission
 	if !errors.Is(err, workflowstate.ErrObservationRequired) || again.ID != submission.ID || publisher.calls.Load() != 1 {

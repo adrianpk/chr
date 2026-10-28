@@ -26,13 +26,13 @@ func testWorkflowSubmissionCorruption(t *testing.T, changed string) {
 	f, provider := newWorkflowSubmissionFixture(t, "rebase")
 	provider.unknown = true
 
-	first, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+	first, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f))
 	if !errors.Is(err, context.DeadlineExceeded) {
 		t.Fatal(err)
 	}
 
 	journal := corruptWorkflowSubmission(t, f, first, changed)
-	if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); err == nil || provider.calls != 1 {
+	if _, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f)); err == nil || provider.calls != 1 {
 		t.Fatal("journal corruption permitted another provider mutation", err)
 	}
 

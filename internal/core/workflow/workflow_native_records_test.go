@@ -41,7 +41,7 @@ func nativeRecordCandidate(t *testing.T, method string) (*Store, workflowstate.I
 
 	f := newWorkflowPreparationFixture(t, method, workflowPreparationGate("test -f result.txt && if test -f target.txt; then printf combined; else printf source; fi"))
 
-	candidate, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git)
 	if err != nil {
 		t.Fatal(err)
 	}

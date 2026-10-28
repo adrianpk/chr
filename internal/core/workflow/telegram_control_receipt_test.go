@@ -23,7 +23,7 @@ func telegramControlJournalFixture(t *testing.T, action string) (*Store, workflo
 		current, _, run, ports := workflowReviewFixture(t, workflowstate.ReviewHuman)
 		store, provider, request.ID = current, ports, run.ID
 
-		review, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
+		review, err := ReviewSlice(t.Context(), store, run.ID, provider, nil)
 		if err != nil {
 			t.Fatal(err)
 		}

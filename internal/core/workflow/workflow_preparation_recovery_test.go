@@ -53,7 +53,7 @@ func TestWorkflowPreparationCrashProcess(t *testing.T) {
 
 		return nil
 	}
-	_, err = store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, NewWorkflowPreparationGit(pr.Repository, remote))
+	_, err = PrepareIntegration(t.Context(), store, id, provider, NewWorkflowPreparationGit(pr.Repository, remote))
 	t.Fatalf("owned preparation writer did not terminate: %v", err)
 }
 
@@ -130,7 +130,7 @@ func testWorkflowPreparationJournal(t *testing.T, stage string, index int) {
 
 	before := workflowTestRead(t, restarted, f.run.ID)
 
-	candidate, err := restarted.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
+	candidate, err := PrepareIntegration(t.Context(), restarted, f.run.ID, f.provider, f.git)
 	if err != nil {
 		t.Fatal(err)
 	}

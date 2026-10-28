@@ -30,7 +30,7 @@ func nativeReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (nativePre
 	f := newNativePreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
 	writeWorkflowTestConfigValue(t, f.f.store.layout.ProjectDir(), "review", "mode", string(mode))
 
-	candidate, err := f.f.store.PrepareWorkflowSliceIntegration(t.Context(), f.f.run.ID, f.provider, f.f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.f.store, f.f.run.ID, f.provider, f.f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func TestNativeReviewPolicy(t *testing.T) {
 	f, _ := nativeReviewFixture(t, workflowstate.ReviewTrustedAutoMerge)
 	store, id := f.f.store, f.f.run.ID
 
-	if _, err := store.ReviewWorkflowSlice(t.Context(), id, f.provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), store, id, f.provider, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -63,7 +63,7 @@ func TestNativeReviewPolicy(t *testing.T) {
 // review grant; source-task validation alone cannot authorize its rewrite.
 func TestNativeReviewSourceOnly(t *testing.T) {
 	f := newNativePreparationFixture(t, "rebase", workflowPreparationGate("test -f result.txt"))
-	if _, err := f.f.store.ReviewWorkflowSlice(t.Context(), f.f.run.ID, f.provider, nil); err == nil {
+	if _, err := ReviewSlice(t.Context(), f.f.store, f.f.run.ID, f.provider, nil); err == nil {
 		t.Fatal("native source-only review produced publication authority")
 	}
 }
@@ -88,7 +88,7 @@ func nativeReviewMode(t *testing.T, mode workflowstate.ReviewMode) {
 
 	nativeReviewRetained(t, store, id, f, candidate)
 
-	again, err := store.ReviewWorkflowSlice(t.Context(), id, f.provider, []string{"false"})
+	again, err := ReviewSlice(t.Context(), store, id, f.provider, []string{"false"})
 	if err != nil || again != binding || workflowTestRead(t, store, id).Revision != before.Revision {
 		t.Fatal("restart repeated a decision or host gate", err)
 	}
@@ -116,7 +116,7 @@ func nativeReviewRetained(t *testing.T, store *Store, id string, f nativePrepara
 func nativeReviewAuthorize(t *testing.T, f nativePreparationFixture) workflowstate.ReviewBinding {
 	t.Helper()
 
-	binding, err := f.f.store.ReviewWorkflowSlice(t.Context(), f.f.run.ID, f.provider, workflowReviewWorker("pass", "", ""))
+	binding, err := ReviewSlice(t.Context(), f.f.store, f.f.run.ID, f.provider, workflowReviewWorker("pass", "", ""))
 	if err != nil {
 		t.Fatal(err)
 	}

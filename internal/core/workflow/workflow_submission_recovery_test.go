@@ -53,7 +53,7 @@ func TestWorkflowSubmissionCrashProcess(t *testing.T) {
 		return nil
 	}
 
-	_, err = store.SubmitWorkflowSliceIntegration(t.Context(), id, provider, NewWorkflowIntegrationGit(pr.Repository, remote))
+	_, err = SubmitIntegration(t.Context(), store, id, provider, NewWorkflowIntegrationGit(pr.Repository, remote))
 	t.Fatalf("owned submission writer did not terminate: %v", err)
 }
 
@@ -103,7 +103,7 @@ func testWorkflowSubmissionJournal(t *testing.T, stage string) {
 
 	f, provider := newWorkflowSubmissionFixture(t, "rebase")
 	if stage == "confirmed" || stage == "confirmation_projection" {
-		if _, err := f.store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); err != nil {
+		if _, err := SubmitIntegration(t.Context(), f.store, f.run.ID, provider, workflowSubmissionObserver(f)); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -133,7 +133,7 @@ func assertWorkflowSubmissionRecovery(t *testing.T, f workflowPreparationFixture
 	}
 
 	expected := sealWorkflowSubmissionCrash(t, restarted, f, provider, first, stage)
-	last, err := restarted.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f))
+	last, err := SubmitIntegration(t.Context(), restarted, f.run.ID, provider, workflowSubmissionObserver(f))
 
 	if err != nil || last.ID != first.ID || string(last.State) != expected || provider.calls != baseline {
 		t.Fatalf("crash recovery repeated publication: %+v, %v", last, err)
@@ -149,7 +149,7 @@ func sealWorkflowSubmissionCrash(t *testing.T, store *Store, f workflowPreparati
 		return "confirmed"
 	}
 
-	if _, err := store.SubmitWorkflowSliceIntegration(t.Context(), f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, workflowstate.ErrObservationRequired) {
+	if _, err := SubmitIntegration(t.Context(), store, f.run.ID, provider, workflowSubmissionObserver(f)); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("an unobserved crash licensed a retry", err)
 	}
 

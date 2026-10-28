@@ -20,7 +20,7 @@ func TestWorkflowPreparationGateFailure(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			f := newWorkflowPreparationFixture(t, "rebase", workflowPreparationGate(test.script))
-			if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err == nil {
+			if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); err == nil {
 				t.Fatal("invalid combined gate was accepted")
 			}
 
@@ -56,13 +56,13 @@ func testWorkflowPreparationStop(t *testing.T, intent string) {
 	done := make(chan error, 1)
 
 	go func() {
-		_, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git)
+		_, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git)
 		done <- err
 	}()
 
 	waitWorkflowClaimFile(t, marker)
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrOwned) {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("concurrent gate: %v", err)
 	}
 
@@ -97,7 +97,7 @@ func TestWorkflowPreparationConflict(t *testing.T) {
 	workflowIntegrationCommand(t, f.actor, "push", "origin", "dev")
 
 	f.provider.target, f.provider.pr.BaseCommit = f.base, f.base
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err == nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); err == nil {
 		t.Fatal("conflicting combined content was accepted")
 	}
 
@@ -120,7 +120,7 @@ func TestWorkflowPreparationConflict(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err == nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); err == nil {
 		t.Fatal("preparation bound was reset")
 	}
 
@@ -133,7 +133,7 @@ func TestWorkflowPreparationApproval(t *testing.T) {
 	f := newWorkflowPreparationFixture(t, "rebase", workflowstate.Validation{WaiverReason: "Manual combined approval fixture"})
 	workflowReviewConfig(t, f.store, workflowstate.ReviewHuman)
 
-	old, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
+	old, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -142,11 +142,11 @@ func TestWorkflowPreparationApproval(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, f.provider, f.git); err != nil {
 		t.Fatal(err)
 	}
 
-	fresh, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, f.provider, nil)
+	fresh, err := ReviewSlice(t.Context(), f.store, f.run.ID, f.provider, nil)
 	if err != nil || fresh.State != workflowstate.ReviewWaitingApproval {
 		t.Fatalf("combined approval wait: %+v, %v", fresh, err)
 	}

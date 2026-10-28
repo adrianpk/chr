@@ -87,7 +87,7 @@ func nativeHostPublication(t *testing.T, mode string) {
 	entry = nativeRoleTransition(t, f.store, entry, "preparing")
 	nativeRoleTransition(t, f.store, entry, "validating")
 
-	candidate, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, provider, f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.store, f.run.ID, provider, f.git)
 	if err != nil {
 		t.Fatal("real provider failed native preparation", err)
 	}
@@ -96,7 +96,7 @@ func nativeHostPublication(t *testing.T, mode string) {
 		t.Fatal("host gate did not validate the combined result")
 	}
 
-	review, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, provider, nil)
+	review, err := ReviewSlice(t.Context(), f.store, f.run.ID, provider, nil)
 	if err != nil || review.State != workflowstate.ReviewAuthorized {
 		t.Fatal("trusted review did not authorize the combined result", review, err)
 	}
@@ -121,7 +121,7 @@ func nativeHostPublication(t *testing.T, mode string) {
 		t.Fatal(err)
 	}
 
-	nativePublication, err := f.store.PublishWorkflowNativeSubmission(t.Context(), guard, provider, provider)
+	nativePublication, err := PublishNativeSubmission(t.Context(), f.store, guard, provider, provider)
 
 	publication := nativePublication.Transport
 	if err != nil || publication.State != workflowstate.GitPublicationApplied {

@@ -73,7 +73,7 @@ func checkWorkflowParallelUnknown(t *testing.T, lanes [2]workflowParallelPublica
 	assertWorkflowParallelPublisherExcluded(t, lanes[1], alias)
 	first.provider.seal(id)
 
-	sealed, err := first.fixture.store.ReconcileWorkflowSubmission(t.Context(), first.fixture.run.ID, first.provider, workflowSubmissionObserver(first.fixture))
+	sealed, err := ReconcileSubmission(t.Context(), first.fixture.store, first.fixture.run.ID, first.provider, workflowSubmissionObserver(first.fixture))
 	if err != nil || sealed.State != workflowstate.SubmissionUnpublished {
 		t.Fatal("definitive unpublished observation did not release target", err)
 	}
@@ -103,7 +103,7 @@ func checkWorkflowParallelRevalidation(t *testing.T, lane workflowParallelPublic
 
 	previous := workflowTestRead(t, lane.fixture.store, lane.fixture.run.ID)
 
-	prepared, err := lane.fixture.store.PrepareWorkflowSliceIntegration(t.Context(), previous.ID, lane.provider, lane.fixture.git)
+	prepared, err := PrepareIntegration(t.Context(), lane.fixture.store, previous.ID, lane.provider, lane.fixture.git)
 	if err != nil || prepared.Validation.Validation[0].Stdout != "combined" || prepared.Input.Git.BaseCommit == lane.fixture.base {
 		t.Fatal("fresh preparation did not validate both independent results", err)
 	}
@@ -112,7 +112,7 @@ func checkWorkflowParallelRevalidation(t *testing.T, lane workflowParallelPublic
 		t.Fatal("old review authorized a new combined result")
 	}
 
-	fresh, err := lane.fixture.store.ReviewWorkflowSlice(t.Context(), previous.ID, lane.provider, nil)
+	fresh, err := ReviewSlice(t.Context(), lane.fixture.store, previous.ID, lane.provider, nil)
 	if err != nil || fresh.InputHash == previous.Review.InputHash {
 		t.Fatal("target movement did not replace review binding", err)
 	}
@@ -124,7 +124,7 @@ func checkWorkflowParallelRevalidation(t *testing.T, lane workflowParallelPublic
 func submitWorkflowParallelPublication(t *testing.T, lane workflowParallelPublicationLane) {
 	t.Helper()
 
-	submission, err := lane.fixture.store.SubmitWorkflowSliceIntegration(t.Context(), lane.fixture.run.ID, lane.provider, workflowSubmissionObserver(lane.fixture))
+	submission, err := SubmitIntegration(t.Context(), lane.fixture.store, lane.fixture.run.ID, lane.provider, workflowSubmissionObserver(lane.fixture))
 	if err != nil || submission.Response != workflowstate.SubmissionResponseAccepted {
 		t.Fatal("eligible independent lane failed guarded publication", err)
 	}
@@ -150,7 +150,7 @@ func TestWorkflowParallelPublicationConflict(t *testing.T) {
 	first := finalizeWorkflowParallelPublication(t, lanes[0])
 	target := workflowIntegrationCommand(t, lanes[0].fixture.remote, "rev-parse", "refs/heads/dev")
 
-	_, err := lanes[1].fixture.store.PrepareWorkflowSliceIntegration(t.Context(), lanes[1].fixture.run.ID, lanes[1].provider, lanes[1].fixture.git)
+	_, err := PrepareIntegration(t.Context(), lanes[1].fixture.store, lanes[1].fixture.run.ID, lanes[1].provider, lanes[1].fixture.git)
 	if err == nil || workflowTestRead(t, lanes[1].fixture.store, lanes[1].fixture.run.ID).Status != workflowstate.InvocationBlocked {
 		t.Fatal("conflicting independent lane did not block", err)
 	}
@@ -167,11 +167,11 @@ func TestWorkflowParallelPublicationHuman(t *testing.T) {
 	first := lanes[0]
 	workflowTicketReviewConfig(t, first.fixture.store, "rebase", workflowstate.ReviewHuman)
 
-	if _, err := first.fixture.store.PrepareWorkflowSliceIntegration(t.Context(), first.fixture.run.ID, first.provider, first.fixture.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), first.fixture.store, first.fixture.run.ID, first.provider, first.fixture.git); err != nil {
 		t.Fatal(err)
 	}
 
-	waiting, err := first.fixture.store.ReviewWorkflowSlice(t.Context(), first.fixture.run.ID, first.provider, nil)
+	waiting, err := ReviewSlice(t.Context(), first.fixture.store, first.fixture.run.ID, first.provider, nil)
 	if err != nil || waiting.State != workflowstate.ReviewWaitingApproval {
 		t.Fatal("human approval was not retained", err)
 	}

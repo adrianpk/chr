@@ -94,12 +94,12 @@ func nativeReceiptObservedFixture(t *testing.T, method, extent string) (nativeCa
 
 	f := nativePreparationExtentFixture(t, method, extent, workflowPreparationGate("test -f result.txt"))
 
-	candidate, err := f.f.store.PrepareWorkflowSliceIntegration(t.Context(), f.f.run.ID, f.provider, f.f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.f.store, f.f.run.ID, f.provider, f.f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := f.f.store.ReviewWorkflowSlice(t.Context(), f.f.run.ID, f.provider, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), f.f.store, f.f.run.ID, f.provider, nil); err != nil {
 		t.Fatal(err)
 	}
 

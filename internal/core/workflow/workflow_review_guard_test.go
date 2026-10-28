@@ -54,7 +54,7 @@ func TestWorkflowReviewChangedInputs(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewHuman)
 
-			binding, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil)
+			binding, err := ReviewSlice(t.Context(), store, run.ID, provider, nil)
 			if err != nil {
 				t.Fatal(err)
 			}

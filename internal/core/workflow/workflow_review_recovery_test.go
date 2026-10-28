@@ -55,7 +55,7 @@ func TestWorkflowReviewCrashProcess(t *testing.T) {
 	if stage == "approval" {
 		_, err = store.ApproveWorkflowSlice(t.Context(), id, run.Review.InputHash, provider)
 	} else {
-		_, err = store.ReviewWorkflowSlice(t.Context(), id, provider, workflowReviewWorker("pass", "", ""))
+		_, err = ReviewSlice(t.Context(), store, id, provider, workflowReviewWorker("pass", "", ""))
 	}
 
 	t.Fatalf("owned review writer did not terminate: %v", err)
@@ -180,7 +180,7 @@ func workflowReviewRepairCheckpoint(t *testing.T, store *Store, id, key string, 
 
 		return nil
 	}
-	_, err := store.ReviewWorkflowSlice(t.Context(), id, provider, workflowReviewWorker("needs_changes", key, ""))
+	_, err := ReviewSlice(t.Context(), store, id, provider, workflowReviewWorker("needs_changes", key, ""))
 	store.afterReplace = nil
 
 	if !errors.Is(err, interrupted) {
@@ -197,7 +197,7 @@ func testWorkflowReviewJournal(t *testing.T, stage string, index int) {
 
 	store, _, run, provider := workflowReviewFixture(t, workflowstate.ReviewHuman)
 	if stage == "approval" {
-		if _, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, nil); err != nil {
+		if _, err := ReviewSlice(t.Context(), store, run.ID, provider, nil); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -237,7 +237,7 @@ func testWorkflowReviewRoleJournal(t *testing.T, stage string, index int) {
 		reviewer = []string{"false"}
 	}
 
-	binding, err := store.ReviewWorkflowSlice(t.Context(), run.ID, provider, reviewer)
+	binding, err := ReviewSlice(t.Context(), store, run.ID, provider, reviewer)
 	if err != nil || binding.State != workflowstate.ReviewAuthorized {
 		t.Fatalf("role replay: %+v, %v", binding, err)
 	}
@@ -256,7 +256,7 @@ func checkWorkflowReviewJournalRetry(t *testing.T, store *Store, id string, prov
 	t.Helper()
 
 	if stage == "input" {
-		if _, err := store.ReviewWorkflowSlice(t.Context(), id, provider, nil); err != nil {
+		if _, err := ReviewSlice(t.Context(), store, id, provider, nil); err != nil {
 			t.Fatal(err)
 		}
 

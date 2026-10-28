@@ -51,7 +51,7 @@ func TestWorkflowParallelPublisher(t *testing.T) {
 	}
 
 	git := NewWorkflowIntegrationGit(spec.PullRequest.Repository, spec.Remote)
-	submission, err := store.SubmitWorkflowSliceIntegration(t.Context(), spec.InvocationID, provider, git)
+	submission, err := SubmitIntegration(t.Context(), store, spec.InvocationID, provider, git)
 	result := workflowParallelPublisherResult{ID: submission.ID, State: string(submission.State), Owned: errors.Is(err, workflowstate.ErrOwned), Unknown: errors.Is(err, context.DeadlineExceeded)}
 
 	if err != nil {

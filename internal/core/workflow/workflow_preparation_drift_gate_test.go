@@ -36,7 +36,7 @@ func TestNativeDriftDuringGate(t *testing.T) {
 	store, id := f.f.store, f.f.run.ID
 	provider := &nativeDriftGateProvider{nativeDriftProviderFixture: nativeDriftProviderFixture{f.provider, f.f.remote}, marker: marker, move: func() { nativeDriftMoveTarget(t, &f, "Target changed during gate") }}
 
-	old, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git)
+	old, err := PrepareIntegration(t.Context(), store, id, provider, f.f.git)
 	if err == nil || old.Native != nil {
 		t.Fatal("gate completion authorized a stale base", err)
 	}
@@ -49,7 +49,7 @@ func TestNativeDriftDuringGate(t *testing.T) {
 	store = NewWorkflowStore(store.layout, store.projectID)
 	f.f.store = store
 
-	fresh, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git)
+	fresh, err := PrepareIntegration(t.Context(), store, id, provider, f.f.git)
 	if err != nil || fresh.Input.Git.BaseCommit != f.f.base || fresh.Input.Native.ClaimGeneration != old.Input.Native.ClaimGeneration+1 {
 		t.Fatal("stale completed gate was not replaced after restart", err)
 	}
@@ -67,7 +67,7 @@ func TestNativeSourceDuringGate(t *testing.T) {
 	store, id := f.f.store, f.f.run.ID
 	provider := &nativeDriftGateProvider{nativeDriftProviderFixture: nativeDriftProviderFixture{f.provider, f.f.remote}, marker: marker, move: func() { nativeDriftMoveSource(t, &f, "foreign scope", "unapproved.txt") }}
 
-	candidate, err := store.PrepareWorkflowSliceIntegration(t.Context(), id, provider, f.f.git)
+	candidate, err := PrepareIntegration(t.Context(), store, id, provider, f.f.git)
 	if err == nil || candidate.Native != nil {
 		t.Fatal("changed source received candidate authority", err)
 	}

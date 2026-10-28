@@ -33,11 +33,11 @@ func newWorkflowSubmissionFixture(t *testing.T, method string) (workflowPreparat
 	f := newWorkflowPreparationFixture(t, method, workflowstate.Validation{WaiverReason: "Submission fixture validates real Git publication"})
 
 	p := &workflowSubmissionProviderFixture{workflowPreparationProviderFixture: f.provider, remote: f.remote, sealed: map[string]bool{}}
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, p, f.git); err != nil {
+	if _, err := PrepareIntegration(t.Context(), f.store, f.run.ID, p, f.git); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := f.store.ReviewWorkflowSlice(t.Context(), f.run.ID, p, nil); err != nil {
+	if _, err := ReviewSlice(t.Context(), f.store, f.run.ID, p, nil); err != nil {
 		t.Fatal(err)
 	}
 

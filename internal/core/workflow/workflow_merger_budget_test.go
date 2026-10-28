@@ -60,7 +60,7 @@ func TestNativeMergerSettlement(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	attempt, err := f.store.ExecuteWorkflowMerger(t.Context(), request, harness, f.provider)
+	attempt, err := ExecuteMerger(t.Context(), f.store, request, harness, f.provider)
 	if err != nil || attempt.TrustedUsage == nil {
 		t.Fatal("compatible driver accounting was lost", err)
 	}

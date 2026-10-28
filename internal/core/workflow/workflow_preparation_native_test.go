@@ -82,7 +82,7 @@ func nativePreparationMethod(t *testing.T, method string) {
 	fixture := newNativePreparationFixture(t, method, workflowPreparationGate("test -f result.txt && if test -f target.txt; then printf combined; else printf source; fi"))
 	f := fixture.f
 
-	candidate, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git)
+	candidate, err := PrepareIntegration(t.Context(), f.store, f.run.ID, fixture.provider, f.git)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func nativePreparationMethod(t *testing.T, method string) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
-	again, err := restarted.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git)
+	again, err := PrepareIntegration(t.Context(), restarted, f.run.ID, fixture.provider, f.git)
 	if err != nil || again.Validation.AttemptID != candidate.Validation.AttemptID || workflowTestRead(t, restarted, f.run.ID).Revision != before.Revision {
 		t.Fatal("native retry repeated its gate or lost retained evidence", err)
 	}
@@ -150,7 +150,7 @@ func TestNativePreparationFailure(t *testing.T) {
 			fixture := newNativePreparationFixture(t, "rebase", workflowPreparationGate(test.script))
 			f := fixture.f
 
-			candidate, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, fixture.provider, f.git)
+			candidate, err := PrepareIntegration(t.Context(), f.store, f.run.ID, fixture.provider, f.git)
 			if err == nil || candidate.Validation.Successful || candidate.Native != nil {
 				t.Fatal("failed native gate produced a publishable candidate", err)
 			}

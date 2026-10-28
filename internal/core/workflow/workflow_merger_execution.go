@@ -11,16 +11,21 @@ import (
 	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 )
 
-// ExecuteWorkflowMerger runs one certified broker driver in a private owned
-// checkout. It retains a proposal; it never accepts, commits or publishes it.
-func (s *Store) ExecuteWorkflowMerger(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (attempt MergerAttempt, err error) {
-	return s.executeWorkflowMerger(ctx, request, harness, provider, nil)
+// workflowMergerHost owns bounded role execution outside persistence.
+type workflowMergerHost struct {
+	store *Store
 }
 
-func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider, git MergerRepairGit) (attempt MergerAttempt, err error) {
+// ExecuteMerger runs one certified broker driver in a private owned
+// checkout. It retains a proposal; it never accepts, commits or publishes it.
+func ExecuteMerger(ctx context.Context, store *Store, request MergerRequest, harness MergerHarness, provider PullRequestProvider) (attempt MergerAttempt, err error) {
+	return (workflowMergerHost{store: store}).execute(ctx, request, harness, provider, nil)
+}
+
+func (host workflowMergerHost) execute(ctx context.Context, request MergerRequest, harness MergerHarness, provider PullRequestProvider, git MergerRepairGit) (attempt MergerAttempt, err error) {
 	harness.Command = slices.Clone(harness.Command)
 
-	claimed, err := s.prepareWorkflowMerger(ctx, request, harness, provider)
+	claimed, err := host.store.prepareWorkflowMerger(ctx, request, harness, provider)
 	if err != nil {
 		return attempt, err
 	}
@@ -35,7 +40,7 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 
 	watched, stop := context.WithCancel(ctx)
 
-	watchWorkflowStop(watched, s, workflowStopWatch{Claim: claim, Cancel: stop})
+	watchWorkflowStop(watched, host.store, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)
@@ -43,7 +48,7 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 
 	harness = MergerHarness{Command: prepared.input.Worker, Certificate: *prepared.input.MergerHarnessRef}
 	attempt = MergerAttempt{SchemaVersion: 1, Input: *prepared.input.Merger, HarnessRef: harness.Certificate}
-	result := s.runWorkflowMerger(deadline, claimed, provider, harness)
+	result := host.run(deadline, claimed, provider, harness)
 	attempt.Harness, attempt.TrustedUsage = result.command, result.usage
 
 	attempt.Checks = result.checks
@@ -57,7 +62,7 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 	}
 
 	if result.err == nil && git != nil {
-		result.err = s.acceptWorkflowMerger(deadline, claimed, provider, git, &attempt)
+		result.err = host.accept(deadline, claimed, provider, git, &attempt)
 	}
 
 	if result.err != nil {
@@ -67,14 +72,14 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 	cleanup, finish := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer finish()
 
-	err = s.finishWorkflowMerger(cleanup, claimed, provider, &attempt, result.err)
+	err = host.store.finishWorkflowMerger(cleanup, claimed, provider, &attempt, result.err)
 
 	return attempt, errors.Join(result.err, err)
 }
 
-func (s *Store) runWorkflowMerger(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, harness MergerHarness) workflowMergerDriverResult {
+func (host workflowMergerHost) run(ctx context.Context, claimed workflowClaimedMerger, provider PullRequestProvider, harness MergerHarness) workflowMergerDriverResult {
 	claim, prepared := claimed.Claim, claimed.Prepared
-	if err := s.checkWorkflowMergerPrepared(ctx, claimed, provider); err != nil {
+	if err := host.store.checkWorkflowMergerPrepared(ctx, claimed, provider); err != nil {
 		return workflowMergerDriverResult{err: fmt.Errorf("merger execution admission: %w", err)}
 	}
 
@@ -100,7 +105,7 @@ func (s *Store) runWorkflowMerger(ctx context.Context, claimed workflowClaimedMe
 	defer func() { _ = root.Close() }() //nolint:errcheck // Release the owned directory handle; tool operations return their IO failures.
 
 	tools := workflowmerge.NewTools(*prepared.input.Merger, root, func(ctx context.Context) error {
-		return s.checkWorkflowMergerPrepared(ctx, claimed, provider)
+		return host.store.checkWorkflowMergerPrepared(ctx, claimed, provider)
 	})
 	result := runWorkflowMergerDriver(ctx, workflowMergerDriverInput{Claim: claim, Prepared: prepared, Tools: tools, Call: call})
 
