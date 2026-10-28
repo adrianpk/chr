@@ -22,7 +22,14 @@ linters:
     - errorlint
     - contextcheck
     - revive
+    - dupl
     - forbidigo
+
+  exclusions:
+    rules:
+      - path: _test\.go$
+        linters:
+          - dupl
 
   settings:
     nlreturn:
@@ -60,8 +67,17 @@ linters:
       forbid:
         - pattern: fmt.Print.*
 
+    dupl:
+      threshold: 150
+
     revive:
       rules:
+        - name: argument-limit
+          arguments: [5]
+          exclude: ["**/*_test.go"]
+        - name: function-result-limit
+          arguments: [2]
+          exclude: ["**/*_test.go"]
         - name: exported
         - name: package-comments
         - name: indent-error-flow

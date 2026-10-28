@@ -36,17 +36,12 @@ func run() error {
 }
 
 func validate(root string, scan sourceScan) error {
-	var rules policy
-	if err := readJSON(filepath.Join(root, "scripts/goquality/debt.json"), &rules); err != nil {
-		return fmt.Errorf("read debt policy: %w", err)
-	}
-
 	var exceptions []allowance
 	if err := readJSON(filepath.Join(root, "scripts/goquality/exceptions.json"), &exceptions); err != nil {
 		return fmt.Errorf("read external exceptions: %w", err)
 	}
 
-	if failures := checkPolicy(scan, rules, exceptions); len(failures) != 0 {
+	if failures := checkPolicy(scan, exceptions); len(failures) != 0 {
 		return fmt.Errorf("production signature policy failed:\n%s", strings.Join(failures, "\n"))
 	}
 
@@ -54,7 +49,7 @@ func validate(root string, scan sourceScan) error {
 		return fmt.Errorf("production dependency policy failed:\n%s", strings.Join(failures, "\n"))
 	}
 
-	_, err := fmt.Fprintf(os.Stdout, "production signatures: %d declarations, ceiling %d, %d exact debt entries, %d external exceptions\n", len(scan.Declarations), rules.MaxParameters, len(rules.Debt), len(exceptions))
+	_, err := fmt.Fprintf(os.Stdout, "production signatures: %d declarations, maximum %d parameters, %d external exceptions\n", len(scan.Declarations), maxParameters, len(exceptions))
 
 	return err
 }

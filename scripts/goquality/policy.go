@@ -14,10 +14,7 @@ type allowance struct {
 	Contract  string `json:"contract,omitempty"`
 }
 
-type policy struct {
-	MaxParameters int         `json:"max_parameters"`
-	Debt          []allowance `json:"debt"`
-}
+const maxParameters = 5
 
 type allowanceIndex struct {
 	values   map[string]allowance
@@ -28,28 +25,16 @@ func invalidResults(results []string) bool {
 	return len(results) > 2 || len(results) == 2 && results[1] != "error" && results[1] != "bool"
 }
 
-func violates(value declaration, maximum int) bool {
-	return value.Parameters > maximum || invalidResults(value.Results)
+func violates(value declaration) bool {
+	return value.Parameters > maxParameters || invalidResults(value.Results)
 }
 
-func checkPolicy(scan sourceScan, rules policy, exceptions []allowance) []string {
-	var failures []string
-	if rules.MaxParameters < 5 || rules.MaxParameters > 7 {
-		failures = append(failures, "parameter ceiling must be five, six or seven")
-	}
+func checkPolicy(scan sourceScan, exceptions []allowance) []string {
+	exempt := indexAllowances(exceptions)
+	failures := exempt.failures
 
-	debt := indexAllowances(rules.Debt, false)
-	exempt := indexAllowances(exceptions, true)
-
-	failures = append(failures, debt.failures...)
-
-	failures = append(failures, exempt.failures...)
 	for _, value := range scan.Declarations {
-		failures = append(failures, checkDeclaration(value, rules.MaxParameters, debt.values, exempt.values)...)
-	}
-
-	for id := range debt.values {
-		failures = append(failures, "stale debt: "+id)
+		failures = append(failures, checkDeclaration(value, exempt.values)...)
 	}
 
 	for id := range exempt.values {
@@ -61,18 +46,18 @@ func checkPolicy(scan sourceScan, rules policy, exceptions []allowance) []string
 	return failures
 }
 
-func indexAllowances(values []allowance, external bool) allowanceIndex {
+func indexAllowances(values []allowance) allowanceIndex {
 	indexed := make(map[string]allowance, len(values))
 
 	var failures []string
 
 	for _, value := range values {
-		if value.ID == "" || value.Signature == "" || value.Reason == "" || external && value.Contract == "" {
-			failures = append(failures, "incomplete allowance: "+value.ID)
+		if value.ID == "" || value.Signature == "" || value.Reason == "" || value.Contract == "" {
+			failures = append(failures, "incomplete external exception: "+value.ID)
 		}
 
 		if _, exists := indexed[value.ID]; exists {
-			failures = append(failures, "duplicate allowance: "+value.ID)
+			failures = append(failures, "duplicate external exception: "+value.ID)
 		}
 
 		indexed[value.ID] = value
@@ -81,33 +66,19 @@ func indexAllowances(values []allowance, external bool) allowanceIndex {
 	return allowanceIndex{values: indexed, failures: failures}
 }
 
-func checkDeclaration(value declaration, maximum int, debt, exempt map[string]allowance) []string {
-	old, hasDebt := debt[value.ID]
+func checkDeclaration(value declaration, exempt map[string]allowance) []string {
 	exception, hasException := exempt[value.ID]
-	delete(debt, value.ID)
 	delete(exempt, value.ID)
 
-	if hasDebt && hasException {
-		return []string{"debt and external exception overlap: " + value.ID}
-	}
-
 	if hasException {
-		if exception.Signature != value.Signature || !violates(value, 5) {
+		if exception.Signature != value.Signature || !violates(value) {
 			return []string{"changed or unnecessary external exception: " + value.ID}
 		}
 
 		return nil
 	}
 
-	if hasDebt {
-		if old.Signature != value.Signature || !violates(value, 5) {
-			return []string{"changed or resolved debt must be reconciled explicitly: " + value.ID}
-		}
-
-		return nil
-	}
-
-	if violates(value, maximum) {
+	if violates(value) {
 		return []string{fmt.Sprintf("%s: unapproved signature %s (%d parameters, results %v)", value.ID, value.Signature, value.Parameters, value.Results)}
 	}
 

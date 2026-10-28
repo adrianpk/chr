@@ -34,8 +34,17 @@ commit introduces the canonical report at that exact path.
 
 ## Contracts Added or Changed
 
-Pending final enforcement and evidence reconciliation. Existing supported
-wire, persistence, authority, hashing and process contracts remain governing.
+The production checker now has a permanent five-parameter maximum and the
+existing semantic result policy. The phase configuration, debt JSON file,
+allowance branch and ratchet tests are removed. Exact external-interface
+exceptions remain mandatory, signature-bound and stale/duplicate/unnecessary
+entries fail. Source/build-variant/alias/dependency coverage remains unchanged.
+
+Pinned revive argument-limit and function-result-limit enforce five inputs and
+two results; the AST check retains interface/callback/literal and second-result
+coverage. dupl is enabled at threshold 150. The new production rules exclude
+only test fixtures; existing defect-oriented lint scope remains unchanged.
+Supported wire, persistence, authority, hashing and process contracts are unchanged.
 
 ## Files of Interest
 
@@ -55,6 +64,18 @@ cohesion decisions. Ten remaining qualified-method/relocation gaps are resolved
 from the actual Slice 9/12 move entries and the shared database extraction commit.
 The secondary-file/type/duplicate/dead-code/minor reconciliation remains active.
 No complete Slice 16 runtime or integrated acceptance is claimed.
+
+
+Permanent-policy task verification:
+
+- `go test ./scripts/goquality -run '^TestBranchIndependent$' -count=1` initially failed as expected: the phase-six policy accepted a new six-input function on a dev self-comparison. The existing fixture now tests this exact final boundary.
+- `go test ./scripts/goquality -count=1` passed after permanent enforcement, including exact exception, alias/build-variant, nested contract and branch-independent coverage.
+- `go run ./scripts/goquality` passed: 9,411 declarations, maximum five, one external exception and no migration manifest.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./...` passed with zero issues under the final new rules.
+- `git diff --check` passed.
+
+These are task checks. Required clean-head controller validation and the later
+integrated delivery-set gate remain distinct.
 
 ## Risks and Follow-ups
 

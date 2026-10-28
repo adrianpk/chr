@@ -18,7 +18,7 @@ func TestTreeCoverage(t *testing.T) {
 		t.Fatalf("source coverage = %+v", scan.Declarations)
 	}
 
-	failures := checkPolicy(scan, policy{MaxParameters: 7}, nil)
+	failures := checkPolicy(scan, nil)
 	assertPolicyOutcome(t, failures, "unapproved signature")
 }
 
@@ -65,13 +65,13 @@ func TestLocalAliasScope(t *testing.T) {
 	}
 }
 
-// TestBranchIndependent proves a dev self-comparison cannot hide tracked debt.
+// TestBranchIndependent proves a dev self-comparison cannot hide a six-parameter violation.
 func TestBranchIndependent(t *testing.T) {
 	root := t.TempDir()
 	runFixtureGit(t, root, "init", "--initial-branch=dev")
 	runFixtureGit(t, root, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--allow-empty", "-m", "fixture")
 	runFixtureGit(t, root, "update-ref", "refs/remotes/origin/dev", "HEAD")
-	writeFixture(t, root, "source.go", "package fixture\nfunc f(a,b,c,d,e,f,g,h int) {}")
+	writeFixture(t, root, "source.go", "package fixture\nfunc f(a,b,c,d,e,f int) {}")
 	runFixtureGit(t, root, "add", "source.go")
 	runFixtureGit(t, root, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "violation")
 	runFixtureGit(t, root, "update-ref", "refs/remotes/origin/dev", "HEAD")
@@ -86,7 +86,7 @@ func TestBranchIndependent(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		assertPolicyOutcome(t, checkPolicy(scan, policy{MaxParameters: 7}, nil), "unapproved signature")
+		assertPolicyOutcome(t, checkPolicy(scan, nil), "unapproved signature")
 	}
 }
 

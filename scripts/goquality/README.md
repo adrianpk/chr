@@ -22,21 +22,22 @@ syntactic contract check, not interface satisfaction or whole-program call
 graph analysis. Selector call sites in the inventory are candidates by method
 name, not proof of a particular receiver's runtime reachability.
 
-The active parameter ceiling starts at seven, becomes six after Slice 11 and
-five in Slice 16. The result policy permits zero or one result, or two whose
-second result is error or bool. debt.json contains exact identities and
-normalized signatures for existing debt against the final five-parameter
-target. It cannot silently follow a rename, move, signature change or fix;
-those require explicit manifest reconciliation in the owning task. New debt
-above the active ceiling is rejected. Resolved and stale allowances fail.
-No automatic baseline-generation mode is part of the gate.
+The permanent parameter maximum is five. The result policy permits zero or one
+result, or two whose second result is error or bool. The checker has no phase
+configuration, debt manifest or migration allowance path. Every production
+source is checked against the same contract on feature branches and dev.
 
-exceptions.json is separate permanent external-interface evidence. Each entry
-requires its exact declaration, signature, external contract and rationale.
-Locally owned interfaces remain ordinary debt. Empty, duplicate, overlapping,
-changed and stale allowances fail. Slice 16 removes the temporary manifest
-mechanism after all remaining debt is resolved; external exceptions remain
-narrow and individually justified.
+exceptions.json is permanent external-interface evidence. Each entry requires
+its exact declaration, signature, external contract and rationale. Locally owned
+interfaces obey the normal policy. Empty, duplicate, changed, stale and unnecessary
+exceptions fail. Model.Update has the single imposed Bubble Tea result contract;
+internal update helpers have no exception.
+
+The pinned revive argument-limit (five) and function-result-limit (two) rules
+provide additional declaration checks. The AST check still covers function types,
+interface methods, literals and second-result meaning. dupl uses threshold 150 on
+production code. These new production rules exclude test fixtures; all existing
+lint protections keep their previous test scope.
 
 The existing signature-layout check and all defect-oriented lint rules remain
 unfiltered. `make verify` runs both checks, tests and the application build.
