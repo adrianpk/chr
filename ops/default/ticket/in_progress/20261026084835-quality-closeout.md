@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084835
 title: "Quality slice 15: Workflow closeout and coordinator cleanup"
-status: ready
+status: in_progress
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
 commits: []
+started_at: 2026-10-28T08:07:25Z
+branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
 ---
 
@@ -56,3 +58,5 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 Existing continuation/closing/process/budget/stop recovery tests, one shared guided parity journey, focused race for lifecycle changes; make verify.
 
 All commands above are planned. None ran as implementation validation during this planning task.
+
+Predecessor PR #451 is verified merged into dev at `8b5659a71af5d393919593c5e0d8c9a6ec0f497c`. Slice 15 is active. Its source ledger freezes 40 assigned signature rows and current declaration identities before closing/lifecycle conversion. No runtime extraction or Store policy disposition is claimed yet.

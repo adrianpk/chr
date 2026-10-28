@@ -1,6 +1,6 @@
 # Slice 14: Forge publication and review stages
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -110,6 +110,12 @@ publication/durability/process-cleanup error is introduced.
 
 ## Validation
 
+Controller evidence `DWWEUV4RMALE7SB4LMQKN2PGSB` passed all four exact ordered commands on
+clean pushed head `8b5659a71af5d393919593c5e0d8c9a6ec0f497c`: `make verify`,
+89 real-boundary tests, 11 focused race checks and `git diff --check`.
+Canonical PR #451 is verified merged into dev at that same commit. Exact command
+strings and timings remain with the controller evidence and canonical PR.
+
 Task-level successful checks follow. Real Git/provider/process selections use the
 existing fixture-owning runner; it cleans only owned descendants after completion.
 Live-forge certification is an explicit opt-in fixture and is not established by
@@ -125,13 +131,7 @@ the task commits and Acta records.
 - `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/core/workflow/... ./internal/app ./scripts/goquality` — PASS: zero lint issues.
 - `make check-go-style` — PASS: 9,359 production signatures, ceiling six, 24 exact debt entries and one external exception.
 
-The controller records `make verify`, the focused real-boundary selection, the
-focused race selection and `git diff --check` in that order against the final
-clean pushed PR head. Its exact command list, head and retained log are the final
-readiness evidence; the canonical PR carries the same ordered commands.
 
 ## Risks and Follow-ups
 
-Canonical dev integration remains controller-owned. This report and the ticket
-stay reviewing until that integration is verified. The retained native profile
-requires its existing independently certified provider/method configuration.
+None recorded. Slice 14 is delivered through verified canonical PR #451.

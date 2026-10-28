@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084834
 title: "Quality slice 14: Forge publication and review stages"
-status: reviewing
+status: solved
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -9,11 +9,14 @@ scope: domain
 tags: code-quality, remediation, slice-14
 source: review
 reported_at: 2026-10-26T08:48:34Z
-commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429, 23453a58cbb8f780065ea29f780e4dd37b76d0fc, 187a9ec4c15fef69e137c158fe574163aaae5497, 1ae59fa07af7ecffc330fd384269860baa9273b2, f22302613d1462d2bee9d20f522bc1cb15127040, 79a581e5f32aca05b74f5bde4879289338c87c3f, f026941182c708d20a5a36979dd8e71e3cd54ba7, 41595fd23b14704199d3b7b94ae0022bd8b10cff, 7261d337c539e442fea37f71a5965810a08a642c, 1685cf0959165446dbc9e51d681197bd270c21fc, 70ec732745fa1706ef9ae6e196a1818b4e83fa4d, 281b0f9fae1b00eaa39c60178ec598109022ee23, 2adac31efaf111d6a15115afd3b76ad62e3d8bbf, 386f8256e37ecb7715d813317d486c7eee6248f7]
+commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429, 23453a58cbb8f780065ea29f780e4dd37b76d0fc, 187a9ec4c15fef69e137c158fe574163aaae5497, 1ae59fa07af7ecffc330fd384269860baa9273b2, f22302613d1462d2bee9d20f522bc1cb15127040, 79a581e5f32aca05b74f5bde4879289338c87c3f, f026941182c708d20a5a36979dd8e71e3cd54ba7, 41595fd23b14704199d3b7b94ae0022bd8b10cff, 7261d337c539e442fea37f71a5965810a08a642c, 1685cf0959165446dbc9e51d681197bd270c21fc, 70ec732745fa1706ef9ae6e196a1818b4e83fa4d, 281b0f9fae1b00eaa39c60178ec598109022ee23, 2adac31efaf111d6a15115afd3b76ad62e3d8bbf, 386f8256e37ecb7715d813317d486c7eee6248f7, 8b5659a71af5d393919593c5e0d8c9a6ec0f497c]
 started_at: 2026-10-28T04:43:13Z
 branch: refactor/slice-14-quality-publication
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/451
 ready_at: 2026-10-26T08:57:09Z
+reviewed_at: 2026-10-28T08:07:25Z
+closed_at: 2026-10-28T08:07:25Z
+resolution: fixed
 ---
 
 # Quality Slice 14: Forge publication and review stages
@@ -58,16 +61,8 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 
 Existing native provider/transport permission and review fixtures through local HTTP/Git; existing review/publication receipt tests; make verify.
 
-Implementation is complete and the ticket is reviewing with its canonical slice
-report. All 61 assigned rows have precise dispositions: 54 implemented and seven
-cohesive five-input contracts. Forge/review policy and protocol have direct owners;
-host current-grant/approval/callback/journal/receipt authority remains explicit.
-Seven named retained state types preserve exact wire values and the glossary
-keeps ticket-native authority distinct from forge-native publication.
-
-The 143-entry extraction ledger, 908 Store methods and original authority/dependency
-maps resolve with frozen source hashes. Provider/review/merge protocol checks,
-19 capability checks, 37 real review/recovery checks, focused races and current
-wire/protocol/dispatch/dependency/lint/debt checks pass. Exact commands and evidence
-boundaries are in the report. Final ordered checks are controller-managed on the
-clean pushed PR head; dev integration remains pending.
+Canonical PR #451 is verified merged into dev at `8b5659a71af5d393919593c5e0d8c9a6ec0f497c`.
+Controller evidence `DWWEUV4RMALE7SB4LMQKN2PGSB` passed all four exact ordered commands on that
+head: make verify, 89 real-boundary tests, 11 focused races and diff check.
+All 61 assigned signature rows, 143 extraction images and preserved wire/authority
+contracts are delivered. Slice 15 is the next approved unit.

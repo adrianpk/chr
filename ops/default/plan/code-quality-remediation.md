@@ -274,7 +274,7 @@ Focused selection: Existing preparation/admission/merger repair/cancellation and
 ### Slice 14: Forge publication and review stages
 
 Findings: R1, R2, R3, R10.
-Ticket: [TKT-20261026084834](../ticket/reviewing/20261026084834-quality-publication.md).
+Ticket: [TKT-20261026084834](../ticket/solved/20261026084834-quality-publication.md).
 
 1. **T14.1:** Extract provider publication, submission and pull-request interaction into internal/core/workflow/forge. Extract review decisions into internal/core/workflow/review. Keep the provider-independent workflow coordinator separate from these adapters.
 2. **T14.2:** Distinguish ticket-native authority from forge-native publication: native is not a global synonym for forge. Rename only symbols whose actual meaning is proven; retain established domain vocabulary and persisted spellings where it remains precise.
@@ -290,7 +290,7 @@ Focused selection: Existing native provider/transport permission and review fixt
 ### Slice 15: Workflow closeout and coordinator cleanup
 
 Findings: R1, R2, R3, R7, R10.
-Ticket: [TKT-20261026084835](../ticket/ready/20261026084835-quality-closeout.md).
+Ticket: [TKT-20261026084835](../ticket/in_progress/20261026084835-quality-closeout.md).
 
 1. **T15.1:** Extract closing-gate and closure behavior into internal/core/workflow/closeout; leave core/workflow responsible for sequencing, dispatch and lifecycle. Preserve confirmation, closing-gate waiver, exact-candidate and terminal outcome distinctions.
 2. **T15.2:** Complete result/input conversions for remaining workflow lifecycle, loose queue, frontier, continuation, amendment, process and capacity paths. Remove workflowClosingInvocationFiles unused context and prepareWorkflowTask/withoutWorkflowPublicationProfile production-only wrappers where still applicable.
@@ -419,8 +419,8 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 11 | [TKT-20261026084831](../ticket/solved/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | delivered; PR #448 verified |
 | 12 | [TKT-20261026084832](../ticket/solved/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | delivered; PR #449 verified |
 | 13 | [TKT-20261026084833](../ticket/solved/20261026084833-quality-integration.md) | Candidate validation and merge stages | in_progress; PR #449 verified |
-| 14 | [TKT-20261026084834](../ticket/reviewing/20261026084834-quality-publication.md) | Forge publication and review stages | reviewing; canonical PR preparation |
-| 15 | [TKT-20261026084835](../ticket/ready/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | ready; predecessor applies |
+| 14 | [TKT-20261026084834](../ticket/solved/20261026084834-quality-publication.md) | Forge publication and review stages | delivered; PR #451 |
+| 15 | [TKT-20261026084835](../ticket/in_progress/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | in_progress; predecessor verified |
 | 16 | [TKT-20261026084836](../ticket/ready/20261026084836-quality-closure.md) | Final enforcement, documentation and integrated closure | ready; predecessor applies |
 
 Each ticket is one slice-sized review unit, linked to this plan and tracker. The tracker owns task execution evidence; Looper owns controller checkpoints and merges only under separately recorded delegation. Tickets are not a second executor and must not be submitted independently to chr native work. On verified integration, mirror that slice's resolved status and commits into its ticket; do not mark a ticket solved merely because code compiled or a PR opened.
