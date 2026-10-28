@@ -76,8 +76,11 @@ func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *au
 }
 
 func (s service) applyGuidedNativeControl(ctx context.Context, store *workflowcore.Store, request workflowstate.ControlMutationRequest) (workflowstate.ControlResult, error) {
-	result, found, err := store.ReadWorkflowControlReceipt(ctx, request)
-	if err != nil || found {
+	observed, err := store.ReadWorkflowControlReceipt(ctx, request)
+
+	result := observed.Result
+
+	if err != nil || observed.Found {
 		return result, err
 	}
 
@@ -92,13 +95,13 @@ func (s service) applyGuidedNativeControl(ctx context.Context, store *workflowco
 	}
 	// A failed write can still have an accepted journal entry. Only a verified
 	// missing original receipt permits rolling back the guided stop reservation.
-	prior, found, readErr := store.ReadWorkflowControlReceipt(ctx, request)
+	prior, readErr := store.ReadWorkflowControlReceipt(ctx, request)
 	if readErr != nil {
 		return result, errors.Join(err, readErr)
 	}
 
-	if found {
-		return prior, nil
+	if prior.Found {
+		return prior.Result, nil
 	}
 
 	return result, errors.Join(authoringcore.ErrGuidedControlRejected, err)

@@ -15,7 +15,10 @@ func (s *Store) ControlWorkflowDecision(ctx context.Context, request workflowsta
 		return result, workflowstate.ErrConflict
 	}
 
-	request, digest, err := freezeWorkflowControlMutation(request)
+	frozen, err := freezeWorkflowControlMutation(request)
+
+	request, digest := frozen.Request, frozen.Digest
+
 	if err != nil {
 		return result, err
 	}
@@ -29,9 +32,9 @@ func (s *Store) ControlWorkflowDecision(ctx context.Context, request workflowsta
 			return err
 		}
 
-		prior, found, err := invocationLocation.Owner.readWorkflowControlReceipt(request, digest)
-		if found || err != nil {
-			result = prior
+		prior, err := invocationLocation.Owner.readWorkflowControlReceipt(request, digest)
+		if prior.Found || err != nil {
+			result = prior.Result
 
 			return err
 		}
@@ -51,7 +54,7 @@ func (s *Store) ControlWorkflowDecision(ctx context.Context, request workflowsta
 
 		commit := invocationLocation.Owner.newWorkflowControlCommit(request, digest, check)
 
-		if err := invocationLocation.Owner.applyWorkflowDecisionControl(ctx, invocationLocation.Run, request, guard, provider, commit); err != nil {
+		if err := invocationLocation.Owner.applyWorkflowDecisionControl(ctx, invocationLocation.Run, provider, workflowDecisionControl{Request: request, Guard: guard, Commit: commit}); err != nil {
 			return err
 		}
 
@@ -63,7 +66,15 @@ func (s *Store) ControlWorkflowDecision(ctx context.Context, request workflowsta
 	return result, err
 }
 
-func (s *Store) applyWorkflowDecisionControl(ctx context.Context, run workflowInvocationFile, request workflowstate.ControlMutationRequest, guard IntegrationBudgetGuard, provider PullRequestProvider, commit *workflowControlCommit) error {
+type workflowDecisionControl struct {
+	Request workflowstate.ControlMutationRequest
+	Guard   IntegrationBudgetGuard
+	Commit  *workflowControlCommit
+}
+
+func (s *Store) applyWorkflowDecisionControl(ctx context.Context, run workflowInvocationFile, provider PullRequestProvider, accepted workflowDecisionControl) error {
+	request, guard, commit := accepted.Request, accepted.Guard, accepted.Commit
+
 	switch request.Action {
 	case "approve":
 		_, err := s.approveWorkflowSlice(ctx, run, request.ReviewHash, provider, commit)

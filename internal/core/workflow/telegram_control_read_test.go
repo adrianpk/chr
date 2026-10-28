@@ -16,9 +16,9 @@ func TestTelegramControlReceiptMissing(t *testing.T) {
 	store, request := telegramLifecycleJournalFixture(t, "pause")
 	before := workflowTestRead(t, store, request.ID)
 
-	result, found, err := store.ReadWorkflowControlReceipt(t.Context(), request)
-	if err != nil || found || result.RequestID != "" || !reflect.DeepEqual(before, workflowTestRead(t, store, request.ID)) {
-		t.Fatal("receipt probe changed an unaccepted request", result, found, err)
+	observed, err := store.ReadWorkflowControlReceipt(t.Context(), request)
+	if err != nil || observed.Found || observed.Result.RequestID != "" || !reflect.DeepEqual(before, workflowTestRead(t, store, request.ID)) {
+		t.Fatal("receipt probe changed an unaccepted request", observed.Result, observed.Found, err)
 	}
 
 	path, err := store.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))

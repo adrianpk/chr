@@ -114,20 +114,20 @@ func checkTelegramLifecycleJournal(t *testing.T, kind string) {
 func readTelegramLifecycleReceipt(t *testing.T, store *Store, request workflowstate.ControlMutationRequest) workflowstate.ControlResult {
 	t.Helper()
 
-	result, found, err := store.ReadWorkflowControlReceipt(t.Context(), request)
-	if err != nil || !found || result.RequestID != request.Binding.RequestID || result.Revision != request.ExpectedRevision+1 {
-		t.Fatal("lifecycle receipt did not recover", result, err)
+	observed, err := store.ReadWorkflowControlReceipt(t.Context(), request)
+	if err != nil || !observed.Found || observed.Result.RequestID != request.Binding.RequestID || observed.Result.Revision != request.ExpectedRevision+1 {
+		t.Fatal("lifecycle receipt did not recover", observed.Result, err)
 	}
 
-	return result
+	return observed.Result
 }
 
 func checkTelegramLifecycleActor(t *testing.T, reopened *Store, request workflowstate.ControlMutationRequest) {
 	t.Helper()
 
 	request.Binding.Operator = "another-operator"
-	if _, found, err := reopened.ReadWorkflowControlReceipt(t.Context(), request); found || !errors.Is(err, workflowstate.ErrConflict) {
-		t.Fatal("receipt read accepted another actor", found, err)
+	if observed, err := reopened.ReadWorkflowControlReceipt(t.Context(), request); observed.Found || !errors.Is(err, workflowstate.ErrConflict) {
+		t.Fatal("receipt read accepted another actor", observed.Found, err)
 	}
 
 	if _, err := reopened.ControlWorkflowLifecycle(t.Context(), request, LifecycleControlPorts{}, nil); !errors.Is(err, workflowstate.ErrConflict) {

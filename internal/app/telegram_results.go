@@ -47,10 +47,6 @@ type telegramTargetResolution struct {
 	Target telegramcore.OperationTarget
 	Needed bool
 }
-type telegramControlReceipt struct {
-	Status WorkflowWorkStatus
-	Found  bool
-}
 type telegramGuidedPreparation struct {
 	Input  telegramGuidedInput
 	Config telegramcore.ReceiverConfig

@@ -6,27 +6,34 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// WorkflowControlReceiptLookup pairs current status with original-receipt
+// presence. Status errors after a verified receipt retain Found and that receipt.
+type WorkflowControlReceiptLookup struct {
+	Status WorkflowWorkStatus
+	Found  bool
+}
+
 // ReadWorkControlReceipt observes an accepted control without constructing
 // execution ports or permitting a fresh mutation through an expired prompt.
-func (s service) ReadWorkControlReceipt(ctx context.Context, request WorkflowControlRequest) (WorkflowWorkStatus, bool, error) {
+func (s service) ReadWorkControlReceipt(ctx context.Context, request WorkflowControlRequest) (WorkflowControlReceiptLookup, error) {
 	if request.RequestBinding == nil {
-		return WorkflowWorkStatus{}, false, workflowstate.ErrConflict
+		return WorkflowControlReceiptLookup{}, workflowstate.ErrConflict
 	}
 
 	store, err := s.workflowStore()
 	if err != nil {
-		return WorkflowWorkStatus{}, false, err
+		return WorkflowControlReceiptLookup{}, err
 	}
 
-	receipt, found, err := store.ReadWorkflowControlReceipt(ctx, workflowNativeControlRequest(request))
-	if err != nil || !found {
-		return WorkflowWorkStatus{}, false, err
+	observed, err := store.ReadWorkflowControlReceipt(ctx, workflowNativeControlRequest(request))
+	if err != nil || !observed.Found {
+		return WorkflowControlReceiptLookup{}, err
 	}
 
 	status, err := s.WorkflowStatus(ctx, request.ID, WorkflowStatusRequest{Limit: 8})
-	status.ControlReceipt = &receipt
+	status.ControlReceipt = &observed.Result
 
-	return status, true, err
+	return WorkflowControlReceiptLookup{Status: status, Found: true}, err
 }
 
 func workflowNativeControlRequest(request WorkflowControlRequest) workflowstate.ControlMutationRequest {

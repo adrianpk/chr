@@ -55,9 +55,9 @@ func operationReceiptTestFixture(t *testing.T, operation string) operationReceip
 	if operation == "control" {
 		fixture.image, fixture.foreign = fixture.foreign, fixture.image
 		fixture.read = func() (bool, error) {
-			_, found, err := store.readWorkflowControlReceipt(control, normalized.Digest)
+			observed, err := store.readWorkflowControlReceipt(control, normalized.Digest)
 
-			return found, err
+			return observed.Found, err
 		}
 	}
 

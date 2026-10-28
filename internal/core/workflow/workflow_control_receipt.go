@@ -63,17 +63,17 @@ func (commit *workflowControlCommit) files(ctx context.Context, revision uint64)
 	return []workflowstate.FileChange{{Path: receipt.Result.ReceiptRef, After: data}}, err
 }
 
-func (s *Store) readWorkflowControlReceipt(request workflowstate.ControlMutationRequest, digest string) (workflowstate.ControlResult, bool, error) {
+func (s *Store) readWorkflowControlReceipt(request workflowstate.ControlMutationRequest, digest string) (workflowstate.ControlReceiptLookup, error) {
 	observed, err := readWorkflowOperationReceipt[workflowControlReceipt](s, request.Binding.RequestID)
 	if err != nil || !observed.Found {
-		return workflowstate.ControlResult{}, false, err
+		return workflowstate.ControlReceiptLookup{}, err
 	}
 
 	if err := s.validateWorkflowControlReceipt(observed.Receipt, request, digest); err != nil {
-		return workflowstate.ControlResult{}, false, err
+		return workflowstate.ControlReceiptLookup{}, err
 	}
 
-	return observed.Receipt.Result, true, nil
+	return workflowstate.ControlReceiptLookup{Result: observed.Receipt.Result, Found: true}, nil
 }
 
 func (s *Store) validateWorkflowControlReceipt(receipt workflowControlReceipt, request workflowstate.ControlMutationRequest, digest string) error {

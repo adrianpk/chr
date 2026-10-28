@@ -42,6 +42,13 @@ type ControlResult struct {
 	Revision       uint64 `json:"revision"`
 }
 
+// ControlReceiptLookup distinguishes a verified original receipt from normal
+// absence. Observing a missing receipt never reserves a new mutation binding.
+type ControlReceiptLookup struct {
+	Result ControlResult
+	Found  bool
+}
+
 // IntegrationGrant is an append-only, attributable ceiling extension.
 type IntegrationGrant struct {
 	ID            string    `json:"id"`

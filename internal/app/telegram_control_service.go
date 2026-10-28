@@ -10,23 +10,21 @@ import (
 
 type telegramControlService interface {
 	ReadTelegramControl(context.Context, telegramcore.OperationTarget, string) (WorkflowWorkStatus, error)
-	ReadTelegramControlReceipt(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (telegramControlReceipt, error)
+	ReadTelegramControlReceipt(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (WorkflowControlReceiptLookup, error)
 	ApplyTelegramControl(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest, workflowcore.AdmissionCheck) (WorkflowWorkStatus, error)
 }
 
 // ReadTelegramControlReceipt scopes receipt recovery to the original project.
-func (s service) ReadTelegramControlReceipt(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest) (telegramControlReceipt, error) {
+func (s service) ReadTelegramControlReceipt(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest) (WorkflowControlReceiptLookup, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
-		return telegramControlReceipt{Status: WorkflowWorkStatus{}, Found: false}, err
+		return WorkflowControlReceiptLookup{Status: WorkflowWorkStatus{}, Found: false}, err
 	}
 
 	scoped.workflowNamespace = target.Namespace
 	request.RequestBinding = &binding
 
-	status, found, err := scoped.ReadWorkControlReceipt(ctx, request)
-
-	return telegramControlReceipt{Status: status, Found: found}, err
+	return scoped.ReadWorkControlReceipt(ctx, request)
 }
 
 // ReadTelegramControl observes the frozen project and namespace through native status.

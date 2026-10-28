@@ -8,34 +8,39 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func freezeWorkflowControlMutation(request workflowstate.ControlMutationRequest) (workflowstate.ControlMutationRequest, string, error) {
+type workflowFrozenControl struct {
+	Request workflowstate.ControlMutationRequest
+	Digest  string
+}
+
+func freezeWorkflowControlMutation(request workflowstate.ControlMutationRequest) (workflowFrozenControl, error) {
 	if err := validateGuidedControlProof(request); err != nil {
-		return request, "", err
+		return workflowFrozenControl{Request: request}, err
 	}
 
 	if err := request.Binding.Validate(); err != nil {
-		return request, "", err
+		return workflowFrozenControl{Request: request}, err
 	}
 
 	if !workflowstate.ValidRequestKey(request.ID) || request.ExpectedRevision == 0 || !slices.Contains([]string{"approve", "grant", "answer_decision", "pause", "cancel", "resume", "continue", "reconcile"}, request.Action) {
-		return request, "", workflowstate.ErrConflict
+		return workflowFrozenControl{Request: request}, workflowstate.ErrConflict
 	}
 
 	data, err := json.Marshal(request)
 	if err != nil || len(data) > 32768 {
-		return request, "", workflowstate.ErrConflict
+		return workflowFrozenControl{Request: request}, workflowstate.ErrConflict
 	}
 
 	var frozen workflowstate.ControlMutationRequest
 	if err := json.Unmarshal(data, &frozen); err != nil {
-		return frozen, "", err
+		return workflowFrozenControl{Request: frozen}, err
 	}
 
 	if err := validateWorkflowControlPayload(frozen); err != nil {
-		return frozen, "", err
+		return workflowFrozenControl{Request: frozen}, err
 	}
 
-	return frozen, contenthash.Sum(data), nil
+	return workflowFrozenControl{Request: frozen, Digest: contenthash.Sum(data)}, nil
 }
 
 func validateWorkflowControlPayload(request workflowstate.ControlMutationRequest) error {

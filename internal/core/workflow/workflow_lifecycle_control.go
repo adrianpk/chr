@@ -26,7 +26,10 @@ type workflowLifecycleAcceptance struct {
 // together. Continuation runs outside exclusion after acceptance; a replay only
 // returns that original receipt and never starts another checkpoint.
 func (s *Store) ControlWorkflowLifecycle(ctx context.Context, request workflowstate.ControlMutationRequest, ports LifecycleControlPorts, check AdmissionCheck) (workflowstate.ControlResult, error) {
-	request, digest, err := freezeWorkflowControlMutation(request)
+	frozen, err := freezeWorkflowControlMutation(request)
+
+	request, digest := frozen.Request, frozen.Digest
+
 	if err != nil || !slices.Contains([]string{"pause", "cancel", "resume", "continue", "reconcile"}, request.Action) {
 		return workflowstate.ControlResult{}, errorsOrConflict(err)
 	}
@@ -63,9 +66,9 @@ func (s *Store) acceptWorkflowLifecycleControl(ctx context.Context, request work
 		return workflowLifecycleAcceptance{}, err
 	}
 
-	prior, found, err := invocationLocation.Owner.readWorkflowControlReceipt(request, digest)
-	if found || err != nil {
-		return workflowLifecycleAcceptance{receipt: prior, replay: found}, err
+	prior, err := invocationLocation.Owner.readWorkflowControlReceipt(request, digest)
+	if prior.Found || err != nil {
+		return workflowLifecycleAcceptance{receipt: prior.Result, replay: prior.Found}, err
 	}
 
 	if err := invocationLocation.Owner.checkGuidedWorkflowControl(ctx, invocationLocation.Run.Invocation, request); err != nil {
