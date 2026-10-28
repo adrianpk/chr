@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -40,11 +41,11 @@ func (p *nativePreparationProviderFixture) WorkflowPreparedNativeCapability(_ co
 		PublicationCapability: workflowstate.PublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
 		SourceRef:             "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-preparation/v1",
 		PolicyFingerprint: contenthash.Sum([]byte(p.policyRevision)), ServerCapabilityFingerprint: fingerprint, CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")),
-		ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion,
+		ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowforge.NativeAdapterVersion,
 		OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit,
 	}
 
-	return sealWorkflowNativeCapability(capability)
+	return workflowforge.SealNativeCapability(capability)
 }
 
 func newNativePreparationFixture(t *testing.T, method string, gate workflowstate.Validation) nativePreparationFixture {

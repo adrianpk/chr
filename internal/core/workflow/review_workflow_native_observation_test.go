@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -93,7 +94,7 @@ func TestNativeLaterSource(t *testing.T) {
 	binding := nativeObservationFixture(t, fixture)
 	git := NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote)
 
-	prior, err := verifyWorkflowNativeTarget(t.Context(), binding, git)
+	prior, err := workflowforge.VerifyNativeTarget(t.Context(), binding, git, workflowNativePublicationProofs{})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -39,7 +40,7 @@ func nativeSourceResultFixture(t *testing.T) (nativeCapabilityFixture, workflows
 	t.Helper()
 
 	fixture := newNativeCapabilityFixture(t, "github")
-	fixture.policy.policy.ObservationContract = workflowNativeSourceResultContract
+	fixture.policy.policy.ObservationContract = workflowforge.NativeSourceResultContract
 	binding := nativeObservationFixture(t, fixture)
 	pr := binding.PullRequest
 	pr.State, pr.Merged, pr.ResultCommit = "closed", true, binding.Git.SourceCommit
@@ -97,7 +98,7 @@ func TestNativeSourceResultGuards(t *testing.T) {
 // integration repair without erasing original source attribution or replay proof.
 func TestNativeSourceRepair(t *testing.T) {
 	fixture := newNativeCapabilityFixture(t, "github")
-	fixture.policy.policy.ObservationContract = workflowNativeSourceResultContract
+	fixture.policy.policy.ObservationContract = workflowforge.NativeSourceResultContract
 	f := workflowGitFixture{request: fixture.request.Publication, remote: fixture.remote}
 	proof, lane := nativeCombinedPreparation(t, f)
 	proof = nativeReplayFix(t, proof, lane)
@@ -124,7 +125,7 @@ func TestNativeSourceLater(t *testing.T) {
 	fixture, binding, pr := nativeSourceResultFixture(t)
 	git := NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote)
 
-	prior, err := verifyWorkflowNativeTarget(t.Context(), binding, git)
+	prior, err := workflowforge.VerifyNativeTarget(t.Context(), binding, git, workflowNativePublicationProofs{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,7 +163,7 @@ func TestNativeSourceLater(t *testing.T) {
 func TestNativeSourceContract(t *testing.T) {
 	_, binding, _ := nativeSourceResultFixture(t)
 	store := workflowTestStore(t)
-	native := workflowstate.NativeReceipt{ObservationContract: workflowNativeSourceResultContract}
+	native := workflowstate.NativeReceipt{ObservationContract: workflowforge.NativeSourceResultContract}
 	native.InvocationID, native.SourceRepository = "source-contract", binding.Git.Repository
 	native.SourceRef, native.TargetRef = binding.Capability.SourceRef, binding.Capability.TargetRef
 	native.CapabilityRef = retainNativeRecordEvidence(t, store, native.InvocationID, "capability", binding.Capability)
@@ -185,7 +186,7 @@ func TestNativeSourceCapability(t *testing.T) {
 	for _, forge := range []string{"github", "forgejo"} {
 		t.Run(forge, func(t *testing.T) {
 			fixture := newNativeCapabilityFixture(t, forge)
-			fixture.policy.policy.ObservationContract = workflowNativeSourceResultContract
+			fixture.policy.policy.ObservationContract = workflowforge.NativeSourceResultContract
 
 			capability, err := fixture.adapter.WorkflowNativeIntegrationCapability(t.Context(), fixture.request, fixture.policy, fixture.git)
 			if err != nil {
@@ -220,7 +221,7 @@ func TestNativeSourceReceipt(t *testing.T) {
 	}
 
 	receipt := nativeSourceResultReceipt(binding, observed)
-	if !workflowNativeReceiptResultMatches(receipt) || validateWorkflowNativeReceiptObservation(receipt, observed) != nil {
+	if !workflowforge.NativeReceiptResultMatches(receipt.ResultCommit, *receipt.Native) || validateWorkflowNativeReceiptObservation(receipt, observed) != nil {
 		t.Fatal("verified source attribution did not preserve an exact-result receipt")
 	}
 

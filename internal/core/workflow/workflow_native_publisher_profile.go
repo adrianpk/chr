@@ -11,6 +11,7 @@ import (
 	"slices"
 	"strings"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -116,7 +117,7 @@ func validateWorkflowNativePublisher(profile NativePublisherProfile) error {
 }
 
 func validateWorkflowNativePublisherMethods(profile NativePublisherProfile) error {
-	if !slices.Contains([]string{"forgejo_same_pr_git_auto_merge/v1", "github_same_pr_git_merge/v1", workflowNativeSourceResultContract}, profile.ObservationContract) || len(profile.CertifiedMethods) == 0 || len(profile.CertifiedMethods) > 3 {
+	if !slices.Contains([]string{"forgejo_same_pr_git_auto_merge/v1", "github_same_pr_git_merge/v1", workflowforge.NativeSourceResultContract}, profile.ObservationContract) || len(profile.CertifiedMethods) == 0 || len(profile.CertifiedMethods) > 3 {
 		return workflowstate.ErrConflict
 	}
 

@@ -219,5 +219,5 @@ func workflowNativeReceiptOwnerMatches(receipt Receipt) bool {
 		return false
 	}
 
-	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && workflowstate.ValidFingerprint(native.CandidateHash) && workflowNativeReceiptResultMatches(receipt) && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= workflowstate.PageLimit
+	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && workflowstate.ValidFingerprint(native.CandidateHash) && workflowforge.NativeReceiptResultMatches(receipt.ResultCommit, *receipt.Native) && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= workflowstate.PageLimit
 }

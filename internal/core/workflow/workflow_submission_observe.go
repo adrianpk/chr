@@ -121,7 +121,7 @@ func checkWorkflowSubmittedObservation(ctx context.Context, submission workflows
 
 func observeWorkflowSubmissionGit(ctx context.Context, git IntegrationGit, query workflowstate.IntegrationQuery, expected workflowstate.IntegrationProof) (workflowstate.IntegrationProof, error) {
 	if query.ResultCommit == expected.ResultCommit {
-		return observeWorkflowPreparedGit(ctx, git, query, expected)
+		return workflowforge.ObservePreparedGit(ctx, git, query, expected)
 	}
 
 	return git.VerifyWorkflowIntegration(ctx, query)

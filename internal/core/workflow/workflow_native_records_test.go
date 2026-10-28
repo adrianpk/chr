@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -50,9 +51,9 @@ func nativeRecordCandidate(t *testing.T, method string) (*Store, workflowstate.I
 	}
 
 	proof, pr := candidate.Input.Git, candidate.Input.Source.PullRequest
-	cap := workflowstate.NativeCapability{PublicationCapability: workflowstate.PublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: contenthash.Sum([]byte("policy")), ServerCapabilityFingerprint: contenthash.Sum([]byte("server")), CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowNativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
+	cap := workflowstate.NativeCapability{PublicationCapability: workflowstate.PublicationCapability{Repository: proof.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true}, SourceRef: "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "native-fixture/v1", PolicyFingerprint: contenthash.Sum([]byte("policy")), ServerCapabilityFingerprint: contenthash.Sum([]byte("server")), CredentialIdentityFingerprint: contenthash.Sum([]byte("publisher")), ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: workflowforge.NativeAdapterVersion, OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit}
 
-	cap, err = sealWorkflowNativeCapability(cap)
+	cap, err = workflowforge.SealNativeCapability(cap)
 	if err != nil {
 		t.Fatal(err)
 	}

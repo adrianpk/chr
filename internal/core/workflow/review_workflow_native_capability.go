@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/url"
-	"strings"
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
@@ -22,11 +20,11 @@ func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx conte
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	capability := newWorkflowNativeCapability(request)
+	capability := workflowforge.NewNativeCapability(workflowNativeCapabilityInput(request))
 	if request.Config.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
 		capability.Unsupported = []workflowstate.NativeUnsupported{{Condition: "profile_disabled", Decision: "Explicitly select git_atomic_dual_ref."}}
 
-		return sealWorkflowNativeCapability(capability)
+		return workflowforge.SealNativeCapability(capability)
 	}
 
 	if policies == nil || git == nil {
@@ -38,7 +36,7 @@ func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx conte
 		return capability, err
 	}
 
-	if !sameWorkflowNativeSourcePR(pr, request.PullRequest) || !workflowNativeSourceBinding(request) {
+	if !workflowforge.SameNativeSourcePR(pr, request.PullRequest) || !workflowforge.NativeSourceBinding(workflowNativeCapabilityInput(request)) {
 		return capability, fmt.Errorf("%w: canonical PR source binding changed", workflowstate.ErrConflict)
 	}
 
@@ -50,33 +48,9 @@ func (adapter RemoteReviewAdapter) WorkflowNativeIntegrationCapability(ctx conte
 	capability.OwnershipRevision = policy.OwnershipRevision
 	capability.CredentialIdentityFingerprint = policy.CredentialIdentityFingerprint
 	capability.ObservationContract = policy.ObservationContract
-	capability.Unsupported = workflowNativePolicyReasons(request, policy)
+	capability.Unsupported = workflowforge.NativePolicyReasons(workflowNativeCapabilityInput(request), policy)
 
 	return adapter.finishWorkflowNativeCapability(ctx, request, policy, git, capability)
-}
-
-func sameWorkflowNativeSourcePR(current, retained workflowstate.PullRequestSnapshot) bool {
-	// GitHub computes a speculative merge_commit_sha while an open PR is still
-	// unmerged. It is not a source/base change or evidence of delivered P.
-	current.ResultCommit, retained.ResultCommit = "", ""
-
-	return current == retained
-}
-
-func newWorkflowNativeCapability(request NativeCapabilityRequest) workflowstate.NativeCapability {
-	return workflowstate.NativeCapability{
-		PublicationCapability: workflowstate.PublicationCapability{Repository: request.Publication.Repository, PullRequestURL: request.PullRequest.URL, Method: request.Publication.Git.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef},
-		SourceRef:             request.Publication.SourceRef, TargetRef: request.Publication.TargetRef, AdapterVersion: workflowNativeAdapterVersion,
-		OriginalSourceCommit: request.Publication.Git.SourceCommit, ExpectedBaseCommit: request.Publication.Git.BaseCommit, PreparedResultCommit: request.Publication.Git.ResultCommit,
-	}
-}
-
-func workflowNativeSourceBinding(request NativeCapabilityRequest) bool {
-	pr, publication := request.PullRequest, request.Publication
-
-	return pr.Repository == publication.Repository && pr.HeadRepository == publication.SourceRepository &&
-		"refs/heads/"+pr.HeadBranch == publication.SourceRef && "refs/heads/"+pr.BaseBranch == publication.TargetRef &&
-		pr.State == "open" && !pr.Merged && pr.HeadCommit == publication.Git.SourceCommit && pr.BaseCommit == publication.Git.BaseCommit
 }
 
 func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, policy workflowstate.NativePolicy, git GitPublicationInspector, capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {
@@ -90,7 +64,7 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 		return capability, err
 	}
 
-	capability.PolicyFingerprint = contenthash.Sum(append(hostData, observation.data...))
+	capability.PolicyFingerprint = contenthash.Sum(append(hostData, observation.Data...))
 
 	identity, err := adapter.readWorkflowNativeIdentity(ctx, request.PullRequest)
 	if err != nil {
@@ -103,13 +77,13 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 
 	capability.CredentialIdentityFingerprint = contenthash.Sum([]byte(policy.CredentialIdentityFingerprint + "\x00" + identity))
 
-	capability.Unsupported = append(capability.Unsupported, observation.unsupported...)
-	if !workflowNativeObservationContractMatches(observation.contract, policy.ObservationContract) {
+	capability.Unsupported = append(capability.Unsupported, observation.Unsupported...)
+	if !workflowforge.NativeObservationContractMatches(observation.Contract, policy.ObservationContract) {
 		capability.Unsupported = append(capability.Unsupported, workflowstate.NativeUnsupported{Condition: "observation_uncertified", Decision: "Certify same-original-PR Git merge observation on this repository."})
 	}
 
 	if len(capability.Unsupported) != 0 {
-		return sealWorkflowNativeCapability(capability)
+		return workflowforge.SealNativeCapability(capability)
 	}
 
 	return inspectWorkflowNativeCapability(ctx, request, git, capability)
@@ -120,7 +94,7 @@ func inspectWorkflowNativeCapability(ctx context.Context, request NativeCapabili
 	if errors.Is(err, workflowstate.ErrAtomicGuard) {
 		capability.Unsupported = append(capability.Unsupported, workflowstate.NativeUnsupported{Condition: "atomic_transport_unavailable", Decision: "Select a server supporting atomic dual-ref transactions."})
 
-		return sealWorkflowNativeCapability(capability)
+		return workflowforge.SealNativeCapability(capability)
 	}
 
 	if err != nil {
@@ -134,7 +108,7 @@ func inspectWorkflowNativeCapability(ctx context.Context, request NativeCapabili
 	capability.ServerCapabilityFingerprint = advertisement.Fingerprint
 	capability.AtomicSourceBase, capability.ExactResult = true, true
 
-	return sealWorkflowNativeCapability(capability)
+	return workflowforge.SealNativeCapability(capability)
 }
 
 // RecheckWorkflowNativeCapability invalidates a retained grant on any relevant
@@ -146,63 +120,19 @@ func (adapter RemoteReviewAdapter) RecheckWorkflowNativeCapability(ctx context.C
 	}
 
 	if !current.AtomicSourceBase || !current.ExactResult || current.Revision != prior.Revision {
-		return fmt.Errorf("%w: native capability changed (%s)", workflowstate.ErrConflict, changedWorkflowNativeCapability(prior, current))
+		return fmt.Errorf("%w: native capability changed (%s)", workflowstate.ErrConflict, workflowforge.ChangedNativeCapability(prior, current))
 	}
 
 	return nil
 }
 
-func changedWorkflowNativeCapability(prior, current workflowstate.NativeCapability) string {
-	fields := []struct{ name, prior, current string }{
-		{"policy", prior.PolicyFingerprint, current.PolicyFingerprint},
-		{"server capability", prior.ServerCapabilityFingerprint, current.ServerCapabilityFingerprint},
-		{"publisher identity", prior.CredentialIdentityFingerprint, current.CredentialIdentityFingerprint},
-		{"ownership", prior.OwnershipRevision, current.OwnershipRevision},
-		{"observation contract", prior.ObservationContract, current.ObservationContract},
-	}
-	for _, field := range fields {
-		if field.prior != field.current {
-			return field.name
-		}
-	}
-
-	return "source, target, method or profile"
-}
-
-func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowNativePolicyObservation, error) {
-	resolvedReview, err := adapter.resolve(pr.URL)
+func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowforge.NativePolicyObservation, error) {
+	resolved, err := adapter.resolve(pr.URL)
 	if err != nil {
-		return workflowNativePolicyObservation{}, err
+		return workflowforge.NativePolicyObservation{}, err
 	}
 
-	reference := resolvedReview.reference
+	client := adapter.workflowForgeClient(pr.Repository, resolved)
 
-	client := adapter.workflowForgeClient(pr.Repository, resolvedReview)
-
-	paths := []string{client.Endpoint.RepositoryPath(), client.Endpoint.RepositoryPath() + "/branches/" + url.PathEscape(pr.BaseBranch), client.Endpoint.RepositoryPath() + "/branches/" + url.PathEscape(pr.HeadBranch)}
-
-	contract := "forgejo_same_pr_git_auto_merge/v1"
-	if reference.Provider == workflowforge.GitHub {
-		contract = "github_same_pr_git_merge/v1"
-
-		paths = append(paths, client.Endpoint.RepositoryPath()+"/rules/branches/"+url.PathEscape(pr.BaseBranch), client.Endpoint.RepositoryPath()+"/rules/branches/"+url.PathEscape(pr.HeadBranch))
-	}
-
-	var responses []json.RawMessage
-
-	for _, path := range paths {
-		data, err := client.Request(ctx, workflowforge.Request{Method: "GET", Path: path})
-		if err != nil || len(data) > workflowstate.FileLimit || !json.Valid(data) {
-			return workflowNativePolicyObservation{contract: contract}, fmt.Errorf("native publication policy could not be completely observed")
-		}
-
-		responses = append(responses, data)
-	}
-
-	var repository workflowNativeRepositoryPolicy
-	if err := json.Unmarshal(responses[0], &repository); err != nil || strings.TrimSuffix(repository.URL, "/") != pr.Repository {
-		return workflowNativePolicyObservation{contract: contract}, workflowstate.ErrConflict
-	}
-
-	return workflowNativeRemotePolicy(responses, method, contract)
+	return client.NativePolicy(ctx, pr, method)
 }

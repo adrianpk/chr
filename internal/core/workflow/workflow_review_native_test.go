@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +21,7 @@ func (p *nativeReviewProviderFixture) WorkflowPreparedNativeCapability(ctx conte
 
 	p.change(&capability)
 
-	return sealWorkflowNativeCapability(capability)
+	return workflowforge.SealNativeCapability(capability)
 }
 
 func nativeReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (nativePreparationFixture, workflowstate.IntegrationCandidate) {

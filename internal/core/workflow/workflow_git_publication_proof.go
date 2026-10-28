@@ -2,26 +2,13 @@ package workflow
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
-
-// GitPublicationRevision binds the original source, base, exact result,
-// ownership grant, full refs and method/history proof. Directory is host-local IO.
-func GitPublicationRevision(request GitPublication) (string, error) {
-	data, err := json.Marshal(struct {
-		Schema, Repository, SourceRepository, SourceRef, TargetRef, OwnershipRevision string
-		SourceRewriteAuthorized                                                       bool
-		Git                                                                           workflowstate.IntegrationProof
-	}{"chr-git-publication/v1", request.Repository, request.SourceRepository, request.SourceRef, request.TargetRef, request.OwnershipRevision, request.SourceRewriteAuthorized, request.Git})
-
-	return contenthash.Sum(data), err
-}
 
 func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, request GitPublication) error {
 	if err := validateWorkflowPublicationOwnership(request); err != nil {
@@ -75,7 +62,7 @@ func validateWorkflowPublicationOwnership(request GitPublication) error {
 		return workflowstate.ErrConflict
 	}
 
-	revision, err := GitPublicationRevision(request)
+	revision, err := workflowforge.PublicationRevision(workflowPublicationIdentity(request))
 	if err != nil || revision != request.CandidateRevision {
 		return workflowstate.ErrConflict
 	}

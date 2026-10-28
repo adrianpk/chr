@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -67,7 +68,7 @@ func sealWorkflowGitFixture(t *testing.T, request *GitPublication) {
 
 	var err error
 
-	request.CandidateRevision, err = GitPublicationRevision(*request)
+	request.CandidateRevision, err = workflowforge.PublicationRevision(workflowPublicationIdentity(*request))
 	if err != nil {
 		t.Fatal(err)
 	}

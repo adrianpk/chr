@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -44,7 +45,7 @@ func (s *Store) workflowNativeReceiptBinding(receipt Record) (workflowstate.Nati
 		return binding, err
 	}
 
-	return binding, validateWorkflowNativeBinding(binding)
+	return binding, workflowforge.CheckNativeBinding(binding, workflowNativePublicationProofs{})
 }
 
 func (s *Store) readWorkflowNativeReceiptPublication(native workflowstate.NativeReceipt, binding *workflowstate.NativePublicationBinding) error {

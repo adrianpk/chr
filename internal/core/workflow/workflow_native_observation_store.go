@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -56,7 +57,7 @@ func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Su
 		}
 	}
 
-	return validateWorkflowNativeBinding(*binding)
+	return workflowforge.CheckNativeBinding(*binding, workflowNativePublicationProofs{})
 }
 
 func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, update NativeSubmissionUpdate, expected workflowstate.Submission, observation workflowstate.NativePublicationObservation) (result workflowNativeRetention, err error) {

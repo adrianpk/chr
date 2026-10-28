@@ -134,6 +134,7 @@ func configurationDependencyCases() []leafDependencyCase {
 
 func workflowDependencyCases() []leafDependencyCase {
 	return []leafDependencyCase{
+		{"forge policy checksums", "internal/core/workflow/forge/native_capability.go", "package forge\nimport _ \"forge.adrianpk.com/chr/internal/core/contenthash\"\n", false},
 		{"review input checksums", "internal/core/workflow/review/input.go", "package review\nimport _ \"forge.adrianpk.com/chr/internal/core/contenthash\"\n", false},
 		{"candidate attribution checksums", "internal/core/workflow/integrate/attribution.go", "package integrate\nimport _ \"forge.adrianpk.com/chr/internal/core/contenthash\"\n", false},
 		{"merger input checksums", "internal/core/workflow/merge/input.go", "package merge\nimport _ \"forge.adrianpk.com/chr/internal/core/contenthash\"\n", false},

@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
@@ -99,7 +100,7 @@ func (s *Store) bindWorkflowNativePreparation(ctx context.Context, run workflowI
 }
 
 func validateWorkflowPreparedNativeCapability(input workflowstate.PreparationInput, capability workflowstate.NativeCapability) error {
-	if err := validateWorkflowNativeCapability(capability); err != nil {
+	if err := workflowforge.CheckNativeCapability(capability); err != nil {
 		return err
 	}
 

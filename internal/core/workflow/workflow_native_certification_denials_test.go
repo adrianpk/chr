@@ -97,7 +97,9 @@ func nativeReviewDenial(t *testing.T, state string, profile nativeLiveProfile) {
 	read := "/repos/" + profile.Repository + "/branches/" + url.PathEscape(branch)
 	data := nativeFixtureAPI(t, t.Context(), profile, http.MethodGet, read, nil)
 
-	var current workflowNativeBranchPolicy
+	var current struct {
+		Protected *bool `json:"protected"`
+	}
 	if json.Unmarshal(data, &current) != nil || current.Protected == nil || !*current.Protected {
 		t.Fatal("native review protection was not retained after denial")
 	}

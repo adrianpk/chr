@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -125,7 +126,7 @@ func (s *Store) workflowNativeDispatchRequest(candidate workflowstate.Integratio
 
 	var err error
 
-	request.CandidateRevision, err = GitPublicationRevision(request)
+	request.CandidateRevision, err = workflowforge.PublicationRevision(workflowPublicationIdentity(request))
 
 	return request, err
 }

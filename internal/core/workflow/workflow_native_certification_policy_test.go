@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -49,7 +50,7 @@ func (reader nativeMethodProbePolicy) methodPolicy(profile nativeLiveProfile, me
 
 	profile.Certification.Methods = []string{method}
 	if profile.Forge == "github" {
-		profile.Certification.Contract = workflowNativeSourceResultContract
+		profile.Certification.Contract = workflowforge.NativeSourceResultContract
 	}
 
 	if reader.https {

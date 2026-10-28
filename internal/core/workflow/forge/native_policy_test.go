@@ -1,4 +1,4 @@
-package workflow
+package forge
 
 import (
 	"encoding/json"
@@ -32,9 +32,9 @@ func TestNativeMergePolicy(t *testing.T) {
 				json.RawMessage(`{"protected":false}`), json.RawMessage(`{"protected":false}`),
 			}
 
-			observation, err := workflowNativeRemotePolicy(responses, "merge", tc.contract)
-			if err != nil || (len(observation.unsupported) == 0) != tc.allowed {
-				t.Fatalf("merge policy allowed=%t, want %t; reasons=%+v, error=%v", len(observation.unsupported) == 0, tc.allowed, observation.unsupported, err)
+			observation, err := nativeRemotePolicy(responses, "merge", tc.contract)
+			if err != nil || (len(observation.Unsupported) == 0) != tc.allowed {
+				t.Fatalf("merge policy allowed=%t, want %t; reasons=%+v, error=%v", len(observation.Unsupported) == 0, tc.allowed, observation.Unsupported, err)
 			}
 		})
 	}

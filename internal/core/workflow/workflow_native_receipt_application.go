@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -45,7 +46,7 @@ func (s *Store) checkWorkflowNativeReceiptApplication(receipt Receipt, transacti
 	}
 
 	binding := workflowstate.NativePublicationBinding{Git: candidate.Input.Git, Publication: transaction, GitApplication: &observation}
-	if !workflowNativeApplicationAttributed(binding) {
+	if !workflowforge.NativeApplicationAttributed(binding, workflowNativePublicationProofs{}) {
 		return workflowstate.ErrConflict
 	}
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -37,7 +38,7 @@ func (adapter *NativeReviewAdapter) WorkflowIntegrationCapability(ctx context.Co
 		return workflowstate.PublicationCapability{}, err
 	}
 
-	if len(observation.unsupported) != 0 || !workflowNativeObservationContractMatches(observation.contract, policy.ObservationContract) {
+	if len(observation.Unsupported) != 0 || !workflowforge.NativeObservationContractMatches(observation.Contract, policy.ObservationContract) {
 		return workflowstate.PublicationCapability{}, fmt.Errorf("%w: current repository policy does not support the publisher profile", workflowstate.ErrAtomicGuard)
 	}
 
@@ -51,7 +52,7 @@ func (adapter *NativeReviewAdapter) WorkflowIntegrationCapability(ctx context.Co
 		return workflowstate.PublicationCapability{}, err
 	}
 
-	return workflowstate.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.data...)), AtomicSourceBase: true, ExactResult: true}, nil
+	return workflowstate.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, Revision: contenthash.Sum(append(host, observation.Data...)), AtomicSourceBase: true, ExactResult: true}, nil
 }
 
 // WorkflowPreparedNativeCapability observes the actual receive-pack server for
@@ -71,7 +72,7 @@ func (adapter *NativeReviewAdapter) WorkflowPreparedNativeCapability(ctx context
 
 	request := GitPublication{Repository: pr.Repository, SourceRepository: pr.HeadRepository, Directory: owner.layout.ProjectDir(), SourceRef: policy.SourceRef, TargetRef: policy.TargetRef, SourceRewriteAuthorized: true, OwnershipRevision: policy.OwnershipRevision, Git: proof}
 
-	request.CandidateRevision, err = GitPublicationRevision(request)
+	request.CandidateRevision, err = workflowforge.PublicationRevision(workflowPublicationIdentity(request))
 	if err != nil {
 		return workflowstate.NativeCapability{}, err
 	}
