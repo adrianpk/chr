@@ -60,7 +60,7 @@ records each binding and its approved subsequent policy extraction task. Locks,
 source/revision checks, cleanup, error joins and atomic acceptance remain in the
 existing operations. Stage interfaces contain no coordinator or mutable-store type.
 
-T12.4's first batch replaces ten assigned declarations (11 baseline rows) with
+T12.4's first batch (`fe0df936e6152c0ad346e1e680ad2dd246825e60`) replaces ten assigned declarations (11 baseline rows) with
 named mutation normalization/preparation/lookup, materialization replay and task
 results. Set construction takes an explicit input and artifact number/time form
 one allocation value; task numbering, timestamps, nil/empty results and replay
