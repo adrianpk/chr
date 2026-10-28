@@ -9,10 +9,10 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type telegramWorkLostAck struct {
@@ -54,7 +54,7 @@ func TestTelegramWorkLostAck(t *testing.T) {
 	checkTelegramWorkRecovery(t, f, operations, input.Update, before)
 }
 
-func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, update telegramcore.ReceivedUpdate, before core.WorkflowInvocation) {
+func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, update telegramcore.ReceivedUpdate, before workflowcore.Invocation) {
 	t.Helper()
 
 	after := checkTelegramWorkRunCount(t, operations, 1)
@@ -65,7 +65,7 @@ func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, 
 	checkTelegramWorkRecoveryBinding(t, f, update, before)
 }
 
-func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, before core.WorkflowInvocation) {
+func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, before workflowcore.Invocation) {
 	t.Helper()
 
 	operationLookup, err := f.receiver.store.Operation(t.Context(), update, 0)
@@ -85,7 +85,7 @@ func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFi
 	}
 }
 
-func telegramWorkEditSource(t *testing.T, operations service, record core.WorkflowRecord) {
+func telegramWorkEditSource(t *testing.T, operations service, record workflowcore.Record) {
 	t.Helper()
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: operations.projectContext.ProjectDir, Namespace: "default"})
@@ -124,7 +124,7 @@ func TestTelegramWorkStalePreview(t *testing.T) {
 	}
 }
 
-func telegramWorkChangePreview(t *testing.T, operations service, record core.WorkflowRecord, change string) {
+func telegramWorkChangePreview(t *testing.T, operations service, record workflowcore.Record, change string) {
 	t.Helper()
 
 	project := operations.projectContext.ProjectDir

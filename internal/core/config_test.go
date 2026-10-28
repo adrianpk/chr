@@ -10,6 +10,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	notifycore "forge.adrianpk.com/chr/internal/core/notify"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
@@ -205,7 +206,7 @@ func TestLoadWorkspaceConfigParsesWorkConfig(t *testing.T) {
 
 	want := workspaceconfig.WorkConfig{
 		Integration:            workspaceconfig.WorkIntegrationConfig{PublicationProfile: workspaceconfig.WorkflowPublicationDisabled, MaxPreparedPerTarget: 2},
-		MergeStrategy:          TicketMergeStrategyRebase,
+		MergeStrategy:          workflowcore.TicketMergeStrategyRebase,
 		WorkerTimeoutSeconds:   3600,
 		CheckpointStepLimit:    workflowstate.PageLimit,
 		MaxWorkerAttempts:      3,

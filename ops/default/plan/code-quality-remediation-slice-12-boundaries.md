@@ -8,9 +8,9 @@ The [method map](code-quality-remediation-slice-12-methods.csv) freezes all 908
 current `WorkflowStore` methods across 234 files. Each row records its exact
 source identity, signature, declaration hash, responsibility, direct calls and
 reachable named lock/mutation/recovery entries. The target receiver owner is always
-`internal/core/workflow`; the source revision still defines the type and its
-methods together in `internal/core`. This is a relocation map, not evidence that
-the family has already moved. A future stage policy owner identifies the consumer of
+`internal/core/workflow`. T12.2 now relocates the actual type as `workflow.Store`
+with all 908 methods. Current identities, signatures and declaration hashes sit
+beside the frozen source fields. A future stage policy owner identifies the consumer of
 store operations; it does not permit methods of a nonlocal type in another Go
 package. Stage policy must become functions/methods of its own types over
 consumer-owned operations when its approved extraction task runs.
@@ -55,18 +55,31 @@ boundary. The current resolution fields record ten review/cycle value dependenci
 owned directly by workflow/state, eleven ticket projection dependencies owned by
 core/ticket and one integer comparator supplied by the standard library. The shared parsed configuration and its admission/recovery operations now have
 the workspace/config owner, resolving another fifteen dependencies. There are
-39 direct root couplings before family relocation after three shared ticket
-text dependencies moved to their existing metadata owner. A temporary compile-time bridge, if necessary, must be recorded with
-its explicit approved removal owner by Slice 15.
+39 remaining dependencies move with the workflow family, resolving all 79 entries.
+The original source identities and hashes remain frozen; current resolutions
+identify the actual capability owner. No compile-time bridge is introduced.
 
 The current compiler graph also includes private struct-field uses and all
 methods of every relocated type. Many remaining direct dependencies are fringe
 workflow declarations that move in the same mechanical unit; they do not all
 require another leaf package. Constructors and consumers of private fields move
 with the owning type. Legacy read/replace consumers require real guarded file
-operation contracts at the existing authority, preserving adopted-ticket refusal,
-source equality, shared repository/non-Git locks and complete replacement. No
-public recovery hook or mutable-store escape is implemented as a prerequisite.
+operation contracts at the existing authority. `ReadLegacyTicketFile` and
+`ReplaceLegacyTicketFile` now serve actual legacy consumers and preserve
+adopted-ticket refusal, source equality, shared repository/non-Git locks and
+complete replacement. No public recovery hook or mutable-store escape is added.
+
+The move covers 2,710 production declarations across 353 files and 1,666 test
+declarations across 276 files. Constant declaration groups stay intact. A
+compiler-resolved rename removes package stutter from 236 public types/functions,
+including implicit embedded-field references; field/tag order and wire values
+stay unchanged. Exact token comparisons cover all 4,342 moved declaration groups.
+Thirty-three fixture declarations without private owner references remain in
+both test packages; tests that
+inspect private workflow state move beside its owner. The package import guard
+allows its 19 actual neutral dependencies and rejects root core and adapters.
+The more-specific state guard continues to reject the coordinator and configuration.
+All 100 frozen authority/recovery entries resolve to actual current declarations.
 
 The [signature entry map](code-quality-remediation-slice-12-signatures.csv)
 reconciles all 71 assigned baseline rows to 68 current declarations. At entry,
@@ -89,6 +102,8 @@ a generic receipt writer cannot be inferred from this duplicate.
 
 The compiler-resolved source graph and exact CSV coverage/hash checks passed.
 The frozen entry map is separate from runtime acceptance. The move ledger
-records shared review values and ticket projections with exact declaration
-preimages and current resolutions. Family relocation, stage ports, assigned
-signature remediation and final candidate validation remain active Slice 12 work.
+records prerequisites and the compiling family relocation with exact declaration
+preimages and current resolutions. Focused wire/storage, native Git/filesystem,
+guarded legacy operations, application and dependency checks pass. Stage ports,
+assigned signature remediation and final candidate validation remain active
+Slice 12 work.

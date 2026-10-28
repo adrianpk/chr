@@ -14,11 +14,11 @@ import (
 	"strconv"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowCLIFixture(t *testing.T) (service, core.WorkflowMaterializationResult, string) {
+func workflowCLIFixture(t *testing.T) (service, workflowcore.MaterializationResult, string) {
 	t.Helper()
 
 	project := newTestWorkspace(t)

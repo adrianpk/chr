@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -24,7 +24,7 @@ func (s service) ResumeRetainedWork(ctx context.Context, id string, revision uin
 
 // ResumeRetainedWorkGuarded rechecks volatile caller authority before recovery
 // and under the common continuation acceptance lock. It grants no new extent.
-func (s service) ResumeRetainedWorkGuarded(ctx context.Context, id string, revision uint64, check core.WorkflowAdmissionCheck) (result RetainedWorkProgress, err error) {
+func (s service) ResumeRetainedWorkGuarded(ctx context.Context, id string, revision uint64, check workflowcore.AdmissionCheck) (result RetainedWorkProgress, err error) {
 	s.ctx = ctx
 
 	if !validWorkflowControlIdentity(id) || revision == 0 {
@@ -62,7 +62,7 @@ func (s service) ResumeRetainedWorkGuarded(ctx context.Context, id string, revis
 	return s.advanceRetainedWork(ctx, result, check)
 }
 
-func (s service) advanceRetainedWork(ctx context.Context, result RetainedWorkProgress, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
+func (s service) advanceRetainedWork(ctx context.Context, result RetainedWorkProgress, check workflowcore.AdmissionCheck) (RetainedWorkProgress, error) {
 	run, err := s.recoverRetainedWork(ctx, result.Status)
 	if err != nil {
 		return result, err
@@ -134,7 +134,7 @@ func (s service) retainedWorkCapacityAvailable(ctx context.Context, status Workf
 	return capacity.Available > 0, err
 }
 
-func retainedWorkAuthorization(ctx context.Context, check core.WorkflowAdmissionCheck) error {
+func retainedWorkAuthorization(ctx context.Context, check workflowcore.AdmissionCheck) error {
 	if check == nil {
 		return nil
 	}
@@ -142,7 +142,7 @@ func retainedWorkAuthorization(ctx context.Context, check core.WorkflowAdmission
 	return check(ctx)
 }
 
-func (s service) recoverRetainedWork(ctx context.Context, status WorkflowWorkStatus) (core.WorkflowInvocation, error) {
+func (s service) recoverRetainedWork(ctx context.Context, status WorkflowWorkStatus) (workflowcore.Invocation, error) {
 	run, err := s.ReadWorkflow(ctx, status.ID)
 	if err != nil {
 		return run, err

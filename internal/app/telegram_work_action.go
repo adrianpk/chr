@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -31,7 +31,7 @@ func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim telegram
 	binding := WorkflowBoundAdmission{RequestKey: claim.Request.ID, Policy: preview.View.Policy, ExecutionPolicy: preview.View.ExecutionPolicy, Check: r.workAdmissionCheck(claim)}
 
 	result, err := operations.StartTelegramWork(ctx, claim.Request.Target, preview, binding)
-	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, core.ErrWorkflowOwned) || errors.Is(err, core.ErrWorkflowCapacity) || errors.Is(err, ErrRecordUnsupported) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, workflowcore.ErrWorkflowOwned) || errors.Is(err, workflowcore.ErrWorkflowCapacity) || errors.Is(err, ErrRecordUnsupported) {
 		return r.finishWorkActionFailure(ctx, claim, err, config)
 	}
 
@@ -42,7 +42,7 @@ func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim telegram
 	return r.finishWorkAdmission(ctx, claim, result, config)
 }
 
-func (r telegramReceiver) workAdmissionCheck(claim telegramcore.ActionClaim) core.WorkflowAdmissionCheck {
+func (r telegramReceiver) workAdmissionCheck(claim telegramcore.ActionClaim) workflowcore.AdmissionCheck {
 	return func(ctx context.Context) error {
 		if !claim.Action.ExpiresAt.After(time.Now()) {
 			return workflowstate.ErrConflict

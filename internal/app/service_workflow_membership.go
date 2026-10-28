@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReconcileWorkflowMembership preserves the invocation's accepted admission policy.
-func (s service) ReconcileWorkflowMembership(ctx context.Context, id string) (core.WorkflowInvocation, error) {
+func (s service) ReconcileWorkflowMembership(ctx context.Context, id string) (workflowcore.Invocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return core.WorkflowInvocation{}, err
+		return workflowcore.Invocation{}, err
 	}
 
 	return store.ReconcileWorkflowMembership(ctx, id)
@@ -20,15 +20,15 @@ func (s service) ReconcileWorkflowMembership(ctx context.Context, id string) (co
 
 // AmendWorkflowSet binds an approved changed plan to the observed quiescent set.
 // The service supplies native key allocation rather than accepting adapter IO.
-func (s service) AmendWorkflowSet(ctx context.Context, request core.WorkflowSetAmendmentRequest) (core.WorkflowMaterializationResult, error) {
+func (s service) AmendWorkflowSet(ctx context.Context, request workflowcore.SetAmendmentRequest) (workflowcore.MaterializationResult, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return core.WorkflowMaterializationResult{}, err
+		return workflowcore.MaterializationResult{}, err
 	}
 
 	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
-		return core.WorkflowMaterializationResult{}, err
+		return workflowcore.MaterializationResult{}, err
 	}
 
 	request.ReserveTicketKey = func(ctx context.Context) (string, error) {

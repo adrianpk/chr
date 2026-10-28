@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -18,7 +18,7 @@ import (
 type GuidedUseCaseInspection struct {
 	Quiz          *quizcore.Observation
 	Ideas         []authoringcore.GuidedLaterIdea
-	Result        *core.WorkflowResultInspection
+	Result        *workflowcore.ResultInspection
 	ResultProblem string
 	Work          *WorkflowWorkStatus
 	ProjectName   string

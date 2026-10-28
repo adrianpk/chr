@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -19,7 +19,7 @@ import (
 func TestHarnessBindingService(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
 	profiles := prepareServiceHarnessBinding(t, operations)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "profile-worker",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -71,7 +71,7 @@ func prepareServiceHarnessBinding(t *testing.T, operations service) string {
 	return profiles
 }
 
-func checkServiceBoundWorker(t *testing.T, operations service, invocation core.WorkflowInvocation) {
+func checkServiceBoundWorker(t *testing.T, operations service, invocation workflowcore.Invocation) {
 	t.Helper()
 
 	public, err := json.Marshal(invocation)

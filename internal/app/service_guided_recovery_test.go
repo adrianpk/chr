@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type guidedRecoveryModel func(context.Context, quizmodel.Request) (quizmodel.Response, error)
@@ -169,7 +169,7 @@ func TestGuidedUseCaseRecoveryAdmission(t *testing.T) {
 	host.start(func(ctx context.Context) service { copy := operations; copy.ctx = ctx; return copy })
 
 	current := waitGuidedRecovery(t, operations, pending, func(current authoringcore.Session) bool {
-		run, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
+		run, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
 
 		return err == nil && current.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"
 	})
@@ -211,7 +211,7 @@ func failGuidedRecovery(t *testing.T, operations service, scope authoringcore.Gu
 
 	current, readErr := authoringcore.ReadGuidedUseCase(t.Context(), operations.projectContext.ProjectDir, scope)
 	if readErr == nil && current.Guided.Work != nil && current.Guided.Work.Invocation != nil {
-		run, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
+		run, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, current)
 		t.Fatalf("managed recovery did not reach its expected state: guided=%s native=%s outcome=%s resume=%s blocker=%+v error=%v", current.Guided.Status, run.Status, run.Outcome, run.ResumeStatus, run.Blocker, err)
 	}
 
@@ -241,7 +241,7 @@ func guidedBlockedRecoveryModel(t *testing.T, operations *service, model *fakeSe
 	return entered, unblock
 }
 
-func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, core.WorkflowInvocation) {
+func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, workflowcore.Invocation) {
 	t.Helper()
 
 	operations, prepared, _ := guidedAdmissionFixture(t)
@@ -259,7 +259,7 @@ func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, core.
 		t.Fatal("lost start fault was not retained", err)
 	}
 
-	before, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, pending)
+	before, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, pending)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -268,7 +268,7 @@ func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, core.
 }
 
 func guidedRecoveryReviewReady(ctx context.Context, operations service, session authoringcore.Session) bool {
-	run, err := core.ReadGuidedInvocation(ctx, operations.projectContext.ProjectDir, session)
+	run, err := workflowcore.ReadGuidedInvocation(ctx, operations.projectContext.ProjectDir, session)
 
 	return err == nil && session.Guided.PendingOperation == nil && run.Review != nil && run.Review.State == "waiting_approval"
 }

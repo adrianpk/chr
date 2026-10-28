@@ -9,13 +9,14 @@ import (
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 	ticket := testMergePreflightTicket()
 	remote := fakeTicketMergePreflightRemote{
-		snapshot: RemoteReviewSnapshot{
-			Reference:       ReviewProviderReference{Provider: ReviewProviderForgejo},
+		snapshot: workflowcore.RemoteReviewSnapshot{
+			Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
 			PullRequestJSON: `{"state":"open","base":{"ref":"develop"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
 		},
 	}
@@ -25,7 +26,7 @@ func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 		Tickets:       []ticketcore.Indexed{ticket},
 		Remote:        remote,
 		ExpectedBase:  "develop",
-		MergeStrategy: TicketMergeStrategyRebase,
+		MergeStrategy: workflowcore.TicketMergeStrategyRebase,
 	})
 	if err != nil {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
@@ -52,7 +53,7 @@ func TestRunTicketMergePreflightBlocksMissingHandoff(t *testing.T) {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
 	}
 
-	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockMissingHandoff, TicketMergePreflightBlockKindOperational)
+	assertMergePreflightBlocker(t, result, workflowcore.TicketMergePreflightBlockMissingHandoff, workflowcore.TicketMergePreflightBlockKindOperational)
 }
 
 func TestRunTicketMergePreflightBlocksProviderUnreadable(t *testing.T) {
@@ -64,15 +65,15 @@ func TestRunTicketMergePreflightBlocksProviderUnreadable(t *testing.T) {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
 	}
 
-	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockProviderUnreadable, TicketMergePreflightBlockKindOperational)
+	assertMergePreflightBlocker(t, result, workflowcore.TicketMergePreflightBlockProviderUnreadable, workflowcore.TicketMergePreflightBlockKindOperational)
 }
 
 func TestRunTicketMergePreflightBlocksWrongBase(t *testing.T) {
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
-			snapshot: RemoteReviewSnapshot{
-				Reference:       ReviewProviderReference{Provider: ReviewProviderForgejo},
+			snapshot: workflowcore.RemoteReviewSnapshot{
+				Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
 				PullRequestJSON: `{"state":"open","base":{"ref":"main"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
 			},
 		},
@@ -81,15 +82,15 @@ func TestRunTicketMergePreflightBlocksWrongBase(t *testing.T) {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
 	}
 
-	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockWrongBase, TicketMergePreflightBlockKindOperational)
+	assertMergePreflightBlocker(t, result, workflowcore.TicketMergePreflightBlockWrongBase, workflowcore.TicketMergePreflightBlockKindOperational)
 }
 
 func TestRunTicketMergePreflightBlocksHeadMismatch(t *testing.T) {
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
-			snapshot: RemoteReviewSnapshot{
-				Reference:       ReviewProviderReference{Provider: ReviewProviderGitHub},
+			snapshot: workflowcore.RemoteReviewSnapshot{
+				Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderGitHub},
 				PullRequestJSON: `{"state":"OPEN","baseRefName":"dev","headRefName":"feat/other","mergeable":"MERGEABLE"}`,
 			},
 		},
@@ -98,15 +99,15 @@ func TestRunTicketMergePreflightBlocksHeadMismatch(t *testing.T) {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
 	}
 
-	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockHeadMismatch, TicketMergePreflightBlockKindRepair)
+	assertMergePreflightBlocker(t, result, workflowcore.TicketMergePreflightBlockHeadMismatch, workflowcore.TicketMergePreflightBlockKindRepair)
 }
 
 func TestRunTicketMergePreflightBlocksNotMergeable(t *testing.T) {
 	result, err := RunTicketMergePreflight(t.Context(), TicketMergePreflightOptions{
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
-			snapshot: RemoteReviewSnapshot{
-				Reference:       ReviewProviderReference{Provider: ReviewProviderGitHub},
+			snapshot: workflowcore.RemoteReviewSnapshot{
+				Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderGitHub},
 				PullRequestJSON: `{"state":"OPEN","baseRefName":"dev","headRefName":"feat/slice-2-merger-preflight","mergeable":"CONFLICTING"}`,
 			},
 		},
@@ -115,7 +116,7 @@ func TestRunTicketMergePreflightBlocksNotMergeable(t *testing.T) {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
 	}
 
-	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockNotMergeable, TicketMergePreflightBlockKindRepair)
+	assertMergePreflightBlocker(t, result, workflowcore.TicketMergePreflightBlockNotMergeable, workflowcore.TicketMergePreflightBlockKindRepair)
 }
 
 func TestRunTicketMergePreflightBlocksSerialRepair(t *testing.T) {
@@ -133,7 +134,7 @@ func TestRunTicketMergePreflightBlocksSerialRepair(t *testing.T) {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
 	}
 
-	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockRepairPending, TicketMergePreflightBlockKindRepair)
+	assertMergePreflightBlocker(t, result, workflowcore.TicketMergePreflightBlockRepairPending, workflowcore.TicketMergePreflightBlockKindRepair)
 }
 
 func TestRunTicketMergePreflightBlocksInvalidMergeStrategy(t *testing.T) {
@@ -146,7 +147,7 @@ func TestRunTicketMergePreflightBlocksInvalidMergeStrategy(t *testing.T) {
 		t.Fatalf("RunTicketMergePreflight returned error: %v", err)
 	}
 
-	assertMergePreflightBlocker(t, result, TicketMergePreflightBlockInvalidMergeStrategy, TicketMergePreflightBlockKindOperational)
+	assertMergePreflightBlocker(t, result, workflowcore.TicketMergePreflightBlockInvalidMergeStrategy, workflowcore.TicketMergePreflightBlockKindOperational)
 }
 
 func testMergePreflightTicket() ticketcore.Indexed {
@@ -192,17 +193,17 @@ func assertMergePreflightBlocker(t *testing.T, result TicketMergePreflightResult
 }
 
 type fakeTicketMergePreflightRemote struct {
-	snapshot RemoteReviewSnapshot
+	snapshot workflowcore.RemoteReviewSnapshot
 	err      error
 }
 
-func (remote fakeTicketMergePreflightRemote) Read(context.Context, string) (RemoteReviewSnapshot, error) {
+func (remote fakeTicketMergePreflightRemote) Read(context.Context, string) (workflowcore.RemoteReviewSnapshot, error) {
 	if remote.err != nil {
-		return RemoteReviewSnapshot{}, remote.err
+		return workflowcore.RemoteReviewSnapshot{}, remote.err
 	}
 
 	if strings.TrimSpace(remote.snapshot.PullRequestJSON) == "" {
-		return RemoteReviewSnapshot{}, errors.New("unexpected remote read")
+		return workflowcore.RemoteReviewSnapshot{}, errors.New("unexpected remote read")
 	}
 
 	return remote.snapshot, nil

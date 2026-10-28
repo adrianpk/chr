@@ -5,41 +5,41 @@ import (
 	"errors"
 	"slices"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
 
-func (s service) prepareWorkflowHarness(ctx context.Context, config workspaceconfig.Config) (core.WorkflowHarnessResolution, error) {
+func (s service) prepareWorkflowHarness(ctx context.Context, config workspaceconfig.Config) (workflowcore.HarnessResolution, error) {
 	if _, err := config.HarnessSelections(s.projectContext.ProjectID); err != nil {
-		return core.WorkflowHarnessResolution{}, err
+		return workflowcore.HarnessResolution{}, err
 	}
 
 	if config.Harnesses.Worker == "" {
-		return core.WorkflowHarnessResolution{}, nil
+		return workflowcore.HarnessResolution{}, nil
 	}
 
 	resolved, err := s.resolveHarnessSelection(ctx, config, harnesscore.Worker, "")
 	if err != nil {
-		return core.WorkflowHarnessResolution{}, err
+		return workflowcore.HarnessResolution{}, err
 	}
 
 	selected, err := s.selectedWorkerCommand(ctx, resolved)
 	if err != nil {
-		return core.WorkflowHarnessResolution{}, err
+		return workflowcore.HarnessResolution{}, err
 	}
 
 	executable, err := harnesshost.FreezeExecutable(selected.Command)
 	if err != nil {
-		return core.WorkflowHarnessResolution{}, err
+		return workflowcore.HarnessResolution{}, err
 	}
 
 	if s.workflowWorker != nil && !slices.Equal(s.workflowWorker, executable.Command) {
-		return core.WorkflowHarnessResolution{}, workflowstate.ErrConflict
+		return workflowcore.HarnessResolution{}, workflowstate.ErrConflict
 	}
 
 	binding, err := harnesscore.SealBinding(harnesscore.Binding{
@@ -49,7 +49,7 @@ func (s service) prepareWorkflowHarness(ctx context.Context, config workspacecon
 		ExecutableRef: executable.Reference, RuntimeRef: selected.RuntimeRef, ProtocolRevision: selected.ProtocolRevision, Capabilities: resolved.View.Capabilities,
 	})
 
-	return core.WorkflowHarnessResolution{Binding: &binding, Command: executable.Command}, err
+	return workflowcore.HarnessResolution{Binding: &binding, Command: executable.Command}, err
 }
 
 func harnessWorkerProvider(provider string) string {

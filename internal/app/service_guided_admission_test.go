@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -60,8 +60,8 @@ func guidedAdmissionFixture(t *testing.T) (service, authoringcore.Session, *guid
 
 	provider := &serviceWorkEntryProvider{serviceWorkflowSubmissionFixture: &serviceWorkflowSubmissionFixture{serviceWorkflowPreparationFixture: &serviceWorkflowPreparationFixture{&serviceWorkflowReviewFixture{&serviceWorkflowPRFixture{}}}}, remote: remote, repository: repository}
 	operations.workflowPullRequests = provider
-	operations.workflowIntegrationGit = core.NewWorkflowIntegrationGit(repository, remote)
-	operations.workflowPreparationGit = core.NewWorkflowPreparationGit(repository, remote)
+	operations.workflowIntegrationGit = workflowcore.NewWorkflowIntegrationGit(repository, remote)
+	operations.workflowPreparationGit = workflowcore.NewWorkflowPreparationGit(repository, remote)
 	operations.workflowWorker = []string{"sh", "-c", "printf 'Delivered\\n' > result.txt && git add result.txt && git -c user.name=Test -c user.email=test@example.com commit -qm 'Task result'"}
 	host := &guidedAdmissionHost{}
 	operations.guidedWorkHost = host
@@ -106,7 +106,7 @@ func TestGuidedUseCaseAdmissionExact(t *testing.T) {
 	}
 }
 
-func assertGuidedNativeAdmission(t *testing.T, operations service, session authoringcore.Session) core.WorkflowInvocation {
+func assertGuidedNativeAdmission(t *testing.T, operations service, session authoringcore.Session) workflowcore.Invocation {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -124,7 +124,7 @@ func assertGuidedNativeAdmission(t *testing.T, operations service, session autho
 	return run
 }
 
-func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, session authoringcore.Session) {
+func assertGuidedNativeBinding(t *testing.T, run workflowcore.Invocation, session authoringcore.Session) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -141,7 +141,7 @@ func assertGuidedNativeBinding(t *testing.T, run core.WorkflowInvocation, sessio
 	assertGuidedNativeProvenance(t, run, session)
 }
 
-func assertGuidedNativeProvenance(t *testing.T, run core.WorkflowInvocation, session authoringcore.Session) {
+func assertGuidedNativeProvenance(t *testing.T, run workflowcore.Invocation, session authoringcore.Session) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -168,7 +168,7 @@ func addGuidedUnrelatedTicket(t *testing.T, operations service, session authorin
 	task := *record.Task
 
 	task.Key, task.SetID, task.SliceID, task.UseCase, task.Order = key, "", "", "", 0
-	if _, err := store.Create(t.Context(), "Unrelated task", core.WorkflowRecord{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Unrelated task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
 		t.Fatal(err)
 	}
 }

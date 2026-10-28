@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -31,31 +31,31 @@ func (p *serviceWorkEntryProvider) ReadWorkflowBranch(ctx context.Context, repos
 	return strings.TrimSpace(string(output)), err
 }
 
-func (p *serviceWorkEntryProvider) CreateWorkflowPullRequest(ctx context.Context, request core.WorkflowPullRequestRequest) (core.WorkflowPullRequestSnapshot, error) {
+func (p *serviceWorkEntryProvider) CreateWorkflowPullRequest(ctx context.Context, request workflowcore.PullRequestRequest) (workflowcore.PullRequestSnapshot, error) {
 	head, err := p.ReadWorkflowBranch(ctx, request.Repository, request.HeadBranch)
 	if err != nil {
-		return core.WorkflowPullRequestSnapshot{}, err
+		return workflowcore.PullRequestSnapshot{}, err
 	}
 
 	base, err := p.ReadWorkflowBranch(ctx, request.Repository, request.BaseBranch)
 	if err != nil {
-		return core.WorkflowPullRequestSnapshot{}, err
+		return workflowcore.PullRequestSnapshot{}, err
 	}
 
 	p.creates++
-	p.pr = core.WorkflowPullRequestSnapshot{URL: p.repository + "/pulls/7", Repository: p.repository, HeadRepository: p.repository, HeadBranch: request.HeadBranch, BaseBranch: request.BaseBranch, HeadCommit: head, BaseCommit: base, State: "open"}
+	p.pr = workflowcore.PullRequestSnapshot{URL: p.repository + "/pulls/7", Repository: p.repository, HeadRepository: p.repository, HeadBranch: request.HeadBranch, BaseBranch: request.BaseBranch, HeadCommit: head, BaseCommit: base, State: "open"}
 
 	return p.pr, nil
 }
 
-func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (core.WorkflowPullRequestSnapshot, error) {
+func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, url string) (workflowcore.PullRequestSnapshot, error) {
 	if url != p.pr.URL {
-		return core.WorkflowPullRequestSnapshot{}, workflowstate.ErrConflict
+		return workflowcore.PullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
 	head, err := p.ReadWorkflowBranch(ctx, p.repository, p.pr.HeadBranch)
 	if err != nil {
-		return core.WorkflowPullRequestSnapshot{}, err
+		return workflowcore.PullRequestSnapshot{}, err
 	}
 
 	base, err := p.ReadWorkflowBranch(ctx, p.repository, p.pr.BaseBranch)
@@ -64,7 +64,7 @@ func (p *serviceWorkEntryProvider) ReadWorkflowPullRequest(ctx context.Context, 
 	return p.pr, err
 }
 
-func serviceWorkNativeFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest, *serviceWorkEntryProvider) {
+func serviceWorkNativeFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, workflowcore.Record, workflowcore.StartRequest, *serviceWorkEntryProvider) {
 	t.Helper()
 
 	operations, record, request := serviceWorkflowTicketFixture(t, plans...)
@@ -78,8 +78,8 @@ func serviceWorkNativeFixture(t *testing.T, plans ...generationcore.GeneratedWor
 
 	provider := &serviceWorkEntryProvider{serviceWorkflowSubmissionFixture: &serviceWorkflowSubmissionFixture{serviceWorkflowPreparationFixture: &serviceWorkflowPreparationFixture{&serviceWorkflowReviewFixture{&serviceWorkflowPRFixture{}}}}, remote: remote, repository: request.Selection.Target.Repository}
 	operations.workflowPullRequests = provider
-	operations.workflowIntegrationGit = core.NewWorkflowIntegrationGit(request.Selection.Target.Repository, remote)
-	operations.workflowPreparationGit = core.NewWorkflowPreparationGit(request.Selection.Target.Repository, remote)
+	operations.workflowIntegrationGit = workflowcore.NewWorkflowIntegrationGit(request.Selection.Target.Repository, remote)
+	operations.workflowPreparationGit = workflowcore.NewWorkflowPreparationGit(request.Selection.Target.Repository, remote)
 	operations.workflowWorker = []string{"sh", "-c", "printf 'Delivered\\n' > result.txt && git add result.txt && git -c user.name=Test -c user.email=test@example.com commit -qm 'Task result'"}
 
 	return operations, record, request, provider
@@ -117,7 +117,7 @@ func checkServiceWorkNativeDisplay(t *testing.T, result AgentWorkResult) {
 	}
 }
 
-func checkServiceWorkNativeAttachment(t *testing.T, operations service, run core.WorkflowInvocation, provider *serviceWorkEntryProvider) {
+func checkServiceWorkNativeAttachment(t *testing.T, operations service, run workflowcore.Invocation, provider *serviceWorkEntryProvider) {
 	t.Helper()
 
 	if _, err := operations.StopWorkflow(t.Context(), run.ID, "pause"); err != nil {
@@ -155,7 +155,7 @@ func TestServiceWorkTicket(t *testing.T) {
 
 			writeCLIWorkspaceConfig(t, operations.projectContext.ProjectDir, "work:\n  state_authority: tracker_compat\n")
 
-			if _, err := operations.StartAgentWorkTicket(key); !errors.Is(err, core.ErrWorkflowAuthority) {
+			if _, err := operations.StartAgentWorkTicket(key); !errors.Is(err, workflowcore.ErrWorkflowAuthority) {
 				t.Fatal("compatibility duplicated adopted execution", err)
 			}
 		})
@@ -213,7 +213,7 @@ func serviceWorkGroupedKey(t *testing.T, operations service) string {
 	return ""
 }
 
-func serviceWorkTaskAttempts(run core.WorkflowInvocation) int {
+func serviceWorkTaskAttempts(run workflowcore.Invocation) int {
 	count := 0
 
 	for _, attempt := range run.Attempts {

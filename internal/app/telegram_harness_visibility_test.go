@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
-func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture, service, core.WorkflowRecord, core.WorkflowStartRequest, string) {
+func telegramHarnessWorkerFixture(t *testing.T) (*telegramConversationAppFixture, service, workflowcore.Record, workflowcore.StartRequest, string) {
 	t.Helper()
 
 	operations, record, request := serviceWorkflowTicketFixture(t)

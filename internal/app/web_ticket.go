@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -22,7 +22,7 @@ func (p webViewProvider) writeTicketAction(operations service, request webui.Wri
 }
 
 func writeWebTicket(operations service, request webui.WriteActionRequest) webui.WriteActionResponse {
-	mutation := core.TicketEditRequest{Key: request.ID, Revision: request.Revision, Binding: webTicketMutationBinding(request.Fields["request_id"])}
+	mutation := workflowcore.TicketEditRequest{Key: request.ID, Revision: request.Revision, Binding: webTicketMutationBinding(request.Fields["request_id"])}
 	if request.Action == webActionTicketComment {
 		if strings.TrimSpace(request.Fields["content"]) == "" {
 			return webValidationWrite(errors.New("ticket comment body is required"))
@@ -35,7 +35,7 @@ func writeWebTicket(operations service, request webui.WriteActionRequest) webui.
 	}
 
 	var (
-		document core.TicketDocument
+		document workflowcore.TicketDocument
 		err      error
 	)
 
@@ -91,7 +91,7 @@ func webTicketFailure(err error) webui.WriteActionResponse {
 		return response
 	}
 
-	if errors.Is(err, core.ErrWorkflowOwned) || errors.Is(err, core.ErrWorkflowAuthority) {
+	if errors.Is(err, workflowcore.ErrWorkflowOwned) || errors.Is(err, workflowcore.ErrWorkflowAuthority) {
 		return webBlockedWrite(err.Error())
 	}
 

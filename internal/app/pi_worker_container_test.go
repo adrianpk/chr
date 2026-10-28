@@ -11,8 +11,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -31,7 +31,7 @@ func TestPiWorkerContainer(t *testing.T) {
 	configurePiWorkerFixture(t, operations, bridge, image, endpoint.URL)
 	assertPiBridgeGenerationRejection(t, operations)
 
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "pi-worker",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -210,7 +210,7 @@ func dockerPiFixture(t *testing.T, args ...string) string {
 	return string(output)
 }
 
-func recoverPiWorkerFixture(t *testing.T, operations service, request core.WorkflowStartRequest) (service, core.WorkflowStartResult) {
+func recoverPiWorkerFixture(t *testing.T, operations service, request workflowcore.StartRequest) (service, workflowcore.StartResult) {
 	t.Helper()
 
 	started, err := operations.StartWorkflow(t.Context(), request)

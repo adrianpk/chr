@@ -3,17 +3,17 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config workspaceconfig.Config) (core.WorkflowHarnessResolution, error) {
+func (s service) prepareGuidedWorkflowHarness(ctx context.Context, config workspaceconfig.Config) (workflowcore.HarnessResolution, error) {
 	resolved, err := s.prepareWorkflowHarness(ctx, config)
 	if err != nil {
-		return core.WorkflowHarnessResolution{}, &authoringcore.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
+		return workflowcore.HarnessResolution{}, &authoringcore.GuidedPrerequisiteError{Action: "Configure an available worker harness and credentials before retrying admission.", Cause: err}
 	}
 
 	return resolved, nil
@@ -34,7 +34,7 @@ func (s service) checkGuidedWorkPrerequisites(ctx context.Context, selection wor
 		return err
 	}
 
-	if remote, ok := provider.(core.RemoteReviewAdapter); ok {
+	if remote, ok := provider.(workflowcore.RemoteReviewAdapter); ok {
 		if err := remote.CheckWorkflowRepositoryProvider(ctx, selection.Target.Repository); err != nil {
 			return &authoringcore.GuidedPrerequisiteError{Action: "Configure the canonical review provider, CLI and credentials before retrying admission.", Cause: err}
 		}
@@ -65,7 +65,7 @@ func (s service) checkGuidedPublisher(config workspaceconfig.Config, repository 
 		return &authoringcore.GuidedPrerequisiteError{Action: "Configure the private certified publisher for the canonical target before retrying admission."}
 	}
 
-	_, err := core.LoadWorkflowNativePublisher(s.env.ConfigDir(), repository, "refs/heads/"+config.Work.BranchPolicy.IntegrationBranch)
+	_, err := workflowcore.LoadWorkflowNativePublisher(s.env.ConfigDir(), repository, "refs/heads/"+config.Work.BranchPolicy.IntegrationBranch)
 	if err != nil {
 		return &authoringcore.GuidedPrerequisiteError{Action: "Configure the private certified publisher for the canonical target before retrying admission.", Cause: err}
 	}

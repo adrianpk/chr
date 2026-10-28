@@ -10,6 +10,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -107,7 +108,7 @@ func ticketStartWorkspaceFromPlan(ticket ticketcore.Indexed, plan executioncore.
 }
 
 func writeDerivedTicketBranch(ctx context.Context, workspace ticketStartWorkspace, branch string) (ticketStartWorkspace, error) {
-	err := core.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(ctx, core.UpdateTicketReviewMetadataOptions{
+	err := workflowcore.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(ctx, workflowcore.UpdateTicketReviewMetadataOptions{
 		Path:      workspace.TicketPath,
 		Branch:    branch,
 		UpdatedAt: time.Now().UTC(),

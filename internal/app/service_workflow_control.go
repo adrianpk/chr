@@ -7,13 +7,13 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // WorkflowControlRequest carries the exact displayed invocation and revision.
 type WorkflowControlRequest struct {
-	AuthorizationCheck core.WorkflowAdmissionCheck    `json:"-"`
+	AuthorizationCheck workflowcore.AdmissionCheck    `json:"-"`
 	RequestBinding     *workflowstate.MutationBinding `json:"request_binding,omitempty"`
 	Integration        *WorkflowIntegrationControlGuard
 	BudgetGrant        *workflowstate.IntegrationGrant

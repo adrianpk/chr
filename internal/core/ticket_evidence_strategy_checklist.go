@@ -6,6 +6,7 @@ import (
 	"time"
 
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TicketEvidenceStrategyChecklistWriter writes evidence strategy blocks to tickets.
@@ -38,7 +39,7 @@ func (w *ticketEvidenceStrategyChecklistWriter) UpsertEvidenceStrategyChecklist(
 		return fmt.Errorf("ticket path is required")
 	}
 
-	content, err := readLegacyTicketFile(opts.Path)
+	content, err := workflowcore.ReadLegacyTicketFile(opts.Path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}
@@ -58,7 +59,7 @@ func (w *ticketEvidenceStrategyChecklistWriter) UpsertEvidenceStrategyChecklist(
 		return err
 	}
 
-	err = writeLegacyTicketFile(ctx, opts.Path, content, []byte(updatedContent))
+	err = workflowcore.ReplaceLegacyTicketFile(ctx, opts.Path, content, []byte(updatedContent))
 	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,12 +16,12 @@ type telegramWorkService interface {
 }
 
 type telegramWorkContinuationService interface {
-	ResumeTelegramWork(context.Context, telegramcore.OperationTarget, WorkflowRetainedReference, WorkflowBoundPreview, core.WorkflowAdmissionCheck) (RetainedWorkProgress, error)
+	ResumeTelegramWork(context.Context, telegramcore.OperationTarget, WorkflowRetainedReference, WorkflowBoundPreview, workflowcore.AdmissionCheck) (RetainedWorkProgress, error)
 }
 
 // ResumeTelegramWork restores the frozen namespace and enters the same guarded
 // retained-work operation used by other hosts, without a replacement selector.
-func (s service) ResumeTelegramWork(ctx context.Context, target telegramcore.OperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
+func (s service) ResumeTelegramWork(ctx context.Context, target telegramcore.OperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check workflowcore.AdmissionCheck) (RetainedWorkProgress, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return RetainedWorkProgress{}, err
@@ -65,7 +65,7 @@ func (s service) StartTelegramWork(ctx context.Context, target telegramcore.Oper
 
 // ReadTelegramWorkConfirmation reads the exact selected source and contract images
 // through the existing scoped workflow owner, without changing readiness.
-func (s service) ReadTelegramWorkConfirmation(ctx context.Context, target telegramcore.OperationTarget, preview WorkflowBoundPreview) ([]core.WorkflowRecord, error) {
+func (s service) ReadTelegramWorkConfirmation(ctx context.Context, target telegramcore.OperationTarget, preview WorkflowBoundPreview) ([]workflowcore.Record, error) {
 	scoped, err := s.telegramBoundProjectService(ctx, target)
 	if err != nil {
 		return nil, err

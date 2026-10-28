@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
@@ -38,7 +38,7 @@ func TestWorkflowUpgradeCLI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var result core.WorkflowUpgradeResult
+	var result workflowcore.UpgradeResult
 	if err := json.Unmarshal(first.Bytes(), &result); err != nil || result.Prior.Version != 0 || result.Current.Version != 1 {
 		t.Fatal("CLI omitted prior policy or new marker", result, err)
 	}
@@ -46,7 +46,7 @@ func TestWorkflowUpgradeCLI(t *testing.T) {
 	checkWorkflowUpgradeCLIResult(t, project, args, first.String(), result)
 }
 
-func checkWorkflowUpgradeCLIResult(t *testing.T, project string, args []string, first string, result core.WorkflowUpgradeResult) {
+func checkWorkflowUpgradeCLIResult(t *testing.T, project string, args []string, first string, result workflowcore.UpgradeResult) {
 	t.Helper()
 
 	if _, err := os.Stat(filepath.Join(project, result.Snapshot)); err != nil {
@@ -115,7 +115,7 @@ func TestWorkflowUpgradeServiceOwned(t *testing.T) {
 			operations := newTestService(t, project)
 			writeWorkflowUpgradeExecution(t, operations, tc.status)
 
-			opts := core.WorkflowUpgradeOptions{ExpectedRevision: authoringcore.WorkflowContentHash(nil), StateAuthority: workspaceconfig.WorkStateAuthorityTickets}
+			opts := workflowcore.UpgradeOptions{ExpectedRevision: authoringcore.WorkflowContentHash(nil), StateAuthority: workspaceconfig.WorkStateAuthorityTickets}
 
 			_, err := operations.UpgradeWorkflowConfiguration(t.Context(), opts)
 			if (err != nil) != tc.blocked {

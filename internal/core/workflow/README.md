@@ -1,0 +1,36 @@
+# `internal/core/workflow`
+
+## Purpose
+
+The package owns executable workflow records and the coordinator that advances
+them through admission, execution, review, integration and closure.
+
+## Boundary
+
+`Store` owns repository locking, journals, guarded source-image checks, atomic
+multi-record writes and recovery. Every method of the store stays with its type.
+Core composition and application adapters call this owner directly. The package
+cannot import root core or application adapters.
+
+Shared retained values live in `workflow/state`. That package has a separate,
+narrow import contract and cannot import this coordinator or its configuration.
+Ticket projections and SQL indexing use the existing ticket and database owners;
+the parsed workspace configuration has its own owner under `workspace/config`.
+
+## API
+
+`NewWorkflowStore` constructs a store over an explicit layout and project ID.
+Its operations retain the existing identity, revision, receipt and recovery
+guards. `ReadLegacyTicketFile` refuses adopted sources. `ReplaceLegacyTicketFile`
+takes the existing repository or legacy file lock, rechecks adoption and the
+observed image, then atomically replaces an unadopted source.
+
+## Validation
+
+Tests live beside the owning behavior. Wire fixtures retain exact baseline bytes;
+Git, filesystem, SQLite and process fixtures exercise durable boundaries without
+exporting private state to tests.
+
+```sh
+go test ./internal/core/workflow -run '^TestWorkflowRoundTrip$' -count=1
+```

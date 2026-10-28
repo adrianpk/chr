@@ -11,6 +11,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type ticketLoopExecutionResult struct {
@@ -349,7 +350,7 @@ type ticketLoopOperationResult struct {
 }
 
 func (s service) runLegacyTicketLoop(ctx context.Context, request ticketLoopRequest) (ticketLoopOperationResult, error) {
-	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketLoopOperationResult{}, err
 	}
@@ -378,7 +379,7 @@ func (s service) runLegacyTicketLoop(ctx context.Context, request ticketLoopRequ
 		return outcome, nil
 	}
 
-	lock, err := acquireAgentOperationLock(ctx, s.projectContext, core.AgentOperationDevelopment)
+	lock, err := acquireAgentOperationLock(ctx, s.projectContext, workflowcore.AgentOperationDevelopment)
 	if err != nil {
 		return ticketLoopOperationResult{}, err
 	}

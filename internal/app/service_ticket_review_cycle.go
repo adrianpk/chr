@@ -8,6 +8,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
@@ -218,7 +219,7 @@ func parseAgenticReviewTicket(ctx context.Context, projectID, projectDir, ticket
 
 func writeAgenticReviewNonBlockingComments(ctx context.Context, ticketPath string, notes []workflowstate.ReviewFinding, limit int, createdAt time.Time) error {
 	for index, note := range limitedAgenticReviewNotes(notes, limit) {
-		err := core.NewTicketCommenter().AddComment(ctx, core.AddTicketCommentOptions{
+		err := workflowcore.NewTicketCommenter().AddComment(ctx, workflowcore.AddTicketCommentOptions{
 			Path:      ticketPath,
 			Author:    "chr-reviewer",
 			Body:      renderAgenticReviewNonBlockingComment(note),
@@ -253,7 +254,7 @@ func (s service) refreshAgenticReviewTicketIndex(execution executioncore.Record,
 		return nil
 	}
 
-	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}

@@ -12,7 +12,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -37,7 +37,7 @@ func workflowCLIStatus(t *testing.T, project string, args ...string) (WorkflowWo
 func TestWorkflowCLIControls(t *testing.T) {
 	operations, hierarchy, _ := workflowCLIFixture(t)
 	project := operations.projectContext.ProjectDir
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "cli-control",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: serviceWorkflowDependencyGit(t, project, "rev-parse", "HEAD")}},
 	}}

@@ -12,6 +12,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func TestRunTicketMergeCommandDryRunDoesNotMutateTicket(t *testing.T) {
@@ -22,7 +23,7 @@ func TestRunTicketMergeCommandDryRunDoesNotMutateTicket(t *testing.T) {
 		Ticket:        ticket,
 		Tickets:       []ticketcore.Indexed{ticket},
 		Remote:        fakeTicketMergeCommandRemote{snapshot: mergeCommandSnapshot()},
-		MergeStrategy: TicketMergeStrategyRebase,
+		MergeStrategy: workflowcore.TicketMergeStrategyRebase,
 		DryRun:        true,
 		MergedAt:      testMergeCommandTime(),
 	})
@@ -43,9 +44,9 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 	ticket, path := writeMergeCommandTicket(t)
 	remote := fakeTicketMergeCommandRemote{
 		snapshot: mergeCommandSnapshot(),
-		merge: MergeResult{
-			Reference: ReviewProviderReference{Provider: ReviewProviderForgejo},
-			Strategy:  TicketMergeStrategyRebase,
+		merge: workflowcore.MergeResult{
+			Reference: workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+			Strategy:  workflowcore.TicketMergeStrategyRebase,
 			SHA:       "abc123",
 		},
 	}
@@ -54,7 +55,7 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 		Ticket:        ticket,
 		Tickets:       []ticketcore.Indexed{ticket},
 		Remote:        remote,
-		MergeStrategy: TicketMergeStrategyRebase,
+		MergeStrategy: workflowcore.TicketMergeStrategyRebase,
 		MergedAt:      testMergeCommandTime(),
 	})
 	if err != nil {
@@ -90,9 +91,9 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 
 	remote := fakeTicketMergeCommandRemote{
 		snapshot: mergeCommandSnapshot(),
-		merge: MergeResult{
-			Reference: ReviewProviderReference{Provider: ReviewProviderForgejo},
-			Strategy:  TicketMergeStrategyRebase,
+		merge: workflowcore.MergeResult{
+			Reference: workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+			Strategy:  workflowcore.TicketMergeStrategyRebase,
 			SHA:       "abc123",
 		},
 	}
@@ -101,7 +102,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 		Ticket:        ticket,
 		Tickets:       []ticketcore.Indexed{ticket},
 		Remote:        remote,
-		MergeStrategy: TicketMergeStrategyRebase,
+		MergeStrategy: workflowcore.TicketMergeStrategyRebase,
 		ProjectDir:    projectDir,
 		BranchPolicy:  executioncore.DefaultWorkBranchPolicy(),
 		Workspace:     testCleanupWorktreeWorkspace(),
@@ -130,7 +131,7 @@ func TestRunTicketMergeCommandRecordsProviderFailure(t *testing.T) {
 		Ticket:        ticket,
 		Tickets:       []ticketcore.Indexed{ticket},
 		Remote:        fakeTicketMergeCommandRemote{snapshot: mergeCommandSnapshot(), mergeErr: errors.New("provider failed")},
-		MergeStrategy: TicketMergeStrategyRebase,
+		MergeStrategy: workflowcore.TicketMergeStrategyRebase,
 		MergedAt:      testMergeCommandTime(),
 	})
 	if err != nil {
@@ -161,7 +162,7 @@ func TestRunTicketMergeCommandRecordsBlockedPreflight(t *testing.T) {
 		Ticket:        ticket,
 		Tickets:       []ticketcore.Indexed{ticket},
 		Remote:        fakeTicketMergeCommandRemote{snapshot: blockedMergeCommandSnapshot()},
-		MergeStrategy: TicketMergeStrategyRebase,
+		MergeStrategy: workflowcore.TicketMergeStrategyRebase,
 		MergedAt:      testMergeCommandTime(),
 	})
 	if err != nil {
@@ -187,18 +188,18 @@ func TestRunTicketMergeCommandRecordsBlockedPreflight(t *testing.T) {
 }
 
 type fakeTicketMergeCommandRemote struct {
-	snapshot RemoteReviewSnapshot
-	merge    MergeResult
+	snapshot workflowcore.RemoteReviewSnapshot
+	merge    workflowcore.MergeResult
 	mergeErr error
 }
 
-func (remote fakeTicketMergeCommandRemote) Read(context.Context, string) (RemoteReviewSnapshot, error) {
+func (remote fakeTicketMergeCommandRemote) Read(context.Context, string) (workflowcore.RemoteReviewSnapshot, error) {
 	return remote.snapshot, nil
 }
 
-func (remote fakeTicketMergeCommandRemote) Merge(context.Context, MergeRequest) (MergeResult, error) {
+func (remote fakeTicketMergeCommandRemote) Merge(context.Context, workflowcore.MergeRequest) (workflowcore.MergeResult, error) {
 	if remote.mergeErr != nil {
-		return MergeResult{}, remote.mergeErr
+		return workflowcore.MergeResult{}, remote.mergeErr
 	}
 
 	return remote.merge, nil
@@ -261,16 +262,16 @@ func readMergeCommandTicket(t *testing.T, path string) string {
 	return string(content)
 }
 
-func mergeCommandSnapshot() RemoteReviewSnapshot {
-	return RemoteReviewSnapshot{
-		Reference:       ReviewProviderReference{Provider: ReviewProviderForgejo},
+func mergeCommandSnapshot() workflowcore.RemoteReviewSnapshot {
+	return workflowcore.RemoteReviewSnapshot{
+		Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
 		PullRequestJSON: `{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-3-merge-execution-command"},"mergeable":true}`,
 	}
 }
 
-func blockedMergeCommandSnapshot() RemoteReviewSnapshot {
-	return RemoteReviewSnapshot{
-		Reference:       ReviewProviderReference{Provider: ReviewProviderForgejo},
+func blockedMergeCommandSnapshot() workflowcore.RemoteReviewSnapshot {
+	return workflowcore.RemoteReviewSnapshot{
+		Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
 		PullRequestJSON: `{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-3-merge-execution-command"},"mergeable":false}`,
 	}
 }

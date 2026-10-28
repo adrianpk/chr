@@ -36,7 +36,7 @@ def commands(go, live):
     ]
     if live:
         checks.append(("live", [go, "test", "-count=1", "-timeout=30m", "-json",
-                                "./internal/core", "-run", LIVE_TESTS]))
+                                "./internal/core/workflow", "-run", LIVE_TESTS]))
     checks.append(("whitespace", ["git", "diff", "--check"]))
     return checks
 

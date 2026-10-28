@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -84,7 +84,7 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 }
 
 func guidedHostFailure(err error) bool {
-	return err != nil && !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, authoringcore.ErrGuidedUseCaseStopped) && !errors.Is(err, core.ErrWorkflowStop)
+	return err != nil && !errors.Is(err, workflowcore.ErrWorkflowOwned) && !errors.Is(err, workflowcore.ErrWorkflowCapacity) && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, authoringcore.ErrGuidedUseCaseStopped) && !errors.Is(err, workflowcore.ErrWorkflowStop)
 }
 
 func (host *guidedWorkHost) release(key string) {

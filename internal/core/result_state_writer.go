@@ -6,6 +6,7 @@ import (
 	"time"
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TicketResultStateWriter defines a package boundary interface.
@@ -20,13 +21,13 @@ type WriteResultStateOptions struct {
 }
 
 type ticketResultStateWriter struct {
-	statusUpdater TicketStatusUpdater
+	statusUpdater workflowcore.TicketStatusUpdater
 }
 
 // NewTicketResultStateWriter constructs the corresponding package service or value.
 func NewTicketResultStateWriter() TicketResultStateWriter {
 	return &ticketResultStateWriter{
-		statusUpdater: NewTicketStatusUpdater(),
+		statusUpdater: workflowcore.NewTicketStatusUpdater(),
 	}
 }
 
@@ -40,7 +41,7 @@ func (w *ticketResultStateWriter) WriteResultState(ctx context.Context, opts Wri
 		return fmt.Errorf("result application ticket status is required")
 	}
 
-	return w.statusUpdater.UpdateStatus(ctx, UpdateTicketStatusOptions{
+	return w.statusUpdater.UpdateStatus(ctx, workflowcore.UpdateTicketStatusOptions{
 		Path:      opts.Application.TicketPath,
 		Status:    ticketcore.Status(opts.Application.TicketStatus),
 		UpdatedAt: opts.UpdatedAt,

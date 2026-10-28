@@ -13,8 +13,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -94,7 +94,7 @@ func telegramControlCapacityAdmission(t *testing.T, f *telegramConversationAppFi
 	return telegramcore.WorkReference{}
 }
 
-func telegramControlRunIDs(runs []core.WorkflowInvocation) []string {
+func telegramControlRunIDs(runs []workflowcore.Invocation) []string {
 	ids := make([]string, len(runs))
 	for index, run := range runs {
 		ids[index] = run.ID
@@ -103,7 +103,7 @@ func telegramControlRunIDs(runs []core.WorkflowInvocation) []string {
 	return ids
 }
 
-func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture, operations service, first telegramcore.WorkReference, capacity int) ([]core.WorkflowInvocation, telegramcore.WorkReference) {
+func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture, operations service, first telegramcore.WorkReference, capacity int) ([]workflowcore.Invocation, telegramcore.WorkReference) {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -126,14 +126,14 @@ func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture
 		t.Fatal(err)
 	}
 
-	runs := []core.WorkflowInvocation{}
+	runs := []workflowcore.Invocation{}
 	waiting := telegramcore.WorkReference{}
 
 	for index := 1; index <= capacity; index++ {
 		task := *original.Task
 
 		task.Key = fmt.Sprintf("PRJ-%d", 90+index)
-		if _, err := store.Create(t.Context(), "Independent capacity task", core.WorkflowRecord{Kind: "ticket", Task: &task, Domain: original.Domain, Body: original.Body}); err != nil {
+		if _, err := store.Create(t.Context(), "Independent capacity task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: original.Domain, Body: original.Body}); err != nil {
 			t.Fatal(err)
 		}
 
@@ -148,7 +148,7 @@ func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture
 
 		selection.SnapshotHash = ""
 
-		started, err := operations.StartWorkflow(t.Context(), core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+		started, err := operations.StartWorkflow(t.Context(), workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 			RequestKey: task.Key,
 			Selection:  selection,
 		}})
@@ -264,7 +264,7 @@ func telegramControlManualCall(t *testing.T, operations service, id string) (fun
 	return execute, finalize
 }
 
-func reconcileTelegramControlManual(ctx context.Context, operations service, claim *core.WorkflowClaim, task core.WorkflowManualTask) (err error) {
+func reconcileTelegramControlManual(ctx context.Context, operations service, claim *workflowcore.Claim, task workflowcore.ManualTask) (err error) {
 	defer func() { err = errors.Join(err, claim.Close()) }()
 
 	output, err := exec.CommandContext(ctx, "git", "-C", task.Input.Lane.Worktree, "rev-parse", "HEAD", "HEAD^{tree}").Output()
@@ -277,7 +277,7 @@ func reconcileTelegramControlManual(ctx context.Context, operations service, cla
 		return errors.New("manual candidate commit/tree missing")
 	}
 
-	candidate := core.WorkflowManualCandidate{InputHash: task.InputHash, Branch: task.Input.Lane.Branch, Commit: identities[0], Tree: identities[1]}
+	candidate := workflowcore.ManualCandidate{InputHash: task.InputHash, Branch: task.Input.Lane.Branch, Commit: identities[0], Tree: identities[1]}
 
 	result, err := operations.ReconcileWorkflowTask(ctx, claim, candidate)
 	if err == nil && (!result.Successful || result.ExecutionMode != "manual") {
@@ -353,7 +353,7 @@ func checkTelegramControlCapacityWait(t *testing.T, f *telegramConversationAppFi
 		t.Error(claim.Close())
 	}
 
-	if !errors.Is(err, core.ErrWorkflowCapacity) {
+	if !errors.Is(err, workflowcore.ErrWorkflowCapacity) {
 		t.Fatal("manual adapter bypassed full capacity", err)
 	}
 
@@ -369,7 +369,7 @@ func checkTelegramControlDuplicate(t *testing.T, f *telegramConversationAppFixtu
 	t.Helper()
 
 	result := f.receiver.activateWork(t.Context(), ref)
-	if (!errors.Is(result.Failure, core.ErrWorkflowOwned) && !errors.Is(result.Failure, core.ErrWorkflowCapacity)) || result.Progress.Steps != 0 {
+	if (!errors.Is(result.Failure, workflowcore.ErrWorkflowOwned) && !errors.Is(result.Failure, workflowcore.ErrWorkflowCapacity)) || result.Progress.Steps != 0 {
 		t.Fatal("duplicate Telegram activation bypassed native owner", result.Progress.Steps, result.Failure)
 	}
 
@@ -473,7 +473,7 @@ func checkTelegramControlResults(t *testing.T, operations service, ids []string)
 	}
 }
 
-func checkTelegramControlResult(t *testing.T, run core.WorkflowInvocation) {
+func checkTelegramControlResult(t *testing.T, run workflowcore.Invocation) {
 	t.Helper()
 
 	if run.Cursor != 1 || len(run.Attempts) != 1 || run.Attempts[0].Outcome != "validated" {

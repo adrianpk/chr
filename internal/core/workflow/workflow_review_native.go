@@ -1,0 +1,130 @@
+package workflow
+
+import (
+	"context"
+	"slices"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
+)
+
+// NativeReviewInput binds source rewrite, history and publication
+// policy to one host-validated candidate and durable queue generation.
+type NativeReviewInput struct {
+	Candidate       NativeCandidate  `json:"candidate"`
+	ClaimGeneration uint64           `json:"claim_generation"`
+	Capability      NativeCapability `json:"capability"`
+}
+
+func (s *Store) checkWorkflowSourceReviewProfile() error {
+	config, err := workspaceconfig.Load(s.layout.ProjectDir())
+	if err != nil {
+		return err
+	}
+
+	if config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
+		return ErrWorkflowAtomicGuard
+	}
+
+	return nil
+}
+
+func (s *Store) bindWorkflowNativeReview(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate, provider PullRequestProvider, input *ReviewInput) error {
+	if err := s.bindWorkflowNativeReviewCapability(ctx, run, candidate, provider, input); err != nil {
+		return err
+	}
+
+	return s.checkWorkflowNativeReviewFence(run, input)
+}
+
+func (s *Store) bindWorkflowNativeReviewCapability(ctx context.Context, run workflowInvocationFile, candidate IntegrationCandidate, provider PullRequestProvider, input *ReviewInput) error {
+	native, err := workflowNativePreparationProfile(s.layout.ProjectDir(), candidate.Input.Capability)
+	if err != nil || !native {
+		return err
+	}
+
+	observer, ok := provider.(NativePreparationProvider)
+	if !ok || candidate.Native == nil || candidate.Input.Native == nil {
+		return ErrWorkflowAtomicGuard
+	}
+
+	capability, err := observeWorkflowPreparedNativeCapability(ctx, observer, candidate.Input)
+	if err != nil {
+		return err
+	}
+
+	if !workflowNativeJSONEqual(capability, candidate.Input.Native.Capability) {
+		return workflowstate.ErrConflict
+	}
+
+	input.Native = &NativeReviewInput{Candidate: *candidate.Native, ClaimGeneration: candidate.Input.Native.ClaimGeneration, Capability: capability}
+	if err := validateWorkflowNativeReviewInput(*input); err != nil {
+		return err
+	}
+
+	if _, err := workflowNativePreparationProfile(s.layout.ProjectDir(), candidate.Input.Capability); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Store) checkWorkflowNativeReviewFence(run workflowInvocationFile, input *ReviewInput) error {
+	if input.Native == nil {
+		return nil
+	}
+
+	if run.Integration == nil || run.Integration.EntryID != input.Native.Candidate.EntryID || run.Preparation == nil {
+		return workflowstate.ErrConflict
+	}
+
+	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
+	if err != nil {
+		return err
+	}
+
+	if !workflowNativeReviewEntryMatches(run, entry, input) {
+		return workflowstate.ErrConflict
+	}
+
+	return nil
+}
+
+func workflowNativeReviewEntryMatches(run workflowInvocationFile, entry IntegrationEntry, input *ReviewInput) bool {
+	return slices.Contains([]string{"reviewing", "waiting_review", "ready_to_publish"}, entry.State) && entry.StopIntent == "" && entry.ClaimGeneration == input.Native.ClaimGeneration && workflowNativePreparedEntryMatches(run, entry) && entry.CandidateRef.Path == input.PreparationRef && entry.CandidateRef.Hash == input.PreparationHash
+}
+
+func validateWorkflowNativeReviewInput(input ReviewInput) error {
+	if input.Native == nil {
+		return nil
+	}
+
+	native := input.Native
+
+	binding := native.Candidate.NativeRecordBinding
+	if native.ClaimGeneration == 0 || !validWorkflowNativeFingerprint(native.Candidate.CandidateHash) || input.PreparedGit == nil {
+		return workflowstate.ErrConflict
+	}
+
+	if err := validateWorkflowNativeRecordBinding(binding); err != nil {
+		return err
+	}
+
+	if !workflowNativeReviewOwnerMatches(input) {
+		return workflowstate.ErrConflict
+	}
+
+	if binding.CapabilityHash != native.Capability.Revision || binding.PolicyHash != native.Capability.PolicyFingerprint {
+		return workflowstate.ErrConflict
+	}
+
+	preparation := PreparationInput{Source: workflowPreparationSource(input), Git: *input.PreparedGit}
+
+	return validateWorkflowPreparedNativeCapability(preparation, native.Capability)
+}
+
+func workflowNativeReviewOwnerMatches(input ReviewInput) bool {
+	binding := input.Native.Candidate.NativeRecordBinding
+
+	return binding.InvocationID == input.InvocationID && binding.Unit == input.Unit && binding.CanonicalPR == input.PullRequest.URL && binding.ContractHash == input.Slice.ContractHash && workflowNativeRecordGitMatches(binding, *input.PreparedGit)
+}

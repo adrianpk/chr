@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TestServiceWorkRepair publishes a revised exact source onto the same bound PR
@@ -36,7 +36,7 @@ func TestServiceWorkRepair(t *testing.T) {
 	}
 }
 
-func serviceWorkApprovalRun(t *testing.T, operations service) core.WorkflowInvocation {
+func serviceWorkApprovalRun(t *testing.T, operations service) workflowcore.Invocation {
 	t.Helper()
 
 	first, err := operations.StartAllReadyAgentWork()
@@ -47,7 +47,7 @@ func serviceWorkApprovalRun(t *testing.T, operations service) core.WorkflowInvoc
 	return *first.Workflow
 }
 
-func checkServiceWorkRepaired(t *testing.T, first core.WorkflowInvocation, second AgentWorkResult, creates int, failure error) {
+func checkServiceWorkRepaired(t *testing.T, first workflowcore.Invocation, second AgentWorkResult, creates int, failure error) {
 	t.Helper()
 
 	if failure != nil || second.Workflow == nil || second.Workflow.ID != first.ID || second.Workflow.Review == nil || second.Workflow.Review.State != "waiting_approval" || creates != 1 || second.Workflow.PullRequest.SourceCommit == first.PullRequest.SourceCommit {

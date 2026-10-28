@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -63,7 +63,7 @@ func TestWebHarnessSelectionBinding(t *testing.T) {
 	}
 }
 
-func claimWebHarnessInvocation(t *testing.T, operations service, request core.WorkflowStartRequest) core.WorkflowInvocation {
+func claimWebHarnessInvocation(t *testing.T, operations service, request workflowcore.StartRequest) workflowcore.Invocation {
 	t.Helper()
 
 	started, err := operations.StartWorkflow(t.Context(), request)

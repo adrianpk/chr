@@ -11,6 +11,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (factory commandFactory) ticketBoardCommand() *cli.Command {
@@ -124,7 +125,7 @@ func (factory commandFactory) runTicketList(ctx context.Context, cmd *cli.Comman
 		return err
 	}
 
-	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}

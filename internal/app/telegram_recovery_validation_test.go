@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -74,7 +74,7 @@ func TestTelegramRecoveryValidation(t *testing.T) {
 	checkTelegramControlPool(t, operations, 1, 1)
 }
 
-func setTelegramRecoveryValidation(t *testing.T, store *core.WorkflowStore, record core.WorkflowRecord, validation workflowstate.Validation) {
+func setTelegramRecoveryValidation(t *testing.T, store *workflowcore.Store, record workflowcore.Record, validation workflowstate.Validation) {
 	t.Helper()
 
 	var contract generationcore.GeneratedWorkflowTask

@@ -3,11 +3,12 @@ package core
 import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // GuidedMaterializationBinding retains owner identities without copying native task state.
-func GuidedMaterializationBinding(result WorkflowMaterializationResult, input generationcore.GeneratedWorkflowPlan) (authoringcore.GuidedMaterializationReference, error) {
+func GuidedMaterializationBinding(result workflowcore.MaterializationResult, input generationcore.GeneratedWorkflowPlan) (authoringcore.GuidedMaterializationReference, error) {
 	if result.Set.Set == nil || result.Set.Set.PlanRevision == nil || result.Set.Set.UseCase != input.UseCase || len(result.Tasks) == 0 || len(result.Tasks) > workflowstate.PageLimit {
 		return authoringcore.GuidedMaterializationReference{}, workflowstate.ErrConflict
 	}

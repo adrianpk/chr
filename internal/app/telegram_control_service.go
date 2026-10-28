@@ -3,15 +3,15 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type telegramControlService interface {
 	ReadTelegramControl(context.Context, telegramcore.OperationTarget, string) (WorkflowWorkStatus, error)
 	ReadTelegramControlReceipt(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest) (telegramControlReceipt, error)
-	ApplyTelegramControl(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest, core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error)
+	ApplyTelegramControl(context.Context, telegramcore.OperationTarget, workflowstate.MutationBinding, WorkflowControlRequest, workflowcore.AdmissionCheck) (WorkflowWorkStatus, error)
 }
 
 // ReadTelegramControlReceipt scopes receipt recovery to the original project.
@@ -43,7 +43,7 @@ func (s service) ReadTelegramControl(ctx context.Context, target telegramcore.Op
 
 // ApplyTelegramControl enters the same guarded operation as other adapters.
 // The configured actor is carried by the immutable caller request binding.
-func (s service) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s service) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check workflowcore.AdmissionCheck) (WorkflowWorkStatus, error) {
 	if err := binding.Validate(); err != nil {
 		return WorkflowWorkStatus{}, err
 	}

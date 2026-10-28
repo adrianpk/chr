@@ -9,6 +9,7 @@ import (
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -27,7 +28,7 @@ type TicketReviewCommandOptions struct {
 	Config     workspaceconfig.Config
 	Result     ticketcore.ReviewResult
 	Findings   []string
-	Adapter    RemoteReviewAdapter
+	Adapter    workflowcore.RemoteReviewAdapter
 	DryRun     bool
 	ReviewedAt time.Time
 }
@@ -36,13 +37,13 @@ type TicketReviewCommandOptions struct {
 type TicketReviewCommandResult struct {
 	TicketKey        string
 	ReviewRef        ticketmetadata.ReviewRef
-	RemoteSnapshot   RemoteReviewSnapshot
+	RemoteSnapshot   workflowcore.RemoteReviewSnapshot
 	ReviewState      ticketcore.ReviewState
 	ReviewResult     ticketcore.ReviewResult
 	ReviewRound      int
 	Status           ticketcore.Status
 	BlockingFindings []string
-	RemoteComments   []RemoteReviewWrittenComment
+	RemoteComments   []workflowcore.RemoteReviewWrittenComment
 	DryRun           bool
 }
 
@@ -137,7 +138,7 @@ func ticketReviewCommandPullRequestRef(ticket ticketcore.Indexed) (ticketmetadat
 	return ticketmetadata.ReviewRef{}, fmt.Errorf("ticket review requires a pull_request review ref")
 }
 
-func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata.ReviewRef, snapshot RemoteReviewSnapshot, result ticketcore.ReviewResult) TicketReviewCommandResult {
+func ticketReviewCommandPlan(opts TicketReviewCommandOptions, ref ticketmetadata.ReviewRef, snapshot workflowcore.RemoteReviewSnapshot, result ticketcore.ReviewResult) TicketReviewCommandResult {
 	transition := ticketReviewCommandStateAndStatus(result)
 
 	return TicketReviewCommandResult{
@@ -173,15 +174,15 @@ func ticketReviewCommandStateAndStatus(result ticketcore.ReviewResult) ticketRev
 	}
 }
 
-func writeTicketReviewCommandFindings(ctx context.Context, adapter RemoteReviewAdapter, url string, findings []string) ([]RemoteReviewWrittenComment, error) {
+func writeTicketReviewCommandFindings(ctx context.Context, adapter workflowcore.RemoteReviewAdapter, url string, findings []string) ([]workflowcore.RemoteReviewWrittenComment, error) {
 	trimmed := trimmedTicketReviewFindings(findings)
 	if len(trimmed) == 0 {
 		return nil, nil
 	}
 
-	comments := make([]RemoteReviewComment, 0, len(trimmed))
+	comments := make([]workflowcore.RemoteReviewComment, 0, len(trimmed))
 	for _, finding := range trimmed {
-		comments = append(comments, RemoteReviewComment{Body: finding, Blocking: true})
+		comments = append(comments, workflowcore.RemoteReviewComment{Body: finding, Blocking: true})
 	}
 
 	result, err := adapter.WriteComments(ctx, url, comments)
@@ -193,7 +194,7 @@ func writeTicketReviewCommandFindings(ctx context.Context, adapter RemoteReviewA
 }
 
 func applyTicketReviewCommandResult(ctx context.Context, path string, result TicketReviewCommandResult, reviewedAt time.Time) error {
-	content, err := readLegacyTicketFile(path)
+	content, err := workflowcore.ReadLegacyTicketFile(path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}
@@ -223,7 +224,7 @@ func applyTicketReviewCommandResult(ctx context.Context, path string, result Tic
 		}
 	}
 
-	err = writeLegacyTicketFile(ctx, path, content, []byte(updated))
+	err = workflowcore.ReplaceLegacyTicketFile(ctx, path, content, []byte(updated))
 	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}

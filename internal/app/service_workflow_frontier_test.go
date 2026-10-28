@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TestServiceWorkflowFrontier keeps the shared service behind canonical delivery
@@ -36,7 +36,7 @@ func TestServiceWorkflowFrontier(t *testing.T) {
 	}
 }
 
-func checkServiceWorkflowFrontier(t *testing.T, run core.WorkflowInvocation, receipt core.WorkflowRecord, provider *serviceWorkflowPRFixture) {
+func checkServiceWorkflowFrontier(t *testing.T, run workflowcore.Invocation, receipt workflowcore.Record, provider *serviceWorkflowPRFixture) {
 	t.Helper()
 
 	if run.Status != "pending" || run.ConfirmedCursor != 3 || len(run.Deliveries) != 1 || run.Deliveries[0].DeliveryRef != receipt.Path || run.ExecutionSelection().Target.Commit != provider.pr.ResultCommit || provider.creates != 1 {

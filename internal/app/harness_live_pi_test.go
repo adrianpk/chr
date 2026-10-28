@@ -15,6 +15,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -52,7 +53,7 @@ func TestHarnessLivePi(t *testing.T) {
 		t.Fatal("prepare both live roles and Docker access before any model call", err)
 	}
 
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "live-pi-worker",
 		Policy:     workflowstate.ExecutionPolicy{WorkerTimeoutSeconds: 90, MaxWorkerAttempts: 1, CheckpointStepLimit: 1},
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/fixture/disposable", Commit: target}},
@@ -140,7 +141,7 @@ func harnessLivePiGeneration(t *testing.T, operations service) harnesshost.RunMe
 	return records[0]
 }
 
-func harnessLivePiWorker(t *testing.T, operations service, request core.WorkflowStartRequest) (core.WorkflowInvocation, core.WorkflowTaskResult) {
+func harnessLivePiWorker(t *testing.T, operations service, request workflowcore.StartRequest) (workflowcore.Invocation, workflowcore.TaskResult) {
 	t.Helper()
 
 	started, err := operations.StartWorkflow(t.Context(), request)
@@ -168,7 +169,7 @@ func harnessLivePiWorker(t *testing.T, operations service, request core.Workflow
 	return retained, result
 }
 
-func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, generation harnesshost.RunMetadata, worker core.WorkflowInvocation, result core.WorkflowTaskResult) {
+func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, generation harnesshost.RunMetadata, worker workflowcore.Invocation, result workflowcore.TaskResult) {
 	t.Helper()
 
 	candidate, err := exec.CommandContext(t.Context(), "git", "rev-parse", "HEAD").Output()
@@ -243,7 +244,7 @@ func validateHarnessLivePiOutput(ctx context.Context, request core.StructuredMod
 	return core.ValidateStructuredModelOutput(ctx, request, validation)
 }
 
-func harnessLivePiWorkerResult(t *testing.T, operations service, id string, request core.WorkflowStartRequest, result core.WorkflowTaskResult) core.WorkflowInvocation {
+func harnessLivePiWorkerResult(t *testing.T, operations service, id string, request workflowcore.StartRequest, result workflowcore.TaskResult) workflowcore.Invocation {
 	t.Helper()
 
 	retained, err := operations.ReadWorkflow(t.Context(), id)
@@ -256,7 +257,7 @@ func harnessLivePiWorkerResult(t *testing.T, operations service, id string, requ
 	return retained
 }
 
-func checkHarnessLivePiCommit(t *testing.T, retained core.WorkflowInvocation, before, after string) {
+func checkHarnessLivePiCommit(t *testing.T, retained workflowcore.Invocation, before, after string) {
 	t.Helper()
 
 	if retained.HarnessBinding == nil || retained.HarnessBinding.Harness != "pi" || retained.Policy.MaxWorkerAttempts != 1 || retained.Policy.WorkerTimeoutSeconds != 90 {

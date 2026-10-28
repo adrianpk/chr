@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -38,7 +38,7 @@ func TestServiceWorkflowClaim(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "manual-claim",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: strings.TrimSpace(string(output))}},
 	}}

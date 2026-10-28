@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -25,7 +25,7 @@ func (s service) executeWorkflowControlResult(ctx context.Context, request Workf
 		return s.executeWorkflowLifecycleResult(ctx, store, request)
 	}
 
-	var provider core.WorkflowPullRequestProvider
+	var provider workflowcore.PullRequestProvider
 	if request.Action != "grant" {
 		_, provider, err = s.workflowReviewDependencies(request.ID)
 		if err != nil {

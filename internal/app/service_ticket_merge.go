@@ -8,6 +8,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -19,7 +20,7 @@ type ticketMergeInput struct {
 }
 
 func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (core.TicketMergeCommandResult, error) {
-	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return core.TicketMergeCommandResult{}, err
 	}
@@ -57,7 +58,7 @@ func (s service) mergeTicket(ctx context.Context, request ticketMergeInput) (cor
 	defer release()
 
 	result, err := core.RunTicketMergeCommand(ctx, core.TicketMergeCommandOptions{
-		Ticket: ticket, Tickets: tickets, Remote: core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
+		Ticket: ticket, Tickets: tickets, Remote: workflowcore.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner),
 		ExpectedBase: base, MergeStrategy: request.Strategy, ProjectDir: s.projectContext.ProjectDir,
 		BranchPolicy: config.Work.BranchPolicy, Workspace: config.Work.Workspace, DryRun: request.DryRun, MergedAt: time.Now().UTC(),
 	})
@@ -99,7 +100,7 @@ func acquireTicketMergeLock(ctx context.Context, projectContext commandProjectCo
 		return noopRelease, nil
 	}
 
-	lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationMerge)
+	lock, err := acquireAgentOperationLock(ctx, projectContext, workflowcore.AgentOperationMerge)
 	if err != nil {
 		return noopRelease, err
 	}

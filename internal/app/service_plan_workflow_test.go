@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -60,7 +60,7 @@ func serviceWorkflowPlanFixture() generationcore.GeneratedWorkflowPlan {
 func checkServiceWorkflowProjection(t *testing.T, service service, project string) {
 	t.Helper()
 
-	index, err := core.NewWorkflowTicketIndex(t.Context(), service.env, service.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(t.Context(), service.env, service.assetsFS)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,12 +76,12 @@ func checkServiceWorkflowProjection(t *testing.T, service service, project strin
 		t.Fatal(err)
 	}
 
-	workflow, ok := index.(core.WorkflowIndex)
+	workflow, ok := index.(workflowcore.Index)
 	if !ok {
 		t.Fatal("missing workflow projection")
 	}
 
-	page, err := workflow.QueryWorkflow(t.Context(), core.NewWorkflowStore(layout, service.projectContext.ProjectID), core.WorkflowQuery{Kind: "ticket", Limit: 128})
+	page, err := workflow.QueryWorkflow(t.Context(), workflowcore.NewWorkflowStore(layout, service.projectContext.ProjectID), workflowcore.Query{Kind: "ticket", Limit: 128})
 	if err != nil || len(page.Records) != 6 {
 		t.Fatalf("indexed tasks = %d, %v", len(page.Records), err)
 	}

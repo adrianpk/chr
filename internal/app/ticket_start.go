@@ -7,10 +7,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (factory commandFactory) ticketStartCommand() *cli.Command {
@@ -158,14 +158,14 @@ func printTicketStartDiagnostics(stdout io.Writer, record executioncore.Record) 
 }
 
 func runOwnedTicketStart(ctx context.Context, stdout io.Writer, preflight ticketStartPreflight) (executioncore.Record, error) {
-	lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, core.AgentOperationDevelopment)
+	lock, err := acquireAgentOperationLock(ctx, preflight.ProjectContext, workflowcore.AgentOperationDevelopment)
 	if err != nil {
 		return executioncore.Record{}, err
 	}
 
 	defer releaseAgentOperationLock(lock)()
 
-	if err := core.CheckLegacyWorkTicket(preflight.Ticket.Path); err != nil {
+	if err := workflowcore.CheckLegacyWorkTicket(preflight.Ticket.Path); err != nil {
 		return executioncore.Record{}, err
 	}
 

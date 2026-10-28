@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,11 +16,11 @@ func telegramWorkFailure(failure error) string {
 		return "Work conflict: the displayed selection, policy, target or authority changed. Read current native work before requesting a new preview."
 	}
 
-	if errors.Is(failure, core.ErrWorkflowOwned) {
+	if errors.Is(failure, workflowcore.ErrWorkflowOwned) {
 		return "This selection already has an execution owner. Inspect the retained work before requesting another start."
 	}
 
-	if errors.Is(failure, core.ErrWorkflowCapacity) {
+	if errors.Is(failure, workflowcore.ErrWorkflowCapacity) {
 		return "Execution capacity is occupied. This request has no confirmed new admission. Inspect active work before retrying."
 	}
 

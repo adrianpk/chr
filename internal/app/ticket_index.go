@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (factory commandFactory) openTicketIndexForCommand(ctx context.Context, cmd *cli.Command, env core.UserEnvironment) (commandTicketIndex, error) {
@@ -21,7 +22,7 @@ func (factory commandFactory) openTicketIndexForCommand(ctx context.Context, cmd
 		return commandTicketIndex{Project: commandProjectContext{}, Index: nil}, err
 	}
 
-	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return commandTicketIndex{Project: commandProjectContext{}, Index: nil}, err
 	}

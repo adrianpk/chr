@@ -6,6 +6,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -17,7 +18,7 @@ type ticketReviewInput struct {
 }
 
 func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (core.TicketReviewCommandResult, error) {
-	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return core.TicketReviewCommandResult{}, err
 	}
@@ -40,7 +41,7 @@ func (s service) reviewTicket(ctx context.Context, request ticketReviewInput) (c
 		return core.TicketReviewCommandResult{}, err
 	}
 
-	adapter := core.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
+	adapter := workflowcore.NewRemoteReviewAdapter(config.Review.Providers, reviewRemoteCommandRunner)
 
 	release, err := acquireTicketReviewLock(ctx, s.projectContext, request.DryRun)
 	if err != nil {
@@ -76,7 +77,7 @@ func acquireTicketReviewLock(ctx context.Context, projectContext commandProjectC
 		return noopRelease, nil
 	}
 
-	lock, err := acquireAgentOperationLock(ctx, projectContext, core.AgentOperationReview)
+	lock, err := acquireAgentOperationLock(ctx, projectContext, workflowcore.AgentOperationReview)
 	if err != nil {
 		return noopRelease, err
 	}

@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func serviceWorkflowSliceFixture(t *testing.T) (service, core.WorkflowMaterializationResult, string) {
+func serviceWorkflowSliceFixture(t *testing.T) (service, workflowcore.MaterializationResult, string) {
 	t.Helper()
 
 	if testing.Short() {
@@ -56,7 +56,7 @@ func serviceWorkflowSliceFixture(t *testing.T) (service, core.WorkflowMaterializ
 // through the shared service, reuses host proof and explicitly invalidates repair.
 func TestServiceWorkflowSlice(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "slice",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -76,7 +76,7 @@ func TestServiceWorkflowSlice(t *testing.T) {
 	checkServiceWorkflowSlice(t, operations, run.Invocation.ID, hierarchy, candidate)
 }
 
-func checkServiceWorkflowSlice(t *testing.T, operations service, id string, hierarchy core.WorkflowMaterializationResult, candidate core.WorkflowSliceCandidate) {
+func checkServiceWorkflowSlice(t *testing.T, operations service, id string, hierarchy workflowcore.MaterializationResult, candidate workflowcore.SliceCandidate) {
 	t.Helper()
 
 	read, err := operations.ReadWorkflowSliceCandidate(t.Context(), id)

@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -173,7 +173,7 @@ func webHarnessBrowserCancel(t *testing.T, browser *webWorkflowBrowser, operatio
 	}
 }
 
-func webHarnessCheckRetained(t *testing.T, operations service, before core.WorkflowInvocation) {
+func webHarnessCheckRetained(t *testing.T, operations service, before workflowcore.Invocation) {
 	t.Helper()
 
 	after, err := operations.ReadWorkflow(t.Context(), before.ID)
@@ -182,7 +182,7 @@ func webHarnessCheckRetained(t *testing.T, operations service, before core.Workf
 	}
 }
 
-func webHarnessCheckNewInvocation(t *testing.T, operations service, record core.WorkflowRecord, request core.WorkflowStartRequest) {
+func webHarnessCheckNewInvocation(t *testing.T, operations service, record workflowcore.Record, request workflowcore.StartRequest) {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -193,7 +193,7 @@ func webHarnessCheckNewInvocation(t *testing.T, operations service, record core.
 	task := *record.Task
 
 	task.Key = "PRJ-91"
-	if _, err := store.Create(t.Context(), "Later independent task", core.WorkflowRecord{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Later independent task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: record.Domain, Body: record.Body}); err != nil {
 		t.Fatal(err)
 	}
 

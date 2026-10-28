@@ -9,6 +9,7 @@ import (
 	"time"
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func TestTicketStatusUpdaterUpdatesStatus(t *testing.T) {
@@ -32,7 +33,7 @@ func TestTicketStatusUpdaterUpdatesStatus(t *testing.T) {
 		t.Fatalf("write ticket: %v", err)
 	}
 
-	err = NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+	err = workflowcore.NewTicketStatusUpdater().UpdateStatus(context.Background(), workflowcore.UpdateTicketStatusOptions{
 		Path:      path,
 		Status:    "ready",
 		UpdatedAt: updatedAt,
@@ -57,7 +58,7 @@ func TestTicketStatusUpdaterUpdatesStatus(t *testing.T) {
 }
 
 func TestTicketStatusUpdaterRejectsInvalidStatus(t *testing.T) {
-	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+	err := workflowcore.NewTicketStatusUpdater().UpdateStatus(context.Background(), workflowcore.UpdateTicketStatusOptions{
 		Path:   filepath.Join(t.TempDir(), "ticket.md"),
 		Status: "unknown",
 	})

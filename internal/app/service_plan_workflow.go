@@ -6,30 +6,30 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // MaterializeWorkflowPlan explicitly opts approved input into ticket-owned
 // workflow state. Ordinary legacy plan reads and defaults do not adopt it.
-func (s service) MaterializeWorkflowPlan(ctx context.Context, plan generationcore.GeneratedWorkflowPlan) (core.WorkflowMaterializationResult, error) {
+func (s service) MaterializeWorkflowPlan(ctx context.Context, plan generationcore.GeneratedWorkflowPlan) (workflowcore.MaterializationResult, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
-		return core.WorkflowMaterializationResult{}, err
+		return workflowcore.MaterializationResult{}, err
 	}
 
 	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
-		return core.WorkflowMaterializationResult{}, err
+		return workflowcore.MaterializationResult{}, err
 	}
 
-	store := core.NewWorkflowStore(layout, s.projectContext.ProjectID)
+	store := workflowcore.NewWorkflowStore(layout, s.projectContext.ProjectID)
 
-	result, err := store.MaterializePlan(ctx, core.WorkflowMaterializationOptions{Plan: plan, ReserveTicketKey: func(ctx context.Context) (string, error) {
+	result, err := store.MaterializePlan(ctx, workflowcore.MaterializationOptions{Plan: plan, ReserveTicketKey: func(ctx context.Context) (string, error) {
 		operations := s
 		operations.ctx = ctx
 		number, err := operations.reserveNextTicketKeyNumber(config.TicketKeyPrefix)
@@ -43,8 +43,8 @@ func (s service) MaterializeWorkflowPlan(ctx context.Context, plan generationcor
 	return result, s.refreshWorkflowProjection(ctx, store)
 }
 
-func (s service) refreshWorkflowProjection(ctx context.Context, store *core.WorkflowStore) (err error) {
-	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
+func (s service) refreshWorkflowProjection(ctx context.Context, store *workflowcore.Store) (err error) {
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (s service) refreshWorkflowProjection(ctx context.Context, store *core.Work
 		}
 	}()
 
-	workflow, ok := index.(core.WorkflowIndex)
+	workflow, ok := index.(workflowcore.Index)
 	if !ok {
 		return fmt.Errorf("ticket index lacks workflow projection")
 	}
@@ -65,13 +65,13 @@ func (s service) refreshWorkflowProjection(ctx context.Context, store *core.Work
 
 // AdoptWorkflowPlan observes legacy runtime state and adopts only the explicit
 // selections in the request. It never converts records while listing plans.
-func (s service) AdoptWorkflowPlan(ctx context.Context, opts core.WorkflowPlanAdoptionOptions) (core.WorkflowMaterializationResult, error) {
+func (s service) AdoptWorkflowPlan(ctx context.Context, opts workflowcore.PlanAdoptionOptions) (workflowcore.MaterializationResult, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: s.workflowNamespace})
 	if err != nil {
-		return core.WorkflowMaterializationResult{}, err
+		return workflowcore.MaterializationResult{}, err
 	}
 
-	store := core.NewWorkflowStore(layout, s.projectContext.ProjectID)
+	store := workflowcore.NewWorkflowStore(layout, s.projectContext.ProjectID)
 	opts.CheckQuiescent = s.checkWorkflowAdoptionExecutions
 
 	result, err := store.AdoptPlanWorkflow(ctx, opts)

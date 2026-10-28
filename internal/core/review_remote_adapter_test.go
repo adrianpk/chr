@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -16,15 +17,15 @@ func TestRemoteReviewAdapterReadsForgejoSnapshot(t *testing.T) {
 	runner.outputs["tea api /repos/example/repo/issues/12/comments"] = []byte(`[{"body":"comment"}]`)
 	runner.outputs["tea api /repos/example/repo/commits/abc123/statuses"] = []byte(`[{"state":"success"}]`)
 
-	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
+	adapter := workflowcore.NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
 	snapshot, err := adapter.Read(t.Context(), "https://codeberg.org/example/repo/pulls/12")
 	if err != nil {
 		t.Fatalf("Read returned error: %v", err)
 	}
 
-	if snapshot.Reference.Provider != ReviewProviderForgejo {
-		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, ReviewProviderForgejo)
+	if snapshot.Reference.Provider != workflowcore.ReviewProviderForgejo {
+		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, workflowcore.ReviewProviderForgejo)
 	}
 
 	if !strings.Contains(snapshot.Diff, "diff --git") {
@@ -48,15 +49,15 @@ func TestRemoteReviewAdapterReadsGitHubSnapshot(t *testing.T) {
 	runner.outputs["gh api repos/example/repo/pulls/34/comments"] = []byte(`[{"body":"review"}]`)
 	runner.outputs["gh pr checks https://github.com/example/repo/pull/34 --json name,state,link,bucket"] = []byte(`[{"name":"test","state":"SUCCESS"}]`)
 
-	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
+	adapter := workflowcore.NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
 	snapshot, err := adapter.Read(t.Context(), "https://github.com/example/repo/pull/34")
 	if err != nil {
 		t.Fatalf("Read returned error: %v", err)
 	}
 
-	if snapshot.Reference.Provider != ReviewProviderGitHub {
-		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, ReviewProviderGitHub)
+	if snapshot.Reference.Provider != workflowcore.ReviewProviderGitHub {
+		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, workflowcore.ReviewProviderGitHub)
 	}
 
 	if !strings.Contains(snapshot.ReviewCommentsJSON, "review") {
@@ -70,9 +71,9 @@ func TestRemoteReviewAdapterReadsGitHubSnapshot(t *testing.T) {
 
 func TestRemoteReviewAdapterWritesInlineComment(t *testing.T) {
 	runner := newFakeRemoteReviewRunner()
-	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
+	adapter := workflowcore.NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
-	result, err := adapter.WriteComments(t.Context(), "https://github.com/example/repo/pull/34", []RemoteReviewComment{
+	result, err := adapter.WriteComments(t.Context(), "https://github.com/example/repo/pull/34", []workflowcore.RemoteReviewComment{
 		{Body: "Handle nil input.", Path: "internal/example.go", Line: 42, Blocking: true},
 	})
 	if err != nil {
@@ -84,7 +85,7 @@ func TestRemoteReviewAdapterWritesInlineComment(t *testing.T) {
 	}
 
 	written := result.Comments[0]
-	if written.Placement != RemoteReviewCommentPlacementInline || written.Kind != RemoteReviewCommentKindBlocking {
+	if written.Placement != workflowcore.RemoteReviewCommentPlacementInline || written.Kind != workflowcore.RemoteReviewCommentKindBlocking {
 		t.Fatalf("written comment = %#v", written)
 	}
 
@@ -107,9 +108,9 @@ func TestRemoteReviewAdapterFallsBackToGeneralComment(t *testing.T) {
 	runner := newFakeRemoteReviewRunner()
 	runner.inputErrors["tea api -X POST /repos/example/repo/pulls/12/reviews -d @-"] = errors.New("inline unsupported")
 
-	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
+	adapter := workflowcore.NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
 
-	result, err := adapter.WriteComments(t.Context(), "https://codeberg.org/example/repo/pulls/12", []RemoteReviewComment{
+	result, err := adapter.WriteComments(t.Context(), "https://codeberg.org/example/repo/pulls/12", []workflowcore.RemoteReviewComment{
 		{Body: "Handle nil input.", Path: "internal/example.go", Line: 42},
 	})
 	if err != nil {
@@ -117,7 +118,7 @@ func TestRemoteReviewAdapterFallsBackToGeneralComment(t *testing.T) {
 	}
 
 	written := result.Comments[0]
-	if written.Placement != RemoteReviewCommentPlacementGeneral || written.Reason != "inline_unavailable" {
+	if written.Placement != workflowcore.RemoteReviewCommentPlacementGeneral || written.Reason != "inline_unavailable" {
 		t.Fatalf("written comment = %#v", written)
 	}
 
@@ -138,7 +139,7 @@ func TestRemoteReviewAdapterRejectsDisabledProvider(t *testing.T) {
 	config := workspaceconfig.DefaultReviewProviderConfig()
 	config.GitHub.Enabled = false
 
-	adapter := NewRemoteReviewAdapter(config, newFakeRemoteReviewRunner())
+	adapter := workflowcore.NewRemoteReviewAdapter(config, newFakeRemoteReviewRunner())
 
 	_, err := adapter.Read(t.Context(), "https://github.com/example/repo/pull/34")
 	if err == nil {

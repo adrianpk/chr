@@ -5,8 +5,8 @@ import (
 	"maps"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -76,7 +76,7 @@ func telegramWorkHoldCapacity(t *testing.T, operations service, ref telegramcore
 		if record.Task != nil && record.Task.SetID != "" {
 			selection := workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: record.Task.Key}, Target: preview.Request.Target}
 
-			run, err := operations.StartWorkflow(t.Context(), core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+			run, err := operations.StartWorkflow(t.Context(), workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 				RequestKey: "another-adapter",
 				Selection:  selection,
 			}})

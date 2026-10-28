@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -14,7 +14,7 @@ func guidedNativeControl(t *testing.T, operations service, session authoringcore
 
 	command := guidedQuizCommand(session, id, action, "")
 	if session.Guided.Work != nil && session.Guided.Work.Invocation != nil {
-		run, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, session)
+		run, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, session)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -81,7 +81,7 @@ func assertGuidedNativeResume(t *testing.T, operations service, paused authoring
 	assertGuidedResumedAttempts(t, operations, before, resumed)
 }
 
-func assertGuidedResumedAttempts(t *testing.T, operations service, before core.WorkflowInvocation, resumed authoringcore.Session) {
+func assertGuidedResumedAttempts(t *testing.T, operations service, before workflowcore.Invocation, resumed authoringcore.Session) {
 	t.Helper()
 
 	host := newGuidedWorkHost(t.Context())
@@ -116,7 +116,7 @@ func TestGuidedUseCaseControlLostAck(t *testing.T) {
 		t.Fatal("control fault was not retained", err)
 	}
 
-	before, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, pending)
+	before, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, pending)
 	if err != nil || before.Status != "paused" {
 		t.Fatal("native stop was not accepted before fault", err)
 	}
@@ -201,16 +201,16 @@ func assertGuidedStopAccepted(t *testing.T, operations service, stopping authori
 		t.Fatal("stop acceptance was confused with quiescence")
 	}
 
-	run, err := core.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, stopping)
+	run, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, stopping)
 	if err != nil || run.Status != "running" || run.StopIntent != action {
 		t.Fatal("native owner did not retain the stop", err)
 	}
 }
 
-func acknowledgeGuidedTestStop(t *testing.T, operations service, claim *core.WorkflowClaim, scope authoringcore.GuidedUseCaseScope) authoringcore.Session {
+func acknowledgeGuidedTestStop(t *testing.T, operations service, claim *workflowcore.Claim, scope authoringcore.GuidedUseCaseScope) authoringcore.Session {
 	t.Helper()
 
-	unsettled, err := authoringcore.ReconcileGuidedStop(t.Context(), operations.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
+	unsettled, err := authoringcore.ReconcileGuidedStop(t.Context(), operations.projectContext.ProjectDir, scope, workflowcore.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
 	if err != nil || unsettled.Guided.Status != "blocked" {
 		t.Fatal("running owner was falsely acknowledged", err)
 	}

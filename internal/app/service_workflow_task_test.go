@@ -6,15 +6,15 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowTask executes an isolated worker through the shared service.
 func TestServiceWorkflowTask(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "execute-task",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -46,7 +46,7 @@ func TestServiceWorkflowTask(t *testing.T) {
 	}
 }
 
-func serviceWorkflowTaskFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, core.WorkflowMaterializationResult, string) {
+func serviceWorkflowTaskFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, workflowcore.MaterializationResult, string) {
 	t.Helper()
 
 	if testing.Short() {

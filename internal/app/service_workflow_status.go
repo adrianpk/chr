@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"maps"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -34,7 +34,7 @@ type WorkflowWorkStatus struct {
 	WorkflowWorkBindings
 	Integration *WorkflowIntegrationStatus `json:"integration,omitempty"`
 	WorkflowWorkLifecycle
-	core.WorkflowIdentity
+	workflowcore.Identity
 	WorkflowWorkSelection
 	WorkflowWorkOutcome
 	WorkflowWorkScope
@@ -53,7 +53,7 @@ type WorkflowWorkBindings struct {
 // WorkflowWorkLifecycle groups the retained lifecycle fields without changing their wire order.
 type WorkflowWorkLifecycle struct {
 	FrozenPolicy         workflowstate.ExecutionPolicy        `json:"execution_policy"`
-	Continuation         *core.WorkflowContinuationCheckpoint `json:"continuation,omitempty"`
+	Continuation         *workflowcore.ContinuationCheckpoint `json:"continuation,omitempty"`
 	NextActionOwner      string                               `json:"next_action_owner"`
 	CapacityResumeStatus string                               `json:"capacity_resume_status,omitempty"`
 	SelectedTicket       string                               `json:"selected_ticket,omitempty"`
@@ -92,7 +92,7 @@ type WorkflowWorkCounts struct {
 // WorkflowWorkControl groups the retained control fields without changing their wire order.
 type WorkflowWorkControl struct {
 	StopIntent string                `json:"stop_intent"`
-	Blocker    *core.WorkflowBlocker `json:"blocker,omitempty"`
+	Blocker    *workflowcore.Blocker `json:"blocker,omitempty"`
 }
 
 // WorkflowWorkDelivery groups the retained delivery fields without changing their wire order.
@@ -101,14 +101,14 @@ type WorkflowWorkDelivery struct {
 	CandidateHash string                           `json:"candidate_hash,omitempty"`
 	ApprovalHash  string                           `json:"approval_hash,omitempty"`
 	ReviewState   string                           `json:"review_state,omitempty"`
-	PullRequest   *core.WorkflowPullRequestBinding `json:"pull_request,omitempty"`
+	PullRequest   *workflowcore.PullRequestBinding `json:"pull_request,omitempty"`
 	DeliveryRef   string                           `json:"delivery_ref,omitempty"`
 	DeliveryHash  string                           `json:"delivery_hash,omitempty"`
 }
 
 // WorkflowWorkPage groups the retained page fields without changing their wire order.
 type WorkflowWorkPage struct {
-	Members       []core.WorkflowPreviewMember `json:"members"`
+	Members       []workflowcore.PreviewMember `json:"members"`
 	Evidence      []WorkflowWorkEvidence       `json:"recent_evidence"`
 	TotalAttempts int                          `json:"total_attempts"`
 	NextOffset    int                          `json:"next_offset"`
@@ -137,10 +137,10 @@ func (s service) WorkflowStatus(ctx context.Context, id string, request Workflow
 	return workflowWorkStatus(inspection, request), nil
 }
 
-func workflowWorkStatus(inspection core.WorkflowInspection, request WorkflowStatusRequest) WorkflowWorkStatus {
+func workflowWorkStatus(inspection workflowcore.Inspection, request WorkflowStatusRequest) WorkflowWorkStatus {
 	run := inspection.Invocation
 
-	result := WorkflowWorkStatus{WorkflowIdentity: run.WorkflowIdentity, WorkflowWorkSelection: WorkflowWorkSelection{Selector: run.Selection.Selector, Authority: run.Authority}, WorkflowWorkOutcome: WorkflowWorkOutcome{Status: run.Status, Outcome: run.Outcome}, WorkflowWorkScope: WorkflowWorkScope{Target: run.Selection.Target, Policy: inspection.Policy, SetOrderRule: run.SetOrderRule, Excluded: maps.Clone(run.Excluded)}, WorkflowWorkCounts: WorkflowWorkCounts{Total: len(run.Members), ValidatedTasks: run.Cursor, ConfirmedTickets: run.ConfirmedCursor, IntegratedUnits: len(run.Deliveries), Remaining: len(run.Members) - run.ConfirmedCursor}, WorkflowWorkControl: WorkflowWorkControl{StopIntent: run.StopIntent, Blocker: run.Blocker}, WorkflowWorkDelivery: WorkflowWorkDelivery{CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest, DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash}, WorkflowWorkPage: WorkflowWorkPage{Members: []core.WorkflowPreviewMember{}, Evidence: []WorkflowWorkEvidence{}, TotalAttempts: len(run.Attempts), NextOffset: -1}}
+	result := WorkflowWorkStatus{Identity: run.Identity, WorkflowWorkSelection: WorkflowWorkSelection{Selector: run.Selection.Selector, Authority: run.Authority}, WorkflowWorkOutcome: WorkflowWorkOutcome{Status: run.Status, Outcome: run.Outcome}, WorkflowWorkScope: WorkflowWorkScope{Target: run.Selection.Target, Policy: inspection.Policy, SetOrderRule: run.SetOrderRule, Excluded: maps.Clone(run.Excluded)}, WorkflowWorkCounts: WorkflowWorkCounts{Total: len(run.Members), ValidatedTasks: run.Cursor, ConfirmedTickets: run.ConfirmedCursor, IntegratedUnits: len(run.Deliveries), Remaining: len(run.Members) - run.ConfirmedCursor}, WorkflowWorkControl: WorkflowWorkControl{StopIntent: run.StopIntent, Blocker: run.Blocker}, WorkflowWorkDelivery: WorkflowWorkDelivery{CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest, DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash}, WorkflowWorkPage: WorkflowWorkPage{Members: []workflowcore.PreviewMember{}, Evidence: []WorkflowWorkEvidence{}, TotalAttempts: len(run.Attempts), NextOffset: -1}}
 
 	for _, record := range inspection.Tasks {
 		if record.Task != nil && run.Selection.Selector.Extent == "ticket" && record.Task.Key == run.Selection.Selector.Identity {
@@ -171,8 +171,8 @@ func workflowWorkStatus(inspection core.WorkflowInspection, request WorkflowStat
 	return result
 }
 
-func workflowWorkMembers(result *WorkflowWorkStatus, inspection core.WorkflowInspection, request WorkflowStatusRequest) {
-	records := map[string]core.WorkflowRecord{}
+func workflowWorkMembers(result *WorkflowWorkStatus, inspection workflowcore.Inspection, request WorkflowStatusRequest) {
+	records := map[string]workflowcore.Record{}
 
 	for _, record := range inspection.Tasks {
 		if record.Task != nil {
@@ -198,7 +198,7 @@ func workflowWorkMembers(result *WorkflowWorkStatus, inspection core.WorkflowIns
 	}
 }
 
-func workflowWorkProgress(result *WorkflowWorkStatus, run core.WorkflowInvocation) {
+func workflowWorkProgress(result *WorkflowWorkStatus, run workflowcore.Invocation) {
 	if run.ExecutionTarget != nil {
 		result.Target = *run.ExecutionTarget
 	}

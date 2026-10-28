@@ -35,6 +35,7 @@ import (
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -7632,7 +7633,7 @@ func indexTicket(t *testing.T, devRoot, projectDir string, ticket ticketcore.Ind
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := core.NewWorkflowTicketIndex(t.Context(), env, testAssetsFS())
+	index, err := workflowcore.NewWorkflowTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}
@@ -7669,7 +7670,7 @@ func listProjectTickets(t *testing.T, devRoot, projectDir string) []ticketcore.I
 		t.Fatalf("NewUserEnvironment returned error: %v", err)
 	}
 
-	index, err := core.NewWorkflowTicketIndex(t.Context(), env, testAssetsFS())
+	index, err := workflowcore.NewWorkflowTicketIndex(t.Context(), env, testAssetsFS())
 	if err != nil {
 		t.Fatalf("NewTicketIndex returned error: %v", err)
 	}
@@ -8751,7 +8752,7 @@ func (runner fakeCLIReviewProviderDiagnosticRunner) Run(_ context.Context, _ str
 	return runner.runErr
 }
 
-func replaceReviewProviderDiagnosticRunner(runner core.ReviewProviderDiagnosticRunner) func() {
+func replaceReviewProviderDiagnosticRunner(runner workflowcore.ReviewProviderDiagnosticRunner) func() {
 	previous := reviewProviderDiagnosticRunner
 	reviewProviderDiagnosticRunner = runner
 
@@ -8812,7 +8813,7 @@ func (runner *fakeCLIReviewRemoteRunner) Input(
 	return []byte(`{}`), nil
 }
 
-func replaceReviewRemoteCommandRunner(runner core.ReviewRemoteCommandRunner) func() {
+func replaceReviewRemoteCommandRunner(runner workflowcore.ReviewRemoteCommandRunner) func() {
 	previous := reviewRemoteCommandRunner
 	reviewRemoteCommandRunner = runner
 

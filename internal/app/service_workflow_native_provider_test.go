@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // Native publication must use the production provider's preparation capability,
@@ -18,7 +18,7 @@ func TestServiceNativeProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, ok := provider.(core.WorkflowNativePreparationProvider); !ok {
+	if _, ok := provider.(workflowcore.NativePreparationProvider); !ok {
 		t.Fatal("production provider cannot prepare native publication")
 	}
 
@@ -27,14 +27,14 @@ func TestServiceNativeProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ports := core.WorkflowPublicationPorts{Provider: provider}
+	ports := workflowcore.PublicationPorts{Provider: provider}
 	bindWorkflowNativePublicationPorts(&ports, run)
 
 	if any(ports.NativePublisher) != any(provider) || any(ports.NativeObserver) != any(provider) {
 		t.Fatal("service bypassed the configured native publisher or observer")
 	}
 
-	if _, ok := ports.NativePublisher.(core.WorkflowGitPublicationInspector); !ok {
+	if _, ok := ports.NativePublisher.(workflowcore.GitPublicationInspector); !ok {
 		t.Fatal("configured publisher cannot inspect its native submission")
 	}
 
@@ -43,7 +43,7 @@ func TestServiceNativeProvider(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, ok := lifecycle.Execution.Publication.Provider.(core.WorkflowNativePreparationProvider); !ok {
+	if _, ok := lifecycle.Execution.Publication.Provider.(workflowcore.NativePreparationProvider); !ok {
 		t.Fatal("bound continuation bypassed the production native provider")
 	}
 }

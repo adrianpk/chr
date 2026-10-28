@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TicketResultCommentWriter defines a package boundary interface.
@@ -18,13 +20,13 @@ type WriteResultCommentOptions struct {
 }
 
 type ticketResultCommentWriter struct {
-	commenter TicketCommenter
+	commenter workflowcore.TicketCommenter
 }
 
 // NewTicketResultCommentWriter constructs the corresponding package service or value.
 func NewTicketResultCommentWriter() TicketResultCommentWriter {
 	return &ticketResultCommentWriter{
-		commenter: NewTicketCommenter(),
+		commenter: workflowcore.NewTicketCommenter(),
 	}
 }
 
@@ -38,7 +40,7 @@ func (w *ticketResultCommentWriter) WriteResultComment(ctx context.Context, opts
 		return fmt.Errorf("result application comment body is required")
 	}
 
-	return w.commenter.AddComment(ctx, AddTicketCommentOptions{
+	return w.commenter.AddComment(ctx, workflowcore.AddTicketCommentOptions{
 		Path:      opts.Application.TicketPath,
 		Author:    opts.Application.Comment.Author,
 		Body:      opts.Application.Comment.Body,

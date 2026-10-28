@@ -49,8 +49,8 @@ run, without imposing the whole suite on interactive development.
 | --- | --- |
 | `make test` | Short tests, with a three-minute timeout per package |
 | `make verify` | Strict lint, short Go tests, CI script regressions and build |
-| `go test ./internal/core -run '^TestWorkflowRoundTrip$' -count=1` | Explicit focused integration regression |
-| `go test -race ./internal/core -run '^TestWorkflowRoundTrip$' -count=1` | Focused race mode when relevant |
+| `go test ./internal/core/workflow -run '^TestWorkflowRoundTrip$' -count=1` | Explicit focused integration regression |
+| `go test -race ./internal/core/workflow -run '^TestWorkflowRoundTrip$' -count=1` | Focused race mode when relevant |
 | `make nightly` | Complete scheduled local gate; live enabled only by fixture opt-in |
 | `make test-full` | Uncached full local tests, for explicitly requested diagnostics |
 | `make test-race` | Uncached full race tests, for explicitly requested diagnostics |

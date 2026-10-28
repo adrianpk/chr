@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (factory commandFactory) ticketMergeCommand() *cli.Command {
@@ -24,7 +25,7 @@ func ticketMergeFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:  "strategy",
 			Usage: "merge strategy: merge, rebase, squash",
-			Value: core.TicketMergeStrategyRebase,
+			Value: workflowcore.TicketMergeStrategyRebase,
 		},
 		&cli.StringFlag{
 			Name:  "base",

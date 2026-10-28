@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func guidedResultFixture(t *testing.T) (service, authoringcore.Session, *guidedWorkHost, *serviceWorkEntryProvider) {
@@ -119,7 +119,7 @@ func assertGuidedResultProjection(t *testing.T, operations service, session auth
 func assertGuidedResultReadOnly(t *testing.T, operations service, session authoringcore.Session) {
 	t.Helper()
 
-	before, err := core.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, session)
+	before, err := workflowcore.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, session)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,7 +130,7 @@ func assertGuidedResultReadOnly(t *testing.T, operations service, session author
 		}
 	}
 
-	after, err := core.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, session)
+	after, err := workflowcore.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, session)
 
 	current := readWebGuidedSession(t, operations, session.ID)
 	if err != nil || !reflect.DeepEqual(before, after) || current.Revision != session.Revision {
@@ -144,7 +144,7 @@ func TestGuidedUseCaseResultCorrupt(t *testing.T) {
 	operations, session, host, provider := guidedResultFixture(t)
 	completed := finishGuidedResultFixture(t, operations, session, host, provider)
 
-	result, err := core.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, completed)
+	result, err := workflowcore.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, completed)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func TestGuidedUseCaseResultCorrupt(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := core.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, completed); err == nil {
+	if _, err := workflowcore.ReadGuidedResult(t.Context(), operations.projectContext.ProjectDir, completed); err == nil {
 		t.Fatal("corrupt delivery was accepted")
 	}
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -75,7 +75,7 @@ func (s service) selectedWorkflowIdentity(ctx context.Context, extent, key strin
 	return workflowstate.Selector{}, workflowstate.SelectionGuard{}, fmt.Errorf("selected ticket has no native workflow identity: %s", key)
 }
 
-func workflowSelectedExtentID(extent string, task *core.WorkflowTask) string {
+func workflowSelectedExtentID(extent string, task *workflowcore.Task) string {
 	switch extent {
 	case "ticket":
 		return task.Key
@@ -154,10 +154,10 @@ func (s service) WorkflowStatusPage(ctx context.Context, offset, limit int) (res
 }
 
 // PreviewWorkflow exposes one adapter-neutral, read-only selection operation.
-func (s service) PreviewWorkflow(ctx context.Context, request workflowstate.PreviewRequest) (core.WorkflowPreview, error) {
+func (s service) PreviewWorkflow(ctx context.Context, request workflowstate.PreviewRequest) (workflowcore.Preview, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return core.WorkflowPreview{}, err
+		return workflowcore.Preview{}, err
 	}
 
 	return store.Preview(ctx, request)
@@ -165,7 +165,7 @@ func (s service) PreviewWorkflow(ctx context.Context, request workflowstate.Prev
 
 var errWorkflowConfirmationBound = errors.New("complete workflow confirmation exceeds source bounds")
 
-func (s service) workflowConfirmationRecords(ctx context.Context, preview WorkflowBoundPreview) ([]core.WorkflowRecord, error) {
+func (s service) workflowConfirmationRecords(ctx context.Context, preview WorkflowBoundPreview) ([]workflowcore.Record, error) {
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
@@ -179,7 +179,7 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 		return nil, err
 	}
 
-	var records []core.WorkflowRecord
+	var records []workflowcore.Record
 
 	size := 0
 
@@ -204,6 +204,6 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 	return records, nil
 }
 
-func (s service) workflowConfirmationRecordMatches(record core.WorkflowRecord, member core.WorkflowPreviewMember) bool {
+func (s service) workflowConfirmationRecordMatches(record workflowcore.Record, member workflowcore.PreviewMember) bool {
 	return record.Task != nil && record.ProjectID == s.projectContext.ProjectID && record.Namespace == s.workflowNamespace && record.Task.Key == member.Key && record.Revision == member.Revision && record.SourceHash == member.SourceHash && record.Task.ContractHash == member.ContractHash
 }

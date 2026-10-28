@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -81,7 +81,7 @@ func (s service) reserveGuidedAdmission(ctx context.Context, session *authoringc
 		return &authoringcore.GuidedPrerequisiteError{Action: "Correct native workflow authority and canonical target setup, then retry the retained admission.", Cause: err}
 	}
 
-	if err := core.ValidateGuidedWorkPreview(*work.Materialization, preview.View.Preview); err != nil {
+	if err := workflowcore.ValidateGuidedWorkPreview(*work.Materialization, preview.View.Preview); err != nil {
 		return &authoringcore.GuidedPrerequisiteError{Action: "Restore the sealed native task membership and contracts before retrying admission.", Cause: err}
 	}
 
@@ -109,7 +109,7 @@ func (s service) retainGuidedInvocation(ctx context.Context, session *authoringc
 		return err
 	}
 
-	request := core.WorkflowStartRequest{StartInput: *session.Guided.Work.Admission, ResolveHarness: s.prepareGuidedWorkflowHarness}
+	request := workflowcore.StartRequest{StartInput: *session.Guided.Work.Admission, ResolveHarness: s.prepareGuidedWorkflowHarness}
 
 	started, err := store.StartWorkflowGuarded(ctx, request, s.boundAdmissionCheck(request.Selection, func(ctx context.Context) error {
 		return s.checkGuidedWorkPrerequisites(ctx, request.Selection)

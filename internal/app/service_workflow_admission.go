@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,7 +15,7 @@ type WorkflowBoundAdmission struct {
 	ExecutionPolicy workflowstate.ExecutionPolicy  `json:"execution_policy"`
 	RequestKey      string                         `json:"request_key"`
 	Policy          workflowstate.ReviewPolicy     `json:"publication_policy"`
-	Check           core.WorkflowAdmissionCheck    `json:"-"`
+	Check           workflowcore.AdmissionCheck    `json:"-"`
 }
 
 func (s service) admitBoundWorkExtent(ctx context.Context, selection workflowstate.PreviewRequest, selected *workflowstate.SelectionGuard, steps int, bindings []WorkflowBoundAdmission) (AgentWorkResult, error) {
@@ -25,7 +25,7 @@ func (s service) admitBoundWorkExtent(ctx context.Context, selection workflowsta
 
 	// Retained requests must reach the owner before re-reading mutable records,
 	// targets or policy. The owner checks every guard for a new admission.
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: bindings[0].RequestKey,
 		Selection:  selection,
 		Admission:  &workflowstate.AdmissionGuard{SnapshotHash: selection.SnapshotHash, Selected: selected, Policy: bindings[0].Policy, ExecutionPolicy: bindings[0].ExecutionPolicy, ReadyTicket: bindings[0].ReadyTicket},
@@ -46,7 +46,7 @@ func (s service) admitBoundWorkExtent(ctx context.Context, selection workflowsta
 	return s.nativeAgentWorkResult(started.Invocation)
 }
 
-func (s service) boundAdmissionCheck(selection workflowstate.PreviewRequest, check core.WorkflowAdmissionCheck) core.WorkflowAdmissionCheck {
+func (s service) boundAdmissionCheck(selection workflowstate.PreviewRequest, check workflowcore.AdmissionCheck) workflowcore.AdmissionCheck {
 	return func(ctx context.Context) error {
 		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()

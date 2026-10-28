@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +20,7 @@ func TestServiceWorkflowClosing(t *testing.T) {
 
 	plan := serviceWorkflowPlanFixture()
 
-	set, err := store.Create(t.Context(), "Empty service set", core.WorkflowRecord{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: core.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}}})
+	set, err := store.Create(t.Context(), "Empty service set", workflowcore.Record{Kind: "plan", Set: &workflowstate.WorkflowSet{Schema: workflowcore.WorkflowSchema, Status: "ready", PlanRef: plan.PlanRef, PlanHash: plan.PlanHash, ClosingValidation: workflowstate.Validation{Required: true, TimeoutSeconds: 30, Commands: [][]string{{"git", "rev-parse", "HEAD"}}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,9 +32,9 @@ func TestServiceWorkflowClosing(t *testing.T) {
 	serviceWorkflowDeliveryGit(t, project, "init", "--bare", remote)
 	serviceWorkflowDeliveryGit(t, project, "push", remote, target+":refs/heads/dev")
 
-	operations.workflowIntegrationGit = core.NewWorkflowIntegrationGit(repository, remote)
-	operations.workflowPullRequests = &serviceWorkflowPRFixture{pr: core.WorkflowPullRequestSnapshot{HeadCommit: target}}
-	request := core.WorkflowSetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: repository, Branch: "dev"}
+	operations.workflowIntegrationGit = workflowcore.NewWorkflowIntegrationGit(repository, remote)
+	operations.workflowPullRequests = &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{HeadCommit: target}}
+	request := workflowcore.SetClosureRequest{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: repository, Branch: "dev"}
 
 	closed, err := operations.CloseWorkflowSet(t.Context(), request)
 	if err != nil {

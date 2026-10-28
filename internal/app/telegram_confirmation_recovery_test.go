@@ -8,20 +8,20 @@ import (
 	"testing"
 	"unicode/utf16"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramPresentationControlQuestions keeps a short question-led view while
 // exporting every original option, question and candidate binding without cuts.
 func TestTelegramPresentationControlQuestions(t *testing.T) {
-	questions := []core.WorkflowMergerDecision{
+	questions := []workflowcore.MergerDecision{
 		{ID: "question-one", Issue: "Which option should be used? " + strings.Repeat("🚀 literal `value` ", 100), Options: []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}, Authority: "maintainer"},
 		{ID: "question-two", Issue: "Which target should be used?", Options: []string{"target one", "target two"}, Authority: "maintainer"},
 	}
-	status := WorkflowWorkStatus{WorkflowIdentity: core.WorkflowIdentity{ID: "execution-one", ProjectID: "example-project", Namespace: "default"}, Integration: &WorkflowIntegrationStatus{EntryID: "integration-one", EntryRevision: 3, CandidateHash: strings.Repeat("c", 64), Decision: &WorkflowIntegrationDecisionStatus{ID: "decision-one", Revision: 2, Hash: strings.Repeat("d", 64), State: "waiting", Requests: questions}}}
+	status := WorkflowWorkStatus{Identity: workflowcore.Identity{ID: "execution-one", ProjectID: "example-project", Namespace: "default"}, Integration: &WorkflowIntegrationStatus{EntryID: "integration-one", EntryRevision: 3, CandidateHash: strings.Repeat("c", 64), Decision: &WorkflowIntegrationDecisionStatus{ID: "decision-one", Revision: 2, Hash: strings.Repeat("d", 64), State: "waiting", Requests: questions}}}
 	target := telegramcore.OperationTarget{ProjectID: "example-project", Namespace: "default", ProjectBindingDigest: strings.Repeat("a", 64)}
 
 	response, err := telegramQuestionDocument(target, status)

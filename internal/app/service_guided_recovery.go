@@ -3,8 +3,8 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type guidedProgressActivator interface {
@@ -90,7 +90,7 @@ func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.Se
 		return session, nil
 	}
 
-	run, err := core.ReadGuidedInvocation(ctx, s.projectContext.ProjectDir, session)
+	run, err := workflowcore.ReadGuidedInvocation(ctx, s.projectContext.ProjectDir, session)
 	if err != nil {
 		return session, err
 	}
@@ -102,12 +102,12 @@ func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.Se
 		}
 	}
 
-	return authoringcore.ReconcileGuidedStop(ctx, s.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir))
+	return authoringcore.ReconcileGuidedStop(ctx, s.projectContext.ProjectDir, scope, workflowcore.NewGuidedWorkflowObserver(s.projectContext.ProjectDir))
 }
 
 // recoverGuidedInterruptedWork resumes a quiescent host interruption under the
 // native owner and original guided authority. An operator stop is never cleared.
-func (s service) recoverGuidedInterruptedWork(ctx context.Context, run core.WorkflowInvocation) error {
+func (s service) recoverGuidedInterruptedWork(ctx context.Context, run workflowcore.Invocation) error {
 	if run.Status != "paused" || run.StopIntent != "" || run.Outcome != "interrupted" {
 		return nil
 	}
@@ -118,7 +118,7 @@ func (s service) recoverGuidedInterruptedWork(ctx context.Context, run core.Work
 	}
 
 	check := func(ctx context.Context) error { return s.checkGuidedActivation(ctx, run) }
-	_, err = store.ResumeWorkflow(ctx, run.ID, core.WorkflowResumePorts{ExpectedRevision: run.Revision, AuthorizationCheck: check})
+	_, err = store.ResumeWorkflow(ctx, run.ID, workflowcore.ResumePorts{ExpectedRevision: run.Revision, AuthorizationCheck: check})
 
 	return err
 }

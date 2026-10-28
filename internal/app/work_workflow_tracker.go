@@ -9,7 +9,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (factory commandFactory) workTrackerCommand() *cli.Command {
@@ -38,11 +38,11 @@ func (factory commandFactory) workTrackerAction(ctx context.Context, cmd *cli.Co
 		return err
 	}
 
-	var result core.WorkflowTrackerStatus
+	var result workflowcore.TrackerStatus
 	if cmd.Name == "status" {
 		result, err = operations.InspectWorkflowTracker(ctx, cmd.Args().First())
 	} else {
-		result, err = operations.ExportWorkflowTracker(ctx, cmd.Args().First(), core.WorkflowTrackerOptions{ReplaceHash: cmd.String("replace-hash")})
+		result, err = operations.ExportWorkflowTracker(ctx, cmd.Args().First(), workflowcore.TrackerOptions{ReplaceHash: cmd.String("replace-hash")})
 	}
 
 	if result.SetID == "" {
@@ -52,7 +52,7 @@ func (factory commandFactory) workTrackerAction(ctx context.Context, cmd *cli.Co
 	return errors.Join(err, printWorkflowTracker(factory.io.Stdout, result, cmd.Bool("json")))
 }
 
-func printWorkflowTracker(stdout io.Writer, result core.WorkflowTrackerStatus, asJSON bool) error {
+func printWorkflowTracker(stdout io.Writer, result workflowcore.TrackerStatus, asJSON bool) error {
 	if asJSON {
 		return json.NewEncoder(stdout).Encode(result)
 	}

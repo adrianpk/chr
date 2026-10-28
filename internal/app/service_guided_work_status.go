@@ -3,11 +3,11 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
-func guidedInvocationMatches(run core.WorkflowInvocation, session authoringcore.Session) bool {
+func guidedInvocationMatches(run workflowcore.Invocation, session authoringcore.Session) bool {
 	if run.Admission == nil || run.Admission.Guided == nil || session.Guided.Work.Materialization == nil {
 		return false
 	}

@@ -8,8 +8,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -18,7 +18,7 @@ type telegramControlLostAck struct {
 	lost atomic.Bool
 }
 
-func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s *telegramControlLostAck) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check workflowcore.AdmissionCheck) (WorkflowWorkStatus, error) {
 	status, err := s.service.ApplyTelegramControl(ctx, target, binding, request, check)
 	if err == nil && s.lost.CompareAndSwap(false, true) {
 		return status, errors.Join(errTelegramLostRecordAck, workflowstate.ErrConflict)

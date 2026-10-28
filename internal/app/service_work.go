@@ -10,6 +10,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -25,7 +26,7 @@ type AgentWorkResult struct {
 	Scope         string
 	Authority     workspaceconfig.WorkStateAuthority
 	Excluded      map[string]int
-	Workflow      *core.WorkflowInvocation
+	Workflow      *workflowcore.Invocation
 	Message       string
 	Tickets       []ticketcore.Indexed
 	Execution     *executioncore.Record
@@ -139,7 +140,7 @@ func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTick
 		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
 
-	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, core.AgentOperationDevelopment)
+	lock, err := acquireAgentOperationLock(s.ctx, s.projectContext, workflowcore.AgentOperationDevelopment)
 	if err != nil {
 		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, err
 	}
@@ -227,7 +228,7 @@ func (s service) PreviewAgentWorkLoop(opts AgentWorkSelectionOptions) (AgentWork
 }
 
 func (s service) startAgentWorkLoop(ctx context.Context, opts AgentWorkSelectionOptions) (AgentWorkResult, error) {
-	lock, err := acquireAgentOperationLock(ctx, s.projectContext, core.AgentOperationDevelopment)
+	lock, err := acquireAgentOperationLock(ctx, s.projectContext, workflowcore.AgentOperationDevelopment)
 	if err != nil {
 		return AgentWorkResult{}, err
 	}
@@ -338,7 +339,7 @@ func (s service) legacyAgentWorkTicket(ticketKey string) (ticketcore.Indexed, er
 		return ticketcore.Indexed{}, err
 	}
 
-	if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
+	if err := workflowcore.CheckLegacyWorkTicket(ticket.Path); err != nil {
 		return ticketcore.Indexed{}, err
 	}
 
@@ -347,7 +348,7 @@ func (s service) legacyAgentWorkTicket(ticketKey string) (ticketcore.Indexed, er
 		return ticketcore.Indexed{}, err
 	}
 
-	tickets, _, err = core.FilterLegacyWorkTickets(s.ctx, tickets)
+	tickets, _, err = workflowcore.FilterLegacyWorkTickets(s.ctx, tickets)
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}

@@ -5,16 +5,16 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type serviceWorkflowPRFixture struct {
-	pr      core.WorkflowPullRequestSnapshot
+	pr      workflowcore.PullRequestSnapshot
 	creates int
 }
 
-func (p *serviceWorkflowPRFixture) FindWorkflowPullRequests(context.Context, core.WorkflowPullRequestQuery) ([]core.WorkflowPullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) FindWorkflowPullRequests(context.Context, workflowcore.PullRequestQuery) ([]workflowcore.PullRequestSnapshot, error) {
 	return nil, nil
 }
 
@@ -22,11 +22,11 @@ func (p *serviceWorkflowPRFixture) ReadWorkflowBranch(context.Context, string, s
 	return p.pr.HeadCommit, nil
 }
 
-func (p *serviceWorkflowPRFixture) ReadWorkflowPullRequest(context.Context, string) (core.WorkflowPullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) ReadWorkflowPullRequest(context.Context, string) (workflowcore.PullRequestSnapshot, error) {
 	return p.pr, nil
 }
 
-func (p *serviceWorkflowPRFixture) CreateWorkflowPullRequest(context.Context, core.WorkflowPullRequestRequest) (core.WorkflowPullRequestSnapshot, error) {
+func (p *serviceWorkflowPRFixture) CreateWorkflowPullRequest(context.Context, workflowcore.PullRequestRequest) (workflowcore.PullRequestSnapshot, error) {
 	p.creates++
 
 	return p.pr, nil
@@ -36,7 +36,7 @@ func (p *serviceWorkflowPRFixture) CreateWorkflowPullRequest(context.Context, co
 // and retain review status without task completion or duplicate provider creation.
 func TestServiceWorkflowSlicePR(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "slice-pr",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -53,10 +53,10 @@ func TestServiceWorkflowSlicePR(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	provider := &serviceWorkflowPRFixture{pr: core.WorkflowPullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
+	provider := &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
 	operations.workflowPullRequests = provider
 
-	content := core.WorkflowSlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
+	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
 	for range 2 {
 		pr, err := operations.EnsureWorkflowSlicePullRequest(t.Context(), run.Invocation.ID, content)
 		if err != nil || pr != provider.pr {

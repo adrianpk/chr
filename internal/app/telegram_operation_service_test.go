@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -18,7 +18,7 @@ func TestTelegramOperationService(t *testing.T) {
 	}
 
 	operations := newTestService(t, project)
-	request := core.WorkflowMutationRequest{Binding: workflowstate.MutationBinding{RequestID: "caller-neutral", Operator: "maintainer"}, Title: "Shared request", Record: core.WorkflowRecord{Kind: "ticket", Body: []byte("# Task\n"), Task: &core.WorkflowTask{Schema: core.WorkflowSchema, Key: "CHR-1", Status: string(ticketcore.StatusBacklog), Phase: "pending", ContractHash: "contract"}}}
+	request := workflowcore.MutationRequest{Binding: workflowstate.MutationBinding{RequestID: "caller-neutral", Operator: "maintainer"}, Title: "Shared request", Record: workflowcore.Record{Kind: "ticket", Body: []byte("# Task\n"), Task: &workflowcore.Task{Schema: workflowcore.WorkflowSchema, Key: "CHR-1", Status: string(ticketcore.StatusBacklog), Phase: "pending", ContractHash: "contract"}}}
 
 	first, err := operations.ApplyWorkflowRecordMutation(t.Context(), "default", request)
 	if err != nil {

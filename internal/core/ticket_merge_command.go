@@ -10,13 +10,14 @@ import (
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
 // TicketMergeCommandRemote defines a package boundary interface.
 type TicketMergeCommandRemote interface {
 	TicketMergePreflightRemoteReader
-	Merge(context.Context, MergeRequest) (MergeResult, error)
+	Merge(context.Context, workflowcore.MergeRequest) (workflowcore.MergeResult, error)
 }
 
 // TicketMergeCommandOptions describes a package boundary value.
@@ -38,7 +39,7 @@ type TicketMergeCommandOptions struct {
 type TicketMergeCommandResult struct {
 	TicketKey       string
 	Preflight       TicketMergePreflightResult
-	Merge           MergeResult
+	Merge           workflowcore.MergeResult
 	Status          ticketcore.Status
 	MergeState      ticketcore.MergeState
 	MergeResult     ticketcore.MergeResult
@@ -76,12 +77,12 @@ func RunTicketMergeCommand(ctx context.Context, opts TicketMergeCommandOptions) 
 		return result, applyTicketMergeCommandResult(ctx, opts.Ticket.Path, result, opts.MergedAt)
 	}
 
-	merge, err := opts.Remote.Merge(ctx, MergeRequest{URL: preflight.ReviewRef.URL, Strategy: preflight.MergeStrategy})
+	merge, err := opts.Remote.Merge(ctx, workflowcore.MergeRequest{URL: preflight.ReviewRef.URL, Strategy: preflight.MergeStrategy})
 	if err != nil {
 		result.Preflight.Allowed = false
 		result.Preflight.Blockers = append(result.Preflight.Blockers, TicketMergePreflightBlocker{
-			Code:   TicketMergePreflightBlockProviderUnreadable,
-			Kind:   TicketMergePreflightBlockKindOperational,
+			Code:   workflowcore.TicketMergePreflightBlockProviderUnreadable,
+			Kind:   workflowcore.TicketMergePreflightBlockKindOperational,
 			Detail: err.Error(),
 		})
 		result.MergeState = ticketcore.MergeStateBlocked
@@ -160,7 +161,7 @@ func ticketMergeCommandBlockerSummary(blockers []TicketMergePreflightBlocker) st
 }
 
 func applyTicketMergeCommandResult(ctx context.Context, path string, result TicketMergeCommandResult, mergedAt time.Time) error {
-	content, err := readLegacyTicketFile(path)
+	content, err := workflowcore.ReadLegacyTicketFile(path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}
@@ -196,7 +197,7 @@ func applyTicketMergeCommandResult(ctx context.Context, path string, result Tick
 		}
 	}
 
-	err = writeLegacyTicketFile(ctx, path, content, []byte(updated))
+	err = workflowcore.ReplaceLegacyTicketFile(ctx, path, content, []byte(updated))
 	if err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}

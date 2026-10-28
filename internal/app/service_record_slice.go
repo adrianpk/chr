@@ -4,40 +4,40 @@ import (
 	"context"
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) prepareSliceRecordMutation(ctx context.Context, store *core.WorkflowStore, binding workflowstate.MutationBinding, request RecordMutationRequest) (core.WorkflowMutationRequest, error) {
+func (s service) prepareSliceRecordMutation(ctx context.Context, store *workflowcore.Store, binding workflowstate.MutationBinding, request RecordMutationRequest) (workflowcore.MutationRequest, error) {
 	parent, err := s.nativeMutationTarget(ctx, store, RecordSliceSet, request.ParentID)
 	if err != nil {
-		return core.WorkflowMutationRequest{}, err
+		return workflowcore.MutationRequest{}, err
 	}
 
 	if err := guardRecordObservation(parent, request); err != nil {
-		return core.WorkflowMutationRequest{}, err
+		return workflowcore.MutationRequest{}, err
 	}
 
 	if parent.Set.Status != "proposed" {
-		return core.WorkflowMutationRequest{}, ErrRecordUnsupported
+		return workflowcore.MutationRequest{}, ErrRecordUnsupported
 	}
 
 	if unsupportedSliceRecordFields(request) {
-		return core.WorkflowMutationRequest{}, ErrRecordUnsupported
+		return workflowcore.MutationRequest{}, ErrRecordUnsupported
 	}
 
 	if request.Action == "create" {
 		if err := prepareSliceDescriptor(&parent, request); err != nil {
-			return core.WorkflowMutationRequest{}, err
+			return workflowcore.MutationRequest{}, err
 		}
 	} else if err := updateSliceDisplay(&parent, request); err != nil {
-		return core.WorkflowMutationRequest{}, err
+		return workflowcore.MutationRequest{}, err
 	}
 
-	return core.WorkflowMutationRequest{Binding: binding, Record: parent, ExpectedRevision: request.ExpectedRevision}, nil
+	return workflowcore.MutationRequest{Binding: binding, Record: parent, ExpectedRevision: request.ExpectedRevision}, nil
 }
 
-func prepareSliceDescriptor(parent *core.WorkflowRecord, request RecordMutationRequest) error {
+func prepareSliceDescriptor(parent *workflowcore.Record, request RecordMutationRequest) error {
 	if request.Title != nil {
 		return ErrRecordUnsupported
 	}
@@ -58,13 +58,13 @@ func prepareSliceDescriptor(parent *core.WorkflowRecord, request RecordMutationR
 	}
 
 	descriptor.Phase = "pending"
-	descriptor.TaskInputHash = core.WorkflowTaskInputHash(nil, descriptor.ID)
+	descriptor.TaskInputHash = workflowcore.TaskInputHash(nil, descriptor.ID)
 	parent.Set.Slices = append(parent.Set.Slices, descriptor)
 
 	return nil
 }
 
-func updateSliceDisplay(parent *core.WorkflowRecord, request RecordMutationRequest) error {
+func updateSliceDisplay(parent *workflowcore.Record, request RecordMutationRequest) error {
 	if !validRecordIdentity(request.Identity) || request.Title == nil || request.Slice != nil {
 		return ErrRecordUnsupported
 	}

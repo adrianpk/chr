@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -46,7 +47,7 @@ func parseProjectTicketsFromDir(ctx context.Context, projectID, projectDir strin
 }
 
 func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWorkLoopSelection, error) {
-	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return agentWorkLoopSelection{}, err
 	}
@@ -76,7 +77,7 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 		return agentWorkLoopSelection{}, err
 	}
 
-	tickets, excluded, err := core.FilterLegacyWorkTickets(s.ctx, tickets)
+	tickets, excluded, err := workflowcore.FilterLegacyWorkTickets(s.ctx, tickets)
 	if err != nil {
 		return agentWorkLoopSelection{}, err
 	}
@@ -104,7 +105,7 @@ func (s service) applyAgentWorkSelectionPreflight(index ticketcore.Index, ticket
 		return nil, err
 	}
 
-	allTickets, _, err = core.FilterLegacyWorkTickets(s.ctx, allTickets)
+	allTickets, _, err = workflowcore.FilterLegacyWorkTickets(s.ctx, allTickets)
 	if err != nil {
 		return nil, err
 	}

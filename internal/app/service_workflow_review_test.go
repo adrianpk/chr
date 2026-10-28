@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -52,7 +52,7 @@ func serviceWorkflowReviewReady(t *testing.T) (service, string, *serviceWorkflow
 	t.Helper()
 
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "slice-review",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice", Identity: hierarchy.Set.Set.Slices[0].ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -70,10 +70,10 @@ func serviceWorkflowReviewReady(t *testing.T) (service, string, *serviceWorkflow
 	}
 
 	repo := request.Selection.Target.Repository
-	provider := &serviceWorkflowReviewFixture{serviceWorkflowPRFixture: &serviceWorkflowPRFixture{pr: core.WorkflowPullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}}
+	provider := &serviceWorkflowReviewFixture{serviceWorkflowPRFixture: &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: repo + "/pulls/7", Repository: repo, HeadRepository: repo, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}}
 	operations.workflowPullRequests = provider
 
-	content := core.WorkflowSlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
+	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
 	if _, err := operations.EnsureWorkflowSlicePullRequest(t.Context(), run.Invocation.ID, content); err != nil {
 		t.Fatal(err)
 	}

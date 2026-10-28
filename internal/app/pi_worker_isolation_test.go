@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -95,7 +95,7 @@ func preparePiProjectContext(t *testing.T, operations service) string {
 	return strings.TrimSpace(string(output))
 }
 
-func clonePiIsolationTicket(t *testing.T, operations service, original core.WorkflowRecord, key string) string {
+func clonePiIsolationTicket(t *testing.T, operations service, original workflowcore.Record, key string) string {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -118,17 +118,17 @@ func clonePiIsolationTicket(t *testing.T, operations service, original core.Work
 	}
 
 	task.ContractHash = authoringcore.WorkflowContentHash(append([]byte("\x00\x00"), data...))
-	if _, err := store.Create(t.Context(), "Independent Pi isolation task", core.WorkflowRecord{Kind: "ticket", Task: &task, Domain: map[string]json.RawMessage{"execution_contract": data}, Body: original.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Independent Pi isolation task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: map[string]json.RawMessage{"execution_contract": data}, Body: original.Body}); err != nil {
 		t.Fatal(err)
 	}
 
 	return key
 }
 
-func startPiIsolationInvocation(t *testing.T, operations service, key, target string) core.WorkflowInvocation {
+func startPiIsolationInvocation(t *testing.T, operations service, key, target string) workflowcore.Invocation {
 	t.Helper()
 
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: key,
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -142,7 +142,7 @@ func startPiIsolationInvocation(t *testing.T, operations service, key, target st
 }
 
 type piIsolationResult struct {
-	task core.WorkflowTaskResult
+	task workflowcore.TaskResult
 	err  error
 }
 
@@ -191,7 +191,7 @@ func checkPiIsolationCapacity(t *testing.T, operations service, available int) {
 	}
 }
 
-func checkPiIsolationOverflow(t *testing.T, operations service, original core.WorkflowRecord, target string) {
+func checkPiIsolationOverflow(t *testing.T, operations service, original workflowcore.Record, target string) {
 	t.Helper()
 
 	harnessSelectionWrite(t, filepath.Join(operations.env.ConfigDir(), "harnesses.yml"), "profiles:\n  worker:\n    harness: codex\n    command: sh\n")
@@ -208,16 +208,16 @@ func checkPiIsolationOverflow(t *testing.T, operations service, original core.Wo
 		t.Error(claim.Close())
 	}
 
-	if !errors.Is(err, core.ErrWorkflowCapacity) {
+	if !errors.Is(err, workflowcore.ErrWorkflowCapacity) {
 		t.Fatal("Codex bypassed occupied Pi slots", err)
 	}
 
-	lock, err := core.AcquireAgentOperationLock(t.Context(), core.AgentOperationLockOptions{ProjectDir: operations.projectContext.ProjectDir, Operation: core.AgentOperationDevelopment, Owner: "native-fixture"})
+	lock, err := workflowcore.AcquireAgentOperationLock(t.Context(), workflowcore.AgentOperationLockOptions{ProjectDir: operations.projectContext.ProjectDir, Operation: workflowcore.AgentOperationDevelopment, Owner: "native-fixture"})
 	if lock != nil {
 		t.Error(lock.Release())
 	}
 
-	if !errors.Is(err, core.ErrWorkflowCapacity) {
+	if !errors.Is(err, workflowcore.ErrWorkflowCapacity) {
 		t.Fatal("native operation bypassed occupied Pi slots", err)
 	}
 
@@ -227,7 +227,7 @@ func checkPiIsolationOverflow(t *testing.T, operations service, original core.Wo
 	}
 }
 
-func checkPiIsolationResult(t *testing.T, operations service, result core.WorkflowTaskResult, states, labels map[string]bool) {
+func checkPiIsolationResult(t *testing.T, operations service, result workflowcore.TaskResult, states, labels map[string]bool) {
 	t.Helper()
 
 	text := result.Validation[0].Stdout
@@ -245,7 +245,7 @@ func checkPiIsolationResult(t *testing.T, operations service, result core.Workfl
 	labels[strings.TrimSpace(string(output))] = true
 }
 
-func piIsolationInput(t *testing.T, operations service, id string) core.WorkflowTaskInput {
+func piIsolationInput(t *testing.T, operations service, id string) workflowcore.TaskInput {
 	t.Helper()
 
 	run, err := operations.ReadWorkflow(t.Context(), id)
@@ -263,7 +263,7 @@ func piIsolationInput(t *testing.T, operations service, id string) core.Workflow
 		t.Fatal(err)
 	}
 
-	var input core.WorkflowTaskInput
+	var input workflowcore.TaskInput
 	if json.Unmarshal(data, &input) != nil {
 		t.Fatal("invalid owned worker input")
 	}

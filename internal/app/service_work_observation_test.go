@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -37,15 +37,15 @@ func TestWorkObservationNative(t *testing.T) {
 func TestWorkObservationContexts(t *testing.T) {
 	at := time.Now().UTC()
 	tickets := map[string]ticketcore.Indexed{"PRJ-1": {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-1"}, IndexedSummary: ticketcore.IndexedSummary{Title: "First"}}, "PRJ-2": {IndexedIdentity: ticketcore.IndexedIdentity{Key: "PRJ-2"}, IndexedSummary: ticketcore.IndexedSummary{Title: "Second"}}}
-	records := map[string]core.WorkflowRecord{"PRJ-1": {Task: &core.WorkflowTask{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &core.WorkflowTask{Phase: "working", AttemptID: "two"}}}
+	records := map[string]workflowcore.Record{"PRJ-1": {Task: &workflowcore.Task{Phase: "validating", AttemptID: "one"}}, "PRJ-2": {Task: &workflowcore.Task{Phase: "working", AttemptID: "two"}}}
 	result := WorkObservation{}
 
 	for _, item := range []struct{ id, key, attempt string }{{"first", "PRJ-1", "one"}, {"second", "PRJ-2", "two"}} {
-		run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.id, UpdatedAt: at}, WorkflowInvocationExecution: core.WorkflowInvocationExecution{Status: "running", Attempts: []core.WorkflowAttempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []core.WorkflowProcess{{State: "running", Command: []string{"go", "test"}}}}}}}
+		run := workflowcore.Invocation{Identity: workflowcore.Identity{ID: item.id, UpdatedAt: at}, InvocationExecution: workflowcore.InvocationExecution{Status: "running", Attempts: []workflowcore.Attempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []workflowcore.Process{{State: "running", Command: []string{"go", "test"}}}}}}}
 		appendNativeWork(&result, run, tickets, records)
 	}
 
-	completed := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: "complete", UpdatedAt: at}, WorkflowInvocationExecution: core.WorkflowInvocationExecution{Status: "completed", Outcome: "task_validated", Cursor: 1}, WorkflowInvocationInput: core.WorkflowInvocationInput{Members: []core.WorkflowMember{{Admission: core.WorkflowPreviewMember{Key: "PRJ-1"}}}}}
+	completed := workflowcore.Invocation{Identity: workflowcore.Identity{ID: "complete", UpdatedAt: at}, InvocationExecution: workflowcore.InvocationExecution{Status: "completed", Outcome: "task_validated", Cursor: 1}, InvocationInput: workflowcore.InvocationInput{Members: []workflowcore.Member{{Admission: workflowcore.PreviewMember{Key: "PRJ-1"}}}}}
 	appendNativeWork(&result, completed, tickets, records)
 
 	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[0].Message != "Running go" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 || result.Results[0].Phase != "task_validated" {
@@ -62,7 +62,7 @@ func TestWorkObservationLifecycle(t *testing.T) {
 	}{{"blocked", "blocked", false}, {"stopped", "paused", false}, {"cancelled", "cancelled", true}} {
 		t.Run(item.name, func(t *testing.T) {
 			result := WorkObservation{}
-			run := core.WorkflowInvocation{WorkflowIdentity: core.WorkflowIdentity{ID: item.name, UpdatedAt: time.Now().UTC()}, WorkflowInvocationExecution: core.WorkflowInvocationExecution{Status: item.status}}
+			run := workflowcore.Invocation{Identity: workflowcore.Identity{ID: item.name, UpdatedAt: time.Now().UTC()}, InvocationExecution: workflowcore.InvocationExecution{Status: item.status}}
 			appendNativeWork(&result, run, nil, nil)
 
 			contexts := result.Current

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/webui"
@@ -174,7 +174,7 @@ func webWorkflowResponse(status WorkflowWorkStatus, err error) webui.WriteAction
 		result.Status = webui.WriteStatusStale
 	}
 
-	if errors.Is(err, core.ErrWorkflowOwned) {
+	if errors.Is(err, workflowcore.ErrWorkflowOwned) {
 		result.Status, result.BlockedReason = webui.WriteStatusBlocked, "Another owner controls this workflow."
 	}
 

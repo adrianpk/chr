@@ -8,6 +8,7 @@ import (
 	"time"
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func TestTicketRepositoryDerivesNextKeyFromExistingTickets(t *testing.T) {
@@ -73,6 +74,6 @@ func writeFile(t *testing.T, path, content string) {
 
 func newTestTicketRepository(projectDir string, opts ...ticketcore.RepositoryOption) ticketcore.Repository {
 	return ticketcore.NewRepository(projectDir, func(ctx context.Context, prefix string) (int, error) {
-		return NextTicketKeyNumber(ctx, projectDir, prefix)
+		return workflowcore.NextTicketKeyNumber(ctx, projectDir, prefix)
 	}, opts...)
 }

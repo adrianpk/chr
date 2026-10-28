@@ -5,6 +5,7 @@ import (
 	"errors"
 	"testing"
 
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -12,7 +13,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 	tests := []struct {
 		name     string
 		rawURL   string
-		provider ReviewProvider
+		provider workflowcore.ReviewProvider
 		host     string
 		owner    string
 		repo     string
@@ -21,7 +22,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 		{
 			name:     "forgejo",
 			rawURL:   "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
-			provider: ReviewProviderForgejo,
+			provider: workflowcore.ReviewProviderForgejo,
 			host:     "forge.adrianpk.com",
 			owner:    "adrianpk",
 			repo:     "chr",
@@ -30,7 +31,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 		{
 			name:     "codeberg",
 			rawURL:   "https://codeberg.org/example/repo/pulls/12",
-			provider: ReviewProviderForgejo,
+			provider: workflowcore.ReviewProviderForgejo,
 			host:     "codeberg.org",
 			owner:    "example",
 			repo:     "repo",
@@ -39,7 +40,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 		{
 			name:     "github",
 			rawURL:   "https://github.com/example/repo/pull/34",
-			provider: ReviewProviderGitHub,
+			provider: workflowcore.ReviewProviderGitHub,
 			host:     "github.com",
 			owner:    "example",
 			repo:     "repo",
@@ -49,7 +50,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			reference, err := DetectReviewProviderReference(test.rawURL)
+			reference, err := workflowcore.DetectReviewProviderReference(test.rawURL)
 			if err != nil {
 				t.Fatalf("DetectReviewProviderReference returned error: %v", err)
 			}
@@ -60,7 +61,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 }
 
 type reviewProviderReferenceAssertion struct {
-	provider ReviewProvider
+	provider workflowcore.ReviewProvider
 	host     string
 	owner    string
 	repo     string
@@ -69,8 +70,8 @@ type reviewProviderReferenceAssertion struct {
 
 func assertReviewProviderReference(
 	t *testing.T,
-	reference ReviewProviderReference,
-	provider ReviewProvider,
+	reference workflowcore.ReviewProviderReference,
+	provider workflowcore.ReviewProvider,
 	host string,
 	owner string,
 	repo string,
@@ -104,34 +105,34 @@ func TestRunReviewProviderDiagnosticsReady(t *testing.T) {
 		env:   map[string]string{"FORGEJO_TOKEN": "secret"},
 	}
 
-	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
+	diagnostic := workflowcore.RunReviewProviderDiagnostics(t.Context(), workflowcore.ReviewProviderDiagnosticOptions{
 		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 		Runner: runner,
 	})
 
-	if diagnostic.Status != ReviewProviderDiagnosticStatusReady {
-		t.Fatalf("Status = %q, want %q", diagnostic.Status, ReviewProviderDiagnosticStatusReady)
+	if diagnostic.Status != workflowcore.ReviewProviderDiagnosticStatusReady {
+		t.Fatalf("Status = %q, want %q", diagnostic.Status, workflowcore.ReviewProviderDiagnosticStatusReady)
 	}
 
-	assertReviewProviderCheck(t, diagnostic, "provider_url", ReviewProviderDiagnosticCheckOK, "detected")
-	assertReviewProviderCheck(t, diagnostic, "cli_available", ReviewProviderDiagnosticCheckOK, "found")
-	assertReviewProviderCheck(t, diagnostic, "token_available", ReviewProviderDiagnosticCheckOK, "found")
-	assertReviewProviderCheck(t, diagnostic, "pr_readable", ReviewProviderDiagnosticCheckOK, "readable")
+	assertReviewProviderCheck(t, diagnostic, "provider_url", workflowcore.ReviewProviderDiagnosticCheckOK, "detected")
+	assertReviewProviderCheck(t, diagnostic, "cli_available", workflowcore.ReviewProviderDiagnosticCheckOK, "found")
+	assertReviewProviderCheck(t, diagnostic, "token_available", workflowcore.ReviewProviderDiagnosticCheckOK, "found")
+	assertReviewProviderCheck(t, diagnostic, "pr_readable", workflowcore.ReviewProviderDiagnosticCheckOK, "readable")
 }
 
 func TestRunReviewProviderDiagnosticsReportsMissingCLI(t *testing.T) {
-	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
+	diagnostic := workflowcore.RunReviewProviderDiagnostics(t.Context(), workflowcore.ReviewProviderDiagnosticOptions{
 		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://github.com/example/repo/pull/34",
 		Runner: fakeReviewProviderDiagnosticRunner{},
 	})
 
-	if diagnostic.Status != ReviewProviderDiagnosticStatusBlocked {
-		t.Fatalf("Status = %q, want %q", diagnostic.Status, ReviewProviderDiagnosticStatusBlocked)
+	if diagnostic.Status != workflowcore.ReviewProviderDiagnosticStatusBlocked {
+		t.Fatalf("Status = %q, want %q", diagnostic.Status, workflowcore.ReviewProviderDiagnosticStatusBlocked)
 	}
 
-	assertReviewProviderCheck(t, diagnostic, "cli_available", ReviewProviderDiagnosticCheckFail, "missing_cli")
+	assertReviewProviderCheck(t, diagnostic, "cli_available", workflowcore.ReviewProviderDiagnosticCheckFail, "missing_cli")
 }
 
 func TestRunReviewProviderDiagnosticsReportsMissingToken(t *testing.T) {
@@ -139,31 +140,31 @@ func TestRunReviewProviderDiagnosticsReportsMissingToken(t *testing.T) {
 		paths: map[string]string{"gh": "/usr/bin/gh"},
 	}
 
-	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
+	diagnostic := workflowcore.RunReviewProviderDiagnostics(t.Context(), workflowcore.ReviewProviderDiagnosticOptions{
 		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://github.com/example/repo/pull/34",
 		Runner: runner,
 	})
 
-	if diagnostic.Status != ReviewProviderDiagnosticStatusBlocked {
-		t.Fatalf("Status = %q, want %q", diagnostic.Status, ReviewProviderDiagnosticStatusBlocked)
+	if diagnostic.Status != workflowcore.ReviewProviderDiagnosticStatusBlocked {
+		t.Fatalf("Status = %q, want %q", diagnostic.Status, workflowcore.ReviewProviderDiagnosticStatusBlocked)
 	}
 
-	assertReviewProviderCheck(t, diagnostic, "token_available", ReviewProviderDiagnosticCheckFail, "missing_token")
+	assertReviewProviderCheck(t, diagnostic, "token_available", workflowcore.ReviewProviderDiagnosticCheckFail, "missing_token")
 }
 
 func TestRunReviewProviderDiagnosticsReportsUnsupportedProvider(t *testing.T) {
-	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
+	diagnostic := workflowcore.RunReviewProviderDiagnostics(t.Context(), workflowcore.ReviewProviderDiagnosticOptions{
 		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://example.com/example/repo/merge-requests/1",
 		Runner: fakeReviewProviderDiagnosticRunner{},
 	})
 
-	if diagnostic.Status != ReviewProviderDiagnosticStatusUnsupported {
-		t.Fatalf("Status = %q, want %q", diagnostic.Status, ReviewProviderDiagnosticStatusUnsupported)
+	if diagnostic.Status != workflowcore.ReviewProviderDiagnosticStatusUnsupported {
+		t.Fatalf("Status = %q, want %q", diagnostic.Status, workflowcore.ReviewProviderDiagnosticStatusUnsupported)
 	}
 
-	assertReviewProviderCheck(t, diagnostic, "provider_url", ReviewProviderDiagnosticCheckFail, "unsupported_provider")
+	assertReviewProviderCheck(t, diagnostic, "provider_url", workflowcore.ReviewProviderDiagnosticCheckFail, "unsupported_provider")
 }
 
 func TestRunReviewProviderDiagnosticsDryRunSkipsReadability(t *testing.T) {
@@ -173,18 +174,18 @@ func TestRunReviewProviderDiagnosticsDryRunSkipsReadability(t *testing.T) {
 		runErr: errors.New("must not run"),
 	}
 
-	diagnostic := RunReviewProviderDiagnostics(t.Context(), ReviewProviderDiagnosticOptions{
+	diagnostic := workflowcore.RunReviewProviderDiagnostics(t.Context(), workflowcore.ReviewProviderDiagnosticOptions{
 		Config: workspaceconfig.DefaultReviewProviderConfig(),
 		URL:    "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
 		DryRun: true,
 		Runner: runner,
 	})
 
-	if diagnostic.Status != ReviewProviderDiagnosticStatusReady {
-		t.Fatalf("Status = %q, want %q", diagnostic.Status, ReviewProviderDiagnosticStatusReady)
+	if diagnostic.Status != workflowcore.ReviewProviderDiagnosticStatusReady {
+		t.Fatalf("Status = %q, want %q", diagnostic.Status, workflowcore.ReviewProviderDiagnosticStatusReady)
 	}
 
-	assertReviewProviderCheck(t, diagnostic, "pr_readable", ReviewProviderDiagnosticCheckSkipped, "dry_run")
+	assertReviewProviderCheck(t, diagnostic, "pr_readable", workflowcore.ReviewProviderDiagnosticCheckSkipped, "dry_run")
 }
 
 type fakeReviewProviderDiagnosticRunner struct {
@@ -211,7 +212,7 @@ func (runner fakeReviewProviderDiagnosticRunner) Run(_ context.Context, _ string
 
 func assertReviewProviderCheck(
 	t *testing.T,
-	diagnostic ReviewProviderDiagnostic,
+	diagnostic workflowcore.ReviewProviderDiagnostic,
 	name string,
 	status string,
 	reason string,

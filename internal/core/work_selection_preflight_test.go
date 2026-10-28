@@ -3,48 +3,14 @@ package core
 import (
 	"context"
 	"errors"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
-	opscore "forge.adrianpk.com/chr/internal/core/ops"
-	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
-
-func TestAgentOperationLockBlocksConcurrentOperation(t *testing.T) {
-	projectDir := t.TempDir()
-
-	lock, err := AcquireAgentOperationLock(context.Background(), AgentOperationLockOptions{
-		ProjectDir: projectDir,
-		Operation:  AgentOperationDevelopment,
-		Owner:      "test",
-	})
-	if err != nil {
-		t.Fatalf("AcquireAgentOperationLock returned error: %v", err)
-	}
-
-	if want := filepath.Join(projectDir, opscore.DirectoryName, opsnamespace.Default, "lock", "agent-operation.lock"); lock.path != want {
-		t.Fatalf("lock path = %q, want %q", lock.path, want)
-	}
-
-	defer func() {
-		if err := lock.Release(); err != nil {
-			t.Fatalf("Release returned error: %v", err)
-		}
-	}()
-
-	_, err = AcquireAgentOperationLock(context.Background(), AgentOperationLockOptions{
-		ProjectDir: projectDir,
-		Operation:  AgentOperationReview,
-		Owner:      "test",
-	})
-	if err == nil || !strings.Contains(err.Error(), "agent operation lock is already held") {
-		t.Fatalf("second AcquireAgentOperationLock error = %v, want held lock", err)
-	}
-}
 
 func TestWorkSelectionPreflightPrioritizesReviewRepair(t *testing.T) {
 	tickets := []ticketcore.Indexed{
@@ -88,7 +54,7 @@ func TestWorkSelectionPreflightBlocksLaterTicketWhenRepairPending(t *testing.T) 
 		t.Fatalf("Allowed = true, want false")
 	}
 
-	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockReviewRepairPending {
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != workflowcore.WorkSelectionBlockReviewRepairPending {
 		t.Fatalf("BlockReasons = %#v, want review repair pending", result.BlockReasons)
 	}
 }
@@ -112,7 +78,7 @@ func TestWorkSelectionPreflightBlocksWrongIntegrationBranch(t *testing.T) {
 		t.Fatalf("Allowed = true, want false")
 	}
 
-	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockBranchPolicy {
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != workflowcore.WorkSelectionBlockBranchPolicy {
 		t.Fatalf("BlockReasons = %#v, want branch policy blocked", result.BlockReasons)
 	}
 }
@@ -136,7 +102,7 @@ func TestWorkSelectionPreflightBlocksIntegrationBranchBehindRemote(t *testing.T)
 		t.Fatalf("Allowed = true, want false")
 	}
 
-	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockBranchPolicy {
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != workflowcore.WorkSelectionBlockBranchPolicy {
 		t.Fatalf("BlockReasons = %#v, want branch policy blocked", result.BlockReasons)
 	}
 }
@@ -317,7 +283,7 @@ func TestWorkSelectionPreflightNoGitEnforcementKeepsReviewRepairOrdering(t *test
 		t.Fatalf("Allowed = true, want false")
 	}
 
-	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != WorkSelectionBlockReviewRepairPending {
+	if len(result.BlockReasons) != 1 || result.BlockReasons[0].Code != workflowcore.WorkSelectionBlockReviewRepairPending {
 		t.Fatalf("BlockReasons = %#v, want review repair pending", result.BlockReasons)
 	}
 }

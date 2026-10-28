@@ -8,6 +8,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -114,7 +115,7 @@ func (factory commandFactory) runTicketReviewModeDiagnostics(ctx context.Context
 		return err
 	}
 
-	diagnostic := core.RunReviewProviderDiagnostics(ctx, core.ReviewProviderDiagnosticOptions{
+	diagnostic := workflowcore.RunReviewProviderDiagnostics(ctx, workflowcore.ReviewProviderDiagnosticOptions{
 		Config: config.Review.Providers,
 		URL:    cmd.String("url"),
 		DryRun: cmd.Bool("dry-run"),
@@ -124,7 +125,7 @@ func (factory commandFactory) runTicketReviewModeDiagnostics(ctx context.Context
 	return printTicketReviewModeDiagnostics(factory.io.Stdout, projectContext, diagnostic, cmd.Bool("dry-run"))
 }
 
-func printTicketReviewModeDiagnostics(stdout io.Writer, projectContext commandProjectContext, diagnostic core.ReviewProviderDiagnostic, dryRun bool) error {
+func printTicketReviewModeDiagnostics(stdout io.Writer, projectContext commandProjectContext, diagnostic workflowcore.ReviewProviderDiagnostic, dryRun bool) error {
 	reference := diagnostic.Reference
 	lines := []string{
 		"review_provider_diagnostics: status",

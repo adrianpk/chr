@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (s service) inspectGuidedResult(ctx context.Context, result *GuidedUseCaseInspection) {
@@ -15,7 +15,7 @@ func (s service) inspectGuidedResult(ctx context.Context, result *GuidedUseCaseI
 		return
 	}
 
-	observed, err := core.ReadGuidedResult(ctx, s.projectContext.ProjectDir, *session)
+	observed, err := workflowcore.ReadGuidedResult(ctx, s.projectContext.ProjectDir, *session)
 	if err != nil {
 		result.ResultProblem = "Native result evidence is unavailable or inconsistent. Reconcile the original invocation before claiming delivery."
 		result.Problems = append(result.Problems, result.ResultProblem)
@@ -40,7 +40,7 @@ func (host *guidedWorkHost) reconcileResult(ctx context.Context, operations serv
 	}
 
 	scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
-	if _, err := authoringcore.ReconcileGuidedResult(ctx, operations.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir)); err != nil {
+	if _, err := authoringcore.ReconcileGuidedResult(ctx, operations.projectContext.ProjectDir, scope, workflowcore.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir)); err != nil {
 		slog.WarnContext(ctx, "Guided result evidence needs recovery", "code", "guided_result_blocked")
 	}
 }

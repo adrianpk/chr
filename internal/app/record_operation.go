@@ -3,8 +3,8 @@ package app
 import (
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -87,7 +87,7 @@ type PreparedRecordMutation struct {
 	Kind      RecordKind                         `json:"kind"`
 	Identity  string                             `json:"identity,omitempty"`
 	ParentID  string                             `json:"parent_id,omitempty"`
-	Native    *core.WorkflowMutationRequest      `json:"native,omitempty"`
+	Native    *workflowcore.MutationRequest      `json:"native,omitempty"`
 	Case      *authoringcore.CaseMutationRequest `json:"case,omitempty"`
 }
 

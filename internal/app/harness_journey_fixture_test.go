@@ -18,13 +18,14 @@ import (
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type harnessJourney struct {
 	operations       service
 	telegram         *telegramConversationAppFixture
-	record           core.WorkflowRecord
-	start            core.WorkflowStartRequest
+	record           workflowcore.Record
+	start            workflowcore.StartRequest
 	code, pi         string
 	worker, auth     string
 	bridge, image    string

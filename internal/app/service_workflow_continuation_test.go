@@ -3,7 +3,7 @@ package app
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -11,7 +11,7 @@ import (
 // operation and preserves that checkpoint on equivalent invocation attachment.
 func TestServiceWorkflowContinuation(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "bounded-service",
 		Policy:     workflowstate.ExecutionPolicy{CheckpointStepLimit: 1},
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
@@ -25,7 +25,7 @@ func TestServiceWorkflowContinuation(t *testing.T) {
 	operations.workflowPullRequests = &serviceWorkflowPRFixture{}
 	worker := []string{"sh", "-c", "printf 'Task\\n' >> result.txt && git add result.txt && git -c user.name=Test -c user.email=test@example.com commit -qm 'Task'"}
 
-	progress, err := operations.ContinueWorkflow(t.Context(), run.Invocation.ID, core.WorkflowContinuationRequest{Worker: worker}, nil)
+	progress, err := operations.ContinueWorkflow(t.Context(), run.Invocation.ID, workflowcore.ContinuationRequest{Worker: worker}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +38,7 @@ func TestServiceWorkflowContinuation(t *testing.T) {
 	}
 }
 
-func checkServiceWorkflowContinuation(t *testing.T, progress core.WorkflowContinuationProgress) {
+func checkServiceWorkflowContinuation(t *testing.T, progress workflowcore.ContinuationProgress) {
 	t.Helper()
 
 	if progress.Steps != 1 || progress.Reason != "step_limit" || progress.Invocation.Cursor != 1 || len(progress.Invocation.Attempts) != 1 || progress.Invocation.Continuation.Sequence != 1 {

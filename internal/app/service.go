@@ -11,6 +11,7 @@ import (
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	openaiquiz "forge.adrianpk.com/chr/internal/core/quiz/openai"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -19,7 +20,7 @@ type service struct {
 	afterGuidedControl     func() error
 	afterGuidedAdmission   func(string) error
 	guidedWorkHost         guidedWorkActivator
-	guidedHostCheck        core.WorkflowAdmissionCheck
+	guidedHostCheck        workflowcore.AdmissionCheck
 	afterGuidedPreparation func(string) error
 	afterGuidedSpec        func(string) error
 	afterGuidedQuiz        func() error
@@ -38,9 +39,9 @@ type service struct {
 	generationRunner       harness.AgentRunner
 	workflowWorker         []string
 	workflowNamespace      string
-	workflowPullRequests   core.WorkflowPullRequestProvider
-	workflowIntegrationGit core.WorkflowIntegrationGit
-	workflowPreparationGit core.WorkflowPreparationGit
+	workflowPullRequests   workflowcore.PullRequestProvider
+	workflowIntegrationGit workflowcore.IntegrationGit
+	workflowPreparationGit workflowcore.PreparationGit
 	now                    func() time.Time
 }
 

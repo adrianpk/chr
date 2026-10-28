@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -85,7 +85,7 @@ func checkServiceWorkflowOwnerStarts(t *testing.T, operations service, key strin
 				return
 			}
 
-			if !errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity) {
+			if !errors.Is(err, workflowcore.ErrWorkflowOwned) && !errors.Is(err, workflowcore.ErrWorkflowCapacity) {
 				t.Fatal("competing start did not retain the live owner", err)
 			}
 		})

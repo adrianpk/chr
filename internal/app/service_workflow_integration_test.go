@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -27,7 +27,7 @@ func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service,
 		identity = hierarchy.Set.ID
 	}
 
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "external-delivery",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: extent, Identity: identity}, Target: workflowstate.PreviewTarget{Repository: repository, Commit: target}},
 	}}
@@ -44,10 +44,10 @@ func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service,
 		t.Fatal(err)
 	}
 
-	provider := &serviceWorkflowPRFixture{pr: core.WorkflowPullRequestSnapshot{URL: repository + "/pulls/7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
+	provider := &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: repository + "/pulls/7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: target, State: "open"}}
 	operations.workflowPullRequests = provider
 
-	content := core.WorkflowSlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
+	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver slice", Body: "Deliver the aggregate candidate."}
 	if _, err := operations.EnsureWorkflowSlicePullRequest(t.Context(), run.Invocation.ID, content); err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func serviceWorkflowDeliveryExtentFixture(t *testing.T, extent string) (service,
 	serviceWorkflowDeliveryGit(t, candidate.Lane.Worktree, "init", "--bare", remote)
 	serviceWorkflowDeliveryGit(t, candidate.Lane.Worktree, "push", remote, candidate.Result.Commit+":refs/heads/dev")
 
-	operations.workflowIntegrationGit = core.NewWorkflowIntegrationGit(repository, remote)
+	operations.workflowIntegrationGit = workflowcore.NewWorkflowIntegrationGit(repository, remote)
 	provider.pr.State, provider.pr.Merged, provider.pr.ResultCommit = "closed", true, candidate.Result.Commit
 	provider.pr.BaseCommit = candidate.Result.Commit
 

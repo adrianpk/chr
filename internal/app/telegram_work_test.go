@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func telegramWorkFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
+func telegramWorkFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (*telegramConversationAppFixture, service, workflowcore.Record) {
 	t.Helper()
 
 	operations, record, _, _ := serviceWorkNativeFixture(t, plans...)
@@ -74,7 +74,7 @@ func telegramWorkBindCase(t *testing.T, operations service) {
 	}
 }
 
-func telegramWorkSelector(t *testing.T, operations service, independent core.WorkflowRecord, extent string) workflowstate.Selector {
+func telegramWorkSelector(t *testing.T, operations service, independent workflowcore.Record, extent string) workflowstate.Selector {
 	t.Helper()
 
 	selector := workflowstate.Selector{Extent: extent}
@@ -158,7 +158,7 @@ func TestTelegramWorkExtents(t *testing.T) {
 	}
 }
 
-func checkTelegramWorkRunCount(t *testing.T, operations service, count int) core.WorkflowInvocation {
+func checkTelegramWorkRunCount(t *testing.T, operations service, count int) workflowcore.Invocation {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -172,7 +172,7 @@ func checkTelegramWorkRunCount(t *testing.T, operations service, count int) core
 	}
 
 	if len(runs) == 0 {
-		return core.WorkflowInvocation{}
+		return workflowcore.Invocation{}
 	}
 
 	return runs[0]

@@ -10,6 +10,7 @@ import (
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
@@ -21,7 +22,7 @@ func TestTicketReviewMetadataUpdaterAddsBranchAndReviewRef(t *testing.T) {
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
-	err := NewTicketReviewMetadataUpdater().UpdateReviewMetadata(context.Background(), UpdateTicketReviewMetadataOptions{
+	err := workflowcore.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(context.Background(), workflowcore.UpdateTicketReviewMetadataOptions{
 		Path:   path,
 		Branch: "feat/slice-2-pr-reference-workflow",
 		ReviewRef: &ticketmetadata.ReviewRef{
@@ -72,7 +73,7 @@ func TestTicketReviewMetadataUpdaterReplacesExistingReviewRef(t *testing.T) {
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
-	err := NewTicketReviewMetadataUpdater().UpdateReviewMetadata(context.Background(), UpdateTicketReviewMetadataOptions{
+	err := workflowcore.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(context.Background(), workflowcore.UpdateTicketReviewMetadataOptions{
 		Path: path,
 		ReviewRef: &ticketmetadata.ReviewRef{
 			Type:     "pull_request",
@@ -106,7 +107,7 @@ func TestTicketStatusUpdaterRequiresReviewMetadataForReadyForReview(t *testing.T
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
-	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+	err := workflowcore.NewTicketStatusUpdater().UpdateStatus(context.Background(), workflowcore.UpdateTicketStatusOptions{
 		Path:      path,
 		Status:    ticketcore.StatusReadyForReview,
 		UpdatedAt: testReviewMetadataTime(13),
@@ -139,7 +140,7 @@ func TestTicketStatusUpdaterAcceptsReadyForReviewWithReviewMetadata(t *testing.T
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
-	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+	err := workflowcore.NewTicketStatusUpdater().UpdateStatus(context.Background(), workflowcore.UpdateTicketStatusOptions{
 		Path:      path,
 		Status:    ticketcore.StatusReadyForReview,
 		UpdatedAt: testReviewMetadataTime(13),
@@ -174,7 +175,7 @@ func TestTicketStatusUpdaterRequiresPassedReviewForReadyForMerge(t *testing.T) {
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
-	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+	err := workflowcore.NewTicketStatusUpdater().UpdateStatus(context.Background(), workflowcore.UpdateTicketStatusOptions{
 		Path:      path,
 		Status:    ticketcore.StatusReadyForMerge,
 		UpdatedAt: testReviewMetadataTime(13),
@@ -209,7 +210,7 @@ func TestTicketStatusUpdaterAcceptsReadyForMergeWithPassedReview(t *testing.T) {
 		UpdatedAt: testReviewMetadataTime(12),
 	})
 
-	err := NewTicketStatusUpdater().UpdateStatus(context.Background(), UpdateTicketStatusOptions{
+	err := workflowcore.NewTicketStatusUpdater().UpdateStatus(context.Background(), workflowcore.UpdateTicketStatusOptions{
 		Path:      path,
 		Status:    ticketcore.StatusReadyForMerge,
 		UpdatedAt: testReviewMetadataTime(13),

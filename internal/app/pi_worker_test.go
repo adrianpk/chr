@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -41,7 +41,7 @@ func TestPiWorkerInput(t *testing.T) {
 	}
 }
 
-func piWorkerInputFixture(t *testing.T) (core.WorkflowTaskInput, pi.WorkerRuntimeOptions) {
+func piWorkerInputFixture(t *testing.T) (workflowcore.TaskInput, pi.WorkerRuntimeOptions) {
 	t.Helper()
 
 	digest := strings.Repeat("a", 64)
@@ -55,13 +55,13 @@ func piWorkerInputFixture(t *testing.T) (core.WorkflowTaskInput, pi.WorkerRuntim
 		t.Fatal(err)
 	}
 
-	input := core.WorkflowTaskInput{Schema: "chr-task-input/v2", HarnessBinding: &binding, Body: "Frozen task body", Worker: []string{"private-credential-reference"}}
+	input := workflowcore.TaskInput{Schema: "chr-task-input/v2", HarnessBinding: &binding, Body: "Frozen task body", Worker: []string{"private-credential-reference"}}
 	options := pi.WorkerRuntimeOptions{Image: binding.RuntimeRef, Provider: binding.ModelProvider, Model: binding.Model}
 
 	return input, options
 }
 
-func alterPiWorkerFixture(scenario string, input core.WorkflowTaskInput, options pi.WorkerRuntimeOptions) (core.WorkflowTaskInput, pi.WorkerRuntimeOptions) {
+func alterPiWorkerFixture(scenario string, input workflowcore.TaskInput, options pi.WorkerRuntimeOptions) (workflowcore.TaskInput, pi.WorkerRuntimeOptions) {
 	switch scenario {
 	case "legacy":
 		input.Schema = "chr-task-input/v1"
@@ -72,9 +72,9 @@ func alterPiWorkerFixture(scenario string, input core.WorkflowTaskInput, options
 	case "changed runtime":
 		options.Image = "sha256:" + strings.Repeat("b", 64)
 	case "merger":
-		input.Merger = &core.WorkflowMergerInput{}
+		input.Merger = &workflowcore.MergerInput{}
 	case "finite budget":
-		input.AgentCall = &core.WorkflowAgentCall{}
+		input.AgentCall = &workflowcore.AgentCall{}
 	}
 
 	return input, options

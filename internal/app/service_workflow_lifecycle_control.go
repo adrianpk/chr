@@ -3,11 +3,11 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *core.WorkflowStore, request WorkflowControlRequest) (*workflowstate.ControlResult, error) {
+func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *workflowcore.Store, request WorkflowControlRequest) (*workflowstate.ControlResult, error) {
 	ports, err := s.workflowLifecycleControlPorts(ctx, store, request)
 	if err != nil {
 		return nil, err
@@ -23,8 +23,8 @@ func (s service) executeWorkflowLifecycleResult(ctx context.Context, store *core
 	return &result, err
 }
 
-func (s service) workflowLifecycleControlPorts(ctx context.Context, store *core.WorkflowStore, request WorkflowControlRequest) (core.WorkflowLifecycleControlPorts, error) {
-	var ports core.WorkflowLifecycleControlPorts
+func (s service) workflowLifecycleControlPorts(ctx context.Context, store *workflowcore.Store, request WorkflowControlRequest) (workflowcore.LifecycleControlPorts, error) {
+	var ports workflowcore.LifecycleControlPorts
 	if request.Action != "continue" && request.Action != "resume" {
 		return ports, nil
 	}

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func assertGuidedTelegramOriginals(t *testing.T, f *telegramConversationAppFixture, operations service, session authoringcore.Session) {
@@ -102,10 +102,10 @@ func assertGuidedTelegramPreparedOriginals(t *testing.T, f *telegramConversation
 func TestGuidedUseCaseTelegramResultGuard(t *testing.T) {
 	for _, test := range []struct {
 		name   string
-		result *core.WorkflowResultInspection
+		result *workflowcore.ResultInspection
 	}{
 		{name: "missing result"},
-		{name: "partial evidence", result: &core.WorkflowResultInspection{}},
+		{name: "partial evidence", result: &workflowcore.ResultInspection{}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			session := authoringcore.Session{Topic: "Result guard", Guided: &authoringcore.GuidedUseCaseState{Stage: "results", Status: "completed"}}

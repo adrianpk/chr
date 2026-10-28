@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -85,7 +85,7 @@ type telegramControlReplaceAfterApply struct {
 	replace func()
 }
 
-func (s telegramControlReplaceAfterApply) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check core.WorkflowAdmissionCheck) (WorkflowWorkStatus, error) {
+func (s telegramControlReplaceAfterApply) ApplyTelegramControl(ctx context.Context, target telegramcore.OperationTarget, binding workflowstate.MutationBinding, request WorkflowControlRequest, check workflowcore.AdmissionCheck) (WorkflowWorkStatus, error) {
 	status, err := s.service.ApplyTelegramControl(ctx, target, binding, request, check)
 	if err == nil {
 		s.replace()

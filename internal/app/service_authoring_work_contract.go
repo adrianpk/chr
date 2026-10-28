@@ -4,21 +4,21 @@ import (
 	"errors"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-func (s service) authoringWorkContract(record core.WorkflowRecord, title string, request AuthoringWorkRequest, source authoringcore.ArtifactObservation) (core.WorkflowRecord, error) {
+func (s service) authoringWorkContract(record workflowcore.Record, title string, request AuthoringWorkRequest, source authoringcore.ArtifactObservation) (workflowcore.Record, error) {
 	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
-		return core.WorkflowRecord{}, err
+		return workflowcore.Record{}, err
 	}
 
 	if strings.TrimSpace(config.Runtime.ValidationCommand) == "" {
-		return core.WorkflowRecord{}, errors.New("native work preparation requires a configured validation command")
+		return workflowcore.Record{}, errors.New("native work preparation requires a configured validation command")
 	}
 
 	timeout := config.Work.ValidationTimeoutSeconds
@@ -30,5 +30,5 @@ func (s service) authoringWorkContract(record core.WorkflowRecord, title string,
 	// reinterpret its acceptance criteria or invent a validation command.
 	contract := generationcore.GeneratedWorkflowTask{ID: record.Task.Key, Title: title, Body: source.Body, Outcome: request.Instruction, Scope: source.Ref.Path, Acceptance: []string{source.Body}, Validation: workflowstate.Validation{Required: true, Commands: [][]string{{"sh", "-c", config.Runtime.ValidationCommand}}, TimeoutSeconds: timeout}}
 
-	return core.PrepareIndependentWorkflowTask(record, contract)
+	return workflowcore.PrepareIndependentWorkflowTask(record, contract)
 }

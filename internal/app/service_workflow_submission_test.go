@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type serviceWorkflowSubmissionFixture struct {
@@ -14,14 +14,14 @@ type serviceWorkflowSubmissionFixture struct {
 	unpublished bool
 }
 
-func (p *serviceWorkflowSubmissionFixture) SubmitWorkflowIntegration(_ context.Context, submission core.WorkflowSubmission) (core.WorkflowSubmissionResponse, error) {
+func (p *serviceWorkflowSubmissionFixture) SubmitWorkflowIntegration(_ context.Context, submission workflowcore.Submission) (workflowcore.SubmissionResponse, error) {
 	p.submissions = append(p.submissions, submission.ID)
 
-	return core.WorkflowSubmissionResponse{}, context.DeadlineExceeded
+	return workflowcore.SubmissionResponse{}, context.DeadlineExceeded
 }
 
-func (p *serviceWorkflowSubmissionFixture) ObserveWorkflowSubmission(_ context.Context, submission core.WorkflowSubmission) (core.WorkflowSubmissionObservation, error) {
-	return core.WorkflowSubmissionObservation{SubmissionID: submission.ID, Unpublished: p.unpublished}, nil
+func (p *serviceWorkflowSubmissionFixture) ObserveWorkflowSubmission(_ context.Context, submission workflowcore.Submission) (workflowcore.SubmissionObservation, error) {
+	return workflowcore.SubmissionObservation{SubmissionID: submission.ID, Unpublished: p.unpublished}, nil
 }
 
 // TestServiceWorkflowSubmission exercises the central operation's durable intent,
@@ -55,7 +55,7 @@ func assertServiceWorkflowSubmission(t *testing.T, operations service, id string
 		t.Fatalf("submission: %+v, %v", first, err)
 	}
 
-	if _, err := operations.SubmitWorkflowSliceIntegration(t.Context(), id); !errors.Is(err, core.ErrWorkflowObservationRequired) {
+	if _, err := operations.SubmitWorkflowSliceIntegration(t.Context(), id); !errors.Is(err, workflowcore.ErrWorkflowObservationRequired) {
 		t.Fatal("central service retried an unknown result", err)
 	}
 

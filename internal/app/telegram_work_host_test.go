@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TestTelegramWorkResponsive runs the actual receiver and a real blocked worker.
@@ -119,7 +119,7 @@ func checkTelegramWorkSharedOwner(t *testing.T, operations service, ref telegram
 		t.Fatal("blocked worker lost canonical ownership", status, err)
 	}
 
-	if progress, err := operations.ResumeRetainedWork(t.Context(), ref.Invocation.ID, status.Revision); (!errors.Is(err, core.ErrWorkflowOwned) && !errors.Is(err, core.ErrWorkflowCapacity)) || progress.Steps != 0 {
+	if progress, err := operations.ResumeRetainedWork(t.Context(), ref.Invocation.ID, status.Revision); (!errors.Is(err, workflowcore.ErrWorkflowOwned) && !errors.Is(err, workflowcore.ErrWorkflowCapacity)) || progress.Steps != 0 {
 		t.Fatal("another adapter duplicated active work", progress, err)
 	}
 }

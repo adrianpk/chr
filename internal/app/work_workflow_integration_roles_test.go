@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -25,7 +25,7 @@ func TestWorkflowIntegrationRole(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.AdmitWorkflowIntegration(t.Context(), core.WorkflowIntegrationAdmission{InvocationID: id, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "slice", ID: hierarchy.Tasks[0].Task.SliceID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}); err != nil {
+	if _, err := store.AdmitWorkflowIntegration(t.Context(), workflowcore.IntegrationAdmission{InvocationID: id, ExpectedRevision: run.Revision, Unit: workflowstate.Ref{Kind: "slice", ID: hierarchy.Tasks[0].Task.SliceID}, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -86,8 +86,8 @@ func TestWorkflowIntegrationFacts(t *testing.T) {
 		{"parallel roles", WorkflowIntegrationStatus{MaximumRoles: 3, AvailableRoles: 1, Roles: []WorkflowIntegrationRoleStatus{{Role: "executor", Slot: 1, State: "running"}, {Role: "merger", Slot: 3, State: "reconciliation_required"}}}, []string{"Agent capacity: parallel; limit 3; available 1", "Active agents: 2", "Agent lane 1: executor; running", "Agent lane 3: merger; reconciliation_required"}},
 		{"unmetered", WorkflowIntegrationStatus{Budget: WorkflowIntegrationBudgetStatus{TokensSettled: 200, TokensReserved: 100}}, []string{"Token budget: unmetered; settled 200; reserved 100"}},
 		{"finite tokens", WorkflowIntegrationStatus{Budget: WorkflowIntegrationBudgetStatus{AdmissionLimit: &limit, TokenLimit: &limit, TokensAvailable: &available, TokensSettled: 200, TokensReserved: 100}}, []string{"Admission token limit: 1000", "Token budget: limit 1000; settled 200; reserved 100; available 700"}},
-		{"budget block", WorkflowIntegrationStatus{Phase: "blocked", Publication: "application_unknown", Blocker: &core.WorkflowIntegrationBlocker{Reason: "submission_budget_exhausted", RequiredAction: "grant"}, Budget: WorkflowIntegrationBudgetStatus{AdmissionLimits: core.WorkflowIntegrationLimits{Submission: 3}, Limits: core.WorkflowIntegrationLimits{Submission: 4}, Consumed: core.WorkflowIntegrationLimits{Submission: 3}, Remaining: core.WorkflowIntegrationLimits{Submission: 1}}}, []string{"Integration phase: blocked", "Publication: application_unknown", "Required action: grant", "Integration blocker: submission_budget_exhausted", "Submission budget: admitted 3; limit 4; consumed 3; remaining 1"}},
-		{"decision wait", WorkflowIntegrationStatus{Decision: &WorkflowIntegrationDecisionStatus{ID: "choices", Revision: 2, Hash: "displayed-hash", State: "waiting", Requests: []core.WorkflowMergerDecision{{ID: "meaning", Issue: "Choose intended behavior", Authority: "operator", Options: []string{"preserve source", "preserve target"}}}}}, []string{"Decision binding: choices revision 2; waiting; hash displayed-hash", "Question meaning: Choose intended behavior; authority operator; options preserve source; preserve target"}},
+		{"budget block", WorkflowIntegrationStatus{Phase: "blocked", Publication: "application_unknown", Blocker: &workflowcore.IntegrationBlocker{Reason: "submission_budget_exhausted", RequiredAction: "grant"}, Budget: WorkflowIntegrationBudgetStatus{AdmissionLimits: workflowcore.IntegrationLimits{Submission: 3}, Limits: workflowcore.IntegrationLimits{Submission: 4}, Consumed: workflowcore.IntegrationLimits{Submission: 3}, Remaining: workflowcore.IntegrationLimits{Submission: 1}}}, []string{"Integration phase: blocked", "Publication: application_unknown", "Required action: grant", "Integration blocker: submission_budget_exhausted", "Submission budget: admitted 3; limit 4; consumed 3; remaining 1"}},
+		{"decision wait", WorkflowIntegrationStatus{Decision: &WorkflowIntegrationDecisionStatus{ID: "choices", Revision: 2, Hash: "displayed-hash", State: "waiting", Requests: []workflowcore.MergerDecision{{ID: "meaning", Issue: "Choose intended behavior", Authority: "operator", Options: []string{"preserve source", "preserve target"}}}}}, []string{"Decision binding: choices revision 2; waiting; hash displayed-hash", "Question meaning: Choose intended behavior; authority operator; options preserve source; preserve target"}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

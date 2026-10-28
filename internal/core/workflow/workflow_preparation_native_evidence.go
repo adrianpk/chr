@@ -1,0 +1,144 @@
+package workflow
+
+import (
+	"encoding/json"
+	"fmt"
+	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
+
+func (s *Store) sealWorkflowNativePreparation(run workflowInvocationFile, candidate *IntegrationCandidate) error {
+	input := candidate.Input
+	if input.Native == nil {
+		return nil
+	}
+
+	binding := workflowNativePreparationRecord(*candidate)
+
+	files, err := workflowNativePreparationEvidence(candidate, &binding)
+	if err != nil {
+		return err
+	}
+
+	candidate.Schema = workflowNativeCandidateSchema
+	candidate.Native = &NativeCandidate{NativeRecordBinding: binding}
+
+	candidate.Native.CandidateHash, err = NativeCandidateHash(*candidate)
+	if err != nil {
+		return err
+	}
+
+	if err := validateWorkflowNativeCandidate(*candidate); err != nil {
+		return err
+	}
+
+	if err := s.checkWorkflowNativePreparationFence(run, input.Native); err != nil {
+		return err
+	}
+
+	// Immutable evidence can survive a crash without granting authority. The
+	// candidate, attempt and queue pointers are journaled together afterward.
+	return s.commitFiles(files)
+}
+
+func workflowNativePreparationRecord(candidate IntegrationCandidate) NativeRecordBinding {
+	input, proof := candidate.Input, candidate.Input.Git
+	capability := input.Native.Capability
+
+	format := "sha1"
+	if len(proof.ResultCommit) == 64 {
+		format = "sha256"
+	}
+
+	return NativeRecordBinding{
+		SchemaVersion: 1, EntryID: input.Native.Entry.EntryID, InvocationID: candidate.InvocationID, Unit: input.Source.Unit,
+		CanonicalPR: input.Source.PullRequest.URL, SourceRepository: proof.Repository, SourceRef: capability.SourceRef, TargetRef: capability.TargetRef,
+		ObjectFormat: format, OriginalSource: proof.SourceCommit, PublishedSource: proof.ResultCommit, ValidatedBase: proof.BaseCommit,
+		PreparedResult: proof.ResultCommit, PreparedTree: proof.PreparedTree, Method: proof.Method,
+		ContractHash: input.Source.Slice.ContractHash, PolicyHash: capability.PolicyFingerprint, CapabilityHash: capability.Revision,
+		MergerAttemptRefs: input.MergerAttemptRefs,
+	}
+}
+
+func workflowNativePreparationEvidence(candidate *IntegrationCandidate, b *NativeRecordBinding) ([]workflowstate.FileChange, error) {
+	proof := candidate.Input.Git
+	if proof.Provenance == nil || len(proof.Provenance.Source) == 0 {
+		return nil, fmt.Errorf("%w: native validation requires the original source manifest", workflowstate.ErrConflict)
+	}
+
+	commits := make([]string, 0, len(proof.Provenance.Source))
+	for _, source := range proof.Provenance.Source {
+		commits = append(commits, source.Commit)
+	}
+
+	b.ValidationRefs = make([]workflowstate.EvidenceRef, 1)
+	values := []struct {
+		ref   *workflowstate.EvidenceRef
+		value any
+	}{
+		{&b.SourceManifestRef, NativeSourceManifest{"chr-native-source/v1", b.SourceRepository, b.SourceRef, b.OriginalSource, commits}},
+		{&b.HistoryManifestRef, NativeHistoryManifest{"chr-native-history/v1", proof}},
+		{&b.PreparationRef, candidate.Input},
+		{&b.CapabilityRef, candidate.Input.Native.Capability},
+		{&b.ValidationRefs[0], candidate.Validation},
+	}
+	files := make([]workflowstate.FileChange, 0, len(values))
+
+	for _, value := range values {
+		file, ref, err := workflowNativePreparationEvidenceFile(b.InvocationID, value.value)
+		if err != nil {
+			return nil, err
+		}
+
+		*value.ref = ref
+
+		files = append(files, file)
+	}
+
+	return files, nil
+}
+
+func workflowNativePreparationEvidenceFile(id string, value any) (workflowstate.FileChange, workflowstate.EvidenceRef, error) {
+	data, err := json.Marshal(value)
+	if err != nil || len(data) >= workflowstate.FileLimit {
+		return workflowstate.FileChange{}, workflowstate.EvidenceRef{}, workflowstate.ErrConflict
+	}
+
+	hash := contenthash.Sum(data)
+	ref := workflowstate.EvidenceRef{Path: filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "preparation", "evidence", hash+".json")), Hash: hash}
+
+	return workflowstate.FileChange{Path: ref.Path, After: data}, ref, nil
+}
+
+func (s *Store) workflowNativePreparedEntryChange(run *workflowInvocationFile, candidate IntegrationCandidate) (workflowstate.FileChange, error) {
+	if err := s.checkWorkflowNativePreparationFence(*run, candidate.Input.Native); err != nil {
+		return workflowstate.FileChange{}, err
+	}
+
+	entry, err := s.readWorkflowIntegrationEntry(*run, *run.Integration)
+	if err != nil {
+		return workflowstate.FileChange{}, err
+	}
+
+	request := IntegrationTransition{EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: "reviewing", CandidateRef: &workflowstate.EvidenceRef{Path: run.Preparation.ResultRef, Hash: run.Preparation.ResultHash}}
+	if entry.CandidateRef != nil {
+		request.CandidateHash = entry.CandidateRef.Hash
+	}
+
+	if err := guardWorkflowIntegrationTransition(entry, request); err != nil {
+		return workflowstate.FileChange{}, err
+	}
+
+	updateWorkflowIntegrationEntry(&entry, request)
+
+	file, err := workflowIntegrationEntryChange(entry, run.Integration.EntryRef.Hash)
+	if err != nil {
+		return file, err
+	}
+
+	updateWorkflowIntegrationBinding(run, IntegrationBinding{EntryID: entry.ID, Unit: entry.Unit, Revision: entry.Revision, EntryRef: workflowstate.EvidenceRef{Path: file.Path, Hash: contenthash.Sum(file.After)}})
+
+	return file, nil
+}

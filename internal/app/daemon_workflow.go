@@ -14,6 +14,7 @@ import (
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -156,7 +157,7 @@ func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry proje
 func daemonWorkflowWait(progress RetainedWorkProgress, failure error) bool {
 	stopped := progress.Status.StopIntent != "" && (progress.Status.Status == "paused" || progress.Status.Status == "cancelled")
 
-	return errors.Is(failure, core.ErrWorkflowOwned) || errors.Is(failure, core.ErrWorkflowCapacity) || errors.Is(failure, workflowstate.ErrConflict) || stopped
+	return errors.Is(failure, workflowcore.ErrWorkflowOwned) || errors.Is(failure, workflowcore.ErrWorkflowCapacity) || errors.Is(failure, workflowstate.ErrConflict) || stopped
 }
 
 func (runner daemonWorkflowRunner) progress(project string, progress RetainedWorkProgress, failure error) error {

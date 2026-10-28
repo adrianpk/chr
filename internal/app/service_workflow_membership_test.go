@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -18,7 +18,7 @@ import (
 // projection, retaining frozen exclusions through the central operation service.
 func TestServiceWorkflowMembership(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowSliceFixture(t)
-	start := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	start := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "service-membership",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "slice_set", Identity: hierarchy.Set.ID}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -45,7 +45,7 @@ func TestServiceWorkflowMembership(t *testing.T) {
 	}
 }
 
-func serviceWorkflowAmendmentRequest(t *testing.T, operations service, hierarchy core.WorkflowMaterializationResult) core.WorkflowSetAmendmentRequest {
+func serviceWorkflowAmendmentRequest(t *testing.T, operations service, hierarchy workflowcore.MaterializationResult) workflowcore.SetAmendmentRequest {
 	t.Helper()
 
 	plan := serviceWorkflowPlanFixture()
@@ -81,5 +81,5 @@ func serviceWorkflowAmendmentRequest(t *testing.T, operations service, hierarchy
 	plan.Slices[1].Tasks = append(plan.Slices[1].Tasks, task)
 	writeServiceWorkspaceFile(t, filepath.Join(operations.projectContext.ProjectDir, "ops", "default", plan.PlanRef), "approved amendment\n")
 
-	return core.WorkflowSetAmendmentRequest{SetPath: hierarchy.Set.Path, ExpectedRevision: hierarchy.Set.Revision, ExpectedSourceHash: hierarchy.Set.SourceHash, Plan: plan, ReserveTicketKey: func(context.Context) (string, error) { return "", fmt.Errorf("adapter allocator must not execute") }}
+	return workflowcore.SetAmendmentRequest{SetPath: hierarchy.Set.Path, ExpectedRevision: hierarchy.Set.Revision, ExpectedSourceHash: hierarchy.Set.SourceHash, Plan: plan, ReserveTicketKey: func(context.Context) (string, error) { return "", fmt.Errorf("adapter allocator must not execute") }}
 }

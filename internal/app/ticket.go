@@ -3,12 +3,12 @@ package app
 import (
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 var (
-	reviewProviderDiagnosticRunner core.ReviewProviderDiagnosticRunner = core.OSReviewProviderDiagnosticRunner{}
-	reviewRemoteCommandRunner      core.ReviewRemoteCommandRunner      = core.OSReviewRemoteCommandRunner{}
+	reviewProviderDiagnosticRunner workflowcore.ReviewProviderDiagnosticRunner = workflowcore.OSReviewProviderDiagnosticRunner{}
+	reviewRemoteCommandRunner      workflowcore.ReviewRemoteCommandRunner      = workflowcore.OSReviewRemoteCommandRunner{}
 )
 
 func (factory commandFactory) ticketCommand() *cli.Command {

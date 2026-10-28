@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/harness/codex"
 )
@@ -92,7 +92,7 @@ func checkDaemonWorkflowActiveStop(t *testing.T, intent string) {
 	}
 }
 
-func checkDaemonWorkflowStopCheckpoint(t *testing.T, operations service, before core.WorkflowInvocation, intent string) {
+func checkDaemonWorkflowStopCheckpoint(t *testing.T, operations service, before workflowcore.Invocation, intent string) {
 	t.Helper()
 
 	current, err := operations.ReadWorkflow(t.Context(), before.ID)
@@ -257,7 +257,7 @@ func checkDaemonWorkflowRecovery(t *testing.T, intent string) {
 	checkDaemonWorkflowRecoveryCheckpoint(t, operations, start.Invocation, intent)
 }
 
-func checkDaemonWorkflowRecoveryCheckpoint(t *testing.T, operations service, before core.WorkflowInvocation, intent string) {
+func checkDaemonWorkflowRecoveryCheckpoint(t *testing.T, operations service, before workflowcore.Invocation, intent string) {
 	t.Helper()
 
 	current, err := operations.ReadWorkflow(t.Context(), before.ID)
@@ -284,7 +284,7 @@ func daemonWorkflowCrashOwner(t *testing.T, project string) {
 		t.Fatal(err)
 	}
 
-	store := core.NewWorkflowStore(layout, os.Getenv("CHR_DAEMON_TEST_PROJECT_ID"))
+	store := workflowcore.NewWorkflowStore(layout, os.Getenv("CHR_DAEMON_TEST_PROJECT_ID"))
 
 	claim, err := store.ClaimWorkflow(t.Context(), os.Getenv("CHR_DAEMON_TEST_INVOCATION"))
 	if err != nil {

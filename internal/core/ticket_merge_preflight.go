@@ -9,42 +9,12 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
-)
-
-const (
-	// TicketMergePreflightBlockKindOperational defines a package boundary constant.
-	TicketMergePreflightBlockKindOperational = "operational"
-	// TicketMergePreflightBlockKindRepair defines a package boundary constant.
-	TicketMergePreflightBlockKindRepair = "repair"
-
-	// TicketMergePreflightBlockMissingHandoff defines a package boundary constant.
-	TicketMergePreflightBlockMissingHandoff = "missing_handoff"
-	// TicketMergePreflightBlockProviderUnreadable defines a package boundary constant.
-	TicketMergePreflightBlockProviderUnreadable = "provider_unreadable"
-	// TicketMergePreflightBlockPullRequestClosed defines a package boundary constant.
-	TicketMergePreflightBlockPullRequestClosed = "pull_request_closed"
-	// TicketMergePreflightBlockWrongBase defines a package boundary constant.
-	TicketMergePreflightBlockWrongBase = "wrong_base"
-	// TicketMergePreflightBlockHeadMismatch defines a package boundary constant.
-	TicketMergePreflightBlockHeadMismatch = "head_mismatch"
-	// TicketMergePreflightBlockNotMergeable defines a package boundary constant.
-	TicketMergePreflightBlockNotMergeable = "not_mergeable"
-	// TicketMergePreflightBlockRepairPending defines a package boundary constant.
-	TicketMergePreflightBlockRepairPending = "serial_repair_pending"
-	// TicketMergePreflightBlockInvalidMergeStrategy defines a package boundary constant.
-	TicketMergePreflightBlockInvalidMergeStrategy = "invalid_merge_strategy"
-
-	// TicketMergeStrategyMerge defines a package boundary constant.
-	TicketMergeStrategyMerge = "merge"
-	// TicketMergeStrategyRebase defines a package boundary constant.
-	TicketMergeStrategyRebase = "rebase"
-	// TicketMergeStrategySquash defines a package boundary constant.
-	TicketMergeStrategySquash = "squash"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TicketMergePreflightRemoteReader defines a package boundary interface.
 type TicketMergePreflightRemoteReader interface {
-	Read(ctx context.Context, rawURL string) (RemoteReviewSnapshot, error)
+	Read(ctx context.Context, rawURL string) (workflowcore.RemoteReviewSnapshot, error)
 }
 
 // TicketMergePreflightOptions describes a package boundary value.
@@ -61,7 +31,7 @@ type TicketMergePreflightResult struct {
 	Allowed       bool
 	TicketKey     string
 	ReviewRef     ticketmetadata.ReviewRef
-	Remote        RemoteReviewSnapshot
+	Remote        workflowcore.RemoteReviewSnapshot
 	ExpectedBase  string
 	MergeStrategy string
 	Blockers      []TicketMergePreflightBlocker
@@ -91,7 +61,7 @@ func RunTicketMergePreflight(ctx context.Context, opts TicketMergePreflightOptio
 
 	handoff, err := ticketcore.ValidateMergeHandoff(opts.Ticket)
 	if err != nil {
-		result.addBlocker(TicketMergePreflightBlockMissingHandoff, TicketMergePreflightBlockKindOperational, err.Error())
+		result.addBlocker(workflowcore.TicketMergePreflightBlockMissingHandoff, workflowcore.TicketMergePreflightBlockKindOperational, err.Error())
 
 		return result, nil
 	}
@@ -111,14 +81,14 @@ func RunTicketMergePreflight(ctx context.Context, opts TicketMergePreflightOptio
 	}
 
 	if opts.Remote == nil {
-		result.addBlocker(TicketMergePreflightBlockProviderUnreadable, TicketMergePreflightBlockKindOperational, "merge preflight remote reader is required")
+		result.addBlocker(workflowcore.TicketMergePreflightBlockProviderUnreadable, workflowcore.TicketMergePreflightBlockKindOperational, "merge preflight remote reader is required")
 
 		return result.finalize(), nil
 	}
 
 	snapshot, err := opts.Remote.Read(ctx, handoff.ReviewRef.URL)
 	if err != nil {
-		result.addBlocker(TicketMergePreflightBlockProviderUnreadable, TicketMergePreflightBlockKindOperational, err.Error())
+		result.addBlocker(workflowcore.TicketMergePreflightBlockProviderUnreadable, workflowcore.TicketMergePreflightBlockKindOperational, err.Error())
 
 		return result.finalize(), nil
 	}
@@ -137,7 +107,7 @@ func newTicketMergePreflightResult(opts TicketMergePreflightOptions) TicketMerge
 
 	mergeStrategy := strings.TrimSpace(opts.MergeStrategy)
 	if mergeStrategy == "" {
-		mergeStrategy = TicketMergeStrategyRebase
+		mergeStrategy = workflowcore.TicketMergeStrategyRebase
 	}
 
 	return TicketMergePreflightResult{
@@ -165,12 +135,12 @@ func (result TicketMergePreflightResult) finalize() TicketMergePreflightResult {
 
 func ticketMergeStrategyBlocker(strategy string) *TicketMergePreflightBlocker {
 	switch strings.TrimSpace(strategy) {
-	case TicketMergeStrategyMerge, TicketMergeStrategyRebase, TicketMergeStrategySquash:
+	case workflowcore.TicketMergeStrategyMerge, workflowcore.TicketMergeStrategyRebase, workflowcore.TicketMergeStrategySquash:
 		return nil
 	default:
 		return &TicketMergePreflightBlocker{
-			Code:   TicketMergePreflightBlockInvalidMergeStrategy,
-			Kind:   TicketMergePreflightBlockKindOperational,
+			Code:   workflowcore.TicketMergePreflightBlockInvalidMergeStrategy,
+			Kind:   workflowcore.TicketMergePreflightBlockKindOperational,
 			Detail: fmt.Sprintf("merge strategy is not allowed: %s", strategy),
 		}
 	}
@@ -187,8 +157,8 @@ func ticketMergeSerialRepairBlocker(ticket ticketcore.Indexed, tickets []ticketc
 		}
 
 		return &TicketMergePreflightBlocker{
-			Code:   TicketMergePreflightBlockRepairPending,
-			Kind:   TicketMergePreflightBlockKindRepair,
+			Code:   workflowcore.TicketMergePreflightBlockRepairPending,
+			Kind:   workflowcore.TicketMergePreflightBlockKindRepair,
 			Detail: fmt.Sprintf("review repair ticket must be resolved first: %s", candidate.Key),
 		}
 	}
@@ -196,38 +166,38 @@ func ticketMergeSerialRepairBlocker(ticket ticketcore.Indexed, tickets []ticketc
 	return nil
 }
 
-func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase string, snapshot RemoteReviewSnapshot) []TicketMergePreflightBlocker {
+func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase string, snapshot workflowcore.RemoteReviewSnapshot) []TicketMergePreflightBlocker {
 	metadata := parseTicketMergeRemoteMetadata(snapshot)
 	blockers := []TicketMergePreflightBlocker{}
 
 	if isTicketMergePullRequestClosed(metadata.State) {
 		blockers = append(blockers, TicketMergePreflightBlocker{
-			Code:   TicketMergePreflightBlockPullRequestClosed,
-			Kind:   TicketMergePreflightBlockKindOperational,
+			Code:   workflowcore.TicketMergePreflightBlockPullRequestClosed,
+			Kind:   workflowcore.TicketMergePreflightBlockKindOperational,
 			Detail: fmt.Sprintf("pull request is not open: %s", metadata.State),
 		})
 	}
 
 	if metadata.Base != "" && metadata.Base != expectedBase {
 		blockers = append(blockers, TicketMergePreflightBlocker{
-			Code:   TicketMergePreflightBlockWrongBase,
-			Kind:   TicketMergePreflightBlockKindOperational,
+			Code:   workflowcore.TicketMergePreflightBlockWrongBase,
+			Kind:   workflowcore.TicketMergePreflightBlockKindOperational,
 			Detail: fmt.Sprintf("pull request base is %q, expected %q", metadata.Base, expectedBase),
 		})
 	}
 
 	if metadata.Head != "" && metadata.Head != handoff.Branch {
 		blockers = append(blockers, TicketMergePreflightBlocker{
-			Code:   TicketMergePreflightBlockHeadMismatch,
-			Kind:   TicketMergePreflightBlockKindRepair,
+			Code:   workflowcore.TicketMergePreflightBlockHeadMismatch,
+			Kind:   workflowcore.TicketMergePreflightBlockKindRepair,
 			Detail: fmt.Sprintf("pull request head is %q, expected ticket branch %q", metadata.Head, handoff.Branch),
 		})
 	}
 
 	if isTicketMergeExplicitlyNotMergeable(metadata.Mergeable) {
 		blockers = append(blockers, TicketMergePreflightBlocker{
-			Code:   TicketMergePreflightBlockNotMergeable,
-			Kind:   TicketMergePreflightBlockKindRepair,
+			Code:   workflowcore.TicketMergePreflightBlockNotMergeable,
+			Kind:   workflowcore.TicketMergePreflightBlockKindRepair,
 			Detail: fmt.Sprintf("pull request is not mergeable: %s", metadata.Mergeable),
 		})
 	}
@@ -235,9 +205,9 @@ func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase str
 	return blockers
 }
 
-func parseTicketMergeRemoteMetadata(snapshot RemoteReviewSnapshot) ticketMergeRemoteMetadata {
+func parseTicketMergeRemoteMetadata(snapshot workflowcore.RemoteReviewSnapshot) ticketMergeRemoteMetadata {
 	switch snapshot.Reference.Provider {
-	case ReviewProviderGitHub:
+	case workflowcore.ReviewProviderGitHub:
 		return parseGitHubTicketMergeMetadata(snapshot.PullRequestJSON)
 	default:
 		return parseForgeTicketMergeMetadata(snapshot.PullRequestJSON)

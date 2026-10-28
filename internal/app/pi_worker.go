@@ -14,9 +14,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	"forge.adrianpk.com/chr/internal/harness"
 	"forge.adrianpk.com/chr/internal/harness/pi"
 )
@@ -76,7 +76,7 @@ func runPiWorker(ctx context.Context, stdin io.Reader, stdout io.Writer, options
 
 	prompt = string(contextData)
 
-	reservation, err := core.DelegateWorkerRuntimeReservation(ctx, directory)
+	reservation, err := workflowcore.DelegateWorkerRuntimeReservation(ctx, directory)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func runPiWorker(ctx context.Context, stdin io.Reader, stdout io.Writer, options
 }
 
 func piWorkerPrompt(data []byte, options pi.WorkerRuntimeOptions) (string, error) {
-	var input core.WorkflowTaskInput
+	var input workflowcore.TaskInput
 	if json.Unmarshal(data, &input) != nil || input.Schema != "chr-task-input/v2" || input.HarnessBinding == nil {
 		return "", errors.New("pi worker requires a retained v2 task input")
 	}
@@ -176,7 +176,7 @@ func (factory commandFactory) runPiBridge(ctx context.Context, cmd *cli.Command)
 	return err
 }
 
-func validPiWorkerRole(input core.WorkflowTaskInput, options pi.WorkerRuntimeOptions) bool {
+func validPiWorkerRole(input workflowcore.TaskInput, options pi.WorkerRuntimeOptions) bool {
 	binding := input.HarnessBinding
 
 	return binding.Harness == pi.Identity && binding.RuntimeRef == options.Image && binding.ModelProvider == options.Provider && binding.Model == options.Model && binding.Thinking == options.Thinking && input.Merger == nil && input.AgentCall == nil

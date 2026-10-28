@@ -11,8 +11,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -46,7 +46,7 @@ func (factory commandFactory) workUpgradeAction(ctx context.Context, cmd *cli.Co
 		return err
 	}
 
-	opts := core.WorkflowUpgradeOptions{ExpectedRevision: cmd.String("config-revision"), StateAuthority: workspaceconfig.WorkStateAuthority(cmd.String("state-authority")), ReviewMode: workflowstate.ReviewMode(cmd.String("review-mode")), Adoption: adoption}
+	opts := workflowcore.UpgradeOptions{ExpectedRevision: cmd.String("config-revision"), StateAuthority: workspaceconfig.WorkStateAuthority(cmd.String("state-authority")), ReviewMode: workflowstate.ReviewMode(cmd.String("review-mode")), Adoption: adoption}
 
 	result, err := operations.UpgradeWorkflowConfiguration(ctx, opts)
 	if err != nil {
@@ -63,7 +63,7 @@ func (factory commandFactory) workUpgradeAction(ctx context.Context, cmd *cli.Co
 	return err
 }
 
-func readWorkflowUpgradeSelection(path string) (*core.WorkflowPlanAdoptionOptions, error) {
+func readWorkflowUpgradeSelection(path string) (*workflowcore.PlanAdoptionOptions, error) {
 	if path == "" {
 		return nil, nil
 	}
@@ -87,11 +87,11 @@ func readWorkflowUpgradeSelection(path string) (*core.WorkflowPlanAdoptionOption
 	return decodeWorkflowUpgradeSelection(data)
 }
 
-func decodeWorkflowUpgradeSelection(data []byte) (*core.WorkflowPlanAdoptionOptions, error) {
+func decodeWorkflowUpgradeSelection(data []byte) (*workflowcore.PlanAdoptionOptions, error) {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
 
-	selection := &core.WorkflowPlanAdoptionOptions{}
+	selection := &workflowcore.PlanAdoptionOptions{}
 	if err := decoder.Decode(selection); err != nil {
 		return nil, err
 	}

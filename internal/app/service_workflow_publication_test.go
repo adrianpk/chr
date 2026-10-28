@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TestServiceWorkflowPublication shares the combined gate, human approval and
@@ -32,7 +32,7 @@ func TestServiceWorkflowPublication(t *testing.T) {
 	before := progress.Invocation
 
 	progress, err = operations.AdvanceWorkflowSliceIntegration(t.Context(), id, nil)
-	if !errors.Is(err, core.ErrWorkflowObservationRequired) || len(provider.submissions) != 1 || len(progress.Invocation.Attempts) != len(before.Attempts) {
+	if !errors.Is(err, workflowcore.ErrWorkflowObservationRequired) || len(provider.submissions) != 1 || len(progress.Invocation.Attempts) != len(before.Attempts) {
 		t.Fatal("central operation retried uncertain execution", err)
 	}
 }

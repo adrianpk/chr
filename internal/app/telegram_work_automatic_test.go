@@ -9,24 +9,24 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type telegramWorkAutomaticProvider struct{ *serviceWorkEntryProvider }
 
-func (p *telegramWorkAutomaticProvider) SubmitWorkflowIntegration(ctx context.Context, submission core.WorkflowSubmission) (core.WorkflowSubmissionResponse, error) {
+func (p *telegramWorkAutomaticProvider) SubmitWorkflowIntegration(ctx context.Context, submission workflowcore.Submission) (workflowcore.SubmissionResponse, error) {
 	proof := submission.Guard.Git
 	branch := "refs/heads/" + p.pr.BaseBranch
 
 	command := exec.CommandContext(ctx, "git", "-C", submission.PreparedLane.Worktree, "push", "--force-with-lease="+branch+":"+proof.BaseCommit, p.remote, proof.ResultCommit+":"+branch)
 	if output, err := command.CombinedOutput(); err != nil {
-		return core.WorkflowSubmissionResponse{}, fmt.Errorf("fixture publication: %w: %s", err, output)
+		return workflowcore.SubmissionResponse{}, fmt.Errorf("fixture publication: %w: %s", err, output)
 	}
 
 	p.submissions = append(p.submissions, submission.ID)
 	p.pr.State, p.pr.Merged, p.pr.ResultCommit = "closed", true, proof.ResultCommit
 
-	return core.WorkflowSubmissionResponse{Accepted: true, ResultCommit: proof.ResultCommit}, nil
+	return workflowcore.SubmissionResponse{Accepted: true, ResultCommit: proof.ResultCommit}, nil
 }
 
 // TestTelegramWorkAutomatic sends only admission and its confirmation. The real

@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -118,9 +118,9 @@ func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref telegramc
 
 func telegramWorkActivationCode(err error) string {
 	switch {
-	case errors.Is(err, core.ErrWorkflowOwned):
+	case errors.Is(err, workflowcore.ErrWorkflowOwned):
 		return "current_owner"
-	case errors.Is(err, core.ErrWorkflowCapacity):
+	case errors.Is(err, workflowcore.ErrWorkflowCapacity):
 		return "waiting_capacity"
 	case errors.Is(err, workflowstate.ErrConflict):
 		return "binding_changed"

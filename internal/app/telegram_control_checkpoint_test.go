@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TestTelegramControlCheckpoint preserves an operator stop when a live worker
@@ -37,7 +37,7 @@ func checkTelegramControlCheckpoint(t *testing.T, action string) {
 
 	select {
 	case err := <-done:
-		if err != nil && !errors.Is(err, core.ErrWorkflowStop) {
+		if err != nil && !errors.Is(err, workflowcore.ErrWorkflowStop) {
 			t.Fatal(err)
 		}
 	case <-time.After(10 * time.Second):

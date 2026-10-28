@@ -8,8 +8,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (factory commandFactory) indexCommand() *cli.Command {
@@ -60,7 +60,7 @@ func (factory commandFactory) runIndexRebuild(ctx context.Context, cmd *cli.Comm
 		return err
 	}
 
-	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func (factory commandFactory) runIndexStatus(ctx context.Context, cmd *cli.Comma
 		return err
 	}
 
-	index, err := core.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, env, factory.deps.assetsFS)
 	if err != nil {
 		return err
 	}

@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +19,7 @@ import (
 // map. It neither admits execution nor starts a worker.
 type PlanDeliveryResult struct {
 	Plan     PlanView
-	Workflow core.WorkflowMaterializationResult
+	Workflow workflowcore.MaterializationResult
 }
 
 // GeneratePlanDelivery creates a plan and its tickets in one user operation.
@@ -77,15 +77,15 @@ func (s service) validatePlanDeliveryScope(ctx context.Context, scope quizcore.S
 	return fmt.Errorf("save a spec for this use case before generating its plan")
 }
 
-func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (core.WorkflowMaterializationResult, error) {
+func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGenerateRequest, generated PlanOperationResult) (workflowcore.MaterializationResult, error) {
 	observed, err := s.planDeliveryInput(ctx, request, generated)
 	if err != nil {
-		return core.WorkflowMaterializationResult{}, err
+		return workflowcore.MaterializationResult{}, err
 	}
 
 	input, layout := observed.Input, observed.Layout
 
-	store := core.NewWorkflowStore(layout, s.projectContext.ProjectID)
+	store := workflowcore.NewWorkflowStore(layout, s.projectContext.ProjectID)
 
 	if retained, err := store.ResumePlanDelivery(ctx, input); retained.Found || err != nil {
 		if err == nil {
@@ -100,7 +100,7 @@ func (s service) materializeGeneratedPlan(ctx context.Context, request PlanGener
 
 	plan, err := s.generatePlanTicketContracts(ctx, input, planView)
 	if err != nil {
-		return core.WorkflowMaterializationResult{}, err
+		return workflowcore.MaterializationResult{}, err
 	}
 
 	return s.MaterializeWorkflowPlan(ctx, plan)

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
 	tgmessage "forge.adrianpk.com/chr/internal/core/telegram/message"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func (r telegramReceiver) offerConfirmationDocument(ctx context.Context, request telegramcore.OperationRequest, offer telegramcore.ActionOffer, image telegramConfirmationDocument) error {
@@ -56,7 +56,7 @@ func (r telegramReceiver) unavailableConfirmationDocument(ctx context.Context, r
 }
 
 type telegramWorkConfirmationService interface {
-	ReadTelegramWorkConfirmation(context.Context, telegramcore.OperationTarget, WorkflowBoundPreview) ([]core.WorkflowRecord, error)
+	ReadTelegramWorkConfirmation(context.Context, telegramcore.OperationTarget, WorkflowBoundPreview) ([]workflowcore.Record, error)
 }
 
 type telegramWorkConfirmation struct {

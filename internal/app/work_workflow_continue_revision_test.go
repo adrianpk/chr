@@ -7,13 +7,13 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type unavailableWorkflowPreparation struct{}
 
-func (unavailableWorkflowPreparation) PrepareWorkflowIntegration(context.Context, core.WorkflowPreparationQuery) (core.WorkflowIntegrationProof, error) {
-	return core.WorkflowIntegrationProof{}, errors.New("publisher credential unavailable")
+func (unavailableWorkflowPreparation) PrepareWorkflowIntegration(context.Context, workflowcore.PreparationQuery) (workflowcore.IntegrationProof, error) {
+	return workflowcore.IntegrationProof{}, errors.New("publisher credential unavailable")
 }
 
 // The CLI must bind explicit continuation to its observed revision. Otherwise

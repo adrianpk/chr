@@ -5,17 +5,17 @@ import (
 	"errors"
 	"fmt"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // UpgradeWorkflowConfiguration owns legacy runtime observation for the explicit
 // project upgrade. A supplied adoption map is checked by the same operation owner.
-func (s service) UpgradeWorkflowConfiguration(ctx context.Context, opts core.WorkflowUpgradeOptions) (core.WorkflowUpgradeResult, error) {
+func (s service) UpgradeWorkflowConfiguration(ctx context.Context, opts workflowcore.UpgradeOptions) (workflowcore.UpgradeResult, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir})
 	if err != nil {
-		return core.WorkflowUpgradeResult{}, err
+		return workflowcore.UpgradeResult{}, err
 	}
 
 	opts.CheckQuiescent = s.checkWorkflowUpgradeExecutions
@@ -25,7 +25,7 @@ func (s service) UpgradeWorkflowConfiguration(ctx context.Context, opts core.Wor
 		opts.Adoption = &selection
 	}
 
-	store := core.NewWorkflowStore(layout, s.projectContext.ProjectID)
+	store := workflowcore.NewWorkflowStore(layout, s.projectContext.ProjectID)
 
 	result, err := store.UpgradeWorkflowConfiguration(ctx, opts)
 	if err != nil || result.Adopted == nil {

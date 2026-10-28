@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TicketResultChangedFilesWriter defines a package boundary interface.
@@ -19,13 +21,13 @@ type WriteChangedFilesOptions struct {
 }
 
 type ticketResultChangedFilesWriter struct {
-	commenter TicketCommenter
+	commenter workflowcore.TicketCommenter
 }
 
 // NewTicketResultChangedFilesWriter constructs the corresponding package service or value.
 func NewTicketResultChangedFilesWriter() TicketResultChangedFilesWriter {
 	return &ticketResultChangedFilesWriter{
-		commenter: NewTicketCommenter(),
+		commenter: workflowcore.NewTicketCommenter(),
 	}
 }
 
@@ -42,7 +44,7 @@ func (w *ticketResultChangedFilesWriter) WriteChangedFiles(
 		return fmt.Errorf("result application ticket path is required")
 	}
 
-	return w.commenter.AddComment(ctx, AddTicketCommentOptions{
+	return w.commenter.AddComment(ctx, workflowcore.AddTicketCommentOptions{
 		Path:      opts.Application.TicketPath,
 		Author:    opts.Application.Comment.Author,
 		Body:      RenderResultApplicationChangedFilesBody(opts.Application),

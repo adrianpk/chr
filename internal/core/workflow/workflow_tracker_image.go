@@ -1,0 +1,130 @@
+package workflow
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"sort"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
+
+func (s *Store) workflowTrackerImage(snapshot Snapshot, setID string) (TrackerStatus, []byte, error) {
+	set, tasks, err := workflowTrackerMembers(snapshot, setID)
+	if err != nil {
+		return TrackerStatus{}, nil, err
+	}
+
+	result := TrackerStatus{Schema: "chr-tracker/v1", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: setID, Path: "tracker/" + setID + ".md"}
+	for _, record := range append([]Record{set}, tasks...) {
+		result.Sources = append(result.Sources, TrackerSource{ID: record.ID, Path: record.Path, Revision: record.Revision, Hash: record.SourceHash})
+	}
+
+	if err := s.workflowTrackerReceiptSources(&result, set, tasks); err != nil {
+		return result, nil, err
+	}
+
+	sort.Slice(result.Sources, func(i, j int) bool { return result.Sources[i].Path < result.Sources[j].Path })
+
+	data, err := json.Marshal(result.Sources)
+	if err != nil {
+		return result, nil, err
+	}
+
+	result.SourceHash = contenthash.Sum(data)
+
+	output := renderWorkflowTracker(result, set, tasks)
+	if len(output) > workflowstate.FileLimit {
+		return result, nil, fmt.Errorf("tracker output exceeds 1 MiB")
+	}
+
+	return result, output, nil
+}
+
+func workflowTrackerMembers(snapshot Snapshot, setID string) (Record, []Record, error) {
+	var (
+		set   Record
+		tasks []Record
+	)
+
+	for _, record := range snapshot.Records {
+		if record.Set != nil && record.ID == setID {
+			set = record
+		}
+
+		if record.Task != nil && record.Task.SetID == setID {
+			tasks = append(tasks, record)
+		}
+	}
+
+	if set.ID == "" {
+		return set, nil, fmt.Errorf("adopted workflow set not found: %s", setID)
+	}
+
+	orders := map[string]int{}
+	for _, slice := range set.Set.Slices {
+		orders[slice.ID] = slice.Order
+	}
+
+	sort.Slice(tasks, func(i, j int) bool {
+		if orders[tasks[i].Task.SliceID] != orders[tasks[j].Task.SliceID] {
+			return orders[tasks[i].Task.SliceID] < orders[tasks[j].Task.SliceID]
+		}
+
+		return tasks[i].Task.Order < tasks[j].Task.Order
+	})
+
+	return set, tasks, nil
+}
+
+func (s *Store) workflowTrackerReceiptSources(result *TrackerStatus, set Record, tasks []Record) error {
+	refs := map[string]bool{}
+	for _, task := range tasks {
+		refs[task.Task.DeliveryRef] = true
+	}
+
+	for _, slice := range set.Set.Slices {
+		refs[slice.DeliveryRef] = true
+	}
+
+	refs[set.Set.ClosureRef] = true
+	for _, ref := range set.Set.ClosureHistory {
+		refs[ref] = true
+	}
+
+	delete(refs, "")
+
+	for ref := range refs {
+		data, err := s.readWorkflowTrackerFile(ref)
+		if err != nil {
+			return err
+		}
+
+		result.Sources = append(result.Sources, TrackerSource{Path: ref, Hash: contenthash.Sum(data)})
+	}
+
+	return nil
+}
+
+//nolint:wsl_v5 // Adjacent writes form one generated Markdown document.
+func renderWorkflowTracker(result TrackerStatus, set Record, tasks []Record) []byte {
+	var output bytes.Buffer
+	output.WriteString("---\nworkflow_projection: chr-tracker/v1\nstate_authority: tickets\n")
+	fmt.Fprintf(&output, "slice_set_id: %s\nsource_hash: %s\n---\n\n", opsmetadata.Quote(set.ID), result.SourceHash)
+	output.WriteString("# Workflow tracker\n\nGenerated view. Ticket records and receipts own progress. Do not execute or import this file.\n\n")
+	fmt.Fprintf(&output, "Set: %s (%s). Closure receipt: %s.\n\n", opsmetadata.TableCell(set.ID), opsmetadata.TableCell(set.Set.Status), opsmetadata.TableCell(set.Set.ClosureRef))
+	output.WriteString("| Slice | Phase | Pull request | Delivery receipt |\n| --- | --- | --- | --- |\n")
+	ordered := append([]workflowstate.WorkflowSlice(nil), set.Set.Slices...)
+	sort.Slice(ordered, func(i, j int) bool { return ordered[i].Order < ordered[j].Order })
+	for _, slice := range ordered {
+		fmt.Fprintf(&output, "| %s | %s | %s | %s |\n", opsmetadata.TableCell(slice.ID), opsmetadata.TableCell(slice.Phase), opsmetadata.TableCell(slice.PullRequest), opsmetadata.TableCell(slice.DeliveryRef))
+	}
+	output.WriteString("\n| Ticket | Slice | Status | Phase | Delivery receipt |\n| --- | --- | --- | --- | --- |\n")
+	for _, task := range tasks {
+		fmt.Fprintf(&output, "| %s | %s | %s | %s | %s |\n", opsmetadata.TableCell(task.Task.Key), opsmetadata.TableCell(task.Task.SliceID), opsmetadata.TableCell(task.Task.Status), opsmetadata.TableCell(task.Task.Phase), opsmetadata.TableCell(task.Task.DeliveryRef))
+	}
+
+	return output.Bytes()
+}

@@ -1,7 +1,7 @@
 package app
 
 import (
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -14,15 +14,15 @@ type WorkflowIntegrationBudgetStatus struct {
 	TokensSettled   int64                          `json:"tokens_settled"`
 	TokensReserved  int64                          `json:"tokens_reserved"`
 	TokensAvailable *int64                         `json:"tokens_available,omitempty"`
-	AdmissionLimits core.WorkflowIntegrationLimits `json:"admission_limits"`
-	Limits          core.WorkflowIntegrationLimits `json:"limits"`
-	Consumed        core.WorkflowIntegrationLimits `json:"consumed"`
-	Remaining       core.WorkflowIntegrationLimits `json:"remaining"`
+	AdmissionLimits workflowcore.IntegrationLimits `json:"admission_limits"`
+	Limits          workflowcore.IntegrationLimits `json:"limits"`
+	Consumed        workflowcore.IntegrationLimits `json:"consumed"`
+	Remaining       workflowcore.IntegrationLimits `json:"remaining"`
 }
 
-func workflowIntegrationBudgetStatus(observed *core.WorkflowIntegrationInspection, unit workflowstate.Ref) WorkflowIntegrationBudgetStatus {
+func workflowIntegrationBudgetStatus(observed *workflowcore.IntegrationInspection, unit workflowstate.Ref) WorkflowIntegrationBudgetStatus {
 	budget, usage := observed.Budget, observed.Usage
-	consumed := core.WorkflowIntegrationLimits{Worker: int64(usage.WorkerCount), Review: int64(usage.ReviewCount), Closing: int64(len(usage.ClosingAttempts))}
+	consumed := workflowcore.IntegrationLimits{Worker: int64(usage.WorkerCount), Review: int64(usage.ReviewCount), Closing: int64(len(usage.ClosingAttempts))}
 
 	for _, counter := range budget.UnitCounters {
 		if counter.Unit == unit {
@@ -31,7 +31,7 @@ func workflowIntegrationBudgetStatus(observed *core.WorkflowIntegrationInspectio
 	}
 
 	limits := budget.LimitsSnapshot
-	remaining := core.WorkflowIntegrationLimits{Worker: max(0, limits.Worker-consumed.Worker), Review: max(0, limits.Review-consumed.Review), Closing: max(0, limits.Closing-consumed.Closing), Merger: max(0, limits.Merger-consumed.Merger), Drift: max(0, limits.Drift-consumed.Drift), Submission: max(0, limits.Submission-consumed.Submission)}
+	remaining := workflowcore.IntegrationLimits{Worker: max(0, limits.Worker-consumed.Worker), Review: max(0, limits.Review-consumed.Review), Closing: max(0, limits.Closing-consumed.Closing), Merger: max(0, limits.Merger-consumed.Merger), Drift: max(0, limits.Drift-consumed.Drift), Submission: max(0, limits.Submission-consumed.Submission)}
 
 	result := WorkflowIntegrationBudgetStatus{Revision: budget.Revision, AdmissionLimit: budget.AdmissionTokenLimit, TokenLimit: budget.TokenLimit, TokensSettled: budget.TokensSettled, TokensReserved: budget.TokensReserved, AdmissionLimits: budget.AdmissionLimits, Limits: limits, Consumed: consumed, Remaining: remaining}
 	if budget.TokenLimit != nil {

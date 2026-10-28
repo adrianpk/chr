@@ -14,7 +14,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 SCENARIOS = ROOT / "qa/scenarios/ticket-native-workflow"
-PACKAGES = ("./internal/core", "./internal/core/authoring", "./internal/app")
+PACKAGES = ("./internal/core", "./internal/core/authoring", "./internal/core/workflow", "./internal/app")
 FILE_LIMIT = 1024 * 1024
 
 

@@ -10,6 +10,7 @@ import (
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
@@ -25,9 +26,9 @@ func TestTicketDocumentRoundTrip(t *testing.T) {
 				"project_area": "ui", "source_kind": "implementation", "owner": "Maintainer", "assignee": "Developer",
 				"branch": "feat/ticket", "pr": "https://forge.example.test/team/project/pulls/7", "commits": "123456789abcdef\nabcdef123456789",
 			}
-			request := TicketEditRequest{Key: original.Ticket.Key, Revision: original.Revision, Fields: fields, Body: &body, Binding: ticketEditorBinding("save")}
+			request := workflowcore.TicketEditRequest{Key: original.Ticket.Key, Revision: original.Revision, Fields: fields, Body: &body, Binding: ticketEditorBinding("save")}
 
-			saved, err := UpdateTicketDocument(t.Context(), opts, request)
+			saved, err := workflowcore.UpdateTicketDocument(t.Context(), opts, request)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -35,7 +36,7 @@ func TestTicketDocumentRoundTrip(t *testing.T) {
 			checkTicketEditorSaved(t, original, saved, body, fields)
 
 			before := ticketEditorBytes(t, saved.Ticket.Path)
-			if _, err := UpdateTicketDocument(t.Context(), opts, request); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowcore.UpdateTicketDocument(t.Context(), opts, request); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale editor overwrote newer content", err)
 			}
 
@@ -48,7 +49,7 @@ func TestTicketDocumentRoundTrip(t *testing.T) {
 	}
 }
 
-func ticketEditorFixture(t *testing.T, kind string) (TicketBoardReadOptions, TicketDocument) {
+func ticketEditorFixture(t *testing.T, kind string) (workflowcore.TicketBoardReadOptions, workflowcore.TicketDocument) {
 	t.Helper()
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: t.TempDir(), Namespace: "default"})
@@ -71,9 +72,9 @@ func ticketEditorFixture(t *testing.T, kind string) (TicketBoardReadOptions, Tic
 	content := "---\n" + identity + "title: Original title\nstatus: in_progress\npriority: normal\nseverity: high\ntype: task\ncreated_at: 2026-01-02T03:04:05Z\nupdated_at: 2026-01-02T03:04:05Z\ncustom:\n  title: Keep nested title\n  flag: true\n---\n\n# Description\n\nOriginal complete description.\n\n# Comments\n\n## 2026-01-02T04:00:00Z Reviewer\n\nExisting comment.\n\n# Validation\n\nKeep evidence.\n"
 	writeTicketFile(t, path, content)
 
-	opts := TicketBoardReadOptions{Layout: layout, ProjectID: "project-1"}
+	opts := workflowcore.TicketBoardReadOptions{Layout: layout, ProjectID: "project-1"}
 
-	document, err := ReadTicketDocument(t.Context(), opts, key)
+	document, err := workflowcore.ReadTicketDocument(t.Context(), opts, key)
 	if err != nil || document.Fields["title"] != "Original title" {
 		t.Fatal("document read changed its identity or nested metadata shadowed its title", err, document)
 	}
@@ -81,7 +82,7 @@ func ticketEditorFixture(t *testing.T, kind string) (TicketBoardReadOptions, Tic
 	return opts, document
 }
 
-func checkTicketEditorSaved(t *testing.T, original, saved TicketDocument, body string, fields map[string]string) {
+func checkTicketEditorSaved(t *testing.T, original, saved workflowcore.TicketDocument, body string, fields map[string]string) {
 	t.Helper()
 
 	if saved.CommittedRevision == "" || saved.CommittedRevision != saved.Revision || saved.Ticket.Path != original.Ticket.Path || saved.Description != strings.TrimSpace(body) || saved.Revision == original.Revision {
@@ -102,10 +103,10 @@ func checkTicketEditorSaved(t *testing.T, original, saved TicketDocument, body s
 	}
 }
 
-func checkTicketEditorComment(t *testing.T, opts TicketBoardReadOptions, saved TicketDocument) {
+func checkTicketEditorComment(t *testing.T, opts workflowcore.TicketBoardReadOptions, saved workflowcore.TicketDocument) {
 	t.Helper()
 
-	commented, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{
+	commented, err := workflowcore.UpdateTicketDocument(t.Context(), opts, workflowcore.TicketEditRequest{
 		Key: saved.Ticket.Key, Revision: saved.Revision, Comment: "Independent comment.", Binding: ticketEditorBinding("comment"),
 	})
 	if err != nil || commented.CommittedRevision == "" || commented.CommittedRevision != commented.Revision || commented.Description != saved.Description || commented.Fields["title"] != saved.Fields["title"] || !strings.Contains(commented.Discussion, "Independent comment.") || !strings.Contains(commented.Discussion, "Existing comment.") {
@@ -126,7 +127,7 @@ func TestTicketDocumentRejections(t *testing.T) {
 	} {
 		before := ticketEditorBytes(t, original.Ticket.Path)
 
-		_, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{Key: original.Ticket.Key, Revision: original.Revision, Fields: fields, Binding: ticketEditorBinding("rejected")})
+		_, err := workflowcore.UpdateTicketDocument(t.Context(), opts, workflowcore.TicketEditRequest{Key: original.Ticket.Key, Revision: original.Revision, Fields: fields, Binding: ticketEditorBinding("rejected")})
 		if err == nil || before != ticketEditorBytes(t, original.Ticket.Path) {
 			t.Fatal("invalid mutation changed bytes", fields, err)
 		}
@@ -145,7 +146,7 @@ func TestTicketDocumentConcurrent(t *testing.T) {
 
 			body := fmt.Sprintf("Concurrent body %d.", i)
 
-			_, err := UpdateTicketDocument(t.Context(), opts, TicketEditRequest{Key: original.Ticket.Key, Revision: original.Revision, Body: &body, Binding: ticketEditorBinding(fmt.Sprintf("concurrent-%d", i))})
+			_, err := workflowcore.UpdateTicketDocument(t.Context(), opts, workflowcore.TicketEditRequest{Key: original.Ticket.Key, Revision: original.Revision, Body: &body, Binding: ticketEditorBinding(fmt.Sprintf("concurrent-%d", i))})
 
 			results <- err
 		}()

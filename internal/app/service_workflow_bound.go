@@ -4,7 +4,7 @@ import (
 	"context"
 	"reflect"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -16,7 +16,7 @@ type WorkflowRetainedReference struct {
 
 // ResumeBoundWork observes original scope and delegates one guarded checkpoint
 // to the shared retained-work owner. It never admits or widens native work.
-func (s service) ResumeBoundWork(ctx context.Context, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
+func (s service) ResumeBoundWork(ctx context.Context, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check workflowcore.AdmissionCheck) (RetainedWorkProgress, error) {
 	run, err := s.ReadWorkflow(ctx, reference.ID)
 	if err != nil {
 		return RetainedWorkProgress{}, err

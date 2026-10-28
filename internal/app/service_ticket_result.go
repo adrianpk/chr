@@ -12,6 +12,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -178,7 +179,7 @@ func refreshAppliedTicketIndex(ctx context.Context, env core.UserEnvironment, pl
 		return nil
 	}
 
-	index, err := core.NewWorkflowTicketIndex(ctx, env, assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, env, assetsFS)
 	if err != nil {
 		return err
 	}

@@ -3,8 +3,8 @@ package app
 import (
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TestGuidedUseCaseTUIResultGuard refuses a completed label when the native
@@ -16,7 +16,7 @@ func TestGuidedUseCaseTUIResultGuard(t *testing.T) {
 
 			observed := GuidedUseCaseInspection{Session: session}
 			if name != "missing" {
-				observed.Result = &core.WorkflowResultInspection{Complete: name == "verified"}
+				observed.Result = &workflowcore.ResultInspection{Complete: name == "verified"}
 			}
 
 			if name == "invalid" {

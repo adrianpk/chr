@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
@@ -14,7 +14,7 @@ import (
 // WorkflowWorkPreview reports the exact scope and current publication policy.
 type WorkflowWorkPreview struct {
 	ExecutionPolicy workflowstate.ExecutionPolicy `json:"execution_policy"`
-	Preview         core.WorkflowPreview          `json:"selection"`
+	Preview         workflowcore.Preview          `json:"selection"`
 	Target          workflowstate.PreviewTarget   `json:"target"`
 	Policy          workflowstate.ReviewPolicy    `json:"publication_policy"`
 }
@@ -69,14 +69,14 @@ func (s service) PreviewWorkExtent(ctx context.Context, request workflowstate.Pr
 }
 
 func (s service) previewWorkTarget(config workspaceconfig.Config, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
-	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
+	run := workflowcore.Invocation{InvocationInput: workflowcore.InvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
 
-	reader, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetReader)
+	reader, ok := s.workflowIntegrationObserver(run).(workflowcore.TargetReader)
 	if !ok {
 		return identity, fmt.Errorf("configured observer cannot read preview targets without fetching")
 	}
 
-	return reader.ReadWorkflowTarget(s.ctx, core.WorkflowTargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
+	return reader.ReadWorkflowTarget(s.ctx, workflowcore.TargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
 }
 
 func (s service) workflowExtentConfig() (workspaceconfig.Config, error) {
@@ -118,20 +118,20 @@ func (s service) StartWorkExtent(ctx context.Context, request workflowstate.Prev
 }
 
 // ContinueWorkExtent retains the invocation's selector, target and budgets.
-func (s service) ContinueWorkExtent(ctx context.Context, id string, steps int, expected ...uint64) (core.WorkflowContinuationProgress, error) {
+func (s service) ContinueWorkExtent(ctx context.Context, id string, steps int, expected ...uint64) (workflowcore.ContinuationProgress, error) {
 	return s.continueWorkExtent(ctx, id, steps, nil, expected...)
 }
 
-func (s service) continueWorkExtent(ctx context.Context, id string, steps int, check core.WorkflowAdmissionCheck, expected ...uint64) (core.WorkflowContinuationProgress, error) {
+func (s service) continueWorkExtent(ctx context.Context, id string, steps int, check workflowcore.AdmissionCheck, expected ...uint64) (workflowcore.ContinuationProgress, error) {
 	request, err := s.workflowContinuationInput(steps)
 	if err != nil {
-		return core.WorkflowContinuationProgress{}, err
+		return workflowcore.ContinuationProgress{}, err
 	}
 
 	request.AuthorizationCheck = check
 
 	if len(expected) > 1 || len(expected) == 1 && expected[0] == 0 {
-		return core.WorkflowContinuationProgress{}, workflowstate.ErrConflict
+		return workflowcore.ContinuationProgress{}, workflowstate.ErrConflict
 	}
 
 	if len(expected) == 1 {
@@ -153,10 +153,10 @@ func workflowInvocationRestriction(restrictions []workflowstate.ReviewMode) (wor
 	return restrictions[0], nil
 }
 
-func (s service) workflowContinuationInput(steps int) (core.WorkflowContinuationRequest, error) {
+func (s service) workflowContinuationInput(steps int) (workflowcore.ContinuationRequest, error) {
 	config, err := agentWorkLoopWorkspaceConfig(s.projectContext.ProjectDir)
 	if err != nil {
-		return core.WorkflowContinuationRequest{}, err
+		return workflowcore.ContinuationRequest{}, err
 	}
 
 	worker := slices.Clone(s.workflowWorker)
@@ -164,7 +164,7 @@ func (s service) workflowContinuationInput(steps int) (core.WorkflowContinuation
 		worker = (codex.Runner{}).WorkflowWorker()
 	}
 
-	request := core.WorkflowContinuationRequest{Worker: worker, StepLimit: steps, PullRequest: core.WorkflowSlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
+	request := workflowcore.ContinuationRequest{Worker: worker, StepLimit: steps, PullRequest: workflowcore.SlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
 
 	return request, nil
 }

@@ -8,6 +8,7 @@ import (
 
 	opsmetadata "forge.adrianpk.com/chr/internal/core/ops/metadata"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TicketMetadataUpdater updates editable ticket metadata fields.
@@ -44,7 +45,7 @@ func (u *ticketMetadataUpdater) UpdateMetadata(ctx context.Context, opts UpdateT
 		return fmt.Errorf("ticket synopsis is required")
 	}
 
-	content, err := readLegacyTicketFile(opts.Path)
+	content, err := workflowcore.ReadLegacyTicketFile(opts.Path)
 	if err != nil {
 		return fmt.Errorf("read ticket file: %w", err)
 	}
@@ -63,7 +64,7 @@ func (u *ticketMetadataUpdater) UpdateMetadata(ctx context.Context, opts UpdateT
 		return err
 	}
 
-	if err := writeLegacyTicketFile(ctx, opts.Path, content, []byte(updated)); err != nil {
+	if err := workflowcore.ReplaceLegacyTicketFile(ctx, opts.Path, content, []byte(updated)); err != nil {
 		return fmt.Errorf("write ticket file: %w", err)
 	}
 

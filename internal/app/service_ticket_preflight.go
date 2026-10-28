@@ -9,6 +9,7 @@ import (
 	harnessruntime "forge.adrianpk.com/chr/internal/core/harness/runtime"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -36,7 +37,7 @@ type ticketStartWorkspace struct {
 }
 
 func (s service) prepareTicketStart(ctx context.Context, ticket ticketcore.Indexed, opts ticketStartPreflightOptions) (ticketStartPreflight, error) {
-	if err := core.CheckLegacyWorkTicket(ticket.Path); err != nil {
+	if err := workflowcore.CheckLegacyWorkTicket(ticket.Path); err != nil {
 		return ticketStartPreflight{}, err
 	}
 
@@ -107,7 +108,7 @@ func (s service) buildLegacyTicketStartPreflight(ctx context.Context, ticket tic
 }
 
 func (s service) selectTicketStartTicket(ctx context.Context, key string) (ticketcore.Indexed, error) {
-	index, err := core.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}

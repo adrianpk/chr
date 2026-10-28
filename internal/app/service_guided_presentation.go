@@ -1,8 +1,8 @@
 package app
 
 import (
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func guidedControlChoices(observed GuidedUseCaseInspection) []string {
@@ -55,9 +55,9 @@ func guidedVisibleStatus(observed GuidedUseCaseInspection) string {
 type guidedResultExport struct {
 	Name, Stage, Status, Problem string
 	Complete                     bool
-	Deliveries                   []core.WorkflowResultReceipt
-	Validations                  []core.WorkflowResultValidation
-	Closures                     []core.WorkflowResultClosure
+	Deliveries                   []workflowcore.ResultReceipt
+	Validations                  []workflowcore.ResultValidation
+	Closures                     []workflowcore.ResultClosure
 	Ideas                        []authoringcore.GuidedLaterIdea
 }
 

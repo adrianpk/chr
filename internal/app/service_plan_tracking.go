@@ -8,12 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // PlanTrackingRequest selects the plan scope used to materialize tracking
@@ -26,7 +26,7 @@ type PlanTrackingRequest struct {
 
 // PlanTrackingResult reports generated tracking artifacts for a plan.
 type PlanTrackingResult struct {
-	Workflow     *core.WorkflowMaterializationResult
+	Workflow     *workflowcore.MaterializationResult
 	Message      string
 	Plan         PlanView
 	TrackingPath string

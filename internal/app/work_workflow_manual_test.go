@@ -12,7 +12,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -23,10 +23,10 @@ git -c user.name=Test -c user.email=test@example.com commit -qm 'Manual result'
 input=$(sha256sum "$CHR_WORKFLOW_INPUT")
 printf '{"input_hash":"%s","branch":"%s","commit":"%s","tree":"%s"}\n' "${input%% *}" "$(git symbolic-ref HEAD)" "$(git rev-parse HEAD)" "$(git rev-parse 'HEAD^{tree}')"`
 
-func workflowCLIManualStart(t *testing.T, operations service, hierarchy core.WorkflowMaterializationResult) string {
+func workflowCLIManualStart(t *testing.T, operations service, hierarchy workflowcore.MaterializationResult) string {
 	t.Helper()
 
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "cli-manual",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: serviceWorkflowDependencyGit(t, operations.projectContext.ProjectDir, "rev-parse", "HEAD")}},
 	}}

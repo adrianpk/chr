@@ -11,7 +11,7 @@ type leafDependencyCase struct {
 }
 
 func leafDependencyCases() []leafDependencyCase {
-	return append(append(ticketProjectionDependencyCases(), configurationDependencyCases()...), append([]leafDependencyCase{
+	return append(append(append(ticketProjectionDependencyCases(), configurationDependencyCases()...), workflowDependencyCases()...), append([]leafDependencyCase{
 		{"authoring bounded journals", "internal/core/authoring/owner.go", "package authoring\nimport _ \"" + coreImportPath + "ops/file\"\n", false},
 		{"authoring native coordinator", "internal/core/authoring/guided_preparation.go", "package authoring\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"file authoring cycle", "internal/core/ops/file/io.go", "package file\nimport _ \"" + coreImportPath + "authoring\"\n", true},
@@ -129,5 +129,15 @@ func configurationDependencyCases() []leafDependencyCase {
 		{"configuration root cycle", "internal/core/workspace/config/workflow.go", "package config\nimport _ \"" + moduleImportPath + "/internal/core\"\n", true},
 		{"configuration workflow coordinator", "internal/core/workspace/config/workflow.go", "package config\nimport _ \"" + coreImportPath + "workflow\"\n", true},
 		{"workspace configuration cycle", "internal/core/workspace/layout.go", "package workspace\nimport _ \"" + coreImportPath + "workspace/config\"\n", true},
+	}
+}
+
+func workflowDependencyCases() []leafDependencyCase {
+	return []leafDependencyCase{
+		{"workflow state contract", "internal/core/workflow/workflow_store.go", "package workflow\nimport _ \"forge.adrianpk.com/chr/internal/core/workflow/state\"\n", false},
+		{"workflow root cycle", "internal/core/workflow/workflow_store.go", "package workflow\nimport _ \"forge.adrianpk.com/chr/internal/core\"\n", true},
+		{"workflow adapter", "internal/core/workflow/workflow_store.go", "package workflow\nimport _ \"forge.adrianpk.com/chr/internal/app\"\n", true},
+		{"workflow descendant root cycle", "internal/core/workflow/durable/store.go", "package durable\nimport _ \"forge.adrianpk.com/chr/internal/core\"\n", true},
+		{"state coordinator configuration", "internal/core/workflow/state/value.go", "package state\nimport _ \"forge.adrianpk.com/chr/internal/core/workspace/config\"\n", true},
 	}
 }

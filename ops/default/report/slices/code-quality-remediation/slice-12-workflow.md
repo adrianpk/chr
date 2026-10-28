@@ -14,110 +14,84 @@ and recovery authority, direct consumers and cohesive stage contracts.
 
 ## Delivered Behavior
 
-Slice 11 is verified integrated through PR #448. Slice 12 implementation is active;
-the complete method/transaction/recovery map is frozen before package relocation.
-Shared cycle/review values and pure value-validation contracts now have the
-existing workflow/state owner with direct native, app and adapter consumers.
-Ticket projections have the existing ticket owner. The complete project
-configuration image and its admission/recovery operations now have the
-workspace/config owner, shared directly by workflow, app and adapters.
+`internal/core/workflow` now owns the actual `Store` and all 908 receiver methods.
+Core composition, application operations and adapters use that package directly.
+The repository/file locks, source-image and revision guards, journals, atomic
+multi-record writes and recovery remain at one owner. Legacy consumers call the
+real guarded read/replace operations; no type bridge or test-only export is added.
+
+Shared review/cycle values live in workflow/state. Ticket queries, Board/document
+projections and pure frontmatter edits use their existing ticket owners. The
+complete parsed configuration image, raw revision, explicit-key presence,
+defaults and guarded harness-selection recovery use workspace/config.
 
 ## Implementation Notes
 
-The approved T12.1–T12.6 tasks own this slice. The shared review prerequisite is
-implemented in `f4be8551581dbec43746e5b676b714911af24e2c`. All methods of the store move with
-their owning Go type. The ticket-projection prerequisite is implemented in
-`a96c05cee2000654f23e2ce0b0347b1155ec17ca`. Shared stage data belongs in workflow/state when needed
-without transferring persistence, coordination or transport behavior. The shared
-configuration prerequisite is implemented in `bedb07a4cca4d39c5f7099d594a83c6650002398`.
-The shared ticket text prerequisite is implemented in `3fb0f46aff5421452d6b602fe91e4e483e93dfbc`.
+T12.1 and the compiling T12.2 relocation are implemented. The
+[authority map](../../../plan/code-quality-remediation-slice-12-boundaries.md)
+retains the frozen predecessor identities/hashes and records actual current
+owners. All 79 direct root dependencies and 100 authority/recovery entries resolve;
+all 908 methods move with their Go type. Final stage ownership remains recorded
+separately for the subsequent approved extraction tasks.
+
+The mechanical unit moves 2,710 production declarations across 353 files and
+1,666 test declarations across 276 files. Compiler-resolved naming removes package
+stutter from 236 public types/functions and updates implicit embedded fields.
+All 4,342 moved declaration groups retain exact tokens after those names and owner
+qualification. JSON field/tag order, enum strings, nil/empty behavior, error branches
+and journal/lock order stay unchanged. Thirty-three shared fixture declarations
+without private owner references remain in both test packages; private workflow
+checks move beside their owner. Frozen wire fixture bytes are unchanged.
 
 ## Contracts Added or Changed
 
-The [authority map](../../../plan/code-quality-remediation-slice-12-boundaries.md)
-records all 908 store methods, 100 concrete IO/authority/recovery entries and 79
-direct root dependencies at the verified predecessor revision. All store methods
-retain one receiver owner; future policy consumers are recorded separately.
-All 71 assigned baseline signature rows map to 68 current declarations; 48 require
-refactoring, 22 are legal cohesion watches and one has a verified prior shared
-owner fix. Twelve review/cycle value/validator declarations have moved to workflow/state.
-Token comparison verifies their original enum strings, JSON field/tag order,
-nil/empty handling, branches and error messages after qualification/naming.
-Shared review values resolve ten direct dependencies. Ticket eligibility/order,
-Board values and document projections now have their existing ticket owner with
-direct app, adapter and native read consumers. Forty-two declaration moves retain
-exact tokens after qualification, API naming and cmp.Compare substitution; the
-removed integer comparator has the same standard-library result. These resolve
-another twelve dependencies. Configuration relocation resolves fifteen more,
-and shared ticket text edits resolve three more, leaving 39 direct root couplings. No type
-bridge or coordinator/transport/persistence authority moved into the value owner.
-The 114 configuration declarations retain exact tokens after qualification/API
-names, insignificant parameter commas and the original rebase default's literal
-value. Raw-image revision, explicit presence, defaults, validation order, locks
-and journal/image/receipt replay are unchanged. Config.Explicit exposes only a
-read-only key-presence query. The existing upgrade-journal tuple debt now names
-workspaceconfig.Config; its shape and Slice 15 ownership are retained.
-Ten ticket frontmatter/range declarations also have the existing metadata owner.
-Their token sequences and the removed insertion helper body match after naming
-and zero-width line-range correspondence. Required-field errors, exact delimiter/
-body bytes, range sentinels, insertion order and nil/empty behavior are unchanged.
-All 908 store methods still retain their original root receiver. Full family
-relocation and assigned signature remediation remain open.
+`ReadLegacyTicketFile` refuses adopted sources. `ReplaceLegacyTicketFile` takes
+the existing repository or non-Git file lock, rechecks adoption and source equality,
+and atomically replaces the whole image. These are actual legacy production
+operations; recovery callbacks and mutable store internals remain private.
+
+The workflow import guard permits its 19 actual neutral dependencies and rejects
+root core and adapters. The more-specific workflow/state guard retains its narrow
+bounds. Existing debt identities and owner-qualified signatures are explicitly
+rekeyed without adding allowances: 9,305 production declarations, ceiling six,
+162 exact debts and one external exception. The 71 assigned baseline rows still
+map to 68 declarations; their signature remediation remains T12.4 work.
+
+Acceptance/fault manifests retain their IDs, order and 78 distinct tests while 82
+bindings follow the moved sources. Native/live command selections target the
+actual workflow package. The frozen controller gate is unchanged.
 
 ## Files of Interest
 
-- `internal/core/workflow_store.go` and the workflow family.
-- `internal/core/workflow/state/`.
-- The approved source inventory and core owner ledger.
+- `internal/core/workflow/workflow_store.go`, `workflow_lock.go` and `workflow_transition.go`.
+- `internal/core/workflow/workflow_legacy_write.go` and colocated recovery tests.
+- `internal/core/workflow/state/` and `internal/core/workspace/config/`.
+- The method, boundary, dependency, signature and move CSVs linked from the authority map.
 
 ## Validation
 
-Activation documentation links, ticket lifecycle metadata and whitespace passed.
-The compiler-resolved source graph, complete method/dependency/signature identity
-coverage and exact frozen declaration hashes passed. These are mapping checks;
-the map is separate from runtime acceptance. The shared-value prerequisite passed:
+The current mechanical batch passes:
 
-- `go test ./internal/core/workflow/state ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(IntegrationCycle|ParseAgenticReview|ApplyAgenticReview|QualityRecordWire|QualityStorage|NativeDecisionReplay|NativeReplayFix|NativeMergerFix|WorkflowReviewModes|WorkflowReviewDecisionChecks|ServiceStartAllReadyAgentWork|Leaf)' -count=1 -timeout=3m`: focused value, frozen wire/storage, real Git replay/repair and native review/app integration checks pass; TUI compiles.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/state ./internal/core ./internal/app ./internal/tui`: zero issues.
-- `make check-go-style`: pass; 9306 production declarations, ceiling six, 162 exact debts and one existing external exception.
+- `go test ./internal/core/workflow ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(QualityRecordWire|QualityStorage|WorkflowRoundTrip|WorkflowClaimFence|WorkflowClaimJournal|WorkflowMaterializationRecovery|WorkflowUpgradeRecovery|WorkflowLegacyEntry|WorkflowAdoption|WorkflowRelocation|Ticket|LeafDependencies)' -count=1 -timeout=3m`: frozen wire/SQLite storage, real Git/filesystem, adoption, claim fencing/journals, materialization/upgrade recovery, ticket/legacy operations, app and boundary checks pass; TUI compiles.
+- `go test ./internal/core/workflow -run '^Test(WorkflowSubmissionJournal|WorkflowSliceJournal|WorkflowReviewJournal|WorkflowFinalizationCrash|WorkflowClosingJournal|WorkflowTrackerCrash|WorkflowPublicationCrash)$' -count=1 -timeout=20m -v`: all seven journal/crash-recovery checks pass through the existing QA fixture-owning runner; owned descendants finish cleanly.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
+- `make check-go-style`: pass with the unchanged limits above.
+- `python3 -m unittest discover -s scripts/qa -p 'test_nightly.py'`: eight runner/admission/evidence regressions pass; no exhaustive gate executes.
+- `scripts/check-package-readmes.sh`: pass.
 
-The twelve declaration token sequences match after namespace/validator naming.
-The ticket-projection prerequisite also passed:
-
-- `go test ./internal/core/ticket/... -count=1 -timeout=3m`: complete ticket-owner suite, including SQLite query/filter/order and Board regressions.
-- `go test ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(TicketBoard|TicketDocument|WorkflowSelection|WorkflowOrder|QualityRecordWire|QualityStorage|TicketLoopDryRunPrintsEligibleTickets|Leaf)' -count=1 -timeout=3m`: native filesystem/Git, selection/order, frozen wire/storage, CLI and dependency boundaries pass; TUI compiles.
-- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(TicketLoopQuery|BoardQuery|BoardObservation|TicketDocument|LegacyWorkObservation|WorkflowSelection|WorkflowOrder|WorkflowRoundTrip|QualityRecordWire|QualityStorage|TicketBoardPrintsBoardColumns|TicketLoopDryRunPrintsEligibleTickets|LeafDependencies)$' -count=1 -timeout=3m`: the anchored exact-name selection includes WorkflowRoundTrip, LegacyWorkObservation, CLI Board output and dependency checks. Prefix cases are covered by the two commands above.
-- `make check-go-style`: pass; 9305 production declarations, ceiling six, 162 exact debts and one existing external exception.
-
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues after removing two exact duplicate, newly unused root fixture helpers and splitting the boundary case list.
-
-The move ledger records 42 matching declaration token sequences and the exact
-standard-library replacement. The frozen entry map is unchanged.
-The configuration prerequisite passed:
-
-- `go test ./internal/core/workspace/config -count=1 -timeout=3m`: complete colocated selection preparation, recovery, receipt, bound and capacity tests.
-- `go test ./internal/core ./internal/app ./internal/tui ./scripts/goquality -run '^Test(LoadWorkspaceConfig|WorkflowConfig|WorkflowUpgrade|NativeProfile|NativeLegacySnapshot|NativePreparedSnapshot|WorkAuthority|HarnessSelection|HarnessGenerationConfigFence|WorkflowReviewPolicy|QualityRecordWire|QualityStorage|Leaf)' -count=1 -timeout=3m`: real filesystem/Git/process, frozen configuration/deadline, upgrade/recovery, wire/storage, app and boundary regressions pass; TUI compiles.
-- `go test ./internal/core -run '^Test(WorkflowConfigDeadline|HarnessSelectionUpgradeFence)$' -count=1 -timeout=3m`: unchanged deadline checks and the real cross-owner receipt-failure/upgrade/replay fixture pass.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workspace/config ./internal/core ./internal/app ./internal/tui ./scripts/goquality`: zero issues.
-- `make check-go-style`: pass; 9306 production declarations, ceiling six, 162 exact debts and one existing external exception.
-
-All 114 configuration declaration token comparisons pass. Earlier test/lint
-overlap hit the existing one-second deadline fixture; unchanged dev and the same
-candidate selection run after lint passed. Assertions and timeout bounds are
-unchanged. This is focused batch evidence, not final controller validation.
-The ticket text prerequisite passed:
-
-- `go test ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui -run '^Test(Ticket|ValidateTicket|QualityRecordWire|QualityStorage|ApplyAgenticReview|WorkflowRoundTrip)' -count=1 -timeout=3m`: ticket query/document/status/review, guarded native and legacy file operations, frozen wire/storage, app and TUI regressions pass.
-- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/ticket/... ./internal/core ./internal/app ./internal/tui`: zero issues.
-- `make check-go-style`: pass; 9305 production declarations, ceiling six, 162 exact debts and one existing external exception.
-
-Ten declaration token sequences and the insertion/range body correspondence pass.
-Final exact-head controller validation has not run.
+Compiler-resolved identity coverage and all 4,342 declaration token comparisons
+pass. Acceptance/fault source validation retains the same 78 test selections.
+Earlier prerequisite batches also passed ticket/configuration component suites
+and native Git/filesystem/wire/storage/app regressions. A prior overlap with strict
+lint hit the existing one-second configuration deadline fixture; unchanged dev and
+the same candidate selection after lint passed. Its bounds/assertions are unchanged.
+The seven-test recovery batch initially exceeded an aggregate three-minute test
+budget; the same tests passed with the existing QA 20-minute budget. Production
+deadlines and assertions are unchanged. Final exact-head controller validation
+has not run.
 
 ## Risks and Follow-ups
 
-Remaining transport, guided admission, native document and operation-lock
-dependencies include workflow-owned fringe functions that move with their types
-and all methods. Shared legacy read/replace consumers must retain the current
-native guards through real operation contracts during that relocation. Assigned signatures, stage ports, candidate validation and canonical
-integration remain outstanding.
+T12.3 stage ports and policy separation, T12.4 assigned signatures/typed modes and
+D08 receipt semantics, final caller reconciliation, exact-head validation and the
+canonical PR remain outstanding. Slice 12 is active and has not been integrated.

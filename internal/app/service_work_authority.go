@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 	"forge.adrianpk.com/chr/internal/harness/codex"
@@ -39,30 +39,30 @@ func (s service) nativeAgentWorkTarget(config workspaceconfig.Config) (workflows
 		return workflowstate.PreviewTarget{}, fmt.Errorf("ticket authority requires an explicit integration branch")
 	}
 
-	repository, err := core.WorkflowEntryRepository(s.ctx, s.projectContext.ProjectDir, config.Work.BranchPolicy.CanonicalRemote)
+	repository, err := workflowcore.EntryRepository(s.ctx, s.projectContext.ProjectDir, config.Work.BranchPolicy.CanonicalRemote)
 
 	return workflowstate.PreviewTarget{Repository: repository}, err
 }
 
 func (s service) observeNativeAgentWorkTarget(config workspaceconfig.Config, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
-	run := core.WorkflowInvocation{WorkflowInvocationInput: core.WorkflowInvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
+	run := workflowcore.Invocation{InvocationInput: workflowcore.InvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
 
-	observer, ok := s.workflowIntegrationObserver(run).(core.WorkflowTargetGit)
+	observer, ok := s.workflowIntegrationObserver(run).(workflowcore.TargetGit)
 	if !ok {
 		return identity, fmt.Errorf("configured observer cannot hydrate entrypoint targets")
 	}
 
-	return observer.ObserveWorkflowTarget(s.ctx, core.WorkflowTargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
+	return observer.ObserveWorkflowTarget(s.ctx, workflowcore.TargetQuery{Repository: identity.Repository, Directory: s.projectContext.ProjectDir, Branch: config.Work.BranchPolicy.IntegrationBranch})
 }
 
-func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection workflowstate.PreviewRequest, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (core.WorkflowStartResult, error) {
+func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection workflowstate.PreviewRequest, restriction workflowstate.ReviewMode, selected ...*workflowstate.SelectionGuard) (workflowcore.StartResult, error) {
 	target, err := s.nativeAgentWorkTarget(config)
 	if err != nil {
-		return core.WorkflowStartResult{}, err
+		return workflowcore.StartResult{}, err
 	}
 
 	selection.Target = target
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey:        "work-entry-" + strconv.FormatInt(time.Now().UnixNano(), 10),
 		Selection:         selection,
 		ReviewRestriction: restriction,
@@ -73,7 +73,7 @@ func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection w
 
 		request.Selection.Target, err = s.observeNativeAgentWorkTarget(config, target)
 		if err != nil {
-			return core.WorkflowStartResult{}, err
+			return workflowcore.StartResult{}, err
 		}
 
 		return s.StartWorkflow(s.ctx, request)
@@ -81,12 +81,12 @@ func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection w
 
 	store, err := s.workflowStore()
 	if err != nil {
-		return core.WorkflowStartResult{}, err
+		return workflowcore.StartResult{}, err
 	}
 
 	previous, found, err := store.FindWorkflowEntry(s.ctx, request)
 	if err != nil {
-		return core.WorkflowStartResult{}, err
+		return workflowcore.StartResult{}, err
 	}
 
 	if found {
@@ -96,13 +96,13 @@ func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection w
 	}
 
 	if err != nil {
-		return core.WorkflowStartResult{}, err
+		return workflowcore.StartResult{}, err
 	}
 
 	return s.StartWorkflow(s.ctx, request)
 }
 
-func retainedNativeAgentWorkRequest(request core.WorkflowStartRequest, previous core.WorkflowInvocation) (core.WorkflowStartRequest, error) {
+func retainedNativeAgentWorkRequest(request workflowcore.StartRequest, previous workflowcore.Invocation) (workflowcore.StartRequest, error) {
 	if request.ReviewRestriction != "" && request.ReviewRestriction != previous.ReviewRestriction {
 		return request, fmt.Errorf("%w: retained invocation has a different review restriction", workflowstate.ErrConflict)
 	}
@@ -130,7 +130,7 @@ func (s service) startNativeAgentWork(config workspaceconfig.Config, selection w
 		worker = (codex.Runner{}).WorkflowWorker()
 	}
 
-	request := core.WorkflowContinuationRequest{Worker: worker, StepLimit: limit, PullRequest: core.WorkflowSlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
+	request := workflowcore.ContinuationRequest{Worker: worker, StepLimit: limit, PullRequest: workflowcore.SlicePullRequestRequest{BaseBranch: config.Work.BranchPolicy.IntegrationBranch, Title: "Deliver ticket-native work", Body: "Deliver the host-validated ticket candidate."}}
 
 	progress, err := s.ContinueWorkflow(s.ctx, started.Invocation.ID, request, worker)
 	if progress.Invocation.ID == "" {
@@ -147,7 +147,7 @@ func (s service) startNativeAgentWork(config workspaceconfig.Config, selection w
 	return result, displayErr
 }
 
-func (s service) nativeAgentWorkResult(run core.WorkflowInvocation) (AgentWorkResult, error) {
+func (s service) nativeAgentWorkResult(run workflowcore.Invocation) (AgentWorkResult, error) {
 	store, err := s.workflowStore()
 	if err != nil {
 		return AgentWorkResult{}, err

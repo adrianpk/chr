@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type serviceWorkflowPreparationFixture struct{ *serviceWorkflowReviewFixture }
 
-func (p *serviceWorkflowPreparationFixture) WorkflowIntegrationCapability(_ context.Context, pr core.WorkflowPullRequestSnapshot, method string) (core.WorkflowPublicationCapability, error) {
-	return core.WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: strings.Repeat("a", 64), AtomicSourceBase: true, ExactResult: true}, nil
+func (p *serviceWorkflowPreparationFixture) WorkflowIntegrationCapability(_ context.Context, pr workflowcore.PullRequestSnapshot, method string) (workflowcore.PublicationCapability, error) {
+	return workflowcore.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: method, Mechanism: "fixture_atomic_source_base", Revision: strings.Repeat("a", 64), AtomicSourceBase: true, ExactResult: true}, nil
 }
 
 // TestServiceWorkflowPreparation uses the central service to prepare a real
@@ -60,7 +60,7 @@ func serviceWorkflowPreparationReady(t *testing.T) (service, string, *serviceWor
 	serviceWorkflowDeliveryGit(t, run.Lane.Worktree, "init", "--bare", remote)
 	serviceWorkflowDeliveryGit(t, run.Lane.Worktree, "push", remote, run.Lane.BaseCommit+":refs/heads/dev", run.Lane.HeadCommit+":"+run.Lane.Branch)
 
-	operations.workflowPreparationGit = core.NewWorkflowPreparationGit(provider.pr.Repository, remote)
+	operations.workflowPreparationGit = workflowcore.NewWorkflowPreparationGit(provider.pr.Repository, remote)
 
 	return operations, id, provider
 }

@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, core.WorkflowRecord, core.WorkflowStartRequest) {
+func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.GeneratedWorkflowPlan) (service, workflowcore.Record, workflowcore.StartRequest) {
 	t.Helper()
 
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t, plans...)
@@ -38,12 +38,12 @@ func serviceWorkflowTicketFixture(t *testing.T, plans ...generationcore.Generate
 		t.Fatal(err)
 	}
 
-	record, err := store.Create(t.Context(), "Independent task", core.WorkflowRecord{Kind: "ticket", Task: &task, Domain: grouped.Domain, Body: grouped.Body})
+	record, err := store.Create(t.Context(), "Independent task", workflowcore.Record{Kind: "ticket", Task: &task, Domain: grouped.Domain, Body: grouped.Body})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "independent",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -79,13 +79,13 @@ func TestServiceWorkflowTicket(t *testing.T) {
 	checkServiceWorkflowTicketPR(t, operations, run.Invocation.ID, request, candidate)
 }
 
-func checkServiceWorkflowTicketPR(t *testing.T, operations service, id string, request core.WorkflowStartRequest, candidate core.WorkflowSliceCandidate) {
+func checkServiceWorkflowTicketPR(t *testing.T, operations service, id string, request workflowcore.StartRequest, candidate workflowcore.SliceCandidate) {
 	t.Helper()
 
-	provider := &serviceWorkflowPRFixture{pr: core.WorkflowPullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}}
+	provider := &serviceWorkflowPRFixture{pr: workflowcore.PullRequestSnapshot{URL: request.Selection.Target.Repository + "/pulls/7", Repository: request.Selection.Target.Repository, HeadRepository: request.Selection.Target.Repository, HeadBranch: strings.TrimPrefix(candidate.Lane.Branch, "refs/heads/"), BaseBranch: "dev", HeadCommit: candidate.Result.Commit, BaseCommit: request.Selection.Target.Commit, State: "open"}}
 	operations.workflowPullRequests = provider
 
-	content := core.WorkflowSlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver independent task", Body: "Deliver its host-validated candidate."}
+	content := workflowcore.SlicePullRequestRequest{BaseBranch: "dev", Title: "Deliver independent task", Body: "Deliver its host-validated candidate."}
 	for range 2 {
 		if _, err := operations.EnsureWorkflowSlicePullRequest(t.Context(), id, content); err != nil {
 			t.Fatal(err)

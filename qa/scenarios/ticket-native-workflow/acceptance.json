@@ -7,14 +7,14 @@
       "id": "A01",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceOrdered",
-          "source": "internal/core/workflow_assurance_test.go"
+          "source": "internal/core/workflow/workflow_assurance_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowMaterialization",
-          "source": "internal/core/workflow_materialization_test.go"
+          "source": "internal/core/workflow/workflow_materialization_test.go"
         }
       ]
     },
@@ -22,14 +22,14 @@
       "id": "A02",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowRelocation",
-          "source": "internal/core/workflow_store_test.go"
+          "source": "internal/core/workflow/workflow_store_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowHierarchy",
-          "source": "internal/core/workflow_record_test.go"
+          "source": "internal/core/workflow/workflow_record_test.go"
         },
         {
           "package": "./internal/core/authoring",
@@ -37,9 +37,9 @@
           "source": "internal/core/authoring/plan_workflow_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowMaterializationRejects",
-          "source": "internal/core/workflow_materialization_test.go"
+          "source": "internal/core/workflow/workflow_materialization_test.go"
         }
       ]
     },
@@ -47,9 +47,9 @@
       "id": "A03",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceOrdered",
-          "source": "internal/core/workflow_assurance_test.go"
+          "source": "internal/core/workflow/workflow_assurance_test.go"
         }
       ]
     },
@@ -57,19 +57,19 @@
       "id": "A04",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionLocalOrder",
-          "source": "internal/core/workflow_selection_order_test.go"
+          "source": "internal/core/workflow/workflow_selection_order_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionSetOrder",
-          "source": "internal/core/workflow_selection_order_test.go"
+          "source": "internal/core/workflow/workflow_selection_order_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowFrontierOrder",
-          "source": "internal/core/workflow_frontier_test.go"
+          "source": "internal/core/workflow/workflow_frontier_test.go"
         }
       ]
     },
@@ -77,24 +77,24 @@
       "id": "A05",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionLooseExamples",
-          "source": "internal/core/workflow_selection_loose_test.go"
+          "source": "internal/core/workflow/workflow_selection_loose_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionLooseFilters",
-          "source": "internal/core/workflow_selection_loose_test.go"
+          "source": "internal/core/workflow/workflow_selection_loose_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionNativeTies",
-          "source": "internal/core/workflow_selection_loose_test.go"
+          "source": "internal/core/workflow/workflow_selection_loose_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionLooseOwnership",
-          "source": "internal/core/workflow_selection_loose_test.go"
+          "source": "internal/core/workflow/workflow_selection_loose_test.go"
         }
       ]
     },
@@ -102,9 +102,9 @@
       "id": "A06",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowManualExact",
-          "source": "internal/core/workflow_manual_test.go"
+          "source": "internal/core/workflow/workflow_manual_test.go"
         }
       ]
     },
@@ -112,19 +112,19 @@
       "id": "A07",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionPrerequisites",
-          "source": "internal/core/workflow_selection_dependencies_test.go"
+          "source": "internal/core/workflow/workflow_selection_dependencies_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionInvalidDependencies",
-          "source": "internal/core/workflow_selection_dependencies_test.go"
+          "source": "internal/core/workflow/workflow_selection_dependencies_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSelectionTargetProof",
-          "source": "internal/core/workflow_selection_dependencies_test.go"
+          "source": "internal/core/workflow/workflow_selection_dependencies_test.go"
         }
       ]
     },
@@ -132,14 +132,14 @@
       "id": "A08",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceOrdered",
-          "source": "internal/core/workflow_assurance_test.go"
+          "source": "internal/core/workflow/workflow_assurance_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowFinalizationCrash",
-          "source": "internal/core/workflow_finalization_recovery_test.go"
+          "source": "internal/core/workflow/workflow_finalization_recovery_test.go"
         }
       ]
     },
@@ -147,9 +147,9 @@
       "id": "A09",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowClaimProcessRace",
-          "source": "internal/core/workflow_claim_process_test.go"
+          "source": "internal/core/workflow/workflow_claim_process_test.go"
         },
         {
           "package": "./internal/app",
@@ -167,14 +167,14 @@
       "id": "A10",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceParallel",
-          "source": "internal/core/workflow_assurance_parallel_test.go"
+          "source": "internal/core/workflow/workflow_assurance_parallel_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowParallelExecution",
-          "source": "internal/core/workflow_parallel_runner_test.go"
+          "source": "internal/core/workflow/workflow_parallel_runner_test.go"
         }
       ]
     },
@@ -182,19 +182,19 @@
       "id": "A11",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowParallelPublication",
-          "source": "internal/core/workflow_parallel_publication_test.go"
+          "source": "internal/core/workflow/workflow_parallel_publication_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowPublicationMovedBase",
-          "source": "internal/core/workflow_publication_test.go"
+          "source": "internal/core/workflow/workflow_publication_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSubmissionAtomicGuard",
-          "source": "internal/core/workflow_submission_boundary_test.go"
+          "source": "internal/core/workflow/workflow_submission_boundary_test.go"
         }
       ]
     },
@@ -202,14 +202,14 @@
       "id": "A12",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowOwnerExpiry",
-          "source": "internal/core/workflow_stop_test.go"
+          "source": "internal/core/workflow/workflow_stop_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowCapacityOrphan",
-          "source": "internal/core/workflow_capacity_process_test.go"
+          "source": "internal/core/workflow/workflow_capacity_process_test.go"
         }
       ]
     },
@@ -217,24 +217,24 @@
       "id": "A13",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowContinuationDelivery",
-          "source": "internal/core/workflow_continuation_test.go"
+          "source": "internal/core/workflow/workflow_continuation_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSlicePRReuse",
-          "source": "internal/core/workflow_pull_request_test.go"
+          "source": "internal/core/workflow/workflow_pull_request_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSlicePRBlock",
-          "source": "internal/core/workflow_pull_request_test.go"
+          "source": "internal/core/workflow/workflow_pull_request_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceLoose",
-          "source": "internal/core/workflow_assurance_test.go"
+          "source": "internal/core/workflow/workflow_assurance_test.go"
         }
       ]
     },
@@ -242,14 +242,14 @@
       "id": "A14",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowPublicationUnknown",
-          "source": "internal/core/workflow_publication_boundary_test.go"
+          "source": "internal/core/workflow/workflow_publication_boundary_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowPublicationModes",
-          "source": "internal/core/workflow_publication_test.go"
+          "source": "internal/core/workflow/workflow_publication_test.go"
         }
       ]
     },
@@ -257,14 +257,14 @@
       "id": "A15",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowPublicationModes",
-          "source": "internal/core/workflow_publication_test.go"
+          "source": "internal/core/workflow/workflow_publication_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowPublicationUnsupported",
-          "source": "internal/core/workflow_publication_boundary_test.go"
+          "source": "internal/core/workflow/workflow_publication_boundary_test.go"
         }
       ]
     },
@@ -282,14 +282,14 @@
           "source": "internal/core/workspace_workflow_init_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowConfigErrors",
-          "source": "internal/core/config_workflow_test.go"
+          "source": "internal/core/workflow/config_workflow_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowUpgradeRecovery",
-          "source": "internal/core/workflow_upgrade_recovery_test.go"
+          "source": "internal/core/workflow/workflow_upgrade_recovery_test.go"
         }
       ]
     },
@@ -297,14 +297,14 @@
       "id": "A17",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowManualSnapshot",
-          "source": "internal/core/workflow_manual_test.go"
+          "source": "internal/core/workflow/workflow_manual_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowTaskRecordEdit",
-          "source": "internal/core/workflow_execution_limits_test.go"
+          "source": "internal/core/workflow/workflow_execution_limits_test.go"
         },
         {
           "package": "./internal/app",
@@ -317,19 +317,19 @@
       "id": "A18",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceOrdered",
-          "source": "internal/core/workflow_assurance_test.go"
+          "source": "internal/core/workflow/workflow_assurance_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowTrackerIO",
-          "source": "internal/core/workflow_tracker_recovery_test.go"
+          "source": "internal/core/workflow/workflow_tracker_recovery_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowTrackerConcurrentEdit",
-          "source": "internal/core/workflow_tracker_recovery_test.go"
+          "source": "internal/core/workflow/workflow_tracker_recovery_test.go"
         }
       ]
     },
@@ -337,24 +337,24 @@
       "id": "A19",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowMembershipFrontier",
-          "source": "internal/core/workflow_membership_frontier_test.go"
+          "source": "internal/core/workflow/workflow_membership_frontier_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowMembershipExternalOrder",
-          "source": "internal/core/workflow_membership_frontier_test.go"
+          "source": "internal/core/workflow/workflow_membership_frontier_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowReopening",
-          "source": "internal/core/workflow_reopening_test.go"
+          "source": "internal/core/workflow/workflow_reopening_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowLooseLater",
-          "source": "internal/core/workflow_loose_examples_test.go"
+          "source": "internal/core/workflow/workflow_loose_examples_test.go"
         }
       ]
     },
@@ -362,24 +362,24 @@
       "id": "A20",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowClosingRetry",
-          "source": "internal/core/workflow_closing_test.go"
+          "source": "internal/core/workflow/workflow_closing_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowClosingChanges",
-          "source": "internal/core/workflow_closing_boundary_test.go"
+          "source": "internal/core/workflow/workflow_closing_boundary_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowClosingActualMembers",
-          "source": "internal/core/workflow_closing_test.go"
+          "source": "internal/core/workflow/workflow_closing_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceOrdered",
-          "source": "internal/core/workflow_assurance_test.go"
+          "source": "internal/core/workflow/workflow_assurance_test.go"
         }
       ]
     },
@@ -387,19 +387,19 @@
       "id": "A21",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowStop",
-          "source": "internal/core/workflow_stop_test.go"
+          "source": "internal/core/workflow/workflow_stop_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowSubmissionStop",
-          "source": "internal/core/workflow_submission_boundary_test.go"
+          "source": "internal/core/workflow/workflow_submission_boundary_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowTerminalControl",
-          "source": "internal/core/workflow_control_guard_test.go"
+          "source": "internal/core/workflow/workflow_control_guard_test.go"
         },
         {
           "package": "./internal/app",
@@ -412,14 +412,14 @@
       "id": "A22",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowClaimJournal",
-          "source": "internal/core/workflow_claim_process_test.go"
+          "source": "internal/core/workflow/workflow_claim_process_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowFinalizationCrash",
-          "source": "internal/core/workflow_finalization_recovery_test.go"
+          "source": "internal/core/workflow/workflow_finalization_recovery_test.go"
         }
       ]
     },
@@ -457,29 +457,29 @@
       "id": "A24",
       "tests": [
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowBounds",
-          "source": "internal/core/workflow_index_test.go"
+          "source": "internal/core/workflow/workflow_index_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowTaskArgvBounds",
-          "source": "internal/core/workflow_execution_limits_test.go"
+          "source": "internal/core/workflow/workflow_execution_limits_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowContinuationBounds",
-          "source": "internal/core/workflow_continuation_test.go"
+          "source": "internal/core/workflow/workflow_continuation_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowAssuranceOrdered",
-          "source": "internal/core/workflow_assurance_test.go"
+          "source": "internal/core/workflow/workflow_assurance_test.go"
         },
         {
-          "package": "./internal/core",
+          "package": "./internal/core/workflow",
           "test": "TestWorkflowConfigBounds",
-          "source": "internal/core/config_workflow_test.go"
+          "source": "internal/core/workflow/config_workflow_test.go"
         }
       ]
     }

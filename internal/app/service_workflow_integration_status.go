@@ -1,7 +1,7 @@
 package app
 
 import (
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -19,7 +19,7 @@ type WorkflowIntegrationDecisionStatus struct {
 	Revision uint64                            `json:"revision"`
 	Hash     string                            `json:"hash"`
 	State    string                            `json:"state"`
-	Requests []core.WorkflowMergerDecision     `json:"questions"`
+	Requests []workflowcore.MergerDecision     `json:"questions"`
 	Answers  []workflowstate.IntegrationAnswer `json:"answers"`
 }
 
@@ -39,7 +39,7 @@ type WorkflowIntegrationStatus struct {
 	PreparedResult string                             `json:"prepared_result,omitempty"`
 	Method         string                             `json:"method,omitempty"`
 	Publication    string                             `json:"publication"`
-	Blocker        *core.WorkflowIntegrationBlocker   `json:"blocker,omitempty"`
+	Blocker        *workflowcore.IntegrationBlocker   `json:"blocker,omitempty"`
 	MaximumRoles   int                                `json:"maximum_roles"`
 	AvailableRoles int                                `json:"available_roles"`
 	Roles          []WorkflowIntegrationRoleStatus    `json:"roles"`
@@ -47,7 +47,7 @@ type WorkflowIntegrationStatus struct {
 	Decision       *WorkflowIntegrationDecisionStatus `json:"decision,omitempty"`
 }
 
-func workflowIntegrationStatus(observed *core.WorkflowIntegrationInspection) *WorkflowIntegrationStatus {
+func workflowIntegrationStatus(observed *workflowcore.IntegrationInspection) *WorkflowIntegrationStatus {
 	if observed == nil {
 		return nil
 	}
@@ -80,12 +80,12 @@ func workflowIntegrationStatus(observed *core.WorkflowIntegrationInspection) *Wo
 		}
 	}
 
-	result.CandidateHash = core.WorkflowIntegrationDisplayedCandidate(observed)
+	result.CandidateHash = workflowcore.IntegrationDisplayedCandidate(observed)
 
 	return result
 }
 
-func workflowIntegrationCandidateStatus(result *WorkflowIntegrationStatus, candidate *core.WorkflowIntegrationCandidate) {
+func workflowIntegrationCandidateStatus(result *WorkflowIntegrationStatus, candidate *workflowcore.IntegrationCandidate) {
 	if candidate == nil {
 		return
 	}
@@ -98,7 +98,7 @@ func workflowIntegrationCandidateStatus(result *WorkflowIntegrationStatus, candi
 	}
 }
 
-func workflowIntegrationPublicationStatus(submission *core.WorkflowSubmission) string {
+func workflowIntegrationPublicationStatus(submission *workflowcore.Submission) string {
 	if submission == nil {
 		return "not_started"
 	}

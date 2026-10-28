@@ -6,8 +6,8 @@ import (
 	"log/slog"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -65,7 +65,7 @@ func (host *guidedWorkHost) dispatchProgress(operations service, scope authoring
 	}
 
 	if len(host.progress) >= guidedHostActivationLimit || len(host.attempts) >= workflowstate.RecordLimit && host.attempts[key] == "" {
-		return core.ErrWorkflowCapacity
+		return workflowcore.ErrWorkflowCapacity
 	}
 
 	host.progress[key], host.attempts[key] = true, fingerprint
@@ -126,7 +126,7 @@ func (host *guidedWorkHost) activateRetained(operations service, session authori
 		return nil
 	}
 
-	run, err := core.ReadGuidedInvocation(host.ctx, operations.projectContext.ProjectDir, session)
+	run, err := workflowcore.ReadGuidedInvocation(host.ctx, operations.projectContext.ProjectDir, session)
 	if err != nil {
 		return err
 	}
@@ -137,7 +137,7 @@ func (host *guidedWorkHost) activateRetained(operations service, session authori
 
 	status, err := operations.WorkflowStatus(host.ctx, run.ID, WorkflowStatusRequest{Limit: 8})
 	if err == nil && status.Status == "completed" {
-		_, err = authoringcore.ReconcileGuidedResult(host.ctx, operations.projectContext.ProjectDir, authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
+		_, err = authoringcore.ReconcileGuidedResult(host.ctx, operations.projectContext.ProjectDir, authoringcore.GuidedUseCaseScope{RunID: session.ID, ProjectID: session.ProjectID, Namespace: session.Namespace}, workflowcore.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
 
 		return err
 	}
@@ -149,7 +149,7 @@ func (host *guidedWorkHost) activateRetained(operations service, session authori
 	return host.activate(operations, run.ID)
 }
 
-func (operations service) checkGuidedActivation(ctx context.Context, run core.WorkflowInvocation) error {
+func (operations service) checkGuidedActivation(ctx context.Context, run workflowcore.Invocation) error {
 	if run.Admission == nil || run.Admission.Guided == nil {
 		return workflowstate.ErrConflict
 	}
@@ -191,7 +191,7 @@ func (host *guidedWorkHost) acknowledgeStop(ctx context.Context, operations serv
 
 	scope := authoringcore.GuidedUseCaseScope{RunID: run.Admission.Guided.RunID, ProjectID: run.ProjectID, Namespace: run.Namespace}
 
-	_, err = authoringcore.ReconcileGuidedStop(ctx, operations.projectContext.ProjectDir, scope, core.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
+	_, err = authoringcore.ReconcileGuidedStop(ctx, operations.projectContext.ProjectDir, scope, workflowcore.NewGuidedWorkflowObserver(operations.projectContext.ProjectDir))
 	if err != nil && !errors.Is(err, context.Canceled) {
 		slog.WarnContext(ctx, "Guided stop acknowledgement needs recovery", "code", "guided_stop_acknowledgement_failed")
 	}

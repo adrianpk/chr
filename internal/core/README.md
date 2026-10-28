@@ -31,6 +31,12 @@ ticket mutations remain with their actual native owners.
 and ticket worktree lifecycle. Native admission composes these operations directly;
 the capability cannot import the root coordinator.
 
+`core/workflow` owns the durable workflow store, all of its receiver methods,
+repository locks, journals, guarded mutations and recovery. Core composition and
+application adapters import that owner directly. Shared retained values remain
+in `core/workflow/state`; the complete parsed configuration image and guarded
+harness-selection changes live in `core/workspace/config`.
+
 ## API
 
 Exported types are internal application contracts shared across adapters and

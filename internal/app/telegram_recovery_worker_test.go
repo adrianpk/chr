@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // TestTelegramRecoveryOwnedStop cancels only the receiver's actual source
@@ -57,7 +57,7 @@ func TestTelegramRecoveryOwnedStop(t *testing.T) {
 	checkTelegramControlPool(t, operations, 2, 2)
 }
 
-func checkTelegramRecoveryForeignOwner(t *testing.T, operations service, before core.WorkflowInvocation) {
+func checkTelegramRecoveryForeignOwner(t *testing.T, operations service, before workflowcore.Invocation) {
 	t.Helper()
 
 	after, err := operations.ReadWorkflow(t.Context(), before.ID)
@@ -68,7 +68,7 @@ func checkTelegramRecoveryForeignOwner(t *testing.T, operations service, before 
 	checkTelegramRecoveryAttempt(t, before.Attempts[0], after.Attempts[0])
 }
 
-func checkTelegramRecoveryAttempt(t *testing.T, first, current core.WorkflowAttempt) {
+func checkTelegramRecoveryAttempt(t *testing.T, first, current workflowcore.Attempt) {
 	t.Helper()
 
 	if first.ID != current.ID || first.Generation != current.Generation || first.InputHash != current.InputHash || first.Outcome != current.Outcome {

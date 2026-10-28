@@ -11,6 +11,7 @@ import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -109,7 +110,7 @@ func (s service) CreateTicket(request CreateTicketRequest) (CreateTicketResult, 
 }
 
 func (s service) reserveNextTicketKeyNumber(keyPrefix string) (int, error) {
-	seed, err := core.NextTicketKeyNumber(s.ctx, s.projectContext.ProjectDir, keyPrefix)
+	seed, err := workflowcore.NextTicketKeyNumber(s.ctx, s.projectContext.ProjectDir, keyPrefix)
 	if err != nil {
 		return 0, err
 	}
@@ -157,7 +158,7 @@ func (s service) CreateDefaultTicket() (ArtifactOperationResult, error) {
 }
 
 func (s service) refreshCreatedTicketIndex(ticketPath string) error {
-	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return err
 	}
@@ -291,7 +292,7 @@ func (s service) AddTicketComment(request TicketCommentRequest) (TicketOperation
 		return TicketOperationResult{}, err
 	}
 
-	err = core.NewTicketCommenter().AddComment(s.ctx, core.AddTicketCommentOptions{
+	err = workflowcore.NewTicketCommenter().AddComment(s.ctx, workflowcore.AddTicketCommentOptions{
 		Path:      ticket.Path,
 		Author:    request.Author,
 		Body:      request.Body,
@@ -345,7 +346,7 @@ func (s service) AttachTicketReviewReference(request TicketReviewReferenceReques
 		return TicketOperationResult{}, err
 	}
 
-	err = core.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(s.ctx, core.UpdateTicketReviewMetadataOptions{
+	err = workflowcore.NewTicketReviewMetadataUpdater().UpdateReviewMetadata(s.ctx, workflowcore.UpdateTicketReviewMetadataOptions{
 		Path:      ticket.Path,
 		Branch:    request.Branch,
 		ReviewRef: request.Ref,
@@ -414,7 +415,7 @@ func (s service) MoveTicketStatus(ticketKey, status string) (TicketOperationResu
 		return TicketOperationResult{}, err
 	}
 
-	err = core.NewTicketStatusUpdater().UpdateStatus(s.ctx, core.UpdateTicketStatusOptions{
+	err = workflowcore.NewTicketStatusUpdater().UpdateStatus(s.ctx, workflowcore.UpdateTicketStatusOptions{
 		Path:      ticket.Path,
 		Status:    ticketcore.Status(status),
 		UpdatedAt: time.Now().UTC(),
@@ -464,7 +465,7 @@ func (s service) listProjectTickets() ([]ticketcore.Indexed, error) {
 }
 
 func (s service) Board() (ticketcore.Board, error) {
-	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketcore.Board{}, err
 	}
@@ -485,7 +486,7 @@ func (s service) Board() (ticketcore.Board, error) {
 }
 
 func (s service) ticketByKey(key string) (ticketcore.Indexed, error) {
-	index, err := core.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
+	index, err := workflowcore.NewWorkflowTicketIndex(s.ctx, s.env, s.assetsFS)
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}

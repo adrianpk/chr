@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // RunWorkflowManual supervises one harness and reconciles its exact Git report.
 // The harness receives frozen public inputs; the host keeps claim credentials.
-func (s service) RunWorkflowManual(ctx context.Context, id string, harness []string) (result core.WorkflowTaskResult, err error) {
+func (s service) RunWorkflowManual(ctx context.Context, id string, harness []string) (result workflowcore.TaskResult, err error) {
 	if err := validateWorkflowManualHarness(harness); err != nil {
 		return result, err
 	}
@@ -66,22 +66,22 @@ func validateWorkflowManualHarness(harness []string) error {
 	return nil
 }
 
-func (s service) checkpointWorkflowManual(ctx context.Context, claim *core.WorkflowClaim, failure error) error {
+func (s service) checkpointWorkflowManual(ctx context.Context, claim *workflowcore.Claim, failure error) error {
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
 	return errors.Join(failure, s.CheckpointWorkflow(cleanup, claim))
 }
 
-func parseWorkflowManualReport(command core.WorkflowCommandResult) (core.WorkflowManualCandidate, error) {
+func parseWorkflowManualReport(command workflowcore.CommandResult) (workflowcore.ManualCandidate, error) {
 	if command.Truncated || len(command.Stdout) > 4096 {
-		return core.WorkflowManualCandidate{}, fmt.Errorf("manual candidate report exceeds 4096 bytes")
+		return workflowcore.ManualCandidate{}, fmt.Errorf("manual candidate report exceeds 4096 bytes")
 	}
 
 	decoder := json.NewDecoder(bytes.NewBufferString(command.Stdout))
 	decoder.DisallowUnknownFields()
 
-	candidate := core.WorkflowManualCandidate{}
+	candidate := workflowcore.ManualCandidate{}
 	if err := decoder.Decode(&candidate); err != nil {
 		return candidate, fmt.Errorf("decode manual candidate: %w", err)
 	}

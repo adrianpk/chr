@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	authoringstate "forge.adrianpk.com/chr/internal/core/authoring/state"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -253,7 +253,7 @@ func guardAuthoringWorkOwner(prepared PreparedAuthoringWork, projectID string) e
 	return guardAuthoringWorkRecord(*mutation.Native, scope)
 }
 
-func guardAuthoringWorkRecord(request core.WorkflowMutationRequest, scope authoringcore.WorkScope) error {
+func guardAuthoringWorkRecord(request workflowcore.MutationRequest, scope authoringcore.WorkScope) error {
 	if request.Binding != scope.Binding || request.ExpectedRevision != 0 || request.Record.Task == nil || request.Record.Task.ContractHash != scope.ContractHash || request.Record.Task.Phase != "pending" || request.Record.Task.Status != string(ticketcore.StatusBacklog) {
 		return workflowstate.ErrConflict
 	}

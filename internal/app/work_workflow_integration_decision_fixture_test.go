@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -29,7 +29,7 @@ func serviceIntegrationDecisionReady(t *testing.T) (service, string) {
 		t.Fatal(err)
 	}
 
-	page, err := store.QueryWorkflowIntegrationQueue(t.Context(), core.WorkflowIntegrationQueueQuery{InvocationID: id, Limit: 1})
+	page, err := store.QueryWorkflowIntegrationQueue(t.Context(), workflowcore.IntegrationQueueQuery{InvocationID: id, Limit: 1})
 	if err != nil || len(page.Entries) != 1 {
 		t.Fatal("missing actual admitted integration unit", err)
 	}
@@ -41,7 +41,7 @@ func serviceIntegrationDecisionReady(t *testing.T) (service, string) {
 
 	entry := page.Entries[0].Entry
 
-	entry, err = store.TransitionWorkflowIntegration(t.Context(), core.WorkflowIntegrationTransition{InvocationID: id, EntryID: entry.ID, InvocationRevision: run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: "merging"})
+	entry, err = store.TransitionWorkflowIntegration(t.Context(), workflowcore.IntegrationTransition{InvocationID: id, EntryID: entry.ID, InvocationRevision: run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: "merging"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func serviceIntegrationDecisionReady(t *testing.T) (service, string) {
 	return operations, id
 }
 
-func retainServiceIntegrationDecision(t *testing.T, operations service, entry core.WorkflowIntegrationEntry) {
+func retainServiceIntegrationDecision(t *testing.T, operations service, entry workflowcore.IntegrationEntry) {
 	t.Helper()
 
 	run, err := operations.ReadWorkflow(t.Context(), entry.InvocationID)
@@ -71,34 +71,34 @@ func retainServiceIntegrationDecision(t *testing.T, operations service, entry co
 
 	input := serviceIntegrationDecisionInput(t, operations, run, entry)
 
-	questions, err := core.WorkflowMergerRequiredDecisions(input)
+	questions, err := workflowcore.MergerRequiredDecisions(input)
 	if err != nil || len(questions) == 0 {
 		t.Fatal("sealed requirements did not retain an operator choice", err)
 	}
 
-	guard := core.WorkflowIntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, BudgetRevision: budget.Revision}
-	if _, err := operations.RecordWorkflowIntegrationDecisions(t.Context(), core.WorkflowIntegrationDecisionRequest{WorkflowIntegrationBudgetGuard: guard, ID: "requirements-choice", Input: input, Decisions: questions}); err != nil {
+	guard := workflowcore.IntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, BudgetRevision: budget.Revision}
+	if _, err := operations.RecordWorkflowIntegrationDecisions(t.Context(), workflowcore.IntegrationDecisionRequest{IntegrationBudgetGuard: guard, ID: "requirements-choice", Input: input, Decisions: questions}); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func serviceIntegrationDecisionInput(t *testing.T, operations service, run core.WorkflowInvocation, entry core.WorkflowIntegrationEntry) core.WorkflowMergerInput {
+func serviceIntegrationDecisionInput(t *testing.T, operations service, run workflowcore.Invocation, entry workflowcore.IntegrationEntry) workflowcore.MergerInput {
 	t.Helper()
 
 	now := time.Now().UTC()
 	gate := serviceIntegrationDecisionGate(t, operations, entry.Unit.ID)
-	input := core.WorkflowMergerInput{WorkflowMergerIdentity: core.WorkflowMergerIdentity{ProtocolVersion: 1, ID: "surface-decision", InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: "actionable_review_finding"}, WorkflowMergerGit: core.WorkflowMergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: run.PullRequest.TargetCommit, Method: "rebase"}, WorkflowMergerScope: core.WorkflowMergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, WorkflowMergerValidation: core.WorkflowMergerValidation{ValidationCommands: gate.Commands}, WorkflowMergerLimits: core.WorkflowMergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: "surface-decision", RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second)}}
+	input := workflowcore.MergerInput{MergerIdentity: workflowcore.MergerIdentity{ProtocolVersion: 1, ID: "surface-decision", InvocationID: run.ID, EntryID: entry.ID, Unit: entry.Unit, CandidateRevision: entry.StateRevision, CandidateHash: run.CandidateHash, ClaimGeneration: entry.ClaimGeneration, ScopeHash: entry.FrozenScopeHash, Reason: "actionable_review_finding"}, MergerGit: workflowcore.MergerGit{Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef, Source: run.Lane.HeadCommit, Base: run.PullRequest.TargetCommit, Method: "rebase"}, MergerScope: workflowcore.MergerScope{AllowedPaths: []string{"result.txt"}, ProtectedPaths: []string{"Makefile"}}, MergerValidation: workflowcore.MergerValidation{ValidationCommands: gate.Commands}, MergerLimits: workflowcore.MergerLimits{CapacityReservationID: "pending-capacity", BudgetReservationID: "surface-decision", RemainingAttempts: 3, WorkerTimeoutSeconds: run.Policy.WorkerTimeoutSeconds, AdmittedAt: now, Deadline: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second)}}
 	input.OwnedWorkspaceID = fmt.Sprintf("%x", sha256.Sum256([]byte(run.ID+"\x00"+entry.ID+"\x00"+input.ID)))
 	commits := strings.Fields(serviceWorkflowDependencyGit(t, run.Lane.Worktree, "rev-list", "--reverse", run.Lane.BaseCommit+".."+run.Lane.HeadCommit))
-	input.SourceManifestRef = serviceIntegrationDecisionEvidence(t, operations, run.ID, "source", core.WorkflowNativeSourceManifest{Schema: "chr-native-source/v1", Repository: entry.Repository, SourceRef: input.SourceRef, OriginalSource: input.Source, Commits: commits})
+	input.SourceManifestRef = serviceIntegrationDecisionEvidence(t, operations, run.ID, "source", workflowcore.NativeSourceManifest{Schema: "chr-native-source/v1", Repository: entry.Repository, SourceRef: input.SourceRef, OriginalSource: input.Source, Commits: commits})
 	input.ValidationContractRef = serviceIntegrationDecisionEvidence(t, operations, run.ID, "validation", gate)
 	source := serviceIntegrationDecisionEvidence(t, operations, run.ID, "source-intent", map[string]string{"intent": "Preserve the original source behavior"})
 	target := serviceIntegrationDecisionEvidence(t, operations, run.ID, "target-intent", map[string]string{"intent": "Preserve the target validation requirements"})
 	finding := serviceIntegrationDecisionEvidence(t, operations, run.ID, "finding", workflowstate.ReviewFinding{Category: workflowstate.AgenticReviewFindingCorrectness, Title: "Reconcile declared requirements", Detail: "The source and target intent require an explicit compatible interpretation"})
 	input.IntentRefs, input.TargetChangeRefs, input.FindingRefs = []workflowstate.EvidenceRef{source}, []workflowstate.EvidenceRef{target}, []workflowstate.EvidenceRef{finding}
-	input.Requirements = []core.WorkflowMergerRequirement{{ID: "source-api", Origin: "source", Evidence: source, ConflictsWith: []string{"target-validation"}}, {ID: "target-validation", Origin: "target", Evidence: target}}
+	input.Requirements = []workflowcore.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source, ConflictsWith: []string{"target-validation"}}, {ID: "target-validation", Origin: "target", Evidence: target}}
 
-	sealed, err := core.SealWorkflowMergerInput(input, now)
+	sealed, err := workflowcore.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -168,7 +168,7 @@ func serviceIntegrationDecisionGate(t *testing.T, operations service, sliceID st
 	return contract.Validation
 }
 
-func serviceIntegrationSliceDescriptor(t *testing.T, snapshot core.WorkflowSnapshot, sliceID string) workflowstate.WorkflowSlice {
+func serviceIntegrationSliceDescriptor(t *testing.T, snapshot workflowcore.Snapshot, sliceID string) workflowstate.WorkflowSlice {
 	t.Helper()
 
 	for _, record := range snapshot.Records {

@@ -11,12 +11,12 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	quizcore "forge.adrianpk.com/chr/internal/core/quiz"
 	quizmodel "forge.adrianpk.com/chr/internal/core/quiz/model"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -197,7 +197,7 @@ func checkWebPlanDelivery(t *testing.T, provider webViewProvider) {
 		t.Fatal(err)
 	}
 
-	snapshot, err := core.NewWorkflowStore(layout, operations.projectContext.ProjectID).Snapshot(t.Context())
+	snapshot, err := workflowcore.NewWorkflowStore(layout, operations.projectContext.ProjectID).Snapshot(t.Context())
 	if err != nil || len(snapshot.Records) != 2 {
 		t.Fatal("missing native plan and ticket", snapshot, err)
 	}

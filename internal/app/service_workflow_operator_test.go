@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -12,7 +12,7 @@ import (
 // retains the frozen policy while rejecting a stale second operator request.
 func TestServiceWorkflowGrant(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "budget-grant",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 		Policy:     workflowstate.ExecutionPolicy{AgentTokenBudget: 100},
@@ -33,7 +33,7 @@ func TestServiceWorkflowGrant(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	grant := core.WorkflowIntegrationGrantRequest{WorkflowIntegrationBudgetGuard: core.WorkflowIntegrationBudgetGuard{InvocationID: started.Invocation.ID, InvocationRevision: started.Invocation.Revision, BudgetRevision: budget.Revision}, Grant: workflowstate.IntegrationGrant{ID: "operator-grant", Kind: "tokens", Amount: 25, Actor: "operator", Reason: "Authorize one bounded extension"}}
+	grant := workflowcore.IntegrationGrantRequest{IntegrationBudgetGuard: workflowcore.IntegrationBudgetGuard{InvocationID: started.Invocation.ID, InvocationRevision: started.Invocation.Revision, BudgetRevision: budget.Revision}, Grant: workflowstate.IntegrationGrant{ID: "operator-grant", Kind: "tokens", Amount: 25, Actor: "operator", Reason: "Authorize one bounded extension"}}
 
 	budget, err = operations.GrantWorkflowIntegration(t.Context(), grant)
 	if err != nil || *budget.TokenLimit != 125 || *budget.AdmissionTokenLimit != 100 {

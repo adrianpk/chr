@@ -15,6 +15,7 @@ import (
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -272,7 +273,7 @@ func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, max
 		_ = registry.Close()
 	}()
 
-	index, err := core.NewWorkflowTicketIndex(ctx, runner.env, runner.assets)
+	index, err := workflowcore.NewWorkflowTicketIndex(ctx, runner.env, runner.assets)
 	if err != nil {
 		return daemonForegroundLoopResult{}, err
 	}

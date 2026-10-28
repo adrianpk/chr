@@ -2,88 +2,15 @@ package core
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"maps"
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
-	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
-	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
-
-// Native authority wins over its derived Markdown; every bounded page remains reachable.
-func TestTicketBoardNativePages(t *testing.T) {
-	store := nativeBoardStore(t)
-	writeTicketFile(t, workspacecore.UserPath(store.layout.ProjectDir(), "tickets", "projection.md"), "---\nkey: CHR-1\ntitle: Outdated projection\nstatus: done\n---\n")
-
-	before := nativeQueueImages(t, store.layout.Root())
-	opts := TicketBoardReadOptions{Layout: store.layout, ProjectID: store.projectID, NativeWorkflow: true}
-
-	first := checkNativeBoardPage(t, opts, 128, 128)
-	opts.Offset = first.NextOffset
-
-	second := checkNativeBoardPage(t, opts, 2, -1)
-	checkNativeBoardTickets(t, append(first.Tickets, second.Tickets...))
-
-	if first.Revision != second.Revision || !maps.Equal(before, nativeQueueImages(t, store.layout.Root())) {
-		t.Fatal("Board read changed canonical documents or the source revision")
-	}
-}
-
-func nativeBoardStore(t *testing.T) *WorkflowStore {
-	t.Helper()
-
-	store := workflowTestStore(t)
-
-	for i := 1; i <= workflowstate.PageLimit+2; i++ {
-		record := workflowTestTask(fmt.Sprintf("CHR-%d", i))
-		record.Metadata = map[string]json.RawMessage{"title": json.RawMessage(fmt.Sprintf("\"Native %d\"", i))}
-
-		data, err := encodeWorkflowRecord(record)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		writeTicketFile(t, filepath.Join(store.layout.Root(), record.Path), string(data))
-		writeTicketFile(t, filepath.Join(store.layout.Root(), filepath.Dir(record.Path), "artifact.md"), string(record.Body))
-	}
-
-	return store
-}
-
-func checkNativeBoardPage(t *testing.T, opts TicketBoardReadOptions, loaded, next int) ticketcore.Board {
-	t.Helper()
-
-	page, err := ReadTicketBoard(t.Context(), opts)
-	if err != nil || page.TotalCount != 130 || page.LoadedCount != loaded || page.Columns[1].Count != 130 || page.NextOffset != next {
-		t.Fatalf("page = %#v, %v", page, err)
-	}
-
-	return page
-}
-
-func checkNativeBoardTickets(t *testing.T, tickets []ticketcore.Indexed) {
-	t.Helper()
-
-	seen := map[string]bool{}
-	for _, ticket := range tickets {
-		if seen[ticket.Key] || !ticket.NativeWorkflow || ticket.Status != ticketcore.StatusReadyForDev || !strings.HasPrefix(ticket.Title, "Native ") {
-			t.Fatal("native identity duplicated or replaced by its projection", ticket)
-		}
-
-		seen[ticket.Key] = true
-	}
-
-	if len(seen) != 130 {
-		t.Fatal("pagination lost records")
-	}
-}
 
 // Repository status aliases differ from runtime aliases, and invalid data stays visible.
 func TestTicketBoardAttention(t *testing.T) {
@@ -101,7 +28,7 @@ func TestTicketBoardAttention(t *testing.T) {
 		writeTicketFile(t, filepath.Join(layout.Root(), "ticket", tc.path), tc.content)
 	}
 
-	board, err := ReadTicketBoard(t.Context(), TicketBoardReadOptions{Layout: layout, ProjectID: "project-1"})
+	board, err := workflowcore.ReadTicketBoard(t.Context(), workflowcore.TicketBoardReadOptions{Layout: layout, ProjectID: "project-1"})
 	if err != nil {
 		t.Fatalf("attention and alias projection = %#v, %v", board, err)
 	}
@@ -147,7 +74,7 @@ func TestTicketBoardFailures(t *testing.T) {
 
 			tc.setup(t, layout)
 
-			if _, err := ReadTicketBoard(t.Context(), TicketBoardReadOptions{Layout: layout, ProjectID: "project-1"}); err == nil {
+			if _, err := workflowcore.ReadTicketBoard(t.Context(), workflowcore.TicketBoardReadOptions{Layout: layout, ProjectID: "project-1"}); err == nil {
 				t.Fatal("invalid store became a successful empty Board")
 			}
 		})
@@ -159,7 +86,7 @@ func TestTicketBoardFailures(t *testing.T) {
 	}
 
 	for _, offset := range []int{-1, workflowstate.RecordLimit + 1} {
-		if _, err := ReadTicketBoard(context.Background(), TicketBoardReadOptions{Layout: layout, ProjectID: "project-1", Offset: offset}); err == nil {
+		if _, err := workflowcore.ReadTicketBoard(context.Background(), workflowcore.TicketBoardReadOptions{Layout: layout, ProjectID: "project-1", Offset: offset}); err == nil {
 			t.Fatal("out-of-bounds page accepted")
 		}
 	}

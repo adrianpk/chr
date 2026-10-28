@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -28,7 +28,7 @@ func (s service) ControlGuidedUseCase(ctx context.Context, command authoringcore
 }
 
 func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.Session) error {
-	if err := authoringcore.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session, core.NewGuidedWorkflowObserver(s.projectContext.ProjectDir)); err != nil {
+	if err := authoringcore.BindGuidedControlInvocation(ctx, s.projectContext.ProjectDir, session, workflowcore.NewGuidedWorkflowObserver(s.projectContext.ProjectDir)); err != nil {
 		return err
 	}
 
@@ -63,7 +63,7 @@ func (s service) controlGuidedWork(ctx context.Context, session *authoringcore.S
 func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *authoringcore.Session) error {
 	control := session.Guided.Control
 
-	run, err := core.ReadGuidedInvocation(ctx, s.projectContext.ProjectDir, *session)
+	run, err := workflowcore.ReadGuidedInvocation(ctx, s.projectContext.ProjectDir, *session)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *au
 	return nil
 }
 
-func (s service) applyGuidedNativeControl(ctx context.Context, store *core.WorkflowStore, request workflowstate.ControlMutationRequest) (workflowstate.ControlResult, error) {
+func (s service) applyGuidedNativeControl(ctx context.Context, store *workflowcore.Store, request workflowstate.ControlMutationRequest) (workflowstate.ControlResult, error) {
 	result, found, err := store.ReadWorkflowControlReceipt(ctx, request)
 	if err != nil || found {
 		return result, err

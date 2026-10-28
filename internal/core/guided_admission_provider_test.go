@@ -3,6 +3,7 @@ package core
 import (
 	"testing"
 
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -23,7 +24,7 @@ func TestGuidedUseCaseAdmissionProvider(t *testing.T) {
 				t.Setenv("CHR_GUIDED_PROVIDER_TEST_TOKEN", "")
 			}
 
-			err := NewRemoteReviewAdapter(config, nil).CheckWorkflowRepositoryProvider(t.Context(), "https://forge.example/team/project")
+			err := workflowcore.NewRemoteReviewAdapter(config, nil).CheckWorkflowRepositoryProvider(t.Context(), "https://forge.example/team/project")
 			if name == "ready" && err != nil || name != "ready" && err == nil {
 				t.Fatal("incorrect local provider readiness", err)
 			}

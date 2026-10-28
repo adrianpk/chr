@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -65,16 +65,16 @@ func (s service) recordViews(ctx context.Context, namespace string, query Record
 	return nativeRecordViews(snapshot, query)
 }
 
-func (s service) scopedRecordStore(namespace string) (*core.WorkflowStore, error) {
+func (s service) scopedRecordStore(namespace string) (*workflowcore.Store, error) {
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: s.projectContext.ProjectDir, Namespace: namespace})
 	if err != nil {
 		return nil, err
 	}
 
-	return core.NewWorkflowStore(layout, s.projectContext.ProjectID), nil
+	return workflowcore.NewWorkflowStore(layout, s.projectContext.ProjectID), nil
 }
 
-func nativeRecordViews(snapshot core.WorkflowSnapshot, query RecordQuery) ([]RecordView, error) {
+func nativeRecordViews(snapshot workflowcore.Snapshot, query RecordQuery) ([]RecordView, error) {
 	if !nativeRecordKind(query.Kind) {
 		return nil, ErrRecordUnsupported
 	}
@@ -98,7 +98,7 @@ func nativeRecordViews(snapshot core.WorkflowSnapshot, query RecordQuery) ([]Rec
 	return filterRecordViews(result, query)
 }
 
-func nativeRecordView(record core.WorkflowRecord, kind RecordKind) RecordView {
+func nativeRecordView(record workflowcore.Record, kind RecordKind) RecordView {
 	view := RecordView{Kind: kind, Identity: record.ID, Revision: record.Revision, SourceHash: record.SourceHash, Reference: record.Path, Body: string(record.Body)}
 	if err := json.Unmarshal(record.Metadata["title"], &view.Title); err != nil {
 		view.Title = record.ID
@@ -115,7 +115,7 @@ func nativeRecordView(record core.WorkflowRecord, kind RecordKind) RecordView {
 	return view
 }
 
-func sliceRecordViews(record core.WorkflowRecord) []RecordView {
+func sliceRecordViews(record workflowcore.Record) []RecordView {
 	var views []RecordView
 	for _, slice := range record.Set.Slices {
 		views = append(views, RecordView{Kind: RecordSlice, Identity: slice.ID, ParentID: record.ID, Title: slice.Title, Phase: slice.Phase, Revision: record.Revision, SourceHash: record.SourceHash, Reference: record.Path + "#" + slice.ID})

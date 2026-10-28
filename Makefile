@@ -102,7 +102,7 @@ qa-ticket-native-workflow:
 	@python3 scripts/qa/ticket-native-workflow.py $(GO)
 
 qa-native-integration:
-	@CHR_NATIVE_INTEGRATION_QA=1 $(GO) test ./internal/core -run '^(TestNative(ForgejoMethods|GitHubMethods|HTTPSMethods|PolicyDenials|PRChanges|TransportLoss)|TestWorkflowGit(Atomic|Advertisement|HTTPS|SSH|SSHUnknown)|TestNativeCapabilityDenials)$$' -count=1 -v
+	@CHR_NATIVE_INTEGRATION_QA=1 $(GO) test ./internal/core/workflow -run '^(TestNative(ForgejoMethods|GitHubMethods|HTTPSMethods|PolicyDenials|PRChanges|TransportLoss)|TestWorkflowGit(Atomic|Advertisement|HTTPS|SSH|SSHUnknown)|TestNativeCapabilityDenials)$$' -count=1 -v
 
 qa-reset-blog:
 	@$(MAKE) qa-reset QA_CASE=blog QA_REF=001

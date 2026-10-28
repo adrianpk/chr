@@ -3,40 +3,40 @@ package app
 import (
 	"context"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 // AdvanceWorkflowSliceIntegration reconciles delivery before guarded publication.
 // Adapters share this operation; it never starts another task or slice.
-func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string, reviewer []string) (core.WorkflowIntegrationProgress, error) {
+func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string, reviewer []string) (workflowcore.IntegrationProgress, error) {
 	store, provider, err := s.workflowReviewDependencies(id)
 	if err != nil {
-		return core.WorkflowIntegrationProgress{}, err
+		return workflowcore.IntegrationProgress{}, err
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
-		return core.WorkflowIntegrationProgress{}, err
+		return workflowcore.IntegrationProgress{}, err
 	}
 
 	preparer := s.workflowPreparationGit
 	if preparer == nil {
-		preparer = core.NewWorkflowPreparationGit(run.Selection.Target.Repository, run.Selection.Target.Repository)
+		preparer = workflowcore.NewWorkflowPreparationGit(run.Selection.Target.Repository, run.Selection.Target.Repository)
 	}
 
-	ports := core.WorkflowPublicationPorts{Provider: provider, Preparer: preparer, Observer: s.workflowIntegrationObserver(run), Reviewer: reviewer}
+	ports := workflowcore.PublicationPorts{Provider: provider, Preparer: preparer, Observer: s.workflowIntegrationObserver(run), Reviewer: reviewer}
 	bindWorkflowNativePublicationPorts(&ports, run)
 
 	return store.AdvanceWorkflowSliceIntegration(ctx, id, ports)
 }
 
-func bindWorkflowNativePublicationPorts(ports *core.WorkflowPublicationPorts, run core.WorkflowInvocation) {
-	ports.NativePublisher = core.NewWorkflowGitPublisher(run.Selection.Target.Repository, run.Selection.Target.Repository)
-	if publisher, ok := ports.Provider.(core.WorkflowGitPublisher); ok {
+func bindWorkflowNativePublicationPorts(ports *workflowcore.PublicationPorts, run workflowcore.Invocation) {
+	ports.NativePublisher = workflowcore.NewWorkflowGitPublisher(run.Selection.Target.Repository, run.Selection.Target.Repository)
+	if publisher, ok := ports.Provider.(workflowcore.GitPublisher); ok {
 		ports.NativePublisher = publisher
 	}
 
-	if observer, ok := ports.Provider.(core.WorkflowNativePublicationObserver); ok {
+	if observer, ok := ports.Provider.(workflowcore.NativePublicationObserver); ok {
 		ports.NativeObserver = observer
 	}
 }

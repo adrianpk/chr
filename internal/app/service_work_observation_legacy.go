@@ -10,6 +10,7 @@ import (
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -21,7 +22,7 @@ func (s service) observeLegacyWork(ctx context.Context, config workspaceconfig.C
 		return err
 	}
 
-	queue, err := core.ReadLegacyWorkQueue(ctx, layout, s.projectContext.ProjectID)
+	queue, err := workflowcore.ReadLegacyWorkQueue(ctx, layout, s.projectContext.ProjectID)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (s service) observeLegacyWork(ctx context.Context, config workspaceconfig.C
 	return nil
 }
 
-func (s service) observeLegacyQueue(ctx context.Context, config workspaceconfig.Config, queue core.LegacyWorkQueue, result *WorkObservation) error {
+func (s service) observeLegacyQueue(ctx context.Context, config workspaceconfig.Config, queue workflowcore.LegacyWorkQueue, result *WorkObservation) error {
 	preflight, err := core.RunWorkSelectionPreflight(ctx, core.WorkSelectionPreflightOptions{ProjectDir: s.projectContext.ProjectDir, Tickets: queue.Eligible, BranchPolicy: config.Work.BranchPolicy, Workspace: config.Work.Workspace, RequireBranchPolicy: true})
 	if err != nil {
 		return err

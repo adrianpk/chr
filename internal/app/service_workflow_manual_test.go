@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -13,7 +13,7 @@ import (
 // evidence reconciliation behind the same adapter-neutral service operation.
 func TestServiceWorkflowManual(t *testing.T) {
 	operations, hierarchy, target := serviceWorkflowTaskFixture(t)
-	request := core.WorkflowStartRequest{StartInput: workflowstate.StartInput{
+	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{
 		RequestKey: "manual-task",
 		Selection:  workflowstate.PreviewRequest{Selector: workflowstate.Selector{Extent: "ticket", Identity: hierarchy.Tasks[0].Task.Key}, Target: workflowstate.PreviewTarget{Repository: "https://forge.example/test/repo", Commit: target}},
 	}}
@@ -42,7 +42,7 @@ func TestServiceWorkflowManual(t *testing.T) {
 	checkServiceWorkflowManualResult(t, operations, claim, run.Invocation.ID, task, target)
 }
 
-func checkServiceWorkflowManualResult(t *testing.T, operations service, claim *core.WorkflowClaim, id string, task core.WorkflowManualTask, target string) {
+func checkServiceWorkflowManualResult(t *testing.T, operations service, claim *workflowcore.Claim, id string, task workflowcore.ManualTask, target string) {
 	t.Helper()
 
 	candidate := serviceWorkflowManualCandidate(t, task)
@@ -58,7 +58,7 @@ func checkServiceWorkflowManualResult(t *testing.T, operations service, claim *c
 	}
 }
 
-func serviceWorkflowManualCandidate(t *testing.T, task core.WorkflowManualTask) core.WorkflowManualCandidate {
+func serviceWorkflowManualCandidate(t *testing.T, task workflowcore.ManualTask) workflowcore.ManualCandidate {
 	t.Helper()
 
 	lane := task.Input.Lane.Worktree
@@ -73,5 +73,5 @@ func serviceWorkflowManualCandidate(t *testing.T, task core.WorkflowManualTask) 
 		t.Fatal("candidate commit/tree missing")
 	}
 
-	return core.WorkflowManualCandidate{InputHash: task.InputHash, Branch: task.Input.Lane.Branch, Commit: identities[0], Tree: identities[1]}
+	return workflowcore.ManualCandidate{InputHash: task.InputHash, Branch: task.Input.Lane.Branch, Commit: identities[0], Tree: identities[1]}
 }

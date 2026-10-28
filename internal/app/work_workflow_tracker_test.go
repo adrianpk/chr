@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
-func workflowTrackerCLI(t *testing.T, project, id, action string, extra ...string) (core.WorkflowTrackerStatus, error) {
+func workflowTrackerCLI(t *testing.T, project, id, action string, extra ...string) (workflowcore.TrackerStatus, error) {
 	t.Helper()
 
 	args := append([]string{"work", "tracker", action, "--dir", project, "--json"}, extra...)
@@ -23,7 +23,7 @@ func workflowTrackerCLI(t *testing.T, project, id, action string, extra ...strin
 
 	err := run(t.Context(), args, &output, &bytes.Buffer{})
 
-	var result core.WorkflowTrackerStatus
+	var result workflowcore.TrackerStatus
 	if decodeErr := json.Unmarshal(output.Bytes(), &result); decodeErr != nil {
 		t.Fatal("CLI omitted projection status", output.String(), decodeErr, err)
 	}
@@ -68,7 +68,7 @@ func TestWorkflowTrackerCLI(t *testing.T) {
 	checkWorkflowTrackerCLIRepair(t, project, hierarchy.Set.ID, before, edited)
 }
 
-func checkWorkflowTrackerCLIService(t *testing.T, operations service, id string, first core.WorkflowTrackerStatus) {
+func checkWorkflowTrackerCLIService(t *testing.T, operations service, id string, first workflowcore.TrackerStatus) {
 	t.Helper()
 
 	status, err := operations.InspectWorkflowTracker(t.Context(), id)

@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -34,7 +34,7 @@ func telegramWorkAdmitted(t *testing.T, extents ...string) (*telegramConversatio
 	return f, operations, refs[0]
 }
 
-func telegramWorkAdmissionFixture(t *testing.T, extent string) (*telegramConversationAppFixture, service, core.WorkflowRecord) {
+func telegramWorkAdmissionFixture(t *testing.T, extent string) (*telegramConversationAppFixture, service, workflowcore.Record) {
 	t.Helper()
 
 	if extent != "ticket" {
@@ -169,7 +169,7 @@ func TestTelegramWorkOtherOwner(t *testing.T) {
 	})
 
 	result := f.receiver.activateWork(t.Context(), ref)
-	if !errors.Is(result.Failure, core.ErrWorkflowOwned) || result.Progress.Steps != 0 {
+	if !errors.Is(result.Failure, workflowcore.ErrWorkflowOwned) || result.Progress.Steps != 0 {
 		t.Fatal("receiver replaced another owner's activation", result.Progress, result.Failure)
 	}
 
@@ -184,7 +184,7 @@ type telegramWorkFinalAuthority struct {
 	change func()
 }
 
-func (s telegramWorkFinalAuthority) ResumeTelegramWork(ctx context.Context, target telegramcore.OperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check core.WorkflowAdmissionCheck) (RetainedWorkProgress, error) {
+func (s telegramWorkFinalAuthority) ResumeTelegramWork(ctx context.Context, target telegramcore.OperationTarget, reference WorkflowRetainedReference, preview WorkflowBoundPreview, check workflowcore.AdmissionCheck) (RetainedWorkProgress, error) {
 	calls := 0
 	guard := func(ctx context.Context) error {
 		calls++

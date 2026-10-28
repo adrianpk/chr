@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 type harnessJourneyChoice struct{ transport, worker, generation string }
@@ -42,7 +42,7 @@ func TestHarnessJourney(t *testing.T) {
 	webHarnessCheckProcess(t, f.operations, webHarnessSnapshot(t, f.operations))
 }
 
-func (f *harnessJourney) startWorker(t *testing.T) (core.WorkflowInvocation, *core.WorkflowClaim) {
+func (f *harnessJourney) startWorker(t *testing.T) (workflowcore.Invocation, *workflowcore.Claim) {
 	t.Helper()
 
 	started, err := f.operations.StartWorkflow(t.Context(), f.start)
@@ -80,7 +80,7 @@ func (f *harnessJourney) checkAdmission(t *testing.T, index int, choice harnessJ
 	task := *f.record.Task
 
 	task.Key = fmt.Sprintf("PRJ-%d", 91+index)
-	if _, err := store.Create(t.Context(), "Independent role combination", core.WorkflowRecord{Kind: "ticket", Task: &task, Domain: f.record.Domain, Body: f.record.Body}); err != nil {
+	if _, err := store.Create(t.Context(), "Independent role combination", workflowcore.Record{Kind: "ticket", Task: &task, Domain: f.record.Domain, Body: f.record.Body}); err != nil {
 		t.Fatal(err)
 	}
 
@@ -102,7 +102,7 @@ func (f *harnessJourney) checkAdmission(t *testing.T, index int, choice harnessJ
 	}
 }
 
-func (f *harnessJourney) resumeWorker(t *testing.T, before core.WorkflowInvocation, claim *core.WorkflowClaim) {
+func (f *harnessJourney) resumeWorker(t *testing.T, before workflowcore.Invocation, claim *workflowcore.Claim) {
 	t.Helper()
 
 	if _, err := f.operations.StopWorkflow(t.Context(), before.ID, "pause", before.Revision); err != nil {

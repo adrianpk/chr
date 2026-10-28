@@ -9,6 +9,7 @@ import (
 	"time"
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 )
 
 func TestTicketCommenterAddsComment(t *testing.T) {
@@ -32,7 +33,7 @@ func TestTicketCommenterAddsComment(t *testing.T) {
 		t.Fatalf("write ticket: %v", err)
 	}
 
-	err = NewTicketCommenter().AddComment(context.Background(), AddTicketCommentOptions{
+	err = workflowcore.NewTicketCommenter().AddComment(context.Background(), workflowcore.AddTicketCommentOptions{
 		Path:      path,
 		Author:    "adrian",
 		Body:      "Looks ready.",
@@ -82,7 +83,7 @@ go test ./...
 		t.Fatalf("write ticket: %v", err)
 	}
 
-	err = NewTicketCommenter().AddComment(context.Background(), AddTicketCommentOptions{
+	err = workflowcore.NewTicketCommenter().AddComment(context.Background(), workflowcore.AddTicketCommentOptions{
 		Path:      path,
 		Author:    "chr",
 		Body:      "Execution finished.",
@@ -109,7 +110,7 @@ go test ./...
 }
 
 func TestTicketCommenterRejectsMissingCommentBody(t *testing.T) {
-	err := NewTicketCommenter().AddComment(context.Background(), AddTicketCommentOptions{
+	err := workflowcore.NewTicketCommenter().AddComment(context.Background(), workflowcore.AddTicketCommentOptions{
 		Path: filepath.Join(t.TempDir(), "ticket.md"),
 	})
 	if err == nil {

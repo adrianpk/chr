@@ -1,0 +1,176 @@
+package workflow
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"os"
+	"path/filepath"
+
+	"forge.adrianpk.com/chr/internal/core/contenthash"
+	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
+
+type workflowControlReceipt struct {
+	Schema    string                      `json:"schema"`
+	State     string                      `json:"state"`
+	ProjectID string                      `json:"project_id"`
+	Namespace string                      `json:"namespace"`
+	Operator  string                      `json:"operator"`
+	Result    workflowstate.ControlResult `json:"result"`
+	Checksum  string                      `json:"checksum"`
+}
+
+type workflowControlReservation struct {
+	Schema           string                        `json:"schema"`
+	State            string                        `json:"state"`
+	ProjectID        string                        `json:"project_id"`
+	Namespace        string                        `json:"namespace"`
+	Binding          workflowstate.MutationBinding `json:"binding"`
+	Action           string                        `json:"action"`
+	InvocationID     string                        `json:"invocation_id"`
+	ArgumentDigest   string                        `json:"argument_digest"`
+	ExpectedRevision uint64                        `json:"expected_revision"`
+	ReceiptRef       string                        `json:"receipt_ref"`
+}
+
+type workflowControlCommit struct {
+	receipt workflowControlReceipt
+	check   AdmissionCheck
+}
+
+func (commit *workflowControlCommit) files(ctx context.Context, revision uint64) ([]workflowstate.FileChange, error) {
+	if commit == nil {
+		return nil, nil
+	}
+
+	if err := workflowCheckAuthorization(ctx, commit.check); err != nil {
+		return nil, err
+	}
+
+	commit.receipt.Result.Revision = revision
+	receipt := commit.receipt
+
+	data, err := json.Marshal(receipt)
+	if err != nil {
+		return nil, err
+	}
+
+	receipt.Checksum = contenthash.Sum(data)
+	data, err = json.Marshal(receipt)
+
+	return []workflowstate.FileChange{{Path: receipt.Result.ReceiptRef, After: data}}, err
+}
+
+func (s *Store) readWorkflowControlReceipt(request workflowstate.ControlMutationRequest, digest string) (workflowstate.ControlResult, bool, error) {
+	path, err := s.safePath(workflowstate.MutationReceiptPath(request.Binding.RequestID))
+	if err != nil {
+		return workflowstate.ControlResult{}, false, err
+	}
+
+	data, err := opsfile.Read(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return workflowstate.ControlResult{}, false, nil
+	}
+
+	if err != nil {
+		return workflowstate.ControlResult{}, false, err
+	}
+
+	var receipt workflowControlReceipt
+	if err := json.Unmarshal(data, &receipt); err != nil {
+		return workflowstate.ControlResult{}, false, err
+	}
+
+	if err := s.validateWorkflowControlReceipt(receipt, request, digest); err != nil {
+		return workflowstate.ControlResult{}, false, err
+	}
+
+	return receipt.Result, true, nil
+}
+
+func (s *Store) validateWorkflowControlReceipt(receipt workflowControlReceipt, request workflowstate.ControlMutationRequest, digest string) error {
+	checksum := receipt.Checksum
+	receipt.Checksum = ""
+
+	encoded, err := json.Marshal(receipt)
+	if err != nil {
+		return err
+	}
+
+	expected := workflowstate.ControlResult{RequestID: request.Binding.RequestID, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID), PriorRevision: request.ExpectedRevision, Revision: request.ExpectedRevision + 1}
+	if receipt.Schema != "chr-workflow-control/v1" || receipt.State != "confirmed" || receipt.ProjectID != s.projectID || receipt.Namespace != s.layout.Namespace() || receipt.Operator != request.Binding.Operator || checksum != contenthash.Sum(encoded) || receipt.Result != expected {
+		return workflowstate.ErrConflict
+	}
+
+	return nil
+}
+
+func (s *Store) reserveWorkflowControlBinding(request workflowstate.ControlMutationRequest, digest string) error {
+	reservation := workflowControlReservation{Schema: "chr-workflow-control-binding/v1", State: "reserved", ProjectID: s.projectID, Namespace: s.layout.Namespace(), Binding: request.Binding, Action: request.Action, InvocationID: request.ID, ArgumentDigest: digest, ExpectedRevision: request.ExpectedRevision, ReceiptRef: workflowstate.MutationReceiptPath(request.Binding.RequestID)}
+
+	path, err := s.safePath(filepath.Join("run", "operation-bindings", contenthash.Sum([]byte(request.Binding.RequestID))+".json"))
+	if err != nil {
+		return err
+	}
+
+	data, err := opsfile.Read(path)
+	if err == nil {
+		var prior workflowControlReservation
+		if err := json.Unmarshal(data, &prior); err != nil {
+			return err
+		}
+
+		if prior != reservation {
+			return workflowstate.ErrConflict
+		}
+
+		return nil
+	}
+
+	if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	if err := s.checkMutationCapacity(); err != nil {
+		return err
+	}
+
+	encoded, err := json.Marshal(reservation)
+	if err != nil {
+		return err
+	}
+
+	return opsfile.WriteAtomic(path, encoded)
+}
+
+func (s *Store) retainWorkflowControlNoop(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit) error {
+	if control == nil {
+		return nil
+	}
+
+	files, err := control.files(ctx, run.Revision+1)
+	if err != nil {
+		return err
+	}
+
+	return s.commitWorkflowPullRequestFiles(&run, files, workflowstate.FileChange{})
+}
+
+func (s *Store) completeWorkflowControlRetry(ctx context.Context, run workflowInvocationFile, control *workflowControlCommit, failure error) error {
+	if failure != nil {
+		return failure
+	}
+
+	return s.retainWorkflowControlNoop(ctx, run, control)
+}
+
+func (s *Store) commitWorkflowControlBudget(ctx context.Context, run *workflowInvocationFile, budget *IntegrationBudget, control *workflowControlCommit) error {
+	files, err := control.files(ctx, run.Revision+1)
+	if err != nil {
+		return err
+	}
+
+	return s.commitWorkflowIntegrationBudget(ctx, run, budget, files...)
+}

@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"forge.adrianpk.com/chr/internal/core"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -16,17 +16,17 @@ type serviceNativeReviewFixture struct {
 	policy string
 }
 
-func (p *serviceNativeReviewFixture) WorkflowIntegrationCapability(ctx context.Context, pr core.WorkflowPullRequestSnapshot, method string) (core.WorkflowPublicationCapability, error) {
+func (p *serviceNativeReviewFixture) WorkflowIntegrationCapability(ctx context.Context, pr workflowcore.PullRequestSnapshot, method string) (workflowcore.PublicationCapability, error) {
 	capability, err := p.serviceWorkflowPreparationFixture.WorkflowIntegrationCapability(ctx, pr, method)
 	capability.Mechanism = workspaceconfig.WorkflowPublicationGitAtomicDualRef
 
 	return capability, err
 }
 
-func (p *serviceNativeReviewFixture) WorkflowPreparedNativeCapability(_ context.Context, pr core.WorkflowPullRequestSnapshot, proof core.WorkflowIntegrationProof) (core.WorkflowNativeCapability, error) {
-	capability := core.WorkflowNativeCapability{
-		WorkflowPublicationCapability: core.WorkflowPublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
-		SourceRef:                     "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "service-review/v1",
+func (p *serviceNativeReviewFixture) WorkflowPreparedNativeCapability(_ context.Context, pr workflowcore.PullRequestSnapshot, proof workflowcore.IntegrationProof) (workflowcore.NativeCapability, error) {
+	capability := workflowcore.NativeCapability{
+		PublicationCapability: workflowcore.PublicationCapability{Repository: pr.Repository, PullRequestURL: pr.URL, Method: proof.Method, Mechanism: workspaceconfig.WorkflowPublicationGitAtomicDualRef, AtomicSourceBase: true, ExactResult: true},
+		SourceRef:             "refs/heads/" + pr.HeadBranch, TargetRef: "refs/heads/" + pr.BaseBranch, OwnershipRevision: "service-review/v1",
 		OriginalSourceCommit: proof.SourceCommit, ExpectedBaseCommit: proof.BaseCommit, PreparedResultCommit: proof.ResultCommit,
 		PolicyFingerprint: serviceNativeReviewHash([]byte(p.policy)), ServerCapabilityFingerprint: serviceNativeReviewHash([]byte("server")), CredentialIdentityFingerprint: serviceNativeReviewHash([]byte("publisher")),
 		ObservationContract: "forgejo_same_pr_git_auto_merge/v1", AdapterVersion: "chr-native-publication/v1",
@@ -104,7 +104,7 @@ func serviceNativeReviewAdmit(t *testing.T, operations service, id string) {
 		t.Fatal(err)
 	}
 
-	entry, err := store.AdmitWorkflowIntegration(t.Context(), core.WorkflowIntegrationAdmission{InvocationID: id, ExpectedRevision: run.Revision, Unit: run.Lane.Unit, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
+	entry, err := store.AdmitWorkflowIntegration(t.Context(), workflowcore.IntegrationAdmission{InvocationID: id, ExpectedRevision: run.Revision, Unit: run.Lane.Unit, AdmissionKey: run.RequestKey, TargetRef: "refs/heads/dev"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -115,14 +115,14 @@ func serviceNativeReviewAdmit(t *testing.T, operations service, id string) {
 			t.Fatal(err)
 		}
 
-		entry, err = store.TransitionWorkflowIntegration(t.Context(), core.WorkflowIntegrationTransition{InvocationID: id, EntryID: entry.ID, InvocationRevision: run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: state})
+		entry, err = store.TransitionWorkflowIntegration(t.Context(), workflowcore.IntegrationTransition{InvocationID: id, EntryID: entry.ID, InvocationRevision: run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, State: state})
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 }
 
-func serviceNativeReviewReject(t *testing.T, operations service, id string, binding core.WorkflowReviewBinding) {
+func serviceNativeReviewReject(t *testing.T, operations service, id string, binding workflowcore.ReviewBinding) {
 	t.Helper()
 
 	if _, err := operations.ApproveWorkflowSlice(t.Context(), id, binding.InputHash); err == nil {

@@ -6,6 +6,7 @@ import (
 	"forge.adrianpk.com/chr/internal/core"
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -28,9 +29,9 @@ func (s service) runAgentWorkMergeCycle(opts agentWorkMergeCycleOptions) (core.T
 	result, err := core.RunTicketMergeCommand(s.ctx, core.TicketMergeCommandOptions{
 		Ticket:        opts.Ticket,
 		Tickets:       tickets,
-		Remote:        core.NewRemoteReviewAdapter(opts.ReviewConfig.Providers, reviewRemoteCommandRunner),
+		Remote:        workflowcore.NewRemoteReviewAdapter(opts.ReviewConfig.Providers, reviewRemoteCommandRunner),
 		ExpectedBase:  opts.WorkConfig.BranchPolicy.IntegrationBranch,
-		MergeStrategy: core.TicketMergeStrategyRebase,
+		MergeStrategy: workflowcore.TicketMergeStrategyRebase,
 		ProjectDir:    s.projectContext.ProjectDir,
 		BranchPolicy:  opts.WorkConfig.BranchPolicy,
 		Workspace:     opts.WorkConfig.Workspace,

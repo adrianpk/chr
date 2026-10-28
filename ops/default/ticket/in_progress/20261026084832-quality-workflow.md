@@ -60,56 +60,25 @@ Existing WorkflowRoundTrip, mutation/receipt/idempotency/materialization and pro
 All commands above are planned. None ran as implementation validation during this planning task.
 
 Slice 11 PR #448 is verified integrated at `d0d65c114cf8ddffcd0492f7fc0b746a832adc0d`.
-Slice 12 is active; T12.1 method/transaction/recovery mapping precedes relocation.
+T12.1 and T12.2 now have the complete frozen map and compiling workflow owner.
+All 908 methods move with `workflow.Store`; all 79 original direct dependencies
+and 100 authority/recovery entries resolve to actual current declarations.
 
+The relocation covers 2,710 production declarations and 1,666 test declarations.
+All 4,342 declaration groups retain exact tokens after compiler-resolved API and
+implicit embedded-field names, owner qualification and the two real guarded legacy
+operations. Wire fixture bytes, lock/journal order and recovery guards remain
+unchanged. The existing review/state, ticket/metadata and complete configuration
+prerequisites retain their direct capability owners.
 
-T12.1 freezes all 908 store methods across 234 files with exact identities/hashes,
-100 concrete IO/authority/recovery entries and 79 direct root dependencies. The
-[authority map](../../plan/code-quality-remediation-slice-12-boundaries.md)
-keeps one receiver/transaction owner and records future policy consumers.
-All 71 assigned baseline rows map to 68 current declarations. Compiler-resolved
-mapping and exact coverage/hash checks pass; T12.2 boundary resolution is active.
-No runtime move or final candidate validation is represented as completed.
+Actual core/app/adapter consumers and acceptance/fault source bindings follow the
+new package. The 78 selected tests and frozen controller gate are unchanged.
+Focused wire/storage, native Git/filesystem/recovery, legacy ticket/app and import
+boundary checks pass; strict lint is clean. Runner/admission/evidence regressions
+and package README checks pass. All seven focused journal/crash-recovery checks
+pass through the existing QA fixture-owning runner. The signature policy remains 9,305 declarations,
+ceiling six, 162 exact debts and one external exception.
 
-
-The first T12.2 prerequisite moves twelve shared review/cycle value and pure
-validator declarations to workflow/state, with direct actual consumers and no
-root aliases. Exact token comparison and focused value/wire/storage/native Git/
-review/app regressions pass; strict lint is clean and the signature policy stays
-at 9306 declarations, ceiling six, 162 exact debts and one external exception.
-Ten frozen direct dependencies resolve; 69 root couplings remain before family
-relocation. Stage ports, assigned signatures and final validation stay open.
-
-
-The next T12.2 prerequisite moves ticket queries and Board/document projections
-to their existing ticket owner with actual native, app and adapter consumers.
-The projection implementation is `a96c05cee2000654f23e2ce0b0347b1155ec17ca`.
-Forty-two moved declaration token sequences match after qualification/naming and
-cmp.Compare substitution; one local generic integer comparator is removed.
-Public query tests colocate with their owner and share its existing SQLite
-fixtures. Twelve more direct dependencies resolve, leaving 57 root couplings;
-all 908 store methods remain together at their original receiver. Native writes,
-locks and journals retain their authority. Focused ticket, native filesystem/Git,
-wire/storage, app and boundary checks, strict lint and the ceiling-six policy pass.
-
-
-Configuration extraction is implemented in `bedb07a4cca4d39c5f7099d594a83c6650002398`.
-Configuration has one shared workspace/config owner for the complete parsed
-image, raw revision/explicit presence, defaults, upgrade fences and guarded
-harness-selection journal/image/receipt recovery. All 114 moved declarations
-retain exact tokens after qualification/API naming and the original literal
-rebase default. Config.Explicit exposes presence without a mutable-map escape.
-Fifteen more direct dependencies resolve, leaving 42; all 908 store methods and
-native workflow upgrade transactions remain at their original receiver. The
-existing Slice 15 upgrade-journal tuple now qualifies the same Config value;
-no new signature debt or relaxed check is introduced.
-
-
-The ticket text prerequisite is implemented in `3fb0f46aff5421452d6b602fe91e4e483e93dfbc`.
-Shared ticket frontmatter edits and ranges now have the existing ticket/metadata
-owner: ten declaration moves and one zero-width use of ops/metadata.ReplaceLines.
-Token/body comparison preserves required-field errors, delimiter/body bytes,
-negative bounds, iteration/insertion order and nil/empty behavior. Existing
-native, legacy, adapter and frozen wire/storage tests, strict lint and the
-ceiling-six policy pass. Three more direct dependencies resolve, leaving 39;
-all 908 store methods still await their one-owner family relocation.
+Stage ports/policy separation, assigned signature and typed mode changes, D08
+receipt semantics, final caller reconciliation, exact-head controller validation
+and canonical PR preparation remain open. The ticket stays in_progress.

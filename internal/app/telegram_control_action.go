@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -127,7 +127,7 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim telegra
 }
 
 func telegramControlExpectedFailure(err error) bool {
-	for _, expected := range []error{workflowstate.ErrConflict, core.ErrWorkflowOwned, core.ErrWorkflowCapacity, core.ErrWorkflowStop, core.ErrWorkflowIntegrationBudget} {
+	for _, expected := range []error{workflowstate.ErrConflict, workflowcore.ErrWorkflowOwned, workflowcore.ErrWorkflowCapacity, workflowcore.ErrWorkflowStop, workflowcore.ErrWorkflowIntegrationBudget} {
 		if errors.Is(err, expected) {
 			return true
 		}
