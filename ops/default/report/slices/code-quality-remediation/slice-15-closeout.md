@@ -160,6 +160,15 @@ current task eligibility and repository worktree/root bounds. Store retains its
 original coherent query/admission/allocation locks, current record/lane/claim
 fences and complete atomic amendment/membership/invocation writes.
 
+Private ticket/tracker readers and a harness resolver now sequence bounded read
+views, exact native/legacy precedence and current configuration resolution.
+Existing frontier/PR/work owners sequence dependency-target observation, delivery
+proof/provider IO, guarded source publication and copied loose-queue selection.
+Store retains original public inspection/admission locks, current evidence and
+candidate rechecks and complete atomic transitions. Harness subprocess fixtures
+now live in the workflow test binary that invokes them, preserving actual
+cross-process retained-binding and old-reader rejection checks.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -174,11 +183,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 304 source/extraction/consolidation images. Current identities and hashes are updated
+retains 331 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. 117 former Store method rows now have actual
+frozen source fields remain unchanged. 131 former Store method rows now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 791 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 777 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -231,11 +240,12 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 893 body-specific decisions in
-the existing 908-row method map: 776 guarded-persistence methods, 23 closing
+contracts. Final method inspection records all 908 body-specific decisions in
+the existing source method map: 777 guarded-persistence methods, 23 closing
 policies, one host evidence adapter, five coordinator functions, one persistence
-reader, 42 lifecycle owners and 45 coordinator operation mappings. The remaining
-15 source rows stay explicitly pending final assessment.
+reader, 55 lifecycle owners and 46 coordinator operation mappings. No source
+method remains unassessed. Final Store/bridge and behavioral slice acceptance
+still requires its recorded checks.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -368,6 +378,25 @@ repository root bounds remain. Forty-three new individual method decisions cover
 13 extracted procedures and 30 actual current-state/adoption/upgrade/amendment/
 resume/read transactions. Store has 791 methods and 15 original rows stay pending.
 
+The final fourteen read/selection/provider methods and the source-publication
+IO facet are separated in `6f7184ab351c8548d43b0ee25c30d3a23e1cd8b5`. Twenty-five production declaration
+streams match with explicit owner/call normalization and source-helper
+recomposition. Independent comparison of raw string/character literals also
+matches before normalization. The original public source lock and owning Store
+candidate guard remain. All original method rows now have individual source
+bases; the lower Store count alone is not acceptance.
+
+Harness subprocess fixtures are relocated in `f3fc48d21dae09efb4c329d4e985546b6bb3739a`. The workflow fixture
+invoked its own test binary, but both helper tests had remained in core after
+relocation. A nonmatching selector returned success without resuming the paused
+invocation; the second claim then failed with retained ownership. The old-reader
+case also failed because its child returned success without testing the schema.
+Both failures reproduce. Moving the exact helper bodies into the invoking test
+package restores actual independent-process resume and strict v1 rejection of
+mandatory v2. Assertions, schema gates, timeouts and production guards are
+unchanged. All 34 exact workflow subprocess selectors now resolve in that binary.
+Both helper streams and literals match after package qualification.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -391,6 +420,35 @@ changes.
 - Existing Store method, declaration, authority/dependency and ownership ledgers.
 
 ## Validation
+
+Final read/provider task evidence preserves its failed initial 38-case command:
+37 cases passed and TestHarnessBindingPending failed on its second claim with
+retained ownership. The isolated unchanged retry reproduced it. The old-reader
+regression reproduced the same missing-helper boundary separately. After the
+separate package relocation, both affected cases pass with unchanged assertions
+and the same 15-minute bound. This establishes successful evidence for 39 distinct
+real cases through the retained 37 passes and corrected two-case command; it does
+not turn the initial failing command into a successful run. No unrelated cases
+were repeated. Six selected races pass without skips or owned-process leaks.
+Corrected short compilation, style and strict lint pass with zero issues. The
+initial temporary rewrite/type insertion was rejected before fixtures; short
+compilation then caught two altered format strings, which were restored before
+fixtures. Independent raw literal comparison now guards the owner normalization.
+Twenty-five production and two helper streams match; production gains only the
+actual source IO helper. Earlier task failures remain below. Final exact-head
+controller validation and guided parity remain pending.
+
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(TicketBoard(NativePages|Case)|TicketNative(Editing|MetadataIdentity|Ownership)|TicketDocumentCreation|WorkflowTracker(Export|Receipt|Edited|Process|ConcurrentEdit|SourceChange)|HarnessBinding(Pending|ExecutableFence|Rejects|SelectionOrder|Manual|Entry)|WorkflowIntegration(Methods|Reject|WrongMethod|ChangedInput|History|HostConfig|Cancelled)|WorkflowSource(Corruption)?|WorkflowLoose(Reselection|ResumeTarget|Resume|ResumeCorruption|ChangedInput|RetainedProof|Later|Ownership)|ServiceWorkflowDependency|HarnessSelectionResolution|WebBoardSources)$' -count=1 -timeout=15m -json` — failed: 37 passes and one missing-helper failure.
+- `go test ./internal/core/workflow -run '^TestHarnessBindingPending$' -count=1 -timeout=15m -json` — failed: reproduced the missing helper.
+- `go test ./internal/core/workflow -run '^TestHarnessBindingOldReader$' -count=1 -timeout=15m -json` — failed before helper relocation.
+- `go test ./internal/core/workflow -run '^TestHarnessBinding(Pending|OldReader)$' -count=1 -timeout=15m -json` — passed after exact helper relocation.
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowTracker(ConcurrentEdit|SourceChange)|WorkflowIntegrationChangedInput|WorkflowLooseResumeTarget|TicketNativeOwnership|WorkflowSourceCorruption)$' -count=1 -timeout=10m -json` — passed.
+- `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality` — corrected pass; initial format-string compilation failure retained.
+- `go test -short ./internal/core ./internal/core/workflow` — passed after helper relocation.
+- `make check-go-style` — 9,411 declarations; zero exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core ./internal/core/workflow/... ./internal/app/... ./scripts/goquality` — zero issues.
+- `git diff --check`
+
 
 Construction/selection task checks passed all 38 selected real fixtures and seven
 focused races without skips or owned-process leaks. Coverage includes amendment
@@ -763,9 +821,18 @@ remain unchanged across 33 ledgers. Current owner declarations, relative links,
 named regressions, 20 compatibility cases, T15 columns and whitespace pass.
 Runtime checks are not repeated for this metadata-only update.
 
+Final read/provider ledger reconciliation verifies 4,445 current declaration
+hashes, all 908 individually assessed method mappings, four signature ledgers,
+27 new frozen images, 86 commit objects and 22 actual ports. Store has 777 real
+methods; no unassessed source rows remain. Frozen source/baseline/introduction
+fields remain unchanged across 33 ledgers. Helper images retain their exact
+relocation introduction commit separately from production extraction. Current
+owner declarations, links, named regressions, 20 compatibility cases, T15 columns
+and whitespace pass. Runtime checks are not repeated for this metadata-only update.
+
 ## Risks and Follow-ups
 
-Remaining method-level Store policy ownership, final bridge removal and naming/compatibility reconciliation remain active
+Final Store/bridge acceptance and naming/compatibility reconciliation remain active
 Slice 15 work. Shared guided parity, final ordered exact-head controller
 validation, PR publication and PR-reference follow-up are pending. No final
 slice acceptance is claimed by these task checks.
