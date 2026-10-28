@@ -8,6 +8,7 @@ import (
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -131,7 +132,7 @@ func validateWorkflowTaskEvidence(t Task) error {
 }
 
 func validateWorkflowSet(s workflowstate.WorkflowSet) error {
-	if err := validateWorkflowClosingBinding(s); err != nil {
+	if err := workflowcloseout.ValidateWorkflowClosingBinding(s); err != nil {
 		return err
 	}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -95,12 +94,4 @@ func checkWorkflowClosingCheckout(ctx context.Context, directory string, input w
 
 func workflowClosingPrepared(claim *workflowClosingClaim, directory string) workflowPreparedTask {
 	return workflowPreparedTask{input: TaskInput{Lane: workflowstate.Lane{Worktree: directory}}, inputRef: claim.state.Input.Ref, inputHash: claim.state.Input.Hash, data: claim.data, leaseUntil: claim.state.LeaseUntil}
-}
-
-func workflowClosingLeaseSeconds(validation workflowstate.Validation) time.Duration {
-	if !validation.Required {
-		return time.Minute
-	}
-
-	return time.Duration(validation.TimeoutSeconds) * time.Second
 }

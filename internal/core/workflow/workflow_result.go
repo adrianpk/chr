@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -127,7 +128,7 @@ func (s *Store) workflowResultClosure(closure InvocationClosure) (ResultClosure,
 		return ResultClosure{}, err
 	}
 
-	if err := validateWorkflowClosingResults(receipt.ClosingInput.Validation, receipt); err != nil {
+	if err := workflowcloseout.ValidateWorkflowClosingResults(receipt.ClosingInput.Validation, receipt); err != nil {
 		return ResultClosure{}, err
 	}
 

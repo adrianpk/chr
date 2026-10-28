@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -114,7 +115,7 @@ func (s *Store) prepareWorkflowClosing(ctx context.Context, set Record, request 
 	data = append(data, '\n')
 	lease := input.Validation
 	lease.TimeoutSeconds = input.ValidationTimeoutSeconds
-	state := workflowClosingAttempt{Schema: "chr-set-closing-attempt/v1", SetID: set.ID, Generation: generation, BudgetID: workflowClosingBudgetID(set, request.InvocationID), OwnerRoot: s.layout.Root(), Owner: owner, InvocationID: request.InvocationID, TokenHash: contenthash.Sum([]byte(worker.Token)), Outcome: "running", LeaseUntil: time.Now().UTC().Add(workflowClosingLeaseSeconds(lease)), Input: workflowstate.ClosingEvidence{Ref: workflowClosingFile(set.ID, generation, "input.json"), Hash: contenthash.Sum(data)}}
+	state := workflowClosingAttempt{Schema: "chr-set-closing-attempt/v1", SetID: set.ID, Generation: generation, BudgetID: workflowClosingBudgetID(set, request.InvocationID), OwnerRoot: s.layout.Root(), Owner: owner, InvocationID: request.InvocationID, TokenHash: contenthash.Sum([]byte(worker.Token)), Outcome: "running", LeaseUntil: time.Now().UTC().Add(workflowcloseout.WorkflowClosingLeaseSeconds(lease)), Input: workflowstate.ClosingEvidence{Ref: workflowClosingFile(set.ID, generation, "input.json"), Hash: contenthash.Sum(data)}}
 	state.CapacitySlot = workflowWorkerSlotNumber(worker.reservation.Name())
 
 	return &workflowClosingClaim{worker: worker, set: set, state: state, input: input, data: data}, nil
