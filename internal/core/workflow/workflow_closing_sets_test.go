@@ -52,7 +52,7 @@ func TestWorkflowClosingSetAdvance(t *testing.T) {
 		t.Fatal("later associated set bypassed closing authority")
 	}
 
-	first, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), fixture.run.ID, "dev", ports)
+	first, err := CloseInvocationSet(t.Context(), fixture.store, fixture.run.ID, "dev", ports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,7 +71,7 @@ func TestWorkflowClosingSetAdvance(t *testing.T) {
 	workflowClosingIntegrateLater(t, &fixture, candidate, ports)
 	workflowAdvanceFrontier(t, fixture)
 
-	closed, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), fixture.run.ID, "dev", ports)
+	closed, err := CloseInvocationSet(t.Context(), fixture.store, fixture.run.ID, "dev", ports)
 	if err != nil {
 		t.Fatal(err)
 	}

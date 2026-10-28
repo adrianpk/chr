@@ -26,7 +26,7 @@ func TestWorkflowClosingBudget(t *testing.T) {
 	seedWorkflowClosingBudget(t, fixture.store, set.Path, run.ID)
 
 	restarted := NewWorkflowStore(fixture.store.layout, fixture.store.projectID)
-	if _, err := restarted.CloseWorkflowInvocationSet(t.Context(), run.ID, "dev", workflowFrontierPorts(fixture)); err == nil || !strings.Contains(err.Error(), "attempt budget exhausted") {
+	if _, err := CloseInvocationSet(t.Context(), restarted, run.ID, "dev", workflowFrontierPorts(fixture)); err == nil || !strings.Contains(err.Error(), "attempt budget exhausted") {
 		t.Fatal("restart reset an exhausted set invocation budget", err)
 	}
 
@@ -45,7 +45,7 @@ func TestWorkflowClosingBudget(t *testing.T) {
 		t.Fatal("distinct policy request did not create a new set invocation")
 	}
 
-	closed, err := restarted.CloseWorkflowInvocationSet(t.Context(), next.Invocation.ID, "dev", workflowFrontierPorts(fixture))
+	closed, err := CloseInvocationSet(t.Context(), restarted, next.Invocation.ID, "dev", workflowFrontierPorts(fixture))
 	if err != nil || closed.Outcome != "completed" || len(closed.Set.Set.Closing.Attempts) != workflowstate.PageLimit+1 {
 		t.Fatal("new invocation lost prior attempts or inherited another invocation's exhausted budget", err)
 	}

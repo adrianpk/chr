@@ -74,7 +74,7 @@ func TestNativeClosingPublication(t *testing.T) {
 		t.Fatal("read-only closure status hid or changed the shared intent", status, err)
 	}
 
-	if _, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, workflowstate.ErrObservationRequired) {
+	if _, err := CloseInvocationSet(t.Context(), f.fixture.f.store, f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, workflowstate.ErrObservationRequired) {
 		t.Fatal("another namespace's intent did not block closure", err)
 	}
 
@@ -109,7 +109,7 @@ func TestNativeClosingPublicationRace(t *testing.T) {
 	results := make(chan closureResult, 1)
 
 	go func() {
-		result, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports)
+		result, err := CloseInvocationSet(t.Context(), f.fixture.f.store, f.fixture.f.entry.InvocationID, "dev", ports)
 		results <- closureResult{result, err}
 	}()
 

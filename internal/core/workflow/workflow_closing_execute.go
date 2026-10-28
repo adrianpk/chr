@@ -11,26 +11,31 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) executeWorkflowClosing(ctx context.Context, claim *workflowClosingClaim) (workflowstate.ClosingReceipt, error) {
+// workflowClosingHost owns process lifetime and checkout IO, outside persistence.
+type workflowClosingHost struct {
+	store *Store
+}
+
+func (host workflowClosingHost) execute(ctx context.Context, claim *workflowClosingClaim) (workflowstate.ClosingReceipt, error) {
 	ctx, cancel := context.WithDeadline(ctx, claim.state.LeaseUntil)
 	defer cancel()
 
 	if claim.state.InvocationID != "" {
 		watched, stop := context.WithCancel(ctx)
 
-		s.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: claim.state.InvocationID}, Cancel: stop})
+		host.store.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: claim.state.InvocationID}, Cancel: stop})
 		defer stop()
 
 		ctx = watched
 	}
 
-	workspace := workflowClosingWorkspace{store: s, claim: claim}
+	workspace := workflowClosingWorkspace{host: host, claim: claim}
 
 	return workflowcloseout.Execute(ctx, workflowcloseout.Execution{Input: claim.input, Evidence: claim.state.Input}, workspace, workspace)
 }
 
-func (s *Store) prepareWorkflowClosingCheckout(ctx context.Context, claim *workflowClosingClaim) (string, error) {
-	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
+func (host workflowClosingHost) prepareCheckout(ctx context.Context, claim *workflowClosingClaim) (string, error) {
+	common, err := projectcore.ResolveRepositoryDirectory(ctx, host.store.layout.ProjectDir())
 	if err != nil {
 		return "", err
 	}
@@ -46,7 +51,7 @@ func (s *Store) prepareWorkflowClosingCheckout(ctx context.Context, claim *workf
 	}
 
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: worktree}}
-	for _, argv := range [][]string{{"init", "--quiet"}, {"fetch", "--quiet", "--no-tags", "--", s.layout.ProjectDir(), claim.input.Target.Commit}, {"checkout", "--quiet", "--detach", claim.input.Target.Commit}} {
+	for _, argv := range [][]string{{"init", "--quiet"}, {"fetch", "--quiet", "--no-tags", "--", host.store.layout.ProjectDir(), claim.input.Target.Commit}, {"checkout", "--quiet", "--detach", claim.input.Target.Commit}} {
 		if _, err := reader.Output(ctx, argv...); err != nil {
 			return "", err
 		}

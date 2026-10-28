@@ -15,19 +15,19 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) runWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, directory string, command []string) (result workflowstate.CommandResult, err error) {
+func (host workflowClosingHost) runCommand(ctx context.Context, claim *workflowClosingClaim, directory string, command []string) (result workflowstate.CommandResult, err error) {
 	result = workflowstate.CommandResult{Command: slices.Clone(command), ExitCode: -1}
 	index := len(claim.state.Processes)
 	base := workflowcloseout.File(claim.set.ID, claim.state.Generation, fmt.Sprintf("command-%d", index+1))
 
-	stdout, err := openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stdout"))
+	stdout, err := openWorkflowCommandOutput(filepath.Join(host.store.layout.Root(), base+".stdout"))
 	if err != nil {
 		return result, err
 	}
 
 	defer func() { err = errors.Join(err, stdout.File.Close()) }()
 
-	stderr, err := openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stderr"))
+	stderr, err := openWorkflowCommandOutput(filepath.Join(host.store.layout.Root(), base+".stderr"))
 	if err != nil {
 		return result, err
 	}
@@ -53,7 +53,7 @@ func (s *Store) runWorkflowClosingCommand(ctx context.Context, claim *workflowCl
 		return result, errors.Join(err, permit.Close(), process.Wait())
 	}
 
-	return s.waitWorkflowClosingCommand(ctx, claim, workflowClosingCommandExecution{Command: command, Process: process, Permit: permit, Output: workflowCommandOutput{Stdout: stdout, Stderr: stderr}, Base: base})
+	return host.waitCommand(ctx, claim, workflowClosingCommandExecution{Command: command, Process: process, Permit: permit, Output: workflowCommandOutput{Stdout: stdout, Stderr: stderr}, Base: base})
 }
 
 type workflowClosingCommandExecution struct {
@@ -64,8 +64,8 @@ type workflowClosingCommandExecution struct {
 	Base    string
 }
 
-func (s *Store) waitWorkflowClosingCommand(ctx context.Context, claim *workflowClosingClaim, execution workflowClosingCommandExecution) (workflowstate.CommandResult, error) {
-	registered, err := s.registerWorkflowClosingProcess(ctx, claim, execution.Command, execution.Process.Process.Pid, execution.Base)
+func (host workflowClosingHost) waitCommand(ctx context.Context, claim *workflowClosingClaim, execution workflowClosingCommandExecution) (workflowstate.CommandResult, error) {
+	registered, err := host.store.registerWorkflowClosingProcess(ctx, claim, execution.Command, execution.Process.Process.Pid, execution.Base)
 	if err == nil {
 		_, err = fmt.Fprintln(execution.Permit, "run")
 	}
@@ -81,7 +81,7 @@ func (s *Store) waitWorkflowClosingCommand(ctx context.Context, claim *workflowC
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		defer cancel()
 
-		err = errors.Join(err, s.finishWorkflowClosingProcess(cleanup, claim, registered))
+		err = errors.Join(err, host.store.finishWorkflowClosingProcess(cleanup, claim, registered))
 	}
 
 	return result, err

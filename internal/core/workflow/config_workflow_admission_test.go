@@ -209,7 +209,7 @@ func TestWorkflowConfigClosing(t *testing.T) {
 
 	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: fixture.provider.pr.Repository, Branch: "dev"}
 
-	closed, err := fixture.store.CloseWorkflowSet(t.Context(), request, workflowFrontierPorts(fixture))
+	closed, err := CloseSet(t.Context(), fixture.store, request, workflowFrontierPorts(fixture))
 	if err == nil || closed.Outcome != "closing_validation_failed" || len(closed.Receipt.Validation) != 1 {
 		t.Fatal("closing deadline did not retain one failed gate", closed, err)
 	}

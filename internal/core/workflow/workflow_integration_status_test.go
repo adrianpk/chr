@@ -104,7 +104,7 @@ func TestNativeQueueClosure(t *testing.T) {
 func nativeQueueClosedStatus(t *testing.T, f workflowIntegrationFixture, ports FrontierPorts) {
 	t.Helper()
 
-	closed, err := f.store.CloseWorkflowInvocationSet(t.Context(), f.run.ID, "dev", ports)
+	closed, err := CloseInvocationSet(t.Context(), f.store, f.run.ID, "dev", ports)
 	if err != nil {
 		t.Fatal(err)
 	}

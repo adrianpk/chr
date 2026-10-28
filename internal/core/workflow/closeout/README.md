@@ -29,7 +29,7 @@ and invocation. Execution alone cannot establish closure. The ports expose no
 mutable store or context retained as state.
 
 The package imports shared `workflow/state` protocol values and `contenthash`
-within the module. Remaining closeout policy extraction and final Store
+within the module. The remaining repository-wide Store
 responsibility dispositions are active Slice 15 work.
 
 `Request` owns the unchanged observed-set/revision/source/target input. The host
@@ -63,8 +63,9 @@ copies the target value.
 
 `ReadClosedSet`, `ReadInvocationClosure`, `CheckInvocationEvidence` and
 `BudgetUsage` use the existing Evidence port. They retain their distinct schema,
-binding, result and error contracts. Closing status aggregation and the final
-Store API assessment remain active work.
+binding, result and error contracts. `Inspect` checks receipts before ordered
+publication blockers, live capacity and final-gate proof through StatusSource.
+The final repository-wide Store API assessment remains active work.
 
 ## Validation
 

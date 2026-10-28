@@ -87,6 +87,15 @@ exchange binds one process, permit and bounded output pair to its exact argv and
 output base. Unused projection context forwarding is removed; journaled set and
 invocation changes still commit under the existing lock.
 
+`CloseSet` and `CloseInvocationSet` are coordinator operations over the guarded
+store. A private `workflowClosingHost` owns the watched context, exact checkout,
+process permits, bounded outputs and waits. The finite Workspace/Commands adapter
+binds that host to the original private claim. Store retains admission,
+credentials, process registration/completion, confirmation and recovery under the
+same critical sections. The application and continuation callers use these
+operations directly; no Store forwarding methods or promoted store fields are
+introduced.
+
 ## Bounded operation results
 
 Capacity observations pair the retained process with liveness; owned worker

@@ -30,7 +30,7 @@ func TestNativeClosingFanout(t *testing.T) {
 	ports := nativeReceiptFrontierPorts(t, f.fixture, f.receipt.Receipt.ResultCommit)
 	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: f.receipt.Receipt.Repository, Branch: "dev"}
 
-	if _, err := store.CloseWorkflowSet(t.Context(), request, ports); !errors.Is(err, workflowstate.ErrOwned) {
+	if _, err := CloseSet(t.Context(), store, request, ports); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("physical receipt bypassed unfinished member fanout", err)
 	}
 
@@ -53,14 +53,14 @@ func TestNativeClosingRetry(t *testing.T) {
 	before := nativeClosingPreservedFiles(t, f)
 	store, id := f.fixture.f.store, f.fixture.f.entry.InvocationID
 
-	failed, err := store.CloseWorkflowInvocationSet(t.Context(), id, "dev", ports)
+	failed, err := CloseInvocationSet(t.Context(), store, id, "dev", ports)
 	if err == nil || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" || len(failed.Set.Set.Closing.Attempts) != 1 {
 		t.Fatal("failed gate established closure or lost its attempt", err)
 	}
 
 	restarted := NewWorkflowStore(store.layout, store.projectID)
 
-	closed, err := restarted.CloseWorkflowInvocationSet(t.Context(), id, "dev", ports)
+	closed, err := CloseInvocationSet(t.Context(), restarted, id, "dev", ports)
 	if err != nil || closed.Outcome != "completed" || len(closed.Set.Set.Closing.Attempts) != 2 {
 		t.Fatal("native closing retry did not finish its own gate", err)
 	}
@@ -73,7 +73,7 @@ func checkNativeClosingRetry(t *testing.T, f nativeClosingFixture, before map[st
 
 	request := workflowcloseout.Request{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}
 
-	again, err := restarted.CloseWorkflowSet(t.Context(), request, ports)
+	again, err := CloseSet(t.Context(), restarted, request, ports)
 	if err != nil || again.ReceiptRef != closed.ReceiptRef || again.Set.Revision != closed.Set.Revision || !reflect.DeepEqual(before, nativeClosingPreservedFiles(t, f)) || f.fixture.publisher.calls.Load() != 1 {
 		t.Fatal("confirmed closure replayed publication, members or its gate", err)
 	}
@@ -98,7 +98,7 @@ func TestNativeClosingDivergence(t *testing.T) {
 
 	ports := nativeReceiptFrontierPorts(t, f.fixture, b.ValidatedBase)
 
-	if _, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, workflowstate.ErrHistoryDivergence) {
+	if _, err := CloseInvocationSet(t.Context(), f.fixture.f.store, f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, workflowstate.ErrHistoryDivergence) {
 		t.Fatal("removed native result entered a closing gate", err)
 	}
 
@@ -117,7 +117,7 @@ func TestNativeClosingSets(t *testing.T) {
 	ports := finalizeNativeClosingFixture(t, f)
 	store := f.fixture.f.store
 
-	original, err := store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports)
+	original, err := CloseInvocationSet(t.Context(), store, f.fixture.f.entry.InvocationID, "dev", ports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,14 +127,14 @@ func TestNativeClosingSets(t *testing.T) {
 
 	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: original.Receipt.Target.Repository, Branch: "dev"}
 
-	failed, err := store.CloseWorkflowSet(t.Context(), request, ports)
+	failed, err := CloseSet(t.Context(), store, request, ports)
 	if err == nil || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" {
 		t.Fatal("original gate proof closed the corrective set", err)
 	}
 
 	request.ExpectedRevision, request.ExpectedSourceHash = failed.Set.Revision, failed.Set.SourceHash
 
-	corrective, err := store.CloseWorkflowSet(t.Context(), request, ports)
+	corrective, err := CloseSet(t.Context(), store, request, ports)
 	if err != nil || corrective.Outcome != "completed" {
 		t.Fatal("corrective set lost its distinct verified outcome", err)
 	}
@@ -236,7 +236,7 @@ func TestNativeClosingPRChange(t *testing.T) {
 		setNativePRFixture(t, f.fixture.forge, pr)
 	}}
 
-	failed, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports)
+	failed, err := CloseInvocationSet(t.Context(), f.fixture.f.store, f.fixture.f.entry.InvocationID, "dev", ports)
 	if !errors.Is(err, workflowstate.ErrObservationRequired) || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" || len(failed.Receipt.Validation) != 1 || failed.Receipt.Validation[0].ExitCode != 0 {
 		t.Fatal("successful gate hid a changed native PR", err)
 	}
@@ -262,7 +262,7 @@ func TestNativeClosingEvidence(t *testing.T) {
 		}
 	}}
 
-	failed, err := store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports)
+	failed, err := CloseInvocationSet(t.Context(), store, f.fixture.f.entry.InvocationID, "dev", ports)
 	if err == nil || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" || len(failed.Receipt.Validation) != 1 || failed.Receipt.Validation[0].ExitCode != 0 {
 		t.Fatal("changed native proof confirmed closure", err)
 	}
@@ -280,7 +280,7 @@ func TestNativeClosingLost(t *testing.T) {
 	ports := finalizeNativeClosingFixture(t, f)
 	store, id := f.fixture.f.store, f.fixture.f.entry.InvocationID
 
-	closed, err := store.CloseWorkflowInvocationSet(t.Context(), id, "dev", ports)
+	closed, err := CloseInvocationSet(t.Context(), store, id, "dev", ports)
 	if err != nil || closed.Outcome != "completed" || f.receipt.Receipt.Native.GitApplicationRef == nil {
 		t.Fatal("reconciled lost exchange remained a closure barrier", err)
 	}

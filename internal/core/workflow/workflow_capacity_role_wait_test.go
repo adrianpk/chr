@@ -73,7 +73,7 @@ func workflowCapacityRoleFixture(t *testing.T, role string) (*Store, string, fun
 		fixture, _, run := workflowClosingEmptyOwner(t)
 
 		return fixture.store, run.ID, func() error {
-			_, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), run.ID, "dev", workflowFrontierPorts(fixture))
+			_, err := CloseInvocationSet(t.Context(), fixture.store, run.ID, "dev", workflowFrontierPorts(fixture))
 
 			return err
 		}

@@ -82,14 +82,14 @@ func TestWorkflowClosingRetry(t *testing.T) {
 	before := workflowClosingTaskBytes(t, fixture)
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)
 
-	failed, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), run.ID, "dev", ports)
+	failed, err := CloseInvocationSet(t.Context(), fixture.store, run.ID, "dev", ports)
 	if err == nil || failed.Outcome != "closing_validation_failed" || failed.Set.Set.ClosureRef != "" || len(failed.Set.Set.Closing.Attempts) != 1 {
 		t.Fatal("failed gate established closure or lost its budget", err)
 	}
 
 	store := NewWorkflowStore(fixture.store.layout, fixture.store.projectID)
 
-	closed, err := store.CloseWorkflowInvocationSet(t.Context(), run.ID, "dev", ports)
+	closed, err := CloseInvocationSet(t.Context(), store, run.ID, "dev", ports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestWorkflowClosingRetry(t *testing.T) {
 	checkWorkflowClosingResult(t, fixture, set, closed)
 	checkWorkflowClosingTasks(t, fixture, before, run)
 
-	attached, err := store.CloseWorkflowSet(t.Context(), workflowcloseout.Request{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}, ports)
+	attached, err := CloseSet(t.Context(), store, workflowcloseout.Request{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}, ports)
 	if err != nil || attached.ReceiptRef != closed.ReceiptRef || attached.Set.Revision != closed.Set.Revision {
 		t.Fatal("confirmed retry created another closure attempt", err)
 	}
@@ -176,7 +176,7 @@ func testWorkflowClosingEmpty(t *testing.T, required bool) {
 	ports := workflowFrontierPorts(fixture)
 	ports.Target = workflowClosingDeadlineTarget{ports.Target}
 
-	closed, err := fixture.store.CloseWorkflowSet(t.Context(), request, ports)
+	closed, err := CloseSet(t.Context(), fixture.store, request, ports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -218,7 +218,7 @@ func TestWorkflowClosingActualMembers(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), fixture.run.ID, "dev", ports); err == nil {
+	if _, err := CloseInvocationSet(t.Context(), fixture.store, fixture.run.ID, "dev", ports); err == nil {
 		t.Fatal("frozen exclusion or waiver hid an actual unfinished member")
 	}
 

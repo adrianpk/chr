@@ -48,7 +48,7 @@ func TestWorkflowClosingChanges(t *testing.T) {
 
 			workflowClosingContract(t, fixture, gate)
 
-			result, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), fixture.run.ID, "dev", ports)
+			result, err := CloseInvocationSet(t.Context(), fixture.store, fixture.run.ID, "dev", ports)
 			if !errors.Is(err, workflowstate.ErrConflict) || result.Outcome != "closing_validation_failed" || result.Set.Set.ClosureRef != "" {
 				t.Fatal("changed closing input or target established completion", err)
 			}
@@ -99,7 +99,7 @@ func TestWorkflowClosingReopen(t *testing.T) {
 	fixture, ports := workflowClosingFixture(t)
 	workflowClosingContract(t, fixture, workflowstate.Validation{WaiverReason: "Approved closure waiver"})
 
-	closed, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), fixture.run.ID, "dev", ports)
+	closed, err := CloseInvocationSet(t.Context(), fixture.store, fixture.run.ID, "dev", ports)
 	if err != nil {
 		t.Fatal(err)
 	}

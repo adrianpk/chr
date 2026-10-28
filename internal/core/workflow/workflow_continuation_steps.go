@@ -111,7 +111,7 @@ func (s *Store) advanceWorkflowContinuation(ctx context.Context, run workflowsta
 	run = state.Invocation
 
 	if workflowContinuationClosing(run) {
-		_, err := s.CloseWorkflowInvocationSet(ctx, run.ID, request.PullRequest.BaseBranch, FrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
+		_, err := CloseInvocationSet(ctx, s, run.ID, request.PullRequest.BaseBranch, FrontierPorts{Provider: ports.Publication.Provider, Observer: ports.Publication.Observer, Target: ports.Target})
 
 		return err
 	}

@@ -28,7 +28,7 @@ func (s service) CloseWorkflowSet(ctx context.Context, request workflowcloseout.
 		return workflowcloseout.Result{}, fmt.Errorf("configured observer cannot hydrate closing targets")
 	}
 
-	return store.CloseWorkflowSet(ctx, request, workflowcore.FrontierPorts{Provider: provider, Observer: observer, Target: target})
+	return workflowcore.CloseSet(ctx, store, request, workflowcore.FrontierPorts{Provider: provider, Observer: observer, Target: target})
 }
 
 // ReconcileWorkflowClosing recovers a dead set-closing owner without rerunning work.

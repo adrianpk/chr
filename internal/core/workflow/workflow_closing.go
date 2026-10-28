@@ -10,10 +10,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// CloseWorkflowSet validates every actual member on an isolated exact target.
+// CloseSet validates every actual member on an isolated exact target.
 // Failed gates retain their attempt and retry only closure. A confirmed receipt,
 // set projection and owning invocation share one replayable transition.
-func (s *Store) CloseWorkflowSet(ctx context.Context, request workflowcloseout.Request, ports FrontierPorts) (result workflowcloseout.Result, err error) {
+func CloseSet(ctx context.Context, store *Store, request workflowcloseout.Request, ports FrontierPorts) (result workflowcloseout.Result, err error) {
 	if request.ExpectedRevision == 0 || request.ExpectedSourceHash == "" || !workflowstate.ValidBranch(request.Branch) || ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
 		return result, fmt.Errorf("closing requires an observed set and canonical observation ports")
 	}
@@ -21,8 +21,8 @@ func (s *Store) CloseWorkflowSet(ctx context.Context, request workflowcloseout.R
 	var claim *workflowClosingClaim
 
 	admission, cancelAdmission := context.WithTimeout(ctx, 3*time.Minute)
-	err = s.withLock(admission, func() error {
-		begun, beginErr := s.beginWorkflowClosing(admission, request, ports)
+	err = store.withLock(admission, func() error {
+		begun, beginErr := store.beginWorkflowClosing(admission, request, ports)
 
 		claim, result = begun.Claim, begun.Result
 
@@ -36,15 +36,15 @@ func (s *Store) CloseWorkflowSet(ctx context.Context, request workflowcloseout.R
 	}
 	defer func() { err = errors.Join(err, claim.worker.releaseReservation()) }()
 
-	receipt, gateErr := s.executeWorkflowClosing(ctx, claim)
+	receipt, gateErr := (workflowClosingHost{store: store}).execute(ctx, claim)
 
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Minute)
 	defer cancel()
 
-	err = s.withLock(cleanup, func() error {
+	err = store.withLock(cleanup, func() error {
 		var finishErr error
 
-		result, finishErr = s.finishWorkflowClosing(cleanup, claim, receipt, gateErr, ports)
+		result, finishErr = store.finishWorkflowClosing(cleanup, claim, receipt, gateErr, ports)
 
 		return finishErr
 	})

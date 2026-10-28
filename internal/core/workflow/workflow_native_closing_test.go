@@ -82,7 +82,7 @@ func nativeClosingGate(t *testing.T, method string) {
 	ports := finalizeNativeClosingFixture(t, f)
 	store, id := f.fixture.f.store, f.fixture.f.entry.InvocationID
 
-	closed, err := store.CloseWorkflowInvocationSet(t.Context(), id, "dev", ports)
+	closed, err := CloseInvocationSet(t.Context(), store, id, "dev", ports)
 	if err != nil {
 		t.Fatal("native receipt could not enter its exact set gate", err)
 	}

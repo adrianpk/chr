@@ -64,19 +64,19 @@ func workflowClosingProjectionFence(run workflowInvocationFile, claim *workflowC
 	return nil
 }
 
-// CloseWorkflowInvocationSet continues only the next frozen set's closing role.
-func (s *Store) CloseWorkflowInvocationSet(ctx context.Context, id, branch string, ports FrontierPorts) (workflowcloseout.Result, error) {
-	run, err := s.ReadWorkflow(ctx, id)
+// CloseInvocationSet continues only the next frozen set's closing role.
+func CloseInvocationSet(ctx context.Context, store *Store, id, branch string, ports FrontierPorts) (workflowcloseout.Result, error) {
+	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
 		return workflowcloseout.Result{}, err
 	}
 
 	if run.ClosingSet != "" {
-		if _, err := s.ReconcileWorkflowClosing(ctx, run.SetImages[len(run.Closures)].Path); err != nil {
+		if _, err := store.ReconcileWorkflowClosing(ctx, run.SetImages[len(run.Closures)].Path); err != nil {
 			return workflowcloseout.Result{}, err
 		}
 
-		run, err = s.ReadWorkflow(ctx, id)
+		run, err = store.ReadWorkflow(ctx, id)
 		if err != nil {
 			return workflowcloseout.Result{}, err
 		}
@@ -98,5 +98,5 @@ func (s *Store) CloseWorkflowInvocationSet(ctx context.Context, id, branch strin
 
 	request := workflowcloseout.Request{SetPath: image.Path, ExpectedRevision: image.Revision, ExpectedSourceHash: image.SourceHash, Repository: run.Selection.Target.Repository, Branch: branch, InvocationID: run.ID}
 
-	return s.CloseWorkflowSet(ctx, request, ports)
+	return CloseSet(ctx, store, request, ports)
 }

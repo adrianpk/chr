@@ -156,7 +156,7 @@ func testWorkflowClosingJournal(t *testing.T, stage string, position int) {
 		ports.Target = &workflowClosingTargetHook{TargetGit: ports.Target, hook: func() { fixture.store.afterReplace = fault }}
 	}
 
-	if _, err := fixture.store.CloseWorkflowInvocationSet(t.Context(), run.ID, "dev", ports); err == nil {
+	if _, err := CloseInvocationSet(t.Context(), fixture.store, run.ID, "dev", ports); err == nil {
 		t.Fatal("closing transition was not interrupted")
 	}
 

@@ -48,12 +48,12 @@ func (operation workflowSubmissionResponses) Retain(ctx context.Context, respons
 }
 
 type workflowClosingWorkspace struct {
-	store *Store
+	host  workflowClosingHost
 	claim *workflowClosingClaim
 }
 
 func (operation workflowClosingWorkspace) Prepare(ctx context.Context) (string, error) {
-	return operation.store.prepareWorkflowClosingCheckout(ctx, operation.claim)
+	return operation.host.prepareCheckout(ctx, operation.claim)
 }
 
 func (operation workflowClosingWorkspace) Check(ctx context.Context, directory string) error {
@@ -61,7 +61,7 @@ func (operation workflowClosingWorkspace) Check(ctx context.Context, directory s
 }
 
 func (operation workflowClosingWorkspace) Run(ctx context.Context, directory string, command []string) (workflowstate.CommandResult, error) {
-	return operation.store.runWorkflowClosingCommand(ctx, operation.claim, directory, command)
+	return operation.host.runCommand(ctx, operation.claim, directory, command)
 }
 
 var (

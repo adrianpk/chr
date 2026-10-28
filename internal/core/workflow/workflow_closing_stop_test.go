@@ -39,7 +39,7 @@ func testWorkflowClosingStop(t *testing.T, intent string) {
 	done := make(chan error, 1)
 
 	go func() {
-		_, err := fixture.store.CloseWorkflowInvocationSet(ctx, run.ID, "dev", workflowFrontierPorts(fixture))
+		_, err := CloseInvocationSet(ctx, fixture.store, run.ID, "dev", workflowFrontierPorts(fixture))
 		done <- err
 	}()
 
