@@ -2,19 +2,32 @@
 
 ## Purpose
 
-This package owns the consumer contract for submission response retention.
+This package owns forge submission dispatch and the immutable policy that relates
+provider replies and PR observations to retained submission identity.
 
 ## Contract
 
-`Responses` is used by `Store.SubmitWorkflowSliceIntegration`. Retain binds the provider response and original IO failure to one invocation and journaled submission ID. Observation and confirmed delivery remain separate from an untrusted response.
+`Submitter` is the narrow guarded provider IO capability used by `Submit`.
+`Submit` receives an already journaled intent, dispatches once under the watched
+context, and invokes `Responses.Retain` within the original five-second detached
+cleanup bound. It preserves the joined provider and retention errors.
 
-The contract imports shared `workflow/state` protocol values. The workflow owner
-implements it with the existing operations and retains claims, reservations,
-source/revision guards, repository locks, journals, atomic writes and recovery.
-The port exposes the required operation without exposing a mutable store.
+The host binds `Responses` to exact invocation/submission journal identity and
+retains intent exclusion, current authorization, stop supervision, definitive
+observation, receipt transactions and recovery. A late response cannot replace a
+concurrent confirmed observation. Acceptance alone cannot establish delivery or
+authorize retrying an uncertain dispatch.
+
+`ResponseState`, `ValidSubmissionState`, `MatchesPullRequest` and
+`CheckUnpublishedProof` preserve the existing response/state spellings and exact
+legacy or native publication identity predicates. The native receipt-bound PR
+rules remain distinct from legacy source-head equality and ticket-native work.
 
 ## Validation
 
-Existing workflow integration tests exercise this binding through real Git,
-filesystem and process fixtures. The production dependency check permits shared
-state and rejects coordinator, filesystem mutation and configuration imports.
+Existing real local Git/provider fixtures cover guarded submission, uncertain and
+lost responses, budgets/policy, atomic exclusion, stop, journals/corruption and
+native recovery/proof. Focused races cover stop, exclusion and lost responses.
+Mechanical token checks preserve all six moved declarations. The dependency
+checker permits only shared `workflow/state` within the module and rejects
+coordinator, configuration and mutation imports.

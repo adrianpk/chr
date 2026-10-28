@@ -18,6 +18,10 @@ the five-second detached cleanup bound. `Result` retains the partial binding and
 role-selected repair task key. Command supervision and subsequent repair use the
 host-owned lifecycle and original operation context.
 
+The host uses named observations, retained records, claimed preparation, selected
+roles and hashed evidence references while keeping every context explicit.
+Partial failure values and reservation cleanup remain local.
+
 The private workflow adapter binds claim, prepared input and provider. It retains
 credential/execution/current-input checks, explicit human approval, repair budgets,
 repository locks, journals, atomic writes and recovery. No mutable Store or claim
