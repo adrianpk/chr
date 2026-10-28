@@ -84,6 +84,14 @@ the original private claim. Store still owns guarded admission, process records,
 credential/input/target fences, receipt confirmation and interrupted recovery.
 Application and continuation callers use the new operations directly.
 
+Task, slice and manual execution now use actual coordinator operations and a
+private task host for lease deadlines, gate commands and partial results. The
+stop watcher owns its ticker, goroutine and cancellation outside Store. Guarded
+claim creation, input freezing, current-candidate checks, process journals,
+verified replay and complete result/claim transactions retain their Store owner.
+Manual handoff and successful worker exit still require explicit host-verified
+candidate reconciliation before task acceptance.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -98,11 +106,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 134 source/extraction/consolidation images. Current identities and hashes are updated
+retains 161 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Thirty-five former Store methods now have actual
+frozen source fields remain unchanged. Forty-eight former Store methods now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 873 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 860 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -155,11 +163,11 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 156 body-specific decisions in
-the existing 908-row method map: 121 guarded-persistence methods, 23 closing
-policies, one host evidence adapter, four coordinator functions, one persistence
-reader, four closing lifecycle methods and two coordinator operations. The
-remaining 752 source rows stay explicitly pending final assessment.
+contracts. Final method inspection now records 242 body-specific decisions in
+the existing 908-row method map: 194 guarded-persistence methods, 23 closing
+policies, one host evidence adapter, five coordinator functions, one persistence
+reader, nine lifecycle owners and nine coordinator operations. The remaining
+666 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -179,6 +187,16 @@ registration and versioned-projection methods also retain individual source
 bases. The v1/v2 tracker compatibility case preserves default schema, original
 bytes, bound order-map requirements and hash-guarded replacement without granting
 execution authority. Final repository-wide API acceptance remains active.
+
+Task and stop lifecycle separation is in `0ce09547cb796604fb01ee41851a1e9a709cf02e`. Twenty-seven complete
+production declarations and 85 test declarations match after explicit receiver,
+coordinator, host and call substitutions. The original execution mutex, frozen
+mode/grant, watched deadline, ordered gate, partial output and detached settlement
+ordering remain. Eighty-six additional method decisions retain individual source
+bases: actual task/manual/slice/stop owners are separate from guarded claim,
+input, replay, current-image and complete result transactions. C15.14 records the
+supported manual empty-worker and execute/reconcile distinction. Final API and
+compatibility acceptance remain active.
 
 ## Contracts Added or Changed
 
@@ -242,6 +260,11 @@ leaked owned descendants. Affected workflow/app/checker short tests, unchanged
 signature bounds and strict lint pass. These are task checks; final slice
 validation and guided parity remain pending.
 
+Task/stop lifecycle changes passed 46 real workflow fixtures and 12 application
+fixtures, plus 11 focused races, without skips or leaked owned descendants.
+Affected short tests, unchanged signature bounds and strict lint pass. These are
+task checks; guided parity and exact-head slice/controller acceptance remain open.
+
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|UseCase|Reopen|SetAdvance|Budget|Recovery|Journal|PostObservation|Stop)|NativeClosing(Gate|Divergence|Evidence|PublicationRace)|WorkflowParallelClosingRecovery|QualityRecordWire)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow ./internal/core/workflow/closeout -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|Execute)$' -count=1 -timeout=10m -json`
 - `go test ./internal/core/workflow -run '^Test(WorkflowClosing(Retry|Empty|ActualMembers|Changes|Budget|Recovery|Journal|Stop)|NativeClosing(Gate|Divergence|Evidence|Lost))$' -count=1 -timeout=15m -json`
@@ -277,6 +300,9 @@ validation and guided parity remain pending.
 
 - `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(WorkflowClosing.*|NativeClosing.*|WorkflowParallelClosingRecovery|WorkflowContinuation.*|WorkflowCapacityRoleWait|NativeQueueClosure|ServiceWorkflowClosing)$' -count=1 -timeout=15m -json`
 - `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowContinuationRecovery|WorkflowCapacityRoleWait|NativeQueueClosure)$' -count=1 -timeout=10m -json`
+
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(WorkflowTask.*|WorkflowManual.*|WorkflowSlice(Aggregate|Prefix|Retry|Repair|Changed|GateMutation|Stop|Waiver|Partial|Budget|Fence|Journal|RepairJournal)|WorkflowStop.*|TelegramControlStopOwner|WorkflowClosingStop|WorkflowContinuationRecovery|WorkflowCapacityRoleWait|NativeQueueClosure|ServiceWorkflow.*Task|DaemonWorkflow.*)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowTaskJournal|WorkflowTaskProcess|WorkflowManualStop|WorkflowManualJournal|WorkflowManualFencing|WorkflowSliceStop|WorkflowSliceJournal|WorkflowStop|TelegramControlStopOwner|WorkflowClosingStop|WorkflowCapacityRoleWait)$' -count=1 -timeout=10m -json`
 
 - `go test -short ./internal/core/... ./internal/app/... ./internal/tui/... ./internal/webui/... ./scripts/goquality`
 - `go test ./internal/core/workflow/closeout -count=1`
@@ -321,10 +347,17 @@ keeping the earlier gate extraction distinct from this host extraction. Relative
 links, named regression declarations, thirteen compatibility rows, T15 columns
 and whitespace pass. Runtime checks are not repeated for this metadata update.
 
+Task/stop ledger reconciliation checks 4,275 current declaration hashes, all
+908 original method mappings, four signature ledgers, 27 new frozen source
+preimages, 65 commit objects and 22 actual ports. It records 242 source-specific
+ownership decisions with 666 pending rows. Frozen source/baseline/introduction
+fields remain unchanged across 33 ledgers. Relative links, named regressions,
+14 compatibility cases, T15 columns and whitespace pass. Runtime checks are not
+repeated for this metadata-only update.
+
 ## Risks and Follow-ups
 
-Remaining closeout policy extraction, method-level Store policy ownership,
-final bridge removal and naming/compatibility reconciliation remain active
+Remaining method-level Store policy ownership, final bridge removal and naming/compatibility reconciliation remain active
 Slice 15 work. Shared guided parity, final ordered exact-head controller
 validation, PR publication and PR-reference follow-up are pending. No final
 slice acceptance is claimed by these task checks.
