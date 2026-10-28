@@ -110,7 +110,7 @@ func (reader workflowIntegrationReader) checkMergerChangedKinds(ctx context.Cont
 			}
 
 			declared := slices.ContainsFunc(input.Conflicts, func(c workflowstate.MergerConflict) bool {
-				return c.Path == path && c.Kind == kind && workflowMergerProcedureRequired(c)
+				return c.Path == path && c.Kind == kind && workflowmerge.WorkflowMergerProcedureRequired(c)
 			})
 			if kind != "text" && !declared {
 				return workflowstate.ErrConflict
@@ -127,7 +127,7 @@ func (reader workflowIntegrationReader) mergerPathObject(ctx context.Context, tr
 
 func (reader workflowIntegrationReader) checkMergerSideSelection(ctx context.Context, state MergerRepairState, input workflowstate.MergerInput, tree string) error {
 	for _, conflict := range input.Conflicts {
-		if workflowMergerProcedureRequired(conflict) {
+		if workflowmerge.WorkflowMergerProcedureRequired(conflict) {
 			continue
 		}
 

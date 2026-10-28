@@ -74,7 +74,7 @@ func (s *Store) migrateWorkflowIntegrationLedger(ctx context.Context, run workfl
 	}
 
 	if workflowIntegrationMigrationHasEvidence(entry) {
-		return entry, workflowIntegrationConflict("retained candidate requires compatible preparation before ledger migration")
+		return entry, workflowstate.IntegrationConflict("retained candidate requires compatible preparation before ledger migration")
 	}
 
 	budget, err := s.workflowIntegrationBudgetAdmission(ctx, run, entry, request.TokenLimit)

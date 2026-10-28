@@ -7,6 +7,7 @@ import (
 	"slices"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -78,13 +79,13 @@ func checkWorkflowMergerEntry(run workflowInvocationFile, entry IntegrationEntry
 		hash = entry.CandidateRef.Hash
 	}
 
-	current := MergerFence{
+	current := workflowmerge.MergerFence{
 		EntryID: entry.ID, CandidateHash: hash, ScopeHash: entry.FrozenScopeHash,
 		OwnedWorkspaceID: workflowMergerWorkspaceID(input), Source: run.Lane.HeadCommit, Base: input.Base,
 		Method: input.Method, Unit: entry.Unit, CandidateRevision: entry.StateRevision,
 		ClaimGeneration: entry.ClaimGeneration, Repository: entry.Repository, SourceRef: run.Lane.Branch, TargetRef: entry.TargetRef,
 	}
-	if input.InvocationID != run.ID || current != workflowMergerFence(input) {
+	if input.InvocationID != run.ID || current != workflowmerge.WorkflowMergerFence(input) {
 		return workflowstate.ErrConflict
 	}
 

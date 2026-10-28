@@ -25,7 +25,7 @@ func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submis
 		}
 
 		submission.Response, submission.UpdatedAt = workflowSubmissionResponseState(response, submitErr), time.Now().UTC()
-		if workflowCommitID(response.ResultCommit) {
+		if workflowstate.ValidCommitID(response.ResultCommit) {
 			submission.ResponseCommit = response.ResultCommit
 		}
 

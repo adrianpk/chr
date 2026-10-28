@@ -72,3 +72,9 @@ execution capability. EvidenceRefs enumerates the original ordered references
 on merger input and native record-binding values; native owners still validate
 containment, hashes, authorization and actual evidence. This data owner gains no
 store, configuration, transport, claim resource, journal or recovery authority.
+
+Repository identity canonicalization and lexical branch, commit, fingerprint,
+evidence-reference and allowance checks are shared by native authority and stage
+consumers. They preserve the original values, error identities and overflow
+behavior. These checks perform no IO, admission, evidence reads or authorization;
+those decisions remain with the native owner.

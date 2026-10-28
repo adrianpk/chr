@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -36,7 +37,7 @@ func TestNativeMergerSemantic(t *testing.T) {
 	input.Repository, input.Source, input.Base, input.Method = complete.Query.Repository, complete.Query.SourceCommit, complete.Query.BaseCommit, "rebase"
 	input.AllowedPaths, input.Conflicts[0].Path = []string{"next.txt"}, "next.txt"
 
-	input, err := SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +86,7 @@ func TestNativeMergerFix(t *testing.T) {
 	input.Repository, input.Source, input.Base, input.Method = state.Query.Repository, state.Query.SourceCommit, state.Query.BaseCommit, "rebase"
 	input.AllowedPaths, input.Conflicts[0].Path = []string{"repair.txt"}, "repair.txt"
 
-	input, err := SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}

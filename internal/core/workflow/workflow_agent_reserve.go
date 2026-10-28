@@ -45,7 +45,7 @@ func (s *Store) reserveWorkflowAgentInput(ctx context.Context, run *workflowInvo
 		return nil, err
 	}
 
-	maximum, err := workflowTokenSum(harness.InputTokens, harness.OutputTokens)
+	maximum, err := workflowstate.TokenSum(harness.InputTokens, harness.OutputTokens)
 	if err != nil {
 		return nil, err
 	}

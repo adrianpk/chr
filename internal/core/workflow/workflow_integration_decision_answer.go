@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -90,17 +91,9 @@ func checkWorkflowDecisionFence(run workflowInvocationFile, entry IntegrationEnt
 }
 
 func workflowDecisionsResolved(record IntegrationDecisions) bool {
-	return len(record.Requests) > 0 && !slices.ContainsFunc(record.Requests, func(d workflowstate.MergerDecision) bool { return !workflowDecisionResolved(record.Answers, d.ID) })
-}
-
-func workflowDecisionResolved(answers []workflowstate.IntegrationAnswer, id string) bool {
-	for i := len(answers) - 1; i >= 0; i-- {
-		if answers[i].DecisionID == id {
-			return answers[i].Action == "resolve"
-		}
-	}
-
-	return false
+	return len(record.Requests) > 0 && !slices.ContainsFunc(record.Requests, func(d workflowstate.MergerDecision) bool {
+		return !workflowmerge.WorkflowDecisionResolved(record.Answers, d.ID)
+	})
 }
 
 func workflowDecisionAnswerRetry(record IntegrationDecisions, request IntegrationAnswerRequest) (bool, error) {

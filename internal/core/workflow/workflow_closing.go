@@ -34,7 +34,7 @@ type SetClosureResult struct {
 // Failed gates retain their attempt and retry only closure. A confirmed receipt,
 // set projection and owning invocation share one replayable transition.
 func (s *Store) CloseWorkflowSet(ctx context.Context, request SetClosureRequest, ports FrontierPorts) (result SetClosureResult, err error) {
-	if request.ExpectedRevision == 0 || request.ExpectedSourceHash == "" || !validWorkflowPRBranch(request.Branch) || ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
+	if request.ExpectedRevision == 0 || request.ExpectedSourceHash == "" || !workflowstate.ValidBranch(request.Branch) || ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
 		return result, fmt.Errorf("closing requires an observed set and canonical observation ports")
 	}
 

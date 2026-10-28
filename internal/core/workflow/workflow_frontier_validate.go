@@ -125,7 +125,7 @@ func validWorkflowFrontierUnit(run workflowInvocationFile, delivery UnitDelivery
 }
 
 func validateWorkflowUnitDeliveryTarget(run workflowInvocationFile, delivery UnitDelivery) error {
-	if delivery.Target.Repository != run.Selection.Target.Repository || delivery.NextTarget.Repository != run.Selection.Target.Repository || delivery.NextTarget.Commit != delivery.Proof.ObservedTarget || !workflowCommitID(delivery.Target.Commit) {
+	if delivery.Target.Repository != run.Selection.Target.Repository || delivery.NextTarget.Repository != run.Selection.Target.Repository || delivery.NextTarget.Commit != delivery.Proof.ObservedTarget || !workflowstate.ValidCommitID(delivery.Target.Commit) {
 		return workflowstate.ErrConflict
 	}
 

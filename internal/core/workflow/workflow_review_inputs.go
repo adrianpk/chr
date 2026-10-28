@@ -89,7 +89,7 @@ func observeWorkflowReviewPR(ctx context.Context, run workflowInvocationFile, pr
 		return pr, target, err
 	}
 
-	if !workflowCommitID(target) || target != pr.BaseCommit {
+	if !workflowstate.ValidCommitID(target) || target != pr.BaseCommit {
 		return pr, target, fmt.Errorf("%w: canonical target differs from review observation", workflowstate.ErrConflict)
 	}
 

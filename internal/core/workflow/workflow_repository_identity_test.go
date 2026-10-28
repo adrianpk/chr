@@ -1,6 +1,10 @@
 package workflow
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestNativeRepositoryAliases resolves real Git remote names into one public
 // identity. Credentials and private transport aliases never become queue keys;
@@ -41,7 +45,7 @@ func TestNativeRepositoryAliases(t *testing.T) {
 			}
 
 			if got != "" {
-				again, err := workflowCanonicalRepository(got)
+				again, err := workflowstate.CanonicalRepository(got)
 				if err != nil || again != got {
 					t.Fatal("canonical repository identity was not stable", err)
 				}

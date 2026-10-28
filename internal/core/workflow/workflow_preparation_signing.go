@@ -100,7 +100,7 @@ func validWorkflowPreparationSignatures(proof workflowstate.IntegrationProof, p 
 	}
 
 	for i, result := range p.Signatures {
-		if result.Commit != proof.Provenance.Prepared[i].Commit || !validWorkflowNativeFingerprint(result.SignatureHash) {
+		if result.Commit != proof.Provenance.Prepared[i].Commit || !workflowstate.ValidFingerprint(result.SignatureHash) {
 			return false
 		}
 	}

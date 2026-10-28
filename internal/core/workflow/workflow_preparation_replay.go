@@ -70,12 +70,12 @@ func (reader workflowIntegrationReader) preparationObject(ctx context.Context, t
 }
 
 func validWorkflowPreparationObject(tree string, parents []string, author workflowstate.IntegrationIdentity, encoding string) bool {
-	if !workflowCommitID(tree) || !validWorkflowCommitIdentity(author) || strings.ContainsAny(encoding, "\x00\r\n") || len(parents) < 1 || len(parents) > 2 {
+	if !workflowstate.ValidCommitID(tree) || !validWorkflowCommitIdentity(author) || strings.ContainsAny(encoding, "\x00\r\n") || len(parents) < 1 || len(parents) > 2 {
 		return false
 	}
 
 	for _, parent := range parents {
-		if !workflowCommitID(parent) || len(parent) != len(tree) {
+		if !workflowstate.ValidCommitID(parent) || len(parent) != len(tree) {
 			return false
 		}
 	}

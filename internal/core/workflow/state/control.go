@@ -1,6 +1,8 @@
 package state
 
-import "time"
+import (
+	"time"
+)
 
 // ControlIntegrationGuard is the displayed integration image. Private
 // claim credentials are derived by the native owner after these fields match.

@@ -16,7 +16,7 @@ func validateWorkflowTicketAdmission(guard *workflowstate.AdmissionGuard, select
 		return nil
 	}
 
-	if guard.Selected == nil || ticket.Key != guard.Selected.Key || ticket.Revision != guard.Selected.Revision || !validWorkflowNativeFingerprint(ticket.ContractHash) || selection.Selector.Extent != "ticket" || selection.Selector.Identity != ticket.Key {
+	if guard.Selected == nil || ticket.Key != guard.Selected.Key || ticket.Revision != guard.Selected.Revision || !workflowstate.ValidFingerprint(ticket.ContractHash) || selection.Selector.Extent != "ticket" || selection.Selector.Identity != ticket.Key {
 		return workflowstate.ErrConflict
 	}
 

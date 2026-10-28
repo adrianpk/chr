@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -72,7 +73,7 @@ func (s *Store) commitWorkflowMergerProcedureStart(run *workflowInvocationFile, 
 	command := processes[len(processes)-1].Command
 
 	allowed := slices.ContainsFunc(prepared.input.Merger.Conflicts, func(c workflowstate.MergerConflict) bool {
-		return workflowMergerProcedureRequired(c) && (slices.Equal(command, c.RegenerationCommand) || slices.Equal(command, c.ValidationCommand))
+		return workflowmerge.WorkflowMergerProcedureRequired(c) && (slices.Equal(command, c.RegenerationCommand) || slices.Equal(command, c.ValidationCommand))
 	})
 	if !allowed {
 		return workflowstate.ErrConflict

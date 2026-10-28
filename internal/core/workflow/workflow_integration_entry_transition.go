@@ -13,7 +13,7 @@ import (
 
 func (s *Store) transitionWorkflowIntegration(ctx context.Context, run workflowInvocationFile, request IntegrationTransition) (IntegrationEntry, error) {
 	if run.Integration == nil || run.Integration.EntryID != request.EntryID || run.Revision != request.InvocationRevision {
-		return IntegrationEntry{}, workflowIntegrationConflict("callback has a stale invocation pointer")
+		return IntegrationEntry{}, workflowstate.IntegrationConflict("callback has a stale invocation pointer")
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -50,11 +50,11 @@ func guardWorkflowIntegrationTransition(entry IntegrationEntry, request Integrat
 	}
 
 	if entry.Revision != request.EntryRevision || entry.ClaimGeneration != request.ClaimGeneration || hash != request.CandidateHash {
-		return workflowIntegrationConflict("callback has a stale revision, generation or candidate")
+		return workflowstate.IntegrationConflict("callback has a stale revision, generation or candidate")
 	}
 
 	if entry.Revision == math.MaxUint64 || entry.StateRevision == math.MaxUint64 || entry.ClaimGeneration == math.MaxUint64 {
-		return workflowIntegrationConflict("revision or generation exhausted")
+		return workflowstate.IntegrationConflict("revision or generation exhausted")
 	}
 
 	if workflowIntegrationPublicationStop(entry, request) {
@@ -145,7 +145,7 @@ func (s *Store) checkWorkflowIntegrationCandidate(entry IntegrationEntry) error 
 	}
 
 	if candidate.Native == nil || candidate.Native.EntryID != entry.ID || candidate.InvocationID != entry.InvocationID || candidate.Native.Unit != entry.Unit || candidate.Native.SourceRepository != entry.Repository || candidate.Native.TargetRef != entry.TargetRef {
-		return workflowIntegrationConflict("candidate has a foreign unit or target")
+		return workflowstate.IntegrationConflict("candidate has a foreign unit or target")
 	}
 
 	return s.checkWorkflowNativeCandidate(candidate)
@@ -153,11 +153,11 @@ func (s *Store) checkWorkflowIntegrationCandidate(entry IntegrationEntry) error 
 
 func (s *Store) checkWorkflowIntegrationAuthorization(run workflowInvocationFile, entry IntegrationEntry) error {
 	if entry.CandidateRef == nil || run.Preparation == nil || run.Review == nil || run.Review.State != "authorized" || run.Preparation.State != "validated" {
-		return workflowIntegrationConflict("requires retained preparation and exact review authorization")
+		return workflowstate.IntegrationConflict("requires retained preparation and exact review authorization")
 	}
 
 	if run.Preparation.Unit != entry.Unit || run.Review.Unit != entry.Unit || run.Preparation.ResultRef != entry.CandidateRef.Path || run.Preparation.ResultHash != entry.CandidateRef.Hash {
-		return workflowIntegrationConflict("authorization names another candidate")
+		return workflowstate.IntegrationConflict("authorization names another candidate")
 	}
 
 	_, err := s.readWorkflowPreparation(run)
@@ -169,7 +169,7 @@ func (s *Store) checkWorkflowIntegrationPublication(ctx context.Context, run wor
 	journal, err := s.readWorkflowSubmissionJournal(ctx, run)
 	if errors.Is(err, os.ErrNotExist) {
 		if run.Submission != nil || next.SubmissionRef != nil || slices.Contains([]string{"publishing", "observing", "finalizing", "integrated"}, next.State) {
-			return workflowIntegrationConflict("has no native submission journal")
+			return workflowstate.IntegrationConflict("has no native submission journal")
 		}
 
 		return nil
@@ -201,7 +201,7 @@ func guardWorkflowIntegrationSubmissionPhase(entry IntegrationEntry, submission 
 	}
 
 	if submission.State == "confirmed" && !slices.Contains([]string{"observing", "finalizing", "integrated", "blocked"}, entry.State) {
-		return workflowIntegrationConflict("confirmed publication cannot be requeued or cancelled")
+		return workflowstate.IntegrationConflict("confirmed publication cannot be requeued or cancelled")
 	}
 
 	return nil
@@ -213,7 +213,7 @@ func checkWorkflowIntegrationSubmissionBinding(run workflowInvocationFile, entry
 	}
 
 	if journal.Schema != "chr-integration-journal/v2" || entry.SubmissionRef == nil || run.Submission == nil || *entry.SubmissionRef != *run.Submission {
-		return workflowIntegrationConflict("requires native publication facts and their current projection")
+		return workflowstate.IntegrationConflict("requires native publication facts and their current projection")
 	}
 
 	return nil
@@ -229,7 +229,7 @@ func (s *Store) checkWorkflowIntegrationFinalization(ctx context.Context, run wo
 	}
 
 	if old.State == "publishing" && next.State == "queued" {
-		return workflowIntegrationConflict("requires native dispatch reconciliation before requeue")
+		return workflowstate.IntegrationConflict("requires native dispatch reconciliation before requeue")
 	}
 
 	if next.State != "finalizing" && next.State != "integrated" {
@@ -237,7 +237,7 @@ func (s *Store) checkWorkflowIntegrationFinalization(ctx context.Context, run wo
 	}
 
 	if !workflowIntegrationReceiptBindingMatches(run, next, submission) {
-		return workflowIntegrationConflict("receipt differs from confirmed publication")
+		return workflowstate.IntegrationConflict("receipt differs from confirmed publication")
 	}
 
 	if err := s.checkWorkflowNativeReceiptContinuation(submission); err != nil {
@@ -260,7 +260,7 @@ func (s *Store) checkWorkflowIntegrationReceiptImages(ctx context.Context, run w
 	}
 
 	if !workflowIntegrationReceiptOwnerMatches(receipt.Receipt, run, next) {
-		return workflowIntegrationConflict("requires native verified receipt")
+		return workflowstate.IntegrationConflict("requires native verified receipt")
 	}
 
 	return nil
@@ -324,12 +324,12 @@ func bindWorkflowIntegrationPublication(entry *IntegrationEntry, run workflowInv
 
 func guardWorkflowIntegrationStop(run workflowInvocationFile, entry IntegrationEntry, request IntegrationTransition) error {
 	if request.ClearStopIntent && entry.State != "paused" {
-		return workflowIntegrationConflict("stop intent may be cleared only at a paused checkpoint")
+		return workflowstate.IntegrationConflict("stop intent may be cleared only at a paused checkpoint")
 	}
 
 	stopped := run.StopIntent != "" || entry.StopIntent != "" || request.StopIntent != ""
 	if stopped && !request.ClearStopIntent && (request.State == "queued" || request.State == "preparing") {
-		return workflowIntegrationConflict("retained stop intent blocks execution")
+		return workflowstate.IntegrationConflict("retained stop intent blocks execution")
 	}
 
 	return nil

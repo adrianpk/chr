@@ -15,7 +15,7 @@ func validateWorkflowAdmissionGuard(guard *workflowstate.AdmissionGuard, selecti
 		return nil
 	}
 
-	if !validWorkflowNativeFingerprint(guard.SnapshotHash) || selection.SnapshotHash != "" && selection.SnapshotHash != guard.SnapshotHash {
+	if !workflowstate.ValidFingerprint(guard.SnapshotHash) || selection.SnapshotHash != "" && selection.SnapshotHash != guard.SnapshotHash {
 		return workflowstate.ErrConflict
 	}
 

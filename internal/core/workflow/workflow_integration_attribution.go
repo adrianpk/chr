@@ -109,12 +109,12 @@ func validWorkflowIntegrationAttribution(entry workflowstate.IntegrationAttribut
 }
 
 func validWorkflowAttributionObjects(entry workflowstate.IntegrationAttribution) bool {
-	if !workflowCommitID(entry.Commit) || !workflowCommitID(entry.Tree) || len(entry.Commit) != len(entry.Tree) || len(entry.Parents) > workflowstate.RecordLimit || !validWorkflowNativeFingerprint(entry.MessageHash) {
+	if !workflowstate.ValidCommitID(entry.Commit) || !workflowstate.ValidCommitID(entry.Tree) || len(entry.Commit) != len(entry.Tree) || len(entry.Parents) > workflowstate.RecordLimit || !workflowstate.ValidFingerprint(entry.MessageHash) {
 		return false
 	}
 
 	for _, parent := range entry.Parents {
-		if !workflowCommitID(parent) || len(parent) != len(entry.Commit) {
+		if !workflowstate.ValidCommitID(parent) || len(parent) != len(entry.Commit) {
 			return false
 		}
 	}

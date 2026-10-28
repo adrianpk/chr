@@ -95,7 +95,7 @@ func validateWorkflowNativeReviewInput(input workflowstate.ReviewInput) error {
 	native := input.Native
 
 	binding := native.Candidate.NativeRecordBinding
-	if native.ClaimGeneration == 0 || !validWorkflowNativeFingerprint(native.Candidate.CandidateHash) || input.PreparedGit == nil {
+	if native.ClaimGeneration == 0 || !workflowstate.ValidFingerprint(native.Candidate.CandidateHash) || input.PreparedGit == nil {
 		return workflowstate.ErrConflict
 	}
 

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // EntryRepository resolves only an explicit public canonical identity.
@@ -22,5 +23,5 @@ func EntryRepository(ctx context.Context, projectDir, remote string) (string, er
 		return "", fmt.Errorf("read canonical remote identity: %w", err)
 	}
 
-	return workflowCanonicalRepository(strings.TrimSpace(raw))
+	return workflowstate.CanonicalRepository(strings.TrimSpace(raw))
 }

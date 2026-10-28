@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -54,7 +55,7 @@ func TestNativeMergerSettlement(t *testing.T) {
 
 	var err error
 
-	request.Input, err = SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}

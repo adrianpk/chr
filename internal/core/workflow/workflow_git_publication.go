@@ -139,7 +139,7 @@ func retainWorkflowPublicationAdvertisement(ctx context.Context, request GitPubl
 }
 
 func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, request GitPublication) error {
-	repository, err := workflowCanonicalRepository(git.repository)
+	repository, err := workflowstate.CanonicalRepository(git.repository)
 	if err != nil || repository != request.Repository || request.Directory == "" {
 		return workflowstate.ErrConflict
 	}
@@ -158,7 +158,7 @@ func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, reque
 
 func validateWorkflowPublicationRefs(request GitPublication) error {
 	for _, ref := range []string{request.SourceRef, request.TargetRef} {
-		if !strings.HasPrefix(ref, "refs/heads/") || !validWorkflowPRBranch(strings.TrimPrefix(ref, "refs/heads/")) {
+		if !strings.HasPrefix(ref, "refs/heads/") || !workflowstate.ValidBranch(strings.TrimPrefix(ref, "refs/heads/")) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -169,7 +169,7 @@ func validateWorkflowPublicationRefs(request GitPublication) error {
 	}
 
 	for _, id := range []string{proof.SourceCommit, proof.BaseCommit, proof.ResultCommit} {
-		if !workflowCommitID(id) || len(id) != len(proof.SourceCommit) {
+		if !workflowstate.ValidCommitID(id) || len(id) != len(proof.SourceCommit) {
 			return workflowstate.ErrConflict
 		}
 	}

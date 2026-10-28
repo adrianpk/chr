@@ -8,6 +8,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -62,7 +63,7 @@ func nativeMergerTreeRepair(t *testing.T, state MergerRepairState, path, content
 		input.HistoryCheckpoint = nativeMergerReplayCheckpoint(t, state)
 	}
 
-	input, err := SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}

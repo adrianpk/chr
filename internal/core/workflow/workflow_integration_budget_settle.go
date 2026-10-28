@@ -86,7 +86,7 @@ func (s *Store) checkWorkflowTokenSettlement(id string, reservation IntegrationR
 		return workflowstate.ErrConflict
 	}
 
-	total, err := workflowTokenSum(proof.Input, proof.Output)
+	total, err := workflowstate.TokenSum(proof.Input, proof.Output)
 	if err != nil || total > reservation.Allowance.Maximum || proof.Input > reservation.Allowance.Input || proof.Output > reservation.Allowance.Output {
 		return workflowstate.ErrConflict
 	}

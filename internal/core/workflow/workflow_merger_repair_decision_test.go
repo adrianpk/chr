@@ -4,6 +4,7 @@ import (
 	"slices"
 	"testing"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,25 +16,25 @@ func TestNativeMergerDecisions(t *testing.T) {
 			_, input, now := nativeMergerInput(t)
 			input.Conflicts[0].Kind = kind
 
-			input, err := SealWorkflowMergerInput(input, now)
+			input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			decisions, err := MergerRequiredDecisions(input)
-			if err != nil || len(decisions) != 1 || validateWorkflowMergerResult(nativeMergerResolved(input), input) == nil {
+			decisions, err := workflowmerge.MergerRequiredDecisions(input)
+			if err != nil || len(decisions) != 1 || workflowmerge.ValidateWorkflowMergerResult(nativeMergerResolved(input), input) == nil {
 				t.Fatal("unsupported procedure silently resolved", err)
 			}
 
 			input.Conflicts[0].RegenerationCommand = []string{"make", "regenerate"}
 			input.Conflicts[0].ValidationCommand = slices.Clone(input.ValidationCommands[0])
 
-			input, err = SealWorkflowMergerInput(input, now)
+			input, err = workflowmerge.SealWorkflowMergerInput(input, now)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			decisions, err = MergerRequiredDecisions(input)
+			decisions, err = workflowmerge.MergerRequiredDecisions(input)
 			if err != nil || len(decisions) != 0 {
 				t.Fatal("declared regeneration and frozen validation were ignored", err)
 			}
@@ -47,13 +48,13 @@ func TestNativeMergerIntentDecision(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
 	input.Requirements[0].ConflictsWith = []string{input.Requirements[1].ID}
 
-	input, err := SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	decisions, err := MergerRequiredDecisions(input)
-	if err != nil || len(decisions) != 1 || validateWorkflowMergerResult(nativeMergerResolved(input), input) == nil {
+	decisions, err := workflowmerge.MergerRequiredDecisions(input)
+	if err != nil || len(decisions) != 1 || workflowmerge.ValidateWorkflowMergerResult(nativeMergerResolved(input), input) == nil {
 		t.Fatal("incompatible required intent was implicitly approved", err)
 	}
 }
@@ -74,7 +75,7 @@ func TestNativeMergerRegeneration(t *testing.T) {
 	repair.Input.Conflicts[0].RegenerationCommand = []string{"make", "regenerate"}
 	repair.Input.Conflicts[0].ValidationCommand = slices.Clone(repair.Input.ValidationCommands[0])
 
-	repair.Input, err = SealWorkflowMergerInput(repair.Input, repair.Input.AdmittedAt)
+	repair.Input, err = workflowmerge.SealWorkflowMergerInput(repair.Input, repair.Input.AdmittedAt)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -56,7 +56,7 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 
 func validWorkflowPublicationProofObjects(proof workflowstate.IntegrationProof) bool {
 	for _, id := range []string{proof.SourceTree, proof.OriginCommit, proof.PreparedTree} {
-		if !workflowCommitID(id) || len(id) != len(proof.ResultCommit) {
+		if !workflowstate.ValidCommitID(id) || len(id) != len(proof.ResultCommit) {
 			return false
 		}
 	}
@@ -65,7 +65,7 @@ func validWorkflowPublicationProofObjects(proof workflowstate.IntegrationProof) 
 }
 
 func validateWorkflowPublicationOwnership(request GitPublication) error {
-	source, err := workflowCanonicalRepository(request.SourceRepository)
+	source, err := workflowstate.CanonicalRepository(request.SourceRepository)
 	if err != nil || source != request.Repository || !request.SourceRewriteAuthorized {
 		return workflowstate.ErrConflict
 	}

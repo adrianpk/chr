@@ -16,7 +16,7 @@ func (s *Store) regenerateWorkflowMerger(ctx context.Context, claim *Claim, prep
 
 	tree := repair.ProposalTree
 	for _, conflict := range repair.Input.Conflicts {
-		if !workflowMergerProcedureRequired(conflict) {
+		if !workflowmerge.WorkflowMergerProcedureRequired(conflict) {
 			continue
 		}
 

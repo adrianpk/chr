@@ -6,6 +6,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -57,7 +58,7 @@ func (s *Store) observeWorkflowMergerRepair(ctx context.Context, claim *Claim, p
 
 func (reader workflowIntegrationReader) checkMergerGeneratedEdits(ctx context.Context, input workflowstate.MergerInput, baseline, proposal string) error {
 	for _, conflict := range input.Conflicts {
-		if !workflowMergerProcedureRequired(conflict) {
+		if !workflowmerge.WorkflowMergerProcedureRequired(conflict) {
 			continue
 		}
 

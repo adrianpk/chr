@@ -151,7 +151,7 @@ func workflowPullRequestMismatch(binding PullRequestBinding, snapshots []workflo
 		return "canonical_pr_state_unknown"
 	}
 
-	if pr.Merged && (pr.State != "closed" || !workflowCommitID(pr.ResultCommit)) {
+	if pr.Merged && (pr.State != "closed" || !workflowstate.ValidCommitID(pr.ResultCommit)) {
 		return "canonical_pr_merge_unverifiable"
 	}
 
@@ -159,7 +159,7 @@ func workflowPullRequestMismatch(binding PullRequestBinding, snapshots []workflo
 }
 
 func workflowPullRequestIdentityMatches(binding PullRequestBinding, pr workflowstate.PullRequestSnapshot) bool {
-	if pr.Repository != binding.Request.Repository || pr.HeadRepository != pr.Repository || pr.HeadBranch != binding.Request.HeadBranch || pr.BaseBranch != binding.Request.BaseBranch || pr.HeadCommit != binding.SourceCommit || !workflowCommitID(pr.BaseCommit) {
+	if pr.Repository != binding.Request.Repository || pr.HeadRepository != pr.Repository || pr.HeadBranch != binding.Request.HeadBranch || pr.BaseBranch != binding.Request.BaseBranch || pr.HeadCommit != binding.SourceCommit || !workflowstate.ValidCommitID(pr.BaseCommit) {
 		return false
 	}
 
@@ -188,5 +188,5 @@ func workflowPullRequestRepository(raw string) (string, error) {
 		return "", workflowstate.ErrConflict
 	}
 
-	return workflowCanonicalRepository(raw[:pos])
+	return workflowstate.CanonicalRepository(raw[:pos])
 }

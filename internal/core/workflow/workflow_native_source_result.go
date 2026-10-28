@@ -1,6 +1,8 @@
 package workflow
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // The additional contract retains a forge's original-source attribution while
 // requiring independent exact-result publication and complete rebase history.
@@ -41,7 +43,7 @@ func workflowNativeSourceResultObserved(observation NativePublicationObservation
 		return observation.PullRequest.HeadCommit == proof.ResultCommit
 	}
 
-	return workflowCommitID(source) && source != proof.SourceCommit && source == observation.PullRequest.HeadCommit
+	return workflowstate.ValidCommitID(source) && source != proof.SourceCommit && source == observation.PullRequest.HeadCommit
 }
 
 func workflowNativeReceiptResultMatches(receipt Receipt) bool {

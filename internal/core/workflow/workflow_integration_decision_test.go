@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -18,12 +19,12 @@ func nativeDecisionFixture(t *testing.T) (workflowPreparationFixture, MergerRequ
 
 	var err error
 
-	request.Input, err = SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	decisions, err := MergerRequiredDecisions(request.Input)
+	decisions, err := workflowmerge.MergerRequiredDecisions(request.Input)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -121,7 +122,7 @@ func nativeDecisionResolvedInput(t *testing.T, f workflowPreparationFixture, inp
 	input.OperatorDecisionRef = entry.DecisionRef
 	input.OperatorAnswers = record.Answers
 
-	input, err = SealWorkflowMergerInput(input, time.Now().UTC())
+	input, err = workflowmerge.SealWorkflowMergerInput(input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,14 +131,14 @@ func nativeDecisionResolvedInput(t *testing.T, f workflowPreparationFixture, inp
 		t.Fatal("answer evidence not bound", err)
 	}
 
-	decisions, err := MergerRequiredDecisions(input)
+	decisions, err := workflowmerge.MergerRequiredDecisions(input)
 	if err != nil || len(decisions) != 0 {
 		t.Fatal("explicit interpretation was not available to merger", err)
 	}
 
 	input.OperatorAnswers[0].Actor = "forged-agent"
 
-	input, err = SealWorkflowMergerInput(input, time.Now().UTC())
+	input, err = workflowmerge.SealWorkflowMergerInput(input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -230,7 +231,7 @@ func TestNativeDecisionContext(t *testing.T) {
 
 			tc.change(&copy.Input)
 
-			input, err := SealWorkflowMergerInput(copy.Input, time.Now().UTC())
+			input, err := workflowmerge.SealWorkflowMergerInput(copy.Input, time.Now().UTC())
 			if err != nil {
 				t.Fatal(err)
 			}

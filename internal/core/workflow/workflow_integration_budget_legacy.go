@@ -91,7 +91,7 @@ func checkWorkflowIntegrationLegacySubmissions(budget IntegrationBudget, counter
 	for _, current := range counters {
 		index := slices.IndexFunc(budget.UnitCounters, func(c IntegrationCounter) bool { return c.Unit == current.Unit })
 		if index < 0 || budget.UnitCounters[index].ExistingSubmissions != current.ExistingSubmissions {
-			return workflowIntegrationConflict("legacy submission usage differs from admission snapshot")
+			return workflowstate.IntegrationConflict("legacy submission usage differs from admission snapshot")
 		}
 	}
 

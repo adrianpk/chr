@@ -164,7 +164,7 @@ func (s *Store) readWorkflowReview(run workflowInvocationFile) (workflowstate.Re
 		return input, workflowstate.ReviewDecision{}, err
 	}
 
-	if input.Schema != "chr-workflow-review-input/v1" || input.InvocationID != run.ID || input.Unit != run.Review.Unit || !workflowCommitID(input.TargetCommit) {
+	if input.Schema != "chr-workflow-review-input/v1" || input.InvocationID != run.ID || input.Unit != run.Review.Unit || !workflowstate.ValidCommitID(input.TargetCommit) {
 		return input, workflowstate.ReviewDecision{}, workflowstate.ErrConflict
 	}
 

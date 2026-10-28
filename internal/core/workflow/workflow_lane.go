@@ -205,5 +205,5 @@ func (s *Store) checkWorkflowLaneRegistration(ctx context.Context, lane workflow
 }
 
 func validWorkflowLane(lane workflowstate.Lane) bool {
-	return (lane.Unit.Kind == "slice" || lane.Unit.Kind == "ticket") && lane.Unit.ID != "" && strings.HasPrefix(lane.Branch, "refs/heads/chr/workflow/") && filepath.IsAbs(lane.Worktree) && workflowCommitID(lane.BaseCommit) && workflowCommitID(lane.HeadCommit)
+	return (lane.Unit.Kind == "slice" || lane.Unit.Kind == "ticket") && lane.Unit.ID != "" && strings.HasPrefix(lane.Branch, "refs/heads/chr/workflow/") && filepath.IsAbs(lane.Worktree) && workflowstate.ValidCommitID(lane.BaseCommit) && workflowstate.ValidCommitID(lane.HeadCommit)
 }

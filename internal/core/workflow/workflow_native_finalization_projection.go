@@ -20,7 +20,7 @@ func (s *Store) workflowNativeReceiptProjection(run *workflowInvocationFile, ent
 	}
 
 	if entry.Revision == math.MaxUint64 || entry.StateRevision == math.MaxUint64 {
-		return projection, workflowIntegrationConflict("receipt projection revision exhausted")
+		return projection, workflowstate.IntegrationConflict("receipt projection revision exhausted")
 	}
 
 	files, err := s.projectWorkflowNativeReceipt(run, &entry, last)
@@ -133,7 +133,7 @@ func (s *Store) checkWorkflowNativeDeliveryProof(run workflowInvocationFile, pro
 }
 
 func (s *Store) readWorkflowNativeDeliveryRecord(run workflowInvocationFile, ref workflowstate.EvidenceRef) (Record, error) {
-	if err := validateWorkflowEvidenceRef(run.ID, ref); err != nil {
+	if err := workflowstate.CheckEvidenceRef(run.ID, ref); err != nil {
 		return Record{}, err
 	}
 

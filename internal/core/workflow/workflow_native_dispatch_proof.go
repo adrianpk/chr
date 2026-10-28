@@ -92,7 +92,7 @@ func validateWorkflowNativeGitObservation(submission workflowstate.Submission, o
 }
 
 func validWorkflowNativeGitObservationHeader(submission workflowstate.Submission, observation NativeGitObservation) bool {
-	return observation.SchemaVersion == 1 && observation.SubmissionID == submission.ID && workflowCommitID(observation.SourceCommit) && workflowCommitID(observation.TargetCommit) && validWorkflowNativeFingerprint(observation.CandidateRevision)
+	return observation.SchemaVersion == 1 && observation.SubmissionID == submission.ID && workflowstate.ValidCommitID(observation.SourceCommit) && workflowstate.ValidCommitID(observation.TargetCommit) && workflowstate.ValidFingerprint(observation.CandidateRevision)
 }
 
 func (s *Store) workflowNativeGitApplied(submission workflowstate.Submission) bool {

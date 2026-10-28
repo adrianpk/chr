@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -42,7 +43,7 @@ func TestNativeMergerCheckpointBinding(t *testing.T) {
 	f, request, harness, _ := nativeMergerAcceptanceFixture(t, "merger-checkpoint-binding", "merge")
 	request.Input.CandidateRevision++
 
-	input, err := SealWorkflowMergerInput(request.Input, request.Input.AdmittedAt)
+	input, err := workflowmerge.SealWorkflowMergerInput(request.Input, request.Input.AdmittedAt)
 	if err != nil {
 		t.Fatal(err)
 	}

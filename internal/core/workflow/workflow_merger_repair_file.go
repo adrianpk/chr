@@ -16,7 +16,7 @@ func (reader workflowIntegrationReader) mergerFileKind(ctx context.Context, tree
 	header, name, ok := strings.Cut(strings.TrimSuffix(data, "\x00"), "\t")
 
 	fields := strings.Fields(header)
-	if !ok || name != path || len(fields) != 3 || !workflowCommitID(fields[2]) {
+	if !ok || name != path || len(fields) != 3 || !workflowstate.ValidCommitID(fields[2]) {
 		return "", workflowstate.ErrConflict
 	}
 

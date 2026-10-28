@@ -54,7 +54,7 @@ func workflowSubmissionPRMatches(submission workflowstate.Submission, pr workflo
 	}
 
 	if pr.Merged {
-		return pr.State == "closed" && workflowCommitID(pr.ResultCommit)
+		return pr.State == "closed" && workflowstate.ValidCommitID(pr.ResultCommit)
 	}
 
 	return pr.State == "open" || pr.State == "closed"
@@ -75,7 +75,7 @@ func checkWorkflowUnpublishedObservation(ctx context.Context, submission workflo
 		return err
 	}
 
-	if !workflowCommitID(target) {
+	if !workflowstate.ValidCommitID(target) {
 		return workflowstate.ErrConflict
 	}
 
@@ -140,7 +140,7 @@ func workflowNativeSubmissionPRMatches(submission workflowstate.Submission, pr w
 
 	// PR head metadata may lag at S or advance after P. The immutable receipt's
 	// transaction/application evidence establishes published P independently.
-	return expected == actual && workflowCommitID(pr.HeadCommit) && pr.Merged && pr.State == "closed" && pr.ResultCommit == native.PreparedResult
+	return expected == actual && workflowstate.ValidCommitID(pr.HeadCommit) && pr.Merged && pr.State == "closed" && pr.ResultCommit == native.PreparedResult
 }
 
 func workflowLegacySubmissionPRIdentityMatches(submission workflowstate.Submission, pr workflowstate.PullRequestSnapshot) bool {

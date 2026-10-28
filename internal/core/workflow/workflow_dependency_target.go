@@ -67,7 +67,7 @@ func (s *Store) resumeWorkflowDependencyTarget(ctx context.Context, run *workflo
 }
 
 func workflowDependencyTargetReady(run workflowInvocationFile, ports ResumePorts) bool {
-	if ports.Target == nil || ports.Provider == nil || !validWorkflowPRBranch(ports.TargetBranch) || run.Lane != nil || len(run.DependencyTargets) >= workflowstate.PageLimit {
+	if ports.Target == nil || ports.Provider == nil || !workflowstate.ValidBranch(ports.TargetBranch) || run.Lane != nil || len(run.DependencyTargets) >= workflowstate.PageLimit {
 		return false
 	}
 
@@ -95,7 +95,7 @@ func (s *Store) observeWorkflowDependencyTarget(ctx context.Context, run workflo
 	}
 
 	observed, err := ports.Provider.ReadWorkflowBranch(ctx, query.Repository, query.Branch)
-	if err != nil || target.Repository != query.Repository || !workflowCommitID(target.Commit) || observed != target.Commit {
+	if err != nil || target.Repository != query.Repository || !workflowstate.ValidCommitID(target.Commit) || observed != target.Commit {
 		return target, errorsOrConflict(err)
 	}
 

@@ -1,6 +1,10 @@
 package workflow
 
-import "testing"
+import (
+	"testing"
+
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
+)
 
 // TestNativeMergerAmbiguity requests ownership rather than silently picking a
 // source step when semantic findings span different original commits.
@@ -14,7 +18,7 @@ func TestNativeMergerAmbiguity(t *testing.T) {
 	other.ID, other.Path = "conflict-2", "next.txt"
 	input.Conflicts = append(input.Conflicts, other)
 
-	input, err := SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}

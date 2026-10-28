@@ -45,7 +45,7 @@ func validateWorkflowPublicationCapability(source workflowstate.ReviewInput, cap
 }
 
 func validateWorkflowSignatureCapability(capability workflowstate.PublicationCapability) error {
-	if capability.RequiredSignatures != (capability.SigningProfile != "") || (capability.RequiredSignatures && !validWorkflowNativeFingerprint(capability.SigningProfile)) {
+	if capability.RequiredSignatures != (capability.SigningProfile != "") || (capability.RequiredSignatures && !workflowstate.ValidFingerprint(capability.SigningProfile)) {
 		return ErrWorkflowAtomicGuard
 	}
 

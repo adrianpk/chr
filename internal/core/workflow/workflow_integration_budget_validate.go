@@ -9,17 +9,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowTokenSum(a, b int64) (int64, error) {
-	if a < 0 || b < 0 || a > math.MaxInt64-b {
-		return 0, workflowIntegrationConflict("token or counter arithmetic overflow")
-	}
-
-	return a + b, nil
-}
-
 func validateWorkflowIntegrationBudget(b IntegrationBudget) error {
 	if !validWorkflowIntegrationBudgetHeader(b) {
-		return workflowIntegrationConflict("unsupported or invalid budget")
+		return workflowstate.IntegrationConflict("unsupported or invalid budget")
 	}
 
 	if err := validateWorkflowIntegrationGrants(b); err != nil {
@@ -51,7 +43,7 @@ func validateWorkflowIntegrationTokens(b IntegrationBudget) error {
 		return workflowstate.ErrConflict
 	}
 
-	total, err := workflowTokenSum(settled, reserved)
+	total, err := workflowstate.TokenSum(settled, reserved)
 	if err != nil || b.TokenLimit != nil && total > *b.TokenLimit {
 		return ErrWorkflowIntegrationBudget
 	}
@@ -113,7 +105,7 @@ func validateWorkflowIntegrationTokenGrants(b IntegrationBudget) error {
 
 		var err error
 
-		limit, err = workflowTokenSum(limit, grant.Amount)
+		limit, err = workflowstate.TokenSum(limit, grant.Amount)
 		if err != nil {
 			return err
 		}
@@ -146,7 +138,7 @@ func addWorkflowIntegrationLimit(limits *IntegrationLimits, kind string, amount 
 		return workflowstate.ErrConflict
 	}
 
-	next, err := workflowTokenSum(*counter, amount)
+	next, err := workflowstate.TokenSum(*counter, amount)
 	if err != nil {
 		return err
 	}
@@ -170,14 +162,14 @@ func workflowIntegrationTokenTotals(reservations []IntegrationReservation) (sett
 
 		switch r.State {
 		case "settled":
-			usage, sumErr := workflowTokenSum(r.ReportedInput, r.ReportedOutput)
+			usage, sumErr := workflowstate.TokenSum(r.ReportedInput, r.ReportedOutput)
 			if sumErr != nil || usage > r.Allowance.Maximum {
 				return 0, 0, workflowstate.ErrConflict
 			}
 
-			settled, err = workflowTokenSum(settled, usage)
+			settled, err = workflowstate.TokenSum(settled, usage)
 		case "reserved", "launched", "unknown":
-			reserved, err = workflowTokenSum(reserved, r.Allowance.Maximum)
+			reserved, err = workflowstate.TokenSum(reserved, r.Allowance.Maximum)
 		}
 
 		if err != nil {
@@ -217,13 +209,7 @@ func validateWorkflowIntegrationReservation(r IntegrationReservation) error {
 }
 
 func validWorkflowIntegrationReservationOwner(r IntegrationReservation) bool {
-	return workflowstate.ValidRequestKey(r.ID) && validWorkflowNativeFingerprint(r.EntryID) && workflowstate.ValidRequestKey(r.AttemptID) && r.Unit.ID != "" && slices.Contains([]string{"reserved", "launched", "unknown", "settled", "released_before_launch"}, r.State)
-}
-
-func validWorkflowTokenAllowance(a workflowstate.TokenAllowance) bool {
-	maximum, err := workflowTokenSum(a.Input, a.Output)
-
-	return err == nil && maximum > 0 && a.Maximum == maximum && a.WholeCall && validWorkflowNativeFingerprint(a.CapabilityRevision) && !a.Deadline.IsZero()
+	return workflowstate.ValidRequestKey(r.ID) && workflowstate.ValidFingerprint(r.EntryID) && workflowstate.ValidRequestKey(r.AttemptID) && r.Unit.ID != "" && slices.Contains([]string{"reserved", "launched", "unknown", "settled", "released_before_launch"}, r.State)
 }
 
 func validWorkflowIntegrationCallAllowance(r IntegrationReservation) bool {
@@ -231,7 +217,7 @@ func validWorkflowIntegrationCallAllowance(r IntegrationReservation) bool {
 		return r.Role == "merger" && !r.RuntimeDeadline.IsZero() && r.State != "settled"
 	}
 
-	return validWorkflowTokenAllowance(r.Allowance) && r.RuntimeDeadline.IsZero()
+	return workflowstate.ValidTokenAllowance(r.Allowance) && r.RuntimeDeadline.IsZero()
 }
 
 func validateWorkflowIntegrationAction(r IntegrationReservation) error {
@@ -252,7 +238,7 @@ func validateWorkflowIntegrationAction(r IntegrationReservation) error {
 
 func validWorkflowIntegrationActionBase(r IntegrationReservation) bool {
 	if r.Kind == "drift" {
-		return workflowCommitID(r.BaseCommit)
+		return workflowstate.ValidCommitID(r.BaseCommit)
 	}
 
 	return r.BaseCommit == ""
@@ -289,7 +275,7 @@ func guardWorkflowIntegrationBudget(run workflowInvocationFile, entry Integratio
 
 	actual := [4]uint64{guard.InvocationRevision, guard.BudgetRevision, guard.EntryRevision, guard.ClaimGeneration}
 	if run.ID != guard.InvocationID || entry.ID != guard.EntryID || expected != actual || budget.Revision == math.MaxUint64 || run.Revision == math.MaxUint64 {
-		return workflowIntegrationConflict("budget callback has a stale owner or exhausted revision")
+		return workflowstate.IntegrationConflict("budget callback has a stale owner or exhausted revision")
 	}
 
 	return nil
@@ -305,7 +291,7 @@ func sameWorkflowIntegrationReservation(a, b IntegrationReservation) bool {
 
 func checkWorkflowIntegrationUsage(before, now IntegrationUsage) error {
 	if now.WorkerCount < before.WorkerCount || now.ReviewCount < before.ReviewCount || now.PreparationCount < before.PreparationCount || !workflowUsageIncludes(now.Attempts, before.Attempts) || !workflowUsageIncludes(now.ClosingAttempts, before.ClosingAttempts) {
-		return workflowIntegrationConflict("existing consumed counters were removed")
+		return workflowstate.IntegrationConflict("existing consumed counters were removed")
 	}
 
 	for _, old := range before.ReviewRepairs {

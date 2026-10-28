@@ -58,7 +58,7 @@ func workflowNativePolicyReasons(request NativeCapabilityRequest, policy NativeP
 		{policy.FastForwardTargetAuthorized, "target_push_unauthorized", "Provide an authorized fast-forward target publication role."},
 		{policy.HostCandidateReview, "native_approval_required", "Select a policy permitting host-bound review of the prepared result."},
 		{slices.Contains([]string{string(workflowstate.ReviewHuman), string(workflowstate.ReviewAgentic), string(workflowstate.ReviewTrustedAutoMerge)}, string(policy.ReviewMode)), "review_policy_unknown", "Resolve the current candidate review policy."},
-		{validWorkflowNativeFingerprint(policy.CredentialIdentityFingerprint), "credential_identity_unknown", "Resolve the current publisher credential identity without secrets."},
+		{workflowstate.ValidFingerprint(policy.CredentialIdentityFingerprint), "credential_identity_unknown", "Resolve the current publisher credential identity without secrets."},
 		{slices.Contains(policy.CertifiedMethods, publication.Git.Method), "method_uncertified", "Certify the configured method for this observation profile."},
 	}
 
@@ -71,10 +71,6 @@ func workflowNativePolicyReasons(request NativeCapabilityRequest, policy NativeP
 	}
 
 	return reasons
-}
-
-func validWorkflowNativeFingerprint(value string) bool {
-	return len(value) == 64 && workflowCommitID(value)
 }
 
 func sealWorkflowNativeCapability(capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {

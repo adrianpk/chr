@@ -135,7 +135,7 @@ func chargeWorkflowIntegrationCounter(budget *IntegrationBudget, r IntegrationRe
 
 func checkWorkflowIntegrationCounterCharge(budget IntegrationBudget, r IntegrationReservation, kind string) error {
 	if kind == "drift" && workflowIntegrationBaseCharged(budget.Reservations, r) {
-		return workflowIntegrationConflict("replacement base already charged under another identity")
+		return workflowstate.IntegrationConflict("replacement base already charged under another identity")
 	}
 
 	total := int64(0)
@@ -143,7 +143,7 @@ func checkWorkflowIntegrationCounterCharge(budget IntegrationBudget, r Integrati
 	for _, counter := range budget.UnitCounters {
 		var err error
 
-		total, err = workflowTokenSum(total, workflowIntegrationCounterValue(counter, kind))
+		total, err = workflowstate.TokenSum(total, workflowIntegrationCounterValue(counter, kind))
 		if err != nil {
 			return err
 		}
@@ -242,7 +242,7 @@ func applyWorkflowIntegrationGrant(budget *IntegrationBudget, grant workflowstat
 		return workflowstate.ErrConflict
 	}
 
-	limit, err := workflowTokenSum(*budget.TokenLimit, grant.Amount)
+	limit, err := workflowstate.TokenSum(*budget.TokenLimit, grant.Amount)
 	if err != nil {
 		return err
 	}

@@ -46,7 +46,7 @@ func workflowNativeObservationTargetValid(observation NativePublicationObservati
 		return true
 	}
 
-	if !workflowCommitID(observation.ObservedTargetCommit) {
+	if !workflowstate.ValidCommitID(observation.ObservedTargetCommit) {
 		return false
 	}
 
@@ -111,5 +111,5 @@ func workflowNativeReceiptReconciliationValid(native workflowstate.NativeSubmiss
 		return native.ReceiptRef != nil && condition == "" && !observation.PullRequest.Merged
 	}
 
-	return observation.CanonicalPR == native.CanonicalPR && workflowCommitID(observation.ObservedTargetCommit) && observation.ObservedTargetCommit != native.PreparedResult && observation.Git == nil
+	return observation.CanonicalPR == native.CanonicalPR && workflowstate.ValidCommitID(observation.ObservedTargetCommit) && observation.ObservedTargetCommit != native.PreparedResult && observation.Git == nil
 }

@@ -100,17 +100,17 @@ func (reader workflowIntegrationReader) readRetainedIntegrationResult(ctx contex
 }
 
 func (git OSWorkflowIntegrationGit) validateQuery(query workflowstate.IntegrationQuery) error {
-	repository, err := workflowCanonicalRepository(git.repository)
+	repository, err := workflowstate.CanonicalRepository(git.repository)
 	if err != nil || repository != query.Repository || git.transport == "" || strings.HasPrefix(git.transport, "-") || strings.ContainsAny(git.transport, "\x00\r\n") {
 		return fmt.Errorf("canonical integration transport identity mismatch")
 	}
 
-	if !validWorkflowPRBranch(query.TargetBranch) || query.SourceDirectory == "" {
+	if !workflowstate.ValidBranch(query.TargetBranch) || query.SourceDirectory == "" {
 		return fmt.Errorf("integration requires an exact target branch and retained source")
 	}
 
 	for _, id := range []string{query.SourceCommit, query.SourceTree, query.OriginCommit, query.ResultCommit} {
-		if !workflowCommitID(id) {
+		if !workflowstate.ValidCommitID(id) {
 			return fmt.Errorf("integration requires full immutable Git identities")
 		}
 	}
@@ -179,7 +179,7 @@ func (reader workflowIntegrationReader) parents(ctx context.Context, commit stri
 
 func (reader workflowIntegrationReader) preparedTree(ctx context.Context, origin, base, source string) (string, error) {
 	line, err := reader.Output(ctx, "merge-tree", "--write-tree", "--merge-base="+origin, base, source)
-	if err != nil || !workflowCommitID(line) {
+	if err != nil || !workflowstate.ValidCommitID(line) {
 		return "", fmt.Errorf("integration combined tree cannot be prepared cleanly")
 	}
 

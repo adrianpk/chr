@@ -6,36 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
-
-func validateWorkflowMergerReferences(input workflowstate.MergerInput) error {
-	refs := input.EvidenceRefs()
-	if len(input.IntentRefs) == 0 || len(input.TargetChangeRefs) == 0 || len(refs) > workflowstate.PageLimit {
-		return workflowstate.ErrConflict
-	}
-
-	seen := map[string]string{}
-
-	for _, ref := range refs {
-		if err := validateWorkflowEvidenceRef(input.InvocationID, ref); err != nil {
-			return err
-		}
-
-		if hash, present := seen[ref.Path]; present && hash != ref.Hash {
-			return workflowstate.ErrConflict
-		}
-
-		seen[ref.Path] = ref.Hash
-	}
-
-	return nil
-}
 
 // CheckWorkflowMergerEvidence reads immutable evidence through the existing
 // contained store port. It neither mutates an invocation nor acquires a slot.
 func (s *Store) CheckWorkflowMergerEvidence(ctx context.Context, input workflowstate.MergerInput, now time.Time) error {
-	if err := validateWorkflowMergerInput(input, now); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerInput(input, now); err != nil {
 		return err
 	}
 
@@ -71,7 +49,7 @@ func (s *Store) checkWorkflowMergerManifest(input workflowstate.MergerInput) err
 
 	seen := map[string]bool{}
 	for _, commit := range manifest.Commits {
-		if !workflowCommitID(commit) || len(commit) != len(input.Source) || seen[commit] {
+		if !workflowstate.ValidCommitID(commit) || len(commit) != len(input.Source) || seen[commit] {
 			return workflowstate.ErrConflict
 		}
 

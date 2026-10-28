@@ -11,20 +11,20 @@ import (
 
 func validateWorkflowIntegrationEntry(entry IntegrationEntry) error {
 	if !validWorkflowIntegrationEntryHeader(entry) {
-		return workflowIntegrationConflict("has invalid version, identity or revision")
+		return workflowstate.IntegrationConflict("has invalid version, identity or revision")
 	}
 
 	if !validWorkflowIntegrationTarget(entry) {
-		return workflowIntegrationConflict("has invalid canonical target")
+		return workflowstate.IntegrationConflict("has invalid canonical target")
 	}
 
 	if !validWorkflowIntegrationState(entry.State) || entry.BudgetRef != workflowIntegrationBudgetPath(entry.InvocationID) {
-		return workflowIntegrationConflict("has invalid phase or budget owner")
+		return workflowstate.IntegrationConflict("has invalid phase or budget owner")
 	}
 
 	for _, ref := range []*workflowstate.EvidenceRef{entry.CandidateRef, entry.ReceiptRef, entry.DecisionRef} {
 		if ref != nil {
-			if err := validateWorkflowEvidenceRef(entry.InvocationID, *ref); err != nil {
+			if err := workflowstate.CheckEvidenceRef(entry.InvocationID, *ref); err != nil {
 				return err
 			}
 		}
@@ -38,7 +38,7 @@ func validWorkflowIntegrationEntryHeader(entry IntegrationEntry) bool {
 }
 
 func validWorkflowIntegrationIdentity(entry IntegrationEntry) bool {
-	return entry.SchemaVersion == 1 && validWorkflowNativeFingerprint(entry.ID) && workflowstate.ValidRequestKey(entry.InvocationID) && entry.ProjectID != "" && opsnamespace.Valid(entry.Namespace) && validWorkflowNativeFingerprint(entry.CoordinatorID) && validWorkflowNativeFingerprint(entry.FrozenScopeHash) && workflowstate.ValidRequestKey(entry.AdmissionKey)
+	return entry.SchemaVersion == 1 && workflowstate.ValidFingerprint(entry.ID) && workflowstate.ValidRequestKey(entry.InvocationID) && entry.ProjectID != "" && opsnamespace.Valid(entry.Namespace) && workflowstate.ValidFingerprint(entry.CoordinatorID) && workflowstate.ValidFingerprint(entry.FrozenScopeHash) && workflowstate.ValidRequestKey(entry.AdmissionKey)
 }
 
 func validWorkflowIntegrationRevisions(entry IntegrationEntry) bool {
@@ -46,9 +46,9 @@ func validWorkflowIntegrationRevisions(entry IntegrationEntry) bool {
 }
 
 func validWorkflowIntegrationTarget(entry IntegrationEntry) bool {
-	repository, err := workflowCanonicalRepository(entry.Repository)
+	repository, err := workflowstate.CanonicalRepository(entry.Repository)
 
-	return err == nil && repository == entry.Repository && strings.HasPrefix(entry.TargetRef, "refs/heads/") && validWorkflowPRBranch(strings.TrimPrefix(entry.TargetRef, "refs/heads/"))
+	return err == nil && repository == entry.Repository && strings.HasPrefix(entry.TargetRef, "refs/heads/") && workflowstate.ValidBranch(strings.TrimPrefix(entry.TargetRef, "refs/heads/"))
 }
 
 func validWorkflowIntegrationState(state string) bool {
@@ -57,11 +57,11 @@ func validWorkflowIntegrationState(state string) bool {
 
 func validateWorkflowIntegrationEntryPhase(entry IntegrationEntry) error {
 	if entry.PreparationReserved && workflowIntegrationTerminal(entry.State) {
-		return workflowIntegrationConflict("terminal entry retains speculative preparation capacity")
+		return workflowstate.IntegrationConflict("terminal entry retains speculative preparation capacity")
 	}
 
 	if !slices.Contains([]string{"", "pause", "cancel"}, entry.StopIntent) {
-		return workflowIntegrationConflict("has invalid stop intent")
+		return workflowstate.IntegrationConflict("has invalid stop intent")
 	}
 
 	if err := validateWorkflowIntegrationBlocker(entry); err != nil {
@@ -69,7 +69,7 @@ func validateWorkflowIntegrationEntryPhase(entry IntegrationEntry) error {
 	}
 
 	if slices.Contains([]string{"reviewing", "waiting_review", "ready_to_publish", "publishing", "observing", "finalizing", "integrated"}, entry.State) && entry.CandidateRef == nil {
-		return workflowIntegrationConflict("requires exact candidate evidence")
+		return workflowstate.IntegrationConflict("requires exact candidate evidence")
 	}
 
 	return validateWorkflowIntegrationPublicationRefs(entry)
@@ -77,11 +77,11 @@ func validateWorkflowIntegrationEntryPhase(entry IntegrationEntry) error {
 
 func validateWorkflowIntegrationPublicationRefs(entry IntegrationEntry) error {
 	if slices.Contains([]string{"publishing", "observing", "finalizing", "integrated"}, entry.State) && (entry.SubmissionRef == nil || !validWorkflowSubmissionProjection(*entry.SubmissionRef)) {
-		return workflowIntegrationConflict("requires retained submission authority")
+		return workflowstate.IntegrationConflict("requires retained submission authority")
 	}
 
 	if (entry.State == "finalizing" || entry.State == "integrated") && entry.ReceiptRef == nil {
-		return workflowIntegrationConflict("requires verified receipt evidence")
+		return workflowstate.IntegrationConflict("requires verified receipt evidence")
 	}
 
 	return nil
@@ -90,10 +90,10 @@ func validateWorkflowIntegrationPublicationRefs(entry IntegrationEntry) error {
 func validateWorkflowIntegrationBlocker(entry IntegrationEntry) error {
 	if entry.State == "blocked" {
 		if !validWorkflowIntegrationBlocker(entry.Blocker) {
-			return workflowIntegrationConflict("requires a typed reconciliation blocker")
+			return workflowstate.IntegrationConflict("requires a typed reconciliation blocker")
 		}
 	} else if entry.Blocker != nil {
-		return workflowIntegrationConflict("retains a blocker outside blocked state")
+		return workflowstate.IntegrationConflict("retains a blocker outside blocked state")
 	}
 
 	return nil
@@ -109,7 +109,7 @@ func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
 	}
 
 	if len(run.IntegrationEntries) > workflowstate.RecordLimit {
-		return workflowIntegrationConflict("history exceeds bounds")
+		return workflowstate.IntegrationConflict("history exceeds bounds")
 	}
 
 	seen := map[workflowstate.Ref]bool{}
@@ -117,10 +117,10 @@ func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
 	current := run.Integration == nil
 	for _, binding := range run.IntegrationEntries {
 		if seen[binding.Unit] || !validWorkflowIntegrationBinding(run, binding) {
-			return workflowIntegrationConflict("has duplicate or foreign invocation binding")
+			return workflowstate.IntegrationConflict("has duplicate or foreign invocation binding")
 		}
 
-		if err := validateWorkflowEvidenceRef(run.ID, binding.EntryRef); err != nil {
+		if err := workflowstate.CheckEvidenceRef(run.ID, binding.EntryRef); err != nil {
 			return err
 		}
 
@@ -129,7 +129,7 @@ func validateWorkflowIntegrationBindings(run workflowInvocationFile) error {
 	}
 
 	if !current {
-		return workflowIntegrationConflict("current pointer differs from retained history")
+		return workflowstate.IntegrationConflict("current pointer differs from retained history")
 	}
 
 	return nil
@@ -202,7 +202,7 @@ func validateWorkflowIntegrationBudgetBinding(run workflowInvocationFile) error 
 		return nil
 	}
 
-	if b.Revision == 0 || b.Ref.Path != workflowIntegrationBudgetPath(run.ID) || !validWorkflowNativeFingerprint(b.Ref.Hash) {
+	if b.Revision == 0 || b.Ref.Path != workflowIntegrationBudgetPath(run.ID) || !workflowstate.ValidFingerprint(b.Ref.Hash) {
 		return workflowstate.ErrConflict
 	}
 

@@ -13,12 +13,12 @@ func validateWorkflowCandidateRepairBinding(run workflowInvocationFile) error {
 		return nil
 	}
 
-	if !slices.Contains([]string{"slice", "ticket"}, b.Unit.Kind) || b.Unit.ID == "" || !validWorkflowNativeFingerprint(b.EntryID) || b.ClaimGeneration == 0 || !validWorkflowNativeFingerprint(b.CandidateHash) {
+	if !slices.Contains([]string{"slice", "ticket"}, b.Unit.Kind) || b.Unit.ID == "" || !workflowstate.ValidFingerprint(b.EntryID) || b.ClaimGeneration == 0 || !workflowstate.ValidFingerprint(b.CandidateHash) {
 		return workflowstate.ErrConflict
 	}
 
 	for _, ref := range []workflowstate.EvidenceRef{b.RecordRef, b.FindingRef} {
-		if validateWorkflowEvidenceRef(run.ID, ref) != nil {
+		if workflowstate.CheckEvidenceRef(run.ID, ref) != nil {
 			return workflowstate.ErrConflict
 		}
 	}

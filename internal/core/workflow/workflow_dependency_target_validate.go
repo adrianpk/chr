@@ -41,7 +41,7 @@ func validWorkflowDependencyTarget(run workflowInvocationFile, proof DependencyT
 }
 
 func validWorkflowDependencyTargetHeader(run workflowInvocationFile, proof DependencyTarget) bool {
-	if proof.Schema != "chr-dependency-target/v1" || proof.InvocationID != run.ID || !validWorkflowPRBranch(proof.Branch) || proof.Cursor < 0 || proof.Cursor >= len(run.Members) || proof.Cursor > run.Cursor || run.Members[proof.Cursor].Admission.SliceID != "" {
+	if proof.Schema != "chr-dependency-target/v1" || proof.InvocationID != run.ID || !workflowstate.ValidBranch(proof.Branch) || proof.Cursor < 0 || proof.Cursor >= len(run.Members) || proof.Cursor > run.Cursor || run.Members[proof.Cursor].Admission.SliceID != "" {
 		return false
 	}
 
@@ -49,7 +49,7 @@ func validWorkflowDependencyTargetHeader(run workflowInvocationFile, proof Depen
 }
 
 func validWorkflowDependencyTargetScope(run workflowInvocationFile, proof DependencyTarget) bool {
-	return (run.Selection.Selector.Extent == "loose" || run.Selection.Selector.Extent == "ticket") && proof.Target.Repository == run.Selection.Target.Repository && proof.Previous.Repository == proof.Target.Repository && workflowCommitID(proof.Target.Commit) && workflowCommitID(proof.Previous.Commit) && workflowDependencyBranchMatches(run, proof.Branch)
+	return (run.Selection.Selector.Extent == "loose" || run.Selection.Selector.Extent == "ticket") && proof.Target.Repository == run.Selection.Target.Repository && proof.Previous.Repository == proof.Target.Repository && workflowstate.ValidCommitID(proof.Target.Commit) && workflowstate.ValidCommitID(proof.Previous.Commit) && workflowDependencyBranchMatches(run, proof.Branch)
 }
 
 func validWorkflowDependencyTargetEvidence(run workflowInvocationFile, proof DependencyTarget, i int) bool {

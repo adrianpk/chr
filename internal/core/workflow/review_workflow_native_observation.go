@@ -180,7 +180,7 @@ func workflowNativeSourceCompatible(binding NativePublicationBinding, pr workflo
 		return true
 	}
 
-	return workflowCommitID(pr.HeadCommit) && (binding.Publication.State == "applied" || workflowNativeApplicationAttributed(binding)) && pr.Merged
+	return workflowstate.ValidCommitID(pr.HeadCommit) && (binding.Publication.State == "applied" || workflowNativeApplicationAttributed(binding)) && pr.Merged
 }
 
 func workflowNativeApplicationAttributed(binding NativePublicationBinding) bool {
@@ -242,7 +242,7 @@ func (adapter RemoteReviewAdapter) verifyWorkflowNativeObservation(ctx context.C
 }
 
 func workflowNativeReceiptHistoryDiverged(binding NativePublicationBinding, proof workflowstate.IntegrationProof, err error) bool {
-	return binding.ReceiptConfirmed && errors.Is(err, ErrWorkflowHistoryDivergence) && workflowCommitID(proof.ObservedTarget)
+	return binding.ReceiptConfirmed && errors.Is(err, ErrWorkflowHistoryDivergence) && workflowstate.ValidCommitID(proof.ObservedTarget)
 }
 
 func verifyWorkflowNativeTarget(ctx context.Context, binding NativePublicationBinding, git IntegrationGit) (workflowstate.IntegrationProof, error) {

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -35,7 +36,7 @@ func TestNativeDecisionReplay(t *testing.T) {
 			input.OperatorDecisionRef = &input.SourceManifestRef
 			input.OperatorAnswers = []workflowstate.IntegrationAnswer{tc.answer}
 
-			input, err := SealWorkflowMergerInput(input, now)
+			input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 			if err != nil {
 				t.Fatal(err)
 			}

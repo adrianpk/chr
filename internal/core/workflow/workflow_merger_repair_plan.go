@@ -6,6 +6,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -13,11 +14,11 @@ import (
 // an explicit integration fix or ownership decision. It does not accept edits.
 func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workflowstate.MergerInput, proof workflowstate.IntegrationProof, fix *workflowstate.ReviewFinding) (MergerRepairPlan, error) {
 	plan := MergerRepairPlan{InputHash: input.InputHash}
-	if validateWorkflowMergerInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil || !workflowMergerRepairIdentity(input, proof) {
+	if workflowmerge.ValidateWorkflowMergerInput(input, time.Now().UTC()) != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil || !workflowMergerRepairIdentity(input, proof) {
 		return plan, workflowstate.ErrConflict
 	}
 
-	decisions, err := MergerRequiredDecisions(input)
+	decisions, err := workflowmerge.MergerRequiredDecisions(input)
 	if err != nil {
 		return plan, err
 	}
@@ -128,5 +129,5 @@ func workflowMergerSemanticPlan(plan MergerRepairPlan, input workflowstate.Merge
 	plan.Outcome = "needs_decision"
 	plan.Decisions = []workflowstate.MergerDecision{{ID: "replay-owner", Issue: "The semantic repair has no unique original replay owner. Select the owning source step or declare an actionable integration fix.", RequirementIDs: requirements, Options: []string{"Identify the original source step", "Declare an integration fix with an actionable finding"}, Authority: "maintainer"}}
 
-	return plan, validateWorkflowMergerDecisions(plan.Decisions, input)
+	return plan, workflowmerge.ValidateWorkflowMergerDecisions(plan.Decisions, input)
 }

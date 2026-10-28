@@ -73,7 +73,7 @@ func checkWorkflowIntegrationBudgetOwnership(run workflowInvocationFile, budget 
 
 		index := slices.IndexFunc(entries, func(e IntegrationEntry) bool { return e.ID == reservation.EntryID })
 		if index < 0 || reservation.ClaimGeneration > entries[index].ClaimGeneration || entries[index].Unit != reservation.Unit {
-			return workflowIntegrationConflict("reservation has missing ownership or future generation")
+			return workflowstate.IntegrationConflict("reservation has missing ownership or future generation")
 		}
 	}
 
@@ -83,11 +83,11 @@ func checkWorkflowIntegrationBudgetOwnership(run workflowInvocationFile, budget 
 func checkWorkflowIntegrationCounterOwners(run workflowInvocationFile, budget IntegrationBudget, entries []IntegrationEntry) error {
 	for _, entry := range entries {
 		if workflowIntegrationEntryInvocation(run, entry) && !workflowIntegrationTerminal(entry.State) && !workflowIntegrationCurrentEntry(run, entry) {
-			return workflowIntegrationConflict("active unit has no current invocation pointer")
+			return workflowstate.IntegrationConflict("active unit has no current invocation pointer")
 		}
 
 		if workflowIntegrationEntryInvocation(run, entry) && !slices.ContainsFunc(budget.UnitCounters, func(c IntegrationCounter) bool { return c.Unit == entry.Unit }) {
-			return workflowIntegrationConflict("entry has no retained unit counter")
+			return workflowstate.IntegrationConflict("entry has no retained unit counter")
 		}
 	}
 
@@ -97,7 +97,7 @@ func checkWorkflowIntegrationCounterOwners(run workflowInvocationFile, budget In
 func checkWorkflowIntegrationCounterHistory(run workflowInvocationFile, budget IntegrationBudget, entries []IntegrationEntry) error {
 	for _, counter := range budget.UnitCounters {
 		if !workflowIntegrationCounterHasOwner(run, counter, entries) {
-			return workflowIntegrationConflict("counter has no retained unit owner")
+			return workflowstate.IntegrationConflict("counter has no retained unit owner")
 		}
 	}
 
@@ -116,7 +116,7 @@ func (s *Store) checkWorkflowIntegrationEntryRecords(ctx context.Context, run wo
 
 func (s *Store) checkWorkflowIntegrationEntryBinding(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry) error {
 	if workflowIntegrationTargetChanged(run, entry) {
-		return workflowIntegrationConflict("target differs from the owning original PR")
+		return workflowstate.IntegrationConflict("target differs from the owning original PR")
 	}
 
 	if err := s.checkWorkflowIntegrationCandidate(entry); err != nil {
@@ -167,7 +167,7 @@ func (s *Store) checkWorkflowIntegrationJournalOwner(ctx context.Context, snapsh
 		return r.ID == journal.InvocationID && r.Namespace == journal.Namespace && r.OwnerRoot == journal.OwnerRoot
 	})
 	if index < 0 {
-		return workflowIntegrationConflict("native publication has no authoritative invocation owner")
+		return workflowstate.IntegrationConflict("native publication has no authoritative invocation owner")
 	}
 
 	run := snapshot.Runs[index]
@@ -179,7 +179,7 @@ func (s *Store) checkWorkflowIntegrationJournalOwner(ctx context.Context, snapsh
 
 	view := slices.IndexFunc(snapshot.Views, func(v IntegrationView) bool { return v.Entry.ID == submission.Native.EntryID })
 	if view < 0 || !workflowIntegrationJournalMatches(snapshot.Views[view], submission) {
-		return workflowIntegrationConflict("publication differs from entry or consumed reservation")
+		return workflowstate.IntegrationConflict("publication differs from entry or consumed reservation")
 	}
 
 	return owner.checkWorkflowNativeSubmissionEvidence(ctx, submission)
@@ -216,7 +216,7 @@ func checkWorkflowIntegrationProjections(snapshot workflowIntegrationSnapshot) e
 
 		projection := workflowSubmissionProjection(journal)
 		if projection != *binding {
-			return workflowIntegrationConflict("publication projection requires reconciliation")
+			return workflowstate.IntegrationConflict("publication projection requires reconciliation")
 		}
 	}
 
@@ -237,11 +237,11 @@ func checkWorkflowIntegrationNativeProjections(snapshot workflowIntegrationSnaps
 
 		binding := snapshot.Views[index].Entry.SubmissionRef
 		if binding == nil || *binding != workflowSubmissionProjection(journal) {
-			return workflowIntegrationConflict("common intent requires owner projection reconciliation")
+			return workflowstate.IntegrationConflict("common intent requires owner projection reconciliation")
 		}
 
 		if !workflowIntegrationInvocationPublicationMatches(snapshot, snapshot.Views[index].Entry, *binding) {
-			return workflowIntegrationConflict("invocation publication projection requires reconciliation")
+			return workflowstate.IntegrationConflict("invocation publication projection requires reconciliation")
 		}
 	}
 
@@ -253,7 +253,7 @@ func (s *Store) checkWorkflowIntegrationEntryReceipt(run workflowInvocationFile,
 		return nil
 	}
 
-	if err := validateWorkflowEvidenceRef(run.ID, *entry.ReceiptRef); err != nil {
+	if err := workflowstate.CheckEvidenceRef(run.ID, *entry.ReceiptRef); err != nil {
 		return err
 	}
 

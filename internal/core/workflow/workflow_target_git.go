@@ -78,8 +78,8 @@ func (git OSWorkflowIntegrationGit) ObserveWorkflowTarget(ctx context.Context, q
 }
 
 func (git OSWorkflowIntegrationGit) checkWorkflowTargetQuery(query TargetQuery) error {
-	repository, err := workflowCanonicalRepository(git.repository)
-	if err != nil || repository != query.Repository || git.transport == "" || strings.HasPrefix(git.transport, "-") || strings.ContainsAny(git.transport, "\x00\r\n") || !validWorkflowPRBranch(query.Branch) || query.Directory == "" {
+	repository, err := workflowstate.CanonicalRepository(git.repository)
+	if err != nil || repository != query.Repository || git.transport == "" || strings.HasPrefix(git.transport, "-") || strings.ContainsAny(git.transport, "\x00\r\n") || !workflowstate.ValidBranch(query.Branch) || query.Directory == "" {
 		return fmt.Errorf("canonical continuation target identity mismatch")
 	}
 
@@ -93,7 +93,7 @@ func (reader workflowIntegrationReader) remoteTarget(ctx context.Context, transp
 	}
 
 	fields := strings.Fields(output)
-	if len(fields) != 2 || !workflowCommitID(fields[0]) || fields[1] != "refs/heads/"+branch {
+	if len(fields) != 2 || !workflowstate.ValidCommitID(fields[0]) || fields[1] != "refs/heads/"+branch {
 		return "", workflowstate.ErrConflict
 	}
 

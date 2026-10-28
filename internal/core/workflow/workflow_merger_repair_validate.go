@@ -27,7 +27,7 @@ func validateWorkflowTreeRepairs(proof workflowstate.IntegrationProof) error {
 }
 
 func validateWorkflowTreeRepair(proof workflowstate.IntegrationProof, repair workflowstate.IntegrationTreeRepair) error {
-	if repair.CompletedAt.IsZero() || validateWorkflowMergerInput(repair.Input, repair.CompletedAt) != nil {
+	if repair.CompletedAt.IsZero() || workflowmerge.ValidateWorkflowMergerInput(repair.Input, repair.CompletedAt) != nil {
 		return workflowstate.ErrConflict
 	}
 
@@ -36,12 +36,12 @@ func validateWorkflowTreeRepair(proof workflowstate.IntegrationProof, repair wor
 		return workflowstate.ErrConflict
 	}
 
-	if repair.Proposal.Outcome != "resolved" || validateWorkflowMergerResult(repair.Proposal, input) != nil {
+	if repair.Proposal.Outcome != "resolved" || workflowmerge.ValidateWorkflowMergerResult(repair.Proposal, input) != nil {
 		return workflowstate.ErrConflict
 	}
 
 	for _, object := range []string{repair.Source, repair.OriginalParent, repair.PreparedParent, repair.BaselineTree, repair.ResolvedTree} {
-		if !workflowCommitID(object) || len(object) != len(input.Source) {
+		if !workflowstate.ValidCommitID(object) || len(object) != len(input.Source) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -61,7 +61,7 @@ func validateWorkflowRepairRegeneration(repair workflowstate.IntegrationTreeRepa
 		tree = repair.BaselineTree
 	}
 
-	if !workflowCommitID(tree) {
+	if !workflowstate.ValidCommitID(tree) {
 		return workflowstate.ErrConflict
 	}
 
@@ -79,7 +79,7 @@ func validateWorkflowRepairRegeneration(repair workflowstate.IntegrationTreeRepa
 	}
 
 	for _, conflict := range repair.Input.Conflicts {
-		if workflowMergerProcedureRequired(conflict) && !seen[conflict.ID] {
+		if workflowmerge.WorkflowMergerProcedureRequired(conflict) && !seen[conflict.ID] {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -92,7 +92,7 @@ func validWorkflowRegenerationEvidence(conflict workflowstate.MergerConflict, ev
 		return false
 	}
 
-	return evidence.Command.ExitCode == 0 && evidence.Validation.ExitCode == 0 && workflowCommitID(evidence.InputTree) && workflowCommitID(evidence.OutputTree) && evidence.OutputTree == tree && !evidence.Command.Truncated && !evidence.Validation.Truncated
+	return evidence.Command.ExitCode == 0 && evidence.Validation.ExitCode == 0 && workflowstate.ValidCommitID(evidence.InputTree) && workflowstate.ValidCommitID(evidence.OutputTree) && evidence.OutputTree == tree && !evidence.Command.Truncated && !evidence.Validation.Truncated
 }
 
 func validateWorkflowRepairPosition(repair workflowstate.IntegrationTreeRepair, original, parent, source, tree string) error {
@@ -132,7 +132,7 @@ func validateWorkflowRegenerationStep(input workflowstate.MergerInput, evidence 
 	}
 
 	conflict := input.Conflicts[index]
-	if !workflowMergerProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, evidence.OutputTree) || evidence.InputTree != tree {
+	if !workflowmerge.WorkflowMergerProcedureRequired(conflict) || !validWorkflowRegenerationEvidence(conflict, evidence, evidence.OutputTree) || evidence.InputTree != tree {
 		return workflowstate.ErrConflict
 	}
 

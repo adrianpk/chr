@@ -75,7 +75,7 @@ func (s *Store) finalizeWorkflowNativeReceipt(ctx context.Context, run *workflow
 
 func (s *Store) commitWorkflowNativeFanout(ctx context.Context, run *workflowInvocationFile, entry IntegrationEntry, observation workflowSliceObservation, receipt Record) error {
 	if entry.Revision == math.MaxUint64 || entry.StateRevision == math.MaxUint64 {
-		return workflowIntegrationConflict("finalization revision exhausted")
+		return workflowstate.IntegrationConflict("finalization revision exhausted")
 	}
 
 	snapshot, err := s.readSnapshot(ctx)

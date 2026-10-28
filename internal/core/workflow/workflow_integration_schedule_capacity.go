@@ -83,7 +83,7 @@ func (s *Store) workflowIntegrationPreparationTarget(run workflowInvocationFile)
 		return "", "", workflowstate.ErrConflict
 	}
 
-	repository, err := workflowCanonicalRepository(run.PullRequest.Request.Repository)
+	repository, err := workflowstate.CanonicalRepository(run.PullRequest.Request.Repository)
 
 	return repository, "refs/heads/" + run.PullRequest.Request.BaseBranch, err
 }

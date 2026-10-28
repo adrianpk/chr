@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strings"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -12,11 +13,11 @@ func validateWorkflowDecisionRecord(record IntegrationDecisions) error {
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowMergerDecisions(record.Requests, record.Input); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerDecisions(record.Requests, record.Input); err != nil {
 		return err
 	}
 
-	if err := validateWorkflowMergerInput(record.Input, record.Input.AdmittedAt); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerInput(record.Input, record.Input.AdmittedAt); err != nil {
 		return err
 	}
 
@@ -29,7 +30,7 @@ func validateWorkflowDecisionRecord(record IntegrationDecisions) error {
 	}
 
 	if record.Previous != nil {
-		return validateWorkflowEvidenceRef(record.Input.InvocationID, *record.Previous)
+		return workflowstate.CheckEvidenceRef(record.Input.InvocationID, *record.Previous)
 	}
 
 	return nil
@@ -68,7 +69,7 @@ func validateWorkflowDecisionPayload(answer workflowstate.IntegrationAnswer) err
 func validateWorkflowReplayPayload(answer workflowstate.IntegrationAnswer) error {
 	switch answer.Choice {
 	case "Identify the original source step":
-		if !workflowCommitID(answer.OriginalCommit) || answer.IntegrationFix != nil {
+		if !workflowstate.ValidCommitID(answer.OriginalCommit) || answer.IntegrationFix != nil {
 			return workflowstate.ErrConflict
 		}
 	case "Declare an integration fix with an actionable finding":
@@ -104,11 +105,11 @@ func validateWorkflowDecisionHistory(record IntegrationDecisions) error {
 }
 
 func validWorkflowDecisionAnswerSeal(record IntegrationDecisions, answer workflowstate.IntegrationAnswer) bool {
-	return answer.PriorRevision > 0 && answer.PriorRevision < record.Revision && validWorkflowNativeFingerprint(answer.QuestionHash) && !answer.RecordedAt.IsZero()
+	return answer.PriorRevision > 0 && answer.PriorRevision < record.Revision && workflowstate.ValidFingerprint(answer.QuestionHash) && !answer.RecordedAt.IsZero()
 }
 
 func validWorkflowDecisionAnswerActor(answer workflowstate.IntegrationAnswer) bool {
-	return workflowstate.ValidRequestKey(answer.ID) && workflowstate.ValidRequestKey(answer.Actor) && validWorkflowMergerText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
+	return workflowstate.ValidRequestKey(answer.ID) && workflowstate.ValidRequestKey(answer.Actor) && workflowmerge.ValidWorkflowMergerText(answer.Reason) && slices.Contains([]string{"resolve", "defer"}, answer.Action)
 }
 
 func validWorkflowDecisionInterpretation(question workflowstate.MergerDecision, answer workflowstate.IntegrationAnswer) bool {

@@ -102,7 +102,7 @@ func validateWorkflowPreparedNativeCapability(input workflowstate.PreparationInp
 		return err
 	}
 
-	if !validWorkflowNativeCapabilityRecord(capability) || !validWorkflowNativeFingerprint(capability.PolicyFingerprint) {
+	if !validWorkflowNativeCapabilityRecord(capability) || !workflowstate.ValidFingerprint(capability.PolicyFingerprint) {
 		return workflowstate.ErrConflict
 	}
 

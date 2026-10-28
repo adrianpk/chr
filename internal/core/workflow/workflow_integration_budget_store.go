@@ -236,7 +236,7 @@ func (s *Store) checkWorkflowIntegrationBudgetEvidence(run workflowInvocationFil
 	}
 
 	if budget.AdmissionLimits != workflowIntegrationAdmissionLimits(run.Policy) {
-		return workflowIntegrationConflict("admission limits differ from frozen execution policy")
+		return workflowstate.IntegrationConflict("admission limits differ from frozen execution policy")
 	}
 
 	for _, reservation := range budget.Reservations {

@@ -1,6 +1,9 @@
 package workflow
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func checkWorkflowMergerHarnessUsage(input workflowstate.MergerInput, certificate MergerHarnessCertificate, usage *workflowstate.MergerUsage) error {
 	if usage == nil {
@@ -11,7 +14,7 @@ func checkWorkflowMergerHarnessUsage(input workflowstate.MergerInput, certificat
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowMergerReportedUsage(usage, input.TokenAllowance); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerReportedUsage(usage, input.TokenAllowance); err != nil {
 		return err
 	}
 

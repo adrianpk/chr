@@ -76,7 +76,7 @@ func (s *Store) checkWorkflowAgentHarness(ctx context.Context, id, role string, 
 }
 
 func checkWorkflowAgentCertificate(c AgentHarnessCertificate, role string, command []string) error {
-	if c.SchemaVersion != 1 || c.Protocol != workflowAgentCallProtocol || !slices.Equal(c.Command, command) || !validWorkflowNativeFingerprint(c.CapabilityRevision) || !slices.Contains(c.Roles, role) {
+	if c.SchemaVersion != 1 || c.Protocol != workflowAgentCallProtocol || !slices.Equal(c.Command, command) || !workflowstate.ValidFingerprint(c.CapabilityRevision) || !slices.Contains(c.Roles, role) {
 		return fmt.Errorf("%w: certified role driver required", ErrWorkflowIntegrationBudget)
 	}
 

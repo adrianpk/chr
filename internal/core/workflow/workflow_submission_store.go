@@ -35,8 +35,8 @@ func workflowSubmissionJournalKey(run workflowInvocationFile) string {
 }
 
 func workflowSubmissionTargetKey(pr workflowstate.PullRequestSnapshot) (string, error) {
-	repository, err := workflowCanonicalRepository(pr.Repository)
-	if err != nil || !validWorkflowPRBranch(pr.BaseBranch) {
+	repository, err := workflowstate.CanonicalRepository(pr.Repository)
+	if err != nil || !workflowstate.ValidBranch(pr.BaseBranch) {
 		return "", workflowstate.ErrConflict
 	}
 

@@ -39,7 +39,7 @@ func (reader workflowIntegrationReader) mergerTree(ctx context.Context, original
 
 func parseWorkflowMergerTree(data string, conflicted bool) (workflowMergerTree, error) {
 	fields := strings.Split(data, "\x00")
-	if len(fields) < 2 || !workflowCommitID(fields[0]) {
+	if len(fields) < 2 || !workflowstate.ValidCommitID(fields[0]) {
 		return workflowMergerTree{}, workflowstate.ErrConflict
 	}
 

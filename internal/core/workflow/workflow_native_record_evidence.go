@@ -27,7 +27,7 @@ type NativeHistoryManifest struct {
 }
 
 func (s *Store) readWorkflowNativeEvidence(id string, ref workflowstate.EvidenceRef, value any) error {
-	if err := validateWorkflowEvidenceRef(id, ref); err != nil {
+	if err := workflowstate.CheckEvidenceRef(id, ref); err != nil {
 		return err
 	}
 
@@ -326,7 +326,7 @@ func validWorkflowNativeSourceHeader(b workflowstate.NativeRecordBinding, source
 
 func validWorkflowNativeCapabilityRecord(capability workflowstate.NativeCapability) bool {
 	for _, fingerprint := range []string{capability.ServerCapabilityFingerprint, capability.CredentialIdentityFingerprint} {
-		if !validWorkflowNativeFingerprint(fingerprint) {
+		if !workflowstate.ValidFingerprint(fingerprint) {
 			return false
 		}
 	}
@@ -337,7 +337,7 @@ func validWorkflowNativeCapabilityRecord(capability workflowstate.NativeCapabili
 func validateWorkflowNativeSourceCommits(b workflowstate.NativeRecordBinding, commits []string, git workflowstate.IntegrationProof) error {
 	seen := map[string]bool{}
 	for _, commit := range commits {
-		if !workflowCommitID(commit) || len(commit) != len(b.OriginalSource) || seen[commit] {
+		if !workflowstate.ValidCommitID(commit) || len(commit) != len(b.OriginalSource) || seen[commit] {
 			return workflowstate.ErrConflict
 		}
 
@@ -379,7 +379,7 @@ func validWorkflowNativeReceiptTransaction(native NativeReceipt, transaction Git
 	expected := [7]string{"chr-git-publication-result/v1", "applied", native.OriginalSource, native.OriginalSource, native.ValidatedBase, native.PreparedResult, native.PreparedResult}
 	actual := [7]string{transaction.Schema, transaction.State, transaction.OriginalSourceCommit, transaction.AdvertisedSourceCommit, transaction.AdvertisedTargetCommit, transaction.PublishedSourceCommit, transaction.ResultCommit}
 
-	return expected == actual && transaction.CommandsSent && validWorkflowNativeFingerprint(transaction.CandidateRevision)
+	return expected == actual && transaction.CommandsSent && workflowstate.ValidFingerprint(transaction.CandidateRevision)
 }
 
 func validWorkflowNativeReceiptObservationHeader(receipt Receipt, observation NativePublicationObservation) bool {

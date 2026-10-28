@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -13,7 +14,7 @@ func workflowMergerTokenSettlement(reservation *IntegrationReservation, result M
 		return workflowstate.FileChange{}, nil
 	}
 
-	if err := validateWorkflowMergerReportedUsage(usage, result.Input.TokenAllowance); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerReportedUsage(usage, result.Input.TokenAllowance); err != nil {
 		return workflowstate.FileChange{}, err
 	}
 

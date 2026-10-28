@@ -18,7 +18,7 @@ func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
 		return fmt.Errorf("invalid workflow canonical PR identity")
 	}
 
-	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
+	repository, err := workflowstate.CanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil || repository != binding.Request.Repository || !validWorkflowPullRequestContent(SlicePullRequestRequest{BaseBranch: binding.Request.BaseBranch, Title: binding.Request.Title, Body: binding.Request.Body}) {
 		return workflowstate.ErrConflict
 	}
@@ -64,7 +64,7 @@ func validateWorkflowPullRequestState(binding PullRequestBinding) error {
 }
 
 func validWorkflowPullRequestCandidate(run workflowInvocationFile, binding PullRequestBinding) bool {
-	if !workflowCommitID(binding.SourceCommit) || !workflowCommitID(binding.SourceTree) {
+	if !workflowstate.ValidCommitID(binding.SourceCommit) || !workflowstate.ValidCommitID(binding.SourceTree) {
 		return false
 	}
 

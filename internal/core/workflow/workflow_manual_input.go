@@ -89,7 +89,7 @@ func (s *Store) readWorkflowManualInput(attempt Attempt) (workflowPreparedTask, 
 }
 
 func validateWorkflowManualCandidate(candidate ManualCandidate) error {
-	if len(candidate.InputHash) != 64 || !workflowCommitID(candidate.Commit) || !workflowCommitID(candidate.Tree) {
+	if len(candidate.InputHash) != 64 || !workflowstate.ValidCommitID(candidate.Commit) || !workflowstate.ValidCommitID(candidate.Tree) {
 		return fmt.Errorf("manual result requires frozen input hash and full commit/tree identities")
 	}
 

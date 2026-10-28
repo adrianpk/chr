@@ -135,7 +135,7 @@ func validateWorkflowTaskDelivery(task Task) error {
 	}
 
 	delivery := task.Delivery
-	if task.Phase != "integrated" || task.DeliveryRef == "" || delivery.PullRequest == "" || !validWorkflowDeliveryBranch(delivery.Branch) || !slices.Contains([]string{"merge", "rebase", "squash"}, delivery.Method) || !workflowCommitID(delivery.ResultCommit) || delivery.ConfirmedAt.IsZero() {
+	if task.Phase != "integrated" || task.DeliveryRef == "" || delivery.PullRequest == "" || !validWorkflowDeliveryBranch(delivery.Branch) || !slices.Contains([]string{"merge", "rebase", "squash"}, delivery.Method) || !workflowstate.ValidCommitID(delivery.ResultCommit) || delivery.ConfirmedAt.IsZero() {
 		return fmt.Errorf("invalid workflow task delivery projection")
 	}
 
@@ -143,5 +143,5 @@ func validateWorkflowTaskDelivery(task Task) error {
 }
 
 func validWorkflowDeliveryBranch(branch string) bool {
-	return strings.HasPrefix(branch, "refs/heads/") && validWorkflowPRBranch(strings.TrimPrefix(branch, "refs/heads/"))
+	return strings.HasPrefix(branch, "refs/heads/") && workflowstate.ValidBranch(strings.TrimPrefix(branch, "refs/heads/"))
 }

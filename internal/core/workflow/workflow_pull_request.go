@@ -95,33 +95,5 @@ func (s *Store) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, r
 }
 
 func validWorkflowPullRequestContent(request SlicePullRequestRequest) bool {
-	return validWorkflowPRBranch(request.BaseBranch) && strings.TrimSpace(request.Title) != "" && len(request.Title) <= 256 && !strings.ContainsAny(request.Title, "\x00\r\n") && len(request.Body) <= 16*1024
-}
-
-func validWorkflowPRBranch(branch string) bool {
-	if !validWorkflowPRBranchText(branch) {
-		return false
-	}
-
-	for _, invalid := range []string{"..", "@{", "//"} {
-		if strings.Contains(branch, invalid) {
-			return false
-		}
-	}
-
-	return validWorkflowPRBranchParts(branch)
-}
-
-func validWorkflowPRBranchText(branch string) bool {
-	return branch != "" && branch != "@" && len(branch) <= 256 && !strings.HasPrefix(branch, "-") && !strings.HasPrefix(branch, "refs/") && !strings.ContainsAny(branch, " ~^:?*[\\\x7f") && !strings.ContainsFunc(branch, func(r rune) bool { return r < 32 })
-}
-
-func validWorkflowPRBranchParts(branch string) bool {
-	for _, part := range strings.Split(branch, "/") {
-		if part == "" || strings.HasPrefix(part, ".") || strings.HasSuffix(part, ".") || strings.HasSuffix(part, ".lock") {
-			return false
-		}
-	}
-
-	return true
+	return workflowstate.ValidBranch(request.BaseBranch) && strings.TrimSpace(request.Title) != "" && len(request.Title) <= 256 && !strings.ContainsAny(request.Title, "\x00\r\n") && len(request.Body) <= 16*1024
 }

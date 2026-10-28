@@ -58,7 +58,7 @@ func (adapter RemoteReviewAdapter) FindWorkflowPullRequests(ctx context.Context,
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
-	if !validWorkflowPRBranch(query.HeadBranch) || !validWorkflowPRBranch(query.BaseBranch) {
+	if !workflowstate.ValidBranch(query.HeadBranch) || !workflowstate.ValidBranch(query.BaseBranch) {
 		return nil, workflowstate.ErrConflict
 	}
 
@@ -171,7 +171,7 @@ func (adapter RemoteReviewAdapter) CreateWorkflowPullRequest(ctx context.Context
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
-	if !validWorkflowPRBranch(request.HeadBranch) || !validWorkflowPullRequestContent(SlicePullRequestRequest{BaseBranch: request.BaseBranch, Title: request.Title, Body: request.Body}) {
+	if !workflowstate.ValidBranch(request.HeadBranch) || !validWorkflowPullRequestContent(SlicePullRequestRequest{BaseBranch: request.BaseBranch, Title: request.Title, Body: request.Body}) {
 		return workflowstate.PullRequestSnapshot{}, workflowstate.ErrConflict
 	}
 
@@ -197,7 +197,7 @@ func (adapter RemoteReviewAdapter) ReadWorkflowBranch(ctx context.Context, repos
 
 	reference, config := resolvedReview.reference, resolvedReview.config
 
-	if !validWorkflowPRBranch(branch) {
+	if !workflowstate.ValidBranch(branch) {
 		return "", workflowstate.ErrConflict
 	}
 
@@ -234,7 +234,7 @@ func decodeWorkflowRemoteBranch(data []byte) (string, error) {
 		return "", workflowstate.ErrConflict
 	}
 
-	if !workflowCommitID(branch.Commit.SHA) {
+	if !workflowstate.ValidCommitID(branch.Commit.SHA) {
 		return "", workflowstate.ErrConflict
 	}
 
@@ -255,12 +255,12 @@ func decodeWorkflowRemotePR(data []byte) (workflowstate.PullRequestSnapshot, err
 }
 
 func workflowRemotePRSnapshot(pr workflowRemotePRJSON) (workflowstate.PullRequestSnapshot, error) {
-	repository, err := workflowCanonicalRepository(pr.Base.Repo.URL)
+	repository, err := workflowstate.CanonicalRepository(pr.Base.Repo.URL)
 	if err != nil {
 		return workflowstate.PullRequestSnapshot{}, err
 	}
 
-	headRepository, err := workflowCanonicalRepository(pr.Head.Repo.URL)
+	headRepository, err := workflowstate.CanonicalRepository(pr.Head.Repo.URL)
 	if err != nil {
 		return workflowstate.PullRequestSnapshot{}, err
 	}
@@ -269,7 +269,7 @@ func workflowRemotePRSnapshot(pr workflowRemotePRJSON) (workflowstate.PullReques
 }
 
 func (adapter RemoteReviewAdapter) resolveWorkflowRepository(repository string) (reviewProviderEndpoint, error) {
-	canonical, err := workflowCanonicalRepository(repository)
+	canonical, err := workflowstate.CanonicalRepository(repository)
 	if err != nil {
 		return reviewProviderEndpoint{}, err
 	}

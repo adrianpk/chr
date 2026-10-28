@@ -83,7 +83,7 @@ func (advertisement workflowAdvertisement) add(packet []byte, first bool) error 
 	}
 
 	fields := strings.Split(ref, " ")
-	if len(fields) != 2 || !workflowCommitID(fields[0]) || !validWorkflowAdvertisedRef(fields[1]) {
+	if len(fields) != 2 || !workflowstate.ValidCommitID(fields[0]) || !validWorkflowAdvertisedRef(fields[1]) {
 		return fmt.Errorf("invalid advertised ref")
 	}
 
@@ -109,7 +109,7 @@ func validWorkflowAdvertisedRef(ref string) bool {
 		return true
 	}
 
-	return strings.HasPrefix(ref, "refs/") && validWorkflowPRBranch(strings.TrimPrefix(ref, "refs/"))
+	return strings.HasPrefix(ref, "refs/") && workflowstate.ValidBranch(strings.TrimPrefix(ref, "refs/"))
 }
 
 func (advertisement workflowAdvertisement) addCapabilities(capabilities string) error {

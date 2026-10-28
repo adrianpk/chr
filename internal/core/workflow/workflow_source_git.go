@@ -39,7 +39,7 @@ func (git OSWorkflowIntegrationGit) validateWorkflowSource(query SourceQuery, br
 		return err
 	}
 
-	if !strings.HasPrefix(branch, "chr/workflow/") || !workflowCommitID(query.Commit) || !workflowCommitID(query.Tree) {
+	if !strings.HasPrefix(branch, "chr/workflow/") || !workflowstate.ValidCommitID(query.Commit) || !workflowstate.ValidCommitID(query.Tree) {
 		return workflowstate.ErrConflict
 	}
 
@@ -70,7 +70,7 @@ func (reader workflowIntegrationReader) workflowSourceHead(ctx context.Context, 
 	}
 
 	fields := strings.Fields(output)
-	if len(fields) != 2 || !workflowCommitID(fields[0]) || fields[1] != ref {
+	if len(fields) != 2 || !workflowstate.ValidCommitID(fields[0]) || fields[1] != ref {
 		return "", workflowstate.ErrConflict
 	}
 

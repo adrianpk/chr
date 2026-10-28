@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -95,7 +96,7 @@ func (s *Store) checkWorkflowDecisionAdmission(ctx context.Context, run workflow
 		return err
 	}
 
-	return validateWorkflowMergerDecisions(request.Decisions, request.Input)
+	return workflowmerge.ValidateWorkflowMergerDecisions(request.Decisions, request.Input)
 }
 
 func workflowDecisionFile(entry *IntegrationEntry, record IntegrationDecisions) (workflowstate.FileChange, error) {
@@ -205,7 +206,7 @@ func (s *Store) checkWorkflowMergerOperatorEvidence(input workflowstate.MergerIn
 		return workflowstate.ErrConflict
 	}
 
-	expected, actual := workflowMergerFence(record.Input), workflowMergerFence(input)
+	expected, actual := workflowmerge.WorkflowMergerFence(record.Input), workflowmerge.WorkflowMergerFence(input)
 	expected.CandidateRevision = record.CandidateRevision
 
 	expected.OwnedWorkspaceID = actual.OwnedWorkspaceID

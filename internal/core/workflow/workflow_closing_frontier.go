@@ -49,5 +49,5 @@ func (s *Store) checkWorkflowInvocationClosureEvidence(run workflowInvocationFil
 }
 
 func validWorkflowInvocationClosure(run workflowInvocationFile, index, cursor int, closure InvocationClosure) bool {
-	return closure.SetID == workflowInvocationSetID(run.SetImages[index]) && closure.Cursor >= cursor && closure.Cursor <= run.ConfirmedCursor && closure.Target.Repository == run.Selection.Target.Repository && workflowCommitID(closure.Target.Commit) && len(closure.Receipt.Hash) == 64
+	return closure.SetID == workflowInvocationSetID(run.SetImages[index]) && closure.Cursor >= cursor && closure.Cursor <= run.ConfirmedCursor && closure.Target.Repository == run.Selection.Target.Repository && workflowstate.ValidCommitID(closure.Target.Commit) && len(closure.Receipt.Hash) == 64
 }

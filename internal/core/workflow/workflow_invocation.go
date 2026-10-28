@@ -264,7 +264,7 @@ func normalizeWorkflowStart(request StartRequest) (StartRequest, error) {
 		return request, fmt.Errorf("workflow worker policy bounds exceeded")
 	}
 
-	if request.Selection.Target.Repository == "" || !workflowCommitID(request.Selection.Target.Commit) {
+	if request.Selection.Target.Repository == "" || !workflowstate.ValidCommitID(request.Selection.Target.Commit) {
 		return request, fmt.Errorf("workflow execution requires a canonical repository and immutable target commit")
 	}
 

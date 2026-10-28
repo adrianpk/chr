@@ -1,6 +1,8 @@
 package state
 
-import "strings"
+import (
+	"strings"
+)
 
 // ValidRequestKey checks the existing opaque workflow request-key contract.
 func ValidRequestKey(key string) bool {

@@ -76,7 +76,7 @@ func validateWorkflowSubmission(submission workflowstate.Submission, journal wor
 		return err
 	}
 
-	if !slices.Contains([]string{"", "accepted", "unaccepted", "error_unknown"}, submission.Response) || submission.ResponseCommit != "" && !workflowCommitID(submission.ResponseCommit) {
+	if !slices.Contains([]string{"", "accepted", "unaccepted", "error_unknown"}, submission.Response) || submission.ResponseCommit != "" && !workflowstate.ValidCommitID(submission.ResponseCommit) {
 		return workflowstate.ErrConflict
 	}
 

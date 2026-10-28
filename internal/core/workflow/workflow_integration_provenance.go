@@ -107,7 +107,7 @@ func validWorkflowProvenanceEnvelope(proof workflowstate.IntegrationProof, p wor
 		expectedFormat = "sha256"
 	}
 
-	return p.Schema == "chr-integration-provenance/v1" && validWorkflowNativeFingerprint(p.CombinedDiffHash) && p.ObjectFormat == expectedFormat
+	return p.Schema == "chr-integration-provenance/v1" && workflowstate.ValidFingerprint(p.CombinedDiffHash) && p.ObjectFormat == expectedFormat
 }
 
 func validWorkflowProvenanceCount(p workflowstate.IntegrationProvenance) bool {

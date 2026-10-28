@@ -3,7 +3,6 @@ package workflow
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
@@ -29,19 +28,6 @@ type NativeReceipt struct {
 	ObservationContract string                      `json:"observation_contract,omitempty"`
 }
 
-func validateWorkflowEvidenceRef(id string, ref workflowstate.EvidenceRef) error {
-	if !workflowstate.ValidRequestKey(id) || filepath.Base(id) != id || strings.ContainsAny(ref.Path, "\\\x00") || !filepath.IsLocal(ref.Path) || filepath.ToSlash(filepath.Clean(ref.Path)) != ref.Path || !validWorkflowNativeFingerprint(ref.Hash) {
-		return workflowstate.ErrConflict
-	}
-
-	root := "run/" + id + "/"
-	if !strings.HasPrefix(ref.Path, root+"evidence/") && !strings.HasPrefix(ref.Path, root+"extension/chr/") {
-		return fmt.Errorf("%w: evidence belongs to another invocation", workflowstate.ErrConflict)
-	}
-
-	return nil
-}
-
 func validateWorkflowNativeRecordBinding(b workflowstate.NativeRecordBinding) error {
 	if !validWorkflowNativeRecordOwner(b) {
 		return fmt.Errorf("%w: unsupported native record version or owner", workflowstate.ErrConflict)
@@ -60,7 +46,7 @@ func validateWorkflowNativeRecordBinding(b workflowstate.NativeRecordBinding) er
 	}
 
 	for _, ref := range b.EvidenceRefs() {
-		if err := validateWorkflowEvidenceRef(b.InvocationID, ref); err != nil {
+		if err := workflowstate.CheckEvidenceRef(b.InvocationID, ref); err != nil {
 			return err
 		}
 	}
@@ -77,13 +63,13 @@ func validateWorkflowNativeRecordObjects(b workflowstate.NativeRecordBinding) er
 	}
 
 	for _, object := range []string{b.OriginalSource, b.ValidatedBase, b.PreparedResult, b.PreparedTree} {
-		if !workflowCommitID(object) || len(object) != size {
+		if !workflowstate.ValidCommitID(object) || len(object) != size {
 			return workflowstate.ErrConflict
 		}
 	}
 
 	for _, hash := range []string{b.ContractHash, b.PolicyHash, b.CapabilityHash} {
-		if !validWorkflowNativeFingerprint(hash) {
+		if !workflowstate.ValidFingerprint(hash) {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -209,7 +195,7 @@ func validateWorkflowNativeReceiptSchema(receipt Receipt) error {
 	}
 
 	for _, ref := range refs {
-		if err := validateWorkflowEvidenceRef(native.InvocationID, ref); err != nil {
+		if err := workflowstate.CheckEvidenceRef(native.InvocationID, ref); err != nil {
 			return err
 		}
 	}
@@ -245,5 +231,5 @@ func workflowNativeReceiptOwnerMatches(receipt Receipt) bool {
 		return false
 	}
 
-	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && validWorkflowNativeFingerprint(native.CandidateHash) && workflowNativeReceiptResultMatches(receipt) && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= workflowstate.PageLimit
+	return native.Unit == receipt.Unit && native.CanonicalPR == receipt.PullRequest && workflowstate.ValidFingerprint(native.CandidateHash) && workflowNativeReceiptResultMatches(receipt) && len(native.ObservationRefs) > 0 && len(native.ObservationRefs) <= workflowstate.PageLimit
 }

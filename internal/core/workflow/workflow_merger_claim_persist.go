@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -25,7 +26,7 @@ func (s *Store) persistWorkflowMergerClaim(ctx context.Context, run workflowInvo
 
 	budget.Reservations = append(budget.Reservations, reservation)
 
-	input, err = SealWorkflowMergerInput(input, time.Now().UTC())
+	input, err = workflowmerge.SealWorkflowMergerInput(input, time.Now().UTC())
 	if err != nil {
 		return nil, workflowPreparedTask{}, err
 	}

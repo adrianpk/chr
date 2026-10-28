@@ -3,7 +3,6 @@ package workflow
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"path/filepath"
 	"time"
 
@@ -106,7 +105,7 @@ func newWorkflowIntegrationEntry(run workflowInvocationFile, request Integration
 		return IntegrationEntry{}, err
 	}
 
-	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
+	repository, err := workflowstate.CanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil {
 		return IntegrationEntry{}, err
 	}
@@ -168,8 +167,4 @@ func (s *Store) TransitionWorkflowIntegration(ctx context.Context, request Integ
 
 func workflowIntegrationTerminal(state string) bool {
 	return state == "integrated" || state == "cancelled"
-}
-
-func workflowIntegrationConflict(reason string) error {
-	return fmt.Errorf("%w: integration entry %s", workflowstate.ErrConflict, reason)
 }

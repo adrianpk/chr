@@ -20,7 +20,7 @@ func (s *Store) observeWorkflowFrontier(ctx context.Context, run workflowInvocat
 		return target, workflowstate.IntegrationProof{}, err
 	}
 
-	if target.Repository != run.Selection.Target.Repository || !workflowCommitID(target.Commit) {
+	if target.Repository != run.Selection.Target.Repository || !workflowstate.ValidCommitID(target.Commit) {
 		return target, workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -31,7 +32,7 @@ func nativeMergerRegenerationFixture(t *testing.T, failing bool) (workflowPrepar
 
 	var err error
 
-	*input, err = SealWorkflowMergerInput(*input, time.Now().UTC())
+	*input, err = workflowmerge.SealWorkflowMergerInput(*input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}

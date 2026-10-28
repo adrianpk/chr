@@ -271,7 +271,7 @@ func (s *Store) checkWorkflowNativeNonApplication(_ context.Context, submission 
 func validWorkflowNativeNonApplication(submission workflowstate.Submission, proof NativeNonApplicationProof) bool {
 	native := submission.Native
 
-	return proof.SchemaVersion == 1 && proof.SubmissionID == submission.ID && proof.CannotApply && proof.InputChanged && workflowCommitID(proof.ObservedSource) && workflowCommitID(proof.ObservedTarget) && (proof.ObservedSource != native.OriginalSource || proof.ObservedTarget != native.ValidatedBase)
+	return proof.SchemaVersion == 1 && proof.SubmissionID == submission.ID && proof.CannotApply && proof.InputChanged && workflowstate.ValidCommitID(proof.ObservedSource) && workflowstate.ValidCommitID(proof.ObservedTarget) && (proof.ObservedSource != native.OriginalSource || proof.ObservedTarget != native.ValidatedBase)
 }
 
 func (s *Store) applyWorkflowNativeSubmissionEvidence(ctx context.Context, submission *workflowstate.Submission) error {

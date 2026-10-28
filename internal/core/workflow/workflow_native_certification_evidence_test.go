@@ -35,7 +35,7 @@ func readNativeCertificationRef(t *testing.T, profile nativeLiveProfile, dir, re
 	t.Helper()
 
 	fields := strings.Fields(workflowIntegrationCommand(t, dir, "ls-remote", profile.GitRemote, ref))
-	if len(fields) != 2 || fields[1] != ref || !workflowCommitID(fields[0]) {
+	if len(fields) != 2 || fields[1] != ref || !workflowstate.ValidCommitID(fields[0]) {
 		t.Fatal("canonical fixture ref is unavailable")
 	}
 

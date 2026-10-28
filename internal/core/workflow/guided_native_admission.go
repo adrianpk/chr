@@ -136,7 +136,7 @@ func validateGuidedControlProof(request workflowstate.ControlMutationRequest) er
 		return nil
 	}
 
-	if !authoringcore.ValidGuidedControlAction(request.Action) || authoringstate.ValidateSessionID(proof.RunID) != nil || !validWorkflowNativeFingerprint(proof.OperationDigest) {
+	if !authoringcore.ValidGuidedControlAction(request.Action) || authoringstate.ValidateSessionID(proof.RunID) != nil || !workflowstate.ValidFingerprint(proof.OperationDigest) {
 		return workflowstate.ErrConflict
 	}
 

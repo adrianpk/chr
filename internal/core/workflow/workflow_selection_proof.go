@@ -162,7 +162,7 @@ func (reader *workflowProofReader) gitOutput(ctx context.Context, args ...string
 }
 
 func (reader *workflowProofReader) commitHasTree(ctx context.Context, commit, tree string) bool {
-	if !workflowCommitID(commit) || !workflowCommitID(tree) {
+	if !workflowstate.ValidCommitID(commit) || !workflowstate.ValidCommitID(tree) {
 		return false
 	}
 
@@ -172,7 +172,7 @@ func (reader *workflowProofReader) commitHasTree(ctx context.Context, commit, tr
 }
 
 func (reader *workflowProofReader) isAncestor(ctx context.Context, commit, target string) bool {
-	if !workflowCommitID(commit) || !workflowCommitID(target) {
+	if !workflowstate.ValidCommitID(commit) || !workflowstate.ValidCommitID(target) {
 		return false
 	}
 
@@ -189,20 +189,6 @@ func (reader *workflowProofReader) branchAtCommit(ctx context.Context) bool {
 	actual, err := reader.gitOutput(ctx, "rev-parse", "--verify", reader.request.CumulativeBranch+"^{commit}")
 
 	return err == nil && actual == reader.request.CumulativeCommit
-}
-
-func workflowCommitID(value string) bool {
-	if len(value) != 40 && len(value) != 64 {
-		return false
-	}
-
-	for _, character := range value {
-		if character < '0' || character > '9' && character < 'a' || character > 'f' {
-			return false
-		}
-	}
-
-	return true
 }
 
 func (s *Store) observePrerequisites(ctx context.Context, selection workflowSelection, request workflowstate.PreviewRequest, preview *Preview) error {

@@ -30,14 +30,14 @@ func (s *Store) readWorkflowIntegrationEntry(run workflowInvocationFile, binding
 
 	hash, err := workflowIntegrationScopeHash(run, entry.Unit)
 	if err != nil || !workflowIntegrationEntryMatches(run, binding, entry) || hash != entry.FrozenScopeHash {
-		return entry, workflowIntegrationConflict("differs from its invocation owner")
+		return entry, workflowstate.IntegrationConflict("differs from its invocation owner")
 	}
 
 	return entry, nil
 }
 
 func workflowIntegrationEntryMatches(run workflowInvocationFile, binding workflowstate.IntegrationBinding, entry IntegrationEntry) bool {
-	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
+	repository, err := workflowstate.CanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil {
 		return false
 	}
@@ -67,7 +67,7 @@ func (s *Store) repositoryWorkflowIntegrationEntries(runs []workflowInvocationFi
 			}
 
 			if entry.CoordinatorID != coordinator.ID || sequences[entry.QueueSequence] || ids[entry.ID] || len(entries) >= workflowstate.RecordLimit {
-				return nil, workflowIntegrationConflict("has foreign, duplicate or excessive allocation")
+				return nil, workflowstate.IntegrationConflict("has foreign, duplicate or excessive allocation")
 			}
 
 			if err := retainWorkflowIntegrationActiveUnit(entry, activeUnits); err != nil {
@@ -104,18 +104,18 @@ func (s *Store) admitWorkflowIntegration(ctx context.Context, runs []workflowInv
 		}
 	}
 
-	return IntegrationEntry{}, workflowIntegrationConflict("invocation not found")
+	return IntegrationEntry{}, workflowstate.IntegrationConflict("invocation not found")
 }
 
 func (s *Store) admitWorkflowIntegrationUnit(ctx context.Context, run workflowInvocationFile, runs []workflowInvocationFile, entries []IntegrationEntry, request IntegrationAdmission, coordinator workflowCoordinator) (IntegrationEntry, error) {
 	if !slices.Contains(run.RequestKeys, request.AdmissionKey) || !workflowstate.ValidRequestKey(request.AdmissionKey) {
-		return IntegrationEntry{}, workflowIntegrationConflict("retry key is not attached to its invocation")
+		return IntegrationEntry{}, workflowstate.IntegrationConflict("retry key is not attached to its invocation")
 	}
 
 	for _, entry := range entries {
 		if entry.ID == workflowIntegrationEntryID(run, request.Unit) {
 			if entry.TargetRef != request.TargetRef {
-				return IntegrationEntry{}, workflowIntegrationConflict("retry changes its canonical target")
+				return IntegrationEntry{}, workflowstate.IntegrationConflict("retry changes its canonical target")
 			}
 
 			return entry, nil
@@ -146,11 +146,11 @@ func (s *Store) admitWorkflowIntegrationUnit(ctx context.Context, run workflowIn
 
 func (s *Store) guardWorkflowIntegrationAdmission(ctx context.Context, run workflowInvocationFile, request IntegrationAdmission) error {
 	if !workflowIntegrationAdmissionCurrent(run, request) {
-		return workflowIntegrationConflict("admission is stale or outside the current frozen unit")
+		return workflowstate.IntegrationConflict("admission is stale or outside the current frozen unit")
 	}
 
 	if run.PullRequest != nil && "refs/heads/"+run.PullRequest.Request.BaseBranch != request.TargetRef {
-		return workflowIntegrationConflict("target differs from its canonical PR binding")
+		return workflowstate.IntegrationConflict("target differs from its canonical PR binding")
 	}
 
 	if err := s.guardWorkflowIntegrationAdmissionHistory(run); err != nil {
@@ -198,7 +198,7 @@ func (s *Store) nextWorkflowIntegrationSequence(ctx context.Context, runs []work
 	}
 
 	if maximum == math.MaxUint64 {
-		return 0, workflowIntegrationConflict("queue sequence exhausted")
+		return 0, workflowstate.IntegrationConflict("queue sequence exhausted")
 	}
 
 	return maximum + 1, nil
@@ -223,7 +223,7 @@ func (s *Store) commitWorkflowIntegrationEntry(run *workflowInvocationFile, entr
 
 func (s *Store) commitWorkflowIntegrationEntryFiles(run *workflowInvocationFile, entry IntegrationEntry, before string, files []workflowstate.FileChange) error {
 	if run.Revision == math.MaxUint64 {
-		return workflowIntegrationConflict("invocation revision exhausted")
+		return workflowstate.IntegrationConflict("invocation revision exhausted")
 	}
 
 	file, err := workflowIntegrationEntryChange(entry, before)
@@ -294,7 +294,7 @@ func retainWorkflowIntegrationActiveUnit(entry IntegrationEntry, activeUnits map
 
 	unitKey := entry.ProjectID + "\x00" + entry.Namespace + "\x00" + entry.Unit.Kind + "\x00" + entry.Unit.ID
 	if activeUnits[unitKey] {
-		return workflowIntegrationConflict("duplicate active unit ownership")
+		return workflowstate.IntegrationConflict("duplicate active unit ownership")
 	}
 
 	activeUnits[unitKey] = true

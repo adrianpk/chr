@@ -51,13 +51,13 @@ func (s *Store) checkWorkflowPullRequestReady(run workflowInvocationFile) error 
 }
 
 func prepareWorkflowPullRequestBinding(run *workflowInvocationFile, observation workflowSliceObservation, candidate SliceCandidate, request SlicePullRequestRequest) error {
-	repository, err := workflowCanonicalRepository(run.ExecutionSelection().Target.Repository)
+	repository, err := workflowstate.CanonicalRepository(run.ExecutionSelection().Target.Repository)
 	if err != nil {
 		return err
 	}
 
 	prRequest := PullRequestRequest{PullRequestQuery: PullRequestQuery{Repository: repository, HeadBranch: strings.TrimPrefix(run.Lane.Branch, "refs/heads/"), BaseBranch: request.BaseBranch}, Title: request.Title, Body: request.Body}
-	if !validWorkflowPRBranch(prRequest.HeadBranch) || prRequest.HeadBranch == prRequest.BaseBranch {
+	if !workflowstate.ValidBranch(prRequest.HeadBranch) || prRequest.HeadBranch == prRequest.BaseBranch {
 		return workflowstate.ErrConflict
 	}
 

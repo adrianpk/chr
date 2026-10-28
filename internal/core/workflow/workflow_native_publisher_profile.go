@@ -97,12 +97,12 @@ func selectWorkflowNativePublisher(profiles []NativePublisherProfile, repository
 }
 
 func validateWorkflowNativePublisher(profile NativePublisherProfile) error {
-	canonical, err := workflowCanonicalRepository(profile.Repository)
-	if err != nil || canonical != profile.Repository || !validWorkflowNativeFingerprint(profile.APIIdentityFingerprint) {
+	canonical, err := workflowstate.CanonicalRepository(profile.Repository)
+	if err != nil || canonical != profile.Repository || !workflowstate.ValidFingerprint(profile.APIIdentityFingerprint) {
 		return workflowstate.ErrConflict
 	}
 
-	if !strings.HasPrefix(profile.TargetRef, "refs/heads/") || !validWorkflowPRBranch(strings.TrimPrefix(profile.TargetRef, "refs/heads/")) {
+	if !strings.HasPrefix(profile.TargetRef, "refs/heads/") || !workflowstate.ValidBranch(strings.TrimPrefix(profile.TargetRef, "refs/heads/")) {
 		return workflowstate.ErrConflict
 	}
 

@@ -121,7 +121,7 @@ func validateWorkflowIntegrationQueueQuery(q IntegrationQueueQuery) error {
 	}
 
 	if q.Repository != "" {
-		if _, err := workflowCanonicalRepository(q.Repository); err != nil {
+		if _, err := workflowstate.CanonicalRepository(q.Repository); err != nil {
 			return workflowstate.ErrConflict
 		}
 	}
@@ -233,7 +233,7 @@ func workflowIntegrationQueryTarget(entry IntegrationEntry, q IntegrationQueueQu
 	if repository != "" {
 		var err error
 
-		repository, err = workflowCanonicalRepository(repository)
+		repository, err = workflowstate.CanonicalRepository(repository)
 		if err != nil {
 			return false
 		}

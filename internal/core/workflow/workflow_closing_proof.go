@@ -17,7 +17,7 @@ func (s *Store) observeWorkflowClosingTarget(ctx context.Context, request SetClo
 		return target, err
 	}
 
-	if target.Repository != request.Repository || !workflowCommitID(target.Commit) {
+	if target.Repository != request.Repository || !workflowstate.ValidCommitID(target.Commit) {
 		return target, workflowstate.ErrConflict
 	}
 

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -46,7 +47,7 @@ func nativeMergerAcceptanceFixture(t *testing.T, id, method string) (workflowPre
 
 	request.Input.Deadline = time.Now().UTC().Add(25 * time.Second)
 
-	request.Input, err = SealWorkflowMergerInput(request.Input, time.Now().UTC())
+	request.Input, err = workflowmerge.SealWorkflowMergerInput(request.Input, time.Now().UTC())
 	if err != nil {
 		t.Fatal(err)
 	}

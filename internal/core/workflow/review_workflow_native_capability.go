@@ -126,7 +126,7 @@ func inspectWorkflowNativeCapability(ctx context.Context, request NativeCapabili
 		return capability, err
 	}
 
-	if advertisement.SourceCommit != request.Publication.Git.SourceCommit || advertisement.TargetCommit != request.Publication.Git.BaseCommit || !validWorkflowNativeFingerprint(advertisement.Fingerprint) {
+	if advertisement.SourceCommit != request.Publication.Git.SourceCommit || advertisement.TargetCommit != request.Publication.Git.BaseCommit || !workflowstate.ValidFingerprint(advertisement.Fingerprint) {
 		return capability, fmt.Errorf("%w: receive-pack source or target binding changed", workflowstate.ErrConflict)
 	}
 

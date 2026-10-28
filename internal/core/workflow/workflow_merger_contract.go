@@ -45,9 +45,9 @@ func checkWorkflowMergerBudget(budget IntegrationBudget, input workflowstate.Mer
 		return nil
 	}
 
-	total, err := workflowTokenSum(budget.TokensReserved, budget.TokensSettled)
+	total, err := workflowstate.TokenSum(budget.TokensReserved, budget.TokensSettled)
 	if err == nil {
-		total, err = workflowTokenSum(total, input.TokenAllowance.Maximum)
+		total, err = workflowstate.TokenSum(total, input.TokenAllowance.Maximum)
 	}
 
 	if err != nil || budget.TokenLimit != nil && total > *budget.TokenLimit {

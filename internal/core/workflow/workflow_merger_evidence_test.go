@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -20,7 +21,7 @@ func TestNativeMergerEvidence(t *testing.T) {
 			path := filepath.Join(store.layout.Root(), input.TargetChangeRefs[0].Path)
 			mutateNativeMergerEvidence(t, mode, path, store, &input)
 
-			sealed, err := SealWorkflowMergerInput(input, now)
+			sealed, err := workflowmerge.SealWorkflowMergerInput(input, now)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -81,7 +82,7 @@ func TestNativeMergerCheckpoint(t *testing.T) {
 			nativeMergerCheckpoint(t, store, &input)
 			mutateNativeMergerCheckpoint(mode, &input)
 
-			sealed, err := SealWorkflowMergerInput(input, now)
+			sealed, err := workflowmerge.SealWorkflowMergerInput(input, now)
 			if err == nil {
 				err = store.CheckWorkflowMergerEvidence(t.Context(), sealed, now)
 			}

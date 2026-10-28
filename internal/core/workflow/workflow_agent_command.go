@@ -10,6 +10,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesshost "forge.adrianpk.com/chr/internal/core/harness/host"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -82,7 +83,7 @@ func checkWorkflowAgentResponse(response AgentResponse, input TaskInput) error {
 	}
 
 	usage := workflowstate.MergerUsage{CapabilityRevision: response.CapabilityRevision, WholeCall: response.WholeCall, Input: *response.Input, Output: *response.Output}
-	if err := validateWorkflowMergerReportedUsage(&usage, &call.Allowance); err != nil {
+	if err := workflowmerge.ValidateWorkflowMergerReportedUsage(&usage, &call.Allowance); err != nil {
 		return errors.Join(ErrWorkflowIntegrationBudget, err)
 	}
 

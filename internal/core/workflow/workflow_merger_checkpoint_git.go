@@ -57,7 +57,7 @@ func checkWorkflowMergerPrivateRepository(ctx context.Context, directory string)
 // ImportWorkflowMergerTree imports the host snapshot into the private repair
 // object store. It does not change a branch or publish a temporary commit.
 func (git OSWorkflowPreparationGit) ImportWorkflowMergerTree(ctx context.Context, state MergerRepairState, directory, tree string) error {
-	if !workflowCommitID(tree) || directory == state.Query.Lane.Worktree {
+	if !workflowstate.ValidCommitID(tree) || directory == state.Query.Lane.Worktree {
 		return workflowstate.ErrConflict
 	}
 

@@ -94,7 +94,7 @@ var leafImports = map[string]map[string]bool{
 	"internal/core/workflow/closeout":  {coreImportPath + "workflow/state": true},
 	"internal/core/workflow/forge":     {coreImportPath + "workflow/state": true},
 	"internal/core/workflow/integrate": {coreImportPath + "workflow/state": true},
-	"internal/core/workflow/merge":     {coreImportPath + "workflow/state": true},
+	"internal/core/workflow/merge":     {coreImportPath + "workflow/state": true, coreImportPath + "contenthash": true},
 	"internal/core/workflow/review":    {coreImportPath + "workflow/state": true},
 	"internal/core/workflow/state":     {coreImportPath + "contenthash": true, coreImportPath + "ops/metadata": true, coreImportPath + "harness": true},
 }

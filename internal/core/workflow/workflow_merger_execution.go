@@ -46,7 +46,7 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 
 	attempt.Checks = result.checks
 	if result.err == nil {
-		proposal, parseErr := ParseWorkflowMergerResult(result.data, attempt.Input, workflowMergerFence(attempt.Input), time.Now().UTC())
+		proposal, parseErr := workflowmerge.ParseWorkflowMergerResult(result.data, attempt.Input, workflowmerge.WorkflowMergerFence(attempt.Input), time.Now().UTC())
 
 		result.err = parseErr
 		if parseErr == nil {

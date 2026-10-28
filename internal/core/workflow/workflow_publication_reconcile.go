@@ -179,7 +179,7 @@ func checkWorkflowSupersededTarget(ctx context.Context, run workflowInvocationFi
 		return err
 	}
 
-	if !workflowCommitID(target) || target != pr.BaseCommit {
+	if !workflowstate.ValidCommitID(target) || target != pr.BaseCommit {
 		return workflowstate.ErrConflict
 	}
 

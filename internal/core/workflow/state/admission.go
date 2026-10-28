@@ -1,6 +1,8 @@
 package state
 
-import harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+import (
+	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+)
 
 // StartInput is the exact serializable native admission input retained by guided state.
 // Host callbacks and commands belong to the caller, outside the durable value.

@@ -276,7 +276,7 @@ func validateWorkflowPreviewContext(request workflowstate.PreviewRequest) error 
 	}
 
 	for _, commit := range []string{request.Target.Commit, request.CumulativeCommit} {
-		if commit != "" && !workflowCommitID(commit) {
+		if commit != "" && !workflowstate.ValidCommitID(commit) {
 			return fmt.Errorf("workflow preview requires full immutable commit IDs")
 		}
 	}

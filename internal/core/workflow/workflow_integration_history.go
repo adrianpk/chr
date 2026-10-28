@@ -88,7 +88,7 @@ func validateWorkflowIntegrationHistory(proof workflowstate.IntegrationProof) er
 
 func validWorkflowIntegrationCommit(entry workflowstate.IntegrationCommit) bool {
 	for _, id := range []string{entry.Source, entry.Commit, entry.Tree, entry.Parent} {
-		if !workflowCommitID(id) {
+		if !workflowstate.ValidCommitID(id) {
 			return false
 		}
 	}
@@ -171,7 +171,7 @@ func validateWorkflowIntegrationProof(query workflowstate.IntegrationQuery, proo
 	}
 
 	for _, id := range []string{proof.BaseCommit, proof.PreparedTree, proof.VerifiedTree, proof.ObservedTarget} {
-		if !workflowCommitID(id) {
+		if !workflowstate.ValidCommitID(id) {
 			return workflowstate.ErrConflict
 		}
 	}

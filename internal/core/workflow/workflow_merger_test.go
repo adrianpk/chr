@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -41,7 +42,7 @@ func nativeMergerInput(t *testing.T) (*Store, workflowstate.MergerInput, time.Ti
 	input.Requirements = []workflowstate.MergerRequirement{{ID: "source-api", Origin: "source", Evidence: source}, {ID: "target-validation", Origin: "target", Evidence: target}}
 	input.Conflicts = []workflowstate.MergerConflict{{ID: "conflict-1", Path: "src/service.go", Kind: "text", Evidence: source, RequirementIDs: []string{"source-api", "target-validation"}}}
 
-	sealed, err := SealWorkflowMergerInput(input, now)
+	sealed, err := workflowmerge.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +88,7 @@ func TestNativeMergerProtocol(t *testing.T) {
 				result.Failure = "No compatible repair was found within the bounded call."
 			}
 
-			parsed, err := ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowMergerFence(input), now)
+			parsed, err := workflowmerge.ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowmerge.WorkflowMergerFence(input), now)
 			if err != nil || !workflowNativeJSONEqual(parsed, result) {
 				t.Fatal("valid proposal lost its immutable binding", err)
 			}
@@ -122,7 +123,7 @@ func TestNativeMergerMalformed(t *testing.T) {
 
 	for name, data := range cases {
 		t.Run(name, func(t *testing.T) {
-			if _, err := ParseWorkflowMergerResult([]byte(data), input, workflowMergerFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.ParseWorkflowMergerResult([]byte(data), input, workflowmerge.WorkflowMergerFence(input), now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("malformed or authority-bearing proposal was accepted", err)
 			}
 		})
@@ -133,34 +134,34 @@ func TestNativeMergerMalformed(t *testing.T) {
 // changes, without trusting a role's unchanged input hash or success narrative.
 func TestNativeMergerFence(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
-	cases := map[string]func(*MergerFence){
-		"entry":      func(f *MergerFence) { f.EntryID = contenthash.Sum([]byte("other")) },
-		"candidate":  func(f *MergerFence) { f.CandidateHash = contenthash.Sum([]byte("new candidate")) },
-		"revision":   func(f *MergerFence) { f.CandidateRevision++ },
-		"generation": func(f *MergerFence) { f.ClaimGeneration++ },
-		"scope":      func(f *MergerFence) { f.ScopeHash = contenthash.Sum([]byte("expanded scope")) },
-		"workspace":  func(f *MergerFence) { f.OwnedWorkspaceID = contenthash.Sum([]byte("user checkout")) },
-		"source":     func(f *MergerFence) { f.Source = strings.Repeat("3", 40) },
-		"base":       func(f *MergerFence) { f.Base = strings.Repeat("4", 40) },
-		"method":     func(f *MergerFence) { f.Method = "squash" },
-		"target":     func(f *MergerFence) { f.TargetRef = "refs/heads/main" },
-		"repository": func(f *MergerFence) { f.Repository = "https://forge.example.test/testing/other" },
-		"unit":       func(f *MergerFence) { f.Unit.ID = "slice-2" },
+	cases := map[string]func(*workflowmerge.MergerFence){
+		"entry":      func(f *workflowmerge.MergerFence) { f.EntryID = contenthash.Sum([]byte("other")) },
+		"candidate":  func(f *workflowmerge.MergerFence) { f.CandidateHash = contenthash.Sum([]byte("new candidate")) },
+		"revision":   func(f *workflowmerge.MergerFence) { f.CandidateRevision++ },
+		"generation": func(f *workflowmerge.MergerFence) { f.ClaimGeneration++ },
+		"scope":      func(f *workflowmerge.MergerFence) { f.ScopeHash = contenthash.Sum([]byte("expanded scope")) },
+		"workspace":  func(f *workflowmerge.MergerFence) { f.OwnedWorkspaceID = contenthash.Sum([]byte("user checkout")) },
+		"source":     func(f *workflowmerge.MergerFence) { f.Source = strings.Repeat("3", 40) },
+		"base":       func(f *workflowmerge.MergerFence) { f.Base = strings.Repeat("4", 40) },
+		"method":     func(f *workflowmerge.MergerFence) { f.Method = "squash" },
+		"target":     func(f *workflowmerge.MergerFence) { f.TargetRef = "refs/heads/main" },
+		"repository": func(f *workflowmerge.MergerFence) { f.Repository = "https://forge.example.test/testing/other" },
+		"unit":       func(f *workflowmerge.MergerFence) { f.Unit.ID = "slice-2" },
 	}
 	data := nativeMergerJSON(t, nativeMergerResolved(input))
 
 	for name, mutate := range cases {
 		t.Run(name, func(t *testing.T) {
-			current := workflowMergerFence(input)
+			current := workflowmerge.WorkflowMergerFence(input)
 			mutate(&current)
 
-			if _, err := ParseWorkflowMergerResult(data, input, current, now); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := workflowmerge.ParseWorkflowMergerResult(data, input, current, now); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("stale proposal passed the host fence", err)
 			}
 		})
 	}
 
-	if _, err := ParseWorkflowMergerResult(data, input, workflowMergerFence(input), input.Deadline); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := workflowmerge.ParseWorkflowMergerResult(data, input, workflowmerge.WorkflowMergerFence(input), input.Deadline); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("elapsed deadline was treated as continuing authority", err)
 	}
 }
@@ -171,7 +172,7 @@ func TestNativeMergerUsage(t *testing.T) {
 	_, input, now := nativeMergerInput(t)
 	input.TokenAllowance = &workflowstate.TokenAllowance{Maximum: 100, Input: 60, Output: 40, WholeCall: true, CapabilityRevision: contenthash.Sum([]byte("harness")), Deadline: input.Deadline}
 
-	input, err := SealWorkflowMergerInput(input, now)
+	input, err := workflowmerge.SealWorkflowMergerInput(input, now)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -195,7 +196,7 @@ func TestNativeMergerUsage(t *testing.T) {
 			result := nativeMergerResolved(input)
 			result.Usage = test.usage
 
-			_, err := ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowMergerFence(input), now)
+			_, err := workflowmerge.ParseWorkflowMergerResult(nativeMergerJSON(t, result), input, workflowmerge.WorkflowMergerFence(input), now)
 			if (err == nil) != test.valid {
 				t.Fatal("usage escaped the immutable call allowance", err)
 			}
