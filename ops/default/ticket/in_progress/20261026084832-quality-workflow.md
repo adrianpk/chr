@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-12
 source: review
 reported_at: 2026-10-26T08:48:32Z
-commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398, 3fb0f46aff5421452d6b602fe91e4e483e93dfbc]
+commits: [6dd94097895b, 5002e793644e, f4be8551581dbec43746e5b676b714911af24e2c, a96c05cee2000654f23e2ce0b0347b1155ec17ca, bedb07a4cca4d39c5f7099d594a83c6650002398, 3fb0f46aff5421452d6b602fe91e4e483e93dfbc, 20ca6c3e508b7c0964baaef4f345c87199e3d81b]
 started_at: 2026-10-27T23:03:10Z
 branch: refactor/slice-12-quality-workflow
 ready_at: 2026-10-26T08:57:09Z
@@ -61,6 +61,7 @@ All commands above are planned. None ran as implementation validation during thi
 
 Slice 11 PR #448 is verified integrated at `d0d65c114cf8ddffcd0492f7fc0b746a832adc0d`.
 T12.1 and T12.2 now have the complete frozen map and compiling workflow owner.
+Relocation implementation: `20ca6c3e508b7c0964baaef4f345c87199e3d81b`.
 All 908 methods move with `workflow.Store`; all 79 original direct dependencies
 and 100 authority/recovery entries resolve to actual current declarations.
 

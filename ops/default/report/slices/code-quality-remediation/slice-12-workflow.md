@@ -27,7 +27,8 @@ defaults and guarded harness-selection recovery use workspace/config.
 
 ## Implementation Notes
 
-T12.1 and the compiling T12.2 relocation are implemented. The
+T12.1 and the compiling T12.2 relocation are implemented. The relocation commit
+is `20ca6c3e508b7c0964baaef4f345c87199e3d81b`. The
 [authority map](../../../plan/code-quality-remediation-slice-12-boundaries.md)
 retains the frozen predecessor identities/hashes and records actual current
 owners. All 79 direct root dependencies and 100 authority/recovery entries resolve;
