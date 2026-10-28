@@ -140,11 +140,11 @@ func validWorkflowPublicationCapability(capability string) bool {
 
 func (advertisement workflowAdvertisement) check(request GitPublication) error {
 	if !advertisement.capabilities["atomic"] || !advertisement.capabilities["report-status"] {
-		return workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.ErrAtomicGuard
 	}
 
 	if len(request.Git.ResultCommit) == 64 && !advertisement.capabilities["object-format=sha256"] {
-		return workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.ErrAtomicGuard
 	}
 
 	source, target := advertisement.refs[request.SourceRef], advertisement.refs[request.TargetRef]

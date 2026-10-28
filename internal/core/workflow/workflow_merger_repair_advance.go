@@ -92,8 +92,8 @@ func (reader workflowIntegrationReader) finishMergerRepair(ctx context.Context, 
 		return err
 	}
 
-	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
-	if err != nil || workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
+	proof.HistoryHash, err = workflowintegrate.HistoryHash(proof)
+	if err != nil || workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
 		return errorsOrConflict(err)
 	}
 

@@ -12,7 +12,7 @@ import (
 
 func observeWorkflowPublicationCapability(ctx context.Context, provider PublicationGuardProvider, source workflowstate.ReviewInput) (workflowstate.PublicationCapability, error) {
 	if provider == nil {
-		return workflowstate.PublicationCapability{}, workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.PublicationCapability{}, workflowstate.ErrAtomicGuard
 	}
 
 	head, err := provider.ReadWorkflowBranch(ctx, source.PullRequest.Repository, source.PullRequest.HeadBranch)
@@ -29,7 +29,7 @@ func observeWorkflowPublicationCapability(ctx context.Context, provider Publicat
 		return capability, err
 	}
 
-	return capability, workflowintegrate.ValidateWorkflowPublicationCapability(source, capability)
+	return capability, workflowintegrate.CheckCapability(source, capability)
 }
 
 func (s *Store) checkWorkflowPublicationGuard(ctx context.Context, run workflowInvocationFile, provider PublicationGuardProvider) (workflowstate.PublicationGuard, error) {
@@ -108,7 +108,7 @@ func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate workf
 		return err
 	}
 
-	observed.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(observed)
+	observed.HistoryHash, err = workflowintegrate.HistoryHash(observed)
 	if err != nil || observed.BaseCommit != proof.BaseCommit || observed.HistoryHash != proof.HistoryHash || observed.VerifiedTree != proof.PreparedTree {
 		return workflowstate.ErrConflict
 	}

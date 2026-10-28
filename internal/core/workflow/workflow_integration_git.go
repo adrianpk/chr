@@ -39,7 +39,7 @@ func (git OSWorkflowIntegrationGit) VerifyWorkflowIntegration(ctx context.Contex
 // VerifyPreparedWorkflowIntegration preserves the retained proof schema while
 // checking original attribution and every prepared object on the remote target.
 func (git OSWorkflowIntegrationGit) VerifyPreparedWorkflowIntegration(ctx context.Context, query workflowstate.IntegrationQuery, expected workflowstate.IntegrationProof) (workflowstate.IntegrationProof, error) {
-	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, expected, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckProof(query, expected, workflowIntegrationRepairs{}); err != nil {
 		return workflowstate.IntegrationProof{}, err
 	}
 
@@ -151,7 +151,7 @@ func (reader workflowIntegrationReader) verifyRetained(ctx context.Context, quer
 
 	var err error
 
-	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.HistoryHash(proof)
 	if err != nil {
 		return proof, err
 	}
@@ -160,7 +160,7 @@ func (reader workflowIntegrationReader) verifyRetained(ctx context.Context, quer
 		return proof, workflowstate.ErrConflict
 	}
 
-	return proof, workflowintegrate.ValidateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{})
+	return proof, workflowintegrate.CheckProof(query, proof, workflowIntegrationRepairs{})
 }
 
 func (reader workflowIntegrationReader) tree(ctx context.Context, commit string) (string, error) {

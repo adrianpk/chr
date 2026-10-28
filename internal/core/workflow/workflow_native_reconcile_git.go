@@ -12,7 +12,7 @@ import (
 // dispatching. Actual refs and method proof classify Git, never forge delivery.
 func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard IntegrationBudgetGuard, inspector GitPublicationInspector, git PreparedIntegrationGit) (workflowstate.Submission, error) {
 	if inspector == nil || git == nil {
-		return workflowstate.Submission{}, workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.Submission{}, workflowstate.ErrAtomicGuard
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
@@ -80,7 +80,7 @@ func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard Int
 
 func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Submission, request GitPublication, inspector GitPublicationInspector, git PreparedIntegrationGit) (NativeGitObservation, error) {
 	advertisement, err := inspector.InspectWorkflowGitPublication(ctx, request)
-	if err != nil && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowObservationRequired) && !errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
+	if err != nil && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowObservationRequired) && !errors.Is(err, workflowstate.ErrAtomicGuard) {
 		return NativeGitObservation{}, err
 	}
 

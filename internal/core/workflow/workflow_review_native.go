@@ -16,7 +16,7 @@ func (s *Store) checkWorkflowSourceReviewProfile() error {
 	}
 
 	if config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef {
-		return workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.ErrAtomicGuard
 	}
 
 	return nil
@@ -38,7 +38,7 @@ func (s *Store) bindWorkflowNativeReviewCapability(ctx context.Context, run work
 
 	observer, ok := provider.(NativePreparationProvider)
 	if !ok || candidate.Native == nil || candidate.Input.Native == nil {
-		return workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.ErrAtomicGuard
 	}
 
 	capability, err := observeWorkflowPreparedNativeCapability(ctx, observer, candidate.Input)

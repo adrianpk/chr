@@ -116,7 +116,7 @@ func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Co
 
 func inspectWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, git GitPublicationInspector, capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {
 	advertisement, err := git.InspectWorkflowGitPublication(ctx, request.Publication)
-	if errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
+	if errors.Is(err, workflowstate.ErrAtomicGuard) {
 		capability.Unsupported = append(capability.Unsupported, workflowstate.NativeUnsupported{Condition: "atomic_transport_unavailable", Decision: "Select a server supporting atomic dual-ref transactions."})
 
 		return sealWorkflowNativeCapability(capability)

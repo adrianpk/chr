@@ -77,7 +77,7 @@ func TestWorkflowPreparationUnsupported(t *testing.T) {
 	f.provider.guarded = false
 
 	before := workflowTestRead(t, f.store, f.run.ID)
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
+	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrAtomicGuard) {
 		t.Fatalf("guard: %v", err)
 	}
 
@@ -105,7 +105,7 @@ func TestWorkflowPreparationProviderPaths(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				if err := workflowintegrate.ValidateWorkflowPublicationCapability(workflowstate.ReviewInput{PullRequest: pr, Policy: workflowstate.ReviewPolicy{Method: method}}, capability); !errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
+				if err := workflowintegrate.CheckCapability(workflowstate.ReviewInput{PullRequest: pr, Policy: workflowstate.ReviewPolicy{Method: method}}, capability); !errors.Is(err, workflowstate.ErrAtomicGuard) {
 					t.Fatalf("provider falsely claimed guard: %v", err)
 				}
 

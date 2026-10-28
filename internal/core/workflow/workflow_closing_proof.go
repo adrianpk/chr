@@ -120,7 +120,7 @@ func (s *Store) observeWorkflowClosingLegacySlice(ctx context.Context, input wor
 		return proof, err
 	}
 
-	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckProof(query, proof, workflowIntegrationRepairs{}); err != nil {
 		return proof, err
 	}
 

@@ -51,7 +51,7 @@ func newWorkflowGitFixture(t *testing.T, method string) workflowGitFixture {
 
 	var err error
 
-	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.HistoryHash(proof)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func TestWorkflowGitAdvertisement(t *testing.T) {
 				target = source
 				workflowIntegrationCommand(t, fixture.remote, "update-ref", fixture.request.TargetRef, target)
 			case "atomic":
-				expected = workflowstate.ErrWorkflowAtomicGuard
+				expected = workflowstate.ErrAtomicGuard
 
 				workflowIntegrationCommand(t, fixture.remote, "config", "receive.advertiseAtomic", "false")
 			}

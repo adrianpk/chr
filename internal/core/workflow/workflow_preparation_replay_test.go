@@ -160,7 +160,7 @@ func rejectNativeReplay(t *testing.T, f workflowGitFixture, proof workflowstate.
 
 	var err error
 
-	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.HistoryHash(proof)
 	if err != nil {
 		t.Fatal(err)
 	}

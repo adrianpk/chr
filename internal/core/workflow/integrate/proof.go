@@ -8,8 +8,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ValidateWorkflowIntegrationProof checks the original immutable candidate observations and retained proof.
-func ValidateWorkflowIntegrationProof(query workflowstate.IntegrationQuery, proof workflowstate.IntegrationProof, repairs RepairProof) error {
+// CheckProof checks the exact query, ordered method history and complete retained provenance.
+func CheckProof(query workflowstate.IntegrationQuery, proof workflowstate.IntegrationProof, repairs RepairProof) error {
 	query.SourceDirectory = ""
 	if proof.IntegrationQuery != query || !slices.Contains([]string{"merge", "rebase", "squash"}, proof.Method) || proof.PreparedTree != proof.VerifiedTree || len(proof.History) == 0 || len(proof.History) > workflowstate.RecordLimit {
 		return workflowstate.ErrConflict
@@ -21,22 +21,22 @@ func ValidateWorkflowIntegrationProof(query workflowstate.IntegrationQuery, proo
 		}
 	}
 
-	hash, err := WorkflowIntegrationHistoryHash(proof)
+	hash, err := HistoryHash(proof)
 	if err != nil || hash != proof.HistoryHash {
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowIntegrationHistory(proof, repairs)
+	return checkHistory(proof, repairs)
 }
 
-func validateWorkflowIntegrationHistory(proof workflowstate.IntegrationProof, repairs RepairProof) error {
+func checkHistory(proof workflowstate.IntegrationProof, repairs RepairProof) error {
 	if proof.Method != "rebase" && len(proof.History) != 1 {
 		return workflowstate.ErrConflict
 	}
 
 	previous := proof.BaseCommit
 	for _, entry := range proof.History {
-		if entry.Parent != previous || !validWorkflowIntegrationCommit(entry) {
+		if entry.Parent != previous || !validHistoryCommit(entry) {
 			return workflowstate.ErrConflict
 		}
 
@@ -44,14 +44,14 @@ func validateWorkflowIntegrationHistory(proof workflowstate.IntegrationProof, re
 	}
 
 	last := proof.History[len(proof.History)-1]
-	if last.Source != proof.SourceCommit || !workflowIntegrationHistoryTipMatches(proof, last) {
+	if last.Source != proof.SourceCommit || !historyTipMatches(proof, last) {
 		return workflowstate.ErrConflict
 	}
 
-	return ValidateWorkflowIntegrationProvenance(proof, repairs)
+	return CheckProvenance(proof, repairs)
 }
 
-func validWorkflowIntegrationCommit(entry workflowstate.IntegrationCommit) bool {
+func validHistoryCommit(entry workflowstate.IntegrationCommit) bool {
 	for _, id := range []string{entry.Source, entry.Commit, entry.Tree, entry.Parent} {
 		if !workflowstate.ValidCommitID(id) {
 			return false
@@ -61,8 +61,8 @@ func validWorkflowIntegrationCommit(entry workflowstate.IntegrationCommit) bool 
 	return true
 }
 
-// WorkflowIntegrationHistoryHash checks the original immutable candidate observations and retained proof.
-func WorkflowIntegrationHistoryHash(proof workflowstate.IntegrationProof) (string, error) {
+// HistoryHash hashes the original ordered history and optional provenance encoding.
+func HistoryHash(proof workflowstate.IntegrationProof) (string, error) {
 	data, err := json.Marshal(struct {
 		Method, Source, Base, Tree string
 		History                    []workflowstate.IntegrationCommit
@@ -72,8 +72,8 @@ func WorkflowIntegrationHistoryHash(proof workflowstate.IntegrationProof) (strin
 	return contenthash.Sum(data), err
 }
 
-// WorkflowIntegrationParentsMatch checks the original immutable candidate observations and retained proof.
-func WorkflowIntegrationParentsMatch(proof workflowstate.IntegrationProof, parents []string) bool {
+// ParentsMatch checks the configured merge or squash parent shape.
+func ParentsMatch(proof workflowstate.IntegrationProof, parents []string) bool {
 	switch proof.Method {
 	case "merge":
 		return len(parents) == 2 && parents[1] == proof.SourceCommit
@@ -84,7 +84,7 @@ func WorkflowIntegrationParentsMatch(proof workflowstate.IntegrationProof, paren
 	}
 }
 
-func workflowIntegrationHistoryTipMatches(proof workflowstate.IntegrationProof, last workflowstate.IntegrationCommit) bool {
+func historyTipMatches(proof workflowstate.IntegrationProof, last workflowstate.IntegrationCommit) bool {
 	if proof.Method == "rebase" && proof.Provenance != nil {
 		p := proof.Provenance
 		if !ValidProvenanceHeader(proof, *p) || len(p.Source) != len(proof.History) {
@@ -99,8 +99,8 @@ func workflowIntegrationHistoryTipMatches(proof workflowstate.IntegrationProof, 
 	return last.Commit == proof.ResultCommit && last.Tree == proof.PreparedTree
 }
 
-// ValidateWorkflowIntegrationProvenance checks the original immutable candidate observations and retained proof.
-func ValidateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof, repairs RepairProof) error {
+// CheckProvenance checks bounded attribution, preparation metadata and the bound repair evidence.
+func CheckProvenance(proof workflowstate.IntegrationProof, repairs RepairProof) error {
 	p := proof.Provenance
 	if p == nil {
 		return nil

@@ -19,7 +19,7 @@ func (reader workflowIntegrationReader) verifyMethod(ctx context.Context, proof 
 		return err
 	}
 
-	if !workflowintegrate.WorkflowIntegrationParentsMatch(*proof, parents) {
+	if !workflowintegrate.ParentsMatch(*proof, parents) {
 		return fmt.Errorf("canonical result does not match the configured integration method")
 	}
 

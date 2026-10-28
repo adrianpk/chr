@@ -33,7 +33,7 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}); err != nil {
 		return err
 	}
 
@@ -91,7 +91,7 @@ func (reader workflowIntegrationReader) verifyPublicationHistory(ctx context.Con
 		return err
 	}
 
-	hash, err := workflowintegrate.WorkflowIntegrationHistoryHash(actual)
+	hash, err := workflowintegrate.HistoryHash(actual)
 	if err != nil || hash != proof.HistoryHash || actual.BaseCommit != proof.BaseCommit || actual.VerifiedTree != proof.VerifiedTree {
 		return workflowstate.ErrConflict
 	}

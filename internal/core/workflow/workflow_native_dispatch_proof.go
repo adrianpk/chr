@@ -89,7 +89,7 @@ func validateWorkflowNativeGitObservation(submission workflowstate.Submission, o
 		return workflowstate.ErrConflict
 	}
 
-	return workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, *proof, workflowIntegrationRepairs{})
+	return workflowintegrate.CheckProof(proof.IntegrationQuery, *proof, workflowIntegrationRepairs{})
 }
 
 func validWorkflowNativeGitObservationHeader(submission workflowstate.Submission, observation NativeGitObservation) bool {

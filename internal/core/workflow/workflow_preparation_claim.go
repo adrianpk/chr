@@ -69,7 +69,7 @@ func (s *Store) workflowPreparationPreflight(ctx context.Context, run *workflowI
 	}
 
 	result.Capability, err = observeWorkflowPublicationCapability(ctx, provider, result.Source)
-	if errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
+	if errors.Is(err, workflowstate.ErrAtomicGuard) {
 		return result, s.blockWorkflowPublication(run, err)
 	}
 
@@ -201,7 +201,7 @@ func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflow
 		return result, err
 	}
 
-	if err := workflowintegrate.CheckWorkflowPreparedProof(query, repairGit.Proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckPrepared(query, repairGit.Proof, workflowIntegrationRepairs{}); err != nil {
 		return result, err
 	}
 

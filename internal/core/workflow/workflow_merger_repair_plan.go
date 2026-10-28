@@ -14,7 +14,7 @@ import (
 // an explicit integration fix or ownership decision. It does not accept edits.
 func PlanWorkflowMergerRepair(ctx context.Context, directory string, input workflowstate.MergerInput, proof workflowstate.IntegrationProof, fix *workflowstate.ReviewFinding) (workflowstate.MergerRepairPlan, error) {
 	plan := workflowstate.MergerRepairPlan{InputHash: input.InputHash}
-	if workflowmerge.CheckInput(input, time.Now().UTC()) != nil || workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil || !workflowmerge.RepairMatches(input, proof) {
+	if workflowmerge.CheckInput(input, time.Now().UTC()) != nil || workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil || !workflowmerge.RepairMatches(input, proof) {
 		return plan, workflowstate.ErrConflict
 	}
 

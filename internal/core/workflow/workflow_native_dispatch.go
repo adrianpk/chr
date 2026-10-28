@@ -12,7 +12,7 @@ import (
 // exact atomic Git publisher once. A transport result is not a delivery receipt.
 func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider, publisher GitPublisher) (workflowstate.Submission, GitPublicationResult, error) {
 	if provider == nil || publisher == nil {
-		return workflowstate.Submission{}, GitPublicationResult{}, workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.Submission{}, GitPublicationResult{}, workflowstate.ErrAtomicGuard
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)

@@ -194,7 +194,7 @@ func workflowNativeApplicationAttributed(binding NativePublicationBinding) bool 
 	expected := [6]string{binding.Git.Repository, binding.Git.Method, binding.Git.SourceCommit, binding.Git.BaseCommit, binding.Git.ResultCommit, binding.Git.HistoryHash}
 	actual := [6]string{proof.Repository, proof.Method, proof.SourceCommit, proof.BaseCommit, proof.ResultCommit, proof.HistoryHash}
 
-	return expected == actual && proof.PreparedTree == binding.Git.PreparedTree && proof.VerifiedTree == binding.Git.VerifiedTree && workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil
+	return expected == actual && proof.PreparedTree == binding.Git.PreparedTree && proof.VerifiedTree == binding.Git.VerifiedTree && workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil
 }
 
 func workflowNativeApplicationHeader(binding NativePublicationBinding, observation *NativeGitObservation) bool {
@@ -255,7 +255,7 @@ func verifyWorkflowNativeTarget(ctx context.Context, binding NativePublicationBi
 		return proof, err
 	}
 
-	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckProof(query, proof, workflowIntegrationRepairs{}); err != nil {
 		return proof, err
 	}
 

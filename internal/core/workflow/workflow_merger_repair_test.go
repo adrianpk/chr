@@ -149,7 +149,7 @@ func checkNativeMergerRepairedProof(t *testing.T, state MergerRepairState) {
 	t.Helper()
 
 	proof := *state.Result
-	if workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil || len(proof.Provenance.Repairs) != 1 {
+	if workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil || len(proof.Provenance.Repairs) != 1 {
 		t.Fatal("repair provenance was not bound to final method proof")
 	}
 

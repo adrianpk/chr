@@ -211,7 +211,7 @@ func workflowSubmissionProjection(journal workflowSubmissionJournal) SubmissionB
 func (s *Store) checkWorkflowLegacyPublicationGuard(ctx context.Context, run *workflowInvocationFile, provider PublicationGuardProvider) (workflowstate.PublicationGuard, error) {
 	guard, err := s.checkWorkflowPublicationGuard(ctx, *run, provider)
 	if err != nil {
-		if errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
+		if errors.Is(err, workflowstate.ErrAtomicGuard) {
 			err = s.blockWorkflowPublication(run, err)
 		}
 

@@ -63,7 +63,7 @@ func TestNativePreparationSigning(t *testing.T) {
 			git := NewWorkflowPreparationGit(q.Repository, f.remote).WithSSHCommitSigning(signing)
 
 			proof, err := git.PrepareWorkflowIntegration(t.Context(), q)
-			if err != nil || workflowintegrate.CheckWorkflowPreparedProof(q, proof, workflowIntegrationRepairs{}) != nil {
+			if err != nil || workflowintegrate.CheckPrepared(q, proof, workflowIntegrationRepairs{}) != nil {
 				t.Fatal("certified signed preparation failed", err)
 			}
 
@@ -156,7 +156,7 @@ func TestNativeSigningBlocked(t *testing.T) {
 				git = git.WithSSHCommitSigning(signing)
 			case "unsigned":
 				proof, _ := nativeCombinedPreparation(t, f)
-				if workflowintegrate.CheckWorkflowPreparedProof(q, proof, workflowIntegrationRepairs{}) == nil {
+				if workflowintegrate.CheckPrepared(q, proof, workflowIntegrationRepairs{}) == nil {
 					t.Fatal("unsigned proof satisfied required signature policy")
 				}
 

@@ -42,5 +42,5 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerCombinedRepair(ctx contex
 }
 
 func validWorkflowCombinedRepairQuery(git OSWorkflowPreparationGit, query workflowstate.PreparationQuery, proof workflowstate.IntegrationProof) bool {
-	return slices.Contains([]string{"merge", "squash"}, query.Method) && git.validateQuery(query) == nil && workflowintegrate.CheckWorkflowPreparedProof(query, proof, workflowIntegrationRepairs{}) == nil && proof.Provenance != nil && proof.Provenance.Preparation != nil
+	return slices.Contains([]string{"merge", "squash"}, query.Method) && git.validateQuery(query) == nil && workflowintegrate.CheckPrepared(query, proof, workflowIntegrationRepairs{}) == nil && proof.Provenance != nil && proof.Provenance.Preparation != nil
 }

@@ -196,7 +196,7 @@ func (s *Store) checkWorkflowNativeJournalObservations(submission workflowstate.
 			return workflowstate.ErrConflict
 		}
 
-		if err := workflowintegrate.ValidateWorkflowIntegrationProof(observation.Git.IntegrationQuery, *observation.Git, workflowIntegrationRepairs{}); err != nil {
+		if err := workflowintegrate.CheckProof(observation.Git.IntegrationQuery, *observation.Git, workflowIntegrationRepairs{}); err != nil {
 			return err
 		}
 	}

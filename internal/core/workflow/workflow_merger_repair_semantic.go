@@ -20,7 +20,7 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx contex
 	expected := query.IntegrationQuery
 
 	expected.SourceDirectory, expected.ResultCommit = "", proof.ResultCommit
-	if workflowintegrate.ValidateWorkflowIntegrationProof(expected, proof, workflowIntegrationRepairs{}) != nil || proof.BaseCommit != query.BaseCommit {
+	if workflowintegrate.CheckProof(expected, proof, workflowIntegrationRepairs{}) != nil || proof.BaseCommit != query.BaseCommit {
 		return MergerRepairState{}, workflowstate.ErrConflict
 	}
 

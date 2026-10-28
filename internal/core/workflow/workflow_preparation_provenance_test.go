@@ -117,7 +117,7 @@ func TestNativeCombinedGuard(t *testing.T) {
 
 			var err error
 
-			proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
+			proof.HistoryHash, err = workflowintegrate.HistoryHash(proof)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -147,7 +147,7 @@ func TestNativeCombinedLegacy(t *testing.T) {
 		Method, Source, Base, Tree string
 		History                    []workflowstate.IntegrationCommit
 	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History})
-	if err != nil || contenthash.Sum(data) != proof.HistoryHash || workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
+	if err != nil || contenthash.Sum(data) != proof.HistoryHash || workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
 		t.Fatal("historical proof hash or read contract changed")
 	}
 }

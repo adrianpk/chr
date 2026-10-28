@@ -38,7 +38,7 @@ func (adapter *NativeReviewAdapter) WorkflowIntegrationCapability(ctx context.Co
 	}
 
 	if len(observation.unsupported) != 0 || !workflowNativeObservationContractMatches(observation.contract, policy.ObservationContract) {
-		return workflowstate.PublicationCapability{}, fmt.Errorf("%w: current repository policy does not support the publisher profile", workflowstate.ErrWorkflowAtomicGuard)
+		return workflowstate.PublicationCapability{}, fmt.Errorf("%w: current repository policy does not support the publisher profile", workflowstate.ErrAtomicGuard)
 	}
 
 	identity, err := adapter.readWorkflowNativeIdentity(ctx, pr)
@@ -103,7 +103,7 @@ func (adapter *NativeReviewAdapter) PublishWorkflowGit(ctx context.Context, requ
 
 	config, err := workspaceconfig.Load(owner.layout.ProjectDir())
 	if err != nil || config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
-		return GitPublicationResult{}, workflowstate.ErrWorkflowAtomicGuard
+		return GitPublicationResult{}, workflowstate.ErrAtomicGuard
 	}
 
 	return NewWorkflowGitPublisher(profile.Repository, profile.Transport).PublishWorkflowGit(ctx, request)

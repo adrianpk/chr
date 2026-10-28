@@ -71,7 +71,7 @@ func TestNativeMergerRepairProof(t *testing.T) {
 	proof := *state.Result
 	proof.Provenance.Repairs = nil
 
-	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.HistoryHash(proof)
 	if err != nil {
 		t.Fatal(err)
 	}

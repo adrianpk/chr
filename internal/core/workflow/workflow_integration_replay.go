@@ -60,7 +60,7 @@ func (reader workflowIntegrationReader) rebaseProvenance(ctx context.Context, pr
 		return nil, err
 	}
 
-	return p, workflowintegrate.ValidateWorkflowIntegrationProvenance(workflowstate.IntegrationProof{IntegrationQuery: proof.IntegrationQuery, BaseCommit: proof.BaseCommit, PreparedTree: proof.PreparedTree, History: proof.History, Provenance: p}, workflowIntegrationRepairs{})
+	return p, workflowintegrate.CheckProvenance(workflowstate.IntegrationProof{IntegrationQuery: proof.IntegrationQuery, BaseCommit: proof.BaseCommit, PreparedTree: proof.PreparedTree, History: proof.History, Provenance: p}, workflowIntegrationRepairs{})
 }
 
 func (reader workflowIntegrationReader) replayEmptyDecision(ctx context.Context, source, prepared workflowstate.IntegrationAttribution) (string, error) {

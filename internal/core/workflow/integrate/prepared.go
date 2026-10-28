@@ -4,8 +4,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// CheckWorkflowPreparedProof checks the original immutable candidate observations and retained proof.
-func CheckWorkflowPreparedProof(query workflowstate.PreparationQuery, proof workflowstate.IntegrationProof, repairs RepairProof) error {
+// CheckPrepared checks the observed base, signing requirements and complete prepared-result proof.
+func CheckPrepared(query workflowstate.PreparationQuery, proof workflowstate.IntegrationProof, repairs RepairProof) error {
 	expected := query.IntegrationQuery
 
 	expected.ResultCommit, expected.SourceDirectory = proof.ResultCommit, ""
@@ -17,5 +17,5 @@ func CheckWorkflowPreparedProof(query workflowstate.PreparationQuery, proof work
 		return err
 	}
 
-	return ValidateWorkflowIntegrationProof(expected, proof, repairs)
+	return CheckProof(expected, proof, repairs)
 }

@@ -20,7 +20,7 @@ func (adapter *NativeReviewAdapter) ReadWorkflowNativePolicy(ctx context.Context
 	}
 
 	if !workflowNativeOwnedPR(run, pr) || !slices.Contains(profile.CertifiedMethods, method) {
-		return NativePolicy{}, fmt.Errorf("%w: source ownership or method is outside the publisher profile", workflowstate.ErrWorkflowAtomicGuard)
+		return NativePolicy{}, fmt.Errorf("%w: source ownership or method is outside the publisher profile", workflowstate.ErrAtomicGuard)
 	}
 
 	policy, err := owner.workflowReviewPolicy(run)
@@ -55,7 +55,7 @@ func (adapter *NativeReviewAdapter) nativePublisher(ctx context.Context) (workfl
 
 	config, err := workspaceconfig.Load(invocationLocation.Owner.layout.ProjectDir())
 	if err != nil || config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
-		return invocationLocation.Run, invocationLocation.Owner, NativePublisherProfile{}, workflowstate.ErrWorkflowAtomicGuard
+		return invocationLocation.Run, invocationLocation.Owner, NativePublisherProfile{}, workflowstate.ErrAtomicGuard
 	}
 
 	if err := invocationLocation.Owner.checkWorkflowLaneRegistration(ctx, *invocationLocation.Run.Lane); err != nil {

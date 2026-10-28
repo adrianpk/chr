@@ -23,7 +23,7 @@ func (s *Store) checkWorkflowNativePreparationAdmission(run workflowInvocationFi
 	}
 
 	if _, ok := provider.(NativePreparationProvider); !ok || run.Integration == nil {
-		return workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.ErrAtomicGuard
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -46,7 +46,7 @@ func workflowNativePreparationProfile(project string, capability workflowstate.P
 
 	native := capability.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef
 	if native != (config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef) {
-		return native, workflowstate.ErrWorkflowAtomicGuard
+		return native, workflowstate.ErrAtomicGuard
 	}
 
 	return native, nil
@@ -79,7 +79,7 @@ func (s *Store) bindWorkflowNativePreparation(ctx context.Context, run workflowI
 
 	observer, ok := provider.(NativePreparationProvider)
 	if !ok || run.Integration == nil {
-		return workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.ErrAtomicGuard
 	}
 
 	capability, err := observeWorkflowPreparedNativeCapability(ctx, observer, *input)
@@ -115,7 +115,7 @@ func validateWorkflowPreparedNativeCapability(input workflowstate.PreparationInp
 		return workflowstate.ErrConflict
 	}
 
-	return workflowintegrate.ValidateWorkflowPublicationCapability(input.Source, capability.PublicationCapability)
+	return workflowintegrate.CheckCapability(input.Source, capability.PublicationCapability)
 }
 
 func observeWorkflowPreparedCapability(ctx context.Context, provider PublicationGuardProvider, input workflowstate.PreparationInput) (workflowstate.PublicationCapability, error) {
@@ -125,7 +125,7 @@ func observeWorkflowPreparedCapability(ctx context.Context, provider Publication
 
 	observer, ok := provider.(NativePreparationProvider)
 	if !ok {
-		return workflowstate.PublicationCapability{}, workflowstate.ErrWorkflowAtomicGuard
+		return workflowstate.PublicationCapability{}, workflowstate.ErrAtomicGuard
 	}
 
 	capability, err := observeWorkflowPreparedNativeCapability(ctx, observer, input)

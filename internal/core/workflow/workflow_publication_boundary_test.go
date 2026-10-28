@@ -88,7 +88,7 @@ func TestWorkflowPublicationUnsupported(t *testing.T) {
 	before := workflowTestRead(t, f.store, f.run.ID)
 
 	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, workflowPublicationPorts(f, p))
-	if !errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) || progress.Invocation.Status != workflowstate.InvocationBlocked || progress.Invocation.Blocker == nil || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 0 {
+	if !errors.Is(err, workflowstate.ErrAtomicGuard) || progress.Invocation.Status != workflowstate.InvocationBlocked || progress.Invocation.Blocker == nil || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 0 {
 		t.Fatal("unsupported provider bypassed the guard contract", err)
 	}
 }

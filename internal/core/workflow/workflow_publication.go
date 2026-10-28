@@ -92,7 +92,7 @@ func (s *Store) blockWorkflowMissingPublisher(ctx context.Context, id string) er
 			return ErrWorkflowStop
 		}
 
-		return invocationLocation.Owner.blockWorkflowPublication(&invocationLocation.Run, workflowstate.ErrWorkflowAtomicGuard)
+		return invocationLocation.Owner.blockWorkflowPublication(&invocationLocation.Run, workflowstate.ErrAtomicGuard)
 	})
 }
 

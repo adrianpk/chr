@@ -103,7 +103,7 @@ func (s *Store) checkWorkflowNativeRecordEvidence(b workflowstate.NativeRecordBi
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowintegrate.ValidateWorkflowIntegrationProof(history.Git.IntegrationQuery, history.Git, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckProof(history.Git.IntegrationQuery, history.Git, workflowIntegrationRepairs{}); err != nil {
 		return err
 	}
 
@@ -307,7 +307,7 @@ func validateWorkflowNativeReceiptObservation(receipt Receipt, observation Nativ
 		return workflowstate.ErrConflict
 	}
 
-	return workflowintegrate.ValidateWorkflowIntegrationProof(git.IntegrationQuery, git, workflowIntegrationRepairs{})
+	return workflowintegrate.CheckProof(git.IntegrationQuery, git, workflowIntegrationRepairs{})
 }
 
 func workflowNativeJSONEqual(a, b any) bool {

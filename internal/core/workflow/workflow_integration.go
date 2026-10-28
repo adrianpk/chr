@@ -92,7 +92,7 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 		return SliceDeliveryProof{}, err
 	}
 
-	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, gitProof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckProof(query, gitProof, workflowIntegrationRepairs{}); err != nil {
 		return SliceDeliveryProof{}, err
 	}
 

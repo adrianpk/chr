@@ -143,12 +143,12 @@ func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, 
 		return proof, err
 	}
 
-	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.HistoryHash(proof)
 	if err != nil || proof.BaseCommit != query.BaseCommit {
 		return proof, workflowstate.ErrConflict
 	}
 
-	return proof, workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
+	return proof, workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
 }
 
 func (reader workflowIntegrationReader) prepareCombinedCommit(ctx context.Context, proof workflowstate.IntegrationProof) (string, error) {

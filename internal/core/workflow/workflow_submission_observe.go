@@ -92,7 +92,7 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission workflowst
 		return submission, err
 	}
 
-	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckProof(query, proof, workflowIntegrationRepairs{}); err != nil {
 		return submission, err
 	}
 

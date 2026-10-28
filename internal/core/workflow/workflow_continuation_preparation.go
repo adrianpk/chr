@@ -26,7 +26,7 @@ func workflowInterruptedPreparation(run Invocation) bool {
 func (s *Store) retryWorkflowContinuationPreparation(ctx context.Context, id string, ports ContinuationPorts) (workflowPreparationRetry, error) {
 	provider, ok := ports.Publication.Provider.(PublicationGuardProvider)
 	if !ok || ports.Publication.Preparer == nil {
-		return workflowPreparationRetry{Steps: 0, Reason: "blocked"}, workflowstate.ErrWorkflowAtomicGuard
+		return workflowPreparationRetry{Steps: 0, Reason: "blocked"}, workflowstate.ErrAtomicGuard
 	}
 
 	if _, err := s.PrepareWorkflowSliceIntegration(ctx, id, provider, ports.Publication.Preparer); err != nil {
