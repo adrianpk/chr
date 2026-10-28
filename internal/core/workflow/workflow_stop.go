@@ -73,26 +73,6 @@ func (s *Store) ResumeWorkflow(ctx context.Context, id string, ports ...ResumePo
 	return result, err
 }
 
-func (s *Store) watchWorkflowStop(watched context.Context, watch workflowStopWatch) {
-	go func() {
-		ticker := time.NewTicker(50 * time.Millisecond)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-watched.Done():
-				return
-			case <-ticker.C:
-				if err := s.checkWorkflowClaimStop(watched, watch.Claim); err != nil {
-					watch.Cancel()
-
-					return
-				}
-			}
-		}
-	}()
-}
-
 func workflowRetainedStopIntent(run workflowInvocationFile, intent string) string {
 	if run.StopIntent == "cancel" {
 		return "cancel"

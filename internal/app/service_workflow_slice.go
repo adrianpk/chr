@@ -14,7 +14,7 @@ func (s service) ExecuteWorkflowSlice(ctx context.Context, id string, worker []s
 		return workflowcore.SliceCandidate{}, err
 	}
 
-	return store.ExecuteWorkflowSlice(ctx, id, worker)
+	return workflowcore.ExecuteSlice(ctx, store, id, worker)
 }
 
 // ValidateWorkflowSlice retries host acceptance while preserving task evidence.
@@ -24,7 +24,7 @@ func (s service) ValidateWorkflowSlice(ctx context.Context, id string) (workflow
 		return workflowcore.SliceCandidate{}, err
 	}
 
-	return store.ValidateWorkflowSlice(ctx, id)
+	return workflowcore.ValidateSlice(ctx, store, id)
 }
 
 // ReadWorkflowSliceCandidate checks retained slice or ticket evidence and its lane.

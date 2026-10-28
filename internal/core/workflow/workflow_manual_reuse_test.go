@@ -23,18 +23,18 @@ func TestWorkflowManualReuse(t *testing.T) {
 			next := workflowTestStart(t, store, request)
 
 			claim, task := workflowTestManual(t, store, next.Invocation.ID, workflowTaskCommand(t, "worker"))
-			if _, err := store.ExecuteWorkflowManualTask(t.Context(), claim); err != nil {
+			if _, err := ExecuteManualTask(t.Context(), store, claim); err != nil {
 				t.Fatal(err)
 			}
 
 			candidate := workflowManualTestCandidate(t, store, task)
-			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); err != nil {
+			if _, err := ReconcileTask(t.Context(), store, claim, candidate); err != nil {
 				t.Fatal(err)
 			}
 
 			changeWorkflowManualReuseImage(t, store, task, image)
 
-			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := ReconcileTask(t.Context(), store, claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed retained %s accepted: %v", image, err)
 			}
 

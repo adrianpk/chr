@@ -52,7 +52,7 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 
 	watched, stop := context.WithCancel(ctx)
 
-	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
+	watchWorkflowStop(watched, s, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)

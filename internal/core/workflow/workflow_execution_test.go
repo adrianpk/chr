@@ -45,7 +45,7 @@ func workflowTestExecute(t *testing.T, store *Store, id, mode string) workflowst
 
 	claim := workflowTestClaim(t, store, id)
 
-	result, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, mode))
+	result, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, mode))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +111,7 @@ func TestWorkflowTaskCumulative(t *testing.T) {
 	next := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, next.Invocation.ID)
 
-	second, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker"))
+	second, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -170,7 +170,7 @@ func TestWorkflowTaskFailures(t *testing.T) {
 			run := workflowTestStart(t, store, request)
 			claim := workflowTestClaim(t, store, run.Invocation.ID)
 
-			proof, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, tc.worker))
+			proof, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, tc.worker))
 			if err == nil || proof.Successful {
 				t.Fatal("invalid worker or host gate accepted")
 			}

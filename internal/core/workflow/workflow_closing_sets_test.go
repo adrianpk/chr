@@ -59,7 +59,7 @@ func TestWorkflowClosingSetAdvance(t *testing.T) {
 
 	before := workflowReadTestBytes(t, fixture.store, first.ReceiptRef)
 
-	candidate, err := fixture.store.ExecuteWorkflowSlice(t.Context(), fixture.run.ID, workflowPRWorker())
+	candidate, err := ExecuteSlice(t.Context(), fixture.store, fixture.run.ID, workflowPRWorker())
 	if err != nil {
 		t.Fatal(err)
 	}

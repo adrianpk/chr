@@ -40,7 +40,7 @@ func testWorkflowLooseFailure(t *testing.T, gate string, worker []string) {
 	for attempt := 1; attempt <= 2; attempt++ {
 		claim := workflowTestClaim(t, store, run.ID)
 
-		result, err := store.ExecuteWorkflowTask(t.Context(), claim, worker)
+		result, err := ExecuteTask(t.Context(), store, claim, worker)
 		if err == nil || result.Successful {
 			t.Fatal("failed worker/gate produced success")
 		}

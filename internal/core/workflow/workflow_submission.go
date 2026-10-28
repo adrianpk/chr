@@ -40,7 +40,7 @@ func (s *Store) SubmitWorkflowSliceIntegration(ctx context.Context, id string, p
 
 	watched, stop := context.WithCancel(ctx)
 
-	s.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: id}, Cancel: stop})
+	watchWorkflowStop(watched, s, workflowStopWatch{Claim: &Claim{InvocationID: id}, Cancel: stop})
 	defer stop()
 
 	responses := workflowSubmissionResponses{store: s, invocationID: id, submissionID: submission.ID}

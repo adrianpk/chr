@@ -138,7 +138,7 @@ func checkWorkflowLooseNext(t *testing.T, f workflowIntegrationFixture, advanced
 	t.Helper()
 
 	claim := workflowTestClaim(t, f.store, run.ID)
-	if _, err := f.store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), f.store, claim, workflowPRWorker()); err != nil {
 		t.Fatal("canonical prerequisite delivery was not observed", err)
 	}
 

@@ -96,6 +96,21 @@ same critical sections. The application and continuation callers use these
 operations directly; no Store forwarding methods or promoted store fields are
 introduced.
 
+## Task execution boundary
+
+`ExecuteTask`, `ExecuteTaskWithHarness`, `ExecuteSlice` and `ValidateSlice` are
+coordinator operations. `PrepareManualTask`, `ExecuteManualTask` and
+`ReconcileTask` keep manual handoff, process execution and verified acceptance
+separate. The application service retains its adapter-neutral operation API and
+calls these functions directly.
+
+A private `workflowTaskHost` owns task and aggregate deadlines, ordered gate
+commands and partial execution results. The shared stop watcher owns its ticker,
+goroutine and cancellation; it reads intent through the original guarded Store
+path. Store retains input freezing, credentials, process records, replay checks,
+candidate fences and complete result/claim transactions. A successful manual
+worker exit still requires explicit candidate reconciliation and host validation.
+
 ## Bounded operation results
 
 Capacity observations pair the retained process with liveness; owned worker

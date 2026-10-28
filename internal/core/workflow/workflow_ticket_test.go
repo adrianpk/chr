@@ -60,7 +60,7 @@ func TestWorkflowTicketCandidate(t *testing.T) {
 			}
 
 			claim := workflowTestClaim(t, store, run.ID)
-			if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+			if _, err := ExecuteTask(t.Context(), store, claim, workflowPRWorker()); err != nil {
 				t.Fatal(err)
 			}
 
@@ -130,7 +130,7 @@ func workflowTicketConfiguredFixture(t *testing.T, method, extent string, setup 
 	run := workflowTestStart(t, store, request).Invocation
 
 	claim := workflowTestClaim(t, store, run.ID)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 

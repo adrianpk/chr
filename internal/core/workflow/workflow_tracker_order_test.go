@@ -49,7 +49,7 @@ func TestWorkflowOrderProgress(t *testing.T) {
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 	checkWorkflowOrderUnchanged(t, store, projection, output, metadata)
 
-	proof, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker"))
+	proof, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker"))
 	if err != nil || !proof.Successful {
 		t.Fatal(proof, err)
 	}

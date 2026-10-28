@@ -86,7 +86,7 @@ func nativeRolePriority(t *testing.T, role string) {
 	}
 
 	claim := nativeScheduleClaim(t, store, IntegrationScheduleQuery{Limit: 10, InvocationID: next.InvocationID})
-	if _, err := peer.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), peer, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -273,7 +273,7 @@ func TestNativeRoleHumanWait(t *testing.T) {
 	}
 
 	claim := nativeScheduleClaim(t, peer, IntegrationScheduleQuery{Limit: 10})
-	if _, err := peer.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), peer, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -302,7 +302,7 @@ func TestNativePreparedWait(t *testing.T) {
 	}
 
 	claim := nativeScheduleClaim(t, peer, IntegrationScheduleQuery{Limit: 10})
-	if _, err := peer.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), peer, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -335,7 +335,7 @@ func TestNativeRoleBlocked(t *testing.T) {
 	}
 
 	claim := nativeScheduleClaim(t, peer, IntegrationScheduleQuery{Limit: 10})
-	if _, err := peer.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), peer, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 

@@ -165,7 +165,7 @@ func workflowPRPlanFixture(t *testing.T, extent string, policy workflowstate.Exe
 	request.Policy = policy
 	run := workflowTestStart(t, store, request)
 
-	candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowPRWorker())
+	candidate, err := ExecuteSlice(t.Context(), store, run.Invocation.ID, workflowPRWorker())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -363,7 +363,7 @@ func TestWorkflowSlicePRRepair(t *testing.T) {
 
 	checkWorkflowPRRepairSet(t, store, hierarchy.Set.Path, pr.URL)
 
-	candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.ID, workflowPRWorker())
+	candidate, err := ExecuteSlice(t.Context(), store, run.ID, workflowPRWorker())
 	if err != nil {
 		t.Fatal(err)
 	}

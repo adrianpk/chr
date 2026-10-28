@@ -29,7 +29,7 @@ func TestNativeQueueCapacity(t *testing.T) {
 		t.Fatal("capacity query changed authority")
 	}
 
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker")); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker")); err != nil {
 		t.Fatal(err)
 	}
 

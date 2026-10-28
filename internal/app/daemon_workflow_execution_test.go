@@ -296,7 +296,7 @@ func daemonWorkflowCrashOwner(t *testing.T, project string) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.PrepareWorkflowManualTask(t.Context(), claim, nil); err != nil {
+	if _, err := workflowcore.PrepareManualTask(t.Context(), store, claim, nil); err != nil {
 		t.Fatal(err)
 	}
 

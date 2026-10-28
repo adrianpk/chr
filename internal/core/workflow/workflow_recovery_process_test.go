@@ -39,7 +39,7 @@ func TestWorkflowRecoveryProcess(t *testing.T) {
 	configureWorkflowProcessStartCrash(t, claim)
 
 	worker := []string{"sh", "-c", "exec 3<&-; printf 'Surviving worker\\n'; printf 'started' > \"$1\"; while [ ! -e \"$2\" ]; do sleep 0.05; done", "worker", os.Getenv("CHR_RECOVERY_STARTED"), os.Getenv("CHR_RECOVERY_RELEASE")}
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, worker); err != nil {
 		t.Fatal(err)
 	}
 }

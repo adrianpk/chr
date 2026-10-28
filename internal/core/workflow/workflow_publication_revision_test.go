@@ -32,7 +32,7 @@ func testWorkflowPublicationRevision(t *testing.T, external bool) {
 		t.Fatal(err)
 	}
 
-	candidate, err := f.store.ExecuteWorkflowSlice(t.Context(), f.run.ID, workflowPRWorker())
+	candidate, err := ExecuteSlice(t.Context(), f.store, f.run.ID, workflowPRWorker())
 	if err != nil {
 		t.Fatal(err)
 	}

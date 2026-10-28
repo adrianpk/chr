@@ -20,7 +20,7 @@ func workflowTicketValidated(t *testing.T) (*Store, workflowstate.Record, workfl
 	run := workflowTestStart(t, store, request).Invocation
 
 	claim := workflowTestClaim(t, store, run.ID)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -279,7 +279,7 @@ func checkWorkflowTicketRepairCandidate(t *testing.T, f workflowPreparationFixtu
 	t.Helper()
 
 	claim := workflowTestClaim(t, f.store, run.ID)
-	if _, err := f.store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), f.store, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 

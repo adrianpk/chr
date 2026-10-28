@@ -60,7 +60,7 @@ func workflowLooseDeliverNext(t *testing.T, fixture *workflowIntegrationFixture,
 	t.Helper()
 
 	claim := workflowTestClaim(t, fixture.store, fixture.run.ID)
-	if _, err := fixture.store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), fixture.store, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 

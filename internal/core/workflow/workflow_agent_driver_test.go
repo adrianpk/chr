@@ -75,7 +75,7 @@ func TestNativeAgentSettlement(t *testing.T) {
 			claim := workflowTestClaim(t, store, run.Invocation.ID)
 			defer func() { _ = claim.Close() }() //nolint:errcheck
 
-			result, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness)
+			result, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness)
 			checkNativeAgentOutcome(t, result, err, mode)
 
 			restarted := NewWorkflowStore(store.layout, store.projectID)
@@ -121,7 +121,7 @@ func TestNativeAgentCapability(t *testing.T) {
 			claim := workflowTestClaim(t, store, run.Invocation.ID)
 			defer func() { _ = claim.Close() }() //nolint:errcheck
 
-			if _, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
+			if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 				t.Fatal("uncertified call admitted", err)
 			}
 

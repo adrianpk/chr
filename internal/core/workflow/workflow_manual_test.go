@@ -14,7 +14,7 @@ func workflowTestManual(t *testing.T, store *Store, id string, worker []string) 
 
 	claim := workflowTestClaim(t, store, id)
 
-	task, err := store.PrepareWorkflowManualTask(t.Context(), claim, worker)
+	task, err := PrepareManualTask(t.Context(), store, claim, worker)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func TestWorkflowManualExact(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	claim, task := workflowTestManual(t, store, run.Invocation.ID, workflowTaskCommand(t, "worker"))
-	if _, err := store.ExecuteWorkflowManualTask(t.Context(), claim); err != nil {
+	if _, err := ExecuteManualTask(t.Context(), store, claim); err != nil {
 		t.Fatal(err)
 	}
 
@@ -52,7 +52,7 @@ func TestWorkflowManualExact(t *testing.T) {
 
 	candidate := workflowManualTestCandidate(t, store, task)
 
-	result, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate)
+	result, err := ReconcileTask(t.Context(), store, claim, candidate)
 	if err != nil || !result.Successful || result.ExecutionMode != "manual" || !result.IntegrationPending {
 		t.Fatalf("manual validation: %+v, %v", result, err)
 	}
@@ -73,7 +73,7 @@ func checkWorkflowManualPending(t *testing.T, store *Store, id string) {
 func checkWorkflowManualReplay(t *testing.T, store *Store, claim *Claim, candidate ManualCandidate, result workflowstate.TaskResult) {
 	t.Helper()
 
-	replay, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate)
+	replay, err := ReconcileTask(t.Context(), store, claim, candidate)
 	if err != nil || replay.Commit != result.Commit {
 		t.Fatal("accepted manual result did not replay")
 	}
@@ -105,7 +105,7 @@ func TestWorkflowManualCandidate(t *testing.T) {
 			candidate := workflowManualTestCandidate(t, store, task)
 			test.change(&candidate)
 
-			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); err == nil {
+			if _, err := ReconcileTask(t.Context(), store, claim, candidate); err == nil {
 				t.Fatal("reported assertion was accepted")
 			}
 
@@ -128,7 +128,7 @@ func TestWorkflowManualSnapshot(t *testing.T) {
 			candidate := workflowManualTestCandidate(t, store, task)
 
 			path, changed := changeWorkflowManualImage(t, store, hierarchy, task, image)
-			if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := ReconcileTask(t.Context(), store, claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed image accepted: %v", err)
 			}
 

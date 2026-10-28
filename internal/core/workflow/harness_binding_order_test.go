@@ -110,12 +110,12 @@ func TestHarnessBindingManual(t *testing.T) {
 	started := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, started.Invocation.ID)
 
-	task, err := store.PrepareWorkflowManualTask(t.Context(), claim, nil)
+	task, err := PrepareManualTask(t.Context(), store, claim, nil)
 	if err != nil || task.Input.Schema != "chr-task-input/v2" || len(task.Input.Worker) != 0 || !sameHarnessBinding(task.Input.HarnessBinding, started.Invocation.HarnessBinding) {
 		t.Fatal("manual handoff lost its explicit mode", err)
 	}
 
-	if _, err := store.ExecuteWorkflowManualTask(t.Context(), claim); err == nil {
+	if _, err := ExecuteManualTask(t.Context(), store, claim); err == nil {
 		t.Fatal("empty manual command launched a worker")
 	}
 }

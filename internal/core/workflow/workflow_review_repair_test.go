@@ -41,7 +41,7 @@ func checkWorkflowReviewRepairStep(t *testing.T, store *Store, hierarchy Materia
 	checkWorkflowReviewRepairState(t, retained, binding, count)
 	checkWorkflowReviewRepairPrefix(t, store, hierarchy.Tasks[:2])
 
-	candidate, err := caller.ExecuteWorkflowSlice(t.Context(), id, workflowPRWorker())
+	candidate, err := ExecuteSlice(t.Context(), caller, id, workflowPRWorker())
 	if err != nil {
 		t.Fatal(err)
 	}

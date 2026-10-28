@@ -56,7 +56,7 @@ func TestWorkflowSourceCorruption(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -114,7 +114,7 @@ func workflowSourceCandidate(t *testing.T) (*Store, StartRequest, workflowstate.
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 

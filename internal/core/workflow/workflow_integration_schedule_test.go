@@ -139,7 +139,7 @@ func checkNativeScheduleWait(t *testing.T, store, peer *Store, entry Integration
 	}
 
 	claim := nativeScheduleClaim(t, store, IntegrationScheduleQuery{Limit: 10, SnapshotHash: page.SnapshotHash})
-	if _, err := peer.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), peer, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -164,7 +164,7 @@ func TestNativeScheduleTasks(t *testing.T) {
 		}
 
 		claim := nativeScheduleClaim(t, store, IntegrationScheduleQuery{Limit: 10, SnapshotHash: page.SnapshotHash})
-		if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker")); err != nil {
+		if _, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker")); err != nil {
 			t.Fatal(err)
 		}
 	}

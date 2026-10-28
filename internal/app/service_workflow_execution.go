@@ -78,7 +78,7 @@ func (s service) ExecuteWorkflowTask(ctx context.Context, claim *workflowcore.Cl
 		return workflowstate.TaskResult{}, err
 	}
 
-	return store.ExecuteWorkflowTask(ctx, claim, worker)
+	return workflowcore.ExecuteTask(ctx, store, claim, worker)
 }
 
 // StopWorkflow persists pause or cancel intent through the shared domain owner.
@@ -172,7 +172,7 @@ func (s service) PrepareWorkflowManualTask(ctx context.Context, claim *workflowc
 		return workflowcore.ManualTask{}, err
 	}
 
-	return store.PrepareWorkflowManualTask(ctx, claim, worker)
+	return workflowcore.PrepareManualTask(ctx, store, claim, worker)
 }
 
 // ExecuteWorkflowManualTask supervises the frozen harness without completing work.
@@ -182,7 +182,7 @@ func (s service) ExecuteWorkflowManualTask(ctx context.Context, claim *workflowc
 		return workflowstate.CommandResult{}, err
 	}
 
-	return store.ExecuteWorkflowManualTask(ctx, claim)
+	return workflowcore.ExecuteManualTask(ctx, store, claim)
 }
 
 // ReconcileWorkflowTask host-validates an explicit manual candidate before status.
@@ -192,5 +192,5 @@ func (s service) ReconcileWorkflowTask(ctx context.Context, claim *workflowcore.
 		return workflowstate.TaskResult{}, err
 	}
 
-	return store.ReconcileWorkflowTask(ctx, claim, candidate)
+	return workflowcore.ReconcileTask(ctx, store, claim, candidate)
 }

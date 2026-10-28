@@ -17,7 +17,7 @@ func TestNativeAgentAdmission(t *testing.T) {
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 	defer func() { _ = claim.Close() }() //nolint:errcheck
 
-	_, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker"))
+	_, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker"))
 	if !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("finite invocation launched an uncertified worker", err)
 	}
@@ -44,7 +44,7 @@ func TestNativeAgentCeiling(t *testing.T) {
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 	defer func() { _ = claim.Close() }() //nolint:errcheck
 
-	if _, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
+	if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("call exceeded remaining invocation ceiling", err)
 	}
 

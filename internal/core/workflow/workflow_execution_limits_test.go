@@ -17,7 +17,7 @@ func TestWorkflowTaskGateOrder(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 
-	proof, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker"))
+	proof, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker"))
 	if err == nil || proof.Successful || len(proof.Validation) != 2 || proof.Validation[0].ExitCode != 0 || proof.Validation[1].ExitCode != 7 {
 		t.Fatal("gate commands were reordered or continued after failure")
 	}
@@ -49,7 +49,7 @@ func TestWorkflowTaskArgvBounds(t *testing.T) {
 			run := workflowTestStart(t, store, request)
 
 			claim := workflowTestClaim(t, store, run.Invocation.ID)
-			if _, err := store.ExecuteWorkflowTask(t.Context(), claim, tc.argv); err == nil {
+			if _, err := ExecuteTask(t.Context(), store, claim, tc.argv); err == nil {
 				t.Fatal("invalid worker command accepted")
 			}
 
@@ -118,7 +118,7 @@ func TestWorkflowTaskRecordEdit(t *testing.T) {
 	path := filepath.Join(store.layout.Root(), filepath.Dir(hierarchy.Tasks[0].Path), "artifact.md")
 
 	worker := []string{"sh", "-c", "printf 'Changed instructions\\n' >> \"$1\"", "worker", path}
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ExecuteTask(t.Context(), store, claim, worker); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("external input overwritten: %v", err)
 	}
 

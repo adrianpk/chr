@@ -137,12 +137,12 @@ func (s *Store) advanceWorkflowContinuation(ctx context.Context, run workflowsta
 	}
 
 	if workflowSliceValidationReady(run) {
-		_, err := s.ValidateWorkflowSlice(ctx, run.ID)
+		_, err := ValidateSlice(ctx, s, run.ID)
 
 		return err
 	}
 
-	return s.executeWorkflowSliceTask(ctx, run.ID, request.Worker)
+	return executeWorkflowSliceTask(ctx, s, run.ID, request.Worker)
 }
 
 func (s *Store) advanceWorkflowContinuationDelivery(ctx context.Context, run workflowstate.Invocation, ports ContinuationPorts) error {

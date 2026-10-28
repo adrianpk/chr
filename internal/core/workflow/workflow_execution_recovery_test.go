@@ -18,7 +18,7 @@ func TestWorkflowTaskRetry(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "fail")); err == nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "fail")); err == nil {
 		t.Fatal("failed worker accepted")
 	}
 
@@ -66,7 +66,7 @@ func TestWorkflowTaskLinked(t *testing.T) {
 	alias := NewWorkflowStore(layout, "linked-alias")
 	claim := workflowTestClaim(t, alias, run.Invocation.ID)
 
-	proof, err := alias.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker"))
+	proof, err := ExecuteTask(t.Context(), alias, claim, workflowTaskCommand(t, "worker"))
 	if err != nil || !proof.Successful {
 		t.Fatalf("linked execution: %v", err)
 	}
@@ -102,7 +102,7 @@ func TestWorkflowTaskJournal(t *testing.T) {
 
 		return nil
 	}
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker")); err == nil || !interrupted {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker")); err == nil || !interrupted {
 		t.Fatal("result journal interruption was not exercised")
 	}
 
@@ -129,7 +129,7 @@ func TestWorkflowTaskPrerequisiteEdit(t *testing.T) {
 	path := filepath.Join(store.layout.Root(), filepath.Dir(hierarchy.Tasks[0].Path), "artifact.md")
 
 	worker := []string{"sh", "-c", "printf 'Changed prerequisite\\n' >> \"$1\"", "worker", path}
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ExecuteTask(t.Context(), store, claim, worker); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed prerequisite accepted: %v", err)
 	}
 

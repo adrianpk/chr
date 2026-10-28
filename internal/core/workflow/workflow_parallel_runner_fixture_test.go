@@ -61,7 +61,7 @@ func TestWorkflowParallelRunner(t *testing.T) {
 
 	result := workflowstate.TaskResult{}
 	if err == nil {
-		result, err = claim.store.ExecuteWorkflowTask(t.Context(), claim, workflowParallelWorker(spec))
+		result, err = ExecuteTask(t.Context(), claim.store, claim, workflowParallelWorker(spec))
 	}
 
 	observed := workflowParallelRunnerResult{Successful: result.Successful, Capacity: errors.Is(err, ErrWorkflowCapacity), Fenced: errors.Is(err, workflowstate.ErrOwned)}

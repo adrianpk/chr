@@ -90,13 +90,13 @@ func workflowCapacityAggregateFixture(t *testing.T) (*Store, string, func() erro
 	run := workflowTestStart(t, store, request).Invocation
 	for range 3 {
 		claim := workflowTestClaim(t, store, run.ID)
-		if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker")); err != nil {
+		if _, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker")); err != nil {
 			t.Fatal(err)
 		}
 	}
 
 	return store, run.ID, func() error {
-		_, err := store.ValidateWorkflowSlice(t.Context(), run.ID)
+		_, err := ValidateSlice(t.Context(), store, run.ID)
 
 		return err
 	}

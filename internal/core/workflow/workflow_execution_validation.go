@@ -8,7 +8,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *workflowstate.TaskResult) error {
+func (host workflowTaskHost) validate(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *workflowstate.TaskResult) error {
 	laneImage, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if err != nil {
 		return err
@@ -20,7 +20,7 @@ func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared
 	if !gate.Required {
 		result.WaiverReason = gate.WaiverReason
 
-		return s.checkWorkflowValidationImage(ctx, claim, prepared, *result)
+		return host.store.checkWorkflowValidationImage(ctx, claim, prepared, *result)
 	}
 
 	seconds := workflowValidationTimeout(gate.TimeoutSeconds, prepared.input.ValidationTimeoutSeconds)
@@ -29,7 +29,7 @@ func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared
 	defer cancel()
 
 	for _, command := range gate.Commands {
-		if err := s.checkWorkflowValidationImage(validationContext, claim, prepared, *result); err != nil {
+		if err := host.store.checkWorkflowValidationImage(validationContext, claim, prepared, *result); err != nil {
 			return err
 		}
 
@@ -41,7 +41,7 @@ func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared
 		}
 	}
 
-	return s.checkWorkflowValidationImage(validationContext, claim, prepared, *result)
+	return host.store.checkWorkflowValidationImage(validationContext, claim, prepared, *result)
 }
 
 func (s *Store) checkWorkflowValidationImage(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result workflowstate.TaskResult) error {

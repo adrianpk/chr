@@ -55,7 +55,7 @@ func TestNativeAgentFaults(t *testing.T) {
 			harness := nativeAgentHarness(t, store, run.Invocation.ID, mode)
 			claim := workflowTestClaim(t, store, run.Invocation.ID)
 
-			result, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness)
+			result, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness)
 			if err == nil || result.Successful {
 				t.Fatal("fault produced successful task", err)
 			}
@@ -110,7 +110,7 @@ func nativeAgentNoRefund(t *testing.T, store *Store, id string, harness AgentHar
 	claim := workflowTestClaim(t, store, id)
 	defer func() { _ = claim.Close() }() //nolint:errcheck
 
-	if _, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
+	if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("restart launched an uncharged replacement", err)
 	}
 
@@ -139,7 +139,7 @@ func TestNativeAgentHost(t *testing.T) {
 	claim := workflowTestClaim(t, store, id)
 	nativeAgentHostCrash(t, claim.store, id)
 
-	if _, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness); err != nil {
+	if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); err != nil {
 		t.Fatal(err)
 	}
 

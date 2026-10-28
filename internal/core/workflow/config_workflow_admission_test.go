@@ -125,7 +125,7 @@ func executeWorkflowConfigDeadline(t *testing.T, extent string, store *Store, id
 	if extent == "ticket" {
 		claim := workflowTestClaim(t, store, id)
 
-		result, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker"))
+		result, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker"))
 		if result.Successful || len(result.Validation) != 1 {
 			t.Fatal("task gate exceeded its frozen shared deadline", result)
 		}
@@ -133,7 +133,7 @@ func executeWorkflowConfigDeadline(t *testing.T, extent string, store *Store, id
 		return err
 	}
 
-	result, err := store.ExecuteWorkflowSlice(t.Context(), id, workflowTaskCommand(t, "worker"))
+	result, err := ExecuteSlice(t.Context(), store, id, workflowTaskCommand(t, "worker"))
 	if result.Result.Successful || len(result.Result.Validation) != 1 {
 		t.Fatal("slice gate exceeded its frozen shared deadline", result, err)
 	}

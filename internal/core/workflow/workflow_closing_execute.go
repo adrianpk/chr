@@ -23,7 +23,7 @@ func (host workflowClosingHost) execute(ctx context.Context, claim *workflowClos
 	if claim.state.InvocationID != "" {
 		watched, stop := context.WithCancel(ctx)
 
-		host.store.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: claim.state.InvocationID}, Cancel: stop})
+		watchWorkflowStop(watched, host.store, workflowStopWatch{Claim: &Claim{InvocationID: claim.state.InvocationID}, Cancel: stop})
 		defer stop()
 
 		ctx = watched

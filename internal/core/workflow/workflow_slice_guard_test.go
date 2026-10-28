@@ -48,7 +48,7 @@ func TestWorkflowSliceChanged(t *testing.T) {
 
 			tc.mutate(t, store, retained, candidate)
 
-			if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := ValidateSlice(t.Context(), store, run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatalf("changed aggregate image reused: %v", err)
 			}
 
@@ -68,7 +68,7 @@ func TestWorkflowSliceGateMutation(t *testing.T) {
 			store, hierarchy, request := workflowSliceFixture(t, workflowSliceGate(t, mode))
 			run := workflowTestStart(t, store, request)
 
-			candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker"))
+			candidate, err := ExecuteSlice(t.Context(), store, run.Invocation.ID, workflowTaskCommand(t, "worker"))
 			if !errors.Is(err, workflowstate.ErrConflict) || candidate.Result.Successful {
 				t.Fatalf("mutable aggregate candidate accepted: %v", err)
 			}
@@ -76,7 +76,7 @@ func TestWorkflowSliceGateMutation(t *testing.T) {
 			retained := workflowTestValidatedSlice(t, store, hierarchy, run.Invocation.ID)
 			checkWorkflowAggregateFailure(t, retained)
 
-			if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
+			if _, err := ValidateSlice(t.Context(), store, run.Invocation.ID); !errors.Is(err, workflowstate.ErrConflict) {
 				t.Fatal("changed lane reran the aggregate gate")
 			}
 		})
@@ -104,13 +104,13 @@ func testWorkflowSliceStop(t *testing.T, intent string) {
 	done := make(chan error, 1)
 
 	go func() {
-		_, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker"))
+		_, err := ExecuteSlice(t.Context(), store, run.Invocation.ID, workflowTaskCommand(t, "worker"))
 		done <- err
 	}()
 
 	waitWorkflowClaimFile(t, marker)
 
-	if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
+	if _, err := ValidateSlice(t.Context(), store, run.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("competing aggregate validator was admitted")
 	}
 
@@ -192,7 +192,7 @@ func TestWorkflowSlicePartial(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker")); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ExecuteSlice(t.Context(), store, run.Invocation.ID, workflowTaskCommand(t, "worker")); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("partial slice formed an aggregate candidate: %v", err)
 	}
 
@@ -209,11 +209,11 @@ func TestWorkflowSliceBudget(t *testing.T) {
 	request.Policy.MaxWorkerAttempts = 1
 
 	run := workflowTestStart(t, store, request)
-	if _, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker")); err == nil {
+	if _, err := ExecuteSlice(t.Context(), store, run.Invocation.ID, workflowTaskCommand(t, "worker")); err == nil {
 		t.Fatal("fixture aggregate gate did not fail")
 	}
 
-	if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); err == nil {
+	if _, err := ValidateSlice(t.Context(), store, run.Invocation.ID); err == nil {
 		t.Fatal("aggregate retry reset its consumed budget")
 	}
 

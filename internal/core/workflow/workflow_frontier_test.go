@@ -148,7 +148,7 @@ func checkWorkflowFrontierCleared(t *testing.T, run workflowstate.Invocation) {
 func workflowDeliverNextFrontier(t *testing.T, fixture *workflowIntegrationFixture) {
 	t.Helper()
 
-	candidate, err := fixture.store.ExecuteWorkflowSlice(t.Context(), fixture.run.ID, workflowPRWorker())
+	candidate, err := ExecuteSlice(t.Context(), fixture.store, fixture.run.ID, workflowPRWorker())
 	if err != nil {
 		t.Fatal(err)
 	}

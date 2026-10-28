@@ -64,7 +64,7 @@ func workflowPreparationPlanFixture(t *testing.T, method, extent string, gate wo
 	}}
 	run := workflowTestStart(t, store, request).Invocation
 
-	candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.ID, workflowPRWorker())
+	candidate, err := ExecuteSlice(t.Context(), store, run.ID, workflowPRWorker())
 	if err != nil {
 		t.Fatal(err)
 	}

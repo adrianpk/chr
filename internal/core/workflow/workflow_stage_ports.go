@@ -19,7 +19,7 @@ type workflowIntegrationValidation struct {
 }
 
 func (operation workflowIntegrationValidation) Validate(ctx context.Context, result *workflowstate.TaskResult) error {
-	return operation.store.validateWorkflowTask(ctx, operation.claim, operation.prepared, result)
+	return (workflowTaskHost{store: operation.store}).validate(ctx, operation.claim, operation.prepared, result)
 }
 
 func (operation workflowIntegrationValidation) Accept(ctx context.Context, completion workflowintegrate.Completion) error {

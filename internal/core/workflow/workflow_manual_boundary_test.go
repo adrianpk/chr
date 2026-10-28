@@ -29,7 +29,7 @@ func TestWorkflowManualAlias(t *testing.T) {
 
 	candidate := workflowManualTestCandidate(t, store, task)
 
-	proof, err := alias.ReconcileWorkflowTask(t.Context(), claim, candidate)
+	proof, err := ReconcileTask(t.Context(), alias, claim, candidate)
 	if err != nil || !proof.Successful || proof.Commit == request.Selection.Target.Commit {
 		t.Fatalf("manual linked candidate: %+v, %v", proof, err)
 	}
@@ -61,7 +61,7 @@ func testWorkflowManualStop(t *testing.T, intent string) {
 	candidate := workflowManualTestCandidate(t, store, task)
 	done := make(chan error, 1)
 
-	go func() { _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); done <- err }()
+	go func() { _, err := ReconcileTask(t.Context(), store, claim, candidate); done <- err }()
 
 	waitWorkflowClaimFile(t, marker)
 

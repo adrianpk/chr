@@ -130,7 +130,7 @@ func workflowParallelPublicationTargetSource(t *testing.T, store *Store, record 
 	claim := workflowTestClaim(t, store, run.ID)
 	worker := []string{"sh", "-c", "printf '%s\\n' \"$2\" > \"$1\" && git add -- \"$1\" && git -c user.name=Test -c user.email=test@example.com commit -qm 'Independent result'", "source", path, record.Task.Key}
 
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, worker); err != nil {
 		t.Fatal(err)
 	}
 

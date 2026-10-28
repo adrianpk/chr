@@ -36,7 +36,7 @@ func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard Integ
 
 	watched, stop := context.WithCancel(ctx)
 
-	s.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: guard.InvocationID}, Cancel: stop})
+	watchWorkflowStop(watched, s, workflowStopWatch{Claim: &Claim{InvocationID: guard.InvocationID}, Cancel: stop})
 	defer stop()
 
 	result, err := publisher.PublishWorkflowGit(watched, request)

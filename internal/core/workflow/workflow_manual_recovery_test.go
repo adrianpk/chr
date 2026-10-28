@@ -61,7 +61,7 @@ func TestWorkflowManualFailure(t *testing.T) {
 	claim, task := workflowTestManual(t, store, run.Invocation.ID, nil)
 	candidate := workflowManualTestCandidate(t, store, task)
 
-	proof, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate)
+	proof, err := ReconcileTask(t.Context(), store, claim, candidate)
 	if err == nil || proof.Successful || len(proof.Validation) != 1 || proof.Validation[0].ExitCode != 7 {
 		t.Fatal("manual gate failure was accepted")
 	}
@@ -93,7 +93,7 @@ func TestWorkflowManualPrerequisite(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ReconcileTask(t.Context(), store, claim, candidate); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("prerequisite edit accepted: %v", err)
 	}
 }
@@ -107,13 +107,13 @@ func TestWorkflowManualJournal(t *testing.T) {
 	candidate := workflowManualTestCandidate(t, store, task)
 
 	interrupted := interruptWorkflowManualResult(claim, store, hierarchy.Tasks[0].Path)
-	if _, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate); err == nil || !*interrupted {
+	if _, err := ReconcileTask(t.Context(), store, claim, candidate); err == nil || !*interrupted {
 		t.Fatal("journal interruption not exercised")
 	}
 
 	claim.store.afterReplace = nil
 
-	proof, err := store.ReconcileWorkflowTask(t.Context(), claim, candidate)
+	proof, err := ReconcileTask(t.Context(), store, claim, candidate)
 	if err != nil || !proof.Successful {
 		t.Fatalf("manual replay: %v", err)
 	}
@@ -162,7 +162,7 @@ func TestWorkflowManualFencing(t *testing.T) {
 	}
 
 	replacement := workflowTestClaim(t, store, run.Invocation.ID)
-	if _, err := store.ReconcileWorkflowTask(t.Context(), old, candidate); !errors.Is(err, workflowstate.ErrOwned) {
+	if _, err := ReconcileTask(t.Context(), store, old, candidate); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("old owner accepted: %v", err)
 	}
 
@@ -174,7 +174,7 @@ func TestWorkflowManualFencing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowManualTask(t.Context(), replacement); !errors.Is(err, workflowstate.ErrOwned) {
+	if _, err := ExecuteManualTask(t.Context(), store, replacement); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("automatic attempt executed manually")
 	}
 }

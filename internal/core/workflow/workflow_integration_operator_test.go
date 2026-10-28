@@ -17,7 +17,7 @@ func TestNativeGrantEarly(t *testing.T) {
 	harness := nativeAgentHarness(t, store, run.Invocation.ID, "missing")
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	if _, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness); err == nil {
+	if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); err == nil {
 		t.Fatal("missing usage accepted")
 	}
 
@@ -91,7 +91,7 @@ func TestNativeGrantUnmetered(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, []string{"false"}); err == nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, []string{"false"}); err == nil {
 		t.Fatal("fixture worker unexpectedly passed")
 	}
 

@@ -44,7 +44,7 @@ func TestWorkflowSliceCrashProcess(t *testing.T) {
 	if stage == "repair" {
 		_, err = store.RepairWorkflowSlice(t.Context(), id, os.Getenv("CHR_SLICE_CRASH_TASK"))
 	} else {
-		_, err = store.ValidateWorkflowSlice(t.Context(), id)
+		_, err = ValidateSlice(t.Context(), store, id)
 	}
 
 	t.Fatalf("owned writer did not terminate: %v", err)

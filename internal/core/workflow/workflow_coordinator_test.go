@@ -244,7 +244,7 @@ func TestWorkflowCoordinatorCandidate(t *testing.T) {
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
 	worker := []string{"sh", "-c", "git rm ops/default/coordinator.json && git -c user.name=Test -c user.email=test@example.com commit -qm 'Remove coordinator'"}
 
-	result, err := store.ExecuteWorkflowTask(t.Context(), claim, worker)
+	result, err := ExecuteTask(t.Context(), store, claim, worker)
 	if err == nil || result.Successful {
 		t.Fatal("a coordinator removal became accepted task proof", err)
 	}

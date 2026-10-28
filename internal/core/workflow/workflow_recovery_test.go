@@ -170,7 +170,7 @@ func TestWorkflowProcessEdit(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "edit process")); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "edit process")); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed process binding accepted: %v", err)
 	}
 

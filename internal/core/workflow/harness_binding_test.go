@@ -78,7 +78,7 @@ func workflowBindingExecute(t *testing.T, store *Store, id string) {
 
 	claim := workflowTestClaim(t, store, id)
 
-	result, err := store.ExecuteWorkflowTask(t.Context(), claim, nil)
+	result, err := ExecuteTask(t.Context(), store, claim, nil)
 	if err != nil || !result.Successful {
 		t.Fatal("bound task failed", result.Failure, err)
 	}
@@ -163,7 +163,7 @@ func checkHarnessBindingCommandOverride(t *testing.T, store *Store, id string) {
 	t.Helper()
 
 	claim := workflowTestClaim(t, store, id)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, []string{"sh", "-c", "exit 0"}); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ExecuteTask(t.Context(), store, claim, []string{"sh", "-c", "exit 0"}); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("caller replaced the bound command", err)
 	}
 }
@@ -261,7 +261,7 @@ func checkHarnessBindingBudget(t *testing.T, identity string) {
 	started := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, started.Invocation.ID)
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, nil); !errors.Is(err, ErrWorkflowIntegrationBudget) {
+	if _, err := ExecuteTask(t.Context(), store, claim, nil); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("binding bypassed finite whole-call authority", err)
 	}
 

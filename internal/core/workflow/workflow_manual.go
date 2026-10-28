@@ -24,36 +24,36 @@ type ManualCandidate struct {
 	Tree      string `json:"tree"`
 }
 
-// PrepareWorkflowManualTask freezes a manual handoff and retains serial ownership.
-// Supply a harness argv to execute it through ExecuteWorkflowManualTask; an empty
+// PrepareManualTask freezes a manual handoff and retains serial ownership.
+// Supply a harness argv to execute it through ExecuteManualTask; an empty
 // argv permits reconciliation of a quiescent candidate without launching a worker.
-func (s *Store) PrepareWorkflowManualTask(ctx context.Context, claim *Claim, worker []string) (ManualTask, error) {
+func PrepareManualTask(ctx context.Context, store *Store, claim *Claim, worker []string) (ManualTask, error) {
 	if err := beginWorkflowClaimExecution(claim); err != nil {
 		return ManualTask{}, err
 	}
 	defer endWorkflowClaimExecution(claim)
 
-	prepared, err := s.prepareWorkflowTaskMode(ctx, claim, worker, workflowPreparationManual)
+	prepared, err := store.prepareWorkflowTaskMode(ctx, claim, worker, workflowPreparationManual)
 
 	return ManualTask{Input: prepared.input, InputRef: prepared.inputRef, InputHash: prepared.inputHash, LeaseUntil: prepared.leaseUntil}, err
 }
 
-// ExecuteWorkflowManualTask supervises the frozen harness once. Success retains
+// ExecuteManualTask supervises the frozen harness once. Success retains
 // ownership for explicit candidate reconciliation; it does not validate the task.
-func (s *Store) ExecuteWorkflowManualTask(ctx context.Context, claim *Claim) (workflowstate.CommandResult, error) {
+func ExecuteManualTask(ctx context.Context, store *Store, claim *Claim) (workflowstate.CommandResult, error) {
 	if err := beginWorkflowClaimExecution(claim); err != nil {
 		return workflowstate.CommandResult{}, err
 	}
 	defer endWorkflowClaimExecution(claim)
 
-	prepared, err := s.loadWorkflowManualTask(ctx, claim, true)
+	prepared, err := store.loadWorkflowManualTask(ctx, claim, true)
 	if err != nil {
 		return workflowstate.CommandResult{}, err
 	}
 
 	watched, stop := context.WithCancel(ctx)
 
-	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
+	watchWorkflowStop(watched, store, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	workerContext, cancel := context.WithDeadline(watched, prepared.leaseUntil)
@@ -78,14 +78,14 @@ func (s *Store) ExecuteWorkflowManualTask(ctx context.Context, claim *Claim) (wo
 	cleanup, done := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer done()
 
-	err = s.finishWorkflowTask(cleanup, claim, prepared, &result, workerContext.Err() != nil)
+	err = store.finishWorkflowTask(cleanup, claim, prepared, &result, workerContext.Err() != nil)
 
 	return observed, errors.Join(executionErr, err)
 }
 
-// ReconcileWorkflowTask verifies a reported manual Git image with the frozen host
+// ReconcileTask verifies a reported manual Git image with the frozen host
 // gate and the same guarded result writer used by automatic execution.
-func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candidate ManualCandidate) (workflowstate.TaskResult, error) {
+func ReconcileTask(ctx context.Context, store *Store, claim *Claim, candidate ManualCandidate) (workflowstate.TaskResult, error) {
 	if err := beginWorkflowClaimExecution(claim); err != nil {
 		return workflowstate.TaskResult{}, err
 	}
@@ -96,25 +96,25 @@ func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candida
 	}
 
 	{
-		manualReplay, err := s.reuseWorkflowManualResult(ctx, claim, candidate)
+		manualReplay, err := store.reuseWorkflowManualResult(ctx, claim, candidate)
 
 		if manualReplay.Found || err != nil {
 			return manualReplay.Result, err
 		}
 	}
 
-	prepared, err := s.loadWorkflowManualTask(ctx, claim, false)
+	prepared, err := store.loadWorkflowManualTask(ctx, claim, false)
 	if err != nil {
 		return workflowstate.TaskResult{}, err
 	}
 
-	if err := s.checkWorkflowManualCandidate(ctx, claim, prepared, candidate); err != nil {
+	if err := store.checkWorkflowManualCandidate(ctx, claim, prepared, candidate); err != nil {
 		return workflowstate.TaskResult{}, err
 	}
 
 	watched, stop := context.WithCancel(ctx)
 
-	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
+	watchWorkflowStop(watched, store, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	validationContext, cancel := context.WithDeadline(watched, prepared.leaseUntil)
@@ -122,12 +122,12 @@ func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candida
 
 	result := newWorkflowTaskResult(prepared)
 
-	result.Worker, err = s.workflowManualWorkerResult(ctx, claim)
+	result.Worker, err = store.workflowManualWorkerResult(ctx, claim)
 	if err != nil {
 		return result, err
 	}
 
-	validationErr := s.validateWorkflowTask(validationContext, claim, prepared, &result)
+	validationErr := (workflowTaskHost{store: store}).validate(validationContext, claim, prepared, &result)
 	result.Successful, result.Outcome, result.IntegrationPending = validationErr == nil, "task_validated", true
 
 	result.FinishedAt = time.Now().UTC()
@@ -142,7 +142,7 @@ func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candida
 	cleanup, done := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer done()
 
-	err = s.finishWorkflowTask(cleanup, claim, prepared, &result, validationContext.Err() != nil)
+	err = store.finishWorkflowTask(cleanup, claim, prepared, &result, validationContext.Err() != nil)
 
 	return result, errors.Join(validationErr, err)
 }

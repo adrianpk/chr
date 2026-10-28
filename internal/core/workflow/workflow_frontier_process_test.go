@@ -81,7 +81,7 @@ func workflowFrontierProcessClaim(t *testing.T, store *Store, request StartReque
 		return run.Invocation, nil, err
 	}
 
-	_, err = store.PrepareWorkflowManualTask(t.Context(), claim, nil)
+	_, err = PrepareManualTask(t.Context(), store, claim, nil)
 
 	return run.Invocation, claim, err
 }

@@ -29,7 +29,7 @@ func testWorkflowStop(t *testing.T, intent string) {
 	done := make(chan error, 1)
 
 	worker := []string{"sh", "-c", "printf 'Retained output\\n'; printf 'started' > \"$1\"; sleep 20", "worker", marker}
-	go func() { _, err := store.ExecuteWorkflowTask(t.Context(), claim, worker); done <- err }()
+	go func() { _, err := ExecuteTask(t.Context(), store, claim, worker); done <- err }()
 
 	waitWorkflowClaimFile(t, marker)
 

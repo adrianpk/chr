@@ -43,7 +43,7 @@ func workflowSliceGate(t *testing.T, mode string) workflowstate.Validation {
 func workflowTestExecuteSlice(t *testing.T, store *Store, id, worker string) SliceCandidate {
 	t.Helper()
 
-	candidate, err := store.ExecuteWorkflowSlice(t.Context(), id, workflowTaskCommand(t, worker))
+	candidate, err := ExecuteSlice(t.Context(), store, id, workflowTaskCommand(t, worker))
 	if err != nil {
 		t.Fatalf("slice candidate %s (%s, %s): %v", candidate.ID, candidate.Result.Outcome, candidate.Result.Failure, err)
 	}
@@ -111,7 +111,7 @@ func TestWorkflowSlicePrefix(t *testing.T) {
 	first := workflowTestStart(t, store, request)
 	proof := workflowTestExecute(t, store, first.Invocation.ID, "worker")
 
-	if _, err := store.ValidateWorkflowSlice(t.Context(), first.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
+	if _, err := ValidateSlice(t.Context(), store, first.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("exact grouped task created an aggregate candidate")
 	}
 
@@ -134,7 +134,7 @@ func TestWorkflowSliceRetry(t *testing.T) {
 	store, hierarchy, request := workflowSliceFixture(t, gate)
 	run := workflowTestStart(t, store, request)
 
-	failed, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, workflowTaskCommand(t, "worker"))
+	failed, err := ExecuteSlice(t.Context(), store, run.Invocation.ID, workflowTaskCommand(t, "worker"))
 	if err == nil || failed.Result.Successful {
 		t.Fatal("failed aggregate gate accepted")
 	}

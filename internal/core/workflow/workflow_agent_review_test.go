@@ -23,7 +23,7 @@ func TestNativeAgentReview(t *testing.T) {
 	harness := nativeAgentHarness(t, store, run.Invocation.ID, "success")
 	nativeAgentReviewSource(t, store, run.Invocation.ID, harness)
 
-	candidate, err := store.ExecuteWorkflowSlice(t.Context(), run.Invocation.ID, nil)
+	candidate, err := ExecuteSlice(t.Context(), store, run.Invocation.ID, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func nativeAgentReviewSource(t *testing.T, store *Store, id string, harness Agen
 
 	for range 3 {
 		claim := workflowTestClaim(t, store, id)
-		if _, err := store.ExecuteWorkflowTaskWithHarness(t.Context(), claim, harness); err != nil {
+		if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); err != nil {
 			t.Fatal(err)
 		}
 

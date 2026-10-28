@@ -26,7 +26,7 @@ func nativeClosingPublicationPeer(t *testing.T, f nativeClosingFixture) nativeSu
 	nativeReceiptFrontierPorts(t, f.fixture, target)
 
 	claim := workflowTestClaim(t, peer, entry.InvocationID)
-	if _, err := peer.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), peer, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 

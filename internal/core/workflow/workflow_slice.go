@@ -24,11 +24,11 @@ type SliceCandidate struct {
 	Result       workflowstate.TaskResult    `json:"result"`
 }
 
-// ExecuteWorkflowSlice runs remaining tasks on the retained lane and validates
+// ExecuteSlice runs remaining tasks on the retained lane and validates
 // one complete slice. It stops at that slice's integration barrier.
-func (s *Store) ExecuteWorkflowSlice(ctx context.Context, id string, worker []string) (SliceCandidate, error) {
+func ExecuteSlice(ctx context.Context, store *Store, id string, worker []string) (SliceCandidate, error) {
 	for range workflowstate.RecordLimit {
-		run, err := s.ReadWorkflow(ctx, id)
+		run, err := store.ReadWorkflow(ctx, id)
 		if err != nil {
 			return SliceCandidate{}, err
 		}
@@ -38,10 +38,10 @@ func (s *Store) ExecuteWorkflowSlice(ctx context.Context, id string, worker []st
 		}
 
 		if workflowSliceValidationReady(run) {
-			return s.ValidateWorkflowSlice(ctx, id)
+			return ValidateSlice(ctx, store, id)
 		}
 
-		if err := s.executeWorkflowSliceTask(ctx, id, worker); err != nil {
+		if err := executeWorkflowSliceTask(ctx, store, id, worker); err != nil {
 			return SliceCandidate{}, fmt.Errorf("workflow slice task: %w", err)
 		}
 	}
@@ -49,15 +49,15 @@ func (s *Store) ExecuteWorkflowSlice(ctx context.Context, id string, worker []st
 	return SliceCandidate{}, fmt.Errorf("workflow slice execution bound exceeded")
 }
 
-func (s *Store) executeWorkflowSliceTask(ctx context.Context, id string, worker []string) error {
+func executeWorkflowSliceTask(ctx context.Context, store *Store, id string, worker []string) error {
 	if err := workflowstate.ValidateCommand(worker); err != nil {
 		return err
 	}
 
-	claim, err := s.ClaimWorkflow(ctx, id)
+	claim, err := store.ClaimWorkflow(ctx, id)
 	if errors.Is(err, workflowstate.ErrOwned) {
 		// Claiming may have reused the complete validated prefix without a worker.
-		run, readErr := s.ReadWorkflow(ctx, id)
+		run, readErr := store.ReadWorkflow(ctx, id)
 		if readErr == nil && workflowSliceValidationReady(run) {
 			return nil
 		}
@@ -67,14 +67,14 @@ func (s *Store) executeWorkflowSliceTask(ctx context.Context, id string, worker 
 		return err
 	}
 
-	_, err = s.ExecuteWorkflowTask(ctx, claim, worker)
+	_, err = ExecuteTask(ctx, store, claim, worker)
 
 	return err
 }
 
-// ValidateWorkflowSlice runs only the host aggregate gate; retries retain tasks.
-func (s *Store) ValidateWorkflowSlice(ctx context.Context, id string) (result SliceCandidate, err error) {
-	slicePreparation, err := s.prepareWorkflowSliceValidation(ctx, id)
+// ValidateSlice runs only the host aggregate gate; retries retain tasks.
+func ValidateSlice(ctx context.Context, store *Store, id string) (result SliceCandidate, err error) {
+	slicePreparation, err := store.prepareWorkflowSliceValidation(ctx, id)
 
 	if err != nil || slicePreparation.Cached != nil {
 		if slicePreparation.Cached != nil {
@@ -92,15 +92,15 @@ func (s *Store) ValidateWorkflowSlice(ctx context.Context, id string) (result Sl
 
 	watched, stop := context.WithCancel(ctx)
 
-	s.watchWorkflowStop(watched, workflowStopWatch{Claim: slicePreparation.Claim, Cancel: stop})
+	watchWorkflowStop(watched, store, workflowStopWatch{Claim: slicePreparation.Claim, Cancel: stop})
 	defer stop()
 
-	candidate, validationErr := s.runWorkflowSliceValidation(watched, slicePreparation.Claim, slicePreparation.Prepared)
+	candidate, validationErr := (workflowTaskHost{store: store}).validateSlice(watched, slicePreparation.Claim, slicePreparation.Prepared)
 
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
-	err = s.finishWorkflowSliceValidation(cleanup, slicePreparation.Claim, slicePreparation.Prepared, &candidate, watched.Err() != nil)
+	err = store.finishWorkflowSliceValidation(cleanup, slicePreparation.Claim, slicePreparation.Prepared, &candidate, watched.Err() != nil)
 
 	return candidate, errors.Join(validationErr, err)
 }
@@ -122,7 +122,7 @@ func workflowSliceValidationReady(run workflowstate.Invocation) bool {
 	return run.Status == workflowstate.InvocationWaitingIntegration || run.Status == workflowstate.InvocationWaitingReview && run.CandidateRef != "" || run.Status == workflowstate.InvocationPaused && run.StopIntent == "" && run.Outcome == "slice_validation_failed"
 }
 
-func (s *Store) runWorkflowSliceValidation(ctx context.Context, claim *Claim, prepared workflowPreparedTask) (SliceCandidate, error) {
+func (host workflowTaskHost) validateSlice(ctx context.Context, claim *Claim, prepared workflowPreparedTask) (SliceCandidate, error) {
 	deadline, cancel := context.WithDeadline(ctx, prepared.leaseUntil)
 	defer cancel()
 
@@ -130,7 +130,7 @@ func (s *Store) runWorkflowSliceValidation(ctx context.Context, claim *Claim, pr
 	result.Schema = "chr-slice-validation/v1"
 	result.Outcome, result.IntegrationPending = "slice_validated", true
 
-	err := s.validateWorkflowTask(deadline, claim, prepared, &result)
+	err := host.validate(deadline, claim, prepared, &result)
 
 	result.Successful, result.FinishedAt = err == nil, time.Now().UTC()
 	if err != nil {

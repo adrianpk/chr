@@ -113,7 +113,7 @@ func testWorkflowLooseResume(t *testing.T, movement string) {
 	checkWorkflowLooseResumed(t, before, run, target, err)
 
 	claim := workflowTestClaim(t, restarted, before.ID)
-	if _, err := restarted.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), restarted, claim, workflowPRWorker()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -137,7 +137,7 @@ func checkWorkflowLooseResumeDelivery(t *testing.T, f workflowIntegrationFixture
 	}
 
 	claim := workflowTestClaim(t, f.store, run.ID)
-	if _, err := f.store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), f.store, claim, workflowPRWorker()); err != nil {
 		t.Fatal("later work could not verify retained dependency-target history", err)
 	}
 }

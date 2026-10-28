@@ -40,7 +40,7 @@ func TestNativeTargetAliases(t *testing.T) {
 		t.Fatal("namespace bypassed the linked checkout reservation", err)
 	}
 
-	if _, err := store.ExecuteWorkflowTask(t.Context(), claim, workflowPRWorker()); err != nil {
+	if _, err := ExecuteTask(t.Context(), store, claim, workflowPRWorker()); err != nil {
 		t.Fatal("selected owner could not execute its real worker", err)
 	}
 
