@@ -11,6 +11,7 @@ import (
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -28,7 +29,7 @@ func NewWorkflowPreparationGit(repository, transport string) OSWorkflowPreparati
 }
 
 // PrepareWorkflowIntegration leaves the source and remote target unchanged.
-func (git OSWorkflowPreparationGit) PrepareWorkflowIntegration(ctx context.Context, query PreparationQuery) (proof workflowstate.IntegrationProof, err error) {
+func (git OSWorkflowPreparationGit) PrepareWorkflowIntegration(ctx context.Context, query workflowstate.PreparationQuery) (proof workflowstate.IntegrationProof, err error) {
 	if err := git.validateQuery(query); err != nil {
 		return proof, err
 	}
@@ -69,7 +70,7 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowIntegration(ctx context.Conte
 	return proof, nil
 }
 
-func (git OSWorkflowPreparationGit) validateQuery(query PreparationQuery) error {
+func (git OSWorkflowPreparationGit) validateQuery(query workflowstate.PreparationQuery) error {
 	base := query.IntegrationQuery
 
 	base.ResultCommit = query.BaseCommit
@@ -88,7 +89,7 @@ func (git OSWorkflowPreparationGit) validateQuery(query PreparationQuery) error 
 	return nil
 }
 
-func (git OSWorkflowPreparationGit) fetchPreparation(ctx context.Context, reader workflowIntegrationReader, query PreparationQuery) error {
+func (git OSWorkflowPreparationGit) fetchPreparation(ctx context.Context, reader workflowIntegrationReader, query workflowstate.PreparationQuery) error {
 	if _, err := reader.Output(ctx, "init", "--bare", "--quiet"); err != nil {
 		return err
 	}
@@ -118,7 +119,7 @@ func (git OSWorkflowPreparationGit) fetchPreparation(ctx context.Context, reader
 	return nil
 }
 
-func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, query PreparationQuery) (workflowstate.IntegrationProof, error) {
+func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, query workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error) {
 	proof := workflowstate.IntegrationProof{IntegrationQuery: query.IntegrationQuery, BaseCommit: query.BaseCommit, ObservedTarget: query.BaseCommit}
 
 	proof.SourceDirectory = ""
@@ -142,12 +143,12 @@ func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, 
 		return proof, err
 	}
 
-	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
 	if err != nil || proof.BaseCommit != query.BaseCommit {
 		return proof, workflowstate.ErrConflict
 	}
 
-	return proof, validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
+	return proof, workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
 }
 
 func (reader workflowIntegrationReader) prepareCombinedCommit(ctx context.Context, proof workflowstate.IntegrationProof) (string, error) {
@@ -204,7 +205,7 @@ func (reader workflowIntegrationReader) preparationCommit(ctx context.Context, t
 	return reader.preparationObject(ctx, workflowPreparationCommit{Tree: tree, Parents: parents, Authorship: workflowPreparationAuthorship{Author: author, Encoding: "", Message: "Prepare configured workflow integration\n"}})
 }
 
-func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationReader, query PreparationQuery, proof workflowstate.IntegrationProof) error {
+func attachWorkflowPreparation(ctx context.Context, reader workflowIntegrationReader, query workflowstate.PreparationQuery, proof workflowstate.IntegrationProof) error {
 	source := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: query.SourceDirectory}}
 	branch := strings.TrimPrefix(query.Lane.Branch, "refs/heads/")
 	git := executioncore.OSWorktreeGit{}

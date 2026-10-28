@@ -58,7 +58,7 @@ func (s service) workflowSubmissionDependencies(ctx context.Context, id string) 
 
 	provider, ok := guarded.(workflowcore.PublicationProvider)
 	if !ok {
-		return nil, nil, workflowcore.Invocation{}, fmt.Errorf("%w: configured provider has no durable publication contract", workflowcore.ErrWorkflowAtomicGuard)
+		return nil, nil, workflowcore.Invocation{}, fmt.Errorf("%w: configured provider has no durable publication contract", workflowstate.ErrWorkflowAtomicGuard)
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)

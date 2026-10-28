@@ -12,7 +12,7 @@ import (
 
 func observeWorkflowPublicationCapability(ctx context.Context, provider PublicationGuardProvider, source workflowstate.ReviewInput) (workflowstate.PublicationCapability, error) {
 	if provider == nil {
-		return workflowstate.PublicationCapability{}, ErrWorkflowAtomicGuard
+		return workflowstate.PublicationCapability{}, workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	head, err := provider.ReadWorkflowBranch(ctx, source.PullRequest.Repository, source.PullRequest.HeadBranch)
@@ -29,27 +29,7 @@ func observeWorkflowPublicationCapability(ctx context.Context, provider Publicat
 		return capability, err
 	}
 
-	return capability, validateWorkflowPublicationCapability(source, capability)
-}
-
-func validateWorkflowPublicationCapability(source workflowstate.ReviewInput, capability workflowstate.PublicationCapability) error {
-	if capability.Repository != source.PullRequest.Repository || capability.PullRequestURL != source.PullRequest.URL || capability.Method != source.Policy.Method || capability.Mechanism == "" || len(capability.Mechanism) > 128 || len(capability.Revision) != 64 {
-		return workflowstate.ErrConflict
-	}
-
-	if !capability.AtomicSourceBase || !capability.ExactResult {
-		return ErrWorkflowAtomicGuard
-	}
-
-	return validateWorkflowSignatureCapability(capability)
-}
-
-func validateWorkflowSignatureCapability(capability workflowstate.PublicationCapability) error {
-	if capability.RequiredSignatures != (capability.SigningProfile != "") || (capability.RequiredSignatures && !workflowstate.ValidFingerprint(capability.SigningProfile)) {
-		return ErrWorkflowAtomicGuard
-	}
-
-	return nil
+	return capability, workflowintegrate.ValidateWorkflowPublicationCapability(source, capability)
 }
 
 func (s *Store) checkWorkflowPublicationGuard(ctx context.Context, run workflowInvocationFile, provider PublicationGuardProvider) (workflowstate.PublicationGuard, error) {
@@ -128,7 +108,7 @@ func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate workf
 		return err
 	}
 
-	observed.HistoryHash, err = workflowIntegrationHistoryHash(observed)
+	observed.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(observed)
 	if err != nil || observed.BaseCommit != proof.BaseCommit || observed.HistoryHash != proof.HistoryHash || observed.VerifiedTree != proof.PreparedTree {
 		return workflowstate.ErrConflict
 	}

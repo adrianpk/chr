@@ -97,7 +97,7 @@ func validateWorkflowPreparationCandidate(run workflowInvocationFile, candidate 
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowPublicationCapability(candidate.Input.Source, candidate.Input.Capability); err != nil {
+	if err := workflowintegrate.ValidateWorkflowPublicationCapability(candidate.Input.Source, candidate.Input.Capability); err != nil {
 		return err
 	}
 
@@ -129,7 +129,7 @@ func validateWorkflowPreparationLaneProof(candidate workflowstate.IntegrationCan
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
+	return workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
 }
 
 func validateWorkflowPreparationResult(run workflowInvocationFile, candidate workflowstate.IntegrationCandidate) error {

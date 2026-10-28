@@ -8,13 +8,14 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func nativeCombinedPreparation(t *testing.T, f workflowGitFixture) (workflowstate.IntegrationProof, workflowstate.Lane) {
 	t.Helper()
 
-	q := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
+	q := workflowstate.PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
 	q.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "combined"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 	git := NewWorkflowPreparationGit(q.Repository, f.remote)
@@ -116,7 +117,7 @@ func TestNativeCombinedGuard(t *testing.T) {
 
 			var err error
 
-			proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
+			proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -146,7 +147,7 @@ func TestNativeCombinedLegacy(t *testing.T) {
 		Method, Source, Base, Tree string
 		History                    []workflowstate.IntegrationCommit
 	}{proof.Method, proof.SourceCommit, proof.BaseCommit, proof.PreparedTree, proof.History})
-	if err != nil || contenthash.Sum(data) != proof.HistoryHash || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
+	if err != nil || contenthash.Sum(data) != proof.HistoryHash || workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
 		t.Fatal("historical proof hash or read contract changed")
 	}
 }

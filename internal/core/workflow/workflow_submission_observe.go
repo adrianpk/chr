@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -91,7 +92,7 @@ func observeWorkflowSubmittedDelivery(ctx context.Context, submission workflowst
 		return submission, err
 	}
 
-	if err := validateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{}); err != nil {
 		return submission, err
 	}
 

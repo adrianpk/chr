@@ -5,18 +5,19 @@ import (
 	"path/filepath"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // PrepareWorkflowRepairedIntegration independently verifies retained method
 // history and imports exactly the host-accepted P into a fresh gate checkout.
-func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx context.Context, query PreparationQuery, state MergerRepairState) (workflowstate.IntegrationProof, error) {
+func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx context.Context, query workflowstate.PreparationQuery, state MergerRepairState) (workflowstate.IntegrationProof, error) {
 	if !validWorkflowRepairedPreparationQuery(git, query, state) {
 		return workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 
 	proof := *state.Result
-	if state.Query.SourceCommit != query.SourceCommit || state.Query.OriginCommit != query.OriginCommit || state.Query.SourceTree != query.SourceTree || checkWorkflowPreparedProof(query, proof, workflowIntegrationRepairs{}) != nil {
+	if state.Query.SourceCommit != query.SourceCommit || state.Query.OriginCommit != query.OriginCommit || state.Query.SourceTree != query.SourceTree || workflowintegrate.CheckWorkflowPreparedProof(query, proof, workflowIntegrationRepairs{}) != nil {
 		return proof, workflowstate.ErrConflict
 	}
 
@@ -55,6 +56,6 @@ func checkWorkflowRepairedCheckout(ctx context.Context, reader workflowIntegrati
 	return nil
 }
 
-func validWorkflowRepairedPreparationQuery(git OSWorkflowPreparationGit, query PreparationQuery, state MergerRepairState) bool {
+func validWorkflowRepairedPreparationQuery(git OSWorkflowPreparationGit, query workflowstate.PreparationQuery, state MergerRepairState) bool {
 	return state.Result != nil && git.validateQuery(query) == nil && state.Query.Lane.Unit == query.Lane.Unit
 }

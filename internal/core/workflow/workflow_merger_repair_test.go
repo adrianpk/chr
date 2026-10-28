@@ -8,11 +8,12 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeMergerRepairFixture(t *testing.T, method string) (workflowGitFixture, PreparationQuery) {
+func nativeMergerRepairFixture(t *testing.T, method string) (workflowGitFixture, workflowstate.PreparationQuery) {
 	t.Helper()
 
 	f := newWorkflowGitFixture(t, method)
@@ -39,7 +40,7 @@ func nativeMergerRepairFixture(t *testing.T, method string) (workflowGitFixture,
 	f.request.Git.SourceTree = workflowIntegrationCommand(t, f.request.Directory, "rev-parse", f.request.Git.SourceCommit+"^{tree}")
 	workflowIntegrationCommand(t, f.request.Directory, "push", f.remote, f.request.Git.SourceCommit+":"+f.request.SourceRef, f.request.Git.BaseCommit+":refs/heads/dev")
 
-	query := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
+	query := workflowstate.PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	query.SourceDirectory = f.request.Directory
 	query.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
 
@@ -148,7 +149,7 @@ func checkNativeMergerRepairedProof(t *testing.T, state MergerRepairState) {
 	t.Helper()
 
 	proof := *state.Result
-	if validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil || len(proof.Provenance.Repairs) != 1 {
+	if workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil || len(proof.Provenance.Repairs) != 1 {
 		t.Fatal("repair provenance was not bound to final method proof")
 	}
 

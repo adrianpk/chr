@@ -3,6 +3,7 @@ package workflow
 import (
 	"slices"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -88,7 +89,7 @@ func validateWorkflowNativeGitObservation(submission workflowstate.Submission, o
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowIntegrationProof(proof.IntegrationQuery, *proof, workflowIntegrationRepairs{})
+	return workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, *proof, workflowIntegrationRepairs{})
 }
 
 func validWorkflowNativeGitObservationHeader(submission workflowstate.Submission, observation NativeGitObservation) bool {

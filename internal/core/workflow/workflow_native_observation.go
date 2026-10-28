@@ -55,7 +55,7 @@ func (s *Store) PollWorkflowNativeSubmission(ctx context.Context, guard Integrat
 
 func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, observer NativePublicationObserver, git IntegrationGit, poll bool) (submission workflowstate.Submission, observation NativePublicationObservation, next IntegrationBudgetGuard, err error) {
 	if observer == nil || git == nil {
-		return submission, observation, next, ErrWorkflowAtomicGuard
+		return submission, observation, next, workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	submission, request, update, err := s.workflowNativeReconciliationInput(ctx, guard)

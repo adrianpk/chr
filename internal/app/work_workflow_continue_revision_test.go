@@ -7,13 +7,12 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type unavailableWorkflowPreparation struct{}
 
-func (unavailableWorkflowPreparation) PrepareWorkflowIntegration(context.Context, workflowcore.PreparationQuery) (workflowstate.IntegrationProof, error) {
+func (unavailableWorkflowPreparation) PrepareWorkflowIntegration(context.Context, workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error) {
 	return workflowstate.IntegrationProof{}, errors.New("publisher credential unavailable")
 }
 

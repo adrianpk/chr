@@ -14,7 +14,7 @@ func nativeMergerCleanReplay(t *testing.T) (OSWorkflowPreparationGit, MergerRepa
 	t.Helper()
 
 	f := nativeReplayFixture(t)
-	query := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
+	query := workflowstate.PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	query.SourceDirectory = f.request.Directory
 	query.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/repair", Worktree: filepath.Join(t.TempDir(), "repair"), BaseCommit: query.BaseCommit, HeadCommit: query.BaseCommit}
 	git := NewWorkflowPreparationGit(query.Repository, f.remote)

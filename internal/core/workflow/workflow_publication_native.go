@@ -39,7 +39,7 @@ func (s *Store) advanceWorkflowNativeIntegration(ctx context.Context, id string,
 
 	provider, ok := ports.Provider.(NativePreparationProvider)
 	if !ok || ports.Preparer == nil || ports.NativePublisher == nil || ports.NativeObserver == nil {
-		return s.workflowIntegrationProgress(ctx, id, nil, ErrWorkflowAtomicGuard)
+		return s.workflowIntegrationProgress(ctx, id, nil, workflowstate.ErrWorkflowAtomicGuard)
 	}
 
 	if run.Integration == nil {
@@ -145,7 +145,7 @@ func (s *Store) observeWorkflowNativeIntegration(ctx context.Context, guard Inte
 	git, prepared := ports.Observer.(PreparedIntegrationGit)
 
 	if !ok || !prepared || ports.NativeObserver == nil {
-		return ErrWorkflowAtomicGuard
+		return workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	if _, err := s.ReconcileWorkflowNativeGitSubmission(ctx, guard, inspector, git); err != nil {

@@ -73,7 +73,7 @@ func nativeCandidateRepairCheckpoint(t *testing.T, f nativePreparationFixture, c
 	t.Helper()
 
 	proof := candidate.Input.Git
-	query := PreparationQuery{IntegrationQuery: proof.IntegrationQuery, BaseCommit: proof.BaseCommit}
+	query := workflowstate.PreparationQuery{IntegrationQuery: proof.IntegrationQuery, BaseCommit: proof.BaseCommit}
 	query.SourceDirectory, query.ResultCommit = candidate.Lane.Worktree, ""
 	query.Lane = workflowstate.Lane{Unit: f.entry.Unit, Branch: "refs/heads/chr/workflow/semantic", Worktree: filepath.Join(t.TempDir(), "semantic"), BaseCommit: f.f.base, HeadCommit: f.f.base}
 

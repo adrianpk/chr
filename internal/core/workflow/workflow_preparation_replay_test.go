@@ -9,6 +9,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -159,7 +160,7 @@ func rejectNativeReplay(t *testing.T, f workflowGitFixture, proof workflowstate.
 
 	var err error
 
-	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -263,7 +264,7 @@ func rejectNativePreparation(t *testing.T, f workflowGitFixture) {
 	t.Helper()
 
 	head := workflowIntegrationCommand(t, f.request.Directory, "rev-parse", "HEAD")
-	q := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
+	q := workflowstate.PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
 	q.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/rejected", Worktree: filepath.Join(t.TempDir(), "rejected"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 	git := NewWorkflowPreparationGit(q.Repository, f.remote)

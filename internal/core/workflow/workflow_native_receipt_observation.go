@@ -9,7 +9,7 @@ import (
 func (s *Store) observeWorkflowNativeReceipt(ctx context.Context, receipt Record, provider PullRequestProvider, git IntegrationGit) (NativePublicationObservation, error) {
 	observer, ok := provider.(NativePublicationObserver)
 	if !ok || git == nil {
-		return NativePublicationObservation{}, ErrWorkflowAtomicGuard
+		return NativePublicationObservation{}, workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	binding, err := s.workflowNativeReceiptBinding(receipt)

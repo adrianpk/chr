@@ -2,12 +2,9 @@ package workflow
 
 import (
 	"context"
-	"encoding/json"
 	"slices"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
-	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
-
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -51,36 +48,6 @@ func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Con
 	}
 
 	if !workflowNativeJSONEqual(actual, proof.Provenance) {
-		return workflowstate.ErrConflict
-	}
-
-	return nil
-}
-
-func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof, repairs workflowintegrate.RepairProof) error {
-	p := proof.Provenance
-	if p == nil {
-		return nil
-	}
-
-	if !workflowintegrate.ValidProvenanceHeader(proof, *p) {
-		return workflowstate.ErrConflict
-	}
-
-	if err := workflowintegrate.CheckProvenanceCommits(proof, *p); err != nil {
-		return err
-	}
-
-	if p.Preparation != nil && !workflowintegrate.ValidPreparationMetadata(proof, *p.Preparation) {
-		return workflowstate.ErrConflict
-	}
-
-	if err := repairs.Check(proof); err != nil {
-		return err
-	}
-
-	data, err := json.Marshal(p)
-	if err != nil || len(data) >= workflowstate.FileLimit {
 		return workflowstate.ErrConflict
 	}
 

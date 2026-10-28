@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 )
 
 // TestNativeMergerReplaySteps retains each successive real conflict checkpoint
@@ -70,7 +71,7 @@ func TestNativeMergerRepairProof(t *testing.T) {
 	proof := *state.Result
 	proof.Provenance.Repairs = nil
 
-	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
 	if err != nil {
 		t.Fatal(err)
 	}

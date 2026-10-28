@@ -12,7 +12,7 @@ import (
 // fresh isolated gate checkout. It cannot replace the result or method.
 type RepairedPreparationGit interface {
 	PreparationGit
-	PrepareWorkflowRepairedIntegration(context.Context, PreparationQuery, MergerRepairState) (workflowstate.IntegrationProof, error)
+	PrepareWorkflowRepairedIntegration(context.Context, workflowstate.PreparationQuery, MergerRepairState) (workflowstate.IntegrationProof, error)
 }
 
 func (s *Store) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (workflowAcceptedRepair, error) {

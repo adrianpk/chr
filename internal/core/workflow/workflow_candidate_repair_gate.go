@@ -68,7 +68,7 @@ func workflowMergerRepairSourceMatches(source workflowstate.ReviewInput, proof w
 	return source.PullRequest.HeadCommit == proof.SourceCommit && source.TargetCommit == proof.BaseCommit && source.Policy.Method == proof.Method && source.PullRequest.Repository == proof.Repository && source.PullRequest.BaseBranch == proof.TargetBranch
 }
 
-func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query PreparationQuery) (workflowCandidateRepairGit, error) {
+func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query workflowstate.PreparationQuery) (workflowCandidateRepairGit, error) {
 	acceptedRepair, err := s.acceptedWorkflowCandidateRepair(run)
 
 	state, refs := acceptedRepair.State, acceptedRepair.Refs

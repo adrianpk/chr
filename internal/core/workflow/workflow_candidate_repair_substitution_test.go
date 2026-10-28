@@ -10,7 +10,7 @@ import (
 
 type nativeCandidateRegenerateGit struct{ OSWorkflowPreparationGit }
 
-func (git nativeCandidateRegenerateGit) PrepareWorkflowRepairedIntegration(ctx context.Context, query PreparationQuery, _ MergerRepairState) (workflowstate.IntegrationProof, error) {
+func (git nativeCandidateRegenerateGit) PrepareWorkflowRepairedIntegration(ctx context.Context, query workflowstate.PreparationQuery, _ MergerRepairState) (workflowstate.IntegrationProof, error) {
 	return git.PrepareWorkflowIntegration(ctx, query)
 }
 

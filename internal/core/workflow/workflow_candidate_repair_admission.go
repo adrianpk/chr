@@ -54,7 +54,7 @@ func (s *Store) checkWorkflowCandidateRepairAdmission(ctx context.Context, run w
 
 	guard, ok := provider.(PublicationGuardProvider)
 	if !ok {
-		return ErrWorkflowAtomicGuard
+		return workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	return s.checkWorkflowCandidateFailureSource(ctx, run, repair.Candidate, guard)

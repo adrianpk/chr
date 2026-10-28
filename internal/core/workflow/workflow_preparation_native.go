@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -22,7 +23,7 @@ func (s *Store) checkWorkflowNativePreparationAdmission(run workflowInvocationFi
 	}
 
 	if _, ok := provider.(NativePreparationProvider); !ok || run.Integration == nil {
-		return ErrWorkflowAtomicGuard
+		return workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
@@ -45,7 +46,7 @@ func workflowNativePreparationProfile(project string, capability workflowstate.P
 
 	native := capability.Mechanism == workspaceconfig.WorkflowPublicationGitAtomicDualRef
 	if native != (config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef) {
-		return native, ErrWorkflowAtomicGuard
+		return native, workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	return native, nil
@@ -78,7 +79,7 @@ func (s *Store) bindWorkflowNativePreparation(ctx context.Context, run workflowI
 
 	observer, ok := provider.(NativePreparationProvider)
 	if !ok || run.Integration == nil {
-		return ErrWorkflowAtomicGuard
+		return workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	capability, err := observeWorkflowPreparedNativeCapability(ctx, observer, *input)
@@ -114,7 +115,7 @@ func validateWorkflowPreparedNativeCapability(input workflowstate.PreparationInp
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowPublicationCapability(input.Source, capability.PublicationCapability)
+	return workflowintegrate.ValidateWorkflowPublicationCapability(input.Source, capability.PublicationCapability)
 }
 
 func observeWorkflowPreparedCapability(ctx context.Context, provider PublicationGuardProvider, input workflowstate.PreparationInput) (workflowstate.PublicationCapability, error) {
@@ -124,7 +125,7 @@ func observeWorkflowPreparedCapability(ctx context.Context, provider Publication
 
 	observer, ok := provider.(NativePreparationProvider)
 	if !ok {
-		return workflowstate.PublicationCapability{}, ErrWorkflowAtomicGuard
+		return workflowstate.PublicationCapability{}, workflowstate.ErrWorkflowAtomicGuard
 	}
 
 	capability, err := observeWorkflowPreparedNativeCapability(ctx, observer, input)

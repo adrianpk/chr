@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -32,7 +33,7 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}); err != nil {
 		return err
 	}
 
@@ -90,7 +91,7 @@ func (reader workflowIntegrationReader) verifyPublicationHistory(ctx context.Con
 		return err
 	}
 
-	hash, err := workflowIntegrationHistoryHash(actual)
+	hash, err := workflowintegrate.WorkflowIntegrationHistoryHash(actual)
 	if err != nil || hash != proof.HistoryHash || actual.BaseCommit != proof.BaseCommit || actual.VerifiedTree != proof.VerifiedTree {
 		return workflowstate.ErrConflict
 	}

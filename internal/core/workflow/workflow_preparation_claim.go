@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -68,7 +69,7 @@ func (s *Store) workflowPreparationPreflight(ctx context.Context, run *workflowI
 	}
 
 	result.Capability, err = observeWorkflowPublicationCapability(ctx, provider, result.Source)
-	if errors.Is(err, ErrWorkflowAtomicGuard) {
+	if errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
 		return result, s.blockWorkflowPublication(run, err)
 	}
 
@@ -200,7 +201,7 @@ func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflow
 		return result, err
 	}
 
-	if err := checkWorkflowPreparedProof(query, repairGit.Proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.CheckWorkflowPreparedProof(query, repairGit.Proof, workflowIntegrationRepairs{}); err != nil {
 		return result, err
 	}
 
@@ -271,16 +272,16 @@ func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source wor
 	return lane, nil
 }
 
-func (s *Store) workflowPreparationQuery(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, source workflowstate.ReviewInput, lane workflowstate.Lane) (PreparationQuery, error) {
+func (s *Store) workflowPreparationQuery(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation, source workflowstate.ReviewInput, lane workflowstate.Lane) (workflowstate.PreparationQuery, error) {
 	candidate, err := s.readWorkflowSliceCandidate(ctx, run, observation)
 	if err != nil {
-		return PreparationQuery{}, err
+		return workflowstate.PreparationQuery{}, err
 	}
 
 	query := workflowIntegrationQuery(run, candidate, source.PullRequest, source.Policy.Method)
 	query.ResultCommit = ""
 
-	return PreparationQuery{IntegrationQuery: query, BaseCommit: source.TargetCommit, Lane: lane}, nil
+	return workflowstate.PreparationQuery{IntegrationQuery: query, BaseCommit: source.TargetCommit, Lane: lane}, nil
 }
 
 func (s *Store) failClaimedWorkflowPreparation(run workflowInvocationFile, record Record, reason error) error {

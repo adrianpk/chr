@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -23,7 +24,7 @@ func workflowNativeSourceResultCompatible(contract string, proof workflowstate.I
 
 	// The existing method validator binds the complete original replay and any
 	// separately attributed integration repairs to the exact prepared result.
-	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil
+	return workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil
 }
 
 func workflowNativeSourceResultRepository(pr workflowstate.PullRequestSnapshot, repository string) bool {

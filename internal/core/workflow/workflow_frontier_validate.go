@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -101,7 +102,7 @@ func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery UnitDeliv
 
 	query := workflowstate.IntegrationQuery{Repository: delivery.PullRequest.Request.Repository, TargetBranch: delivery.PullRequest.Request.BaseBranch, Method: delivery.Proof.Method, SourceCommit: delivery.PullRequest.SourceCommit, SourceTree: delivery.PullRequest.SourceTree, OriginCommit: delivery.Target.Commit, ResultCommit: delivery.Proof.ResultCommit}
 
-	return validateWorkflowIntegrationProof(query, delivery.Proof, workflowIntegrationRepairs{})
+	return workflowintegrate.ValidateWorkflowIntegrationProof(query, delivery.Proof, workflowIntegrationRepairs{})
 }
 
 func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery UnitDelivery, previous int) error {

@@ -15,7 +15,7 @@ type nativeDriftExclusionGit struct {
 	key, target string
 }
 
-func (git nativeDriftExclusionGit) PrepareWorkflowIntegration(ctx context.Context, query PreparationQuery) (workflowstate.IntegrationProof, error) {
+func (git nativeDriftExclusionGit) PrepareWorkflowIntegration(ctx context.Context, query workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error) {
 	if err := git.store.guardWorkflowSubmissionTarget(ctx, git.key, git.target); err != nil {
 		return workflowstate.IntegrationProof{}, err
 	}

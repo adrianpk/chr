@@ -11,7 +11,7 @@ import (
 
 type unavailableNativePreparation struct{}
 
-func (unavailableNativePreparation) PrepareWorkflowIntegration(context.Context, PreparationQuery) (workflowstate.IntegrationProof, error) {
+func (unavailableNativePreparation) PrepareWorkflowIntegration(context.Context, workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error) {
 	return workflowstate.IntegrationProof{}, errors.New("publisher credential unavailable")
 }
 

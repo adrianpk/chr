@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -76,7 +77,7 @@ func TestWorkflowPreparationUnsupported(t *testing.T) {
 	f.provider.guarded = false
 
 	before := workflowTestRead(t, f.store, f.run.ID)
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, ErrWorkflowAtomicGuard) {
+	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
 		t.Fatalf("guard: %v", err)
 	}
 
@@ -104,7 +105,7 @@ func TestWorkflowPreparationProviderPaths(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				if err := validateWorkflowPublicationCapability(workflowstate.ReviewInput{PullRequest: pr, Policy: workflowstate.ReviewPolicy{Method: method}}, capability); !errors.Is(err, ErrWorkflowAtomicGuard) {
+				if err := workflowintegrate.ValidateWorkflowPublicationCapability(workflowstate.ReviewInput{PullRequest: pr, Policy: workflowstate.ReviewPolicy{Method: method}}, capability); !errors.Is(err, workflowstate.ErrWorkflowAtomicGuard) {
 					t.Fatalf("provider falsely claimed guard: %v", err)
 				}
 
@@ -121,7 +122,7 @@ type workflowPreparationGitHook struct {
 	after func()
 }
 
-func (g workflowPreparationGitHook) PrepareWorkflowIntegration(ctx context.Context, query PreparationQuery) (workflowstate.IntegrationProof, error) {
+func (g workflowPreparationGitHook) PrepareWorkflowIntegration(ctx context.Context, query workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error) {
 	proof, err := g.git.PrepareWorkflowIntegration(ctx, query)
 	if err == nil {
 		g.after()

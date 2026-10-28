@@ -52,7 +52,7 @@ func (s service) workflowPreparationDependencies(id string) (servicePreparationD
 
 	guarded, ok := provider.(workflowcore.PublicationGuardProvider)
 	if !ok {
-		return servicePreparationDependencies{Store: nil, Provider: nil}, fmt.Errorf("%w: configured provider has no guarded integration contract", workflowcore.ErrWorkflowAtomicGuard)
+		return servicePreparationDependencies{Store: nil, Provider: nil}, fmt.Errorf("%w: configured provider has no guarded integration contract", workflowstate.ErrWorkflowAtomicGuard)
 	}
 
 	return servicePreparationDependencies{Store: store, Provider: guarded}, nil

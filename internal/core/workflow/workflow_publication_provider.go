@@ -36,7 +36,7 @@ func (adapter RemoteReviewAdapter) WorkflowIntegrationCapability(ctx context.Con
 // SubmitWorkflowIntegration refuses the current source-only merge APIs. It does
 // not call legacy Merge or substitute another method for an exact prepared result.
 func (adapter RemoteReviewAdapter) SubmitWorkflowIntegration(_ context.Context, _ workflowstate.Submission) (workflowstate.SubmissionResponse, error) {
-	return workflowstate.SubmissionResponse{}, ErrWorkflowAtomicGuard
+	return workflowstate.SubmissionResponse{}, workflowstate.ErrWorkflowAtomicGuard
 }
 
 // ObserveWorkflowSubmission cannot seal an operation through a provider path

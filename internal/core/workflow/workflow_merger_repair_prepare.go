@@ -12,7 +12,7 @@ import (
 
 // BeginWorkflowMergerRepair prepares an owned private checkpoint. Conflicts are
 // retained at their original source step, without touching canonical refs.
-func (git OSWorkflowPreparationGit) BeginWorkflowMergerRepair(ctx context.Context, query PreparationQuery) (MergerRepairState, error) {
+func (git OSWorkflowPreparationGit) BeginWorkflowMergerRepair(ctx context.Context, query workflowstate.PreparationQuery) (MergerRepairState, error) {
 	if err := git.validateQuery(query); err != nil {
 		return MergerRepairState{}, err
 	}
@@ -33,7 +33,7 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerRepair(ctx context.Contex
 	return state, nil
 }
 
-func (git OSWorkflowPreparationGit) newMergerRepairReader(ctx context.Context, query PreparationQuery) (workflowIntegrationReader, error) {
+func (git OSWorkflowPreparationGit) newMergerRepairReader(ctx context.Context, query workflowstate.PreparationQuery) (workflowIntegrationReader, error) {
 	reader, err := git.preparationReader(query.Lane.Worktree, query)
 	if err != nil {
 		return reader, err
@@ -64,7 +64,7 @@ func (git OSWorkflowPreparationGit) newMergerRepairReader(ctx context.Context, q
 	return reader, nil
 }
 
-func (git OSWorkflowPreparationGit) importMergerRepairObjects(ctx context.Context, reader workflowIntegrationReader, query PreparationQuery) error {
+func (git OSWorkflowPreparationGit) importMergerRepairObjects(ctx context.Context, reader workflowIntegrationReader, query workflowstate.PreparationQuery) error {
 	for _, fetch := range [][]string{{query.SourceDirectory, query.SourceCommit}, {git.transport.transport, "refs/heads/" + query.TargetBranch + ":refs/heads/target"}} {
 		if _, err := reader.Output(ctx, append([]string{"fetch", "--quiet", "--no-tags", "--no-recurse-submodules", "--no-write-fetch-head", "--"}, fetch...)...); err != nil {
 			return err

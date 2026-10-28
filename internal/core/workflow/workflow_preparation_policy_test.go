@@ -14,10 +14,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativePolicyQuery(t *testing.T, f workflowGitFixture) PreparationQuery {
+func nativePolicyQuery(t *testing.T, f workflowGitFixture) workflowstate.PreparationQuery {
 	t.Helper()
 
-	q := PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
+	q := workflowstate.PreparationQuery{IntegrationQuery: f.request.Git.IntegrationQuery, BaseCommit: f.request.Git.BaseCommit}
 	q.SourceDirectory = f.request.Directory
 	q.Lane = workflowstate.Lane{Unit: workflowstate.Ref{Kind: "slice", ID: "fixture"}, Branch: "refs/heads/chr/workflow/prepared", Worktree: filepath.Join(t.TempDir(), "prepared"), BaseCommit: q.BaseCommit, HeadCommit: q.BaseCommit}
 
@@ -63,7 +63,7 @@ func TestNativePreparationSigning(t *testing.T) {
 			git := NewWorkflowPreparationGit(q.Repository, f.remote).WithSSHCommitSigning(signing)
 
 			proof, err := git.PrepareWorkflowIntegration(t.Context(), q)
-			if err != nil || checkWorkflowPreparedProof(q, proof, workflowIntegrationRepairs{}) != nil {
+			if err != nil || workflowintegrate.CheckWorkflowPreparedProof(q, proof, workflowIntegrationRepairs{}) != nil {
 				t.Fatal("certified signed preparation failed", err)
 			}
 
@@ -156,7 +156,7 @@ func TestNativeSigningBlocked(t *testing.T) {
 				git = git.WithSSHCommitSigning(signing)
 			case "unsigned":
 				proof, _ := nativeCombinedPreparation(t, f)
-				if checkWorkflowPreparedProof(q, proof, workflowIntegrationRepairs{}) == nil {
+				if workflowintegrate.CheckWorkflowPreparedProof(q, proof, workflowIntegrationRepairs{}) == nil {
 					t.Fatal("unsigned proof satisfied required signature policy")
 				}
 

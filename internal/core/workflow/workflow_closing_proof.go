@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -119,7 +120,7 @@ func (s *Store) observeWorkflowClosingLegacySlice(ctx context.Context, input wor
 		return proof, err
 	}
 
-	if err := validateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{}); err != nil {
 		return proof, err
 	}
 

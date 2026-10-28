@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -91,8 +92,8 @@ func (reader workflowIntegrationReader) finishMergerRepair(ctx context.Context, 
 		return err
 	}
 
-	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
-	if err != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
+	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
+	if err != nil || workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
 		return errorsOrConflict(err)
 	}
 

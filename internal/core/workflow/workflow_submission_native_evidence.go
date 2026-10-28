@@ -4,6 +4,7 @@ import (
 	"context"
 	"slices"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -195,7 +196,7 @@ func (s *Store) checkWorkflowNativeJournalObservations(submission workflowstate.
 			return workflowstate.ErrConflict
 		}
 
-		if err := validateWorkflowIntegrationProof(observation.Git.IntegrationQuery, *observation.Git, workflowIntegrationRepairs{}); err != nil {
+		if err := workflowintegrate.ValidateWorkflowIntegrationProof(observation.Git.IntegrationQuery, *observation.Git, workflowIntegrationRepairs{}); err != nil {
 			return err
 		}
 	}

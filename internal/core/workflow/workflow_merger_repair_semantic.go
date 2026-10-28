@@ -6,12 +6,13 @@ import (
 	"time"
 
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // BeginWorkflowMergerSemanticRepair rewinds an existing verified rebase to the
 // owning original step. The unchanged prefix stays exact and the suffix replays.
-func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx context.Context, query PreparationQuery, proof workflowstate.IntegrationProof, original string) (MergerRepairState, error) {
+func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx context.Context, query workflowstate.PreparationQuery, proof workflowstate.IntegrationProof, original string) (MergerRepairState, error) {
 	if git.validateQuery(query) != nil || !validWorkflowMergerSemanticProof(query, proof) {
 		return MergerRepairState{}, workflowstate.ErrConflict
 	}
@@ -19,7 +20,7 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx contex
 	expected := query.IntegrationQuery
 
 	expected.SourceDirectory, expected.ResultCommit = "", proof.ResultCommit
-	if validateWorkflowIntegrationProof(expected, proof, workflowIntegrationRepairs{}) != nil || proof.BaseCommit != query.BaseCommit {
+	if workflowintegrate.ValidateWorkflowIntegrationProof(expected, proof, workflowIntegrationRepairs{}) != nil || proof.BaseCommit != query.BaseCommit {
 		return MergerRepairState{}, workflowstate.ErrConflict
 	}
 
@@ -47,11 +48,11 @@ func (git OSWorkflowPreparationGit) BeginWorkflowMergerSemanticRepair(ctx contex
 	return reader.semanticMergerCheckpoint(ctx, query, proof, original)
 }
 
-func validWorkflowMergerSemanticProof(query PreparationQuery, proof workflowstate.IntegrationProof) bool {
+func validWorkflowMergerSemanticProof(query workflowstate.PreparationQuery, proof workflowstate.IntegrationProof) bool {
 	return query.Method == "rebase" && proof.Provenance != nil && proof.Provenance.Preparation != nil && len(proof.Provenance.IntegrationFixes) == 0
 }
 
-func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Context, query PreparationQuery, proof workflowstate.IntegrationProof, original string) (MergerRepairState, error) {
+func (reader workflowIntegrationReader) semanticMergerCheckpoint(ctx context.Context, query workflowstate.PreparationQuery, proof workflowstate.IntegrationProof, original string) (MergerRepairState, error) {
 	index := slices.IndexFunc(proof.History, func(entry workflowstate.IntegrationCommit) bool { return entry.Source == original })
 	if index < 0 {
 		return MergerRepairState{}, workflowstate.ErrConflict

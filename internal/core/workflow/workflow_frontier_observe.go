@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -73,7 +74,7 @@ func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFil
 		return proof, err
 	}
 
-	if err := validateWorkflowIntegrationProof(integration, proof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.ValidateWorkflowIntegrationProof(integration, proof, workflowIntegrationRepairs{}); err != nil {
 		return proof, err
 	}
 

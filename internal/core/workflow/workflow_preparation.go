@@ -11,9 +11,6 @@ import (
 
 const workflowIntegrationValidationPurpose = "integration_validation"
 
-// ErrWorkflowAtomicGuard blocks a provider path without both immutable guards.
-var ErrWorkflowAtomicGuard = errors.New("provider cannot atomically guard the source and validated target base")
-
 // PublicationGuardProvider resolves current repository protections.
 // Implementations must enforce both guards and the prepared result in the same
 // server transaction; a local lock or observation before IO is insufficient.
@@ -22,18 +19,9 @@ type PublicationGuardProvider interface {
 	WorkflowIntegrationCapability(context.Context, workflowstate.PullRequestSnapshot, string) (workflowstate.PublicationCapability, error)
 }
 
-// PreparationQuery describes host-owned combined-result preparation.
-type PreparationQuery struct {
-	workflowstate.IntegrationQuery
-	BaseCommit         string             `json:"base_commit"`
-	Lane               workflowstate.Lane `json:"lane"`
-	RequiredSignatures bool               `json:"required_signatures,omitempty"`
-	SigningProfile     string             `json:"signing_profile,omitempty"`
-}
-
 // PreparationGit prepares a clean isolated lane without publishing.
 type PreparationGit interface {
-	PrepareWorkflowIntegration(context.Context, PreparationQuery) (workflowstate.IntegrationProof, error)
+	PrepareWorkflowIntegration(context.Context, workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error)
 }
 
 // PreparationBinding retains bounded preparation across candidate changes.

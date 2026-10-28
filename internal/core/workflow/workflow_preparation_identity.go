@@ -10,7 +10,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (git OSWorkflowPreparationGit) preparationReader(dir string, query PreparationQuery) (workflowIntegrationReader, error) {
+func (git OSWorkflowPreparationGit) preparationReader(dir string, query workflowstate.PreparationQuery) (workflowIntegrationReader, error) {
 	reader := workflowIntegrationReader{GitReader: projectcore.GitReader{Directory: dir}, signing: git.signing}
 
 	date := git.committerTime

@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -91,7 +92,7 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 		return SliceDeliveryProof{}, err
 	}
 
-	if err := validateWorkflowIntegrationProof(query, gitProof, workflowIntegrationRepairs{}); err != nil {
+	if err := workflowintegrate.ValidateWorkflowIntegrationProof(query, gitProof, workflowIntegrationRepairs{}); err != nil {
 		return SliceDeliveryProof{}, err
 	}
 

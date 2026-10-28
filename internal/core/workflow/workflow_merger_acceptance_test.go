@@ -22,7 +22,7 @@ func nativeMergerAcceptanceFixture(t *testing.T, id, method string) (workflowPre
 	request.Input.Method = method
 	writeWorkspaceConfig(t, f.store.layout.ProjectDir(), "review:\n  mode: trusted_auto_merge\nwork:\n  merge_strategy: "+method+"\n")
 
-	query := PreparationQuery{IntegrationQuery: workflowstate.IntegrationQuery{Repository: request.Input.Repository, TargetBranch: "dev", Method: method, SourceCommit: request.Input.Source, SourceTree: workflowIntegrationCommand(t, f.run.Lane.Worktree, "rev-parse", request.Input.Source+"^{tree}"), OriginCommit: f.run.Lane.BaseCommit, SourceDirectory: f.run.Lane.Worktree}, BaseCommit: f.base}
+	query := workflowstate.PreparationQuery{IntegrationQuery: workflowstate.IntegrationQuery{Repository: request.Input.Repository, TargetBranch: "dev", Method: method, SourceCommit: request.Input.Source, SourceTree: workflowIntegrationCommand(t, f.run.Lane.Worktree, "rev-parse", request.Input.Source+"^{tree}"), OriginCommit: f.run.Lane.BaseCommit, SourceDirectory: f.run.Lane.Worktree}, BaseCommit: f.base}
 	query.Lane = workflowstate.Lane{Unit: request.Input.Unit, Branch: "refs/heads/chr/workflow/checkpoint", Worktree: filepath.Join(t.TempDir(), "checkpoint"), BaseCommit: f.base, HeadCommit: f.base}
 
 	state, err := f.git.BeginWorkflowMergerRepair(t.Context(), query)

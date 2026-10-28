@@ -8,7 +8,7 @@ import (
 // tree is available without publishing or altering the source checkout.
 type MergerRepairState struct {
 	SchemaVersion  int                                   `json:"schema_version"`
-	Query          PreparationQuery                      `json:"query"`
+	Query          workflowstate.PreparationQuery        `json:"query"`
 	Preparation    workflowstate.IntegrationPreparation  `json:"preparation"`
 	ReplayIndex    int                                   `json:"replay_index"`
 	OriginalParent string                                `json:"original_parent"`

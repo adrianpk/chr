@@ -34,7 +34,7 @@ func LoadWorkflowNativePublisher(configDir, repository, target string) (NativePu
 
 	info, err := os.Lstat(path)
 	if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0o077 != 0 || info.Size() > 65536 {
-		return NativePublisherProfile{}, fmt.Errorf("%w: configure a private native-publishers.json host profile", ErrWorkflowAtomicGuard)
+		return NativePublisherProfile{}, fmt.Errorf("%w: configure a private native-publishers.json host profile", workflowstate.ErrWorkflowAtomicGuard)
 	}
 
 	file, err := os.Open(path)
@@ -90,7 +90,7 @@ func selectWorkflowNativePublisher(profiles []NativePublisherProfile, repository
 	}
 
 	if selected.Repository == "" {
-		return selected, fmt.Errorf("%w: no certified publisher for the exact canonical target", ErrWorkflowAtomicGuard)
+		return selected, fmt.Errorf("%w: no certified publisher for the exact canonical target", workflowstate.ErrWorkflowAtomicGuard)
 	}
 
 	return selected, nil

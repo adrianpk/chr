@@ -41,21 +41,6 @@ func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflo
 	return encodedTaskInput.Prepared, s.commitWorkflowPullRequestFiles(run, files, encodedTaskInput.Change)
 }
 
-func checkWorkflowPreparedProof(query PreparationQuery, proof workflowstate.IntegrationProof, repairs workflowintegrate.RepairProof) error {
-	expected := query.IntegrationQuery
-
-	expected.ResultCommit, expected.SourceDirectory = proof.ResultCommit, ""
-	if proof.BaseCommit != query.BaseCommit || proof.ObservedTarget != query.BaseCommit {
-		return workflowstate.ErrConflict
-	}
-
-	if err := workflowintegrate.CheckSigning(proof, query.RequiredSignatures, query.SigningProfile); err != nil {
-		return err
-	}
-
-	return validateWorkflowIntegrationProof(expected, proof, repairs)
-}
-
 func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflowInvocationFile, input workflowstate.PreparationInput, provider PublicationGuardProvider) error {
 	_, source, err := s.workflowReviewSourceInputs(ctx, run, provider)
 	if err != nil {

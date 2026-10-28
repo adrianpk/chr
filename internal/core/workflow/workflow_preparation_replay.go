@@ -107,7 +107,7 @@ func (reader workflowIntegrationReader) prepareRebaseFix(ctx context.Context, pr
 		return proof, err
 	}
 
-	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
+	proof.HistoryHash, err = workflowintegrate.WorkflowIntegrationHistoryHash(proof)
 	if err != nil {
 		return proof, err
 	}
@@ -130,5 +130,5 @@ func (reader workflowIntegrationReader) requireRebaseFixSigner(proof workflowsta
 }
 
 func validWorkflowRebaseFixInput(proof workflowstate.IntegrationProof, finding workflowstate.ReviewFinding) bool {
-	return proof.Method == "rebase" && proof.Provenance != nil && validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil && workflowstate.ValidateReviewFinding(finding) == nil && finding.Category != workflowstate.AgenticReviewFindingCosmetic
+	return proof.Method == "rebase" && proof.Provenance != nil && workflowintegrate.ValidateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil && workflowstate.ValidateReviewFinding(finding) == nil && finding.Category != workflowstate.AgenticReviewFindingCosmetic
 }

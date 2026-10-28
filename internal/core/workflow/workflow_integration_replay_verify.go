@@ -8,21 +8,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowIntegrationHistoryTipMatches(proof workflowstate.IntegrationProof, last workflowstate.IntegrationCommit) bool {
-	if proof.Method == "rebase" && proof.Provenance != nil {
-		p := proof.Provenance
-		if !workflowintegrate.ValidProvenanceHeader(proof, *p) || len(p.Source) != len(proof.History) {
-			return false
-		}
-
-		entry := p.Prepared[len(p.Source)-1]
-
-		return entry.Commit == last.Commit && entry.Tree == last.Tree
-	}
-
-	return last.Commit == proof.ResultCommit && last.Tree == proof.PreparedTree
-}
-
 func (reader workflowIntegrationReader) rebaseResults(ctx context.Context, proof workflowstate.IntegrationProof, count int) (workflowRebaseResults, error) {
 	base := proof.ResultCommit
 	if p := proof.Provenance; p != nil {
