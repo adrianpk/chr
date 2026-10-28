@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
@@ -25,11 +26,7 @@ func validateWorkflowSubmissionBinding(run workflowInvocationFile) error {
 }
 
 func validWorkflowSubmissionProjection(b SubmissionBinding) bool {
-	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && validWorkflowSubmissionState(b.State) && (!b.ExternalDelivery || b.State == "confirmed")
-}
-
-func validWorkflowSubmissionState(state string) bool {
-	return slices.Contains([]string{"awaiting_observation", "unpublished", "confirmed"}, state)
+	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && workflowforge.ValidWorkflowSubmissionState(b.State) && (!b.ExternalDelivery || b.State == "confirmed")
 }
 
 func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error {
@@ -90,7 +87,7 @@ func validateWorkflowSubmission(submission workflowstate.Submission, journal wor
 }
 
 func validWorkflowSubmissionIdentity(submission workflowstate.Submission, journal workflowSubmissionJournal) bool {
-	return submission.ID == workflowSubmissionID(journal.Key, submission.Attempt, submission.Guard.PreparationHash) && submission.CandidateID != "" && len(submission.CandidateHash) == 64 && validWorkflowSubmissionState(submission.State) && !submission.SubmittedAt.IsZero() && !submission.UpdatedAt.Before(submission.SubmittedAt)
+	return submission.ID == workflowSubmissionID(journal.Key, submission.Attempt, submission.Guard.PreparationHash) && submission.CandidateID != "" && len(submission.CandidateHash) == 64 && workflowforge.ValidWorkflowSubmissionState(submission.State) && !submission.SubmittedAt.IsZero() && !submission.UpdatedAt.Before(submission.SubmittedAt)
 }
 
 func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error {
@@ -119,7 +116,7 @@ func validateWorkflowSubmissionProof(submission workflowstate.Submission) error 
 			return workflowstate.ErrConflict
 		}
 
-		return validateWorkflowUnpublishedProof(submission)
+		return workflowforge.ValidateWorkflowUnpublishedProof(submission)
 	}
 
 	if !validWorkflowConfirmedSubmissionHeader(submission) {
@@ -140,17 +137,5 @@ func validateWorkflowSubmissionProof(submission workflowstate.Submission) error 
 }
 
 func validWorkflowConfirmedSubmissionHeader(submission workflowstate.Submission) bool {
-	return submission.Unpublished == nil && submission.Proof != nil && submission.ObservedPR != nil && submission.ObservedPR.Merged && workflowSubmissionPRMatches(submission, *submission.ObservedPR)
-}
-
-func validateWorkflowUnpublishedProof(submission workflowstate.Submission) error {
-	if submission.State == "unpublished" {
-		if submission.Unpublished == nil || submission.Unpublished.SubmissionID != submission.ID || !submission.Unpublished.Unpublished {
-			return workflowstate.ErrConflict
-		}
-	} else if submission.Unpublished != nil {
-		return workflowstate.ErrConflict
-	}
-
-	return nil
+	return submission.Unpublished == nil && submission.Proof != nil && submission.ObservedPR != nil && submission.ObservedPR.Merged && workflowforge.WorkflowSubmissionPRMatches(submission, *submission.ObservedPR)
 }

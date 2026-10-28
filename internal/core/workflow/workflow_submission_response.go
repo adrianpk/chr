@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -24,7 +25,7 @@ func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submis
 			return nil // A concurrent definitive observation wins over a late response.
 		}
 
-		submission.Response, submission.UpdatedAt = workflowSubmissionResponseState(response, submitErr), time.Now().UTC()
+		submission.Response, submission.UpdatedAt = workflowforge.WorkflowSubmissionResponseState(response, submitErr), time.Now().UTC()
 		if workflowstate.ValidCommitID(response.ResultCommit) {
 			submission.ResponseCommit = response.ResultCommit
 		}
@@ -38,18 +39,6 @@ func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submis
 	})
 
 	return submission, err
-}
-
-func workflowSubmissionResponseState(response workflowstate.SubmissionResponse, err error) string {
-	if err != nil {
-		return "error_unknown"
-	}
-
-	if response.Accepted {
-		return "accepted"
-	}
-
-	return "unaccepted"
 }
 
 func (s *Store) finishWorkflowSubmissionObservation(ctx context.Context, id string, observed workflowstate.Submission) (submission workflowstate.Submission, err error) {
