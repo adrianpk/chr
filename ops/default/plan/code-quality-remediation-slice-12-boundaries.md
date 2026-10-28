@@ -160,13 +160,13 @@ locks, journal/recovery entries and atomic acceptance.
 ## Slice 15 final method inspection
 
 The 908-row method map separates ownership disposition, body-specific basis and
-inspected revision from original responsibility/reachability. It records 584
-decisions: 497 guarded-persistence methods, 23 closing policies, one contained
-evidence adapter, five coordinator functions, one private reader, 22 lifecycle
-owners and 35 coordinator mappings. Private PR provider sequencing has a real
-host and canonical identity/URL policy has forge owners with direct consumers.
-The original public minute-bounded lock and current-candidate/creating-intent/
-complete observation transactions stay in Store. Seventy additional source bases
-cover PR, retained plan-order, explicit adoption and materialization/receipt
-paths. The remaining 324 Store rows stay explicitly pending. Reachable locking,
-IO or a lower method count alone is not an ownership decision.
+inspected revision from original responsibility/reachability. It records 689
+decisions: 597 guarded-persistence methods, 23 closing policies, one contained
+evidence adapter, five coordinator functions, one private reader, 24 lifecycle
+owners and 38 coordinator mappings. Actual native observation/Git/poll
+coordinators and a private host own provider sequencing, deadlines and detached
+cleanup. Store retains exact reconciliation/binding/callback locks and complete
+journal/projection/finalization transactions. Additional source bases cover
+native evidence/receipts, transition/budget, coherent inspection/selection and
+coordinator registration. The remaining 219 Store rows stay explicitly pending.
+Reachable locking, IO or a lower method count alone is not an ownership decision.

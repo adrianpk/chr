@@ -130,6 +130,13 @@ set transactions. Exact PR identity and URL policy have actual forge owners and
 direct consumers. Uncertain creation remains observation-only; neither absence
 nor merged metadata can authorize a replacement PR or confirmed delivery.
 
+Native single observation, bounded polling and Git reconciliation now use actual
+coordinator functions. A private observation host sequences canonical provider
+IO and detached retention; Store retains reconciliation snapshots, evidence
+binding, callback fences and complete journal/projection transactions. Actual
+continuation, closing and frontier consumers call these owners directly. The
+persisted deadline, bounded backoff, cancellation and partial outcomes are exact.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -144,11 +151,11 @@ Execution extraction is a policy-flow change, not a whole-method move or a
 whole-method token-equivalence claim.
 
 The [move ledger](../../../plan/code-quality-remediation-slice-15-moves.csv)
-retains 244 source/extraction/consolidation images. Current identities and hashes are updated
+retains 252 source/extraction/consolidation images. Current identities and hashes are updated
 in the original declaration, method, dependency and ownership ledgers while their
-frozen source fields remain unchanged. Eighty-seven former Store method rows now have actual
+frozen source fields remain unchanged. Ninety-two former Store method rows now have actual
 closeout policy, host evidence, coordinator, lifecycle or private-function owners. The original 908 method rows
-retain frozen source evidence and current identities; 821 methods remain on Store. This count does not establish
+retain frozen source evidence and current identities; 816 methods remain on Store. This count does not establish
 final policy/persistence separation.
 
 Capacity/continuation conversion is in `d4844af16cce52e3a44ad9bba5e2a59e80adb520`, control/receipt
@@ -168,7 +175,7 @@ replaces the removed policy methods.
 
 The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
 defines frontier, adoption, loose selection, continuation, amendment and closing
-from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Eighteen current compatibility/control cases identify actual
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Nineteen current compatibility/control cases identify actual
 consumers, existing regression protection and retirement conditions. Remaining
 legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
 
@@ -201,11 +208,11 @@ final Store API assessment remains active.
 
 Closing status extraction is in `5f506a41dee1e172f8915f5712bbc9d6292a7bea`, with three exact declaration
 comparisons and four frozen source images. The port map now records 22 actual
-contracts. Final method inspection now records 584 body-specific decisions in
-the existing 908-row method map: 497 guarded-persistence methods, 23 closing
+contracts. Final method inspection now records 689 body-specific decisions in
+the existing 908-row method map: 597 guarded-persistence methods, 23 closing
 policies, one host evidence adapter, five coordinator functions, one persistence
-reader, 22 lifecycle owners and 35 coordinator operation mappings. The remaining
-324 source rows stay explicitly pending final assessment.
+reader, 24 lifecycle owners and 38 coordinator operation mappings. The remaining
+219 source rows stay explicitly pending final assessment.
 
 Unused-receiver cleanup is in `3ed65239b85570183865b74e169bcbf5a62c1819`. Five complete declarations
 match after receiver removal and the Markdown reader name; all 879 remaining
@@ -293,6 +300,17 @@ decisions cover these PR paths and retained plan-order, adoption, materializatio
 and receipt guards. Store has 821 methods; 324 source rows remain pending. C15.18
 records retained uncertain creation and canonical identity without replacement.
 
+Native observation separation is in `6afffc97a34bc31483d9f7f8acd4ff045e827bc3`. Eight production
+declarations and 23 changed test declarations match after explicit receiver,
+coordinator, host and call normalization. The original once/poll choice, 250ms
+initial backoff capped at eight seconds, persisted deadline, three-minute IO
+bound and five-second detached retention/error joins remain. Store retains all
+original reconciliation and callback locks. One hundred five additional source
+bases cover these actual owners plus native evidence/receipt/finalization,
+transition/budget, coherent inspection/selection and coordinator registration.
+Store has 816 methods; 219 source rows remain pending. C15.16 records the actual
+observation owners and C15.19 resolves the explicit registration/read control.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -316,6 +334,30 @@ changes.
 - Existing Store method, declaration, authority/dependency and ownership ledgers.
 
 ## Validation
+
+Native observation task checks passed all 33 selected real fixtures. The initial
+race command passed five cases; its closing-publication case failed the existing
+three-second gate-start wait, with no data-race warning. That single case passed
+an isolated uncached retry under unchanged fixture and timeout bounds. The first
+failure is retained; its cause was not reproduced. No test or production change
+was made between runs, and no passed race was repeated. Both commands cleaned
+owned fixtures and reported no skips. They cover actual Git
+application, canonical outcomes, polling/deadline/timeout, lost responses,
+callback fences, dispatch crash recovery, receipt proof/descendants/divergence,
+stop, fanout/restart and closing publication races. Affected short tests,
+signature/style and pinned strict lint pass. Eight production and 23 test
+streams retain their original tokens after explicit owner/call normalization.
+These are task checks; guided parity and final exact-head controller acceptance
+remain pending.
+
+- `go test ./internal/core/workflow -run '^Test(NativeCanonical.*|NativeGit(Outcomes|Fence)|NativeReceipt.*|NativeStop(Rejected|Receipt)|NativeHostPublication|NativeClosing(Evidence|Divergence|PublicationRace)|NativeFaultCrashes)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(NativeCanonical(Poll|Fence|Lost)|NativeGitFence|NativeClosingPublicationRace|NativeReceiptFences)$' -count=1 -timeout=10m -json` — failed only the closing gate-start wait; five other races passed.
+- `go test -race ./internal/core/workflow -run '^TestNativeClosingPublicationRace$' -count=1 -timeout=10m -json`
+- `go test -short ./internal/core/workflow/... ./internal/app/... ./scripts/goquality`
+- `make check-go-style` — 9,410 declarations; zero exact debts and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app/... ./scripts/goquality` — zero issues.
+- `git diff --check`
+
 
 Canonical PR task checks passed all 19 selected real fixtures and four focused
 races without skips or owned fixture leaks. They cover durable intent before
@@ -567,6 +609,14 @@ decisions with 324 pending rows. Frozen source/baseline/introduction fields rema
 unchanged across 33 ledgers. Current owner declarations, relative links, named
 regressions, 18 compatibility cases, T15 columns and whitespace pass. Runtime
 checks are not repeated for this metadata-only update.
+
+Native observation ledger reconciliation verifies 4,366 current declaration
+hashes, all 908 original method mappings, four signature ledgers, eight new frozen
+source preimages, 77 commit objects and 22 actual ports. It records 689 specific
+ownership decisions with 219 pending rows. Frozen source/baseline/introduction
+fields remain unchanged across 33 ledgers. Current owner declarations, relative
+links, named regressions, 19 compatibility cases, T15 columns and whitespace pass.
+Runtime checks are not repeated for this metadata-only update.
 
 ## Risks and Follow-ups
 
