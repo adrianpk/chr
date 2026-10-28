@@ -59,6 +59,15 @@ Partial journal, owner, PR, transport, observation, fence, proof and receipt val
 survive the same errors and deferred cleanup as before. The existing closeout
 reader adapts the native proof/hash value while retaining its own current API.
 
+
+The forge client now owns provider-specific request arguments, all-state PR
+pagination, structured PR creation/read/branch IO and bounded JSON decoding.
+Native policy/identity reads consume this same request protocol. The host adapter
+retains enabled configuration, canonical URL/repository resolution, prerequisite
+diagnostics and the existing bounded process runner. Shared PR query, request and
+content values live in state; direct application and host callers use that owner.
+The separate transport input boolean is replaced by the request body's nil state.
+
 ## Implementation Notes
 
 Predecessor PR #450 is verified merged into dev at
@@ -85,10 +94,16 @@ checkout remains on dev; implementation uses the recorded slice branch.
   All direct consumers retain their assertion and authority behavior. Original
   named/unnamed error scope and conditional-initializer variable scope are preserved.
 
+- `f22302613d1462d2bee9d20f522bc1cb15127040` extracts provider PR protocol and relocates shared inputs.
+  Eleven pure declaration token streams match after naming changes. Four PR flow
+  entries retain their original host configuration gates; provider IO does not gain
+  store, claim, approval or receipt authority.
+
 The [extraction ledger](../../../plan/code-quality-remediation-slice-14-moves.csv)
-keeps 14 mechanical preimages plus two explicit flow extractions.
-The flow entries record their original host methods without claiming whole-method
-moves or token equivalence. Current images reconcile all 908 Store methods, 2,918 prior
+keeps 35 entries, including 25 pure declarations with matching token evidence,
+six explicit flow extractions and four endpoint/request protocol transformations.
+Flow and inlined-path entries identify their original host operations without
+claiming whole-method moves or token equivalence. Current images reconcile all 908 Store methods, 2,918 prior
 relocations, 146 Slice 13 extractions, 100 authority boundaries and 79 dependencies;
 original source identities and hashes remain frozen. The standard-library
 `cmp.Compare[int]` reference remains an external dependency identity.
@@ -106,15 +121,21 @@ port; `PublicationProvider` includes that unchanged guarded submission method.
 `Responses` stays bound to the private host operation, which now receives one
 reply/failure value instead of parallel response parameters.
 The dependency checker permits that actual hash dependency and continues to reject
-coordinator, configuration and mutation imports. Wire/hash encodings, persisted
-state spellings and public service signatures remain unchanged in this unit.
+coordinator, configuration and mutation imports. Wire/hash encodings and persisted
+state spellings remain unchanged. Service/adapter callers now consume the shared
+state PR input types directly; no compatibility aliases are introduced.
+`forge.Commands` exposes only bounded command Output/Input IO to `Client.Request`.
+The host resolves configuration before constructing an endpoint; leaf modules
+still import only shared state for this transport work. PR creation is metadata
+IO, not permission to dispatch integration or proof of delivered work.
 Ticket-native execution and forge-native publication remain distinct terms.
 
 ## Files of Interest
 
 - `internal/core/workflow/review/{input,parse,policy,execution,decision}.go`.
 - `workflow_review.go`, `workflow_review_result.go` and `workflow_stage_ports.go`.
-- `forge/{identity,policy,dispatch,response}.go` and `workflow_review_operation.go`.
+- `forge/{identity,policy,dispatch,response,client,pull_request}.go` and `workflow_review_operation.go`.
+- `state/pull_request.go`, `review_workflow_pull_request.go` and native policy/identity reads.
 - `workflow_publication_operation.go`, native dispatch/observation/receipt owners
   and the existing closeout proof reader.
 - `internal/app/service_workflow_review.go` and its direct control/continuation callers.
@@ -168,9 +189,26 @@ which completed cleanup after each command.
   package READMEs resolve; all 908 Store methods retain their guarded owner.
 - `git diff --check` — PASS after documentation/provenance updates.
 
+
+- `go test ./internal/core/workflow ./internal/app ./scripts/goquality -run '^Test(WorkflowPR(Adapter|AdapterBounds|Branch|Command|CommandDeadline)|WorkflowSlicePR(Concurrent|Reuse|Observation|Block|Existing|Repair|Source)|Native(Capability|CapabilityDenials|PolicyDenials|Observation|ObservationProof|HostPublication|HostDenials)|ServiceWorkflowSlicePR|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v` — PASS, 22 top-level real local checks for exact adapter protocol, response
+  bounds, command deadlines, PR reuse/uncertainty/concurrency/source binding,
+  native capability/observation and the application PR path. The additional
+  `TestNativePolicyDenials` requires explicit live fixture opt-in and skipped;
+  this command does not establish live-forge certification.
+- `go test -race ./internal/core/workflow ./scripts/goquality -run '^Test(WorkflowSlicePRConcurrent|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=15m -v` — PASS, three top-level checks for concurrent PR intent, frozen wire values
+  and leaf dependencies.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./internal/core/workflow/... ./internal/app ./scripts/goquality` — PASS with zero issues for the PR transport extraction.
+- `make check-go-style` — PASS: 9,333 production declarations, ceiling six,
+  24 exact debt entries and one external exception.
+- Eleven pure PR wire decoder/content/input declarations match their frozen
+  token preimages after naming; the existing `PullRequestSnapshot` declaration
+  remains byte-identical. Frozen wire fixtures retain nested PR binding bytes.
+- Current hashes, frozen source columns and report/ticket/tracker links resolve.
+- `git diff --check` — PASS after report and provenance reconciliation.
+
 ## Risks and Follow-ups
 
-PR creation/observation and native publication/review binding policy extraction,
+Native publication/review binding policy extraction,
 the remaining 11 category B cohesion dispositions and local stored-state/flag/error/
 suppression/glossary reconciliation are active Slice 14 work. Final `make verify`,
 remaining focused publication/receipt checks and exact-head controller validation

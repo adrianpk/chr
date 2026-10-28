@@ -50,3 +50,12 @@ entry/budget/journal image and pair read-only canonical/Git observation ports.
 Contexts remain explicit and Store retains claim, journal, lock and receipt
 transactions. Internal `Handled` and `Observed` flags preserve native/publication
 barriers on partial errors; they do not assert completed delivery.
+
+## Provider protocol boundary
+
+`workflow/forge.Client` owns provider request construction, bounded PR discovery,
+JSON decoding and structured PR creation. The host adapter resolves enabled
+configuration and canonical URLs/repositories, chooses the bounded command runner
+and retains prerequisite diagnostics before delegating IO. Immutable PR inputs
+live in `workflow/state`. Guarded PR intents, uncertain outcome reconciliation,
+source identity checks, approval and receipt transactions retain their host owner.
