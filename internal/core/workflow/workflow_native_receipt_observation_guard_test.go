@@ -30,7 +30,7 @@ func TestNativeReceiptUncertainty(t *testing.T) {
 			f := fixture.f
 
 			submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, git)
-			if errors.Is(err, ErrWorkflowHistoryDivergence) || submission.State != "confirmed" {
+			if errors.Is(err, workflowstate.ErrHistoryDivergence) || submission.State != "confirmed" {
 				t.Fatal("uncertain observation invented removed history", err)
 			}
 
@@ -84,7 +84,7 @@ func TestNativeReceiptRecovery(t *testing.T) {
 
 	checkNativeReceiptPreserved(t, fixture, receipt, before)
 
-	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, ErrWorkflowHistoryDivergence) {
+	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, workflowstate.ErrHistoryDivergence) {
 		t.Fatal("fresh owner could not observe retained divergence", err)
 	}
 
@@ -98,7 +98,7 @@ func TestNativeReceiptTransition(t *testing.T) {
 	f, b := fixture.f, fixture.f.candidate.Native.NativeRecordBinding
 	workflowIntegrationCommand(t, fixture.remote, "update-ref", b.TargetRef, b.ValidatedBase, b.PreparedResult)
 
-	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, ErrWorkflowHistoryDivergence) {
+	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, workflowstate.ErrHistoryDivergence) {
 		t.Fatal(err)
 	}
 
@@ -122,7 +122,7 @@ func TestNativeReceiptBeforeFanout(t *testing.T) {
 	f, b := fixture.f, fixture.f.candidate.Native.NativeRecordBinding
 	workflowIntegrationCommand(t, fixture.remote, "update-ref", b.TargetRef, b.ValidatedBase, b.PreparedResult)
 
-	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, ErrWorkflowHistoryDivergence) {
+	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, workflowstate.ErrHistoryDivergence) {
 		t.Fatal(err)
 	}
 
@@ -198,7 +198,7 @@ func TestNativeReceiptStopped(t *testing.T) {
 
 	workflowIntegrationCommand(t, fixture.remote, "update-ref", b.TargetRef, b.ValidatedBase, b.PreparedResult)
 
-	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, ErrWorkflowHistoryDivergence) {
+	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git); !errors.Is(err, workflowstate.ErrHistoryDivergence) {
 		t.Fatal(err)
 	}
 

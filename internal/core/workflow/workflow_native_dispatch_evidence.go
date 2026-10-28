@@ -12,7 +12,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) retainWorkflowNativeSend(ctx context.Context, submission workflowstate.Submission, request GitPublication, advertisement GitPublicationAdvertisement) error {
+func (s *Store) retainWorkflowNativeSend(ctx context.Context, submission workflowstate.Submission, request GitPublication, advertisement workflowstate.GitPublicationAdvertisement) error {
 	_, err := s.updateWorkflowNativeDispatch(ctx, submission, func(owner *Store, native *workflowstate.NativeSubmission) error {
 		if err := owner.checkWorkflowNativeSendStop(native.InvocationID); err != nil {
 			return err
@@ -42,7 +42,7 @@ func (s *Store) retainWorkflowNativeSend(ctx context.Context, submission workflo
 		}
 
 		native.CommandManifestRef = &commandRef
-		result := GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "unknown", CommandsSent: true, OriginalSourceCommit: native.OriginalSource, AdvertisedSourceCommit: native.OriginalSource, AdvertisedTargetCommit: native.ValidatedBase, ResultCommit: native.PreparedResult, CandidateRevision: request.CandidateRevision}
+		result := workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "unknown", CommandsSent: true, OriginalSourceCommit: native.OriginalSource, AdvertisedSourceCommit: native.OriginalSource, AdvertisedTargetCommit: native.ValidatedBase, ResultCommit: native.PreparedResult, CandidateRevision: request.CandidateRevision}
 
 		return owner.retainWorkflowNativeDispatchResponse(submission, native, result)
 	})
@@ -56,7 +56,7 @@ func workflowNativeCommandManifest(submission workflowstate.Submission) NativeCo
 	return NativeCommandManifest{SchemaVersion: 1, SubmissionID: submission.ID, Atomic: true, SourceRef: native.SourceRef, ExpectedSource: native.OriginalSource, NewSource: native.PreparedResult, TargetRef: native.TargetRef, ExpectedTarget: native.ValidatedBase, NewTarget: native.PreparedResult}
 }
 
-func (s *Store) completeWorkflowNativeDispatch(ctx context.Context, submission workflowstate.Submission, result GitPublicationResult) (workflowstate.Submission, error) {
+func (s *Store) completeWorkflowNativeDispatch(ctx context.Context, submission workflowstate.Submission, result workflowstate.GitPublicationResult) (workflowstate.Submission, error) {
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
@@ -82,7 +82,7 @@ func (s *Store) completeWorkflowNativeDispatch(ctx context.Context, submission w
 	})
 }
 
-func (s *Store) retainWorkflowNativeDispatchResponse(submission workflowstate.Submission, native *workflowstate.NativeSubmission, result GitPublicationResult) error {
+func (s *Store) retainWorkflowNativeDispatchResponse(submission workflowstate.Submission, native *workflowstate.NativeSubmission, result workflowstate.GitPublicationResult) error {
 	ref, err := s.writeWorkflowNativeDispatchEvidence(submission, result)
 	if err != nil {
 		return err

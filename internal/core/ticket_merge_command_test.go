@@ -13,6 +13,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 )
 
 func TestRunTicketMergeCommandDryRunDoesNotMutateTicket(t *testing.T) {
@@ -45,7 +46,7 @@ func TestRunTicketMergeCommandAppliesSuccessfulMerge(t *testing.T) {
 	remote := fakeTicketMergeCommandRemote{
 		snapshot: mergeCommandSnapshot(),
 		merge: workflowcore.MergeResult{
-			Reference: workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+			Reference: workflowforge.Reference{Provider: workflowforge.Forgejo},
 			Strategy:  workflowcore.TicketMergeStrategyRebase,
 			SHA:       "abc123",
 		},
@@ -92,7 +93,7 @@ func TestRunTicketMergeCommandCleansWorktreeAfterSuccessfulMerge(t *testing.T) {
 	remote := fakeTicketMergeCommandRemote{
 		snapshot: mergeCommandSnapshot(),
 		merge: workflowcore.MergeResult{
-			Reference: workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+			Reference: workflowforge.Reference{Provider: workflowforge.Forgejo},
 			Strategy:  workflowcore.TicketMergeStrategyRebase,
 			SHA:       "abc123",
 		},
@@ -264,14 +265,14 @@ func readMergeCommandTicket(t *testing.T, path string) string {
 
 func mergeCommandSnapshot() workflowcore.RemoteReviewSnapshot {
 	return workflowcore.RemoteReviewSnapshot{
-		Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+		Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 		PullRequestJSON: `{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-3-merge-execution-command"},"mergeable":true}`,
 	}
 }
 
 func blockedMergeCommandSnapshot() workflowcore.RemoteReviewSnapshot {
 	return workflowcore.RemoteReviewSnapshot{
-		Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+		Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 		PullRequestJSON: `{"state":"open","base":{"ref":"dev"},"head":{"ref":"feat/slice-3-merge-execution-command"},"mergeable":false}`,
 	}
 }

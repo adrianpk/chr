@@ -1,6 +1,7 @@
 package workflow
 
 import (
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -28,12 +29,12 @@ func workflowNativeSourceResultCompatible(contract string, proof workflowstate.I
 }
 
 func workflowNativeSourceResultRepository(pr workflowstate.PullRequestSnapshot, repository string) bool {
-	reference, err := DetectReviewProviderReference(pr.URL)
+	reference, err := workflowforge.ParseReference(pr.URL)
 
-	return err == nil && reference.Provider == ReviewProviderGitHub && pr.Repository == repository && pr.HeadRepository == repository
+	return err == nil && reference.Provider == workflowforge.GitHub && pr.Repository == repository && pr.HeadRepository == repository
 }
 
-func workflowNativeSourceResultObserved(observation NativePublicationObservation) bool {
+func workflowNativeSourceResultObserved(observation workflowstate.NativePublicationObservation) bool {
 	proof := observation.Git
 	if proof == nil || !workflowNativeSourceResultCompatible(observation.ObservationContract, *proof, observation.PullRequest) {
 		return false
@@ -53,7 +54,7 @@ func workflowNativeReceiptResultMatches(receipt Receipt) bool {
 		return true
 	}
 
-	reference, err := DetectReviewProviderReference(native.CanonicalPR)
+	reference, err := workflowforge.ParseReference(native.CanonicalPR)
 
-	return err == nil && reference.Provider == ReviewProviderGitHub && native.ObservationContract == workflowNativeSourceResultContract && native.Method == "rebase" && native.ActualMergeResult == native.OriginalSource
+	return err == nil && reference.Provider == workflowforge.GitHub && native.ObservationContract == workflowNativeSourceResultContract && native.Method == "rebase" && native.ActualMergeResult == native.OriginalSource
 }

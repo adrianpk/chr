@@ -13,11 +13,11 @@ import (
 )
 
 type nativePolicyFixture struct {
-	policy NativePolicy
+	policy workflowstate.NativePolicy
 	calls  int
 }
 
-func (fixture *nativePolicyFixture) ReadWorkflowNativePolicy(_ context.Context, _ workflowstate.PullRequestSnapshot, _ string) (NativePolicy, error) {
+func (fixture *nativePolicyFixture) ReadWorkflowNativePolicy(_ context.Context, _ workflowstate.PullRequestSnapshot, _ string) (workflowstate.NativePolicy, error) {
 	fixture.calls++
 
 	return fixture.policy, nil
@@ -28,7 +28,7 @@ type nativeInspectorFixture struct {
 	calls int
 }
 
-func (fixture *nativeInspectorFixture) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (GitPublicationAdvertisement, error) {
+func (fixture *nativeInspectorFixture) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (workflowstate.GitPublicationAdvertisement, error) {
 	fixture.calls++
 
 	return fixture.GitPublicationInspector.InspectWorkflowGitPublication(ctx, request)
@@ -61,7 +61,7 @@ func newNativeCapabilityFixture(t *testing.T, forge string) nativeCapabilityFixt
 	pr := workflowstate.PullRequestSnapshot{URL: repository + marker + "7", Repository: repository, HeadRepository: repository, HeadBranch: strings.TrimPrefix(publication.SourceRef, "refs/heads/"), BaseBranch: "dev", HeadCommit: publication.Git.SourceCommit, BaseCommit: publication.Git.BaseCommit, State: "open"}
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}
 	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), runner)
-	policy := NativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: contenthash.Sum([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
+	policy := workflowstate.NativePolicy{Repository: repository, SourceRef: publication.SourceRef, TargetRef: publication.TargetRef, OwnershipRevision: publication.OwnershipRevision, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, CredentialIdentityFingerprint: contenthash.Sum([]byte("fixture-role")), ObservationContract: contract, CertifiedMethods: []string{"rebase"}}
 	policy.ReviewMode = workflowstate.ReviewHuman
 	result := nativeCapabilityFixture{adapter: adapter, runner: runner, request: NativeCapabilityRequest{Config: workspaceconfig.WorkIntegrationConfig{PublicationProfile: workspaceconfig.WorkflowPublicationGitAtomicDualRef}, PullRequest: pr, Publication: publication}, policy: &nativePolicyFixture{policy: policy}, git: &nativeInspectorFixture{GitPublicationInspector: NewWorkflowGitPublisher(repository, fixture.remote)}, remote: fixture.remote}
 	result.prefix = nativePolicyCommand(t, result, "")

@@ -13,34 +13,34 @@ import (
 
 // ReadWorkflowNativePolicy combines a private target certificate with retained
 // host ownership of one exact source. A branch prefix never supplies authority.
-func (adapter *NativeReviewAdapter) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (NativePolicy, error) {
+func (adapter *NativeReviewAdapter) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.NativePolicy, error) {
 	nativePublisher, err := adapter.nativePublisher(ctx)
 	run, owner, profile := nativePublisher.Run, nativePublisher.Owner, nativePublisher.Profile
 
 	if err != nil {
-		return NativePolicy{}, err
+		return workflowstate.NativePolicy{}, err
 	}
 
 	if !workflowNativeOwnedPR(run, pr) || !slices.Contains(profile.CertifiedMethods, method) {
-		return NativePolicy{}, fmt.Errorf("%w: source ownership or method is outside the publisher profile", workflowstate.ErrAtomicGuard)
+		return workflowstate.NativePolicy{}, fmt.Errorf("%w: source ownership or method is outside the publisher profile", workflowstate.ErrAtomicGuard)
 	}
 
 	policy, err := owner.workflowReviewPolicy(run)
 	if err != nil || policy.Method != method {
-		return NativePolicy{}, workflowstate.ErrConflict
+		return workflowstate.NativePolicy{}, workflowstate.ErrConflict
 	}
 
 	ownership, err := workflowNativeOwnershipRevision(run, profile)
 	if err != nil {
-		return NativePolicy{}, err
+		return workflowstate.NativePolicy{}, err
 	}
 
 	image, err := json.Marshal(profile)
 	if err != nil {
-		return NativePolicy{}, err
+		return workflowstate.NativePolicy{}, err
 	}
 
-	return NativePolicy{Repository: profile.Repository, SourceRef: run.Lane.Branch, TargetRef: profile.TargetRef, OwnershipRevision: ownership, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, ReviewMode: policy.Mode, CredentialIdentityFingerprint: contenthash.Sum(image), APIIdentityFingerprint: profile.APIIdentityFingerprint, ObservationContract: profile.ObservationContract, CertifiedMethods: profile.CertifiedMethods}, nil
+	return workflowstate.NativePolicy{Repository: profile.Repository, SourceRef: run.Lane.Branch, TargetRef: profile.TargetRef, OwnershipRevision: ownership, SourceRewriteAuthorized: true, FastForwardTargetAuthorized: true, HostCandidateReview: true, ReviewMode: policy.Mode, CredentialIdentityFingerprint: contenthash.Sum(image), APIIdentityFingerprint: profile.APIIdentityFingerprint, ObservationContract: profile.ObservationContract, CertifiedMethods: profile.CertifiedMethods}, nil
 }
 
 func (adapter *NativeReviewAdapter) nativePublisher(ctx context.Context) (workflowNativePublisher, error) {

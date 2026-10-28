@@ -21,10 +21,6 @@ type OSWorkflowIntegrationGit struct {
 	transport  string
 }
 
-// ErrWorkflowHistoryDivergence means fetched target history excludes the known
-// result object. Transport errors and unavailable objects do not prove removal.
-var ErrWorkflowHistoryDivergence = errors.New("canonical target history excludes the integration result")
-
 // NewWorkflowIntegrationGit stores an explicit canonical repository/transport pair.
 // Production callers use the canonical HTTPS repository itself as the transport.
 func NewWorkflowIntegrationGit(repository, transport string) OSWorkflowIntegrationGit {
@@ -197,7 +193,7 @@ func (reader workflowIntegrationReader) observeIntegrationTarget(ctx context.Con
 	if _, err := reader.Output(ctx, "merge-base", "--is-ancestor", proof.ResultCommit, target); err != nil {
 		var exit *exec.ExitError
 		if errors.As(err, &exit) && exit.ExitCode() == 1 {
-			return fmt.Errorf("%w: %w", ErrWorkflowHistoryDivergence, err)
+			return fmt.Errorf("%w: %w", workflowstate.ErrHistoryDivergence, err)
 		}
 
 		return fmt.Errorf("provider result is absent from the canonical target: %w", err)

@@ -12,7 +12,7 @@ func (s *Store) projectWorkflowNativeReceiptObservation(run *workflowInvocationF
 		return workflowstate.ErrConflict
 	}
 
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 	if err := s.readWorkflowNativeEvidence(run.ID, refs[len(refs)-1], &observation); err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (s *Store) checkWorkflowNativeReceiptContinuation(submission workflowstate.
 		return ErrWorkflowObservationRequired
 	}
 
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, refs[len(refs)-1], &observation); err != nil {
 		return err
 	}

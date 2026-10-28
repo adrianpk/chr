@@ -2,29 +2,18 @@ package workflow
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"os/exec"
 	"path"
 	"strconv"
 	"strings"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-// ReviewProvider defines a package boundary type.
-type ReviewProvider string
-
 const (
-	// ReviewProviderForgejo defines a package boundary constant.
-	ReviewProviderForgejo ReviewProvider = "forgejo"
-	// ReviewProviderGitHub defines a package boundary constant.
-	ReviewProviderGitHub ReviewProvider = "github"
-	// ReviewProviderUnsupported defines a package boundary constant.
-	ReviewProviderUnsupported ReviewProvider = "unsupported"
-
 	// ReviewProviderDiagnosticStatusReady defines a package boundary constant.
 	ReviewProviderDiagnosticStatusReady = "ready"
 	// ReviewProviderDiagnosticStatusBlocked defines a package boundary constant.
@@ -39,16 +28,6 @@ const (
 	// ReviewProviderDiagnosticCheckSkipped defines a package boundary constant.
 	ReviewProviderDiagnosticCheckSkipped = "skipped"
 )
-
-// ReviewProviderReference describes a package boundary value.
-type ReviewProviderReference struct {
-	Provider ReviewProvider
-	URL      string
-	Host     string
-	Owner    string
-	Repo     string
-	Number   int
-}
 
 // ReviewProviderDiagnosticOptions describes a package boundary value.
 type ReviewProviderDiagnosticOptions struct {
@@ -71,8 +50,8 @@ type OSReviewProviderDiagnosticRunner struct{}
 // ReviewProviderDiagnostic describes a package boundary value.
 type ReviewProviderDiagnostic struct {
 	Status    string
-	Provider  ReviewProvider
-	Reference ReviewProviderReference
+	Provider  workflowforge.Provider
+	Reference workflowforge.Reference
 	Checks    []ReviewProviderDiagnosticCheck
 }
 
@@ -104,40 +83,6 @@ func (OSReviewProviderDiagnosticRunner) Run(ctx context.Context, command string,
 	return nil
 }
 
-// DetectReviewProviderReference executes the corresponding package operation.
-func DetectReviewProviderReference(rawURL string) (ReviewProviderReference, error) {
-	trimmed := strings.TrimSpace(rawURL)
-	if trimmed == "" {
-		return ReviewProviderReference{Provider: ReviewProviderUnsupported}, errors.New("pull request URL is required")
-	}
-
-	address, err := parseReviewProviderURL(trimmed)
-
-	reference := ReviewProviderReference{
-		Provider: ReviewProviderUnsupported,
-		URL:      trimmed,
-	}
-	if err != nil {
-		return reference, err
-	}
-
-	reference.Host = strings.ToLower(address.url.Hostname())
-	reference.Owner = address.segments[0]
-	reference.Repo = address.segments[1]
-
-	reference.Number, err = parseReviewProviderPRNumber(address.segments[3], trimmed)
-	if err != nil {
-		return reference, err
-	}
-
-	reference.Provider = detectReviewProvider(reference.Host, address.segments[2])
-	if reference.Provider == ReviewProviderUnsupported {
-		return reference, fmt.Errorf("unsupported pull request URL: %s", trimmed)
-	}
-
-	return reference, nil
-}
-
 // RunReviewProviderDiagnostics executes the corresponding package operation.
 func RunReviewProviderDiagnostics(ctx context.Context, opts ReviewProviderDiagnosticOptions) ReviewProviderDiagnostic {
 	runner := opts.Runner
@@ -145,7 +90,7 @@ func RunReviewProviderDiagnostics(ctx context.Context, opts ReviewProviderDiagno
 		runner = OSReviewProviderDiagnosticRunner{}
 	}
 
-	reference, err := DetectReviewProviderReference(opts.URL)
+	reference, err := workflowforge.ParseReference(opts.URL)
 	diagnostic := ReviewProviderDiagnostic{
 		Status:    ReviewProviderDiagnosticStatusReady,
 		Provider:  reference.Provider,
@@ -176,7 +121,7 @@ func RunReviewProviderDiagnostics(ctx context.Context, opts ReviewProviderDiagno
 	return diagnostic
 }
 
-func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, dryRun bool) {
+func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig, dryRun bool) {
 	if !diagnostic.checkProviderEnabled(reference, config) {
 		return
 	}
@@ -192,7 +137,7 @@ func (diagnostic *ReviewProviderDiagnostic) addProviderChecks(ctx context.Contex
 	diagnostic.checkProviderPullRequestRead(ctx, runner, reference, config, dryRun)
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig) bool {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderEnabled(reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig) bool {
 	if !config.Enabled {
 		diagnostic.addCheck("provider_enabled", ReviewProviderDiagnosticCheckFail, "provider_disabled", string(reference.Provider))
 
@@ -242,7 +187,7 @@ func (diagnostic *ReviewProviderDiagnostic) checkProviderToken(runner ReviewProv
 	return true
 }
 
-func (diagnostic *ReviewProviderDiagnostic) checkProviderPullRequestRead(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, dryRun bool) {
+func (diagnostic *ReviewProviderDiagnostic) checkProviderPullRequestRead(ctx context.Context, runner ReviewProviderDiagnosticRunner, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig, dryRun bool) {
 	if dryRun {
 		diagnostic.addCheck("pr_readable", ReviewProviderDiagnosticCheckSkipped, "dry_run", reference.URL)
 
@@ -267,22 +212,22 @@ func (diagnostic *ReviewProviderDiagnostic) addCheck(name, status, reason, detai
 	})
 }
 
-func reviewProviderTargetConfig(config workspaceconfig.ReviewProviderConfig, provider ReviewProvider) (workspaceconfig.ReviewProviderTargetConfig, bool) {
+func reviewProviderTargetConfig(config workspaceconfig.ReviewProviderConfig, provider workflowforge.Provider) (workspaceconfig.ReviewProviderTargetConfig, bool) {
 	switch provider {
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		return config.Forgejo, true
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return config.GitHub, true
 	default:
 		return workspaceconfig.ReviewProviderTargetConfig{}, false
 	}
 }
 
-func reviewProviderReadArgs(reference ReviewProviderReference) []string {
+func reviewProviderReadArgs(reference workflowforge.Reference) []string {
 	switch reference.Provider {
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return []string{"pr", "view", reference.URL, "--json", "number"}
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		apiPath := path.Join("/repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number))
 
 		return []string{"api", apiPath}
@@ -303,57 +248,4 @@ func reviewProviderDiagnosticStatus(checks []ReviewProviderDiagnosticCheck) stri
 	}
 
 	return ReviewProviderDiagnosticStatusReady
-}
-
-func cleanPathSegments(rawPath string) []string {
-	parts := strings.Split(strings.Trim(rawPath, "/"), "/")
-	segments := make([]string, 0, len(parts))
-
-	for _, part := range parts {
-		if part != "" {
-			segments = append(segments, part)
-		}
-	}
-
-	return segments
-}
-
-type reviewProviderURL struct {
-	url      *url.URL
-	segments []string
-}
-
-func parseReviewProviderURL(rawURL string) (reviewProviderURL, error) {
-	parsed, err := url.Parse(rawURL)
-	if err != nil || parsed.Scheme == "" || parsed.Host == "" {
-		return reviewProviderURL{}, fmt.Errorf("invalid pull request URL: %s", rawURL)
-	}
-
-	segments := cleanPathSegments(parsed.Path)
-	if len(segments) < 4 {
-		return reviewProviderURL{}, fmt.Errorf("unsupported pull request URL: %s", rawURL)
-	}
-
-	return reviewProviderURL{url: parsed, segments: segments}, nil
-}
-
-func parseReviewProviderPRNumber(rawNumber, rawURL string) (int, error) {
-	number, err := strconv.Atoi(rawNumber)
-	if err != nil || number <= 0 {
-		return 0, fmt.Errorf("unsupported pull request URL: %s", rawURL)
-	}
-
-	return number, nil
-}
-
-func detectReviewProvider(host, pathMarker string) ReviewProvider {
-	if strings.EqualFold(host, "github.com") && pathMarker == "pull" {
-		return ReviewProviderGitHub
-	}
-
-	if pathMarker == "pulls" {
-		return ReviewProviderForgejo
-	}
-
-	return ReviewProviderUnsupported
 }

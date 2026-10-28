@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -13,7 +14,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 	tests := []struct {
 		name     string
 		rawURL   string
-		provider workflowcore.ReviewProvider
+		provider workflowforge.Provider
 		host     string
 		owner    string
 		repo     string
@@ -22,7 +23,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 		{
 			name:     "forgejo",
 			rawURL:   "https://forge.adrianpk.com/adrianpk/chr/pulls/275",
-			provider: workflowcore.ReviewProviderForgejo,
+			provider: workflowforge.Forgejo,
 			host:     "forge.adrianpk.com",
 			owner:    "adrianpk",
 			repo:     "chr",
@@ -31,7 +32,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 		{
 			name:     "codeberg",
 			rawURL:   "https://codeberg.org/example/repo/pulls/12",
-			provider: workflowcore.ReviewProviderForgejo,
+			provider: workflowforge.Forgejo,
 			host:     "codeberg.org",
 			owner:    "example",
 			repo:     "repo",
@@ -40,7 +41,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 		{
 			name:     "github",
 			rawURL:   "https://github.com/example/repo/pull/34",
-			provider: workflowcore.ReviewProviderGitHub,
+			provider: workflowforge.GitHub,
 			host:     "github.com",
 			owner:    "example",
 			repo:     "repo",
@@ -50,7 +51,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			reference, err := workflowcore.DetectReviewProviderReference(test.rawURL)
+			reference, err := workflowforge.ParseReference(test.rawURL)
 			if err != nil {
 				t.Fatalf("DetectReviewProviderReference returned error: %v", err)
 			}
@@ -61,7 +62,7 @@ func TestDetectReviewProviderReference(t *testing.T) {
 }
 
 type reviewProviderReferenceAssertion struct {
-	provider workflowcore.ReviewProvider
+	provider workflowforge.Provider
 	host     string
 	owner    string
 	repo     string
@@ -70,8 +71,8 @@ type reviewProviderReferenceAssertion struct {
 
 func assertReviewProviderReference(
 	t *testing.T,
-	reference workflowcore.ReviewProviderReference,
-	provider workflowcore.ReviewProvider,
+	reference workflowforge.Reference,
+	provider workflowforge.Provider,
 	host string,
 	owner string,
 	repo string,

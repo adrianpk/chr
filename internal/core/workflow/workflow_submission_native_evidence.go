@@ -94,7 +94,7 @@ func (s *Store) checkWorkflowNativeAdvertisement(submission workflowstate.Submis
 		return nil
 	}
 
-	var advertisement GitPublicationAdvertisement
+	var advertisement workflowstate.GitPublicationAdvertisement
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.AdvertisementRef, &advertisement); err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func (s *Store) checkWorkflowNativeResponse(submission workflowstate.Submission)
 	}
 
 	for _, ref := range refs {
-		var response GitPublicationResult
+		var response workflowstate.GitPublicationResult
 		if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &response); err != nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func (s *Store) checkWorkflowNativeResponse(submission workflowstate.Submission)
 			return workflowstate.ErrConflict
 		}
 
-		if err := s.checkWorkflowNativeTransactionRevision(NativeReceipt{NativeRecordBinding: native.NativeRecordBinding}, response); err != nil {
+		if err := s.checkWorkflowNativeTransactionRevision(workflowstate.NativeReceipt{NativeRecordBinding: native.NativeRecordBinding}, response); err != nil {
 			return err
 		}
 	}
@@ -156,7 +156,7 @@ func (s *Store) checkWorkflowNativeResponse(submission workflowstate.Submission)
 	return nil
 }
 
-func validWorkflowNativeResponse(native workflowstate.NativeSubmission, response GitPublicationResult) bool {
+func validWorkflowNativeResponse(native workflowstate.NativeSubmission, response workflowstate.GitPublicationResult) bool {
 	if [3]string{response.Schema, response.OriginalSourceCommit, response.ResultCommit} != [3]string{"chr-git-publication-result/v1", native.OriginalSource, native.PreparedResult} {
 		return false
 	}
@@ -179,7 +179,7 @@ func validWorkflowNativeResponse(native workflowstate.NativeSubmission, response
 func (s *Store) checkWorkflowNativeJournalObservations(submission workflowstate.Submission) error {
 	native := submission.Native
 	for _, ref := range native.ObservationRefs {
-		var observation NativePublicationObservation
+		var observation workflowstate.NativePublicationObservation
 		if err := s.readWorkflowNativeEvidence(submission.InvocationID, ref, &observation); err != nil {
 			return err
 		}
@@ -204,7 +204,7 @@ func (s *Store) checkWorkflowNativeJournalObservations(submission workflowstate.
 	return nil
 }
 
-func workflowNativeJournalObservationMatches(native workflowstate.NativeSubmission, observation NativePublicationObservation) bool {
+func workflowNativeJournalObservationMatches(native workflowstate.NativeSubmission, observation workflowstate.NativePublicationObservation) bool {
 	if [2]string{native.OriginalSource, native.PublishedSource} != [2]string{observation.OriginalSourceCommit, observation.PublishedSourceCommit} {
 		return false
 	}
@@ -223,12 +223,12 @@ func (s *Store) checkWorkflowNativeAppliedEvidence(submission workflowstate.Subm
 		return workflowstate.ErrConflict
 	}
 
-	var result GitPublicationResult
+	var result workflowstate.GitPublicationResult
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.TransportResponseRef, &result); err != nil {
 		return err
 	}
 
-	receipt := NativeReceipt{NativeRecordBinding: native.NativeRecordBinding}
+	receipt := workflowstate.NativeReceipt{NativeRecordBinding: native.NativeRecordBinding}
 	if !validWorkflowNativeReceiptTransaction(receipt, result) {
 		if result.State != "unknown" || !result.CommandsSent || !s.workflowNativeGitApplied(submission) {
 			return workflowstate.ErrConflict
@@ -324,7 +324,7 @@ func (s *Store) confirmWorkflowNativeSubmission(_ context.Context, submission *w
 		return err
 	}
 
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 
 	ref := record.Receipt.Native.ObservationRefs[len(record.Receipt.Native.ObservationRefs)-1]
 	if !slices.Contains(native.ObservationRefs, ref) {

@@ -19,18 +19,6 @@ type NativeDispatchCompletion struct {
 	FinishedAt        time.Time                     `json:"finished_at"`
 }
 
-// NativeGitObservation binds independently fetched refs and history to
-// the same intent. It asserts no forge merge metadata or delivery receipt.
-type NativeGitObservation struct {
-	SchemaVersion     int                             `json:"schema_version"`
-	SubmissionID      string                          `json:"submission_id"`
-	CandidateRevision string                          `json:"candidate_revision"`
-	SourceCommit      string                          `json:"source_commit"`
-	TargetCommit      string                          `json:"target_commit"`
-	Condition         string                          `json:"condition"`
-	Git               *workflowstate.IntegrationProof `json:"git,omitempty"`
-}
-
 // NativeCommandManifest is sanitized evidence, never a packet trace.
 type NativeCommandManifest struct {
 	SchemaVersion  int    `json:"schema_version"`

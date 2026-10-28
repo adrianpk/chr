@@ -21,14 +21,14 @@ type nativeMethodProbePolicy struct {
 	https bool
 }
 
-func (reader nativeMethodProbePolicy) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (NativePolicy, error) {
+func (reader nativeMethodProbePolicy) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.NativePolicy, error) {
 	if err := ctx.Err(); err != nil {
-		return NativePolicy{}, err
+		return workflowstate.NativePolicy{}, err
 	}
 
 	profiles, err := loadNativeLiveProfiles(reader.state)
 	if err != nil {
-		return NativePolicy{}, err
+		return workflowstate.NativePolicy{}, err
 	}
 
 	for _, profile := range profiles {
@@ -39,12 +39,12 @@ func (reader nativeMethodProbePolicy) ReadWorkflowNativePolicy(ctx context.Conte
 		return reader.methodPolicy(profile, method)
 	}
 
-	return NativePolicy{}, fmt.Errorf("designated method probe profile changed")
+	return workflowstate.NativePolicy{}, fmt.Errorf("designated method probe profile changed")
 }
 
-func (reader nativeMethodProbePolicy) methodPolicy(profile nativeLiveProfile, method string) (NativePolicy, error) {
+func (reader nativeMethodProbePolicy) methodPolicy(profile nativeLiveProfile, method string) (workflowstate.NativePolicy, error) {
 	if !validNativeLiveProfile(profile) || !slices.Contains(profile.Policy.Methods, method) {
-		return NativePolicy{}, fmt.Errorf("selected method lacks designated fixture authorization")
+		return workflowstate.NativePolicy{}, fmt.Errorf("selected method lacks designated fixture authorization")
 	}
 
 	profile.Certification.Methods = []string{method}
@@ -54,7 +54,7 @@ func (reader nativeMethodProbePolicy) methodPolicy(profile nativeLiveProfile, me
 
 	if reader.https {
 		if profile.Role.HTTPReference == "" {
-			return NativePolicy{}, fmt.Errorf("designated HTTPS publisher role is unavailable")
+			return workflowstate.NativePolicy{}, fmt.Errorf("designated HTTPS publisher role is unavailable")
 		}
 
 		profile.Role.GitReference = profile.Role.HTTPReference

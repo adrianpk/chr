@@ -11,7 +11,7 @@ import (
 // NativePublicationObserver reads canonical metadata and fetched Git
 // proof through the existing forge adapters. It has no publication authority.
 type NativePublicationObserver interface {
-	ObserveWorkflowNativePublication(context.Context, NativePublicationBinding, IntegrationGit) (NativePublicationObservation, error)
+	ObserveWorkflowNativePublication(context.Context, workflowstate.NativePublicationBinding, IntegrationGit) (workflowstate.NativePublicationObservation, error)
 }
 
 // ObserveWorkflowNativeSubmission reconciles the retained intent once, including
@@ -61,7 +61,7 @@ func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard Integ
 
 	var (
 		submission  workflowstate.Submission
-		observation NativePublicationObservation
+		observation workflowstate.NativePublicationObservation
 		next        IntegrationBudgetGuard
 	)
 
@@ -98,7 +98,7 @@ func (s *Store) observeWorkflowNativeSubmission(ctx context.Context, guard Integ
 	return workflowNativeObservation{Submission: retained, Observation: observation, Next: next}, errors.Join(err, retainErr)
 }
 
-func observeWorkflowNativeBounded(ctx context.Context, observer NativePublicationObserver, binding NativePublicationBinding, git IntegrationGit) (NativePublicationObservation, error) {
+func observeWorkflowNativeBounded(ctx context.Context, observer NativePublicationObserver, binding workflowstate.NativePublicationBinding, git IntegrationGit) (workflowstate.NativePublicationObservation, error) {
 	deadline := time.Now().Add(3 * time.Minute)
 	if time.Now().Before(binding.ObservationDeadline) && binding.ObservationDeadline.Before(deadline) {
 		deadline = binding.ObservationDeadline
@@ -124,6 +124,6 @@ func observeWorkflowNativeBounded(ctx context.Context, observer NativePublicatio
 	return observation, err
 }
 
-func workflowNativeDeadlineObservation(binding NativePublicationBinding) NativePublicationObservation {
-	return NativePublicationObservation{CanonicalPR: binding.PullRequest.URL, State: "reconciliation_required", Condition: "canonical_pr_observation_deadline", PullRequest: binding.PullRequest, OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
+func workflowNativeDeadlineObservation(binding workflowstate.NativePublicationBinding) workflowstate.NativePublicationObservation {
+	return workflowstate.NativePublicationObservation{CanonicalPR: binding.PullRequest.URL, State: "reconciliation_required", Condition: "canonical_pr_observation_deadline", PullRequest: binding.PullRequest, OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
 }

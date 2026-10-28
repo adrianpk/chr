@@ -25,7 +25,7 @@ func TestNativeStopBeforeSend(t *testing.T) {
 	f := newNativeSubmissionFixture(t)
 	publisher, remote := nativeDispatchPublisher(t, f)
 	transport := publisher.publisher
-	publisher.publisher = nativeOutcomePublisherFixture{publish: func(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+	publisher.publisher = nativeOutcomePublisherFixture{publish: func(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 		if _, err := f.store.StopWorkflow(ctx, f.entry.InvocationID, "cancel"); err != nil {
 			t.Fatal(err)
 		}

@@ -41,8 +41,8 @@ func nativeRecordReceipt(t *testing.T, store *Store, candidate workflowstate.Int
 
 	pr := candidate.Input.Source.PullRequest
 	pr.Merged, pr.State, pr.HeadCommit, pr.ResultCommit = true, "closed", b.PublishedSource, b.PreparedResult
-	observation := NativePublicationObservation{State: "merged", PullRequest: pr, Git: &proof, OriginalSourceCommit: b.OriginalSource, PublishedSourceCommit: b.PublishedSource}
-	native := &NativeReceipt{NativeRecordBinding: b, CandidateHash: candidate.Native.CandidateHash, ActualMergeResult: b.PreparedResult}
+	observation := workflowstate.NativePublicationObservation{State: "merged", PullRequest: pr, Git: &proof, OriginalSourceCommit: b.OriginalSource, PublishedSourceCommit: b.PublishedSource}
+	native := &workflowstate.NativeReceipt{NativeRecordBinding: b, CandidateHash: candidate.Native.CandidateHash, ActualMergeResult: b.PreparedResult}
 	native.CandidateRef = retainNativeRecordEvidence(t, store, b.InvocationID, "candidate", candidate)
 	native.TransactionProofRef = retainNativeRecordEvidence(t, store, b.InvocationID, "transaction", transaction)
 	native.ObservationRefs = []workflowstate.EvidenceRef{retainNativeRecordEvidence(t, store, b.InvocationID, "observation", observation)}
@@ -107,7 +107,7 @@ func TestNativeReceiptProof(t *testing.T) {
 func testNativeReceiptPending(t *testing.T, store *Store, record Record) {
 	t.Helper()
 
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 
 	ref := record.Receipt.Native.ObservationRefs[0]
 	if err := store.readWorkflowNativeEvidence(record.Receipt.Native.InvocationID, ref, &observation); err != nil {

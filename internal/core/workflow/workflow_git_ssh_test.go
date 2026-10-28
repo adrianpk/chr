@@ -173,7 +173,7 @@ func TestWorkflowGitSSH(t *testing.T) {
 	}
 }
 
-func checkWorkflowGitStale(t *testing.T, result GitPublicationResult, err error) {
+func checkWorkflowGitStale(t *testing.T, result workflowstate.GitPublicationResult, err error) {
 	t.Helper()
 
 	if !errors.Is(err, workflowstate.ErrConflict) || result.CommandsSent {

@@ -79,7 +79,7 @@ func workflowNativeSourceBinding(request NativeCapabilityRequest) bool {
 		pr.State == "open" && !pr.Merged && pr.HeadCommit == publication.Git.SourceCommit && pr.BaseCommit == publication.Git.BaseCommit
 }
 
-func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, policy NativePolicy, git GitPublicationInspector, capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {
+func (adapter RemoteReviewAdapter) finishWorkflowNativeCapability(ctx context.Context, request NativeCapabilityRequest, policy workflowstate.NativePolicy, git GitPublicationInspector, capability workflowstate.NativeCapability) (workflowstate.NativeCapability, error) {
 	observation, err := adapter.readWorkflowNativePolicy(ctx, request.PullRequest, request.Publication.Git.Method)
 	if err != nil {
 		return capability, err
@@ -182,7 +182,7 @@ func (adapter RemoteReviewAdapter) readWorkflowNativePolicy(ctx context.Context,
 	paths := []string{client.Endpoint.RepositoryPath(), client.Endpoint.RepositoryPath() + "/branches/" + url.PathEscape(pr.BaseBranch), client.Endpoint.RepositoryPath() + "/branches/" + url.PathEscape(pr.HeadBranch)}
 
 	contract := "forgejo_same_pr_git_auto_merge/v1"
-	if reference.Provider == ReviewProviderGitHub {
+	if reference.Provider == workflowforge.GitHub {
 		contract = "github_same_pr_git_merge/v1"
 
 		paths = append(paths, client.Endpoint.RepositoryPath()+"/rules/branches/"+url.PathEscape(pr.BaseBranch), client.Endpoint.RepositoryPath()+"/rules/branches/"+url.PathEscape(pr.HeadBranch))

@@ -27,26 +27,12 @@ type GitPublication struct {
 	Git                     workflowstate.IntegrationProof
 	// BeforeSend retains the actual advertisement and exact command intent.
 	// A failed callback aborts before any update command is sent.
-	BeforeSend func(context.Context, GitPublicationAdvertisement) error `json:"-"`
-}
-
-// GitPublicationResult distinguishes transport application from delivery.
-// Unknown means commands may have reached the server and must not be retried.
-type GitPublicationResult struct {
-	Schema                 string `json:"schema"`
-	State                  string `json:"state"`
-	CommandsSent           bool   `json:"commands_sent"`
-	OriginalSourceCommit   string `json:"original_source_commit"`
-	AdvertisedSourceCommit string `json:"advertised_source_commit"`
-	AdvertisedTargetCommit string `json:"advertised_target_commit"`
-	PublishedSourceCommit  string `json:"published_source_commit,omitempty"`
-	ResultCommit           string `json:"result_commit"`
-	CandidateRevision      string `json:"candidate_revision"`
+	BeforeSend func(context.Context, workflowstate.GitPublicationAdvertisement) error `json:"-"`
 }
 
 // GitPublisher owns the advertisement and atomic two-ref exchange.
 type GitPublisher interface {
-	PublishWorkflowGit(context.Context, GitPublication) (GitPublicationResult, error)
+	PublishWorkflowGit(context.Context, GitPublication) (workflowstate.GitPublicationResult, error)
 }
 
 // OSWorkflowGitPublisher uses an explicit host-owned repository/transport mapping.
@@ -87,8 +73,8 @@ type workflowReceivePack interface {
 
 // PublishWorkflowGit sends both old/new commands only after checking the actual
 // receive-pack advertisement. No CLI push or non-atomic fallback is used.
-func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, request GitPublication) (result GitPublicationResult, err error) {
-	result = GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "not_sent", OriginalSourceCommit: request.Git.SourceCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
+func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, request GitPublication) (result workflowstate.GitPublicationResult, err error) {
+	result = workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "not_sent", OriginalSourceCommit: request.Git.SourceCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
@@ -125,7 +111,7 @@ func (git OSWorkflowGitPublisher) PublishWorkflowGit(ctx context.Context, reques
 	return exchangeWorkflowPublication(session, request, pack, result)
 }
 
-func retainWorkflowPublicationAdvertisement(ctx context.Context, request GitPublication, advertisement workflowAdvertisement, result GitPublicationResult) error {
+func retainWorkflowPublicationAdvertisement(ctx context.Context, request GitPublication, advertisement workflowAdvertisement, result workflowstate.GitPublicationResult) error {
 	if request.BeforeSend == nil {
 		return nil
 	}
@@ -135,7 +121,7 @@ func retainWorkflowPublicationAdvertisement(ctx context.Context, request GitPubl
 		return err
 	}
 
-	return request.BeforeSend(ctx, GitPublicationAdvertisement{SourceCommit: result.AdvertisedSourceCommit, TargetCommit: result.AdvertisedTargetCommit, Fingerprint: fingerprint})
+	return request.BeforeSend(ctx, workflowstate.GitPublicationAdvertisement{SourceCommit: result.AdvertisedSourceCommit, TargetCommit: result.AdvertisedTargetCommit, Fingerprint: fingerprint})
 }
 
 func (git OSWorkflowGitPublisher) validatePublication(ctx context.Context, request GitPublication) error {
@@ -177,7 +163,7 @@ func validateWorkflowPublicationRefs(request GitPublication) error {
 	return nil
 }
 
-func exchangeWorkflowPublication(session workflowReceivePack, request GitPublication, pack []byte, result GitPublicationResult) (GitPublicationResult, error) {
+func exchangeWorkflowPublication(session workflowReceivePack, request GitPublication, pack []byte, result workflowstate.GitPublicationResult) (workflowstate.GitPublicationResult, error) {
 	commands := workflowPublicationCommands(request)
 	commands = append(commands, pack...)
 	result.CommandsSent, result.State = true, "unknown"

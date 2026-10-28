@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func nativeObservationFixture(t *testing.T, fixture nativeCapabilityFixture) NativePublicationBinding {
+func nativeObservationFixture(t *testing.T, fixture nativeCapabilityFixture) workflowstate.NativePublicationBinding {
 	t.Helper()
 
 	capability, err := fixture.adapter.WorkflowNativeIntegrationCapability(t.Context(), fixture.request, fixture.policy, fixture.git)
@@ -24,7 +24,7 @@ func nativeObservationFixture(t *testing.T, fixture nativeCapabilityFixture) Nat
 
 	fixture.runner.outputs[fixture.prefix+"/branches/chr%2Fworkflow%2Ffixture"] = []byte(`{"protected":false,"commit":{"sha":"` + publication.ResultCommit + `"}}`)
 
-	return NativePublicationBinding{Capability: capability, PullRequest: fixture.request.PullRequest, Git: fixture.request.Publication.Git, Publication: publication, SourceDirectory: fixture.request.Publication.Directory, ObservationDeadline: time.Now().Add(time.Minute)}
+	return workflowstate.NativePublicationBinding{Capability: capability, PullRequest: fixture.request.PullRequest, Git: fixture.request.Publication.Git, Publication: publication, SourceDirectory: fixture.request.Publication.Directory, ObservationDeadline: time.Now().Add(time.Minute)}
 }
 
 // TestNativeObservation proves actual target history alongside the original PR,
@@ -39,7 +39,7 @@ func TestNativeObservation(t *testing.T) {
 	}
 }
 
-func checkNativeObservationCases(t *testing.T, fixture nativeCapabilityFixture, binding NativePublicationBinding) {
+func checkNativeObservationCases(t *testing.T, fixture nativeCapabilityFixture, binding workflowstate.NativePublicationBinding) {
 	t.Helper()
 
 	cases := []struct {
@@ -78,7 +78,7 @@ func checkNativeObservationCases(t *testing.T, fixture nativeCapabilityFixture, 
 	}
 }
 
-func checkNativeObservedHistory(t *testing.T, observed NativePublicationObservation, binding NativePublicationBinding) {
+func checkNativeObservedHistory(t *testing.T, observed workflowstate.NativePublicationObservation, binding workflowstate.NativePublicationBinding) {
 	t.Helper()
 
 	if observed.State == "merged" && (observed.Git == nil || observed.Git.HistoryHash != binding.Git.HistoryHash || observed.Git.ObservedTarget != binding.Git.ResultCommit) {
@@ -122,12 +122,12 @@ func TestNativeLaterSource(t *testing.T) {
 	checkNativeLaterAttribution(t, fixture, binding, prior, later)
 }
 
-func checkNativeLaterAttribution(t *testing.T, fixture nativeCapabilityFixture, binding NativePublicationBinding, prior workflowstate.IntegrationProof, later string) {
+func checkNativeLaterAttribution(t *testing.T, fixture nativeCapabilityFixture, binding workflowstate.NativePublicationBinding, prior workflowstate.IntegrationProof, later string) {
 	t.Helper()
 
 	git := NewWorkflowIntegrationGit(binding.Git.Repository, fixture.remote)
 
-	binding.GitApplication = &NativeGitObservation{SchemaVersion: 1, CandidateRevision: binding.Publication.CandidateRevision, SourceCommit: binding.Git.ResultCommit, TargetCommit: prior.ObservedTarget, Condition: "result_verified", Git: &prior}
+	binding.GitApplication = &workflowstate.NativeGitObservation{SchemaVersion: 1, CandidateRevision: binding.Publication.CandidateRevision, SourceCommit: binding.Git.ResultCommit, TargetCommit: prior.ObservedTarget, Condition: "result_verified", Git: &prior}
 
 	observed, err := fixture.adapter.ObserveWorkflowNativePublication(t.Context(), binding, git)
 	if err != nil || observed.State != "merged" || observed.LaterSourceCommit != later {

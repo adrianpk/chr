@@ -6,7 +6,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowNativeCanonicalObservationValid(submission workflowstate.Submission, observation NativePublicationObservation) bool {
+func (s *Store) workflowNativeCanonicalObservationValid(submission workflowstate.Submission, observation workflowstate.NativePublicationObservation) bool {
 	if !workflowNativeObservationTargetValid(observation) {
 		return false
 	}
@@ -28,7 +28,7 @@ func (s *Store) workflowNativeCanonicalObservationValid(submission workflowstate
 	return workflowNativeCanonicalResultValid(binding, observation)
 }
 
-func workflowNativeCanonicalResultValid(binding NativePublicationBinding, observation NativePublicationObservation) bool {
+func workflowNativeCanonicalResultValid(binding workflowstate.NativePublicationBinding, observation workflowstate.NativePublicationObservation) bool {
 	contractMatches := observation.ObservationContract == binding.Capability.ObservationContract
 
 	sourceResult := contractMatches && workflowNativeSourceResultObserved(observation)
@@ -41,7 +41,7 @@ func workflowNativeCanonicalResultValid(binding NativePublicationBinding, observ
 	return observation.State == "observing" && (!observation.PullRequest.Merged || pendingSource)
 }
 
-func workflowNativeObservationTargetValid(observation NativePublicationObservation) bool {
+func workflowNativeObservationTargetValid(observation workflowstate.NativePublicationObservation) bool {
 	if observation.ObservedTargetCommit == "" {
 		return true
 	}
@@ -57,10 +57,10 @@ func workflowNativeObservationTargetValid(observation NativePublicationObservati
 	return observation.State == "reconciliation_required" && observation.Condition == "canonical_target_history_diverged"
 }
 
-func (s *Store) workflowNativeCanonicalEvidenceBinding(submission workflowstate.Submission) (NativePublicationBinding, bool) {
+func (s *Store) workflowNativeCanonicalEvidenceBinding(submission workflowstate.Submission) (workflowstate.NativePublicationBinding, bool) {
 	native := submission.Native
 
-	binding := NativePublicationBinding{PullRequest: submission.Guard.PullRequest, Git: submission.Guard.Git}
+	binding := workflowstate.NativePublicationBinding{PullRequest: submission.Guard.PullRequest, Git: submission.Guard.Git}
 	if s.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &binding.Capability) != nil {
 		return binding, false
 	}
@@ -70,7 +70,7 @@ func (s *Store) workflowNativeCanonicalEvidenceBinding(submission workflowstate.
 	}
 
 	for _, ref := range native.GitObservationRefs {
-		var prior NativeGitObservation
+		var prior workflowstate.NativeGitObservation
 		if s.readWorkflowNativeEvidence(native.InvocationID, ref, &prior) != nil {
 			return binding, false
 		}
@@ -85,7 +85,7 @@ func (s *Store) workflowNativeCanonicalEvidenceBinding(submission workflowstate.
 	return binding, true
 }
 
-func workflowNativeReconciliationObservationValid(submission workflowstate.Submission, binding NativePublicationBinding, observation NativePublicationObservation, condition string) bool {
+func workflowNativeReconciliationObservationValid(submission workflowstate.Submission, binding workflowstate.NativePublicationBinding, observation workflowstate.NativePublicationObservation, condition string) bool {
 	native := submission.Native
 
 	switch observation.Condition {
@@ -102,11 +102,11 @@ func workflowNativeReconciliationObservationValid(submission workflowstate.Submi
 	}
 }
 
-func workflowNativeDeadlineEvidenceValid(native workflowstate.NativeSubmission, observation NativePublicationObservation) bool {
+func workflowNativeDeadlineEvidenceValid(native workflowstate.NativeSubmission, observation workflowstate.NativePublicationObservation) bool {
 	return observation.CanonicalPR == native.CanonicalPR && !time.Now().Before(native.ObservationDeadline)
 }
 
-func workflowNativeReceiptReconciliationValid(native workflowstate.NativeSubmission, observation NativePublicationObservation, condition string) bool {
+func workflowNativeReceiptReconciliationValid(native workflowstate.NativeSubmission, observation workflowstate.NativePublicationObservation, condition string) bool {
 	if observation.Condition == "canonical_receipt_pr_unmerged" {
 		return native.ReceiptRef != nil && condition == "" && !observation.PullRequest.Merged
 	}

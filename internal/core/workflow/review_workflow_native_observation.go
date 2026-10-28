@@ -11,40 +11,11 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
-// NativePublicationBinding retains the original PR/source and exact
-// prepared history independently of the rewritten published source head.
-type NativePublicationBinding struct {
-	ReceiptConfirmed    bool                              `json:"receipt_confirmed,omitempty"`
-	GitApplication      *NativeGitObservation             `json:"git_application,omitempty"`
-	Capability          workflowstate.NativeCapability    `json:"capability"`
-	PullRequest         workflowstate.PullRequestSnapshot `json:"original_pull_request"`
-	Git                 workflowstate.IntegrationProof    `json:"prepared_git"`
-	Publication         GitPublicationResult              `json:"publication"`
-	SourceDirectory     string                            `json:"-"`
-	ObservationDeadline time.Time                         `json:"observation_deadline"`
-}
-
-// NativePublicationObservation distinguishes Git proof from canonical
-// merged metadata. Only merged supplies both; no outcome issues a receipt.
-type NativePublicationObservation struct {
-	ObservationContract   string                            `json:"observation_contract,omitempty"`
-	CanonicalPR           string                            `json:"canonical_pr,omitempty"`
-	State                 string                            `json:"state"`
-	Condition             string                            `json:"condition,omitempty"`
-	PullRequest           workflowstate.PullRequestSnapshot `json:"pull_request"`
-	Git                   *workflowstate.IntegrationProof   `json:"git,omitempty"`
-	OriginalSourceCommit  string                            `json:"original_source_commit"`
-	PublishedSourceCommit string                            `json:"published_source_commit"`
-	ObservedSourceCommit  string                            `json:"observed_source_commit,omitempty"`
-	LaterSourceCommit     string                            `json:"later_source_commit,omitempty"`
-	ObservedTargetCommit  string                            `json:"observed_target_commit,omitempty"`
-}
-
 // ObserveWorkflowNativePublication reads the original PR through the existing
 // forge adapter and independently fetches the canonical target's exact history.
 // It never submits another push, merges/closes a PR, or rolls target history back.
-func (adapter RemoteReviewAdapter) ObserveWorkflowNativePublication(ctx context.Context, binding NativePublicationBinding, git IntegrationGit) (NativePublicationObservation, error) {
-	observed := NativePublicationObservation{ObservationContract: binding.Capability.ObservationContract, CanonicalPR: binding.PullRequest.URL, State: "observing", OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
+func (adapter RemoteReviewAdapter) ObserveWorkflowNativePublication(ctx context.Context, binding workflowstate.NativePublicationBinding, git IntegrationGit) (workflowstate.NativePublicationObservation, error) {
+	observed := workflowstate.NativePublicationObservation{ObservationContract: binding.Capability.ObservationContract, CanonicalPR: binding.PullRequest.URL, State: "observing", OriginalSourceCommit: binding.Git.SourceCommit, PublishedSourceCommit: binding.Git.ResultCommit}
 	if err := validateWorkflowNativeBinding(binding); err != nil || git == nil {
 		return observed, fmt.Errorf("invalid native observation binding")
 	}
@@ -67,7 +38,7 @@ func (adapter RemoteReviewAdapter) ObserveWorkflowNativePublication(ctx context.
 	return adapter.verifyWorkflowNativeObservation(ctx, binding, git, observed)
 }
 
-func validateWorkflowNativeBinding(binding NativePublicationBinding) error {
+func validateWorkflowNativeBinding(binding workflowstate.NativePublicationBinding) error {
 	if err := validateWorkflowNativeCapability(binding.Capability); err != nil {
 		return err
 	}
@@ -107,7 +78,7 @@ func validateWorkflowNativeCapability(capability workflowstate.NativeCapability)
 	return nil
 }
 
-func validateWorkflowNativeResult(binding NativePublicationBinding) error {
+func validateWorkflowNativeResult(binding workflowstate.NativePublicationBinding) error {
 	proof, publication := binding.Git, binding.Publication
 	if !publication.CommandsSent || (publication.State != "applied" && publication.State != "unknown") {
 		return workflowstate.ErrConflict
@@ -127,7 +98,7 @@ func validateWorkflowNativeResult(binding NativePublicationBinding) error {
 	return nil
 }
 
-func workflowNativeObservationCondition(binding NativePublicationBinding, pr workflowstate.PullRequestSnapshot) string {
+func workflowNativeObservationCondition(binding workflowstate.NativePublicationBinding, pr workflowstate.PullRequestSnapshot) string {
 	original := binding.PullRequest
 	expected := [4]string{original.URL, original.Repository, original.HeadRepository, original.HeadBranch}
 
@@ -143,7 +114,7 @@ func workflowNativeObservationCondition(binding NativePublicationBinding, pr wor
 	return workflowNativeMetadataCondition(binding, pr)
 }
 
-func workflowNativeMetadataCondition(binding NativePublicationBinding, pr workflowstate.PullRequestSnapshot) string {
+func workflowNativeMetadataCondition(binding workflowstate.NativePublicationBinding, pr workflowstate.PullRequestSnapshot) string {
 	if condition := workflowNativeMergeCondition(binding, pr); condition != "" {
 		return condition
 	}
@@ -159,7 +130,7 @@ func workflowNativeMetadataCondition(binding NativePublicationBinding, pr workfl
 	return ""
 }
 
-func workflowNativeMergeCondition(binding NativePublicationBinding, pr workflowstate.PullRequestSnapshot) string {
+func workflowNativeMergeCondition(binding workflowstate.NativePublicationBinding, pr workflowstate.PullRequestSnapshot) string {
 	if !pr.Merged && pr.State == "closed" {
 		return "canonical_pr_closed_unmerged"
 	}
@@ -176,7 +147,7 @@ func workflowNativeMergeCondition(binding NativePublicationBinding, pr workflows
 	return ""
 }
 
-func workflowNativeSourceCompatible(binding NativePublicationBinding, pr workflowstate.PullRequestSnapshot) bool {
+func workflowNativeSourceCompatible(binding workflowstate.NativePublicationBinding, pr workflowstate.PullRequestSnapshot) bool {
 	if pr.HeadCommit == binding.Git.SourceCommit || pr.HeadCommit == binding.Git.ResultCommit {
 		return true
 	}
@@ -184,7 +155,7 @@ func workflowNativeSourceCompatible(binding NativePublicationBinding, pr workflo
 	return workflowstate.ValidCommitID(pr.HeadCommit) && (binding.Publication.State == "applied" || workflowNativeApplicationAttributed(binding)) && pr.Merged
 }
 
-func workflowNativeApplicationAttributed(binding NativePublicationBinding) bool {
+func workflowNativeApplicationAttributed(binding workflowstate.NativePublicationBinding) bool {
 	observation := binding.GitApplication
 	if !workflowNativeApplicationHeader(binding, observation) {
 		return false
@@ -197,7 +168,7 @@ func workflowNativeApplicationAttributed(binding NativePublicationBinding) bool 
 	return expected == actual && proof.PreparedTree == binding.Git.PreparedTree && proof.VerifiedTree == binding.Git.VerifiedTree && workflowintegrate.CheckProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil
 }
 
-func workflowNativeApplicationHeader(binding NativePublicationBinding, observation *NativeGitObservation) bool {
+func workflowNativeApplicationHeader(binding workflowstate.NativePublicationBinding, observation *workflowstate.NativeGitObservation) bool {
 	if observation == nil || observation.Git == nil {
 		return false
 	}
@@ -205,7 +176,7 @@ func workflowNativeApplicationHeader(binding NativePublicationBinding, observati
 	return observation.SchemaVersion == 1 && observation.Condition == "result_verified" && observation.CandidateRevision == binding.Publication.CandidateRevision && observation.SourceCommit == binding.Git.ResultCommit && observation.TargetCommit == observation.Git.ObservedTarget
 }
 
-func (adapter RemoteReviewAdapter) verifyWorkflowNativeObservation(ctx context.Context, binding NativePublicationBinding, git IntegrationGit, observed NativePublicationObservation) (NativePublicationObservation, error) {
+func (adapter RemoteReviewAdapter) verifyWorkflowNativeObservation(ctx context.Context, binding workflowstate.NativePublicationBinding, git IntegrationGit, observed workflowstate.NativePublicationObservation) (workflowstate.NativePublicationObservation, error) {
 	proof, err := verifyWorkflowNativeTarget(ctx, binding, git)
 	if err != nil {
 		observed.State, observed.Condition = "reconciliation_required", "canonical_target_unverified"
@@ -242,11 +213,11 @@ func (adapter RemoteReviewAdapter) verifyWorkflowNativeObservation(ctx context.C
 	return finishWorkflowNativeObservation(binding, observed), nil
 }
 
-func workflowNativeReceiptHistoryDiverged(binding NativePublicationBinding, proof workflowstate.IntegrationProof, err error) bool {
-	return binding.ReceiptConfirmed && errors.Is(err, ErrWorkflowHistoryDivergence) && workflowstate.ValidCommitID(proof.ObservedTarget)
+func workflowNativeReceiptHistoryDiverged(binding workflowstate.NativePublicationBinding, proof workflowstate.IntegrationProof, err error) bool {
+	return binding.ReceiptConfirmed && errors.Is(err, workflowstate.ErrHistoryDivergence) && workflowstate.ValidCommitID(proof.ObservedTarget)
 }
 
-func verifyWorkflowNativeTarget(ctx context.Context, binding NativePublicationBinding, git IntegrationGit) (workflowstate.IntegrationProof, error) {
+func verifyWorkflowNativeTarget(ctx context.Context, binding workflowstate.NativePublicationBinding, git IntegrationGit) (workflowstate.IntegrationProof, error) {
 	query := binding.Git.IntegrationQuery
 	query.SourceDirectory = binding.SourceDirectory
 
@@ -269,7 +240,7 @@ func verifyWorkflowNativeTarget(ctx context.Context, binding NativePublicationBi
 	return proof, nil
 }
 
-func finishWorkflowNativeObservation(binding NativePublicationBinding, observed NativePublicationObservation) NativePublicationObservation {
+func finishWorkflowNativeObservation(binding workflowstate.NativePublicationBinding, observed workflowstate.NativePublicationObservation) workflowstate.NativePublicationObservation {
 	pr := observed.PullRequest
 	if condition := workflowNativeObservationCondition(binding, pr); condition != "" {
 		observed.State, observed.Condition = "reconciliation_required", condition

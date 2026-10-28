@@ -6,22 +6,22 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) observeWorkflowNativeReceipt(ctx context.Context, receipt Record, provider PullRequestProvider, git IntegrationGit) (NativePublicationObservation, error) {
+func (s *Store) observeWorkflowNativeReceipt(ctx context.Context, receipt Record, provider PullRequestProvider, git IntegrationGit) (workflowstate.NativePublicationObservation, error) {
 	observer, ok := provider.(NativePublicationObserver)
 	if !ok || git == nil {
-		return NativePublicationObservation{}, workflowstate.ErrAtomicGuard
+		return workflowstate.NativePublicationObservation{}, workflowstate.ErrAtomicGuard
 	}
 
 	binding, err := s.workflowNativeReceiptBinding(receipt)
 	if err != nil {
-		return NativePublicationObservation{}, err
+		return workflowstate.NativePublicationObservation{}, err
 	}
 
 	return observeWorkflowNativeBounded(ctx, observer, binding, git)
 }
 
-func (s *Store) workflowNativeReceiptBinding(receipt Record) (NativePublicationBinding, error) {
-	var binding NativePublicationBinding
+func (s *Store) workflowNativeReceiptBinding(receipt Record) (workflowstate.NativePublicationBinding, error) {
+	var binding workflowstate.NativePublicationBinding
 	if receipt.Receipt == nil || receipt.Receipt.Native == nil {
 		return binding, workflowstate.ErrConflict
 	}
@@ -47,7 +47,7 @@ func (s *Store) workflowNativeReceiptBinding(receipt Record) (NativePublicationB
 	return binding, validateWorkflowNativeBinding(binding)
 }
 
-func (s *Store) readWorkflowNativeReceiptPublication(native NativeReceipt, binding *NativePublicationBinding) error {
+func (s *Store) readWorkflowNativeReceiptPublication(native workflowstate.NativeReceipt, binding *workflowstate.NativePublicationBinding) error {
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &binding.Capability); err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func (s *Store) readWorkflowNativeReceiptPublication(native NativeReceipt, bindi
 	}
 
 	if native.GitApplicationRef != nil {
-		binding.GitApplication = &NativeGitObservation{}
+		binding.GitApplication = &workflowstate.NativeGitObservation{}
 		if err := s.readWorkflowNativeEvidence(native.InvocationID, *native.GitApplicationRef, binding.GitApplication); err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ func (s *Store) readWorkflowNativeReceiptPublication(native NativeReceipt, bindi
 	return nil
 }
 
-func (s *Store) retainWorkflowNativeReceiptObservation(ctx context.Context, run workflowInvocationFile, observation NativePublicationObservation) (workflowInvocationFile, error) {
+func (s *Store) retainWorkflowNativeReceiptObservation(ctx context.Context, run workflowInvocationFile, observation workflowstate.NativePublicationObservation) (workflowInvocationFile, error) {
 	if observation.CanonicalPR == "" || observation.State == "" {
 		return run, ErrWorkflowObservationRequired
 	}

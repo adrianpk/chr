@@ -10,13 +10,14 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 )
 
 func TestRunTicketMergePreflightAllowsReadyTicket(t *testing.T) {
 	ticket := testMergePreflightTicket()
 	remote := fakeTicketMergePreflightRemote{
 		snapshot: workflowcore.RemoteReviewSnapshot{
-			Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+			Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 			PullRequestJSON: `{"state":"open","base":{"ref":"develop"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
 		},
 	}
@@ -73,7 +74,7 @@ func TestRunTicketMergePreflightBlocksWrongBase(t *testing.T) {
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
 			snapshot: workflowcore.RemoteReviewSnapshot{
-				Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderForgejo},
+				Reference:       workflowforge.Reference{Provider: workflowforge.Forgejo},
 				PullRequestJSON: `{"state":"open","base":{"ref":"main"},"head":{"ref":"feat/slice-2-merger-preflight"},"mergeable":true}`,
 			},
 		},
@@ -90,7 +91,7 @@ func TestRunTicketMergePreflightBlocksHeadMismatch(t *testing.T) {
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
 			snapshot: workflowcore.RemoteReviewSnapshot{
-				Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderGitHub},
+				Reference:       workflowforge.Reference{Provider: workflowforge.GitHub},
 				PullRequestJSON: `{"state":"OPEN","baseRefName":"dev","headRefName":"feat/other","mergeable":"MERGEABLE"}`,
 			},
 		},
@@ -107,7 +108,7 @@ func TestRunTicketMergePreflightBlocksNotMergeable(t *testing.T) {
 		Ticket: testMergePreflightTicket(),
 		Remote: fakeTicketMergePreflightRemote{
 			snapshot: workflowcore.RemoteReviewSnapshot{
-				Reference:       workflowcore.ReviewProviderReference{Provider: workflowcore.ReviewProviderGitHub},
+				Reference:       workflowforge.Reference{Provider: workflowforge.GitHub},
 				PullRequestJSON: `{"state":"OPEN","baseRefName":"dev","headRefName":"feat/slice-2-merger-preflight","mergeable":"CONFLICTING"}`,
 			},
 		},

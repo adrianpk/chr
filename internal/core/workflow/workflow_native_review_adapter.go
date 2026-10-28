@@ -92,22 +92,22 @@ func (adapter *NativeReviewAdapter) WorkflowPreparedNativeCapability(ctx context
 
 // PublishWorkflowGit rechecks the exact local ownership/profile binding before
 // entering the existing atomic transport. It never calls a provider merge API.
-func (adapter *NativeReviewAdapter) PublishWorkflowGit(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+func (adapter *NativeReviewAdapter) PublishWorkflowGit(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 	nativePublisher2, err := adapter.nativePublisher(ctx)
 	run, owner, profile := nativePublisher2.Run, nativePublisher2.Owner, nativePublisher2.Profile
 
 	if err != nil {
-		return GitPublicationResult{}, err
+		return workflowstate.GitPublicationResult{}, err
 	}
 
 	ownership, err := workflowNativeOwnershipRevision(run, profile)
 	if err != nil || request.OwnershipRevision != ownership || request.SourceRef != run.Lane.Branch || request.TargetRef != profile.TargetRef || request.Git.SourceCommit != run.PullRequest.SourceCommit {
-		return GitPublicationResult{}, workflowstate.ErrConflict
+		return workflowstate.GitPublicationResult{}, workflowstate.ErrConflict
 	}
 
 	config, err := workspaceconfig.Load(owner.layout.ProjectDir())
 	if err != nil || config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
-		return GitPublicationResult{}, workflowstate.ErrAtomicGuard
+		return workflowstate.GitPublicationResult{}, workflowstate.ErrAtomicGuard
 	}
 
 	return NewWorkflowGitPublisher(profile.Repository, profile.Transport).PublishWorkflowGit(ctx, request)
@@ -115,10 +115,10 @@ func (adapter *NativeReviewAdapter) PublishWorkflowGit(ctx context.Context, requ
 
 // InspectWorkflowGitPublication keeps the configured transport available for
 // read-only reconciliation, including after publication authorization stops.
-func (adapter *NativeReviewAdapter) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (GitPublicationAdvertisement, error) {
+func (adapter *NativeReviewAdapter) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (workflowstate.GitPublicationAdvertisement, error) {
 	profile, err := LoadWorkflowNativePublisher(adapter.configDir, request.Repository, request.TargetRef)
 	if err != nil {
-		return GitPublicationAdvertisement{}, err
+		return workflowstate.GitPublicationAdvertisement{}, err
 	}
 
 	return NewWorkflowGitPublisher(profile.Repository, profile.Transport).InspectWorkflowGitPublication(ctx, request)

@@ -13,7 +13,7 @@ type nativeGitInspectorFixture struct {
 	after     func(context.Context)
 }
 
-func (p nativeGitInspectorFixture) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (GitPublicationAdvertisement, error) {
+func (p nativeGitInspectorFixture) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (workflowstate.GitPublicationAdvertisement, error) {
 	advertisement, err := p.inspector.InspectWorkflowGitPublication(ctx, request)
 	p.after(ctx)
 

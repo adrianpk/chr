@@ -1,11 +1,13 @@
 package workflow
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func (s *Store) workflowNativeReceiptApplication(submission workflowstate.Submission) (*workflowstate.EvidenceRef, error) {
 	native := submission.Native
 	for _, ref := range native.GitObservationRefs {
-		var observation NativeGitObservation
+		var observation workflowstate.NativeGitObservation
 		if err := s.readWorkflowNativeEvidence(native.InvocationID, ref, &observation); err != nil {
 			return nil, err
 		}
@@ -18,7 +20,7 @@ func (s *Store) workflowNativeReceiptApplication(submission workflowstate.Submis
 	return nil, nil
 }
 
-func (s *Store) checkWorkflowNativeReceiptApplication(receipt Receipt, transaction GitPublicationResult) error {
+func (s *Store) checkWorkflowNativeReceiptApplication(receipt Receipt, transaction workflowstate.GitPublicationResult) error {
 	native := receipt.Native
 	if native.GitApplicationRef == nil {
 		if !validWorkflowNativeReceiptTransaction(*native, transaction) {
@@ -28,7 +30,7 @@ func (s *Store) checkWorkflowNativeReceiptApplication(receipt Receipt, transacti
 		return nil
 	}
 
-	var observation NativeGitObservation
+	var observation workflowstate.NativeGitObservation
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, *native.GitApplicationRef, &observation); err != nil {
 		return err
 	}
@@ -42,7 +44,7 @@ func (s *Store) checkWorkflowNativeReceiptApplication(receipt Receipt, transacti
 		return err
 	}
 
-	binding := NativePublicationBinding{Git: candidate.Input.Git, Publication: transaction, GitApplication: &observation}
+	binding := workflowstate.NativePublicationBinding{Git: candidate.Input.Git, Publication: transaction, GitApplication: &observation}
 	if !workflowNativeApplicationAttributed(binding) {
 		return workflowstate.ErrConflict
 	}

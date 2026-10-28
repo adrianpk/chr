@@ -226,7 +226,7 @@ func (s *Store) checkWorkflowNativeReceipt(record Record) error {
 func (s *Store) checkWorkflowNativeReceiptObservations(receipt Receipt) error {
 	native := receipt.Native
 
-	var transaction GitPublicationResult
+	var transaction workflowstate.GitPublicationResult
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.TransactionProofRef, &transaction); err != nil {
 		return err
 	}
@@ -240,7 +240,7 @@ func (s *Store) checkWorkflowNativeReceiptObservations(receipt Receipt) error {
 	}
 
 	for i, ref := range native.ObservationRefs {
-		var observation NativePublicationObservation
+		var observation workflowstate.NativePublicationObservation
 		if err := s.readWorkflowNativeEvidence(native.InvocationID, ref, &observation); err != nil {
 			return err
 		}
@@ -267,7 +267,7 @@ func workflowNativeReceiptCandidateMatches(receipt Receipt, candidate workflowst
 	return workflowNativeJSONEqual(candidate.Native.NativeRecordBinding, receipt.Native.NativeRecordBinding) && candidate.Native.CandidateHash == receipt.Native.CandidateHash
 }
 
-func (s *Store) checkWorkflowNativeTransactionRevision(native NativeReceipt, transaction GitPublicationResult) error {
+func (s *Store) checkWorkflowNativeTransactionRevision(native workflowstate.NativeReceipt, transaction workflowstate.GitPublicationResult) error {
 	var capability workflowstate.NativeCapability
 	if err := s.readWorkflowNativeEvidence(native.InvocationID, native.CapabilityRef, &capability); err != nil {
 		return err
@@ -292,7 +292,7 @@ func (s *Store) checkWorkflowNativeTransactionRevision(native NativeReceipt, tra
 	return nil
 }
 
-func validateWorkflowNativeReceiptObservation(receipt Receipt, observation NativePublicationObservation) error {
+func validateWorkflowNativeReceiptObservation(receipt Receipt, observation workflowstate.NativePublicationObservation) error {
 	native := receipt.Native
 	if !workflowNativeObservationTargetValid(observation) || !validWorkflowNativeReceiptObservationHeader(receipt, observation) {
 		return workflowstate.ErrConflict
@@ -375,14 +375,14 @@ func validateWorkflowNativeSourceMapping(b workflowstate.NativeRecordBinding, co
 	return nil
 }
 
-func validWorkflowNativeReceiptTransaction(native NativeReceipt, transaction GitPublicationResult) bool {
+func validWorkflowNativeReceiptTransaction(native workflowstate.NativeReceipt, transaction workflowstate.GitPublicationResult) bool {
 	expected := [7]string{"chr-git-publication-result/v1", "applied", native.OriginalSource, native.OriginalSource, native.ValidatedBase, native.PreparedResult, native.PreparedResult}
 	actual := [7]string{transaction.Schema, transaction.State, transaction.OriginalSourceCommit, transaction.AdvertisedSourceCommit, transaction.AdvertisedTargetCommit, transaction.PublishedSourceCommit, transaction.ResultCommit}
 
 	return expected == actual && transaction.CommandsSent && workflowstate.ValidFingerprint(transaction.CandidateRevision)
 }
 
-func validWorkflowNativeReceiptObservationHeader(receipt Receipt, observation NativePublicationObservation) bool {
+func validWorkflowNativeReceiptObservationHeader(receipt Receipt, observation workflowstate.NativePublicationObservation) bool {
 	native, pr := receipt.Native, observation.PullRequest
 	if observation.CanonicalPR != "" && observation.CanonicalPR != native.CanonicalPR {
 		return false

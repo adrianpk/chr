@@ -97,7 +97,7 @@ func TestNativeClosingDivergence(t *testing.T) {
 
 	ports := nativeReceiptFrontierPorts(t, f.fixture, b.ValidatedBase)
 
-	if _, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, ErrWorkflowHistoryDivergence) {
+	if _, err := f.fixture.f.store.CloseWorkflowInvocationSet(t.Context(), f.fixture.f.entry.InvocationID, "dev", ports); !errors.Is(err, workflowstate.ErrHistoryDivergence) {
 		t.Fatal("removed native result entered a closing gate", err)
 	}
 
@@ -284,7 +284,7 @@ func TestNativeClosingLost(t *testing.T) {
 		t.Fatal("reconciled lost exchange remained a closure barrier", err)
 	}
 
-	var response GitPublicationResult
+	var response workflowstate.GitPublicationResult
 	if err := store.readWorkflowNativeEvidence(id, f.receipt.Receipt.Native.TransactionProofRef, &response); err != nil || response.State != "unknown" || f.fixture.publisher.calls.Load() != 1 {
 		t.Fatal("closure rewrote or repeated the lost exchange", err)
 	}

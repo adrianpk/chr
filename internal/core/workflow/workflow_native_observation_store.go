@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowNativeObservationBinding(ctx context.Context, submission workflowstate.Submission, request GitPublication) (binding NativePublicationBinding, err error) {
+func (s *Store) workflowNativeObservationBinding(ctx context.Context, submission workflowstate.Submission, request GitPublication) (binding workflowstate.NativePublicationBinding, err error) {
 	err = s.withLock(ctx, func() error {
 		invocationLocation, err := s.locateWorkflowInvocation(ctx, submission.InvocationID)
 		if err != nil {
@@ -20,7 +20,7 @@ func (s *Store) workflowNativeObservationBinding(ctx context.Context, submission
 	return binding, err
 }
 
-func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Submission, request GitPublication, binding *NativePublicationBinding) error {
+func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Submission, request GitPublication, binding *workflowstate.NativePublicationBinding) error {
 	native := submission.Native
 	if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil {
 		return ErrWorkflowObservationRequired
@@ -44,7 +44,7 @@ func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Su
 	}
 
 	for _, ref := range native.GitObservationRefs {
-		var observation NativeGitObservation
+		var observation workflowstate.NativeGitObservation
 		if err := s.readWorkflowNativeEvidence(native.InvocationID, ref, &observation); err != nil {
 			return err
 		}
@@ -59,7 +59,7 @@ func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Su
 	return validateWorkflowNativeBinding(*binding)
 }
 
-func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, update NativeSubmissionUpdate, expected workflowstate.Submission, observation NativePublicationObservation) (result workflowNativeRetention, err error) {
+func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, update NativeSubmissionUpdate, expected workflowstate.Submission, observation workflowstate.NativePublicationObservation) (result workflowNativeRetention, err error) {
 	var (
 		submission workflowstate.Submission
 		next       IntegrationBudgetGuard
@@ -97,7 +97,7 @@ func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, up
 	return workflowNativeRetention{Submission: submission, Next: next}, err
 }
 
-func (s *Store) recordWorkflowNativeCanonicalObservation(ctx context.Context, run workflowInvocationFile, update NativeSubmissionUpdate, expected workflowstate.Submission, observation NativePublicationObservation) (workflowstate.Submission, error) {
+func (s *Store) recordWorkflowNativeCanonicalObservation(ctx context.Context, run workflowInvocationFile, update NativeSubmissionUpdate, expected workflowstate.Submission, observation workflowstate.NativePublicationObservation) (workflowstate.Submission, error) {
 	ref, err := s.writeWorkflowNativeDispatchEvidence(expected, observation)
 	if err != nil {
 		return expected, err

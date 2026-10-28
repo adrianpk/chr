@@ -86,13 +86,13 @@ func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard Int
 	return workflowNativeReconciliation{Submission: submission, Request: request, Update: update}, err
 }
 
-func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Submission, request GitPublication, inspector GitPublicationInspector, git PreparedIntegrationGit) (NativeGitObservation, error) {
+func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Submission, request GitPublication, inspector GitPublicationInspector, git PreparedIntegrationGit) (workflowstate.NativeGitObservation, error) {
 	advertisement, err := inspector.InspectWorkflowGitPublication(ctx, request)
 	if err != nil && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowObservationRequired) && !errors.Is(err, workflowstate.ErrAtomicGuard) {
-		return NativeGitObservation{}, err
+		return workflowstate.NativeGitObservation{}, err
 	}
 
-	observation := NativeGitObservation{SchemaVersion: 1, SubmissionID: submission.ID, CandidateRevision: request.CandidateRevision, SourceCommit: advertisement.SourceCommit, TargetCommit: advertisement.TargetCommit, Condition: "result_unverified"}
+	observation := workflowstate.NativeGitObservation{SchemaVersion: 1, SubmissionID: submission.ID, CandidateRevision: request.CandidateRevision, SourceCommit: advertisement.SourceCommit, TargetCommit: advertisement.TargetCommit, Condition: "result_unverified"}
 	if err := validateWorkflowNativeGitObservation(submission, observation); err != nil {
 		return observation, err
 	}
@@ -113,7 +113,7 @@ func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Subm
 	return observation, validateWorkflowNativeGitObservation(submission, observation)
 }
 
-func (s *Store) retainWorkflowNativeGitObservation(ctx context.Context, update NativeSubmissionUpdate, submission workflowstate.Submission, observation NativeGitObservation) (retained workflowstate.Submission, err error) {
+func (s *Store) retainWorkflowNativeGitObservation(ctx context.Context, update NativeSubmissionUpdate, submission workflowstate.Submission, observation workflowstate.NativeGitObservation) (retained workflowstate.Submission, err error) {
 	retained = submission
 	err = s.withLock(ctx, func() error {
 		invocationLocation2, err := s.locateWorkflowInvocation(ctx, update.InvocationID)
@@ -143,12 +143,12 @@ func (s *Store) retainWorkflowNativeGitObservation(ctx context.Context, update N
 	return retained, err
 }
 
-func (s *Store) classifyWorkflowNativeGitObservation(submission workflowstate.Submission, observation NativeGitObservation, native *workflowstate.NativeSubmission) error {
+func (s *Store) classifyWorkflowNativeGitObservation(submission workflowstate.Submission, observation workflowstate.NativeGitObservation, native *workflowstate.NativeSubmission) error {
 	if native.TransportResponseRef == nil {
 		return nil
 	}
 
-	var response GitPublicationResult
+	var response workflowstate.GitPublicationResult
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, *native.TransportResponseRef, &response); err != nil {
 		return err
 	}
@@ -176,10 +176,10 @@ func (s *Store) classifyWorkflowNativeGitObservation(submission workflowstate.Su
 	return nil
 }
 
-func workflowNativeObservedApplication(native workflowstate.NativeSubmission, response GitPublicationResult, observation NativeGitObservation) bool {
+func workflowNativeObservedApplication(native workflowstate.NativeSubmission, response workflowstate.GitPublicationResult, observation workflowstate.NativeGitObservation) bool {
 	return observation.Git != nil && (response.State == "applied" || response.State == "unknown" && observation.SourceCommit == native.PreparedResult)
 }
 
-func workflowNativeMaySealRejection(native workflowstate.NativeSubmission, response GitPublicationResult, observation NativeGitObservation) bool {
+func workflowNativeMaySealRejection(native workflowstate.NativeSubmission, response workflowstate.GitPublicationResult, observation workflowstate.NativeGitObservation) bool {
 	return native.DispatchCompletionRef != nil && observation.Git == nil && observation.SourceCommit != native.PreparedResult && observation.TargetCommit != native.PreparedResult && workflowNativeDefiniteResponse(native, response)
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -32,7 +33,7 @@ func validateWorkflowFinalizationRef(run workflowInvocationFile) error {
 }
 
 func workflowSliceReceipt(run workflowInvocationFile, proof SliceDeliveryProof, candidate SliceCandidate) (Record, error) {
-	reference, err := DetectReviewProviderReference(proof.PullRequest.URL)
+	reference, err := workflowforge.ParseReference(proof.PullRequest.URL)
 	if err != nil {
 		return Record{}, err
 	}

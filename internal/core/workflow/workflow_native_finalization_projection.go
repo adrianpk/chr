@@ -85,7 +85,7 @@ func (s *Store) workflowNativeDeliveryProof(run workflowInvocationFile, record R
 		return SliceDeliveryProof{}, workflowstate.ErrConflict
 	}
 
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 	if err := s.readWorkflowNativeEvidence(run.ID, refs[len(refs)-1], &observation); err != nil {
 		return SliceDeliveryProof{}, err
 	}

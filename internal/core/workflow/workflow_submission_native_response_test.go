@@ -16,7 +16,7 @@ func TestNativeSubmissionResponses(t *testing.T) {
 	receipt := nativeRecordReceipt(t, f.store, f.candidate)
 	applied := nativeSubmissionApplied(t, f, submission, receipt)
 
-	var result GitPublicationResult
+	var result workflowstate.GitPublicationResult
 	if err := f.store.readWorkflowNativeEvidence(submission.InvocationID, *applied.Facts.TransportResponseRef, &result); err != nil {
 		t.Fatal(err)
 	}

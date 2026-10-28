@@ -60,7 +60,7 @@ func nativeReceiptDivergence(t *testing.T, method string) {
 	workflowIntegrationCommand(t, fixture.remote, "update-ref", b.TargetRef, b.ValidatedBase, b.PreparedResult)
 
 	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
-	if !errors.Is(err, ErrWorkflowHistoryDivergence) || submission.State != "confirmed" {
+	if !errors.Is(err, workflowstate.ErrHistoryDivergence) || submission.State != "confirmed" {
 		t.Fatal("removed result was not retained as history divergence", err)
 	}
 
@@ -187,7 +187,7 @@ func TestNativeReceiptFrontierBlock(t *testing.T) {
 	ports := nativeReceiptFrontierPorts(t, fixture, b.ValidatedBase)
 
 	blocked, err := f.store.AdvanceWorkflowFrontier(t.Context(), f.entry.InvocationID, ports)
-	if !errors.Is(err, ErrWorkflowHistoryDivergence) || blocked.Status != workflowstate.InvocationBlocked || blocked.Blocker == nil || len(blocked.Deliveries) != 0 {
+	if !errors.Is(err, workflowstate.ErrHistoryDivergence) || blocked.Status != workflowstate.InvocationBlocked || blocked.Blocker == nil || len(blocked.Deliveries) != 0 {
 		t.Fatal("frontier hid or bypassed removed delivery history", err)
 	}
 

@@ -82,7 +82,7 @@ func nativeSubmissionApplied(t *testing.T, f nativeSubmissionFixture, submission
 		t.Fatal(err)
 	}
 
-	advertisement := GitPublicationAdvertisement{SourceCommit: native.OriginalSource, TargetCommit: native.ValidatedBase, Fingerprint: capability.ServerCapabilityFingerprint}
+	advertisement := workflowstate.GitPublicationAdvertisement{SourceCommit: native.OriginalSource, TargetCommit: native.ValidatedBase, Fingerprint: capability.ServerCapabilityFingerprint}
 	manifest := NativeCommandManifest{SchemaVersion: 1, SubmissionID: submission.ID, Atomic: true, SourceRef: native.SourceRef, ExpectedSource: native.OriginalSource, NewSource: native.PreparedResult, TargetRef: native.TargetRef, ExpectedTarget: native.ValidatedBase, NewTarget: native.PreparedResult}
 	advRef := retainNativeRecordEvidence(t, f.store, native.InvocationID, "actual-advertisement", advertisement)
 	commandRef := retainNativeRecordEvidence(t, f.store, native.InvocationID, "actual-commands", manifest)

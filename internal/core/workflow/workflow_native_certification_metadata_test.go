@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestNativePRChanges changes the original real PR after advertisement and
@@ -32,7 +34,7 @@ func nativePRChange(t *testing.T, state string, profile nativeLiveProfile, scena
 	f := newNativeFaultCase(t, state, profile, "external_"+scenario)
 	f.admit(t)
 
-	f.request.BeforeSend = func(ctx context.Context, _ GitPublicationAdvertisement) error {
+	f.request.BeforeSend = func(ctx context.Context, _ workflowstate.GitPublicationAdvertisement) error {
 		nativeChangeOriginalPR(t, ctx, f, scenario)
 
 		return nil

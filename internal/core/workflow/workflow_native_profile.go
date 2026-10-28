@@ -14,27 +14,10 @@ const (
 	workflowNativeAdapterVersion = "chr-native-publication/v1"
 )
 
-// NativePolicy contains current host-owned grants and certification.
-// Workers cannot supply it. Ownership names one full ref, never a prefix grant.
-type NativePolicy struct {
-	Repository                    string                   `json:"repository"`
-	SourceRef                     string                   `json:"source_ref"`
-	TargetRef                     string                   `json:"target_ref"`
-	OwnershipRevision             string                   `json:"ownership_revision"`
-	SourceRewriteAuthorized       bool                     `json:"source_rewrite_authorized"`
-	FastForwardTargetAuthorized   bool                     `json:"fast_forward_target_authorized"`
-	HostCandidateReview           bool                     `json:"host_candidate_review"`
-	ReviewMode                    workflowstate.ReviewMode `json:"review_mode"`
-	CredentialIdentityFingerprint string                   `json:"credential_identity_fingerprint"`
-	APIIdentityFingerprint        string                   `json:"api_identity_fingerprint,omitempty"`
-	ObservationContract           string                   `json:"observation_contract"`
-	CertifiedMethods              []string                 `json:"certified_methods"`
-}
-
 // NativePolicyReader rechecks trusted ownership, credential roles and
 // provider observation certification before each admission or intent check.
 type NativePolicyReader interface {
-	ReadWorkflowNativePolicy(context.Context, workflowstate.PullRequestSnapshot, string) (NativePolicy, error)
+	ReadWorkflowNativePolicy(context.Context, workflowstate.PullRequestSnapshot, string) (workflowstate.NativePolicy, error)
 }
 
 // NativeCapabilityRequest supplies the explicit profile and exact source.
@@ -44,7 +27,7 @@ type NativeCapabilityRequest struct {
 	Publication GitPublication
 }
 
-func workflowNativePolicyReasons(request NativeCapabilityRequest, policy NativePolicy) []workflowstate.NativeUnsupported {
+func workflowNativePolicyReasons(request NativeCapabilityRequest, policy workflowstate.NativePolicy) []workflowstate.NativeUnsupported {
 	publication := request.Publication
 	checks := []struct {
 		valid     bool

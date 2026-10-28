@@ -59,7 +59,7 @@ func checkNativeReceiptCompatibility(t *testing.T, evidence *nativeCertification
 		PreparedResult: git.ResultCommit, PublishedSource: git.ResultCommit, PreparedTree: git.PreparedTree,
 		CanonicalPR: binding.PullRequest.URL,
 	}
-	native := NativeReceipt{NativeRecordBinding: b, ActualMergeResult: observed.PullRequest.ResultCommit}
+	native := workflowstate.NativeReceipt{NativeRecordBinding: b, ActualMergeResult: observed.PullRequest.ResultCommit}
 	native.ObservationContract = observed.ObservationContract
 
 	receipt := Receipt{

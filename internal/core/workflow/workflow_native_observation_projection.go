@@ -13,7 +13,7 @@ func (s *Store) projectWorkflowNativeCanonicalObservation(entry *IntegrationEntr
 
 	refs := submission.Native.ObservationRefs
 
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 	if err := s.readWorkflowNativeEvidence(submission.InvocationID, refs[len(refs)-1], &observation); err != nil {
 		return err
 	}

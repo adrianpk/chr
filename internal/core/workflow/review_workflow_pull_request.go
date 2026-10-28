@@ -101,6 +101,6 @@ func (adapter RemoteReviewAdapter) workflowForgeClient(repository string, resolv
 	return workflowforge.Client{Endpoint: workflowForgeEndpoint(repository, resolved.reference, resolved.config), Commands: adapter.workflowProviderRunner()}
 }
 
-func workflowForgeEndpoint(repository string, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig) workflowforge.Endpoint {
+func workflowForgeEndpoint(repository string, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig) workflowforge.Endpoint {
 	return workflowforge.Endpoint{Repository: repository, Provider: string(reference.Provider), Host: reference.Host, Owner: reference.Owner, Repo: reference.Repo, Number: reference.Number, Command: config.CLI}
 }

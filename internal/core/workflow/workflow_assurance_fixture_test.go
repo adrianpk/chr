@@ -75,7 +75,7 @@ func (p *workflowAssuranceProvider) ReadWorkflowPullRequest(ctx context.Context,
 	return pr, err
 }
 
-func (p *workflowAssuranceProvider) PublishWorkflowGit(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+func (p *workflowAssuranceProvider) PublishWorkflowGit(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 	p.calls++
 
 	var publisher GitPublisher = NewWorkflowGitPublisher(request.Repository, p.remote)
@@ -111,14 +111,14 @@ func (p *workflowAssuranceProvider) retainPublicationFacts(ctx context.Context, 
 	return nil
 }
 
-func (p *workflowAssuranceProvider) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (GitPublicationAdvertisement, error) {
+func (p *workflowAssuranceProvider) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (workflowstate.GitPublicationAdvertisement, error) {
 	return NewWorkflowGitPublisher(request.Repository, p.remote).InspectWorkflowGitPublication(ctx, request)
 }
 
-func (p *workflowAssuranceProvider) ObserveWorkflowNativePublication(ctx context.Context, binding NativePublicationBinding, git IntegrationGit) (NativePublicationObservation, error) {
+func (p *workflowAssuranceProvider) ObserveWorkflowNativePublication(ctx context.Context, binding workflowstate.NativePublicationBinding, git IntegrationGit) (workflowstate.NativePublicationObservation, error) {
 	pr, err := p.ReadWorkflowPullRequest(ctx, binding.PullRequest.URL)
 	if err != nil {
-		return NativePublicationObservation{}, err
+		return workflowstate.NativePublicationObservation{}, err
 	}
 
 	runner := &workflowPRCommandFixture{fakeRemoteReviewRunner: newFakeRemoteReviewRunner()}

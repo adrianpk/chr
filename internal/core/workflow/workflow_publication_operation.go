@@ -1,6 +1,8 @@
 package workflow
 
-import workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+import (
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // SubmissionIntent retains the journal image and permission for one dispatch.
 // A retained unknown attempt has Dispatch false and must be reconciled.
@@ -13,7 +15,7 @@ type SubmissionIntent struct {
 // Neither transport completion nor acceptance proves canonical delivery.
 type NativePublicationResult struct {
 	Submission workflowstate.Submission
-	Transport  GitPublicationResult
+	Transport  workflowstate.GitPublicationResult
 }
 
 type workflowNativePublisher struct {
@@ -24,7 +26,7 @@ type workflowNativePublisher struct {
 
 type workflowNativeObservation struct {
 	Submission  workflowstate.Submission
-	Observation NativePublicationObservation
+	Observation workflowstate.NativePublicationObservation
 	Next        IntegrationBudgetGuard
 }
 
@@ -57,7 +59,7 @@ type workflowNativeRetention struct {
 }
 
 type workflowNativeReceiptEvidence struct {
-	Observation NativePublicationObservation
+	Observation workflowstate.NativePublicationObservation
 	Ref         workflowstate.EvidenceRef
 }
 

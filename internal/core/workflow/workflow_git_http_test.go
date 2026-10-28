@@ -11,6 +11,8 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowHTTPFixture struct {
@@ -184,7 +186,7 @@ func checkWorkflowGitHTTPS(t *testing.T, mode string) {
 	checkWorkflowGitRefs(t, fixture, source, target)
 }
 
-func checkWorkflowHTTPOutcome(t *testing.T, mode string, result GitPublicationResult, err error, posts int64) {
+func checkWorkflowHTTPOutcome(t *testing.T, mode string, result workflowstate.GitPublicationResult, err error, posts int64) {
 	t.Helper()
 
 	expectedState, sent := "not_sent", false
@@ -211,7 +213,7 @@ func checkWorkflowHTTPOutcome(t *testing.T, mode string, result GitPublicationRe
 	checkWorkflowHTTPStatus(t, result, err, posts, expectedState, sent)
 }
 
-func checkWorkflowHTTPStatus(t *testing.T, result GitPublicationResult, err error, posts int64, expectedState string, sent bool) {
+func checkWorkflowHTTPStatus(t *testing.T, result workflowstate.GitPublicationResult, err error, posts int64, expectedState string, sent bool) {
 	t.Helper()
 
 	if result.State != expectedState || result.CommandsSent != sent || (posts == 1) != sent || posts > 1 {

@@ -10,6 +10,7 @@ import (
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	ticketmetadata "forge.adrianpk.com/chr/internal/core/ticket/metadata"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 )
 
 // TicketMergePreflightRemoteReader defines a package boundary interface.
@@ -207,7 +208,7 @@ func ticketMergeRemoteBlockers(handoff ticketcore.MergeHandoff, expectedBase str
 
 func parseTicketMergeRemoteMetadata(snapshot workflowcore.RemoteReviewSnapshot) ticketMergeRemoteMetadata {
 	switch snapshot.Reference.Provider {
-	case workflowcore.ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return parseGitHubTicketMergeMetadata(snapshot.PullRequestJSON)
 	default:
 		return parseForgeTicketMergeMetadata(snapshot.PullRequestJSON)

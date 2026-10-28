@@ -295,7 +295,7 @@ func workflowIntegrationEntryInvocation(run workflowInvocationFile, entry Integr
 	return entry.InvocationID == run.ID && entry.Namespace == run.Namespace && entry.ProjectID == run.ProjectID
 }
 
-func workflowIntegrationReceiptEntryScopeMatches(native *NativeReceipt, run workflowInvocationFile, entry IntegrationEntry) bool {
+func workflowIntegrationReceiptEntryScopeMatches(native *workflowstate.NativeReceipt, run workflowInvocationFile, entry IntegrationEntry) bool {
 	return native.EntryID == entry.ID && native.InvocationID == run.ID && native.Unit == entry.Unit && native.SourceRepository == entry.Repository && native.TargetRef == entry.TargetRef && native.CandidateRef == *entry.CandidateRef
 }
 

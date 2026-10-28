@@ -5,6 +5,8 @@ import (
 	"errors"
 	"sync"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type nativeDispatchWaitingPublisher struct {
@@ -14,12 +16,12 @@ type nativeDispatchWaitingPublisher struct {
 	once      sync.Once
 }
 
-func (p *nativeDispatchWaitingPublisher) PublishWorkflowGit(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+func (p *nativeDispatchWaitingPublisher) PublishWorkflowGit(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 	p.once.Do(func() { close(p.started) })
 
 	select {
 	case <-ctx.Done():
-		return GitPublicationResult{}, ctx.Err()
+		return workflowstate.GitPublicationResult{}, ctx.Err()
 	case <-p.release:
 		return p.publisher.PublishWorkflowGit(ctx, request)
 	}

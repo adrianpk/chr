@@ -9,24 +9,17 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
-
-// GitPublicationAdvertisement is a read-only observation of the actual
-// receive-pack server. It is not a claim that an update was sent or applied.
-type GitPublicationAdvertisement struct {
-	SourceCommit string
-	TargetCommit string
-	Fingerprint  string
-}
 
 // GitPublicationInspector observes transport capability without updates.
 type GitPublicationInspector interface {
-	InspectWorkflowGitPublication(context.Context, GitPublication) (GitPublicationAdvertisement, error)
+	InspectWorkflowGitPublication(context.Context, GitPublication) (workflowstate.GitPublicationAdvertisement, error)
 }
 
 // InspectWorkflowGitPublication reads the actual advertisement and terminates
 // with an empty command list. Expected-old checks are repeated during publication.
-func (git OSWorkflowGitPublisher) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (observed GitPublicationAdvertisement, err error) {
+func (git OSWorkflowGitPublisher) InspectWorkflowGitPublication(ctx context.Context, request GitPublication) (observed workflowstate.GitPublicationAdvertisement, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 

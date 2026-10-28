@@ -141,14 +141,14 @@ type nativeLivePolicyReader struct {
 	publication GitPublication
 }
 
-func (reader nativeLivePolicyReader) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (NativePolicy, error) {
+func (reader nativeLivePolicyReader) ReadWorkflowNativePolicy(ctx context.Context, pr workflowstate.PullRequestSnapshot, method string) (workflowstate.NativePolicy, error) {
 	if err := ctx.Err(); err != nil {
-		return NativePolicy{}, err
+		return workflowstate.NativePolicy{}, err
 	}
 
 	profiles, err := loadNativeLiveProfiles(reader.state)
 	if err != nil {
-		return NativePolicy{}, err
+		return workflowstate.NativePolicy{}, err
 	}
 
 	for _, profile := range profiles {
@@ -157,19 +157,19 @@ func (reader nativeLivePolicyReader) ReadWorkflowNativePolicy(ctx context.Contex
 		}
 	}
 
-	return NativePolicy{}, fmt.Errorf("current designated fixture profile changed")
+	return workflowstate.NativePolicy{}, fmt.Errorf("current designated fixture profile changed")
 }
 
-func (reader nativeLivePolicyReader) policy(profile nativeLiveProfile, method string) (NativePolicy, error) {
+func (reader nativeLivePolicyReader) policy(profile nativeLiveProfile, method string) (workflowstate.NativePolicy, error) {
 	request := reader.publication
 
 	if !slices.Contains(profile.Certification.Methods, method) || profile.Role.Identity == "" || !profile.Role.Push || !profile.Certification.Enabled {
-		return NativePolicy{}, fmt.Errorf("current native fixture role or observation certification changed")
+		return workflowstate.NativePolicy{}, fmt.Errorf("current native fixture role or observation certification changed")
 	}
 
 	identity := profile.Role.Identity + "\x00" + profile.Role.APIReference + "\x00" + profile.Role.GitReference
 
-	return NativePolicy{
+	return workflowstate.NativePolicy{
 		Repository: profile.URL, SourceRef: request.SourceRef, TargetRef: request.TargetRef, OwnershipRevision: request.OwnershipRevision,
 		SourceRewriteAuthorized:       profile.Policy.Rewrite && profile.Policy.RewriteCondition == "Only the exact test-owned source ref at its expected prior SHA",
 		FastForwardTargetAuthorized:   profile.Policy.TargetPublication == "Explicitly authorized fast-forward Git publication",

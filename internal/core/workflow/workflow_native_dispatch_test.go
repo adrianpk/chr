@@ -18,7 +18,7 @@ type nativeDispatchPublisherFixture struct {
 	calls     atomic.Int32
 }
 
-func (p *nativeDispatchPublisherFixture) PublishWorkflowGit(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+func (p *nativeDispatchPublisherFixture) PublishWorkflowGit(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 	p.calls.Add(1)
 
 	submission, err := p.store.ReadWorkflowSubmission(ctx, p.id)

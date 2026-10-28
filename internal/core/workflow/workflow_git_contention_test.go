@@ -80,7 +80,7 @@ func checkWorkflowGitContention(t *testing.T, transport, mode, endpoint, config 
 	}
 }
 
-func checkWorkflowGitApplied(t *testing.T, fixture workflowGitFixture, result GitPublicationResult, err error) {
+func checkWorkflowGitApplied(t *testing.T, fixture workflowGitFixture, result workflowstate.GitPublicationResult, err error) {
 	t.Helper()
 
 	if err != nil || result.State != "applied" || !result.CommandsSent || result.PublishedSourceCommit != fixture.request.Git.ResultCommit || result.OriginalSourceCommit != fixture.request.Git.SourceCommit {
@@ -90,7 +90,7 @@ func checkWorkflowGitApplied(t *testing.T, fixture workflowGitFixture, result Gi
 	checkWorkflowGitRefs(t, fixture, fixture.request.Git.ResultCommit, fixture.request.Git.ResultCommit)
 }
 
-func checkWorkflowGitRejected(t *testing.T, fixture workflowGitFixture, mode string, result GitPublicationResult, err error) {
+func checkWorkflowGitRejected(t *testing.T, fixture workflowGitFixture, mode string, result workflowstate.GitPublicationResult, err error) {
 	t.Helper()
 
 	if !errors.Is(err, workflowstate.ErrConflict) || result.State != "rejected" || !result.CommandsSent || result.PublishedSourceCommit != "" {

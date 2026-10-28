@@ -17,10 +17,10 @@ import (
 )
 
 type nativeLiveEvidence struct {
-	Profile      string                         `json:"profile"`
-	Binding      NativePublicationBinding       `json:"binding"`
-	Observations []NativePublicationObservation `json:"observations"`
-	Failure      string                         `json:"failure,omitempty"`
+	Profile      string                                       `json:"profile"`
+	Binding      workflowstate.NativePublicationBinding       `json:"binding"`
+	Observations []workflowstate.NativePublicationObservation `json:"observations"`
+	Failure      string                                       `json:"failure,omitempty"`
 }
 
 // TestWorkflowNativeRebase exercises the real publisher and existing adapters
@@ -46,7 +46,7 @@ func nativeLiveRebase(t *testing.T, state string, profile nativeLiveProfile) {
 	publisher := NewWorkflowGitPublisher(profile.URL, nativeLiveTransport(t, profile))
 	capability := admitNativeLiveProfile(t, state, adapter, profile, request, pr, publisher)
 	result, publicationErr := publisher.PublishWorkflowGit(t.Context(), request)
-	binding := NativePublicationBinding{Capability: capability, PullRequest: pr, Git: request.Git, Publication: result, SourceDirectory: request.Directory, ObservationDeadline: time.Now().Add(2 * time.Minute)}
+	binding := workflowstate.NativePublicationBinding{Capability: capability, PullRequest: pr, Git: request.Git, Publication: result, SourceDirectory: request.Directory, ObservationDeadline: time.Now().Add(2 * time.Minute)}
 
 	evidence := nativeLiveEvidence{Profile: profile.Forge, Binding: binding}
 	if publicationErr != nil {
@@ -177,7 +177,7 @@ func observeNativeLiveRebase(t *testing.T, adapter RemoteReviewAdapter, profile 
 	t.Fatal(evidence.Failure)
 }
 
-func stopNativeLiveObservation(binding NativePublicationBinding, observed NativePublicationObservation) bool {
+func stopNativeLiveObservation(binding workflowstate.NativePublicationBinding, observed workflowstate.NativePublicationObservation) bool {
 	return !time.Now().Before(binding.ObservationDeadline) || (observed.Condition != "" && observed.Condition != "canonical_pr_closed_unmerged")
 }
 

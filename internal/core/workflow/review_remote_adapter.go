@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -44,7 +45,7 @@ type RemoteReviewAdapter struct {
 
 // RemoteReviewSnapshot describes a package boundary value.
 type RemoteReviewSnapshot struct {
-	Reference          ReviewProviderReference
+	Reference          workflowforge.Reference
 	PullRequestJSON    string
 	Diff               string
 	IssueCommentsJSON  string
@@ -72,7 +73,7 @@ type RemoteReviewComment struct {
 
 // RemoteReviewWriteResult describes a package boundary value.
 type RemoteReviewWriteResult struct {
-	Reference ReviewProviderReference
+	Reference workflowforge.Reference
 	Comments  []RemoteReviewWrittenComment
 }
 
@@ -84,7 +85,7 @@ type MergeRequest struct {
 
 // MergeResult describes a package boundary value.
 type MergeResult struct {
-	Reference ReviewProviderReference
+	Reference workflowforge.Reference
 	Strategy  string
 	SHA       string
 }
@@ -151,9 +152,9 @@ func (adapter RemoteReviewAdapter) Read(ctx context.Context, rawURL string) (Rem
 	reference, config := resolvedReview.reference, resolvedReview.config
 
 	switch reference.Provider {
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		return adapter.readForgejo(ctx, reference, config)
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return adapter.readGitHub(ctx, reference, config)
 	default:
 		return RemoteReviewSnapshot{}, fmt.Errorf("unsupported review provider: %s", reference.Provider)
@@ -209,12 +210,12 @@ func (a RemoteReviewAdapter) Merge(ctx context.Context, req MergeRequest) (Merge
 }
 
 type reviewProviderEndpoint struct {
-	reference ReviewProviderReference
+	reference workflowforge.Reference
 	config    workspaceconfig.ReviewProviderTargetConfig
 }
 
 func (adapter RemoteReviewAdapter) resolve(rawURL string) (reviewProviderEndpoint, error) {
-	reference, err := DetectReviewProviderReference(rawURL)
+	reference, err := workflowforge.ParseReference(rawURL)
 	if err != nil {
 		return reviewProviderEndpoint{}, err
 	}
@@ -231,7 +232,7 @@ func (adapter RemoteReviewAdapter) resolve(rawURL string) (reviewProviderEndpoin
 	return reviewProviderEndpoint{reference: reference, config: config}, nil
 }
 
-func (adapter RemoteReviewAdapter) readForgejo(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
+func (adapter RemoteReviewAdapter) readForgejo(ctx context.Context, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
 	prJSON, err := adapter.runner.Output(ctx, config.CLI, "api", forgejoPullRequestPath(reference))
 	if err != nil {
 		return RemoteReviewSnapshot{}, err
@@ -263,7 +264,7 @@ func (adapter RemoteReviewAdapter) readForgejo(ctx context.Context, reference Re
 	}, nil
 }
 
-func (adapter RemoteReviewAdapter) readGitHub(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
+func (adapter RemoteReviewAdapter) readGitHub(ctx context.Context, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig) (RemoteReviewSnapshot, error) {
 	prJSON, err := adapter.runner.Output(ctx, config.CLI, "pr", "view", reference.URL, "--json", "number,title,state,baseRefName,headRefName,headRefOid,mergeable,isDraft,reviewDecision")
 	if err != nil {
 		return RemoteReviewSnapshot{}, err
@@ -304,7 +305,7 @@ func (adapter RemoteReviewAdapter) readGitHub(ctx context.Context, reference Rev
 	}, nil
 }
 
-func (adapter RemoteReviewAdapter) readForgejoChecks(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, prJSON []byte) ([]byte, bool) {
+func (adapter RemoteReviewAdapter) readForgejoChecks(ctx context.Context, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig, prJSON []byte) ([]byte, bool) {
 	metadata := remoteReviewPRMetadata{}
 	if err := json.Unmarshal(prJSON, &metadata); err != nil || strings.TrimSpace(metadata.Head.SHA) == "" {
 		return nil, false
@@ -318,7 +319,7 @@ func (adapter RemoteReviewAdapter) readForgejoChecks(ctx context.Context, refere
 	return checks, true
 }
 
-func (adapter RemoteReviewAdapter) writeComment(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
+func (adapter RemoteReviewAdapter) writeComment(ctx context.Context, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
 	if isInlineComment(comment) {
 		written, err := adapter.writeInlineComment(ctx, reference, config, comment)
 		if err == nil {
@@ -329,7 +330,7 @@ func (adapter RemoteReviewAdapter) writeComment(ctx context.Context, reference R
 	return adapter.writeGeneralComment(ctx, reference, config, comment)
 }
 
-func (adapter RemoteReviewAdapter) writeInlineComment(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
+func (adapter RemoteReviewAdapter) writeInlineComment(ctx context.Context, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
 	payload, err := inlineCommentPayload(reference.Provider, comment)
 	if err != nil {
 		return RemoteReviewWrittenComment{}, err
@@ -348,7 +349,7 @@ func (adapter RemoteReviewAdapter) writeInlineComment(ctx context.Context, refer
 	}, nil
 }
 
-func (adapter RemoteReviewAdapter) writeGeneralComment(ctx context.Context, reference ReviewProviderReference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
+func (adapter RemoteReviewAdapter) writeGeneralComment(ctx context.Context, reference workflowforge.Reference, config workspaceconfig.ReviewProviderTargetConfig, comment RemoteReviewComment) (RemoteReviewWrittenComment, error) {
 	payload, err := json.Marshal(map[string]string{"body": generalCommentBody(comment)})
 	if err != nil {
 		return RemoteReviewWrittenComment{}, fmt.Errorf("encode general comment payload: %w", err)
@@ -380,9 +381,9 @@ func remoteReviewCommentKind(comment RemoteReviewComment) string {
 	return RemoteReviewCommentKindNonBlocking
 }
 
-func inlineCommentPayload(provider ReviewProvider, comment RemoteReviewComment) ([]byte, error) {
+func inlineCommentPayload(provider workflowforge.Provider, comment RemoteReviewComment) ([]byte, error) {
 	switch provider {
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		return json.Marshal(map[string]any{
 			"event": "COMMENT",
 			"comments": []map[string]any{
@@ -393,7 +394,7 @@ func inlineCommentPayload(provider ReviewProvider, comment RemoteReviewComment) 
 				},
 			},
 		})
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return json.Marshal(map[string]any{
 			"body": comment.Body,
 			"path": comment.Path,
@@ -422,72 +423,72 @@ func remoteReviewCommentSide(side string) string {
 	return "RIGHT"
 }
 
-func inlineCommentArgs(reference ReviewProviderReference) []string {
+func inlineCommentArgs(reference workflowforge.Reference) []string {
 	switch reference.Provider {
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		return []string{"api", "-X", "POST", forgejoPullRequestReviewsPath(reference), "-d", "@-"}
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return []string{"api", "-X", "POST", githubReviewCommentsPath(reference), "--input", "-"}
 	default:
 		return nil
 	}
 }
 
-func generalCommentArgs(reference ReviewProviderReference) []string {
+func generalCommentArgs(reference workflowforge.Reference) []string {
 	switch reference.Provider {
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		return []string{"api", "-X", "POST", forgejoIssueCommentsPath(reference), "-d", "@-"}
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return []string{"api", "-X", "POST", githubIssueCommentsPath(reference), "--input", "-"}
 	default:
 		return nil
 	}
 }
 
-func forgejoPullRequestPath(reference ReviewProviderReference) string {
+func forgejoPullRequestPath(reference workflowforge.Reference) string {
 	return path.Join("/repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number))
 }
 
-func forgejoPullRequestDiffPath(reference ReviewProviderReference) string {
+func forgejoPullRequestDiffPath(reference workflowforge.Reference) string {
 	return path.Join("/repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number)+".diff")
 }
 
-func forgejoIssueCommentsPath(reference ReviewProviderReference) string {
+func forgejoIssueCommentsPath(reference workflowforge.Reference) string {
 	return path.Join("/repos", reference.Owner, reference.Repo, "issues", strconv.Itoa(reference.Number), "comments")
 }
 
-func forgejoPullRequestReviewsPath(reference ReviewProviderReference) string {
+func forgejoPullRequestReviewsPath(reference workflowforge.Reference) string {
 	return path.Join("/repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number), "reviews")
 }
 
-func forgejoCommitStatusesPath(reference ReviewProviderReference, sha string) string {
+func forgejoCommitStatusesPath(reference workflowforge.Reference, sha string) string {
 	return path.Join("/repos", reference.Owner, reference.Repo, "commits", sha, "statuses")
 }
 
-func githubIssueCommentsPath(reference ReviewProviderReference) string {
+func githubIssueCommentsPath(reference workflowforge.Reference) string {
 	return path.Join("repos", reference.Owner, reference.Repo, "issues", strconv.Itoa(reference.Number), "comments")
 }
 
-func githubReviewCommentsPath(reference ReviewProviderReference) string {
+func githubReviewCommentsPath(reference workflowforge.Reference) string {
 	return path.Join("repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number), "comments")
 }
 
-func mergePayload(provider ReviewProvider, strategy string) ([]byte, error) {
+func mergePayload(provider workflowforge.Provider, strategy string) ([]byte, error) {
 	switch provider {
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		return json.Marshal(map[string]string{"Do": forgejoMergeStrategy(strategy)})
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return []byte("{}"), nil
 	default:
 		return nil, fmt.Errorf("unsupported review provider: %s", provider)
 	}
 }
 
-func mergeArgs(reference ReviewProviderReference, strategy string) []string {
+func mergeArgs(reference workflowforge.Reference, strategy string) []string {
 	switch reference.Provider {
-	case ReviewProviderForgejo:
+	case workflowforge.Forgejo:
 		return []string{"api", "-X", "PUT", forgejoPullRequestMergePath(reference), "-d", "@-"}
-	case ReviewProviderGitHub:
+	case workflowforge.GitHub:
 		return []string{"pr", "merge", reference.URL, githubMergeStrategyFlag(strategy)}
 	default:
 		return nil
@@ -516,7 +517,7 @@ func githubMergeStrategyFlag(strategy string) string {
 	}
 }
 
-func forgejoPullRequestMergePath(reference ReviewProviderReference) string {
+func forgejoPullRequestMergePath(reference workflowforge.Reference) string {
 	return path.Join("/repos", reference.Owner, reference.Repo, "pulls", strconv.Itoa(reference.Number), "merge")
 }
 

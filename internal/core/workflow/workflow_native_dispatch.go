@@ -12,7 +12,7 @@ import (
 // exact atomic Git publisher once. A transport result is not a delivery receipt.
 func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider, publisher GitPublisher) (NativePublicationResult, error) {
 	if provider == nil || publisher == nil {
-		return NativePublicationResult{Submission: workflowstate.Submission{}, Transport: GitPublicationResult{}}, workflowstate.ErrAtomicGuard
+		return NativePublicationResult{Submission: workflowstate.Submission{}, Transport: workflowstate.GitPublicationResult{}}, workflowstate.ErrAtomicGuard
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
@@ -22,14 +22,14 @@ func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard Integ
 
 	submission, request := nativeDispatch.Submission, nativeDispatch.Request
 	if err != nil {
-		return NativePublicationResult{Submission: submission, Transport: GitPublicationResult{}}, err
+		return NativePublicationResult{Submission: submission, Transport: workflowstate.GitPublicationResult{}}, err
 	}
 
 	if err := ctx.Err(); err != nil {
-		return NativePublicationResult{Submission: submission, Transport: GitPublicationResult{}}, err
+		return NativePublicationResult{Submission: submission, Transport: workflowstate.GitPublicationResult{}}, err
 	}
 
-	request.BeforeSend = func(ctx context.Context, advertisement GitPublicationAdvertisement) error {
+	request.BeforeSend = func(ctx context.Context, advertisement workflowstate.GitPublicationAdvertisement) error {
 		return s.retainWorkflowNativeSend(ctx, submission, request, advertisement)
 	}
 

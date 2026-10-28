@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -14,19 +15,6 @@ const (
 	workflowNativeCandidateSchema = "chr-integration-candidate/v2"
 	workflowNativeReceiptSchema   = "chr-workflow-receipt/v2"
 )
-
-// NativeReceipt requires both transaction and original-PR observations.
-type NativeReceipt struct {
-	workflowstate.NativeRecordBinding
-	CandidateHash       string                      `json:"candidate_hash"`
-	Mechanism           string                      `json:"mechanism,omitempty"`
-	CandidateRef        workflowstate.EvidenceRef   `json:"candidate_ref"`
-	TransactionProofRef workflowstate.EvidenceRef   `json:"transaction_proof_ref"`
-	GitApplicationRef   *workflowstate.EvidenceRef  `json:"git_application_ref,omitempty"`
-	ObservationRefs     []workflowstate.EvidenceRef `json:"observation_refs"`
-	ActualMergeResult   string                      `json:"actual_merge_result"`
-	ObservationContract string                      `json:"observation_contract,omitempty"`
-}
 
 func validateWorkflowNativeRecordBinding(b workflowstate.NativeRecordBinding) error {
 	if !validWorkflowNativeRecordOwner(b) {
@@ -78,7 +66,7 @@ func validateWorkflowNativeRecordObjects(b workflowstate.NativeRecordBinding) er
 }
 
 func validateWorkflowNativeRecordRepository(b workflowstate.NativeRecordBinding) error {
-	reference, err := DetectReviewProviderReference(b.CanonicalPR)
+	reference, err := workflowforge.ParseReference(b.CanonicalPR)
 	if err != nil || "https://"+reference.Host+"/"+reference.Owner+"/"+reference.Repo != b.SourceRepository {
 		return workflowstate.ErrConflict
 	}

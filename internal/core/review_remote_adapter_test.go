@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -24,8 +25,8 @@ func TestRemoteReviewAdapterReadsForgejoSnapshot(t *testing.T) {
 		t.Fatalf("Read returned error: %v", err)
 	}
 
-	if snapshot.Reference.Provider != workflowcore.ReviewProviderForgejo {
-		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, workflowcore.ReviewProviderForgejo)
+	if snapshot.Reference.Provider != workflowforge.Forgejo {
+		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, workflowforge.Forgejo)
 	}
 
 	if !strings.Contains(snapshot.Diff, "diff --git") {
@@ -56,8 +57,8 @@ func TestRemoteReviewAdapterReadsGitHubSnapshot(t *testing.T) {
 		t.Fatalf("Read returned error: %v", err)
 	}
 
-	if snapshot.Reference.Provider != workflowcore.ReviewProviderGitHub {
-		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, workflowcore.ReviewProviderGitHub)
+	if snapshot.Reference.Provider != workflowforge.GitHub {
+		t.Fatalf("Provider = %q, want %q", snapshot.Reference.Provider, workflowforge.GitHub)
 	}
 
 	if !strings.Contains(snapshot.ReviewCommentsJSON, "review") {

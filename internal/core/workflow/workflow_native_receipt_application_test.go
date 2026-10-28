@@ -19,15 +19,15 @@ func TestNativeReceiptApplication(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		change func(*NativeGitObservation)
+		change func(*workflowstate.NativeGitObservation)
 	}{
 		{"missing", nil},
-		{"submission", func(o *NativeGitObservation) { o.SubmissionID = "another-submission" }},
-		{"revision", func(o *NativeGitObservation) {
+		{"submission", func(o *workflowstate.NativeGitObservation) { o.SubmissionID = "another-submission" }},
+		{"revision", func(o *workflowstate.NativeGitObservation) {
 			o.CandidateRevision = contenthash.Sum([]byte("another-revision"))
 		}},
-		{"source", func(o *NativeGitObservation) { o.SourceCommit = submission.Native.OriginalSource }},
-		{"history", func(o *NativeGitObservation) { o.Git = nil }},
+		{"source", func(o *workflowstate.NativeGitObservation) { o.SourceCommit = submission.Native.OriginalSource }},
+		{"history", func(o *workflowstate.NativeGitObservation) { o.Git = nil }},
 	}
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
@@ -75,10 +75,10 @@ func nativeReceiptRecord(t *testing.T, f nativeSubmissionFixture, submission wor
 	return record
 }
 
-func nativeReceiptAlteredApplication(t *testing.T, store *Store, submission workflowstate.Submission, ref workflowstate.EvidenceRef, change func(*NativeGitObservation)) workflowstate.EvidenceRef {
+func nativeReceiptAlteredApplication(t *testing.T, store *Store, submission workflowstate.Submission, ref workflowstate.EvidenceRef, change func(*workflowstate.NativeGitObservation)) workflowstate.EvidenceRef {
 	t.Helper()
 
-	var observation NativeGitObservation
+	var observation workflowstate.NativeGitObservation
 	if err := store.readWorkflowNativeEvidence(submission.InvocationID, ref, &observation); err != nil {
 		t.Fatal(err)
 	}

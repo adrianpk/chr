@@ -13,10 +13,10 @@ import (
 )
 
 type nativeOutcomePublisherFixture struct {
-	publish func(context.Context, GitPublication) (GitPublicationResult, error)
+	publish func(context.Context, GitPublication) (workflowstate.GitPublicationResult, error)
 }
 
-func (p nativeOutcomePublisherFixture) PublishWorkflowGit(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+func (p nativeOutcomePublisherFixture) PublishWorkflowGit(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 	return p.publish(ctx, request)
 }
 
@@ -83,7 +83,7 @@ func nativeOutcomePublisher(t *testing.T, f nativeSubmissionFixture, remote stri
 		transport = nativeLostResponsePublisher(t, f.candidate.Native.SourceRepository, remote)
 	}
 
-	return nativeOutcomePublisherFixture{publish: func(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+	return nativeOutcomePublisherFixture{publish: func(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 		if name == "unknown unchanged" || name == "unknown moved" {
 			result, err := nativeUnknownExchange(ctx, request, transport)
 			if name == "unknown moved" {
@@ -95,7 +95,7 @@ func nativeOutcomePublisher(t *testing.T, f nativeSubmissionFixture, remote stri
 
 		before := request.BeforeSend
 
-		request.BeforeSend = func(ctx context.Context, advertisement GitPublicationAdvertisement) error {
+		request.BeforeSend = func(ctx context.Context, advertisement workflowstate.GitPublicationAdvertisement) error {
 			if err := before(ctx, advertisement); err != nil {
 				return err
 			}
@@ -147,22 +147,22 @@ func nativeLostResponsePublisher(t *testing.T, repository, remote string) OSWork
 	return NewWorkflowGitPublisher(repository, endpoint+remote).WithSSHConfig(config)
 }
 
-func nativeUnknownExchange(ctx context.Context, request GitPublication, transport OSWorkflowGitPublisher) (GitPublicationResult, error) {
+func nativeUnknownExchange(ctx context.Context, request GitPublication, transport OSWorkflowGitPublisher) (workflowstate.GitPublicationResult, error) {
 	advertisement, err := transport.InspectWorkflowGitPublication(ctx, request)
 	if err != nil {
-		return GitPublicationResult{}, err
+		return workflowstate.GitPublicationResult{}, err
 	}
 
 	if err := request.BeforeSend(ctx, advertisement); err != nil {
-		return GitPublicationResult{}, err
+		return workflowstate.GitPublicationResult{}, err
 	}
 
-	result := GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "unknown", CommandsSent: true, OriginalSourceCommit: request.Git.SourceCommit, AdvertisedSourceCommit: advertisement.SourceCommit, AdvertisedTargetCommit: advertisement.TargetCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
+	result := workflowstate.GitPublicationResult{Schema: "chr-git-publication-result/v1", State: "unknown", CommandsSent: true, OriginalSourceCommit: request.Git.SourceCommit, AdvertisedSourceCommit: advertisement.SourceCommit, AdvertisedTargetCommit: advertisement.TargetCommit, ResultCommit: request.Git.ResultCommit, CandidateRevision: request.CandidateRevision}
 
 	return result, context.DeadlineExceeded
 }
 
-func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *nativeDispatchPublisherFixture, remote, name string, result GitPublicationResult, retained workflowstate.Submission) {
+func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *nativeDispatchPublisherFixture, remote, name string, result workflowstate.GitPublicationResult, retained workflowstate.Submission) {
 	t.Helper()
 
 	if retained.Native.ReceiptRef != nil || retained.State == "confirmed" {
@@ -170,7 +170,7 @@ func checkNativeGitOutcome(t *testing.T, f nativeSubmissionFixture, publisher *n
 	}
 
 	if name == "lost response" {
-		var response GitPublicationResult
+		var response workflowstate.GitPublicationResult
 		if err := f.store.readWorkflowNativeEvidence(retained.InvocationID, *retained.Native.TransportResponseRef, &response); err != nil || response.State != "unknown" || result.State != "unknown" {
 			t.Fatal("observation invented a successful response", err)
 		}

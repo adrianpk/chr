@@ -120,7 +120,7 @@ func configureNativeFaultCrash(store *Store, stage string) {
 func nativeFaultPublisher(t *testing.T, transport OSWorkflowGitPublisher, stage string) GitPublisher {
 	t.Helper()
 
-	return nativeOutcomePublisherFixture{publish: func(ctx context.Context, request GitPublication) (GitPublicationResult, error) {
+	return nativeOutcomePublisherFixture{publish: func(ctx context.Context, request GitPublication) (workflowstate.GitPublicationResult, error) {
 		if stage == "lease" {
 			if err := os.WriteFile(os.Getenv("CHR_NATIVE_FAULT_MARKER"), []byte("ready"), 0o600); err != nil {
 				t.Fatal(err)

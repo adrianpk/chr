@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -173,13 +174,13 @@ func workflowPullRequestIdentityMatches(binding PullRequestBinding, pr workflows
 }
 
 func workflowPullRequestRepository(raw string) (string, error) {
-	reference, err := DetectReviewProviderReference(raw)
+	reference, err := workflowforge.ParseReference(raw)
 	if err != nil {
 		return "", err
 	}
 
 	marker := "/pulls/"
-	if reference.Provider == ReviewProviderGitHub {
+	if reference.Provider == workflowforge.GitHub {
 		marker = "/pull/"
 	}
 

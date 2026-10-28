@@ -145,7 +145,7 @@ func checkNativeCanonicalDivergence(t *testing.T, fixture nativeCanonicalFixture
 	nativeCanonicalPending(t, fixture, submission, before)
 }
 
-func nativeCanonicalLast(t *testing.T, store *Store, submission workflowstate.Submission) NativePublicationObservation {
+func nativeCanonicalLast(t *testing.T, store *Store, submission workflowstate.Submission) workflowstate.NativePublicationObservation {
 	t.Helper()
 
 	refs := submission.Native.ObservationRefs
@@ -153,7 +153,7 @@ func nativeCanonicalLast(t *testing.T, store *Store, submission workflowstate.Su
 		t.Fatal("canonical observation was not retained")
 	}
 
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 	if err := store.readWorkflowNativeEvidence(submission.InvocationID, refs[len(refs)-1], &observation); err != nil {
 		t.Fatal(err)
 	}
@@ -177,11 +177,11 @@ func nativeCanonicalPending(t *testing.T, fixture nativeCanonicalFixture, submis
 
 type nativeCanonicalObserverFixture struct {
 	observer NativePublicationObserver
-	before   func(context.Context, NativePublicationBinding)
+	before   func(context.Context, workflowstate.NativePublicationBinding)
 	calls    int
 }
 
-func (f *nativeCanonicalObserverFixture) ObserveWorkflowNativePublication(ctx context.Context, binding NativePublicationBinding, git IntegrationGit) (NativePublicationObservation, error) {
+func (f *nativeCanonicalObserverFixture) ObserveWorkflowNativePublication(ctx context.Context, binding workflowstate.NativePublicationBinding, git IntegrationGit) (workflowstate.NativePublicationObservation, error) {
 	f.calls++
 	f.before(ctx, binding)
 
@@ -201,7 +201,7 @@ func TestNativeCanonicalPoll(t *testing.T) {
 	}
 
 	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter}
-	observer.before = func(_ context.Context, binding NativePublicationBinding) {
+	observer.before = func(_ context.Context, binding workflowstate.NativePublicationBinding) {
 		if observer.calls == 3 {
 			pr := binding.PullRequest
 			pr.State, pr.Merged, pr.ResultCommit = "closed", true, binding.Git.ResultCommit
@@ -236,7 +236,7 @@ func TestNativeCanonicalFence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter, before: func(ctx context.Context, _ NativePublicationBinding) {
+	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter, before: func(ctx context.Context, _ workflowstate.NativePublicationBinding) {
 		entry := nativeReviewEntry(t, f.store, f.entry.InvocationID)
 
 		invocationLocation, err := f.store.locateWorkflowInvocation(ctx, f.entry.InvocationID)
@@ -295,7 +295,7 @@ func TestNativeCanonicalDeadline(t *testing.T) {
 	deadline := time.Now().UTC().Add(600 * time.Millisecond)
 	nativeCanonicalDeadline(t, fixture, deadline)
 
-	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter, before: func(_ context.Context, _ NativePublicationBinding) {}}
+	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter, before: func(_ context.Context, _ workflowstate.NativePublicationBinding) {}}
 
 	submission, err := f.store.PollWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git)
 	// The persisted bound may expire during a real Git read or during backoff.
@@ -328,10 +328,10 @@ func checkNativeDeadlineRecovery(t *testing.T, fixture nativeCanonicalFixture, s
 
 type nativeCanonicalBlockedObserver struct{}
 
-func (nativeCanonicalBlockedObserver) ObserveWorkflowNativePublication(ctx context.Context, _ NativePublicationBinding, _ IntegrationGit) (NativePublicationObservation, error) {
+func (nativeCanonicalBlockedObserver) ObserveWorkflowNativePublication(ctx context.Context, _ workflowstate.NativePublicationBinding, _ IntegrationGit) (workflowstate.NativePublicationObservation, error) {
 	<-ctx.Done()
 
-	return NativePublicationObservation{}, ctx.Err()
+	return workflowstate.NativePublicationObservation{}, ctx.Err()
 }
 
 // TestNativeCanonicalTimeout bounds a stalled adapter by the retained deadline,
@@ -370,7 +370,7 @@ func TestNativeCanonicalLost(t *testing.T) {
 		t.Fatal("lost response attribution was replaced by later source", err)
 	}
 
-	var result GitPublicationResult
+	var result workflowstate.GitPublicationResult
 	if err := f.store.readWorkflowNativeEvidence(submission.InvocationID, *submission.Native.TransportResponseRef, &result); err != nil || result.State != "unknown" || result.PublishedSourceCommit != "" {
 		t.Fatal("canonical observation fabricated a transport response", err)
 	}

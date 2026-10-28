@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -100,7 +101,7 @@ func (s *Store) retainWorkflowNativeReceipt(ctx context.Context, run workflowInv
 }
 
 func (s *Store) workflowNativeReceiptObservation(submission workflowstate.Submission) (workflowNativeReceiptEvidence, error) {
-	var observation NativePublicationObservation
+	var observation workflowstate.NativePublicationObservation
 
 	native := submission.Native
 	if native.ApplicationState != "git_applied" || native.TransportResponseRef == nil || len(native.ObservationRefs) == 0 {
@@ -127,14 +128,14 @@ func workflowNativeReceiptPath(run workflowInvocationFile, submission workflowst
 	return filepath.ToSlash(filepath.Join("run", run.ID, "evidence", workflowNativeReceiptID(run, submission)+".json"))
 }
 
-func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission workflowstate.Submission, observation NativePublicationObservation, ref workflowstate.EvidenceRef) (Record, error) {
-	reference, err := DetectReviewProviderReference(submission.Native.CanonicalPR)
+func (s *Store) workflowNativeReceipt(run workflowInvocationFile, submission workflowstate.Submission, observation workflowstate.NativePublicationObservation, ref workflowstate.EvidenceRef) (Record, error) {
+	reference, err := workflowforge.ParseReference(submission.Native.CanonicalPR)
 	if err != nil {
 		return Record{}, err
 	}
 
 	native, git := submission.Native, *observation.Git
-	facts := &NativeReceipt{NativeRecordBinding: native.NativeRecordBinding, CandidateHash: native.CandidateHash, Mechanism: native.Mechanism, CandidateRef: native.CandidateRef, TransactionProofRef: *native.TransportResponseRef, ObservationRefs: []workflowstate.EvidenceRef{ref}, ActualMergeResult: observation.PullRequest.ResultCommit}
+	facts := &workflowstate.NativeReceipt{NativeRecordBinding: native.NativeRecordBinding, CandidateHash: native.CandidateHash, Mechanism: native.Mechanism, CandidateRef: native.CandidateRef, TransactionProofRef: *native.TransportResponseRef, ObservationRefs: []workflowstate.EvidenceRef{ref}, ActualMergeResult: observation.PullRequest.ResultCommit}
 	facts.ObservationContract = observation.ObservationContract
 
 	facts.GitApplicationRef, err = s.workflowNativeReceiptApplication(submission)

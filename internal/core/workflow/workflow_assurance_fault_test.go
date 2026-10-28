@@ -75,7 +75,7 @@ func workflowAssuranceLostResponse(t *testing.T, store *Store, progress Continua
 func checkWorkflowAssuranceLostProof(t *testing.T, store *Store, submission workflowstate.Submission) {
 	t.Helper()
 
-	var response GitPublicationResult
+	var response workflowstate.GitPublicationResult
 	if err := store.readWorkflowNativeEvidence(submission.InvocationID, *submission.Native.TransportResponseRef, &response); err != nil || response.State != "unknown" || !response.CommandsSent || response.PublishedSourceCommit != "" {
 		t.Fatal("lost native report was replaced with an applied response", err)
 	}

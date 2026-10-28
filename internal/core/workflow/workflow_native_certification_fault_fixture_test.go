@@ -9,6 +9,7 @@ import (
 	"time"
 
 	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -35,7 +36,7 @@ func newNativeFaultCase(t *testing.T, state string, profile nativeLiveProfile, s
 			Native: nativeLiveEvidence{Profile: profile.Forge},
 		},
 	}
-	f.evidence.Native.Binding = NativePublicationBinding{Git: request.Git, SourceDirectory: request.Directory, ObservationDeadline: time.Now().Add(2 * time.Minute)}
+	f.evidence.Native.Binding = workflowstate.NativePublicationBinding{Git: request.Git, SourceDirectory: request.Directory, ObservationDeadline: time.Now().Add(2 * time.Minute)}
 
 	t.Cleanup(func() { retainNativeCertification(t, state, key, &f.evidence) })
 	pushNativeLiveInitialRefs(t, profile, request)

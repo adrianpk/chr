@@ -71,7 +71,7 @@ func nativeMethodCase(t *testing.T, state string, profile nativeLiveProfile, ser
 	adapter := NewRemoteReviewAdapter(workspaceconfig.DefaultReviewProviderConfig(), OSReviewRemoteCommandRunner{})
 	pr := createNativeLivePR(t, adapter, profile, request)
 
-	evidence.Native.Binding = NativePublicationBinding{
+	evidence.Native.Binding = workflowstate.NativePublicationBinding{
 		PullRequest: pr, Git: request.Git, SourceDirectory: request.Directory,
 		ObservationDeadline: time.Now().Add(2 * time.Minute),
 	}
@@ -111,7 +111,7 @@ func installNativeContention(t *testing.T, profile nativeLiveProfile, request *G
 	workflowIntegrationCommand(t, request.Directory, "checkout", "--detach", old)
 
 	advanced := workflowIntegrationCommit(t, request.Directory, "contention.txt", "External fixture writer")
-	request.BeforeSend = func(ctx context.Context, _ GitPublicationAdvertisement) error {
+	request.BeforeSend = func(ctx context.Context, _ workflowstate.GitPublicationAdvertisement) error {
 		_, err := outputWorktreeGit(ctx, request.Directory, "push", "--force-with-lease="+ref+":"+old, profile.GitRemote, advanced+":"+ref)
 
 		return err
@@ -120,7 +120,7 @@ func installNativeContention(t *testing.T, profile nativeLiveProfile, request *G
 	return advanced
 }
 
-func checkNativeContention(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication, advanced string, result GitPublicationResult, err error, evidence *nativeCertificationEvidence) {
+func checkNativeContention(t *testing.T, adapter RemoteReviewAdapter, profile nativeLiveProfile, request GitPublication, advanced string, result workflowstate.GitPublicationResult, err error, evidence *nativeCertificationEvidence) {
 	t.Helper()
 
 	if !errors.Is(err, workflowstate.ErrConflict) || !result.CommandsSent || result.State != "rejected" {

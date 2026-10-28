@@ -40,7 +40,7 @@ func TestNativeReceiptLost(t *testing.T) {
 		t.Fatal("lost exchange lacks independent application proof")
 	}
 
-	var response GitPublicationResult
+	var response workflowstate.GitPublicationResult
 	if err := f.store.readWorkflowNativeEvidence(submission.InvocationID, receipt.Receipt.Native.TransactionProofRef, &response); err != nil || response.State != "unknown" || response.PublishedSourceCommit != "" {
 		t.Fatal("receipt rewrote lost transport response", err)
 	}
