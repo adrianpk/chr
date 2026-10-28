@@ -95,3 +95,14 @@ and receipt values retain their original field order and JSON tags here.
 text. Callback-bearing publication requests, live contexts, config, processes,
 claims and receipt writes remain host-owned; these retained values grant no IO or
 mutation authority.
+
+
+## Publication and review progress
+
+SubmissionState, SubmissionResponseState, ReviewState, NativeDispatchState,
+NativeApplicationState, NativeObservationState and GitPublicationState are
+separate named string types. Their constants retain exact stored spellings.
+They add no custom JSON codec, default, normalization or unknown-value rejection;
+existing host validators retain those decisions. Display/IPC projections convert
+at their original string boundary. NativeRecordGitMatches is the shared exact
+source/target/method/prepared-result predicate and performs no IO or authorization.

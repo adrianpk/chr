@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084834
 title: "Quality slice 14: Forge publication and review stages"
-status: in_progress
+status: reviewing
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-14
 source: review
 reported_at: 2026-10-26T08:48:34Z
-commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429, 23453a58cbb8f780065ea29f780e4dd37b76d0fc, 187a9ec4c15fef69e137c158fe574163aaae5497, 1ae59fa07af7ecffc330fd384269860baa9273b2, f22302613d1462d2bee9d20f522bc1cb15127040, 79a581e5f32aca05b74f5bde4879289338c87c3f, f026941182c708d20a5a36979dd8e71e3cd54ba7, 41595fd23b14704199d3b7b94ae0022bd8b10cff]
+commits: [42253fe479a1a47d9a465c7359bba1a0df3f3586, ee47cb41ee02ee2df60d475a29128783b0e9ef37, 09431ee3293fdd5a279e5d3b7170dbf7037070a6, ca61d8a6fadc0d1c98685dbed31d7239196a0b90, 09b9e4c262dee11a83b7a34d5c886c2ceadb5907, 3e053ee5515e9943ab6ddac1a8024f5fb3f73d13, 932090eb2531dba22e53b2ec57264c38c49d9429, 23453a58cbb8f780065ea29f780e4dd37b76d0fc, 187a9ec4c15fef69e137c158fe574163aaae5497, 1ae59fa07af7ecffc330fd384269860baa9273b2, f22302613d1462d2bee9d20f522bc1cb15127040, 79a581e5f32aca05b74f5bde4879289338c87c3f, f026941182c708d20a5a36979dd8e71e3cd54ba7, 41595fd23b14704199d3b7b94ae0022bd8b10cff, 7261d337c539e442fea37f71a5965810a08a642c, 1685cf0959165446dbc9e51d681197bd270c21fc, 70ec732745fa1706ef9ae6e196a1818b4e83fa4d, 281b0f9fae1b00eaa39c60178ec598109022ee23, 2adac31efaf111d6a15115afd3b76ad62e3d8bbf]
 started_at: 2026-10-28T04:43:13Z
 branch: refactor/slice-14-quality-publication
 ready_at: 2026-10-26T08:57:09Z
@@ -57,42 +57,16 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 
 Existing native provider/transport permission and review fixtures through local HTTP/Git; existing review/publication receipt tests; make verify.
 
-Task checks for review and forge extraction pass: 42 real review/preparation/
-application-control checks, 17 real submission/recovery checks and focused races,
-with pinned lint and finite-debt validation. Exact commands are in the canonical
-report. The first review completion unit's evidence remains recorded separately. The
-publication value conversion adds 35 real native/legacy checks and six focused
-race/wire/dependency checks. The PR transport extraction adds 22 real local checks
-and three focused race checks; one explicit-opt-in live denial test skipped.
-`make verify` and final exact-head controller validation remain pending.
+Implementation is complete and the ticket is reviewing with its canonical slice
+report. All 61 assigned rows have precise dispositions: 54 implemented and seven
+cohesive five-input contracts. Forge/review policy and protocol have direct owners;
+host current-grant/approval/callback/journal/receipt authority remains explicit.
+Seven named retained state types preserve exact wire values and the glossary
+keeps ticket-native authority distinct from forge-native publication.
 
-Slice 13 PR #450 is verified merged into dev at
-`53b2adb23b9b1d20529d00bbe3b32b3be5990b4e`. Slice 14 is active. Fourteen pure
-policy declarations have independent review/forge owners and matching mechanical
-token evidence; completion and dispatch use consumer-owned ports with host
-claim/process/write authority retained. Fifty assigned rows are implemented, including all category A/C rows;
-11 category B rows remain pending. Exact debt is 24. Remaining review transport, host native capability composition, review-input
-binding policy and state/flag/error/glossary work must finish
-before a PR is ready.
-
-The publication value conversion preserves dispatch permission, transport,
-canonical observation, revision fences and receipt evidence as distinct outcomes.
-Native-path/publication barriers retain partial/error behavior and cannot be read
-as successful delivery. All direct consumers retain their current authority and
-assertions; real IO/recovery and focused races are recorded in the report.
-
-Provider PR protocol, bounded paging/response parsing and structured create/read/
-branch IO now belong to forge. Shared query/request/content values live in state;
-all direct callers consume that owner without aliases. Enabled configuration,
-canonical endpoint resolution and bounded process supervision stay with the host.
-Eleven additional pure declaration streams match their frozen sources, and the
-35-entry extraction ledger distinguishes pure moves, protocol transformations
-and flow extractions. Exact commands and live-certification limits are in the report.
-
-Native retained values/errors and provider references now have shared state/forge
-owners without aliases. Effective native policy, identity hashing, immutable
-revision encoding and canonical observation/source-result classification live in
-forge. Host callbacks/config/grants and exact query/proof composition remain
-explicit. The 91-entry ledger traces split enum members and every flow/input
-transformation. This unit adds 29 direct-consumer checks, 47 real local native
-checks and five focused races with strict lint and unchanged 24-entry debt.
+The 143-entry extraction ledger, 908 Store methods and original authority/dependency
+maps resolve with frozen source hashes. Provider/review/merge protocol checks,
+19 capability checks, 37 real review/recovery checks, focused races and current
+wire/protocol/dispatch/dependency/lint/debt checks pass. Exact commands and evidence
+boundaries are in the report. Final ordered checks are controller-managed on the
+clean pushed PR head; dev integration remains pending.
