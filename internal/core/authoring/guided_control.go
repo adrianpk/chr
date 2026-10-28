@@ -118,6 +118,6 @@ func completeGuidedControl(session *Session, operation GuidedUseCaseOperation, r
 
 	state.Status, state.Blocker = "blocked", "Stop requested; native work is stopping."
 	if control.NativeReceipt == nil || control.AcknowledgedRevision != 0 {
-		state.Status, state.Blocker = workflowstate.StopStatus(operation.Action), ""
+		state.Status, state.Blocker = string(workflowstate.StopStatus(operation.Action)), ""
 	}
 }

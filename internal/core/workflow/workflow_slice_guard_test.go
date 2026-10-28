@@ -142,7 +142,7 @@ func checkWorkflowSliceStopResume(t *testing.T, store *Store, retained Invocatio
 		return
 	}
 
-	if err != nil || resumed.Status != "waiting_integration" || resumed.Cursor != 3 {
+	if err != nil || resumed.Status != workflowstate.InvocationWaitingIntegration || resumed.Cursor != 3 {
 		t.Fatal("pause lost the aggregate barrier")
 	}
 
@@ -228,12 +228,12 @@ func TestWorkflowSliceFence(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 	workflowSliceBeforeGate(t, store, run.Invocation.ID)
 
-	old, prepared, _, err := store.prepareWorkflowSliceValidation(t.Context(), run.Invocation.ID)
+	slicePreparation, err := store.prepareWorkflowSliceValidation(t.Context(), run.Invocation.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), old); err != nil {
+	if err := store.CheckpointWorkflow(t.Context(), slicePreparation.Claim); err != nil {
 		t.Fatal(err)
 	}
 
@@ -241,20 +241,20 @@ func TestWorkflowSliceFence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	replacement, _, _, err := store.prepareWorkflowSliceValidation(t.Context(), run.Invocation.ID)
+	slicePreparation2, err := store.prepareWorkflowSliceValidation(t.Context(), run.Invocation.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err := store.finishWorkflowSliceValidation(t.Context(), old, prepared, &SliceCandidate{}, false); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.finishWorkflowSliceValidation(t.Context(), slicePreparation.Claim, slicePreparation.Prepared, &SliceCandidate{}, false); !errors.Is(err, ErrWorkflowOwned) {
 		t.Fatal("old aggregate claim finalized or released its replacement")
 	}
 
-	if err := store.CheckWorkflowClaim(t.Context(), replacement); err != nil {
+	if err := store.CheckWorkflowClaim(t.Context(), slicePreparation2.Claim); err != nil {
 		t.Fatal("replacement aggregate claim lost ownership")
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), replacement); err != nil {
+	if err := store.CheckpointWorkflow(t.Context(), slicePreparation2.Claim); err != nil {
 		t.Fatal(err)
 	}
 

@@ -110,9 +110,10 @@ func TestTelegramJourneyAdmissionGuards(t *testing.T) {
 				t.Fatal("rejection changed ticket readiness", after, err)
 			}
 
-			runs, _, err := store.InspectWorkflowPage(t.Context(), 0, 8)
-			if err != nil || len(runs) != 0 {
-				t.Fatal("rejection allocated an invocation", runs, err)
+			invocationPage, err := store.InspectWorkflowPage(t.Context(), 0, 8)
+
+			if err != nil || len(invocationPage.Invocations) != 0 {
+				t.Fatal("rejection allocated an invocation", invocationPage.Invocations, err)
 			}
 		})
 	}

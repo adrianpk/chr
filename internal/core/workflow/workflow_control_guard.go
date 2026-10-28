@@ -55,22 +55,22 @@ func (s *Store) acceptWorkflowContinuation(ctx context.Context, id string, expec
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		if err := checkWorkflowRevision(run.Invocation, []uint64{expected}); err != nil {
+		if err := checkWorkflowRevision(invocationLocation.Run.Invocation, []uint64{expected}); err != nil {
 			return err
 		}
 
-		if workflowInvocationTerminal(run.Status) {
-			result = run.Invocation
+		if workflowInvocationTerminal(invocationLocation.Run.Status) {
+			result = invocationLocation.Run.Invocation
 
 			return nil
 		}
 
-		if err := owner.checkWorkflowInputs(ctx, run); err != nil {
+		if err := invocationLocation.Owner.checkWorkflowInputs(ctx, invocationLocation.Run); err != nil {
 			return err
 		}
 
@@ -80,11 +80,11 @@ func (s *Store) acceptWorkflowContinuation(ctx context.Context, id string, expec
 
 		// Record acceptance before leaving exclusion. A second UI request with
 		// this revision cannot independently start the same continuation.
-		if err := owner.commitWorkflowContinuation(&run, 0, "accepted"); err != nil {
+		if err := invocationLocation.Owner.commitWorkflowContinuation(&invocationLocation.Run, 0, "accepted"); err != nil {
 			return err
 		}
 
-		result = run.Invocation
+		result = invocationLocation.Run.Invocation
 
 		return nil
 	})

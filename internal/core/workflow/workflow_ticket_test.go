@@ -93,7 +93,7 @@ func checkWorkflowTicketCandidateRetry(t *testing.T, store *Store, id string, ca
 	restarted := NewWorkflowStore(store.layout, store.projectID)
 
 	again, err := restarted.PrepareWorkflowTicketCandidate(t.Context(), id)
-	if err != nil || again.ID != candidate.ID || workflowTestRead(t, restarted, id).Revision != before.Revision || len(before.Attempts) != 1 || before.Status != "waiting_integration" {
+	if err != nil || again.ID != candidate.ID || workflowTestRead(t, restarted, id).Revision != before.Revision || len(before.Attempts) != 1 || before.Status != workflowstate.InvocationWaitingIntegration {
 		t.Fatal("candidate retry executed a gate or completed the invocation", err)
 	}
 }
@@ -237,7 +237,7 @@ func checkWorkflowTicketCombinedGate(t *testing.T, store *Store, f workflowPrepa
 		expectedStatus = "waiting_integration"
 	}
 
-	if progress.Invocation.Status != expectedStatus || progress.Invocation.Preparation == nil {
+	if string(progress.Invocation.Status) != expectedStatus || progress.Invocation.Preparation == nil {
 		t.Fatal("ticket delivery bypassed its frontier or combined gate")
 	}
 

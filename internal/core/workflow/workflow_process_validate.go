@@ -53,7 +53,7 @@ func validWorkflowProcessIdentity(identity workflowstate.ProcessIdentity) bool {
 }
 
 func validateWorkflowProcess(invocationID, attemptID string, index int, process Process) error {
-	if !validWorkflowCapacityProcess(process) || !slices.Contains([]string{"running", "stopped"}, process.State) {
+	if !validWorkflowCapacityProcess(process) || !slices.Contains([]ProcessState{ProcessRunning, ProcessStopped}, process.State) {
 		return fmt.Errorf("invalid workflow command process identity or state")
 	}
 
@@ -66,7 +66,7 @@ func validateWorkflowProcess(invocationID, attemptID string, index int, process 
 		return fmt.Errorf("invalid workflow process output references")
 	}
 
-	if process.State == "stopped" && (len(process.StdoutHash) != 64 || len(process.StderrHash) != 64) {
+	if process.State == ProcessStopped && (len(process.StdoutHash) != 64 || len(process.StderrHash) != 64) {
 		return fmt.Errorf("stopped process requires output hashes")
 	}
 

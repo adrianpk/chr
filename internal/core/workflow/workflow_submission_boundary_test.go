@@ -207,7 +207,7 @@ func assertWorkflowSubmissionStopped(t *testing.T, f workflowPreparationFixture,
 	}
 
 	last, err := f.store.ReadWorkflowSubmission(t.Context(), f.run.ID)
-	if err != nil || last.State != "awaiting_observation" || provider.calls != 1 || workflowTestRead(t, f.store, f.run.ID).Status != "cancelled" {
+	if err != nil || last.State != "awaiting_observation" || provider.calls != 1 || workflowTestRead(t, f.store, f.run.ID).Status != workflowstate.InvocationCancelled {
 		t.Fatal("cancelled IO discarded exclusion or consumed another attempt")
 	}
 }

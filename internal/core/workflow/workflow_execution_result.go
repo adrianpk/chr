@@ -14,7 +14,7 @@ import (
 
 func (s *Store) finishWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *workflowstate.TaskResult, interrupted bool) error {
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
+		claimObservation, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if err != nil {
 			return err
 		}
@@ -23,20 +23,20 @@ func (s *Store) finishWorkflowTask(ctx context.Context, claim *Claim, prepared w
 			return err
 		}
 
-		if err := checkWorkflowExecutionBinding(run, record, prepared); err != nil {
+		if err := checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared); err != nil {
 			return err
 		}
 
-		if workflowExecutionStopped(run, interrupted) {
-			return claim.store.finishStoppedWorkflowTask(run, record, claim, result)
+		if workflowExecutionStopped(claimObservation.Run, interrupted) {
+			return claim.store.finishStoppedWorkflowTask(claimObservation.Run, claimObservation.Record, claim, result)
 		}
 
-		if err := claim.store.checkWorkflowTaskCandidate(ctx, &run, prepared, result); err != nil {
+		if err := claim.store.checkWorkflowTaskCandidate(ctx, &claimObservation.Run, prepared, result); err != nil {
 			return err
 		}
 
-		ref := workflowAttemptFile(run.ID, claim.AttemptID, "result.json")
-		applyWorkflowTaskResult(&run, &record, *result, ref)
+		ref := workflowAttemptFile(claimObservation.Run.ID, claim.AttemptID, "result.json")
+		applyWorkflowTaskResult(&claimObservation.Run, &claimObservation.Record, *result, ref)
 
 		data, err := json.MarshalIndent(result, "", "  ")
 		if err != nil || len(data) >= workflowstate.FileLimit {
@@ -44,9 +44,9 @@ func (s *Store) finishWorkflowTask(ctx context.Context, claim *Claim, prepared w
 		}
 
 		data = append(data, '\n')
-		run.Attempts[len(run.Attempts)-1].ResultHash = contenthash.Sum(data)
+		claimObservation.Run.Attempts[len(claimObservation.Run.Attempts)-1].ResultHash = contenthash.Sum(data)
 
-		if err := claim.store.commitWorkflowClaim(run, record, workflowstate.FileChange{Path: ref, After: data}); err != nil {
+		if err := claim.store.commitWorkflowClaim(claimObservation.Run, claimObservation.Record, workflowstate.FileChange{Path: ref, After: data}); err != nil {
 			return err
 		}
 
@@ -55,19 +55,20 @@ func (s *Store) finishWorkflowTask(ctx context.Context, claim *Claim, prepared w
 }
 
 func (s *Store) checkWorkflowTaskCandidate(ctx context.Context, run *workflowInvocationFile, prepared workflowPreparedTask, result *workflowstate.TaskResult) error {
-	commit, tree, err := s.workflowLaneCandidate(ctx, prepared.input.Lane)
-	if result.Successful && (err != nil || commit != result.Commit || tree != result.Tree) {
+	laneImage, err := s.workflowLaneCandidate(ctx, prepared.input.Lane)
+
+	if result.Successful && (err != nil || laneImage.Commit != result.Commit || laneImage.Tree != result.Tree) {
 		return fmt.Errorf("%w: validated candidate changed before journaling", workflowstate.ErrConflict)
 	}
 
 	if err == nil {
 		if result.Commit == "" {
-			result.Commit, result.Tree = commit, tree
+			result.Commit, result.Tree = laneImage.Commit, laneImage.Tree
 		}
 
-		if result.Commit == commit && result.Tree == tree {
+		if result.Commit == laneImage.Commit && result.Tree == laneImage.Tree {
 			lane := prepared.input.Lane
-			lane.HeadCommit = commit
+			lane.HeadCommit = laneImage.Commit
 			run.Lane = &lane
 		}
 	}
@@ -81,7 +82,7 @@ func applyWorkflowTaskResult(run *workflowInvocationFile, record *Record, result
 	record.Task.AttemptID = ""
 
 	if !result.Successful {
-		attempt.Outcome, run.Status = "failed", "paused"
+		attempt.Outcome, run.Status = "failed", workflowstate.InvocationPaused
 		run.Outcome = result.Outcome
 		record.Task.Phase, record.Task.Status = "pending", string(ticketcore.StatusReadyForDev)
 
@@ -93,7 +94,7 @@ func applyWorkflowTaskResult(run *workflowInvocationFile, record *Record, result
 	record.Task.Evidence = append(record.Task.Evidence, ref)
 	run.Cursor++
 
-	run.Status = "pending"
+	run.Status = workflowstate.InvocationPending
 	workflowTaskBoundary(run, *record)
 }
 
@@ -104,7 +105,7 @@ func workflowExecutionStopped(run workflowInvocationFile, interrupted bool) bool
 func (s *Store) finishStoppedWorkflowTask(run workflowInvocationFile, record Record, claim *Claim, result *workflowstate.TaskResult) error {
 	result.Successful, result.Outcome = false, "interrupted"
 	if run.StopIntent != "" {
-		result.Outcome = workflowstate.StopStatus(run.StopIntent)
+		result.Outcome = string(workflowstate.StopStatus(run.StopIntent))
 	}
 
 	if err := s.checkpointWorkflowAttempt(run, record, result.Outcome, result); err != nil {

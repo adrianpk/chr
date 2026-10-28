@@ -53,7 +53,7 @@ func (s *Store) freezeWorkflowSets(ctx context.Context, run *workflowInvocationF
 	}
 
 	if workflowInvocationNeedsClosing(run.Invocation) {
-		run.Status, run.Outcome = "waiting_integration", "set_closure_required"
+		run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "set_closure_required"
 	}
 
 	return nil

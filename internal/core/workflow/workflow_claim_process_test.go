@@ -12,6 +12,7 @@ import (
 	"time"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowClaimProcessResult struct {
@@ -167,7 +168,7 @@ func TestWorkflowClaimProcessRace(t *testing.T) {
 	finishWorkflowClaimProcesses(t, commands, release)
 
 	retained, err := store.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if claimed != 1 || err != nil || len(retained.Attempts) != 1 || retained.Status != "paused" {
+	if claimed != 1 || err != nil || len(retained.Attempts) != 1 || retained.Status != workflowstate.InvocationPaused {
 		t.Fatalf("race = %d owners, %+v, %v", claimed, retained, err)
 	}
 }
@@ -217,7 +218,7 @@ func TestWorkflowClaimJournal(t *testing.T) {
 			}
 
 			recovered, err := store.ReadWorkflow(t.Context(), run.Invocation.ID)
-			if err != nil || recovered.Status != "running" || len(recovered.Attempts) != 1 {
+			if err != nil || recovered.Status != workflowstate.InvocationRunning || len(recovered.Attempts) != 1 {
 				t.Fatalf("recovery: %+v, %v", recovered, err)
 			}
 

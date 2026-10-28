@@ -20,12 +20,12 @@ func (s *Store) ReadWorkflowControlReceipt(ctx context.Context, request workflow
 	)
 
 	err = s.withLock(ctx, func() error {
-		_, owner, err := s.locateWorkflowInvocation(ctx, request.ID)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, request.ID)
 		if err != nil {
 			return err
 		}
 
-		result, found, err = owner.readWorkflowControlReceipt(request, digest)
+		result, found, err = invocationLocation.Owner.readWorkflowControlReceipt(request, digest)
 
 		return err
 	})

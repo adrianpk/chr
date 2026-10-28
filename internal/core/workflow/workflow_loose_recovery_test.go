@@ -127,14 +127,14 @@ func checkWorkflowLooseStopState(t *testing.T, run Invocation, action, target st
 	t.Helper()
 
 	if action == "block" {
-		if run.Status != "paused" || run.Blocker == nil || run.Blocker.Dependency.ID != "PRJ-89" {
+		if run.Status != workflowstate.InvocationPaused || run.Blocker == nil || run.Blocker.Dependency.ID != "PRJ-89" {
 			t.Fatal("recovery lost the dependency stop")
 		}
 
 		return
 	}
 
-	if run.Status != "pending" || run.Blocker != nil || len(run.DependencyTargets) != 1 || run.ExecutionSelection().Target.Commit != target {
+	if run.Status != workflowstate.InvocationPending || run.Blocker != nil || len(run.DependencyTargets) != 1 || run.ExecutionSelection().Target.Commit != target {
 		t.Fatal("recovery lost verified resume evidence or its target")
 	}
 }

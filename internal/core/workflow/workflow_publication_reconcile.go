@@ -11,17 +11,17 @@ import (
 // A paused invocation resumes at its delivery barrier, never at old task work.
 func workflowRetainDeliveryStatus(run *workflowInvocationFile, outcome string, complete bool) {
 	run.Outcome, run.Blocker = outcome, nil
-	if run.StopIntent != "" || run.Status == "paused" || run.Status == "cancelled" {
-		if run.Status == "paused" {
-			run.ResumeStatus = "waiting_integration"
+	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || run.Status == workflowstate.InvocationCancelled {
+		if run.Status == workflowstate.InvocationPaused {
+			run.ResumeStatus = workflowstate.InvocationWaitingIntegration
 		}
 
 		return
 	}
 
-	run.Status = "waiting_integration"
+	run.Status = workflowstate.InvocationWaitingIntegration
 	if complete {
-		run.Status = "completed"
+		run.Status = workflowstate.InvocationCompleted
 	}
 }
 

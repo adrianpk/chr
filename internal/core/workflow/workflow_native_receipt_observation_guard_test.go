@@ -203,7 +203,7 @@ func TestNativeReceiptStopped(t *testing.T) {
 	}
 
 	run := workflowTestRead(t, f.store, f.entry.InvocationID)
-	if run.Status != "cancelled" || run.StopIntent != "cancel" || nativeReviewEntry(t, f.store, run.ID).State != "blocked" {
+	if run.Status != workflowstate.InvocationCancelled || run.StopIntent != "cancel" || nativeReviewEntry(t, f.store, run.ID).State != "blocked" {
 		t.Fatal("receipt observation erased stop or reconciliation")
 	}
 

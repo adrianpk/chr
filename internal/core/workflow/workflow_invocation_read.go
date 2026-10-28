@@ -17,11 +17,17 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowInvocationLocation struct {
+	Run   workflowInvocationFile
+	Owner *Store
+}
+
 // ReadWorkflow observes a retained invocation; its private token hashes stay private.
 func (s *Store) ReadWorkflow(ctx context.Context, id string) (result Invocation, err error) {
 	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
-		run, _, readErr := s.locateWorkflowInvocation(ctx, id)
-		result = run.Invocation
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
+
+		result = invocationLocation.Run.Invocation
 
 		return readErr
 	})
@@ -62,25 +68,25 @@ func (s *Store) readWorkflowInvocation(id string) (workflowInvocationFile, error
 	return run, validateWorkflowInvocation(run)
 }
 
-func (s *Store) locateWorkflowInvocation(ctx context.Context, id string) (workflowInvocationFile, *Store, error) {
+func (s *Store) locateWorkflowInvocation(ctx context.Context, id string) (workflowInvocationLocation, error) {
 	return s.locateWorkflowInvocationPrepared(ctx, id, func(owner *Store) error { return owner.prepareWorkflowRead(ctx) })
 }
 
-func (s *Store) locateWorkflowInvocationPrepared(ctx context.Context, id string, prepare func(*Store) error) (workflowInvocationFile, *Store, error) {
+func (s *Store) locateWorkflowInvocationPrepared(ctx context.Context, id string, prepare func(*Store) error) (workflowInvocationLocation, error) {
 	runs, err := s.repositoryWorkflowInvocationsPrepared(ctx, prepare)
 	if err != nil {
-		return workflowInvocationFile{}, nil, err
+		return workflowInvocationLocation{Run: workflowInvocationFile{}, Owner: nil}, err
 	}
 
 	for _, run := range runs {
 		if run.ID == id && run.Namespace == s.layout.Namespace() {
 			owner, err := s.workflowOwnerStore(run)
 
-			return run, owner, err
+			return workflowInvocationLocation{Run: run, Owner: owner}, err
 		}
 	}
 
-	return workflowInvocationFile{}, nil, fmt.Errorf("workflow invocation not found: %s", id)
+	return workflowInvocationLocation{Run: workflowInvocationFile{}, Owner: nil}, fmt.Errorf("workflow invocation not found: %s", id)
 }
 
 func (s *Store) workflowOwnerStore(run workflowInvocationFile) (*Store, error) {

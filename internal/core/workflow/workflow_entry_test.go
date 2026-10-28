@@ -15,16 +15,21 @@ func TestWorkflowEntry(t *testing.T) {
 	request.RequestKey = "entry-retry"
 	request.Selection.Target.Commit = ""
 
-	found, matched, err := store.FindWorkflowEntry(t.Context(), request)
-	if err != nil || !matched || found.ID != run.Invocation.ID || found.Selection.Target != run.Invocation.Selection.Target {
+	entryLookup, err := store.FindWorkflowEntry(t.Context(), request)
+
+	if err != nil || !entryLookup.Found || entryLookup.Invocation.ID != run.Invocation.ID || entryLookup.Invocation.Selection.Target != run.Invocation.Selection.Target {
 		t.Fatal("entry lost frozen target", err)
 	}
 
 	checkWorkflowEntryChanges(t, store, hierarchy, request)
 	workflowTestExecute(t, store, run.Invocation.ID, "worker")
 
-	if _, matched, err := store.FindWorkflowEntry(t.Context(), request); err != nil || matched {
-		t.Fatal("terminal entry reopened", err)
+	{
+		entryLookup2, err := store.FindWorkflowEntry(t.Context(), request)
+
+		if err != nil || entryLookup2.Found {
+			t.Fatal("terminal entry reopened", err)
+		}
 	}
 }
 
@@ -38,8 +43,9 @@ func TestWorkflowLegacyEntry(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	selected, excluded, err := FilterLegacyWorkTickets(t.Context(), tickets)
-	if err != nil || len(selected) != 0 || excluded != len(hierarchy.Tasks) {
+	legacySelection, err := FilterLegacyWorkTickets(t.Context(), tickets)
+
+	if err != nil || len(legacySelection.Tickets) != 0 || legacySelection.Excluded != len(hierarchy.Tasks) {
 		t.Fatal("JSON projection retained legacy authority", err)
 	}
 
@@ -107,8 +113,12 @@ func checkWorkflowEntryChanges(t *testing.T, store *Store, hierarchy Materializa
 				changed.Selection.Selector.Identity = hierarchy.Tasks[1].Task.Key
 			}
 
-			if _, matched, err := store.FindWorkflowEntry(t.Context(), changed); err != nil || matched {
-				t.Fatal("entry replaced frozen inputs", err)
+			{
+				entryLookup3, err := store.FindWorkflowEntry(t.Context(), changed)
+
+				if err != nil || entryLookup3.Found {
+					t.Fatal("entry replaced frozen inputs", err)
+				}
 			}
 		})
 	}

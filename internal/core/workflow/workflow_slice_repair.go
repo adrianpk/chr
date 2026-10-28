@@ -17,43 +17,43 @@ const workflowSliceRepairPurpose = "slice_repair"
 // Historical results remain immutable; unchanged earlier task proof is reusable.
 func (s *Store) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (result Invocation, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		restoreWorkflowCapacityWait(&run)
+		restoreWorkflowCapacityWait(&invocationLocation.Run)
 
-		if run.CandidateRepair != nil {
+		if invocationLocation.Run.CandidateRepair != nil {
 			return workflowstate.ErrConflict
 		}
 
-		if !workflowSliceRepairReady(run.Invocation) || run.StopIntent != "" {
+		if !workflowSliceRepairReady(invocationLocation.Run.Invocation) || invocationLocation.Run.StopIntent != "" {
 			return ErrWorkflowOwned
 		}
 
-		if readErr := owner.guardWorkflowPublicationWork(ctx, run); readErr != nil {
+		if readErr := invocationLocation.Owner.guardWorkflowPublicationWork(ctx, invocationLocation.Run); readErr != nil {
 			return readErr
 		}
 
-		if readErr := owner.checkWorkflowSliceRepairPR(run); readErr != nil {
+		if readErr := invocationLocation.Owner.checkWorkflowSliceRepairPR(invocationLocation.Run); readErr != nil {
 			return readErr
 		}
 
-		observation, readErr := owner.readWorkflowSliceMembership(ctx, run)
+		observation, readErr := invocationLocation.Owner.readWorkflowSliceMembership(ctx, invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
 
-		readErr = owner.repairWorkflowSlice(ctx, &run, observation, taskKey)
+		readErr = invocationLocation.Owner.repairWorkflowSlice(ctx, &invocationLocation.Run, observation, taskKey)
 		if errors.Is(readErr, ErrWorkflowReviewRepairBudget) {
-			run.Review.State = "repair_limit_exceeded"
-			run.Status, run.Outcome = "waiting_review", "review_repair_limit_exceeded"
-			run.Blocker = &Blocker{Dependency: run.Review.Unit, Reason: run.Outcome, NextActionOwner: "workflow_operator"}
-			readErr = errors.Join(readErr, owner.commitWorkflowState(&run))
+			invocationLocation.Run.Review.State = "repair_limit_exceeded"
+			invocationLocation.Run.Status, invocationLocation.Run.Outcome = workflowstate.InvocationWaitingReview, "review_repair_limit_exceeded"
+			invocationLocation.Run.Blocker = &Blocker{Dependency: invocationLocation.Run.Review.Unit, Reason: invocationLocation.Run.Outcome, NextActionOwner: "workflow_operator"}
+			readErr = errors.Join(readErr, invocationLocation.Owner.commitWorkflowState(&invocationLocation.Run))
 		}
 
-		result = run.Invocation
+		result = invocationLocation.Run.Invocation
 
 		return readErr
 	})
@@ -102,7 +102,7 @@ func (s *Store) repairWorkflowSlice(ctx context.Context, run *workflowInvocation
 	}
 	defer func() { err = errors.Join(err, claim.releaseReservation()) }()
 
-	commit, _, err := s.workflowLaneCandidate(ctx, *run.Lane)
+	laneImage, err := s.workflowLaneCandidate(ctx, *run.Lane)
 	if err != nil {
 		return err
 	}
@@ -112,10 +112,10 @@ func (s *Store) repairWorkflowSlice(ctx context.Context, run *workflowInvocation
 	}
 
 	lane := *run.Lane
-	lane.HeadCommit = commit
+	lane.HeadCommit = laneImage.Commit
 	run.Lane = &lane
 	run.Cursor -= len(observation.tasks) - index
-	run.Status, run.Outcome, run.ResumeStatus = "pending", "slice_repair_requested", ""
+	run.Status, run.Outcome, run.ResumeStatus = workflowstate.InvocationPending, "slice_repair_requested", workflowstate.InvocationUnspecified
 
 	run.CandidateRef, run.CandidateHash = "", ""
 	if run.Preparation != nil {
@@ -134,7 +134,7 @@ func workflowSliceRepairReady(run Invocation) bool {
 		return false
 	}
 
-	return workflowSliceValidationReady(run) || run.Status == "waiting_review"
+	return workflowSliceValidationReady(run) || run.Status == workflowstate.InvocationWaitingReview
 }
 
 func (s *Store) commitWorkflowSliceRepair(run *workflowInvocationFile, observation workflowSliceObservation, index int) error {

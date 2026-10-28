@@ -58,17 +58,17 @@ func (s *Store) ControlWorkflowLifecycle(ctx context.Context, request workflowst
 }
 
 func (s *Store) acceptWorkflowLifecycleControl(ctx context.Context, request workflowstate.ControlMutationRequest, digest string, ports LifecycleControlPorts, check AdmissionCheck) (workflowLifecycleAcceptance, error) {
-	run, owner, err := s.locateWorkflowInvocation(ctx, request.ID)
+	invocationLocation, err := s.locateWorkflowInvocation(ctx, request.ID)
 	if err != nil {
 		return workflowLifecycleAcceptance{}, err
 	}
 
-	prior, found, err := owner.readWorkflowControlReceipt(request, digest)
+	prior, found, err := invocationLocation.Owner.readWorkflowControlReceipt(request, digest)
 	if found || err != nil {
 		return workflowLifecycleAcceptance{receipt: prior, replay: found}, err
 	}
 
-	if err := owner.checkGuidedWorkflowControl(ctx, run.Invocation, request); err != nil {
+	if err := invocationLocation.Owner.checkGuidedWorkflowControl(ctx, invocationLocation.Run.Invocation, request); err != nil {
 		return workflowLifecycleAcceptance{}, err
 	}
 
@@ -76,17 +76,17 @@ func (s *Store) acceptWorkflowLifecycleControl(ctx context.Context, request work
 		return workflowLifecycleAcceptance{}, err
 	}
 
-	if err := owner.reserveWorkflowControlBinding(request, digest); err != nil {
+	if err := invocationLocation.Owner.reserveWorkflowControlBinding(request, digest); err != nil {
 		return workflowLifecycleAcceptance{}, err
 	}
 
-	if err := checkWorkflowRevision(run.Invocation, []uint64{request.ExpectedRevision}); err != nil {
+	if err := checkWorkflowRevision(invocationLocation.Run.Invocation, []uint64{request.ExpectedRevision}); err != nil {
 		return workflowLifecycleAcceptance{}, err
 	}
 
-	commit := owner.newWorkflowControlCommit(request, digest, check)
+	commit := invocationLocation.Owner.newWorkflowControlCommit(request, digest, check)
 
-	limit, err := owner.applyWorkflowLifecycleControl(ctx, run, request, ports, commit)
+	limit, err := invocationLocation.Owner.applyWorkflowLifecycleControl(ctx, invocationLocation.Run, request, ports, commit)
 	if err != nil {
 		return workflowLifecycleAcceptance{}, err
 	}

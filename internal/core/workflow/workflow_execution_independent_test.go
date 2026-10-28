@@ -6,6 +6,7 @@ import (
 
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowTaskIndependent keeps validation distinct from required integration.
@@ -27,7 +28,7 @@ func TestWorkflowTaskIndependent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if retained.Status != "waiting_integration" || retained.Outcome != "task_validated" || !proof.IntegrationPending {
+	if retained.Status != workflowstate.InvocationWaitingIntegration || retained.Outcome != "task_validated" || !proof.IntegrationPending {
 		t.Fatal("independent ticket completed without integration")
 	}
 

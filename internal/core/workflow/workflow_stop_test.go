@@ -34,7 +34,7 @@ func testWorkflowStop(t *testing.T, intent string) {
 	waitWorkflowClaimFile(t, marker)
 
 	stopped, err := store.StopWorkflow(t.Context(), run.Invocation.ID, intent)
-	if err != nil || stopped.Status != "running" || stopped.StopIntent != intent {
+	if err != nil || stopped.Status != workflowstate.InvocationRunning || stopped.StopIntent != intent {
 		t.Fatalf("stop intent: %+v, %v", stopped, err)
 	}
 
@@ -87,7 +87,7 @@ func TestWorkflowStopBarrier(t *testing.T) {
 	}
 
 	resumed, err := store.ResumeWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || resumed.Status != "waiting_integration" || resumed.Cursor != 3 || len(resumed.Attempts) != 3 {
+	if err != nil || resumed.Status != workflowstate.InvocationWaitingIntegration || resumed.Cursor != 3 || len(resumed.Attempts) != 3 {
 		t.Fatal("pause lost integration barrier")
 	}
 }
@@ -124,7 +124,7 @@ func checkWorkflowStoppedContinuation(t *testing.T, store *Store, request StartR
 	}
 
 	attached := workflowTestStart(t, store, request)
-	if !attached.Attached || attached.Invocation.Status != "cancelled" {
+	if !attached.Attached || attached.Invocation.Status != workflowstate.InvocationCancelled {
 		t.Fatal("terminal retry restarted cancelled invocation")
 	}
 

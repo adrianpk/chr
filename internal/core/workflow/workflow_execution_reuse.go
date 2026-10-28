@@ -12,7 +12,7 @@ import (
 )
 
 func (s *Store) reuseWorkflowValidatedTasks(ctx context.Context, run *workflowInvocationFile) error {
-	if !slices.Contains([]string{"pending", "paused", "waiting_capacity"}, run.Status) {
+	if !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationPending, workflowstate.InvocationPaused, workflowstate.InvocationWaitingCapacity}, run.Status) {
 		return nil
 	}
 
@@ -70,13 +70,13 @@ func (s *Store) reuseWorkflowTask(ctx context.Context, run *workflowInvocationFi
 func workflowTaskBoundary(run *workflowInvocationFile, record Record) bool {
 	run.Outcome = "task_validated"
 	if run.Selection.Selector.Extent == "ticket" && record.Task.SliceID != "" {
-		run.Status = "completed"
+		run.Status = workflowstate.InvocationCompleted
 
 		return true
 	}
 
 	if record.Task.SliceID == "" || run.Cursor == len(run.Members) || run.Members[run.Cursor].Admission.SliceID != record.Task.SliceID {
-		run.Status = "waiting_integration"
+		run.Status = workflowstate.InvocationWaitingIntegration
 
 		return true
 	}

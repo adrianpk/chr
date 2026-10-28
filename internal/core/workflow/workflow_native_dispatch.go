@@ -31,7 +31,9 @@ func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard Integ
 		return s.retainWorkflowNativeSend(ctx, submission, request, advertisement)
 	}
 
-	watched, stop := s.watchWorkflowStop(ctx, &Claim{InvocationID: guard.InvocationID})
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: guard.InvocationID}, Cancel: stop})
 	defer stop()
 
 	result, err := publisher.PublishWorkflowGit(watched, request)
@@ -43,14 +45,14 @@ func (s *Store) PublishWorkflowNativeSubmission(ctx context.Context, guard Integ
 
 func (s *Store) prepareWorkflowNativeDispatch(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission workflowstate.Submission, request GitPublication, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
 		var fresh bool
 
-		submission, fresh, readErr = owner.beginWorkflowNativeSubmission(ctx, run, guard, provider)
+		submission, fresh, readErr = invocationLocation.Owner.beginWorkflowNativeSubmission(ctx, invocationLocation.Run, guard, provider)
 		if readErr != nil {
 			return readErr
 		}
@@ -59,7 +61,7 @@ func (s *Store) prepareWorkflowNativeDispatch(ctx context.Context, guard Integra
 			return ErrWorkflowObservationRequired
 		}
 
-		submission, request, readErr = owner.authorizeWorkflowNativeDispatch(ctx, submission, provider)
+		submission, request, readErr = invocationLocation.Owner.authorizeWorkflowNativeDispatch(ctx, submission, provider)
 
 		return readErr
 	})

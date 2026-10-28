@@ -70,7 +70,7 @@ func checkServiceWorkflowClaim(t *testing.T, operations service, id string) {
 	}
 
 	read, err := operations.ReadWorkflow(t.Context(), id)
-	if err != nil || read.Status != "paused" || read.Cursor != 0 || len(read.Attempts) != 1 {
+	if err != nil || read.Status != workflowstate.InvocationPaused || read.Cursor != 0 || len(read.Attempts) != 1 {
 		t.Fatalf("checkpoint = %+v, %v", read, err)
 	}
 
@@ -81,12 +81,12 @@ func checkServiceWorkflowResume(t *testing.T, operations service, id string) {
 	t.Helper()
 
 	resumed, err := operations.ResumeWorkflow(t.Context(), id)
-	if err != nil || resumed.Status != "pending" || resumed.StopIntent != "" || len(resumed.Attempts) != 1 {
+	if err != nil || resumed.Status != workflowstate.InvocationPending || resumed.StopIntent != "" || len(resumed.Attempts) != 1 {
 		t.Fatal("service resume reset the retained attempt")
 	}
 
 	recovered, err := operations.ReconcileWorkflow(t.Context(), id)
-	if err != nil || recovered.Status != "pending" || len(recovered.Attempts) != 1 {
+	if err != nil || recovered.Status != workflowstate.InvocationPending || len(recovered.Attempts) != 1 {
 		t.Fatal("service reconciliation changed the paused attempt history")
 	}
 }
@@ -95,7 +95,7 @@ func requestServiceWorkflowPause(t *testing.T, operations service, id string) {
 	t.Helper()
 
 	stopping, err := operations.StopWorkflow(t.Context(), id, "pause")
-	if err != nil || stopping.Status != "running" || stopping.StopIntent != "pause" {
+	if err != nil || stopping.Status != workflowstate.InvocationRunning || stopping.StopIntent != "pause" {
 		t.Fatal("manual owner lost durable stop intent")
 	}
 }

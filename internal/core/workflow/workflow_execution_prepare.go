@@ -13,6 +13,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowEncodedTaskInput struct {
+	Prepared workflowPreparedTask
+	Change   workflowstate.FileChange
+}
+
 type workflowPreparationMode string
 
 const (
@@ -36,17 +41,17 @@ func (s *Store) prepareWorkflowTaskHarness(ctx context.Context, claim *Claim, wo
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, record, readErr := s.checkWorkflowClaim(ctx, claim)
+		claimObservation, readErr := s.checkWorkflowClaim(ctx, claim)
 		if readErr != nil {
 			return readErr
 		}
 
-		worker, readErr = workflowBoundTaskWorker(run, worker, mode)
+		worker, readErr = workflowBoundTaskWorker(claimObservation.Run, worker, mode)
 		if readErr != nil {
 			return readErr
 		}
 
-		prepared, readErr = claim.store.prepareWorkflowAttempt(ctx, run, record, worker, mode, harness)
+		prepared, readErr = claim.store.prepareWorkflowAttempt(ctx, workflowAttemptPreparation{Run: claimObservation.Run, Record: claimObservation.Record, Worker: worker, Mode: mode, Harness: harness})
 
 		return readErr
 	})
@@ -54,24 +59,32 @@ func (s *Store) prepareWorkflowTaskHarness(ctx context.Context, claim *Claim, wo
 	return prepared, err
 }
 
-func (s *Store) prepareWorkflowAttempt(ctx context.Context, run workflowInvocationFile, record Record, worker []string, mode workflowPreparationMode, harness *AgentHarness) (workflowPreparedTask, error) {
-	attempt := &run.Attempts[len(run.Attempts)-1]
+type workflowAttemptPreparation struct {
+	Run     workflowInvocationFile
+	Record  Record
+	Worker  []string
+	Mode    workflowPreparationMode
+	Harness *AgentHarness
+}
+
+func (s *Store) prepareWorkflowAttempt(ctx context.Context, preparation workflowAttemptPreparation) (workflowPreparedTask, error) {
+	attempt := &preparation.Run.Attempts[len(preparation.Run.Attempts)-1]
 	if attempt.InputRef != "" {
 		return workflowPreparedTask{}, fmt.Errorf("%w: attempt input is already prepared", ErrWorkflowOwned)
 	}
 
-	lane, err := s.retainedWorkflowLane(ctx, run, record)
+	lane, err := s.retainedWorkflowLane(ctx, preparation.Run, preparation.Record)
 	if err != nil {
 		return workflowPreparedTask{}, err
 	}
 
 	if lane == nil {
-		value := s.newWorkflowLane(run, record)
+		value := s.newWorkflowLane(preparation.Run, preparation.Record)
 		lane = &value
 	}
 
-	run.Lane = lane
-	if err := s.commitWorkflowState(&run); err != nil {
+	preparation.Run.Lane = lane
+	if err := s.commitWorkflowState(&preparation.Run); err != nil {
 		return workflowPreparedTask{}, err
 	}
 
@@ -79,15 +92,15 @@ func (s *Store) prepareWorkflowAttempt(ctx context.Context, run workflowInvocati
 		return workflowPreparedTask{}, err
 	}
 
-	input, err := s.workflowTaskInput(ctx, run, record, worker)
+	input, err := s.workflowTaskInput(ctx, preparation.Run, preparation.Record, preparation.Worker)
 	if err != nil {
 		return workflowPreparedTask{}, err
 	}
 
-	input.ExecutionMode = string(mode)
+	input.ExecutionMode = string(preparation.Mode)
 	input.Instructions = workflowTaskInstructions
 
-	return s.saveWorkflowTaskInput(ctx, run, input, harness)
+	return s.saveWorkflowTaskInput(ctx, preparation.Run, input, preparation.Harness)
 }
 
 func (s *Store) workflowTaskInput(ctx context.Context, run workflowInvocationFile, record Record, worker []string) (TaskInput, error) {
@@ -110,13 +123,15 @@ func (s *Store) workflowTaskInput(ctx context.Context, run workflowInvocationFil
 		return input, err
 	}
 
-	input.Prerequisites, input.EvidenceHashes, err = s.workflowPrerequisiteImages(ctx, run, record)
+	prerequisiteImages, prerequisiteImagesErr := s.workflowPrerequisiteImages(ctx, run, record)
+
+	input.Prerequisites, input.EvidenceHashes, err = prerequisiteImages.Images, prerequisiteImages.EvidenceHashes, prerequisiteImagesErr
 
 	return input, err
 }
 
 func (s *Store) saveWorkflowTaskInput(ctx context.Context, run workflowInvocationFile, input TaskInput, harness *AgentHarness) (workflowPreparedTask, error) {
-	prepared, file, budgetFile, err := s.encodeWorkflowAgentInput(ctx, &run, input, harness)
+	encodedAgentInput, err := s.encodeWorkflowAgentInput(ctx, &run, input, harness)
 	if err != nil {
 		return workflowPreparedTask{}, err
 	}
@@ -129,31 +144,31 @@ func (s *Store) saveWorkflowTaskInput(ctx context.Context, run workflowInvocatio
 		return workflowPreparedTask{}, err
 	}
 
-	files := []workflowstate.FileChange{file, state}
-	if budgetFile.Path != "" {
-		files = append(files, budgetFile)
+	files := []workflowstate.FileChange{encodedAgentInput.Input, state}
+	if encodedAgentInput.Budget.Path != "" {
+		files = append(files, encodedAgentInput.Budget)
 	}
 
 	if err := s.commitFiles(files); err != nil {
 		return workflowPreparedTask{}, err
 	}
 
-	return prepared, nil
+	return encodedAgentInput.Prepared, nil
 }
 
-func encodeWorkflowTaskInput(run *workflowInvocationFile, input TaskInput) (workflowPreparedTask, workflowstate.FileChange, error) {
+func encodeWorkflowTaskInput(run *workflowInvocationFile, input TaskInput) (workflowEncodedTaskInput, error) {
 	var err error
 
 	input.ValidationTimeoutSeconds = run.Policy.ValidationTimeoutSeconds
 
 	input.ScopeHash, err = workflowExecutionScopeHash(*run)
 	if err != nil {
-		return workflowPreparedTask{}, workflowstate.FileChange{}, err
+		return workflowEncodedTaskInput{Prepared: workflowPreparedTask{}, Change: workflowstate.FileChange{}}, err
 	}
 
 	data, err := json.MarshalIndent(input, "", "  ")
 	if err != nil || len(data) >= workflowstate.FileLimit {
-		return workflowPreparedTask{}, workflowstate.FileChange{}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
+		return workflowEncodedTaskInput{Prepared: workflowPreparedTask{}, Change: workflowstate.FileChange{}}, fmt.Errorf("workflow input exceeds file bounds: %w", errorsOrConflict(err))
 	}
 
 	data = append(data, '\n')
@@ -162,7 +177,7 @@ func encodeWorkflowTaskInput(run *workflowInvocationFile, input TaskInput) (work
 	lane := input.Lane
 	attempt.Lane, attempt.InputRef, attempt.InputHash = &lane, ref, contenthash.Sum(data)
 
-	return workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, workflowstate.FileChange{Path: ref, After: data}, nil
+	return workflowEncodedTaskInput{Prepared: workflowPreparedTask{input: input, inputRef: ref, inputHash: attempt.InputHash, data: data, leaseUntil: attempt.LeaseUntil}, Change: workflowstate.FileChange{Path: ref, After: data}}, nil
 }
 
 func workflowAttemptFile(invocationID, attemptID, name string) string {

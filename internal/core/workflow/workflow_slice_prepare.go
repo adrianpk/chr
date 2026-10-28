@@ -7,32 +7,51 @@ import (
 	"time"
 )
 
-func (s *Store) prepareWorkflowSliceValidation(ctx context.Context, id string) (claim *Claim, prepared workflowPreparedTask, cached *SliceCandidate, err error) {
+type workflowSliceValidationPreparation struct {
+	Claim    *Claim
+	Prepared workflowPreparedTask
+	Cached   *SliceCandidate
+}
+
+type workflowSliceValidationClaim struct {
+	Claim    *Claim
+	Prepared workflowPreparedTask
+}
+
+func (s *Store) prepareWorkflowSliceValidation(ctx context.Context, id string) (observed workflowSliceValidationPreparation, err error) {
+	var (
+		claim    *Claim
+		prepared workflowPreparedTask
+		cached   *SliceCandidate
+	)
+
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		restoreWorkflowCapacityWait(&run)
+		restoreWorkflowCapacityWait(&invocationLocation.Run)
 
-		if !workflowSliceValidationReady(run.Invocation) || run.StopIntent != "" || run.Lane == nil || run.Lane.Unit.Kind != "slice" {
+		if !workflowSliceValidationReady(invocationLocation.Run.Invocation) || invocationLocation.Run.StopIntent != "" || invocationLocation.Run.Lane == nil || invocationLocation.Run.Lane.Unit.Kind != "slice" {
 			return ErrWorkflowOwned
 		}
 
-		observation, readErr := owner.observeWorkflowSlice(ctx, run)
+		observation, readErr := invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
 		if readErr != nil {
 			return fmt.Errorf("observe workflow slice: %w", readErr)
 		}
 
-		if run.CandidateRef != "" {
-			candidate, readErr := owner.readWorkflowSliceCandidate(ctx, run, observation)
+		if invocationLocation.Run.CandidateRef != "" {
+			candidate, readErr := invocationLocation.Owner.readWorkflowSliceCandidate(ctx, invocationLocation.Run, observation)
 			cached = &candidate
 
 			return readErr
 		}
 
-		claim, prepared, readErr = owner.claimWorkflowSliceValidation(ctx, run, observation)
+		sliceClaim, sliceClaimErr := invocationLocation.Owner.claimWorkflowSliceValidation(ctx, invocationLocation.Run, observation)
+
+		claim, prepared, readErr = sliceClaim.Claim, sliceClaim.Prepared, sliceClaimErr
 		if readErr != nil {
 			return fmt.Errorf("prepare workflow slice: %w", readErr)
 		}
@@ -40,18 +59,23 @@ func (s *Store) prepareWorkflowSliceValidation(ctx context.Context, id string) (
 		return nil
 	})
 
-	return claim, prepared, cached, err
+	return workflowSliceValidationPreparation{Claim: claim, Prepared: prepared, Cached: cached}, err
 }
 
-func (s *Store) claimWorkflowSliceValidation(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation) (claim *Claim, prepared workflowPreparedTask, err error) {
+func (s *Store) claimWorkflowSliceValidation(ctx context.Context, run workflowInvocationFile, observation workflowSliceObservation) (observed workflowSliceValidationClaim, err error) {
+	var (
+		claim    *Claim
+		prepared workflowPreparedTask
+	)
+
 	record := observation.tasks[len(observation.tasks)-1]
 	if !workflowTaskClaimable(record.Task) {
-		return nil, prepared, ErrWorkflowOwned
+		return workflowSliceValidationClaim{Claim: nil, Prepared: prepared}, ErrWorkflowOwned
 	}
 
 	claim, err = s.reserveWorkflowRole(ctx, run, workflowSliceValidationPurpose)
 	if err != nil {
-		return nil, prepared, err
+		return workflowSliceValidationClaim{Claim: nil, Prepared: prepared}, err
 	}
 
 	owned := claim
@@ -66,17 +90,17 @@ func (s *Store) claimWorkflowSliceValidation(ctx context.Context, run workflowIn
 
 	claim.Token, err = newWorkflowClaimToken()
 	if err != nil {
-		return nil, prepared, err
+		return workflowSliceValidationClaim{Claim: nil, Prepared: prepared}, err
 	}
 
 	if err := s.beginWorkflowAttempt(&run, &record, claim); err != nil {
-		return nil, prepared, err
+		return workflowSliceValidationClaim{Claim: nil, Prepared: prepared}, err
 	}
 
 	run.Attempts[len(run.Attempts)-1].ContractHash = observation.descriptor.ContractHash
 	prepared, err = s.commitWorkflowSliceInput(ctx, run, record, observation)
 
-	return claim, prepared, err
+	return workflowSliceValidationClaim{Claim: claim, Prepared: prepared}, err
 }
 
 func (s *Store) commitWorkflowSliceInput(ctx context.Context, run workflowInvocationFile, record Record, observation workflowSliceObservation) (workflowPreparedTask, error) {
@@ -98,9 +122,9 @@ func (s *Store) commitWorkflowSliceInput(ctx context.Context, run workflowInvoca
 		}
 	}
 
-	prepared, file, err := encodeWorkflowTaskInput(&run, input)
+	encodedTaskInput, err := encodeWorkflowTaskInput(&run, input)
 	if err != nil {
-		return prepared, err
+		return encodedTaskInput.Prepared, err
 	}
 
 	run.Revision++
@@ -108,10 +132,10 @@ func (s *Store) commitWorkflowSliceInput(ctx context.Context, run workflowInvoca
 
 	state, err := workflowInvocationChange(run)
 	if err != nil {
-		return prepared, err
+		return encodedTaskInput.Prepared, err
 	}
 
-	files = append(files, file, state)
+	files = append(files, encodedTaskInput.Change, state)
 
-	return prepared, s.commitFiles(files)
+	return encodedTaskInput.Prepared, s.commitFiles(files)
 }

@@ -68,12 +68,12 @@ type NativeSubmissionUpdate struct {
 // Retrying an unknown attempt only repairs its projection, never grants dispatch.
 func (s *Store) BeginWorkflowNativeSubmission(ctx context.Context, guard IntegrationBudgetGuard, provider PublicationGuardProvider) (submission workflowstate.Submission, dispatch bool, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		submission, dispatch, readErr = owner.beginWorkflowNativeSubmission(ctx, run, guard, provider)
+		submission, dispatch, readErr = invocationLocation.Owner.beginWorkflowNativeSubmission(ctx, invocationLocation.Run, guard, provider)
 
 		return readErr
 	})
@@ -85,12 +85,12 @@ func (s *Store) BeginWorkflowNativeSubmission(ctx context.Context, guard Integra
 // Only exact Git plus the original canonical PR can confirm native delivery.
 func (s *Store) RetainWorkflowNativeSubmission(ctx context.Context, request NativeSubmissionUpdate) (submission workflowstate.Submission, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation2, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		submission, readErr = owner.retainWorkflowNativeSubmission(ctx, run, request)
+		submission, readErr = invocationLocation2.Owner.retainWorkflowNativeSubmission(ctx, invocationLocation2.Run, request)
 
 		return readErr
 	})

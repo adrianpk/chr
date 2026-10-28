@@ -17,12 +17,12 @@ import (
 // mutation or task fanout; retries preserve the first immutable receipt bytes.
 func (s *Store) ConfirmWorkflowNativeReceipt(ctx context.Context, guard IntegrationBudgetGuard) (receipt Record, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		receipt, readErr = owner.confirmWorkflowNativeReceipt(ctx, run, guard)
+		receipt, readErr = invocationLocation.Owner.confirmWorkflowNativeReceipt(ctx, invocationLocation.Run, guard)
 
 		return readErr
 	})

@@ -140,7 +140,7 @@ func (s service) WorkflowStatus(ctx context.Context, id string, request Workflow
 func workflowWorkStatus(inspection workflowcore.Inspection, request WorkflowStatusRequest) WorkflowWorkStatus {
 	run := inspection.Invocation
 
-	result := WorkflowWorkStatus{Identity: run.Identity, WorkflowWorkSelection: WorkflowWorkSelection{Selector: run.Selection.Selector, Authority: run.Authority}, WorkflowWorkOutcome: WorkflowWorkOutcome{Status: run.Status, Outcome: run.Outcome}, WorkflowWorkScope: WorkflowWorkScope{Target: run.Selection.Target, Policy: inspection.Policy, SetOrderRule: run.SetOrderRule, Excluded: maps.Clone(run.Excluded)}, WorkflowWorkCounts: WorkflowWorkCounts{Total: len(run.Members), ValidatedTasks: run.Cursor, ConfirmedTickets: run.ConfirmedCursor, IntegratedUnits: len(run.Deliveries), Remaining: len(run.Members) - run.ConfirmedCursor}, WorkflowWorkControl: WorkflowWorkControl{StopIntent: run.StopIntent, Blocker: run.Blocker}, WorkflowWorkDelivery: WorkflowWorkDelivery{CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest, DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash}, WorkflowWorkPage: WorkflowWorkPage{Members: []workflowcore.PreviewMember{}, Evidence: []WorkflowWorkEvidence{}, TotalAttempts: len(run.Attempts), NextOffset: -1}}
+	result := WorkflowWorkStatus{Identity: run.Identity, WorkflowWorkSelection: WorkflowWorkSelection{Selector: run.Selection.Selector, Authority: run.Authority}, WorkflowWorkOutcome: WorkflowWorkOutcome{Status: string(run.Status), Outcome: run.Outcome}, WorkflowWorkScope: WorkflowWorkScope{Target: run.Selection.Target, Policy: inspection.Policy, SetOrderRule: run.SetOrderRule, Excluded: maps.Clone(run.Excluded)}, WorkflowWorkCounts: WorkflowWorkCounts{Total: len(run.Members), ValidatedTasks: run.Cursor, ConfirmedTickets: run.ConfirmedCursor, IntegratedUnits: len(run.Deliveries), Remaining: len(run.Members) - run.ConfirmedCursor}, WorkflowWorkControl: WorkflowWorkControl{StopIntent: run.StopIntent, Blocker: run.Blocker}, WorkflowWorkDelivery: WorkflowWorkDelivery{CandidateRef: run.CandidateRef, CandidateHash: run.CandidateHash, PullRequest: run.PullRequest, DeliveryRef: run.DeliveryRef, DeliveryHash: run.DeliveryHash}, WorkflowWorkPage: WorkflowWorkPage{Members: []workflowcore.PreviewMember{}, Evidence: []WorkflowWorkEvidence{}, TotalAttempts: len(run.Attempts), NextOffset: -1}}
 
 	for _, record := range inspection.Tasks {
 		if record.Task != nil && run.Selection.Selector.Extent == "ticket" && record.Task.Key == run.Selection.Selector.Identity {
@@ -204,7 +204,7 @@ func workflowWorkProgress(result *WorkflowWorkStatus, run workflowcore.Invocatio
 	}
 
 	result.FrozenPolicy, result.Continuation = run.Policy, run.Continuation
-	result.CapacityResumeStatus = run.CapacityResumeStatus
+	result.CapacityResumeStatus = string(run.CapacityResumeStatus)
 
 	result.NextActionOwner = "host"
 	if run.Cursor < len(run.Members) {
@@ -223,11 +223,11 @@ func workflowWorkProgress(result *WorkflowWorkStatus, run workflowcore.Invocatio
 	}
 
 	switch run.Status {
-	case "waiting_capacity", "running":
+	case workflowstate.InvocationWaitingCapacity, workflowstate.InvocationRunning:
 		result.NextActionOwner = "current_owner"
-	case "waiting_review", "paused", "blocked":
+	case workflowstate.InvocationWaitingReview, workflowstate.InvocationPaused, workflowstate.InvocationBlocked:
 		result.NextActionOwner = "operator"
-	case "completed", "cancelled":
+	case workflowstate.InvocationCompleted, workflowstate.InvocationCancelled:
 		result.NextActionOwner = "none"
 	}
 }

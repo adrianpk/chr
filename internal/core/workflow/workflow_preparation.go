@@ -65,7 +65,9 @@ func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, 
 
 	defer endWorkflowClaimExecution(claim)
 
-	watched, stop := s.watchWorkflowStop(ctx, claim)
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)
@@ -100,12 +102,12 @@ func (s *Store) CheckWorkflowPublicationGuard(ctx context.Context, id string, pr
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		guard, readErr = owner.checkWorkflowPublicationGuard(ctx, run, provider)
+		guard, readErr = invocationLocation.Owner.checkWorkflowPublicationGuard(ctx, invocationLocation.Run, provider)
 
 		return readErr
 	})

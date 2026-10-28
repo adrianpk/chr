@@ -1,9 +1,13 @@
 package workflow
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 func workflowContinuationPreparationRetry(run Invocation, request ContinuationRequest, steps int) bool {
-	return steps == 0 && request.ExpectedRevision != 0 && run.Status == "blocked" && run.Outcome == "integration_preparation_failed" && run.StopIntent == "" && run.Integration != nil && workflowInterruptedPreparation(run)
+	return steps == 0 && request.ExpectedRevision != 0 && run.Status == workflowstate.InvocationBlocked && run.Outcome == "integration_preparation_failed" && run.StopIntent == "" && run.Integration != nil && workflowInterruptedPreparation(run)
 }
 
 func workflowInterruptedPreparation(run Invocation) bool {

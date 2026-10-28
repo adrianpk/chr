@@ -67,7 +67,7 @@ func TestWorkflowInvocationRetry(t *testing.T) {
 	}
 
 	paused := workflowTestStart(t, store, request)
-	if !paused.Attached || paused.Invocation.Status != "paused" || len(paused.Invocation.Attempts) != 1 {
+	if !paused.Attached || paused.Invocation.Status != workflowstate.InvocationPaused || len(paused.Invocation.Attempts) != 1 {
 		t.Fatal("checkpoint retry allocated another invocation or lost history")
 	}
 }
@@ -250,12 +250,12 @@ func TestWorkflowClaimJournalGuard(t *testing.T) {
 	claim := workflowTestClaim(t, store, started.Invocation.ID)
 
 	err := store.withLock(t.Context(), func() error {
-		run, record, err := store.checkWorkflowClaim(t.Context(), claim)
+		claimObservation, err := store.checkWorkflowClaim(t.Context(), claim)
 		if err != nil {
 			return err
 		}
 
-		path := filepath.Join(store.layout.Root(), record.Path)
+		path := filepath.Join(store.layout.Root(), claimObservation.Record.Path)
 
 		data, err := os.ReadFile(path)
 		if err != nil {
@@ -266,14 +266,14 @@ func TestWorkflowClaimJournalGuard(t *testing.T) {
 			return err
 		}
 
-		return store.commitWorkflowClaim(run, record)
+		return store.commitWorkflowClaim(claimObservation.Run, claimObservation.Record)
 	})
 	if !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatalf("changed pre-journal image accepted: %v", err)
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), started.Invocation.ID)
-	if err != nil || retained.Revision != started.Invocation.Revision+1 || retained.Status != "running" {
+	if err != nil || retained.Revision != started.Invocation.Revision+1 || retained.Status != workflowstate.InvocationRunning {
 		t.Fatal("rejected image changed invocation state")
 	}
 }

@@ -67,7 +67,7 @@ func checkWorkflowLooseFailure(t *testing.T, store *Store, id string, attempts i
 	before := workflowTestRead(t, store, id)
 
 	progress, err := store.ContinueWorkflow(t.Context(), id, ContinuationRequest{Worker: workflowPRWorker()}, ContinuationPorts{})
-	if err != nil || progress.Reason != "stopped" || progress.Steps != 0 || progress.Invocation.Status != "paused" || progress.Invocation.Cursor != 0 || len(progress.Invocation.Attempts) != attempts || progress.Invocation.Lane.Unit.ID != "PRJ-90" {
+	if err != nil || progress.Reason != "stopped" || progress.Steps != 0 || progress.Invocation.Status != workflowstate.InvocationPaused || progress.Invocation.Cursor != 0 || len(progress.Invocation.Attempts) != attempts || progress.Invocation.Lane.Unit.ID != "PRJ-90" {
 		t.Fatal("failed ticket did not stop its invocation", err)
 	}
 
@@ -137,7 +137,7 @@ func TestWorkflowLooseTerminal(t *testing.T) {
 	workflowAdvanceFrontier(t, f)
 
 	run, err := f.store.ReconcileWorkflowMembership(t.Context(), f.run.ID)
-	if err != nil || run.Status != "completed" {
+	if err != nil || run.Status != workflowstate.InvocationCompleted {
 		t.Fatal("queue did not exhaust", err)
 	}
 

@@ -93,7 +93,7 @@ func checkServiceWorkflowTicketPR(t *testing.T, operations service, id string, r
 	}
 
 	retained, err := operations.ReadWorkflow(t.Context(), id)
-	if err != nil || retained.Status != "waiting_review" || provider.creates != 1 || retained.PullRequest.Unit.Kind != "ticket" || len(retained.Attempts) != 1 {
+	if err != nil || retained.Status != workflowstate.InvocationWaitingReview || provider.creates != 1 || retained.PullRequest.Unit.Kind != "ticket" || len(retained.Attempts) != 1 {
 		t.Fatal("service completed without delivery or duplicated candidate work", err)
 	}
 }

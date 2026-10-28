@@ -61,13 +61,13 @@ func (s *Store) AdvanceWorkflowFrontier(ctx context.Context, id string, ports Fr
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		readErr = owner.advanceWorkflowFrontier(ctx, &run, ports)
-		result = run.Invocation
+		readErr = invocationLocation.Owner.advanceWorkflowFrontier(ctx, &invocationLocation.Run, ports)
+		result = invocationLocation.Run.Invocation
 
 		return readErr
 	})
@@ -125,7 +125,7 @@ func (s *Store) refreshWorkflowNativeFrontier(run *workflowInvocationFile, recei
 }
 
 func (s *Store) workflowFrontierReady(ctx context.Context, run workflowInvocationFile) (bool, error) {
-	if run.StopIntent != "" || run.Status == "paused" || run.Status == "cancelled" {
+	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || run.Status == workflowstate.InvocationCancelled {
 		return false, ErrWorkflowStop
 	}
 

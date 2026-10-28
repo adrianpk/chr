@@ -1,6 +1,10 @@
 package app
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestServiceWorkflowFinalization applies and reuses one real remote receipt
 // through the central service without allocating another PR or worker.
@@ -21,7 +25,7 @@ func TestServiceWorkflowFinalization(t *testing.T) {
 	}
 
 	run, err := operations.ReadWorkflow(t.Context(), id)
-	if err != nil || run.Status != "completed" || run.DeliveryRef != receipt.Path {
+	if err != nil || run.Status != workflowstate.InvocationCompleted || run.DeliveryRef != receipt.Path {
 		t.Fatal("service finalization lost the shared receipt")
 	}
 }

@@ -139,7 +139,7 @@ func checkWorkflowClosingTasks(t *testing.T, fixture workflowIntegrationFixture,
 	}
 
 	after := workflowTestRead(t, fixture.store, before.ID)
-	if after.Status != "completed" || len(after.Attempts) != len(before.Attempts) || after.RequestHash != before.RequestHash || len(after.Closures) != 1 || after.Cursor != 6 {
+	if after.Status != workflowstate.InvocationCompleted || len(after.Attempts) != len(before.Attempts) || after.RequestHash != before.RequestHash || len(after.Closures) != 1 || after.Cursor != 6 {
 		t.Fatal("closure changed task attempts, admission or confirmed progress")
 	}
 }

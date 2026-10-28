@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowFrontierReject rejects changed canonical history, explicit stops
@@ -84,7 +86,7 @@ func TestWorkflowFrontierRecovery(t *testing.T) {
 			}
 
 			run := workflowAdvanceFrontier(t, fixture)
-			if run.Status != "pending" || run.PullRequest != nil || len(run.Deliveries) != 1 || run.ConfirmedCursor != 3 {
+			if run.Status != workflowstate.InvocationPending || run.PullRequest != nil || len(run.Deliveries) != 1 || run.ConfirmedCursor != 3 {
 				t.Fatal("frontier recovery lost or duplicated the released unit")
 			}
 		})

@@ -77,7 +77,9 @@ func (s service) agentWorkLoopSelection(opts AgentWorkSelectionOptions) (agentWo
 		return agentWorkLoopSelection{}, err
 	}
 
-	tickets, excluded, err := workflowcore.FilterLegacyWorkTickets(s.ctx, tickets)
+	legacySelection, legacySelectionErr := workflowcore.FilterLegacyWorkTickets(s.ctx, tickets)
+
+	tickets, excluded, err := legacySelection.Tickets, legacySelection.Excluded, legacySelectionErr
 	if err != nil {
 		return agentWorkLoopSelection{}, err
 	}
@@ -105,7 +107,9 @@ func (s service) applyAgentWorkSelectionPreflight(index ticketcore.Index, ticket
 		return nil, err
 	}
 
-	allTickets, _, err = workflowcore.FilterLegacyWorkTickets(s.ctx, allTickets)
+	legacySelection2, legacySelectionErr2 := workflowcore.FilterLegacyWorkTickets(s.ctx, allTickets)
+
+	allTickets, _, err = legacySelection2.Tickets, legacySelection2.Excluded, legacySelectionErr2
 	if err != nil {
 		return nil, err
 	}

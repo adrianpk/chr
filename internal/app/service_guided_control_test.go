@@ -117,7 +117,7 @@ func TestGuidedUseCaseControlLostAck(t *testing.T) {
 	}
 
 	before, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, pending)
-	if err != nil || before.Status != "paused" {
+	if err != nil || before.Status != workflowstate.InvocationPaused {
 		t.Fatal("native stop was not accepted before fault", err)
 	}
 
@@ -202,7 +202,7 @@ func assertGuidedStopAccepted(t *testing.T, operations service, stopping authori
 	}
 
 	run, err := workflowcore.ReadGuidedInvocation(t.Context(), operations.projectContext.ProjectDir, stopping)
-	if err != nil || run.Status != "running" || run.StopIntent != action {
+	if err != nil || run.Status != workflowstate.InvocationRunning || run.StopIntent != action {
 		t.Fatal("native owner did not retain the stop", err)
 	}
 }

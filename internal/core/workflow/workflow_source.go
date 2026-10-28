@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // SourceQuery identifies only an owned validated source branch. It has
@@ -34,42 +36,42 @@ func (s *Store) PublishWorkflowSource(ctx context.Context, id string, publisher 
 	defer cancel()
 
 	return s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		if !workflowSourcePublishable(run) {
+		if !workflowSourcePublishable(invocationLocation.Run) {
 			return ErrWorkflowOwned
 		}
 
-		observation, err := owner.observeWorkflowSlice(ctx, run)
+		observation, err := invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
 		if err != nil {
 			return err
 		}
 
-		candidate, err := owner.readWorkflowSliceCandidate(ctx, run, observation)
+		candidate, err := invocationLocation.Owner.readWorkflowSliceCandidate(ctx, invocationLocation.Run, observation)
 		if err != nil {
 			return err
 		}
 
-		query := SourceQuery{Repository: run.ExecutionSelection().Target.Repository, Directory: candidate.Lane.Worktree, Branch: candidate.Lane.Branch, Commit: candidate.Result.Commit, Tree: candidate.Result.Tree}
-		if run.PullRequest != nil {
-			query.PreviousCommit = run.PullRequest.SourceCommit
+		query := SourceQuery{Repository: invocationLocation.Run.ExecutionSelection().Target.Repository, Directory: candidate.Lane.Worktree, Branch: candidate.Lane.Branch, Commit: candidate.Result.Commit, Tree: candidate.Result.Tree}
+		if invocationLocation.Run.PullRequest != nil {
+			query.PreviousCommit = invocationLocation.Run.PullRequest.SourceCommit
 		}
 
 		if err := publisher.PublishWorkflowSource(ctx, query); err != nil {
 			return err
 		}
 
-		_, err = owner.readWorkflowSliceCandidate(ctx, run, observation)
+		_, err = invocationLocation.Owner.readWorkflowSliceCandidate(ctx, invocationLocation.Run, observation)
 
 		return err
 	})
 }
 
 func workflowSourcePublishable(run workflowInvocationFile) bool {
-	if run.StopIntent != "" || run.Status == "paused" || workflowInvocationTerminal(run.Status) {
+	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || workflowInvocationTerminal(run.Status) {
 		return false
 	}
 

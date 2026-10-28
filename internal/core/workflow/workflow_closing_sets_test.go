@@ -107,7 +107,7 @@ func checkWorkflowClosingSetAdvance(t *testing.T, fixture workflowIntegrationFix
 	t.Helper()
 
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)
-	if run.Status != "completed" || run.Cursor != 9 || len(run.Closures) != 2 || len(run.Deliveries) != 3 {
+	if run.Status != workflowstate.InvocationCompleted || run.Cursor != 9 || len(run.Closures) != 2 || len(run.Deliveries) != 3 {
 		t.Fatal("associated set continuation lost ordered progress")
 	}
 

@@ -242,7 +242,7 @@ func checkNativeRolePriorityWait(t *testing.T, peer *Store, id string) {
 	}
 
 	waiting := workflowTestRead(t, peer, id)
-	if waiting.Status != "waiting_capacity" || len(waiting.Attempts) != 0 {
+	if waiting.Status != workflowstate.InvocationWaitingCapacity || len(waiting.Attempts) != 0 {
 		t.Fatal("priority wait consumed task ownership", waiting)
 	}
 }

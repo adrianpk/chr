@@ -104,7 +104,7 @@ func checkWorkflowCLIManualFailure(t *testing.T, operations service, id string) 
 	t.Helper()
 
 	retained, err := operations.ReadWorkflow(t.Context(), id)
-	if err != nil || retained.Cursor != 0 || retained.Status != "paused" || retained.Attempts[0].Outcome != "checkpointed" {
+	if err != nil || retained.Cursor != 0 || retained.Status != workflowstate.InvocationPaused || retained.Attempts[0].Outcome != "checkpointed" {
 		t.Fatal("failed report fabricated success or lost checkpoint", retained, err)
 	}
 

@@ -348,7 +348,9 @@ func (s service) legacyAgentWorkTicket(ticketKey string) (ticketcore.Indexed, er
 		return ticketcore.Indexed{}, err
 	}
 
-	tickets, _, err = workflowcore.FilterLegacyWorkTickets(s.ctx, tickets)
+	legacySelection, legacySelectionErr := workflowcore.FilterLegacyWorkTickets(s.ctx, tickets)
+
+	tickets, _, err = legacySelection.Tickets, legacySelection.Excluded, legacySelectionErr
 	if err != nil {
 		return ticketcore.Indexed{}, err
 	}

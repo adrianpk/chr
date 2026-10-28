@@ -155,7 +155,7 @@ func TestWorkflowTicketClosedPR(t *testing.T) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != "blocked" || run.PullRequest.URL != f.provider.pr.URL || f.provider.creates != 1 || run.DeliveryRef != "" {
+	if run.Status != workflowstate.InvocationBlocked || run.PullRequest.URL != f.provider.pr.URL || f.provider.creates != 1 || run.DeliveryRef != "" {
 		t.Fatal("closed PR lost identity or created delivery")
 	}
 }
@@ -264,7 +264,7 @@ func checkWorkflowTicketRepair(t *testing.T, f workflowPreparationFixture) {
 	t.Helper()
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Cursor != 0 || run.CandidateRef != "" || run.Status != "pending" || run.PullRequest.URL != f.provider.pr.URL || len(run.ReviewRepairs) != 1 {
+	if run.Cursor != 0 || run.CandidateRef != "" || run.Status != workflowstate.InvocationPending || run.PullRequest.URL != f.provider.pr.URL || len(run.ReviewRepairs) != 1 {
 		t.Fatal("repair broadened scope or lost canonical PR")
 	}
 

@@ -155,7 +155,7 @@ func TestWorkflowInvocationTerminal(t *testing.T) {
 	markWorkflowInvocationCancelled(t, store, first.Invocation.ID)
 
 	retry := workflowTestStart(t, store, request)
-	if !retry.Attached || retry.Invocation.Status != "cancelled" || len(retry.Invocation.Attempts) != 0 {
+	if !retry.Attached || retry.Invocation.Status != workflowstate.InvocationCancelled || len(retry.Invocation.Attempts) != 0 {
 		t.Fatal("terminal alias retry restarted work")
 	}
 
@@ -174,7 +174,7 @@ func markWorkflowInvocationCancelled(t *testing.T, store *Store, id string) {
 			return err
 		}
 
-		run.Status = "cancelled"
+		run.Status = workflowstate.InvocationCancelled
 		run.Revision++
 
 		change, err := workflowInvocationChange(run)

@@ -74,30 +74,33 @@ func (s *Store) executeWorkflowSliceTask(ctx context.Context, id string, worker 
 
 // ValidateWorkflowSlice runs only the host aggregate gate; retries retain tasks.
 func (s *Store) ValidateWorkflowSlice(ctx context.Context, id string) (result SliceCandidate, err error) {
-	claim, prepared, cached, err := s.prepareWorkflowSliceValidation(ctx, id)
-	if err != nil || cached != nil {
-		if cached != nil {
-			return *cached, err
+	slicePreparation, err := s.prepareWorkflowSliceValidation(ctx, id)
+
+	if err != nil || slicePreparation.Cached != nil {
+		if slicePreparation.Cached != nil {
+			return *slicePreparation.Cached, err
 		}
 
 		return SliceCandidate{}, err
 	}
-	defer func() { err = errors.Join(err, closeWorkflowSliceCapacity(claim)) }()
+	defer func() { err = errors.Join(err, closeWorkflowSliceCapacity(slicePreparation.Claim)) }()
 
-	if err := beginWorkflowClaimExecution(claim); err != nil {
+	if err := beginWorkflowClaimExecution(slicePreparation.Claim); err != nil {
 		return SliceCandidate{}, err
 	}
-	defer endWorkflowClaimExecution(claim)
+	defer endWorkflowClaimExecution(slicePreparation.Claim)
 
-	watched, stop := s.watchWorkflowStop(ctx, claim)
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: slicePreparation.Claim, Cancel: stop})
 	defer stop()
 
-	candidate, validationErr := s.runWorkflowSliceValidation(watched, claim, prepared)
+	candidate, validationErr := s.runWorkflowSliceValidation(watched, slicePreparation.Claim, slicePreparation.Prepared)
 
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 
-	err = s.finishWorkflowSliceValidation(cleanup, claim, prepared, &candidate, watched.Err() != nil)
+	err = s.finishWorkflowSliceValidation(cleanup, slicePreparation.Claim, slicePreparation.Prepared, &candidate, watched.Err() != nil)
 
 	return candidate, errors.Join(validationErr, err)
 }
@@ -116,7 +119,7 @@ func closeWorkflowSliceCapacity(claim *Claim) error {
 }
 
 func workflowSliceValidationReady(run Invocation) bool {
-	return run.Status == "waiting_integration" || run.Status == "waiting_review" && run.CandidateRef != "" || run.Status == "paused" && run.StopIntent == "" && run.Outcome == "slice_validation_failed"
+	return run.Status == workflowstate.InvocationWaitingIntegration || run.Status == workflowstate.InvocationWaitingReview && run.CandidateRef != "" || run.Status == workflowstate.InvocationPaused && run.StopIntent == "" && run.Outcome == "slice_validation_failed"
 }
 
 func (s *Store) runWorkflowSliceValidation(ctx context.Context, claim *Claim, prepared workflowPreparedTask) (SliceCandidate, error) {

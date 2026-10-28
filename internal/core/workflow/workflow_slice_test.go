@@ -98,7 +98,7 @@ func TestWorkflowSliceAggregate(t *testing.T) {
 func checkWorkflowAggregateAttempt(t *testing.T, run Invocation) {
 	t.Helper()
 
-	if run.Status != "waiting_integration" || len(run.Attempts) != 4 || run.Attempts[3].Purpose != workflowSliceValidationPurpose || run.CandidateRef == "" {
+	if run.Status != workflowstate.InvocationWaitingIntegration || len(run.Attempts) != 4 || run.Attempts[3].Purpose != workflowSliceValidationPurpose || run.CandidateRef == "" {
 		t.Fatal("slice lacks a separately owned aggregate attempt")
 	}
 }
@@ -157,7 +157,7 @@ func TestWorkflowSliceRetry(t *testing.T) {
 func checkWorkflowAggregateFailure(t *testing.T, run Invocation) {
 	t.Helper()
 
-	if run.Status != "paused" || run.CandidateRef != "" || len(run.Attempts) != 4 || run.Attempts[3].ResultRef == "" {
+	if run.Status != workflowstate.InvocationPaused || run.CandidateRef != "" || len(run.Attempts) != 4 || run.Attempts[3].ResultRef == "" {
 		t.Fatal("aggregate failure lost reusable task results")
 	}
 }
@@ -170,7 +170,7 @@ func TestWorkflowSliceRepair(t *testing.T) {
 	first := workflowTestExecuteSlice(t, store, run.Invocation.ID, "worker")
 
 	repaired, err := store.RepairWorkflowSlice(t.Context(), run.Invocation.ID, hierarchy.Tasks[1].Task.Key)
-	if err != nil || repaired.Cursor != 1 || repaired.Status != "pending" || repaired.CandidateRef != "" || len(repaired.Attempts) != 5 {
+	if err != nil || repaired.Cursor != 1 || repaired.Status != workflowstate.InvocationPending || repaired.CandidateRef != "" || len(repaired.Attempts) != 5 {
 		t.Fatalf("slice repair: %+v, %v", repaired, err)
 	}
 

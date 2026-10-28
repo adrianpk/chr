@@ -83,16 +83,16 @@ func (s *Store) workflowIntegrationProgress(ctx context.Context, id string, rece
 
 func (s *Store) blockWorkflowMissingPublisher(ctx context.Context, id string) error {
 	return s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == "paused" {
+		if invocationLocation.Run.StopIntent != "" || workflowInvocationTerminal(invocationLocation.Run.Status) || invocationLocation.Run.Status == workflowstate.InvocationPaused {
 			return ErrWorkflowStop
 		}
 
-		return owner.blockWorkflowPublication(&run, ErrWorkflowAtomicGuard)
+		return invocationLocation.Owner.blockWorkflowPublication(&invocationLocation.Run, ErrWorkflowAtomicGuard)
 	})
 }
 
@@ -101,12 +101,12 @@ func (s *Store) observeWorkflowPublicationCheckpoint(ctx context.Context, id str
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation2, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		receipt, delivered, readErr = owner.reconcileWorkflowPublicationCheckpoint(ctx, run, ports)
+		receipt, delivered, readErr = invocationLocation2.Owner.reconcileWorkflowPublicationCheckpoint(ctx, invocationLocation2.Run, ports)
 
 		return readErr
 	})
@@ -137,7 +137,7 @@ func (s *Store) reconcileWorkflowPublicationCheckpoint(ctx context.Context, run 
 		return nil, false, err
 	}
 
-	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == "paused" {
+	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
 		return nil, false, ErrWorkflowStop
 	}
 

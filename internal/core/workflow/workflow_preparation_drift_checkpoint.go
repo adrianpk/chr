@@ -22,11 +22,11 @@ func (s *Store) retainWorkflowNativeTargetDrift(id string) error {
 		return err
 	}
 
-	if run.StopIntent != "" || run.Status != "paused" || run.ResumeStatus != "waiting_integration" {
+	if run.StopIntent != "" || run.Status != workflowstate.InvocationPaused || run.ResumeStatus != workflowstate.InvocationWaitingIntegration {
 		return ErrWorkflowStop
 	}
 
-	run.Status, run.ResumeStatus, run.Outcome = "waiting_integration", "", "target_changed"
+	run.Status, run.ResumeStatus, run.Outcome = workflowstate.InvocationWaitingIntegration, workflowstate.InvocationUnspecified, "target_changed"
 
 	return s.commitWorkflowState(&run)
 }

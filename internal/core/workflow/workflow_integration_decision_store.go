@@ -120,7 +120,7 @@ func blockWorkflowDecisionEntry(entry *IntegrationEntry, run *workflowInvocation
 	entry.Revision++
 	entry.StateRevision++
 	entry.Blocker = &IntegrationBlocker{Reason: "merger_decision_required", RequiredAction: "answer_decision", ResumeState: "merging"}
-	run.Status, run.Outcome = "waiting_integration", "merger_waiting_decision"
+	run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "merger_waiting_decision"
 }
 
 func (s *Store) commitWorkflowDecisionRecord(run *workflowInvocationFile, entry IntegrationEntry, file workflowstate.FileChange, extra ...workflowstate.FileChange) error {

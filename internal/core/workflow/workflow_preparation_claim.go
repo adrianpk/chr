@@ -21,26 +21,26 @@ func (s *Store) prepareWorkflowIntegrationValidation(ctx context.Context, id str
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		restoreWorkflowCapacityWait(&run)
+		restoreWorkflowCapacityWait(&invocationLocation.Run)
 
-		observation, source, capability, readErr := owner.workflowPreparationPreflight(ctx, &run, provider)
+		observation, source, capability, readErr := invocationLocation.Owner.workflowPreparationPreflight(ctx, &invocationLocation.Run, provider)
 		if readErr != nil {
 			return readErr
 		}
 
-		cached, readErr = owner.cachedWorkflowPreparation(ctx, run, source, capability, provider)
+		cached, readErr = invocationLocation.Owner.cachedWorkflowPreparation(ctx, invocationLocation.Run, source, capability, provider)
 		if readErr != nil || cached != nil {
 			return readErr
 		}
 
-		claim, prepared, input, readErr = owner.claimWorkflowIntegrationValidation(ctx, &run, observation, source, capability, provider, git)
-		if run.Preparation != nil {
-			round = run.Preparation.Round
+		claim, prepared, input, readErr = invocationLocation.Owner.claimWorkflowIntegrationValidation(ctx, &invocationLocation.Run, observation, source, capability, provider, git)
+		if invocationLocation.Run.Preparation != nil {
+			round = invocationLocation.Run.Preparation.Round
 		}
 
 		return readErr
@@ -50,7 +50,7 @@ func (s *Store) prepareWorkflowIntegrationValidation(ctx context.Context, id str
 }
 
 func (s *Store) workflowPreparationPreflight(ctx context.Context, run *workflowInvocationFile, provider PublicationGuardProvider) (workflowSliceObservation, workflowstate.ReviewInput, workflowstate.PublicationCapability, error) {
-	if !slices.Contains([]string{"waiting_integration", "waiting_review", "blocked"}, run.Status) {
+	if !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingIntegration, workflowstate.InvocationWaitingReview, workflowstate.InvocationBlocked}, run.Status) {
 		return workflowSliceObservation{}, workflowstate.ReviewInput{}, workflowstate.PublicationCapability{}, ErrWorkflowOwned
 	}
 
@@ -127,7 +127,7 @@ func workflowPreparationInputsCurrent(run workflowInvocationFile, candidate work
 }
 
 func (s *Store) blockWorkflowPublication(run *workflowInvocationFile, reason error) error {
-	run.Status, run.Outcome = "blocked", "publication_guard_unsupported"
+	run.Status, run.Outcome = workflowstate.InvocationBlocked, "publication_guard_unsupported"
 
 	run.Blocker = &Blocker{Dependency: run.Lane.Unit, Reason: "atomic_source_base_guard_required", NextActionOwner: "workflow_operator"}
 	if run.Review != nil {
@@ -189,18 +189,18 @@ func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflow
 
 	query.RequiredSignatures, query.SigningProfile = capability.RequiredSignatures, capability.SigningProfile
 
-	proof, refs, err := s.prepareWorkflowCandidateRepairGit(ctx, *run, git, query)
+	repairGit, err := s.prepareWorkflowCandidateRepairGit(ctx, *run, git, query)
 	if err != nil {
 		return workflowstate.PreparationInput{}, lane, err
 	}
 
-	if err := checkWorkflowPreparedProof(query, proof); err != nil {
+	if err := checkWorkflowPreparedProof(query, repairGit.Proof); err != nil {
 		return workflowstate.PreparationInput{}, lane, err
 	}
 
-	lane.HeadCommit = proof.ResultCommit
+	lane.HeadCommit = repairGit.Proof.ResultCommit
 
-	input := workflowstate.PreparationInput{Source: source, Capability: capability, Git: proof, MergerAttemptRefs: refs}
+	input := workflowstate.PreparationInput{Source: source, Capability: capability, Git: repairGit.Proof, MergerAttemptRefs: repairGit.Evidence}
 	if err := s.bindWorkflowNativePreparation(ctx, *run, &input, provider); err != nil {
 		return input, lane, err
 	}
@@ -254,7 +254,7 @@ func (s *Store) beginWorkflowPreparation(run *workflowInvocationFile, source wor
 	run.PreparationCount++
 	run.Preparation = &PreparationBinding{Round: run.PreparationCount, Unit: source.Unit, State: "preparing", SourceHash: hash}
 
-	run.Status, run.Outcome, run.Blocker = "waiting_integration", "integration_preparing", nil
+	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingIntegration, "integration_preparing", nil
 	if run.Review != nil {
 		run.Review.State = "stale"
 	}
@@ -287,7 +287,7 @@ func (s *Store) failClaimedWorkflowPreparation(run workflowInvocationFile, recor
 		return errors.Join(reason, err)
 	}
 
-	current.Status, current.Outcome = "blocked", "integration_preparation_failed"
+	current.Status, current.Outcome = workflowstate.InvocationBlocked, "integration_preparation_failed"
 	current.Blocker = &Blocker{Dependency: run.Lane.Unit, Reason: "combined_result_preparation_failed", NextActionOwner: "workflow_operator"}
 
 	return errors.Join(reason, s.commitWorkflowState(&current))

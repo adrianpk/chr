@@ -10,6 +10,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowTrackerPreparation struct {
+	Status   TrackerStatus
+	Output   []byte
+	Previous TrackerStatus
+}
+
 // TrackerSource binds an export to its authoritative revision and bytes.
 type TrackerSource struct {
 	ID       string `json:"id,omitempty"`
@@ -76,18 +82,18 @@ func (s *Store) InspectWorkflowTracker(ctx context.Context, setID string) (resul
 			return readErr
 		}
 
-		source, _, readErr := s.versionedWorkflowTrackerImage(snapshot, setID, result.Schema)
+		trackerImage, readErr := s.versionedWorkflowTrackerImage(snapshot, setID, result.Schema)
 		if readErr != nil {
 			return readErr
 		}
 
 		result.ObservedHash, readErr = s.workflowTrackerOutput(setID)
-		if readErr != nil || source.SourceHash != result.SourceHash || result.ObservedHash != result.OutputHash {
+		if readErr != nil || trackerImage.Status.SourceHash != result.SourceHash || result.ObservedHash != result.OutputHash {
 			result.Status, result.Reason = "stale", "projection_stale"
 			result.Detail = "authoritative sources or tracker output changed"
 		}
 
-		if imageErr := s.inspectRequiredOrderImages(snapshot, source); imageErr != nil {
+		if imageErr := s.inspectRequiredOrderImages(snapshot, trackerImage.Status); imageErr != nil {
 			return imageErr
 		}
 
@@ -108,33 +114,33 @@ func workflowTrackerResult(result TrackerStatus, err error) (TrackerStatus, erro
 }
 
 func (s *Store) exportWorkflowTracker(snapshot Snapshot, setID string, opts TrackerOptions) (TrackerStatus, error) {
-	result, output, previous, err := s.prepareWorkflowTrackerImage(snapshot, setID, opts)
+	trackerPreparation, err := s.prepareWorkflowTrackerImage(snapshot, setID, opts)
 	if err != nil {
-		return result, err
+		return trackerPreparation.Status, err
 	}
 
-	result.ObservedHash, err = s.workflowTrackerOutput(setID)
+	trackerPreparation.Status.ObservedHash, err = s.workflowTrackerOutput(setID)
 	if err != nil {
-		return s.workflowTrackerFailure(result, err)
+		return s.workflowTrackerFailure(trackerPreparation.Status, err)
 	}
 
-	if !workflowTrackerMayReplace(result, previous, opts) {
-		return s.workflowTrackerFailure(result, fmt.Errorf("tracker edited; replacement requires its observed hash"))
+	if !workflowTrackerMayReplace(trackerPreparation.Status, trackerPreparation.Previous, opts) {
+		return s.workflowTrackerFailure(trackerPreparation.Status, fmt.Errorf("tracker edited; replacement requires its observed hash"))
 	}
 
-	if err := s.repairWorkflowTrackerCompanions(snapshot, result, output, opts); err != nil {
-		return s.workflowTrackerFailure(result, err)
+	if err := s.repairWorkflowTrackerCompanions(snapshot, trackerPreparation.Status, trackerPreparation.Output, opts); err != nil {
+		return s.workflowTrackerFailure(trackerPreparation.Status, err)
 	}
 
-	if previous.Status == "current" && previous.SourceHash == result.SourceHash && result.ObservedHash == result.PendingHash {
-		return previous, nil
+	if trackerPreparation.Previous.Status == "current" && trackerPreparation.Previous.SourceHash == trackerPreparation.Status.SourceHash && trackerPreparation.Status.ObservedHash == trackerPreparation.Status.PendingHash {
+		return trackerPreparation.Previous, nil
 	}
 
-	if result.ObservedHash != "" && result.ObservedHash == previous.PendingHash {
-		result.OutputHash = result.ObservedHash
+	if trackerPreparation.Status.ObservedHash != "" && trackerPreparation.Status.ObservedHash == trackerPreparation.Previous.PendingHash {
+		trackerPreparation.Status.OutputHash = trackerPreparation.Status.ObservedHash
 	}
 
-	return s.writeWorkflowTracker(result, output)
+	return s.writeWorkflowTracker(trackerPreparation.Status, trackerPreparation.Output)
 }
 
 func (s *Store) workflowTrackerPrevious(setID string) (TrackerStatus, error) {
@@ -143,10 +149,14 @@ func (s *Store) workflowTrackerPrevious(setID string) (TrackerStatus, error) {
 		return previous, err
 	}
 
-	if retained, found, err := s.retainedOrderRegistration(setID); found || err != nil {
-		retained.Status, retained.Reason = "stale", "registration_missing"
+	{
+		trackerRegistration, err := s.retainedOrderRegistration(setID)
 
-		return retained, err
+		if trackerRegistration.Found || err != nil {
+			trackerRegistration.Status.Status, trackerRegistration.Status.Reason = "stale", "registration_missing"
+
+			return trackerRegistration.Status, err
+		}
 	}
 
 	ids, err := s.workflowTrackerRegistrations()
@@ -171,29 +181,29 @@ func (s *Store) workflowTrackerFailure(result TrackerStatus, failure error) (Tra
 	return result, errors.Join(workflowstate.ErrProjectionStale, failure, s.persistWorkflowTracker(result))
 }
 
-func (s *Store) prepareWorkflowTrackerImage(snapshot Snapshot, setID string, opts TrackerOptions) (TrackerStatus, []byte, TrackerStatus, error) {
+func (s *Store) prepareWorkflowTrackerImage(snapshot Snapshot, setID string, opts TrackerOptions) (workflowTrackerPreparation, error) {
 	previous, err := s.workflowTrackerPrevious(setID)
 	if err != nil {
-		return TrackerStatus{}, nil, previous, err
+		return workflowTrackerPreparation{Status: TrackerStatus{}, Output: nil, Previous: previous}, err
 	}
 
 	schema := workflowTrackerSchema(snapshot, setID, opts.Schema, previous.Schema)
 
-	result, output, err := s.versionedWorkflowTrackerImage(snapshot, setID, schema)
+	trackerImage2, err := s.versionedWorkflowTrackerImage(snapshot, setID, schema)
 	if err != nil {
-		return result, nil, previous, err
+		return workflowTrackerPreparation{Status: trackerImage2.Status, Output: nil, Previous: previous}, err
 	}
 
-	result.OutputHash, result.PendingHash = previous.OutputHash, contenthash.Sum(output)
+	trackerImage2.Status.OutputHash, trackerImage2.Status.PendingHash = previous.OutputHash, contenthash.Sum(trackerImage2.Output)
 
-	result.GeneratedAt = previous.GeneratedAt
-	if result.Schema == "chr-tracker/v2" && result.SourceHash != previous.SourceHash {
-		result.GeneratedAt = time.Time{}
+	trackerImage2.Status.GeneratedAt = previous.GeneratedAt
+	if trackerImage2.Status.Schema == "chr-tracker/v2" && trackerImage2.Status.SourceHash != previous.SourceHash {
+		trackerImage2.Status.GeneratedAt = time.Time{}
 	}
 
-	result.Status, result.Reason = "stale", "projection_stale"
+	trackerImage2.Status.Status, trackerImage2.Status.Reason = "stale", "projection_stale"
 
-	return result, output, previous, nil
+	return workflowTrackerPreparation{Status: trackerImage2.Status, Output: trackerImage2.Output, Previous: previous}, nil
 }
 
 func workflowTrackerMayReplace(result, previous TrackerStatus, opts TrackerOptions) bool {
@@ -209,12 +219,12 @@ func (s *Store) inspectRequiredOrderImages(snapshot Snapshot, source TrackerStat
 		return nil
 	}
 
-	_, output, err := s.workflowOrderTrackerImage(snapshot, source.SetID)
+	trackerImage3, err := s.workflowOrderTrackerImage(snapshot, source.SetID)
 	if err != nil {
 		return err
 	}
 
-	return s.checkRequiredOrderImages(source, output)
+	return s.checkRequiredOrderImages(source, trackerImage3.Output)
 }
 
 func (s *Store) repairWorkflowTrackerCompanions(snapshot Snapshot, result TrackerStatus, output []byte, opts TrackerOptions) error {

@@ -76,7 +76,7 @@ func projectNativeWork(result *WorkObservation, observation workflowcore.WorkObs
 }
 
 func appendNativeWork(result *WorkObservation, run workflowcore.Invocation, tickets map[string]ticketcore.Indexed, records map[string]workflowcore.Record) {
-	base := WorkContext{ID: run.ID, Kind: "native", InvocationID: run.ID, Status: run.Status, Outcome: run.Outcome, UpdatedAt: run.UpdatedAt, Validated: run.Cursor, Confirmed: run.ConfirmedCursor, Remaining: len(run.Members) - run.ConfirmedCursor}
+	base := WorkContext{ID: run.ID, Kind: "native", InvocationID: run.ID, Status: string(run.Status), Outcome: run.Outcome, UpdatedAt: run.UpdatedAt, Validated: run.Cursor, Confirmed: run.ConfirmedCursor, Remaining: len(run.Members) - run.ConfirmedCursor}
 	if len(run.Members) > 0 {
 		base.TicketKey = run.Members[min(run.Cursor, len(run.Members)-1)].Admission.Key
 	}
@@ -106,13 +106,13 @@ func appendNativeWork(result *WorkObservation, run workflowcore.Invocation, tick
 
 	bindNativeWorkContext(&base, tickets, records)
 
-	if run.Status == "completed" || run.Status == "cancelled" {
+	if run.Status == workflowstate.InvocationCompleted || run.Status == workflowstate.InvocationCancelled {
 		result.Results = append(result.Results, base)
 	} else if !active {
 		result.Current = append(result.Current, base)
 	}
 
-	result.Events = append(result.Events, WorkEvent{ID: fmt.Sprintf("%s:revision:%d", run.ID, run.Revision), ContextID: run.ID, TicketKey: base.TicketKey, Time: run.UpdatedAt, Phase: run.Status, Message: run.Outcome})
+	result.Events = append(result.Events, WorkEvent{ID: fmt.Sprintf("%s:revision:%d", run.ID, run.Revision), ContextID: run.ID, TicketKey: base.TicketKey, Time: run.UpdatedAt, Phase: string(run.Status), Message: run.Outcome})
 }
 
 func bindNativeWorkContext(current *WorkContext, tickets map[string]ticketcore.Indexed, records map[string]workflowcore.Record) {
@@ -153,7 +153,7 @@ func bindNativeWorkProcess(current *WorkContext, attempt workflowcore.Attempt) {
 
 	for index := len(attempt.Processes) - 1; index >= 0; index-- {
 		process := attempt.Processes[index]
-		if process.State == "running" && len(process.Command) > 0 {
+		if process.State == workflowcore.ProcessRunning && len(process.Command) > 0 {
 			current.Message = "Running " + filepath.Base(process.Command[0])
 
 			return

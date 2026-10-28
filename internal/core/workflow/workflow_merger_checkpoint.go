@@ -43,25 +43,25 @@ func (s *Store) RetainWorkflowMergerCheckpoint(ctx context.Context, guard Integr
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, guard.InvocationID)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if err != nil {
 			return err
 		}
 
-		entry, budget, err := owner.currentWorkflowIntegrationBudget(ctx, run, guard)
+		entry, budget, err := invocationLocation.Owner.currentWorkflowIntegrationBudget(ctx, invocationLocation.Run, guard)
 		if err != nil {
 			return err
 		}
 
-		if err := guardWorkflowIntegrationBudget(run, entry, budget, guard); err != nil {
+		if err := guardWorkflowIntegrationBudget(invocationLocation.Run, entry, budget, guard); err != nil {
 			return err
 		}
 
-		if !workflowMergerRunnable(run, entry) {
+		if !workflowMergerRunnable(invocationLocation.Run, entry) {
 			return ErrWorkflowOwned
 		}
 
-		if err := owner.checkWorkflowMergerCheckpointOwner(run, entry, state); err != nil {
+		if err := invocationLocation.Owner.checkWorkflowMergerCheckpointOwner(invocationLocation.Run, entry, state); err != nil {
 			return err
 		}
 
@@ -69,8 +69,8 @@ func (s *Store) RetainWorkflowMergerCheckpoint(ctx context.Context, guard Integr
 			return err
 		}
 
-		record := MergerCheckpointRecord{1, run.ID, entry.ID, entry.StateRevision, entry.ClaimGeneration, workflowMergerCandidateHash(run, entry), entry.FrozenScopeHash, state}
-		ref, err = owner.persistWorkflowMergerCheckpoint(record)
+		record := MergerCheckpointRecord{1, invocationLocation.Run.ID, entry.ID, entry.StateRevision, entry.ClaimGeneration, workflowMergerCandidateHash(invocationLocation.Run, entry), entry.FrozenScopeHash, state}
+		ref, err = invocationLocation.Owner.persistWorkflowMergerCheckpoint(record)
 
 		return err
 	})

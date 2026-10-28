@@ -131,7 +131,7 @@ func checkServiceWorkNativeAttachment(t *testing.T, operations service, run work
 	serviceWorkflowDeliveryGit(t, project, "push", provider.remote, "HEAD:refs/heads/dev")
 
 	attached, err := operations.StartAllReadyAgentWork()
-	if err != nil || attached.Workflow == nil || attached.Workflow.ID != run.ID || attached.Workflow.Selection.Target != run.Selection.Target || attached.Workflow.Status != "paused" || serviceWorkTaskAttempts(*attached.Workflow) != 1 || provider.creates != 1 {
+	if err != nil || attached.Workflow == nil || attached.Workflow.ID != run.ID || attached.Workflow.Selection.Target != run.Selection.Target || attached.Workflow.Status != workflowstate.InvocationPaused || serviceWorkTaskAttempts(*attached.Workflow) != 1 || provider.creates != 1 {
 		t.Fatal("entry replaced an unfinished target or replayed work", err)
 	}
 }

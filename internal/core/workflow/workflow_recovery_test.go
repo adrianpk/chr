@@ -28,7 +28,7 @@ func TestWorkflowRecoveryBudget(t *testing.T) {
 	}
 
 	recovered, err := store.ReconcileWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || recovered.Status != "paused" || len(recovered.Attempts) != 1 || recovered.Attempts[0].Outcome != "recovered" {
+	if err != nil || recovered.Status != workflowstate.InvocationPaused || len(recovered.Attempts) != 1 || recovered.Attempts[0].Outcome != "recovered" {
 		t.Fatalf("claim recovery: %+v, %v", recovered, err)
 	}
 
@@ -113,14 +113,14 @@ func expireWorkflowRecoveryLease(t *testing.T, store *Store, id string) {
 	t.Helper()
 
 	if err := store.withLock(t.Context(), func() error {
-		run, owner, err := store.locateWorkflowInvocation(t.Context(), id)
+		invocationLocation, err := store.locateWorkflowInvocation(t.Context(), id)
 		if err != nil {
 			return err
 		}
 
-		run.Attempts[0].LeaseUntil = run.Attempts[0].StartedAt.Add(time.Millisecond)
+		invocationLocation.Run.Attempts[0].LeaseUntil = invocationLocation.Run.Attempts[0].StartedAt.Add(time.Millisecond)
 
-		return owner.commitWorkflowState(&run)
+		return invocationLocation.Owner.commitWorkflowState(&invocationLocation.Run)
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func testWorkflowRecoveryStop(t *testing.T, index int) {
 	}
 
 	retained, err := store.ReconcileWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || retained.Status != "cancelled" || retained.Attempts[0].CheckpointRef == "" {
+	if err != nil || retained.Status != workflowstate.InvocationCancelled || retained.Attempts[0].CheckpointRef == "" {
 		t.Fatalf("stop replay: %+v, %v", retained, err)
 	}
 
@@ -175,7 +175,7 @@ func TestWorkflowProcessEdit(t *testing.T) {
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || retained.Status != "running" || retained.Cursor != 0 || retained.Attempts[0].Processes[0].State != "running" {
+	if err != nil || retained.Status != workflowstate.InvocationRunning || retained.Cursor != 0 || retained.Attempts[0].Processes[0].State != ProcessRunning {
 		t.Fatal("host overwrote the incompatible process image")
 	}
 }

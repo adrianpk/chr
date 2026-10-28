@@ -33,7 +33,7 @@ func TestWorkflowSource(t *testing.T) {
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), run.ID)
-	if err != nil || retained.Status != "waiting_integration" || len(retained.Attempts) != 1 || retained.DeliveryRef != "" {
+	if err != nil || retained.Status != workflowstate.InvocationWaitingIntegration || len(retained.Attempts) != 1 || retained.DeliveryRef != "" {
 		t.Fatal("source push fabricated completion", err)
 	}
 

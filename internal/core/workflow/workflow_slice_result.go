@@ -13,7 +13,7 @@ import (
 
 func (s *Store) finishWorkflowSliceValidation(ctx context.Context, claim *Claim, prepared workflowPreparedTask, candidate *SliceCandidate, interrupted bool) error {
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
+		claimObservation, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if err != nil {
 			return err
 		}
@@ -22,23 +22,23 @@ func (s *Store) finishWorkflowSliceValidation(ctx context.Context, claim *Claim,
 			return err
 		}
 
-		if err := checkWorkflowExecutionBinding(run, record, prepared); err != nil {
+		if err := checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared); err != nil {
 			return err
 		}
 
-		if workflowExecutionStopped(run, interrupted) {
-			return claim.store.finishStoppedWorkflowTask(run, record, claim, &candidate.Result)
+		if workflowExecutionStopped(claimObservation.Run, interrupted) {
+			return claim.store.finishStoppedWorkflowTask(claimObservation.Run, claimObservation.Record, claim, &candidate.Result)
 		}
 
-		if err := workflowAttemptQuiescent(run.Attempts[len(run.Attempts)-1]); err != nil {
+		if err := workflowAttemptQuiescent(claimObservation.Run.Attempts[len(claimObservation.Run.Attempts)-1]); err != nil {
 			return err
 		}
 
-		if err := claim.store.checkWorkflowTaskCandidate(ctx, &run, prepared, &candidate.Result); err != nil {
+		if err := claim.store.checkWorkflowTaskCandidate(ctx, &claimObservation.Run, prepared, &candidate.Result); err != nil {
 			return err
 		}
 
-		if err := claim.store.commitWorkflowSliceCandidate(run, record, *candidate); err != nil {
+		if err := claim.store.commitWorkflowSliceCandidate(claimObservation.Run, claimObservation.Record, *candidate); err != nil {
 			return err
 		}
 
@@ -60,11 +60,11 @@ func (s *Store) commitWorkflowSliceCandidate(run workflowInvocationFile, record 
 
 	run.Outcome = candidate.Result.Outcome
 	if candidate.Result.Successful {
-		attempt.Outcome, run.Status = "validated", "waiting_integration"
+		attempt.Outcome, run.Status = "validated", workflowstate.InvocationWaitingIntegration
 		run.CandidateRef, run.CandidateHash = ref, attempt.ResultHash
-		run.ResumeStatus = ""
+		run.ResumeStatus = workflowstate.InvocationUnspecified
 	} else {
-		attempt.Outcome, run.Status, run.ResumeStatus = "failed", "paused", "waiting_integration"
+		attempt.Outcome, run.Status, run.ResumeStatus = "failed", workflowstate.InvocationPaused, workflowstate.InvocationWaitingIntegration
 	}
 
 	return s.commitWorkflowClaim(run, record, workflowstate.FileChange{Path: ref, After: data})
@@ -73,17 +73,17 @@ func (s *Store) commitWorkflowSliceCandidate(run workflowInvocationFile, record 
 // ReadWorkflowSliceCandidate rechecks retained host proof and the actual lane.
 func (s *Store) ReadWorkflowSliceCandidate(ctx context.Context, id string) (candidate SliceCandidate, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		observation, readErr := owner.observeWorkflowSlice(ctx, run)
+		observation, readErr := invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
 
-		candidate, readErr = owner.readWorkflowSliceCandidate(ctx, run, observation)
+		candidate, readErr = invocationLocation.Owner.readWorkflowSliceCandidate(ctx, invocationLocation.Run, observation)
 
 		return readErr
 	})

@@ -53,7 +53,7 @@ func checkServiceWorkflowManualResult(t *testing.T, operations service, claim *w
 	}
 
 	retained, err := operations.ReadWorkflow(t.Context(), id)
-	if err != nil || retained.Status != "completed" || retained.Attempts[0].ResultRef == "" {
+	if err != nil || retained.Status != workflowstate.InvocationCompleted || retained.Attempts[0].ResultRef == "" {
 		t.Fatal("manual service lost retained evidence")
 	}
 }

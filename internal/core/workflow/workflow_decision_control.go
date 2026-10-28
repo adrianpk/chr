@@ -24,12 +24,12 @@ func (s *Store) ControlWorkflowDecision(ctx context.Context, request workflowsta
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, request.ID)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, request.ID)
 		if err != nil {
 			return err
 		}
 
-		prior, found, err := owner.readWorkflowControlReceipt(request, digest)
+		prior, found, err := invocationLocation.Owner.readWorkflowControlReceipt(request, digest)
 		if found || err != nil {
 			result = prior
 
@@ -40,18 +40,18 @@ func (s *Store) ControlWorkflowDecision(ctx context.Context, request workflowsta
 			return err
 		}
 
-		if err := owner.reserveWorkflowControlBinding(request, digest); err != nil {
+		if err := invocationLocation.Owner.reserveWorkflowControlBinding(request, digest); err != nil {
 			return err
 		}
 
-		guard, err := owner.workflowDecisionControlGuard(ctx, run, request)
+		guard, err := invocationLocation.Owner.workflowDecisionControlGuard(ctx, invocationLocation.Run, request)
 		if err != nil {
 			return err
 		}
 
-		commit := owner.newWorkflowControlCommit(request, digest, check)
+		commit := invocationLocation.Owner.newWorkflowControlCommit(request, digest, check)
 
-		if err := owner.applyWorkflowDecisionControl(ctx, run, request, guard, provider, commit); err != nil {
+		if err := invocationLocation.Owner.applyWorkflowDecisionControl(ctx, invocationLocation.Run, request, guard, provider, commit); err != nil {
 			return err
 		}
 

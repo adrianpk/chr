@@ -9,29 +9,39 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) reuseWorkflowManualResult(ctx context.Context, claim *Claim, candidate ManualCandidate) (result workflowstate.TaskResult, found bool, err error) {
+type workflowManualReplay struct {
+	Result workflowstate.TaskResult
+	Found  bool
+}
+
+func (s *Store) reuseWorkflowManualResult(ctx context.Context, claim *Claim, candidate ManualCandidate) (observed workflowManualReplay, err error) {
+	var (
+		result workflowstate.TaskResult
+		found  bool
+	)
+
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, claim.InvocationID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, claim.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		if len(run.Attempts) == 0 {
+		if len(invocationLocation.Run.Attempts) == 0 {
 			return ErrWorkflowOwned
 		}
 
-		attempt := run.Attempts[len(run.Attempts)-1]
+		attempt := invocationLocation.Run.Attempts[len(invocationLocation.Run.Attempts)-1]
 		if attempt.Outcome != "validated" {
 			return nil
 		}
 
 		found = true
 
-		if !workflowManualResultOwnerMatches(run, attempt, claim) {
+		if !workflowManualResultOwnerMatches(invocationLocation.Run, attempt, claim) {
 			return ErrWorkflowOwned
 		}
 
-		if readErr = owner.checkWorkflowInputs(ctx, run); readErr != nil {
+		if readErr = invocationLocation.Owner.checkWorkflowInputs(ctx, invocationLocation.Run); readErr != nil {
 			return readErr
 		}
 
@@ -39,7 +49,7 @@ func (s *Store) reuseWorkflowManualResult(ctx context.Context, claim *Claim, can
 			return readErr
 		}
 
-		result, readErr = owner.checkWorkflowManualProof(ctx, run, attempt, candidate)
+		result, readErr = invocationLocation.Owner.checkWorkflowManualProof(ctx, invocationLocation.Run, attempt, candidate)
 		if readErr != nil {
 			return readErr
 		}
@@ -47,7 +57,7 @@ func (s *Store) reuseWorkflowManualResult(ctx context.Context, claim *Claim, can
 		return claim.releaseReservation()
 	})
 
-	return result, found, err
+	return workflowManualReplay{Result: result, Found: found}, err
 }
 
 func (s *Store) checkWorkflowManualProof(ctx context.Context, run workflowInvocationFile, attempt Attempt, candidate ManualCandidate) (workflowstate.TaskResult, error) {
@@ -86,12 +96,12 @@ func (s *Store) checkWorkflowManualRetainedImage(ctx context.Context, attempt At
 		return err
 	}
 
-	commit, tree, err := s.workflowLaneCandidate(ctx, prepared.input.Lane)
+	laneImage, err := s.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if err != nil {
 		return err
 	}
 
-	if commit != candidate.Commit || tree != candidate.Tree {
+	if laneImage.Commit != candidate.Commit || laneImage.Tree != candidate.Tree {
 		return workflowstate.ErrConflict
 	}
 

@@ -283,7 +283,11 @@ func (runner daemonWorkflowRunner) foregroundIterations(ctx context.Context, max
 		_ = index.Close()
 	}()
 
-	ctx, finish := watchDaemonHeartbeat(ctx, runner.repository)
+	ctx, heartbeatCancel := context.WithCancel(ctx)
+
+	heartbeatWatch := watchDaemonHeartbeat(ctx, runner.repository, heartbeatCancel)
+
+	finish := heartbeatWatch.Finish
 	defer func() { err = errors.Join(err, finish()) }()
 
 	for range maxIterations {

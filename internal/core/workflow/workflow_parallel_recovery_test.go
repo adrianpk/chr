@@ -3,6 +3,8 @@ package workflow
 import (
 	"errors"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowParallelExpiredWorker keeps an expired actual process counted,
@@ -27,7 +29,7 @@ func TestWorkflowParallelExpiredWorker(t *testing.T) {
 	}
 
 	recovered, err := stores[0].ReconcileWorkflow(t.Context(), runs[0].ID)
-	if err != nil || recovered.Status != "paused" || recovered.Attempts[0].Outcome != "recovered" || recovered.Cursor != 0 {
+	if err != nil || recovered.Status != workflowstate.InvocationPaused || recovered.Attempts[0].Outcome != "recovered" || recovered.Cursor != 0 {
 		t.Fatal("unrelated live worker blocked quiescent recovery", recovered, err)
 	}
 

@@ -169,7 +169,7 @@ func (s *Store) persistWorkflowPreparation(run *workflowInvocationFile, record R
 	attempt.ResultRef, attempt.ResultHash = workflowAttemptFile(run.ID, attempt.ID, "result.json"), contenthash.Sum(data)
 	record.Task.AttemptID = ""
 
-	run.Status, run.Outcome, run.Blocker = "waiting_review", "integration_validated", nil
+	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingReview, "integration_validated", nil
 
 	run.CandidateRepair = nil
 	if run.Review != nil {

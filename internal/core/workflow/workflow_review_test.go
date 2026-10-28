@@ -99,7 +99,7 @@ func testWorkflowReviewMode(t *testing.T, mode workflowstate.ReviewMode, decisio
 	}
 
 	retained := workflowTestRead(t, store, run.ID)
-	if retained.Status != status || provider.creates != 1 || retained.CandidateRef != run.CandidateRef {
+	if string(retained.Status) != status || provider.creates != 1 || retained.CandidateRef != run.CandidateRef {
 		t.Fatal("review repeated work or crossed its policy stop")
 	}
 

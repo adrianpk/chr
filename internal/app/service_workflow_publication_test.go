@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestServiceWorkflowPublication shares the combined gate, human approval and
@@ -47,7 +48,7 @@ func TestServiceWorkflowPublicationExternal(t *testing.T) {
 	}
 
 	progress, err := operations.AdvanceWorkflowSliceIntegration(t.Context(), id, nil)
-	if err != nil || progress.Receipt == nil || progress.Invocation.Status != "cancelled" || progress.Invocation.StopIntent != "cancel" || provider.creates != 1 {
+	if err != nil || progress.Receipt == nil || progress.Invocation.Status != workflowstate.InvocationCancelled || progress.Invocation.StopIntent != "cancel" || provider.creates != 1 {
 		t.Fatal("central service did not preserve external delivery and cancellation", err)
 	}
 

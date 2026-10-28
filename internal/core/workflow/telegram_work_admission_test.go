@@ -88,9 +88,10 @@ func TestTelegramWorkAdmissionGuards(t *testing.T) {
 				t.Fatal("changed admission accepted", err)
 			}
 
-			runs, _, err := store.InspectWorkflowPage(t.Context(), 0, 10)
-			if err != nil || len(runs) != 0 {
-				t.Fatal("rejected admission retained an invocation", runs, err)
+			invocationPage, err := store.InspectWorkflowPage(t.Context(), 0, 10)
+
+			if err != nil || len(invocationPage.Invocations) != 0 {
+				t.Fatal("rejected admission retained an invocation", invocationPage.Invocations, err)
 			}
 		})
 	}

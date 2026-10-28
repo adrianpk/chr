@@ -150,13 +150,13 @@ func validTelegramLifecycleRecovery(kind string, run Invocation) bool {
 	case "pause", "cancel":
 		valid = run.StopIntent == kind && run.Status == workflowstate.StopStatus(kind)
 	case "resume":
-		valid = run.StopIntent == "" && run.Status == "pending"
+		valid = run.StopIntent == "" && run.Status == workflowstate.InvocationPending
 	case "submitted", "unprojected":
-		valid = run.StopIntent == "pause" && run.Status != "paused"
+		valid = run.StopIntent == "pause" && run.Status != workflowstate.InvocationPaused
 	case "continue", "recovered", "closing":
 		valid = validTelegramLifecycleCheckpoint(kind, run)
 	case "reconcile":
-		valid = run.Status == "pending" && len(run.Attempts) == 0
+		valid = run.Status == workflowstate.InvocationPending && len(run.Attempts) == 0
 	}
 
 	return valid

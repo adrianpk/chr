@@ -41,7 +41,7 @@ func TestServiceWorkflowTask(t *testing.T) {
 	}
 
 	retained, err := operations.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || retained.Status != "completed" || retained.Attempts[0].ResultRef == "" {
+	if err != nil || retained.Status != workflowstate.InvocationCompleted || retained.Attempts[0].ResultRef == "" {
 		t.Fatal("service did not retain task evidence")
 	}
 }

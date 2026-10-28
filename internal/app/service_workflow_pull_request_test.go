@@ -65,7 +65,7 @@ func TestServiceWorkflowSlicePR(t *testing.T) {
 	}
 
 	retained, err := operations.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || retained.Status != "waiting_review" || provider.creates != 1 || retained.PullRequest.URL != provider.pr.URL {
+	if err != nil || retained.Status != workflowstate.InvocationWaitingReview || provider.creates != 1 || retained.PullRequest.URL != provider.pr.URL {
 		t.Fatal("service did not share durable canonical PR state")
 	}
 }

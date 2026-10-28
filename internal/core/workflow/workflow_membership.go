@@ -16,14 +16,14 @@ import (
 // In loose scope it also reselects inactive admissions using current metadata.
 func (s *Store) ReconcileWorkflowMembership(ctx context.Context, id string) (result Invocation, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		result = run.Invocation
-		run, readErr = owner.reconcileWorkflowMembership(ctx, run)
-		result = run.Invocation
+		result = invocationLocation.Run.Invocation
+		invocationLocation.Run, readErr = invocationLocation.Owner.reconcileWorkflowMembership(ctx, invocationLocation.Run)
+		result = invocationLocation.Run.Invocation
 
 		return readErr
 	})
@@ -61,7 +61,7 @@ func (s *Store) reconcileWorkflowMembership(ctx context.Context, run workflowInv
 }
 
 func workflowMembershipDormant(run workflowInvocationFile) bool {
-	return workflowInvocationTerminal(run.Status) || run.StopIntent != "" || run.Status == "paused" || slices.Contains([]string{"ticket", "loose"}, run.Selection.Selector.Extent)
+	return workflowInvocationTerminal(run.Status) || run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || slices.Contains([]string{"ticket", "loose"}, run.Selection.Selector.Extent)
 }
 
 func (s *Store) retainWorkflowLaterMembers(ctx context.Context, run workflowInvocationFile, selection workflowSelection) (workflowInvocationFile, error) {

@@ -38,7 +38,7 @@ func TestWorkflowLooseDelivery(t *testing.T) {
 func checkWorkflowLooseCompletion(t *testing.T, run Invocation, creates int) {
 	t.Helper()
 
-	if run.Status != "completed" || run.Outcome != "loose_exhausted" || run.Cursor != 3 || run.ConfirmedCursor != 3 || len(run.Deliveries) != 3 || creates != 3 {
+	if run.Status != workflowstate.InvocationCompleted || run.Outcome != "loose_exhausted" || run.Cursor != 3 || run.ConfirmedCursor != 3 || len(run.Deliveries) != 3 || creates != 3 {
 		t.Fatal("queue did not exhaust after three distinct verified deliveries")
 	}
 }
@@ -104,7 +104,7 @@ func TestWorkflowLooseExhaustion(t *testing.T) {
 	workflowAdvanceFrontier(t, f)
 
 	run, err := f.store.ReconcileWorkflowMembership(t.Context(), f.run.ID)
-	if err != nil || run.Status != "completed" || run.Cursor != 1 || run.ConfirmedCursor != 1 || len(run.Members) != 3 || len(run.LooseQueue.Excluded) != 2 || len(run.Deliveries) != 1 {
+	if err != nil || run.Status != workflowstate.InvocationCompleted || run.Cursor != 1 || run.ConfirmedCursor != 1 || len(run.Members) != 3 || len(run.LooseQueue.Excluded) != 2 || len(run.Deliveries) != 1 {
 		t.Fatal("excluded work was hidden or counted as delivery", err)
 	}
 }

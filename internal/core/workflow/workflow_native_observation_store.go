@@ -9,12 +9,12 @@ import (
 
 func (s *Store) workflowNativeObservationBinding(ctx context.Context, submission workflowstate.Submission, request GitPublication) (binding NativePublicationBinding, err error) {
 	err = s.withLock(ctx, func() error {
-		_, owner, err := s.locateWorkflowInvocation(ctx, submission.InvocationID)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, submission.InvocationID)
 		if err != nil {
 			return err
 		}
 
-		return owner.readWorkflowNativeObservationBinding(submission, request, &binding)
+		return invocationLocation.Owner.readWorkflowNativeObservationBinding(submission, request, &binding)
 	})
 
 	return binding, err
@@ -62,28 +62,28 @@ func (s *Store) readWorkflowNativeObservationBinding(submission workflowstate.Su
 func (s *Store) retainWorkflowNativeCanonicalObservation(ctx context.Context, update NativeSubmissionUpdate, expected workflowstate.Submission, observation NativePublicationObservation) (submission workflowstate.Submission, next IntegrationBudgetGuard, err error) {
 	submission = expected
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, update.InvocationID)
+		invocationLocation2, err := s.locateWorkflowInvocation(ctx, update.InvocationID)
 		if err != nil {
 			return err
 		}
 
-		if err := owner.checkWorkflowNativeCanonicalCallback(ctx, run, update); err != nil {
+		if err := invocationLocation2.Owner.checkWorkflowNativeCanonicalCallback(ctx, invocationLocation2.Run, update); err != nil {
 			return err
 		}
 
-		submission, err = owner.recordWorkflowNativeCanonicalObservation(ctx, run, update, expected, observation)
+		submission, err = invocationLocation2.Owner.recordWorkflowNativeCanonicalObservation(ctx, invocationLocation2.Run, update, expected, observation)
 		if err != nil {
 			return err
 		}
 
-		run, err = owner.readWorkflowInvocation(run.ID)
+		invocationLocation2.Run, err = invocationLocation2.Owner.readWorkflowInvocation(invocationLocation2.Run.ID)
 		if err != nil {
 			return err
 		}
 
-		entry, err := owner.readWorkflowIntegrationEntry(run, *run.Integration)
+		entry, err := invocationLocation2.Owner.readWorkflowIntegrationEntry(invocationLocation2.Run, *invocationLocation2.Run.Integration)
 		if err == nil {
-			next = IntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, BudgetRevision: run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
+			next = IntegrationBudgetGuard{InvocationID: invocationLocation2.Run.ID, InvocationRevision: invocationLocation2.Run.Revision, BudgetRevision: invocationLocation2.Run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
 		}
 
 		return err

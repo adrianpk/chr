@@ -178,7 +178,7 @@ func checkNativeScheduleReceiptBarrier(t *testing.T, store *Store, hierarchy Mat
 	before := workflowTestRead(t, store, id)
 
 	page := nativeSchedulePage(t, store, IntegrationScheduleQuery{Limit: 10})
-	if len(page.Items) != 0 || before.Cursor != 3 || before.ConfirmedCursor != 0 || before.Status != "waiting_integration" {
+	if len(page.Items) != 0 || before.Cursor != 3 || before.ConfirmedCursor != 0 || before.Status != workflowstate.InvocationWaitingIntegration {
 		t.Fatal("unreceipted slice exposed a later task", page)
 	}
 

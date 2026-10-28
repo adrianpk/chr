@@ -84,7 +84,7 @@ func checkTelegramControlOutcome(t *testing.T, action string, run workflowcore.I
 		"reconcile": {status: "pending"},
 	}[action]
 
-	if want.status != "" && run.Status != want.status || run.StopIntent != want.stop || run.Cursor != want.cursor || run.ConfirmedCursor != 0 || len(run.Attempts) != want.attempts {
+	if want.status != "" && string(run.Status) != want.status || run.StopIntent != want.stop || run.Cursor != want.cursor || run.ConfirmedCursor != 0 || len(run.Attempts) != want.attempts {
 		t.Fatal("control changed stop intent, ownership or the bounded checkpoint", action, run)
 	}
 }

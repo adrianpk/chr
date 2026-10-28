@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestGuidedUseCaseRecoveryProcess fences a real dead child owner on startup,
@@ -82,7 +83,7 @@ func TestGuidedUseCaseRecoveryShutdown(t *testing.T) {
 	old.close()
 
 	interrupted := assertGuidedNativeAdmission(t, operations, session)
-	if interrupted.Status != "paused" || interrupted.StopIntent != "" || interrupted.Outcome != "interrupted" {
+	if interrupted.Status != workflowstate.InvocationPaused || interrupted.StopIntent != "" || interrupted.Outcome != "interrupted" {
 		t.Fatal("shutdown did not retain a quiescent interrupted checkpoint", interrupted.Status, interrupted.Outcome)
 	}
 

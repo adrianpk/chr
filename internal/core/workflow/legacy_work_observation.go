@@ -22,14 +22,14 @@ func ReadLegacyWorkQueue(ctx context.Context, layout opscore.Layout, projectID s
 		return result, err
 	}
 
-	tickets, excluded, err := FilterLegacyWorkTickets(ctx, result.Tickets)
+	legacySelection, err := FilterLegacyWorkTickets(ctx, result.Tickets)
 	if err != nil {
 		return result, err
 	}
 
-	result.Excluded = excluded
+	result.Excluded = legacySelection.Excluded
 
-	for _, ticket := range tickets {
+	for _, ticket := range legacySelection.Tickets {
 		if ticket.Status == ticketcore.StatusReadyForDev {
 			result.Eligible = append(result.Eligible, ticket)
 		}

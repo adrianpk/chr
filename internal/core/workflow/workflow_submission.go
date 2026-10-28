@@ -53,7 +53,9 @@ func (s *Store) SubmitWorkflowSliceIntegration(ctx context.Context, id string, p
 		return submission, err
 	}
 
-	watched, stop := s.watchWorkflowStop(ctx, &Claim{InvocationID: id})
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: &Claim{InvocationID: id}, Cancel: stop})
 	defer stop()
 
 	response, submitErr := provider.SubmitWorkflowIntegration(watched, submission)
@@ -95,12 +97,12 @@ func (s *Store) ReconcileWorkflowSubmission(ctx context.Context, id string, prov
 // intent that survived a crash before its invocation projection was updated.
 func (s *Store) ReadWorkflowSubmission(ctx context.Context, id string) (submission workflowstate.Submission, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		journal, readErr := owner.readWorkflowSubmissionJournal(ctx, run)
+		journal, readErr := invocationLocation.Owner.readWorkflowSubmissionJournal(ctx, invocationLocation.Run)
 		if readErr == nil {
 			submission = journal.Attempts[len(journal.Attempts)-1]
 		}

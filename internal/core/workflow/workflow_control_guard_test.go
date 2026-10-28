@@ -82,8 +82,9 @@ func testWorkflowGuardedAdmission(t *testing.T, name string) {
 		t.Fatal("stale selected ticket was admitted", err)
 	}
 
-	page, _, err := store.InspectWorkflowPage(t.Context(), 0, 8)
-	if err != nil || len(page) != 0 {
+	invocationPage, err := store.InspectWorkflowPage(t.Context(), 0, 8)
+
+	if err != nil || len(invocationPage.Invocations) != 0 {
 		t.Fatal("rejected admission retained authorization", err)
 	}
 

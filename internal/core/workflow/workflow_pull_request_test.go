@@ -218,7 +218,7 @@ func checkWorkflowPRBinding(t *testing.T, store *Store, hierarchy Materializatio
 	t.Helper()
 
 	run, err := store.ReadWorkflow(t.Context(), id)
-	if err != nil || run.Status != "waiting_review" || run.PullRequest.URL != pr.URL || run.PullRequest.ObservationCount != 1 || len(run.Attempts) != 4 {
+	if err != nil || run.Status != workflowstate.InvocationWaitingReview || run.PullRequest.URL != pr.URL || run.PullRequest.ObservationCount != 1 || len(run.Attempts) != 4 {
 		t.Fatalf("PR binding: %+v, %v", run, err)
 	}
 
@@ -307,7 +307,7 @@ func assertWorkflowPRBlocked(t *testing.T, store *Store, id string, provider *wo
 	}
 
 	run, err := store.ReadWorkflow(t.Context(), id)
-	if err != nil || run.Status != "blocked" || run.PullRequest.State != "blocked" || run.PullRequest.ObservationRef == "" || run.Blocker == nil {
+	if err != nil || run.Status != workflowstate.InvocationBlocked || run.PullRequest.State != "blocked" || run.PullRequest.ObservationRef == "" || run.Blocker == nil {
 		t.Fatal("PR blocker or observation was not durable")
 	}
 
@@ -419,7 +419,7 @@ func TestWorkflowSlicePRSource(t *testing.T) {
 	workflowPREnsure(t, store, run.ID, provider)
 
 	retained, err := store.ReadWorkflow(t.Context(), run.ID)
-	if err != nil || retained.Status != "waiting_integration" {
+	if err != nil || retained.Status != workflowstate.InvocationWaitingIntegration {
 		t.Fatal("provider merge observation skipped delivery verification")
 	}
 

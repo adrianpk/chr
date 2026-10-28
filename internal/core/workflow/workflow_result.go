@@ -40,12 +40,12 @@ func (s *Store) InspectWorkflowResult(ctx context.Context, id string) (result Re
 	defer cancel()
 
 	err = s.withWorkflowInspection(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		result, err = owner.workflowResult(ctx, run)
+		result, err = invocationLocation.Owner.workflowResult(ctx, invocationLocation.Run)
 
 		return err
 	})
@@ -139,7 +139,7 @@ func workflowResultComplete(run workflowInvocationFile, cursor int) bool {
 		return false
 	}
 
-	if run.Status != "completed" || run.StopIntent != "" || cursor != len(run.Members) || run.ConfirmedCursor != cursor || run.Cursor != cursor {
+	if run.Status != workflowstate.InvocationCompleted || run.StopIntent != "" || cursor != len(run.Members) || run.ConfirmedCursor != cursor || run.Cursor != cursor {
 		return false
 	}
 

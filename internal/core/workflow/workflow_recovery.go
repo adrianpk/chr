@@ -21,12 +21,12 @@ func (s *Store) ReconcileWorkflow(ctx context.Context, id string, expected ...ui
 
 func (s *Store) reconcileWorkflowChecked(ctx context.Context, id string, check AdmissionCheck, expected ...uint64) (result Invocation, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		if err := checkWorkflowRevision(run.Invocation, expected); err != nil {
+		if err := checkWorkflowRevision(invocationLocation.Run.Invocation, expected); err != nil {
 			return err
 		}
 
@@ -34,11 +34,11 @@ func (s *Store) reconcileWorkflowChecked(ctx context.Context, id string, check A
 			return err
 		}
 
-		if readErr = owner.reconcileWorkflowInvocation(ctx, run, nil); readErr != nil {
+		if readErr = invocationLocation.Owner.reconcileWorkflowInvocation(ctx, invocationLocation.Run, nil); readErr != nil {
 			return readErr
 		}
 
-		updated, readErr := owner.readWorkflowInvocation(run.ID)
+		updated, readErr := invocationLocation.Owner.readWorkflowInvocation(invocationLocation.Run.ID)
 		result = updated.Invocation
 
 		return readErr
@@ -127,7 +127,7 @@ func (s *Store) reconcileWorkflowOwner(ctx context.Context, run workflowInvocati
 		return err
 	}
 
-	if run.Status == "running" {
+	if run.Status == workflowstate.InvocationRunning {
 		if err := s.recoverWorkflowAttempt(ctx, run, attempt, control); err != nil {
 			return err
 		}
@@ -139,7 +139,7 @@ func (s *Store) reconcileWorkflowOwner(ctx context.Context, run workflowInvocati
 }
 
 func (s *Store) checkRecoverableWorkflow(ctx context.Context, run workflowInvocationFile, attempt Attempt) error {
-	if run.Status != "running" {
+	if run.Status != workflowstate.InvocationRunning {
 		return nil
 	}
 

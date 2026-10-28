@@ -152,9 +152,10 @@ func checkWorkflowConfigRetry(t *testing.T, store *Store, request StartRequest, 
 	t.Helper()
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "workflow:\n  version: 1\nwork:\n  max_worker_attempts: 1\n  worker_timeout_seconds: 120\n")
 
-	entry, found, err := store.FindWorkflowEntry(t.Context(), request)
-	if err != nil || !found || entry.Policy != policy {
-		t.Fatal("entry lookup replaced frozen project policy", entry, err)
+	entryLookup, err := store.FindWorkflowEntry(t.Context(), request)
+
+	if err != nil || !entryLookup.Found || entryLookup.Invocation.Policy != policy {
+		t.Fatal("entry lookup replaced frozen project policy", entryLookup.Invocation, err)
 	}
 
 	retry, err := store.StartWorkflow(t.Context(), request)

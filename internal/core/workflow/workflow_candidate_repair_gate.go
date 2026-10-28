@@ -6,6 +6,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowCandidateRepairGit struct {
+	Proof    workflowstate.IntegrationProof
+	Evidence []workflowstate.EvidenceRef
+}
+
 func (s *Store) resumeWorkflowCandidateRepairGate(ctx context.Context, run *workflowInvocationFile, source workflowstate.ReviewInput) error {
 	if run.Integration == nil {
 		return nil
@@ -60,21 +65,21 @@ func workflowMergerRepairSourceMatches(source workflowstate.ReviewInput, proof w
 	return source.PullRequest.HeadCommit == proof.SourceCommit && source.TargetCommit == proof.BaseCommit && source.Policy.Method == proof.Method && source.PullRequest.Repository == proof.Repository && source.PullRequest.BaseBranch == proof.TargetBranch
 }
 
-func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query PreparationQuery) (workflowstate.IntegrationProof, []workflowstate.EvidenceRef, error) {
+func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workflowInvocationFile, git PreparationGit, query PreparationQuery) (workflowCandidateRepairGit, error) {
 	state, refs, err := s.acceptedWorkflowCandidateRepair(run)
 	if err != nil {
-		return workflowstate.IntegrationProof{}, nil, err
+		return workflowCandidateRepairGit{Proof: workflowstate.IntegrationProof{}, Evidence: nil}, err
 	}
 
 	if state == nil {
 		proof, err := git.PrepareWorkflowIntegration(ctx, query)
 
-		return proof, nil, err
+		return workflowCandidateRepairGit{Proof: proof, Evidence: nil}, err
 	}
 
 	repaired, ok := git.(RepairedPreparationGit)
 	if !ok {
-		return workflowstate.IntegrationProof{}, nil, workflowstate.ErrConflict
+		return workflowCandidateRepairGit{Proof: workflowstate.IntegrationProof{}, Evidence: nil}, workflowstate.ErrConflict
 	}
 
 	proof, err := repaired.PrepareWorkflowRepairedIntegration(ctx, query, *state)
@@ -82,5 +87,5 @@ func (s *Store) prepareWorkflowCandidateRepairGit(ctx context.Context, run workf
 		err = workflowstate.ErrConflict
 	}
 
-	return proof, refs, err
+	return workflowCandidateRepairGit{Proof: proof, Evidence: refs}, err
 }

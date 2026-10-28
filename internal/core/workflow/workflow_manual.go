@@ -51,7 +51,9 @@ func (s *Store) ExecuteWorkflowManualTask(ctx context.Context, claim *Claim) (wo
 		return workflowstate.CommandResult{}, err
 	}
 
-	watched, stop := s.watchWorkflowStop(ctx, claim)
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	workerContext, cancel := context.WithDeadline(watched, prepared.leaseUntil)
@@ -93,8 +95,12 @@ func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candida
 		return workflowstate.TaskResult{}, err
 	}
 
-	if result, found, err := s.reuseWorkflowManualResult(ctx, claim, candidate); found || err != nil {
-		return result, err
+	{
+		manualReplay, err := s.reuseWorkflowManualResult(ctx, claim, candidate)
+
+		if manualReplay.Found || err != nil {
+			return manualReplay.Result, err
+		}
 	}
 
 	prepared, err := s.loadWorkflowManualTask(ctx, claim, false)
@@ -106,7 +112,9 @@ func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candida
 		return workflowstate.TaskResult{}, err
 	}
 
-	watched, stop := s.watchWorkflowStop(ctx, claim)
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	validationContext, cancel := context.WithDeadline(watched, prepared.leaseUntil)

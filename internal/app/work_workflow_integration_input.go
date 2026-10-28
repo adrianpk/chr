@@ -34,8 +34,8 @@ func workflowIntegrationControlFields(action string, fields map[string]string) (
 	}
 }
 
-func workflowIntegrationGuardFields(fields map[string]string) (WorkflowIntegrationControlGuard, error) {
-	guard := WorkflowIntegrationControlGuard{EntryID: fields["entry_id"], CandidateHash: fields["candidate_hash"]}
+func workflowIntegrationGuardFields(fields map[string]string) (workflowstate.ControlIntegrationGuard, error) {
+	guard := workflowstate.ControlIntegrationGuard{EntryID: fields["entry_id"], CandidateHash: fields["candidate_hash"]}
 
 	budget, err := workflowIntegrationRevision(fields["budget_revision"], false)
 	if err != nil {

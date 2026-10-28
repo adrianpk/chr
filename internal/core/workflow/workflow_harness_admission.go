@@ -10,6 +10,11 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
+type workflowHarnessRequestLookup struct {
+	Request StartRequest
+	Found   bool
+}
+
 // HarnessResolution binds the prepared host command to its semantic identity.
 // This transient outcome does not change retained admission or invocation records.
 type HarnessResolution struct {
@@ -22,9 +27,10 @@ type HarnessResolution struct {
 type HarnessResolver func(context.Context, workspaceconfig.Config) (HarnessResolution, error)
 
 func (s *Store) resolveWorkflowHarnessRequest(ctx context.Context, request StartRequest) (StartRequest, error) {
-	retained, found, err := s.retainedWorkflowHarnessRequest(ctx, request)
-	if err != nil || found {
-		return retained, err
+	harnessRequest, err := s.retainedWorkflowHarnessRequest(ctx, request)
+
+	if err != nil || harnessRequest.Found {
+		return harnessRequest.Request, err
 	}
 
 	config, err := workspaceconfig.Load(s.layout.ProjectDir())
@@ -52,21 +58,21 @@ func (s *Store) resolveWorkflowHarnessRequest(ctx context.Context, request Start
 	return request, harnesshost.CheckExecutable(request.HarnessBinding, request.HarnessCommand)
 }
 
-func (s *Store) retainedWorkflowHarnessRequest(ctx context.Context, request StartRequest) (StartRequest, bool, error) {
+func (s *Store) retainedWorkflowHarnessRequest(ctx context.Context, request StartRequest) (workflowHarnessRequestLookup, error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
-		return request, false, err
+		return workflowHarnessRequestLookup{Request: request, Found: false}, err
 	}
 
 	for _, run := range runs {
 		if run.Namespace == s.layout.Namespace() && slices.Contains(run.RequestKeys, request.RequestKey) {
 			retained, err := retainWorkflowHarnessRequest(request, run)
 
-			return retained, true, err
+			return workflowHarnessRequestLookup{Request: retained, Found: true}, err
 		}
 	}
 
-	return request, false, nil
+	return workflowHarnessRequestLookup{Request: request, Found: false}, nil
 }
 
 func retainWorkflowHarnessRequest(request StartRequest, run workflowInvocationFile) (StartRequest, error) {
@@ -117,16 +123,16 @@ func checkCurrentWorkflowHarness(config workspaceconfig.Config, request StartReq
 // binding returns nil so the explicit historical v1 execution path stays intact.
 func (s *Store) WorkflowHarnessWorker(ctx context.Context, id string) (command []string, err error) {
 	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
-		run, _, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		if readErr := harnesshost.CheckExecutable(run.HarnessBinding, run.HarnessCommand); readErr != nil {
+		if readErr := harnesshost.CheckExecutable(invocationLocation.Run.HarnessBinding, invocationLocation.Run.HarnessCommand); readErr != nil {
 			return readErr
 		}
 
-		command = slices.Clone(run.HarnessCommand)
+		command = slices.Clone(invocationLocation.Run.HarnessCommand)
 
 		return nil
 	})

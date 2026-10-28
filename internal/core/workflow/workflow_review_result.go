@@ -11,7 +11,7 @@ import (
 
 func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared workflowPreparedTask, provider PullRequestProvider, decision workflowstate.ReviewDecision, executionErr error, interrupted bool) (result workflowstate.ReviewBinding, err error) {
 	err = s.withLock(ctx, func() error {
-		run, record, readErr := s.checkWorkflowCredential(ctx, claim, false)
+		claimObservation, readErr := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if readErr != nil {
 			return readErr
 		}
@@ -21,17 +21,17 @@ func (s *Store) finishWorkflowReview(ctx context.Context, claim *Claim, prepared
 			return readErr
 		}
 
-		if readErr = checkWorkflowExecutionBinding(run, record, prepared); readErr != nil {
+		if readErr = checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared); readErr != nil {
 			return readErr
 		}
 
-		if workflowExecutionStopped(run, interrupted) {
-			readErr = owner.finishStoppedWorkflowTask(run, record, claim, &workflowstate.TaskResult{})
+		if workflowExecutionStopped(claimObservation.Run, interrupted) {
+			readErr = owner.finishStoppedWorkflowTask(claimObservation.Run, claimObservation.Record, claim, &workflowstate.TaskResult{})
 
 			return errors.Join(executionErr, ErrWorkflowStop, readErr)
 		}
 
-		result, readErr = owner.acceptWorkflowReview(ctx, claim, run, record, provider, decision, executionErr)
+		result, readErr = owner.acceptWorkflowReview(ctx, claim, claimObservation.Run, claimObservation.Record, provider, decision, executionErr)
 
 		return readErr
 	})

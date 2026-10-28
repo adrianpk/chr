@@ -30,7 +30,9 @@ func (s *Store) executeWorkflowTask(ctx context.Context, claim *Claim, worker []
 		return workflowstate.TaskResult{}, err
 	}
 
-	watched, stop := s.watchWorkflowStop(ctx, claim)
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	result, executionErr := s.runWorkflowTask(watched, claim, prepared)

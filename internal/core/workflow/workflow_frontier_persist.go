@@ -24,11 +24,11 @@ func (s *Store) commitWorkflowFrontier(run *workflowInvocationFile, target workf
 	run.ConfirmedCursor = run.Cursor
 	clearWorkflowSliceBindings(run)
 
-	run.Status, run.Outcome, run.ResumeStatus, run.Blocker = "pending", "slice_integrated", "", nil
+	run.Status, run.Outcome, run.ResumeStatus, run.Blocker = workflowstate.InvocationPending, "slice_integrated", workflowstate.InvocationUnspecified, nil
 	if run.Selection.Selector.Extent == "loose" {
 		run.Outcome = "ticket_integrated"
 	} else if run.Cursor == len(run.Members) || run.Members[run.Cursor].Admission.SetID != delivery.SetID {
-		run.Status, run.Outcome = "waiting_integration", "set_closure_required"
+		run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "set_closure_required"
 	}
 
 	return s.commitWorkflowPullRequestFiles(run, nil, workflowstate.FileChange{Path: delivery.EvidenceRef, After: data})

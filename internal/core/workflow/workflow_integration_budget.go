@@ -120,16 +120,16 @@ type TokenSettlement struct {
 // ReadWorkflowIntegrationBudget reads retained accounting without resetting it.
 func (s *Store) ReadWorkflowIntegrationBudget(ctx context.Context, id string) (budget IntegrationBudget, err error) {
 	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
-		run, owner, readErr := s.locateWorkflowInvocationPrepared(ctx, id, (*Store).requireNoWorkflowTransition)
+		invocationLocation, readErr := s.locateWorkflowInvocationPrepared(ctx, id, (*Store).requireNoWorkflowTransition)
 		if readErr != nil {
 			return readErr
 		}
 
-		if recordErr := owner.checkWorkflowIntegrationRetainedRecords(ctx, run); recordErr != nil {
+		if recordErr := invocationLocation.Owner.checkWorkflowIntegrationRetainedRecords(ctx, invocationLocation.Run); recordErr != nil {
 			return recordErr
 		}
 
-		budget, readErr = owner.readWorkflowIntegrationBudget(run)
+		budget, readErr = invocationLocation.Owner.readWorkflowIntegrationBudget(invocationLocation.Run)
 
 		return readErr
 	})
@@ -140,12 +140,12 @@ func (s *Store) ReadWorkflowIntegrationBudget(ctx context.Context, id string) (b
 // ReserveWorkflowIntegration durably charges a call or action exactly once.
 func (s *Store) ReserveWorkflowIntegration(ctx context.Context, request IntegrationReserve) (budget IntegrationBudget, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation2, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		budget, readErr = owner.reserveWorkflowIntegration(ctx, run, request)
+		budget, readErr = invocationLocation2.Owner.reserveWorkflowIntegration(ctx, invocationLocation2.Run, request)
 
 		return readErr
 	})
@@ -156,12 +156,12 @@ func (s *Store) ReserveWorkflowIntegration(ctx context.Context, request Integrat
 // SettleWorkflowIntegration never releases possibly launched or unknown calls.
 func (s *Store) SettleWorkflowIntegration(ctx context.Context, request IntegrationSettlement) (budget IntegrationBudget, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation3, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		budget, readErr = owner.settleWorkflowIntegration(ctx, run, request)
+		budget, readErr = invocationLocation3.Owner.settleWorkflowIntegration(ctx, invocationLocation3.Run, request)
 
 		return readErr
 	})

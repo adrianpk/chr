@@ -23,7 +23,7 @@ func TestWorkflowTaskRetry(t *testing.T) {
 	}
 
 	retry := workflowTestStart(t, store, request)
-	if !retry.Attached || retry.Invocation.Status != "paused" || len(retry.Invocation.Attempts) != 1 {
+	if !retry.Attached || retry.Invocation.Status != workflowstate.InvocationPaused || len(retry.Invocation.Attempts) != 1 {
 		t.Fatal("retry reset consumed attempts")
 	}
 
@@ -72,7 +72,7 @@ func TestWorkflowTaskLinked(t *testing.T) {
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || retained.Status != "completed" || retained.Lane.Worktree == dir {
+	if err != nil || retained.Status != workflowstate.InvocationCompleted || retained.Lane.Worktree == dir {
 		t.Fatal("alias forked durable execution ownership")
 	}
 }
@@ -109,7 +109,7 @@ func TestWorkflowTaskJournal(t *testing.T) {
 	claim.store.afterReplace = nil
 
 	retry := workflowTestStart(t, store, request)
-	if !retry.Attached || retry.Invocation.Status != "completed" || len(retry.Invocation.Attempts) != 1 {
+	if !retry.Attached || retry.Invocation.Status != workflowstate.InvocationCompleted || len(retry.Invocation.Attempts) != 1 {
 		t.Fatal("partial result replay reran or lost the task")
 	}
 

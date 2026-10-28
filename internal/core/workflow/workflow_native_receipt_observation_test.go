@@ -170,7 +170,7 @@ func TestNativeReceiptFrontier(t *testing.T) {
 	}
 
 	read := workflowTestRead(t, f.store, advanced.ID)
-	if read.PreparationCount != 1 || read.ReviewCount != 1 || read.Status != "pending" {
+	if read.PreparationCount != 1 || read.ReviewCount != 1 || read.Status != workflowstate.InvocationPending {
 		t.Fatal("frontier reset consumed role counters or lost its retained unit")
 	}
 }
@@ -187,7 +187,7 @@ func TestNativeReceiptFrontierBlock(t *testing.T) {
 	ports := nativeReceiptFrontierPorts(t, fixture, b.ValidatedBase)
 
 	blocked, err := f.store.AdvanceWorkflowFrontier(t.Context(), f.entry.InvocationID, ports)
-	if !errors.Is(err, ErrWorkflowHistoryDivergence) || blocked.Status != "blocked" || blocked.Blocker == nil || len(blocked.Deliveries) != 0 {
+	if !errors.Is(err, ErrWorkflowHistoryDivergence) || blocked.Status != workflowstate.InvocationBlocked || blocked.Blocker == nil || len(blocked.Deliveries) != 0 {
 		t.Fatal("frontier hid or bypassed removed delivery history", err)
 	}
 

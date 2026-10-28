@@ -12,6 +12,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowLaneImage struct {
+	Commit string
+	Tree   string
+}
+
 func workflowTaskUnit(record Record) workflowstate.Ref {
 	if record.Task.SliceID != "" {
 		return workflowstate.Ref{Kind: "slice", ID: record.Task.SliceID}
@@ -127,38 +132,39 @@ func (s *Store) ensureWorkflowLane(ctx context.Context, lane workflowstate.Lane)
 }
 
 func (s *Store) observeWorkflowLane(ctx context.Context, lane workflowstate.Lane) (string, error) {
-	commit, tree, err := s.workflowLaneCandidate(ctx, lane)
-	if err == nil && commit != lane.HeadCommit {
+	laneImage, err := s.workflowLaneCandidate(ctx, lane)
+
+	if err == nil && laneImage.Commit != lane.HeadCommit {
 		err = fmt.Errorf("%w: retained lane moved without a checkpoint", workflowstate.ErrConflict)
 	}
 
-	return tree, err
+	return laneImage.Tree, err
 }
 
-func (s *Store) workflowLaneCandidate(ctx context.Context, lane workflowstate.Lane) (string, string, error) {
+func (s *Store) workflowLaneCandidate(ctx context.Context, lane workflowstate.Lane) (workflowLaneImage, error) {
 	if err := s.checkWorkflowLaneRegistration(ctx, lane); err != nil {
-		return "", "", err
+		return workflowLaneImage{Commit: "", Tree: ""}, err
 	}
 
 	status, err := (executioncore.OSWorktreeGit{}).WorktreeStatus(ctx, lane.Worktree)
 	if err != nil || len(status) != 0 {
-		return "", "", fmt.Errorf("workflow lane must be clean: %w", errorsOrConflict(err))
+		return workflowLaneImage{Commit: "", Tree: ""}, fmt.Errorf("workflow lane must be clean: %w", errorsOrConflict(err))
 	}
 
 	reader := workflowProofReader{store: s}
 
 	commit, err := (executioncore.OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{commit}")
 	if err != nil || !reader.isAncestor(ctx, lane.HeadCommit, commit) {
-		return "", "", fmt.Errorf("%w: lane history does not descend from its accepted head", workflowstate.ErrConflict)
+		return workflowLaneImage{Commit: "", Tree: ""}, fmt.Errorf("%w: lane history does not descend from its accepted head", workflowstate.ErrConflict)
 	}
 
 	if err := s.checkWorkflowCoordinatorTarget(ctx, workflowstate.PreviewTarget{Commit: commit}); err != nil {
-		return "", "", err
+		return workflowLaneImage{Commit: "", Tree: ""}, err
 	}
 
 	tree, err := (executioncore.OSWorktreeGit{}).ResolveRef(ctx, lane.Worktree, "HEAD^{tree}")
 
-	return commit, tree, err
+	return workflowLaneImage{Commit: commit, Tree: tree}, err
 }
 
 func errorsOrConflict(err error) error {

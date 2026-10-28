@@ -135,7 +135,7 @@ func freezeWorkflowMergerRequest(request MergerRequest) (MergerRequest, error) {
 }
 
 func workflowMergerRunnable(run workflowInvocationFile, entry IntegrationEntry) bool {
-	return run.StopIntent == "" && entry.StopIntent == "" && entry.State == "merging" && slices.Contains([]string{"waiting_integration", "waiting_review"}, run.Status)
+	return run.StopIntent == "" && entry.StopIntent == "" && entry.State == "merging" && slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingIntegration, workflowstate.InvocationWaitingReview}, run.Status)
 }
 
 func (s *Store) workflowCandidateRepairSeed(ctx context.Context, run workflowInvocationFile) (string, error) {

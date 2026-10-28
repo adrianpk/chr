@@ -7,10 +7,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// WorkflowIntegrationControlGuard contains displayed revisions and candidate
-// identity. The service derives the private claim fence from retained ownership.
-type WorkflowIntegrationControlGuard = workflowstate.ControlIntegrationGuard
-
 func (s service) executeWorkflowIntegrationControl(ctx context.Context, request WorkflowControlRequest) error {
 	guard, err := s.workflowIntegrationControlGuard(ctx, request)
 	if err != nil {
@@ -65,6 +61,6 @@ func (s service) workflowIntegrationControlGuard(ctx context.Context, request Wo
 	return guard, nil
 }
 
-func workflowIntegrationDisplayedGuardMatches(expected WorkflowIntegrationControlGuard, shown WorkflowIntegrationStatus) bool {
+func workflowIntegrationDisplayedGuardMatches(expected workflowstate.ControlIntegrationGuard, shown WorkflowIntegrationStatus) bool {
 	return expected.EntryID == shown.EntryID && expected.EntryRevision == shown.EntryRevision && expected.BudgetRevision == shown.Budget.Revision && expected.CandidateHash == shown.CandidateHash
 }

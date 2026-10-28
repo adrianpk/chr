@@ -275,18 +275,18 @@ func projectWorkflowIntegrationPhase(run *workflowInvocationFile, entry Integrat
 
 	switch entry.State {
 	case "queued":
-		run.Status = "pending"
+		run.Status = workflowstate.InvocationPending
 	case "waiting_review":
-		run.Status = "waiting_review"
+		run.Status = workflowstate.InvocationWaitingReview
 	case "blocked":
-		run.Status = "blocked"
+		run.Status = workflowstate.InvocationBlocked
 		run.Blocker = &Blocker{Dependency: entry.Unit, Reason: entry.Blocker.Reason, NextActionOwner: "operator"}
 	case "paused", "cancelled":
-		run.Status = entry.State
+		run.Status = workflowstate.InvocationStatus(entry.State)
 	case "integrated":
 		// Verified unit completion is distinct from the existing set frontier.
 	default:
-		run.Status = "waiting_integration"
+		run.Status = workflowstate.InvocationWaitingIntegration
 	}
 
 	if entry.State != "blocked" {
@@ -296,14 +296,14 @@ func projectWorkflowIntegrationPhase(run *workflowInvocationFile, entry Integrat
 	if checkOwned {
 		// A queue projection cannot replace a live gate or review credential. Its owner
 		// must retain stopped observations before releasing shared capacity.
-		run.Status = "running"
+		run.Status = workflowstate.InvocationRunning
 	}
 
 	run.StopIntent = entry.StopIntent
 }
 
 func workflowIntegrationCheckOwned(run workflowInvocationFile) bool {
-	if run.Status != "running" || len(run.Attempts) == 0 {
+	if run.Status != workflowstate.InvocationRunning || len(run.Attempts) == 0 {
 		return false
 	}
 

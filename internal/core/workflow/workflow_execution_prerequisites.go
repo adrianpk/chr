@@ -9,20 +9,25 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvocationFile, record Record) ([]InputImage, map[string]string, error) {
+type workflowPrerequisiteObservation struct {
+	Images         []InputImage
+	EvidenceHashes map[string]string
+}
+
+func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvocationFile, record Record) (workflowPrerequisiteObservation, error) {
 	selection, err := s.readWorkflowSelection(ctx)
 	if err != nil {
-		return nil, nil, err
+		return workflowPrerequisiteObservation{Images: nil, EvidenceHashes: nil}, err
 	}
 
 	dependencies, err := newWorkflowDependencies(selection)
 	if err != nil {
-		return nil, nil, err
+		return workflowPrerequisiteObservation{Images: nil, EvidenceHashes: nil}, err
 	}
 
 	refs := dependencies.refs[workflowstate.Ref{Kind: "ticket", ID: record.Task.Key}]
 	if len(refs) > workflowstate.PageLimit {
-		return nil, nil, fmt.Errorf("workflow prerequisite bounds exceeded")
+		return workflowPrerequisiteObservation{Images: nil, EvidenceHashes: nil}, fmt.Errorf("workflow prerequisite bounds exceeded")
 	}
 
 	request := run.ExecutionSelection()
@@ -33,7 +38,7 @@ func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvo
 
 	for _, ref := range refs {
 		if reason := reader.prerequisiteReason(ctx, record, ref); reason != "" {
-			return nil, nil, fmt.Errorf("workflow prerequisite %s: %s", ref.ID, reason)
+			return workflowPrerequisiteObservation{Images: nil, EvidenceHashes: nil}, fmt.Errorf("workflow prerequisite %s: %s", ref.ID, reason)
 		}
 
 		dependency := workflowPrerequisiteRecord(selection, ref)
@@ -46,7 +51,7 @@ func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvo
 		}
 	}
 
-	return images, hashes, nil
+	return workflowPrerequisiteObservation{Images: images, EvidenceHashes: hashes}, nil
 }
 
 func workflowPrerequisiteRecord(selection workflowSelection, ref workflowstate.Ref) Record {

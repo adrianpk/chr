@@ -42,7 +42,7 @@ func (s *Store) retainWorkflowCandidateRepair(ctx context.Context, run *workflow
 
 	updateWorkflowIntegrationEntry(&entry, request)
 
-	run.Status, run.Outcome = "waiting_integration", "candidate_repair_required"
+	run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "candidate_repair_required"
 	run.Blocker = &Blocker{Dependency: entry.Unit, Reason: reason, NextActionOwner: "workflow_merger"}
 
 	queue, err := workflowIntegrationEntryChange(entry, before)

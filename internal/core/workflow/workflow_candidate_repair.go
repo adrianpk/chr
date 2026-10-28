@@ -31,12 +31,12 @@ type CandidateRepair struct {
 // assembly. Reading never reserves a role or advances the queue.
 func (s *Store) ReadWorkflowCandidateRepair(ctx context.Context, id string) (repair CandidateRepair, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		repair, err = owner.readWorkflowCandidateRepair(run)
+		repair, err = invocationLocation.Owner.readWorkflowCandidateRepair(invocationLocation.Run)
 
 		return err
 	})
@@ -48,19 +48,19 @@ func (s *Store) repairWorkflowReviewedSlice(ctx context.Context, id, key string,
 	native := false
 
 	err := s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation2, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		input, _, err := owner.readWorkflowReview(run)
+		input, _, err := invocationLocation2.Owner.readWorkflowReview(invocationLocation2.Run)
 		if err != nil || input.Native == nil {
 			return err
 		}
 
 		native = true
 
-		return owner.repairWorkflowNativeReview(ctx, run, key, provider)
+		return invocationLocation2.Owner.repairWorkflowNativeReview(ctx, invocationLocation2.Run, key, provider)
 	})
 	if err != nil || native {
 		return err

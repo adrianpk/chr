@@ -15,7 +15,7 @@ import (
 type WorkflowControlRequest struct {
 	AuthorizationCheck workflowcore.AdmissionCheck    `json:"-"`
 	RequestBinding     *workflowstate.MutationBinding `json:"request_binding,omitempty"`
-	Integration        *WorkflowIntegrationControlGuard
+	Integration        *workflowstate.ControlIntegrationGuard
 	BudgetGrant        *workflowstate.IntegrationGrant
 	DecisionAnswer     *workflowstate.IntegrationAnswer
 	DecisionRevision   uint64

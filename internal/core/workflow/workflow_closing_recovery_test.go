@@ -213,7 +213,7 @@ func checkWorkflowClosingJournalState(t *testing.T, stage, id string, current Re
 		if current.Set.Status != "closing" || retained.ClosingSet != id || current.Set.ClosureRef != "" {
 			t.Fatal("partial admission was not replayed as a fenced closing role")
 		}
-	} else if current.Set.Status != "completed" || retained.Status != "completed" || len(retained.Closures) != 1 {
+	} else if current.Set.Status != "completed" || retained.Status != workflowstate.InvocationCompleted || len(retained.Closures) != 1 {
 		t.Fatal("terminal replay did not confirm set, invocation and receipt together")
 	}
 }

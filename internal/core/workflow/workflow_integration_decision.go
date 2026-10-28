@@ -43,22 +43,22 @@ type IntegrationAnswerRequest struct {
 // Stale decisions are reported without transferring old answers to new work.
 func (s *Store) ReadWorkflowIntegrationDecisions(ctx context.Context, id string) (result IntegrationDecisions, err error) {
 	err = s.withWorkflowInspection(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocationPrepared(ctx, id, (*Store).requireNoWorkflowTransition)
+		invocationLocation, readErr := s.locateWorkflowInvocationPrepared(ctx, id, (*Store).requireNoWorkflowTransition)
 		if readErr != nil {
 			return readErr
 		}
 
-		if run.Integration == nil {
+		if invocationLocation.Run.Integration == nil {
 			return workflowstate.ErrConflict
 		}
 
-		entry, readErr := owner.readWorkflowIntegrationEntry(run, *run.Integration)
+		entry, readErr := invocationLocation.Owner.readWorkflowIntegrationEntry(invocationLocation.Run, *invocationLocation.Run.Integration)
 		if readErr != nil {
 			return readErr
 		}
 
-		result, readErr = owner.readWorkflowDecisionRecord(ctx, run, entry)
-		if readErr == nil && checkWorkflowDecisionFence(run, entry, result) != nil {
+		result, readErr = invocationLocation.Owner.readWorkflowDecisionRecord(ctx, invocationLocation.Run, entry)
+		if readErr == nil && checkWorkflowDecisionFence(invocationLocation.Run, entry, result) != nil {
 			result.State = "stale"
 		}
 
@@ -77,12 +77,12 @@ func (s *Store) RecordWorkflowIntegrationDecisions(ctx context.Context, request 
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation2, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		result, readErr = owner.recordWorkflowDecisions(ctx, run, request, provider)
+		result, readErr = invocationLocation2.Owner.recordWorkflowDecisions(ctx, invocationLocation2.Run, request, provider)
 
 		return readErr
 	})
@@ -104,12 +104,12 @@ func (s *Store) AnswerWorkflowIntegrationDecision(ctx context.Context, request I
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation3, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		result, readErr = owner.answerWorkflowDecision(ctx, run, frozen, provider, nil)
+		result, readErr = invocationLocation3.Owner.answerWorkflowDecision(ctx, invocationLocation3.Run, frozen, provider, nil)
 
 		return readErr
 	})

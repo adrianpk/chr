@@ -237,12 +237,12 @@ func TestNativeCanonicalFence(t *testing.T) {
 	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter, before: func(ctx context.Context, _ NativePublicationBinding) {
 		entry := nativeReviewEntry(t, f.store, f.entry.InvocationID)
 
-		run, _, err := f.store.locateWorkflowInvocation(ctx, f.entry.InvocationID)
+		invocationLocation, err := f.store.locateWorkflowInvocation(ctx, f.entry.InvocationID)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		request := IntegrationTransition{InvocationID: run.ID, EntryID: entry.ID, InvocationRevision: run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, CandidateHash: entry.CandidateRef.Hash, State: "blocked"}
+		request := IntegrationTransition{InvocationID: invocationLocation.Run.ID, EntryID: entry.ID, InvocationRevision: invocationLocation.Run.Revision, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration, CandidateHash: entry.CandidateRef.Hash, State: "blocked"}
 
 		request.Blocker = &IntegrationBlocker{Reason: "observation_hold", RequiredAction: "observe current owner", ResumeState: "observing"}
 		if _, err := f.store.TransitionWorkflowIntegration(ctx, request); err != nil {

@@ -51,7 +51,7 @@ func assertWorkflowSubmissionIntent(t *testing.T, ctx context.Context, f workflo
 	}
 
 	run, err := f.store.ReadWorkflow(ctx, f.run.ID)
-	if err != nil || run.Submission == nil || run.Submission.ID != submission.ID || run.Status != "waiting_integration" || run.Outcome != "awaiting_observation" {
+	if err != nil || run.Submission == nil || run.Submission.ID != submission.ID || run.Status != workflowstate.InvocationWaitingIntegration || run.Outcome != "awaiting_observation" {
 		t.Fatal("provider IO preceded invocation projection")
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"sync"
 	"testing"
 
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -134,7 +135,7 @@ func TestNativeFinalizationTicket(t *testing.T) {
 	}
 
 	after := workflowTestRead(t, f.store, f.run.ID)
-	if after.Status != "completed" || after.Outcome != "ticket_integrated" || len(after.Attempts) != len(before.Attempts) || receipt.Receipt.Unit.Kind != "ticket" {
+	if after.Status != workflowstate.InvocationCompleted || after.Outcome != "ticket_integrated" || len(after.Attempts) != len(before.Attempts) || receipt.Receipt.Unit.Kind != "ticket" {
 		t.Fatal("independent finalization fabricated aggregate or worker work")
 	}
 
@@ -193,7 +194,7 @@ func TestNativeFinalizationStop(t *testing.T) {
 	}
 
 	stopped, err := f.store.StopWorkflow(t.Context(), f.entry.InvocationID, "cancel")
-	if err != nil || stopped.Status == "cancelled" || nativeReviewEntry(t, f.store, stopped.ID).State != "finalizing" {
+	if err != nil || stopped.Status == workflowstate.InvocationCancelled || nativeReviewEntry(t, f.store, stopped.ID).State != "finalizing" {
 		t.Fatal("stop discarded unfinished fanout", err)
 	}
 
@@ -201,7 +202,7 @@ func TestNativeFinalizationStop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if workflowTestRead(t, f.store, stopped.ID).Status != "cancelled" {
+	if workflowTestRead(t, f.store, stopped.ID).Status != workflowstate.InvocationCancelled {
 		t.Fatal("completed fanout lost pending stop")
 	}
 

@@ -453,9 +453,10 @@ func checkTelegramControlResults(t *testing.T, operations service, ids []string)
 		t.Fatal(err)
 	}
 
-	runs, next, err := store.InspectWorkflowPage(t.Context(), 0, 16)
-	if err != nil || next != -1 || len(runs) != len(ids) {
-		t.Fatal("shared activation lost an invocation", len(runs), next, err)
+	invocationPage, err := store.InspectWorkflowPage(t.Context(), 0, 16)
+
+	if err != nil || invocationPage.NextOffset != -1 || len(invocationPage.Invocations) != len(ids) {
+		t.Fatal("shared activation lost an invocation", len(invocationPage.Invocations), invocationPage.NextOffset, err)
 	}
 
 	wanted := map[string]bool{}
@@ -463,7 +464,7 @@ func checkTelegramControlResults(t *testing.T, operations service, ids []string)
 		wanted[id] = true
 	}
 
-	for _, run := range runs {
+	for _, run := range invocationPage.Invocations {
 		if !wanted[run.ID] {
 			t.Fatal("shared activation duplicated or replaced an invocation", run.ID)
 		}

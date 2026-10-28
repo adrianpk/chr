@@ -152,7 +152,7 @@ func TestWorkflowReviewRepairJournal(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if retained.Status != "pending" || retained.Cursor != 2 || len(retained.ReviewRepairs) != 1 || retained.ReviewRepairs[0].Consumed != 1 {
+			if retained.Status != workflowstate.InvocationPending || retained.Cursor != 2 || len(retained.ReviewRepairs) != 1 || retained.ReviewRepairs[0].Consumed != 1 {
 				t.Fatal("repair replay lost its budget or ordered frontier")
 			}
 
@@ -276,7 +276,7 @@ func checkWorkflowReviewClaimRecovered(t *testing.T, store *Store, id string, re
 	t.Helper()
 
 	if stage == "claim" {
-		if retained.Status != "paused" || retained.ResumeStatus != "waiting_review" {
+		if retained.Status != workflowstate.InvocationPaused || retained.ResumeStatus != workflowstate.InvocationWaitingReview {
 			t.Fatal("review claim recovery rewound tasks")
 		}
 

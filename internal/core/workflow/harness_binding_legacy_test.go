@@ -82,8 +82,9 @@ func TestHarnessBindingEntry(t *testing.T) {
 	started := workflowTestStart(t, store, request)
 	request.RequestKey = "compatibility-entry"
 
-	found, matched, err := store.FindWorkflowEntry(t.Context(), request)
-	if err != nil || !matched || found.ID != started.Invocation.ID || !sameHarnessBinding(found.HarnessBinding, started.Invocation.HarnessBinding) {
+	entryLookup, err := store.FindWorkflowEntry(t.Context(), request)
+
+	if err != nil || !entryLookup.Found || entryLookup.Invocation.ID != started.Invocation.ID || !sameHarnessBinding(entryLookup.Invocation.HarnessBinding, started.Invocation.HarnessBinding) {
 		t.Fatal("entry lost frozen worker identity", err)
 	}
 }

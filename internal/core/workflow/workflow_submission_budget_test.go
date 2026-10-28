@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSubmissionBudget preserves the consumed per-unit attempts through
@@ -47,7 +49,7 @@ func assertWorkflowSubmissionBudget(t *testing.T, f workflowPreparationFixture, 
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != "blocked" || run.Blocker.Reason != "integration_submission_budget_exhausted" || provider.calls != 3 || run.PreparationCount != 3 {
+	if run.Status != workflowstate.InvocationBlocked || run.Blocker.Reason != "integration_submission_budget_exhausted" || provider.calls != 3 || run.PreparationCount != 3 {
 		t.Fatal("candidate replacement reset budget or launched extra work")
 	}
 

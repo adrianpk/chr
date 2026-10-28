@@ -144,7 +144,7 @@ func checkWorkflowPublicationConfirmation(t *testing.T, f workflowPreparationFix
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)
 
 	progress, err := restarted.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
-	if err != nil || progress.Receipt == nil || progress.Invocation.Status != "completed" || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 1 {
+	if err != nil || progress.Receipt == nil || progress.Invocation.Status != workflowstate.InvocationCompleted || len(progress.Invocation.Attempts) != len(before.Attempts) || p.calls != 1 {
 		t.Fatal("verified delivery did not finalize without more work", err)
 	}
 

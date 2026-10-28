@@ -140,3 +140,19 @@ records prerequisites and the compiling family relocation with exact declaration
 preimages and current resolutions. Focused wire/storage, native Git/filesystem,
 guarded legacy operations, application and dependency checks pass. Assigned signature remediation and final candidate validation remain active
 Slice 12 work.
+
+## Completed operation contracts
+
+The signature ledger resolves all 71 frozen rows to 47 implemented declarations,
+20 individually retained cohesive five-parameter declarations and the prior
+shared RequireMarkdown fix. All current declarations satisfy the final parameter
+and result shape; no new debt is added. Named observations retain absence/error
+values, pagination, byte limits, owner identity and nil/empty behavior.
+
+Coordinator progress/resume and supervised-process state types retain existing
+JSON spellings and validation order; 337 literal references are replaced through
+compiler-resolved types. Stop child contexts remain explicit at their callers,
+with bound claim/cancellation input; heartbeat completion retains cancel-and-wait.
+The real consumer reconciliation removes the app control-guard alias. No temporary
+compile-time bridge remains. One Store still owns all 908 methods and all existing
+locks, journal/recovery entries and atomic acceptance.

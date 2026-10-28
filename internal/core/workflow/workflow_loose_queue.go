@@ -73,7 +73,7 @@ func validateWorkflowLooseExclusions(queue *LooseQueue, keys map[string]bool) er
 }
 
 func (s *Store) reconcileWorkflowLooseQueue(ctx context.Context, run workflowInvocationFile) (workflowInvocationFile, error) {
-	if workflowInvocationTerminal(run.Status) || run.StopIntent != "" || slices.Contains([]string{"paused", "blocked"}, run.Status) {
+	if workflowInvocationTerminal(run.Status) || run.StopIntent != "" || slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationPaused, workflowstate.InvocationBlocked}, run.Status) {
 		return run, nil
 	}
 
@@ -124,7 +124,7 @@ func (s *Store) selectWorkflowLooseQueue(ctx context.Context, run workflowInvoca
 	selectWorkflowLoosePending(&next, selection)
 
 	if next.LooseQueue.Eligible == 0 {
-		next.Status, next.Outcome = "completed", "loose_exhausted"
+		next.Status, next.Outcome = workflowstate.InvocationCompleted, "loose_exhausted"
 	}
 
 	return next, nil

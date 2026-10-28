@@ -10,6 +10,11 @@ import (
 	"time"
 )
 
+type workflowSupervisedProcess struct {
+	Process *exec.Cmd
+	Guard   *workflowCommandGuard
+}
+
 // The supervisor waits for permission after its birth identity is journaled.
 // It keeps fd 3 even when a worker closes inherited descriptors, and waits for
 // non-zombie group members, including descendants orphaned by their parent.
@@ -41,7 +46,7 @@ done
 wait "$worker"
 `
 
-func workflowSupervisedCommand(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string, gate *os.File) (*exec.Cmd, *workflowCommandGuard) {
+func workflowSupervisedCommand(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string, gate *os.File) workflowSupervisedProcess {
 	remaining := max(1, int(math.Ceil(time.Until(prepared.leaseUntil).Seconds())))
 	args := []string{"-c", workflowSupervisorScript, "chr-workflow", strconv.Itoa(remaining)}
 	args = append(args, command...)
@@ -63,5 +68,5 @@ func workflowSupervisedCommand(ctx context.Context, claim *Claim, prepared workf
 	guard := &workflowCommandGuard{}
 	process.Cancel = func() error { return guard.kill(process) }
 
-	return process, guard
+	return workflowSupervisedProcess{Process: process, Guard: guard}
 }

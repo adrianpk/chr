@@ -10,6 +10,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowSelectedIdentity struct {
+	Selector workflowstate.Selector
+	Guard    workflowstate.SelectionGuard
+}
+
 // WorkflowBoundPreview freezes the displayed native selection for confirmation.
 type WorkflowBoundPreview struct {
 	ReadyTicket *workflowstate.TicketAdmission `json:"ready_ticket,omitempty"`
@@ -29,12 +34,12 @@ func (s service) PreviewSelectedWork(ctx context.Context, request workflowstate.
 	}
 
 	if key != "" {
-		selector, guard, err := s.selectedWorkflowIdentity(ctx, request.Selector.Extent, key)
+		workflowIdentity, err := s.selectedWorkflowIdentity(ctx, request.Selector.Extent, key)
 		if err != nil {
 			return result, err
 		}
 
-		result.Request.Selector, result.Selected = selector, &guard
+		result.Request.Selector, result.Selected = workflowIdentity.Selector, &workflowIdentity.Guard
 	}
 
 	result.View, err = s.PreviewWorkExtent(ctx, result.Request)
@@ -53,26 +58,26 @@ func (s service) PreviewSelectedWork(ctx context.Context, request workflowstate.
 	return result, err
 }
 
-func (s service) selectedWorkflowIdentity(ctx context.Context, extent, key string) (workflowstate.Selector, workflowstate.SelectionGuard, error) {
+func (s service) selectedWorkflowIdentity(ctx context.Context, extent, key string) (workflowSelectedIdentity, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowstate.Selector{}, workflowstate.SelectionGuard{}, err
+		return workflowSelectedIdentity{Selector: workflowstate.Selector{}, Guard: workflowstate.SelectionGuard{}}, err
 	}
 
 	snapshot, err := store.InspectWorkflowRecords(ctx)
 	if err != nil {
-		return workflowstate.Selector{}, workflowstate.SelectionGuard{}, err
+		return workflowSelectedIdentity{Selector: workflowstate.Selector{}, Guard: workflowstate.SelectionGuard{}}, err
 	}
 
 	for _, record := range snapshot.Records {
 		if record.Task != nil && record.Task.Key == key {
 			selector := workflowstate.Selector{Extent: extent, Identity: workflowSelectedExtentID(extent, record.Task)}
 
-			return selector, workflowstate.SelectionGuard{Key: key, Revision: record.Revision}, nil
+			return workflowSelectedIdentity{Selector: selector, Guard: workflowstate.SelectionGuard{Key: key, Revision: record.Revision}}, nil
 		}
 	}
 
-	return workflowstate.Selector{}, workflowstate.SelectionGuard{}, fmt.Errorf("selected ticket has no native workflow identity: %s", key)
+	return workflowSelectedIdentity{Selector: workflowstate.Selector{}, Guard: workflowstate.SelectionGuard{}}, fmt.Errorf("selected ticket has no native workflow identity: %s", key)
 }
 
 func workflowSelectedExtentID(extent string, task *workflowcore.Task) string {
@@ -134,14 +139,14 @@ func (s service) WorkflowStatusPage(ctx context.Context, offset, limit int) (res
 		return result, err
 	}
 
-	runs, next, err := store.InspectWorkflowPage(ctx, offset, limit)
+	invocationPage, err := store.InspectWorkflowPage(ctx, offset, limit)
 	if err != nil {
 		return result, err
 	}
 
-	result.Items, result.NextOffset = []WorkflowWorkStatus{}, next
+	result.Items, result.NextOffset = []WorkflowWorkStatus{}, invocationPage.NextOffset
 
-	for _, run := range runs {
+	for _, run := range invocationPage.Invocations {
 		inspection, err := store.InspectWorkflow(ctx, run.ID)
 		if err != nil {
 			return result, err

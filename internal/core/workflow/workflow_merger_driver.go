@@ -27,12 +27,12 @@ func runWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflo
 
 	index := len(run.Attempts[len(run.Attempts)-1].Processes)
 
-	stdout, stderr, err := claim.store.workflowProcessOutput(claim, index)
+	commandOutput, err := claim.store.workflowProcessOutput(claim, index)
 	if err != nil {
 		return workflowMergerDriverResult{err: err}
 	}
 
-	defer func() { _ = stdout.File.Close(); _ = stderr.File.Close() }() //nolint:errcheck
+	defer func() { _ = commandOutput.Stdout.File.Close(); _ = commandOutput.Stderr.File.Close() }() //nolint:errcheck
 
 	gate, permit, err := os.Pipe()
 	if err != nil {
@@ -40,14 +40,16 @@ func runWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflo
 	}
 	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
 
-	return executeWorkflowMergerDriver(ctx, claim, prepared, tools, call, gate, permit, index, stdout, stderr)
+	return executeWorkflowMergerDriver(ctx, claim, prepared, tools, call, gate, permit, index, commandOutput.Stdout, commandOutput.Stderr)
 }
 
 func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared workflowPreparedTask, tools *workflowMergerTools, call workflowMergerCall, gate, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) workflowMergerDriverResult {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	process, guard := workflowSupervisedCommand(ctx, claim, prepared, prepared.input.Worker, gate)
+	supervisedProcess := workflowSupervisedCommand(ctx, claim, prepared, prepared.input.Worker, gate)
+
+	process, guard := supervisedProcess.Process, supervisedProcess.Guard
 
 	stdin, err := process.StdinPipe()
 	if err != nil {
@@ -71,7 +73,7 @@ func executeWorkflowMergerDriver(ctx context.Context, claim *Claim, prepared wor
 	finished := make(chan workflowMergerDriverResult, 1)
 
 	go func() {
-		command, waitErr := runWorkflowSupervisedProcess(ctx, claim, prepared, prepared.input.Worker, process, permit, index, stdout, stderr)
+		command, waitErr := runWorkflowSupervisedProcess(ctx, claim, prepared, workflowProcessExecution{Command: prepared.input.Worker, Process: process, Permit: permit, Index: index, Output: workflowCommandOutput{Stdout: stdout, Stderr: stderr}})
 		_ = writer.Close() //nolint:errcheck
 
 		finished <- workflowMergerDriverResult{command: command, err: waitErr}

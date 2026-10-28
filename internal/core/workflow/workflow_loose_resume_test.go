@@ -145,7 +145,7 @@ func checkWorkflowLooseResumeDelivery(t *testing.T, f workflowIntegrationFixture
 func checkWorkflowLooseResumed(t *testing.T, before, run Invocation, target string, failure error) {
 	t.Helper()
 
-	if failure != nil || run.Status != "pending" || run.Blocker != nil || run.ExecutionSelection().Target.Commit != target || run.Selection.Target != before.Selection.Target || run.Cursor != before.Cursor {
+	if failure != nil || run.Status != workflowstate.InvocationPending || run.Blocker != nil || run.ExecutionSelection().Target.Commit != target || run.Selection.Target != before.Selection.Target || run.Cursor != before.Cursor {
 		t.Fatal("resume changed scope or failed to verify the prerequisite", failure)
 	}
 

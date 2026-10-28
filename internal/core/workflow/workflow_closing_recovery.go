@@ -104,7 +104,7 @@ func (s *Store) workflowRecoveredClosingClaim(set Record, state workflowClosingA
 	for i := range claim.state.Processes {
 		process := &claim.state.Processes[i]
 
-		process.State = "stopped"
+		process.State = ProcessStopped
 		if err := s.hashWorkflowProcessOutput(process); err != nil {
 			return nil, err
 		}

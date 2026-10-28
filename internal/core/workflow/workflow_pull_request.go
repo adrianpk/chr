@@ -76,17 +76,17 @@ func (s *Store) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, r
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		observation, readErr := owner.prepareWorkflowPullRequest(ctx, &run, request)
+		observation, readErr := invocationLocation.Owner.prepareWorkflowPullRequest(ctx, &invocationLocation.Run, request)
 		if readErr != nil {
 			return readErr
 		}
 
-		result, readErr = owner.ensureWorkflowPullRequest(ctx, &run, observation, provider)
+		result, readErr = invocationLocation.Owner.ensureWorkflowPullRequest(ctx, &invocationLocation.Run, observation, provider)
 
 		return readErr
 	})

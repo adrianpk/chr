@@ -102,7 +102,7 @@ func checkDaemonWorkflowStopCheckpoint(t *testing.T, operations service, before 
 		expected = "cancelled"
 	}
 
-	if err != nil || current.Status != expected || current.Cursor != 0 || current.ConfirmedCursor != 0 || len(current.Attempts) != 1 || current.Attempts[0].CheckpointHash == "" || current.Policy != before.Policy {
+	if err != nil || string(current.Status) != expected || current.Cursor != 0 || current.ConfirmedCursor != 0 || len(current.Attempts) != 1 || current.Attempts[0].CheckpointHash == "" || current.Policy != before.Policy {
 		t.Fatal("daemon stop lost checkpoint, budget or ownership", current, err)
 	}
 }
@@ -154,7 +154,12 @@ func TestDaemonWorkflowCoordinatorStop(t *testing.T) {
 	var output bytes.Buffer
 
 	runner := daemonWorkflowFixture(t, &output)
-	ctx, finish := watchDaemonHeartbeat(t.Context(), runner.repository)
+	ctx, heartbeatCancel := context.WithCancel(t.Context())
+
+	heartbeatWatch := watchDaemonHeartbeat(ctx, runner.repository, heartbeatCancel)
+
+	finish := heartbeatWatch.Finish
+
 	t.Cleanup(func() {
 		if err := finish(); err != nil {
 			t.Error(err)

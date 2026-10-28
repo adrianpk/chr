@@ -29,12 +29,12 @@ func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflo
 
 	run.Preparation.State, run.Outcome = "validating", "integration_validating"
 
-	prepared, file, err := encodeWorkflowTaskInput(run, taskInput)
+	encodedTaskInput, err := encodeWorkflowTaskInput(run, taskInput)
 	if err != nil {
-		return prepared, err
+		return encodedTaskInput.Prepared, err
 	}
 
-	return prepared, s.commitWorkflowPullRequestFiles(run, files, file)
+	return encodedTaskInput.Prepared, s.commitWorkflowPullRequestFiles(run, files, encodedTaskInput.Change)
 }
 
 func checkWorkflowPreparedProof(query PreparationQuery, proof workflowstate.IntegrationProof) error {
@@ -83,7 +83,7 @@ func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflow
 
 func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *Claim, prepared workflowPreparedTask, candidate *workflowstate.IntegrationCandidate, provider PublicationGuardProvider, validationErr error, interrupted bool) error {
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
+		claimObservation, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if err != nil {
 			return err
 		}
@@ -93,24 +93,24 @@ func (s *Store) finishWorkflowIntegrationValidation(ctx context.Context, claim *
 			return err
 		}
 
-		if err := checkWorkflowExecutionBinding(run, record, prepared); err != nil {
+		if err := checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared); err != nil {
 			return err
 		}
 
-		if workflowExecutionStopped(run, interrupted) {
-			return owner.finishStoppedWorkflowTask(run, record, claim, &candidate.Validation)
+		if workflowExecutionStopped(claimObservation.Run, interrupted) {
+			return owner.finishStoppedWorkflowTask(claimObservation.Run, claimObservation.Record, claim, &candidate.Validation)
 		}
 
-		if err := workflowAttemptQuiescent(run.Attempts[len(run.Attempts)-1]); err != nil {
+		if err := workflowAttemptQuiescent(claimObservation.Run.Attempts[len(claimObservation.Run.Attempts)-1]); err != nil {
 			return err
 		}
 
-		failure := owner.checkWorkflowPreparationCompletion(ctx, run, prepared, candidate, provider, validationErr)
+		failure := owner.checkWorkflowPreparationCompletion(ctx, claimObservation.Run, prepared, candidate, provider, validationErr)
 		if failure != nil {
-			return owner.checkpointWorkflowPreparationFailure(ctx, run, record, claim, *candidate, prepared, provider, validationErr, failure)
+			return owner.checkpointWorkflowPreparationFailure(ctx, claimObservation.Run, claimObservation.Record, claim, *candidate, prepared, provider, validationErr, failure)
 		}
 
-		if err := owner.persistWorkflowPreparation(&run, record, *candidate); err != nil {
+		if err := owner.persistWorkflowPreparation(&claimObservation.Run, claimObservation.Record, *candidate); err != nil {
 			return err
 		}
 

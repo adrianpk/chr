@@ -35,39 +35,39 @@ func workflowTrackerSchema(snapshot Snapshot, setID, requested, previous string)
 	return "chr-tracker/v1"
 }
 
-func (s *Store) versionedWorkflowTrackerImage(snapshot Snapshot, setID, schema string) (TrackerStatus, []byte, error) {
+func (s *Store) versionedWorkflowTrackerImage(snapshot Snapshot, setID, schema string) (workflowTrackerImageResult, error) {
 	switch schema {
 	case "chr-tracker/v1":
 		return s.workflowTrackerImage(snapshot, setID)
 	case "chr-tracker/v2":
 		return s.workflowOrderTrackerImage(snapshot, setID)
 	default:
-		return TrackerStatus{}, nil, fmt.Errorf("unsupported tracker schema")
+		return workflowTrackerImageResult{Status: TrackerStatus{}, Output: nil}, fmt.Errorf("unsupported tracker schema")
 	}
 }
 
-func (s *Store) workflowOrderTrackerImage(snapshot Snapshot, setID string) (TrackerStatus, []byte, error) {
-	set, tasks, err := workflowTrackerMembers(snapshot, setID)
+func (s *Store) workflowOrderTrackerImage(snapshot Snapshot, setID string) (workflowTrackerImageResult, error) {
+	trackerMembers, err := workflowTrackerMembers(snapshot, setID)
 	if err != nil {
-		return TrackerStatus{}, nil, err
+		return workflowTrackerImageResult{Status: TrackerStatus{}, Output: nil}, err
 	}
 
-	result := TrackerStatus{Schema: "chr-tracker/v2", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: setID, Path: "tracker/" + setID + ".md", PlanRevision: set.Set.PlanRevision}
+	result := TrackerStatus{Schema: "chr-tracker/v2", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: setID, Path: "tracker/" + setID + ".md", PlanRevision: trackerMembers.Set.Set.PlanRevision}
 
-	document, err := s.workflowOrderDocument(set, tasks)
+	document, err := s.workflowOrderDocument(trackerMembers.Set, trackerMembers.Tasks)
 	if err != nil {
-		return result, nil, err
+		return workflowTrackerImageResult{Status: result, Output: nil}, err
 	}
 
 	images, err := authoringcore.EncodePlanOrder(document)
 	if err != nil {
-		return result, nil, err
+		return workflowTrackerImageResult{Status: result, Output: nil}, err
 	}
 
 	result.SourceHash = contenthash.Sum(images.Order)
-	result.Sources = []TrackerSource{{ID: set.ID, Path: set.Path, Hash: result.SourceHash}, {Path: set.Set.PlanRevision.BodyRef, Hash: set.Set.PlanRevision.BodyHash}}
+	result.Sources = []TrackerSource{{ID: trackerMembers.Set.ID, Path: trackerMembers.Set.Path, Hash: result.SourceHash}, {Path: trackerMembers.Set.Set.PlanRevision.BodyRef, Hash: trackerMembers.Set.Set.PlanRevision.BodyHash}}
 
-	return result, images.Tracker, nil
+	return workflowTrackerImageResult{Status: result, Output: images.Tracker}, nil
 }
 
 func (s *Store) workflowOrderDocument(set Record, tasks []Record) (generationcore.PlanOrderDocument, error) {

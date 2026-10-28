@@ -60,7 +60,7 @@ func TestWorkflowFrontierOrder(t *testing.T) {
 			workflowDeliverNextFrontier(t, &fixture)
 
 			second := workflowAdvanceFrontier(t, fixture)
-			if second.Status != "waiting_integration" || second.Outcome != "set_closure_required" || second.ConfirmedCursor != 6 || len(second.Deliveries) != 2 || fixture.provider.creates != 2 {
+			if second.Status != workflowstate.InvocationWaitingIntegration || second.Outcome != "set_closure_required" || second.ConfirmedCursor != 6 || len(second.Deliveries) != 2 || fixture.provider.creates != 2 {
 				t.Fatal("last slice bypassed set closure or duplicated a PR")
 			}
 
@@ -140,7 +140,7 @@ func checkWorkflowFrontierNext(t *testing.T, fixture workflowIntegrationFixture,
 func checkWorkflowFrontierCleared(t *testing.T, run Invocation) {
 	t.Helper()
 
-	if run.Status != "pending" || run.Lane != nil || run.PullRequest != nil || run.DeliveryRef != "" || run.CandidateRef != "" || run.ConfirmedCursor != 3 || len(run.Deliveries) != 1 {
+	if run.Status != workflowstate.InvocationPending || run.Lane != nil || run.PullRequest != nil || run.DeliveryRef != "" || run.CandidateRef != "" || run.ConfirmedCursor != 3 || len(run.Deliveries) != 1 {
 		t.Fatal("restart resurrected bindings or discarded the confirmed frontier")
 	}
 }

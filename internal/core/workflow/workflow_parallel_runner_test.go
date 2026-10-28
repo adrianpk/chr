@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowParallelExecution proves source-process overlap across namespaces
@@ -82,7 +84,7 @@ func assertWorkflowCapacityWait(t *testing.T, store *Store, id string) {
 	t.Helper()
 
 	run := workflowTestRead(t, store, id)
-	if run.Status != "waiting_capacity" || run.CapacityResumeStatus != "pending" || len(run.Attempts) != 0 {
+	if run.Status != workflowstate.InvocationWaitingCapacity || run.CapacityResumeStatus != workflowstate.InvocationPending || len(run.Attempts) != 0 {
 		t.Fatal("capacity wait lost its phase or consumed an attempt", run)
 	}
 }

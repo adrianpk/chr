@@ -17,6 +17,18 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowCredentialCheck uint8
+
+const (
+	workflowCredentialIdentity workflowCredentialCheck = iota
+	workflowCredentialLease
+)
+
+type workflowClaimObservation struct {
+	Run    workflowInvocationFile
+	Record Record
+}
+
 // ErrWorkflowOwned identifies overlap with retained task or hierarchy ownership.
 var ErrWorkflowOwned = errors.New("workflow work is already owned")
 
@@ -40,17 +52,17 @@ type Claim struct {
 // ClaimWorkflow acquires one task and a repository-wide worker reservation.
 func (s *Store) ClaimWorkflow(ctx context.Context, id string) (claim *Claim, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		run, readErr = owner.reconcileWorkflowMembership(ctx, run)
+		invocationLocation.Run, readErr = invocationLocation.Owner.reconcileWorkflowMembership(ctx, invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
 
-		claim, readErr = owner.claimWorkflow(ctx, run)
+		claim, readErr = invocationLocation.Owner.claimWorkflow(ctx, invocationLocation.Run)
 
 		return readErr
 	})
@@ -230,7 +242,7 @@ func (s *Store) beginWorkflowAttempt(run *workflowInvocationFile, record *Record
 	attempt := Attempt{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Purpose: claim.purpose, OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key, claim.purpose), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
 	run.Attempts = append(run.Attempts, attempt)
 	run.Owners[claim.AttemptID] = contenthash.Sum([]byte(claim.Token))
-	run.Status = "running"
+	run.Status = workflowstate.InvocationRunning
 
 	record.Task.AttemptID, record.Task.ClaimGeneration = claim.AttemptID, claim.Generation
 	if claim.purpose == "" {
@@ -304,45 +316,45 @@ func (s *Store) CheckWorkflowClaim(ctx context.Context, claim *Claim) error {
 	}
 
 	return s.withLock(ctx, func() error {
-		_, _, err := s.checkWorkflowClaim(ctx, claim)
+		_, err := s.checkWorkflowClaim(ctx, claim)
 
 		return err
 	})
 }
 
-func (s *Store) checkWorkflowClaim(ctx context.Context, claim *Claim) (workflowInvocationFile, Record, error) {
-	return s.checkWorkflowCredential(ctx, claim, true)
+func (s *Store) checkWorkflowClaim(ctx context.Context, claim *Claim) (workflowClaimObservation, error) {
+	return s.checkWorkflowCredential(ctx, claim, workflowCredentialLease)
 }
 
-func (s *Store) checkWorkflowCredential(ctx context.Context, claim *Claim, lease bool) (workflowInvocationFile, Record, error) {
-	run, owner, err := s.locateWorkflowClaim(ctx, claim)
+func (s *Store) checkWorkflowCredential(ctx context.Context, claim *Claim, check workflowCredentialCheck) (workflowClaimObservation, error) {
+	invocationLocation2, err := s.locateWorkflowClaim(ctx, claim)
 	if err != nil {
-		return run, Record{}, err
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, err
 	}
 
-	if owner.layout.Root() != claim.store.layout.Root() || len(run.Attempts) == 0 {
-		return run, Record{}, ErrWorkflowOwned
+	if invocationLocation2.Owner.layout.Root() != claim.store.layout.Root() || len(invocationLocation2.Run.Attempts) == 0 {
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, ErrWorkflowOwned
 	}
 
-	if err := owner.checkWorkflowInputs(ctx, run); err != nil {
-		return run, Record{}, err
+	if err := invocationLocation2.Owner.checkWorkflowInputs(ctx, invocationLocation2.Run); err != nil {
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, err
 	}
 
-	attempt := run.Attempts[len(run.Attempts)-1]
-	if !workflowCredentialValid(run, claim, attempt, lease) {
-		return run, Record{}, ErrWorkflowOwned
+	attempt := invocationLocation2.Run.Attempts[len(invocationLocation2.Run.Attempts)-1]
+	if !workflowCredentialValid(invocationLocation2.Run, claim, attempt, check) {
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: Record{}}, ErrWorkflowOwned
 	}
 
-	record, err := owner.readWorkflowAttemptTask(run, attempt)
+	record, err := invocationLocation2.Owner.readWorkflowAttemptTask(invocationLocation2.Run, attempt)
 	if err != nil {
-		return run, record, err
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: record}, err
 	}
 
 	if record.Task.AttemptID != claim.AttemptID || record.Task.ClaimGeneration != claim.Generation {
-		return run, record, workflowstate.ErrConflict
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: record}, workflowstate.ErrConflict
 	}
 
-	return run, record, nil
+	return workflowClaimObservation{Run: invocationLocation2.Run, Record: record}, nil
 }
 
 // CheckpointWorkflow yields at a quiescent task boundary without claiming success.
@@ -359,12 +371,12 @@ func (s *Store) CheckpointWorkflow(ctx context.Context, claim *Claim) error {
 	}
 
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowClaim(ctx, claim)
+		claimObservation, err := s.checkWorkflowClaim(ctx, claim)
 		if err != nil {
 			return err
 		}
 
-		if err := claim.store.checkpointWorkflowAttempt(run, record, "checkpointed", nil); err != nil {
+		if err := claim.store.checkpointWorkflowAttempt(claimObservation.Run, claimObservation.Record, "checkpointed", nil); err != nil {
 			return err
 		}
 
@@ -373,7 +385,7 @@ func (s *Store) CheckpointWorkflow(ctx context.Context, claim *Claim) error {
 }
 
 func workflowAttemptCredentialMatches(run workflowInvocationFile, claim *Claim, attempt Attempt) bool {
-	return run.Status == "running" && attempt.Outcome == "running" && attempt.Purpose == claim.purpose && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == contenthash.Sum([]byte(claim.Token))
+	return run.Status == workflowstate.InvocationRunning && attempt.Outcome == "running" && attempt.Purpose == claim.purpose && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == contenthash.Sum([]byte(claim.Token))
 }
 
 func workflowReplacedAttempt(run workflowInvocationFile, key, purpose string) string {
@@ -400,9 +412,9 @@ func (s *Store) readWorkflowAttemptTask(run workflowInvocationFile, attempt Atte
 }
 
 func workflowInvocationClaimable(run workflowInvocationFile) bool {
-	return run.StopIntent == "" && !workflowPrerequisitePaused(run) && !workflowFailedTaskPaused(run) && slices.Contains([]string{"pending", "paused", "waiting_capacity"}, run.Status) && run.Cursor < len(run.Members)
+	return run.StopIntent == "" && !workflowPrerequisitePaused(run) && !workflowFailedTaskPaused(run) && slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationPending, workflowstate.InvocationPaused, workflowstate.InvocationWaitingCapacity}, run.Status) && run.Cursor < len(run.Members)
 }
 
-func workflowCredentialValid(run workflowInvocationFile, claim *Claim, attempt Attempt, lease bool) bool {
-	return workflowAttemptCredentialMatches(run, claim, attempt) && (!lease || time.Now().Before(attempt.LeaseUntil))
+func workflowCredentialValid(run workflowInvocationFile, claim *Claim, attempt Attempt, check workflowCredentialCheck) bool {
+	return workflowAttemptCredentialMatches(run, claim, attempt) && (check != workflowCredentialLease || time.Now().Before(attempt.LeaseUntil))
 }

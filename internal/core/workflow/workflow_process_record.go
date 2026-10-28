@@ -13,55 +13,70 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) registerWorkflowProcess(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string, pid int) (registered Process, index int, err error) {
+type workflowRegisteredProcess struct {
+	Process Process
+	Index   int
+}
+
+type workflowCommandOutput struct {
+	Stdout *opsfile.CommandOutput
+	Stderr *opsfile.CommandOutput
+}
+
+func (s *Store) registerWorkflowProcess(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string, pid int) (observed workflowRegisteredProcess, err error) {
+	var (
+		registered Process
+		index      int
+	)
+
 	identity, err := workflowProcessIdentity(pid)
 	if err != nil {
-		return registered, 0, err
+		return workflowRegisteredProcess{Process: registered, Index: 0}, err
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, record, readErr := s.checkWorkflowClaim(ctx, claim)
+		claimObservation, readErr := s.checkWorkflowClaim(ctx, claim)
 		if readErr != nil {
 			return readErr
 		}
 
-		if run.StopIntent != "" {
+		if claimObservation.Run.StopIntent != "" {
 			return ErrWorkflowStop
 		}
 
-		if readErr = checkWorkflowExecutionBinding(run, record, prepared); readErr != nil {
+		if readErr = checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared); readErr != nil {
 			return readErr
 		}
 
-		attempt := &run.Attempts[len(run.Attempts)-1]
+		attempt := &claimObservation.Run.Attempts[len(claimObservation.Run.Attempts)-1]
 
 		index = len(attempt.Processes)
 		if index >= 17 {
 			return fmt.Errorf("workflow command process limit exceeded")
 		}
 
-		base := workflowAttemptFile(run.ID, attempt.ID, fmt.Sprintf("command-%d", index+1))
-		registered = Process{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Identity: identity, GroupID: pid, Command: command, State: "running", StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
+		base := workflowAttemptFile(claimObservation.Run.ID, attempt.ID, fmt.Sprintf("command-%d", index+1))
+		registered = Process{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Identity: identity, GroupID: pid, Command: command, State: ProcessRunning, StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
 		attempt.Processes = append(attempt.Processes, registered)
 
-		if err := claim.store.commitWorkflowProcessStart(ctx, &run, prepared); err != nil {
+		if err := claim.store.commitWorkflowProcessStart(ctx, &claimObservation.Run, prepared); err != nil {
 			return err
 		}
 
 		return registerWorkflowProcessCapacity(ctx, claim, attempt.Processes[index])
 	})
 
-	return registered, index, err
+	return workflowRegisteredProcess{Process: registered, Index: index}, err
 }
 
 func (s *Store) finishWorkflowProcess(ctx context.Context, claim *Claim, index int, expected Process, result workflowstate.CommandResult) error {
 	return s.withLock(ctx, func() error {
-		run, _, err := s.checkWorkflowCredential(ctx, claim, false)
+		claimObservation2, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if err != nil {
 			return err
 		}
 
-		attempt := &run.Attempts[len(run.Attempts)-1]
+		attempt := &claimObservation2.Run.Attempts[len(claimObservation2.Run.Attempts)-1]
 		if index >= len(attempt.Processes) {
 			return workflowstate.ErrConflict
 		}
@@ -80,12 +95,12 @@ func (s *Store) finishWorkflowProcess(ctx context.Context, claim *Claim, index i
 			return ErrWorkflowOwned
 		}
 
-		process.State, process.Result = "stopped", &result
+		process.State, process.Result = ProcessStopped, &result
 		if err := claim.store.hashWorkflowProcessOutput(process); err != nil {
 			return err
 		}
 
-		return claim.store.commitWorkflowState(&run)
+		return claim.store.commitWorkflowState(&claimObservation2.Run)
 	})
 }
 
@@ -105,20 +120,25 @@ func (s *Store) hashWorkflowProcessOutput(process *Process) error {
 	return nil
 }
 
-func (s *Store) workflowProcessOutput(claim *Claim, index int) (stdout, stderr *opsfile.CommandOutput, err error) {
+func (s *Store) workflowProcessOutput(claim *Claim, index int) (observed workflowCommandOutput, err error) {
+	var (
+		stdout *opsfile.CommandOutput
+		stderr *opsfile.CommandOutput
+	)
+
 	base := workflowAttemptFile(claim.InvocationID, claim.AttemptID, fmt.Sprintf("command-%d", index+1))
 
 	stdout, err = openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stdout"))
 	if err != nil {
-		return nil, nil, err
+		return workflowCommandOutput{Stdout: nil, Stderr: nil}, err
 	}
 
 	stderr, err = openWorkflowCommandOutput(filepath.Join(s.layout.Root(), base+".stderr"))
 	if err != nil {
-		return nil, nil, errors.Join(err, stdout.File.Close())
+		return workflowCommandOutput{Stdout: nil, Stderr: nil}, errors.Join(err, stdout.File.Close())
 	}
 
-	return stdout, stderr, nil
+	return workflowCommandOutput{Stdout: stdout, Stderr: stderr}, nil
 }
 
 func openWorkflowCommandOutput(path string) (*opsfile.CommandOutput, error) {
@@ -128,5 +148,5 @@ func openWorkflowCommandOutput(path string) (*opsfile.CommandOutput, error) {
 }
 
 func workflowProcessBindingMatches(observed, expected Process) bool {
-	return observed.CapacitySlot == expected.CapacitySlot && observed.Identity == expected.Identity && observed.GroupID == expected.GroupID && observed.StdoutRef == expected.StdoutRef && observed.StderrRef == expected.StderrRef && observed.State == "running" && slices.Equal(observed.Command, expected.Command)
+	return observed.CapacitySlot == expected.CapacitySlot && observed.Identity == expected.Identity && observed.GroupID == expected.GroupID && observed.StdoutRef == expected.StdoutRef && observed.StderrRef == expected.StderrRef && observed.State == ProcessRunning && slices.Equal(observed.Command, expected.Command)
 }

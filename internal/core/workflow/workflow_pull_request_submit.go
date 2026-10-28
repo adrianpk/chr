@@ -68,7 +68,7 @@ func (s *Store) createWorkflowPullRequest(ctx context.Context, run *workflowInvo
 
 func (s *Store) awaitWorkflowPullRequest(run *workflowInvocationFile, snapshots []workflowstate.PullRequestSnapshot) error {
 	run.PullRequest.State, run.PullRequest.Reason = "awaiting_observation", "creation_outcome_unknown"
-	run.Status, run.Outcome = "waiting_integration", "pr_awaiting_observation"
+	run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "pr_awaiting_observation"
 
 	change, err := s.workflowPullRequestObservation(run, snapshots)
 	if err != nil {
@@ -95,8 +95,8 @@ func (s *Store) acceptWorkflowPullRequest(ctx context.Context, run *workflowInvo
 	pr := snapshots[0]
 	run.PullRequest.URL, run.PullRequest.State, run.PullRequest.Reason = pr.URL, "bound", ""
 
-	if run.StopIntent == "" && run.Status != "paused" && !workflowInvocationTerminal(run.Status) {
-		run.Status, run.Outcome = "waiting_review", "slice_pr_bound"
+	if run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && !workflowInvocationTerminal(run.Status) {
+		run.Status, run.Outcome = workflowstate.InvocationWaitingReview, "slice_pr_bound"
 	}
 
 	if pr.Merged {
@@ -118,7 +118,7 @@ func (s *Store) acceptWorkflowPullRequest(ctx context.Context, run *workflowInvo
 
 func (s *Store) blockWorkflowPullRequest(run *workflowInvocationFile, snapshots []workflowstate.PullRequestSnapshot, reason string) error {
 	run.PullRequest.State, run.PullRequest.Reason = "blocked", reason
-	run.Status, run.Outcome = "blocked", reason
+	run.Status, run.Outcome = workflowstate.InvocationBlocked, reason
 	run.Blocker = &Blocker{Dependency: run.PullRequest.Unit, Reason: reason, NextActionOwner: "workflow_operator"}
 
 	change, err := s.workflowPullRequestObservation(run, snapshots)

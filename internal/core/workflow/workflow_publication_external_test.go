@@ -91,7 +91,7 @@ func assertWorkflowPublicationStopped(t *testing.T, f workflowPreparationFixture
 
 	if intent == "pause" {
 		resumed, err := restarted.ResumeWorkflow(t.Context(), f.run.ID)
-		if err != nil || resumed.Status != "waiting_integration" || resumed.DeliveryRef != progress.Receipt.Path {
+		if err != nil || resumed.Status != workflowstate.InvocationWaitingIntegration || resumed.DeliveryRef != progress.Receipt.Path {
 			t.Fatal("pause resume returned to old task execution", err)
 		}
 	}
@@ -113,7 +113,7 @@ func TestWorkflowPublicationReadOnly(t *testing.T) {
 	ports.Preparer, ports.Reviewer = nil, nil
 
 	progress, err := f.store.AdvanceWorkflowSliceIntegration(t.Context(), f.run.ID, ports)
-	if err != nil || progress.Receipt == nil || progress.Invocation.Status != "cancelled" || progress.Invocation.Submission != nil || p.calls != 0 {
+	if err != nil || progress.Receipt == nil || progress.Invocation.Status != workflowstate.InvocationCancelled || progress.Invocation.Submission != nil || p.calls != 0 {
 		t.Fatal("read-only external delivery required execution authority", err)
 	}
 }

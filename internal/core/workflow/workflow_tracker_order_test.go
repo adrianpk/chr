@@ -106,9 +106,10 @@ func TestWorkflowOrderStructure(t *testing.T) {
 		}
 	}
 
-	source, output, err := store.workflowOrderTrackerImage(snapshot, hierarchy.Set.ID)
-	if err != nil || source.SourceHash == first.SourceHash || !strings.Contains(string(output), "Different integration title") {
-		t.Fatal("structural title missing from map", source, err)
+	trackerImage, err := store.workflowOrderTrackerImage(snapshot, hierarchy.Set.ID)
+
+	if err != nil || trackerImage.Status.SourceHash == first.SourceHash || !strings.Contains(string(trackerImage.Output), "Different integration title") {
+		t.Fatal("structural title missing from map", trackerImage.Status, err)
 	}
 
 	if _, err := store.Write(t.Context(), changed, changed.Revision); !errors.Is(err, workflowstate.ErrConflict) {

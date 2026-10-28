@@ -11,39 +11,48 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) workflowTrackerImage(snapshot Snapshot, setID string) (TrackerStatus, []byte, error) {
-	set, tasks, err := workflowTrackerMembers(snapshot, setID)
+type workflowTrackerImageResult struct {
+	Status TrackerStatus
+	Output []byte
+}
+type workflowTrackerMembership struct {
+	Set   Record
+	Tasks []Record
+}
+
+func (s *Store) workflowTrackerImage(snapshot Snapshot, setID string) (workflowTrackerImageResult, error) {
+	trackerMembers, err := workflowTrackerMembers(snapshot, setID)
 	if err != nil {
-		return TrackerStatus{}, nil, err
+		return workflowTrackerImageResult{Status: TrackerStatus{}, Output: nil}, err
 	}
 
 	result := TrackerStatus{Schema: "chr-tracker/v1", ProjectID: s.projectID, Namespace: s.layout.Namespace(), SetID: setID, Path: "tracker/" + setID + ".md"}
-	for _, record := range append([]Record{set}, tasks...) {
+	for _, record := range append([]Record{trackerMembers.Set}, trackerMembers.Tasks...) {
 		result.Sources = append(result.Sources, TrackerSource{ID: record.ID, Path: record.Path, Revision: record.Revision, Hash: record.SourceHash})
 	}
 
-	if err := s.workflowTrackerReceiptSources(&result, set, tasks); err != nil {
-		return result, nil, err
+	if err := s.workflowTrackerReceiptSources(&result, trackerMembers.Set, trackerMembers.Tasks); err != nil {
+		return workflowTrackerImageResult{Status: result, Output: nil}, err
 	}
 
 	sort.Slice(result.Sources, func(i, j int) bool { return result.Sources[i].Path < result.Sources[j].Path })
 
 	data, err := json.Marshal(result.Sources)
 	if err != nil {
-		return result, nil, err
+		return workflowTrackerImageResult{Status: result, Output: nil}, err
 	}
 
 	result.SourceHash = contenthash.Sum(data)
 
-	output := renderWorkflowTracker(result, set, tasks)
+	output := renderWorkflowTracker(result, trackerMembers.Set, trackerMembers.Tasks)
 	if len(output) > workflowstate.FileLimit {
-		return result, nil, fmt.Errorf("tracker output exceeds 1 MiB")
+		return workflowTrackerImageResult{Status: result, Output: nil}, fmt.Errorf("tracker output exceeds 1 MiB")
 	}
 
-	return result, output, nil
+	return workflowTrackerImageResult{Status: result, Output: output}, nil
 }
 
-func workflowTrackerMembers(snapshot Snapshot, setID string) (Record, []Record, error) {
+func workflowTrackerMembers(snapshot Snapshot, setID string) (workflowTrackerMembership, error) {
 	var (
 		set   Record
 		tasks []Record
@@ -60,7 +69,7 @@ func workflowTrackerMembers(snapshot Snapshot, setID string) (Record, []Record, 
 	}
 
 	if set.ID == "" {
-		return set, nil, fmt.Errorf("adopted workflow set not found: %s", setID)
+		return workflowTrackerMembership{Set: set, Tasks: nil}, fmt.Errorf("adopted workflow set not found: %s", setID)
 	}
 
 	orders := map[string]int{}
@@ -76,7 +85,7 @@ func workflowTrackerMembers(snapshot Snapshot, setID string) (Record, []Record, 
 		return tasks[i].Task.Order < tasks[j].Task.Order
 	})
 
-	return set, tasks, nil
+	return workflowTrackerMembership{Set: set, Tasks: tasks}, nil
 }
 
 func (s *Store) workflowTrackerReceiptSources(result *TrackerStatus, set Record, tasks []Record) error {

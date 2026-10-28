@@ -67,7 +67,7 @@ func TestWorkflowManualFailure(t *testing.T) {
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || retained.Status != "paused" || retained.Cursor != 0 || retained.Attempts[0].ResultRef == "" {
+	if err != nil || retained.Status != workflowstate.InvocationPaused || retained.Cursor != 0 || retained.Attempts[0].ResultRef == "" {
 		t.Fatal("manual failure lost retained evidence")
 	}
 

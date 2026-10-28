@@ -10,16 +10,27 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// InvocationLookup reports an equivalent retained entry without authorizing another effect.
+type InvocationLookup struct {
+	Invocation Invocation
+	Found      bool
+}
+
 // FindWorkflowEntry attaches a compatibility entrypoint to equivalent unfinished
 // work without replacing its original target with a newly observed branch head.
 // StartWorkflow still verifies the full frozen request and owns all mutations.
-func (s *Store) FindWorkflowEntry(ctx context.Context, request StartRequest) (result Invocation, found bool, err error) {
+func (s *Store) FindWorkflowEntry(ctx context.Context, request StartRequest) (observed InvocationLookup, err error) {
+	var (
+		result Invocation
+		found  bool
+	)
+
 	request.Selection.Target.Commit = strings.Repeat("0", 40)
 	policy := request.Policy
 
 	request, err = normalizeWorkflowStart(request)
 	if err != nil {
-		return result, false, err
+		return InvocationLookup{Invocation: result, Found: false}, err
 	}
 
 	request.Policy = policy
@@ -30,12 +41,14 @@ func (s *Store) FindWorkflowEntry(ctx context.Context, request StartRequest) (re
 			return readErr
 		}
 
-		result, found, readErr = s.matchWorkflowEntry(runs, request)
+		entryLookup, entryLookupErr := s.matchWorkflowEntry(runs, request)
+
+		result, found, readErr = entryLookup.Invocation, entryLookup.Found, entryLookupErr
 
 		return readErr
 	})
 
-	return result, found, err
+	return InvocationLookup{Invocation: result, Found: found}, err
 }
 
 // WorkflowTickets provides a bounded filesystem-owned display view. It neither
@@ -69,7 +82,12 @@ func (s *Store) CheckLegacyWorkKey(ctx context.Context, key string) error {
 	return nil
 }
 
-func (s *Store) matchWorkflowEntry(runs []workflowInvocationFile, request StartRequest) (result Invocation, found bool, err error) {
+func (s *Store) matchWorkflowEntry(runs []workflowInvocationFile, request StartRequest) (observed InvocationLookup, err error) {
+	var (
+		result Invocation
+		found  bool
+	)
+
 	for _, run := range runs {
 		if run.Namespace != s.layout.Namespace() || workflowInvocationTerminal(run.Status) || run.Selection.Target.Repository != request.Selection.Target.Repository {
 			continue
@@ -79,19 +97,19 @@ func (s *Store) matchWorkflowEntry(runs []workflowInvocationFile, request StartR
 
 		hash, hashErr := workflowStartHash(candidate)
 		if hashErr != nil {
-			return result, found, hashErr
+			return InvocationLookup{Invocation: result, Found: found}, hashErr
 		}
 
 		if run.RequestHash == hash {
 			if found {
-				return result, found, fmt.Errorf("%w: ambiguous unfinished entrypoint", workflowstate.ErrConflict)
+				return InvocationLookup{Invocation: result, Found: found}, fmt.Errorf("%w: ambiguous unfinished entrypoint", workflowstate.ErrConflict)
 			}
 
 			result, found = run.Invocation, true
 		}
 	}
 
-	return result, found, nil
+	return InvocationLookup{Invocation: result, Found: found}, nil
 }
 
 func workflowRetainedEntryRequest(request StartRequest, run Invocation) StartRequest {

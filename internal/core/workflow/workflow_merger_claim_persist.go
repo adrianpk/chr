@@ -43,18 +43,18 @@ func (s *Store) persistWorkflowMergerClaim(ctx context.Context, run workflowInvo
 	taskInput.SourceHash, taskInput.Lane, taskInput.Merger = record.SourceHash, lane, &input
 	taskInput.MergerHarnessRef = &harness.Certificate
 
-	prepared, file, err := encodeWorkflowTaskInput(&run, taskInput)
+	encodedTaskInput, err := encodeWorkflowTaskInput(&run, taskInput)
 	if err != nil {
-		return nil, prepared, err
+		return nil, encodedTaskInput.Prepared, err
 	}
 
 	budgetFile, err := s.workflowIntegrationBudgetChange(ctx, &run, &budget)
 	if err != nil {
-		return nil, prepared, err
+		return nil, encodedTaskInput.Prepared, err
 	}
 
-	prepared.environment, prepared.directory = workflowMergerEnvironment(root), root
-	err = s.commitWorkflowPullRequestFiles(&run, append(files, budgetFile), file)
+	encodedTaskInput.Prepared.environment, encodedTaskInput.Prepared.directory = workflowMergerEnvironment(root), root
+	err = s.commitWorkflowPullRequestFiles(&run, append(files, budgetFile), encodedTaskInput.Change)
 
-	return claim, prepared, err
+	return claim, encodedTaskInput.Prepared, err
 }

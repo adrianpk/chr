@@ -84,13 +84,13 @@ func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection w
 		return workflowcore.StartResult{}, err
 	}
 
-	previous, found, err := store.FindWorkflowEntry(s.ctx, request)
+	entryLookup, err := store.FindWorkflowEntry(s.ctx, request)
 	if err != nil {
 		return workflowcore.StartResult{}, err
 	}
 
-	if found {
-		request, err = retainedNativeAgentWorkRequest(request, previous)
+	if entryLookup.Found {
+		request, err = retainedNativeAgentWorkRequest(request, entryLookup.Invocation)
 	} else {
 		request.Selection.Target, err = s.observeNativeAgentWorkTarget(config, target)
 	}

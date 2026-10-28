@@ -38,7 +38,7 @@ func guidedWebResult(view *webui.GuidedUseCaseView, observed GuidedUseCaseInspec
 		projected.Summary = "All admitted work has confirmed delivery and required closing evidence."
 	}
 
-	if result.Invocation.Status == "cancelled" {
+	if result.Invocation.Status == workflowstate.InvocationCancelled {
 		projected.Summary = "Cancelled. Confirmed deliveries are preserved; the remaining work has not been delivered."
 	}
 

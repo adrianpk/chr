@@ -90,7 +90,7 @@ func checkServiceWorkflowSlice(t *testing.T, operations service, id string, hier
 	}
 
 	retained, err := operations.ReadWorkflow(t.Context(), id)
-	if err != nil || retained.Status != "waiting_integration" || len(retained.Attempts) != 4 {
+	if err != nil || retained.Status != workflowstate.InvocationWaitingIntegration || len(retained.Attempts) != 4 {
 		t.Fatal("service skipped required integration or repeated tasks")
 	}
 
@@ -101,7 +101,7 @@ func checkServiceWorkflowSliceRepair(t *testing.T, operations service, id, key s
 	t.Helper()
 
 	repaired, err := operations.RepairWorkflowSlice(t.Context(), id, key)
-	if err != nil || repaired.Cursor != 2 || repaired.CandidateRef != "" || repaired.Status != "pending" {
+	if err != nil || repaired.Cursor != 2 || repaired.CandidateRef != "" || repaired.Status != workflowstate.InvocationPending {
 		t.Fatal("service repair retained affected aggregate acceptance")
 	}
 }

@@ -68,7 +68,7 @@ func (s service) acknowledgeGuidedNativeControl(ctx context.Context, session *au
 		return err
 	}
 
-	if run.StopIntent == control.StopIntent && (run.Status == "paused" || run.Status == "cancelled") {
+	if run.StopIntent == control.StopIntent && (run.Status == workflowstate.InvocationPaused || run.Status == workflowstate.InvocationCancelled) {
 		control.AcknowledgedRevision = run.Revision
 	}
 

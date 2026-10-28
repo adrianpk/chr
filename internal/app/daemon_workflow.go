@@ -19,6 +19,10 @@ import (
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
+type daemonHeartbeatWatch struct {
+	Finish func() error
+}
+
 const daemonWorkflowActivationLimit = 16
 
 func (factory commandFactory) daemonWorkflowCommand() *cli.Command {
@@ -171,8 +175,7 @@ func (runner daemonWorkflowRunner) progress(project string, progress RetainedWor
 
 // Heartbeats stay fresh during owned workers. A daemon stop yields between
 // checkpoints; per-invocation pause/cancel uses the shared worker stop watcher.
-func watchDaemonHeartbeat(ctx context.Context, repository daemoncore.Repository) (context.Context, func() error) {
-	watched, cancel := context.WithCancel(ctx)
+func watchDaemonHeartbeat(watched context.Context, repository daemoncore.Repository, cancel context.CancelFunc) daemonHeartbeatWatch {
 	finished := make(chan error, 1)
 
 	go func() {
@@ -201,5 +204,5 @@ func watchDaemonHeartbeat(ctx context.Context, repository daemoncore.Repository)
 		}
 	}()
 
-	return watched, func() error { cancel(); return <-finished }
+	return daemonHeartbeatWatch{Finish: func() error { cancel(); return <-finished }}
 }

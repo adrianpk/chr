@@ -151,7 +151,7 @@ func checkWorkflowPreparationRecovery(t *testing.T, store *Store, run Invocation
 	t.Helper()
 
 	if stage != "result" {
-		if run.Status != "paused" || run.ResumeStatus != "waiting_integration" || run.Preparation.State != "stale" {
+		if run.Status != workflowstate.InvocationPaused || run.ResumeStatus != workflowstate.InvocationWaitingIntegration || run.Preparation.State != "stale" {
 			t.Fatal("killed gate lost its retained frontier")
 		}
 

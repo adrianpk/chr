@@ -15,17 +15,17 @@ func (s *Store) prepareWorkflowMerger(ctx context.Context, request MergerRequest
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		entry, budget, seed, readErr := owner.workflowMergerAdmission(ctx, run, request, harness, provider)
+		entry, budget, seed, readErr := invocationLocation.Owner.workflowMergerAdmission(ctx, invocationLocation.Run, request, harness, provider)
 		if readErr != nil {
 			return readErr
 		}
 
-		claim, prepared, readErr = owner.claimWorkflowMerger(ctx, run, entry, budget, request.Input, harness, seed)
+		claim, prepared, readErr = invocationLocation.Owner.claimWorkflowMerger(ctx, invocationLocation.Run, entry, budget, request.Input, harness, seed)
 
 		return readErr
 	})

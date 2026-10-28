@@ -81,7 +81,7 @@ func TestWorkflowPreparationUnsupported(t *testing.T) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != "blocked" || run.Blocker.Reason != "atomic_source_base_guard_required" || run.PreparationCount != 0 || len(run.Attempts) != len(before.Attempts) {
+	if run.Status != workflowstate.InvocationBlocked || run.Blocker.Reason != "atomic_source_base_guard_required" || run.PreparationCount != 0 || len(run.Attempts) != len(before.Attempts) {
 		t.Fatal("unsupported guard launched preparation or discarded its blocker")
 	}
 
@@ -141,7 +141,7 @@ func TestWorkflowPreparationIO(t *testing.T) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Preparation.State != "stale" || run.Status != "blocked" {
+	if run.Preparation.State != "stale" || run.Status != workflowstate.InvocationBlocked {
 		t.Fatal("stale preparation was retained as valid")
 	}
 

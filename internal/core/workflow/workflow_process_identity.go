@@ -11,13 +11,22 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// ProcessState names the existing supervised-command lifecycle.
+type ProcessState string
+
+// Process states retain the running/stopped journal protocol.
+const (
+	ProcessRunning ProcessState = "running"
+	ProcessStopped ProcessState = "stopped"
+)
+
 // Process retains each supervised worker or validation command.
 type Process struct {
 	CapacitySlot int                           `json:"capacity_slot,omitempty"`
 	Identity     workflowstate.ProcessIdentity `json:"identity"`
 	GroupID      int                           `json:"group_id"`
 	Command      []string                      `json:"command"`
-	State        string                        `json:"state"`
+	State        ProcessState                  `json:"state"`
 	StdoutRef    string                        `json:"stdout_ref"`
 	StderrRef    string                        `json:"stderr_ref"`
 	StdoutHash   string                        `json:"stdout_hash"`

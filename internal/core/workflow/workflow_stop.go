@@ -10,6 +10,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowStopWatch struct {
+	Claim  *Claim
+	Cancel context.CancelFunc
+}
+
 // ErrWorkflowStop reports a durable pause or cancellation request.
 var ErrWorkflowStop = errors.New("workflow stop requested")
 
@@ -25,12 +30,12 @@ func (s *Store) stopWorkflowChecked(ctx context.Context, id, intent string, chec
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		if err := checkWorkflowRevision(run.Invocation, expected); err != nil {
+		if err := checkWorkflowRevision(invocationLocation.Run.Invocation, expected); err != nil {
 			return err
 		}
 
@@ -38,9 +43,9 @@ func (s *Store) stopWorkflowChecked(ctx context.Context, id, intent string, chec
 			return err
 		}
 
-		readErr = owner.stopWorkflow(ctx, &run, intent, nil)
+		readErr = invocationLocation.Owner.stopWorkflow(ctx, &invocationLocation.Run, intent, nil)
 
-		result = run.Invocation
+		result = invocationLocation.Run.Invocation
 
 		return readErr
 	})
@@ -58,12 +63,12 @@ func (s *Store) ResumeWorkflow(ctx context.Context, id string, ports ...ResumePo
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation2, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		result, readErr = owner.resumeGuardedWorkflow(ctx, run, ports, nil)
+		result, readErr = invocationLocation2.Owner.resumeGuardedWorkflow(ctx, invocationLocation2.Run, ports, nil)
 
 		return readErr
 	})
@@ -71,9 +76,7 @@ func (s *Store) ResumeWorkflow(ctx context.Context, id string, ports ...ResumePo
 	return result, err
 }
 
-func (s *Store) watchWorkflowStop(ctx context.Context, claim *Claim) (context.Context, context.CancelFunc) {
-	watched, cancel := context.WithCancel(ctx)
-
+func (s *Store) watchWorkflowStop(watched context.Context, watch workflowStopWatch) {
 	go func() {
 		ticker := time.NewTicker(50 * time.Millisecond)
 		defer ticker.Stop()
@@ -83,16 +86,14 @@ func (s *Store) watchWorkflowStop(ctx context.Context, claim *Claim) (context.Co
 			case <-watched.Done():
 				return
 			case <-ticker.C:
-				if err := s.checkWorkflowClaimStop(watched, claim); err != nil {
-					cancel()
+				if err := s.checkWorkflowClaimStop(watched, watch.Claim); err != nil {
+					watch.Cancel()
 
 					return
 				}
 			}
 		}
 	}()
-
-	return watched, cancel
 }
 
 func workflowRetainedStopIntent(run workflowInvocationFile, intent string) string {
@@ -114,7 +115,7 @@ func (s *Store) resumeGuardedWorkflow(ctx context.Context, run workflowInvocatio
 		}
 	}
 
-	if run.Status != "paused" || run.StopIntent == "cancel" {
+	if run.Status != workflowstate.InvocationPaused || run.StopIntent == "cancel" {
 		return Invocation{}, ErrWorkflowOwned
 	}
 
@@ -127,12 +128,12 @@ func (s *Store) resumeGuardedWorkflow(ctx context.Context, run workflowInvocatio
 		return Invocation{}, err
 	}
 
-	run.Status = "pending"
-	if run.ResumeStatus != "" {
+	run.Status = workflowstate.InvocationPending
+	if run.ResumeStatus != workflowstate.InvocationUnspecified {
 		run.Status = run.ResumeStatus
 	}
 
-	run.StopIntent, run.ResumeStatus = "", ""
+	run.StopIntent, run.ResumeStatus = "", workflowstate.InvocationUnspecified
 	restoreWorkflowInterruptedContinuation(&run)
 
 	if err := s.commitWorkflowControlResume(ctx, &run, changes, control); err != nil {
@@ -167,8 +168,8 @@ func (s *Store) stopWorkflow(ctx context.Context, run *workflowInvocationFile, i
 	}
 
 	run.StopIntent = intent
-	if run.Status != "running" {
-		if run.Status != "paused" {
+	if run.Status != workflowstate.InvocationRunning {
+		if run.Status != workflowstate.InvocationPaused {
 			run.ResumeStatus = run.Status
 		}
 

@@ -57,7 +57,7 @@ func (s *Store) workflowClosingRunReady(ctx context.Context, run workflowInvocat
 }
 
 func workflowClosingRunStopped(run workflowInvocationFile, root string) bool {
-	return workflowInvocationTerminal(run.Status) || run.StopIntent != "" || run.OwnerRoot != root || run.Status == "paused"
+	return workflowInvocationTerminal(run.Status) || run.StopIntent != "" || run.OwnerRoot != root || run.Status == workflowstate.InvocationPaused
 }
 
 func workflowClosingRunFrontier(run workflowInvocationFile, setID string) bool {
@@ -90,7 +90,7 @@ func (s *Store) workflowClosingInvocationFiles(ctx context.Context, claim *workf
 
 	projectWorkflowClosing(&run, claim)
 
-	run.CapacityResumeStatus = ""
+	run.CapacityResumeStatus = workflowstate.InvocationUnspecified
 
 	if run.StopIntent != "" && claim.state.Outcome != "running" {
 		run.Status = workflowstate.StopStatus(run.StopIntent)
@@ -124,19 +124,19 @@ func workflowClosingProjectionFence(run workflowInvocationFile, claim *workflowC
 func projectWorkflowClosing(run *workflowInvocationFile, claim *workflowClosingClaim) {
 	run.ClosingSet = ""
 
-	run.Status, run.Outcome = "waiting_integration", "set_closure_required"
+	run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "set_closure_required"
 	switch claim.state.Outcome {
 	case "running":
-		run.ClosingSet, run.Status, run.Outcome = claim.set.ID, "running", "set_closing"
+		run.ClosingSet, run.Status, run.Outcome = claim.set.ID, workflowstate.InvocationRunning, "set_closing"
 	case "completed":
 		run.Closures = append(run.Closures, InvocationClosure{SetID: claim.set.ID, Cursor: run.Cursor, Receipt: claim.state.Result, Target: claim.input.Target})
 		run.ExecutionTarget = &claim.input.Target
 
-		run.Status, run.Outcome = "pending", "set_closed"
+		run.Status, run.Outcome = workflowstate.InvocationPending, "set_closed"
 		if len(run.Closures) == len(run.SetImages) {
-			run.Status, run.Outcome = "completed", "sets_closed"
+			run.Status, run.Outcome = workflowstate.InvocationCompleted, "sets_closed"
 		} else if workflowInvocationNeedsClosing(run.Invocation) {
-			run.Status, run.Outcome = "waiting_integration", "set_closure_required"
+			run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "set_closure_required"
 		}
 	default:
 		run.Outcome = claim.state.Outcome

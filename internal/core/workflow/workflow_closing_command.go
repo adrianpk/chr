@@ -40,7 +40,9 @@ func (s *Store) runWorkflowClosingCommand(ctx context.Context, claim *workflowCl
 	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
 
 	prepared := workflowClosingPrepared(claim, directory)
-	process, guard := workflowSupervisedCommand(ctx, claim.worker, prepared, command, gate)
+	supervisedProcess := workflowSupervisedCommand(ctx, claim.worker, prepared, command, gate)
+
+	process, guard := supervisedProcess.Process, supervisedProcess.Guard
 
 	process.Stdin, process.Stdout, process.Stderr = bytes.NewReader(claim.data), stdout, stderr
 	if err := process.Start(); err != nil {
@@ -92,7 +94,7 @@ func (s *Store) registerWorkflowClosingProcess(ctx context.Context, claim *workf
 			return workflowstate.ErrConflict
 		}
 
-		registered = Process{CapacitySlot: workflowWorkerSlotNumber(claim.worker.reservation.Name()), Identity: identity, GroupID: pid, Command: slices.Clone(command), State: "running", StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
+		registered = Process{CapacitySlot: workflowWorkerSlotNumber(claim.worker.reservation.Name()), Identity: identity, GroupID: pid, Command: slices.Clone(command), State: ProcessRunning, StdoutRef: base + ".stdout", StderrRef: base + ".stderr"}
 
 		claim.state.Processes = append(claim.state.Processes, registered)
 		if err := s.commitWorkflowClosingState(ctx, claim); err != nil {
@@ -121,7 +123,7 @@ func (s *Store) finishWorkflowClosingProcess(ctx context.Context, claim *workflo
 			return errors.Join(err, ErrWorkflowCapacity)
 		}
 
-		process.State = "stopped"
+		process.State = ProcessStopped
 		if err := s.hashWorkflowProcessOutput(process); err != nil {
 			return err
 		}

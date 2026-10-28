@@ -153,12 +153,12 @@ func (s *Store) AdmitWorkflowIntegration(ctx context.Context, request Integratio
 // TransitionWorkflowIntegration journals the entry and its exact invocation pointer.
 func (s *Store) TransitionWorkflowIntegration(ctx context.Context, request IntegrationTransition) (entry IntegrationEntry, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		entry, readErr = owner.transitionWorkflowIntegration(ctx, run, request)
+		entry, readErr = invocationLocation.Owner.transitionWorkflowIntegration(ctx, invocationLocation.Run, request)
 
 		return readErr
 	})

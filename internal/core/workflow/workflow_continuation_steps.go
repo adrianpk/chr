@@ -3,6 +3,8 @@ package workflow
 import (
 	"context"
 	"errors"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func (s *Store) continueWorkflowSteps(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts, limit int) (int, string, error) {
@@ -71,10 +73,10 @@ func workflowContinuationAfter(before, after Invocation) (int, string) {
 
 func workflowContinuationBarrier(run Invocation) string {
 	if workflowInvocationTerminal(run.Status) {
-		return run.Status
+		return string(run.Status)
 	}
 
-	if run.StopIntent != "" || run.Status == "paused" {
+	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused {
 		return "stopped"
 	}
 
@@ -86,8 +88,8 @@ func workflowContinuationBarrier(run Invocation) string {
 		return run.Outcome
 	}
 
-	if run.Status == "blocked" || run.Status == "waiting_capacity" {
-		return run.Status
+	if run.Status == workflowstate.InvocationBlocked || run.Status == workflowstate.InvocationWaitingCapacity {
+		return string(run.Status)
 	}
 
 	return ""
@@ -159,11 +161,11 @@ func (s *Store) ensureWorkflowContinuationPR(ctx context.Context, run Invocation
 }
 
 func workflowContinuationClosing(run Invocation) bool {
-	return !workflowInvocationTerminal(run.Status) && run.StopIntent == "" && run.Status != "paused" && (run.Outcome == "set_closure_required" || run.Outcome == "closing_validation_failed" || run.Outcome == "interrupted" || run.ClosingSet != "")
+	return !workflowInvocationTerminal(run.Status) && run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && (run.Outcome == "set_closure_required" || run.Outcome == "closing_validation_failed" || run.Outcome == "interrupted" || run.ClosingSet != "")
 }
 
 func workflowContinuationBefore(run Invocation) string {
-	if run.Status == "waiting_capacity" && run.StopIntent == "" {
+	if run.Status == workflowstate.InvocationWaitingCapacity && run.StopIntent == "" {
 		return ""
 	}
 

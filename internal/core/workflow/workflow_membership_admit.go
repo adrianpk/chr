@@ -54,7 +54,7 @@ func sortWorkflowLaterSetImages(run *workflowInvocationFile, selection workflowS
 
 func workflowContinueAmendedSet(run *workflowInvocationFile) {
 	if run.Outcome == "set_closure_required" && run.Cursor < len(run.Members) && run.Members[run.Cursor].Admission.SetID == workflowNextClosingSet(run.Invocation) {
-		run.Status, run.Outcome = "pending", "later_work_admitted"
+		run.Status, run.Outcome = workflowstate.InvocationPending, "later_work_admitted"
 	}
 }
 

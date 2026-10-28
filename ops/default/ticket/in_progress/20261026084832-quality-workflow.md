@@ -91,17 +91,16 @@ real stage, stop/lost-response, wire/storage, policy/admission and dependency te
 pass; strict lint is clean with 9,316 production declarations, unchanged ceiling
 six, 162 exact debts and one external exception.
 
-T12.4's receipt/materialization batch (`fe0df936e6152c0ad346e1e680ad2dd246825e60`) implements ten assigned declarations (11
-baseline rows): named mutation lookup/normalization/preparation and materialization
-replay/task results, plus cohesive set/allocation inputs. Actual authoring and
-amendment/adoption callers consume those values. D08 shares only contained receipt
-read/absence/decode; operation-specific schemas, checksum/order and request guards,
-receipt writers and lock/journal authority remain. Typed operation states retain
-existing bytes. Thirty focused real IO/recovery/replay/adoption/amendment/authoring
-checks and ten receipt corruption/cross-schema cases pass; strict lint is clean.
-The current signature policy has 9,317 declarations, unchanged ceiling six,
-152 debts and one external exception.
+T12.4 and T12.5 are implemented. All 71 signature rows are reconciled to 47
+implemented contracts, 20 cohesive five-parameter contracts with individual
+reasons and one prior shared-owner fix. Named operation inputs/results, typed
+coordinator/process/receipt states and explicit inherited context/cancellation
+contracts retain wire bytes, replay, bounds, locking/journal authority and recovery.
+The app guard alias is removed and actual consumers use shared values directly.
+All 908 Store methods remain local; current hashes and frozen source identities,
+79 original dependencies and 100 authority/recovery entries are reconciled.
 
-Thirty-seven required declarations, typed mode and cohesion-watch reconciliation,
-final caller reconciliation, exact-head controller validation and canonical PR
-preparation remain open. The ticket stays in_progress.
+The 75-check real IO/process/recovery/caller suite, strict lint, README checks and
+ceiling-six/115-debt policy pass. Final clean-head controller validation and the
+canonical PR remain to be prepared. The ticket stays in_progress until that PR
+exists.

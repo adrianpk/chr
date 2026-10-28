@@ -29,12 +29,12 @@ func workflowTestManual(t *testing.T, store *Store, id string, worker []string) 
 func workflowManualTestCandidate(t *testing.T, store *Store, task ManualTask) ManualCandidate {
 	t.Helper()
 
-	commit, tree, err := store.workflowLaneCandidate(t.Context(), task.Input.Lane)
+	laneImage, err := store.workflowLaneCandidate(t.Context(), task.Input.Lane)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return ManualCandidate{InputHash: task.InputHash, Branch: task.Input.Lane.Branch, Commit: commit, Tree: tree}
+	return ManualCandidate{InputHash: task.InputHash, Branch: task.Input.Lane.Branch, Commit: laneImage.Commit, Tree: laneImage.Tree}
 }
 
 // TestWorkflowManualExact uses a real supervised harness and the shared host
@@ -65,7 +65,7 @@ func checkWorkflowManualPending(t *testing.T, store *Store, id string) {
 	t.Helper()
 
 	before, err := store.ReadWorkflow(t.Context(), id)
-	if err != nil || before.Cursor != 0 || before.Status != "running" || before.Attempts[0].ResultRef != "" {
+	if err != nil || before.Cursor != 0 || before.Status != workflowstate.InvocationRunning || before.Attempts[0].ResultRef != "" {
 		t.Fatal("manual harness completed a task without host evidence")
 	}
 }
@@ -79,7 +79,7 @@ func checkWorkflowManualReplay(t *testing.T, store *Store, claim *Claim, candida
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), claim.InvocationID)
-	if err != nil || retained.Status != "completed" || len(retained.Attempts) != 1 || len(retained.Attempts[0].Processes) != 2 {
+	if err != nil || retained.Status != workflowstate.InvocationCompleted || len(retained.Attempts) != 1 || len(retained.Attempts[0].Processes) != 2 {
 		t.Fatal("manual retry reran host validation")
 	}
 }
@@ -110,7 +110,7 @@ func TestWorkflowManualCandidate(t *testing.T) {
 			}
 
 			retained, err := store.ReadWorkflow(t.Context(), run.Invocation.ID)
-			if err != nil || retained.Cursor != 0 || retained.Status != "running" || len(retained.Attempts[0].Processes) != 0 {
+			if err != nil || retained.Cursor != 0 || retained.Status != workflowstate.InvocationRunning || len(retained.Attempts[0].Processes) != 0 {
 				t.Fatal("invalid candidate advanced work or ran validation")
 			}
 		})

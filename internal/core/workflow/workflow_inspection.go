@@ -9,6 +9,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// InvocationPage retains stable invocation order and the original continuation offset.
+type InvocationPage struct {
+	Invocations []Invocation
+	NextOffset  int
+}
+
 // Inspection observes retained authorization and current task records.
 // Adapters project it without exposing process identities or owner credentials.
 type Inspection struct {
@@ -24,26 +30,26 @@ func (s *Store) InspectWorkflow(ctx context.Context, id string) (result Inspecti
 	defer cancel()
 
 	err = s.withWorkflowInspection(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		result.Invocation = run.Invocation
+		result.Invocation = invocationLocation.Run.Invocation
 
-		result.Policy, readErr = owner.workflowReviewPolicy(run)
+		result.Policy, readErr = invocationLocation.Owner.workflowReviewPolicy(invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
 
-		snapshot, readErr := owner.readSnapshot(ctx)
+		snapshot, readErr := invocationLocation.Owner.readSnapshot(ctx)
 		result.Tasks = snapshot.Records
 
 		if readErr != nil {
 			return readErr
 		}
 
-		result.Integration, readErr = owner.inspectWorkflowIntegration(ctx, run)
+		result.Integration, readErr = invocationLocation.Owner.inspectWorkflowIntegration(ctx, invocationLocation.Run)
 
 		return readErr
 	})
@@ -85,13 +91,18 @@ func (s *Store) InspectWorkflowRecords(ctx context.Context) (snapshot Snapshot, 
 
 // InspectWorkflowPage returns retained invocations in stable ID order.
 // It does not reconcile owners, replay journals or start work.
-func (s *Store) InspectWorkflowPage(ctx context.Context, offset, limit int) (page []Invocation, next int, err error) {
+func (s *Store) InspectWorkflowPage(ctx context.Context, offset, limit int) (observed InvocationPage, err error) {
+	var (
+		page []Invocation
+		next int
+	)
+
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	next = -1
 	if offset < 0 || offset > workflowstate.RecordLimit || limit < 1 || limit > workflowstate.PageLimit {
-		return nil, next, workflowstate.ErrConflict
+		return InvocationPage{Invocations: nil, NextOffset: next}, workflowstate.ErrConflict
 	}
 
 	err = s.withWorkflowInspection(ctx, func() error {
@@ -118,7 +129,7 @@ func (s *Store) InspectWorkflowPage(ctx context.Context, offset, limit int) (pag
 		return nil
 	})
 
-	return page, next, err
+	return InvocationPage{Invocations: page, NextOffset: next}, err
 }
 
 func (s *Store) withWorkflowInspection(ctx context.Context, action func() error) error {

@@ -25,28 +25,28 @@ func workflowExecutionScopeHash(run workflowInvocationFile) (string, error) {
 
 func (s *Store) checkWorkflowPreparedClaim(ctx context.Context, claim *Claim, prepared workflowPreparedTask) error {
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowClaim(ctx, claim)
+		claimObservation, err := s.checkWorkflowClaim(ctx, claim)
 		if err != nil {
 			return err
 		}
 
-		if run.StopIntent != "" {
+		if claimObservation.Run.StopIntent != "" {
 			return ErrWorkflowStop
 		}
 
 		if input := prepared.input.Preparation; input != nil {
-			if err := claim.store.checkWorkflowNativePreparationFence(run, input.Native); err != nil {
+			if err := claim.store.checkWorkflowNativePreparationFence(claimObservation.Run, input.Native); err != nil {
 				return err
 			}
 		}
 
 		if input := prepared.input.Review; input != nil {
-			if err := claim.store.checkWorkflowNativeReviewFence(run, input); err != nil {
+			if err := claim.store.checkWorkflowNativeReviewFence(claimObservation.Run, input); err != nil {
 				return err
 			}
 		}
 
-		return checkWorkflowExecutionBinding(run, record, prepared)
+		return checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared)
 	})
 }
 

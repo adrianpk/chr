@@ -68,7 +68,7 @@ func TestNativeStopRejected(t *testing.T) {
 	}
 
 	stopped, err := f.store.StopWorkflow(t.Context(), submission.InvocationID, "cancel")
-	if err != nil || stopped.Status == "cancelled" {
+	if err != nil || stopped.Status == workflowstate.InvocationCancelled {
 		t.Fatal("raw rejection finalized stop without independent refs", err)
 	}
 
@@ -101,7 +101,7 @@ func TestNativeStopReceipt(t *testing.T) {
 	}
 
 	stopped, err := f.store.StopWorkflow(t.Context(), confirmed.InvocationID, "cancel")
-	if err != nil || stopped.Status == "cancelled" || stopped.StopIntent != "cancel" {
+	if err != nil || stopped.Status == workflowstate.InvocationCancelled || stopped.StopIntent != "cancel" {
 		t.Fatal("stop discarded receipt finalization", err)
 	}
 
@@ -168,7 +168,7 @@ func checkNativeRejectedStop(t *testing.T, f nativeSubmissionFixture, stopped In
 	t.Helper()
 
 	entry := nativeReviewEntry(t, f.store, stopped.ID)
-	if after := workflowTestRead(t, f.store, stopped.ID); after.Status != "cancelled" || entry.State != "cancelled" || entry.StopIntent != "cancel" {
+	if after := workflowTestRead(t, f.store, stopped.ID); after.Status != workflowstate.InvocationCancelled || entry.State != "cancelled" || entry.StopIntent != "cancel" {
 		t.Fatal("sealed non-application did not finalize retained cancellation")
 	}
 

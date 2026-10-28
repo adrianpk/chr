@@ -19,12 +19,12 @@ func (s *Store) beginWorkflowSubmission(ctx context.Context, id string, provider
 	}
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		submission, submit, readErr = owner.prepareWorkflowSubmission(ctx, &run, provider, git)
+		submission, submit, readErr = invocationLocation.Owner.prepareWorkflowSubmission(ctx, &invocationLocation.Run, provider, git)
 
 		return readErr
 	})
@@ -127,7 +127,7 @@ func (s *Store) observeWorkflowSubmissionRetry(ctx context.Context, run *workflo
 }
 
 func (s *Store) checkWorkflowSubmissionAdmission(run *workflowInvocationFile, journal workflowSubmissionJournal) error {
-	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == "paused" {
+	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
 		return ErrWorkflowStop
 	}
 
@@ -188,15 +188,15 @@ func (s *Store) projectWorkflowSubmission(run *workflowInvocationFile, journal w
 	}
 
 	run.Submission = &binding
-	if run.StopIntent == "" && !workflowInvocationTerminal(run.Status) && run.Status != "paused" {
-		run.Status, run.Outcome = "waiting_integration", last.State
+	if run.StopIntent == "" && !workflowInvocationTerminal(run.Status) && run.Status != workflowstate.InvocationPaused {
+		run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, last.State
 	}
 
 	return s.commitWorkflowState(run)
 }
 
 func (s *Store) blockWorkflowSubmissionBudget(run *workflowInvocationFile) error {
-	run.Status, run.Outcome = "blocked", "integration_budget_exhausted"
+	run.Status, run.Outcome = workflowstate.InvocationBlocked, "integration_budget_exhausted"
 	run.Blocker = &Blocker{Dependency: run.Lane.Unit, Reason: "integration_submission_budget_exhausted", NextActionOwner: "workflow_operator"}
 
 	return errors.Join(ErrWorkflowIntegrationBudget, s.commitWorkflowState(run))

@@ -8,6 +8,7 @@ import (
 
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -41,7 +42,7 @@ func TestServiceWorkflowOwner(t *testing.T) {
 	checkServiceWorkflowOwnerStarts(t, operations, record.Task.Key)
 
 	retained, err := operations.ReadWorkflow(t.Context(), run.Invocation.ID)
-	if err != nil || len(retained.Attempts) != 1 || retained.Cursor != 0 || retained.Status != "running" {
+	if err != nil || len(retained.Attempts) != 1 || retained.Cursor != 0 || retained.Status != workflowstate.InvocationRunning {
 		t.Fatal("competing entrypoint changed the manual owner", err)
 	}
 

@@ -183,12 +183,12 @@ type IntegrationGrantRequest struct {
 // GrantWorkflowIntegration extends a ceiling without changing consumed history.
 func (s *Store) GrantWorkflowIntegration(ctx context.Context, request IntegrationGrantRequest) (budget IntegrationBudget, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, request.InvocationID)
 		if readErr != nil {
 			return readErr
 		}
 
-		budget, readErr = owner.grantWorkflowIntegration(ctx, run, request, nil)
+		budget, readErr = invocationLocation.Owner.grantWorkflowIntegration(ctx, invocationLocation.Run, request, nil)
 
 		return readErr
 	})

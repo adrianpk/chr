@@ -120,12 +120,12 @@ func (s *Store) guardWorkflowMergerAcceptance(ctx context.Context, claim *Claim,
 
 func (s *Store) checkWorkflowMergerRepairRequest(ctx context.Context, input workflowstate.MergerInput, git MergerRepairGit) error {
 	return s.withLock(ctx, func() error {
-		_, owner, err := s.locateWorkflowInvocation(ctx, input.InvocationID)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, input.InvocationID)
 		if err != nil {
 			return err
 		}
 
-		state, err := owner.readWorkflowMergerCheckpoint(input)
+		state, err := invocationLocation.Owner.readWorkflowMergerCheckpoint(input)
 		if err != nil {
 			return err
 		}

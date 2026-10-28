@@ -31,7 +31,9 @@ func (s *Store) executeWorkflowMerger(ctx context.Context, request MergerRequest
 	}
 	defer endWorkflowClaimExecution(claim)
 
-	watched, stop := s.watchWorkflowStop(ctx, claim)
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)

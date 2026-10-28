@@ -153,7 +153,7 @@ func checkNativeProcessProof(t *testing.T, store *Store, id string) {
 	t.Helper()
 
 	run := workflowTestRead(t, store, id)
-	if run.Cursor != 1 || run.ConfirmedCursor != 0 || run.Status != "waiting_integration" || len(run.Attempts) != 1 || run.Attempts[0].Outcome != "validated" {
+	if run.Cursor != 1 || run.ConfirmedCursor != 0 || run.Status != workflowstate.InvocationWaitingIntegration || len(run.Attempts) != 1 || run.Attempts[0].Outcome != "validated" {
 		t.Fatal("worker completion lost source proof or fabricated delivery", run)
 	}
 

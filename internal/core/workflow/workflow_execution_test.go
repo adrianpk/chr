@@ -70,7 +70,7 @@ func checkWorkflowTaskExact(t *testing.T, store *Store, hierarchy Materializatio
 	t.Helper()
 
 	retry := workflowTestStart(t, store, request)
-	if !retry.Attached || retry.Invocation.ID != run.Invocation.ID || retry.Invocation.Status != "completed" || len(retry.Invocation.Attempts) != 1 || retry.Invocation.Lane.HeadCommit != proof.Commit {
+	if !retry.Attached || retry.Invocation.ID != run.Invocation.ID || retry.Invocation.Status != workflowstate.InvocationCompleted || len(retry.Invocation.Attempts) != 1 || retry.Invocation.Lane.HeadCommit != proof.Commit {
 		t.Fatal("unchanged retry did not retain evidence and worktree")
 	}
 
@@ -124,7 +124,7 @@ func TestWorkflowTaskCumulative(t *testing.T) {
 	workflowTestExecute(t, store, next.Invocation.ID, "worker")
 
 	retained, err = store.ReadWorkflow(t.Context(), next.Invocation.ID)
-	if err != nil || retained.Status != "waiting_integration" || retained.Cursor != 3 || len(retained.Attempts) != 2 {
+	if err != nil || retained.Status != workflowstate.InvocationWaitingIntegration || retained.Cursor != 3 || len(retained.Attempts) != 2 {
 		t.Fatal("slice did not stop at the integration barrier")
 	}
 
@@ -203,7 +203,7 @@ func checkWorkflowTaskFailure(t *testing.T, store *Store, task Record, id string
 func checkWorkflowFailedAttempt(t *testing.T, store *Store, run Invocation) {
 	t.Helper()
 
-	if run.Status != "paused" || run.Attempts[0].Outcome != "failed" || run.Attempts[0].ResultRef == "" {
+	if run.Status != workflowstate.InvocationPaused || run.Attempts[0].Outcome != "failed" || run.Attempts[0].ResultRef == "" {
 		t.Fatal("failed attempt was not retained")
 	}
 

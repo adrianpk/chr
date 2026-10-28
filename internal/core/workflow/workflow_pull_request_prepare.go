@@ -33,7 +33,7 @@ func (s *Store) prepareWorkflowPullRequest(ctx context.Context, run *workflowInv
 }
 
 func (s *Store) checkWorkflowPullRequestReady(run workflowInvocationFile) error {
-	if run.StopIntent != "" || !slices.Contains([]string{"waiting_integration", "waiting_review", "blocked"}, run.Status) {
+	if run.StopIntent != "" || !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingIntegration, workflowstate.InvocationWaitingReview, workflowstate.InvocationBlocked}, run.Status) {
 		return ErrWorkflowOwned
 	}
 

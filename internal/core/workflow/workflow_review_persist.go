@@ -38,7 +38,7 @@ func (s *Store) persistWorkflowReviewInput(run *workflowInvocationFile, observat
 	run.ReviewCount++
 	ref := workflowReviewPath(run.ID, run.ReviewCount, "input.json")
 	run.Review = &workflowstate.ReviewBinding{Round: run.ReviewCount, Unit: input.Unit, State: "pending", InputRef: ref, InputHash: contenthash.Sum(data)}
-	run.Status, run.Outcome, run.Blocker = "waiting_review", "slice_review_pending", nil
+	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingReview, "slice_review_pending", nil
 
 	files, err := s.workflowReviewDomainChanges(run, observation, false)
 	if err != nil {
@@ -71,9 +71,9 @@ func (s *Store) persistWorkflowReviewDecision(run *workflowInvocationFile, obser
 	run.Review.ResultRef, run.Review.ResultHash, run.Review.State = ref, contenthash.Sum(data), state
 	run.Review.RepairTaskKey = decision.RepairTaskKey
 
-	run.Status, run.Outcome, run.Blocker = "waiting_review", "slice_review_"+state, nil
+	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationWaitingReview, "slice_review_"+state, nil
 	if state == "authorized" {
-		run.Status = "waiting_integration"
+		run.Status = workflowstate.InvocationWaitingIntegration
 	}
 
 	if state == "insufficient_evidence" || state == "human_required" {

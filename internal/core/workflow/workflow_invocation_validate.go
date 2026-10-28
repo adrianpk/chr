@@ -50,7 +50,7 @@ func validateWorkflowInvocationHeader(run workflowInvocationFile) error {
 		return fmt.Errorf("unsupported workflow invocation schema, authority or owner")
 	}
 
-	if !slices.Contains([]string{"pending", "running", "waiting_capacity", "waiting_review", "waiting_integration", "blocked", "completed", "paused", "cancelled"}, run.Status) {
+	if !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationPending, workflowstate.InvocationRunning, workflowstate.InvocationWaitingCapacity, workflowstate.InvocationWaitingReview, workflowstate.InvocationWaitingIntegration, workflowstate.InvocationBlocked, workflowstate.InvocationCompleted, workflowstate.InvocationPaused, workflowstate.InvocationCancelled}, run.Status) {
 		return fmt.Errorf("unsupported workflow invocation status")
 	}
 
@@ -276,11 +276,11 @@ func validateWorkflowStopState(run workflowInvocationFile) error {
 		return fmt.Errorf("invalid workflow stop intent")
 	}
 
-	if !slices.Contains([]string{"", "pending", "waiting_capacity", "waiting_review", "waiting_integration", "blocked", "paused"}, run.ResumeStatus) {
+	if !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationUnspecified, workflowstate.InvocationPending, workflowstate.InvocationWaitingCapacity, workflowstate.InvocationWaitingReview, workflowstate.InvocationWaitingIntegration, workflowstate.InvocationBlocked, workflowstate.InvocationPaused}, run.ResumeStatus) {
 		return fmt.Errorf("invalid workflow resume status")
 	}
 
-	if !slices.Contains([]string{"", "pending", "waiting_review", "waiting_integration", "blocked", "paused"}, run.CapacityResumeStatus) {
+	if !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationUnspecified, workflowstate.InvocationPending, workflowstate.InvocationWaitingReview, workflowstate.InvocationWaitingIntegration, workflowstate.InvocationBlocked, workflowstate.InvocationPaused}, run.CapacityResumeStatus) {
 		return fmt.Errorf("invalid workflow capacity resume status")
 	}
 

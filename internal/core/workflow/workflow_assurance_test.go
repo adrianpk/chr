@@ -94,7 +94,7 @@ func workflowAssuranceRun(t *testing.T, store *Store, id string, ports Continuat
 		progress := workflowAssuranceContinue(t, store, id, ports)
 		run := progress.Invocation
 
-		if run.Status == "completed" {
+		if run.Status == workflowstate.InvocationCompleted {
 			return run
 		}
 

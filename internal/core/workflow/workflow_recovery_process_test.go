@@ -158,7 +158,7 @@ func checkWorkflowRecoveryReplacement(t *testing.T, store *Store, id, release st
 	}
 
 	recovered := waitWorkflowRecovery(t, store, id)
-	if recovered.Status != "paused" || recovered.Attempts[0].Outcome != "recovered" || recovered.Attempts[0].CheckpointRef == "" || recovered.Cursor != 0 {
+	if recovered.Status != workflowstate.InvocationPaused || recovered.Attempts[0].Outcome != "recovered" || recovered.Attempts[0].CheckpointRef == "" || recovered.Cursor != 0 {
 		t.Fatal("dead owner was not checkpointed")
 	}
 
@@ -273,7 +273,7 @@ func TestWorkflowRecoveryTimeout(t *testing.T) {
 	}
 
 	recovered := waitWorkflowRecovery(t, store, run.Invocation.ID)
-	if recovered.Status != "paused" || recovered.Attempts[0].CheckpointRef == "" {
+	if recovered.Status != workflowstate.InvocationPaused || recovered.Attempts[0].CheckpointRef == "" {
 		t.Fatal("timeout discarded evidence")
 	}
 }

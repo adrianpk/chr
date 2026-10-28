@@ -41,7 +41,9 @@ func checkTelegramControlStopOwner(t *testing.T, change string) {
 
 	telegramControlOwnerStop(t, store, run.ID, change)
 
-	watched, stop := store.watchWorkflowStop(t.Context(), &observed)
+	watched, stop := context.WithCancel(t.Context())
+
+	store.watchWorkflowStop(watched, workflowStopWatch{Claim: &observed, Cancel: stop})
 	defer stop()
 
 	waitTelegramControlOwnerStop(t, watched, change)

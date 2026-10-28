@@ -44,31 +44,31 @@ func (adapter *NativeReviewAdapter) ReadWorkflowNativePolicy(ctx context.Context
 func (adapter *NativeReviewAdapter) nativePublisher(ctx context.Context) (workflowInvocationFile, *Store, NativePublisherProfile, error) {
 	// Capability checks also run inside the repository mutation lock. Read the
 	// already prepared owner images without acquiring that lock recursively.
-	run, owner, err := adapter.store.locateWorkflowInvocationPrepared(ctx, adapter.id, func(*Store) error { return nil })
+	invocationLocation, err := adapter.store.locateWorkflowInvocationPrepared(ctx, adapter.id, func(*Store) error { return nil })
 	if err != nil {
-		return run, owner, NativePublisherProfile{}, err
+		return invocationLocation.Run, invocationLocation.Owner, NativePublisherProfile{}, err
 	}
 
-	if !workflowNativePublicationOwner(run) {
-		return run, owner, NativePublisherProfile{}, workflowstate.ErrConflict
+	if !workflowNativePublicationOwner(invocationLocation.Run) {
+		return invocationLocation.Run, invocationLocation.Owner, NativePublisherProfile{}, workflowstate.ErrConflict
 	}
 
-	config, err := workspaceconfig.Load(owner.layout.ProjectDir())
+	config, err := workspaceconfig.Load(invocationLocation.Owner.layout.ProjectDir())
 	if err != nil || config.Work.Integration.PublicationProfile != workspaceconfig.WorkflowPublicationGitAtomicDualRef {
-		return run, owner, NativePublisherProfile{}, ErrWorkflowAtomicGuard
+		return invocationLocation.Run, invocationLocation.Owner, NativePublisherProfile{}, ErrWorkflowAtomicGuard
 	}
 
-	if err := owner.checkWorkflowLaneRegistration(ctx, *run.Lane); err != nil {
-		return run, owner, NativePublisherProfile{}, err
+	if err := invocationLocation.Owner.checkWorkflowLaneRegistration(ctx, *invocationLocation.Run.Lane); err != nil {
+		return invocationLocation.Run, invocationLocation.Owner, NativePublisherProfile{}, err
 	}
 
-	profile, err := LoadWorkflowNativePublisher(adapter.configDir, run.PullRequest.Request.Repository, "refs/heads/"+run.PullRequest.Request.BaseBranch)
+	profile, err := LoadWorkflowNativePublisher(adapter.configDir, invocationLocation.Run.PullRequest.Request.Repository, "refs/heads/"+invocationLocation.Run.PullRequest.Request.BaseBranch)
 
-	return run, owner, profile, err
+	return invocationLocation.Run, invocationLocation.Owner, profile, err
 }
 
 func workflowNativePublicationOwner(run workflowInvocationFile) bool {
-	return run.Lane != nil && run.PullRequest != nil && run.PullRequest.State == "bound" && run.PullRequest.CandidateHash == run.CandidateHash && run.StopIntent == "" && run.Status != "paused" && !workflowInvocationTerminal(run.Status)
+	return run.Lane != nil && run.PullRequest != nil && run.PullRequest.State == "bound" && run.PullRequest.CandidateHash == run.CandidateHash && run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && !workflowInvocationTerminal(run.Status)
 }
 
 func workflowNativeOwnedPR(run workflowInvocationFile, pr workflowstate.PullRequestSnapshot) bool {

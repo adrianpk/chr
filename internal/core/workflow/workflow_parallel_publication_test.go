@@ -134,7 +134,7 @@ func finalizeWorkflowParallelPublication(t *testing.T, lane workflowParallelPubl
 	t.Helper()
 
 	progress, err := lane.fixture.store.AdvanceWorkflowSliceIntegration(t.Context(), lane.fixture.run.ID, workflowPublicationPorts(lane.fixture, lane.provider))
-	if err != nil || progress.Receipt == nil || progress.Invocation.Status != "completed" {
+	if err != nil || progress.Receipt == nil || progress.Invocation.Status != workflowstate.InvocationCompleted {
 		t.Fatal("canonical publication was not finalized", err)
 	}
 
@@ -151,7 +151,7 @@ func TestWorkflowParallelPublicationConflict(t *testing.T) {
 	target := workflowIntegrationCommand(t, lanes[0].fixture.remote, "rev-parse", "refs/heads/dev")
 
 	_, err := lanes[1].fixture.store.PrepareWorkflowSliceIntegration(t.Context(), lanes[1].fixture.run.ID, lanes[1].provider, lanes[1].fixture.git)
-	if err == nil || workflowTestRead(t, lanes[1].fixture.store, lanes[1].fixture.run.ID).Status != "blocked" {
+	if err == nil || workflowTestRead(t, lanes[1].fixture.store, lanes[1].fixture.run.ID).Status != workflowstate.InvocationBlocked {
 		t.Fatal("conflicting independent lane did not block", err)
 	}
 
@@ -184,7 +184,7 @@ func TestWorkflowParallelPublicationHuman(t *testing.T) {
 	workflowTestReleaseLegacy(t, lock)
 
 	current := workflowTestRead(t, first.fixture.store, first.fixture.run.ID)
-	if current.Status != "waiting_review" || current.CandidateRef != first.fixture.run.CandidateRef || current.Submission != nil || workflowTestRead(t, lanes[1].fixture.store, lanes[1].fixture.run.ID).Submission != nil {
+	if current.Status != workflowstate.InvocationWaitingReview || current.CandidateRef != first.fixture.run.CandidateRef || current.Submission != nil || workflowTestRead(t, lanes[1].fixture.store, lanes[1].fixture.run.ID).Submission != nil {
 		t.Fatal("human wait changed a candidate or acquired publication exclusion")
 	}
 }

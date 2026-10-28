@@ -5,6 +5,7 @@ import (
 
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type guidedProgressActivator interface {
@@ -95,7 +96,7 @@ func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.Se
 		return session, err
 	}
 
-	if run.Status == "running" {
+	if run.Status == workflowstate.InvocationRunning {
 		s.workflowNamespace = session.Namespace
 		if _, err := s.ReconcileWorkflow(ctx, run.ID, run.Revision); err != nil {
 			return session, err
@@ -108,7 +109,7 @@ func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.Se
 // recoverGuidedInterruptedWork resumes a quiescent host interruption under the
 // native owner and original guided authority. An operator stop is never cleared.
 func (s service) recoverGuidedInterruptedWork(ctx context.Context, run workflowcore.Invocation) error {
-	if run.Status != "paused" || run.StopIntent != "" || run.Outcome != "interrupted" {
+	if run.Status != workflowstate.InvocationPaused || run.StopIntent != "" || run.Outcome != "interrupted" {
 		return nil
 	}
 

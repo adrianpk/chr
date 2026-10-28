@@ -18,11 +18,11 @@ func (failure workflowPrerequisiteError) Error() string {
 }
 
 func workflowPrerequisitePaused(run workflowInvocationFile) bool {
-	return run.Status == "paused" && run.Outcome == "prerequisite_blocked" && run.Blocker != nil && run.Blocker.NextActionOwner == "prerequisite_owner"
+	return run.Status == workflowstate.InvocationPaused && run.Outcome == "prerequisite_blocked" && run.Blocker != nil && run.Blocker.NextActionOwner == "prerequisite_owner"
 }
 
 func workflowFailedTaskPaused(run workflowInvocationFile) bool {
-	return run.Selection.Selector.Extent == "loose" && run.Status == "paused" && len(run.Attempts) > 0 && run.Attempts[len(run.Attempts)-1].Outcome == "failed"
+	return run.Selection.Selector.Extent == "loose" && run.Status == workflowstate.InvocationPaused && len(run.Attempts) > 0 && run.Attempts[len(run.Attempts)-1].Outcome == "failed"
 }
 
 func (s *Store) retainWorkflowPrerequisiteStop(run *workflowInvocationFile, failure error) error {
@@ -31,7 +31,7 @@ func (s *Store) retainWorkflowPrerequisiteStop(run *workflowInvocationFile, fail
 		return failure
 	}
 
-	run.Status, run.Outcome, run.Blocker = "paused", "prerequisite_blocked", &prerequisite.blocker
+	run.Status, run.Outcome, run.Blocker = workflowstate.InvocationPaused, "prerequisite_blocked", &prerequisite.blocker
 
 	return errors.Join(failure, s.commitWorkflowState(run))
 }

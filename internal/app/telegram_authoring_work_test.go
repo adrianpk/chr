@@ -281,9 +281,10 @@ func telegramAuthoringWorkNoAdmission(t *testing.T, operations service) {
 		t.Fatal(err)
 	}
 
-	invocations, _, err := store.InspectWorkflowPage(t.Context(), 0, 20)
-	if err != nil || len(invocations) != 0 {
-		t.Fatalf("preparation admitted invocations=%+v err=%v", invocations, err)
+	invocationPage, err := store.InspectWorkflowPage(t.Context(), 0, 20)
+
+	if err != nil || len(invocationPage.Invocations) != 0 {
+		t.Fatalf("preparation admitted invocations=%+v err=%v", invocationPage.Invocations, err)
 	}
 }
 

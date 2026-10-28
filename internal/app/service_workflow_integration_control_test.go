@@ -11,7 +11,7 @@ import (
 func serviceIntegrationControl(status WorkflowWorkStatus, action string) WorkflowControlRequest {
 	current := status.Integration
 
-	return WorkflowControlRequest{Action: action, ID: status.ID, ExpectedRevision: status.Revision, BindingHash: status.ApprovalHash, Integration: &WorkflowIntegrationControlGuard{EntryID: current.EntryID, EntryRevision: current.EntryRevision, BudgetRevision: current.Budget.Revision, CandidateHash: current.CandidateHash}}
+	return WorkflowControlRequest{Action: action, ID: status.ID, ExpectedRevision: status.Revision, BindingHash: status.ApprovalHash, Integration: &workflowstate.ControlIntegrationGuard{EntryID: current.EntryID, EntryRevision: current.EntryRevision, BudgetRevision: current.Budget.Revision, CandidateHash: current.CandidateHash}}
 }
 
 // TestServiceIntegrationGrant rejects every stale displayed fence before the

@@ -52,7 +52,9 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 	}
 	defer endWorkflowClaimExecution(claim)
 
-	watched, stop := s.watchWorkflowStop(ctx, claim)
+	watched, stop := context.WithCancel(ctx)
+
+	s.watchWorkflowStop(watched, workflowStopWatch{Claim: claim, Cancel: stop})
 	defer stop()
 
 	deadline, cancel := context.WithDeadline(watched, prepared.leaseUntil)
@@ -89,16 +91,16 @@ func (s *Store) ApproveWorkflowSlice(ctx context.Context, id, bindingHash string
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		if err := checkWorkflowRevision(run.Invocation, expected); err != nil {
+		if err := checkWorkflowRevision(invocationLocation.Run.Invocation, expected); err != nil {
 			return err
 		}
 
-		result, readErr = owner.approveWorkflowSlice(ctx, run, bindingHash, provider, nil)
+		result, readErr = invocationLocation.Owner.approveWorkflowSlice(ctx, invocationLocation.Run, bindingHash, provider, nil)
 
 		return readErr
 	})
@@ -113,12 +115,12 @@ func (s *Store) CheckWorkflowReviewGrant(ctx context.Context, id string, provide
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation2, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		input, readErr = owner.checkWorkflowReviewGrant(ctx, run, provider)
+		input, readErr = invocationLocation2.Owner.checkWorkflowReviewGrant(ctx, invocationLocation2.Run, provider)
 
 		return readErr
 	})

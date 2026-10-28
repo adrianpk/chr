@@ -9,12 +9,12 @@ import (
 
 func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submissionID string, response workflowstate.SubmissionResponse, submitErr error) (submission workflowstate.Submission, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		journal, readErr := owner.readWorkflowSubmissionJournal(ctx, run)
+		journal, readErr := invocationLocation.Owner.readWorkflowSubmissionJournal(ctx, invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
@@ -30,11 +30,11 @@ func (s *Store) retainWorkflowSubmissionResponse(ctx context.Context, id, submis
 		}
 
 		journal.Attempts[len(journal.Attempts)-1] = submission
-		if readErr := owner.writeWorkflowSubmissionJournal(ctx, &journal); readErr != nil {
+		if readErr := invocationLocation.Owner.writeWorkflowSubmissionJournal(ctx, &journal); readErr != nil {
 			return readErr
 		}
 
-		return owner.projectWorkflowSubmission(&run, journal)
+		return invocationLocation.Owner.projectWorkflowSubmission(&invocationLocation.Run, journal)
 	})
 
 	return submission, err
@@ -54,12 +54,12 @@ func workflowSubmissionResponseState(response workflowstate.SubmissionResponse, 
 
 func (s *Store) finishWorkflowSubmissionObservation(ctx context.Context, id string, observed workflowstate.Submission) (submission workflowstate.Submission, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation2, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		journal, readErr := owner.readWorkflowSubmissionJournal(ctx, run)
+		journal, readErr := invocationLocation2.Owner.readWorkflowSubmissionJournal(ctx, invocationLocation2.Run)
 		if readErr != nil {
 			return readErr
 		}
@@ -69,13 +69,13 @@ func (s *Store) finishWorkflowSubmissionObservation(ctx context.Context, id stri
 			return workflowstate.ErrConflict
 		}
 
-		if readErr := owner.retainWorkflowSubmissionObservation(ctx, &journal, observed); readErr != nil {
+		if readErr := invocationLocation2.Owner.retainWorkflowSubmissionObservation(ctx, &journal, observed); readErr != nil {
 			return readErr
 		}
 
 		submission = journal.Attempts[len(journal.Attempts)-1]
 
-		return owner.projectWorkflowSubmission(&run, journal)
+		return invocationLocation2.Owner.projectWorkflowSubmission(&invocationLocation2.Run, journal)
 	})
 
 	return submission, err

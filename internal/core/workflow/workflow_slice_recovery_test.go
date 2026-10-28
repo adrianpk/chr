@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowSliceCrashProcess terminates an owned writer between journaled
@@ -112,7 +113,7 @@ func checkWorkflowSliceJournal(t *testing.T, store *Store, hierarchy Materializa
 	workflowTestValidatedSlice(t, store, hierarchy, retained.ID)
 
 	if stage == "claim" {
-		if retained.Status != "paused" || retained.ResumeStatus != "waiting_integration" || retained.Attempts[3].Outcome != "recovered" {
+		if retained.Status != workflowstate.InvocationPaused || retained.ResumeStatus != workflowstate.InvocationWaitingIntegration || retained.Attempts[3].Outcome != "recovered" {
 			t.Fatal("aggregate claim recovery reset validated tasks")
 		}
 
@@ -140,7 +141,7 @@ func TestWorkflowSliceRepairJournal(t *testing.T) {
 			workflowSliceCrash(t, store, run.Invocation.ID, "repair", hierarchy.Tasks[1].Task.Key, index)
 
 			retained, err := store.ReconcileWorkflow(t.Context(), run.Invocation.ID)
-			if err != nil || retained.Status != "pending" || retained.Cursor != 1 || retained.CandidateRef != "" {
+			if err != nil || retained.Status != workflowstate.InvocationPending || retained.Cursor != 1 || retained.CandidateRef != "" {
 				t.Fatalf("repair journal recovery: %+v, %v", retained, err)
 			}
 

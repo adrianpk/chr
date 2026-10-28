@@ -14,16 +14,16 @@ func (s *Store) finishWorkflowMerger(ctx context.Context, claim *Claim, prepared
 	freshErr := s.checkWorkflowMergerPrepared(ctx, claim, prepared, provider)
 
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
+		claimObservation, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if err != nil {
 			return err
 		}
 
-		if err := workflowAttemptQuiescent(run.Attempts[len(run.Attempts)-1]); err != nil {
+		if err := workflowAttemptQuiescent(claimObservation.Run.Attempts[len(claimObservation.Run.Attempts)-1]); err != nil {
 			return err
 		}
 
-		bindingErr := checkWorkflowExecutionBinding(run, record, prepared)
+		bindingErr := checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared)
 		if err := s.checkWorkflowPreparedInput(prepared); err != nil {
 			bindingErr = errors.Join(bindingErr, err)
 		}
@@ -38,7 +38,7 @@ func (s *Store) finishWorkflowMerger(ctx context.Context, claim *Claim, prepared
 			failure = errors.Join(failure, err)
 		}
 
-		if err := s.persistWorkflowMergerFinish(ctx, &run, record, claim, *attempt); err != nil {
+		if err := s.persistWorkflowMergerFinish(ctx, &claimObservation.Run, claimObservation.Record, claim, *attempt); err != nil {
 			return errors.Join(failure, err)
 		}
 
@@ -103,7 +103,7 @@ func workflowMergerFinishedRun(run *workflowInvocationFile, claim *Claim, result
 	current.Outcome, current.FinishedAt = "checkpointed", time.Now().UTC()
 	current.ResultRef, current.ResultHash = workflowAttemptFile(run.ID, claim.AttemptID, "result.json"), contenthash.Sum(data)
 
-	run.Status, run.Outcome = "waiting_integration", "merger_proposal_pending"
+	run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "merger_proposal_pending"
 	if result.Acceptance != nil && result.Acceptance.Outcome == "accepted_pending_validation" {
 		run.Outcome = "merger_repair_pending_validation"
 	}
@@ -113,11 +113,11 @@ func workflowMergerFinishedRun(run *workflowInvocationFile, claim *Claim, result
 	}
 
 	if run.StopIntent != "" {
-		run.Status, current.Outcome = workflowstate.StopStatus(run.StopIntent), workflowstate.StopStatus(run.StopIntent)
+		run.Status, current.Outcome = workflowstate.StopStatus(run.StopIntent), string(workflowstate.StopStatus(run.StopIntent))
 	}
 
-	if run.Status == "paused" {
-		run.ResumeStatus = "waiting_integration"
+	if run.Status == workflowstate.InvocationPaused {
+		run.ResumeStatus = workflowstate.InvocationWaitingIntegration
 	}
 
 	return workflowstate.FileChange{Path: current.ResultRef, After: data}

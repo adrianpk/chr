@@ -12,21 +12,21 @@ import (
 
 func (s *Store) loadWorkflowManualTask(ctx context.Context, claim *Claim, execute bool) (prepared workflowPreparedTask, err error) {
 	err = s.withLock(ctx, func() error {
-		run, record, readErr := s.checkWorkflowClaim(ctx, claim)
+		claimObservation, readErr := s.checkWorkflowClaim(ctx, claim)
 		if readErr != nil {
 			return readErr
 		}
 
-		if run.StopIntent != "" {
+		if claimObservation.Run.StopIntent != "" {
 			return ErrWorkflowStop
 		}
 
-		attempt := run.Attempts[len(run.Attempts)-1]
+		attempt := claimObservation.Run.Attempts[len(claimObservation.Run.Attempts)-1]
 		if readErr = workflowAttemptQuiescent(attempt); readErr != nil {
 			return readErr
 		}
 
-		prepared, readErr = claim.store.loadWorkflowManualInput(run, record, execute)
+		prepared, readErr = claim.store.loadWorkflowManualInput(claimObservation.Run, claimObservation.Record, execute)
 
 		return readErr
 	})
@@ -101,16 +101,16 @@ func (s *Store) checkWorkflowManualCandidate(ctx context.Context, claim *Claim, 
 		return workflowstate.ErrConflict
 	}
 
-	commit, tree, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
+	laneImage, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if err != nil {
 		return err
 	}
 
-	if commit != candidate.Commit || tree != candidate.Tree {
+	if laneImage.Commit != candidate.Commit || laneImage.Tree != candidate.Tree {
 		return fmt.Errorf("%w: reported manual candidate differs from actual Git image", workflowstate.ErrConflict)
 	}
 
-	return s.checkWorkflowValidationImage(ctx, claim, prepared, workflowstate.TaskResult{TaskValidation: workflowstate.TaskValidation{Commit: commit, Tree: tree}})
+	return s.checkWorkflowValidationImage(ctx, claim, prepared, workflowstate.TaskResult{TaskValidation: workflowstate.TaskValidation{Commit: laneImage.Commit, Tree: laneImage.Tree}})
 }
 
 func (s *Store) workflowManualWorkerResult(ctx context.Context, claim *Claim) (workflowstate.CommandResult, error) {

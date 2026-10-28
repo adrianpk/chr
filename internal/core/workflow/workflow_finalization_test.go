@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func workflowVerifiedDelivery(t *testing.T, method string) workflowIntegrationFixture {
@@ -52,7 +54,7 @@ func checkWorkflowFinalizedSlice(t *testing.T, fixture workflowIntegrationFixtur
 	t.Helper()
 
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)
-	if run.Status != "completed" || run.Outcome != "slice_integrated" || run.DeliveryRef != receipt.Path || len(run.Attempts) != 4 || fixture.provider.creates != 1 {
+	if run.Status != workflowstate.InvocationCompleted || run.Outcome != "slice_integrated" || run.DeliveryRef != receipt.Path || len(run.Attempts) != 4 || fixture.provider.creates != 1 {
 		t.Fatal("finalization changed PR/worker count or did not complete the selected slice")
 	}
 

@@ -143,7 +143,7 @@ func TestWorkflowTaskReuseTarget(t *testing.T) {
 	}
 
 	retained, err := store.ReadWorkflow(t.Context(), next.Invocation.ID)
-	if err != nil || retained.Cursor != 0 || retained.Status != "pending" {
+	if err != nil || retained.Cursor != 0 || retained.Status != workflowstate.InvocationPending {
 		t.Fatal("reused evidence advanced an unavailable target")
 	}
 }

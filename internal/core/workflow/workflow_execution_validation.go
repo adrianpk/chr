@@ -9,12 +9,12 @@ import (
 )
 
 func (s *Store) validateWorkflowTask(ctx context.Context, claim *Claim, prepared workflowPreparedTask, result *workflowstate.TaskResult) error {
-	commit, tree, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
+	laneImage, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if err != nil {
 		return err
 	}
 
-	result.Commit, result.Tree = commit, tree
+	result.Commit, result.Tree = laneImage.Commit, laneImage.Tree
 
 	gate := prepared.input.Contract.Validation
 	if !gate.Required {
@@ -53,12 +53,12 @@ func (s *Store) checkWorkflowValidationImage(ctx context.Context, claim *Claim, 
 		return err
 	}
 
-	commit, tree, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
+	laneImage2, err := claim.store.workflowLaneCandidate(ctx, prepared.input.Lane)
 	if err != nil {
 		return err
 	}
 
-	if commit != result.Commit || tree != result.Tree {
+	if laneImage2.Commit != result.Commit || laneImage2.Tree != result.Tree {
 		return fmt.Errorf("%w: validation changed its immutable Git candidate", workflowstate.ErrConflict)
 	}
 

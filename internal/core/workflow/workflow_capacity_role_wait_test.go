@@ -42,7 +42,7 @@ func testWorkflowCapacityRoleWait(t *testing.T, role string) {
 	}
 
 	after := workflowTestRead(t, store, id)
-	if after.Status == "waiting_capacity" || after.CapacityResumeStatus != "" {
+	if after.Status == workflowstate.InvocationWaitingCapacity || after.CapacityResumeStatus != workflowstate.InvocationUnspecified {
 		t.Fatal("completed role retained an obsolete wait", after)
 	}
 }
@@ -50,7 +50,7 @@ func testWorkflowCapacityRoleWait(t *testing.T, role string) {
 func assertWorkflowRoleWait(t *testing.T, before, waiting Invocation) {
 	t.Helper()
 
-	if waiting.Status != "waiting_capacity" || waiting.CapacityResumeStatus != before.Status || len(waiting.Attempts) != len(before.Attempts) || waiting.CandidateRef != before.CandidateRef {
+	if waiting.Status != workflowstate.InvocationWaitingCapacity || waiting.CapacityResumeStatus != before.Status || len(waiting.Attempts) != len(before.Attempts) || waiting.CandidateRef != before.CandidateRef {
 		t.Fatal("role wait changed evidence, attempts or previous phase", before, waiting)
 	}
 }

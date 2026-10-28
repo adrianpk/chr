@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"strings"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramGuidedResultSummary(observed GuidedUseCaseInspection) string {
@@ -20,7 +22,7 @@ func telegramGuidedResultSummary(observed GuidedUseCaseInspection) string {
 		text = "All admitted work has confirmed delivery and required closing evidence."
 	}
 
-	if result.Invocation.Status == "cancelled" {
+	if result.Invocation.Status == workflowstate.InvocationCancelled {
 		text = "Cancelled. Confirmed deliveries are preserved; remaining work has not been delivered."
 	}
 

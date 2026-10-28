@@ -88,7 +88,7 @@ func checkHarnessBindingPause(t *testing.T, store *Store, original Invocation) {
 	t.Helper()
 
 	paused, err := store.StopWorkflow(t.Context(), original.ID, "pause")
-	if err != nil || paused.Status != "paused" {
+	if err != nil || paused.Status != workflowstate.InvocationPaused {
 		t.Fatal("bound invocation did not pause", err)
 	}
 

@@ -159,7 +159,7 @@ func checkWorkflowDeliveryProof(t *testing.T, fixture workflowIntegrationFixture
 	}
 
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)
-	if run.Status != "waiting_integration" || run.Outcome != "slice_delivery_verified" || run.DeliveryProofRef == "" || len(run.Attempts) != 4 {
+	if run.Status != workflowstate.InvocationWaitingIntegration || run.Outcome != "slice_delivery_verified" || run.DeliveryProofRef == "" || len(run.Attempts) != 4 {
 		t.Fatal("verified delivery did not retain the finalization barrier")
 	}
 
@@ -210,7 +210,7 @@ func TestWorkflowIntegrationReject(t *testing.T) {
 			}
 
 			run := workflowTestRead(t, fixture.store, fixture.run.ID)
-			if run.DeliveryProofRef != "" || run.Status == "completed" {
+			if run.DeliveryProofRef != "" || run.Status == workflowstate.InvocationCompleted {
 				t.Fatal("failed verification created delivery proof or completed tasks")
 			}
 

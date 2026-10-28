@@ -9,6 +9,16 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowValidationRead struct {
+	Validation ResultValidation
+	Bytes      int
+}
+
+type workflowTaskInputRead struct {
+	Input TaskInput
+	Bytes int
+}
+
 // ResultValidation contains the latest host task validation, without
 // worker output, launch commands, process identities or owner credentials.
 type ResultValidation struct {
@@ -37,79 +47,79 @@ func (s *Store) workflowResultValidations(ctx context.Context, run workflowInvoc
 			return nil, ErrWorkflowCapacity
 		}
 
-		validation, size, err := s.workflowResultValidation(attempt)
+		validationRead, err := s.workflowResultValidation(attempt)
 		if err != nil {
 			return nil, err
 		}
 
-		remaining -= size
+		remaining -= validationRead.Bytes
 		if remaining < 0 {
 			return nil, ErrWorkflowCapacity
 		}
 
 		seen[attempt.TaskKey] = true
 
-		result = append(result, validation)
+		result = append(result, validationRead.Validation)
 	}
 
 	return result, nil
 }
 
-func (s *Store) workflowResultValidation(attempt Attempt) (ResultValidation, int, error) {
+func (s *Store) workflowResultValidation(attempt Attempt) (workflowValidationRead, error) {
 	path, err := s.safePath(attempt.ResultRef)
 	if err != nil {
-		return ResultValidation{}, 0, err
+		return workflowValidationRead{Validation: ResultValidation{}, Bytes: 0}, err
 	}
 
 	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != attempt.ResultHash {
-		return ResultValidation{}, 0, errorsOrConflict(err)
+		return workflowValidationRead{Validation: ResultValidation{}, Bytes: 0}, errorsOrConflict(err)
 	}
 
 	var evidence workflowstate.TaskResult
 	if err := json.Unmarshal(data, &evidence); err != nil {
-		return ResultValidation{}, 0, err
+		return workflowValidationRead{Validation: ResultValidation{}, Bytes: 0}, err
 	}
 
 	if !workflowResultMatchesAttempt(evidence, attempt) {
-		return ResultValidation{}, 0, workflowstate.ErrConflict
+		return workflowValidationRead{Validation: ResultValidation{}, Bytes: 0}, workflowstate.ErrConflict
 	}
 
 	for i := range evidence.Validation {
 		evidence.Validation[i].Stdout, evidence.Validation[i].Stderr = "", ""
 	}
 
-	input, size, err := s.workflowResultTask(attempt)
+	taskInputRead, err := s.workflowResultTask(attempt)
 	if err != nil {
-		return ResultValidation{}, 0, err
+		return workflowValidationRead{Validation: ResultValidation{}, Bytes: 0}, err
 	}
 
-	return ResultValidation{Ticket: attempt.TaskKey, Title: input.Contract.Title, Outcome: evidence.Outcome, Reference: workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, Commands: evidence.Validation, Waiver: evidence.WaiverReason}, len(data) + size, nil
+	return workflowValidationRead{Validation: ResultValidation{Ticket: attempt.TaskKey, Title: taskInputRead.Input.Contract.Title, Outcome: evidence.Outcome, Reference: workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, Commands: evidence.Validation, Waiver: evidence.WaiverReason}, Bytes: len(data) + taskInputRead.Bytes}, nil
 }
 
 func workflowResultMatchesAttempt(evidence workflowstate.TaskResult, attempt Attempt) bool {
 	return evidence.AttemptID == attempt.ID && evidence.Generation == attempt.Generation && evidence.InputRef == attempt.InputRef && evidence.InputHash == attempt.InputHash
 }
 
-func (s *Store) workflowResultTask(attempt Attempt) (TaskInput, int, error) {
+func (s *Store) workflowResultTask(attempt Attempt) (workflowTaskInputRead, error) {
 	path, err := s.safePath(attempt.InputRef)
 	if err != nil {
-		return TaskInput{}, 0, err
+		return workflowTaskInputRead{Input: TaskInput{}, Bytes: 0}, err
 	}
 
 	data, err := opsfile.Read(path)
 	if err != nil || contenthash.Sum(data) != attempt.InputHash {
-		return TaskInput{}, 0, errorsOrConflict(err)
+		return workflowTaskInputRead{Input: TaskInput{}, Bytes: 0}, errorsOrConflict(err)
 	}
 
 	var input TaskInput
 	if err := json.Unmarshal(data, &input); err != nil {
-		return input, 0, err
+		return workflowTaskInputRead{Input: input, Bytes: 0}, err
 	}
 
 	if input.AttemptID != attempt.ID || input.Generation != attempt.Generation || input.TaskKey != attempt.TaskKey {
-		return input, 0, workflowstate.ErrConflict
+		return workflowTaskInputRead{Input: input, Bytes: 0}, workflowstate.ErrConflict
 	}
 
-	return input, len(data), nil
+	return workflowTaskInputRead{Input: input, Bytes: len(data)}, nil
 }

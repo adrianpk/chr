@@ -121,12 +121,12 @@ func (s *Store) writeWorkflowNativeDispatchEvidence(submission workflowstate.Sub
 func (s *Store) updateWorkflowNativeDispatch(ctx context.Context, expected workflowstate.Submission, change func(*Store, *workflowstate.NativeSubmission) error) (submission workflowstate.Submission, err error) {
 	submission = expected
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, expected.InvocationID)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, expected.InvocationID)
 		if err != nil {
 			return err
 		}
 
-		journal, entry, err := owner.readWorkflowOwnedDispatch(ctx, run, expected)
+		journal, entry, err := invocationLocation.Owner.readWorkflowOwnedDispatch(ctx, invocationLocation.Run, expected)
 		if err != nil {
 			return err
 		}
@@ -134,13 +134,13 @@ func (s *Store) updateWorkflowNativeDispatch(ctx context.Context, expected workf
 		last := journal.Attempts[len(journal.Attempts)-1]
 
 		facts := *last.Native
-		if err := change(owner, &facts); err != nil {
+		if err := change(invocationLocation.Owner, &facts); err != nil {
 			return err
 		}
 
-		guard := IntegrationBudgetGuard{InvocationID: run.ID, InvocationRevision: run.Revision, BudgetRevision: run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
+		guard := IntegrationBudgetGuard{InvocationID: invocationLocation.Run.ID, InvocationRevision: invocationLocation.Run.Revision, BudgetRevision: invocationLocation.Run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
 
-		submission, err = owner.retainWorkflowNativeSubmission(ctx, run, NativeSubmissionUpdate{IntegrationBudgetGuard: guard, SubmissionID: last.ID, JournalHash: journal.sourceHash, Facts: facts})
+		submission, err = invocationLocation.Owner.retainWorkflowNativeSubmission(ctx, invocationLocation.Run, NativeSubmissionUpdate{IntegrationBudgetGuard: guard, SubmissionID: last.ID, JournalHash: journal.sourceHash, Facts: facts})
 		if err != nil {
 			return fmt.Errorf("retain dispatch facts: %w", err)
 		}

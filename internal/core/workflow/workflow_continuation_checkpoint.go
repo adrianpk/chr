@@ -36,24 +36,24 @@ func (s *Store) retainWorkflowContinuation(ctx context.Context, observed Invocat
 	result = observed
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, observed.ID)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, observed.ID)
 		if readErr != nil {
 			return readErr
 		}
 
-		if run.Revision != observed.Revision || run.RequestHash != observed.RequestHash {
+		if invocationLocation.Run.Revision != observed.Revision || invocationLocation.Run.RequestHash != observed.RequestHash {
 			return workflowstate.ErrConflict
 		}
 
-		if readErr = owner.checkWorkflowInputs(ctx, run); readErr != nil {
+		if readErr = invocationLocation.Owner.checkWorkflowInputs(ctx, invocationLocation.Run); readErr != nil {
 			return readErr
 		}
 
-		if readErr = owner.commitWorkflowContinuation(&run, steps, reason); readErr != nil {
+		if readErr = invocationLocation.Owner.commitWorkflowContinuation(&invocationLocation.Run, steps, reason); readErr != nil {
 			return readErr
 		}
 
-		result = run.Invocation
+		result = invocationLocation.Run.Invocation
 
 		return nil
 	})

@@ -68,7 +68,7 @@ func (s service) advanceRetainedWork(ctx context.Context, result RetainedWorkPro
 		return result, err
 	}
 
-	if run.StopIntent != "" || run.Status == "paused" || run.Status == "cancelled" {
+	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || run.Status == workflowstate.InvocationCancelled {
 		return result, nil
 	}
 
@@ -152,14 +152,14 @@ func (s service) recoverRetainedWork(ctx context.Context, status WorkflowWorkSta
 		return run, workflowstate.ErrConflict
 	}
 
-	if run.Status == "running" {
+	if run.Status == workflowstate.InvocationRunning {
 		run, err = s.ReconcileWorkflow(ctx, run.ID, run.Revision)
 		if err != nil {
 			return run, err
 		}
 	}
 
-	if run.Status == "paused" && run.StopIntent == "" && run.Outcome == "recovered" {
+	if run.Status == workflowstate.InvocationPaused && run.StopIntent == "" && run.Outcome == "recovered" {
 		return s.ResumeWorkflow(ctx, run.ID, run.Revision)
 	}
 

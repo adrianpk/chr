@@ -21,11 +21,11 @@ func TestWorkflowPreparationRetryAuthority(t *testing.T) {
 		}, false},
 		{"retained input", func(run *Invocation, _ *ContinuationRequest) { run.Attempts[0].InputRef = "input.json" }, false},
 		{"stop", func(run *Invocation, _ *ContinuationRequest) { run.StopIntent = "pause" }, false},
-		{"paused", func(run *Invocation, _ *ContinuationRequest) { run.Status = "paused" }, false},
+		{"paused", func(run *Invocation, _ *ContinuationRequest) { run.Status = workflowstate.InvocationPaused }, false},
 		{"legacy", func(run *Invocation, _ *ContinuationRequest) { run.Integration = nil }, false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			run := Invocation{InvocationExecution: InvocationExecution{Status: "blocked", Outcome: "integration_preparation_failed", Attempts: []Attempt{{Purpose: workflowIntegrationValidationPurpose, Outcome: "interrupted"}}}, InvocationIntegration: InvocationIntegration{Integration: &workflowstate.IntegrationBinding{}}, InvocationPreparation: InvocationPreparation{Preparation: &PreparationBinding{State: "stale"}}}
+			run := Invocation{InvocationExecution: InvocationExecution{Status: workflowstate.InvocationBlocked, Outcome: "integration_preparation_failed", Attempts: []Attempt{{Purpose: workflowIntegrationValidationPurpose, Outcome: "interrupted"}}}, InvocationIntegration: InvocationIntegration{Integration: &workflowstate.IntegrationBinding{}}, InvocationPreparation: InvocationPreparation{Preparation: &PreparationBinding{State: "stale"}}}
 			request := ContinuationRequest{ExpectedRevision: 1}
 			test.change(&run, &request)
 

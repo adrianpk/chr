@@ -47,16 +47,16 @@ func (s *Store) checkpointWorkflowAttempt(run workflowInvocationFile, record Rec
 
 	switch attempt.Purpose {
 	case workflowIntegrationValidationPurpose:
-		run.ResumeStatus = "waiting_integration"
+		run.ResumeStatus = workflowstate.InvocationWaitingIntegration
 		run.Preparation.State = "stale"
 	case workflowSliceReviewPurpose:
-		run.ResumeStatus = "waiting_review"
+		run.ResumeStatus = workflowstate.InvocationWaitingReview
 		run.Review.State = "stale"
 	case workflowSliceValidationPurpose:
-		run.ResumeStatus = "waiting_integration"
+		run.ResumeStatus = workflowstate.InvocationWaitingIntegration
 	default:
 		record.Task.Phase, record.Task.Status = "pending", string(ticketcore.StatusReadyForDev)
-		run.ResumeStatus = "pending"
+		run.ResumeStatus = workflowstate.InvocationPending
 	}
 
 	run.Status = workflowstate.StopStatus(run.StopIntent)
@@ -72,7 +72,7 @@ func (s *Store) retainWorkflowProcessOutputs(attempt *Attempt) error {
 			return err
 		}
 
-		process.State = "stopped"
+		process.State = ProcessStopped
 	}
 
 	return nil

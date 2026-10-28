@@ -113,12 +113,12 @@ func (s *Store) workflowClosingValidationTimeout(ctx context.Context, id string,
 	seconds := config.Work.ValidationTimeoutSeconds
 
 	if id != "" {
-		run, _, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return 0, err
 		}
 
-		seconds = run.Policy.ValidationTimeoutSeconds
+		seconds = invocationLocation.Run.Policy.ValidationTimeoutSeconds
 	}
 
 	return workflowValidationTimeout(contract, seconds), nil

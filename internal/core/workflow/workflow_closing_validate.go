@@ -99,7 +99,7 @@ func validateWorkflowClosingProcess(id string, state workflowClosingAttempt, i i
 		return workflowstate.ErrConflict
 	}
 
-	if process.State == "stopped" {
+	if process.State == ProcessStopped {
 		if len(process.StdoutHash) != 64 || len(process.StderrHash) != 64 {
 			return workflowstate.ErrConflict
 		}
@@ -119,7 +119,7 @@ func validWorkflowClosingProcess(state workflowClosingAttempt, process Process) 
 		return false
 	}
 
-	return validWorkflowProcessIdentity(process.Identity) && process.GroupID == process.Identity.PID && slices.Contains([]string{"running", "stopped"}, process.State)
+	return validWorkflowProcessIdentity(process.Identity) && process.GroupID == process.Identity.PID && slices.Contains([]ProcessState{ProcessRunning, ProcessStopped}, process.State)
 }
 
 func (s *Store) checkWorkflowClosingEvidence(set Record) error {
@@ -159,7 +159,7 @@ func (s *Store) checkWorkflowClosingAttemptEvidence(state workflowClosingAttempt
 	}
 
 	for _, process := range state.Processes {
-		if process.State == "stopped" {
+		if process.State == ProcessStopped {
 			refs[process.StdoutRef], refs[process.StderrRef] = process.StdoutHash, process.StderrHash
 		}
 	}

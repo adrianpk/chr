@@ -21,7 +21,7 @@ func validateWorkflowInvocationClosures(run workflowInvocationFile) error {
 		cursor = closure.Cursor
 	}
 
-	if run.ClosingSet != "" && (run.ClosingSet != workflowNextClosingSet(run.Invocation) || run.Status != "running") {
+	if run.ClosingSet != "" && (run.ClosingSet != workflowNextClosingSet(run.Invocation) || run.Status != workflowstate.InvocationRunning) {
 		return workflowstate.ErrConflict
 	}
 

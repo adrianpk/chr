@@ -91,5 +91,5 @@ func guidedNativeReferenceMatches(run Invocation, session authoringcore.Session)
 func guidedNativeControlAuthority(session authoringcore.Session, run Invocation, request workflowstate.ControlMutationRequest) bool {
 	state := session.Guided
 
-	return guidedNativeReferenceMatches(run, session) && run.Status != "completed" && request.Binding.Operator == state.Actor && request.Guided.OperationDigest == state.Control.PendingOperation.Digest
+	return guidedNativeReferenceMatches(run, session) && run.Status != workflowstate.InvocationCompleted && request.Binding.Operator == state.Actor && request.Guided.OperationDigest == state.Control.PendingOperation.Digest
 }

@@ -19,7 +19,7 @@ func (observer guidedWorkflowObserver) ObserveStop(ctx context.Context, session 
 	run, err := ReadGuidedInvocation(ctx, observer.root, session)
 
 	return authoringcore.GuidedStopObservation{
-		Status:       run.Status,
+		Status:       string(run.Status),
 		Revision:     run.Revision,
 		Acknowledged: run.Status == workflowstate.StopStatus(intent) && run.StopIntent == intent,
 	}, err

@@ -110,7 +110,7 @@ func (s *Store) currentWorkflowPreparation(ctx context.Context, run workflowInvo
 }
 
 func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate workflowstate.IntegrationCandidate) error {
-	commit, tree, err := s.workflowLaneCandidate(ctx, candidate.Lane)
+	laneImage, err := s.workflowLaneCandidate(ctx, candidate.Lane)
 
 	proof := candidate.Input.Git
 
@@ -123,7 +123,7 @@ func (s *Store) checkWorkflowPreparationGit(ctx context.Context, candidate workf
 		return fmt.Errorf("%w: prepared lane changed: %w", workflowstate.ErrConflict, err)
 	}
 
-	if commit != proof.ResultCommit || tree != proof.PreparedTree {
+	if laneImage.Commit != proof.ResultCommit || laneImage.Tree != proof.PreparedTree {
 		return fmt.Errorf("%w: prepared lane commit or tree changed", workflowstate.ErrConflict)
 	}
 

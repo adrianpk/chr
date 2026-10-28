@@ -15,34 +15,34 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		restoreWorkflowCapacityWait(&run)
+		restoreWorkflowCapacityWait(&invocationLocation.Run)
 
-		if readErr := owner.checkWorkflowReviewAdmission(ctx, run); readErr != nil {
+		if readErr := invocationLocation.Owner.checkWorkflowReviewAdmission(ctx, invocationLocation.Run); readErr != nil {
 			return readErr
 		}
 
-		observation, input, readErr := owner.workflowReviewInputs(ctx, run, provider)
+		observation, input, readErr := invocationLocation.Owner.workflowReviewInputs(ctx, invocationLocation.Run, provider)
 		if readErr != nil {
 			return readErr
 		}
 
-		if readErr = owner.ensureWorkflowReviewInput(&run, observation, input); readErr != nil {
+		if readErr = invocationLocation.Owner.ensureWorkflowReviewInput(&invocationLocation.Run, observation, input); readErr != nil {
 			return readErr
 		}
 
 		// Replacing review input can change task and slice wait images. A policy
 		// decision must use those current images rather than the pre-journal read.
-		observation, readErr = owner.observeWorkflowSlice(ctx, run)
+		observation, readErr = invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
 
-		binding = *run.Review
+		binding = *invocationLocation.Run.Review
 		if binding.State == "repair_limit_exceeded" {
 			return ErrWorkflowReviewRepairBudget
 		}
@@ -51,8 +51,8 @@ func (s *Store) prepareWorkflowReview(ctx context.Context, id string, provider P
 			return nil
 		}
 
-		claim, prepared, readErr = owner.prepareWorkflowReviewPolicy(ctx, &run, observation, input, reviewer, harness)
-		binding = *run.Review
+		claim, prepared, readErr = invocationLocation.Owner.prepareWorkflowReviewPolicy(ctx, &invocationLocation.Run, observation, input, reviewer, harness)
+		binding = *invocationLocation.Run.Review
 
 		return readErr
 	})
@@ -162,7 +162,9 @@ func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocation
 	taskInput.ReviewHash = run.Review.InputHash
 	run.Review.State, run.Outcome = "running", "slice_review_running"
 
-	prepared, file, budgetFile, err := s.encodeWorkflowAgentInput(ctx, run, taskInput, harness)
+	encodedAgentInput, encodedAgentInputErr := s.encodeWorkflowAgentInput(ctx, run, taskInput, harness)
+
+	prepared, file, budgetFile, err := encodedAgentInput.Prepared, encodedAgentInput.Input, encodedAgentInput.Budget, encodedAgentInputErr
 	if err != nil {
 		return nil, prepared, err
 	}
@@ -175,7 +177,7 @@ func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocation
 }
 
 func (s *Store) checkWorkflowReviewAdmission(ctx context.Context, run workflowInvocationFile) error {
-	if !slices.Contains([]string{"waiting_review", "waiting_integration", "blocked"}, run.Status) {
+	if !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingReview, workflowstate.InvocationWaitingIntegration, workflowstate.InvocationBlocked}, run.Status) {
 		return ErrWorkflowOwned
 	}
 

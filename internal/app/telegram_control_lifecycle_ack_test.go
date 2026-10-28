@@ -7,6 +7,7 @@ import (
 	"time"
 
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramControlLifecycleAck exercises all five lifecycle controls on a
@@ -47,13 +48,13 @@ func prepareTelegramLifecycleAck(t *testing.T, operations service, id, action st
 		t.Fatal(err)
 	}
 
-	if run.Status == "paused" && action != "resume" {
+	if run.Status == workflowstate.InvocationPaused && action != "resume" {
 		if _, err := operations.ResumeWorkflow(t.Context(), id); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	if action == "resume" && run.Status != "paused" {
+	if action == "resume" && run.Status != workflowstate.InvocationPaused {
 		if _, err := operations.StopWorkflow(t.Context(), id, "pause"); err != nil {
 			t.Fatal(err)
 		}

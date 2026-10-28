@@ -166,16 +166,17 @@ func checkTelegramWorkRunCount(t *testing.T, operations service, count int) work
 		t.Fatal(err)
 	}
 
-	runs, _, err := store.InspectWorkflowPage(t.Context(), 0, 10)
-	if err != nil || len(runs) != count {
-		t.Fatal("unexpected native invocations", runs, err)
+	invocationPage, err := store.InspectWorkflowPage(t.Context(), 0, 10)
+
+	if err != nil || len(invocationPage.Invocations) != count {
+		t.Fatal("unexpected native invocations", invocationPage.Invocations, err)
 	}
 
-	if len(runs) == 0 {
+	if len(invocationPage.Invocations) == 0 {
 		return workflowcore.Invocation{}
 	}
 
-	return runs[0]
+	return invocationPage.Invocations[0]
 }
 
 // TestTelegramWorkCommandBounds rejects missing, ambiguous and extra targets

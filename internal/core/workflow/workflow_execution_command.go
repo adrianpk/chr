@@ -13,7 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -25,13 +24,13 @@ func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPrep
 
 	index := len(run.Attempts[len(run.Attempts)-1].Processes)
 
-	stdout, stderr, err := claim.store.workflowProcessOutput(claim, index)
+	commandOutput, err := claim.store.workflowProcessOutput(claim, index)
 	if err != nil {
 		return workflowstate.CommandResult{}, err
 	}
 
 	defer func() {
-		err = errors.Join(err, stdout.File.Close(), stderr.File.Close())
+		err = errors.Join(err, commandOutput.Stdout.File.Close(), commandOutput.Stderr.File.Close())
 	}()
 
 	gate, permit, err := os.Pipe()
@@ -41,10 +40,12 @@ func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPrep
 
 	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
 
-	process, guard := workflowSupervisedCommand(ctx, claim, prepared, command, gate)
+	supervisedProcess := workflowSupervisedCommand(ctx, claim, prepared, command, gate)
+
+	process, guard := supervisedProcess.Process, supervisedProcess.Guard
 	process.Stdin = bytes.NewReader(prepared.data)
 
-	process.Stdout, process.Stderr = stdout, stderr
+	process.Stdout, process.Stderr = commandOutput.Stdout, commandOutput.Stderr
 	if err := process.Start(); err != nil {
 		return workflowstate.CommandResult{}, err
 	}
@@ -53,7 +54,7 @@ func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPrep
 		return workflowstate.CommandResult{}, errors.Join(err, permit.Close(), process.Wait())
 	}
 
-	return runWorkflowSupervisedProcess(ctx, claim, prepared, command, process, permit, index, stdout, stderr)
+	return runWorkflowSupervisedProcess(ctx, claim, prepared, workflowProcessExecution{Command: command, Process: process, Permit: permit, Index: index, Output: workflowCommandOutput{Stdout: commandOutput.Stdout, Stderr: commandOutput.Stderr}})
 }
 
 func filepathForWorkflowInput(claim *Claim, prepared workflowPreparedTask) string {
@@ -84,37 +85,46 @@ func workflowCommandGroupStopped(pid int) bool {
 	return err == nil && !alive
 }
 
-func runWorkflowSupervisedProcess(ctx context.Context, claim *Claim, prepared workflowPreparedTask, command []string, process *exec.Cmd, permit *os.File, index int, stdout, stderr *opsfile.CommandOutput) (workflowstate.CommandResult, error) {
-	ownership, registered, registerErr := claim.store.registerWorkflowProcess(ctx, claim, prepared, command, process.Process.Pid)
-	if registerErr == nil && registered != index {
+type workflowProcessExecution struct {
+	Command []string
+	Process *exec.Cmd
+	Permit  *os.File
+	Index   int
+	Output  workflowCommandOutput
+}
+
+func runWorkflowSupervisedProcess(ctx context.Context, claim *Claim, prepared workflowPreparedTask, execution workflowProcessExecution) (workflowstate.CommandResult, error) {
+	registeredProcess, registerErr := claim.store.registerWorkflowProcess(ctx, claim, prepared, execution.Command, execution.Process.Process.Pid)
+
+	if registerErr == nil && registeredProcess.Index != execution.Index {
 		registerErr = workflowstate.ErrConflict
 	}
 
 	if registerErr == nil {
-		_, registerErr = fmt.Fprintln(permit, "run")
+		_, registerErr = fmt.Fprintln(execution.Permit, "run")
 	}
 
-	closeErr := permit.Close()
-	err := errors.Join(registerErr, closeErr, process.Wait())
+	closeErr := execution.Permit.Close()
+	err := errors.Join(registerErr, closeErr, execution.Process.Wait())
 
-	result := workflowstate.CommandResult{Command: slices.Clone(command), ExitCode: -1, Stdout: stdout.Buffer.String(), Stderr: stderr.Buffer.String(), Truncated: stdout.Truncated || stderr.Truncated}
-	if process.ProcessState != nil {
-		result.ExitCode = process.ProcessState.ExitCode()
+	result := workflowstate.CommandResult{Command: slices.Clone(execution.Command), ExitCode: -1, Stdout: execution.Output.Stdout.Buffer.String(), Stderr: execution.Output.Stderr.Buffer.String(), Truncated: execution.Output.Stdout.Truncated || execution.Output.Stderr.Truncated}
+	if execution.Process.ProcessState != nil {
+		result.ExitCode = execution.Process.ProcessState.ExitCode()
 	}
 
 	if registerErr == nil {
 		var quiescenceErr error
 		if prepared.input.Merger != nil || prepared.input.AgentCall != nil {
-			quiescenceErr = waitWorkflowMergerProcessGroup(ctx, ownership, prepared.leaseUntil)
+			quiescenceErr = waitWorkflowMergerProcessGroup(ctx, registeredProcess.Process, prepared.leaseUntil)
 		}
 
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 		defer cancel()
 
-		finishErr := claim.store.finishWorkflowProcess(cleanup, claim, index, ownership, result)
+		finishErr := claim.store.finishWorkflowProcess(cleanup, claim, execution.Index, registeredProcess.Process, result)
 		if errors.Is(finishErr, ErrWorkflowOwned) {
 			claim.execution.Lock()
-			claim.execution.groupPID = process.Process.Pid
+			claim.execution.groupPID = execution.Process.Process.Pid
 			claim.execution.Unlock()
 		}
 

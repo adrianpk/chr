@@ -1,6 +1,10 @@
 package workflow
 
-import "errors"
+import (
+	"errors"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // Capacity waits retain their previous phase without consuming an attempt or
 // changing task/review/preparation evidence. An explicit retry checks capacity.
@@ -14,24 +18,24 @@ func (s *Store) retainWorkflowCapacityWait(observed workflowInvocationFile, fail
 		return errors.Join(failure, err)
 	}
 
-	if run.Status == "waiting_capacity" {
+	if run.Status == workflowstate.InvocationWaitingCapacity {
 		return failure
 	}
 
-	run.CapacityResumeStatus, run.Status = run.Status, "waiting_capacity"
+	run.CapacityResumeStatus, run.Status = run.Status, workflowstate.InvocationWaitingCapacity
 
 	return errors.Join(failure, s.commitWorkflowState(&run))
 }
 
 func restoreWorkflowCapacityWait(run *workflowInvocationFile) {
-	if run.Status != "waiting_capacity" || run.StopIntent != "" {
+	if run.Status != workflowstate.InvocationWaitingCapacity || run.StopIntent != "" {
 		return
 	}
 
 	run.Status = run.CapacityResumeStatus
-	if run.Status == "" {
-		run.Status = "pending"
+	if run.Status == workflowstate.InvocationUnspecified {
+		run.Status = workflowstate.InvocationPending
 	}
 
-	run.CapacityResumeStatus = ""
+	run.CapacityResumeStatus = workflowstate.InvocationUnspecified
 }

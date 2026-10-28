@@ -84,7 +84,7 @@ func TestWorkflowClosingUseCase(t *testing.T) {
 	ports := ContinuationPorts{Publication: PublicationPorts{Provider: workflowFrontierPorts(fixture).Provider, Observer: fixture.git}, Target: fixture.git}
 
 	first := workflowContinueOne(t, fixture.store, run.Invocation.ID, ports)
-	if len(first.Invocation.Closures) != 1 || first.Invocation.Closures[0].SetID != sets[1].ID || first.Invocation.Status == "completed" {
+	if len(first.Invocation.Closures) != 1 || first.Invocation.Closures[0].SetID != sets[1].ID || first.Invocation.Status == workflowstate.InvocationCompleted {
 		t.Fatal("empty set order or closing frontier was lost")
 	}
 
@@ -137,7 +137,7 @@ func checkWorkflowClosingReopen(t *testing.T, fixture workflowIntegrationFixture
 func checkWorkflowClosingUseCase(t *testing.T, second Invocation, setID, requestHash string) {
 	t.Helper()
 
-	if second.Status != "completed" || len(second.Closures) != 2 || second.Closures[1].SetID != setID || len(second.Attempts) != 0 || second.RequestHash != requestHash {
+	if second.Status != workflowstate.InvocationCompleted || len(second.Closures) != 2 || second.Closures[1].SetID != setID || len(second.Attempts) != 0 || second.RequestHash != requestHash {
 		t.Fatal("empty use-case continuation changed admission or executed a task")
 	}
 }

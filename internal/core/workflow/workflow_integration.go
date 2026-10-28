@@ -48,12 +48,12 @@ func (s *Store) VerifyWorkflowSliceIntegration(ctx context.Context, id, method s
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		proof, readErr = owner.verifyWorkflowSliceIntegration(ctx, run, method, provider, git)
+		proof, readErr = invocationLocation.Owner.verifyWorkflowSliceIntegration(ctx, invocationLocation.Run, method, provider, git)
 
 		return readErr
 	})
@@ -106,7 +106,7 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 }
 
 func (s *Store) workflowDeliveryCandidate(ctx context.Context, run workflowInvocationFile) (workflowSliceObservation, SliceCandidate, error) {
-	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" || !slices.Contains([]string{"waiting_review", "waiting_integration", "blocked", "paused", "cancelled"}, run.Status) {
+	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" || !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingReview, workflowstate.InvocationWaitingIntegration, workflowstate.InvocationBlocked, workflowstate.InvocationPaused, workflowstate.InvocationCancelled}, run.Status) {
 		return workflowSliceObservation{}, SliceCandidate{}, fmt.Errorf("workflow requires an unchanged bound slice PR at its delivery barrier")
 	}
 

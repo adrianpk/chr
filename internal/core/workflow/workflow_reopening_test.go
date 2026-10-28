@@ -77,7 +77,7 @@ func checkWorkflowReopeningTerminal(t *testing.T, store *Store, request StartReq
 	}
 
 	attached, err := store.StartWorkflow(t.Context(), request)
-	if err != nil || !attached.Attached || attached.Invocation.Status != "cancelled" || !bytes.Equal(before, workflowReadTestBytes(t, store, workflowInvocationPath(terminal.ID))) {
+	if err != nil || !attached.Attached || attached.Invocation.Status != workflowstate.InvocationCancelled || !bytes.Equal(before, workflowReadTestBytes(t, store, workflowInvocationPath(terminal.ID))) {
 		t.Fatal("terminal retry rewrote the previous invocation", err)
 	}
 }

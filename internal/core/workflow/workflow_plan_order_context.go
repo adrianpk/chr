@@ -13,6 +13,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowTrackerRegistration struct {
+	Status TrackerStatus
+	Found  bool
+}
+
 // OrderMapInput supplies declared order only. Live task inputs and
 // prerequisite images remain the authority for current processing state.
 type OrderMapInput struct {
@@ -41,16 +46,16 @@ func (s *Store) requiredWorkflowOrderMap(ctx context.Context, record Record) (*O
 		return nil, err
 	}
 
-	source, output, err := s.workflowOrderTrackerImage(snapshot, set.ID)
+	trackerImage, err := s.workflowOrderTrackerImage(snapshot, set.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.checkRequiredOrderStatus(source, output); err != nil {
+	if err := s.checkRequiredOrderStatus(trackerImage.Status, trackerImage.Output); err != nil {
 		return nil, err
 	}
 
-	return &OrderMapInput{Binding: *set.Set.PlanRevision, Reference: source.Path, SourceHash: source.SourceHash, Content: string(output)}, nil
+	return &OrderMapInput{Binding: *set.Set.PlanRevision, Reference: trackerImage.Status.Path, SourceHash: trackerImage.Status.SourceHash, Content: string(trackerImage.Output)}, nil
 }
 
 func (s *Store) checkRequiredOrderImages(source TrackerStatus, output []byte) error {
@@ -101,41 +106,41 @@ func (s *Store) repairRequiredOrderImages(snapshot Snapshot, source TrackerStatu
 	return s.commitFiles(changes)
 }
 
-func (s *Store) retainedOrderRegistration(setID string) (TrackerStatus, bool, error) {
+func (s *Store) retainedOrderRegistration(setID string) (workflowTrackerRegistration, error) {
 	set, err := s.readWorkflowOrderSet(setID)
 	if errors.Is(err, os.ErrNotExist) || errors.Is(err, workflowstate.ErrNotWorkflow) {
-		return TrackerStatus{}, false, nil
+		return workflowTrackerRegistration{Status: TrackerStatus{}, Found: false}, nil
 	}
 
 	if err != nil {
-		return TrackerStatus{}, false, err
+		return workflowTrackerRegistration{Status: TrackerStatus{}, Found: false}, err
 	}
 
 	if set.Set.PlanRevision == nil {
-		return TrackerStatus{}, false, nil
+		return workflowTrackerRegistration{Status: TrackerStatus{}, Found: false}, nil
 	}
 
 	reference := filepath.ToSlash(filepath.Join(filepath.Dir(set.Set.PlanRevision.OrderRef), "projection.json"))
 
 	data, err := s.readWorkflowTrackerFile(reference)
 	if err != nil {
-		return TrackerStatus{}, false, err
+		return workflowTrackerRegistration{Status: TrackerStatus{}, Found: false}, err
 	}
 
 	var status TrackerStatus
 	if err := json.Unmarshal(data, &status); err != nil {
-		return status, false, err
+		return workflowTrackerRegistration{Status: status, Found: false}, err
 	}
 
 	if err := s.validateWorkflowTracker(status, setID); err != nil {
-		return status, false, err
+		return workflowTrackerRegistration{Status: status, Found: false}, err
 	}
 
 	if !matchingOrderRegistration(status, *set.Set.PlanRevision) {
-		return status, false, workflowstate.ErrConflict
+		return workflowTrackerRegistration{Status: status, Found: false}, workflowstate.ErrConflict
 	}
 
-	return status, true, nil
+	return workflowTrackerRegistration{Status: status, Found: true}, nil
 }
 
 func (s *Store) guardBoundWorkflowTaskOrder(old, next Record) error {
@@ -191,12 +196,12 @@ func (s *Store) requiredOrderRepairImages(snapshot Snapshot, source TrackerStatu
 		return nil, workflowstate.ErrProjectionStale
 	}
 
-	set, tasks, err := workflowTrackerMembers(snapshot, source.SetID)
+	trackerMembers, err := workflowTrackerMembers(snapshot, source.SetID)
 	if err != nil {
 		return nil, err
 	}
 
-	document, err := s.workflowOrderDocument(set, tasks)
+	document, err := s.workflowOrderDocument(trackerMembers.Set, trackerMembers.Tasks)
 	if err != nil {
 		return nil, err
 	}

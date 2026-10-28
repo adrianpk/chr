@@ -27,7 +27,7 @@ func telegramControlRequest(request telegramcore.OperationRequest, args telegram
 func telegramBoundDecisionControlRequest(request telegramcore.OperationRequest, control WorkflowControlRequest, parameters *telegramControlParameters, status WorkflowWorkStatus) (WorkflowControlRequest, error) {
 	control.BindingHash = status.ApprovalHash
 	if current := status.Integration; current != nil && current.EntryID != "" {
-		control.Integration = &WorkflowIntegrationControlGuard{EntryID: current.EntryID, EntryRevision: current.EntryRevision, BudgetRevision: current.Budget.Revision, CandidateHash: current.CandidateHash}
+		control.Integration = &workflowstate.ControlIntegrationGuard{EntryID: current.EntryID, EntryRevision: current.EntryRevision, BudgetRevision: current.Budget.Revision, CandidateHash: current.CandidateHash}
 	}
 
 	if control.Action == "approve" {

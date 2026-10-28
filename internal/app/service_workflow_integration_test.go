@@ -87,7 +87,7 @@ func TestServiceWorkflowIntegration(t *testing.T) {
 	}
 
 	run, err := operations.ReadWorkflow(t.Context(), id)
-	if err != nil || run.Status != "waiting_integration" || run.Outcome != "slice_delivery_verified" || provider.creates != 1 {
+	if err != nil || run.Status != workflowstate.InvocationWaitingIntegration || run.Outcome != "slice_delivery_verified" || provider.creates != 1 {
 		t.Fatal("service skipped finalization or created another PR")
 	}
 }

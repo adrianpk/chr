@@ -41,7 +41,7 @@ func workflowAssuranceLosses(t *testing.T, store *Store, id string, ports Contin
 		progress, err := restarted.ContinueWorkflow(t.Context(), id, request, ports)
 		losses += workflowAssuranceLostResponse(t, store, progress, err)
 
-		if progress.Invocation.Status == "completed" {
+		if progress.Invocation.Status == workflowstate.InvocationCompleted {
 			return progress.Invocation, losses
 		}
 	}

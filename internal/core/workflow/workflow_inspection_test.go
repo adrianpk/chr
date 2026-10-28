@@ -74,7 +74,7 @@ func checkWorkflowClaimClosed(t *testing.T, store *Store, claim *Claim, id strin
 	}
 
 	after, err := store.ReadWorkflow(t.Context(), id)
-	if err != nil || after.Revision != before.Revision || after.Cursor != 0 || after.Status != "running" || claim.reservation != nil || claim.capacityGuard != nil {
+	if err != nil || after.Revision != before.Revision || after.Cursor != 0 || after.Status != workflowstate.InvocationRunning || claim.reservation != nil || claim.capacityGuard != nil {
 		t.Fatal("close changed authority or retained owned descriptors", err)
 	}
 }
@@ -108,7 +108,7 @@ func TestWorkflowInspectionLinked(t *testing.T) {
 		read func() error
 	}{
 		{"invocation", func() error { _, err := store.InspectWorkflow(t.Context(), run.Invocation.ID); return err }},
-		{"page", func() error { _, _, err := store.InspectWorkflowPage(t.Context(), 0, 8); return err }},
+		{"page", func() error { _, err := store.InspectWorkflowPage(t.Context(), 0, 8); return err }},
 		{"records", func() error { _, err := store.InspectWorkflowRecords(t.Context()); return err }},
 		{"board", func() error {
 			_, err := ReadTicketBoard(t.Context(), TicketBoardReadOptions{Layout: store.layout, ProjectID: store.projectID, NativeWorkflow: true})

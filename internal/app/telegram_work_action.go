@@ -114,7 +114,7 @@ func (r telegramReceiver) finishWorkAdmission(ctx context.Context, claim telegra
 	run := result.Workflow
 	binding := telegramcore.InvocationBinding{ID: run.ID, Revision: run.Revision}
 
-	facts, err := json.Marshal(telegramWorkAdmissionResult{Invocation: binding, RequestKey: run.RequestKey, Selector: run.Selection.Selector, Status: run.Status, Members: len(run.Members)})
+	facts, err := json.Marshal(telegramWorkAdmissionResult{Invocation: binding, RequestKey: run.RequestKey, Selector: run.Selection.Selector, Status: string(run.Status), Members: len(run.Members)})
 	if err != nil {
 		return err
 	}

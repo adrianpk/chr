@@ -159,7 +159,7 @@ func checkNativeMergerProcesses(t *testing.T, attempt Attempt) {
 	}
 
 	for _, process := range attempt.Processes {
-		if process.State != "stopped" || process.StdoutHash == "" || process.StderrHash == "" {
+		if process.State != ProcessStopped || process.StdoutHash == "" || process.StderrHash == "" {
 			t.Fatal("host process evidence was not retained")
 		}
 	}

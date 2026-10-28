@@ -12,6 +12,7 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowCoordinatorClone rejects copied authority before an invocation
@@ -230,7 +231,7 @@ func TestWorkflowCoordinatorLoss(t *testing.T) {
 	}
 
 	retained := workflowTestRead(t, store, run.Invocation.ID)
-	if retained.Status != "running" || len(retained.Attempts) != 1 {
+	if retained.Status != workflowstate.InvocationRunning || len(retained.Attempts) != 1 {
 		t.Fatal("registration loss changed the live claim")
 	}
 }
@@ -248,7 +249,7 @@ func TestWorkflowCoordinatorCandidate(t *testing.T) {
 		t.Fatal("a coordinator removal became accepted task proof", err)
 	}
 
-	if current := workflowTestRead(t, store, run.Invocation.ID); current.Cursor != 0 || current.Status == "completed" {
+	if current := workflowTestRead(t, store, run.Invocation.ID); current.Cursor != 0 || current.Status == workflowstate.InvocationCompleted {
 		t.Fatal("coordinator removal advanced the frontier")
 	}
 }

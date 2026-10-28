@@ -18,6 +18,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+// LegacyTicketSelection keeps the unadopted queue and its excluded-source count.
+type LegacyTicketSelection struct {
+	Tickets  []ticketcore.Indexed
+	Excluded int
+}
+
 // ErrWorkflowAuthority prevents legacy execution of an adopted task or projection.
 var ErrWorkflowAuthority = errors.New("adopted workflow ticket requires ticket authority")
 
@@ -55,16 +61,16 @@ func CheckLegacyWorkTicket(path string) error {
 
 // FilterLegacyWorkTickets partitions a derived queue by its actual source images.
 // It never treats an adopted projection as legacy execution authority.
-func FilterLegacyWorkTickets(ctx context.Context, tickets []ticketcore.Indexed) ([]ticketcore.Indexed, int, error) {
+func FilterLegacyWorkTickets(ctx context.Context, tickets []ticketcore.Indexed) (LegacyTicketSelection, error) {
 	if len(tickets) > workflowstate.RecordLimit {
-		return nil, 0, fmt.Errorf("legacy authority selection bound exceeded")
+		return LegacyTicketSelection{Tickets: nil, Excluded: 0}, fmt.Errorf("legacy authority selection bound exceeded")
 	}
 
 	selected, excluded := []ticketcore.Indexed{}, 0
 
 	for _, ticket := range tickets {
 		if err := ctx.Err(); err != nil {
-			return nil, excluded, err
+			return LegacyTicketSelection{Tickets: nil, Excluded: excluded}, err
 		}
 
 		err := CheckLegacyWorkTicket(ticket.Path)
@@ -75,13 +81,13 @@ func FilterLegacyWorkTickets(ctx context.Context, tickets []ticketcore.Indexed) 
 		}
 
 		if err != nil {
-			return nil, excluded, err
+			return LegacyTicketSelection{Tickets: nil, Excluded: excluded}, err
 		}
 
 		selected = append(selected, ticket)
 	}
 
-	return selected, excluded, nil
+	return LegacyTicketSelection{Tickets: selected, Excluded: excluded}, nil
 }
 
 // ReadLegacyTicketFile reads an unadopted source image and refuses workflow authority.

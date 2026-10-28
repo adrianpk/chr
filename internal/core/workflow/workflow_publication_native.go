@@ -9,13 +9,13 @@ import (
 
 func (s *Store) workflowNativeContinuationProfile(ctx context.Context, id string) (native bool, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		config, err := workspaceconfig.Load(owner.layout.ProjectDir())
-		native = run.Integration != nil || config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef
+		config, err := workspaceconfig.Load(invocationLocation.Owner.layout.ProjectDir())
+		native = invocationLocation.Run.Integration != nil || config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef
 
 		return err
 	})
@@ -66,17 +66,17 @@ func (s *Store) admitWorkflowNativeContinuation(ctx context.Context, run Invocat
 
 func (s *Store) workflowNativeContinuationOwner(ctx context.Context, id string) (entry IntegrationEntry, guard IntegrationBudgetGuard, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation2, err := s.locateWorkflowInvocation(ctx, id)
 		if err != nil {
 			return err
 		}
 
-		if run.Integration == nil || run.IntegrationBudget == nil {
+		if invocationLocation2.Run.Integration == nil || invocationLocation2.Run.IntegrationBudget == nil {
 			return workflowstate.ErrConflict
 		}
 
-		entry, err = owner.readWorkflowIntegrationEntry(run, *run.Integration)
-		guard = IntegrationBudgetGuard{InvocationID: id, InvocationRevision: run.Revision, BudgetRevision: run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
+		entry, err = invocationLocation2.Owner.readWorkflowIntegrationEntry(invocationLocation2.Run, *invocationLocation2.Run.Integration)
+		guard = IntegrationBudgetGuard{InvocationID: id, InvocationRevision: invocationLocation2.Run.Revision, BudgetRevision: invocationLocation2.Run.IntegrationBudget.Revision, EntryID: entry.ID, EntryRevision: entry.Revision, ClaimGeneration: entry.ClaimGeneration}
 
 		return err
 	})

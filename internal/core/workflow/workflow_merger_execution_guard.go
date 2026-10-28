@@ -40,39 +40,39 @@ func (s *Store) checkWorkflowMergerPrepared(ctx context.Context, claim *Claim, p
 			return err
 		}
 
-		run, _, err := s.checkWorkflowClaim(ctx, claim)
+		claimObservation, err := s.checkWorkflowClaim(ctx, claim)
 		if err != nil {
 			return err
 		}
 
-		entry, err := claim.store.readWorkflowIntegrationEntry(run, *run.Integration)
+		entry, err := claim.store.readWorkflowIntegrationEntry(claimObservation.Run, *claimObservation.Run.Integration)
 		if err != nil {
 			return err
 		}
 
-		return claim.store.checkWorkflowCandidateRepairAdmission(ctx, run, entry, *prepared.input.Merger, provider)
+		return claim.store.checkWorkflowCandidateRepairAdmission(ctx, claimObservation.Run, entry, *prepared.input.Merger, provider)
 	})
 }
 
 func (s *Store) checkWorkflowMergerOwned(ctx context.Context, claim *Claim, prepared workflowPreparedTask) error {
-	run, record, err := s.checkWorkflowClaim(ctx, claim)
+	claimObservation2, err := s.checkWorkflowClaim(ctx, claim)
 	if err != nil {
 		return err
 	}
 
-	if err := checkWorkflowExecutionBinding(run, record, prepared); err != nil {
+	if err := checkWorkflowExecutionBinding(claimObservation2.Run, claimObservation2.Record, prepared); err != nil {
 		return err
 	}
 
-	if run.StopIntent != "" {
+	if claimObservation2.Run.StopIntent != "" {
 		return ErrWorkflowStop
 	}
 
-	if run.Integration == nil {
+	if claimObservation2.Run.Integration == nil {
 		return workflowstate.ErrConflict
 	}
 
-	entry, err := s.readWorkflowIntegrationEntry(run, *run.Integration)
+	entry, err := s.readWorkflowIntegrationEntry(claimObservation2.Run, *claimObservation2.Run.Integration)
 	if err != nil {
 		return err
 	}
@@ -81,13 +81,13 @@ func (s *Store) checkWorkflowMergerOwned(ctx context.Context, claim *Claim, prep
 		return ErrWorkflowStop
 	}
 
-	if err := checkWorkflowMergerEntry(run, entry, *prepared.input.Merger); err != nil {
+	if err := checkWorkflowMergerEntry(claimObservation2.Run, entry, *prepared.input.Merger); err != nil {
 		return err
 	}
 
-	if _, err := s.workflowMergerSeed(ctx, run, entry, *prepared.input.Merger); err != nil {
+	if _, err := s.workflowMergerSeed(ctx, claimObservation2.Run, entry, *prepared.input.Merger); err != nil {
 		return err
 	}
 
-	return s.checkWorkflowMergerCommands(ctx, run, *prepared.input.Merger)
+	return s.checkWorkflowMergerCommands(ctx, claimObservation2.Run, *prepared.input.Merger)
 }

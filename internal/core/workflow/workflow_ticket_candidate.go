@@ -60,32 +60,32 @@ func (s *Store) readWorkflowTicketMembership(run workflowInvocationFile) (workfl
 // gate. Review, combined-result validation and delivery use the shared lifecycle.
 func (s *Store) PrepareWorkflowTicketCandidate(ctx context.Context, id string) (candidate SliceCandidate, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		if run.Lane == nil || run.Lane.Unit.Kind != "ticket" || run.StopIntent != "" || !workflowSliceValidationReady(run.Invocation) {
+		if invocationLocation.Run.Lane == nil || invocationLocation.Run.Lane.Unit.Kind != "ticket" || invocationLocation.Run.StopIntent != "" || !workflowSliceValidationReady(invocationLocation.Run.Invocation) {
 			return ErrWorkflowOwned
 		}
 
-		observation, readErr := owner.observeWorkflowSlice(ctx, run)
+		observation, readErr := invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
 		if readErr != nil {
 			return readErr
 		}
 
-		if run.CandidateRef != "" {
-			candidate, readErr = owner.readWorkflowSliceCandidate(ctx, run, observation)
+		if invocationLocation.Run.CandidateRef != "" {
+			candidate, readErr = invocationLocation.Owner.readWorkflowSliceCandidate(ctx, invocationLocation.Run, observation)
 
 			return readErr
 		}
 
-		candidate, readErr = owner.workflowTicketCandidate(ctx, run, observation)
+		candidate, readErr = invocationLocation.Owner.workflowTicketCandidate(ctx, invocationLocation.Run, observation)
 		if readErr != nil {
 			return readErr
 		}
 
-		return owner.commitWorkflowTicketCandidate(&run, candidate)
+		return invocationLocation.Owner.commitWorkflowTicketCandidate(&invocationLocation.Run, candidate)
 	})
 
 	return candidate, err

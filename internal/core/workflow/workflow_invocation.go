@@ -15,6 +15,11 @@ import (
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 )
 
+type workflowRetainedInvocation struct {
+	Run   workflowInvocationFile
+	Found bool
+}
+
 // StartRequest supplies host-only inputs around the retained admission request.
 type StartRequest struct {
 	workflowstate.StartInput
@@ -124,15 +129,15 @@ type InvocationInput struct {
 
 // InvocationExecution groups the retained execution fields without changing their wire order.
 type InvocationExecution struct {
-	Cursor               int                 `json:"cursor"`
-	Status               string              `json:"status"`
-	Outcome              string              `json:"outcome"`
-	Attempts             []Attempt           `json:"attempts"`
-	Blocker              *Blocker            `json:"blocker,omitempty"`
-	Lane                 *workflowstate.Lane `json:"lane,omitempty"`
-	StopIntent           string              `json:"stop_intent"`
-	ResumeStatus         string              `json:"resume_status"`
-	CapacityResumeStatus string              `json:"capacity_resume_status,omitempty"`
+	Cursor               int                            `json:"cursor"`
+	Status               workflowstate.InvocationStatus `json:"status"`
+	Outcome              string                         `json:"outcome"`
+	Attempts             []Attempt                      `json:"attempts"`
+	Blocker              *Blocker                       `json:"blocker,omitempty"`
+	Lane                 *workflowstate.Lane            `json:"lane,omitempty"`
+	StopIntent           string                         `json:"stop_intent"`
+	ResumeStatus         workflowstate.InvocationStatus `json:"resume_status"`
+	CapacityResumeStatus workflowstate.InvocationStatus `json:"capacity_resume_status,omitempty"`
 }
 
 // InvocationCandidate groups the retained candidate fields without changing their wire order.
@@ -320,12 +325,16 @@ func (s *Store) startWorkflow(ctx context.Context, request StartRequest, check A
 		return StartResult{}, err
 	}
 
-	if previous, found, err := s.findWorkflowInvocation(runs, request.RequestKey, hash); found || err != nil {
-		if found && err == nil {
-			previous, err = s.attachWorkflowInvocation(previous, request.RequestKey)
-		}
+	{
+		retainedInvocation, err := s.findWorkflowInvocation(runs, request.RequestKey, hash)
 
-		return StartResult{Invocation: previous.Invocation, Attached: found}, err
+		if retainedInvocation.Found || err != nil {
+			if retainedInvocation.Found && err == nil {
+				retainedInvocation.Run, err = s.attachWorkflowInvocation(retainedInvocation.Run, request.RequestKey)
+			}
+
+			return StartResult{Invocation: retainedInvocation.Run.Invocation, Attached: retainedInvocation.Found}, err
+		}
 	}
 
 	return s.startNewWorkflow(ctx, request, hash, runs, check)
@@ -360,7 +369,7 @@ func (s *Store) startNewWorkflow(ctx context.Context, request StartRequest, hash
 		return StartResult{}, err
 	}
 
-	run, err := s.createWorkflowInvocation(ctx, request, hash, preview, runs, limits)
+	run, err := s.createWorkflowInvocation(ctx, workflowInvocationAdmission{Request: request, Hash: hash, Preview: preview, Invocations: runs, Limits: limits})
 
 	return StartResult{Invocation: run.Invocation}, err
 }
@@ -401,7 +410,7 @@ func (s *Store) freezeWorkflowSelection(ctx context.Context, request workflowsta
 	}
 }
 
-func (s *Store) findWorkflowInvocation(runs []workflowInvocationFile, key, hash string) (workflowInvocationFile, bool, error) {
+func (s *Store) findWorkflowInvocation(runs []workflowInvocationFile, key, hash string) (workflowRetainedInvocation, error) {
 	for _, run := range runs {
 		if run.Namespace != s.layout.Namespace() {
 			continue
@@ -409,22 +418,30 @@ func (s *Store) findWorkflowInvocation(runs []workflowInvocationFile, key, hash 
 
 		matchedKey := slices.Contains(run.RequestKeys, key)
 		if matchedKey && run.RequestHash != hash {
-			return run, false, fmt.Errorf("%w: request key names different frozen input", workflowstate.ErrConflict)
+			return workflowRetainedInvocation{Run: run, Found: false}, fmt.Errorf("%w: request key names different frozen input", workflowstate.ErrConflict)
 		}
 
 		if matchedKey || run.RequestHash == hash && !workflowInvocationTerminal(run.Status) {
-			return run, true, nil
+			return workflowRetainedInvocation{Run: run, Found: true}, nil
 		}
 	}
 
-	return workflowInvocationFile{}, false, nil
+	return workflowRetainedInvocation{Run: workflowInvocationFile{}, Found: false}, nil
 }
 
-func workflowInvocationTerminal(status string) bool {
-	return status == "completed" || status == "cancelled"
+func workflowInvocationTerminal(status workflowstate.InvocationStatus) bool {
+	return status == workflowstate.InvocationCompleted || status == workflowstate.InvocationCancelled
 }
 
-func (s *Store) createWorkflowInvocation(ctx context.Context, request StartRequest, hash string, preview Preview, runs []workflowInvocationFile, limits workflowCapacityLimits) (run workflowInvocationFile, err error) {
+type workflowInvocationAdmission struct {
+	Request     StartRequest
+	Hash        string
+	Preview     Preview
+	Invocations []workflowInvocationFile
+	Limits      workflowCapacityLimits
+}
+
+func (s *Store) createWorkflowInvocation(ctx context.Context, admission workflowInvocationAdmission) (run workflowInvocationFile, err error) {
 	guard, err := s.acquireWorkflowAllocation()
 	if err != nil {
 		return run, err
@@ -441,16 +458,16 @@ func (s *Store) createWorkflowInvocation(ctx context.Context, request StartReque
 		return run, err
 	}
 
-	run = newWorkflowInvocation(s.layout.Root(), envelope.Identity, request, hash, preview)
+	run = newWorkflowInvocation(s.layout.Root(), envelope.Identity, admission.Request, admission.Hash, admission.Preview)
 	if err := s.freezeWorkflowSets(ctx, &run); err != nil {
 		return run, err
 	}
 
-	if err := s.guardWorkflowAdmission(runs, run); err != nil {
+	if err := s.guardWorkflowAdmission(admission.Invocations, run); err != nil {
 		return run, err
 	}
 
-	if err := guardWorkflowReadyQueue(runs, run, limits); err != nil {
+	if err := guardWorkflowReadyQueue(admission.Invocations, run, admission.Limits); err != nil {
 		return run, err
 	}
 
@@ -472,7 +489,7 @@ func (s *Store) createWorkflowInvocation(ctx context.Context, request StartReque
 }
 
 func newWorkflowInvocation(root string, identity workflowstate.Identity, request StartRequest, hash string, preview Preview) workflowInvocationFile {
-	invocation := Invocation{Identity: identity, InvocationInput: InvocationInput{Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded}, InvocationExecution: InvocationExecution{Status: "pending"}}
+	invocation := Invocation{Identity: identity, InvocationInput: InvocationInput{Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded}, InvocationExecution: InvocationExecution{Status: workflowstate.InvocationPending}}
 
 	invocation.HarnessBinding = harnesscore.CloneBinding(request.HarnessBinding)
 	if invocation.HarnessBinding != nil {

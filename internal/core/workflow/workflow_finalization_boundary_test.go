@@ -1,6 +1,10 @@
 package workflow
 
-import "testing"
+import (
+	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // TestWorkflowFinalizationSet stops at the current slice receipt and leaves
 // later frozen set members untouched rather than completing the whole invocation.
@@ -16,7 +20,7 @@ func TestWorkflowFinalizationSet(t *testing.T) {
 	}
 
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)
-	if run.Cursor != 3 || run.Cursor == len(run.Members) || run.Status != "waiting_integration" || run.Outcome != "slice_integrated" || run.DeliveryRef != receipt.Path {
+	if run.Cursor != 3 || run.Cursor == len(run.Members) || run.Status != workflowstate.InvocationWaitingIntegration || run.Outcome != "slice_integrated" || run.DeliveryRef != receipt.Path {
 		t.Fatal("current slice receipt advanced or completed later selected set members")
 	}
 

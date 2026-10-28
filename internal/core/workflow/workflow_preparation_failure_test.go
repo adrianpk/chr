@@ -25,7 +25,7 @@ func TestWorkflowPreparationGateFailure(t *testing.T) {
 			}
 
 			run := workflowTestRead(t, f.store, f.run.ID)
-			if run.Status != "paused" || run.ResumeStatus != "waiting_integration" || run.Preparation.State != "stale" {
+			if run.Status != workflowstate.InvocationPaused || run.ResumeStatus != workflowstate.InvocationWaitingIntegration || run.Preparation.State != "stale" {
 				t.Fatal("failed gate did not retain a resumable combined-result wait")
 			}
 
@@ -75,7 +75,7 @@ func testWorkflowPreparationStop(t *testing.T, intent string) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != workflowstate.StopStatus(intent) || run.Preparation.State != "stale" || run.ResumeStatus != "waiting_integration" {
+	if run.Status != workflowstate.StopStatus(intent) || run.Preparation.State != "stale" || run.ResumeStatus != workflowstate.InvocationWaitingIntegration {
 		t.Fatal("stop reset combined-result state")
 	}
 
@@ -102,7 +102,7 @@ func TestWorkflowPreparationConflict(t *testing.T) {
 	}
 
 	run := workflowTestRead(t, f.store, f.run.ID)
-	if run.Status != "blocked" || run.Preparation.State != "stale" || run.PreparationCount != 1 {
+	if run.Status != workflowstate.InvocationBlocked || run.Preparation.State != "stale" || run.PreparationCount != 1 {
 		t.Fatal("conflict lost its preparation bound")
 	}
 

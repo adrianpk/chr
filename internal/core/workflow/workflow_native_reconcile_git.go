@@ -33,25 +33,25 @@ func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard 
 
 func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard IntegrationBudgetGuard) (submission workflowstate.Submission, request GitPublication, update NativeSubmissionUpdate, err error) {
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, guard.InvocationID)
+		invocationLocation, err := s.locateWorkflowInvocation(ctx, guard.InvocationID)
 		if err != nil {
 			return err
 		}
 
-		if err := owner.recoverWorkflowNativeReceiptProjection(ctx, &run, guard); err != nil {
+		if err := invocationLocation.Owner.recoverWorkflowNativeReceiptProjection(ctx, &invocationLocation.Run, guard); err != nil {
 			return err
 		}
 
-		entry, budget, err := owner.currentWorkflowIntegrationBudget(ctx, run, guard)
+		entry, budget, err := invocationLocation.Owner.currentWorkflowIntegrationBudget(ctx, invocationLocation.Run, guard)
 		if err != nil {
 			return err
 		}
 
-		if err := guardWorkflowIntegrationBudget(run, entry, budget, guard); err != nil {
+		if err := guardWorkflowIntegrationBudget(invocationLocation.Run, entry, budget, guard); err != nil {
 			return err
 		}
 
-		journal, err := owner.readWorkflowSubmissionJournal(ctx, run)
+		journal, err := invocationLocation.Owner.readWorkflowSubmissionJournal(ctx, invocationLocation.Run)
 		if err != nil {
 			return err
 		}
@@ -62,11 +62,11 @@ func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard Int
 		}
 
 		var candidate workflowstate.IntegrationCandidate
-		if err := owner.readWorkflowNativeEvidence(run.ID, submission.Native.CandidateRef, &candidate); err != nil {
+		if err := invocationLocation.Owner.readWorkflowNativeEvidence(invocationLocation.Run.ID, submission.Native.CandidateRef, &candidate); err != nil {
 			return err
 		}
 
-		request, err = owner.workflowNativeDispatchRequest(candidate)
+		request, err = invocationLocation.Owner.workflowNativeDispatchRequest(candidate)
 		update = NativeSubmissionUpdate{IntegrationBudgetGuard: guard, SubmissionID: submission.ID, JournalHash: journal.sourceHash, Facts: *submission.Native}
 
 		return err
@@ -105,7 +105,7 @@ func observeWorkflowNativeGit(ctx context.Context, submission workflowstate.Subm
 func (s *Store) retainWorkflowNativeGitObservation(ctx context.Context, update NativeSubmissionUpdate, submission workflowstate.Submission, observation NativeGitObservation) (retained workflowstate.Submission, err error) {
 	retained = submission
 	err = s.withLock(ctx, func() error {
-		run, owner, err := s.locateWorkflowInvocation(ctx, update.InvocationID)
+		invocationLocation2, err := s.locateWorkflowInvocation(ctx, update.InvocationID)
 		if err != nil {
 			return err
 		}
@@ -114,17 +114,17 @@ func (s *Store) retainWorkflowNativeGitObservation(ctx context.Context, update N
 			return ErrWorkflowObservationRequired
 		}
 
-		ref, err := owner.writeWorkflowNativeDispatchEvidence(submission, observation)
+		ref, err := invocationLocation2.Owner.writeWorkflowNativeDispatchEvidence(submission, observation)
 		if err != nil {
 			return err
 		}
 
 		update.Facts.GitObservationRefs = append(update.Facts.GitObservationRefs, ref)
-		if err := owner.classifyWorkflowNativeGitObservation(submission, observation, &update.Facts); err != nil {
+		if err := invocationLocation2.Owner.classifyWorkflowNativeGitObservation(submission, observation, &update.Facts); err != nil {
 			return err
 		}
 
-		retained, err = owner.retainWorkflowNativeSubmission(ctx, run, update)
+		retained, err = invocationLocation2.Owner.retainWorkflowNativeSubmission(ctx, invocationLocation2.Run, update)
 
 		return err
 	})

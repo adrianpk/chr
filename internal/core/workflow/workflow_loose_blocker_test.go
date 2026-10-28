@@ -60,7 +60,7 @@ func TestWorkflowLooseBlocker(t *testing.T) {
 	}
 
 	blocked := workflowTestRead(t, f.store, before.ID)
-	if blocked.Status != "paused" || blocked.Blocker == nil || blocked.Blocker.Dependency.ID != "PRJ-89" || blocked.Cursor != 1 || len(blocked.Attempts) != len(before.Attempts) {
+	if blocked.Status != workflowstate.InvocationPaused || blocked.Blocker == nil || blocked.Blocker.Dependency.ID != "PRJ-89" || blocked.Cursor != 1 || len(blocked.Attempts) != len(before.Attempts) {
 		t.Fatal("dependency refusal did not retain an invocation stop")
 	}
 

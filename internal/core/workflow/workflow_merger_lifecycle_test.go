@@ -140,7 +140,7 @@ func nativeMergerStop(t *testing.T, intent string) {
 	checkNativeMergerBudget(t, f)
 
 	if intent == "pause" {
-		if run.ResumeStatus != "waiting_integration" {
+		if run.ResumeStatus != workflowstate.InvocationWaitingIntegration {
 			t.Fatal("pause lost its integration continuation")
 		}
 

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 type workflowFrontierProcessResult struct {
@@ -200,7 +201,7 @@ func readWorkflowFrontierProcess(t *testing.T, store *Store, path string) workfl
 
 	if result.Claimed {
 		run := workflowTestRead(t, store, result.ID)
-		if len(run.Attempts) != 1 || run.Status != "running" || run.Attempts[0].InputRef == "" {
+		if len(run.Attempts) != 1 || run.Status != workflowstate.InvocationRunning || run.Attempts[0].InputRef == "" {
 			t.Fatal("held manual claim lost its immutable input")
 		}
 	}

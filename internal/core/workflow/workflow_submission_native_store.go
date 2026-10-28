@@ -282,7 +282,7 @@ func projectWorkflowNativeStop(entry *IntegrationEntry, last workflowstate.Submi
 		return false
 	}
 
-	entry.State, entry.Blocker = workflowstate.StopStatus(entry.StopIntent), nil
+	entry.State, entry.Blocker = string(workflowstate.StopStatus(entry.StopIntent)), nil
 	if entry.State == "cancelled" {
 		entry.PreparationReserved = false
 	}

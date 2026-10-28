@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowCapacityContinuation retains a distinct wait checkpoint without
@@ -29,7 +30,7 @@ func TestWorkflowCapacityContinuation(t *testing.T) {
 	}
 
 	continued, err := store.ContinueWorkflow(t.Context(), run.ID, request, ContinuationPorts{})
-	if err != nil || continued.Steps != 1 || len(continued.Invocation.Attempts) != 1 || continued.Invocation.Cursor != 1 || continued.Invocation.CapacityResumeStatus != "" {
+	if err != nil || continued.Steps != 1 || len(continued.Invocation.Attempts) != 1 || continued.Invocation.Cursor != 1 || continued.Invocation.CapacityResumeStatus != workflowstate.InvocationUnspecified {
 		t.Fatal("capacity wait could not continue its frozen task", continued, err)
 	}
 }

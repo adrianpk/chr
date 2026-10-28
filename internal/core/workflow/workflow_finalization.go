@@ -14,12 +14,12 @@ func (s *Store) FinalizeWorkflowSlice(ctx context.Context, id string, provider P
 	defer cancel()
 
 	err = s.withLock(ctx, func() error {
-		run, owner, readErr := s.locateWorkflowInvocation(ctx, id)
+		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
 			return readErr
 		}
 
-		receipt, readErr = owner.finalizeWorkflowSlice(ctx, run, provider, git)
+		receipt, readErr = invocationLocation.Owner.finalizeWorkflowSlice(ctx, invocationLocation.Run, provider, git)
 
 		return readErr
 	})

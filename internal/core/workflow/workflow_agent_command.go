@@ -91,16 +91,16 @@ func checkWorkflowAgentResponse(response AgentResponse, input TaskInput) error {
 
 func (s *Store) settleWorkflowAgentCall(ctx context.Context, claim *Claim, prepared workflowPreparedTask, response AgentResponse, executionErr error) error {
 	return s.withLock(ctx, func() error {
-		run, record, err := s.checkWorkflowCredential(ctx, claim, false)
+		claimObservation, err := s.checkWorkflowCredential(ctx, claim, workflowCredentialIdentity)
 		if err != nil {
 			return err
 		}
 
-		if err := checkWorkflowExecutionBinding(run, record, prepared); err != nil {
+		if err := checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared); err != nil {
 			return err
 		}
 
-		budget, err := claim.store.readWorkflowIntegrationBudget(run)
+		budget, err := claim.store.readWorkflowIntegrationBudget(claimObservation.Run)
 		if err != nil {
 			return err
 		}
@@ -115,12 +115,12 @@ func (s *Store) settleWorkflowAgentCall(ctx context.Context, claim *Claim, prepa
 			return err
 		}
 
-		budgetFile, err := claim.store.workflowIntegrationBudgetChange(ctx, &run, &budget)
+		budgetFile, err := claim.store.workflowIntegrationBudgetChange(ctx, &claimObservation.Run, &budget)
 		if err != nil {
 			return err
 		}
 
-		return claim.store.commitWorkflowPullRequestFiles(&run, []workflowstate.FileChange{budgetFile}, proofFile)
+		return claim.store.commitWorkflowPullRequestFiles(&claimObservation.Run, []workflowstate.FileChange{budgetFile}, proofFile)
 	})
 }
 

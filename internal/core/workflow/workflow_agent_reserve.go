@@ -7,6 +7,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
+type workflowEncodedAgentInput struct {
+	Prepared workflowPreparedTask
+	Input    workflowstate.FileChange
+	Budget   workflowstate.FileChange
+}
+
 func (s *Store) workflowAgentBudgetCreation(ctx context.Context, run *workflowInvocationFile) (workflowstate.FileChange, error) {
 	if run.Policy.AgentTokenBudget == 0 {
 		return workflowstate.FileChange{}, nil
@@ -126,26 +132,27 @@ func workflowAgentReservation(budget *IntegrationBudget, input TaskInput) (*Inte
 	return &budget.Reservations[index], nil
 }
 
-func (s *Store) encodeWorkflowAgentInput(ctx context.Context, run *workflowInvocationFile, input TaskInput, harness *AgentHarness) (workflowPreparedTask, workflowstate.FileChange, workflowstate.FileChange, error) {
+func (s *Store) encodeWorkflowAgentInput(ctx context.Context, run *workflowInvocationFile, input TaskInput, harness *AgentHarness) (workflowEncodedAgentInput, error) {
 	budget, err := s.reserveWorkflowAgentInput(ctx, run, &input, harness)
 	if err != nil {
-		return workflowPreparedTask{}, workflowstate.FileChange{}, workflowstate.FileChange{}, err
+		return workflowEncodedAgentInput{Prepared: workflowPreparedTask{}, Input: workflowstate.FileChange{}, Budget: workflowstate.FileChange{}}, err
 	}
 
-	prepared, file, err := encodeWorkflowTaskInput(run, input)
+	encodedTaskInput, err := encodeWorkflowTaskInput(run, input)
+
 	if err != nil || budget == nil {
-		return prepared, file, workflowstate.FileChange{}, err
+		return workflowEncodedAgentInput{Prepared: encodedTaskInput.Prepared, Input: encodedTaskInput.Change, Budget: workflowstate.FileChange{}}, err
 	}
 
 	reservation, err := workflowAgentReservation(budget, input)
 	if err != nil {
-		return prepared, file, workflowstate.FileChange{}, err
+		return workflowEncodedAgentInput{Prepared: encodedTaskInput.Prepared, Input: encodedTaskInput.Change, Budget: workflowstate.FileChange{}}, err
 	}
 
-	reservation.AttemptInput = &workflowstate.EvidenceRef{Path: prepared.inputRef, Hash: prepared.inputHash}
+	reservation.AttemptInput = &workflowstate.EvidenceRef{Path: encodedTaskInput.Prepared.inputRef, Hash: encodedTaskInput.Prepared.inputHash}
 	budgetFile, err := s.workflowIntegrationBudgetChange(ctx, run, budget)
 
-	return prepared, file, budgetFile, err
+	return workflowEncodedAgentInput{Prepared: encodedTaskInput.Prepared, Input: encodedTaskInput.Change, Budget: budgetFile}, err
 }
 
 func appendWorkflowAgentBudgetFile(files []workflowstate.FileChange, file workflowstate.FileChange) []workflowstate.FileChange {
