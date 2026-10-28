@@ -78,3 +78,18 @@ claims, retained completion, partial proof and hash outcomes. The closing comman
 exchange binds one process, permit and bounded output pair to its exact argv and
 output base. Unused projection context forwarding is removed; journaled set and
 invocation changes still commit under the existing lock.
+
+## Bounded operation results
+
+Capacity observations pair the retained process with liveness; owned worker
+reservations pair the slot and shared guard through the existing cleanup owner.
+Continuation results retain accepted steps, barrier reasons, membership-change
+observations and role counts. Control receipt lookups distinguish normal absence
+from verified original receipt recovery without reserving or executing new work.
+Frozen requests pair the exact original JSON digest with their request value.
+
+Amendment preparation retains partial materialization and its atomic file set.
+Frontier proof uses one retained invocation/receipt/candidate unit; target and
+proof observations survive their original errors. Upgrade preparation retains
+journal/image outcomes while journal presence remains distinct from validity.
+All writes, locks, authority checks and recovery retain their existing owners.
