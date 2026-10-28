@@ -5,7 +5,7 @@ Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
 Branch: `refactor/slice-15-quality-closeout`
-PR: pending
+PR: [#452](https://forge.adrianpk.com/adrianpk/chr/pulls/452)
 
 ## Purpose
 
@@ -442,6 +442,27 @@ changes.
 
 ## Validation
 
+Development acceptance passed through the controller at
+`30743d17b45afc3656cc08aac01e1b8950422984`: `make verify`, followed by
+`git diff --check`. The required gate completed strict lint with zero issues,
+short tests, eight QA harness tests and the application build. Owned fixture
+cleanup completed successfully. Canonical PR [#452](https://forge.adrianpk.com/adrianpk/chr/pulls/452)
+is open against dev with the exact approved title and immutable report link.
+
+Final PR-head certification runs after the PR-reference follow-up commit. The
+controller binds its result to the exact clean HEAD and this ordered list; the
+canonical PR Validation section records only successful commands. Selection
+contains 28 behavior fixtures, eight lifecycle race cases and one shared guided
+parity journey. The process recovery case launches and loses an actual host;
+the harness cases execute their colocated subprocess fixtures. Existing bounds,
+assertions and task failure evidence remain intact.
+
+- `make verify`
+- `go test -p=1 ./internal/core/workflow ./internal/app -run '^Test(Workflow(Closing(ActualMembers|Retry|Stop|Recovery|PostObservation|Budget)|Continuation(Bounds|Recovery|Delivery)|Capacity(RoleWait|Overlap)|Recovery(Child|Timeout|Budget|Stop)|TaskPrerequisiteEdit|Amendment(LiveOwner|Recovery)|LooseResumeTarget|SlicePRObservation)|Native(BudgetLegacy|ClosingEvidence|ReceiptLegacy|MergerWorkspace|RolePriority)|HarnessBinding(Pending|OldReader)|WorkObservationLegacy)$' -count=1 -timeout=15m -json`
+- `go test -race ./internal/core/workflow -run '^Test(WorkflowClosingStop|NativeClosingPublicationRace|WorkflowParallelClosingRecovery|WorkflowContinuationRecovery|WorkflowCapacityRoleWait|WorkflowTaskPrerequisiteEdit|WorkflowAmendmentRecovery|WorkflowTrackerConcurrentEdit)$' -count=1 -timeout=10m -json`
+- `go test ./internal/app -run '^TestGuidedUseCaseParityNative$' -count=1 -timeout=3m -json`
+- `git diff --check`
+
 Final metadata/source reconciliation passed: all 217 original evidence lines match
 the approved baseline; all current declaration identities/hashes and named
 regressions resolve; all 32 compatibility rows form one valid table. All 65 root
@@ -867,7 +888,7 @@ and whitespace pass. Runtime checks are not repeated for this metadata-only upda
 ## Risks and Follow-ups
 
 Source-method, bridge and owned compatibility reconciliation are complete.
-Supported retained protocols have explicit retirement conditions. Shared guided
-parity, final ordered exact-HEAD controller validation, canonical PR preparation
-and its reference follow-up remain required before PR readiness. Delivery remains
-subject to controller-owned dev integration; no task check alone marks it delivered.
+Supported retained protocols have explicit retirement conditions. Canonical PR [#452](https://forge.adrianpk.com/adrianpk/chr/pulls/452) is
+open. PR readiness requires successful final ordered controller evidence for the
+clean PR head after its reference follow-up. The controller owns dev integration;
+no task check alone marks the slice delivered.

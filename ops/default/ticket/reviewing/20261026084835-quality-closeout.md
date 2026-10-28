@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084835
 title: "Quality slice 15: Workflow closeout and coordinator cleanup"
-status: in_progress
+status: reviewing
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -9,9 +9,11 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [6f7184ab351c8548d43b0ee25c30d3a23e1cd8b5, f3fc48d21dae09efb4c329d4e985546b6bb3739a, 178e8fcdcc0d5091d5e51b92813a7fa8f576f58b, 3e1896c7f42a0a802d78a23ff036adbe3298d8e4, e5fbc60981a76a7b25cf76e69b63ce6260140252, 6afffc97a34bc31483d9f7f8acd4ff045e827bc3, 85256e808df3824ddaf4b1eb230ff4a5ad8ae757, 4d4f74804e857046b099ea3db91e87ec5d1258f6, 6e281666ac251b7f6cbdf997122dee845fff87bf, 12eb09162d1a2dd2256bd5197b28e9be70c66312, 72253efe04a5f0ca41a2393b442f89c98aac8637, 0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
+commits: [30743d17b45afc3656cc08aac01e1b8950422984, 6f7184ab351c8548d43b0ee25c30d3a23e1cd8b5, f3fc48d21dae09efb4c329d4e985546b6bb3739a, 178e8fcdcc0d5091d5e51b92813a7fa8f576f58b, 3e1896c7f42a0a802d78a23ff036adbe3298d8e4, e5fbc60981a76a7b25cf76e69b63ce6260140252, 6afffc97a34bc31483d9f7f8acd4ff045e827bc3, 85256e808df3824ddaf4b1eb230ff4a5ad8ae757, 4d4f74804e857046b099ea3db91e87ec5d1258f6, 6e281666ac251b7f6cbdf997122dee845fff87bf, 12eb09162d1a2dd2256bd5197b28e9be70c66312, 72253efe04a5f0ca41a2393b442f89c98aac8637, 0ce09547cb796604fb01ee41851a1e9a709cf02e, b5b75ade5cbf21eb68ab3521b26545a20c5ee970, 3ed65239b85570183865b74e169bcbf5a62c1819, 5f506a41dee1e172f8915f5712bbc9d6292a7bea, e7255f915be24ad6e3fecda8d9ed5a76ecc35f8c, 93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
+pr: https://forge.adrianpk.com/adrianpk/chr/pulls/452
+reviewed_at: 2026-10-28T15:59:24Z
 ready_at: 2026-10-26T08:57:09Z
 ---
 
@@ -288,3 +290,11 @@ observer operation names are corrected. These are metadata-only changes; runtime
 source is unchanged. Required development and shared guided parity checks,
 ordered exact-HEAD controller acceptance, canonical PR/reference follow-up and
 controller-owned dev integration remain the delivery boundary.
+
+Canonical PR [#452](https://forge.adrianpk.com/adrianpk/chr/pulls/452) is open
+against dev. The controller recorded successful `make verify` and
+`git diff --check` at `30743d17b45afc3656cc08aac01e1b8950422984` without owned
+fixture leaks. This ticket and the report are reviewing. Final clean PR-head
+acceptance uses the report's ordered commands and the canonical PR's successful
+Validation list. The controller retains the exact HEAD/command evidence and owns
+dev integration; this transition does not mark the slice delivered.
