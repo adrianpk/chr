@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084833
 title: "Quality slice 13: Candidate validation and merge stages"
-status: in_progress
+status: solved
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -14,6 +14,8 @@ started_at: 2026-10-28T02:15:11Z
 branch: refactor/slice-13-quality-integration
 ready_at: 2026-10-26T08:57:09Z
 pr: https://forge.adrianpk.com/adrianpk/chr/pulls/450
+closed_at: 2026-10-28T04:43:13Z
+resolution: fixed
 ---
 
 # Quality Slice 13: Candidate validation and merge stages
@@ -61,6 +63,6 @@ Existing preparation/admission/merger repair/cancellation and lost-ack fixtures 
 The report records the exact successful task commands and final controller validation contract.
 
 Slice 12 PR #449 is verified integrated at
-`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Candidate proof/capability and merge/repair policy now use their independent stage owners. All 87 assigned signature rows and every stored-state/mode/suppression entry are reconciled. The 146 extraction images, 908 Store methods, 100 authority boundaries and 79 dependency references resolve with frozen preimages. Each stage imports only state/contenthash and receives no mutable Store or claim resource. Real proof, repair, state, rejection, cancellation, recovery/lost-ack and wire checks pass; exact commands and prior focused races are in the report. The report is reviewing. Canonical PR preparation and final controller evidence complete T13.6 before integration readiness; the controller owns the merge.
+`a49c32c9f5e81e1bde9f585a25c6d5cc669d7a9e`. Candidate proof/capability and merge/repair policy now use their independent stage owners. All 87 assigned signature rows and every stored-state/mode/suppression entry are reconciled. The 146 extraction images, 908 Store methods, 100 authority boundaries and 79 dependency references resolve with frozen preimages. Each stage imports only state/contenthash and receives no mutable Store or claim resource. Real proof, repair, state, rejection, cancellation, recovery/lost-ack and wire checks pass; exact commands and prior focused races are in the report. The report is delivered. Canonical PR #450 and exact-head controller evidence complete T13.6.
 
-Canonical PR [#450](https://forge.adrianpk.com/adrianpk/chr/pulls/450) is open against dev with the configured title. The report/tracker reference this PR before final clean-head controller validation. Integration and ticket closure remain pending the controller-owned merge.
+Canonical PR #450 is verified merged into dev at `53b2adb23b9b1d20529d00bbe3b32b3be5990b4e`. Controller evidence `5CL5UBXU2HGBPKW5NNUL6O3PMP` passed all four ordered checks at that exact head. Slice 13 is delivered; Slice 14 is the next approved unit.

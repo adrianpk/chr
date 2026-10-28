@@ -1,6 +1,6 @@
 # Slice 13: Candidate validation and merge stages
 
-Status: reviewing
+Status: delivered
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -94,16 +94,15 @@ records every typed-state, mode, retained-data and suppression disposition.
 
 ## Validation
 
-The controller records the final ordered checks against the exact clean pushed
-PR head after the PR-reference commit: `make verify`, focused real workflow
-checks, focused claim/process races and `git diff --check`. Their current outcome
-is retained with that head by the controller and the canonical PR. Task-level
-successful commands and evidence follow; they do not substitute for that final
-head-bound validation.
+Controller evidence `5CL5UBXU2HGBPKW5NNUL6O3PMP` passed all four ordered
+commands on clean pushed head `53b2adb23b9b1d20529d00bbe3b32b3be5990b4e`: `make verify`,
+35 focused real workflow checks, 11 focused race checks and `git diff --check`.
+Canonical PR #450 is verified merged into dev at that same commit. The exact
+command strings and log remain with the controller evidence and canonical PR;
+task-level successful commands follow.
 
 The first final `make verify` stopped at `nlreturn` for the repair-port adapter
-return separator. The formatting is corrected; the controller reruns the ordered
-checks for the replacement clean head.
+return separator; the correction is included in the verified passing head.
 
 - `go test ./internal/core/workflow ./scripts/goquality -run '^Test(WorkflowPreparation(Methods|GateFailure|Stop|Guard|Journal)|NativePreparation(Methods|Failure|Stop)|QualityRecordWire|LeafDependencies)$' -count=1 -timeout=12m -v`: pass; ten top-level checks, including real Git, stop, failure, journal/restart and frozen wire evidence. The existing runner owns and cleans its fixtures.
 
@@ -142,5 +141,4 @@ checks for the replacement clean head.
 
 ## Risks and Follow-ups
 
-None recorded. Integration into dev remains a controller-owned transition;
-the report and tracker close after the canonical merge is verified.
+None recorded. Slice 13 is delivered through verified canonical PR #450.

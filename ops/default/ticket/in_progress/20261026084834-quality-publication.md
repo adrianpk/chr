@@ -1,7 +1,7 @@
 ---
 id: TKT-20261026084834
 title: "Quality slice 14: Forge publication and review stages"
-status: ready
+status: in_progress
 kind: cleanup
 severity: unclassified
 priority: normal
@@ -10,6 +10,8 @@ tags: code-quality, remediation, slice-14
 source: review
 reported_at: 2026-10-26T08:48:34Z
 commits: []
+started_at: 2026-10-28T04:43:13Z
+branch: refactor/slice-14-quality-publication
 ready_at: 2026-10-26T08:57:09Z
 ---
 
@@ -56,3 +58,5 @@ The tracker owns task execution; this ticket mirrors verified slice state. The m
 Existing native provider/transport permission and review fixtures through local HTTP/Git; existing review/publication receipt tests; make verify.
 
 All commands above are planned. None ran as implementation validation during this planning task.
+
+Slice 13 PR #450 is verified merged into dev at `53b2adb23b9b1d20529d00bbe3b32b3be5990b4e`. Slice 14 is active. The assigned signature ledger freezes all 61 original rows and their current declarations; stage ownership and runtime changes are not yet claimed.

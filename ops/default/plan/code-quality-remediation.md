@@ -258,7 +258,7 @@ Focused selection: Existing WorkflowRoundTrip, mutation/receipt/idempotency/mate
 ### Slice 13: Candidate validation and merge stages
 
 Findings: R1, R2, R3, R10.
-Ticket: [TKT-20261026084833](../ticket/in_progress/20261026084833-quality-integration.md).
+Ticket: [TKT-20261026084833](../ticket/solved/20261026084833-quality-integration.md).
 
 1. **T13.1:** Extract candidate preparation/validation into internal/core/workflow/integrate through the ports established in Slice 12. Preserve exact source/target observation, guard checks, validation claims and atomic acceptance.
 2. **T13.2:** Extract merge and repair policy into internal/core/workflow/merge. Convert executeWorkflowMergerDriver, preparation claim/result tuples and repeated claim/prepared/tool/process inputs into cohesive execution values; contexts stay explicit.
@@ -274,7 +274,7 @@ Focused selection: Existing preparation/admission/merger repair/cancellation and
 ### Slice 14: Forge publication and review stages
 
 Findings: R1, R2, R3, R10.
-Ticket: [TKT-20261026084834](../ticket/ready/20261026084834-quality-publication.md).
+Ticket: [TKT-20261026084834](../ticket/in_progress/20261026084834-quality-publication.md).
 
 1. **T14.1:** Extract provider publication, submission and pull-request interaction into internal/core/workflow/forge. Extract review decisions into internal/core/workflow/review. Keep the provider-independent workflow coordinator separate from these adapters.
 2. **T14.2:** Distinguish ticket-native authority from forge-native publication: native is not a global synonym for forge. Rename only symbols whose actual meaning is proven; retain established domain vocabulary and persisted spellings where it remains precise.
@@ -418,8 +418,8 @@ Cost: runtime gates were not rerun for this planning task. Budget each slice for
 | 10 | [TKT-20261026084830](../ticket/solved/20261026084830-quality-harness.md) | Harness contracts and runtime lifecycle | delivered; PR #447 verified |
 | 11 | [TKT-20261026084831](../ticket/solved/20261026084831-quality-tickets.md) | Ticket, readiness and execution boundaries | delivered; PR #448 verified |
 | 12 | [TKT-20261026084832](../ticket/solved/20261026084832-quality-workflow.md) | Workflow state, store and coordinator package | delivered; PR #449 verified |
-| 13 | [TKT-20261026084833](../ticket/in_progress/20261026084833-quality-integration.md) | Candidate validation and merge stages | in_progress; PR #449 verified |
-| 14 | [TKT-20261026084834](../ticket/ready/20261026084834-quality-publication.md) | Forge publication and review stages | ready; predecessor applies |
+| 13 | [TKT-20261026084833](../ticket/solved/20261026084833-quality-integration.md) | Candidate validation and merge stages | in_progress; PR #449 verified |
+| 14 | [TKT-20261026084834](../ticket/in_progress/20261026084834-quality-publication.md) | Forge publication and review stages | ready; predecessor applies |
 | 15 | [TKT-20261026084835](../ticket/ready/20261026084835-quality-closeout.md) | Workflow closeout and coordinator cleanup | ready; predecessor applies |
 | 16 | [TKT-20261026084836](../ticket/ready/20261026084836-quality-closure.md) | Final enforcement, documentation and integrated closure | ready; predecessor applies |
 
