@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: []
+commits: [66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -59,4 +59,4 @@ Existing continuation/closing/process/budget/stop recovery tests, one shared gui
 
 All commands above are planned. None ran as implementation validation during this planning task.
 
-Predecessor PR #451 is verified merged into dev at `8b5659a71af5d393919593c5e0d8c9a6ec0f497c`. Slice 15 is active. Its source ledger freezes 40 assigned signature rows and current declaration identities before closing/lifecycle conversion. No runtime extraction or Store policy disposition is claimed yet.
+Predecessor PR #451 is verified merged into dev at `8b5659a71af5d393919593c5e0d8c9a6ec0f497c`. Slice 15 is active. Its source ledger freezes 40 assigned signature rows and current declaration identities before closing/lifecycle conversion. Closeout execution/pure policy and three closing signature conversions are committed. The Slice 15 report records passed real closing, process, recovery, focused race and strict lint task checks. Remaining policy ownership, 37 assigned signature dispositions, final bridge/compatibility work and slice acceptance remain active.

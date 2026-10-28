@@ -2,19 +2,31 @@
 
 ## Purpose
 
-This package owns the consumer contract for closing gate execution.
+This package owns closing lease, binding and result policy, plus ordered gate
+execution against one frozen closing input.
 
 ## Contract
 
-`Gate` is used by `Store.CloseWorkflowSet`. Execute returns the receipt for one reserved closing claim and exact retained input. The owner subsequently rechecks and commits the closing result; execution alone does not confirm closure.
+`Execute` builds the unconfirmed receipt, preserves the explicit waiver, retains
+each command's partial result before checking failure and checks the final
+checkout. It receives the host's watched deadline context through narrow
+`Workspace` and `Commands` ports. A waived gate still prepares and checks the
+exact checkout. `LeaseDuration`, `CheckBinding` and `CheckResults` preserve the
+existing lease bound, retained-reference checks and ordered result validation.
 
-The contract imports shared `workflow/state` protocol values. The workflow owner
-implements it with the existing operations and retains claims, reservations,
-source/revision guards, repository locks, journals, atomic writes and recovery.
-The port exposes the required operation without exposing a mutable store.
+The host keeps the private claim, process identity registration, bounded output,
+capacity reservation, stop supervision and process journals. It rechecks current
+source, candidate and authority before atomically confirming the receipt, set
+and invocation. Execution alone cannot establish closure. The ports expose no
+mutable store or context retained as state.
+
+The package imports only shared `workflow/state` protocol values within the
+module. Remaining closeout policy extraction and final Store responsibility
+dispositions are active Slice 15 work.
 
 ## Validation
 
-Existing workflow integration tests exercise this binding through real Git,
-filesystem and process fixtures. The production dependency check permits shared
-state and rejects coordinator, filesystem mutation and configuration imports.
+Stage boundary tests cover partial failures, nonzero exit, changed checkout,
+explicit waiver and late cancellation. Existing real Git, filesystem, process,
+stop and journal-recovery tests exercise the host binding. The production
+dependency check rejects coordinator, mutation and configuration imports.

@@ -13,7 +13,7 @@ Core composition and application adapters call this owner directly. The package
 cannot import root core or application adapters.
 
 Consumer-owned contracts in `integrate`, `merge`, `review`, `forge` and `closeout`
-serve live validation, evidence, decision, response and gate operations. Bound
+serve live validation, evidence, decision, response, checkout and command operations. Bound
 implementations retain private claim/prepared/provider or journal identities;
 the merger evidence contract is implemented directly by the store. Stage policy
 extraction uses these operation boundaries without moving mutation authority.
@@ -67,3 +67,14 @@ to the existing integration validator. Enabled configuration, current host grant
 process lifetime, intent fences and receipt transactions retain their owners.
 Native retained values and the history-divergence sentinel live in state; direct
 consumers use those owners without compatibility aliases.
+
+## Closing execution boundary
+
+`closeout.Execute` owns ordered command policy and unconfirmed receipts through
+consumer-owned checkout and command ports. The host supplies the watched finite
+deadline, supervises processes and retains current-input/candidate checks and
+atomic confirmation. Named closing admission and proof results preserve optional
+claims, retained completion, partial proof and hash outcomes. The closing command
+exchange binds one process, permit and bounded output pair to its exact argv and
+output base. Unused projection context forwarding is removed; journaled set and
+invocation changes still commit under the existing lock.
