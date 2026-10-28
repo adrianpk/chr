@@ -20,3 +20,9 @@ type Validation interface {
 	Validate(context.Context, *workflowstate.TaskResult) error
 	Accept(context.Context, Completion) error
 }
+
+// RepairProof checks retained tree and replay repair evidence in its owning stage.
+// It accepts immutable proof data and exposes no store or execution capability.
+type RepairProof interface {
+	Check(workflowstate.IntegrationProof) error
+}

@@ -41,7 +41,7 @@ func (s *Store) commitWorkflowPreparationInput(ctx context.Context, run *workflo
 	return encodedTaskInput.Prepared, s.commitWorkflowPullRequestFiles(run, files, encodedTaskInput.Change)
 }
 
-func checkWorkflowPreparedProof(query PreparationQuery, proof workflowstate.IntegrationProof) error {
+func checkWorkflowPreparedProof(query PreparationQuery, proof workflowstate.IntegrationProof, repairs workflowintegrate.RepairProof) error {
 	expected := query.IntegrationQuery
 
 	expected.ResultCommit, expected.SourceDirectory = proof.ResultCommit, ""
@@ -53,7 +53,7 @@ func checkWorkflowPreparedProof(query PreparationQuery, proof workflowstate.Inte
 		return err
 	}
 
-	return validateWorkflowIntegrationProof(expected, proof)
+	return validateWorkflowIntegrationProof(expected, proof, repairs)
 }
 
 func (s *Store) checkWorkflowPreparationSource(ctx context.Context, run workflowInvocationFile, input workflowstate.PreparationInput, provider PublicationGuardProvider) error {

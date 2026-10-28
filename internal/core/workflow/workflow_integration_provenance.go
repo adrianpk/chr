@@ -7,7 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
-	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
+
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -57,7 +57,7 @@ func (reader workflowIntegrationReader) verifyCombinedProvenance(ctx context.Con
 	return nil
 }
 
-func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof) error {
+func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof, repairs workflowintegrate.RepairProof) error {
 	p := proof.Provenance
 	if p == nil {
 		return nil
@@ -75,11 +75,7 @@ func validateWorkflowIntegrationProvenance(proof workflowstate.IntegrationProof)
 		return workflowstate.ErrConflict
 	}
 
-	if err := workflowmerge.CheckRepairs(proof); err != nil {
-		return err
-	}
-
-	if err := workflowmerge.CheckHistory(proof); err != nil {
+	if err := repairs.Check(proof); err != nil {
 		return err
 	}
 

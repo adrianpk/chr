@@ -130,5 +130,5 @@ func (reader workflowIntegrationReader) requireRebaseFixSigner(proof workflowsta
 }
 
 func validWorkflowRebaseFixInput(proof workflowstate.IntegrationProof, finding workflowstate.ReviewFinding) bool {
-	return proof.Method == "rebase" && proof.Provenance != nil && validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) == nil && workflowstate.ValidateReviewFinding(finding) == nil && finding.Category != workflowstate.AgenticReviewFindingCosmetic
+	return proof.Method == "rebase" && proof.Provenance != nil && validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil && workflowstate.ValidateReviewFinding(finding) == nil && finding.Category != workflowstate.AgenticReviewFindingCosmetic
 }

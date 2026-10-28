@@ -50,7 +50,7 @@ func nativeAlteredTree(t *testing.T, directory string, proof workflowstate.Integ
 	}
 
 	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
-	if err != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil {
+	if err != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
 		t.Fatal("altered-object fixture did not carry a structurally consistent proof", err)
 	}
 

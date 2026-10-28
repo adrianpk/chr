@@ -6,6 +6,7 @@ import (
 	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+	workflowmerge "forge.adrianpk.com/chr/internal/core/workflow/merge"
 	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -61,3 +62,15 @@ var (
 	_ workflowforge.Responses      = workflowSubmissionResponses{}
 	_ workflowcloseout.Gate        = workflowClosingGate{}
 )
+
+// workflowIntegrationRepairs composes pure repair checks without sibling imports.
+type workflowIntegrationRepairs struct{}
+
+func (workflowIntegrationRepairs) Check(proof workflowstate.IntegrationProof) error {
+	if err := workflowmerge.CheckRepairs(proof); err != nil {
+		return err
+	}
+	return workflowmerge.CheckHistory(proof)
+}
+
+var _ workflowintegrate.RepairProof = workflowIntegrationRepairs{}

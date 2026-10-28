@@ -200,7 +200,7 @@ func (s *Store) prepareWorkflowIntegrationGit(ctx context.Context, run *workflow
 		return result, err
 	}
 
-	if err := checkWorkflowPreparedProof(query, repairGit.Proof); err != nil {
+	if err := checkWorkflowPreparedProof(query, repairGit.Proof, workflowIntegrationRepairs{}); err != nil {
 		return result, err
 	}
 

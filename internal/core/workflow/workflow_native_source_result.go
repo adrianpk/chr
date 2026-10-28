@@ -23,7 +23,7 @@ func workflowNativeSourceResultCompatible(contract string, proof workflowstate.I
 
 	// The existing method validator binds the complete original replay and any
 	// separately attributed integration repairs to the exact prepared result.
-	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) == nil
+	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) == nil
 }
 
 func workflowNativeSourceResultRepository(pr workflowstate.PullRequestSnapshot, repository string) bool {

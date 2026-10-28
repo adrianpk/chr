@@ -129,7 +129,7 @@ func validateWorkflowPreparationLaneProof(candidate workflowstate.IntegrationCan
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof)
+	return validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
 }
 
 func validateWorkflowPreparationResult(run workflowInvocationFile, candidate workflowstate.IntegrationCandidate) error {

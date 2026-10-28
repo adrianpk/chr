@@ -147,7 +147,7 @@ func (reader workflowIntegrationReader) prepareIntegration(ctx context.Context, 
 		return proof, workflowstate.ErrConflict
 	}
 
-	return proof, validateWorkflowIntegrationProof(proof.IntegrationQuery, proof)
+	return proof, validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{})
 }
 
 func (reader workflowIntegrationReader) prepareCombinedCommit(ctx context.Context, proof workflowstate.IntegrationProof) (string, error) {

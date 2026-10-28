@@ -90,7 +90,7 @@ func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof SliceDel
 
 	query := workflowstate.IntegrationQuery{Repository: run.PullRequest.Request.Repository, TargetBranch: run.PullRequest.Request.BaseBranch, Method: proof.Git.Method, SourceCommit: run.PullRequest.SourceCommit, SourceTree: run.PullRequest.SourceTree, OriginCommit: run.ExecutionSelection().Target.Commit, ResultCommit: proof.PullRequest.ResultCommit}
 
-	return validateWorkflowIntegrationProof(query, proof.Git)
+	return validateWorkflowIntegrationProof(query, proof.Git, workflowIntegrationRepairs{})
 }
 
 func workflowDeliveryProofMatchesRun(run workflowInvocationFile, proof SliceDeliveryProof) bool {

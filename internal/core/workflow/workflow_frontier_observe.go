@@ -73,7 +73,7 @@ func observeWorkflowFrontierProof(ctx context.Context, run workflowInvocationFil
 		return proof, err
 	}
 
-	if err := validateWorkflowIntegrationProof(integration, proof); err != nil {
+	if err := validateWorkflowIntegrationProof(integration, proof, workflowIntegrationRepairs{}); err != nil {
 		return proof, err
 	}
 

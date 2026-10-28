@@ -109,7 +109,7 @@ func validateWorkflowSubmissionGuard(guard workflowstate.PublicationGuard) error
 		return err
 	}
 
-	return validateWorkflowIntegrationProof(guard.Git.IntegrationQuery, guard.Git)
+	return validateWorkflowIntegrationProof(guard.Git.IntegrationQuery, guard.Git, workflowIntegrationRepairs{})
 }
 
 func validateWorkflowSubmissionProof(submission workflowstate.Submission) error {
@@ -135,7 +135,7 @@ func validateWorkflowSubmissionProof(submission workflowstate.Submission) error 
 	query := submission.Guard.Git.IntegrationQuery
 	query.ResultCommit = proof.ResultCommit
 
-	return validateWorkflowIntegrationProof(query, proof)
+	return validateWorkflowIntegrationProof(query, proof, workflowIntegrationRepairs{})
 }
 
 func validWorkflowConfirmedSubmissionHeader(submission workflowstate.Submission) bool {

@@ -32,7 +32,7 @@ func (git OSWorkflowGitPublisher) validatePublicationProof(ctx context.Context, 
 		return workflowstate.ErrConflict
 	}
 
-	if err := validateWorkflowIntegrationProof(proof.IntegrationQuery, proof); err != nil {
+	if err := validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}); err != nil {
 		return err
 	}
 

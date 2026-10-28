@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strings"
 
+	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
+
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -64,7 +66,7 @@ func (reader workflowIntegrationReader) verifyBase(ctx context.Context, proof wo
 	return nil
 }
 
-func validateWorkflowIntegrationHistory(proof workflowstate.IntegrationProof) error {
+func validateWorkflowIntegrationHistory(proof workflowstate.IntegrationProof, repairs workflowintegrate.RepairProof) error {
 	if proof.Method != "rebase" && len(proof.History) != 1 {
 		return workflowstate.ErrConflict
 	}
@@ -83,7 +85,7 @@ func validateWorkflowIntegrationHistory(proof workflowstate.IntegrationProof) er
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowIntegrationProvenance(proof)
+	return validateWorkflowIntegrationProvenance(proof, repairs)
 }
 
 func validWorkflowIntegrationCommit(entry workflowstate.IntegrationCommit) bool {
@@ -167,7 +169,7 @@ func workflowIntegrationHistoryHash(proof workflowstate.IntegrationProof) (strin
 	return contenthash.Sum(data), err
 }
 
-func validateWorkflowIntegrationProof(query workflowstate.IntegrationQuery, proof workflowstate.IntegrationProof) error {
+func validateWorkflowIntegrationProof(query workflowstate.IntegrationQuery, proof workflowstate.IntegrationProof, repairs workflowintegrate.RepairProof) error {
 	query.SourceDirectory = ""
 	if proof.IntegrationQuery != query || !slices.Contains([]string{"merge", "rebase", "squash"}, proof.Method) || proof.PreparedTree != proof.VerifiedTree || len(proof.History) == 0 || len(proof.History) > workflowstate.RecordLimit {
 		return workflowstate.ErrConflict
@@ -184,5 +186,5 @@ func validateWorkflowIntegrationProof(query workflowstate.IntegrationQuery, proo
 		return workflowstate.ErrConflict
 	}
 
-	return validateWorkflowIntegrationHistory(proof)
+	return validateWorkflowIntegrationHistory(proof, repairs)
 }

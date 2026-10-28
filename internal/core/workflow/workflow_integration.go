@@ -91,7 +91,7 @@ func (s *Store) verifyWorkflowSliceIntegration(ctx context.Context, run workflow
 		return SliceDeliveryProof{}, err
 	}
 
-	if err := validateWorkflowIntegrationProof(query, gitProof); err != nil {
+	if err := validateWorkflowIntegrationProof(query, gitProof, workflowIntegrationRepairs{}); err != nil {
 		return SliceDeliveryProof{}, err
 	}
 

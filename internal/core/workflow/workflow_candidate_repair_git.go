@@ -16,7 +16,7 @@ func (git OSWorkflowPreparationGit) PrepareWorkflowRepairedIntegration(ctx conte
 	}
 
 	proof := *state.Result
-	if state.Query.SourceCommit != query.SourceCommit || state.Query.OriginCommit != query.OriginCommit || state.Query.SourceTree != query.SourceTree || checkWorkflowPreparedProof(query, proof) != nil {
+	if state.Query.SourceCommit != query.SourceCommit || state.Query.OriginCommit != query.OriginCommit || state.Query.SourceTree != query.SourceTree || checkWorkflowPreparedProof(query, proof, workflowIntegrationRepairs{}) != nil {
 		return proof, workflowstate.ErrConflict
 	}
 

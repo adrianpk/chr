@@ -101,7 +101,7 @@ func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery UnitDeliv
 
 	query := workflowstate.IntegrationQuery{Repository: delivery.PullRequest.Request.Repository, TargetBranch: delivery.PullRequest.Request.BaseBranch, Method: delivery.Proof.Method, SourceCommit: delivery.PullRequest.SourceCommit, SourceTree: delivery.PullRequest.SourceTree, OriginCommit: delivery.Target.Commit, ResultCommit: delivery.Proof.ResultCommit}
 
-	return validateWorkflowIntegrationProof(query, delivery.Proof)
+	return validateWorkflowIntegrationProof(query, delivery.Proof, workflowIntegrationRepairs{})
 }
 
 func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery UnitDelivery, previous int) error {

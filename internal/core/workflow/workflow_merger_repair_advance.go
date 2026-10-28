@@ -92,7 +92,7 @@ func (reader workflowIntegrationReader) finishMergerRepair(ctx context.Context, 
 	}
 
 	proof.HistoryHash, err = workflowIntegrationHistoryHash(proof)
-	if err != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof) != nil {
+	if err != nil || validateWorkflowIntegrationProof(proof.IntegrationQuery, proof, workflowIntegrationRepairs{}) != nil {
 		return errorsOrConflict(err)
 	}
 
