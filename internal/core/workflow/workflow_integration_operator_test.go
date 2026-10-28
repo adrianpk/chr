@@ -55,7 +55,7 @@ func nativeOperatorWorkerRetry(t *testing.T, store *Store, id string, grant Inte
 	}
 
 	second := workflowTestClaim(t, store, id)
-	defer func() { _ = second.Close() }() //nolint:errcheck
+	defer func() { _ = second.Close() }() //nolint:errcheck // Release this fixture claim after its operation and budget assertions.
 
 	harness.InputTokens, harness.OutputTokens = 30, 20
 	if _, err := store.prepareWorkflowTaskHarness(t.Context(), second, harness.Command, "automatic", &harness); err != nil {

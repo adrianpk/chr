@@ -89,7 +89,7 @@ func (s service) startLegacyAgentWorkTicket(ticketKey string) (AgentWorkResult, 
 	defer release()
 
 	if !harnessruntime.ValidationPassed(preflight.Runtime.Checks) {
-		return AgentWorkResult{}, executioncore.NewFailure(
+		return AgentWorkResult{}, executioncore.NewError(
 			executioncore.FailureRuntime,
 			errors.New("runtime validation failed"),
 		)
@@ -152,7 +152,7 @@ func (s service) prepareAgentWorkTicket(ticketKey string) (preparedAgentWorkTick
 			return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, releaseErr
 		}
 
-		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, executioncore.NewFailure(executioncore.FailurePreflight, err)
+		return preparedAgentWorkTicket{Ticket: ticketcore.Indexed{}, Preflight: ticketStartPreflight{}, Release: noopRelease}, executioncore.NewError(executioncore.FailurePreflight, err)
 	}
 
 	return preparedAgentWorkTicket{Ticket: ticket, Preflight: preflight, Release: releaseAgentOperationLock(lock)}, nil

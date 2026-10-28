@@ -68,7 +68,7 @@ func RunWorkerBridge(ctx context.Context, request WorkerBridgeRequest) (result R
 	if err != nil {
 		result.Output = nil
 
-		var provider *providerFailure
+		var provider *providerError
 		if errors.As(err, &provider) && provider.message != "" {
 			return result, &privateCallError{cause: err, message: "pi provider failed: " + string(process.DiagnosticWithSecrets([]byte(provider.message), secrets...))}
 		}
@@ -144,10 +144,10 @@ func workerBridgeError(err error) error {
 	return errors.New("pi worker failed; check the selected runtime, credential owner and model endpoint")
 }
 
-type providerFailure struct{ message string }
+type providerError struct{ message string }
 
-func (*providerFailure) Error() string { return ErrProvider.Error() }
-func (*providerFailure) Unwrap() error { return ErrProvider }
+func (*providerError) Error() string { return ErrProvider.Error() }
+func (*providerError) Unwrap() error { return ErrProvider }
 
 func writeWorkerToolProfile(stateDir string) error {
 	root, err := os.Getwd()

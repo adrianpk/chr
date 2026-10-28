@@ -63,7 +63,7 @@ func nativeMergerTestHarness(t *testing.T, store *Store, id string) MergerHarnes
 		t.Fatal(err)
 	}
 
-	defer func() { _ = file.Close() }() //nolint:errcheck
+	defer func() { _ = file.Close() }() //nolint:errcheck // Read-only executable handle; hashing errors are checked below.
 
 	hash, err := workflowMergerFileHash(file)
 	if err != nil {

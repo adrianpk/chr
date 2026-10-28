@@ -81,7 +81,7 @@ func nativeMergerToolFiles(t *testing.T, input workflowstate.MergerInput) (*Tool
 		t.Fatal(err)
 	}
 
-	t.Cleanup(func() { _ = root.Close() }) //nolint:errcheck
+	t.Cleanup(func() { _ = root.Close() }) //nolint:errcheck // Owned fixture directory handle; tool results are asserted separately.
 
 	tools := &Tools{input: input, root: root, guard: func(ctx context.Context) error { return ctx.Err() }}
 

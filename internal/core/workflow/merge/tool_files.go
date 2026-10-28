@@ -13,7 +13,7 @@ func (tools *Tools) read(path string) (toolResponse, error) {
 	if err != nil {
 		return toolResponse{}, err
 	}
-	defer func() { _ = file.Close() }() //nolint:errcheck
+	defer func() { _ = file.Close() }() //nolint:errcheck // Read-only descriptor; the bounded read reports content failures.
 
 	data, err := io.ReadAll(io.LimitReader(file, workflowstate.FileLimit+1))
 	if err != nil {

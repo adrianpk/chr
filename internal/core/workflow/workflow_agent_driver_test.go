@@ -73,7 +73,7 @@ func TestNativeAgentSettlement(t *testing.T) {
 			harness := nativeAgentHarness(t, store, run.Invocation.ID, mode)
 
 			claim := workflowTestClaim(t, store, run.Invocation.ID)
-			defer func() { _ = claim.Close() }() //nolint:errcheck
+			defer func() { _ = claim.Close() }() //nolint:errcheck // Release this fixture claim after its operation and budget assertions.
 
 			result, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness)
 			checkNativeAgentOutcome(t, result, err, mode)
@@ -119,7 +119,7 @@ func TestNativeAgentCapability(t *testing.T) {
 			harness.Certificate = retainNativeRecordEvidence(t, store, run.Invocation.ID, "invalid-agent-harness", certificate)
 
 			claim := workflowTestClaim(t, store, run.Invocation.ID)
-			defer func() { _ = claim.Close() }() //nolint:errcheck
+			defer func() { _ = claim.Close() }() //nolint:errcheck // Release this fixture claim after its operation and budget assertions.
 
 			if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 				t.Fatal("uncertified call admitted", err)

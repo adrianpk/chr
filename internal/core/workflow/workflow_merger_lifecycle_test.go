@@ -26,8 +26,8 @@ func TestNativeMergerDescendants(t *testing.T) {
 
 	reservation, err := f.store.acquireWorkflowWorkerSlot(t.Context())
 	if err == nil {
-		_ = reservation.Slot.Close()  //nolint:errcheck
-		_ = reservation.Guard.Close() //nolint:errcheck
+		_ = reservation.Slot.Close()  //nolint:errcheck // Release the unexpectedly acquired fixture guard before reporting failure.
+		_ = reservation.Guard.Close() //nolint:errcheck // Release the unexpectedly acquired fixture guard before reporting failure.
 
 		t.Fatal("live descendant lost the shared slot")
 	}

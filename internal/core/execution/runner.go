@@ -29,7 +29,7 @@ func (e OSHarnessExecutor) Run(ctx context.Context, command harnessruntime.Comma
 
 	err := cmd.Run()
 	if err != nil {
-		return NewFailure(FailureHarness, fmt.Errorf("run harness command %s: %w", command.Program, err))
+		return NewError(FailureHarness, fmt.Errorf("run harness command %s: %w", command.Program, err))
 	}
 
 	return nil
@@ -228,44 +228,44 @@ func (r Runner) runHarness(ctx context.Context, opts RunOptions, record Record, 
 }
 
 func harnessFailure(err error) error {
-	var failure Failure
+	var failure Error
 	if errors.As(err, &failure) {
 		return err
 	}
 
-	return NewFailure(FailureHarness, err)
+	return NewError(FailureHarness, err)
 }
 
 func workerFailure(err error) error {
-	var failure Failure
+	var failure Error
 	if errors.As(err, &failure) {
 		if failure.Kind == FailureWorker {
 			return err
 		}
 
-		return NewFailure(FailureWorker, failure.Err)
+		return NewError(FailureWorker, failure.Err)
 	}
 
-	return NewFailure(FailureWorker, err)
+	return NewError(FailureWorker, err)
 }
 
 func validationFailure(err error) error {
-	var failure Failure
+	var failure Error
 	if errors.As(err, &failure) {
 		if failure.Kind == FailureValidation {
 			return err
 		}
 
-		return NewFailure(FailureValidation, failure.Err)
+		return NewError(FailureValidation, failure.Err)
 	}
 
-	return NewFailure(FailureValidation, err)
+	return NewError(FailureValidation, err)
 }
 
 func captureExecutionResult(record Record) (Result, error) {
 	result, err := LoadResult(record.Artifacts.ResultPath)
 	if err != nil {
-		return Result{}, NewFailure(FailureResultCapture, err)
+		return Result{}, NewError(FailureResultCapture, err)
 	}
 
 	err = validateExecutionResultForRecord(result, record)
@@ -278,21 +278,21 @@ func captureExecutionResult(record Record) (Result, error) {
 
 func validateExecutionResultForRecord(result Result, record Record) error {
 	if result.ExecutionID != record.ID {
-		return NewFailure(
+		return NewError(
 			FailureResultCapture,
 			fmt.Errorf("execution result id mismatch: %s", result.ExecutionID),
 		)
 	}
 
 	if result.TicketKey != record.TicketKey {
-		return NewFailure(
+		return NewError(
 			FailureResultCapture,
 			fmt.Errorf("execution result ticket key mismatch: %s", result.TicketKey),
 		)
 	}
 
 	if result.Status == ResultStatusFailed {
-		return NewFailure(FailureValidation, fmt.Errorf("execution result failed: %s", result.Summary))
+		return NewError(FailureValidation, fmt.Errorf("execution result failed: %s", result.Summary))
 	}
 
 	return nil

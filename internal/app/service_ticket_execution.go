@@ -67,7 +67,7 @@ func (s service) runTicketStartExecution(ctx context.Context, input ticketExecut
 
 	err = core.MaterializeWorkerContextForExecution(ctx, input.Record, input.Runtime.Plan)
 	if err != nil {
-		return executioncore.Record{}, executioncore.NewFailure(executioncore.FailurePreflight, err)
+		return executioncore.Record{}, executioncore.NewError(executioncore.FailurePreflight, err)
 	}
 
 	invocation, err := harnessruntime.NewInvocation(harnessruntime.InvocationOptions{

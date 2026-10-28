@@ -37,7 +37,7 @@ func (host workflowClosingHost) runCommand(ctx context.Context, claim *workflowC
 	if err != nil {
 		return result, err
 	}
-	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
+	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck // Fallback pipe cleanup; launch and wait paths report permission/process failures.
 
 	prepared := workflowClosingPrepared(claim, directory)
 	supervisedProcess := workflowSupervisedCommand(ctx, claim.worker, prepared, command, gate)

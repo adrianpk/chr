@@ -47,7 +47,7 @@ func testWorkflowClosingStop(t *testing.T, intent string) {
 
 	if capacity, err := acquireWorkflowCapacity(t.Context(), fixture.store.layout.ProjectDir()); !errors.Is(err, ErrWorkflowCapacity) {
 		if capacity != nil {
-			_ = capacity.Close() //nolint:errcheck
+			_ = capacity.Close() //nolint:errcheck // Release the unexpectedly acquired fixture guard before reporting failure.
 		}
 
 		t.Fatal("live closing descendants did not retain repository capacity", err)

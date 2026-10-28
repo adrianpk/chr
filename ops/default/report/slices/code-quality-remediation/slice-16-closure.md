@@ -77,6 +77,29 @@ Permanent-policy task verification:
 These are task checks. Required clean-head controller validation and the later
 integrated delivery-set gate remain distinct.
 
+
+Minor-item source correction completes the reported eight error-type names:
+AssistedModelError, execution.Error and providerError replace the three remaining
+names, with constructor/caller updates and no compatibility aliases. Error text,
+cause unwrapping, failure-kind strings and transport sentinels are unchanged.
+The other five names were corrected by the existing Telegram owner.
+
+The reported 23 bare errcheck directives comprise 11 production sites and 12
+test-fixture sites at the approved baseline. Eight production sites already have
+resource-specific handling/reasons. The remaining three production fallback
+pipe/read-handle closes and all 12 fixture sites now state their exact cleanup
+purpose. Checked permission, process, output and durable-write errors remain
+observable. No generic close helper replaces their distinct failure contracts.
+
+- Identical non-comment token streams were verified for all 11 cleanup-comment files.
+- Exact error-identifier normalization matches all tokens in the 11 naming files; raw literals and assertions are unchanged.
+- `go test -p=1 ./internal/core/authoring ./internal/core/execution ./internal/harness/pi -run '^Test(InvokeAssistedModel.*|RecordAssistedModelInvocation.*|RenderAssistedModelArtifacts.*|ExecutionFailure.*|ExecutionRunner.*|PiTransport(Failures|Worker|WorkerOutput))$' -count=1 -timeout=3m -json` passed all 19 selected roots without failures/skips; owned fixture cleanup passed.
+- `go run ./scripts/goquality` passed with 9,411 declarations, maximum five and one external exception.
+- `go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.14.0 run --timeout=5m ./...` passed with zero issues.
+
+Current declaration/hash provenance is reconciled separately after this source
+commit; frozen source evidence remains unchanged.
+
 ## Risks and Follow-ups
 
 All Slice 16 tasks remain open. Final integrated gate evidence and delivery-set

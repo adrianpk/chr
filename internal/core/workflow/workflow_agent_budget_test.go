@@ -15,7 +15,7 @@ func TestNativeAgentAdmission(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	defer func() { _ = claim.Close() }() //nolint:errcheck
+	defer func() { _ = claim.Close() }() //nolint:errcheck // Release this fixture claim after its operation and budget assertions.
 
 	_, err := ExecuteTask(t.Context(), store, claim, workflowTaskCommand(t, "worker"))
 	if !errors.Is(err, ErrWorkflowIntegrationBudget) {
@@ -42,7 +42,7 @@ func TestNativeAgentCeiling(t *testing.T) {
 	harness := nativeAgentHarness(t, store, run.Invocation.ID, "success")
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	defer func() { _ = claim.Close() }() //nolint:errcheck
+	defer func() { _ = claim.Close() }() //nolint:errcheck // Release this fixture claim after its operation and budget assertions.
 
 	if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("call exceeded remaining invocation ceiling", err)
@@ -81,7 +81,7 @@ func TestNativeAgentPermitBudget(t *testing.T) {
 	run := workflowTestStart(t, store, request)
 
 	claim := workflowTestClaim(t, store, run.Invocation.ID)
-	defer func() { _ = claim.Close() }() //nolint:errcheck
+	defer func() { _ = claim.Close() }() //nolint:errcheck // Release this fixture claim after its operation and budget assertions.
 
 	prepared, err := store.prepareWorkflowTask(t.Context(), claim, workflowTaskCommand(t, "worker"))
 	if err != nil {

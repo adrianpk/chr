@@ -108,7 +108,7 @@ func nativeAgentNoRefund(t *testing.T, store *Store, id string, harness AgentHar
 	}
 
 	claim := workflowTestClaim(t, store, id)
-	defer func() { _ = claim.Close() }() //nolint:errcheck
+	defer func() { _ = claim.Close() }() //nolint:errcheck // Release this fixture claim after its operation and budget assertions.
 
 	if _, err := ExecuteTaskWithHarness(t.Context(), store, claim, harness); !errors.Is(err, ErrWorkflowIntegrationBudget) {
 		t.Fatal("restart launched an uncharged replacement", err)

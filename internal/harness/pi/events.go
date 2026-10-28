@@ -197,7 +197,7 @@ func (s *session) message(data json.RawMessage) error {
 	}
 
 	if message.StopReason != "stop" {
-		s.finalErr = &providerFailure{message: message.ErrorMessage}
+		s.finalErr = &providerError{message: message.ErrorMessage}
 
 		return nil
 	}

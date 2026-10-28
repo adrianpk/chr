@@ -377,11 +377,11 @@ func (e *fakeHarnessExecutor) Run(_ context.Context, command harnessruntime.Comm
 	}
 
 	if e.failWorker && isWorkerHarnessCommand(command) {
-		return executioncore.NewFailure(executioncore.FailureHarness, fmt.Errorf("failed %s", name))
+		return executioncore.NewError(executioncore.FailureHarness, fmt.Errorf("failed %s", name))
 	}
 
 	if e.failValidation && isValidationHarnessCommand(command) {
-		return executioncore.NewFailure(executioncore.FailureHarness, fmt.Errorf("failed %s", name))
+		return executioncore.NewError(executioncore.FailureHarness, fmt.Errorf("failed %s", name))
 	}
 
 	err = e.writeResultForWorkerRun(command)

@@ -82,8 +82,8 @@ type AssistedModelAdapter interface {
 	InvokeAssistedModel(ctx context.Context, request AssistedModelRequest) (AssistedModelResponse, error)
 }
 
-// AssistedModelFailure describes a package boundary value.
-type AssistedModelFailure struct {
+// AssistedModelError describes a package boundary value.
+type AssistedModelError struct {
 	Kind AssistedModelFailureKind
 	Err  error
 }
@@ -119,7 +119,7 @@ func (k AssistedModelFailureKind) Valid() bool {
 }
 
 // Error executes the corresponding package operation.
-func (e AssistedModelFailure) Error() string {
+func (e AssistedModelError) Error() string {
 	if e.Err == nil {
 		return string(e.Kind)
 	}
@@ -128,18 +128,18 @@ func (e AssistedModelFailure) Error() string {
 }
 
 // Unwrap executes the corresponding package operation.
-func (e AssistedModelFailure) Unwrap() error {
+func (e AssistedModelError) Unwrap() error {
 	return e.Err
 }
 
-// NewAssistedModelFailure constructs the corresponding package service or value.
-func NewAssistedModelFailure(kind AssistedModelFailureKind, err error) AssistedModelFailure {
-	return AssistedModelFailure{Kind: kind, Err: err}
+// NewAssistedModelError constructs the corresponding package service or value.
+func NewAssistedModelError(kind AssistedModelFailureKind, err error) AssistedModelError {
+	return AssistedModelError{Kind: kind, Err: err}
 }
 
 // ClassifyAssistedModelFailure executes the corresponding package operation.
 func ClassifyAssistedModelFailure(err error) AssistedModelFailureKind {
-	var failure AssistedModelFailure
+	var failure AssistedModelError
 
 	if errors.As(err, &failure) {
 		return failure.Kind
@@ -192,11 +192,11 @@ func InvokeAssistedModel(
 ) (AssistedModelResponse, error) {
 	err := ValidateAssistedModelRequest(request)
 	if err != nil {
-		return AssistedModelResponse{}, NewAssistedModelFailure(AssistedModelFailureInvalidRequest, err)
+		return AssistedModelResponse{}, NewAssistedModelError(AssistedModelFailureInvalidRequest, err)
 	}
 
 	if adapter == nil {
-		return AssistedModelResponse{}, NewAssistedModelFailure(
+		return AssistedModelResponse{}, NewAssistedModelError(
 			AssistedModelFailureAdapter,
 			fmt.Errorf("assisted model adapter is required"),
 		)
@@ -204,12 +204,12 @@ func InvokeAssistedModel(
 
 	response, err := adapter.InvokeAssistedModel(ctx, request)
 	if err != nil {
-		return AssistedModelResponse{}, NewAssistedModelFailure(AssistedModelFailureAdapter, err)
+		return AssistedModelResponse{}, NewAssistedModelError(AssistedModelFailureAdapter, err)
 	}
 
 	err = ValidateAssistedModelResponse(response)
 	if err != nil {
-		return AssistedModelResponse{}, NewAssistedModelFailure(AssistedModelFailureInvalidResponse, err)
+		return AssistedModelResponse{}, NewAssistedModelError(AssistedModelFailureInvalidResponse, err)
 	}
 
 	return response, nil
@@ -322,12 +322,12 @@ func RecordAssistedModelInvocation(ctx context.Context, artifacts AssistedModelI
 
 	err = validateAssistedModelInvocationArtifacts(artifacts)
 	if err != nil {
-		return NewAssistedModelFailure(AssistedModelFailureArtifact, err)
+		return NewAssistedModelError(AssistedModelFailureArtifact, err)
 	}
 
 	err = os.MkdirAll(artifacts.Paths.InvocationDir, 0o755)
 	if err != nil {
-		return NewAssistedModelFailure(
+		return NewAssistedModelError(
 			AssistedModelFailureArtifact,
 			fmt.Errorf("create assisted model invocation directory: %w", err),
 		)
@@ -341,7 +341,7 @@ func RecordAssistedModelInvocation(ctx context.Context, artifacts AssistedModelI
 	for path, content := range files {
 		err = os.WriteFile(path, []byte(content), 0o644)
 		if err != nil {
-			return NewAssistedModelFailure(
+			return NewAssistedModelError(
 				AssistedModelFailureArtifact,
 				fmt.Errorf("write assisted model artifact: %w", err),
 			)

@@ -24,22 +24,22 @@ const (
 	FailureResultCapture FailureKind = "result_capture"
 )
 
-// Failure describes a package boundary value.
-type Failure struct {
+// Error describes a package boundary value.
+type Error struct {
 	Kind FailureKind
 	Err  error
 }
 
-// NewFailure constructs the corresponding package service or value.
-func NewFailure(kind FailureKind, err error) Failure {
-	return Failure{
+// NewError constructs the corresponding package service or value.
+func NewError(kind FailureKind, err error) Error {
+	return Error{
 		Kind: kind,
 		Err:  err,
 	}
 }
 
 // Error executes the corresponding package operation.
-func (e Failure) Error() string {
+func (e Error) Error() string {
 	if e.Err == nil {
 		return string(e.Kind)
 	}
@@ -48,13 +48,13 @@ func (e Failure) Error() string {
 }
 
 // Unwrap executes the corresponding package operation.
-func (e Failure) Unwrap() error {
+func (e Error) Unwrap() error {
 	return e.Err
 }
 
 // ClassifyFailure executes the corresponding package operation.
 func ClassifyFailure(err error) FailureKind {
-	var failure Failure
+	var failure Error
 	if errors.As(err, &failure) {
 		return failure.Kind
 	}

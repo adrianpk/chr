@@ -7924,7 +7924,7 @@ func (e *fakeTicketStartHarnessExecutor) Run(
 	}
 
 	if e.failWorker && isFakeTicketStartWorkerCommand(command) {
-		return executioncore.NewFailure(executioncore.FailureHarness, fmt.Errorf("codex failed"))
+		return executioncore.NewError(executioncore.FailureHarness, fmt.Errorf("codex failed"))
 	}
 
 	err = e.writeFakeTicketStartResult(command)

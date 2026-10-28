@@ -8,7 +8,7 @@ import (
 )
 
 func TestExecutionFailurePrefixesErrorWithKind(t *testing.T) {
-	err := executioncore.NewFailure(executioncore.FailureHarness, fmt.Errorf("docker failed"))
+	err := executioncore.NewError(executioncore.FailureHarness, fmt.Errorf("docker failed"))
 
 	if err.Error() != "harness: docker failed" {
 		t.Fatalf("Error = %q, want harness prefix", err.Error())

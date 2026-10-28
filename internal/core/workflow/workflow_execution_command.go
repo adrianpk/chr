@@ -38,7 +38,7 @@ func workflowRunCommand(ctx context.Context, claim *Claim, prepared workflowPrep
 		return workflowstate.CommandResult{}, err
 	}
 
-	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck
+	defer func() { _ = gate.Close(); _ = permit.Close() }() //nolint:errcheck // Fallback pipe cleanup; launch and wait paths report permission/process failures.
 
 	supervisedProcess := workflowSupervisedCommand(ctx, claim, prepared, command, gate)
 

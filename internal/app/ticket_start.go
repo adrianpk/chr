@@ -42,12 +42,12 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 
 	preflight, err := factory.buildTicketStartPreflight(ctx, cmd)
 	if err != nil {
-		return executioncore.NewFailure(executioncore.FailurePreflight, err)
+		return executioncore.NewError(executioncore.FailurePreflight, err)
 	}
 
 	if !harnessruntime.ValidationPassed(preflight.Runtime.Checks) {
 		preflight.Record.Status = executioncore.StatusBlocked
-		preflight.Record.FailureReason = executioncore.NewFailure(
+		preflight.Record.FailureReason = executioncore.NewError(
 			executioncore.FailureRuntime,
 			fmt.Errorf("runtime validation failed"),
 		).Error()
@@ -57,7 +57,7 @@ func (factory commandFactory) runTicketStart(ctx context.Context, cmd *cli.Comma
 			return err
 		}
 
-		return executioncore.NewFailure(executioncore.FailureRuntime, fmt.Errorf("runtime validation failed"))
+		return executioncore.NewError(executioncore.FailureRuntime, fmt.Errorf("runtime validation failed"))
 	}
 
 	if !cmd.Bool("dry-run") {
