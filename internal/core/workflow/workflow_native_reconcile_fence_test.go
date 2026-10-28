@@ -52,7 +52,7 @@ func TestNativeGitFence(t *testing.T) {
 			t.Fatal(err)
 		}
 	}}
-	if _, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), guard, inspector, git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ReconcileNativeGitSubmission(t.Context(), f.store, guard, inspector, git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale observation changed the common journal", err)
 	}
 
@@ -61,7 +61,7 @@ func TestNativeGitFence(t *testing.T) {
 		t.Fatal("stale callback rewrote retained evidence", err)
 	}
 
-	retained, err = f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, submission.InvocationID), transport, git)
+	retained, err = ReconcileNativeGitSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, submission.InvocationID), transport, git)
 	if err != nil || retained.Native.ApplicationState != workflowstate.NativeApplicationGitApplied || publisher.calls.Load() != 1 {
 		t.Fatal("fresh observation failed to recover the same submission", err)
 	}

@@ -223,7 +223,7 @@ func checkNativeFaultApplication(t *testing.T, f nativeSubmissionFixture, submis
 	if stage == "applied" || stage == "response" {
 		b := f.candidate.Native
 
-		observed, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), NewWorkflowGitPublisher(b.SourceRepository, remote), NewWorkflowIntegrationGit(b.SourceRepository, remote))
+		observed, err := ReconcileNativeGitSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), NewWorkflowGitPublisher(b.SourceRepository, remote), NewWorkflowIntegrationGit(b.SourceRepository, remote))
 		if err != nil || observed.Native.ApplicationState != workflowstate.NativeApplicationGitApplied || observed.ID != submission.ID {
 			t.Fatal("actual server application was not recovered", err)
 		}

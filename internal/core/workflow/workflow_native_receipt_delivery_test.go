@@ -44,7 +44,7 @@ func testNativeReceiptObservation(t *testing.T, fixture nativeCanonicalFixture, 
 	f := fixture.f
 	setNativePRFixture(t, fixture.forge, pr)
 
-	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+	submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -52,7 +52,7 @@ func nativeCanonicalSubmissionFixture(t *testing.T, f nativeSubmissionFixture, l
 	b := f.candidate.Native.NativeRecordBinding
 
 	git := NewWorkflowIntegrationGit(b.SourceRepository, remote)
-	if _, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, submission.InvocationID), NewWorkflowGitPublisher(b.SourceRepository, remote), git); err != nil {
+	if _, err := ReconcileNativeGitSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, submission.InvocationID), NewWorkflowGitPublisher(b.SourceRepository, remote), git); err != nil {
 		t.Fatal("native canonical fixture Git reconciliation", err)
 	}
 
@@ -98,7 +98,7 @@ func TestNativeCanonicalOutcomes(t *testing.T) {
 			test.change(&pr)
 			setNativePRFixture(t, fixture.forge, pr)
 
-			submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+			submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -133,7 +133,7 @@ func checkNativeCanonicalDivergence(t *testing.T, fixture nativeCanonicalFixture
 
 	workflowIntegrationCommand(t, fixture.remote, "update-ref", b.TargetRef, b.ValidatedBase, b.PreparedResult)
 
-	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+	submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err == nil || nativeCanonicalLast(t, f.store, submission).Condition != "canonical_target_unverified" {
 		t.Fatal("rewritten target did not retain reconciliation", err)
 	}
@@ -209,7 +209,7 @@ func TestNativeCanonicalPoll(t *testing.T) {
 		}
 	}
 
-	submission, err := f.store.PollWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, before.ID), observer, fixture.git)
+	submission, err := PollNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, before.ID), observer, fixture.git)
 	if err != nil || observer.calls != 3 || len(submission.Native.ObservationRefs) != 2 || nativeCanonicalLast(t, f.store, submission).State != workflowstate.NativeMerged {
 		t.Fatal("bounded canonical polling did not converge", err)
 	}
@@ -231,7 +231,7 @@ func TestNativeCanonicalFence(t *testing.T) {
 	fixture := newNativeCanonicalFixture(t)
 	f := fixture.f
 
-	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+	submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -251,7 +251,7 @@ func TestNativeCanonicalFence(t *testing.T) {
 			t.Fatal(err)
 		}
 	}}
-	if _, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("stale canonical callback changed the journal", err)
 	}
 
@@ -297,7 +297,7 @@ func TestNativeCanonicalDeadline(t *testing.T) {
 
 	observer := &nativeCanonicalObserverFixture{observer: fixture.forge.adapter, before: func(_ context.Context, _ workflowstate.NativePublicationBinding) {}}
 
-	submission, err := f.store.PollWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git)
+	submission, err := PollNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git)
 	// The persisted bound may expire during a real Git read or during backoff.
 	// Both paths retain the same deadline fact; only the read returns an IO error.
 	if err != nil && !errors.Is(err, context.DeadlineExceeded) || nativeCanonicalLast(t, f.store, submission).Condition != "canonical_pr_observation_deadline" || !submission.Native.ObservationDeadline.Equal(deadline) {
@@ -305,7 +305,7 @@ func TestNativeCanonicalDeadline(t *testing.T) {
 	}
 
 	calls := observer.calls
-	if _, err := f.store.PollWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git); err != nil || observer.calls != calls {
+	if _, err := PollNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), observer, fixture.git); err != nil || observer.calls != calls {
 		t.Fatal("expired automatic polling performed more external IO", err)
 	}
 
@@ -320,7 +320,7 @@ func checkNativeDeadlineRecovery(t *testing.T, fixture nativeCanonicalFixture, s
 	pr.State, pr.Merged, pr.ResultCommit = "closed", true, submission.Native.PreparedResult
 	setNativePRFixture(t, fixture.forge, pr)
 
-	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+	submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err != nil || nativeCanonicalLast(t, f.store, submission).State != workflowstate.NativeMerged || nativeReviewEntry(t, f.store, submission.InvocationID).State != "observing" || fixture.publisher.calls.Load() != 1 {
 		t.Fatal("explicit reconciliation did not recover the same publication", err)
 	}
@@ -342,7 +342,7 @@ func TestNativeCanonicalTimeout(t *testing.T) {
 	deadline := time.Now().UTC().Add(600 * time.Millisecond)
 	nativeCanonicalDeadline(t, fixture, deadline)
 
-	submission, err := f.store.PollWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), nativeCanonicalBlockedObserver{}, fixture.git)
+	submission, err := PollNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), nativeCanonicalBlockedObserver{}, fixture.git)
 	if !errors.Is(err, context.DeadlineExceeded) || nativeCanonicalLast(t, f.store, submission).Condition != "canonical_pr_observation_deadline" {
 		t.Fatal("stalled canonical IO lost its persisted deadline", err)
 	}
@@ -365,7 +365,7 @@ func TestNativeCanonicalLost(t *testing.T) {
 
 	fixture.forge.runner.outputs[fixture.forge.prefix+"/branches/"+url.PathEscape(pr.HeadBranch)] = []byte(`{"commit":{"sha":"` + later + `"}}`)
 
-	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+	submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err != nil || nativeCanonicalLast(t, f.store, submission).LaterSourceCommit != later {
 		t.Fatal("lost response attribution was replaced by later source", err)
 	}

@@ -17,7 +17,7 @@ func nativeReceiptMerged(t *testing.T, fixture nativeCanonicalFixture) workflows
 	pr.State, pr.Merged, pr.ResultCommit = "closed", true, b.PreparedResult
 	setNativePRFixture(t, fixture.forge, pr)
 
-	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
+	submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), fixture.forge.adapter, fixture.git)
 	if err != nil {
 		t.Fatal("native merged observation", err)
 	}

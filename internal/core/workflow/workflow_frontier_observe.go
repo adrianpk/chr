@@ -58,7 +58,7 @@ func (s *Store) workflowFrontierReceiptProof(ctx context.Context, unit workflowF
 		return observeWorkflowFrontierProof(ctx, unit, target, ports)
 	}
 
-	observation, err := s.observeWorkflowNativeReceipt(ctx, receipt, ports.Provider, ports.Observer)
+	observation, err := (workflowNativeObservationHost{store: s}).receipt(ctx, receipt, ports.Provider, ports.Observer)
 
 	retained, retainErr := s.retainWorkflowNativeReceiptObservation(ctx, run, observation)
 	if failure := errors.Join(err, retainErr); failure != nil {

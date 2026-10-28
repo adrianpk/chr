@@ -76,7 +76,7 @@ func TestNativeStopRejected(t *testing.T) {
 		t.Fatal("raw rejection finalized stop without independent refs", err)
 	}
 
-	submission, err = f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, stopped.ID), transport, NewWorkflowIntegrationGit(b.SourceRepository, remote))
+	submission, err = ReconcileNativeGitSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, stopped.ID), transport, NewWorkflowIntegrationGit(b.SourceRepository, remote))
 	if err != nil || submission.State != workflowstate.SubmissionUnpublished {
 		t.Fatal("definitive changed-input rejection was not sealed", err)
 	}
@@ -156,7 +156,7 @@ func checkNativeStoppedMetadata(t *testing.T, fixture nativeCanonicalFixture, st
 	pr.State, pr.Merged, pr.ResultCommit = "closed", true, f.candidate.Native.PreparedResult
 	setNativePRFixture(t, fixture.forge, pr)
 
-	submission, err := f.store.ObserveWorkflowNativeSubmission(t.Context(), nativeBudgetGuard(t, f.store, stopped.ID), fixture.forge.adapter, fixture.git)
+	submission, err := ObserveNativeSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, stopped.ID), fixture.forge.adapter, fixture.git)
 	if err != nil || nativeCanonicalLast(t, f.store, submission).State != workflowstate.NativeMerged {
 		t.Fatal("stopped intent could not reconcile actual delivery metadata", err)
 	}

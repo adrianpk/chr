@@ -62,7 +62,7 @@ func nativeGitOutcome(t *testing.T, name, application, state string) {
 	f.store = NewWorkflowStore(f.store.layout, f.store.projectID)
 	git := NewWorkflowIntegrationGit(f.candidate.Native.SourceRepository, remote)
 
-	retained, err := f.store.ReconcileWorkflowNativeGitSubmission(t.Context(), nativeBudgetGuard(t, f.store, f.entry.InvocationID), transport, git)
+	retained, err := ReconcileNativeGitSubmission(t.Context(), f.store, nativeBudgetGuard(t, f.store, f.entry.InvocationID), transport, git)
 	if err != nil || retained.ID != submission.ID || string(retained.Native.ApplicationState) != application || string(retained.State) != state {
 		t.Fatal("actual refs and prepared history were not classified", err)
 	}

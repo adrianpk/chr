@@ -8,9 +8,9 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// ReconcileWorkflowNativeGitSubmission observes the same submission without
+// ReconcileNativeGitSubmission observes the same submission without
 // dispatching. Actual refs and method proof classify Git, never forge delivery.
-func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard IntegrationBudgetGuard, inspector GitPublicationInspector, git PreparedIntegrationGit) (workflowstate.Submission, error) {
+func ReconcileNativeGitSubmission(ctx context.Context, store *Store, guard IntegrationBudgetGuard, inspector GitPublicationInspector, git PreparedIntegrationGit) (workflowstate.Submission, error) {
 	if inspector == nil || git == nil {
 		return workflowstate.Submission{}, workflowstate.ErrAtomicGuard
 	}
@@ -18,7 +18,7 @@ func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
-	nativeReconciliation, err := s.workflowNativeReconciliationInput(ctx, guard)
+	nativeReconciliation, err := store.workflowNativeReconciliationInput(ctx, guard)
 
 	submission, request, update := nativeReconciliation.Submission, nativeReconciliation.Request, nativeReconciliation.Update
 	if err != nil || submission.Native.ApplicationState == workflowstate.NativeApplicationNotApplied {
@@ -30,7 +30,7 @@ func (s *Store) ReconcileWorkflowNativeGitSubmission(ctx context.Context, guard 
 		return submission, err
 	}
 
-	return s.retainWorkflowNativeGitObservation(ctx, update, submission, observation)
+	return store.retainWorkflowNativeGitObservation(ctx, update, submission, observation)
 }
 
 func (s *Store) workflowNativeReconciliationInput(ctx context.Context, guard IntegrationBudgetGuard) (result workflowNativeReconciliation, err error) {

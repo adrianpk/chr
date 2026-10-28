@@ -155,7 +155,7 @@ func observeWorkflowNativeIntegration(ctx context.Context, store *Store, guard I
 		return workflowstate.ErrAtomicGuard
 	}
 
-	if _, err := store.ReconcileWorkflowNativeGitSubmission(ctx, guard, inspector, git); err != nil {
+	if _, err := ReconcileNativeGitSubmission(ctx, store, guard, inspector, git); err != nil {
 		return err
 	}
 
@@ -167,9 +167,9 @@ func observeWorkflowNativeIntegration(ctx context.Context, store *Store, guard I
 	}
 
 	if mode == workflowNativeObservationPoll {
-		_, err = store.PollWorkflowNativeSubmission(ctx, guard, ports.NativeObserver, ports.Observer)
+		_, err = PollNativeSubmission(ctx, store, guard, ports.NativeObserver, ports.Observer)
 	} else {
-		_, err = store.ObserveWorkflowNativeSubmission(ctx, guard, ports.NativeObserver, ports.Observer)
+		_, err = ObserveNativeSubmission(ctx, store, guard, ports.NativeObserver, ports.Observer)
 	}
 
 	if err != nil {

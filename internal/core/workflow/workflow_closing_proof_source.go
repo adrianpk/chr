@@ -49,7 +49,7 @@ func (source workflowClosingProofSource) CheckProof(query workflowstate.Integrat
 }
 
 func (source workflowClosingProofSource) NativeObservation(ctx context.Context, receipt workflowstate.Record) (workflowstate.NativePublicationObservation, error) {
-	return source.store.observeWorkflowNativeReceipt(ctx, receipt, source.ports.Provider, source.ports.Observer)
+	return (workflowNativeObservationHost{store: source.store}).receipt(ctx, receipt, source.ports.Provider, source.ports.Observer)
 }
 
 func (source workflowClosingProofSource) Hash(relative string) (string, error) {
