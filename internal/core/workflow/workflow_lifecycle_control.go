@@ -116,7 +116,7 @@ func (s *Store) applyWorkflowLifecycleControl(ctx context.Context, run workflowI
 }
 
 func (s *Store) acceptWorkflowControlContinuation(ctx context.Context, run *workflowInvocationFile, steps int, commit *workflowControlCommit) (int, error) {
-	if workflowInvocationTerminal(run.Status) {
+	if workflowstate.InvocationTerminal(run.Status) {
 		return 0, s.retainWorkflowControlNoop(ctx, *run, commit)
 	}
 

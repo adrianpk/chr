@@ -28,19 +28,19 @@ func validateWorkflowDependencyTargets(run workflowInvocationFile) error {
 	return nil
 }
 
-func validWorkflowDependencyTarget(run workflowInvocationFile, proof DependencyTarget, i int) bool {
+func validWorkflowDependencyTarget(run workflowInvocationFile, proof workflowstate.DependencyTarget, i int) bool {
 	if !validWorkflowDependencyTargetHeader(run, proof) {
 		return false
 	}
 
-	if !slices.ContainsFunc(run.Members, func(member Member) bool { return member.Admission.Key == proof.TicketKey }) {
+	if !slices.ContainsFunc(run.Members, func(member workflowstate.Member) bool { return member.Admission.Key == proof.TicketKey }) {
 		return false
 	}
 
 	return validWorkflowDependencyTargetScope(run, proof) && validWorkflowDependencyTargetEvidence(run, proof, i)
 }
 
-func validWorkflowDependencyTargetHeader(run workflowInvocationFile, proof DependencyTarget) bool {
+func validWorkflowDependencyTargetHeader(run workflowInvocationFile, proof workflowstate.DependencyTarget) bool {
 	if proof.Schema != "chr-dependency-target/v1" || proof.InvocationID != run.ID || !workflowstate.ValidBranch(proof.Branch) || proof.Cursor < 0 || proof.Cursor >= len(run.Members) || proof.Cursor > run.Cursor || run.Members[proof.Cursor].Admission.SliceID != "" {
 		return false
 	}
@@ -48,11 +48,11 @@ func validWorkflowDependencyTargetHeader(run workflowInvocationFile, proof Depen
 	return true
 }
 
-func validWorkflowDependencyTargetScope(run workflowInvocationFile, proof DependencyTarget) bool {
+func validWorkflowDependencyTargetScope(run workflowInvocationFile, proof workflowstate.DependencyTarget) bool {
 	return (run.Selection.Selector.Extent == "loose" || run.Selection.Selector.Extent == "ticket") && proof.Target.Repository == run.Selection.Target.Repository && proof.Previous.Repository == proof.Target.Repository && workflowstate.ValidCommitID(proof.Target.Commit) && workflowstate.ValidCommitID(proof.Previous.Commit) && workflowDependencyBranchMatches(run, proof.Branch)
 }
 
-func validWorkflowDependencyTargetEvidence(run workflowInvocationFile, proof DependencyTarget, i int) bool {
+func validWorkflowDependencyTargetEvidence(run workflowInvocationFile, proof workflowstate.DependencyTarget, i int) bool {
 	if proof.EvidenceRef != workflowDependencyTargetPath(run.ID, i+1) || len(proof.EvidenceHash) != 64 || proof.ConfirmedAt.IsZero() || proof.Blocker.NextActionOwner != "prerequisite_owner" || len(proof.Receipts) == 0 || len(proof.Receipts) > workflowstate.PageLimit {
 		return false
 	}

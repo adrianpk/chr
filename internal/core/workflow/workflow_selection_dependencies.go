@@ -8,13 +8,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// Blocker identifies one prerequisite without adding it to the extent.
-type Blocker struct {
-	Dependency      workflowstate.Ref
-	Reason          string
-	NextActionOwner string
-}
-
 type workflowDependencies struct {
 	selection     workflowSelection
 	tasks         map[string][]workflowstate.Record
@@ -103,7 +96,7 @@ func (dependencies workflowDependencies) taskPrerequisites(record workflowstate.
 	return unique
 }
 
-func (dependencies workflowDependencies) validateMembers(members []PreviewMember) error {
+func (dependencies workflowDependencies) validateMembers(members []workflowstate.PreviewMember) error {
 	for _, member := range members {
 		task := dependencies.selection.records[member.Key].Task
 

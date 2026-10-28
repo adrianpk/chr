@@ -86,7 +86,7 @@ func checkWorkflowFrontierExclusions(t *testing.T, fixture workflowIntegrationFi
 	}
 }
 
-func workflowAdvanceFrontier(t *testing.T, fixture workflowIntegrationFixture) Invocation {
+func workflowAdvanceFrontier(t *testing.T, fixture workflowIntegrationFixture) workflowstate.Invocation {
 	t.Helper()
 
 	store := NewWorkflowStore(fixture.store.layout, fixture.store.projectID)
@@ -119,7 +119,7 @@ func checkWorkflowFrontierBarrier(t *testing.T, fixture workflowIntegrationFixtu
 	}
 }
 
-func checkWorkflowFrontierNext(t *testing.T, fixture workflowIntegrationFixture, run Invocation, receipt workflowstate.Record) {
+func checkWorkflowFrontierNext(t *testing.T, fixture workflowIntegrationFixture, run workflowstate.Invocation, receipt workflowstate.Record) {
 	t.Helper()
 	checkWorkflowFrontierCleared(t, run)
 
@@ -137,7 +137,7 @@ func checkWorkflowFrontierNext(t *testing.T, fixture workflowIntegrationFixture,
 	}
 }
 
-func checkWorkflowFrontierCleared(t *testing.T, run Invocation) {
+func checkWorkflowFrontierCleared(t *testing.T, run workflowstate.Invocation) {
 	t.Helper()
 
 	if run.Status != workflowstate.InvocationPending || run.Lane != nil || run.PullRequest != nil || run.DeliveryRef != "" || run.CandidateRef != "" || run.ConfirmedCursor != 3 || len(run.Deliveries) != 1 {

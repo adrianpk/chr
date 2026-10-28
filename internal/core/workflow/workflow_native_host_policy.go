@@ -70,7 +70,7 @@ func (adapter *NativeReviewAdapter) nativePublisher(ctx context.Context) (workfl
 }
 
 func workflowNativePublicationOwner(run workflowInvocationFile) bool {
-	return run.Lane != nil && run.PullRequest != nil && run.PullRequest.State == "bound" && run.PullRequest.CandidateHash == run.CandidateHash && run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && !workflowInvocationTerminal(run.Status)
+	return run.Lane != nil && run.PullRequest != nil && run.PullRequest.State == "bound" && run.PullRequest.CandidateHash == run.CandidateHash && run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && !workflowstate.InvocationTerminal(run.Status)
 }
 
 func workflowNativeOwnedPR(run workflowInvocationFile, pr workflowstate.PullRequestSnapshot) bool {

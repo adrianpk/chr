@@ -55,7 +55,7 @@ func (s *Store) executeWorkflowSliceTask(ctx context.Context, id string, worker 
 	}
 
 	claim, err := s.ClaimWorkflow(ctx, id)
-	if errors.Is(err, ErrWorkflowOwned) {
+	if errors.Is(err, workflowstate.ErrOwned) {
 		// Claiming may have reused the complete validated prefix without a worker.
 		run, readErr := s.ReadWorkflow(ctx, id)
 		if readErr == nil && workflowSliceValidationReady(run) {
@@ -118,7 +118,7 @@ func closeWorkflowSliceCapacity(claim *Claim) error {
 	return err
 }
 
-func workflowSliceValidationReady(run Invocation) bool {
+func workflowSliceValidationReady(run workflowstate.Invocation) bool {
 	return run.Status == workflowstate.InvocationWaitingIntegration || run.Status == workflowstate.InvocationWaitingReview && run.CandidateRef != "" || run.Status == workflowstate.InvocationPaused && run.StopIntent == "" && run.Outcome == "slice_validation_failed"
 }
 

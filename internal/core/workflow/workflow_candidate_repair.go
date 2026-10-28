@@ -8,17 +8,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// CandidateRepairBinding retains actionable combined-result evidence.
-// It cannot authorize publication or rewind accepted source task execution.
-type CandidateRepairBinding struct {
-	Unit            workflowstate.Ref         `json:"unit"`
-	EntryID         string                    `json:"entry_id"`
-	ClaimGeneration uint64                    `json:"claim_generation"`
-	CandidateHash   string                    `json:"candidate_hash"`
-	FindingRef      workflowstate.EvidenceRef `json:"finding_ref"`
-	RecordRef       workflowstate.EvidenceRef `json:"record_ref"`
-}
-
 // CandidateRepair records the host result and its exact findings before
 // a bounded merger may act. Failed gate results remain non-candidates.
 type CandidateRepair struct {
@@ -102,7 +91,7 @@ func (s *Store) repairWorkflowNativeReview(ctx context.Context, run workflowInvo
 	return s.retainWorkflowCandidateRepair(ctx, &run, candidate, "actionable_review_finding", []workflowstate.EvidenceRef{ref})
 }
 
-func workflowCandidateRepairFindingMatches(b CandidateRepairBinding, review *workflowstate.ReviewBinding) bool {
+func workflowCandidateRepairFindingMatches(b workflowstate.CandidateRepairBinding, review *workflowstate.ReviewBinding) bool {
 	return review != nil && b.Unit == review.Unit && b.FindingRef == (workflowstate.EvidenceRef{Path: review.ResultRef, Hash: review.ResultHash})
 }
 

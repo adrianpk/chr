@@ -15,11 +15,11 @@ import (
 
 // ReconcileWorkflow fences an expired or dead owner after proving its group dead
 // and acquiring capacity. It never creates an attempt or resets a retry budget.
-func (s *Store) ReconcileWorkflow(ctx context.Context, id string, expected ...uint64) (result Invocation, err error) {
+func (s *Store) ReconcileWorkflow(ctx context.Context, id string, expected ...uint64) (result workflowstate.Invocation, err error) {
 	return s.reconcileWorkflowChecked(ctx, id, nil, expected...)
 }
 
-func (s *Store) reconcileWorkflowChecked(ctx context.Context, id string, check AdmissionCheck, expected ...uint64) (result Invocation, err error) {
+func (s *Store) reconcileWorkflowChecked(ctx context.Context, id string, check AdmissionCheck, expected ...uint64) (result workflowstate.Invocation, err error) {
 	err = s.withLock(ctx, func() error {
 		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -66,7 +66,7 @@ func (s *Store) reconcileWorkflowInvocation(ctx context.Context, run workflowInv
 	return s.reconcileWorkflowOwner(ctx, run, control)
 }
 
-func workflowRecoverableOwner(attempt Attempt) error {
+func workflowRecoverableOwner(attempt workflowstate.Attempt) error {
 	if attempt.OwnerProcess == nil {
 		return workflowstate.ErrConflict
 	}
@@ -77,7 +77,7 @@ func workflowRecoverableOwner(attempt Attempt) error {
 	}
 
 	if alive && time.Now().Before(attempt.LeaseUntil) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return nil
@@ -138,7 +138,7 @@ func (s *Store) reconcileWorkflowOwner(ctx context.Context, run workflowInvocati
 	return releaseWorkflowAdoptionLocks(locks)
 }
 
-func (s *Store) checkRecoverableWorkflow(ctx context.Context, run workflowInvocationFile, attempt Attempt) error {
+func (s *Store) checkRecoverableWorkflow(ctx context.Context, run workflowInvocationFile, attempt workflowstate.Attempt) error {
 	if run.Status != workflowstate.InvocationRunning {
 		return nil
 	}
@@ -150,7 +150,7 @@ func (s *Store) checkRecoverableWorkflow(ctx context.Context, run workflowInvoca
 	return s.checkWorkflowInputs(ctx, run)
 }
 
-func (s *Store) recoverWorkflowAttempt(ctx context.Context, run workflowInvocationFile, attempt Attempt, control *workflowControlCommit) error {
+func (s *Store) recoverWorkflowAttempt(ctx context.Context, run workflowInvocationFile, attempt workflowstate.Attempt, control *workflowControlCommit) error {
 	record, err := s.readWorkflowAttemptTask(run, attempt)
 	if err != nil {
 		return err
@@ -168,7 +168,7 @@ func (s *Store) recoverWorkflowAttempt(ctx context.Context, run workflowInvocati
 	return s.checkpointWorkflowAttempt(run, record, "recovered", nil, files...)
 }
 
-func recoveredWorkflowLock(path, invocationID string, attempt Attempt) (*AgentOperationLock, error) {
+func recoveredWorkflowLock(path, invocationID string, attempt workflowstate.Attempt) (*AgentOperationLock, error) {
 	data, readErr := opsfile.Read(path)
 	if errors.Is(readErr, os.ErrNotExist) {
 		return nil, nil

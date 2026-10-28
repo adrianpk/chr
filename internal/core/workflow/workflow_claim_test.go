@@ -112,7 +112,7 @@ func TestWorkflowInvocationOverlap(t *testing.T) {
 			request.RequestKey = "request-2"
 
 			request.Selection.Selector = workflowClaimSelector(hierarchy, tc.next)
-			if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, ErrWorkflowOwned) {
+			if _, err := store.StartWorkflow(t.Context(), request); !errors.Is(err, workflowstate.ErrOwned) {
 				t.Fatalf("overlapping request accepted: %v", err)
 			}
 
@@ -138,7 +138,7 @@ func TestWorkflowClaimFence(t *testing.T) {
 	falseOwner := *first
 
 	falseOwner.Token = "counterfeit"
-	if err := store.CheckpointWorkflow(t.Context(), &falseOwner); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckpointWorkflow(t.Context(), &falseOwner); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("counterfeit checkpoint accepted: %v", err)
 	}
 
@@ -151,7 +151,7 @@ func TestWorkflowClaimFence(t *testing.T) {
 		t.Fatal("replacement reused fencing identity")
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), first); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckpointWorkflow(t.Context(), first); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("old owner checkpoint accepted: %v", err)
 	}
 
@@ -172,7 +172,7 @@ func TestWorkflowClaimEdits(t *testing.T) {
 	}
 
 	record.Task.AttemptID, record.Task.Phase, record.Task.Status = "", "pending", string(ticketcore.StatusReadyForDev)
-	if _, err := store.Write(t.Context(), record, record.Revision); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.Write(t.Context(), record, record.Revision); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("status edit bypassed owner: %v", err)
 	}
 

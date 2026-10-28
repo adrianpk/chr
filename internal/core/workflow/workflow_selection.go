@@ -12,28 +12,12 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// PreviewMember freezes the identity, revision and contract of one task.
-type PreviewMember struct {
-	Key          string
-	Path         string
-	Revision     uint64
-	SourceHash   string
-	ContractHash string
-	SetID        string
-	SliceID      string
-	TaskOrder    int
-	Status       string
-	Phase        string
-	Readiness    string
-	Blocker      *Blocker
-}
-
 // Preview returns one bounded page and counts for the whole extent.
 // Exclusion reasons are mutually exclusive; excluded work is never admitted.
 type Preview struct {
 	Selector     workflowstate.Selector
 	Authority    string
-	Members      []PreviewMember
+	Members      []workflowstate.PreviewMember
 	Total        int
 	Excluded     map[string]int
 	SnapshotHash string
@@ -135,7 +119,7 @@ func (selection workflowSelection) preview(request workflowstate.PreviewRequest)
 
 	preview.SnapshotHash = contenthash.Sum([]byte(selection.hash() + requestHash))
 
-	members := []PreviewMember{}
+	members := []workflowstate.PreviewMember{}
 
 	for _, ticket := range selection.tickets {
 		record, prepared := selection.records[ticket.Key]
@@ -241,13 +225,13 @@ func workflowSelectionExclusion(selector workflowstate.Selector, record workflow
 	return ""
 }
 
-func workflowPreviewMember(record workflowstate.Record) PreviewMember {
+func workflowPreviewMember(record workflowstate.Record) workflowstate.PreviewMember {
 	task := record.Task
 
-	return PreviewMember{Key: task.Key, Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, ContractHash: task.ContractHash, SetID: task.SetID, SliceID: task.SliceID, TaskOrder: task.Order, Status: task.Status, Phase: task.Phase}
+	return workflowstate.PreviewMember{Key: task.Key, Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, ContractHash: task.ContractHash, SetID: task.SetID, SliceID: task.SliceID, TaskOrder: task.Order, Status: task.Status, Phase: task.Phase}
 }
 
-func workflowAdmittedRefs(members []PreviewMember, selector workflowstate.Selector) map[workflowstate.Ref]bool {
+func workflowAdmittedRefs(members []workflowstate.PreviewMember, selector workflowstate.Selector) map[workflowstate.Ref]bool {
 	admitted := map[workflowstate.Ref]bool{}
 	for _, member := range members {
 		admitted[workflowstate.Ref{Kind: "ticket", ID: member.Key}] = true
@@ -298,7 +282,7 @@ func workflowPreviewExclusion(request workflowstate.PreviewRequest, ticket ticke
 	return reason
 }
 
-func (selection workflowSelection) resolveOrder(members []PreviewMember, request workflowstate.PreviewRequest) (string, error) {
+func (selection workflowSelection) resolveOrder(members []workflowstate.PreviewMember, request workflowstate.PreviewRequest) (string, error) {
 	if request.Selector.Extent == "loose" {
 		selection.orderLooseMembers(members, request.Order)
 

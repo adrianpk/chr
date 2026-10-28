@@ -24,7 +24,7 @@ func (p *workflowPreparationProviderFixture) WorkflowIntegrationCapability(_ con
 type workflowPreparationFixture struct {
 	store               *Store
 	hierarchy           MaterializationResult
-	run                 Invocation
+	run                 workflowstate.Invocation
 	provider            *workflowPreparationProviderFixture
 	git                 OSWorkflowPreparationGit
 	actor, remote, base string
@@ -185,7 +185,7 @@ func assertWorkflowPreparationSource(t *testing.T, f workflowPreparationFixture)
 	checkWorkflowPreparationTaskProofs(t, f.store, run)
 }
 
-func checkWorkflowPreparationTaskProofs(t *testing.T, store *Store, run Invocation) {
+func checkWorkflowPreparationTaskProofs(t *testing.T, store *Store, run workflowstate.Invocation) {
 	t.Helper()
 
 	for _, member := range run.Members {

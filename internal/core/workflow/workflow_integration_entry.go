@@ -21,26 +21,26 @@ type IntegrationBlocker struct {
 type IntegrationEntry struct {
 	DecisionRef *workflowstate.EvidenceRef `json:"decision_ref,omitempty"`
 	workflowstate.Identity
-	SchemaVersion       int                        `json:"schema_version"`
-	InvocationID        string                     `json:"invocation_id"`
-	Unit                workflowstate.Ref          `json:"unit"`
-	CoordinatorID       string                     `json:"coordinator_id"`
-	Repository          string                     `json:"repository_id"`
-	TargetRef           string                     `json:"target_ref"`
-	QueueSequence       uint64                     `json:"queue_sequence"`
-	AdmissionKey        string                     `json:"admission_key"`
-	FrozenScopeHash     string                     `json:"frozen_scope_hash"`
-	State               IntegrationState           `json:"state"`
-	StateRevision       uint64                     `json:"state_revision"`
-	PreparationReserved bool                       `json:"preparation_reserved,omitempty"`
-	ClaimGeneration     uint64                     `json:"claim_generation"`
-	BudgetRef           string                     `json:"budget_ref"`
-	CandidateRef        *workflowstate.EvidenceRef `json:"candidate_ref"`
-	SubmissionRef       *SubmissionBinding         `json:"submission_ref"`
-	ReceiptRef          *workflowstate.EvidenceRef `json:"receipt_ref"`
-	Blocker             *IntegrationBlocker        `json:"blocker"`
-	StopIntent          string                     `json:"stop_intent"`
-	Extensions          map[string]json.RawMessage `json:"extensions,omitempty"`
+	SchemaVersion       int                              `json:"schema_version"`
+	InvocationID        string                           `json:"invocation_id"`
+	Unit                workflowstate.Ref                `json:"unit"`
+	CoordinatorID       string                           `json:"coordinator_id"`
+	Repository          string                           `json:"repository_id"`
+	TargetRef           string                           `json:"target_ref"`
+	QueueSequence       uint64                           `json:"queue_sequence"`
+	AdmissionKey        string                           `json:"admission_key"`
+	FrozenScopeHash     string                           `json:"frozen_scope_hash"`
+	State               IntegrationState                 `json:"state"`
+	StateRevision       uint64                           `json:"state_revision"`
+	PreparationReserved bool                             `json:"preparation_reserved,omitempty"`
+	ClaimGeneration     uint64                           `json:"claim_generation"`
+	BudgetRef           string                           `json:"budget_ref"`
+	CandidateRef        *workflowstate.EvidenceRef       `json:"candidate_ref"`
+	SubmissionRef       *workflowstate.SubmissionBinding `json:"submission_ref"`
+	ReceiptRef          *workflowstate.EvidenceRef       `json:"receipt_ref"`
+	Blocker             *IntegrationBlocker              `json:"blocker"`
+	StopIntent          string                           `json:"stop_intent"`
+	Extensions          map[string]json.RawMessage       `json:"extensions,omitempty"`
 }
 
 // IntegrationAdmission requires an explicit frozen unit and full target.
@@ -82,7 +82,7 @@ func workflowIntegrationBudgetPath(id string) string {
 }
 
 func workflowIntegrationScopeHash(run workflowInvocationFile, unit workflowstate.Ref) (string, error) {
-	members := []PreviewMember{}
+	members := []workflowstate.PreviewMember{}
 
 	for _, member := range run.Members {
 		if workflowMemberOwnsUnit(member, unit) {
@@ -93,7 +93,7 @@ func workflowIntegrationScopeHash(run workflowInvocationFile, unit workflowstate
 	data, err := json.Marshal(struct {
 		RequestHash string
 		Unit        workflowstate.Ref
-		Members     []PreviewMember
+		Members     []workflowstate.PreviewMember
 	}{run.RequestHash, unit, members})
 
 	return contenthash.Sum(data), err

@@ -91,7 +91,7 @@ func webTicketFailure(err error) webui.WriteActionResponse {
 		return response
 	}
 
-	if errors.Is(err, workflowcore.ErrWorkflowOwned) || errors.Is(err, workflowcore.ErrWorkflowAuthority) {
+	if errors.Is(err, workflowstate.ErrOwned) || errors.Is(err, workflowcore.ErrWorkflowAuthority) {
 		return webBlockedWrite(err.Error())
 	}
 

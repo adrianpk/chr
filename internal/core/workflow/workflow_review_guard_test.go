@@ -16,37 +16,37 @@ import (
 func TestWorkflowReviewChangedInputs(t *testing.T) {
 	cases := []struct {
 		name   string
-		mutate func(*testing.T, *Store, Invocation, *workflowReviewProviderFixture)
+		mutate func(*testing.T, *Store, workflowstate.Invocation, *workflowReviewProviderFixture)
 	}{
-		{"policy", func(t *testing.T, s *Store, _ Invocation, _ *workflowReviewProviderFixture) {
+		{"policy", func(t *testing.T, s *Store, _ workflowstate.Invocation, _ *workflowReviewProviderFixture) {
 			workflowReviewConfig(t, s, workflowstate.ReviewTrustedAutoMerge)
 		}},
-		{"method", func(t *testing.T, s *Store, _ Invocation, _ *workflowReviewProviderFixture) {
+		{"method", func(t *testing.T, s *Store, _ workflowstate.Invocation, _ *workflowReviewProviderFixture) {
 			workflowReviewWrite(t, workspacecore.UserPath(s.layout.ProjectDir(), "config.yml"), []byte("review:\n  mode: human_review\nwork:\n  merge_strategy: squash\n"))
 		}},
-		{"target", func(_ *testing.T, _ *Store, _ Invocation, p *workflowReviewProviderFixture) {
+		{"target", func(_ *testing.T, _ *Store, _ workflowstate.Invocation, p *workflowReviewProviderFixture) {
 			p.target = strings.Repeat("b", 40)
 			p.pr.BaseCommit = p.target
 		}},
-		{"head", func(_ *testing.T, _ *Store, _ Invocation, p *workflowReviewProviderFixture) {
+		{"head", func(_ *testing.T, _ *Store, _ workflowstate.Invocation, p *workflowReviewProviderFixture) {
 			p.pr.HeadCommit = strings.Repeat("b", 40)
 		}},
-		{"fork", func(_ *testing.T, _ *Store, _ Invocation, p *workflowReviewProviderFixture) {
+		{"fork", func(_ *testing.T, _ *Store, _ workflowstate.Invocation, p *workflowReviewProviderFixture) {
 			p.pr.HeadRepository = "https://forge.example/other/repo"
 		}},
-		{"closed", func(_ *testing.T, _ *Store, _ Invocation, p *workflowReviewProviderFixture) {
+		{"closed", func(_ *testing.T, _ *Store, _ workflowstate.Invocation, p *workflowReviewProviderFixture) {
 			p.pr.State = "closed"
 		}},
-		{"body", func(t *testing.T, s *Store, r Invocation, _ *workflowReviewProviderFixture) {
+		{"body", func(t *testing.T, s *Store, r workflowstate.Invocation, _ *workflowReviewProviderFixture) {
 			workflowReviewWrite(t, filepath.Join(s.layout.Root(), filepath.Dir(r.Members[0].Admission.Path), "artifact.md"), []byte("Changed task body\n"))
 		}},
-		{"candidate", func(t *testing.T, s *Store, r Invocation, _ *workflowReviewProviderFixture) {
+		{"candidate", func(t *testing.T, s *Store, r workflowstate.Invocation, _ *workflowReviewProviderFixture) {
 			workflowReviewWrite(t, filepath.Join(s.layout.Root(), r.CandidateRef), []byte("{}\n"))
 		}},
-		{"grant", func(t *testing.T, s *Store, r Invocation, _ *workflowReviewProviderFixture) {
+		{"grant", func(t *testing.T, s *Store, r workflowstate.Invocation, _ *workflowReviewProviderFixture) {
 			workflowReviewWrite(t, filepath.Join(s.layout.Root(), r.Review.InputRef), []byte("{}\n"))
 		}},
-		{"dirty lane", func(t *testing.T, _ *Store, r Invocation, _ *workflowReviewProviderFixture) {
+		{"dirty lane", func(t *testing.T, _ *Store, r workflowstate.Invocation, _ *workflowReviewProviderFixture) {
 			workflowReviewWrite(t, filepath.Join(r.Lane.Worktree, "result.txt"), []byte("Changed Git tree\n"))
 		}},
 	}

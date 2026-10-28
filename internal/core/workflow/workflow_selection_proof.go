@@ -222,7 +222,7 @@ func (s *Store) observePrerequisites(ctx context.Context, selection workflowSele
 			}
 
 			member.Readiness = "blocked"
-			member.Blocker = &Blocker{Dependency: ref, Reason: reason, NextActionOwner: "prerequisite_owner"}
+			member.Blocker = &workflowstate.Blocker{Dependency: ref, Reason: reason, NextActionOwner: "prerequisite_owner"}
 
 			break
 		}

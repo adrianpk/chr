@@ -106,7 +106,7 @@ func (s *Store) checkWorkflowClosingNativeSubmission(ctx context.Context, run wo
 	return s.checkWorkflowNativeRetainedReceipt(run, last, receipt)
 }
 
-func workflowClosingNativeJournalMatches(journal workflowSubmissionJournal, run workflowInvocationFile, binding SubmissionBinding, receipt workflowstate.Record) bool {
+func workflowClosingNativeJournalMatches(journal workflowSubmissionJournal, run workflowInvocationFile, binding workflowstate.SubmissionBinding, receipt workflowstate.Record) bool {
 	expected := [4]string{binding.JournalHash, run.OwnerRoot, run.Namespace, run.ID}
 	actual := [4]string{journal.sourceHash, journal.OwnerRoot, journal.Namespace, journal.InvocationID}
 

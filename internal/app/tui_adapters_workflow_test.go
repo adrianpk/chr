@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
@@ -51,7 +50,7 @@ func TestTUIWorkflowStale(t *testing.T) {
 	id := workflowCLIManualStart(t, operations, hierarchy)
 
 	before := workflowCLIImage(t, operations.projectContext.ProjectDir)
-	if _, err := executor.ExecuteWorkAction(preview.Confirmation.Request); !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, workflowcore.ErrWorkflowOwned) {
+	if _, err := executor.ExecuteWorkAction(preview.Confirmation.Request); !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("stale confirmation started work", err)
 	}
 

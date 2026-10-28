@@ -169,7 +169,7 @@ func TestTelegramWorkOtherOwner(t *testing.T) {
 	})
 
 	result := f.receiver.activateWork(t.Context(), ref)
-	if !errors.Is(result.Failure, workflowcore.ErrWorkflowOwned) || result.Progress.Steps != 0 {
+	if !errors.Is(result.Failure, workflowstate.ErrOwned) || result.Progress.Steps != 0 {
 		t.Fatal("receiver replaced another owner's activation", result.Progress, result.Failure)
 	}
 

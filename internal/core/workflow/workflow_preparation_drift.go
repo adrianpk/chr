@@ -25,7 +25,7 @@ func (s *Store) guardWorkflowPreparationWork(ctx context.Context, run workflowIn
 	}
 
 	if run.StopIntent != "" || entry.StopIntent != "" {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	if entry.State == "blocked" && entry.Blocker.Reason == "native_not_applied" {
@@ -33,7 +33,7 @@ func (s *Store) guardWorkflowPreparationWork(ctx context.Context, run workflowIn
 	}
 
 	if !slices.Contains([]IntegrationState{"queued", "preparing", "merging", "validating", "reviewing", "waiting_review", "ready_to_publish"}, entry.State) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return nil

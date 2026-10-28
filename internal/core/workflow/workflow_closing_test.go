@@ -103,7 +103,7 @@ func TestWorkflowClosingRetry(t *testing.T) {
 	}
 }
 
-func checkWorkflowClosingResult(t *testing.T, fixture workflowIntegrationFixture, set workflowstate.Record, closed SetClosureResult) {
+func checkWorkflowClosingResult(t *testing.T, fixture workflowIntegrationFixture, set workflowstate.Record, closed workflowcloseout.Result) {
 	t.Helper()
 
 	if !workflowClosingResultComplete(closed) {
@@ -115,7 +115,7 @@ func checkWorkflowClosingResult(t *testing.T, fixture workflowIntegrationFixture
 	}
 }
 
-func workflowClosingResultComplete(closed SetClosureResult) bool {
+func workflowClosingResultComplete(closed workflowcloseout.Result) bool {
 	return closed.Outcome == "completed" && closed.Set.Set.Status == "completed" && closed.Set.Set.ClosureRef == closed.ReceiptRef && len(closed.Receipt.Members) == 6 && len(closed.Receipt.Slices) == 2 && len(closed.Set.Set.Closing.Attempts) == 2
 }
 
@@ -130,7 +130,7 @@ func workflowClosingTaskBytes(t *testing.T, fixture workflowIntegrationFixture) 
 	return images
 }
 
-func checkWorkflowClosingTasks(t *testing.T, fixture workflowIntegrationFixture, images map[string][]byte, before Invocation) {
+func checkWorkflowClosingTasks(t *testing.T, fixture workflowIntegrationFixture, images map[string][]byte, before workflowstate.Invocation) {
 	t.Helper()
 
 	for path, image := range images {
@@ -188,7 +188,7 @@ func testWorkflowClosingEmpty(t *testing.T, required bool) {
 	}
 }
 
-func checkWorkflowClosingEmpty(t *testing.T, closed SetClosureResult, required bool) {
+func checkWorkflowClosingEmpty(t *testing.T, closed workflowcloseout.Result, required bool) {
 	t.Helper()
 
 	if closed.Outcome != "completed" || len(closed.Receipt.Members) != 0 || len(closed.Receipt.Slices) != 0 {

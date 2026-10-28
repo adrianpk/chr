@@ -71,7 +71,7 @@ func prepareServiceHarnessBinding(t *testing.T, operations service) string {
 	return profiles
 }
 
-func checkServiceBoundWorker(t *testing.T, operations service, invocation workflowcore.Invocation) {
+func checkServiceBoundWorker(t *testing.T, operations service, invocation workflowstate.Invocation) {
 	t.Helper()
 
 	public, err := json.Marshal(invocation)

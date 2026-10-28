@@ -34,7 +34,7 @@ func (s *Store) prepareWorkflowPullRequest(ctx context.Context, run *workflowInv
 
 func (s *Store) checkWorkflowPullRequestReady(run workflowInvocationFile) error {
 	if run.StopIntent != "" || !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingIntegration, workflowstate.InvocationWaitingReview, workflowstate.InvocationBlocked}, run.Status) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	if run.PullRequest != nil && run.PullRequest.State == "blocked" {
@@ -80,7 +80,7 @@ func prepareWorkflowPullRequestBinding(run *workflowInvocationFile, observation 
 	return nil
 }
 
-func workflowPullRequestCandidateMayAdvance(binding PullRequestBinding, id string) bool {
+func workflowPullRequestCandidateMayAdvance(binding workflowstate.PullRequestBinding, id string) bool {
 	return binding.CandidateID == "" || binding.CandidateID == id || binding.State == "prepared" || binding.State == "bound" && binding.URL != ""
 }
 
@@ -97,7 +97,7 @@ func initializeWorkflowPullRequestBinding(run *workflowInvocationFile, descripto
 		return workflowstate.ErrConflict
 	}
 
-	run.PullRequest = &PullRequestBinding{Schema: "chr-slice-pr/v1", ID: workflowPullRequestBindingID(*run, request.Repository), Unit: run.Lane.Unit, Request: request, TargetCommit: run.ExecutionSelection().Target.Commit, State: "prepared", URL: descriptor.PullRequest}
+	run.PullRequest = &workflowstate.PullRequestBinding{Schema: "chr-slice-pr/v1", ID: workflowPullRequestBindingID(*run, request.Repository), Unit: run.Lane.Unit, Request: request, TargetCommit: run.ExecutionSelection().Target.Commit, State: "prepared", URL: descriptor.PullRequest}
 	if run.PullRequest.URL != "" {
 		run.PullRequest.State = "bound"
 	}

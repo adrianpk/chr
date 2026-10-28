@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"slices"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvocationFile, selection workflowSelection, later []PreviewMember) error {
+func (s *Store) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvocationFile, selection workflowSelection, later []workflowstate.PreviewMember) error {
 	if len(run.Members)+len(later) > workflowstate.RecordLimit {
 		return fmt.Errorf("workflow later admission member bound exceeded")
 	}
@@ -27,7 +28,7 @@ func (s *Store) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvo
 		return err
 	}
 
-	known := map[string]Member{}
+	known := map[string]workflowstate.Member{}
 	for _, member := range append(workflowNewMembers(preview.Members), run.Members...) {
 		known[member.Admission.Key] = member
 	}
@@ -47,28 +48,28 @@ func (s *Store) admitWorkflowLaterMembers(ctx context.Context, run *workflowInvo
 }
 
 func sortWorkflowLaterSetImages(run *workflowInvocationFile, selection workflowSelection) {
-	slices.SortFunc(run.SetImages, func(a, b InputImage) int {
-		return selection.compareSets(workflowInvocationSetID(a), workflowInvocationSetID(b), run.SetOrderRule)
+	slices.SortFunc(run.SetImages, func(a, b workflowstate.InputImage) int {
+		return selection.compareSets(workflowcloseout.SetID(a), workflowcloseout.SetID(b), run.SetOrderRule)
 	})
 }
 
 func workflowContinueAmendedSet(run *workflowInvocationFile) {
-	if run.Outcome == "set_closure_required" && run.Cursor < len(run.Members) && run.Members[run.Cursor].Admission.SetID == workflowNextClosingSet(run.Invocation) {
+	if run.Outcome == "set_closure_required" && run.Cursor < len(run.Members) && run.Members[run.Cursor].Admission.SetID == workflowcloseout.NextSet(run.Invocation) {
 		run.Status, run.Outcome = workflowstate.InvocationPending, "later_work_admitted"
 	}
 }
 
-func workflowNewMembers(members []PreviewMember) []Member {
-	result := make([]Member, 0, len(members))
+func workflowNewMembers(members []workflowstate.PreviewMember) []workflowstate.Member {
+	result := make([]workflowstate.Member, 0, len(members))
 	for _, member := range members {
-		result = append(result, Member{Admission: member, ExpectedRevision: member.Revision, ExpectedSourceHash: member.SourceHash})
+		result = append(result, workflowstate.Member{Admission: member, ExpectedRevision: member.Revision, ExpectedSourceHash: member.SourceHash})
 	}
 
 	return result
 }
 
-func mergeWorkflowLaterMembers(run workflowInvocationFile, selection workflowSelection, later []PreviewMember) ([]PreviewMember, error) {
-	ordered := append([]PreviewMember(nil), later...)
+func mergeWorkflowLaterMembers(run workflowInvocationFile, selection workflowSelection, later []workflowstate.PreviewMember) ([]workflowstate.PreviewMember, error) {
+	ordered := append([]workflowstate.PreviewMember(nil), later...)
 
 	known := map[string]int{}
 	for i, member := range run.Members {
@@ -110,12 +111,12 @@ func appendWorkflowLaterSetImages(run *workflowInvocationFile, selection workflo
 			continue
 		}
 
-		run.SetImages = append(run.SetImages, InputImage{Path: set.Path, Revision: set.Revision, SourceHash: set.SourceHash, UseCase: set.Set.UseCase})
+		run.SetImages = append(run.SetImages, workflowstate.InputImage{Path: set.Path, Revision: set.Revision, SourceHash: set.SourceHash, UseCase: set.Set.UseCase})
 		known[set.Path] = true
 	}
 }
 
-func (s *Store) checkWorkflowLaterOwnership(ctx context.Context, run workflowInvocationFile, later []PreviewMember) error {
+func (s *Store) checkWorkflowLaterOwnership(ctx context.Context, run workflowInvocationFile, later []workflowstate.PreviewMember) error {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
 		return err

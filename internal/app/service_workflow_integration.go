@@ -47,7 +47,7 @@ func (s service) workflowIntegrationProvider() (workflowcore.PullRequestProvider
 	return provider, nil
 }
 
-func (s service) workflowIntegrationObserver(run workflowcore.Invocation) workflowcore.IntegrationGit {
+func (s service) workflowIntegrationObserver(run workflowstate.Invocation) workflowcore.IntegrationGit {
 	git := s.workflowIntegrationGit
 	if git == nil {
 		git = workflowcore.NewWorkflowIntegrationGit(run.Selection.Target.Repository, run.Selection.Target.Repository)

@@ -67,7 +67,7 @@ func workflowNativePreparationEntryReady(run workflowInvocationFile, entry Integ
 	}
 
 	if entry.State != "validating" {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return nil

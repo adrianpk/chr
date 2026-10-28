@@ -148,7 +148,7 @@ func validWorkflowPreparationHeader(run workflowInvocationFile) bool {
 	return run.Lane != nil && b.Unit == run.Lane.Unit && b.Round >= 1 && b.Round == run.PreparationCount && len(b.SourceHash) == 64 && slices.Contains([]string{"preparing", "validating", "validated", "stale"}, b.State)
 }
 
-func validateWorkflowPreparationRefs(id string, b PreparationBinding) error {
+func validateWorkflowPreparationRefs(id string, b workflowstate.PreparationBinding) error {
 	if b.ResultRef == "" {
 		if b.State == "validated" || b.ResultHash != "" {
 			return workflowstate.ErrConflict

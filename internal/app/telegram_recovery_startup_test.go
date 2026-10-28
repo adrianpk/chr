@@ -10,7 +10,7 @@ import (
 	"time"
 
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramRecoveryStartup replays an interrupted authoring acknowledgement
@@ -60,7 +60,7 @@ func checkTelegramRecoveryStartup(t *testing.T, state string) {
 	}
 }
 
-func telegramRecoveryRetainedWork(t *testing.T, state string) (*telegramConversationAppFixture, service, workflowcore.Invocation) {
+func telegramRecoveryRetainedWork(t *testing.T, state string) (*telegramConversationAppFixture, service, workflowstate.Invocation) {
 	t.Helper()
 
 	var (

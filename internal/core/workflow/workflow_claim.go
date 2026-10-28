@@ -29,9 +29,6 @@ type workflowClaimObservation struct {
 	Record workflowstate.Record
 }
 
-// ErrWorkflowOwned identifies overlap with retained task or hierarchy ownership.
-var ErrWorkflowOwned = errors.New("workflow work is already owned")
-
 // ErrWorkflowCapacity reports occupied repository capacity, independently of a lease.
 var ErrWorkflowCapacity = errors.New("workflow waiting for repository capacity")
 
@@ -80,7 +77,7 @@ func (s *Store) claimWorkflow(ctx context.Context, run workflowInvocationFile) (
 	}
 
 	if !workflowInvocationClaimable(run) {
-		return nil, fmt.Errorf("%w: invocation %s is %s", ErrWorkflowOwned, run.ID, run.Status)
+		return nil, fmt.Errorf("%w: invocation %s is %s", workflowstate.ErrOwned, run.ID, run.Status)
 	}
 
 	record, err := s.observeWorkflowClaim(ctx, run)
@@ -121,7 +118,7 @@ func (s *Store) prepareWorkflowClaimState(ctx context.Context, run *workflowInvo
 	restoreWorkflowCapacityWait(run)
 
 	if run.StopIntent != "" {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	if err := s.guardWorkflowIntegrationExecutor(ctx, *run); err != nil {
@@ -177,7 +174,7 @@ func (s *Store) observeWorkflowClaim(ctx context.Context, run workflowInvocation
 
 func validateWorkflowClaimableContract(record workflowstate.Record) error {
 	if !workflowTaskClaimable(record.Task) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return validateWorkflowClaimContract(record)
@@ -239,7 +236,7 @@ func (s *Store) beginWorkflowAttempt(run *workflowInvocationFile, record *workfl
 		return err
 	}
 
-	attempt := Attempt{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Purpose: claim.purpose, OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key, claim.purpose), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
+	attempt := workflowstate.Attempt{CapacitySlot: workflowWorkerSlotNumber(claim.reservation.Name()), Purpose: claim.purpose, OwnerProcess: &owner, Replaces: workflowReplacedAttempt(*run, record.Task.Key, claim.purpose), ID: claim.AttemptID, TaskKey: record.Task.Key, Generation: claim.Generation, InputRevision: record.Revision, ContractHash: record.Task.ContractHash, LeaseUntil: now.Add(time.Duration(run.Policy.WorkerTimeoutSeconds) * time.Second), StartedAt: now, Outcome: "running"}
 	run.Attempts = append(run.Attempts, attempt)
 	run.Owners[claim.AttemptID] = contenthash.Sum([]byte(claim.Token))
 	run.Status = workflowstate.InvocationRunning
@@ -312,7 +309,7 @@ func workflowClaimRecordHash(record workflowstate.Record, files []workflowstate.
 // CheckWorkflowClaim rejects expired credentials and any unaccepted file image.
 func (s *Store) CheckWorkflowClaim(ctx context.Context, claim *Claim) error {
 	if claim == nil || claim.store == nil || claim.execution == nil {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return s.withLock(ctx, func() error {
@@ -333,7 +330,7 @@ func (s *Store) checkWorkflowCredential(ctx context.Context, claim *Claim, check
 	}
 
 	if invocationLocation2.Owner.layout.Root() != claim.store.layout.Root() || len(invocationLocation2.Run.Attempts) == 0 {
-		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, ErrWorkflowOwned
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, workflowstate.ErrOwned
 	}
 
 	if err := invocationLocation2.Owner.checkWorkflowInputs(ctx, invocationLocation2.Run); err != nil {
@@ -342,7 +339,7 @@ func (s *Store) checkWorkflowCredential(ctx context.Context, claim *Claim, check
 
 	attempt := invocationLocation2.Run.Attempts[len(invocationLocation2.Run.Attempts)-1]
 	if !workflowCredentialValid(invocationLocation2.Run, claim, attempt, check) {
-		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, ErrWorkflowOwned
+		return workflowClaimObservation{Run: invocationLocation2.Run, Record: workflowstate.Record{}}, workflowstate.ErrOwned
 	}
 
 	record, err := invocationLocation2.Owner.readWorkflowAttemptTask(invocationLocation2.Run, attempt)
@@ -360,14 +357,14 @@ func (s *Store) checkWorkflowCredential(ctx context.Context, claim *Claim, check
 // CheckpointWorkflow yields at a quiescent task boundary without claiming success.
 func (s *Store) CheckpointWorkflow(ctx context.Context, claim *Claim) error {
 	if claim == nil || claim.store == nil || claim.execution == nil {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	claim.execution.Lock()
 	defer claim.execution.Unlock()
 
 	if !workflowClaimQuiescent(claim) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return s.withLock(ctx, func() error {
@@ -384,7 +381,7 @@ func (s *Store) CheckpointWorkflow(ctx context.Context, claim *Claim) error {
 	})
 }
 
-func workflowAttemptCredentialMatches(run workflowInvocationFile, claim *Claim, attempt Attempt) bool {
+func workflowAttemptCredentialMatches(run workflowInvocationFile, claim *Claim, attempt workflowstate.Attempt) bool {
 	return run.Status == workflowstate.InvocationRunning && attempt.Outcome == "running" && attempt.Purpose == claim.purpose && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == contenthash.Sum([]byte(claim.Token))
 }
 
@@ -398,7 +395,7 @@ func workflowReplacedAttempt(run workflowInvocationFile, key, purpose string) st
 	return ""
 }
 
-func (s *Store) readWorkflowAttemptTask(run workflowInvocationFile, attempt Attempt) (workflowstate.Record, error) {
+func (s *Store) readWorkflowAttemptTask(run workflowInvocationFile, attempt workflowstate.Attempt) (workflowstate.Record, error) {
 	cursor := run.Cursor
 	if attempt.Purpose == workflowSliceValidationPurpose || attempt.Purpose == workflowSliceReviewPurpose || attempt.Purpose == workflowIntegrationValidationPurpose || attempt.Purpose == workflowMergerPurpose {
 		cursor--
@@ -415,6 +412,6 @@ func workflowInvocationClaimable(run workflowInvocationFile) bool {
 	return run.StopIntent == "" && !workflowPrerequisitePaused(run) && !workflowFailedTaskPaused(run) && slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationPending, workflowstate.InvocationPaused, workflowstate.InvocationWaitingCapacity}, run.Status) && run.Cursor < len(run.Members)
 }
 
-func workflowCredentialValid(run workflowInvocationFile, claim *Claim, attempt Attempt, check workflowCredentialCheck) bool {
+func workflowCredentialValid(run workflowInvocationFile, claim *Claim, attempt workflowstate.Attempt, check workflowCredentialCheck) bool {
 	return workflowAttemptCredentialMatches(run, claim, attempt) && (check != workflowCredentialLease || time.Now().Before(attempt.LeaseUntil))
 }

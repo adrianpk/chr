@@ -43,7 +43,7 @@ func nativeCandidateRepairFixture(t *testing.T, method, reason string) (nativePr
 	return f, request, nativeMergerTestHarness(t, f.f.store, run.ID)
 }
 
-func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run Invocation, candidate workflowstate.IntegrationCandidate, gate workflowstate.Validation) workflowstate.MergerInput {
+func nativeCandidateRepairInput(t *testing.T, f nativePreparationFixture, run workflowstate.Invocation, candidate workflowstate.IntegrationCandidate, gate workflowstate.Validation) workflowstate.MergerInput {
 	t.Helper()
 
 	repair, err := f.f.store.ReadWorkflowCandidateRepair(t.Context(), run.ID)

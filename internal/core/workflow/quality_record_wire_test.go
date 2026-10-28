@@ -21,7 +21,7 @@ func recordWireFactories() map[string]func() any {
 		"guided-session":     func() any { return &authoringcore.Session{} },
 		"guided-control":     func() any { return &authoringcore.GuidedControlState{} },
 		"workflow-start":     func() any { return &StartRequest{} },
-		"invocation":         func() any { return &Invocation{} },
+		"invocation":         func() any { return &workflowstate.Invocation{} },
 		"merger-input":       func() any { return &workflowstate.MergerInput{} },
 		"indexed-ticket":     func() any { return &ticketcore.Indexed{} },
 		"invocation-file":    func() any { return &workflowInvocationFile{} },

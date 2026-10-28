@@ -10,6 +10,7 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -40,19 +41,19 @@ func (s *Store) freezeWorkflowSets(ctx context.Context, run *workflowInvocationF
 
 	for _, record := range selection.sets {
 		if workflowFrozenSetMatches(record, run.Selection.Selector, ids) {
-			run.SetImages = append(run.SetImages, InputImage{Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, UseCase: record.Set.UseCase})
+			run.SetImages = append(run.SetImages, workflowstate.InputImage{Path: record.Path, Revision: record.Revision, SourceHash: record.SourceHash, UseCase: record.Set.UseCase})
 		}
 	}
 
-	slices.SortFunc(run.SetImages, func(a, b InputImage) int {
-		return selection.compareSets(workflowInvocationSetID(a), workflowInvocationSetID(b), run.SetOrderRule)
+	slices.SortFunc(run.SetImages, func(a, b workflowstate.InputImage) int {
+		return selection.compareSets(workflowcloseout.SetID(a), workflowcloseout.SetID(b), run.SetOrderRule)
 	})
 
 	if len(run.Members) == 0 && len(run.SetImages) == 0 {
 		return fmt.Errorf("selected workflow has no prepared unfinished tasks or sets")
 	}
 
-	if workflowInvocationNeedsClosing(run.Invocation) {
+	if workflowcloseout.NeedsClosing(run.Invocation) {
 		run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "set_closure_required"
 	}
 
@@ -69,16 +70,6 @@ func workflowFrozenSetMatches(set workflowstate.Record, selector workflowstate.S
 	}
 
 	return memberSets[set.ID]
-}
-
-func workflowInvocationNeedsClosing(run Invocation) bool {
-	if run.Selection.Selector.Extent != "slice_set" && run.Selection.Selector.Extent != "use_case" {
-		return false
-	}
-
-	next := workflowNextClosingSet(run)
-
-	return next != "" && (run.Cursor == len(run.Members) || run.Members[run.Cursor].Admission.SetID != next)
 }
 
 func (s *Store) checkWorkflowInputs(ctx context.Context, run workflowInvocationFile) error {
@@ -120,7 +111,7 @@ func (s *Store) checkWorkflowInputsPrepared(ctx context.Context, run workflowInv
 	return s.checkWorkflowSetImages(run)
 }
 
-func workflowMemberImageMatches(record workflowstate.Record, input Member, identity workflowstate.Identity) bool {
+func workflowMemberImageMatches(record workflowstate.Record, input workflowstate.Member, identity workflowstate.Identity) bool {
 	if record.ProjectID != identity.ProjectID || record.Namespace != identity.Namespace || record.Task == nil {
 		return false
 	}

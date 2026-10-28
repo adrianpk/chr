@@ -8,7 +8,7 @@ import (
 )
 
 type workflowContinuationState struct {
-	Invocation        Invocation
+	Invocation        workflowstate.Invocation
 	MembershipChanged bool
 }
 
@@ -72,7 +72,7 @@ func (s *Store) readWorkflowContinuation(ctx context.Context, id string) (workfl
 	return workflowContinuationState{Invocation: run, MembershipChanged: refreshed.Revision != run.Revision}, err
 }
 
-func workflowContinuationAfter(before, after Invocation) workflowContinuationStep {
+func workflowContinuationAfter(before, after workflowstate.Invocation) workflowContinuationStep {
 	if after.Revision == before.Revision {
 		return workflowContinuationStep{Reason: "awaiting_authority"}
 	}
@@ -80,8 +80,8 @@ func workflowContinuationAfter(before, after Invocation) workflowContinuationSte
 	return workflowContinuationStep{Steps: 1, Reason: workflowContinuationBarrier(after)}
 }
 
-func workflowContinuationBarrier(run Invocation) string {
-	if workflowInvocationTerminal(run.Status) {
+func workflowContinuationBarrier(run workflowstate.Invocation) string {
+	if workflowstate.InvocationTerminal(run.Status) {
 		return string(run.Status)
 	}
 
@@ -104,7 +104,7 @@ func workflowContinuationBarrier(run Invocation) string {
 	return ""
 }
 
-func (s *Store) advanceWorkflowContinuation(ctx context.Context, run Invocation, request ContinuationRequest, ports ContinuationPorts) error {
+func (s *Store) advanceWorkflowContinuation(ctx context.Context, run workflowstate.Invocation, request ContinuationRequest, ports ContinuationPorts) error {
 	state := workflowInvocationFile{Invocation: run}
 	restoreWorkflowCapacityWait(&state)
 
@@ -145,7 +145,7 @@ func (s *Store) advanceWorkflowContinuation(ctx context.Context, run Invocation,
 	return s.executeWorkflowSliceTask(ctx, run.ID, request.Worker)
 }
 
-func (s *Store) advanceWorkflowContinuationDelivery(ctx context.Context, run Invocation, ports ContinuationPorts) error {
+func (s *Store) advanceWorkflowContinuationDelivery(ctx context.Context, run workflowstate.Invocation, ports ContinuationPorts) error {
 	if run.Integration != nil && run.ConfirmedCursor < run.Cursor {
 		_, err := s.AdvanceWorkflowSliceIntegration(ctx, run.ID, ports.Publication)
 
@@ -157,7 +157,7 @@ func (s *Store) advanceWorkflowContinuationDelivery(ctx context.Context, run Inv
 	return err
 }
 
-func (s *Store) ensureWorkflowContinuationPR(ctx context.Context, run Invocation, request ContinuationRequest, ports ContinuationPorts) error {
+func (s *Store) ensureWorkflowContinuationPR(ctx context.Context, run workflowstate.Invocation, request ContinuationRequest, ports ContinuationPorts) error {
 	if ports.Source != nil && (run.PullRequest == nil || run.PullRequest.State == "prepared" || run.PullRequest.State == "bound") {
 		if err := s.PublishWorkflowSource(ctx, run.ID, ports.Source); err != nil {
 			return err
@@ -169,11 +169,11 @@ func (s *Store) ensureWorkflowContinuationPR(ctx context.Context, run Invocation
 	return err
 }
 
-func workflowContinuationClosing(run Invocation) bool {
-	return !workflowInvocationTerminal(run.Status) && run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && (run.Outcome == "set_closure_required" || run.Outcome == "closing_validation_failed" || run.Outcome == "interrupted" || run.ClosingSet != "")
+func workflowContinuationClosing(run workflowstate.Invocation) bool {
+	return !workflowstate.InvocationTerminal(run.Status) && run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && (run.Outcome == "set_closure_required" || run.Outcome == "closing_validation_failed" || run.Outcome == "interrupted" || run.ClosingSet != "")
 }
 
-func workflowContinuationBefore(run Invocation) string {
+func workflowContinuationBefore(run workflowstate.Invocation) string {
 	if run.Status == workflowstate.InvocationWaitingCapacity && run.StopIntent == "" {
 		return ""
 	}
@@ -185,6 +185,6 @@ func workflowContinuationBefore(run Invocation) string {
 	return workflowContinuationBarrier(run)
 }
 
-func workflowCandidateNeedsPR(run Invocation) bool {
+func workflowCandidateNeedsPR(run workflowstate.Invocation) bool {
 	return run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.CandidateHash != run.CandidateHash
 }

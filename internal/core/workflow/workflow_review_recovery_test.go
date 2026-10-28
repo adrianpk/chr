@@ -252,7 +252,7 @@ func testWorkflowReviewRoleJournal(t *testing.T, stage string, index int) {
 	}
 }
 
-func checkWorkflowReviewJournalRetry(t *testing.T, store *Store, id string, provider *workflowReviewProviderFixture, retained Invocation, before uint64, stage string) {
+func checkWorkflowReviewJournalRetry(t *testing.T, store *Store, id string, provider *workflowReviewProviderFixture, retained workflowstate.Invocation, before uint64, stage string) {
 	t.Helper()
 
 	if stage == "input" {
@@ -272,7 +272,7 @@ func checkWorkflowReviewJournalRetry(t *testing.T, store *Store, id string, prov
 	}
 }
 
-func checkWorkflowReviewClaimRecovered(t *testing.T, store *Store, id string, retained Invocation, stage string) {
+func checkWorkflowReviewClaimRecovered(t *testing.T, store *Store, id string, retained workflowstate.Invocation, stage string) {
 	t.Helper()
 
 	if stage == "claim" {

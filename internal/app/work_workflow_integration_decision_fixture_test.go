@@ -83,7 +83,7 @@ func retainServiceIntegrationDecision(t *testing.T, operations service, entry wo
 	}
 }
 
-func serviceIntegrationDecisionInput(t *testing.T, operations service, run workflowcore.Invocation, entry workflowcore.IntegrationEntry) workflowstate.MergerInput {
+func serviceIntegrationDecisionInput(t *testing.T, operations service, run workflowstate.Invocation, entry workflowcore.IntegrationEntry) workflowstate.MergerInput {
 	t.Helper()
 
 	now := time.Now().UTC()

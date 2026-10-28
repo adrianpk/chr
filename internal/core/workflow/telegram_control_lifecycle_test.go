@@ -135,7 +135,7 @@ func checkTelegramLifecycleActor(t *testing.T, reopened *Store, request workflow
 	}
 }
 
-func checkTelegramLifecycleRecovery(t *testing.T, kind string, run Invocation) {
+func checkTelegramLifecycleRecovery(t *testing.T, kind string, run workflowstate.Invocation) {
 	t.Helper()
 
 	if !validTelegramLifecycleRecovery(kind, run) {
@@ -143,7 +143,7 @@ func checkTelegramLifecycleRecovery(t *testing.T, kind string, run Invocation) {
 	}
 }
 
-func validTelegramLifecycleRecovery(kind string, run Invocation) bool {
+func validTelegramLifecycleRecovery(kind string, run workflowstate.Invocation) bool {
 	valid := false
 
 	switch kind {
@@ -162,7 +162,7 @@ func validTelegramLifecycleRecovery(kind string, run Invocation) bool {
 	return valid
 }
 
-func validTelegramLifecycleCheckpoint(kind string, run Invocation) bool {
+func validTelegramLifecycleCheckpoint(kind string, run workflowstate.Invocation) bool {
 	switch kind {
 	case "continue":
 		return len(run.Attempts) == 0 && run.Continuation != nil && run.Continuation.Reason == "accepted"

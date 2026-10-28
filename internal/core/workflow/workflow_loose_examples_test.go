@@ -76,7 +76,7 @@ func workflowLooseFields(t *testing.T, store *Store, key, area, priority, severi
 	return changed
 }
 
-func workflowLoosePendingKeys(run Invocation) []string {
+func workflowLoosePendingKeys(run workflowstate.Invocation) []string {
 	keys := []string{}
 	for _, member := range run.Members[run.Cursor : run.Cursor+run.LooseQueue.Eligible] {
 		keys = append(keys, member.Admission.Key)
@@ -107,7 +107,7 @@ func TestWorkflowLooseLater(t *testing.T) {
 	}
 }
 
-func checkWorkflowLooseLater(t *testing.T, run Invocation, include bool, failure error) {
+func checkWorkflowLooseLater(t *testing.T, run workflowstate.Invocation, include bool, failure error) {
 	t.Helper()
 
 	if failure != nil || run.Members[0].Admission.Key != "PRJ-90" || run.ConfirmedCursor != 1 || len(run.Deliveries) != 1 {
@@ -117,7 +117,7 @@ func checkWorkflowLooseLater(t *testing.T, run Invocation, include bool, failure
 	checkWorkflowLooseLaterScope(t, run, include)
 }
 
-func checkWorkflowLooseLaterScope(t *testing.T, run Invocation, include bool) {
+func checkWorkflowLooseLaterScope(t *testing.T, run workflowstate.Invocation, include bool) {
 	t.Helper()
 
 	if include {

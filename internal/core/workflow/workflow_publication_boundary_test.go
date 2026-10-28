@@ -54,12 +54,12 @@ func TestWorkflowPublicationUnknown(t *testing.T) {
 func TestWorkflowPublicationCorrupt(t *testing.T) {
 	cases := []struct {
 		name string
-		path func(Invocation) string
+		path func(workflowstate.Invocation) string
 	}{
-		{"candidate", func(run Invocation) string { return run.CandidateRef }},
-		{"task", func(run Invocation) string { return run.Members[0].Admission.Path }},
-		{"preparation", func(run Invocation) string { return run.Preparation.ResultRef }},
-		{"review", func(run Invocation) string { return run.Review.InputRef }},
+		{"candidate", func(run workflowstate.Invocation) string { return run.CandidateRef }},
+		{"task", func(run workflowstate.Invocation) string { return run.Members[0].Admission.Path }},
+		{"preparation", func(run workflowstate.Invocation) string { return run.Preparation.ResultRef }},
+		{"review", func(run workflowstate.Invocation) string { return run.Review.InputRef }},
 	}
 	for _, check := range cases {
 		t.Run(check.name, func(t *testing.T) {

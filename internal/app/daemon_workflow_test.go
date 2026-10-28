@@ -15,7 +15,7 @@ import (
 	"time"
 
 	daemoncore "forge.adrianpk.com/chr/internal/core/harness/daemon"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/tui"
 )
 
@@ -94,7 +94,7 @@ func TestDaemonWorkflowContinue(t *testing.T) {
 	checkDaemonWorkflowSelection(t, start.Invocation, current, ticket.Task.Key, output.String())
 }
 
-func checkDaemonWorkflowSelection(t *testing.T, before, current workflowcore.Invocation, key, output string) {
+func checkDaemonWorkflowSelection(t *testing.T, before, current workflowstate.Invocation, key, output string) {
 	t.Helper()
 
 	if current.Selection.Selector.Identity != key || len(current.Members) != 1 || !reflect.DeepEqual(current.Members[0].Admission, before.Members[0].Admission) || current.Policy != before.Policy || current.Selection.Target != before.Selection.Target {
@@ -194,7 +194,7 @@ func checkDaemonWorkflowResume(t *testing.T, project, id, intent string, before 
 		t.Fatal("explicit daemon resume failed", resumed, err)
 	}
 
-	if intent == "cancel" && (!errors.Is(err, workflowcore.ErrWorkflowOwned) || !maps.Equal(before, workflowCLIImage(t, project))) {
+	if intent == "cancel" && (!errors.Is(err, workflowstate.ErrOwned) || !maps.Equal(before, workflowCLIImage(t, project))) {
 		t.Fatal("terminal cancellation resumed", err)
 	}
 }

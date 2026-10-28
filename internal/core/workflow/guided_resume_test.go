@@ -20,7 +20,7 @@ func TestGuidedUseCaseRecoveryResumeMarker(t *testing.T) {
 		{"operator pause", func(run *workflowInvocationFile) { run.Outcome = "paused" }, "paused"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			run := workflowInvocationFile{Invocation: Invocation{InvocationExecution: InvocationExecution{Status: workflowstate.InvocationPending, Outcome: "interrupted"}, InvocationInput: InvocationInput{Members: []Member{{}}, SetImages: []InputImage{{Path: "slice-set/original/artifact.md"}}}}}
+			run := workflowInvocationFile{Invocation: workflowstate.Invocation{InvocationExecution: workflowstate.InvocationExecution{Status: workflowstate.InvocationPending, Outcome: "interrupted"}, InvocationInput: workflowstate.InvocationInput{Members: []workflowstate.Member{{}}, SetImages: []workflowstate.InputImage{{Path: "slice-set/original/artifact.md"}}}}}
 			test.change(&run)
 			restoreWorkflowInterruptedContinuation(&run)
 

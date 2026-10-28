@@ -78,7 +78,7 @@ func (s *Store) persistWorkflowReviewDecision(run *workflowInvocationFile, obser
 	}
 
 	if state == workflowstate.ReviewInsufficientEvidence || state == workflowstate.ReviewHumanRequired {
-		run.Blocker = &Blocker{Dependency: run.Review.Unit, Reason: "review_" + string(state), NextActionOwner: "workflow_operator"}
+		run.Blocker = &workflowstate.Blocker{Dependency: run.Review.Unit, Reason: "review_" + string(state), NextActionOwner: "workflow_operator"}
 	}
 
 	files, err := s.workflowReviewDomainChanges(run, observation, state == workflowstate.ReviewAuthorized)

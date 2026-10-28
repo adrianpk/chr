@@ -44,7 +44,7 @@ func workflowNativeSourceRevisionRequired(config workspaceconfig.Config, run wor
 	return config.Work.Integration.PublicationProfile == workspaceconfig.WorkflowPublicationGitAtomicDualRef && run.Integration != nil && run.PullRequest != nil
 }
 
-func workflowNativeSourceIdentityMatches(binding PullRequestBinding, pr workflowstate.PullRequestSnapshot) bool {
+func workflowNativeSourceIdentityMatches(binding workflowstate.PullRequestBinding, pr workflowstate.PullRequestSnapshot) bool {
 	observed := pr
 	observed.HeadRepository, observed.HeadCommit = binding.Request.Repository, binding.SourceCommit
 

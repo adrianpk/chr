@@ -62,7 +62,7 @@ func testWorkflowPreparationStop(t *testing.T, intent string) {
 
 	waitWorkflowClaimFile(t, marker)
 
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("concurrent gate: %v", err)
 	}
 
@@ -70,7 +70,7 @@ func testWorkflowPreparationStop(t *testing.T, intent string) {
 		t.Fatal(err)
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowStop) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrStop) {
 		t.Fatalf("stop: %v", err)
 	}
 

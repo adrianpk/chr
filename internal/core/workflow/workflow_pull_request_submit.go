@@ -96,7 +96,7 @@ func (s *Store) acceptWorkflowPullRequest(ctx context.Context, run *workflowInvo
 	pr := snapshots[0]
 	run.PullRequest.URL, run.PullRequest.State, run.PullRequest.Reason = pr.URL, "bound", ""
 
-	if run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && !workflowInvocationTerminal(run.Status) {
+	if run.StopIntent == "" && run.Status != workflowstate.InvocationPaused && !workflowstate.InvocationTerminal(run.Status) {
 		run.Status, run.Outcome = workflowstate.InvocationWaitingReview, "slice_pr_bound"
 	}
 
@@ -120,7 +120,7 @@ func (s *Store) acceptWorkflowPullRequest(ctx context.Context, run *workflowInvo
 func (s *Store) blockWorkflowPullRequest(run *workflowInvocationFile, snapshots []workflowstate.PullRequestSnapshot, reason string) error {
 	run.PullRequest.State, run.PullRequest.Reason = "blocked", reason
 	run.Status, run.Outcome = workflowstate.InvocationBlocked, reason
-	run.Blocker = &Blocker{Dependency: run.PullRequest.Unit, Reason: reason, NextActionOwner: "workflow_operator"}
+	run.Blocker = &workflowstate.Blocker{Dependency: run.PullRequest.Unit, Reason: reason, NextActionOwner: "workflow_operator"}
 
 	change, err := s.workflowPullRequestObservation(run, snapshots)
 	if err != nil {
@@ -134,7 +134,7 @@ func (s *Store) blockWorkflowPullRequest(run *workflowInvocationFile, snapshots 
 	return fmt.Errorf("%w: %s requires explicit reconciliation", workflowstate.ErrConflict, reason)
 }
 
-func workflowPullRequestMismatch(binding PullRequestBinding, snapshots []workflowstate.PullRequestSnapshot) string {
+func workflowPullRequestMismatch(binding workflowstate.PullRequestBinding, snapshots []workflowstate.PullRequestSnapshot) string {
 	if len(snapshots) != 1 {
 		return "canonical_pr_ambiguous"
 	}
@@ -159,7 +159,7 @@ func workflowPullRequestMismatch(binding PullRequestBinding, snapshots []workflo
 	return ""
 }
 
-func workflowPullRequestIdentityMatches(binding PullRequestBinding, pr workflowstate.PullRequestSnapshot) bool {
+func workflowPullRequestIdentityMatches(binding workflowstate.PullRequestBinding, pr workflowstate.PullRequestSnapshot) bool {
 	if pr.Repository != binding.Request.Repository || pr.HeadRepository != pr.Repository || pr.HeadBranch != binding.Request.HeadBranch || pr.BaseBranch != binding.Request.BaseBranch || pr.HeadCommit != binding.SourceCommit || !workflowstate.ValidCommitID(pr.BaseCommit) {
 		return false
 	}

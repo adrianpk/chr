@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -122,7 +123,7 @@ func TestWorkflowClosingReopen(t *testing.T) {
 	checkWorkflowClosingReopen(t, fixture, changed.Set, closed, before, receipt)
 }
 
-func checkWorkflowClosingReopen(t *testing.T, fixture workflowIntegrationFixture, reopened workflowstate.Record, closed SetClosureResult, before, receipt []byte) {
+func checkWorkflowClosingReopen(t *testing.T, fixture workflowIntegrationFixture, reopened workflowstate.Record, closed workflowcloseout.Result, before, receipt []byte) {
 	t.Helper()
 
 	if reopened.Set.Status != "ready" || reopened.Set.ClosureRef != "" || len(reopened.Set.ClosureHistory) != 1 || reopened.Set.ClosureHistory[0] != closed.ReceiptRef {
@@ -134,7 +135,7 @@ func checkWorkflowClosingReopen(t *testing.T, fixture workflowIntegrationFixture
 	}
 }
 
-func checkWorkflowClosingUseCase(t *testing.T, second Invocation, setID, requestHash string) {
+func checkWorkflowClosingUseCase(t *testing.T, second workflowstate.Invocation, setID, requestHash string) {
 	t.Helper()
 
 	if second.Status != workflowstate.InvocationCompleted || len(second.Closures) != 2 || second.Closures[1].SetID != setID || len(second.Attempts) != 0 || second.RequestHash != requestHash {

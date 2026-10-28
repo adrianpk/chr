@@ -39,7 +39,7 @@ func TestWorkflowFrontierProcess(t *testing.T) {
 	}
 
 	run, claim, err := workflowFrontierProcessClaim(t, store, request)
-	result := workflowFrontierProcessResult{ID: run.ID, Claimed: err == nil, Owned: errors.Is(err, ErrWorkflowOwned) || errors.Is(err, ErrWorkflowCapacity)}
+	result := workflowFrontierProcessResult{ID: run.ID, Claimed: err == nil, Owned: errors.Is(err, workflowstate.ErrOwned) || errors.Is(err, ErrWorkflowCapacity)}
 	writeWorkflowFrontierProcess(t, result)
 
 	if err != nil && !result.Owned {
@@ -68,7 +68,7 @@ func writeWorkflowFrontierProcess(t *testing.T, result workflowFrontierProcessRe
 	}
 }
 
-func workflowFrontierProcessClaim(t *testing.T, store *Store, request StartRequest) (Invocation, *Claim, error) {
+func workflowFrontierProcessClaim(t *testing.T, store *Store, request StartRequest) (workflowstate.Invocation, *Claim, error) {
 	t.Helper()
 
 	run, err := store.StartWorkflow(t.Context(), request)

@@ -242,7 +242,7 @@ func guidedBlockedRecoveryModel(t *testing.T, operations *service, model *fakeSe
 	return entered, unblock
 }
 
-func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, workflowcore.Invocation) {
+func guidedLostStartFixture(t *testing.T) (service, authoringcore.Session, workflowstate.Invocation) {
 	t.Helper()
 
 	operations, prepared, _ := guidedAdmissionFixture(t)

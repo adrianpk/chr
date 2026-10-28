@@ -106,7 +106,7 @@ func TestGuidedUseCaseAdmissionExact(t *testing.T) {
 	}
 }
 
-func assertGuidedNativeAdmission(t *testing.T, operations service, session authoringcore.Session) workflowcore.Invocation {
+func assertGuidedNativeAdmission(t *testing.T, operations service, session authoringcore.Session) workflowstate.Invocation {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -124,7 +124,7 @@ func assertGuidedNativeAdmission(t *testing.T, operations service, session autho
 	return run
 }
 
-func assertGuidedNativeBinding(t *testing.T, run workflowcore.Invocation, session authoringcore.Session) {
+func assertGuidedNativeBinding(t *testing.T, run workflowstate.Invocation, session authoringcore.Session) {
 	t.Helper()
 
 	work := session.Guided.Work
@@ -141,7 +141,7 @@ func assertGuidedNativeBinding(t *testing.T, run workflowcore.Invocation, sessio
 	assertGuidedNativeProvenance(t, run, session)
 }
 
-func assertGuidedNativeProvenance(t *testing.T, run workflowcore.Invocation, session authoringcore.Session) {
+func assertGuidedNativeProvenance(t *testing.T, run workflowstate.Invocation, session authoringcore.Session) {
 	t.Helper()
 
 	work := session.Guided.Work

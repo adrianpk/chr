@@ -107,7 +107,7 @@ func TestWorkflowSliceJournal(t *testing.T) {
 	}
 }
 
-func checkWorkflowSliceJournal(t *testing.T, store *Store, hierarchy MaterializationResult, retained Invocation, stage string) {
+func checkWorkflowSliceJournal(t *testing.T, store *Store, hierarchy MaterializationResult, retained workflowstate.Invocation, stage string) {
 	t.Helper()
 
 	workflowTestValidatedSlice(t, store, hierarchy, retained.ID)

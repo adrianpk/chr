@@ -64,7 +64,7 @@ func TestWorkflowParallelRunner(t *testing.T) {
 		result, err = claim.store.ExecuteWorkflowTask(t.Context(), claim, workflowParallelWorker(spec))
 	}
 
-	observed := workflowParallelRunnerResult{Successful: result.Successful, Capacity: errors.Is(err, ErrWorkflowCapacity), Fenced: errors.Is(err, ErrWorkflowOwned)}
+	observed := workflowParallelRunnerResult{Successful: result.Successful, Capacity: errors.Is(err, ErrWorkflowCapacity), Fenced: errors.Is(err, workflowstate.ErrOwned)}
 	if err != nil {
 		observed.Failure = err.Error()
 	}
@@ -152,7 +152,7 @@ func finishWorkflowParallelRunner(t *testing.T, fixture *workflowParallelRunner)
 	return result
 }
 
-func workflowParallelRunnerLanes(t *testing.T, capacity int) ([3]*Store, [3]Invocation) {
+func workflowParallelRunnerLanes(t *testing.T, capacity int) ([3]*Store, [3]workflowstate.Invocation) {
 	t.Helper()
 
 	store, first, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("test -f result.txt"))
@@ -167,7 +167,7 @@ func workflowParallelRunnerLanes(t *testing.T, capacity int) ([3]*Store, [3]Invo
 	linked := workflowCapacityLinked(t, store, capacity)
 	linked.projectID = store.projectID
 	stores := [3]*Store{store, linked, store}
-	runs := [3]Invocation{}
+	runs := [3]workflowstate.Invocation{}
 
 	for i, record := range [3]workflowstate.Record{first, second, third} {
 		request.RequestKey, request.Selection.Selector.Identity = record.Task.Key, record.Task.Key

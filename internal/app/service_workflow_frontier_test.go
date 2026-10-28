@@ -3,7 +3,6 @@ package app
 import (
 	"testing"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -37,7 +36,7 @@ func TestServiceWorkflowFrontier(t *testing.T) {
 	}
 }
 
-func checkServiceWorkflowFrontier(t *testing.T, run workflowcore.Invocation, receipt workflowstate.Record, provider *serviceWorkflowPRFixture) {
+func checkServiceWorkflowFrontier(t *testing.T, run workflowstate.Invocation, receipt workflowstate.Record, provider *serviceWorkflowPRFixture) {
 	t.Helper()
 
 	if run.Status != workflowstate.InvocationPending || run.ConfirmedCursor != 3 || len(run.Deliveries) != 1 || run.Deliveries[0].DeliveryRef != receipt.Path || run.ExecutionSelection().Target.Commit != provider.pr.ResultCommit || provider.creates != 1 {

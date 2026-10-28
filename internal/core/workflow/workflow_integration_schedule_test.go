@@ -123,7 +123,7 @@ func nativeScheduleWait(t *testing.T, state string) {
 func checkNativeScheduleWait(t *testing.T, store, peer *Store, entry IntegrationEntry, other IntegrationAdmission, stale IntegrationSchedulePage, state string) {
 	t.Helper()
 
-	if _, err := store.ClaimWorkflow(t.Context(), entry.InvocationID); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ClaimWorkflow(t.Context(), entry.InvocationID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("direct claim bypassed native pause or blocker", err)
 	}
 
@@ -182,7 +182,7 @@ func checkNativeScheduleReceiptBarrier(t *testing.T, store *Store, hierarchy Mat
 		t.Fatal("unreceipted slice exposed a later task", page)
 	}
 
-	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), IntegrationScheduleQuery{Limit: 10}); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), IntegrationScheduleQuery{Limit: 10}); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("scheduler crossed the receipt barrier", err)
 	}
 
@@ -212,7 +212,7 @@ func TestNativeSchedulePrerequisite(t *testing.T) {
 		t.Fatal("queue rank bypassed task prerequisites", page)
 	}
 
-	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), IntegrationScheduleQuery{Limit: 10}); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ClaimNextWorkflowIntegration(t.Context(), IntegrationScheduleQuery{Limit: 10}); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("unproven prerequisite acquired an owner", err)
 	}
 

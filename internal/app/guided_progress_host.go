@@ -149,7 +149,7 @@ func (host *guidedWorkHost) activateRetained(operations service, session authori
 	return host.activate(operations, run.ID)
 }
 
-func (operations service) checkGuidedActivation(ctx context.Context, run workflowcore.Invocation) error {
+func (operations service) checkGuidedActivation(ctx context.Context, run workflowstate.Invocation) error {
 	if run.Admission == nil || run.Admission.Guided == nil {
 		return workflowstate.ErrConflict
 	}

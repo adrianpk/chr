@@ -170,7 +170,7 @@ func (s *Store) guardWorkflowIntegrationAdmissionHistory(run workflowInvocationF
 		}
 
 		if !workflowIntegrationTerminal(current.State) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 	}
 
@@ -178,7 +178,7 @@ func (s *Store) guardWorkflowIntegrationAdmissionHistory(run workflowInvocationF
 }
 
 func workflowIntegrationAdmissionCurrent(run workflowInvocationFile, request IntegrationAdmission) bool {
-	return run.Revision == request.ExpectedRevision && !workflowInvocationTerminal(run.Status) && run.StopIntent == "" && run.ConfirmedCursor < len(run.Members) && workflowMemberOwnsUnit(run.Members[run.ConfirmedCursor], request.Unit)
+	return run.Revision == request.ExpectedRevision && !workflowstate.InvocationTerminal(run.Status) && run.StopIntent == "" && run.ConfirmedCursor < len(run.Members) && workflowMemberOwnsUnit(run.Members[run.ConfirmedCursor], request.Unit)
 }
 
 func (s *Store) nextWorkflowIntegrationSequence(ctx context.Context, runs []workflowInvocationFile, entries []IntegrationEntry) (uint64, error) {
@@ -305,5 +305,5 @@ func retainWorkflowIntegrationActiveUnit(entry IntegrationEntry, activeUnits map
 }
 
 func workflowIntegrationRetainedUnit(run workflowInvocationFile, unit workflowstate.Ref) bool {
-	return slices.ContainsFunc(run.Members, func(member Member) bool { return workflowMemberOwnsUnit(member, unit) })
+	return slices.ContainsFunc(run.Members, func(member workflowstate.Member) bool { return workflowMemberOwnsUnit(member, unit) })
 }

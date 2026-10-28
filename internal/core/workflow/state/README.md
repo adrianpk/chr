@@ -134,3 +134,13 @@ closing, finalization and frontier consumers. TaskInputHash retains the exact
 ordered task membership/contract digest. ErrObservationRequired has one shared
 identity and unchanged text for uncertain canonical delivery. These helpers do
 not read files, observe providers, mutate state or grant confirmation authority.
+
+## Public invocation checkpoints
+
+Invocation and its 26 membership, attempt, progress and retained-binding records
+have exact shared definitions. Existing embedded field order, tags, nil/empty
+forms, enum strings and checkpoint hashes remain unchanged. ExecutionSelection
+keeps its original value-copy behavior and terminal/ownership/stop distinctions
+have direct shared consumers. These records expose no token credentials, IO or
+confirmation authority. The private host journal retains owner-token hashes,
+unknown JSON fields, observed source hash, validation, locks and atomic writes.

@@ -42,7 +42,7 @@ func (s *Store) PublishWorkflowSource(ctx context.Context, id string, publisher 
 		}
 
 		if !workflowSourcePublishable(invocationLocation.Run) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		observation, err := invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
@@ -71,7 +71,7 @@ func (s *Store) PublishWorkflowSource(ctx context.Context, id string, publisher 
 }
 
 func workflowSourcePublishable(run workflowInvocationFile) bool {
-	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || workflowInvocationTerminal(run.Status) {
+	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || workflowstate.InvocationTerminal(run.Status) {
 		return false
 	}
 

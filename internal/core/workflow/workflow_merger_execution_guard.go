@@ -68,7 +68,7 @@ func (s *Store) checkWorkflowMergerOwned(ctx context.Context, claimed workflowCl
 	}
 
 	if claimObservation2.Run.StopIntent != "" {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	if claimObservation2.Run.Integration == nil {
@@ -81,7 +81,7 @@ func (s *Store) checkWorkflowMergerOwned(ctx context.Context, claimed workflowCl
 	}
 
 	if entry.StopIntent != "" || entry.State != "merging" {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	if err := checkWorkflowMergerEntry(claimObservation2.Run, entry, *prepared.input.Merger); err != nil {

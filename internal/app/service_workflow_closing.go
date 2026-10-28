@@ -10,22 +10,22 @@ import (
 )
 
 // CloseWorkflowSet shares set-owned closing validation across operation adapters.
-func (s service) CloseWorkflowSet(ctx context.Context, request workflowcloseout.Request) (workflowcore.SetClosureResult, error) {
+func (s service) CloseWorkflowSet(ctx context.Context, request workflowcloseout.Request) (workflowcloseout.Result, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.SetClosureResult{}, err
+		return workflowcloseout.Result{}, err
 	}
 
 	provider, err := s.workflowIntegrationProvider()
 	if err != nil {
-		return workflowcore.SetClosureResult{}, err
+		return workflowcloseout.Result{}, err
 	}
 
-	observer := s.workflowIntegrationObserver(workflowcore.Invocation{InvocationInput: workflowcore.InvocationInput{Selection: workflowstate.PreviewRequest{Target: workflowstate.PreviewTarget{Repository: request.Repository}}}})
+	observer := s.workflowIntegrationObserver(workflowstate.Invocation{InvocationInput: workflowstate.InvocationInput{Selection: workflowstate.PreviewRequest{Target: workflowstate.PreviewTarget{Repository: request.Repository}}}})
 
 	target, ok := observer.(workflowcore.TargetGit)
 	if !ok {
-		return workflowcore.SetClosureResult{}, fmt.Errorf("configured observer cannot hydrate closing targets")
+		return workflowcloseout.Result{}, fmt.Errorf("configured observer cannot hydrate closing targets")
 	}
 
 	return store.CloseWorkflowSet(ctx, request, workflowcore.FrontierPorts{Provider: provider, Observer: observer, Target: target})

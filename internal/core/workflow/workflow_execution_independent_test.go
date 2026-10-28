@@ -32,7 +32,7 @@ func TestWorkflowTaskIndependent(t *testing.T) {
 		t.Fatal("independent ticket completed without integration")
 	}
 
-	if workflowInvocationTerminal(retained.Status) {
+	if workflowstate.InvocationTerminal(retained.Status) {
 		t.Fatal("independent ticket released delivery ownership")
 	}
 }

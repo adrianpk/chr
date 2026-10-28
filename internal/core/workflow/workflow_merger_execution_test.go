@@ -118,7 +118,7 @@ func checkNativeMergerRetained(t *testing.T, f workflowPreparationFixture, resul
 	checkNativeMergerFrozenHarness(t, f.store, attempt, result.HarnessRef)
 }
 
-func checkNativeMergerFrozenHarness(t *testing.T, store *Store, attempt Attempt, reference workflowstate.EvidenceRef) {
+func checkNativeMergerFrozenHarness(t *testing.T, store *Store, attempt workflowstate.Attempt, reference workflowstate.EvidenceRef) {
 	t.Helper()
 
 	data, err := os.ReadFile(filepath.Join(store.layout.Root(), attempt.InputRef))
@@ -152,7 +152,7 @@ func checkNativeMergerBudget(t *testing.T, f workflowPreparationFixture) {
 	}
 }
 
-func checkNativeMergerProcesses(t *testing.T, attempt Attempt) {
+func checkNativeMergerProcesses(t *testing.T, attempt workflowstate.Attempt) {
 	t.Helper()
 
 	if len(attempt.Processes) != 1 || workflowAttemptQuiescent(attempt) != nil {

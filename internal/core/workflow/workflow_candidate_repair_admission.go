@@ -84,6 +84,6 @@ func (s *Store) checkWorkflowCandidateFailureSource(ctx context.Context, run wor
 	return s.checkWorkflowPreparationGit(ctx, candidate)
 }
 
-func workflowCandidateRepairFenceMatches(b CandidateRepairBinding, run workflowInvocationFile, entry IntegrationEntry, input workflowstate.MergerInput) bool {
+func workflowCandidateRepairFenceMatches(b workflowstate.CandidateRepairBinding, run workflowInvocationFile, entry IntegrationEntry, input workflowstate.MergerInput) bool {
 	return b.EntryID == entry.ID && b.ClaimGeneration == entry.ClaimGeneration && b.CandidateHash == workflowMergerCandidateHash(run, entry) && input.RepairCheckpointRef != nil
 }

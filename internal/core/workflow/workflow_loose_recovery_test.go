@@ -113,7 +113,7 @@ func TestWorkflowLooseStopRecovery(t *testing.T) {
 	}
 }
 
-func checkWorkflowLooseStopRecovery(t *testing.T, run Invocation, action, target string) {
+func checkWorkflowLooseStopRecovery(t *testing.T, run workflowstate.Invocation, action, target string) {
 	t.Helper()
 
 	if len(run.Attempts) != 1 || run.Cursor != 1 || run.ConfirmedCursor != 1 || run.Lane != nil || len(run.Deliveries) != 1 {
@@ -123,7 +123,7 @@ func checkWorkflowLooseStopRecovery(t *testing.T, run Invocation, action, target
 	checkWorkflowLooseStopState(t, run, action, target)
 }
 
-func checkWorkflowLooseStopState(t *testing.T, run Invocation, action, target string) {
+func checkWorkflowLooseStopState(t *testing.T, run workflowstate.Invocation, action, target string) {
 	t.Helper()
 
 	if action == "block" {

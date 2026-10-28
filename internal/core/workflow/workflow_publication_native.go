@@ -56,7 +56,7 @@ func (s *Store) advanceWorkflowNativeIntegration(ctx context.Context, id string,
 	return s.workflowIntegrationProgress(ctx, id, nil, err)
 }
 
-func (s *Store) admitWorkflowNativeContinuation(ctx context.Context, run Invocation) error {
+func (s *Store) admitWorkflowNativeContinuation(ctx context.Context, run workflowstate.Invocation) error {
 	if run.Lane == nil || run.PullRequest == nil || run.PullRequest.State != "bound" {
 		return workflowstate.ErrConflict
 	}

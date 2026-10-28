@@ -8,12 +8,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// IntegrationBudgetBinding seals the invocation-wide budget image.
-type IntegrationBudgetBinding struct {
-	Revision uint64                    `json:"revision"`
-	Ref      workflowstate.EvidenceRef `json:"ref"`
-}
-
 // IntegrationLimits retain admission ceilings and positive grants.
 type IntegrationLimits struct {
 	Worker     int64 `json:"worker"`
@@ -35,12 +29,12 @@ type IntegrationCounter struct {
 
 // IntegrationUsage preserves the existing owners' consumed history.
 type IntegrationUsage struct {
-	Attempts         []string             `json:"attempts"`
-	WorkerCount      int                  `json:"worker_count"`
-	ReviewCount      int                  `json:"review_count"`
-	PreparationCount int                  `json:"preparation_count"`
-	ReviewRepairs    []ReviewRepairBudget `json:"review_repairs"`
-	ClosingAttempts  []string             `json:"closing_attempts"`
+	Attempts         []string                           `json:"attempts"`
+	WorkerCount      int                                `json:"worker_count"`
+	ReviewCount      int                                `json:"review_count"`
+	PreparationCount int                                `json:"preparation_count"`
+	ReviewRepairs    []workflowstate.ReviewRepairBudget `json:"review_repairs"`
+	ClosingAttempts  []string                           `json:"closing_attempts"`
 }
 
 // IntegrationReservation is retained before any possible dispatch.

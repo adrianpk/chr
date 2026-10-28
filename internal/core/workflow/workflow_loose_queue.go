@@ -10,17 +10,8 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// LooseQueue retains admission order independently of live pending order.
-// Excluded members remain admitted facts; they are never counted as delivered.
-type LooseQueue struct {
-	Admitted []string          `json:"admitted"`
-	Cursor   int               `json:"cursor"`
-	Eligible int               `json:"eligible"`
-	Excluded map[string]string `json:"excluded"`
-}
-
-func newWorkflowLooseQueue(members []Member) *LooseQueue {
-	queue := &LooseQueue{Eligible: len(members), Excluded: map[string]string{}}
+func newWorkflowLooseQueue(members []workflowstate.Member) *workflowstate.LooseQueue {
+	queue := &workflowstate.LooseQueue{Eligible: len(members), Excluded: map[string]string{}}
 	for _, member := range members {
 		queue.Admitted = append(queue.Admitted, member.Admission.Key)
 	}
@@ -62,7 +53,7 @@ func validWorkflowLooseQueueBounds(run workflowInvocationFile) bool {
 	return run.Selection.Selector.Extent == "loose" && len(queue.Admitted) == len(run.Members) && queue.Cursor >= 0 && queue.Cursor <= run.Cursor && queue.Eligible >= 0 && queue.Eligible <= len(run.Members)-queue.Cursor && len(queue.Excluded) <= len(run.Members)
 }
 
-func validateWorkflowLooseExclusions(queue *LooseQueue, keys map[string]bool) error {
+func validateWorkflowLooseExclusions(queue *workflowstate.LooseQueue, keys map[string]bool) error {
 	for key, reason := range queue.Excluded {
 		if !keys[key] || !slices.Contains([]string{"status_mismatch", "filter_mismatch", "below_minimum", "integrated"}, reason) {
 			return workflowstate.ErrConflict
@@ -73,7 +64,7 @@ func validateWorkflowLooseExclusions(queue *LooseQueue, keys map[string]bool) er
 }
 
 func (s *Store) reconcileWorkflowLooseQueue(ctx context.Context, run workflowInvocationFile) (workflowInvocationFile, error) {
-	if workflowInvocationTerminal(run.Status) || run.StopIntent != "" || slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationPaused, workflowstate.InvocationBlocked}, run.Status) {
+	if workflowstate.InvocationTerminal(run.Status) || run.StopIntent != "" || slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationPaused, workflowstate.InvocationBlocked}, run.Status) {
 		return run, nil
 	}
 
@@ -136,8 +127,8 @@ func selectWorkflowLoosePending(run *workflowInvocationFile, selection workflowS
 		tickets[ticket.Key] = ticket
 	}
 
-	eligible, excluded := []PreviewMember{}, []Member{}
-	known := map[string]Member{}
+	eligible, excluded := []workflowstate.PreviewMember{}, []workflowstate.Member{}
+	known := map[string]workflowstate.Member{}
 
 	for _, member := range run.Members[run.Cursor:] {
 		key := member.Admission.Key

@@ -140,14 +140,14 @@ func (claim *Claim) Close() error {
 	}
 
 	if claim.execution == nil {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	claim.execution.Lock()
 	defer claim.execution.Unlock()
 
 	if !workflowClaimQuiescent(claim) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return claim.releaseReservation()

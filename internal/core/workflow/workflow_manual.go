@@ -60,7 +60,7 @@ func (s *Store) ExecuteWorkflowManualTask(ctx context.Context, claim *Claim) (wo
 	defer cancel()
 
 	observed, executionErr := workflowRunAgentCommand(workerContext, claim, prepared, prepared.input.Worker)
-	if errors.Is(executionErr, ErrWorkflowOwned) {
+	if errors.Is(executionErr, workflowstate.ErrOwned) {
 		return observed, executionErr
 	}
 
@@ -135,7 +135,7 @@ func (s *Store) ReconcileWorkflowTask(ctx context.Context, claim *Claim, candida
 		result.Outcome, result.Failure = "task_validation_failed", workflowFailureText(validationErr)
 	}
 
-	if errors.Is(validationErr, ErrWorkflowOwned) {
+	if errors.Is(validationErr, workflowstate.ErrOwned) {
 		return result, validationErr
 	}
 

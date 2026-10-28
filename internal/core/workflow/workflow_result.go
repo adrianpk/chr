@@ -2,11 +2,9 @@ package workflow
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
-	"forge.adrianpk.com/chr/internal/core/contenthash"
 	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -18,18 +16,12 @@ type ResultReceipt struct {
 	Proof     workflowstate.SliceDeliveryProof
 }
 
-// ResultClosure is a successful set gate and its immutable reference.
-type ResultClosure struct {
-	Reference workflowstate.ClosingEvidence
-	Receipt   workflowstate.ClosingReceipt
-}
-
 // ResultInspection distinguishes evidence-backed completion from counters
 // and preserves partial delivery when an invocation is stopped or still waiting.
 type ResultInspection struct {
-	Invocation  Invocation
+	Invocation  workflowstate.Invocation
 	Receipts    []ResultReceipt
-	Closures    []ResultClosure
+	Closures    []workflowcloseout.InvocationResult
 	Validations []ResultValidation
 	Complete    bool
 }
@@ -83,7 +75,7 @@ func (s *Store) workflowResult(ctx context.Context, run workflowInvocationFile) 
 	}
 
 	for _, closure := range run.Closures {
-		receipt, err := s.workflowResultClosure(closure)
+		receipt, err := workflowcloseout.ReadInvocationClosure(closure, workflowClosingEvidence{store: s})
 		if err != nil {
 			return result, err
 		}
@@ -115,24 +107,6 @@ func (s *Store) workflowResultReceipt(run workflowInvocationFile) (ResultReceipt
 	}
 
 	return ResultReceipt{Reference: workflowstate.EvidenceRef{Path: record.Path, Hash: record.SourceHash}, Receipt: *record.Receipt, Proof: proof}, nil
-}
-
-func (s *Store) workflowResultClosure(closure InvocationClosure) (ResultClosure, error) {
-	data, err := (workflowClosingEvidence{store: s}).Read(closure.Receipt.Ref)
-	if err != nil || contenthash.Sum(data) != closure.Receipt.Hash {
-		return ResultClosure{}, errors.Join(workflowstate.ErrConflict, err)
-	}
-
-	var receipt workflowstate.ClosingReceipt
-	if err := json.Unmarshal(data, &receipt); err != nil {
-		return ResultClosure{}, err
-	}
-
-	if err := workflowcloseout.CheckResults(receipt.ClosingInput.Validation, receipt); err != nil {
-		return ResultClosure{}, err
-	}
-
-	return ResultClosure{Reference: closure.Receipt, Receipt: receipt}, nil
 }
 
 func workflowResultComplete(run workflowInvocationFile, cursor int) bool {

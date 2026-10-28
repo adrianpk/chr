@@ -120,7 +120,7 @@ func checkNativeUnknownQueries(t *testing.T, store *Store, peer, other Integrati
 	}
 
 	key := contenthash.Sum([]byte(peer.Repository + "\n" + peer.TargetRef))
-	if err := store.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("other intent")), key); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("other intent")), key); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("uncertain native target admitted another publication", err)
 	}
 

@@ -61,7 +61,7 @@ func TestWorkflowMembershipFrontier(t *testing.T) {
 	}
 }
 
-func checkWorkflowMembershipFrontier(t *testing.T, fixture workflowIntegrationFixture, current Invocation, changed MaterializationResult, previous workflowstate.Record) {
+func checkWorkflowMembershipFrontier(t *testing.T, fixture workflowIntegrationFixture, current workflowstate.Invocation, changed MaterializationResult, previous workflowstate.Record) {
 	t.Helper()
 
 	if len(current.Members) != 7 || current.Cursor != 3 || current.ConfirmedCursor != 3 || len(current.Deliveries) != 1 || current.ExecutionSelection().Target.Commit != fixture.target {
@@ -94,7 +94,7 @@ func TestWorkflowMembershipLaterSet(t *testing.T) {
 	}
 }
 
-func checkWorkflowMembershipLaterSet(t *testing.T, before, current Invocation, later MaterializationResult, retroactive bool, failure error) {
+func checkWorkflowMembershipLaterSet(t *testing.T, before, current workflowstate.Invocation, later MaterializationResult, retroactive bool, failure error) {
 	t.Helper()
 
 	if retroactive {
@@ -112,7 +112,7 @@ func checkWorkflowMembershipLaterSet(t *testing.T, before, current Invocation, l
 	checkWorkflowMembershipLaterScope(t, current, later)
 }
 
-func checkWorkflowMembershipLaterScope(t *testing.T, current Invocation, later MaterializationResult) {
+func checkWorkflowMembershipLaterScope(t *testing.T, current workflowstate.Invocation, later MaterializationResult) {
 	t.Helper()
 
 	if len(current.Members) != 12 || len(current.SetImages) != 2 || current.Members[6].Admission.SetID != later.Set.ID || current.Cursor != 3 || current.Excluded["unsliced"] != 1 {

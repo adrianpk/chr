@@ -28,7 +28,7 @@ func ValidateGuidedWorkPreview(reference authoringcore.GuidedMaterializationRefe
 	return nil
 }
 
-func guidedInitialMemberMatches(member PreviewMember, expected authoringcore.GuidedWorkMember, set string) bool {
+func guidedInitialMemberMatches(member workflowstate.PreviewMember, expected authoringcore.GuidedWorkMember, set string) bool {
 	return member.Key == expected.Key && member.Path == expected.Path && member.Revision == expected.Revision && member.SourceHash == expected.SourceHash && member.ContractHash == expected.ContractHash && member.SetID == set
 }
 
@@ -144,7 +144,7 @@ func validateGuidedControlProof(request workflowstate.ControlMutationRequest) er
 }
 
 type guidedAdmissionLookup struct {
-	Invocation Invocation
+	Invocation workflowstate.Invocation
 	Found      bool
 }
 

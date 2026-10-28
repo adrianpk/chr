@@ -3,7 +3,6 @@ package app
 import (
 	"testing"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -37,7 +36,7 @@ func TestServiceWorkRepair(t *testing.T) {
 	}
 }
 
-func serviceWorkApprovalRun(t *testing.T, operations service) workflowcore.Invocation {
+func serviceWorkApprovalRun(t *testing.T, operations service) workflowstate.Invocation {
 	t.Helper()
 
 	first, err := operations.StartAllReadyAgentWork()
@@ -48,7 +47,7 @@ func serviceWorkApprovalRun(t *testing.T, operations service) workflowcore.Invoc
 	return *first.Workflow
 }
 
-func checkServiceWorkRepaired(t *testing.T, first workflowcore.Invocation, second AgentWorkResult, creates int, failure error) {
+func checkServiceWorkRepaired(t *testing.T, first workflowstate.Invocation, second AgentWorkResult, creates int, failure error) {
 	t.Helper()
 
 	if failure != nil || second.Workflow == nil || second.Workflow.ID != first.ID || second.Workflow.Review == nil || second.Workflow.Review.State != workflowstate.ReviewWaitingApproval || creates != 1 || second.Workflow.PullRequest.SourceCommit == first.PullRequest.SourceCommit {

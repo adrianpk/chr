@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspacecore "forge.adrianpk.com/chr/internal/core/workspace"
 	"forge.adrianpk.com/chr/internal/webui"
 )
@@ -63,7 +64,7 @@ func TestWebHarnessSelectionBinding(t *testing.T) {
 	}
 }
 
-func claimWebHarnessInvocation(t *testing.T, operations service, request workflowcore.StartRequest) workflowcore.Invocation {
+func claimWebHarnessInvocation(t *testing.T, operations service, request workflowcore.StartRequest) workflowstate.Invocation {
 	t.Helper()
 
 	started, err := operations.StartWorkflow(t.Context(), request)

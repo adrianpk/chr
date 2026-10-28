@@ -90,7 +90,7 @@ func TestServiceWorkflowDependency(t *testing.T) {
 	}
 }
 
-func checkServiceWorkflowResumed(t *testing.T, resumed workflowcore.Invocation, request workflowcore.StartRequest, failure error) {
+func checkServiceWorkflowResumed(t *testing.T, resumed workflowstate.Invocation, request workflowcore.StartRequest, failure error) {
 	t.Helper()
 
 	if failure != nil || resumed.Status != workflowstate.InvocationPending || resumed.Blocker != nil || len(resumed.DependencyTargets) != 1 || len(resumed.Members) != 1 || resumed.Members[0].Admission.Key != "PRJ-90" || resumed.Selection.Target != request.Selection.Target {

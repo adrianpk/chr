@@ -31,7 +31,7 @@ func (r telegramReceiver) applyWorkAdmission(ctx context.Context, claim telegram
 	binding := WorkflowBoundAdmission{RequestKey: claim.Request.ID, Policy: preview.View.Policy, ExecutionPolicy: preview.View.ExecutionPolicy, Check: r.workAdmissionCheck(claim)}
 
 	result, err := operations.StartTelegramWork(ctx, claim.Request.Target, preview, binding)
-	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, workflowcore.ErrWorkflowOwned) || errors.Is(err, workflowcore.ErrWorkflowCapacity) || errors.Is(err, ErrRecordUnsupported) {
+	if errors.Is(err, workflowstate.ErrConflict) || errors.Is(err, workflowstate.ErrOwned) || errors.Is(err, workflowcore.ErrWorkflowCapacity) || errors.Is(err, ErrRecordUnsupported) {
 		return r.finishWorkActionFailure(ctx, claim, err, config)
 	}
 

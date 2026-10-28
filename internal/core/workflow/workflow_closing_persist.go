@@ -22,7 +22,7 @@ func (s *Store) commitWorkflowClosingStart(claim *workflowClosingClaim) error {
 }
 
 func (s *Store) commitWorkflowClosingState(claim *workflowClosingClaim, extra ...workflowstate.FileChange) error {
-	previous := InputImage{Path: claim.set.Path, Revision: claim.set.Revision, SourceHash: claim.set.SourceHash}
+	previous := workflowstate.InputImage{Path: claim.set.Path, Revision: claim.set.Revision, SourceHash: claim.set.SourceHash}
 	index := claim.state.Generation - 1
 	binding := &claim.set.Set.Closing.Attempts[index]
 
@@ -56,11 +56,11 @@ func (s *Store) commitWorkflowClosingState(claim *workflowClosingClaim, extra ..
 
 func (s *Store) checkWorkflowClosingClaim(ctx context.Context, claim *workflowClosingClaim, lease bool) error {
 	if claim.state.OwnerRoot != s.layout.Root() || claim.state.TokenHash != contenthash.Sum([]byte(claim.worker.Token)) || claim.state.Outcome != "running" {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	if lease && time.Now().After(claim.state.LeaseUntil) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	if err := s.checkWorkflowClosingCredential(claim); err != nil {

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 func telegramControlOffer(t *testing.T, f *telegramConversationAppFixture, command string) string {
@@ -68,7 +68,7 @@ func checkTelegramControlLifecycle(t *testing.T, action string) {
 	}
 }
 
-func checkTelegramControlOutcome(t *testing.T, action string, run workflowcore.Invocation) {
+func checkTelegramControlOutcome(t *testing.T, action string, run workflowstate.Invocation) {
 	t.Helper()
 
 	type outcome struct {

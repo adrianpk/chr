@@ -13,19 +13,6 @@ import (
 // per-unit, per-invocation submission budget is consumed.
 var ErrWorkflowIntegrationBudget = errors.New("workflow integration submission budget exhausted")
 
-// SubmissionBinding projects the repository journal into an invocation.
-// The common-directory journal remains authoritative after interrupted updates.
-type SubmissionBinding struct {
-	JournalKey       string                        `json:"journal_key"`
-	JournalHash      string                        `json:"journal_hash"`
-	TargetKey        string                        `json:"target_key"`
-	ID               string                        `json:"id"`
-	Unit             workflowstate.Ref             `json:"unit"`
-	Attempt          int                           `json:"attempt"`
-	State            workflowstate.SubmissionState `json:"state"`
-	ExternalDelivery bool                          `json:"external_delivery,omitempty"`
-}
-
 // PublicationProvider submits the exact prepared result with both guards
 // in one server transaction. It never falls back to an unguarded merge endpoint.
 type PublicationProvider interface {

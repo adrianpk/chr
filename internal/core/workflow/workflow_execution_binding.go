@@ -11,8 +11,8 @@ import (
 
 type workflowExecutionScope struct {
 	RequestHash string
-	Members     []Member
-	Sets        []InputImage
+	Members     []workflowstate.Member
+	Sets        []workflowstate.InputImage
 	Cursor      int
 	Lane        *workflowstate.Lane
 }
@@ -31,7 +31,7 @@ func (s *Store) checkWorkflowPreparedClaim(ctx context.Context, claim *Claim, pr
 		}
 
 		if claimObservation.Run.StopIntent != "" {
-			return ErrWorkflowStop
+			return workflowstate.ErrStop
 		}
 
 		if input := prepared.input.Preparation; input != nil {
@@ -72,7 +72,7 @@ func checkWorkflowExecutionBinding(run workflowInvocationFile, record workflowst
 	return nil
 }
 
-func workflowPreparedAttemptMatches(attempt Attempt, prepared workflowPreparedTask) bool {
+func workflowPreparedAttemptMatches(attempt workflowstate.Attempt, prepared workflowPreparedTask) bool {
 	input := prepared.input
 
 	return attempt.InputRef == prepared.inputRef && attempt.InputHash == prepared.inputHash && attempt.InputRevision == input.InputRevision && attempt.ContractHash == input.ContractHash && attempt.LeaseUntil.Equal(prepared.leaseUntil) && attempt.Lane != nil && *attempt.Lane == input.Lane

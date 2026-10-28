@@ -42,7 +42,7 @@ func nativeCandidateRepairGate(t *testing.T, method, reason string) {
 	checkNativeCandidateRevalidated(t, f, store, before, candidate, attempt)
 }
 
-func checkNativeCandidateRevalidated(t *testing.T, f nativePreparationFixture, store *Store, before Invocation, candidate workflowstate.IntegrationCandidate, attempt MergerAttempt) {
+func checkNativeCandidateRevalidated(t *testing.T, f nativePreparationFixture, store *Store, before workflowstate.Invocation, candidate workflowstate.IntegrationCandidate, attempt MergerAttempt) {
 	t.Helper()
 
 	id := f.f.run.ID

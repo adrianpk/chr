@@ -176,7 +176,7 @@ func TestWorkflowUpgradeRejects(t *testing.T) {
 		{"unknown review", func(o *UpgradeOptions) { o.ReviewMode = "unknown" }},
 		{"no ownership observation", func(o *UpgradeOptions) { o.CheckQuiescent = nil }},
 		{"active legacy execution", func(o *UpgradeOptions) {
-			o.CheckQuiescent = func(context.Context) error { return ErrWorkflowOwned }
+			o.CheckQuiescent = func(context.Context) error { return workflowstate.ErrOwned }
 		}},
 	}
 	for _, tc := range cases {

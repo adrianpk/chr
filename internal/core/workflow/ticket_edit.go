@@ -41,7 +41,7 @@ func UpdateTicketDocument(ctx context.Context, opts TicketBoardReadOptions, requ
 	}
 
 	if document.ReadOnlyReason != "" {
-		return document, fmt.Errorf("%w: %s", ErrWorkflowOwned, document.ReadOnlyReason)
+		return document, fmt.Errorf("%w: %s", workflowstate.ErrOwned, document.ReadOnlyReason)
 	}
 
 	content, err := prepareTicketEdit(document, request, time.Now().UTC())

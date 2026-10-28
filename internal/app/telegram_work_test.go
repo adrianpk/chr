@@ -9,7 +9,6 @@ import (
 	generationcore "forge.adrianpk.com/chr/internal/core/authoring/generation"
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -158,7 +157,7 @@ func TestTelegramWorkExtents(t *testing.T) {
 	}
 }
 
-func checkTelegramWorkRunCount(t *testing.T, operations service, count int) workflowcore.Invocation {
+func checkTelegramWorkRunCount(t *testing.T, operations service, count int) workflowstate.Invocation {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -173,7 +172,7 @@ func checkTelegramWorkRunCount(t *testing.T, operations service, count int) work
 	}
 
 	if len(invocationPage.Invocations) == 0 {
-		return workflowcore.Invocation{}
+		return workflowstate.Invocation{}
 	}
 
 	return invocationPage.Invocations[0]

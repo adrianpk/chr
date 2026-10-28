@@ -35,7 +35,7 @@ func TestWorkflowLooseDelivery(t *testing.T) {
 	}
 }
 
-func checkWorkflowLooseCompletion(t *testing.T, run Invocation, creates int) {
+func checkWorkflowLooseCompletion(t *testing.T, run workflowstate.Invocation, creates int) {
 	t.Helper()
 
 	if run.Status != workflowstate.InvocationCompleted || run.Outcome != "loose_exhausted" || run.Cursor != 3 || run.ConfirmedCursor != 3 || len(run.Deliveries) != 3 || creates != 3 {
@@ -43,7 +43,7 @@ func checkWorkflowLooseCompletion(t *testing.T, run Invocation, creates int) {
 	}
 }
 
-func checkWorkflowLooseArchive(t *testing.T, run Invocation) {
+func checkWorkflowLooseArchive(t *testing.T, run workflowstate.Invocation) {
 	t.Helper()
 
 	urls := map[string]bool{}

@@ -26,11 +26,11 @@ func validateWorkflowContinuation(run workflowInvocationFile) error {
 	return nil
 }
 
-func validWorkflowContinuationPosition(checkpoint ContinuationCheckpoint, run workflowInvocationFile) bool {
+func validWorkflowContinuationPosition(checkpoint workflowstate.ContinuationCheckpoint, run workflowInvocationFile) bool {
 	return checkpoint.SourceRevision > 0 && checkpoint.SourceRevision < run.Revision && checkpoint.MemberCount >= 0 && checkpoint.MemberCount <= len(run.Members) && checkpoint.Cursor >= 0 && checkpoint.Cursor <= checkpoint.MemberCount && checkpoint.ConfirmedCursor >= 0 && checkpoint.ConfirmedCursor <= checkpoint.Cursor && checkpoint.AttemptCount >= 0 && checkpoint.AttemptCount <= len(run.Attempts)
 }
 
-func validWorkflowContinuationEvidence(checkpoint ContinuationCheckpoint) bool {
+func validWorkflowContinuationEvidence(checkpoint workflowstate.ContinuationCheckpoint) bool {
 	if checkpoint.Sequence < 1 || checkpoint.Sequence > workflowstate.RecordLimit || checkpoint.EvidenceRef != workflowContinuationCheckpointPath(checkpoint.InvocationID, checkpoint.Sequence) || len(checkpoint.EvidenceHash) != 64 {
 		return false
 	}
@@ -42,7 +42,7 @@ func validWorkflowContinuationEvidence(checkpoint ContinuationCheckpoint) bool {
 	return validWorkflowContinuationParent(checkpoint)
 }
 
-func validWorkflowContinuationParent(checkpoint ContinuationCheckpoint) bool {
+func validWorkflowContinuationParent(checkpoint workflowstate.ContinuationCheckpoint) bool {
 	if checkpoint.Sequence == 1 {
 		return checkpoint.ParentRef == "" && checkpoint.ParentHash == ""
 	}

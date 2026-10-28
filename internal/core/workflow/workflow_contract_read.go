@@ -66,7 +66,7 @@ func (s *Store) guardMutationSlices(record workflowstate.Record, snapshot workfl
 		}
 
 		if previous.Set.Status != "proposed" || slice.Phase != "pending" {
-			return fmt.Errorf("%w: slice contract changes require approved amendment authority", ErrWorkflowOwned)
+			return fmt.Errorf("%w: slice contract changes require approved amendment authority", workflowstate.ErrOwned)
 		}
 
 		if _, err := s.readContractImage(slice.ContractRef, slice.ContractHash); err != nil {

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -101,7 +102,7 @@ func TestNativeClosingPublicationRace(t *testing.T) {
 	})
 
 	type closureResult struct {
-		result SetClosureResult
+		result workflowcloseout.Result
 		err    error
 	}
 

@@ -28,151 +28,9 @@ type StartRequest struct {
 	Selected       *workflowstate.SelectionGuard `json:"-"`
 }
 
-// Member retains admission facts and the latest accepted owned image.
-type Member struct {
-	Admission          PreviewMember `json:"admission"`
-	ExpectedRevision   uint64        `json:"expected_revision"`
-	ExpectedSourceHash string        `json:"expected_source_hash"`
-}
-
-// InputImage freezes an owning set contract separately from its tasks.
-type InputImage struct {
-	Path       string `json:"path"`
-	Revision   uint64 `json:"revision"`
-	SourceHash string `json:"source_hash"`
-	UseCase    string `json:"use_case,omitempty"`
-}
-
-// Attempt exposes stable ownership facts without private credentials.
-type Attempt struct {
-	CapacitySlot   int                            `json:"capacity_slot,omitempty"`
-	ID             string                         `json:"id"`
-	Purpose        string                         `json:"purpose,omitempty"`
-	TaskKey        string                         `json:"task_key"`
-	Generation     uint64                         `json:"generation"`
-	InputRevision  uint64                         `json:"input_revision"`
-	ContractHash   string                         `json:"contract_hash"`
-	LeaseUntil     time.Time                      `json:"lease_until"`
-	StartedAt      time.Time                      `json:"started_at"`
-	FinishedAt     time.Time                      `json:"finished_at,omitempty"`
-	Outcome        string                         `json:"outcome"`
-	Lane           *workflowstate.Lane            `json:"lane,omitempty"`
-	InputRef       string                         `json:"input_ref,omitempty"`
-	InputHash      string                         `json:"input_hash,omitempty"`
-	ResultRef      string                         `json:"result_ref,omitempty"`
-	ResultHash     string                         `json:"result_hash,omitempty"`
-	OwnerProcess   *workflowstate.ProcessIdentity `json:"owner_process,omitempty"`
-	Processes      []workflowstate.Process        `json:"processes"`
-	Replaces       string                         `json:"replaces"`
-	CheckpointRef  string                         `json:"checkpoint_ref"`
-	CheckpointHash string                         `json:"checkpoint_hash"`
-}
-
-// Invocation is the public durable checkpoint, not an execution token.
-type Invocation struct {
-	InvocationAdmission
-	InvocationIntegration
-	InvocationScope
-	InvocationProgress
-	workflowstate.Identity
-	InvocationInput
-	InvocationExecution
-	InvocationCandidate
-	InvocationDelivery
-	InvocationReview
-	InvocationPreparation
-	Submission *SubmissionBinding `json:"submission_binding,omitempty"`
-}
-
-// InvocationAdmission groups the retained admission fields without changing their wire order.
-type InvocationAdmission struct {
-	HarnessBinding *harnesscore.Binding          `json:"harness_binding,omitempty"`
-	Admission      *workflowstate.AdmissionGuard `json:"admission_guard,omitempty"`
-}
-
-// InvocationIntegration groups the retained integration fields without changing their wire order.
-type InvocationIntegration struct {
-	IntegrationBudget  *IntegrationBudgetBinding          `json:"integration_budget,omitempty"`
-	Integration        *workflowstate.IntegrationBinding  `json:"integration_binding,omitempty"`
-	IntegrationEntries []workflowstate.IntegrationBinding `json:"integration_entries,omitempty"`
-}
-
-// InvocationScope groups the retained scope fields without changing their wire order.
-type InvocationScope struct {
-	DependencyTargets []DependencyTarget           `json:"dependency_targets,omitempty"`
-	LooseQueue        *LooseQueue                  `json:"loose_queue,omitempty"`
-	Closures          []InvocationClosure          `json:"set_closures,omitempty"`
-	ClosingSet        string                       `json:"closing_set,omitempty"`
-	ExecutionTarget   *workflowstate.PreviewTarget `json:"execution_target,omitempty"`
-}
-
-// InvocationProgress groups the retained progress fields without changing their wire order.
-type InvocationProgress struct {
-	ConfirmedCursor int                     `json:"confirmed_cursor,omitempty"`
-	Deliveries      []UnitDelivery          `json:"integrated_units,omitempty"`
-	Continuation    *ContinuationCheckpoint `json:"continuation_checkpoint,omitempty"`
-}
-
-// InvocationInput groups the retained input fields without changing their wire order.
-type InvocationInput struct {
-	Schema       string                        `json:"schema"`
-	RequestKey   string                        `json:"request_key"`
-	RequestHash  string                        `json:"request_hash"`
-	Authority    string                        `json:"authority"`
-	Selection    workflowstate.PreviewRequest  `json:"selection"`
-	Policy       workflowstate.ExecutionPolicy `json:"policy"`
-	SetOrderRule string                        `json:"set_order_rule"`
-	Members      []Member                      `json:"members"`
-	SetImages    []InputImage                  `json:"set_images"`
-	Excluded     map[string]int                `json:"excluded"`
-}
-
-// InvocationExecution groups the retained execution fields without changing their wire order.
-type InvocationExecution struct {
-	Cursor               int                            `json:"cursor"`
-	Status               workflowstate.InvocationStatus `json:"status"`
-	Outcome              string                         `json:"outcome"`
-	Attempts             []Attempt                      `json:"attempts"`
-	Blocker              *Blocker                       `json:"blocker,omitempty"`
-	Lane                 *workflowstate.Lane            `json:"lane,omitempty"`
-	StopIntent           string                         `json:"stop_intent"`
-	ResumeStatus         workflowstate.InvocationStatus `json:"resume_status"`
-	CapacityResumeStatus workflowstate.InvocationStatus `json:"capacity_resume_status,omitempty"`
-}
-
-// InvocationCandidate groups the retained candidate fields without changing their wire order.
-type InvocationCandidate struct {
-	CandidateRef  string `json:"candidate_ref"`
-	CandidateHash string `json:"candidate_hash"`
-}
-
-// InvocationDelivery groups the retained delivery fields without changing their wire order.
-type InvocationDelivery struct {
-	PullRequest       *PullRequestBinding `json:"pull_request_binding,omitempty"`
-	DeliveryProofRef  string              `json:"delivery_proof_ref"`
-	DeliveryProofHash string              `json:"delivery_proof_hash"`
-	DeliveryRef       string              `json:"delivery_ref"`
-	DeliveryHash      string              `json:"delivery_hash"`
-}
-
-// InvocationReview groups the retained review fields without changing their wire order.
-type InvocationReview struct {
-	ReviewRestriction workflowstate.ReviewMode     `json:"review_restriction,omitempty"`
-	Review            *workflowstate.ReviewBinding `json:"review_binding,omitempty"`
-	ReviewCount       int                          `json:"review_count,omitempty"`
-	ReviewRepairs     []ReviewRepairBudget         `json:"review_repairs,omitempty"`
-}
-
-// InvocationPreparation groups the retained preparation fields without changing their wire order.
-type InvocationPreparation struct {
-	Preparation      *PreparationBinding     `json:"preparation_binding,omitempty"`
-	CandidateRepair  *CandidateRepairBinding `json:"candidate_repair,omitempty"`
-	PreparationCount int                     `json:"preparation_count,omitempty"`
-}
-
 type workflowInvocationFile struct {
 	HarnessCommand []string `json:"harness_command,omitempty"`
-	Invocation
+	workflowstate.Invocation
 	OwnerRoot   string            `json:"owner_root"`
 	Owners      map[string]string `json:"owner_token_hashes"`
 	RequestKeys []string          `json:"request_keys"`
@@ -182,7 +40,7 @@ type workflowInvocationFile struct {
 
 // StartResult distinguishes an accepted request from an attachment.
 type StartResult struct {
-	Invocation Invocation
+	Invocation workflowstate.Invocation
 	Attached   bool
 }
 
@@ -421,16 +279,12 @@ func (s *Store) findWorkflowInvocation(runs []workflowInvocationFile, key, hash 
 			return workflowRetainedInvocation{Run: run, Found: false}, fmt.Errorf("%w: request key names different frozen input", workflowstate.ErrConflict)
 		}
 
-		if matchedKey || run.RequestHash == hash && !workflowInvocationTerminal(run.Status) {
+		if matchedKey || run.RequestHash == hash && !workflowstate.InvocationTerminal(run.Status) {
 			return workflowRetainedInvocation{Run: run, Found: true}, nil
 		}
 	}
 
 	return workflowRetainedInvocation{Run: workflowInvocationFile{}, Found: false}, nil
-}
-
-func workflowInvocationTerminal(status workflowstate.InvocationStatus) bool {
-	return status == workflowstate.InvocationCompleted || status == workflowstate.InvocationCancelled
 }
 
 type workflowInvocationAdmission struct {
@@ -489,7 +343,7 @@ func (s *Store) createWorkflowInvocation(ctx context.Context, admission workflow
 }
 
 func newWorkflowInvocation(root string, identity workflowstate.Identity, request StartRequest, hash string, preview Preview) workflowInvocationFile {
-	invocation := Invocation{Identity: identity, InvocationInput: InvocationInput{Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded}, InvocationExecution: InvocationExecution{Status: workflowstate.InvocationPending}}
+	invocation := workflowstate.Invocation{Identity: identity, InvocationInput: workflowstate.InvocationInput{Schema: "chr-invocation/v1", RequestKey: request.RequestKey, RequestHash: hash, Authority: "tickets", Selection: request.Selection, Policy: request.Policy, SetOrderRule: preview.SetOrderRule, Excluded: preview.Excluded}, InvocationExecution: workflowstate.InvocationExecution{Status: workflowstate.InvocationPending}}
 
 	invocation.HarnessBinding = harnesscore.CloneBinding(request.HarnessBinding)
 	if invocation.HarnessBinding != nil {
@@ -501,7 +355,7 @@ func newWorkflowInvocation(root string, identity workflowstate.Identity, request
 
 	invocation.Selection.SnapshotHash = ""
 	for _, member := range preview.Members {
-		invocation.Members = append(invocation.Members, Member{Admission: member, ExpectedRevision: member.Revision, ExpectedSourceHash: member.SourceHash})
+		invocation.Members = append(invocation.Members, workflowstate.Member{Admission: member, ExpectedRevision: member.Revision, ExpectedSourceHash: member.SourceHash})
 	}
 
 	if request.Selection.Selector.Extent == "loose" {

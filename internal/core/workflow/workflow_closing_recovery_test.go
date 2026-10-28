@@ -13,13 +13,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowClosingEmptyOwner(t *testing.T) (workflowIntegrationFixture, workflowstate.Record, Invocation) {
+func workflowClosingEmptyOwner(t *testing.T) (workflowIntegrationFixture, workflowstate.Record, workflowstate.Invocation) {
 	t.Helper()
 
 	return workflowClosingEmptyGate(t, workflowstate.Validation{WaiverReason: "Approved recovery fixture waiver"})
 }
 
-func workflowClosingEmptyGate(t *testing.T, gate workflowstate.Validation) (workflowIntegrationFixture, workflowstate.Record, Invocation) {
+func workflowClosingEmptyGate(t *testing.T, gate workflowstate.Validation) (workflowIntegrationFixture, workflowstate.Record, workflowstate.Invocation) {
 	t.Helper()
 
 	fixture := workflowDeliveryFixture(t, "rebase")
@@ -39,7 +39,7 @@ func workflowClosingEmptyGate(t *testing.T, gate workflowstate.Validation) (work
 	return fixture, set, run.Invocation
 }
 
-func workflowClosingBeginTest(t *testing.T, fixture workflowIntegrationFixture, run Invocation, ports FrontierPorts) *workflowClosingClaim {
+func workflowClosingBeginTest(t *testing.T, fixture workflowIntegrationFixture, run workflowstate.Invocation, ports FrontierPorts) *workflowClosingClaim {
 	t.Helper()
 
 	image := run.SetImages[len(run.Closures)]
@@ -91,7 +91,7 @@ func TestWorkflowClosingRecovery(t *testing.T) {
 	fixture, set, run := workflowClosingEmptyOwner(t)
 	for generation := 1; generation <= 2; generation++ {
 		claim := workflowClosingBeginTest(t, fixture, run, workflowFrontierPorts(fixture))
-		if _, err := fixture.store.ReconcileWorkflow(t.Context(), run.ID); !errors.Is(err, ErrWorkflowOwned) {
+		if _, err := fixture.store.ReconcileWorkflow(t.Context(), run.ID); !errors.Is(err, workflowstate.ErrOwned) {
 			t.Fatal("live closing owner was adopted", err)
 		}
 
@@ -109,7 +109,7 @@ func TestWorkflowClosingRecovery(t *testing.T) {
 	}
 }
 
-func checkWorkflowClosingRecovered(t *testing.T, store *Store, path string, run Invocation, generation int) {
+func checkWorkflowClosingRecovered(t *testing.T, store *Store, path string, run workflowstate.Invocation, generation int) {
 	t.Helper()
 
 	set, err := store.Read(t.Context(), path)
@@ -207,7 +207,7 @@ func testWorkflowClosingPostObservation(t *testing.T, change string) {
 	}
 }
 
-func checkWorkflowClosingJournalState(t *testing.T, stage, id string, current workflowstate.Record, retained Invocation) {
+func checkWorkflowClosingJournalState(t *testing.T, stage, id string, current workflowstate.Record, retained workflowstate.Invocation) {
 	t.Helper()
 
 	if stage == "start" {

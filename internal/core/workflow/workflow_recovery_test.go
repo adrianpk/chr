@@ -158,7 +158,7 @@ func testWorkflowRecoveryStop(t *testing.T, index int) {
 		t.Fatalf("stop replay: %+v, %v", retained, err)
 	}
 
-	if _, err := store.ClaimWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ClaimWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("cancel replay resumed work")
 	}
 }

@@ -37,7 +37,7 @@ func (s *Store) prepareWorkflowTaskMode(ctx context.Context, claim *Claim, worke
 
 func (s *Store) prepareWorkflowTaskHarness(ctx context.Context, claim *Claim, worker []string, mode workflowPreparationMode, harness *AgentHarness) (prepared workflowPreparedTask, err error) {
 	if claim == nil || claim.purpose != "" {
-		return prepared, ErrWorkflowOwned
+		return prepared, workflowstate.ErrOwned
 	}
 
 	err = s.withLock(ctx, func() error {
@@ -70,7 +70,7 @@ type workflowAttemptPreparation struct {
 func (s *Store) prepareWorkflowAttempt(ctx context.Context, preparation workflowAttemptPreparation) (workflowPreparedTask, error) {
 	attempt := &preparation.Run.Attempts[len(preparation.Run.Attempts)-1]
 	if attempt.InputRef != "" {
-		return workflowPreparedTask{}, fmt.Errorf("%w: attempt input is already prepared", ErrWorkflowOwned)
+		return workflowPreparedTask{}, fmt.Errorf("%w: attempt input is already prepared", workflowstate.ErrOwned)
 	}
 
 	lane, err := s.retainedWorkflowLane(ctx, preparation.Run, preparation.Record)

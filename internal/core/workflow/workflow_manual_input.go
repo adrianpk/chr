@@ -18,7 +18,7 @@ func (s *Store) loadWorkflowManualTask(ctx context.Context, claim *Claim, execut
 		}
 
 		if claimObservation.Run.StopIntent != "" {
-			return ErrWorkflowStop
+			return workflowstate.ErrStop
 		}
 
 		attempt := claimObservation.Run.Attempts[len(claimObservation.Run.Attempts)-1]
@@ -51,13 +51,13 @@ func (s *Store) loadWorkflowManualInput(run workflowInvocationFile, record workf
 	}
 
 	if execute && (len(attempt.Processes) != 0 || len(prepared.input.Worker) == 0) {
-		return prepared, ErrWorkflowOwned
+		return prepared, workflowstate.ErrOwned
 	}
 
 	return prepared, nil
 }
 
-func (s *Store) readWorkflowManualInput(attempt Attempt) (workflowPreparedTask, error) {
+func (s *Store) readWorkflowManualInput(attempt workflowstate.Attempt) (workflowPreparedTask, error) {
 	path, err := s.safePath(attempt.InputRef)
 	if err != nil || attempt.InputRef == "" {
 		return workflowPreparedTask{}, workflowstate.ErrConflict
@@ -78,7 +78,7 @@ func (s *Store) readWorkflowManualInput(attempt Attempt) (workflowPreparedTask, 
 	}
 
 	if validateWorkflowTaskHarnessSchema(input) != nil || input.ExecutionMode != "manual" {
-		return workflowPreparedTask{}, ErrWorkflowOwned
+		return workflowPreparedTask{}, workflowstate.ErrOwned
 	}
 
 	if err := validateWorkflowInputWorker(workflowPreparationMode(input.ExecutionMode), input.Worker); err != nil {
@@ -125,7 +125,7 @@ func (s *Store) workflowManualWorkerResult(ctx context.Context, claim *Claim) (w
 	}
 
 	if len(processes) != 1 || processes[0].Result == nil || processes[0].Result.ExitCode != 0 {
-		return workflowstate.CommandResult{}, ErrWorkflowOwned
+		return workflowstate.CommandResult{}, workflowstate.ErrOwned
 	}
 
 	return *processes[0].Result, nil

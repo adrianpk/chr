@@ -105,7 +105,7 @@ func (s *Store) checkWorkflowUpgradeQuiescent(ctx context.Context, opts UpgradeO
 	}
 
 	for _, run := range runs {
-		if !workflowInvocationTerminal(run.Status) {
+		if !workflowstate.InvocationTerminal(run.Status) {
 			return fmt.Errorf("unfinished workflow %s blocks project upgrade", run.ID)
 		}
 

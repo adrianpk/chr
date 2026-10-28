@@ -32,10 +32,10 @@ func (s service) StartWorkflow(ctx context.Context, request workflowcore.StartRe
 }
 
 // ReadWorkflow returns a retained checkpoint without owner credentials.
-func (s service) ReadWorkflow(ctx context.Context, id string) (workflowcore.Invocation, error) {
+func (s service) ReadWorkflow(ctx context.Context, id string) (workflowstate.Invocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	return store.ReadWorkflow(ctx, id)
@@ -82,41 +82,41 @@ func (s service) ExecuteWorkflowTask(ctx context.Context, claim *workflowcore.Cl
 }
 
 // StopWorkflow persists pause or cancel intent through the shared domain owner.
-func (s service) StopWorkflow(ctx context.Context, id, intent string, expected ...uint64) (workflowcore.Invocation, error) {
+func (s service) StopWorkflow(ctx context.Context, id, intent string, expected ...uint64) (workflowstate.Invocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	return store.StopWorkflow(ctx, id, intent, expected...)
 }
 
 // ResumeWorkflow continues a completed pause with its consumed budget retained.
-func (s service) ResumeWorkflow(ctx context.Context, id string, expected ...uint64) (workflowcore.Invocation, error) {
+func (s service) ResumeWorkflow(ctx context.Context, id string, expected ...uint64) (workflowstate.Invocation, error) {
 	return s.resumeWorkflowChecked(ctx, id, nil, expected...)
 }
 
-func (s service) resumeWorkflowChecked(ctx context.Context, id string, check workflowcore.AdmissionCheck, expected ...uint64) (workflowcore.Invocation, error) {
+func (s service) resumeWorkflowChecked(ctx context.Context, id string, check workflowcore.AdmissionCheck, expected ...uint64) (workflowstate.Invocation, error) {
 	revision, err := workflowControlRevision(expected)
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	ports := workflowcore.ResumePorts{ExpectedRevision: revision}
 	if run.Blocker != nil && run.Blocker.NextActionOwner == "prerequisite_owner" {
 		ports, err = s.workflowResumePorts(run)
 		if err != nil {
-			return workflowcore.Invocation{}, err
+			return workflowstate.Invocation{}, err
 		}
 
 		ports.ExpectedRevision = revision
@@ -139,7 +139,7 @@ func workflowControlRevision(expected []uint64) (uint64, error) {
 	return expected[0], nil
 }
 
-func (s service) workflowResumePorts(run workflowcore.Invocation) (workflowcore.ResumePorts, error) {
+func (s service) workflowResumePorts(run workflowstate.Invocation) (workflowcore.ResumePorts, error) {
 	config, err := workspaceconfig.Load(s.projectContext.ProjectDir)
 	if err != nil {
 		return workflowcore.ResumePorts{}, err
@@ -156,10 +156,10 @@ func (s service) workflowResumePorts(run workflowcore.Invocation) (workflowcore.
 }
 
 // ReconcileWorkflow recovers dead or expired ownership after process exclusion.
-func (s service) ReconcileWorkflow(ctx context.Context, id string, expected ...uint64) (workflowcore.Invocation, error) {
+func (s service) ReconcileWorkflow(ctx context.Context, id string, expected ...uint64) (workflowstate.Invocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	return store.ReconcileWorkflow(ctx, id, expected...)

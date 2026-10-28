@@ -139,8 +139,8 @@ func (s *Store) observeWorkflowSubmissionRetry(ctx context.Context, run *workflo
 }
 
 func (s *Store) checkWorkflowSubmissionAdmission(run *workflowInvocationFile, journal workflowSubmissionJournal) error {
-	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
-		return ErrWorkflowStop
+	if run.StopIntent != "" || workflowstate.InvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
+		return workflowstate.ErrStop
 	}
 
 	if len(journal.Attempts) >= workflowIntegrationAttemptLimit(run.Policy) {
@@ -200,7 +200,7 @@ func (s *Store) projectWorkflowSubmission(run *workflowInvocationFile, journal w
 	}
 
 	run.Submission = &binding
-	if run.StopIntent == "" && !workflowInvocationTerminal(run.Status) && run.Status != workflowstate.InvocationPaused {
+	if run.StopIntent == "" && !workflowstate.InvocationTerminal(run.Status) && run.Status != workflowstate.InvocationPaused {
 		run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, string(last.State)
 	}
 
@@ -209,15 +209,15 @@ func (s *Store) projectWorkflowSubmission(run *workflowInvocationFile, journal w
 
 func (s *Store) blockWorkflowSubmissionBudget(run *workflowInvocationFile) error {
 	run.Status, run.Outcome = workflowstate.InvocationBlocked, "integration_budget_exhausted"
-	run.Blocker = &Blocker{Dependency: run.Lane.Unit, Reason: "integration_submission_budget_exhausted", NextActionOwner: "workflow_operator"}
+	run.Blocker = &workflowstate.Blocker{Dependency: run.Lane.Unit, Reason: "integration_submission_budget_exhausted", NextActionOwner: "workflow_operator"}
 
 	return errors.Join(ErrWorkflowIntegrationBudget, s.commitWorkflowState(run))
 }
 
-func workflowSubmissionProjection(journal workflowSubmissionJournal) SubmissionBinding {
+func workflowSubmissionProjection(journal workflowSubmissionJournal) workflowstate.SubmissionBinding {
 	last := journal.Attempts[len(journal.Attempts)-1]
 
-	return SubmissionBinding{JournalKey: journal.Key, JournalHash: journal.sourceHash, TargetKey: journal.TargetKey, ID: last.ID, Unit: journal.Unit, Attempt: last.Attempt, State: last.State, ExternalDelivery: last.ExternalDelivery}
+	return workflowstate.SubmissionBinding{JournalKey: journal.Key, JournalHash: journal.sourceHash, TargetKey: journal.TargetKey, ID: last.ID, Unit: journal.Unit, Attempt: last.Attempt, State: last.State, ExternalDelivery: last.ExternalDelivery}
 }
 
 func (s *Store) checkWorkflowLegacyPublicationGuard(ctx context.Context, run *workflowInvocationFile, provider PublicationGuardProvider) (workflowstate.PublicationGuard, error) {

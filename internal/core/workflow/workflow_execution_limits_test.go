@@ -65,19 +65,19 @@ func TestWorkflowTaskArgvBounds(t *testing.T) {
 func TestWorkflowTaskReuseEdits(t *testing.T) {
 	cases := []struct {
 		name   string
-		change func(*testing.T, *Store, Invocation, workflowstate.Record)
+		change func(*testing.T, *Store, workflowstate.Invocation, workflowstate.Record)
 	}{
-		{"result", func(t *testing.T, s *Store, run Invocation, _ workflowstate.Record) {
+		{"result", func(t *testing.T, s *Store, run workflowstate.Invocation, _ workflowstate.Record) {
 			workflowProcessWrite(t, filepath.Join(s.layout.Root(), run.Attempts[0].ResultRef), "Changed\n")
 		}},
-		{"input", func(t *testing.T, s *Store, run Invocation, _ workflowstate.Record) {
+		{"input", func(t *testing.T, s *Store, run workflowstate.Invocation, _ workflowstate.Record) {
 			workflowProcessWrite(t, filepath.Join(s.layout.Root(), run.Attempts[0].InputRef), "Changed\n")
 		}},
-		{"instructions", func(t *testing.T, s *Store, _ Invocation, record workflowstate.Record) {
+		{"instructions", func(t *testing.T, s *Store, _ workflowstate.Invocation, record workflowstate.Record) {
 			record.Body = []byte("Changed instructions\n")
 			workflowTestWrite(t, s, record)
 		}},
-		{"lane", func(t *testing.T, s *Store, run Invocation, _ workflowstate.Record) {
+		{"lane", func(t *testing.T, s *Store, run workflowstate.Invocation, _ workflowstate.Record) {
 			workflowSelectionGit(t, s, "update-ref", run.Lane.Branch, run.Lane.BaseCommit)
 		}},
 	}

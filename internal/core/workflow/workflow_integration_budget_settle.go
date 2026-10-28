@@ -23,7 +23,7 @@ func (s *Store) settleWorkflowIntegration(ctx context.Context, run workflowInvoc
 	}
 
 	if request.State == "launched" && workflowIntegrationReservationStopped(run, entry) {
-		return budget, ErrWorkflowStop
+		return budget, workflowstate.ErrStop
 	}
 
 	previous := budget.Reservations[index]

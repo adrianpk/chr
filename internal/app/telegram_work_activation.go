@@ -118,7 +118,7 @@ func (r telegramReceiver) projectWorkProgress(ctx context.Context, ref telegramc
 
 func telegramWorkActivationCode(err error) string {
 	switch {
-	case errors.Is(err, workflowcore.ErrWorkflowOwned):
+	case errors.Is(err, workflowstate.ErrOwned):
 		return "current_owner"
 	case errors.Is(err, workflowcore.ErrWorkflowCapacity):
 		return "waiting_capacity"

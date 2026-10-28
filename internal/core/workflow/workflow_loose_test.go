@@ -126,7 +126,7 @@ func TestWorkflowLooseReselection(t *testing.T) {
 	checkWorkflowLooseNext(t, f, advanced, run)
 }
 
-func checkWorkflowLooseReselected(t *testing.T, first, run Invocation, failure error) {
+func checkWorkflowLooseReselected(t *testing.T, first, run workflowstate.Invocation, failure error) {
 	t.Helper()
 
 	if failure != nil || run.Cursor != 1 || run.ConfirmedCursor != 1 || run.Members[1].Admission.Key != "PRJ-92" || run.LooseQueue.Excluded["PRJ-91"] != "status_mismatch" || !slices.Equal(run.LooseQueue.Admitted, first.LooseQueue.Admitted) {
@@ -134,7 +134,7 @@ func checkWorkflowLooseReselected(t *testing.T, first, run Invocation, failure e
 	}
 }
 
-func checkWorkflowLooseNext(t *testing.T, f workflowIntegrationFixture, advanced, run Invocation) {
+func checkWorkflowLooseNext(t *testing.T, f workflowIntegrationFixture, advanced, run workflowstate.Invocation) {
 	t.Helper()
 
 	claim := workflowTestClaim(t, f.store, run.ID)

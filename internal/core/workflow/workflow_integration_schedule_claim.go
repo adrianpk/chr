@@ -30,7 +30,7 @@ func (s *Store) ClaimNextWorkflowIntegration(ctx context.Context, q IntegrationS
 		}
 
 		if len(page.Items) == 0 {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		claim, err = s.claimWorkflowIntegrationSelection(ctx, page.Items[0])
@@ -79,7 +79,7 @@ func (s *Store) guardWorkflowIntegrationExecutor(ctx context.Context, run workfl
 	}
 
 	if entry.State != "queued" || entry.StopIntent != "" || !workflowIntegrationExecutorFrontier(run, entry) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return nil

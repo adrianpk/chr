@@ -162,7 +162,7 @@ func TestWorkflowManualFencing(t *testing.T) {
 	}
 
 	replacement := workflowTestClaim(t, store, run.Invocation.ID)
-	if _, err := store.ReconcileWorkflowTask(t.Context(), old, candidate); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ReconcileWorkflowTask(t.Context(), old, candidate); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("old owner accepted: %v", err)
 	}
 
@@ -174,7 +174,7 @@ func TestWorkflowManualFencing(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.ExecuteWorkflowManualTask(t.Context(), replacement); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ExecuteWorkflowManualTask(t.Context(), replacement); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("automatic attempt executed manually")
 	}
 }

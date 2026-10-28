@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (selection workflowSelection) orderMembers(members []PreviewMember, selector workflowstate.Selector) (string, error) {
+func (selection workflowSelection) orderMembers(members []workflowstate.PreviewMember, selector workflowstate.Selector) (string, error) {
 	if err := selection.validateMemberInputs(members); err != nil {
 		return "", err
 	}
@@ -20,7 +20,7 @@ func (selection workflowSelection) orderMembers(members []PreviewMember, selecto
 
 	rule := selection.setOrderRule(selector)
 
-	slices.SortFunc(members, func(left, right PreviewMember) int {
+	slices.SortFunc(members, func(left, right workflowstate.PreviewMember) int {
 		if left.SetID != right.SetID {
 			return selection.compareSets(left.SetID, right.SetID, rule)
 		}
@@ -66,7 +66,7 @@ func (selection workflowSelection) setOrderRule(selector workflowstate.Selector)
 	return "created_at_id"
 }
 
-func (selection workflowSelection) validateMemberInputs(members []PreviewMember) error {
+func (selection workflowSelection) validateMemberInputs(members []workflowstate.PreviewMember) error {
 	checked := map[string]bool{}
 	for _, member := range members {
 		if member.SliceID == "" || checked[member.SliceID] {

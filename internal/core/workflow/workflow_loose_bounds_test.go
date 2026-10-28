@@ -71,7 +71,7 @@ func checkWorkflowLooseFailure(t *testing.T, store *Store, id string, attempts i
 		t.Fatal("failed ticket did not stop its invocation", err)
 	}
 
-	if _, err := store.ClaimWorkflow(t.Context(), id); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ClaimWorkflow(t.Context(), id); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("failed ticket resumed without an explicit resume", err)
 	}
 

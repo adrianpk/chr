@@ -74,7 +74,7 @@ func nativeSourceDrift(t *testing.T, name, path string) {
 	nativeSourceDriftRetry(t, f, provider, after)
 }
 
-func nativeSourceDriftFacts(t *testing.T, f nativePreparationFixture, before Invocation, budget IntegrationBudget) Invocation {
+func nativeSourceDriftFacts(t *testing.T, f nativePreparationFixture, before workflowstate.Invocation, budget IntegrationBudget) workflowstate.Invocation {
 	t.Helper()
 
 	store, id := f.f.store, f.f.run.ID
@@ -128,7 +128,7 @@ func nativeDriftMoveSource(t *testing.T, f *nativePreparationFixture, name, path
 	}
 }
 
-func nativeSourceDriftRetry(t *testing.T, f nativePreparationFixture, provider nativeDriftProviderFixture, before Invocation) {
+func nativeSourceDriftRetry(t *testing.T, f nativePreparationFixture, provider nativeDriftProviderFixture, before workflowstate.Invocation) {
 	t.Helper()
 
 	store := NewWorkflowStore(f.f.store.layout, f.f.store.projectID)

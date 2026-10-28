@@ -22,7 +22,7 @@ func (candidate SliceCandidate) UnitInput() workflowstate.SliceInput {
 	return candidate.Slice
 }
 
-func workflowMemberOwnsUnit(member Member, unit workflowstate.Ref) bool {
+func workflowMemberOwnsUnit(member workflowstate.Member, unit workflowstate.Ref) bool {
 	if unit.Kind == "ticket" {
 		return member.Admission.Key == unit.ID && member.Admission.SliceID == "" && member.Admission.SetID == ""
 	}
@@ -66,7 +66,7 @@ func (s *Store) PrepareWorkflowTicketCandidate(ctx context.Context, id string) (
 		}
 
 		if invocationLocation.Run.Lane == nil || invocationLocation.Run.Lane.Unit.Kind != "ticket" || invocationLocation.Run.StopIntent != "" || !workflowSliceValidationReady(invocationLocation.Run.Invocation) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		observation, readErr := invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
@@ -124,10 +124,10 @@ func workflowTicketCandidatePath(id, candidateID string) string {
 func validWorkflowTicketCandidateRef(run workflowInvocationFile) bool {
 	id := strings.TrimSuffix(filepath.Base(run.CandidateRef), ".json")
 
-	return run.Lane != nil && run.Lane.Unit.Kind == "ticket" && slices.ContainsFunc(run.Members, func(member Member) bool { return workflowMemberOwnsUnit(member, run.Lane.Unit) }) && len(run.CandidateHash) == 64 && len(id) == 64 && run.CandidateRef == workflowTicketCandidatePath(run.ID, id)
+	return run.Lane != nil && run.Lane.Unit.Kind == "ticket" && slices.ContainsFunc(run.Members, func(member workflowstate.Member) bool { return workflowMemberOwnsUnit(member, run.Lane.Unit) }) && len(run.CandidateHash) == 64 && len(id) == 64 && run.CandidateRef == workflowTicketCandidatePath(run.ID, id)
 }
 
-func workflowAttemptOwnsCandidate(run workflowInvocationFile, attempt Attempt) bool {
+func workflowAttemptOwnsCandidate(run workflowInvocationFile, attempt workflowstate.Attempt) bool {
 	return attempt.Purpose == workflowSliceValidationPurpose && attempt.Outcome == "validated" && attempt.ResultRef == run.CandidateRef && attempt.ResultHash == run.CandidateHash && len(run.CandidateHash) == 64
 }
 
@@ -208,7 +208,7 @@ func (s *Store) workflowTicketValidationInput(ctx context.Context, run workflowI
 	input.ExecutionMode = "aggregate"
 	input.Slice = &workflowstate.SliceInput{Unit: run.Lane.Unit, ContractHash: observation.tasks[0].Task.ContractHash, Tasks: []workflowstate.SliceTaskProof{proof}}
 	input.EvidenceHashes[proof.EvidenceRef], input.EvidenceHashes[proof.InputRef] = proof.EvidenceHash, proof.InputHash
-	input.Prerequisites = append(input.Prerequisites, InputImage{Path: observation.tasks[0].Path, Revision: observation.tasks[0].Revision, SourceHash: observation.tasks[0].SourceHash})
+	input.Prerequisites = append(input.Prerequisites, workflowstate.InputImage{Path: observation.tasks[0].Path, Revision: observation.tasks[0].Revision, SourceHash: observation.tasks[0].SourceHash})
 
 	return input, nil
 }

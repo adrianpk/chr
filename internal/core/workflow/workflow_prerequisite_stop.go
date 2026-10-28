@@ -10,7 +10,7 @@ import (
 )
 
 type workflowPrerequisiteError struct {
-	blocker Blocker
+	blocker workflowstate.Blocker
 }
 
 func (failure workflowPrerequisiteError) Error() string {

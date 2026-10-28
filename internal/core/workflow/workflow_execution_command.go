@@ -122,7 +122,7 @@ func runWorkflowSupervisedProcess(ctx context.Context, claim *Claim, prepared wo
 		defer cancel()
 
 		finishErr := claim.store.finishWorkflowProcess(cleanup, claim, execution.Index, registeredProcess.Process, result)
-		if errors.Is(finishErr, ErrWorkflowOwned) {
+		if errors.Is(finishErr, workflowstate.ErrOwned) {
 			claim.execution.Lock()
 			claim.execution.groupPID = execution.Process.Process.Pid
 			claim.execution.Unlock()

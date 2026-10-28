@@ -22,7 +22,7 @@ type PublicationPorts struct {
 
 // IntegrationProgress exposes the retained barrier or shared receipt.
 type IntegrationProgress struct {
-	Invocation Invocation
+	Invocation workflowstate.Invocation
 	Receipt    *workflowstate.Record
 }
 
@@ -90,8 +90,8 @@ func (s *Store) blockWorkflowMissingPublisher(ctx context.Context, id string) er
 			return err
 		}
 
-		if invocationLocation.Run.StopIntent != "" || workflowInvocationTerminal(invocationLocation.Run.Status) || invocationLocation.Run.Status == workflowstate.InvocationPaused {
-			return ErrWorkflowStop
+		if invocationLocation.Run.StopIntent != "" || workflowstate.InvocationTerminal(invocationLocation.Run.Status) || invocationLocation.Run.Status == workflowstate.InvocationPaused {
+			return workflowstate.ErrStop
 		}
 
 		return invocationLocation.Owner.blockWorkflowPublication(&invocationLocation.Run, workflowstate.ErrAtomicGuard)
@@ -147,8 +147,8 @@ func (s *Store) reconcileWorkflowPublicationCheckpoint(ctx context.Context, run 
 		return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, err
 	}
 
-	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
-		return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, ErrWorkflowStop
+	if run.StopIntent != "" || workflowstate.InvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
+		return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, workflowstate.ErrStop
 	}
 
 	return workflowPublicationCheckpoint{Receipt: nil, Observed: false}, nil

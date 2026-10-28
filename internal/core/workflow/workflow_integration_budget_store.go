@@ -55,32 +55,9 @@ func (s *Store) workflowIntegrationUsage(ctx context.Context, run workflowInvoca
 		return usage, err
 	}
 
-	usage.ClosingAttempts, err = s.workflowIntegrationClosingUsage(snapshot, run.ID)
+	usage.ClosingAttempts, err = workflowcloseout.BudgetUsage(snapshot, run.ID, workflowClosingEvidence{store: s})
 
 	return usage, err
-}
-
-func (s *Store) workflowIntegrationClosingUsage(snapshot workflowstate.Snapshot, id string) ([]string, error) {
-	attempts := []string{}
-
-	for _, record := range snapshot.Records {
-		if record.Set == nil || record.Set.Closing == nil {
-			continue
-		}
-
-		for i := range record.Set.Closing.Attempts {
-			attempt, err := workflowcloseout.ReadAttempt(record.ID, record.Set.Closing, i, workflowClosingEvidence{store: s})
-			if err != nil {
-				return nil, err
-			}
-
-			if attempt.BudgetID == id {
-				attempts = append(attempts, record.ID+":"+fmt.Sprint(attempt.Generation))
-			}
-		}
-	}
-
-	return attempts, nil
 }
 
 func (s *Store) workflowIntegrationBudgetAdmission(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, tokenLimit *int64) (IntegrationBudget, error) {
@@ -173,7 +150,7 @@ func (s *Store) workflowIntegrationBudgetChange(ctx context.Context, run *workfl
 	}
 
 	file := workflowstate.FileChange{Path: path, Before: before, After: append(data, '\n')}
-	run.IntegrationBudget = &IntegrationBudgetBinding{Revision: budget.Revision, Ref: workflowstate.EvidenceRef{Path: path, Hash: contenthash.Sum(file.After)}}
+	run.IntegrationBudget = &workflowstate.IntegrationBudgetBinding{Revision: budget.Revision, Ref: workflowstate.EvidenceRef{Path: path, Hash: contenthash.Sum(file.After)}}
 
 	return file, nil
 }

@@ -121,11 +121,11 @@ func (s *Store) checkWorkflowReusableTaskPrepared(ctx context.Context, run workf
 	return fmt.Errorf("%w: reusable task lacks unchanged host evidence", workflowstate.ErrConflict)
 }
 
-func workflowAttemptValidatesTask(attempt Attempt, record workflowstate.Record) bool {
+func workflowAttemptValidatesTask(attempt workflowstate.Attempt, record workflowstate.Record) bool {
 	return attempt.Purpose == "" && attempt.TaskKey == record.Task.Key && attempt.ContractHash == record.Task.ContractHash && attempt.Outcome == "validated" && slices.Contains(record.Task.Evidence, attempt.ResultRef)
 }
 
-func (s *Store) workflowRetainedResultMatches(ctx context.Context, run workflowInvocationFile, attempt Attempt, record workflowstate.Record, reader *workflowProofReader) bool {
+func (s *Store) workflowRetainedResultMatches(ctx context.Context, run workflowInvocationFile, attempt workflowstate.Attempt, record workflowstate.Record, reader *workflowProofReader) bool {
 	owner, err := s.workflowOwnerStore(run)
 	if err != nil {
 		return false
@@ -149,7 +149,7 @@ func (s *Store) workflowRetainedResultMatches(ctx context.Context, run workflowI
 	return result.AttemptID == attempt.ID && result.Generation == attempt.Generation && result.InputHash == attempt.InputHash && owner.workflowRetainedInputMatches(attempt, record) && reader.validTaskProof(ctx, record, result.TaskValidation)
 }
 
-func (s *Store) workflowRetainedInputMatches(attempt Attempt, record workflowstate.Record) bool {
+func (s *Store) workflowRetainedInputMatches(attempt workflowstate.Attempt, record workflowstate.Record) bool {
 	path, err := s.safePath(attempt.InputRef)
 	if err != nil {
 		return false

@@ -14,7 +14,7 @@ import (
 // Only the policy accepted at StartWorkflow can admit it. Reconciliation cannot
 // reopen a terminal invocation or a completed set, or change an active unit.
 // In loose scope it also reselects inactive admissions using current metadata.
-func (s *Store) ReconcileWorkflowMembership(ctx context.Context, id string) (result Invocation, err error) {
+func (s *Store) ReconcileWorkflowMembership(ctx context.Context, id string) (result workflowstate.Invocation, err error) {
 	err = s.withLock(ctx, func() error {
 		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -61,7 +61,7 @@ func (s *Store) reconcileWorkflowMembership(ctx context.Context, run workflowInv
 }
 
 func workflowMembershipDormant(run workflowInvocationFile) bool {
-	return workflowInvocationTerminal(run.Status) || run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || slices.Contains([]string{"ticket", "loose"}, run.Selection.Selector.Extent)
+	return workflowstate.InvocationTerminal(run.Status) || run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || slices.Contains([]string{"ticket", "loose"}, run.Selection.Selector.Extent)
 }
 
 func (s *Store) retainWorkflowLaterMembers(ctx context.Context, run workflowInvocationFile, selection workflowSelection) (workflowInvocationFile, error) {
@@ -79,8 +79,8 @@ func (s *Store) retainWorkflowLaterMembers(ctx context.Context, run workflowInvo
 	}
 
 	next := run
-	next.Members = append([]Member(nil), run.Members...)
-	next.SetImages = append([]InputImage(nil), run.SetImages...)
+	next.Members = append([]workflowstate.Member(nil), run.Members...)
+	next.SetImages = append([]workflowstate.InputImage(nil), run.SetImages...)
 
 	next.Excluded = maps.Clone(run.Excluded)
 	if err := s.admitWorkflowLaterMembers(ctx, &next, selection, later); err != nil {
@@ -94,13 +94,13 @@ func (s *Store) retainWorkflowLaterMembers(ctx context.Context, run workflowInvo
 	return next, nil
 }
 
-func workflowLaterMembers(selection workflowSelection, run workflowInvocationFile) []PreviewMember {
+func workflowLaterMembers(selection workflowSelection, run workflowInvocationFile) []workflowstate.PreviewMember {
 	known := map[string]bool{}
 	for _, member := range run.Members {
 		known[member.Admission.Key] = true
 	}
 
-	later := []PreviewMember{}
+	later := []workflowstate.PreviewMember{}
 
 	for _, ticket := range selection.tickets {
 		record := selection.records[ticket.Key]

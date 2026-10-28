@@ -23,7 +23,7 @@ type workflowInvocationLocation struct {
 }
 
 // ReadWorkflow observes a retained invocation; its private token hashes stay private.
-func (s *Store) ReadWorkflow(ctx context.Context, id string) (result Invocation, err error) {
+func (s *Store) ReadWorkflow(ctx context.Context, id string) (result workflowstate.Invocation, err error) {
 	err = s.withRepositoryLock(ctx, func() error { return s.prepareWorkflowRead(ctx) }, func() error {
 		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 
@@ -180,7 +180,7 @@ func (s *Store) appendObservedWorkflowInvocation(runs *[]workflowInvocationFile,
 	}
 
 	outside := !owners[run.OwnerRoot]
-	if outside && !workflowInvocationTerminal(run.Status) {
+	if outside && !workflowstate.InvocationTerminal(run.Status) {
 		return fmt.Errorf("%w: invocation owner is outside this repository coordinator", workflowstate.ErrConflict)
 	}
 	// A Git copy cannot claim work. Terminal copies retain retry identity as history.

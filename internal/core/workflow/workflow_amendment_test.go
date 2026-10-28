@@ -122,7 +122,7 @@ func TestWorkflowAmendmentAdmission(t *testing.T) {
 	}
 }
 
-func checkWorkflowAmendmentAdmission(t *testing.T, store *Store, initial, current Invocation, changed MaterializationResult, include bool) {
+func checkWorkflowAmendmentAdmission(t *testing.T, store *Store, initial, current workflowstate.Invocation, changed MaterializationResult, include bool) {
 	t.Helper()
 	checkWorkflowAmendmentIdentity(t, initial, current, changed)
 
@@ -145,7 +145,7 @@ func checkWorkflowAmendmentAdmission(t *testing.T, store *Store, initial, curren
 	}
 }
 
-func checkWorkflowAmendmentIdentity(t *testing.T, initial, current Invocation, changed MaterializationResult) {
+func checkWorkflowAmendmentIdentity(t *testing.T, initial, current workflowstate.Invocation, changed MaterializationResult) {
 	t.Helper()
 
 	if current.Policy != initial.Policy || current.RequestHash != initial.RequestHash || len(changed.Tasks) != 7 || changed.Set.Revision != 2 || len(changed.Set.Set.Amendments) != 1 {
@@ -260,7 +260,7 @@ func TestWorkflowAmendmentLiveOwner(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.AmendWorkflowSet(t.Context(), amend); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.AmendWorkflowSet(t.Context(), amend); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("checkpointed owner bypassed: %v", err)
 	}
 }

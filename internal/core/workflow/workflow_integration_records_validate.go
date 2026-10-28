@@ -299,7 +299,7 @@ func workflowIntegrationReceiptEntryScopeMatches(native *workflowstate.NativeRec
 	return native.EntryID == entry.ID && native.InvocationID == run.ID && native.Unit == entry.Unit && native.SourceRepository == entry.Repository && native.TargetRef == entry.TargetRef && native.CandidateRef == *entry.CandidateRef
 }
 
-func workflowIntegrationInvocationPublicationMatches(snapshot workflowIntegrationSnapshot, entry IntegrationEntry, binding SubmissionBinding) bool {
+func workflowIntegrationInvocationPublicationMatches(snapshot workflowIntegrationSnapshot, entry IntegrationEntry, binding workflowstate.SubmissionBinding) bool {
 	index := slices.IndexFunc(snapshot.Runs, func(run workflowInvocationFile) bool { return workflowIntegrationEntryInvocation(run, entry) })
 	if index < 0 {
 		return false
@@ -324,7 +324,7 @@ func workflowAgentCounterOwner(run workflowInvocationFile, counter IntegrationCo
 }
 
 func workflowAgentReservationOwned(run workflowInvocationFile, r IntegrationReservation) bool {
-	return r.Kind == "agent_call" && workflowAgentUsageRecorded(run, r) && workflowIntegrationRetainedUnit(run, r.Unit) && slices.ContainsFunc(run.Attempts, func(a Attempt) bool {
+	return r.Kind == "agent_call" && workflowAgentUsageRecorded(run, r) && workflowIntegrationRetainedUnit(run, r.Unit) && slices.ContainsFunc(run.Attempts, func(a workflowstate.Attempt) bool {
 		return a.ID == r.AttemptID && a.Generation == r.ClaimGeneration && a.InputRef == r.AttemptInput.Path && a.InputHash == r.AttemptInput.Hash && a.Lane != nil && a.Lane.Unit == r.Unit
 	})
 }

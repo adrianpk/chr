@@ -112,5 +112,5 @@ func (s *Store) finishStoppedWorkflowTask(run workflowInvocationFile, record wor
 		return err
 	}
 
-	return errors.Join(ErrWorkflowStop, claim.releaseReservation())
+	return errors.Join(workflowstate.ErrStop, claim.releaseReservation())
 }

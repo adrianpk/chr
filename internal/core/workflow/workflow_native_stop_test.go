@@ -141,14 +141,14 @@ func checkNativeStopPending(t *testing.T, intent string) {
 		t.Fatal("repeated pending stop was not idempotent", err)
 	}
 
-	if _, err := f.store.ResumeWorkflow(t.Context(), stopped.ID); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := f.store.ResumeWorkflow(t.Context(), stopped.ID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("pending publication could resume task execution", err)
 	}
 
 	checkNativeStoppedMetadata(t, fixture, stopped, budget, intent)
 }
 
-func checkNativeStoppedMetadata(t *testing.T, fixture nativeCanonicalFixture, stopped Invocation, budget IntegrationBudget, intent string) {
+func checkNativeStoppedMetadata(t *testing.T, fixture nativeCanonicalFixture, stopped workflowstate.Invocation, budget IntegrationBudget, intent string) {
 	t.Helper()
 
 	f := fixture.f
@@ -168,7 +168,7 @@ func checkNativeStoppedMetadata(t *testing.T, fixture nativeCanonicalFixture, st
 	}
 }
 
-func checkNativeRejectedStop(t *testing.T, f nativeSubmissionFixture, stopped Invocation, budget IntegrationBudget) {
+func checkNativeRejectedStop(t *testing.T, f nativeSubmissionFixture, stopped workflowstate.Invocation, budget IntegrationBudget) {
 	t.Helper()
 
 	entry := nativeReviewEntry(t, f.store, stopped.ID)

@@ -3,6 +3,7 @@ package app
 import (
 	authoringcore "forge.adrianpk.com/chr/internal/core/authoring"
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 )
 
 func guidedControlChoices(observed GuidedUseCaseInspection) []string {
@@ -57,7 +58,7 @@ type guidedResultExport struct {
 	Complete                     bool
 	Deliveries                   []workflowcore.ResultReceipt
 	Validations                  []workflowcore.ResultValidation
-	Closures                     []workflowcore.ResultClosure
+	Closures                     []workflowcloseout.InvocationResult
 	Ideas                        []authoringcore.GuidedLaterIdea
 }
 

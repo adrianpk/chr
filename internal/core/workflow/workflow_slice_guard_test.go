@@ -13,24 +13,24 @@ import (
 func TestWorkflowSliceChanged(t *testing.T) {
 	cases := []struct {
 		name   string
-		mutate func(*testing.T, *Store, Invocation, SliceCandidate)
+		mutate func(*testing.T, *Store, workflowstate.Invocation, SliceCandidate)
 	}{
-		{"candidate", func(t *testing.T, s *Store, run Invocation, _ SliceCandidate) {
+		{"candidate", func(t *testing.T, s *Store, run workflowstate.Invocation, _ SliceCandidate) {
 			workflowProcessWrite(t, filepath.Join(s.layout.Root(), run.CandidateRef), "Changed\n")
 		}},
-		{"contract", func(t *testing.T, s *Store, _ Invocation, candidate SliceCandidate) {
+		{"contract", func(t *testing.T, s *Store, _ workflowstate.Invocation, candidate SliceCandidate) {
 			workflowProcessWrite(t, filepath.Join(s.layout.Root(), candidate.Slice.ContractRef), "Changed\n")
 		}},
-		{"task proof", func(t *testing.T, s *Store, _ Invocation, candidate SliceCandidate) {
+		{"task proof", func(t *testing.T, s *Store, _ workflowstate.Invocation, candidate SliceCandidate) {
 			workflowProcessWrite(t, filepath.Join(s.layout.Root(), candidate.Slice.Tasks[0].EvidenceRef), "Changed\n")
 		}},
-		{"task input", func(t *testing.T, s *Store, _ Invocation, candidate SliceCandidate) {
+		{"task input", func(t *testing.T, s *Store, _ workflowstate.Invocation, candidate SliceCandidate) {
 			workflowProcessWrite(t, filepath.Join(s.layout.Root(), candidate.Slice.Tasks[0].InputRef), "Changed\n")
 		}},
-		{"dirty lane", func(t *testing.T, _ *Store, _ Invocation, candidate SliceCandidate) {
+		{"dirty lane", func(t *testing.T, _ *Store, _ workflowstate.Invocation, candidate SliceCandidate) {
 			workflowProcessWrite(t, filepath.Join(candidate.Lane.Worktree, "dirty.txt"), "Changed\n")
 		}},
-		{"new commit", func(t *testing.T, _ *Store, _ Invocation, candidate SliceCandidate) {
+		{"new commit", func(t *testing.T, _ *Store, _ workflowstate.Invocation, candidate SliceCandidate) {
 			workflowProcessWrite(t, filepath.Join(candidate.Lane.Worktree, "later.txt"), "Changed\n")
 			workflowProcessCommit(t, candidate.Lane.Worktree)
 		}},
@@ -110,7 +110,7 @@ func testWorkflowSliceStop(t *testing.T, intent string) {
 
 	waitWorkflowClaimFile(t, marker)
 
-	if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ValidateWorkflowSlice(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("competing aggregate validator was admitted")
 	}
 
@@ -118,7 +118,7 @@ func testWorkflowSliceStop(t *testing.T, intent string) {
 		t.Fatal(err)
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowStop) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrStop) {
 		t.Fatalf("aggregate stop: %v", err)
 	}
 
@@ -130,12 +130,12 @@ func testWorkflowSliceStop(t *testing.T, intent string) {
 	checkWorkflowSliceStopResume(t, store, retained, intent)
 }
 
-func checkWorkflowSliceStopResume(t *testing.T, store *Store, retained Invocation, intent string) {
+func checkWorkflowSliceStopResume(t *testing.T, store *Store, retained workflowstate.Invocation, intent string) {
 	t.Helper()
 
 	resumed, err := store.ResumeWorkflow(t.Context(), retained.ID)
 	if intent == "cancel" {
-		if !errors.Is(err, ErrWorkflowOwned) {
+		if !errors.Is(err, workflowstate.ErrOwned) {
 			t.Fatal("cancelled aggregate resumed")
 		}
 
@@ -246,7 +246,7 @@ func TestWorkflowSliceFence(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.finishWorkflowSliceValidation(t.Context(), slicePreparation.Claim, slicePreparation.Prepared, &SliceCandidate{}, false); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.finishWorkflowSliceValidation(t.Context(), slicePreparation.Claim, slicePreparation.Prepared, &SliceCandidate{}, false); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("old aggregate claim finalized or released its replacement")
 	}
 

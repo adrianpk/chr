@@ -10,7 +10,7 @@ import (
 )
 
 type workflowPrerequisiteObservation struct {
-	Images         []InputImage
+	Images         []workflowstate.InputImage
 	EvidenceHashes map[string]string
 }
 
@@ -33,7 +33,7 @@ func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvo
 	request := run.ExecutionSelection()
 	request.CumulativeBranch, request.CumulativeCommit = run.Lane.Branch, run.Lane.HeadCommit
 	reader := workflowProofReader{store: s, selection: selection, request: request, observations: map[workflowProofKey]string{}}
-	images := []InputImage{}
+	images := []workflowstate.InputImage{}
 	hashes := map[string]string{}
 
 	for _, ref := range refs {
@@ -43,7 +43,7 @@ func (s *Store) workflowPrerequisiteImages(ctx context.Context, run workflowInvo
 
 		dependency := workflowPrerequisiteRecord(selection, ref)
 
-		images = append(images, InputImage{Path: dependency.Path, Revision: dependency.Revision, SourceHash: dependency.SourceHash})
+		images = append(images, workflowstate.InputImage{Path: dependency.Path, Revision: dependency.Revision, SourceHash: dependency.SourceHash})
 		if dependency.Task != nil {
 			for _, path := range dependency.Task.Evidence {
 				hashes[path] = selection.evidenceHashes[path]

@@ -24,16 +24,6 @@ type PreparationGit interface {
 	PrepareWorkflowIntegration(context.Context, workflowstate.PreparationQuery) (workflowstate.IntegrationProof, error)
 }
 
-// PreparationBinding retains bounded preparation across candidate changes.
-type PreparationBinding struct {
-	Round      int               `json:"round"`
-	Unit       workflowstate.Ref `json:"unit"`
-	State      string            `json:"state"`
-	SourceHash string            `json:"source_hash"`
-	ResultRef  string            `json:"result_ref"`
-	ResultHash string            `json:"result_hash"`
-}
-
 // PrepareWorkflowSliceIntegration validates the configured combined result on
 // a separate owned lane. It preserves task proofs and the canonical PR identity.
 func (s *Store) PrepareWorkflowSliceIntegration(ctx context.Context, id string, provider PublicationGuardProvider, git PreparationGit) (candidate workflowstate.IntegrationCandidate, err error) {

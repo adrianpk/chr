@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -103,7 +104,7 @@ func workflowClosingIntegrateLater(t *testing.T, fixture *workflowIntegrationFix
 	workflowFinalizeFrontier(t, *fixture)
 }
 
-func checkWorkflowClosingSetAdvance(t *testing.T, fixture workflowIntegrationFixture, first, closed SetClosureResult, before []byte) {
+func checkWorkflowClosingSetAdvance(t *testing.T, fixture workflowIntegrationFixture, first, closed workflowcloseout.Result, before []byte) {
 	t.Helper()
 
 	run := workflowTestRead(t, fixture.store, fixture.run.ID)

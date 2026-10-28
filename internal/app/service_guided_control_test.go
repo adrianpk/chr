@@ -81,7 +81,7 @@ func assertGuidedNativeResume(t *testing.T, operations service, paused authoring
 	assertGuidedResumedAttempts(t, operations, before, resumed)
 }
 
-func assertGuidedResumedAttempts(t *testing.T, operations service, before workflowcore.Invocation, resumed authoringcore.Session) {
+func assertGuidedResumedAttempts(t *testing.T, operations service, before workflowstate.Invocation, resumed authoringcore.Session) {
 	t.Helper()
 
 	host := newGuidedWorkHost(t.Context())

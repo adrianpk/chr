@@ -62,7 +62,7 @@ func nativeDriftMoveTarget(t *testing.T, f *nativePreparationFixture, content st
 	f.f.base, f.provider.pr.BaseCommit, f.provider.target = base, base, base
 }
 
-func nativeDriftRetained(t *testing.T, f nativePreparationFixture, before Invocation, fresh workflowstate.IntegrationCandidate) {
+func nativeDriftRetained(t *testing.T, f nativePreparationFixture, before workflowstate.Invocation, fresh workflowstate.IntegrationCandidate) {
 	t.Helper()
 
 	store, id := f.f.store, f.f.run.ID

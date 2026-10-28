@@ -51,7 +51,7 @@ func workflowTestExecuteSlice(t *testing.T, store *Store, id, worker string) Sli
 	return candidate
 }
 
-func workflowTestValidatedSlice(t *testing.T, store *Store, hierarchy MaterializationResult, id string) Invocation {
+func workflowTestValidatedSlice(t *testing.T, store *Store, hierarchy MaterializationResult, id string) workflowstate.Invocation {
 	t.Helper()
 
 	run, err := store.ReadWorkflow(t.Context(), id)
@@ -95,7 +95,7 @@ func TestWorkflowSliceAggregate(t *testing.T) {
 	}
 }
 
-func checkWorkflowAggregateAttempt(t *testing.T, run Invocation) {
+func checkWorkflowAggregateAttempt(t *testing.T, run workflowstate.Invocation) {
 	t.Helper()
 
 	if run.Status != workflowstate.InvocationWaitingIntegration || len(run.Attempts) != 4 || run.Attempts[3].Purpose != workflowSliceValidationPurpose || run.CandidateRef == "" {
@@ -111,7 +111,7 @@ func TestWorkflowSlicePrefix(t *testing.T) {
 	first := workflowTestStart(t, store, request)
 	proof := workflowTestExecute(t, store, first.Invocation.ID, "worker")
 
-	if _, err := store.ValidateWorkflowSlice(t.Context(), first.Invocation.ID); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ValidateWorkflowSlice(t.Context(), first.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("exact grouped task created an aggregate candidate")
 	}
 
@@ -154,7 +154,7 @@ func TestWorkflowSliceRetry(t *testing.T) {
 	}
 }
 
-func checkWorkflowAggregateFailure(t *testing.T, run Invocation) {
+func checkWorkflowAggregateFailure(t *testing.T, run workflowstate.Invocation) {
 	t.Helper()
 
 	if run.Status != workflowstate.InvocationPaused || run.CandidateRef != "" || len(run.Attempts) != 4 || run.Attempts[3].ResultRef == "" {

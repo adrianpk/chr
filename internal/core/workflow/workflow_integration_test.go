@@ -13,13 +13,13 @@ import (
 type workflowIntegrationFixture struct {
 	store                               *Store
 	hierarchy                           MaterializationResult
-	run                                 Invocation
+	run                                 workflowstate.Invocation
 	provider                            *workflowPRProviderFixture
 	git                                 OSWorkflowIntegrationGit
 	actor, remote, base, result, target string
 }
 
-func workflowTestRead(t *testing.T, store *Store, id string) Invocation {
+func workflowTestRead(t *testing.T, store *Store, id string) workflowstate.Invocation {
 	t.Helper()
 
 	run, err := store.ReadWorkflow(t.Context(), id)
@@ -50,7 +50,7 @@ func workflowDeliveryPolicyFixture(t *testing.T, method, extent string, policy w
 	return workflowFinishDeliveryFixture(t, method, store, hierarchy, run, provider)
 }
 
-func workflowFinishDeliveryFixture(t *testing.T, method string, store *Store, hierarchy MaterializationResult, run Invocation, provider *workflowPRProviderFixture) workflowIntegrationFixture {
+func workflowFinishDeliveryFixture(t *testing.T, method string, store *Store, hierarchy MaterializationResult, run workflowstate.Invocation, provider *workflowPRProviderFixture) workflowIntegrationFixture {
 	t.Helper()
 	workflowPREnsure(t, store, run.ID, provider)
 

@@ -69,7 +69,7 @@ func checkWorkflowReopeningClosure(t *testing.T, store *Store, changed Materiali
 	}
 }
 
-func checkWorkflowReopeningTerminal(t *testing.T, store *Store, request StartRequest, terminal Invocation, before []byte) {
+func checkWorkflowReopeningTerminal(t *testing.T, store *Store, request StartRequest, terminal workflowstate.Invocation, before []byte) {
 	t.Helper()
 
 	if current, err := store.ReconcileWorkflowMembership(t.Context(), terminal.ID); err != nil || current.Revision != terminal.Revision || len(current.Members) != 6 {

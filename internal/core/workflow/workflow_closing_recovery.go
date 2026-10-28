@@ -44,9 +44,9 @@ func (s *Store) reconcileWorkflowClosing(ctx context.Context, set workflowstate.
 		return set, s.retainWorkflowClosingControlNoop(ctx, control)
 	}
 
-	attempt := Attempt{ID: workflowClosingAttemptID(set, state.Generation), OwnerProcess: &state.Owner, LeaseUntil: state.LeaseUntil, Processes: state.Processes}
+	attempt := workflowstate.Attempt{ID: workflowClosingAttemptID(set, state.Generation), OwnerProcess: &state.Owner, LeaseUntil: state.LeaseUntil, Processes: state.Processes}
 	if state.OwnerRoot != s.layout.Root() {
-		return set, ErrWorkflowOwned
+		return set, workflowstate.ErrOwned
 	}
 
 	if err := errors.Join(workflowRecoverableOwner(attempt), workflowAttemptQuiescent(attempt)); err != nil {
@@ -59,7 +59,7 @@ func (s *Store) reconcileWorkflowClosing(ctx context.Context, set workflowstate.
 	}
 	defer func() { err = errors.Join(err, reservation.releaseReservation()) }()
 
-	run := workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: workflowClosingOwnerID(set)}, InvocationExecution: InvocationExecution{Attempts: []Attempt{attempt}}}}
+	run := workflowInvocationFile{Invocation: workflowstate.Invocation{Identity: workflowstate.Identity{ID: workflowClosingOwnerID(set)}, InvocationExecution: workflowstate.InvocationExecution{Attempts: []workflowstate.Attempt{attempt}}}}
 
 	locks, err := s.recoveredWorkflowLocks(ctx, run)
 	if err != nil {

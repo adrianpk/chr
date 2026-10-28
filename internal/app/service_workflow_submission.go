@@ -54,7 +54,7 @@ func (s service) ReadWorkflowSubmission(ctx context.Context, id string) (workflo
 type workflowSubmissionDependencies struct {
 	Store      *workflowcore.Store
 	Provider   workflowcore.PublicationProvider
-	Invocation workflowcore.Invocation
+	Invocation workflowstate.Invocation
 }
 
 func (s service) workflowSubmissionDependencies(ctx context.Context, id string) (workflowSubmissionDependencies, error) {
@@ -63,12 +63,12 @@ func (s service) workflowSubmissionDependencies(ctx context.Context, id string) 
 	store, guarded := preparationDependencies.Store, preparationDependencies.Provider
 
 	if err != nil {
-		return workflowSubmissionDependencies{Store: nil, Provider: nil, Invocation: workflowcore.Invocation{}}, err
+		return workflowSubmissionDependencies{Store: nil, Provider: nil, Invocation: workflowstate.Invocation{}}, err
 	}
 
 	provider, ok := guarded.(workflowcore.PublicationProvider)
 	if !ok {
-		return workflowSubmissionDependencies{Store: nil, Provider: nil, Invocation: workflowcore.Invocation{}}, fmt.Errorf("%w: configured provider has no durable publication contract", workflowstate.ErrAtomicGuard)
+		return workflowSubmissionDependencies{Store: nil, Provider: nil, Invocation: workflowstate.Invocation{}}, fmt.Errorf("%w: configured provider has no durable publication contract", workflowstate.ErrAtomicGuard)
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)

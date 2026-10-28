@@ -25,7 +25,7 @@ func (s *Store) retainWorkflowNativeTargetDrift(id string) error {
 	}
 
 	if run.StopIntent != "" || run.Status != workflowstate.InvocationPaused || run.ResumeStatus != workflowstate.InvocationWaitingIntegration {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	run.Status, run.ResumeStatus, run.Outcome = workflowstate.InvocationWaitingIntegration, workflowstate.InvocationUnspecified, "target_changed"

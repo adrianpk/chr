@@ -128,12 +128,12 @@ func TestWorkflowTaskCumulative(t *testing.T) {
 		t.Fatal("slice did not stop at the integration barrier")
 	}
 
-	if _, err := store.ClaimWorkflow(t.Context(), next.Invocation.ID); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ClaimWorkflow(t.Context(), next.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("integration barrier admitted another claim")
 	}
 }
 
-func workflowCumulativeMatches(run Invocation, path, first, second string) bool {
+func workflowCumulativeMatches(run workflowstate.Invocation, path, first, second string) bool {
 	return run.Cursor == 2 && len(run.Attempts) == 1 && run.Lane.Worktree == path && run.Attempts[0].Lane.HeadCommit == first && run.Lane.HeadCommit == second
 }
 
@@ -200,7 +200,7 @@ func checkWorkflowTaskFailure(t *testing.T, store *Store, task workflowstate.Rec
 	checkWorkflowFailedAttempt(t, store, run)
 }
 
-func checkWorkflowFailedAttempt(t *testing.T, store *Store, run Invocation) {
+func checkWorkflowFailedAttempt(t *testing.T, store *Store, run workflowstate.Invocation) {
 	t.Helper()
 
 	if run.Status != workflowstate.InvocationPaused || run.Attempts[0].Outcome != "failed" || run.Attempts[0].ResultRef == "" {

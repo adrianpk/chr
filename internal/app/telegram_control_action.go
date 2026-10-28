@@ -127,7 +127,7 @@ func (r telegramReceiver) finishControlAction(ctx context.Context, claim telegra
 }
 
 func telegramControlExpectedFailure(err error) bool {
-	for _, expected := range []error{workflowstate.ErrConflict, workflowcore.ErrWorkflowOwned, workflowcore.ErrWorkflowCapacity, workflowcore.ErrWorkflowStop, workflowcore.ErrWorkflowIntegrationBudget} {
+	for _, expected := range []error{workflowstate.ErrConflict, workflowstate.ErrOwned, workflowcore.ErrWorkflowCapacity, workflowstate.ErrStop, workflowcore.ErrWorkflowIntegrationBudget} {
 		if errors.Is(err, expected) {
 			return true
 		}

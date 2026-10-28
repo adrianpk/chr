@@ -36,7 +36,7 @@ func (s *Store) executeWorkflowTask(ctx context.Context, claim *Claim, worker []
 	defer stop()
 
 	result, executionErr := s.runWorkflowTask(watched, claim, prepared)
-	if errors.Is(executionErr, ErrWorkflowOwned) {
+	if errors.Is(executionErr, workflowstate.ErrOwned) {
 		return result, executionErr
 	}
 
@@ -89,14 +89,14 @@ func workflowFailureText(err error) string {
 
 func beginWorkflowClaimExecution(claim *Claim) error {
 	if claim == nil || claim.store == nil || claim.execution == nil {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	claim.execution.Lock()
 	defer claim.execution.Unlock()
 
 	if !workflowClaimQuiescent(claim) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	claim.execution.running = true

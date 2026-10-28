@@ -4,6 +4,7 @@ import (
 	"context"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AdvanceWorkflowSliceIntegration reconciles delivery before guarded publication.
@@ -32,7 +33,7 @@ func (s service) AdvanceWorkflowSliceIntegration(ctx context.Context, id string,
 	return store.AdvanceWorkflowSliceIntegration(ctx, id, ports)
 }
 
-func bindWorkflowNativePublicationPorts(ports *workflowcore.PublicationPorts, run workflowcore.Invocation) {
+func bindWorkflowNativePublicationPorts(ports *workflowcore.PublicationPorts, run workflowstate.Invocation) {
 	ports.NativePublisher = workflowcore.NewWorkflowGitPublisher(run.Selection.Target.Repository, run.Selection.Target.Repository)
 	if publisher, ok := ports.Provider.(workflowcore.GitPublisher); ok {
 		ports.NativePublisher = publisher

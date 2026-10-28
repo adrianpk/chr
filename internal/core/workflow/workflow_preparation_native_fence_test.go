@@ -47,7 +47,7 @@ func nativePreparationFence(t *testing.T, change string) {
 		t.Fatal(err)
 	}
 
-	if err := <-done; !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, ErrWorkflowOwned) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("stale gate succeeded", err)
 	}
 

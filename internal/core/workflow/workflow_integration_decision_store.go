@@ -239,7 +239,7 @@ func (s *Store) guardWorkflowDecisionTransition(ctx context.Context, run workflo
 	}
 
 	if record.State != "resolved" && entry.ClaimGeneration == record.Input.ClaimGeneration {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return nil

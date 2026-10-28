@@ -25,7 +25,7 @@ func validateWorkflowSubmissionBinding(run workflowInvocationFile) error {
 	return nil
 }
 
-func validWorkflowSubmissionProjection(b SubmissionBinding) bool {
+func validWorkflowSubmissionProjection(b workflowstate.SubmissionBinding) bool {
 	return len(b.JournalHash) == 64 && len(b.TargetKey) == 64 && b.ID != "" && b.Attempt >= 1 && b.Attempt <= 10 && workflowforge.ValidSubmissionState(b.State) && (!b.ExternalDelivery || b.State == workflowstate.SubmissionConfirmed)
 }
 
@@ -34,7 +34,7 @@ func validateWorkflowSubmissionJournal(journal workflowSubmissionJournal) error 
 		return workflowstate.ErrConflict
 	}
 
-	run := workflowInvocationFile{OwnerRoot: journal.OwnerRoot, Invocation: Invocation{Identity: workflowstate.Identity{ID: journal.InvocationID, Namespace: journal.Namespace}, InvocationExecution: InvocationExecution{Lane: &workflowstate.Lane{Unit: journal.Unit}}}}
+	run := workflowInvocationFile{OwnerRoot: journal.OwnerRoot, Invocation: workflowstate.Invocation{Identity: workflowstate.Identity{ID: journal.InvocationID, Namespace: journal.Namespace}, InvocationExecution: workflowstate.InvocationExecution{Lane: &workflowstate.Lane{Unit: journal.Unit}}}}
 	if journal.Key != workflowSubmissionJournalKey(run) {
 		return workflowstate.ErrConflict
 	}

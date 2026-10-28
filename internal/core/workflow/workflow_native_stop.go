@@ -69,7 +69,7 @@ func (s *Store) finishWorkflowNativeStop(ctx context.Context, run *workflowInvoc
 		return err
 	}
 
-	if workflowInvocationTerminal(run.Status) || run.StopIntent == intent && run.Status == workflowstate.StopStatus(intent) {
+	if workflowstate.InvocationTerminal(run.Status) || run.StopIntent == intent && run.Status == workflowstate.StopStatus(intent) {
 		return s.retainWorkflowControlNoop(ctx, *run, control)
 	}
 

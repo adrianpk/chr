@@ -161,7 +161,7 @@ func (runner daemonWorkflowRunner) iteration(ctx context.Context, registry proje
 func daemonWorkflowWait(progress RetainedWorkProgress, failure error) bool {
 	stopped := progress.Status.StopIntent != "" && (progress.Status.Status == "paused" || progress.Status.Status == "cancelled")
 
-	return errors.Is(failure, workflowcore.ErrWorkflowOwned) || errors.Is(failure, workflowcore.ErrWorkflowCapacity) || errors.Is(failure, workflowstate.ErrConflict) || stopped
+	return errors.Is(failure, workflowstate.ErrOwned) || errors.Is(failure, workflowcore.ErrWorkflowCapacity) || errors.Is(failure, workflowstate.ErrConflict) || stopped
 }
 
 func (runner daemonWorkflowRunner) progress(project string, progress RetainedWorkProgress, failure error) error {

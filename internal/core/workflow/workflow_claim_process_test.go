@@ -37,7 +37,7 @@ func TestWorkflowClaimProcess(t *testing.T) {
 	configureWorkflowClaimCrash(t, store)
 
 	claim, err := store.ClaimWorkflow(t.Context(), os.Getenv("CHR_CLAIM_ID"))
-	result := workflowClaimProcessResult{Claimed: err == nil, Owned: errors.Is(err, ErrWorkflowOwned) || errors.Is(err, ErrWorkflowCapacity)}
+	result := workflowClaimProcessResult{Claimed: err == nil, Owned: errors.Is(err, workflowstate.ErrOwned) || errors.Is(err, ErrWorkflowCapacity)}
 
 	writeWorkflowClaimProcessResult(t, result)
 
@@ -224,14 +224,14 @@ func TestWorkflowClaimJournal(t *testing.T) {
 
 			checkRecoveredWorkflowClaim(t, store, hierarchy.Tasks[0].Path, recovered)
 
-			if _, err := store.ClaimWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, ErrWorkflowOwned) {
+			if _, err := store.ClaimWorkflow(t.Context(), run.Invocation.ID); !errors.Is(err, workflowstate.ErrOwned) {
 				t.Fatal("unreconciled crash admitted another worker")
 			}
 		})
 	}
 }
 
-func checkRecoveredWorkflowClaim(t *testing.T, store *Store, path string, recovered Invocation) {
+func checkRecoveredWorkflowClaim(t *testing.T, store *Store, path string, recovered workflowstate.Invocation) {
 	t.Helper()
 
 	record, err := store.Read(t.Context(), path)

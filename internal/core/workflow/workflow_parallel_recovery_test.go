@@ -41,7 +41,7 @@ func TestWorkflowParallelExpiredWorker(t *testing.T) {
 func assertWorkflowLiveRecoveryBlocked(t *testing.T, store *Store, id string) {
 	t.Helper()
 
-	if _, err := store.ReconcileWorkflow(t.Context(), id); !errors.Is(err, ErrWorkflowOwned) && !errors.Is(err, ErrWorkflowCapacity) {
+	if _, err := store.ReconcileWorkflow(t.Context(), id); !errors.Is(err, workflowstate.ErrOwned) && !errors.Is(err, ErrWorkflowCapacity) {
 		t.Fatal("expired live group was recovered", err)
 	}
 }
@@ -72,7 +72,7 @@ func TestWorkflowParallelReplacement(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := stores[0].CheckpointWorkflow(t.Context(), old); !errors.Is(err, ErrWorkflowOwned) {
+	if err := stores[0].CheckpointWorkflow(t.Context(), old); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("old owner changed the replacement checkpoint", err)
 	}
 

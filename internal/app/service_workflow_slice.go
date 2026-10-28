@@ -4,6 +4,7 @@ import (
 	"context"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ExecuteWorkflowSlice executes the remaining ordered tasks and aggregate gate.
@@ -37,10 +38,10 @@ func (s service) ReadWorkflowSliceCandidate(ctx context.Context, id string) (wor
 }
 
 // RepairWorkflowSlice invalidates affected cumulative evidence before a retry.
-func (s service) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (workflowcore.Invocation, error) {
+func (s service) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (workflowstate.Invocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	return store.RepairWorkflowSlice(ctx, id, taskKey)

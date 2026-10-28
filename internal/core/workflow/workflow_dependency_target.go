@@ -11,23 +11,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// DependencyTarget binds a resumed independent cursor to canonical
-// descendant history and the immutable prerequisite receipts observed there.
-type DependencyTarget struct {
-	Schema       string                      `json:"schema"`
-	InvocationID string                      `json:"invocation_id"`
-	Cursor       int                         `json:"cursor"`
-	TicketKey    string                      `json:"ticket_key"`
-	Previous     workflowstate.PreviewTarget `json:"previous_target"`
-	Target       workflowstate.PreviewTarget `json:"target"`
-	Branch       string                      `json:"branch"`
-	Blocker      Blocker                     `json:"blocker"`
-	Receipts     map[string]string           `json:"receipt_hashes"`
-	ConfirmedAt  time.Time                   `json:"confirmed_at"`
-	EvidenceRef  string                      `json:"evidence_ref,omitempty"`
-	EvidenceHash string                      `json:"evidence_hash,omitempty"`
-}
-
 func (s *Store) resumeWorkflowDependencyTarget(ctx context.Context, run *workflowInvocationFile, ports ResumePorts) ([]workflowstate.FileChange, error) {
 	if !workflowDependencyTargetReady(*run, ports) {
 		return nil, workflowstate.ErrObservationRequired
@@ -50,7 +33,7 @@ func (s *Store) resumeWorkflowDependencyTarget(ctx context.Context, run *workflo
 		return nil, err
 	}
 
-	proof := DependencyTarget{Schema: "chr-dependency-target/v1", InvocationID: run.ID, Cursor: run.Cursor, TicketKey: run.Members[run.Cursor].Admission.Key, Previous: run.ExecutionSelection().Target, Target: target, Branch: ports.TargetBranch, Blocker: *run.Blocker, Receipts: receipts, ConfirmedAt: time.Now().UTC()}
+	proof := workflowstate.DependencyTarget{Schema: "chr-dependency-target/v1", InvocationID: run.ID, Cursor: run.Cursor, TicketKey: run.Members[run.Cursor].Admission.Key, Previous: run.ExecutionSelection().Target, Target: target, Branch: ports.TargetBranch, Blocker: *run.Blocker, Receipts: receipts, ConfirmedAt: time.Now().UTC()}
 
 	data, err := encodeWorkflowDependencyTarget(proof)
 	if err != nil {
@@ -152,7 +135,7 @@ func workflowDependencyTargetPath(id string, sequence int) string {
 	return fmt.Sprintf("run/%s/extension/chr/dependency-target/%04d.json", id, sequence)
 }
 
-func encodeWorkflowDependencyTarget(proof DependencyTarget) ([]byte, error) {
+func encodeWorkflowDependencyTarget(proof workflowstate.DependencyTarget) ([]byte, error) {
 	proof.EvidenceRef, proof.EvidenceHash = "", ""
 
 	data, err := json.MarshalIndent(proof, "", "  ")

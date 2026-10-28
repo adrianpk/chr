@@ -76,7 +76,7 @@ func testWorkflowCapacityStoppedWait(t *testing.T, intent string) {
 	}
 
 	if intent == "cancel" {
-		if _, err := stores[1].ClaimWorkflow(t.Context(), runs[1].ID); !errors.Is(err, ErrWorkflowOwned) {
+		if _, err := stores[1].ClaimWorkflow(t.Context(), runs[1].ID); !errors.Is(err, workflowstate.ErrOwned) {
 			t.Fatal("cancelled wait resumed", err)
 		}
 

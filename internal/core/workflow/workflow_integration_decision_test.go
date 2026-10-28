@@ -76,7 +76,7 @@ func TestNativeDecisionWait(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := store.TransitionWorkflowIntegration(t.Context(), nativeEntryTransition(t, store, entry, "merging")); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.TransitionWorkflowIntegration(t.Context(), nativeEntryTransition(t, store, entry, "merging")); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("silence resumed merger work", err)
 	}
 

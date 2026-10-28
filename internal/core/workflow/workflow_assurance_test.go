@@ -87,7 +87,7 @@ func checkWorkflowAssuranceBudgets(t *testing.T, store *Store, id string) {
 	}
 }
 
-func workflowAssuranceRun(t *testing.T, store *Store, id string, ports ContinuationPorts) Invocation {
+func workflowAssuranceRun(t *testing.T, store *Store, id string, ports ContinuationPorts) workflowstate.Invocation {
 	t.Helper()
 
 	for range 80 {
@@ -109,10 +109,10 @@ func workflowAssuranceRun(t *testing.T, store *Store, id string, ports Continuat
 
 	t.Fatal("composed workflow exceeded eighty bounded calls", workflowTestRead(t, store, id))
 
-	return Invocation{}
+	return workflowstate.Invocation{}
 }
 
-func checkWorkflowAssuranceDelivery(t *testing.T, store *Store, run Invocation, provider *workflowAssuranceProvider, keys []string, publications int) {
+func checkWorkflowAssuranceDelivery(t *testing.T, store *Store, run workflowstate.Invocation, provider *workflowAssuranceProvider, keys []string, publications int) {
 	t.Helper()
 
 	var actual []string
@@ -133,7 +133,7 @@ func checkWorkflowAssuranceDelivery(t *testing.T, store *Store, run Invocation, 
 	checkWorkflowAssuranceMembers(t, store, run, provider)
 }
 
-func checkWorkflowAssuranceMembers(t *testing.T, store *Store, run Invocation, provider *workflowAssuranceProvider) {
+func checkWorkflowAssuranceMembers(t *testing.T, store *Store, run workflowstate.Invocation, provider *workflowAssuranceProvider) {
 	t.Helper()
 
 	for _, member := range run.Members {
@@ -148,7 +148,7 @@ func checkWorkflowAssuranceMembers(t *testing.T, store *Store, run Invocation, p
 	}
 }
 
-func checkWorkflowAssuranceClosure(t *testing.T, store *Store, hierarchy MaterializationResult, run Invocation, path string) {
+func checkWorkflowAssuranceClosure(t *testing.T, store *Store, hierarchy MaterializationResult, run workflowstate.Invocation, path string) {
 	t.Helper()
 
 	set, err := store.Read(t.Context(), hierarchy.Set.Path)

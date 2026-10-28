@@ -50,7 +50,7 @@ func (s *Store) workflowClosingControlFiles(ctx context.Context, claim *workflow
 	}
 
 	files, err := control.files(ctx, run.Revision+1)
-	if err != nil || !workflowInvocationTerminal(run.Status) {
+	if err != nil || !workflowstate.InvocationTerminal(run.Status) {
 		return files, err
 	}
 

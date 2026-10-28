@@ -148,7 +148,7 @@ func validateWorkflowPreparationResult(run workflowInvocationFile, candidate wor
 	return workflowstate.ErrConflict
 }
 
-func workflowPreparationAttemptMatches(attempt Attempt, result workflowstate.TaskResult, hash string) bool {
+func workflowPreparationAttemptMatches(attempt workflowstate.Attempt, result workflowstate.TaskResult, hash string) bool {
 	return attempt.ID == result.AttemptID && attempt.Purpose == workflowIntegrationValidationPurpose && attempt.Outcome == "prepared" && attempt.ResultHash == hash && attempt.InputRef == result.InputRef && attempt.InputHash == result.InputHash
 }
 

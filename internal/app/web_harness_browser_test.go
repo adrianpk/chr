@@ -174,7 +174,7 @@ func webHarnessBrowserCancel(t *testing.T, browser *webWorkflowBrowser, operatio
 	}
 }
 
-func webHarnessCheckRetained(t *testing.T, operations service, before workflowcore.Invocation) {
+func webHarnessCheckRetained(t *testing.T, operations service, before workflowstate.Invocation) {
 	t.Helper()
 
 	after, err := operations.ReadWorkflow(t.Context(), before.ID)

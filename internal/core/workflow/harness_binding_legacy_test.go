@@ -50,7 +50,7 @@ func TestHarnessBindingLegacy(t *testing.T) {
 	workflowTestExecute(t, store, current.ID, "worker")
 }
 
-func checkHarnessBindingLegacyHash(t *testing.T, run Invocation) {
+func checkHarnessBindingLegacyHash(t *testing.T, run workflowstate.Invocation) {
 	t.Helper()
 	// Field order and tags are the pre-binding StartRequest contract.
 	legacy := struct {

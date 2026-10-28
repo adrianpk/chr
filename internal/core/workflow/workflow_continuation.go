@@ -29,7 +29,7 @@ type ContinuationPorts struct {
 
 // ContinuationProgress reports accepted steps and the retained barrier.
 type ContinuationProgress struct {
-	Invocation Invocation
+	Invocation workflowstate.Invocation
 	Steps      int
 	Reason     string
 }
@@ -61,7 +61,7 @@ func (s *Store) ContinueWorkflow(ctx context.Context, id string, request Continu
 	return s.finishWorkflowContinuation(ctx, id, step, err)
 }
 
-func workflowContinuationLimit(run Invocation, requested int) (int, error) {
+func workflowContinuationLimit(run workflowstate.Invocation, requested int) (int, error) {
 	if run.Continuation != nil && run.Continuation.Sequence >= workflowstate.RecordLimit {
 		return 0, fmt.Errorf("continuation checkpoint history exhausted")
 	}
@@ -97,7 +97,7 @@ func (s *Store) finishWorkflowContinuation(ctx context.Context, id string, step 
 		reason = barrier
 	}
 
-	if !workflowInvocationTerminal(run.Status) {
+	if !workflowstate.InvocationTerminal(run.Status) {
 		run, err = s.retainWorkflowContinuation(cleanup, run, steps, reason)
 	}
 

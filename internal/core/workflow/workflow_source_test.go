@@ -41,7 +41,7 @@ func TestWorkflowSource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := store.PublishWorkflowSource(t.Context(), run.ID, publisher); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.PublishWorkflowSource(t.Context(), run.ID, publisher); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("paused source performed IO", err)
 	}
 }
@@ -103,7 +103,7 @@ func checkWorkflowSourceTarget(t *testing.T, store *Store, candidate SliceCandid
 	return target
 }
 
-func workflowSourceCandidate(t *testing.T) (*Store, StartRequest, Invocation, SliceCandidate) {
+func workflowSourceCandidate(t *testing.T) (*Store, StartRequest, workflowstate.Invocation, SliceCandidate) {
 	t.Helper()
 
 	store, _, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("test -f result.txt"))

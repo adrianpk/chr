@@ -47,13 +47,13 @@ func (s *Store) admitWorkflowLooseLater(ctx context.Context, run *workflowInvoca
 	return nil
 }
 
-func workflowLooseLaterMembers(run workflowInvocationFile, selection workflowSelection) []PreviewMember {
+func workflowLooseLaterMembers(run workflowInvocationFile, selection workflowSelection) []workflowstate.PreviewMember {
 	known := map[string]bool{}
 	for _, member := range run.Members {
 		known[member.Admission.Key] = true
 	}
 
-	later := []PreviewMember{}
+	later := []workflowstate.PreviewMember{}
 
 	for _, ticket := range selection.tickets {
 		record, prepared := selection.records[ticket.Key]
@@ -69,8 +69,8 @@ func workflowLooseLaterMembers(run workflowInvocationFile, selection workflowSel
 	return later
 }
 
-func workflowLooseAdmissions(members []Member) []PreviewMember {
-	result := make([]PreviewMember, 0, len(members))
+func workflowLooseAdmissions(members []workflowstate.Member) []workflowstate.PreviewMember {
+	result := make([]workflowstate.PreviewMember, 0, len(members))
 	for _, member := range members {
 		result = append(result, member.Admission)
 	}

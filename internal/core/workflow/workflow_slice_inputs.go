@@ -42,7 +42,7 @@ func (s *Store) readWorkflowSliceMembership(ctx context.Context, run workflowInv
 
 func (s *Store) readWorkflowSliceMembershipPrepared(ctx context.Context, run workflowInvocationFile, prepare func(*Store) error) (workflowSliceObservation, error) {
 	if run.Lane == nil || run.Cursor < 1 {
-		return workflowSliceObservation{}, ErrWorkflowOwned
+		return workflowSliceObservation{}, workflowstate.ErrOwned
 	}
 
 	if err := s.checkWorkflowInputsPrepared(ctx, run, prepare); err != nil {
@@ -54,7 +54,7 @@ func (s *Store) readWorkflowSliceMembershipPrepared(ctx context.Context, run wor
 	}
 
 	if run.Lane.Unit.Kind != "slice" || run.Selection.Selector.Extent == "ticket" {
-		return workflowSliceObservation{}, ErrWorkflowOwned
+		return workflowSliceObservation{}, workflowstate.ErrOwned
 	}
 
 	return s.readWorkflowAggregateMembership(ctx, run)
@@ -130,7 +130,7 @@ func (s *Store) workflowSliceInput(ctx context.Context, run workflowInvocationFi
 		input.Slice.Tasks = append(input.Slice.Tasks, proof)
 		input.EvidenceHashes[proof.EvidenceRef] = proof.EvidenceHash
 		input.EvidenceHashes[proof.InputRef] = proof.InputHash
-		input.Prerequisites = append(input.Prerequisites, InputImage{Path: task.Path, Revision: task.Revision, SourceHash: task.SourceHash})
+		input.Prerequisites = append(input.Prerequisites, workflowstate.InputImage{Path: task.Path, Revision: task.Revision, SourceHash: task.SourceHash})
 	}
 
 	return input, nil

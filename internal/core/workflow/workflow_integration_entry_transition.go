@@ -280,7 +280,7 @@ func projectWorkflowIntegrationPhase(run *workflowInvocationFile, entry Integrat
 		run.Status = workflowstate.InvocationWaitingReview
 	case IntegrationBlocked:
 		run.Status = workflowstate.InvocationBlocked
-		run.Blocker = &Blocker{Dependency: entry.Unit, Reason: entry.Blocker.Reason, NextActionOwner: "operator"}
+		run.Blocker = &workflowstate.Blocker{Dependency: entry.Unit, Reason: entry.Blocker.Reason, NextActionOwner: "operator"}
 	case IntegrationPaused, "cancelled":
 		run.Status = workflowstate.InvocationStatus(entry.State)
 	case IntegrationIntegrated:

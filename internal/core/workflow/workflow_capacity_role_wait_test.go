@@ -47,7 +47,7 @@ func testWorkflowCapacityRoleWait(t *testing.T, role string) {
 	}
 }
 
-func assertWorkflowRoleWait(t *testing.T, before, waiting Invocation) {
+func assertWorkflowRoleWait(t *testing.T, before, waiting workflowstate.Invocation) {
 	t.Helper()
 
 	if waiting.Status != workflowstate.InvocationWaitingCapacity || waiting.CapacityResumeStatus != before.Status || len(waiting.Attempts) != len(before.Attempts) || waiting.CandidateRef != before.CandidateRef {

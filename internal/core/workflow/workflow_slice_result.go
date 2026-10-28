@@ -148,7 +148,7 @@ func workflowSliceCandidateMatchesContract(observation workflowSliceObservation,
 	return input.SetID == observation.set.ID && input.ContractRef == observation.descriptor.ContractRef && input.ContractHash == observation.descriptor.ContractHash
 }
 
-func workflowSliceCandidateMatchesAttempt(run workflowInvocationFile, candidate SliceCandidate, attempt Attempt) bool {
+func workflowSliceCandidateMatchesAttempt(run workflowInvocationFile, candidate SliceCandidate, attempt workflowstate.Attempt) bool {
 	return attempt.ID == candidate.ID && attempt.Purpose == workflowSliceValidationPurpose && attempt.Outcome == "validated" && attempt.ResultRef == run.CandidateRef && attempt.ResultHash == run.CandidateHash && attempt.InputHash == candidate.Result.InputHash && attempt.InputRef == candidate.Result.InputRef
 }
 

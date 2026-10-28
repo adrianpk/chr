@@ -45,7 +45,7 @@ func (s service) nativeAgentWorkTarget(config workspaceconfig.Config) (workflows
 }
 
 func (s service) observeNativeAgentWorkTarget(config workspaceconfig.Config, identity workflowstate.PreviewTarget) (workflowstate.PreviewTarget, error) {
-	run := workflowcore.Invocation{InvocationInput: workflowcore.InvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
+	run := workflowstate.Invocation{InvocationInput: workflowstate.InvocationInput{Selection: workflowstate.PreviewRequest{Target: identity}}}
 
 	observer, ok := s.workflowIntegrationObserver(run).(workflowcore.TargetGit)
 	if !ok {
@@ -102,7 +102,7 @@ func (s service) nativeAgentWorkStart(config workspaceconfig.Config, selection w
 	return s.StartWorkflow(s.ctx, request)
 }
 
-func retainedNativeAgentWorkRequest(request workflowcore.StartRequest, previous workflowcore.Invocation) (workflowcore.StartRequest, error) {
+func retainedNativeAgentWorkRequest(request workflowcore.StartRequest, previous workflowstate.Invocation) (workflowcore.StartRequest, error) {
 	if request.ReviewRestriction != "" && request.ReviewRestriction != previous.ReviewRestriction {
 		return request, fmt.Errorf("%w: retained invocation has a different review restriction", workflowstate.ErrConflict)
 	}
@@ -147,7 +147,7 @@ func (s service) startNativeAgentWork(config workspaceconfig.Config, selection w
 	return result, displayErr
 }
 
-func (s service) nativeAgentWorkResult(run workflowcore.Invocation) (AgentWorkResult, error) {
+func (s service) nativeAgentWorkResult(run workflowstate.Invocation) (AgentWorkResult, error) {
 	store, err := s.workflowStore()
 	if err != nil {
 		return AgentWorkResult{}, err

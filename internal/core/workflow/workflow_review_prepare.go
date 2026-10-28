@@ -87,7 +87,7 @@ func (s *Store) ensureWorkflowReviewInput(run *workflowInvocationFile, observati
 	}
 
 	if run.Review.State == workflowstate.ReviewRunning {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	if hash == run.Review.InputHash && run.Review.State != workflowstate.ReviewStale {
@@ -160,7 +160,7 @@ func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocation
 
 	record := observation.tasks[len(observation.tasks)-1]
 	if !workflowTaskClaimable(record.Task) {
-		return workflowClaimedReview{Claim: nil, Prepared: prepared}, ErrWorkflowOwned
+		return workflowClaimedReview{Claim: nil, Prepared: prepared}, workflowstate.ErrOwned
 	}
 
 	if err := s.beginWorkflowAttempt(run, &record, claim); err != nil {
@@ -197,7 +197,7 @@ func (s *Store) claimWorkflowReview(ctx context.Context, run *workflowInvocation
 
 func (s *Store) checkWorkflowReviewAdmission(ctx context.Context, run workflowInvocationFile) error {
 	if !slices.Contains([]workflowstate.InvocationStatus{workflowstate.InvocationWaitingReview, workflowstate.InvocationWaitingIntegration, workflowstate.InvocationBlocked}, run.Status) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return s.guardWorkflowPublicationWork(ctx, run)

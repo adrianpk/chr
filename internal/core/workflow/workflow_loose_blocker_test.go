@@ -77,7 +77,7 @@ func TestWorkflowLooseBlocker(t *testing.T) {
 func checkWorkflowLooseBlockedRetry(t *testing.T, f workflowIntegrationFixture, id string) {
 	t.Helper()
 
-	if _, err := f.store.ClaimWorkflow(t.Context(), id); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := f.store.ClaimWorkflow(t.Context(), id); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("dependency stop accepted a direct claim", err)
 	}
 

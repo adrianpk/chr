@@ -33,7 +33,7 @@ func (s *Store) AmendWorkflowSet(ctx context.Context, request SetAmendmentReques
 	}
 
 	err = s.withWorkflowPlanMutation(ctx, func(ctx context.Context) (lockErr error) {
-		reservation, readErr := s.reserveWorkflowRole(ctx, workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: "set-amendment"}}}, "set_amendment")
+		reservation, readErr := s.reserveWorkflowRole(ctx, workflowInvocationFile{Invocation: workflowstate.Invocation{Identity: workflowstate.Identity{ID: "set-amendment"}}}, "set_amendment")
 		if readErr != nil {
 			return readErr
 		}

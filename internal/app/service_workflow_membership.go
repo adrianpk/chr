@@ -5,14 +5,15 @@ import (
 	"fmt"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
 // ReconcileWorkflowMembership preserves the invocation's accepted admission policy.
-func (s service) ReconcileWorkflowMembership(ctx context.Context, id string) (workflowcore.Invocation, error) {
+func (s service) ReconcileWorkflowMembership(ctx context.Context, id string) (workflowstate.Invocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	return store.ReconcileWorkflowMembership(ctx, id)

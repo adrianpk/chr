@@ -117,7 +117,7 @@ func checkServiceWorkNativeDisplay(t *testing.T, result AgentWorkResult) {
 	}
 }
 
-func checkServiceWorkNativeAttachment(t *testing.T, operations service, run workflowcore.Invocation, provider *serviceWorkEntryProvider) {
+func checkServiceWorkNativeAttachment(t *testing.T, operations service, run workflowstate.Invocation, provider *serviceWorkEntryProvider) {
 	t.Helper()
 
 	if _, err := operations.StopWorkflow(t.Context(), run.ID, "pause"); err != nil {
@@ -213,7 +213,7 @@ func serviceWorkGroupedKey(t *testing.T, operations service) string {
 	return ""
 }
 
-func serviceWorkTaskAttempts(run workflowcore.Invocation) int {
+func serviceWorkTaskAttempts(run workflowstate.Invocation) int {
 	count := 0
 
 	for _, attempt := range run.Attempts {

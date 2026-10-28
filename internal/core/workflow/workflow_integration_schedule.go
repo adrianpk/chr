@@ -27,7 +27,7 @@ type IntegrationScheduleQuery struct {
 type IntegrationSelection struct {
 	Entry              IntegrationEntry
 	InvocationRevision uint64
-	Task               PreviewMember
+	Task               workflowstate.PreviewMember
 }
 
 // IntegrationSchedulePage reports queue order and bounded exclusions.

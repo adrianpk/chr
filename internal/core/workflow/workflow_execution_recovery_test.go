@@ -47,7 +47,7 @@ func TestWorkflowTaskRetry(t *testing.T) {
 	}
 }
 
-func workflowRepairHistoryMatches(run Invocation, generation uint64) bool {
+func workflowRepairHistoryMatches(run workflowstate.Invocation, generation uint64) bool {
 	return len(run.Attempts) == 2 && run.Attempts[0].Outcome == "failed" && run.Attempts[1].Generation == generation+1
 }
 

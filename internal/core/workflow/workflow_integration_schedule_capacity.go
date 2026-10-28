@@ -162,7 +162,7 @@ func (s *Store) workflowLegacyPreparedCount(runs []workflowInvocationFile, run w
 	count := 0
 
 	for _, peer := range runs {
-		if peer.Integration != nil || workflowInvocationTerminal(peer.Status) || peer.Preparation == nil {
+		if peer.Integration != nil || workflowstate.InvocationTerminal(peer.Status) || peer.Preparation == nil {
 			continue
 		}
 
@@ -199,7 +199,7 @@ func (s *Store) guardWorkflowIntegrationRoleOwner(run workflowInvocationFile) er
 	}
 
 	if run.StopIntent != "" || entry.StopIntent != "" || !slices.Contains([]IntegrationState{"queued", "preparing", "merging", "validating", "reviewing"}, entry.State) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return nil

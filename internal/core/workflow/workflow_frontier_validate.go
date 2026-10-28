@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -33,7 +34,7 @@ func validateWorkflowFrontier(run workflowInvocationFile) error {
 }
 
 func validateWorkflowExecutionTarget(run workflowInvocationFile) error {
-	if err := validateWorkflowInvocationClosures(run); err != nil {
+	if err := workflowcloseout.CheckInvocation(run.Invocation); err != nil {
 		return err
 	}
 
@@ -76,7 +77,7 @@ func workflowRetainedExecutionTarget(run workflowInvocationFile) *workflowstate.
 	return target
 }
 
-func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery UnitDelivery, previous int) error {
+func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery workflowstate.UnitDelivery, previous int) error {
 	if err := validateWorkflowUnitDeliveryIdentity(run, delivery, previous); err != nil {
 		return err
 	}
@@ -105,7 +106,7 @@ func validateWorkflowUnitDelivery(run workflowInvocationFile, delivery UnitDeliv
 	return workflowintegrate.CheckProof(query, delivery.Proof, workflowIntegrationRepairs{})
 }
 
-func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery UnitDelivery, previous int) error {
+func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery workflowstate.UnitDelivery, previous int) error {
 	if delivery.Schema != "chr-unit-frontier/v1" || delivery.InvocationID != run.ID || !validWorkflowFrontierUnit(run, delivery, previous) || delivery.Cursor <= previous || delivery.Cursor > run.Cursor || delivery.Cursor > len(run.Members) {
 		return workflowstate.ErrConflict
 	}
@@ -117,7 +118,7 @@ func validateWorkflowUnitDeliveryIdentity(run workflowInvocationFile, delivery U
 	return nil
 }
 
-func validWorkflowFrontierUnit(run workflowInvocationFile, delivery UnitDelivery, previous int) bool {
+func validWorkflowFrontierUnit(run workflowInvocationFile, delivery workflowstate.UnitDelivery, previous int) bool {
 	if delivery.Unit.Kind == "ticket" {
 		return run.Selection.Selector.Extent == "loose" && delivery.SetID == "" && delivery.Cursor == previous+1
 	}
@@ -125,7 +126,7 @@ func validWorkflowFrontierUnit(run workflowInvocationFile, delivery UnitDelivery
 	return delivery.Unit.Kind == "slice"
 }
 
-func validateWorkflowUnitDeliveryTarget(run workflowInvocationFile, delivery UnitDelivery) error {
+func validateWorkflowUnitDeliveryTarget(run workflowInvocationFile, delivery workflowstate.UnitDelivery) error {
 	if delivery.Target.Repository != run.Selection.Target.Repository || delivery.NextTarget.Repository != run.Selection.Target.Repository || delivery.NextTarget.Commit != delivery.Proof.ObservedTarget || !workflowstate.ValidCommitID(delivery.Target.Commit) {
 		return workflowstate.ErrConflict
 	}
@@ -133,7 +134,7 @@ func validateWorkflowUnitDeliveryTarget(run workflowInvocationFile, delivery Uni
 	return nil
 }
 
-func workflowDeliveredUnitView(run workflowInvocationFile, delivery UnitDelivery) workflowInvocationFile {
+func workflowDeliveredUnitView(run workflowInvocationFile, delivery workflowstate.UnitDelivery) workflowInvocationFile {
 	run.ExecutionTarget, run.Cursor, run.Lane = &delivery.Target, delivery.Cursor, &delivery.Lane
 	run.CandidateRef, run.CandidateHash, run.PullRequest = delivery.CandidateRef, delivery.CandidateHash, delivery.PullRequest
 	run.DeliveryProofRef, run.DeliveryProofHash = delivery.DeliveryProofRef, delivery.DeliveryProofHash
@@ -179,7 +180,7 @@ func (s *Store) checkWorkflowRetainedBoundaries(ctx context.Context, run workflo
 		return err
 	}
 
-	return s.checkWorkflowInvocationClosureEvidence(run)
+	return workflowcloseout.CheckInvocationEvidence(run.Closures, workflowClosingEvidence{store: s})
 }
 
 func (s *Store) checkWorkflowContinuationEvidence(ctx context.Context, run workflowInvocationFile) error {
@@ -216,7 +217,7 @@ func (s *Store) checkWorkflowContinuationEvidence(ctx context.Context, run workf
 	return nil
 }
 
-func workflowUnitEvidenceHashes(run workflowInvocationFile, delivery UnitDelivery) map[string]string {
+func workflowUnitEvidenceHashes(run workflowInvocationFile, delivery workflowstate.UnitDelivery) map[string]string {
 	refs := map[string]string{delivery.DeliveryRef: delivery.DeliveryHash, delivery.CandidateRef: delivery.CandidateHash, delivery.DeliveryProofRef: delivery.DeliveryProofHash, delivery.PullRequest.ObservationRef: delivery.PullRequest.ObservationHash}
 	for _, attempt := range run.Attempts {
 		if attempt.Lane == nil || attempt.Lane.Unit != delivery.Unit {

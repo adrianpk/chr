@@ -68,7 +68,7 @@ func (s *Store) answerWorkflowDecision(ctx context.Context, run workflowInvocati
 
 func (s *Store) checkWorkflowDecisionCurrent(ctx context.Context, run workflowInvocationFile, entry IntegrationEntry, record IntegrationDecisions, provider PullRequestProvider) error {
 	if run.StopIntent != "" || entry.StopIntent != "" {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	if err := checkWorkflowDecisionFence(run, entry, record); err != nil {

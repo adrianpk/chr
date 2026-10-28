@@ -103,7 +103,7 @@ func (s *Store) checkWorkflowGrantInputs(ctx context.Context, run workflowInvoca
 	}
 
 	if run.StopIntent == "cancel" {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	return nil

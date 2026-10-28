@@ -121,7 +121,7 @@ func workflowProcessMissing(err error) bool {
 	return errors.Is(err, os.ErrNotExist) || errors.Is(err, syscall.ESRCH)
 }
 
-func workflowAttemptQuiescent(attempt Attempt) error {
+func workflowAttemptQuiescent(attempt workflowstate.Attempt) error {
 	for _, process := range attempt.Processes {
 		alive, err := workflowProcessGroupAlive(process)
 		if err != nil {

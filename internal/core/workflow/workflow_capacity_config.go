@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -86,7 +87,7 @@ func guardWorkflowReadyQueue(runs []workflowInvocationFile, next workflowInvocat
 }
 
 func workflowUnfinishedLaneCount(run workflowInvocationFile) int {
-	if workflowInvocationTerminal(run.Status) {
+	if workflowstate.InvocationTerminal(run.Status) {
 		return 0
 	}
 
@@ -101,7 +102,7 @@ func workflowUnfinishedLaneCount(run workflowInvocationFile) int {
 		lanes[identity] = true
 	}
 	// A retained set closure is itself unfinished admission even with no tasks.
-	if len(lanes) == 0 && workflowInvocationNeedsClosing(run.Invocation) {
+	if len(lanes) == 0 && workflowcloseout.NeedsClosing(run.Invocation) {
 		return 1
 	}
 

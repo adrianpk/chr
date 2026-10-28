@@ -41,7 +41,7 @@ func (s *Store) registerWorkflowProcess(ctx context.Context, claim *Claim, prepa
 		}
 
 		if claimObservation.Run.StopIntent != "" {
-			return ErrWorkflowStop
+			return workflowstate.ErrStop
 		}
 
 		if readErr = checkWorkflowExecutionBinding(claimObservation.Run, claimObservation.Record, prepared); readErr != nil {
@@ -83,7 +83,7 @@ func (s *Store) finishWorkflowProcess(ctx context.Context, claim *Claim, index i
 
 		process := &attempt.Processes[index]
 		if !workflowProcessBindingMatches(*process, expected) {
-			return errors.Join(workflowstate.ErrConflict, ErrWorkflowOwned)
+			return errors.Join(workflowstate.ErrConflict, workflowstate.ErrOwned)
 		}
 
 		alive, err := workflowProcessGroupAlive(*process)
@@ -92,7 +92,7 @@ func (s *Store) finishWorkflowProcess(ctx context.Context, claim *Claim, index i
 		}
 
 		if alive {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		process.State, process.Result = workflowstate.ProcessStopped, &result

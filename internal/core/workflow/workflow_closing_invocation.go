@@ -2,70 +2,12 @@ package workflow
 
 import (
 	"context"
-	"fmt"
-	"path/filepath"
-	"slices"
 
 	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// InvocationClosure retains a confirmed set and its refreshed execution
-// base without changing earlier unit delivery images or admission identity.
-type InvocationClosure struct {
-	SetID   string                        `json:"set_id"`
-	Cursor  int                           `json:"cursor"`
-	Receipt workflowstate.ClosingEvidence `json:"receipt"`
-	Target  workflowstate.PreviewTarget   `json:"target"`
-}
-
-func workflowInvocationSetID(image InputImage) string {
-	return filepath.Base(filepath.Dir(image.Path))
-}
-
-func workflowNextClosingSet(run Invocation) string {
-	if len(run.Closures) >= len(run.SetImages) {
-		return ""
-	}
-
-	return workflowInvocationSetID(run.SetImages[len(run.Closures)])
-}
-
-func (s *Store) workflowClosingRunReady(ctx context.Context, run workflowInvocationFile, setID string) error {
-	if workflowClosingRunStopped(run, s.layout.Root()) {
-		return ErrWorkflowStop
-	}
-
-	if !workflowClosingRunFrontier(run, setID) {
-		return fmt.Errorf("%w: invocation must reach this set's closing frontier", ErrWorkflowOwned)
-	}
-
-	if run.Cursor < len(run.Members) && run.Members[run.Cursor].Admission.SetID == setID {
-		return fmt.Errorf("%w: selected set work remains", workflowstate.ErrConflict)
-	}
-
-	for _, attempt := range run.Attempts {
-		if slices.Contains([]string{"running", "checkpointed"}, attempt.Outcome) {
-			return ErrWorkflowOwned
-		}
-
-		if err := workflowAttemptQuiescent(attempt); err != nil {
-			return err
-		}
-	}
-
-	return s.checkWorkflowInputs(ctx, run)
-}
-
-func workflowClosingRunStopped(run workflowInvocationFile, root string) bool {
-	return workflowInvocationTerminal(run.Status) || run.StopIntent != "" || run.OwnerRoot != root || run.Status == workflowstate.InvocationPaused
-}
-
-func workflowClosingRunFrontier(run workflowInvocationFile, setID string) bool {
-	return run.Lane == nil && run.Submission == nil && run.Cursor == run.ConfirmedCursor && workflowNextClosingSet(run.Invocation) == setID
-}
-
-func (s *Store) workflowClosingInvocationFiles(claim *workflowClosingClaim, previous InputImage, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
+func (s *Store) workflowClosingInvocationFiles(claim *workflowClosingClaim, previous workflowstate.InputImage, files []workflowstate.FileChange) ([]workflowstate.FileChange, error) {
 	if claim.state.InvocationID == "" {
 		return files, nil
 	}
@@ -75,7 +17,7 @@ func (s *Store) workflowClosingInvocationFiles(claim *workflowClosingClaim, prev
 		return nil, err
 	}
 
-	if workflowInvocationTerminal(run.Status) && claim.state.Outcome != "completed" {
+	if workflowstate.InvocationTerminal(run.Status) && claim.state.Outcome != "completed" {
 		return files, nil
 	}
 
@@ -89,7 +31,7 @@ func (s *Store) workflowClosingInvocationFiles(claim *workflowClosingClaim, prev
 		}
 	}
 
-	projectWorkflowClosing(&run, claim)
+	workflowcloseout.ProjectInvocation(&run.Invocation, workflowcloseout.Projection{State: claim.state, SetID: claim.set.ID, Target: &claim.input.Target})
 
 	run.CapacityResumeStatus = workflowstate.InvocationUnspecified
 
@@ -105,9 +47,9 @@ func (s *Store) workflowClosingInvocationFiles(claim *workflowClosingClaim, prev
 	return append(files, change), err
 }
 
-func workflowClosingProjectionFence(run workflowInvocationFile, claim *workflowClosingClaim, previous InputImage, root string) error {
-	if run.OwnerRoot != root || !workflowClosingRunFrontier(run, claim.set.ID) {
-		return ErrWorkflowOwned
+func workflowClosingProjectionFence(run workflowInvocationFile, claim *workflowClosingClaim, previous workflowstate.InputImage, root string) error {
+	if run.OwnerRoot != root || !workflowcloseout.AtFrontier(run.Invocation, claim.set.ID) {
+		return workflowstate.ErrOwned
 	}
 
 	image := run.SetImages[len(run.Closures)]
@@ -116,61 +58,39 @@ func workflowClosingProjectionFence(run workflowInvocationFile, claim *workflowC
 	}
 
 	if run.ClosingSet != "" && run.ClosingSet != claim.set.ID {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	return nil
 }
 
-func projectWorkflowClosing(run *workflowInvocationFile, claim *workflowClosingClaim) {
-	run.ClosingSet = ""
-
-	run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "set_closure_required"
-	switch claim.state.Outcome {
-	case "running":
-		run.ClosingSet, run.Status, run.Outcome = claim.set.ID, workflowstate.InvocationRunning, "set_closing"
-	case "completed":
-		run.Closures = append(run.Closures, InvocationClosure{SetID: claim.set.ID, Cursor: run.Cursor, Receipt: claim.state.Result, Target: claim.input.Target})
-		run.ExecutionTarget = &claim.input.Target
-
-		run.Status, run.Outcome = workflowstate.InvocationPending, "set_closed"
-		if len(run.Closures) == len(run.SetImages) {
-			run.Status, run.Outcome = workflowstate.InvocationCompleted, "sets_closed"
-		} else if workflowInvocationNeedsClosing(run.Invocation) {
-			run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "set_closure_required"
-		}
-	default:
-		run.Outcome = claim.state.Outcome
-	}
-}
-
 // CloseWorkflowInvocationSet continues only the next frozen set's closing role.
-func (s *Store) CloseWorkflowInvocationSet(ctx context.Context, id, branch string, ports FrontierPorts) (SetClosureResult, error) {
+func (s *Store) CloseWorkflowInvocationSet(ctx context.Context, id, branch string, ports FrontierPorts) (workflowcloseout.Result, error) {
 	run, err := s.ReadWorkflow(ctx, id)
 	if err != nil {
-		return SetClosureResult{}, err
+		return workflowcloseout.Result{}, err
 	}
 
 	if run.ClosingSet != "" {
 		if _, err := s.ReconcileWorkflowClosing(ctx, run.SetImages[len(run.Closures)].Path); err != nil {
-			return SetClosureResult{}, err
+			return workflowcloseout.Result{}, err
 		}
 
 		run, err = s.ReadWorkflow(ctx, id)
 		if err != nil {
-			return SetClosureResult{}, err
+			return workflowcloseout.Result{}, err
 		}
 	}
 
-	if workflowNextClosingSet(run) == "" || workflowInvocationTerminal(run.Status) {
-		return SetClosureResult{}, ErrWorkflowStop
+	if workflowcloseout.NextSet(run) == "" || workflowstate.InvocationTerminal(run.Status) {
+		return workflowcloseout.Result{}, workflowstate.ErrStop
 	}
 
 	image := run.SetImages[len(run.Closures)]
 	if len(run.Deliveries) > 0 {
 		retained := run.Deliveries[len(run.Deliveries)-1].PullRequest.Request.BaseBranch
 		if branch != "" && branch != retained {
-			return SetClosureResult{}, workflowstate.ErrConflict
+			return workflowcloseout.Result{}, workflowstate.ErrConflict
 		}
 
 		branch = retained

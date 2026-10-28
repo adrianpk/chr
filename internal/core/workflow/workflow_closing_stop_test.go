@@ -99,7 +99,7 @@ func checkWorkflowClosingStopped(t *testing.T, store *Store, path, id, intent st
 		t.Fatal(err)
 	}
 
-	if err := workflowAttemptQuiescent(Attempt{Processes: state.Processes}); err != nil {
+	if err := workflowAttemptQuiescent(workflowstate.Attempt{Processes: state.Processes}); err != nil {
 		t.Fatal("stopped closing gate retained a descendant", err)
 	}
 

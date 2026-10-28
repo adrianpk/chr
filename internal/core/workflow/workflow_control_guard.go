@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func checkWorkflowRevision(run Invocation, expected []uint64) error {
+func checkWorkflowRevision(run workflowstate.Invocation, expected []uint64) error {
 	if len(expected) == 0 {
 		return nil
 	}
@@ -44,7 +44,7 @@ func (s *Store) checkWorkflowSelectionGuard(ctx context.Context, request StartRe
 	return nil
 }
 
-func (s *Store) acceptWorkflowContinuation(ctx context.Context, id string, expected uint64, checks ...AdmissionCheck) (result Invocation, err error) {
+func (s *Store) acceptWorkflowContinuation(ctx context.Context, id string, expected uint64, checks ...AdmissionCheck) (result workflowstate.Invocation, err error) {
 	if len(checks) > 1 {
 		return result, workflowstate.ErrConflict
 	}
@@ -64,7 +64,7 @@ func (s *Store) acceptWorkflowContinuation(ctx context.Context, id string, expec
 			return err
 		}
 
-		if workflowInvocationTerminal(invocationLocation.Run.Status) {
+		if workflowstate.InvocationTerminal(invocationLocation.Run.Status) {
 			result = invocationLocation.Run.Invocation
 
 			return nil
@@ -92,7 +92,7 @@ func (s *Store) acceptWorkflowContinuation(ctx context.Context, id string, expec
 	return result, err
 }
 
-func checkWorkflowResumeRevision(run Invocation, ports []ResumePorts) error {
+func checkWorkflowResumeRevision(run workflowstate.Invocation, ports []ResumePorts) error {
 	if len(ports) == 1 && ports[0].ExpectedRevision != 0 {
 		return checkWorkflowRevision(run, []uint64{ports[0].ExpectedRevision})
 	}

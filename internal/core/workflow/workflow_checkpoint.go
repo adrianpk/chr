@@ -65,7 +65,7 @@ func (s *Store) checkpointWorkflowAttempt(run workflowInvocationFile, record wor
 	return s.commitWorkflowClaim(run, record, append(extra, workflowstate.FileChange{Path: ref, After: data})...)
 }
 
-func (s *Store) retainWorkflowProcessOutputs(attempt *Attempt) error {
+func (s *Store) retainWorkflowProcessOutputs(attempt *workflowstate.Attempt) error {
 	for i := range attempt.Processes {
 		process := &attempt.Processes[i]
 		if err := s.hashWorkflowProcessOutput(process); err != nil {

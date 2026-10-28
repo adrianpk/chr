@@ -303,7 +303,7 @@ func checkWorkflowIntegrationUsage(before, now IntegrationUsage) error {
 	}
 
 	for _, old := range before.ReviewRepairs {
-		index := slices.IndexFunc(now.ReviewRepairs, func(current ReviewRepairBudget) bool { return current.Unit == old.Unit })
+		index := slices.IndexFunc(now.ReviewRepairs, func(current workflowstate.ReviewRepairBudget) bool { return current.Unit == old.Unit })
 		if index < 0 || now.ReviewRepairs[index].Consumed < old.Consumed {
 			return fmt.Errorf("%w: existing review repair consumption decreased", workflowstate.ErrConflict)
 		}

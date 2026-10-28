@@ -231,7 +231,7 @@ func guardWorkflowDomain(old, next workflowstate.Record) error {
 
 	if old.Task != nil && next.Task != nil {
 		if old.Task.AttemptID != "" {
-			return fmt.Errorf("%w: owned task requires a fenced operation", ErrWorkflowOwned)
+			return fmt.Errorf("%w: owned task requires a fenced operation", workflowstate.ErrOwned)
 		}
 
 		return guardWorkflowTaskChange(old.Task, next.Task)

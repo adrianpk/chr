@@ -108,25 +108,25 @@ func workflowPRContent() workflowstate.PullRequestContent {
 	return workflowstate.PullRequestContent{BaseBranch: "dev", Title: "Deliver approved slice", Body: "Deliver the aggregate candidate."}
 }
 
-func workflowPRFixture(t *testing.T) (*Store, MaterializationResult, Invocation, *workflowPRProviderFixture) {
+func workflowPRFixture(t *testing.T) (*Store, MaterializationResult, workflowstate.Invocation, *workflowPRProviderFixture) {
 	t.Helper()
 
 	return workflowPRFixtureFor(t, "slice")
 }
 
-func workflowPRFixtureFor(t *testing.T, extent string) (*Store, MaterializationResult, Invocation, *workflowPRProviderFixture) {
+func workflowPRFixtureFor(t *testing.T, extent string) (*Store, MaterializationResult, workflowstate.Invocation, *workflowPRProviderFixture) {
 	t.Helper()
 
 	return workflowPRPolicyFixture(t, extent, workflowstate.ExecutionPolicy{})
 }
 
-func workflowPRPolicyFixture(t *testing.T, extent string, policy workflowstate.ExecutionPolicy) (*Store, MaterializationResult, Invocation, *workflowPRProviderFixture) {
+func workflowPRPolicyFixture(t *testing.T, extent string, policy workflowstate.ExecutionPolicy) (*Store, MaterializationResult, workflowstate.Invocation, *workflowPRProviderFixture) {
 	t.Helper()
 
 	return workflowPRPlanFixture(t, extent, policy, workflowMaterializationFixture)
 }
 
-func workflowPRPlanFixture(t *testing.T, extent string, policy workflowstate.ExecutionPolicy, planFixture func(*testing.T) (*Store, MaterializationOptions)) (*Store, MaterializationResult, Invocation, *workflowPRProviderFixture) {
+func workflowPRPlanFixture(t *testing.T, extent string, policy workflowstate.ExecutionPolicy, planFixture func(*testing.T) (*Store, MaterializationOptions)) (*Store, MaterializationResult, workflowstate.Invocation, *workflowPRProviderFixture) {
 	t.Helper()
 
 	store, opts := planFixture(t)
@@ -230,7 +230,7 @@ func checkWorkflowPRBinding(t *testing.T, store *Store, hierarchy Materializatio
 	}
 }
 
-func checkWorkflowPRSet(t *testing.T, store *Store, path string, run Invocation) {
+func checkWorkflowPRSet(t *testing.T, store *Store, path string, run workflowstate.Invocation) {
 	t.Helper()
 
 	set, err := store.Read(t.Context(), path)
@@ -385,7 +385,7 @@ func checkWorkflowPRRepairSet(t *testing.T, store *Store, path, prURL string) {
 	}
 }
 
-func checkWorkflowPRRepairBinding(t *testing.T, store *Store, id string, before Invocation) {
+func checkWorkflowPRRepairBinding(t *testing.T, store *Store, id string, before workflowstate.Invocation) {
 	t.Helper()
 
 	after, err := store.ReadWorkflow(t.Context(), id)
@@ -436,7 +436,7 @@ func TestWorkflowSlicePRSource(t *testing.T) {
 func checkWorkflowPRMergedRepair(t *testing.T, store *Store, id, task string) {
 	t.Helper()
 
-	if _, err := store.RepairWorkflowSlice(t.Context(), id, task); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.RepairWorkflowSlice(t.Context(), id, task); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("repair discarded an observed integration before verification")
 	}
 }

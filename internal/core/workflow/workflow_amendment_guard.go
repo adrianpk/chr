@@ -53,7 +53,7 @@ func (s *Store) workflowAmendmentImageMatches(set workflowstate.Record, request 
 
 func (s *Store) checkWorkflowAmendmentPlan(set workflowstate.Record, request SetAmendmentRequest) error {
 	if set.Set.Status == "closing" {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	plan := request.Plan
@@ -79,7 +79,7 @@ func (s *Store) checkWorkflowAmendmentPlan(set workflowstate.Record, request Set
 func (s *Store) checkWorkflowAmendmentOwner(ctx context.Context, run workflowInvocationFile) error {
 	for _, attempt := range run.Attempts {
 		if slices.Contains([]string{"running", "checkpointed"}, attempt.Outcome) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		if err := workflowAttemptQuiescent(attempt); err != nil {
@@ -87,16 +87,16 @@ func (s *Store) checkWorkflowAmendmentOwner(ctx context.Context, run workflowInv
 		}
 	}
 
-	if workflowInvocationTerminal(run.Status) {
+	if workflowstate.InvocationTerminal(run.Status) {
 		return nil
 	}
 
 	if run.OwnerRoot != s.layout.Root() {
-		return fmt.Errorf("%w: amend in the invocation's owning checkout", ErrWorkflowOwned)
+		return fmt.Errorf("%w: amend in the invocation's owning checkout", workflowstate.ErrOwned)
 	}
 
 	if run.Lane != nil || run.Submission != nil {
-		return fmt.Errorf("%w: advance or reconcile the retained unit before amendment", ErrWorkflowOwned)
+		return fmt.Errorf("%w: advance or reconcile the retained unit before amendment", workflowstate.ErrOwned)
 	}
 
 	owner, err := s.workflowOwnerStore(run)

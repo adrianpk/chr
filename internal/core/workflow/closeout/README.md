@@ -52,6 +52,20 @@ observation-required outcomes, the shared evidence map and source order remain
 unchanged. Confirmation still rechecks authority and frozen inputs after all
 external observations. No forwarding Store methods replace these policies.
 
+`CheckReady` owns invocation closing eligibility and preserves each attempt's
+live-process guard before checking the next attempt. `RunGuard` keeps process
+quiescence and final current-input fences with the bound private host journal.
+`NextSet`, `NeedsClosing`, `AtFrontier` and `CheckInvocation` use the actual shared
+checkpoint model. `ProjectInvocation` updates that supplied value; the host still
+owns its source/revision fence and atomic journal update. The live execution
+target keeps the original claim-target alias while retained closure history
+copies the target value.
+
+`ReadClosedSet`, `ReadInvocationClosure`, `CheckInvocationEvidence` and
+`BudgetUsage` use the existing Evidence port. They retain their distinct schema,
+binding, result and error contracts. Closing status aggregation and the final
+Store API assessment remain active work.
+
 ## Validation
 
 Stage boundary tests cover partial failures, nonzero exit, changed checkout,

@@ -12,7 +12,7 @@ import (
 
 // InvocationLookup reports an equivalent retained entry without authorizing another effect.
 type InvocationLookup struct {
-	Invocation Invocation
+	Invocation workflowstate.Invocation
 	Found      bool
 }
 
@@ -21,7 +21,7 @@ type InvocationLookup struct {
 // StartWorkflow still verifies the full frozen request and owns all mutations.
 func (s *Store) FindWorkflowEntry(ctx context.Context, request StartRequest) (observed InvocationLookup, err error) {
 	var (
-		result Invocation
+		result workflowstate.Invocation
 		found  bool
 	)
 
@@ -84,12 +84,12 @@ func (s *Store) CheckLegacyWorkKey(ctx context.Context, key string) error {
 
 func (s *Store) matchWorkflowEntry(runs []workflowInvocationFile, request StartRequest) (observed InvocationLookup, err error) {
 	var (
-		result Invocation
+		result workflowstate.Invocation
 		found  bool
 	)
 
 	for _, run := range runs {
-		if run.Namespace != s.layout.Namespace() || workflowInvocationTerminal(run.Status) || run.Selection.Target.Repository != request.Selection.Target.Repository {
+		if run.Namespace != s.layout.Namespace() || workflowstate.InvocationTerminal(run.Status) || run.Selection.Target.Repository != request.Selection.Target.Repository {
 			continue
 		}
 
@@ -112,7 +112,7 @@ func (s *Store) matchWorkflowEntry(runs []workflowInvocationFile, request StartR
 	return InvocationLookup{Invocation: result, Found: found}, nil
 }
 
-func workflowRetainedEntryRequest(request StartRequest, run Invocation) StartRequest {
+func workflowRetainedEntryRequest(request StartRequest, run workflowstate.Invocation) StartRequest {
 	if request.Admission == nil {
 		request.Admission = run.Admission
 	}

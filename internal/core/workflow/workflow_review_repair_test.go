@@ -52,7 +52,7 @@ func checkWorkflowReviewRepairStep(t *testing.T, store *Store, hierarchy Materia
 	}
 }
 
-func checkWorkflowReviewRepairState(t *testing.T, retained Invocation, binding workflowstate.ReviewBinding, count int) {
+func checkWorkflowReviewRepairState(t *testing.T, retained workflowstate.Invocation, binding workflowstate.ReviewBinding, count int) {
 	t.Helper()
 
 	if binding.State != workflowstate.ReviewNeedsRepair || retained.Cursor != 2 || retained.Status != workflowstate.InvocationPending || retained.CandidateRef != "" {
@@ -170,7 +170,7 @@ func testWorkflowReviewStop(t *testing.T, intent string) {
 		t.Fatal(err)
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowStop) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrStop) {
 		t.Fatalf("review stop: %v", err)
 	}
 

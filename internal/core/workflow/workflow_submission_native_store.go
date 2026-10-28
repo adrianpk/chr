@@ -179,7 +179,7 @@ func workflowNativeSubmissionEntryMatches(submission workflowstate.Submission, e
 	return native != nil && native.EntryID == entry.ID && entry.CandidateRef != nil && native.CandidateRef == *entry.CandidateRef && native.ClaimGeneration == entry.ClaimGeneration
 }
 
-func workflowNativeSubmissionProjected(run workflowInvocationFile, entry IntegrationEntry, binding SubmissionBinding) bool {
+func workflowNativeSubmissionProjected(run workflowInvocationFile, entry IntegrationEntry, binding workflowstate.SubmissionBinding) bool {
 	return entry.SubmissionRef != nil && *entry.SubmissionRef == binding && run.Submission != nil && *run.Submission == binding
 }
 
@@ -283,7 +283,7 @@ func checkWorkflowNativeSubmissionCallback(run workflowInvocationFile, current w
 	}
 
 	if workflowNativeDispatchStopped(*last.Native, run, entry) {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	return guardWorkflowNativeSubmissionUpdate(*last.Native, request.Facts)

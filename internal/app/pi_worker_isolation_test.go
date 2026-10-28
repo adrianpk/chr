@@ -125,7 +125,7 @@ func clonePiIsolationTicket(t *testing.T, operations service, original workflows
 	return key
 }
 
-func startPiIsolationInvocation(t *testing.T, operations service, key, target string) workflowcore.Invocation {
+func startPiIsolationInvocation(t *testing.T, operations service, key, target string) workflowstate.Invocation {
 	t.Helper()
 
 	request := workflowcore.StartRequest{StartInput: workflowstate.StartInput{

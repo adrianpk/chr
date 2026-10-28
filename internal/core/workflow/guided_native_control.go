@@ -11,7 +11,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) checkGuidedWorkflowControl(ctx context.Context, run Invocation, request workflowstate.ControlMutationRequest) error {
+func (s *Store) checkGuidedWorkflowControl(ctx context.Context, run workflowstate.Invocation, request workflowstate.ControlMutationRequest) error {
 	if request.Guided == nil {
 		return nil
 	}
@@ -33,7 +33,7 @@ func (s *Store) checkGuidedWorkflowControl(ctx context.Context, run Invocation, 
 	return guardGuidedNativeControl(session, run, request)
 }
 
-func guardGuidedNativeControl(session authoringcore.Session, run Invocation, request workflowstate.ControlMutationRequest) error {
+func guardGuidedNativeControl(session authoringcore.Session, run workflowstate.Invocation, request workflowstate.ControlMutationRequest) error {
 	state := session.Guided
 	if state.Work == nil || state.Work.Invocation == nil || state.Work.Materialization == nil || state.Control == nil || state.Control.PendingOperation == nil {
 		return workflowstate.ErrConflict
@@ -51,19 +51,19 @@ func guardGuidedNativeControl(session authoringcore.Session, run Invocation, req
 }
 
 // ReadGuidedInvocation checks the exact native reference without claiming work.
-func ReadGuidedInvocation(ctx context.Context, root string, session authoringcore.Session) (Invocation, error) {
+func ReadGuidedInvocation(ctx context.Context, root string, session authoringcore.Session) (workflowstate.Invocation, error) {
 	if session.Guided == nil {
-		return Invocation{}, workflowstate.ErrConflict
+		return workflowstate.Invocation{}, workflowstate.ErrConflict
 	}
 
 	layout, err := opscore.ResolveLayout(opscore.LayoutOptions{ProjectDir: root, Namespace: session.Namespace})
 	if err != nil {
-		return Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	work := session.Guided.Work
 	if work == nil || work.Invocation == nil || work.Materialization == nil {
-		return Invocation{}, workflowstate.ErrConflict
+		return workflowstate.Invocation{}, workflowstate.ErrConflict
 	}
 
 	run, err := NewWorkflowStore(layout, session.ProjectID).ReadWorkflow(ctx, work.Invocation.ID)
@@ -78,7 +78,7 @@ func ReadGuidedInvocation(ctx context.Context, root string, session authoringcor
 	return run, nil
 }
 
-func guidedNativeReferenceMatches(run Invocation, session authoringcore.Session) bool {
+func guidedNativeReferenceMatches(run workflowstate.Invocation, session authoringcore.Session) bool {
 	if run.Admission == nil || run.Admission.Guided == nil {
 		return false
 	}
@@ -88,7 +88,7 @@ func guidedNativeReferenceMatches(run Invocation, session authoringcore.Session)
 	return run.ProjectID == session.ProjectID && run.Namespace == session.Namespace && run.RequestKey == session.Guided.Work.Invocation.RequestKey && proof.RunID == session.ID && proof.Actor == session.Guided.Actor && proof.MaterializationID == session.Guided.Work.Materialization.ID
 }
 
-func guidedNativeControlAuthority(session authoringcore.Session, run Invocation, request workflowstate.ControlMutationRequest) bool {
+func guidedNativeControlAuthority(session authoringcore.Session, run workflowstate.Invocation, request workflowstate.ControlMutationRequest) bool {
 	state := session.Guided
 
 	return guidedNativeReferenceMatches(run, session) && run.Status != workflowstate.InvocationCompleted && request.Binding.Operator == state.Actor && request.Guided.OperationDigest == state.Control.PendingOperation.Digest

@@ -44,7 +44,7 @@ func (s *Store) checkWorkflowMergerAdmissionInputs(ctx context.Context, admissio
 	run, entry, budget := admission.Run, admission.Entry, admission.Budget
 
 	if !workflowMergerRunnable(run, entry) {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	if err := s.CheckWorkflowMergerEvidence(ctx, input, time.Now().UTC()); err != nil {

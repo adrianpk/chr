@@ -26,7 +26,7 @@ type AgentWorkResult struct {
 	Scope         string
 	Authority     workspaceconfig.WorkStateAuthority
 	Excluded      map[string]int
-	Workflow      *workflowcore.Invocation
+	Workflow      *workflowstate.Invocation
 	Message       string
 	Tickets       []ticketcore.Indexed
 	Execution     *executioncore.Record

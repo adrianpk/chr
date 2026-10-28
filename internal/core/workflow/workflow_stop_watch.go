@@ -1,6 +1,10 @@
 package workflow
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // A live claim already identifies its canonical owner. Poll that owner's
 // invocation under the same repository exclusion and read preparation as a
@@ -16,7 +20,7 @@ func (s *Store) checkWorkflowClaimStop(ctx context.Context, claim *Claim) error 
 		}
 
 		if run.StopIntent != "" {
-			return ErrWorkflowStop
+			return workflowstate.ErrStop
 		}
 
 		return nil
@@ -35,16 +39,16 @@ func checkWorkflowOwnedStop(ctx context.Context, claim *Claim) error {
 		}
 
 		if run.OwnerRoot != owner.layout.Root() || run.ProjectID != owner.projectID || len(run.Attempts) == 0 {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		attempt := run.Attempts[len(run.Attempts)-1]
 		if !workflowAttemptCredentialMatches(run, claim, attempt) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		if run.StopIntent != "" {
-			return ErrWorkflowStop
+			return workflowstate.ErrStop
 		}
 
 		return nil

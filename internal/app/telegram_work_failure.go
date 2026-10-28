@@ -16,7 +16,7 @@ func telegramWorkFailure(failure error) string {
 		return "Work conflict: the displayed selection, policy, target or authority changed. Read current native work before requesting a new preview."
 	}
 
-	if errors.Is(failure, workflowcore.ErrWorkflowOwned) {
+	if errors.Is(failure, workflowstate.ErrOwned) {
 		return "This selection already has an execution owner. Inspect the retained work before requesting another start."
 	}
 

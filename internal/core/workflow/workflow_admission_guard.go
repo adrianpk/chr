@@ -45,7 +45,7 @@ func (s *Store) checkWorkflowAdmissionGuard(ctx context.Context, request StartRe
 	}
 
 	if request.Admission != nil {
-		policy, err := s.workflowReviewPolicy(workflowInvocationFile{Invocation: Invocation{InvocationReview: InvocationReview{ReviewRestriction: request.ReviewRestriction}}})
+		policy, err := s.workflowReviewPolicy(workflowInvocationFile{Invocation: workflowstate.Invocation{InvocationReview: workflowstate.InvocationReview{ReviewRestriction: request.ReviewRestriction}}})
 		if err != nil {
 			return err
 		}

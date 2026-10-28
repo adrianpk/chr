@@ -23,7 +23,7 @@ func TestWorkflowClaimExpiry(t *testing.T) {
 
 	<-deadline.C
 
-	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("expired owner applied checkpoint: %v", err)
 	}
 

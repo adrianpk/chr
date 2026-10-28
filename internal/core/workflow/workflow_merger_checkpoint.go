@@ -62,7 +62,7 @@ func (s *Store) RetainWorkflowMergerCheckpoint(ctx context.Context, guard Integr
 		}
 
 		if !workflowMergerRunnable(invocationLocation.Run, entry) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		if err := invocationLocation.Owner.checkWorkflowMergerCheckpointOwner(invocationLocation.Run, entry, state); err != nil {

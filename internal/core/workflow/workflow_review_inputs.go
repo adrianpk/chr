@@ -175,8 +175,8 @@ func (s *Store) approveWorkflowSlice(ctx context.Context, run workflowInvocation
 }
 
 func checkWorkflowReviewReady(run workflowInvocationFile, provider PullRequestProvider) error {
-	if provider == nil || run.StopIntent != "" || workflowInvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
-		return ErrWorkflowOwned
+	if provider == nil || run.StopIntent != "" || workflowstate.InvocationTerminal(run.Status) || run.Status == workflowstate.InvocationPaused {
+		return workflowstate.ErrOwned
 	}
 
 	if run.PullRequest == nil || run.PullRequest.State != "bound" || run.PullRequest.URL == "" {

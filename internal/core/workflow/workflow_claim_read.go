@@ -1,6 +1,10 @@
 package workflow
 
-import "context"
+import (
+	"context"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
+)
 
 // Credential checks hold repository exclusion and have already prepared reads.
 // An exact owner needs no repository-wide search. Other roots and project
@@ -16,7 +20,7 @@ func (s *Store) locateWorkflowClaim(ctx context.Context, claim *Claim) (workflow
 	}
 
 	if run.OwnerRoot != s.layout.Root() || run.ProjectID != s.projectID {
-		return workflowInvocationLocation{Run: run, Owner: s}, ErrWorkflowOwned
+		return workflowInvocationLocation{Run: run, Owner: s}, workflowstate.ErrOwned
 	}
 
 	return workflowInvocationLocation{Run: run, Owner: s}, nil

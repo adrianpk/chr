@@ -3,6 +3,7 @@ package workflow
 import (
 	"testing"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -93,7 +94,7 @@ func nativeClosingGate(t *testing.T, method string) {
 	checkNativeClosingGateEvidence(t, f, closed)
 }
 
-func checkNativeClosingGateEvidence(t *testing.T, f nativeClosingFixture, closed SetClosureResult) {
+func checkNativeClosingGateEvidence(t *testing.T, f nativeClosingFixture, closed workflowcloseout.Result) {
 	t.Helper()
 
 	proof := closed.Receipt.Slices[0]

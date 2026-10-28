@@ -11,13 +11,13 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosingClaim, receipt workflowstate.ClosingReceipt, failure error, ports FrontierPorts) (SetClosureResult, error) {
+func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosingClaim, receipt workflowstate.ClosingReceipt, failure error, ports FrontierPorts) (workflowcloseout.Result, error) {
 	if err := s.checkWorkflowClosingCredential(claim); err != nil {
-		return SetClosureResult{}, errors.Join(failure, err)
+		return workflowcloseout.Result{}, errors.Join(failure, err)
 	}
 
-	if err := workflowAttemptQuiescent(Attempt{Processes: claim.state.Processes}); err != nil {
-		return SetClosureResult{}, errors.Join(failure, err)
+	if err := workflowAttemptQuiescent(workflowstate.Attempt{Processes: claim.state.Processes}); err != nil {
+		return workflowcloseout.Result{}, errors.Join(failure, err)
 	}
 
 	failure = errors.Join(failure, s.checkWorkflowClosingConfirmation(ctx, claim, ports))
@@ -29,7 +29,7 @@ func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosin
 
 	data, err := json.MarshalIndent(receipt, "", "  ")
 	if err != nil {
-		return SetClosureResult{}, err
+		return workflowcloseout.Result{}, err
 	}
 
 	data = append(data, '\n')
@@ -42,10 +42,10 @@ func (s *Store) finishWorkflowClosing(ctx context.Context, claim *workflowClosin
 	}
 
 	if err := s.commitWorkflowClosingState(claim, workflowstate.FileChange{Path: claim.state.Result.Ref, After: data}); err != nil {
-		return SetClosureResult{}, errors.Join(failure, err)
+		return workflowcloseout.Result{}, errors.Join(failure, err)
 	}
 
-	result := SetClosureResult{Set: claim.set, Receipt: receipt, ReceiptRef: claim.state.Result.Ref, Outcome: receipt.Outcome}
+	result := workflowcloseout.Result{Set: claim.set, Receipt: receipt, ReceiptRef: claim.state.Result.Ref, Outcome: receipt.Outcome}
 
 	return result, failure
 }
@@ -93,8 +93,8 @@ func (s *Store) checkWorkflowClosingAuthority(claim *workflowClosingClaim) error
 		return err
 	}
 
-	if run.StopIntent != "" || workflowInvocationTerminal(run.Status) {
-		return ErrWorkflowStop
+	if run.StopIntent != "" || workflowstate.InvocationTerminal(run.Status) {
+		return workflowstate.ErrStop
 	}
 
 	return nil

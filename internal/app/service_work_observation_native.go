@@ -75,7 +75,7 @@ func projectNativeWork(result *WorkObservation, observation workflowcore.WorkObs
 	}
 }
 
-func appendNativeWork(result *WorkObservation, run workflowcore.Invocation, tickets map[string]ticketcore.Indexed, records map[string]workflowstate.Record) {
+func appendNativeWork(result *WorkObservation, run workflowstate.Invocation, tickets map[string]ticketcore.Indexed, records map[string]workflowstate.Record) {
 	base := WorkContext{ID: run.ID, Kind: "native", InvocationID: run.ID, Status: string(run.Status), Outcome: run.Outcome, UpdatedAt: run.UpdatedAt, Validated: run.Cursor, Confirmed: run.ConfirmedCursor, Remaining: len(run.Members) - run.ConfirmedCursor}
 	if len(run.Members) > 0 {
 		base.TicketKey = run.Members[min(run.Cursor, len(run.Members)-1)].Admission.Key
@@ -137,7 +137,7 @@ func bindNativeWorkContext(current *WorkContext, tickets map[string]ticketcore.I
 	}
 }
 
-func appendNativeAttemptEvent(result *WorkObservation, id string, attempt workflowcore.Attempt) {
+func appendNativeAttemptEvent(result *WorkObservation, id string, attempt workflowstate.Attempt) {
 	at := attempt.StartedAt
 	if !attempt.FinishedAt.IsZero() {
 		at = attempt.FinishedAt
@@ -146,7 +146,7 @@ func appendNativeAttemptEvent(result *WorkObservation, id string, attempt workfl
 	result.Events = append(result.Events, WorkEvent{ID: id + ":" + attempt.ID + ":" + attempt.Outcome, ContextID: id + ":" + attempt.ID, TicketKey: attempt.TaskKey, Time: at, Phase: attempt.Purpose, Message: attempt.Outcome})
 }
 
-func bindNativeWorkProcess(current *WorkContext, attempt workflowcore.Attempt) {
+func bindNativeWorkProcess(current *WorkContext, attempt workflowstate.Attempt) {
 	if current.Message != "" {
 		return
 	}

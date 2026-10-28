@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"slices"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -153,7 +154,7 @@ func validateWorkflowInvocationMembers(run workflowInvocationFile) error {
 	return validateWorkflowInvocationAttempts(run, keys)
 }
 
-func validWorkflowInvocationMember(member Member) bool {
+func validWorkflowInvocationMember(member workflowstate.Member) bool {
 	input := member.Admission
 
 	return input.Key != "" && input.Revision > 0 && input.SourceHash != "" && input.ContractHash != "" && filepath.IsLocal(input.Path) && member.ExpectedRevision >= input.Revision && member.ExpectedSourceHash != ""
@@ -161,7 +162,7 @@ func validWorkflowInvocationMember(member Member) bool {
 
 func validateWorkflowInvocationAttempts(run workflowInvocationFile, keys map[string]bool) error {
 	ids := map[string]bool{}
-	previous := map[string]Attempt{}
+	previous := map[string]workflowstate.Attempt{}
 
 	for _, attempt := range run.Attempts {
 		if ids[attempt.ID] || !keys[attempt.TaskKey] || !validWorkflowAttemptIdentity(attempt, run.Owners[attempt.ID]) {
@@ -191,7 +192,7 @@ func validateWorkflowInvocationAttempts(run workflowInvocationFile, keys map[str
 	return nil
 }
 
-func validateWorkflowAttemptExecution(invocationID string, attempt Attempt) error {
+func validateWorkflowAttemptExecution(invocationID string, attempt workflowstate.Attempt) error {
 	if filepath.Base(attempt.ID) != attempt.ID {
 		return fmt.Errorf("invalid workflow attempt path identity")
 	}
@@ -213,7 +214,7 @@ func validateWorkflowAttemptExecution(invocationID string, attempt Attempt) erro
 	return validateWorkflowAttemptResult(invocationID, attempt)
 }
 
-func validateWorkflowAttemptResult(invocationID string, attempt Attempt) error {
+func validateWorkflowAttemptResult(invocationID string, attempt workflowstate.Attempt) error {
 	if attempt.ResultRef != "" && (attempt.ResultRef != workflowAttemptFile(invocationID, attempt.ID, "result.json") || len(attempt.ResultHash) != 64 || attempt.InputRef == "" || attempt.FinishedAt.IsZero()) {
 		return fmt.Errorf("invalid workflow attempt result binding")
 	}
@@ -225,7 +226,7 @@ func validateWorkflowAttemptResult(invocationID string, attempt Attempt) error {
 	return nil
 }
 
-func validWorkflowAttemptIdentity(attempt Attempt, ownerHash string) bool {
+func validWorkflowAttemptIdentity(attempt workflowstate.Attempt, ownerHash string) bool {
 	return attempt.ID != "" && attempt.Generation > 0 && attempt.InputRevision > 0 && attempt.ContractHash != "" && len(ownerHash) == 64
 }
 
@@ -233,13 +234,13 @@ func (s *Store) guardWorkflowAdmission(runs []workflowInvocationFile, next workf
 	resources := workflowClaimResources(next)
 
 	for _, run := range runs {
-		if run.Namespace != s.layout.Namespace() || workflowInvocationTerminal(run.Status) {
+		if run.Namespace != s.layout.Namespace() || workflowstate.InvocationTerminal(run.Status) {
 			continue
 		}
 
 		for resource := range workflowClaimResources(run) {
 			if resources[resource] {
-				return fmt.Errorf("%w: %s owned by invocation %s", ErrWorkflowOwned, resource, run.ID)
+				return fmt.Errorf("%w: %s owned by invocation %s", workflowstate.ErrOwned, resource, run.ID)
 			}
 		}
 	}
@@ -261,7 +262,7 @@ func workflowClaimResources(run workflowInvocationFile) map[string]bool {
 	}
 
 	for _, image := range run.SetImages {
-		resources["set:"+workflowInvocationSetID(image)] = true
+		resources["set:"+workflowcloseout.SetID(image)] = true
 
 		if image.UseCase != "" {
 			resources["use_case:"+image.UseCase] = true
@@ -287,7 +288,7 @@ func validateWorkflowStopState(run workflowInvocationFile) error {
 	return nil
 }
 
-func validWorkflowReplacement(attempt Attempt, previous map[string]Attempt) bool {
+func validWorkflowReplacement(attempt workflowstate.Attempt, previous map[string]workflowstate.Attempt) bool {
 	if attempt.Replaces == "" {
 		return true
 	}
@@ -297,7 +298,7 @@ func validWorkflowReplacement(attempt Attempt, previous map[string]Attempt) bool
 	return exists && replaced.TaskKey == attempt.TaskKey && replaced.Purpose == attempt.Purpose && replaced.Generation < attempt.Generation && replaced.Outcome != "validated"
 }
 
-func validateWorkflowAttemptState(attempt Attempt) error {
+func validateWorkflowAttemptState(attempt workflowstate.Attempt) error {
 	if !slices.Contains([]string{"", workflowSliceValidationPurpose, workflowSliceRepairPurpose, workflowSliceReviewPurpose, workflowIntegrationValidationPurpose, workflowMergerPurpose}, attempt.Purpose) {
 		return fmt.Errorf("invalid workflow attempt purpose")
 	}
@@ -321,7 +322,7 @@ func validateWorkflowAttemptState(attempt Attempt) error {
 	return nil
 }
 
-func validateWorkflowRepairAttempt(attempt Attempt) error {
+func validateWorkflowRepairAttempt(attempt workflowstate.Attempt) error {
 	if attempt.StartedAt.IsZero() || !attempt.LeaseUntil.After(attempt.StartedAt) || attempt.Outcome != "repaired" || attempt.FinishedAt.IsZero() || attempt.InputRef != "" || len(attempt.Processes) != 0 {
 		return fmt.Errorf("invalid workflow repair attempt")
 	}

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestTelegramControlClaimScope checks actual credentials through their exact
@@ -56,7 +58,7 @@ func checkTelegramControlClaimScope(t *testing.T, store *Store, claim *Claim, va
 	t.Helper()
 
 	err := store.CheckWorkflowClaim(t.Context(), claim)
-	if valid && err != nil || !valid && !errors.Is(err, ErrWorkflowOwned) {
+	if valid && err != nil || !valid && !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("claim scope changed", err)
 	}
 }

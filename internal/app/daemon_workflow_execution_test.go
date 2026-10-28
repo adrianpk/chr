@@ -92,7 +92,7 @@ func checkDaemonWorkflowActiveStop(t *testing.T, intent string) {
 	}
 }
 
-func checkDaemonWorkflowStopCheckpoint(t *testing.T, operations service, before workflowcore.Invocation, intent string) {
+func checkDaemonWorkflowStopCheckpoint(t *testing.T, operations service, before workflowstate.Invocation, intent string) {
 	t.Helper()
 
 	current, err := operations.ReadWorkflow(t.Context(), before.ID)
@@ -262,7 +262,7 @@ func checkDaemonWorkflowRecovery(t *testing.T, intent string) {
 	checkDaemonWorkflowRecoveryCheckpoint(t, operations, start.Invocation, intent)
 }
 
-func checkDaemonWorkflowRecoveryCheckpoint(t *testing.T, operations service, before workflowcore.Invocation, intent string) {
+func checkDaemonWorkflowRecoveryCheckpoint(t *testing.T, operations service, before workflowstate.Invocation, intent string) {
 	t.Helper()
 
 	current, err := operations.ReadWorkflow(t.Context(), before.ID)

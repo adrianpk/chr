@@ -36,7 +36,7 @@ func (s *Store) prepareWorkflowSliceValidation(ctx context.Context, id string) (
 		restoreWorkflowCapacityWait(&invocationLocation.Run)
 
 		if !workflowSliceValidationReady(invocationLocation.Run.Invocation) || invocationLocation.Run.StopIntent != "" || invocationLocation.Run.Lane == nil || invocationLocation.Run.Lane.Unit.Kind != "slice" {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		observation, readErr := invocationLocation.Owner.observeWorkflowSlice(ctx, invocationLocation.Run)
@@ -72,7 +72,7 @@ func (s *Store) claimWorkflowSliceValidation(ctx context.Context, run workflowIn
 
 	record := observation.tasks[len(observation.tasks)-1]
 	if !workflowTaskClaimable(record.Task) {
-		return workflowSliceValidationClaim{Claim: nil, Prepared: prepared}, ErrWorkflowOwned
+		return workflowSliceValidationClaim{Claim: nil, Prepared: prepared}, workflowstate.ErrOwned
 	}
 
 	claim, err = s.reserveWorkflowRole(ctx, run, workflowSliceValidationPurpose)

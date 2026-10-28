@@ -115,14 +115,14 @@ func workflowMeetsMinimum(value, minimum string) bool {
 	return value != "unclassified" && ticketcore.PriorityRank(value) <= ticketcore.PriorityRank(minimum)
 }
 
-func (selection workflowSelection) orderLooseMembers(members []PreviewMember, order workflowstate.TicketOrder) {
+func (selection workflowSelection) orderLooseMembers(members []workflowstate.PreviewMember, order workflowstate.TicketOrder) {
 	tickets := map[string]ticketcore.Indexed{}
 	for _, ticket := range selection.tickets {
 		ticket.Priority, ticket.Severity = workflowRank(ticket.Priority), workflowRank(ticket.Severity)
 		tickets[ticket.Key] = ticket
 	}
 
-	slices.SortFunc(members, func(left, right PreviewMember) int {
+	slices.SortFunc(members, func(left, right workflowstate.PreviewMember) int {
 		return ticketcore.CompareLoopOrder(order, tickets[left.Key], tickets[right.Key])
 	})
 }

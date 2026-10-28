@@ -193,7 +193,7 @@ func (s *Store) checkWorkflowNativeSendStop(id string) error {
 	}
 
 	if run.StopIntent != "" || entry.StopIntent != "" {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	return nil

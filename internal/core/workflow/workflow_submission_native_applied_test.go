@@ -134,7 +134,7 @@ func nativeSubmissionPendingExcluded(t *testing.T, f nativeSubmissionFixture, su
 		t.Fatal("forge lag permitted another publication", err)
 	}
 
-	if err := f.store.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another publication")), contenthash.Sum([]byte(f.candidate.Native.SourceRepository+"\n"+f.candidate.Native.TargetRef))); !errors.Is(err, ErrWorkflowOwned) {
+	if err := f.store.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another publication")), contenthash.Sum([]byte(f.candidate.Native.SourceRepository+"\n"+f.candidate.Native.TargetRef))); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("applied Git released target exclusion", err)
 	}
 }

@@ -41,7 +41,7 @@ func nativePreparationStop(t *testing.T, intent string) {
 		t.Fatal(err)
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowStop) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrStop) {
 		t.Fatal("native queue stop was not retained", err)
 	}
 

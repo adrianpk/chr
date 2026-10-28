@@ -108,7 +108,7 @@ func (s service) recoverGuidedStop(ctx context.Context, session authoringcore.Se
 
 // recoverGuidedInterruptedWork resumes a quiescent host interruption under the
 // native owner and original guided authority. An operator stop is never cleared.
-func (s service) recoverGuidedInterruptedWork(ctx context.Context, run workflowcore.Invocation) error {
+func (s service) recoverGuidedInterruptedWork(ctx context.Context, run workflowstate.Invocation) error {
 	if run.Status != workflowstate.InvocationPaused || run.StopIntent != "" || run.Outcome != "interrupted" {
 		return nil
 	}

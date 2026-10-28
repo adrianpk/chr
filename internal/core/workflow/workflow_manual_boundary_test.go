@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // TestWorkflowManualAlias validates a quiescent human commit through a linked
@@ -67,11 +69,11 @@ func testWorkflowManualStop(t *testing.T, intent string) {
 		t.Fatal(err)
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("checkpoint released a manual validation child")
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowStop) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrStop) {
 		t.Fatalf("manual stop: %v", err)
 	}
 

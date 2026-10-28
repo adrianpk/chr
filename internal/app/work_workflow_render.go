@@ -8,7 +8,6 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -108,7 +107,7 @@ func workflowDeliveryLines(status WorkflowWorkStatus) []string {
 	return lines
 }
 
-func workflowBlockerLines(blocker *workflowcore.Blocker) []string {
+func workflowBlockerLines(blocker *workflowstate.Blocker) []string {
 	if blocker == nil {
 		return nil
 	}
@@ -132,7 +131,7 @@ func workflowExcludedLines(excluded map[string]int) []string {
 	return lines
 }
 
-func workflowMemberLines(members []workflowcore.PreviewMember) []string {
+func workflowMemberLines(members []workflowstate.PreviewMember) []string {
 	lines := make([]string, 0, len(members))
 	for _, member := range members {
 		lines = append(lines, fmt.Sprintf("member: %s; revision: %d; slice_set: %s; slice: %s; order: %d; status: %s; phase: %s; readiness: %s", member.Key, member.Revision, member.SetID, member.SliceID, member.TaskOrder, member.Status, member.Phase, member.Readiness))

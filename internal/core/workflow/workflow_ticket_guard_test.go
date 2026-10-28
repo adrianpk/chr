@@ -13,7 +13,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowTicketValidated(t *testing.T) (*Store, workflowstate.Record, Invocation) {
+func workflowTicketValidated(t *testing.T) (*Store, workflowstate.Record, workflowstate.Invocation) {
 	t.Helper()
 
 	store, record, request := workflowTicketFixture(t, "ticket", workflowPreparationGate("test -f result.txt"))
@@ -35,21 +35,21 @@ func TestWorkflowTicketCandidateGuard(t *testing.T) {
 
 	cases := []struct {
 		name   string
-		mutate func(*testing.T, *Store, Invocation)
+		mutate func(*testing.T, *Store, workflowstate.Invocation)
 	}{
-		{"result", func(t *testing.T, s *Store, r Invocation) {
+		{"result", func(t *testing.T, s *Store, r workflowstate.Invocation) {
 			workflowTicketCorrupt(t, s, r.Attempts[0].ResultRef)
 		}},
-		{"input", func(t *testing.T, s *Store, r Invocation) {
+		{"input", func(t *testing.T, s *Store, r workflowstate.Invocation) {
 			workflowTicketCorrupt(t, s, r.Attempts[0].InputRef)
 		}},
-		{"candidate", func(t *testing.T, s *Store, r Invocation) {
+		{"candidate", func(t *testing.T, s *Store, r workflowstate.Invocation) {
 			workflowTicketCorrupt(t, s, r.CandidateRef)
 		}},
-		{"task image", func(t *testing.T, s *Store, r Invocation) {
+		{"task image", func(t *testing.T, s *Store, r workflowstate.Invocation) {
 			workflowTicketCorrupt(t, s, r.Members[0].Admission.Path)
 		}},
-		{"lane", func(t *testing.T, _ *Store, r Invocation) {
+		{"lane", func(t *testing.T, _ *Store, r workflowstate.Invocation) {
 			workflowIntegrationCommit(t, r.Lane.Worktree, "extra.txt", "Unaccepted change")
 		}},
 	}
@@ -275,7 +275,7 @@ func checkWorkflowTicketRepair(t *testing.T, f workflowPreparationFixture) {
 	checkWorkflowTicketRepairCandidate(t, f, run)
 }
 
-func checkWorkflowTicketRepairCandidate(t *testing.T, f workflowPreparationFixture, run Invocation) {
+func checkWorkflowTicketRepairCandidate(t *testing.T, f workflowPreparationFixture, run workflowstate.Invocation) {
 	t.Helper()
 
 	claim := workflowTestClaim(t, f.store, run.ID)

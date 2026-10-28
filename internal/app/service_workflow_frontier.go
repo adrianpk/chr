@@ -5,24 +5,25 @@ import (
 	"fmt"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // AdvanceWorkflowFrontier refreshes the exact retained extent after finalization.
 // It does not execute work, create a PR, submit integration or close a set.
-func (s service) AdvanceWorkflowFrontier(ctx context.Context, id string) (workflowcore.Invocation, error) {
+func (s service) AdvanceWorkflowFrontier(ctx context.Context, id string) (workflowstate.Invocation, error) {
 	store, err := s.workflowStore()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	run, err := store.ReadWorkflow(ctx, id)
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	provider, err := s.workflowIntegrationProvider()
 	if err != nil {
-		return workflowcore.Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	observer := s.workflowIntegrationObserver(run)

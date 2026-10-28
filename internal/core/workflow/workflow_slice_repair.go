@@ -15,7 +15,7 @@ const workflowSliceRepairPurpose = "slice_repair"
 
 // RepairWorkflowSlice invalidates the affected task and its ordered successors.
 // Historical results remain immutable; unchanged earlier task proof is reusable.
-func (s *Store) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (result Invocation, err error) {
+func (s *Store) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (result workflowstate.Invocation, err error) {
 	err = s.withLock(ctx, func() error {
 		invocationLocation, readErr := s.locateWorkflowInvocation(ctx, id)
 		if readErr != nil {
@@ -29,7 +29,7 @@ func (s *Store) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (re
 		}
 
 		if !workflowSliceRepairReady(invocationLocation.Run.Invocation) || invocationLocation.Run.StopIntent != "" {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		if readErr := invocationLocation.Owner.guardWorkflowPublicationWork(ctx, invocationLocation.Run); readErr != nil {
@@ -49,7 +49,7 @@ func (s *Store) RepairWorkflowSlice(ctx context.Context, id, taskKey string) (re
 		if errors.Is(readErr, ErrWorkflowReviewRepairBudget) {
 			invocationLocation.Run.Review.State = workflowstate.ReviewRepairLimitExceeded
 			invocationLocation.Run.Status, invocationLocation.Run.Outcome = workflowstate.InvocationWaitingReview, "review_repair_limit_exceeded"
-			invocationLocation.Run.Blocker = &Blocker{Dependency: invocationLocation.Run.Review.Unit, Reason: invocationLocation.Run.Outcome, NextActionOwner: "workflow_operator"}
+			invocationLocation.Run.Blocker = &workflowstate.Blocker{Dependency: invocationLocation.Run.Review.Unit, Reason: invocationLocation.Run.Outcome, NextActionOwner: "workflow_operator"}
 			readErr = errors.Join(readErr, invocationLocation.Owner.commitWorkflowState(&invocationLocation.Run))
 		}
 
@@ -73,7 +73,7 @@ func (s *Store) checkWorkflowSliceRepairPR(run workflowInvocationFile) error {
 
 	for _, pr := range observation.Snapshots {
 		if pr.Merged {
-			return fmt.Errorf("%w: observed delivery requires verification before repair", ErrWorkflowOwned)
+			return fmt.Errorf("%w: observed delivery requires verification before repair", workflowstate.ErrOwned)
 		}
 	}
 
@@ -92,7 +92,7 @@ func (s *Store) repairWorkflowSlice(ctx context.Context, run *workflowInvocation
 
 	for _, record := range observation.tasks {
 		if !workflowTaskClaimable(record.Task) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 	}
 
@@ -129,7 +129,7 @@ func (s *Store) repairWorkflowSlice(ctx context.Context, run *workflowInvocation
 	return s.commitWorkflowSliceRepair(run, observation, index)
 }
 
-func workflowSliceRepairReady(run Invocation) bool {
+func workflowSliceRepairReady(run workflowstate.Invocation) bool {
 	if run.PullRequest != nil && !slices.Contains([]string{"prepared", "bound"}, run.PullRequest.State) {
 		return false
 	}

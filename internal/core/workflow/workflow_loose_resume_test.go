@@ -65,7 +65,7 @@ func workflowLooseConfirmDependency(t *testing.T, f workflowIntegrationFixture, 
 	return workflowTestWrite(t, f.store, record)
 }
 
-func workflowLoosePauseDependency(t *testing.T, f workflowIntegrationFixture) Invocation {
+func workflowLoosePauseDependency(t *testing.T, f workflowIntegrationFixture) workflowstate.Invocation {
 	t.Helper()
 
 	if _, err := f.store.ClaimWorkflow(t.Context(), f.run.ID); err == nil {
@@ -125,7 +125,7 @@ func testWorkflowLooseResume(t *testing.T, movement string) {
 	checkWorkflowLooseResumeDelivery(t, f, target, next)
 }
 
-func checkWorkflowLooseResumeDelivery(t *testing.T, f workflowIntegrationFixture, target string, before Invocation) {
+func checkWorkflowLooseResumeDelivery(t *testing.T, f workflowIntegrationFixture, target string, before workflowstate.Invocation) {
 	t.Helper()
 
 	f.target = target
@@ -142,7 +142,7 @@ func checkWorkflowLooseResumeDelivery(t *testing.T, f workflowIntegrationFixture
 	}
 }
 
-func checkWorkflowLooseResumed(t *testing.T, before, run Invocation, target string, failure error) {
+func checkWorkflowLooseResumed(t *testing.T, before, run workflowstate.Invocation, target string, failure error) {
 	t.Helper()
 
 	if failure != nil || run.Status != workflowstate.InvocationPending || run.Blocker != nil || run.ExecutionSelection().Target.Commit != target || run.Selection.Target != before.Selection.Target || run.Cursor != before.Cursor {

@@ -10,18 +10,10 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// SetClosureResult distinguishes retained failures from confirmed closure.
-type SetClosureResult struct {
-	Set        workflowstate.Record
-	Receipt    workflowstate.ClosingReceipt
-	ReceiptRef string
-	Outcome    string
-}
-
 // CloseWorkflowSet validates every actual member on an isolated exact target.
 // Failed gates retain their attempt and retry only closure. A confirmed receipt,
 // set projection and owning invocation share one replayable transition.
-func (s *Store) CloseWorkflowSet(ctx context.Context, request workflowcloseout.Request, ports FrontierPorts) (result SetClosureResult, err error) {
+func (s *Store) CloseWorkflowSet(ctx context.Context, request workflowcloseout.Request, ports FrontierPorts) (result workflowcloseout.Result, err error) {
 	if request.ExpectedRevision == 0 || request.ExpectedSourceHash == "" || !workflowstate.ValidBranch(request.Branch) || ports.Provider == nil || ports.Observer == nil || ports.Target == nil {
 		return result, fmt.Errorf("closing requires an observed set and canonical observation ports")
 	}

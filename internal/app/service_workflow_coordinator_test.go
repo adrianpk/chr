@@ -86,7 +86,7 @@ func checkServiceWorkflowOwnerStarts(t *testing.T, operations service, key strin
 				return
 			}
 
-			if !errors.Is(err, workflowcore.ErrWorkflowOwned) && !errors.Is(err, workflowcore.ErrWorkflowCapacity) {
+			if !errors.Is(err, workflowstate.ErrOwned) && !errors.Is(err, workflowcore.ErrWorkflowCapacity) {
 				t.Fatal("competing start did not retain the live owner", err)
 			}
 		})

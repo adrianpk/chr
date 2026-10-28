@@ -129,7 +129,7 @@ func nativeMergerStop(t *testing.T, intent string) {
 		t.Fatal(err)
 	}
 
-	if err := <-finished; !errors.Is(err, ErrWorkflowStop) {
+	if err := <-finished; !errors.Is(err, workflowstate.ErrStop) {
 		t.Fatal("owned stop was not retained", err)
 	}
 

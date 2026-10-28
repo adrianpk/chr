@@ -147,7 +147,7 @@ func testWorkflowPreparationJournal(t *testing.T, stage string, index int) {
 	assertWorkflowPreparationSource(t, f)
 }
 
-func checkWorkflowPreparationRecovery(t *testing.T, store *Store, run Invocation, stage string) {
+func checkWorkflowPreparationRecovery(t *testing.T, store *Store, run workflowstate.Invocation, stage string) {
 	t.Helper()
 
 	if stage != "result" {

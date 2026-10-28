@@ -32,7 +32,7 @@ func ReadGuidedResult(ctx context.Context, root string, session authoringcore.Se
 	return result, nil
 }
 
-func guardGuidedResultBinding(session authoringcore.Session, run Invocation) error {
+func guardGuidedResultBinding(session authoringcore.Session, run workflowstate.Invocation) error {
 	work := session.Guided.Work
 	if work.Materialization == nil || work.Admission == nil {
 		return workflowstate.ErrConflict
@@ -49,7 +49,7 @@ func guardGuidedResultBinding(session authoringcore.Session, run Invocation) err
 	return guardGuidedResultMembers(work, run)
 }
 
-func guardGuidedResultMembers(work *authoringcore.GuidedWorkState, run Invocation) error {
+func guardGuidedResultMembers(work *authoringcore.GuidedWorkState, run workflowstate.Invocation) error {
 	for i, member := range run.Members {
 		frozen := work.Materialization.Members[i]
 		if member.Admission.Key != frozen.Key || member.Admission.ContractHash != frozen.ContractHash {

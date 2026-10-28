@@ -142,7 +142,7 @@ func retainedWorkAuthorization(ctx context.Context, check workflowcore.Admission
 	return check(ctx)
 }
 
-func (s service) recoverRetainedWork(ctx context.Context, status WorkflowWorkStatus) (workflowcore.Invocation, error) {
+func (s service) recoverRetainedWork(ctx context.Context, status WorkflowWorkStatus) (workflowstate.Invocation, error) {
 	run, err := s.ReadWorkflow(ctx, status.ID)
 	if err != nil {
 		return run, err

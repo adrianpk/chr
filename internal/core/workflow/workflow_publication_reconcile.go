@@ -111,7 +111,7 @@ func (s *Store) guardWorkflowPublicationWork(ctx context.Context, run workflowIn
 
 func (s *Store) guardWorkflowPublicationJournal(ctx context.Context, run workflowInvocationFile) error {
 	if run.DeliveryProofRef != "" || run.DeliveryRef != "" {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	journal, err := s.loadWorkflowSubmissionJournal(ctx, run)

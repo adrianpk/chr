@@ -209,6 +209,6 @@ func (s service) workflowConfirmationRecords(ctx context.Context, preview Workfl
 	return records, nil
 }
 
-func (s service) workflowConfirmationRecordMatches(record workflowstate.Record, member workflowcore.PreviewMember) bool {
+func (s service) workflowConfirmationRecordMatches(record workflowstate.Record, member workflowstate.PreviewMember) bool {
 	return record.Task != nil && record.ProjectID == s.projectContext.ProjectID && record.Namespace == s.workflowNamespace && record.Task.Key == member.Key && record.Revision == member.Revision && record.SourceHash == member.SourceHash && record.Task.ContractHash == member.ContractHash
 }

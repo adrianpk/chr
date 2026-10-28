@@ -7,7 +7,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func validateWorkflowAttemptProcesses(invocationID string, attempt Attempt) error {
+func validateWorkflowAttemptProcesses(invocationID string, attempt workflowstate.Attempt) error {
 	if err := validateWorkflowAttemptOwner(attempt); err != nil {
 		return err
 	}
@@ -33,7 +33,7 @@ func validateWorkflowAttemptProcesses(invocationID string, attempt Attempt) erro
 	return nil
 }
 
-func validateWorkflowAttemptOwner(attempt Attempt) error {
+func validateWorkflowAttemptOwner(attempt workflowstate.Attempt) error {
 	if attempt.CapacitySlot < 0 || attempt.CapacitySlot > workflowstate.WorkerSlotLimit {
 		return workflowstate.ErrConflict
 	}

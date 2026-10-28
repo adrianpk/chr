@@ -74,7 +74,7 @@ func TestTelegramJourneyAdmission(t *testing.T) {
 	}
 }
 
-func checkTelegramJourneyReady(t *testing.T, store *Store, record workflowstate.Record, run Invocation) {
+func checkTelegramJourneyReady(t *testing.T, store *Store, record workflowstate.Record, run workflowstate.Invocation) {
 	t.Helper()
 
 	ready, err := store.Read(t.Context(), record.Path)

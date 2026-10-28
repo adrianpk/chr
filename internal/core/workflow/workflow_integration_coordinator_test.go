@@ -92,7 +92,7 @@ func TestNativeTargetBarrier(t *testing.T) {
 	}
 
 	before := nativeQueueImages(t, f.store.layout.Root())
-	if err := linked.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another intent")), key); !errors.Is(err, ErrWorkflowOwned) {
+	if err := linked.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another intent")), key); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("alias bypassed the actual publication barrier", err)
 	}
 

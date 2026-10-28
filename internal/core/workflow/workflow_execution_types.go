@@ -35,7 +35,7 @@ type TaskInput struct {
 	Body                     string                               `json:"body"`
 	Target                   workflowstate.PreviewTarget          `json:"target"`
 	Lane                     workflowstate.Lane                   `json:"lane"`
-	Prerequisites            []InputImage                         `json:"prerequisites"`
+	Prerequisites            []workflowstate.InputImage           `json:"prerequisites"`
 	EvidenceHashes           map[string]string                    `json:"prerequisite_evidence_hashes"`
 	Worker                   []string                             `json:"worker"`
 	Slice                    *workflowstate.SliceInput            `json:"slice,omitempty"`

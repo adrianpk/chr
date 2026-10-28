@@ -66,7 +66,7 @@ func workflowUnitPullRequestObservationPath(id, bindingID string, count int) str
 	return filepath.ToSlash(filepath.Join("run", id, "extension", "chr", "pull-request", "observations", bindingID, fmt.Sprintf("%03d.json", count)))
 }
 
-func (s *Store) readWorkflowPullRequestObservation(binding PullRequestBinding) (workflowPullRequestObservation, error) {
+func (s *Store) readWorkflowPullRequestObservation(binding workflowstate.PullRequestBinding) (workflowPullRequestObservation, error) {
 	path, err := s.safePath(binding.ObservationRef)
 	if err != nil {
 		return workflowPullRequestObservation{}, err

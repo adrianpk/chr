@@ -9,7 +9,7 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowContinuationFixture(t *testing.T) (*Store, StartRequest, Invocation) {
+func workflowContinuationFixture(t *testing.T) (*Store, StartRequest, workflowstate.Invocation) {
 	t.Helper()
 
 	store, opts := workflowMaterializationFixture(t)
@@ -83,7 +83,7 @@ func checkWorkflowContinuationStep(t *testing.T, progress ContinuationProgress, 
 	}
 }
 
-func checkWorkflowContinuationIdentity(t *testing.T, checkpoint *ContinuationCheckpoint, run Invocation, step int) {
+func checkWorkflowContinuationIdentity(t *testing.T, checkpoint *workflowstate.ContinuationCheckpoint, run workflowstate.Invocation, step int) {
 	t.Helper()
 
 	if checkpoint == nil || checkpoint.Sequence != step || checkpoint.RequestHash != run.RequestHash || checkpoint.MemberCount != 6 || checkpoint.AttemptCount != step {

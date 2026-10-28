@@ -8,6 +8,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	harnesscore "forge.adrianpk.com/chr/internal/core/harness"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
 
@@ -71,7 +72,7 @@ func TestHarnessBindingSelectionOrder(t *testing.T) {
 	}
 }
 
-func checkHarnessBindingAdmissionImage(t *testing.T, run Invocation, before string) {
+func checkHarnessBindingAdmissionImage(t *testing.T, run workflowstate.Invocation, before string) {
 	t.Helper()
 
 	binding := run.HarnessBinding

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
 // ContinueWorkflow resumes an existing invocation through the common bounded
@@ -37,7 +38,7 @@ func (s service) ContinueWorkflow(ctx context.Context, id string, request workfl
 	return store.ContinueWorkflow(ctx, id, request, ports)
 }
 
-func (s service) workflowContinuationPorts(run workflowcore.Invocation, provider workflowcore.PullRequestProvider, reviewer []string) (workflowcore.ContinuationPorts, error) {
+func (s service) workflowContinuationPorts(run workflowstate.Invocation, provider workflowcore.PullRequestProvider, reviewer []string) (workflowcore.ContinuationPorts, error) {
 	observer := s.workflowIntegrationObserver(run)
 
 	target, ok := observer.(workflowcore.TargetGit)

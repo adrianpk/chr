@@ -84,7 +84,7 @@ func (host *guidedWorkHost) activate(operations service, id string) error {
 }
 
 func guidedHostFailure(err error) bool {
-	return err != nil && !errors.Is(err, workflowcore.ErrWorkflowOwned) && !errors.Is(err, workflowcore.ErrWorkflowCapacity) && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, authoringcore.ErrGuidedUseCaseStopped) && !errors.Is(err, workflowcore.ErrWorkflowStop)
+	return err != nil && !errors.Is(err, workflowstate.ErrOwned) && !errors.Is(err, workflowcore.ErrWorkflowCapacity) && !errors.Is(err, workflowstate.ErrConflict) && !errors.Is(err, authoringcore.ErrGuidedUseCaseStopped) && !errors.Is(err, workflowstate.ErrStop)
 }
 
 func (host *guidedWorkHost) release(key string) {

@@ -31,7 +31,7 @@ func (s *Store) finishWorkflowReview(ctx context.Context, operation workflowRevi
 		if workflowExecutionStopped(claimObservation.Run, interrupted) {
 			readErr = owner.finishStoppedWorkflowTask(claimObservation.Run, claimObservation.Record, claim, &workflowstate.TaskResult{})
 
-			return errors.Join(executionErr, ErrWorkflowStop, readErr)
+			return errors.Join(executionErr, workflowstate.ErrStop, readErr)
 		}
 
 		result, readErr = owner.acceptWorkflowReview(ctx, claimObservation, operation, completion)
@@ -108,7 +108,7 @@ func consumeWorkflowReviewRepair(run *workflowInvocationFile, taskKey string) er
 		return nil
 	}
 
-	run.ReviewRepairs = append(run.ReviewRepairs, ReviewRepairBudget{Unit: run.Review.Unit, Consumed: 1})
+	run.ReviewRepairs = append(run.ReviewRepairs, workflowstate.ReviewRepairBudget{Unit: run.Review.Unit, Consumed: 1})
 	run.Review.State = workflowstate.ReviewStale
 
 	return nil

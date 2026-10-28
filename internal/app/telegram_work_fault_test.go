@@ -12,7 +12,6 @@ import (
 	opscore "forge.adrianpk.com/chr/internal/core/ops"
 	opsnamespace "forge.adrianpk.com/chr/internal/core/ops/namespace"
 	telegramcore "forge.adrianpk.com/chr/internal/core/telegram"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -55,7 +54,7 @@ func TestTelegramWorkLostAck(t *testing.T) {
 	checkTelegramWorkRecovery(t, f, operations, input.Update, before)
 }
 
-func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, update telegramcore.ReceivedUpdate, before workflowcore.Invocation) {
+func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, operations service, update telegramcore.ReceivedUpdate, before workflowstate.Invocation) {
 	t.Helper()
 
 	after := checkTelegramWorkRunCount(t, operations, 1)
@@ -66,7 +65,7 @@ func checkTelegramWorkRecovery(t *testing.T, f *telegramConversationAppFixture, 
 	checkTelegramWorkRecoveryBinding(t, f, update, before)
 }
 
-func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, before workflowcore.Invocation) {
+func checkTelegramWorkRecoveryBinding(t *testing.T, f *telegramConversationAppFixture, update telegramcore.ReceivedUpdate, before workflowstate.Invocation) {
 	t.Helper()
 
 	operationLookup, err := f.receiver.store.Operation(t.Context(), update, 0)

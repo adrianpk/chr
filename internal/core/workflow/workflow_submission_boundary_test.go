@@ -135,7 +135,7 @@ func assertWorkflowSubmissionExcluded(t *testing.T, alias *Store, submission wor
 
 		return alias.guardWorkflowSubmissionTarget(t.Context(), contenthash.Sum([]byte("another-unit")), key)
 	})
-	if !errors.Is(err, ErrWorkflowOwned) {
+	if !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatalf("linked worktree or namespace bypassed target exclusion: %v", err)
 	}
 }

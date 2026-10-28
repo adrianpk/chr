@@ -77,7 +77,7 @@ func nativeProcessCapacity(t *testing.T, capacity int) {
 	}
 }
 
-func checkNativeProcessOverlap(t *testing.T, stores [3]*Store, runs [3]Invocation) {
+func checkNativeProcessOverlap(t *testing.T, stores [3]*Store, runs [3]workflowstate.Invocation) {
 	t.Helper()
 
 	first := workflowTestRead(t, stores[0], runs[0].ID)

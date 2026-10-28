@@ -53,7 +53,7 @@ func TestWorkflowClaimClose(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := claim.Close(); !errors.Is(err, ErrWorkflowOwned) || claim.reservation == nil {
+	if err := claim.Close(); !errors.Is(err, workflowstate.ErrOwned) || claim.reservation == nil {
 		t.Fatal("close released a running execution", err)
 	}
 

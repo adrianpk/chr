@@ -40,13 +40,13 @@ func (s *Store) retainWorkflowCandidateRepair(ctx context.Context, run *workflow
 		return err
 	}
 
-	run.CandidateRepair = &CandidateRepairBinding{Unit: entry.Unit, EntryID: entry.ID, ClaimGeneration: entry.ClaimGeneration, CandidateHash: workflowMergerCandidateHash(*run, entry), FindingRef: refs[0], RecordRef: ref}
+	run.CandidateRepair = &workflowstate.CandidateRepairBinding{Unit: entry.Unit, EntryID: entry.ID, ClaimGeneration: entry.ClaimGeneration, CandidateHash: workflowMergerCandidateHash(*run, entry), FindingRef: refs[0], RecordRef: ref}
 	before := run.Integration.EntryRef.Hash
 
 	updateWorkflowIntegrationEntry(&entry, request)
 
 	run.Status, run.Outcome = workflowstate.InvocationWaitingIntegration, "candidate_repair_required"
-	run.Blocker = &Blocker{Dependency: entry.Unit, Reason: reason, NextActionOwner: "workflow_merger"}
+	run.Blocker = &workflowstate.Blocker{Dependency: entry.Unit, Reason: reason, NextActionOwner: "workflow_merger"}
 
 	queue, err := workflowIntegrationEntryChange(entry, before)
 	if err != nil {

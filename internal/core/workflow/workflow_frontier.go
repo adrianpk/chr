@@ -9,32 +9,6 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-// UnitDelivery retains a delivered unit before its active bindings move.
-// EvidenceRef binds the exact frontier, target and receipt to an immutable image.
-type UnitDelivery struct {
-	Schema            string                         `json:"schema"`
-	InvocationID      string                         `json:"invocation_id"`
-	Unit              workflowstate.Ref              `json:"unit"`
-	SetID             string                         `json:"set_id,omitempty"`
-	Cursor            int                            `json:"cursor"`
-	Target            workflowstate.PreviewTarget    `json:"target"`
-	NextTarget        workflowstate.PreviewTarget    `json:"next_target"`
-	Lane              workflowstate.Lane             `json:"lane"`
-	CandidateRef      string                         `json:"candidate_ref"`
-	CandidateHash     string                         `json:"candidate_hash"`
-	PullRequest       *PullRequestBinding            `json:"pull_request_binding"`
-	DeliveryProofRef  string                         `json:"delivery_proof_ref"`
-	DeliveryProofHash string                         `json:"delivery_proof_hash"`
-	DeliveryRef       string                         `json:"delivery_ref"`
-	DeliveryHash      string                         `json:"delivery_hash"`
-	Preparation       *PreparationBinding            `json:"preparation_binding,omitempty"`
-	Review            *workflowstate.ReviewBinding   `json:"review_binding,omitempty"`
-	Submission        *SubmissionBinding             `json:"submission_binding,omitempty"`
-	Proof             workflowstate.IntegrationProof `json:"proof"`
-	EvidenceRef       string                         `json:"evidence_ref,omitempty"`
-	EvidenceHash      string                         `json:"evidence_hash,omitempty"`
-}
-
 // FrontierPorts supplies trusted canonical observation and target hydration.
 type FrontierPorts struct {
 	Provider PullRequestProvider
@@ -42,21 +16,11 @@ type FrontierPorts struct {
 	Target   TargetGit
 }
 
-// ExecutionSelection preserves admission identity while refreshing execution base.
-func (run Invocation) ExecutionSelection() workflowstate.PreviewRequest {
-	selection := run.Selection
-	if run.ExecutionTarget != nil {
-		selection.Target = *run.ExecutionTarget
-	}
-
-	return selection
-}
-
 // AdvanceWorkflowFrontier releases one finalized integration unit without work.
 // It verifies canonical delivery, journals retained proof, and hydrates the next
 // base. Grouped set boundaries wait for closing validation, including the last
 // set; loose units return to their frozen queue for fresh selection.
-func (s *Store) AdvanceWorkflowFrontier(ctx context.Context, id string, ports FrontierPorts) (result Invocation, err error) {
+func (s *Store) AdvanceWorkflowFrontier(ctx context.Context, id string, ports FrontierPorts) (result workflowstate.Invocation, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
@@ -126,7 +90,7 @@ func (s *Store) refreshWorkflowNativeFrontier(run *workflowInvocationFile, recei
 
 func (s *Store) workflowFrontierReady(ctx context.Context, run workflowInvocationFile) (bool, error) {
 	if run.StopIntent != "" || run.Status == workflowstate.InvocationPaused || run.Status == workflowstate.InvocationCancelled {
-		return false, ErrWorkflowStop
+		return false, workflowstate.ErrStop
 	}
 
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {

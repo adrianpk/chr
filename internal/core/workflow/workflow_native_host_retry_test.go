@@ -56,7 +56,7 @@ func TestNativeHostPreparationRetry(t *testing.T) {
 	checkNativeHostRetryReplay(t, host, request, control, after)
 }
 
-func checkNativeHostRetryReplay(t *testing.T, host nativeHostFixture, request workflowstate.ControlMutationRequest, control LifecycleControlPorts, after Invocation) {
+func checkNativeHostRetryReplay(t *testing.T, host nativeHostFixture, request workflowstate.ControlMutationRequest, control LifecycleControlPorts, after workflowstate.Invocation) {
 	t.Helper()
 
 	if _, err := host.f.store.ControlWorkflowLifecycle(t.Context(), request, control, nil); err != nil {

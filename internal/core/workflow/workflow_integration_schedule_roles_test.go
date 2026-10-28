@@ -188,12 +188,12 @@ func nativeRolePool(t *testing.T, purpose string) {
 	t.Helper()
 
 	store, _, _ := workflowClaimFixture(t)
-	firstRun := workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: "role-one"}}}
-	secondRun := workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: "role-two"}}}
+	firstRun := workflowInvocationFile{Invocation: workflowstate.Invocation{Identity: workflowstate.Identity{ID: "role-one"}}}
+	secondRun := workflowInvocationFile{Invocation: workflowstate.Invocation{Identity: workflowstate.Identity{ID: "role-two"}}}
 	// Merger payload and credential fencing remain with its role owner. This
 	// boundary certifies its pool reservation using the exact production purpose.
 	if purpose == workflowMergerPurpose {
-		firstRun.PullRequest = &PullRequestBinding{Request: workflowstate.PullRequestRequest{PullRequestQuery: workflowstate.PullRequestQuery{Repository: "https://forge.example/test/repo", BaseBranch: "dev"}}}
+		firstRun.PullRequest = &workflowstate.PullRequestBinding{Request: workflowstate.PullRequestRequest{PullRequestQuery: workflowstate.PullRequestQuery{Repository: "https://forge.example/test/repo", BaseBranch: "dev"}}}
 	}
 
 	var first *Claim
@@ -326,7 +326,7 @@ func TestNativeRoleBlocked(t *testing.T) {
 	peer, next := nativeRolePeer(t, f.store, "peer", "PRJ-91", "refs/heads/dev")
 
 	before := nativeQueueImages(t, f.store.layout.Root())
-	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := f.store.PrepareWorkflowSliceIntegration(t.Context(), f.run.ID, f.provider, f.git); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("preparation resumed a blocked native owner", err)
 	}
 

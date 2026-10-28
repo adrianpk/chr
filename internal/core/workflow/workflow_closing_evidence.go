@@ -75,24 +75,6 @@ func (s *Store) checkWorkflowClosingMembers(ctx context.Context, claim *workflow
 	return workflowClosingProofs(s, FrontierPorts{}).CheckReceipts(ctx, set)
 }
 
-func (s *Store) readWorkflowClosedSet(set workflowstate.Record) (SetClosureResult, error) {
-	if set.Set.Closing == nil || len(set.Set.Closing.Attempts) == 0 {
-		return SetClosureResult{}, workflowstate.ErrConflict
-	}
-
-	state, err := workflowcloseout.ReadAttempt(set.ID, set.Set.Closing, len(set.Set.Closing.Attempts)-1, workflowClosingEvidence{store: s})
-	if err != nil || state.Outcome != "completed" || state.Result.Ref != set.Set.ClosureRef {
-		return SetClosureResult{}, errorsOrConflict(err)
-	}
-
-	receipt, err := workflowcloseout.ReadReceipt(state, workflowClosingEvidence{store: s})
-	if err != nil {
-		return SetClosureResult{}, err
-	}
-
-	return SetClosureResult{Set: set, Receipt: receipt, ReceiptRef: state.Result.Ref, Outcome: state.Outcome}, nil
-}
-
 func (e workflowClosingEvidence) Check(hashes map[string]string) error {
 	return e.store.checkWorkflowPrerequisiteEvidence(hashes)
 }

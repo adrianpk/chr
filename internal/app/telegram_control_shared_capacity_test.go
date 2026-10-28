@@ -94,7 +94,7 @@ func telegramControlCapacityAdmission(t *testing.T, f *telegramConversationAppFi
 	return telegramcore.WorkReference{}
 }
 
-func telegramControlRunIDs(runs []workflowcore.Invocation) []string {
+func telegramControlRunIDs(runs []workflowstate.Invocation) []string {
 	ids := make([]string, len(runs))
 	for index, run := range runs {
 		ids[index] = run.ID
@@ -103,7 +103,7 @@ func telegramControlRunIDs(runs []workflowcore.Invocation) []string {
 	return ids
 }
 
-func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture, operations service, first telegramcore.WorkReference, capacity int) ([]workflowcore.Invocation, telegramcore.WorkReference) {
+func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture, operations service, first telegramcore.WorkReference, capacity int) ([]workflowstate.Invocation, telegramcore.WorkReference) {
 	t.Helper()
 
 	store, err := operations.workflowStore()
@@ -126,7 +126,7 @@ func telegramControlCapacityRuns(t *testing.T, f *telegramConversationAppFixture
 		t.Fatal(err)
 	}
 
-	runs := []workflowcore.Invocation{}
+	runs := []workflowstate.Invocation{}
 	waiting := telegramcore.WorkReference{}
 
 	for index := 1; index <= capacity; index++ {
@@ -369,7 +369,7 @@ func checkTelegramControlDuplicate(t *testing.T, f *telegramConversationAppFixtu
 	t.Helper()
 
 	result := f.receiver.activateWork(t.Context(), ref)
-	if (!errors.Is(result.Failure, workflowcore.ErrWorkflowOwned) && !errors.Is(result.Failure, workflowcore.ErrWorkflowCapacity)) || result.Progress.Steps != 0 {
+	if (!errors.Is(result.Failure, workflowstate.ErrOwned) && !errors.Is(result.Failure, workflowcore.ErrWorkflowCapacity)) || result.Progress.Steps != 0 {
 		t.Fatal("duplicate Telegram activation bypassed native owner", result.Progress.Steps, result.Failure)
 	}
 
@@ -474,7 +474,7 @@ func checkTelegramControlResults(t *testing.T, operations service, ids []string)
 	}
 }
 
-func checkTelegramControlResult(t *testing.T, run workflowcore.Invocation) {
+func checkTelegramControlResult(t *testing.T, run workflowstate.Invocation) {
 	t.Helper()
 
 	if run.Cursor != 1 || len(run.Attempts) != 1 || run.Attempts[0].Outcome != "validated" {

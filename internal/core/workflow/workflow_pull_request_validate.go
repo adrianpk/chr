@@ -35,7 +35,7 @@ func validateWorkflowPullRequestBinding(run workflowInvocationFile) error {
 	return validateWorkflowPullRequestObservationRef(run.ID, *binding)
 }
 
-func validWorkflowPullRequestIdentity(run workflowInvocationFile, binding PullRequestBinding) bool {
+func validWorkflowPullRequestIdentity(run workflowInvocationFile, binding workflowstate.PullRequestBinding) bool {
 	if run.Lane == nil {
 		return false
 	}
@@ -43,7 +43,7 @@ func validWorkflowPullRequestIdentity(run workflowInvocationFile, binding PullRe
 	return binding.Schema == "chr-slice-pr/v1" && binding.ID == workflowPullRequestBindingID(run, binding.Request.Repository) && (binding.Unit.Kind == "slice" || binding.Unit.Kind == "ticket") && binding.Unit == run.Lane.Unit && binding.TargetCommit == run.ExecutionSelection().Target.Commit && binding.Request.HeadBranch == strings.TrimPrefix(run.Lane.Branch, "refs/heads/")
 }
 
-func validateWorkflowPullRequestState(binding PullRequestBinding) error {
+func validateWorkflowPullRequestState(binding workflowstate.PullRequestBinding) error {
 	if !slices.Contains([]string{"prepared", "creating", "awaiting_observation", "bound", "blocked"}, binding.State) {
 		return workflowstate.ErrConflict
 	}
@@ -64,7 +64,7 @@ func validateWorkflowPullRequestState(binding PullRequestBinding) error {
 	return nil
 }
 
-func validWorkflowPullRequestCandidate(run workflowInvocationFile, binding PullRequestBinding) bool {
+func validWorkflowPullRequestCandidate(run workflowInvocationFile, binding workflowstate.PullRequestBinding) bool {
 	if !workflowstate.ValidCommitID(binding.SourceCommit) || !workflowstate.ValidCommitID(binding.SourceTree) {
 		return false
 	}
@@ -83,7 +83,7 @@ func validWorkflowPullRequestCandidate(run workflowInvocationFile, binding PullR
 	return false
 }
 
-func validateWorkflowPullRequestObservationRef(id string, binding PullRequestBinding) error {
+func validateWorkflowPullRequestObservationRef(id string, binding workflowstate.PullRequestBinding) error {
 	if binding.ObservationCount == 0 && binding.ObservationRef == "" && binding.ObservationHash == "" {
 		return nil
 	}
@@ -98,7 +98,7 @@ func validateWorkflowPullRequestObservationRef(id string, binding PullRequestBin
 	return nil
 }
 
-func validWorkflowTicketPullRequestCandidate(run workflowInvocationFile, binding PullRequestBinding) bool {
+func validWorkflowTicketPullRequestCandidate(run workflowInvocationFile, binding workflowstate.PullRequestBinding) bool {
 	run.CandidateRef, run.CandidateHash = binding.CandidateRef, binding.CandidateHash
 
 	return validWorkflowTicketCandidateRef(run) && binding.CandidateRef == workflowTicketCandidatePath(run.ID, binding.CandidateID)

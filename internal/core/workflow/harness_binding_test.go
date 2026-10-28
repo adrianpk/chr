@@ -84,7 +84,7 @@ func workflowBindingExecute(t *testing.T, store *Store, id string) {
 	}
 }
 
-func checkHarnessBindingPause(t *testing.T, store *Store, original Invocation) {
+func checkHarnessBindingPause(t *testing.T, store *Store, original workflowstate.Invocation) {
 	t.Helper()
 
 	paused, err := store.StopWorkflow(t.Context(), original.ID, "pause")
@@ -100,7 +100,7 @@ func checkHarnessBindingPause(t *testing.T, store *Store, original Invocation) {
 	}
 }
 
-func checkHarnessBindingInputs(t *testing.T, store *Store, run Invocation) {
+func checkHarnessBindingInputs(t *testing.T, store *Store, run workflowstate.Invocation) {
 	t.Helper()
 
 	for _, attempt := range run.Attempts {

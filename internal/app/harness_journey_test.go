@@ -43,7 +43,7 @@ func TestHarnessJourney(t *testing.T) {
 	webHarnessCheckProcess(t, f.operations, webHarnessSnapshot(t, f.operations))
 }
 
-func (f *harnessJourney) startWorker(t *testing.T) (workflowcore.Invocation, *workflowcore.Claim) {
+func (f *harnessJourney) startWorker(t *testing.T) (workflowstate.Invocation, *workflowcore.Claim) {
 	t.Helper()
 
 	started, err := f.operations.StartWorkflow(t.Context(), f.start)
@@ -103,7 +103,7 @@ func (f *harnessJourney) checkAdmission(t *testing.T, index int, choice harnessJ
 	}
 }
 
-func (f *harnessJourney) resumeWorker(t *testing.T, before workflowcore.Invocation, claim *workflowcore.Claim) {
+func (f *harnessJourney) resumeWorker(t *testing.T, before workflowstate.Invocation, claim *workflowcore.Claim) {
 	t.Helper()
 
 	if _, err := f.operations.StopWorkflow(t.Context(), before.ID, "pause", before.Revision); err != nil {

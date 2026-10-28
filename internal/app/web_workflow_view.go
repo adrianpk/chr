@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strconv"
 
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
+	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	"forge.adrianpk.com/chr/internal/webui"
 )
 
@@ -104,7 +104,7 @@ func webWorkflowBindings(status WorkflowWorkStatus) []webui.WorkflowFieldView {
 	return fields
 }
 
-func webWorkflowMembers(members []workflowcore.PreviewMember) []webui.WorkflowFieldView {
+func webWorkflowMembers(members []workflowstate.PreviewMember) []webui.WorkflowFieldView {
 	fields := make([]webui.WorkflowFieldView, 0, len(members))
 	for _, member := range members {
 		value := fmt.Sprintf("revision %d; set %s; slice %s; order %d; phase %s; readiness %s", member.Revision, member.SetID, member.SliceID, member.TaskOrder, member.Phase, member.Readiness)

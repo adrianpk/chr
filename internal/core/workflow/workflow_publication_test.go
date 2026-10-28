@@ -138,7 +138,7 @@ func workflowPublicationModeStart(t *testing.T, f workflowPreparationFixture, p 
 	return progress, err
 }
 
-func checkWorkflowPublicationConfirmation(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, ports PublicationPorts, before Invocation) {
+func checkWorkflowPublicationConfirmation(t *testing.T, f workflowPreparationFixture, p *workflowSubmissionProviderFixture, ports PublicationPorts, before workflowstate.Invocation) {
 	t.Helper()
 
 	restarted := NewWorkflowStore(f.store.layout, f.store.projectID)

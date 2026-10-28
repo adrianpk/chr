@@ -9,7 +9,6 @@ import (
 
 	executioncore "forge.adrianpk.com/chr/internal/core/execution"
 	ticketcore "forge.adrianpk.com/chr/internal/core/ticket"
-	workflowcore "forge.adrianpk.com/chr/internal/core/workflow"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -42,11 +41,11 @@ func TestWorkObservationContexts(t *testing.T) {
 	result := WorkObservation{}
 
 	for _, item := range []struct{ id, key, attempt string }{{"first", "PRJ-1", "one"}, {"second", "PRJ-2", "two"}} {
-		run := workflowcore.Invocation{Identity: workflowstate.Identity{ID: item.id, UpdatedAt: at}, InvocationExecution: workflowcore.InvocationExecution{Status: workflowstate.InvocationRunning, Attempts: []workflowcore.Attempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []workflowstate.Process{{State: workflowstate.ProcessRunning, Command: []string{"go", "test"}}}}}}}
+		run := workflowstate.Invocation{Identity: workflowstate.Identity{ID: item.id, UpdatedAt: at}, InvocationExecution: workflowstate.InvocationExecution{Status: workflowstate.InvocationRunning, Attempts: []workflowstate.Attempt{{ID: item.attempt, TaskKey: item.key, Outcome: "running", StartedAt: at, Processes: []workflowstate.Process{{State: workflowstate.ProcessRunning, Command: []string{"go", "test"}}}}}}}
 		appendNativeWork(&result, run, tickets, records)
 	}
 
-	completed := workflowcore.Invocation{Identity: workflowstate.Identity{ID: "complete", UpdatedAt: at}, InvocationExecution: workflowcore.InvocationExecution{Status: workflowstate.InvocationCompleted, Outcome: "task_validated", Cursor: 1}, InvocationInput: workflowcore.InvocationInput{Members: []workflowcore.Member{{Admission: workflowcore.PreviewMember{Key: "PRJ-1"}}}}}
+	completed := workflowstate.Invocation{Identity: workflowstate.Identity{ID: "complete", UpdatedAt: at}, InvocationExecution: workflowstate.InvocationExecution{Status: workflowstate.InvocationCompleted, Outcome: "task_validated", Cursor: 1}, InvocationInput: workflowstate.InvocationInput{Members: []workflowstate.Member{{Admission: workflowstate.PreviewMember{Key: "PRJ-1"}}}}}
 	appendNativeWork(&result, completed, tickets, records)
 
 	if len(result.Current) != 2 || result.Current[0].Phase != "validating" || result.Current[0].Message != "Running go" || result.Current[1].Phase != "working" || len(result.Results) != 1 || result.Results[0].Confirmed != 0 || result.Results[0].Phase != "task_validated" {
@@ -63,7 +62,7 @@ func TestWorkObservationLifecycle(t *testing.T) {
 	}{{"blocked", "blocked", false}, {"stopped", "paused", false}, {"cancelled", "cancelled", true}} {
 		t.Run(item.name, func(t *testing.T) {
 			result := WorkObservation{}
-			run := workflowcore.Invocation{Identity: workflowstate.Identity{ID: item.name, UpdatedAt: time.Now().UTC()}, InvocationExecution: workflowcore.InvocationExecution{Status: workflowstate.InvocationStatus(item.status)}}
+			run := workflowstate.Invocation{Identity: workflowstate.Identity{ID: item.name, UpdatedAt: time.Now().UTC()}, InvocationExecution: workflowstate.InvocationExecution{Status: workflowstate.InvocationStatus(item.status)}}
 			appendNativeWork(&result, run, nil, nil)
 
 			contexts := result.Current

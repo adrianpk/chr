@@ -54,7 +54,7 @@ func (s *Store) checkWorkflowIntegrationReservationAdmission(ctx context.Context
 	}
 
 	if workflowIntegrationReservationStopped(run, entry) {
-		return ErrWorkflowStop
+		return workflowstate.ErrStop
 	}
 
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {
@@ -300,7 +300,7 @@ func workflowIntegrationBaseCharged(reservations []IntegrationReservation, reser
 }
 
 func workflowAgentUsageRecorded(run workflowInvocationFile, r IntegrationReservation) bool {
-	return slices.ContainsFunc(run.Attempts, func(a Attempt) bool {
+	return slices.ContainsFunc(run.Attempts, func(a workflowstate.Attempt) bool {
 		role := "executor"
 		if a.Purpose == workflowSliceReviewPurpose {
 			role = "reviewer"

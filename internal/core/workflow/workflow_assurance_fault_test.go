@@ -29,7 +29,7 @@ func TestWorkflowAssuranceLost(t *testing.T) {
 	}
 }
 
-func workflowAssuranceLosses(t *testing.T, store *Store, id string, ports ContinuationPorts) (Invocation, int) {
+func workflowAssuranceLosses(t *testing.T, store *Store, id string, ports ContinuationPorts) (workflowstate.Invocation, int) {
 	t.Helper()
 
 	losses := 0
@@ -48,7 +48,7 @@ func workflowAssuranceLosses(t *testing.T, store *Store, id string, ports Contin
 
 	t.Fatal("lost-response recovery exceeded eighty bounded calls")
 
-	return Invocation{}, losses
+	return workflowstate.Invocation{}, losses
 }
 
 func workflowAssuranceLostResponse(t *testing.T, store *Store, progress ContinuationProgress, failure error) int {

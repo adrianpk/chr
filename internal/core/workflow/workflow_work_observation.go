@@ -16,8 +16,8 @@ import (
 type WorkObservation struct {
 	Tickets     []ticketcore.Indexed
 	Records     []workflowstate.Record
-	Invocations []Invocation
-	Queue       []PreviewMember
+	Invocations []workflowstate.Invocation
+	Queue       []workflowstate.PreviewMember
 	Excluded    map[string]int
 }
 

@@ -108,7 +108,7 @@ func appendWorkflowIntegrationOwners(result *IntegrationCapacity, runs []workflo
 	return nil
 }
 
-func appendWorkflowIntegrationAttemptOwner(result *IntegrationCapacity, run workflowInvocationFile, attempt Attempt, slots map[int]bool, now time.Time) error {
+func appendWorkflowIntegrationAttemptOwner(result *IntegrationCapacity, run workflowInvocationFile, attempt workflowstate.Attempt, slots map[int]bool, now time.Time) error {
 	if attempt.OwnerProcess == nil || attempt.Outcome != "running" {
 		return nil
 	}
@@ -333,7 +333,7 @@ func (s *Store) workflowIntegrationClosureStatus(ctx context.Context, snapshot w
 	}
 
 	if set.Set.Status == "completed" {
-		if _, err := s.readWorkflowClosedSet(set); err != nil {
+		if _, err := workflowcloseout.ReadClosedSet(set, workflowClosingEvidence{store: s}); err != nil {
 			return status, err
 		}
 

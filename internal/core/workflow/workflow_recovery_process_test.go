@@ -99,7 +99,7 @@ func assertWorkflowRecoveryCapacity(t *testing.T, store *Store, id string) {
 	}
 }
 
-func waitWorkflowRecovery(t *testing.T, store *Store, id string) Invocation {
+func waitWorkflowRecovery(t *testing.T, store *Store, id string) workflowstate.Invocation {
 	t.Helper()
 
 	deadline := time.Now().Add(5 * time.Second)
@@ -118,7 +118,7 @@ func waitWorkflowRecovery(t *testing.T, store *Store, id string) Invocation {
 
 	t.Fatal("owned worker did not become quiescent")
 
-	return Invocation{}
+	return workflowstate.Invocation{}
 }
 
 func stopWorkflowRecoveryHost(t *testing.T, host *exec.Cmd, release string, store *Store, id string) {
@@ -165,7 +165,7 @@ func checkWorkflowRecoveryReplacement(t *testing.T, store *Store, id, release st
 	checkWorkflowReplacementFence(t, store, id, retained.Attempts[0])
 }
 
-func checkWorkflowReplacementFence(t *testing.T, store *Store, id string, previous Attempt) {
+func checkWorkflowReplacementFence(t *testing.T, store *Store, id string, previous workflowstate.Attempt) {
 	t.Helper()
 
 	replacement := workflowTestClaim(t, store, id)

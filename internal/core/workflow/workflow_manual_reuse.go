@@ -27,7 +27,7 @@ func (s *Store) reuseWorkflowManualResult(ctx context.Context, claim *Claim, can
 		}
 
 		if len(invocationLocation.Run.Attempts) == 0 {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		attempt := invocationLocation.Run.Attempts[len(invocationLocation.Run.Attempts)-1]
@@ -38,7 +38,7 @@ func (s *Store) reuseWorkflowManualResult(ctx context.Context, claim *Claim, can
 		found = true
 
 		if !workflowManualResultOwnerMatches(invocationLocation.Run, attempt, claim) {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
 		if readErr = invocationLocation.Owner.checkWorkflowInputs(ctx, invocationLocation.Run); readErr != nil {
@@ -60,7 +60,7 @@ func (s *Store) reuseWorkflowManualResult(ctx context.Context, claim *Claim, can
 	return workflowManualReplay{Result: result, Found: found}, err
 }
 
-func (s *Store) checkWorkflowManualProof(ctx context.Context, run workflowInvocationFile, attempt Attempt, candidate ManualCandidate) (workflowstate.TaskResult, error) {
+func (s *Store) checkWorkflowManualProof(ctx context.Context, run workflowInvocationFile, attempt workflowstate.Attempt, candidate ManualCandidate) (workflowstate.TaskResult, error) {
 	result, err := s.readWorkflowManualResult(attempt, candidate)
 	if err != nil {
 		return result, err
@@ -86,7 +86,7 @@ func (s *Store) checkWorkflowManualProof(ctx context.Context, run workflowInvoca
 	return result, nil
 }
 
-func (s *Store) checkWorkflowManualRetainedImage(ctx context.Context, attempt Attempt, candidate ManualCandidate) error {
+func (s *Store) checkWorkflowManualRetainedImage(ctx context.Context, attempt workflowstate.Attempt, candidate ManualCandidate) error {
 	prepared, err := s.readWorkflowManualInput(attempt)
 	if err != nil {
 		return err
@@ -108,11 +108,11 @@ func (s *Store) checkWorkflowManualRetainedImage(ctx context.Context, attempt At
 	return nil
 }
 
-func workflowManualResultOwnerMatches(run workflowInvocationFile, attempt Attempt, claim *Claim) bool {
+func workflowManualResultOwnerMatches(run workflowInvocationFile, attempt workflowstate.Attempt, claim *Claim) bool {
 	return run.OwnerRoot == claim.store.layout.Root() && attempt.ID == claim.AttemptID && attempt.Generation == claim.Generation && run.Owners[attempt.ID] == contenthash.Sum([]byte(claim.Token))
 }
 
-func workflowAttemptTaskPath(run workflowInvocationFile, attempt Attempt) string {
+func workflowAttemptTaskPath(run workflowInvocationFile, attempt workflowstate.Attempt) string {
 	for _, member := range run.Members {
 		if member.Admission.Key == attempt.TaskKey {
 			return member.Admission.Path
@@ -122,7 +122,7 @@ func workflowAttemptTaskPath(run workflowInvocationFile, attempt Attempt) string
 	return ""
 }
 
-func (s *Store) readWorkflowManualResult(attempt Attempt, candidate ManualCandidate) (workflowstate.TaskResult, error) {
+func (s *Store) readWorkflowManualResult(attempt workflowstate.Attempt, candidate ManualCandidate) (workflowstate.TaskResult, error) {
 	path, err := s.safePath(attempt.ResultRef)
 	if err != nil {
 		return workflowstate.TaskResult{}, err
@@ -149,6 +149,6 @@ func (s *Store) readWorkflowManualResult(attempt Attempt, candidate ManualCandid
 	return result, nil
 }
 
-func workflowManualResultMatches(result workflowstate.TaskResult, attempt Attempt, candidate ManualCandidate) bool {
+func workflowManualResultMatches(result workflowstate.TaskResult, attempt workflowstate.Attempt, candidate ManualCandidate) bool {
 	return result.ExecutionMode == "manual" && result.AttemptID == attempt.ID && result.Generation == attempt.Generation && result.InputHash == candidate.InputHash && result.InputHash == attempt.InputHash && result.Branch == candidate.Branch && result.Commit == candidate.Commit && result.Tree == candidate.Tree
 }

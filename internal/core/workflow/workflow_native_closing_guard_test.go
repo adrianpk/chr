@@ -30,7 +30,7 @@ func TestNativeClosingFanout(t *testing.T) {
 	ports := nativeReceiptFrontierPorts(t, f.fixture, f.receipt.Receipt.ResultCommit)
 	request := workflowcloseout.Request{SetPath: set.Path, ExpectedRevision: set.Revision, ExpectedSourceHash: set.SourceHash, Repository: f.receipt.Receipt.Repository, Branch: "dev"}
 
-	if _, err := store.CloseWorkflowSet(t.Context(), request, ports); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.CloseWorkflowSet(t.Context(), request, ports); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("physical receipt bypassed unfinished member fanout", err)
 	}
 
@@ -68,7 +68,7 @@ func TestNativeClosingRetry(t *testing.T) {
 	checkNativeClosingRetry(t, f, before, closed, restarted, ports, counter)
 }
 
-func checkNativeClosingRetry(t *testing.T, f nativeClosingFixture, before map[string]string, closed SetClosureResult, restarted *Store, ports FrontierPorts, counter string) {
+func checkNativeClosingRetry(t *testing.T, f nativeClosingFixture, before map[string]string, closed workflowcloseout.Result, restarted *Store, ports FrontierPorts, counter string) {
 	t.Helper()
 
 	request := workflowcloseout.Request{SetPath: closed.Set.Path, ExpectedRevision: closed.Set.Revision, ExpectedSourceHash: closed.Set.SourceHash, Repository: closed.Receipt.Target.Repository, Branch: "dev"}
@@ -157,7 +157,7 @@ func nativeClosingCorrectiveSet(t *testing.T, store *Store) workflowstate.Record
 	return set
 }
 
-func checkNativeClosingSetOutcomes(t *testing.T, store *Store, original, corrective SetClosureResult, before []byte) {
+func checkNativeClosingSetOutcomes(t *testing.T, store *Store, original, corrective workflowcloseout.Result, before []byte) {
 	t.Helper()
 
 	if corrective.ReceiptRef == original.ReceiptRef || corrective.Receipt.SetID == original.Receipt.SetID || len(corrective.Set.Set.Closing.Attempts) != 2 {

@@ -23,26 +23,6 @@ type PullRequestProvider interface {
 	ReadWorkflowBranch(context.Context, string, string) (string, error)
 }
 
-// PullRequestBinding retains creation intent across crash and candidate repair.
-type PullRequestBinding struct {
-	Schema           string                           `json:"schema"`
-	ID               string                           `json:"id"`
-	Unit             workflowstate.Ref                `json:"unit"`
-	Request          workflowstate.PullRequestRequest `json:"request"`
-	TargetCommit     string                           `json:"target_commit"`
-	CandidateID      string                           `json:"candidate_id"`
-	CandidateRef     string                           `json:"candidate_ref"`
-	CandidateHash    string                           `json:"candidate_hash"`
-	SourceCommit     string                           `json:"source_commit"`
-	SourceTree       string                           `json:"source_tree"`
-	URL              string                           `json:"url"`
-	State            string                           `json:"state"`
-	Reason           string                           `json:"reason"`
-	ObservationCount int                              `json:"observation_count"`
-	ObservationRef   string                           `json:"observation_ref"`
-	ObservationHash  string                           `json:"observation_hash"`
-}
-
 // EnsureWorkflowSlicePullRequest creates or reuses one unit-owned canonical PR.
 // Provider IO is bounded and serialized by the common repository mutation lock;
 // it holds no worker capacity reservation. Uncertain creation never resubmits.

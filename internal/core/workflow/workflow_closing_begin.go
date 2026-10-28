@@ -15,7 +15,7 @@ import (
 
 type workflowClosingAdmission struct {
 	Claim  *workflowClosingClaim
-	Result SetClosureResult
+	Result workflowcloseout.Result
 }
 
 func (s *Store) beginWorkflowClosing(ctx context.Context, request workflowcloseout.Request, ports FrontierPorts) (admission workflowClosingAdmission, err error) {
@@ -33,7 +33,7 @@ func (s *Store) beginWorkflowClosing(ctx context.Context, request workflowcloseo
 	}
 
 	if set.Set.Status == "completed" {
-		admission.Result, err = s.readWorkflowClosedSet(set)
+		admission.Result, err = workflowcloseout.ReadClosedSet(set, workflowClosingEvidence{store: s})
 
 		return admission, err
 	}
@@ -87,7 +87,7 @@ func workflowClosingReservation(set workflowstate.Record) workflowInvocationFile
 		count = len(set.Set.Closing.Attempts)
 	}
 
-	return workflowInvocationFile{Invocation: Invocation{Identity: workflowstate.Identity{ID: workflowClosingOwnerID(set)}, InvocationExecution: InvocationExecution{Attempts: make([]Attempt, count)}}}
+	return workflowInvocationFile{Invocation: workflowstate.Invocation{Identity: workflowstate.Identity{ID: workflowClosingOwnerID(set)}, InvocationExecution: workflowstate.InvocationExecution{Attempts: make([]workflowstate.Attempt, count)}}}
 }
 
 func (s *Store) prepareWorkflowClosing(ctx context.Context, set workflowstate.Record, request workflowcloseout.Request, ports FrontierPorts, worker *Claim) (*workflowClosingClaim, error) {
@@ -133,7 +133,7 @@ func workflowClosingOwnerID(set workflowstate.Record) string {
 
 func (s *Store) workflowClosingReady(ctx context.Context, set workflowstate.Record, request workflowcloseout.Request) error {
 	if set.Set.Status == "closing" {
-		return ErrWorkflowOwned
+		return workflowstate.ErrOwned
 	}
 
 	if err := s.checkWorkflowClosingPublications(ctx); err != nil {
@@ -163,7 +163,7 @@ func (s *Store) workflowClosingReady(ctx context.Context, set workflowstate.Reco
 			return err
 		}
 
-		return s.workflowClosingRunReady(ctx, run, set.ID)
+		return workflowcloseout.CheckReady(ctx, workflowcloseout.Readiness{Run: run.Invocation, SetID: set.ID, OwnerRoot: run.OwnerRoot, Root: s.layout.Root()}, workflowClosingRunGuard{store: s, run: run})
 	}
 
 	return nil
@@ -171,15 +171,15 @@ func (s *Store) workflowClosingReady(ctx context.Context, set workflowstate.Reco
 
 func (s *Store) workflowClosingInvocationOwner(ctx context.Context, runs []workflowInvocationFile, set workflowstate.Record, id string) error {
 	for _, run := range runs {
-		if run.Namespace != set.Namespace || workflowInvocationTerminal(run.Status) || !workflowClaimResources(run)["set:"+set.ID] {
+		if run.Namespace != set.Namespace || workflowstate.InvocationTerminal(run.Status) || !workflowClaimResources(run)["set:"+set.ID] {
 			continue
 		}
 
 		if run.ID != id || run.OwnerRoot != s.layout.Root() {
-			return ErrWorkflowOwned
+			return workflowstate.ErrOwned
 		}
 
-		if err := s.workflowClosingRunReady(ctx, run, set.ID); err != nil {
+		if err := workflowcloseout.CheckReady(ctx, workflowcloseout.Readiness{Run: run.Invocation, SetID: set.ID, OwnerRoot: run.OwnerRoot, Root: s.layout.Root()}, workflowClosingRunGuard{store: s, run: run}); err != nil {
 			return err
 		}
 	}

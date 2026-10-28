@@ -94,7 +94,7 @@ func testWorkflowGuardedAdmission(t *testing.T, name string) {
 	}
 }
 
-func workflowCASControl(t *testing.T, store *Store, run Invocation, action string) error {
+func workflowCASControl(t *testing.T, store *Store, run workflowstate.Invocation, action string) error {
 	t.Helper()
 
 	if action == "pause" {

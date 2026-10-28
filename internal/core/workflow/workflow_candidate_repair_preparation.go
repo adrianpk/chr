@@ -43,7 +43,7 @@ func (s *Store) acceptedWorkflowCandidateRepair(run workflowInvocationFile) (wor
 	return workflowAcceptedRepair{State: nil, Refs: nil}, nil
 }
 
-func (s *Store) readWorkflowAcceptedRepair(run workflowInvocationFile, entry IntegrationEntry, attempt Attempt) (workflowAcceptedRepair, error) {
+func (s *Store) readWorkflowAcceptedRepair(run workflowInvocationFile, entry IntegrationEntry, attempt workflowstate.Attempt) (workflowAcceptedRepair, error) {
 	ref := workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}
 
 	var result MergerAttempt
@@ -110,7 +110,7 @@ func (s *Store) workflowCandidateRepairAttemptRef(run workflowInvocationFile, ha
 	return workflowstate.EvidenceRef{}, workflowstate.ErrConflict
 }
 
-func validWorkflowAcceptedRepair(run workflowInvocationFile, entry IntegrationEntry, attempt Attempt, result MergerAttempt) bool {
+func validWorkflowAcceptedRepair(run workflowInvocationFile, entry IntegrationEntry, attempt workflowstate.Attempt, result MergerAttempt) bool {
 	a := result.Acceptance
 	if attempt.Outcome != "checkpointed" || a == nil || a.Outcome != "accepted_pending_validation" || a.AttemptID != attempt.ID || a.InputHash != result.Input.InputHash || a.Next == nil || a.Next.Result == nil {
 		return false

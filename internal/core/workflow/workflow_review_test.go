@@ -25,7 +25,7 @@ func (p *workflowReviewProviderFixture) ReadWorkflowBranch(_ context.Context, _,
 	return p.pr.HeadCommit, nil
 }
 
-func workflowReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (*Store, MaterializationResult, Invocation, *workflowReviewProviderFixture) {
+func workflowReviewFixture(t *testing.T, mode workflowstate.ReviewMode) (*Store, MaterializationResult, workflowstate.Invocation, *workflowReviewProviderFixture) {
 	t.Helper()
 
 	store, hierarchy, run, provider := workflowPRPolicyFixture(t, "slice", workflowstate.ExecutionPolicy{MaxWorkerAttempts: 128})

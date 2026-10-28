@@ -2,11 +2,11 @@ package workflow
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 	"time"
 
+	workflowcloseout "forge.adrianpk.com/chr/internal/core/workflow/closeout"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -15,16 +15,13 @@ type workflowStopWatch struct {
 	Cancel context.CancelFunc
 }
 
-// ErrWorkflowStop reports a durable pause or cancellation request.
-var ErrWorkflowStop = errors.New("workflow stop requested")
-
 // StopWorkflow records intent. A running attempt releases ownership only after
 // its process group is quiescent and its retained checkpoint is journaled.
-func (s *Store) StopWorkflow(ctx context.Context, id, intent string, expected ...uint64) (result Invocation, err error) {
+func (s *Store) StopWorkflow(ctx context.Context, id, intent string, expected ...uint64) (result workflowstate.Invocation, err error) {
 	return s.stopWorkflowChecked(ctx, id, intent, nil, expected...)
 }
 
-func (s *Store) stopWorkflowChecked(ctx context.Context, id, intent string, check AdmissionCheck, expected ...uint64) (result Invocation, err error) {
+func (s *Store) stopWorkflowChecked(ctx context.Context, id, intent string, check AdmissionCheck, expected ...uint64) (result workflowstate.Invocation, err error) {
 	if !slices.Contains([]string{"pause", "cancel"}, intent) {
 		return result, fmt.Errorf("workflow stop intent must be pause or cancel")
 	}
@@ -54,7 +51,7 @@ func (s *Store) stopWorkflowChecked(ctx context.Context, id, intent string, chec
 }
 
 // ResumeWorkflow clears a completed pause without resetting attempts or evidence.
-func (s *Store) ResumeWorkflow(ctx context.Context, id string, ports ...ResumePorts) (result Invocation, err error) {
+func (s *Store) ResumeWorkflow(ctx context.Context, id string, ports ...ResumePorts) (result workflowstate.Invocation, err error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Minute)
 	defer cancel()
 
@@ -104,28 +101,28 @@ func workflowRetainedStopIntent(run workflowInvocationFile, intent string) strin
 	return intent
 }
 
-func (s *Store) resumeGuardedWorkflow(ctx context.Context, run workflowInvocationFile, ports []ResumePorts, control *workflowControlCommit) (Invocation, error) {
+func (s *Store) resumeGuardedWorkflow(ctx context.Context, run workflowInvocationFile, ports []ResumePorts, control *workflowControlCommit) (workflowstate.Invocation, error) {
 	if err := checkWorkflowResumeRevision(run.Invocation, ports); err != nil {
-		return Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	if len(ports) == 1 {
 		if err := workflowCheckAuthorization(ctx, ports[0].AuthorizationCheck); err != nil {
-			return Invocation{}, err
+			return workflowstate.Invocation{}, err
 		}
 	}
 
 	if run.Status != workflowstate.InvocationPaused || run.StopIntent == "cancel" {
-		return Invocation{}, ErrWorkflowOwned
+		return workflowstate.Invocation{}, workflowstate.ErrOwned
 	}
 
 	if err := s.checkWorkflowInputs(ctx, run); err != nil {
-		return Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	changes, err := s.resumeWorkflowPrerequisite(ctx, &run, ports)
 	if err != nil {
-		return Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	run.Status = workflowstate.InvocationPending
@@ -137,7 +134,7 @@ func (s *Store) resumeGuardedWorkflow(ctx context.Context, run workflowInvocatio
 	restoreWorkflowInterruptedContinuation(&run)
 
 	if err := s.commitWorkflowControlResume(ctx, &run, changes, control); err != nil {
-		return Invocation{}, err
+		return workflowstate.Invocation{}, err
 	}
 
 	return run.Invocation, nil
@@ -149,8 +146,8 @@ func restoreWorkflowInterruptedContinuation(run *workflowInvocationFile) {
 	}
 	// Interrupted set closure retains its own retry marker. A resumed task or
 	// validation must reach its original owner rather than the closing branch.
-	next := workflowNextClosingSet(run.Invocation)
-	if next != "" && workflowClosingRunFrontier(*run, next) {
+	next := workflowcloseout.NextSet(run.Invocation)
+	if next != "" && workflowcloseout.AtFrontier((*run).Invocation, next) {
 		return
 	}
 
@@ -163,7 +160,7 @@ func (s *Store) stopWorkflow(ctx context.Context, run *workflowInvocationFile, i
 		return err
 	}
 
-	if workflowInvocationTerminal(run.Status) || run.StopIntent == intent {
+	if workflowstate.InvocationTerminal(run.Status) || run.StopIntent == intent {
 		return s.retainWorkflowControlNoop(ctx, *run, control)
 	}
 

@@ -141,7 +141,7 @@ func harnessLivePiGeneration(t *testing.T, operations service) harnesshost.RunMe
 	return records[0]
 }
 
-func harnessLivePiWorker(t *testing.T, operations service, request workflowcore.StartRequest) (workflowcore.Invocation, workflowstate.TaskResult) {
+func harnessLivePiWorker(t *testing.T, operations service, request workflowcore.StartRequest) (workflowstate.Invocation, workflowstate.TaskResult) {
 	t.Helper()
 
 	started, err := operations.StartWorkflow(t.Context(), request)
@@ -169,7 +169,7 @@ func harnessLivePiWorker(t *testing.T, operations service, request workflowcore.
 	return retained, result
 }
 
-func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, generation harnesshost.RunMetadata, worker workflowcore.Invocation, result workflowstate.TaskResult) {
+func writeHarnessLivePiEvidence(t *testing.T, options harnessLivePiOptions, generation harnesshost.RunMetadata, worker workflowstate.Invocation, result workflowstate.TaskResult) {
 	t.Helper()
 
 	candidate, err := exec.CommandContext(t.Context(), "git", "rev-parse", "HEAD").Output()
@@ -244,7 +244,7 @@ func validateHarnessLivePiOutput(ctx context.Context, request core.StructuredMod
 	return core.ValidateStructuredModelOutput(ctx, request, validation)
 }
 
-func harnessLivePiWorkerResult(t *testing.T, operations service, id string, request workflowcore.StartRequest, result workflowstate.TaskResult) workflowcore.Invocation {
+func harnessLivePiWorkerResult(t *testing.T, operations service, id string, request workflowcore.StartRequest, result workflowstate.TaskResult) workflowstate.Invocation {
 	t.Helper()
 
 	retained, err := operations.ReadWorkflow(t.Context(), id)
@@ -257,7 +257,7 @@ func harnessLivePiWorkerResult(t *testing.T, operations service, id string, requ
 	return retained
 }
 
-func checkHarnessLivePiCommit(t *testing.T, retained workflowcore.Invocation, before, after string) {
+func checkHarnessLivePiCommit(t *testing.T, retained workflowstate.Invocation, before, after string) {
 	t.Helper()
 
 	if retained.HarnessBinding == nil || retained.HarnessBinding.Harness != "pi" || retained.Policy.MaxWorkerAttempts != 1 || retained.Policy.WorkerTimeoutSeconds != 90 {

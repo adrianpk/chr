@@ -58,7 +58,7 @@ func (s *Store) workflowLooseWriteChanges(ctx context.Context, next workflowstat
 }
 
 func (s *Store) workflowLooseWriteMember(run *workflowInvocationFile, old, next workflowstate.Record) (bool, error) {
-	if run.OwnerRoot != s.layout.Root() || run.Namespace != old.Namespace || run.Selection.Selector.Extent != "loose" || workflowInvocationTerminal(run.Status) {
+	if run.OwnerRoot != s.layout.Root() || run.Namespace != old.Namespace || run.Selection.Selector.Extent != "loose" || workflowstate.InvocationTerminal(run.Status) {
 		return false, nil
 	}
 

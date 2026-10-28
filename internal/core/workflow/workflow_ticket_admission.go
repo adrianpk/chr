@@ -25,7 +25,7 @@ func validateWorkflowTicketAdmission(guard *workflowstate.AdmissionGuard, select
 
 // PreviewWorkflowTicketAdmission observes a proposed readiness transition. It
 // never changes the ticket or admits work; non-backlog tickets need no transition.
-func (s *Store) PreviewWorkflowTicketAdmission(ctx context.Context, member PreviewMember) (result *workflowstate.TicketAdmission, err error) {
+func (s *Store) PreviewWorkflowTicketAdmission(ctx context.Context, member workflowstate.PreviewMember) (result *workflowstate.TicketAdmission, err error) {
 	err = s.withRepositoryLock(ctx, s.requireNoWorkflowTransition, func() error {
 		record, err := s.readRecord(member.Path)
 		if err != nil {

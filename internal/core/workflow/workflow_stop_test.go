@@ -38,11 +38,11 @@ func testWorkflowStop(t *testing.T, intent string) {
 		t.Fatalf("stop intent: %+v, %v", stopped, err)
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("checkpoint freed a running worker")
 	}
 
-	if err := <-done; !errors.Is(err, ErrWorkflowStop) {
+	if err := <-done; !errors.Is(err, workflowstate.ErrStop) {
 		t.Fatalf("stopped result: %v", err)
 	}
 
@@ -51,7 +51,7 @@ func testWorkflowStop(t *testing.T, intent string) {
 	checkWorkflowStoppedContinuation(t, store, request, run.Invocation.ID, claim, intent)
 }
 
-func checkWorkflowStopEvidence(t *testing.T, store *Store, taskPath string, retained Invocation) {
+func checkWorkflowStopEvidence(t *testing.T, store *Store, taskPath string, retained workflowstate.Invocation) {
 	t.Helper()
 
 	attempt := retained.Attempts[0]
@@ -101,7 +101,7 @@ func TestWorkflowOwnerExpiry(t *testing.T) {
 
 	time.Sleep(1100 * time.Millisecond)
 
-	if err := store.CheckWorkflowClaim(t.Context(), claim); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckWorkflowClaim(t.Context(), claim); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("expired owner accepted")
 	}
 
@@ -109,7 +109,7 @@ func TestWorkflowOwnerExpiry(t *testing.T) {
 		t.Fatalf("replaced a held reservation: %v", err)
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("expired token applied a checkpoint")
 	}
 }
@@ -128,7 +128,7 @@ func checkWorkflowStoppedContinuation(t *testing.T, store *Store, request StartR
 		t.Fatal("terminal retry restarted cancelled invocation")
 	}
 
-	if _, err := store.ResumeWorkflow(t.Context(), id); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ResumeWorkflow(t.Context(), id); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("cancelled invocation resumed")
 	}
 }
@@ -145,7 +145,7 @@ func checkWorkflowPauseResume(t *testing.T, store *Store, id string, claim *Clai
 		t.Fatal("resume lost the fence")
 	}
 
-	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, ErrWorkflowOwned) {
+	if err := store.CheckpointWorkflow(t.Context(), claim); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("old credential released the resumed claim")
 	}
 }
@@ -160,7 +160,7 @@ func checkWorkflowStoppedTask(t *testing.T, store *Store, path, id, intent strin
 
 	checkWorkflowStopEvidence(t, store, path, retained)
 
-	if _, err := store.ClaimWorkflow(t.Context(), id); !errors.Is(err, ErrWorkflowOwned) {
+	if _, err := store.ClaimWorkflow(t.Context(), id); !errors.Is(err, workflowstate.ErrOwned) {
 		t.Fatal("stop intent allowed continuation")
 	}
 }

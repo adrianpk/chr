@@ -65,7 +65,7 @@ func (s *Store) workflowResultValidations(ctx context.Context, run workflowInvoc
 	return result, nil
 }
 
-func (s *Store) workflowResultValidation(attempt Attempt) (workflowValidationRead, error) {
+func (s *Store) workflowResultValidation(attempt workflowstate.Attempt) (workflowValidationRead, error) {
 	path, err := s.safePath(attempt.ResultRef)
 	if err != nil {
 		return workflowValidationRead{Validation: ResultValidation{}, Bytes: 0}, err
@@ -97,11 +97,11 @@ func (s *Store) workflowResultValidation(attempt Attempt) (workflowValidationRea
 	return workflowValidationRead{Validation: ResultValidation{Ticket: attempt.TaskKey, Title: taskInputRead.Input.Contract.Title, Outcome: evidence.Outcome, Reference: workflowstate.EvidenceRef{Path: attempt.ResultRef, Hash: attempt.ResultHash}, Commands: evidence.Validation, Waiver: evidence.WaiverReason}, Bytes: len(data) + taskInputRead.Bytes}, nil
 }
 
-func workflowResultMatchesAttempt(evidence workflowstate.TaskResult, attempt Attempt) bool {
+func workflowResultMatchesAttempt(evidence workflowstate.TaskResult, attempt workflowstate.Attempt) bool {
 	return evidence.AttemptID == attempt.ID && evidence.Generation == attempt.Generation && evidence.InputRef == attempt.InputRef && evidence.InputHash == attempt.InputHash
 }
 
-func (s *Store) workflowResultTask(attempt Attempt) (workflowTaskInputRead, error) {
+func (s *Store) workflowResultTask(attempt workflowstate.Attempt) (workflowTaskInputRead, error) {
 	path, err := s.safePath(attempt.InputRef)
 	if err != nil {
 		return workflowTaskInputRead{Input: TaskInput{}, Bytes: 0}, err

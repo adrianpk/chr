@@ -6,11 +6,11 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func workflowContinuationPreparationRetry(run Invocation, request ContinuationRequest, steps int) bool {
+func workflowContinuationPreparationRetry(run workflowstate.Invocation, request ContinuationRequest, steps int) bool {
 	return steps == 0 && request.ExpectedRevision != 0 && run.Status == workflowstate.InvocationBlocked && run.Outcome == "integration_preparation_failed" && run.StopIntent == "" && run.Integration != nil && workflowInterruptedPreparation(run)
 }
 
-func workflowInterruptedPreparation(run Invocation) bool {
+func workflowInterruptedPreparation(run workflowstate.Invocation) bool {
 	if run.Preparation == nil || len(run.Attempts) == 0 {
 		return false
 	}

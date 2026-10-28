@@ -17,12 +17,6 @@ const (
 // ErrWorkflowReviewRepairBudget requires an explicit operator action.
 var ErrWorkflowReviewRepairBudget = errors.New("automatic review repair budget exhausted")
 
-// ReviewRepairBudget survives candidate replacement and continuation.
-type ReviewRepairBudget struct {
-	Unit     workflowstate.Ref `json:"unit"`
-	Consumed int               `json:"consumed"`
-}
-
 // ReviewWorkflowSlice applies current policy. Human review retains a wait;
 // trusted mode grants validated inputs; agentic mode runs a separate owned role.
 // It never publishes a target or completes a task.
@@ -69,7 +63,7 @@ func (s *Store) reviewWorkflowSlice(ctx context.Context, id string, provider Pul
 		executionErr = errors.Join(executionErr, errors.New("workflow review output exceeded its bounds"))
 	}
 
-	if errors.Is(executionErr, ErrWorkflowOwned) {
+	if errors.Is(executionErr, workflowstate.ErrOwned) {
 		return result, executionErr
 	}
 

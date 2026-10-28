@@ -11,7 +11,7 @@ import (
 
 // InvocationPage retains stable invocation order and the original continuation offset.
 type InvocationPage struct {
-	Invocations []Invocation
+	Invocations []workflowstate.Invocation
 	NextOffset  int
 }
 
@@ -19,7 +19,7 @@ type InvocationPage struct {
 // Adapters project it without exposing process identities or owner credentials.
 type Inspection struct {
 	Integration *IntegrationInspection
-	Invocation  Invocation
+	Invocation  workflowstate.Invocation
 	Policy      workflowstate.ReviewPolicy
 	Tasks       []workflowstate.Record
 }
@@ -93,7 +93,7 @@ func (s *Store) InspectWorkflowRecords(ctx context.Context) (snapshot workflowst
 // It does not reconcile owners, replay journals or start work.
 func (s *Store) InspectWorkflowPage(ctx context.Context, offset, limit int) (observed InvocationPage, err error) {
 	var (
-		page []Invocation
+		page []workflowstate.Invocation
 		next int
 	)
 
@@ -116,7 +116,7 @@ func (s *Store) InspectWorkflowPage(ctx context.Context, offset, limit int) (obs
 		slices.SortFunc(runs, func(a, b workflowInvocationFile) int { return strings.Compare(a.ID, b.ID) })
 
 		start, end := min(offset, len(runs)), min(offset+limit, len(runs))
-		page = []Invocation{}
+		page = []workflowstate.Invocation{}
 
 		for _, run := range runs[start:end] {
 			page = append(page, run.Invocation)
