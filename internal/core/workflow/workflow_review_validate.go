@@ -19,8 +19,8 @@ func validateWorkflowReviewBinding(run workflowInvocationFile) error {
 	}
 
 	if run.Review == nil {
-		_, retained := workflowRetainedRoleCounts(run)
-		if run.ReviewCount != retained {
+		retained := workflowRetainedRoleCounts(run)
+		if run.ReviewCount != retained.Review {
 			return workflowstate.ErrConflict
 		}
 

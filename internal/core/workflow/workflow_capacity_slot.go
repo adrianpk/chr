@@ -14,44 +14,49 @@ import (
 	projectcore "forge.adrianpk.com/chr/internal/core/project"
 )
 
-func (s *Store) acquireWorkflowWorkerSlot(ctx context.Context) (slot, guard *os.File, err error) {
+type workflowWorkerReservation struct {
+	Slot  *os.File
+	Guard *os.File
+}
+
+func (s *Store) acquireWorkflowWorkerSlot(ctx context.Context) (reservation workflowWorkerReservation, err error) {
 	runs, err := s.repositoryWorkflowInvocations(ctx)
 	if err != nil {
-		return nil, nil, err
+		return reservation, err
 	}
 
 	limits, err := s.workflowRepositoryCapacity(ctx, runs)
 	if err != nil {
-		return nil, nil, err
+		return reservation, err
 	}
 
 	common, err := projectcore.ResolveRepositoryDirectory(ctx, s.layout.ProjectDir())
 	if err != nil {
-		return nil, nil, err
+		return reservation, err
 	}
 
-	guard, err = workflowCapacityFile(common, "chr-workflow-worker.lock", syscall.LOCK_SH)
+	reservation.Guard, err = workflowCapacityFile(common, "chr-workflow-worker.lock", syscall.LOCK_SH)
 	if err != nil {
-		return nil, nil, err
+		return reservation, err
 	}
 
-	owned := guard
+	owned := reservation.Guard
 
 	defer func() {
 		if err != nil {
 			err = errors.Join(err, owned.Close())
-			if slot != nil {
-				err = errors.Join(err, slot.Close())
-				slot = nil
+			if reservation.Slot != nil {
+				err = errors.Join(err, reservation.Slot.Close())
+				reservation.Slot = nil
 			}
 
-			guard = nil
+			reservation.Guard = nil
 		}
 	}()
 
-	slot, err = reserveWorkflowWorkerSlot(ctx, common, limits.Workers)
+	reservation.Slot, err = reserveWorkflowWorkerSlot(ctx, common, limits.Workers)
 
-	return slot, guard, err
+	return reservation, err
 }
 
 func workflowCapacityFile(common, name string, mode int) (*os.File, error) {

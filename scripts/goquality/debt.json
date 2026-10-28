@@ -22,36 +22,6 @@
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {
-      "id": "internal/core/workflow/workflow_capacity_process.go::workflowCapacityProcess",
-      "signature": "func(path string) (Process, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_capacity_process.go::observeWorkflowCapacityProcess",
-      "signature": "func(path string) (Process, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_capacity_slot.go::Store.acquireWorkflowWorkerSlot",
-      "signature": "func(ctx context.Context) (slot, guard *os.File, err error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_continuation_steps.go::Store.continueWorkflowSteps",
-      "signature": "func(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts, limit int) (int, string, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_continuation_steps.go::Store.readWorkflowContinuation",
-      "signature": "func(ctx context.Context, id string) (Invocation, bool, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_continuation_steps.go::workflowContinuationAfter",
-      "signature": "func(before, after Invocation) (int, string)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
       "id": "internal/core/workflow/workflow_control_read.go::Store.ReadWorkflowControlReceipt",
       "signature": "func(ctx context.Context, request workflowstate.ControlMutationRequest) (workflowstate.ControlResult, bool, error)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
@@ -84,11 +54,6 @@
     {
       "id": "internal/core/workflow/workflow_frontier_observe.go::observeWorkflowFrontierProof",
       "signature": "func(ctx context.Context, run workflowInvocationFile, receipt Record, candidate SliceCandidate, target workflowstate.PreviewTarget, ports FrontierPorts) (workflowstate.IntegrationProof, error)",
-      "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
-    },
-    {
-      "id": "internal/core/workflow/workflow_frontier_validate.go::workflowRetainedRoleCounts",
-      "signature": "func(run workflowInvocationFile) (preparation, review int)",
       "reason": "Existing production debt; assigned to Slice 15 in the reconciled baseline inventory. Remove or explicitly reconcile this identity in its owning task; temporary debt expires in Slice 16."
     },
     {

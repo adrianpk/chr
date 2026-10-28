@@ -56,9 +56,9 @@ func (s *Store) ContinueWorkflow(ctx context.Context, id string, request Continu
 		return ContinuationProgress{Invocation: run}, workflowstate.ErrConflict
 	}
 
-	steps, reason, err := s.continueWorkflowSteps(ctx, id, request, ports, limit)
+	step, err := s.continueWorkflowSteps(ctx, id, request, ports, limit)
 
-	return s.finishWorkflowContinuation(ctx, id, steps, reason, err)
+	return s.finishWorkflowContinuation(ctx, id, step, err)
 }
 
 func workflowContinuationLimit(run Invocation, requested int) (int, error) {
@@ -82,7 +82,9 @@ func workflowContinuationLimit(run Invocation, requested int) (int, error) {
 	return requested, nil
 }
 
-func (s *Store) finishWorkflowContinuation(ctx context.Context, id string, steps int, reason string, failure error) (ContinuationProgress, error) {
+func (s *Store) finishWorkflowContinuation(ctx context.Context, id string, step workflowContinuationStep, failure error) (ContinuationProgress, error) {
+	steps, reason := step.Steps, step.Reason
+
 	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
 	defer cancel()
 

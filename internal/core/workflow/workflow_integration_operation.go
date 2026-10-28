@@ -11,7 +11,7 @@ type (
 		State *MergerRepairState
 		Refs  []workflowstate.EvidenceRef
 	}
-	workflowPreparationRetry struct {
+	workflowContinuationStep struct {
 		Steps  int
 		Reason string
 	}

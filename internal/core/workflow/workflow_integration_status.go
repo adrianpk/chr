@@ -260,13 +260,13 @@ func observeWorkflowIntegrationProcesses(common string) ([]Process, error) {
 			return nil, workflowstate.ErrConflict
 		}
 
-		process, alive, err := observeWorkflowCapacityProcess(filepath.Join(dir, file.Name()))
+		observed, err := observeWorkflowCapacityProcess(filepath.Join(dir, file.Name()))
 		if err != nil {
 			return nil, err
 		}
 
-		if alive {
-			processes = append(processes, process)
+		if observed.Alive {
+			processes = append(processes, observed.Process)
 		}
 	}
 

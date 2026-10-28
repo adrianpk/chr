@@ -30,61 +30,66 @@ func workflowOccupiedProcessSlots(common string) (map[int]bool, error) {
 	}
 
 	for _, entry := range entries {
-		process, alive, err := workflowCapacityProcess(filepath.Join(dir, entry.Name()))
+		observed, err := workflowCapacityProcess(filepath.Join(dir, entry.Name()))
 		if err != nil {
 			return nil, err
 		}
 
-		if !alive {
+		if !observed.Alive {
 			continue
 		}
 		// Old serial observations have no slot binding and conservatively exclude all
 		// new workers until their actual group is quiescent.
-		if process.CapacitySlot == 0 {
+		if observed.Process.CapacitySlot == 0 {
 			return nil, ErrWorkflowCapacity
 		}
 
-		occupied[process.CapacitySlot] = true
+		occupied[observed.Process.CapacitySlot] = true
 	}
 
 	return occupied, nil
 }
 
-func workflowCapacityProcess(path string) (Process, bool, error) {
-	process, alive, err := observeWorkflowCapacityProcess(path)
-	if err != nil || alive {
-		return process, alive, err
-	}
-
-	return process, false, os.Remove(path)
+type workflowCapacityObservation struct {
+	Process Process
+	Alive   bool
 }
 
-func observeWorkflowCapacityProcess(path string) (Process, bool, error) {
+func workflowCapacityProcess(path string) (workflowCapacityObservation, error) {
+	observed, err := observeWorkflowCapacityProcess(path)
+	if err != nil || observed.Alive {
+		return observed, err
+	}
+
+	return observed, os.Remove(path)
+}
+
+func observeWorkflowCapacityProcess(path string) (workflowCapacityObservation, error) {
 	data, err := opsfile.Read(path)
 	if err != nil {
-		return Process{}, false, err
+		return workflowCapacityObservation{}, err
 	}
 
 	var process Process
 	if err := json.Unmarshal(data, &process); err != nil {
-		return process, false, err
+		return workflowCapacityObservation{Process: process}, err
 	}
 
 	name, err := workflowCapacityProcessName(process)
 	if err != nil {
-		return process, false, err
+		return workflowCapacityObservation{Process: process}, err
 	}
 
 	if name != filepath.Base(path) || !validWorkflowCapacityProcess(process) {
-		return process, false, workflowstate.ErrConflict
+		return workflowCapacityObservation{Process: process}, workflowstate.ErrConflict
 	}
 
 	alive, err := workflowProcessGroupAlive(process)
 	if err != nil || alive {
-		return process, alive, err
+		return workflowCapacityObservation{Process: process, Alive: alive}, err
 	}
 
-	return process, false, nil
+	return workflowCapacityObservation{Process: process}, nil
 }
 
 func validWorkflowCapacityProcess(process Process) bool {

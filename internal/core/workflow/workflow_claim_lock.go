@@ -65,12 +65,12 @@ func (s *Store) reserveWorkflowRole(ctx context.Context, run workflowInvocationF
 		return nil, s.retainWorkflowCapacityWait(run, err)
 	}
 
-	file, guard, err := s.acquireWorkflowWorkerSlot(ctx)
+	reservation, err := s.acquireWorkflowWorkerSlot(ctx)
 	if err != nil {
 		return nil, s.retainWorkflowCapacityWait(run, err)
 	}
 
-	claim = &Claim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: file, capacityGuard: guard, execution: &workflowClaimExecution{}, purpose: purpose}
+	claim = &Claim{InvocationID: run.ID, AttemptID: fmt.Sprintf("%s-attempt-%d", run.ID, len(run.Attempts)+1), store: s, reservation: reservation.Slot, capacityGuard: reservation.Guard, execution: &workflowClaimExecution{}, purpose: purpose}
 	owned := claim
 
 	defer func() {

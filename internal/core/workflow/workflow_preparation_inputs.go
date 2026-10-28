@@ -127,8 +127,8 @@ func validateWorkflowPreparationBinding(run workflowInvocationFile) error {
 	}
 
 	if run.Preparation == nil {
-		retained, _ := workflowRetainedRoleCounts(run)
-		if run.PreparationCount != retained {
+		retained := workflowRetainedRoleCounts(run)
+		if run.PreparationCount != retained.Preparation {
 			return workflowstate.ErrConflict
 		}
 

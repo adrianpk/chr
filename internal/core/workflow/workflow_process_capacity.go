@@ -67,12 +67,12 @@ func guardWorkflowProcessCapacity(common string) error {
 }
 
 func guardWorkflowCapacityProcess(path string) error {
-	_, alive, err := workflowCapacityProcess(path)
+	observed, err := workflowCapacityProcess(path)
 	if err != nil {
 		return err
 	}
 
-	if alive {
+	if observed.Alive {
 		return ErrWorkflowCapacity
 	}
 

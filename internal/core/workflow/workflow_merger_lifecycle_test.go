@@ -24,10 +24,10 @@ func TestNativeMergerDescendants(t *testing.T) {
 
 	nativeMergerWaitMarker(t, f, "child.pid")
 
-	file, guard, err := f.store.acquireWorkflowWorkerSlot(t.Context())
+	reservation, err := f.store.acquireWorkflowWorkerSlot(t.Context())
 	if err == nil {
-		_ = file.Close()  //nolint:errcheck
-		_ = guard.Close() //nolint:errcheck
+		_ = reservation.Slot.Close()  //nolint:errcheck
+		_ = reservation.Guard.Close() //nolint:errcheck
 
 		t.Fatal("live descendant lost the shared slot")
 	}
@@ -46,12 +46,12 @@ func TestNativeMergerDescendants(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	file, guard, err = f.store.acquireWorkflowWorkerSlot(t.Context())
+	reservation, err = f.store.acquireWorkflowWorkerSlot(t.Context())
 	if err != nil {
 		t.Fatal("stopped descendant retained capacity", err)
 	}
 
-	if err := errors.Join(file.Close(), guard.Close()); err != nil {
+	if err := errors.Join(reservation.Slot.Close(), reservation.Guard.Close()); err != nil {
 		t.Fatal(err)
 	}
 }

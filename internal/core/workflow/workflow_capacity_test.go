@@ -121,7 +121,7 @@ func TestWorkflowCapacityAliases(t *testing.T) {
 	}
 
 	linked := NewWorkflowStore(layout, "alias")
-	if _, _, err := linked.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, workflowstate.ErrConflict) {
+	if _, err := linked.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, workflowstate.ErrConflict) {
 		t.Fatal("alias accepted conflicting capacity", err)
 	}
 
@@ -134,7 +134,7 @@ func TestWorkflowCapacityAliases(t *testing.T) {
 		t.Fatal("independent reservations shared one slot")
 	}
 
-	if _, _, err := store.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, ErrWorkflowCapacity) {
+	if _, err := store.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, ErrWorkflowCapacity) {
 		t.Fatal("alias created another pool", err)
 	}
 
@@ -146,10 +146,12 @@ func TestWorkflowCapacityAliases(t *testing.T) {
 func workflowTestSlot(t *testing.T, store *Store) (*os.File, *os.File) {
 	t.Helper()
 
-	slot, guard, err := store.acquireWorkflowWorkerSlot(t.Context())
+	reservation, err := store.acquireWorkflowWorkerSlot(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	slot, guard := reservation.Slot, reservation.Guard
 
 	t.Cleanup(func() {
 		for _, file := range []*os.File{slot, guard} {
@@ -173,7 +175,7 @@ func TestWorkflowCapacityReduction(t *testing.T) {
 	writeWorkspaceConfig(t, store.layout.ProjectDir(), "work:\n  max_active_workers: 1\n")
 
 	for step := 0; step < 2; step++ {
-		if _, _, err := store.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, ErrWorkflowCapacity) {
+		if _, err := store.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, ErrWorkflowCapacity) {
 			t.Fatal("reduction ignored a live slot", err)
 		}
 

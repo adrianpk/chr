@@ -41,7 +41,7 @@ func TestNativeLegacySnapshot(t *testing.T) {
 
 	prior := workspaceconfig.EffectiveWorkflowConfiguration(config, "")
 
-	prior.Values = withoutWorkflowPublicationProfile(prior.Values)
+	prior.Values = withoutWorkflowConfigurationKey(prior.Values, "work.integration.publication_profile")
 	if !validWorkflowUpgradeConfiguration(prior) {
 		t.Fatal("legacy upgrade snapshot lost compatibility")
 	}

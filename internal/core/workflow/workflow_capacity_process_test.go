@@ -25,10 +25,12 @@ func TestWorkflowCapacityProcess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	slot, guard, err := NewWorkflowStore(layout, "capacity-alias").acquireWorkflowWorkerSlot(t.Context())
+	reservation, err := NewWorkflowStore(layout, "capacity-alias").acquireWorkflowWorkerSlot(t.Context())
 	if err != nil && !errors.Is(err, ErrWorkflowCapacity) {
 		t.Fatal(err)
 	}
+
+	slot, guard := reservation.Slot, reservation.Guard
 
 	value := "waiting"
 	if slot != nil {
@@ -172,7 +174,7 @@ func TestWorkflowCapacityOrphan(t *testing.T) {
 		t.Fatal("orphan's slot was reused")
 	}
 
-	if _, _, err := store.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, ErrWorkflowCapacity) {
+	if _, err := store.acquireWorkflowWorkerSlot(t.Context()); !errors.Is(err, ErrWorkflowCapacity) {
 		t.Fatal("live orphan was omitted from capacity", err)
 	}
 

@@ -155,18 +155,23 @@ func workflowDeliveredUnitView(run workflowInvocationFile, delivery UnitDelivery
 	return run
 }
 
-func workflowRetainedRoleCounts(run workflowInvocationFile) (preparation, review int) {
+type workflowRoleCounts struct {
+	Preparation int
+	Review      int
+}
+
+func workflowRetainedRoleCounts(run workflowInvocationFile) (counts workflowRoleCounts) {
 	for _, delivery := range run.Deliveries {
 		if delivery.Preparation != nil {
-			preparation = max(preparation, delivery.Preparation.Round)
+			counts.Preparation = max(counts.Preparation, delivery.Preparation.Round)
 		}
 
 		if delivery.Review != nil {
-			review = max(review, delivery.Review.Round)
+			counts.Review = max(counts.Review, delivery.Review.Round)
 		}
 	}
 
-	return preparation, review
+	return counts
 }
 
 func (s *Store) checkWorkflowRetainedBoundaries(ctx context.Context, run workflowInvocationFile) error {

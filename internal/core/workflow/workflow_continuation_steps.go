@@ -7,43 +7,50 @@ import (
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
-func (s *Store) continueWorkflowSteps(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts, limit int) (int, string, error) {
+type workflowContinuationState struct {
+	Invocation        Invocation
+	MembershipChanged bool
+}
+
+func (s *Store) continueWorkflowSteps(ctx context.Context, id string, request ContinuationRequest, ports ContinuationPorts, limit int) (workflowContinuationStep, error) {
 	for steps := 0; steps < limit; steps++ {
-		run, membershipChanged, err := s.readWorkflowContinuation(ctx, id)
+		observed, err := s.readWorkflowContinuation(ctx, id)
 		if err != nil {
-			return steps, "blocked", err
+			return workflowContinuationStep{Steps: steps, Reason: "blocked"}, err
 		}
 
-		if membershipChanged {
+		if observed.MembershipChanged {
 			continue
 		}
+
+		run := observed.Invocation
 
 		if workflowContinuationPreparationRetry(run, request, steps) {
 			retry, err := s.retryWorkflowContinuationPreparation(ctx, id, ports)
 
-			return retry.Steps, retry.Reason, err
+			return retry, err
 		}
 
 		if reason := workflowContinuationBefore(run); reason != "" {
-			return steps, reason, nil
+			return workflowContinuationStep{Steps: steps, Reason: reason}, nil
 		}
 
 		if err := s.advanceWorkflowContinuation(ctx, run, request, ports); err != nil {
-			return steps, workflowContinuationFailureReason(err), err
+			return workflowContinuationStep{Steps: steps, Reason: workflowContinuationFailureReason(err)}, err
 		}
 
 		after, err := s.ReadWorkflow(ctx, id)
 		if err != nil {
-			return steps, "blocked", err
+			return workflowContinuationStep{Steps: steps, Reason: "blocked"}, err
 		}
 
-		accepted, reason := workflowContinuationAfter(run, after)
-		if reason != "" {
-			return steps + accepted, reason, nil
+		accepted := workflowContinuationAfter(run, after)
+		if accepted.Reason != "" {
+			return workflowContinuationStep{Steps: steps + accepted.Steps, Reason: accepted.Reason}, nil
 		}
 	}
 
-	return limit, "step_limit", nil
+	return workflowContinuationStep{Steps: limit, Reason: "step_limit"}, nil
 }
 
 func workflowContinuationFailureReason(err error) string {
@@ -54,23 +61,23 @@ func workflowContinuationFailureReason(err error) string {
 	return "blocked"
 }
 
-func (s *Store) readWorkflowContinuation(ctx context.Context, id string) (Invocation, bool, error) {
+func (s *Store) readWorkflowContinuation(ctx context.Context, id string) (workflowContinuationState, error) {
 	run, err := s.ReadWorkflow(ctx, id)
 	if err != nil {
-		return run, false, err
+		return workflowContinuationState{Invocation: run}, err
 	}
 
 	refreshed, err := s.ReconcileWorkflowMembership(ctx, id)
 
-	return run, refreshed.Revision != run.Revision, err
+	return workflowContinuationState{Invocation: run, MembershipChanged: refreshed.Revision != run.Revision}, err
 }
 
-func workflowContinuationAfter(before, after Invocation) (int, string) {
+func workflowContinuationAfter(before, after Invocation) workflowContinuationStep {
 	if after.Revision == before.Revision {
-		return 0, "awaiting_authority"
+		return workflowContinuationStep{Reason: "awaiting_authority"}
 	}
 
-	return 1, workflowContinuationBarrier(after)
+	return workflowContinuationStep{Steps: 1, Reason: workflowContinuationBarrier(after)}
 }
 
 func workflowContinuationBarrier(run Invocation) string {

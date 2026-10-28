@@ -282,10 +282,6 @@ func checkWorkflowUpgradePolicy(data []byte, expected workspaceconfig.WorkflowCo
 	return err
 }
 
-func withoutWorkflowPublicationProfile(values []workspaceconfig.WorkflowConfigurationValue) []workspaceconfig.WorkflowConfigurationValue {
-	return withoutWorkflowConfigurationKey(values, "work.integration.publication_profile")
-}
-
 func withoutWorkflowConfigurationKey(values []workspaceconfig.WorkflowConfigurationValue, key string) []workspaceconfig.WorkflowConfigurationValue {
 	result := make([]workspaceconfig.WorkflowConfigurationValue, 0, len(values))
 	for _, value := range values {
