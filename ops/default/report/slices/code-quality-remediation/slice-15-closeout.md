@@ -1,6 +1,6 @@
 # Slice 15: Workflow closeout and coordinator cleanup
 
-Status: drafting
+Status: reviewing
 Delivery set: code-quality-remediation
 Plan: [Approved plan](../../../plan/code-quality-remediation.md)
 Tracker: [Task evidence](../../../tracker/code-quality-remediation.md)
@@ -169,6 +169,13 @@ candidate rechecks and complete atomic transitions. Harness subprocess fixtures
 now live in the workflow test binary that invokes them, preserving actual
 cross-process retained-binding and old-reader rejection checks.
 
+Final source acceptance finds no core/workflow type alias or root workflow
+forwarding facade. All 65 root core production files match the recorded shared
+composition/dependency owners; all 22 stage ports are real finite interfaces
+without Store, claim or opaque escape fields. Two stale port-operation names now
+point to the actual native/capacity observers. This is source/contract acceptance;
+canonical PR-head behavioral validation and integration remain separate.
+
 ## Implementation Notes
 
 Predecessor PR #451 is verified merged into dev at
@@ -207,9 +214,14 @@ replaces the removed policy methods.
 
 The [vocabulary and compatibility ledger](../../../plan/code-quality-remediation-slice-15-vocabulary.md)
 defines frontier, adoption, loose selection, continuation, amendment and closing
-from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Twenty current compatibility/control cases identify actual
-consumers, existing regression protection and retirement conditions. Remaining
-legacy/schema/control references are explicitly unreconciled; T15.5 stays active.
+from the governing spec in `05d68ed95bc5b154df6be54f0279bc18856eab96`. Thirty-two compatibility/control cases identify actual
+consumers, existing regression protection and retirement conditions. The
+[secondary reference map](../../../plan/code-quality-remediation-slice-15-compatibility.csv)
+reconciles all 217 owned references against exact baseline lines and current
+compiler-owned declarations: 158 compatibility references, 48 boolean candidates
+and eleven cleanup exceptions. Result-only booleans, named outcomes, typed modes
+and genuine controls have separate dispositions. Retained paths, schemas,
+status spellings, authority and public flags keep their governing contracts.
 
 Frozen input/shared-record extraction is in `c737a56d85e5fb0532d20b18a3c56c9d86a21fb1`. Nine owner/name moves
 and five value-receiver validations match after explicit call/receiver
@@ -397,6 +409,15 @@ mandatory v2. Assertions, schema gates, timeouts and production guards are
 unchanged. All 34 exact workflow subprocess selectors now resolve in that binary.
 Both helper streams and literals match after package qualification.
 
+The final compatibility and bridge assessment uses clean source revision
+`42049e668f8c077450d6e7491d05b1996c0d28fb`. The new secondary map retains exact approved baseline row, file,
+line, evidence and declaration identities plus current hashes, individual
+control meaning/owning contract, named regression protection and retirement
+condition. Compiler ownership includes workflow-owned files without a workflow
+filename prefix and actual work service/CLI consumers. Global inventory closure
+and the delivered service_work large-file item retain their recorded Slice 16
+and Slice 11 owners. No new runtime behavior or dependency is introduced.
+
 ## Contracts Added or Changed
 
 The [assigned signature ledger](../../../plan/code-quality-remediation-slice-15-signatures.csv)
@@ -420,6 +441,19 @@ changes.
 - Existing Store method, declaration, authority/dependency and ownership ledgers.
 
 ## Validation
+
+Final metadata/source reconciliation passed: all 217 original evidence lines match
+the approved baseline; all current declaration identities/hashes and named
+regressions resolve; all 32 compatibility rows form one valid table. All 65 root
+core production declaration sets match their ownership entries, normalized for
+the ledger's existing method-name format. The source scan finds zero aliases and
+root workflow pass-through facades; all 22 actual ports are finite and retain no
+Store/claim/opaque escape. Current private Store/host operation references resolve,
+including the two corrected observer names. Relative links, task columns and
+`git diff --check` pass. No runtime checks are repeated for these documentation
+and ledger changes. Required development and final exact-HEAD controller checks
+are recorded separately before PR readiness; prior task outcomes remain below.
+
 
 Final read/provider task evidence preserves its failed initial 38-case command:
 37 cases passed and TestHarnessBindingPending failed on its second claim with
@@ -832,7 +866,8 @@ and whitespace pass. Runtime checks are not repeated for this metadata-only upda
 
 ## Risks and Follow-ups
 
-Final Store/bridge acceptance and naming/compatibility reconciliation remain active
-Slice 15 work. Shared guided parity, final ordered exact-head controller
-validation, PR publication and PR-reference follow-up are pending. No final
-slice acceptance is claimed by these task checks.
+Source-method, bridge and owned compatibility reconciliation are complete.
+Supported retained protocols have explicit retirement conditions. Shared guided
+parity, final ordered exact-HEAD controller validation, canonical PR preparation
+and its reference follow-up remain required before PR readiness. Delivery remains
+subject to controller-owned dev integration; no task check alone marks it delivered.

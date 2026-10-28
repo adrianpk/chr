@@ -11,9 +11,11 @@ them through admission, execution, review, integration and closure.
 multi-record writes and recovery. Closing history, receipt and retry policy now
 belong to closeout through a read-only evidence adapter. Frozen input assembly
 and actual-member policy use the stage InputSource and shared native record data.
-Remaining Store methods
-are still being reconciled under Slice 15; their count does not establish final
-persistence ownership.
+The complete source-method map records each retained persistence/authority guard
+and each extracted policy, host or coordinator owner. Method count alone does
+not establish persistence ownership. Private operation hosts sequence external
+IO and bounded loops under the original Store-owned locks and current-image
+fences; they cannot independently commit partial transitions.
 Core composition and application adapters call this owner directly. The package
 cannot import root core or application adapters.
 
@@ -164,3 +166,19 @@ Frontier proof uses one retained invocation/receipt/candidate unit; target and
 proof observations survive their original errors. Upgrade preparation retains
 journal/image outcomes while journal presence remains distinct from validity.
 All writes, locks, authority checks and recovery retain their existing owners.
+
+## Read and selection ownership
+
+Private ticket/tracker readers build bounded read views with the original
+native/legacy precedence, inspection lock, exact source image and read-only
+rules. The harness resolver skips fresh resolution for exact retained requests.
+Frontier, capacity and work observers sequence canonical/process/slot/prerequisite
+facts and pagination without creating authority. The role selector preserves
+exact target occupancy, current task eligibility and stable priority.
+
+The amendment host sequences native-key callbacks and task construction under
+Store-owned allocation/mutation exclusion. The lane host sets up only the exact
+retained branch/worktree; Store still checks actual registration, accepted head
+and coordinator target before candidate acceptance. The PR host sequences source
+publication and delivery verification, then returns through the same current
+candidate and complete proof/journal transactions.

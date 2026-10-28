@@ -30,7 +30,7 @@ mutable store or context retained as state.
 
 The package imports shared `workflow/state` protocol values and `contenthash`
 within the module. The remaining repository-wide Store
-responsibility dispositions are active Slice 15 work.
+responsibility dispositions are recorded in the complete Slice 15 source-method map.
 
 `Request` owns the unchanged observed-set/revision/source/target input. The host
 continues to enforce admission and authority. `BuildInput` owns contract hashing,
@@ -65,7 +65,7 @@ copies the target value.
 `BudgetUsage` use the existing Evidence port. They retain their distinct schema,
 binding, result and error contracts. `Inspect` checks receipts before ordered
 publication blockers, live capacity and final-gate proof through StatusSource.
-The final repository-wide Store API assessment remains active work.
+The repository-wide Store API assessment records each original source method and its current guarded persistence, stage or host owner.
 
 ## Validation
 

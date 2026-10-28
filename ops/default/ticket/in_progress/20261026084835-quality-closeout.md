@@ -277,3 +277,14 @@ short/style/strict lint pass without skips or owned leaks. All 34 exact workflow
 subprocess selectors resolve. All 908 source-method decisions are recorded;
 Store has 777 actual methods. Final bridge/compatibility acceptance, guided
 parity, exact-head slice validation and canonical PR preparation remain open.
+
+Final source/compatibility acceptance records all 908 original method decisions
+and 217 exact owned secondary references with individual contract/control bases,
+current hashes, named regressions and retirement conditions. Six terms and 32
+cases preserve supported retained schemas, paths, statuses, authority and public
+flags. All 65 root core production files match the shared ownership map; zero
+workflow aliases/root facades and 22 actual finite ports are verified. Two stale
+observer operation names are corrected. These are metadata-only changes; runtime
+source is unchanged. Required development and shared guided parity checks,
+ordered exact-HEAD controller acceptance, canonical PR/reference follow-up and
+controller-owned dev integration remain the delivery boundary.
