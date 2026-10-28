@@ -3,6 +3,7 @@
 Status: in_progress
 Task: T15.5
 Source revision: `5f58bc1cf3f22c0553035b9935d66530cb4762dd`
+Closing-proof revision: `93708ffd89d4eee64d111ad71424a5fc3fcfed19`
 Governing contract: [Ticket-native workflow](../spec/stable/ticket-native-workflow.md)
 Execution evidence: [Slice 15 report](../report/slices/code-quality-remediation/slice-15-closeout.md)
 
@@ -43,11 +44,12 @@ this delivery set.
 | C15.8 | `--human-review`, `--review-restriction`, upgrade `--review-mode` | Supported, distinct scopes. Invocation restriction can require human review; it cannot relax project policy. Upgrade's explicit review choice is a prospective configuration decision, with omission preserving the old effective policy. | [Extent flags](../../../internal/app/work_workflow_cli.go), [configuration observation](../../../internal/app/work_workflow_config.go), [upgrade flags](../../../internal/app/work_workflow_upgrade.go); section 8; `TestWorkflowUpgradePolicy`, `TestWorkflowReviewModes` | An approved policy/interface change. Preserve omission, restriction and explicit policy choice as separate inputs. |
 | C15.9 | Legacy submission counters | Evidence-backed retained case. Non-native retained submission attempts consume the original per-unit budget; adoption of native integration cannot refill or rewrite them. Missing, changed, duplicate or uncertain evidence blocks progress. | [Legacy budget scan](../../../internal/core/workflow/workflow_integration_budget_legacy.go), `Store.workflowIntegrationLegacySubmissions`, `checkWorkflowIntegrationLegacySubmissions`; section 8 and A24; `TestNativeBudgetLegacy` | After an approved protocol retirement accounts for all readable legacy attempts and uncertain outcomes. This set must not rewrite retained journals. |
 | C15.10 | `withoutWorkflowPublicationProfile` and `prepareWorkflowTask` | Safe production removal. The profile wrapper's sole test consumer calls the existing key filter with the same key. `prepareWorkflowTask` exists only as a test helper. Neither supplies runtime compatibility. | [Upgrade journal](../../../internal/core/workflow/workflow_upgrade_journal.go), `withoutWorkflowConfigurationKey`; [signature/move evidence](code-quality-remediation-slice-15-moves.csv); `TestNativeLegacySnapshot`, `TestNativeProfileUpgrade` | Removed from production in this set; no replacement facade or compatibility alias. |
+| C15.11 | Retained legacy delivery receipts and slice proofs | Supported retained protocol. A receipt without native facts remains legacy; reads never synthesize native facts or rewrite its bytes. Closing verifies the exact schema, unit/candidate/submission, confirmation time, validation reference, receipt Git facts, finalized tasks, contract and fresh target proof. Native receipts retain separate journal, observation and authority checks; uncertainty never grants completion. | [Shared receipt binding](../../../internal/core/workflow/state/delivery_binding.go), [closing proof](../../../internal/core/workflow/closeout/proof.go), [canonical observation](../../../internal/core/workflow/closeout/proof_observation.go), [host native guard](../../../internal/core/workflow/workflow_closing_native.go); sections 6 and 8; `TestNativeReceiptLegacy`, `TestWorkflowClosingRetry`, `TestNativeClosingEvidence`, `TestNativeClosingDivergence`, `TestNativeClosingPublicationRace` | An approved retained-receipt/proof protocol retirement that accounts for readable historical deliveries, exact hashes and uncertain publication. This refactor cannot silently migrate or reinterpret them. |
 
 ## Remaining reconciliation
 
-These six definitions and ten dispositions do not close T15.5. Reconcile the
-remaining legacy delivery/submission schemas, observation-reference paths,
+These six definitions and eleven dispositions do not close T15.5. Reconcile the
+other legacy delivery/submission schemas, observation-reference paths,
 tracker variants, status aliases, legacy runtime observations, shared capacity
 and control guards against their actual consumers and tests. Link each relevant
 secondary-inventory reference to its final disposition. Complete the final

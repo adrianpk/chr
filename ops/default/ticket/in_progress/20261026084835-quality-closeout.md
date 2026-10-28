@@ -9,7 +9,7 @@ scope: domain
 tags: code-quality, remediation, slice-15
 source: review
 reported_at: 2026-10-26T08:48:35Z
-commits: [66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
+commits: [93708ffd89d4eee64d111ad71424a5fc3fcfed19, 66222b13904fd86cba76f67e69eafa922fe48a28, 72d968844ee6ee3d4915cb7f2e200a3f049487d1, 38b7f97593a2df3d2af6c465c809dca4bb4c1345, 663c49213963ec459a32015b8feedbda32271f2e, d4844af16cce52e3a44ad9bba5e2a59e80adb520, c111c9df77898601331cd83c6df4932a9c2add8b, c3d57b9927bb8d739808fea8d5db2809c5915398, 5f58bc1cf3f22c0553035b9935d66530cb4762dd, 05d68ed95bc5b154df6be54f0279bc18856eab96, c737a56d85e5fb0532d20b18a3c56c9d86a21fb1]
 started_at: 2026-10-28T08:07:25Z
 branch: refactor/slice-15-quality-closeout
 ready_at: 2026-10-26T08:57:09Z
@@ -84,3 +84,14 @@ match; 31 real tests, five races, affected broad short tests, wire and strict
 checks pass. Original 908 Store source rows retain current references to 899
 Store methods and nine stage/adapter owners. Slice-proof policy, final method
 ownership, compatibility and slice acceptance remain active.
+
+Closing slice/proof/member/canonical/hash policy now has closeout owners through
+ProofSource. Immutable receipt/task/target bindings, the ordered task digest and
+observation-required identity are shared directly without aliases. Twelve
+normalized shared/pure declarations match; 42 real regressions and six races pass
+without skips or leaked owned descendants, along with short/style/strict checks.
+Original 908 method rows now map to 890 Store methods and 18 stage/adapter owners;
+20 actual ports preserve host native guards and atomic confirmation. A concrete
+legacy receipt/proof disposition raises the compatibility ledger to eleven
+cases. Remaining final method/bridge/compatibility and exact-head slice acceptance
+are still active.
