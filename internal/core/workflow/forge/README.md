@@ -45,6 +45,13 @@ cleanup bound. It preserves the joined provider and retention errors.
 results. Configuration diagnostics remain host-owned. Provider enum values and
 retained native protocol spellings are unchanged.
 
+`PullRequestMismatch` and `PullRequestRepository` own exact legacy canonical PR
+identity and URL policy. Ambiguous observations, fork heads, changed candidates,
+closed unmerged PRs and unverifiable merge results keep their original reasons.
+The host retains the repository lock across read/find/create IO, journals creation
+intent before sending and rechecks the current candidate before accepting facts.
+An uncertain creation remains observation-only; it never permits another create.
+
 `PublicationIdentity` excludes the live `BeforeSend` callback, transport config
 and local directory. The host projects exact hash inputs into it; the original
 revision payload and field order are retained. Capability and publisher identity

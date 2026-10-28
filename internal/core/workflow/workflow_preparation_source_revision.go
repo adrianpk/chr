@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 	workspaceconfig "forge.adrianpk.com/chr/internal/core/workspace/config"
 )
@@ -48,7 +49,7 @@ func workflowNativeSourceIdentityMatches(binding workflowstate.PullRequestBindin
 	observed := pr
 	observed.HeadRepository, observed.HeadCommit = binding.Request.Repository, binding.SourceCommit
 
-	return workflowPullRequestMismatch(binding, []workflowstate.PullRequestSnapshot{observed}) == ""
+	return workflowforge.PullRequestMismatch(binding, []workflowstate.PullRequestSnapshot{observed}) == ""
 }
 
 func (s *Store) freezeWorkflowNativeSourceRevision(ctx context.Context, run *workflowInvocationFile, pr workflowstate.PullRequestSnapshot, head string) error {

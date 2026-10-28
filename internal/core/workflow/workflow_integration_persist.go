@@ -7,6 +7,7 @@ import (
 
 	"forge.adrianpk.com/chr/internal/core/contenthash"
 	opsfile "forge.adrianpk.com/chr/internal/core/ops/file"
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -85,7 +86,7 @@ func (s *Store) readWorkflowDeliveryProof(run workflowInvocationFile) (workflows
 }
 
 func checkWorkflowLegacyDeliveryProof(run workflowInvocationFile, proof workflowstate.SliceDeliveryProof) error {
-	if !workflowDeliveryProofMatchesRun(run, proof) || !proof.PullRequest.Merged || workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{proof.PullRequest}) != "" {
+	if !workflowDeliveryProofMatchesRun(run, proof) || !proof.PullRequest.Merged || workflowforge.PullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{proof.PullRequest}) != "" {
 		return workflowstate.ErrConflict
 	}
 

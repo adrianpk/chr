@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowreview "forge.adrianpk.com/chr/internal/core/workflow/review"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -84,7 +85,7 @@ func observeWorkflowReviewPR(ctx context.Context, run workflowInvocationFile, pr
 		return workflowReviewPullRequest{PullRequest: pr, TargetCommit: ""}, err
 	}
 
-	if reason := workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}); reason != "" || pr.Merged {
+	if reason := workflowforge.PullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}); reason != "" || pr.Merged {
 		return workflowReviewPullRequest{PullRequest: pr, TargetCommit: ""}, fmt.Errorf("%w: canonical PR is changed or requires delivery observation", workflowstate.ErrConflict)
 	}
 

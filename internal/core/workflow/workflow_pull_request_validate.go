@@ -56,7 +56,7 @@ func validateWorkflowPullRequestState(binding workflowstate.PullRequestBinding) 
 		return nil
 	}
 
-	repository, err := workflowPullRequestRepository(binding.URL)
+	repository, err := workflowforge.PullRequestRepository(binding.URL)
 	if err != nil || repository != binding.Request.Repository {
 		return workflowstate.ErrConflict
 	}

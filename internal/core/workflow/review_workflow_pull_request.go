@@ -68,7 +68,7 @@ func (adapter RemoteReviewAdapter) ReadWorkflowBranch(ctx context.Context, repos
 
 // ReadWorkflowPullRequest validates the canonical URL before provider IO.
 func (adapter RemoteReviewAdapter) ReadWorkflowPullRequest(ctx context.Context, rawURL string) (workflowstate.PullRequestSnapshot, error) {
-	repository, err := workflowPullRequestRepository(rawURL)
+	repository, err := workflowforge.PullRequestRepository(rawURL)
 	if err != nil {
 		return workflowstate.PullRequestSnapshot{}, err
 	}

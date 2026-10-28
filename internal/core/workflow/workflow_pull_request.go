@@ -45,7 +45,7 @@ func (s *Store) EnsureWorkflowSlicePullRequest(ctx context.Context, id string, r
 			return readErr
 		}
 
-		result, readErr = invocationLocation.Owner.ensureWorkflowPullRequest(ctx, &invocationLocation.Run, observation, provider)
+		result, readErr = (workflowPullRequestHost{store: invocationLocation.Owner}).ensure(ctx, &invocationLocation.Run, observation, provider)
 
 		return readErr
 	})

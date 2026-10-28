@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowintegrate "forge.adrianpk.com/chr/internal/core/workflow/integrate"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
@@ -79,7 +80,7 @@ func observeWorkflowFrontierProof(ctx context.Context, unit workflowFrontierUnit
 		return workflowstate.IntegrationProof{}, err
 	}
 
-	if workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != receipt.Receipt.ResultCommit || pr.BaseCommit != target.Commit {
+	if workflowforge.PullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != receipt.Receipt.ResultCommit || pr.BaseCommit != target.Commit {
 		return workflowstate.IntegrationProof{}, workflowstate.ErrConflict
 	}
 

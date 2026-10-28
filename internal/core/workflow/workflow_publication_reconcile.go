@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -39,7 +40,7 @@ func checkWorkflowVerifiedPR(ctx context.Context, run workflowInvocationFile, pr
 		return err
 	}
 
-	if workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != proof.ResultCommit || pr.BaseCommit != proof.ObservedTarget {
+	if workflowforge.PullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || !pr.Merged || pr.ResultCommit != proof.ResultCommit || pr.BaseCommit != proof.ObservedTarget {
 		return workflowstate.ErrConflict
 	}
 
@@ -170,7 +171,7 @@ func checkWorkflowSupersededTarget(ctx context.Context, run workflowInvocationFi
 		return err
 	}
 
-	if workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || pr.Merged {
+	if workflowforge.PullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}) != "" || pr.Merged {
 		return workflowstate.ErrObservationRequired
 	}
 

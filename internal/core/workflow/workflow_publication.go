@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	workflowforge "forge.adrianpk.com/chr/internal/core/workflow/forge"
 	workflowstate "forge.adrianpk.com/chr/internal/core/workflow/state"
 )
 
@@ -236,7 +237,7 @@ func (s *Store) readWorkflowPublicationCheckpoint(ctx context.Context, run workf
 		return workflowPublicationObservation{Journal: journal, PullRequest: pr}, err
 	}
 
-	if reason := workflowPullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}); reason != "" {
+	if reason := workflowforge.PullRequestMismatch(*run.PullRequest, []workflowstate.PullRequestSnapshot{pr}); reason != "" {
 		return workflowPublicationObservation{Journal: journal, PullRequest: pr}, fmt.Errorf("%w: %s", workflowstate.ErrConflict, reason)
 	}
 
